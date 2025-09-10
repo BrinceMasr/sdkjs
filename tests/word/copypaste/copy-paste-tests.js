@@ -48,6 +48,7 @@ $(function () {
 
 	QUnit.module("Word Copy Paste Tests");
 
+	// AscTest.Editor._init();
     let logicDocument = AscTest.CreateLogicDocument();
 	AscTest.Editor.WordControl.m_oDrawingDocument.m_oLogicDocument = logicDocument;
 	AscTest.Editor.WordControl.m_oLogicDocument = logicDocument;
@@ -251,7 +252,6 @@ $(function () {
 
 		// Normalize copied HTML for comparison
 		const jsonedData = removeBase64(JSON.stringify(copiedHtml));
-		console.log(jsonedData);
 		const expectedHtml = "\"<p style=\\\"margin-top:0pt;margin-bottom:0pt;border:none;mso-border-left-alt:none;mso-border-top-alt:none;mso-border-right-alt:none;mso-border-bottom-alt:none;mso-border-between:none\\\" class=\\\"docData;\\\"><span style=\\\"font-family:'Times New Roman';font-size:10pt;color:#000000;mso-style-textfill-fill-color:#000000\\\">Simple text</span></p><p style=\\\"margin-top:0pt;margin-bottom:0pt;border:none;border-left:none;border-top:none;border-right:none;border-bottom:none;mso-border-between:none\\\">&nbsp;</p>\""
 		assert.strictEqual(jsonedData, expectedHtml, "Copied HTML should match for simple div paste");
 		done();
@@ -699,14 +699,215 @@ $(function () {
 		done();
 	});
 
+	QUnit.test("Paste sum formula from excel to word", function(assert) {
+		initDocument(logicDocument);
+		let done = assert.async();
+
+		let htmlText = `<head>
+		<meta http-equiv=Content-Type content="text/html; charset=utf-8">
+		<meta name=ProgId content=Excel.Sheet>
+		<meta name=Generator content="Microsoft Excel 15">
+		<link id=Main-File rel=Main-File
+		href="file:///C:/Users/asus/AppData/Local/Temp/msohtmlclip1/01/clip.htm">
+		<link rel=File-List
+		href="file:///C:/Users/asus/AppData/Local/Temp/msohtmlclip1/01/clip_filelist.xml">
+		<style>
+		<!--table
+		\t{mso-displayed-decimal-separator:"\\,";
+		\tmso-displayed-thousand-separator:" ";}
+		@page
+		\t{margin:.75in .7in .75in .7in;
+		\tmso-header-margin:.3in;
+		\tmso-footer-margin:.3in;}
+		tr
+		\t{mso-height-source:auto;}
+		col
+		\t{mso-width-source:auto;}
+		br
+		\t{mso-data-placement:same-cell;}
+		td
+		\t{padding-top:1px;
+		\tpadding-right:1px;
+		\tpadding-left:1px;
+		\tmso-ignore:padding;
+		\tcolor:black;
+		\tfont-size:11.0pt;
+		\tfont-weight:400;
+		\tfont-style:normal;
+		\ttext-decoration:none;
+		\tfont-family:Calibri, sans-serif;
+		\tmso-font-charset:0;
+		\tmso-number-format:General;
+		\ttext-align:general;
+		\tvertical-align:bottom;
+		\tborder:none;
+		\tmso-background-source:auto;
+		\tmso-pattern:auto;
+		\tmso-protection:locked visible;
+		\twhite-space:nowrap;
+		\tmso-rotate:0;}
+		-->
+		</style>
+		</head>
+
+		<body link="#0563C1" vlink="#954F72">
+
+		<table border=0 cellpadding=0 cellspacing=0 width=256 style='border-collapse:
+		 collapse;width:192pt'>
+		 <col width=64 span=4 style='width:48pt'>
+		 <tr height=20 style='height:15.0pt'>
+		<!--StartFragment-->
+		  <td height=20 align=right width=64 style='height:15.0pt;width:48pt'>1</td>
+		  <td align=right width=64 style='width:48pt'>2</td>
+		  <td align=right width=64 style='width:48pt'>3</td>
+		  <td align=right width=64 style='width:48pt'>6</td>
+		<!--EndFragment-->
+		 </tr>
+		</table>
+
+		</body>`;
+		AscTest.Editor['pluginMethod_PasteHtml'](htmlText)
+
+		logicDocument.SelectAll();
+		let oCopyProcessor = new AscCommon.CopyProcessor(AscTest.Editor);
+		oCopyProcessor.Start();
+		const copiedHtml = oCopyProcessor.getInnerHtml();
+		console.log(copiedHtml)
+		logicDocument.RemoveSelection();
+
+		const jsonedData = removeBase64(JSON.stringify(copiedHtml));
+		const expectedHtml = ""
+		assert.strictEqual(jsonedData, expectedHtml, "Copied HTML should match for bold + italic");
+		done();
+	});
+
+	QUnit.test("Paste Newton's binom formula from word", function(assert) {
+		initDocument(logicDocument);
+		let done = assert.async();
+
+		// let htmlElement = document.createElement("html");
+		// htmlElement.setAttribute("xmlns:o", "urn:schemas-microsoft-com:office:office");
+		// htmlElement.setAttribute("xmlns:w", "urn:schemas-microsoft-com:office:word");
+		// htmlElement.setAttribute('xmlns:m', "http://schemas.microsoft.com/office/2004/12/omml");
+		// htmlElement.setAttribute("xmlns", "http://www.w3.org/TR/REC-html40");
+
+		const htmlText = `
+	<head>
+	<meta http-equiv=Content-Type content="text/html; charset=utf-8">
+	<meta name=ProgId content=Word.Document>
+	<meta name=Generator content="Microsoft Word 15">
+	<meta name=Originator content="Microsoft Word 15">
+	<link rel=File-List
+	href="file:///C:/Users/asus/AppData/Local/Temp/msohtmlclip1/01/clip_filelist.xml">
+	<link rel=themeData
+	href="file:///C:/Users/asus/AppData/Local/Temp/msohtmlclip1/01/clip_themedata.thmx">
+	<link rel=colorSchemeMapping
+	href="file:///C:/Users/asus/AppData/Local/Temp/msohtmlclip1/01/clip_colorschememapping.xml">
+	<style>
+	<!--
+	 /* Font Definitions */
+		 @font-face
+		\t{font-family:"Cambria Math";
+		\tpanose-1:2 4 5 3 5 4 6 3 2 4;
+		\tmso-font-charset:204;
+		\tmso-generic-font-family:roman;
+		\tmso-font-pitch:variable;
+		\tmso-font-signature:-536869121 1107305727 33554432 0 415 0;}
+		@font-face
+		\t{font-family:Aptos;
+		\tmso-font-charset:0;
+		\tmso-generic-font-family:swiss;
+		\tmso-font-pitch:variable;
+		\tmso-font-signature:536871559 3 0 0 415 0;}
+		 /* Style Definitions */
+		 p.MsoNormal, li.MsoNormal, div.MsoNormal
+		\t{mso-style-unhide:no;
+		\tmso-style-qformat:yes;
+		\tmso-style-parent:"";
+		\tmargin-top:0cm;
+		\tmargin-right:0cm;
+		\tmargin-bottom:8.0pt;
+		\tmargin-left:0cm;
+		\tline-height:115%;
+		\tmso-pagination:widow-orphan;
+		\tfont-size:12.0pt;
+		\tfont-family:"Aptos",sans-serif;
+		\tmso-ascii-font-family:Aptos;
+		\tmso-ascii-theme-font:minor-latin;
+		\tmso-fareast-font-family:Aptos;
+		\tmso-fareast-theme-font:minor-latin;
+		\tmso-hansi-font-family:Aptos;
+		\tmso-hansi-theme-font:minor-latin;
+		\tmso-bidi-font-family:"Times New Roman";
+		\tmso-bidi-theme-font:minor-bidi;
+		\tmso-font-kerning:1.0pt;
+		\tmso-ligatures:standardcontextual;
+		\tmso-fareast-language:EN-US;}
+		.MsoChpDefault
+		\t{mso-style-type:export-only;
+		\tmso-default-props:yes;
+		\tfont-family:"Aptos",sans-serif;
+		\tmso-ascii-font-family:Aptos;
+		\tmso-ascii-theme-font:minor-latin;
+		\tmso-fareast-font-family:Aptos;
+		\tmso-fareast-theme-font:minor-latin;
+		\tmso-hansi-font-family:Aptos;
+		\tmso-hansi-theme-font:minor-latin;
+		\tmso-bidi-font-family:"Times New Roman";
+		\tmso-bidi-theme-font:minor-bidi;
+		\tmso-fareast-language:EN-US;}
+		.MsoPapDefault
+		\t{mso-style-type:export-only;
+		\tmargin-bottom:8.0pt;
+		\tline-height:115%;}
+		@page WordSection1
+		\t{size:595.3pt 841.9pt;
+		\tmargin:2.0cm 42.5pt 2.0cm 3.0cm;
+		\tmso-header-margin:35.4pt;
+		\tmso-footer-margin:35.4pt;
+		\tmso-paper-source:0;}
+		div.WordSection1
+		\t{page:WordSection1;}
+		-->
+		</style>
+	
+		</head>
+		
+		<body lang=RU style='tab-interval:35.4pt;word-wrap:break-word'>
+		<!--StartFragment-->
+		
+		<p class=MsoNormal><span
+			style='font-size:12.0pt;line-height:115%;font-family:"Aptos",sans-serif;
+			mso-ascii-theme-font:minor-latin;mso-fareast-font-family:Aptos;mso-fareast-theme-font:
+			minor-latin;mso-hansi-theme-font:minor-latin;mso-bidi-font-family:"Times New Roman";
+			mso-bidi-theme-font:minor-bidi;mso-ansi-language:RU;mso-fareast-language:EN-US;
+			mso-bidi-language:AR-SA'><img width=182 height=55
+			src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALYAAAA3CAMAAACWwkBLAAAAAXNSR0IArs4c6QAAALpQTFRFAAAAAAAAAAA6AABmADpmADqQAGa2OgAAOgA6OgBmOjo6OjpmOjqQOmaQOma2OpCQOpDbZgAAZgA6ZgBmZjoAZjo6ZjqQZmYAZmaQZpDbZraQZrbbZrb/kDoAkDo6kGY6kGZmkGaQkJC2kLbbkNvbkNv/tmYAtmY6tmaQtpA6tpBmtpCQtpC2ttv/tv/btv//25A625CQ27Zm27aQ27a229uQ2//b2////7Zm/7aQ/9uQ/9u2//+2///b3VjZygAAAAF0Uk5TAEDm2GYAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAAZdEVYdFNvZnR3YXJlAE1pY3Jvc29mdCBPZmZpY2V/7TVxAAADn0lEQVRoQ+1Zi1baQBDdKBLbWgqWPiFqW4nVljZVC+mS/f/f6sw+ktlHMNgHyznMOeoBlszduzN3ZkfG9rZnYDsMrMb92/RouR3nj/d6//N4Ur3eOdis6LNy8Phtb+ub+ZTlk6+7Rnd1OmPXB7Ntkbb3u2dgz4BhoEg8m+4AOyJLDr8TnPDagi3Ok+lqnAxj2wpPkz7FxFMC+8f8Zp6/+LgsoPD/mkQFHcKEcimyGra4gg9EBrvK4Ue+isjyxCo0UDC1IVjGj2cAHd8TWVS4q1ESbP5KGfT4mz+R4Y87iMjc8FbQNLlIeXm0+ID9iqQ/HoPw9lVPUSzBl2mvhe78oUaGLOCvuh1W8XzekZrcVkH5rQC1fnRXL6l6Brw1C4qTrg0mf4r763B1CYR3MAFzNwn4wBZ6z1e9QOeHs7MimOUyq7pcXUpbBTH/qH4bZypLiRXD1cUn8lr7gmwBwwAyC1pkKAxbLe5ydfHCuwxFrfemF12uL7OgRYXCsBmWN9bl6uIWeVa4xEoJdI6gOr3Mhisas46veoE+p9UY2LhqGLFgQxNx8P4tPg1X06sLoNPmRimEtyVvQdjVSCpO7ZyfLEtVY7VL95pUL5D8MfF5kQ2vSJdAYfN0sKxG8mkbVIjSVhMv+/Bx6qmeczyG2mVATjBQDU2FaSU8BtGjbi02gM1TK6vXwEYUTk9IXD4A285qwrY8yZZ63B4kIrPDZj1sR1KoyzBs8wVxbqU6gS0Z1l49xQo/FPlzUnBtSjrOVSwGN2r86WMXZ5DDvAluCjudii9v+vwdDalWuPoDT6bXwXado8LULsOelBTnvRnE16CRHpqS10lvfis/7NxrViO3S1qj255zxhqXbfyEz31NlXyIaPw891Ta0A/C2KRq8Ai6PH+Tg+8ufwFq64OiYvRHnevd3+4AHe1T9BmlJT2QrjYd6f3Xy1ztU/4My3WhUDU3HivCvX6uYhr+rEZqhX4nDuTBFhXpltcbDAz+TN43wi3zljbhal8TFNCEYqxc3iihJaOILUGlbl3tI2pRAF6ctsm2T5zFNN8pndvvXUoKz/0cSvYCBzzQmna9mP6Po1DXJ8tUJmrDVrU4/CbnDfFY0xE2yC3YKIM87cXEdDzs7ZHEzYAzDoMU3Yl/q6ppl5nHiLNZXP1S25nb4zCs31F1Hm2w7XEYzDVwiBW/qWmXCRJku2XAFdVWnHEYBHZcHVMLWc04TC0od0RJojr7yMD8BlNbdQ3ULx22AAAAAElFTkSuQmCC"
+			v:shapes="_x0000_i1025"></span><o:p></o:p></p>
+	
+		
+		<!--EndFragment-->
+		</body>
+
+		`;
+		// AscTest.Editor.asc_PasteData(AscCommon.c_oAscClipboardDataFormat.HtmlElement, htmlElement);
+		AscTest.Editor['pluginMethod_PasteHtml'](htmlText)
+
+		logicDocument.SelectAll();
+		let oCopyProcessor = new AscCommon.CopyProcessor(AscTest.Editor);
+		oCopyProcessor.Start();
+		console.log(oCopyProcessor);
+		const copiedHtml = oCopyProcessor.getInnerHtml();
+		logicDocument.RemoveSelection();
+
+		const jsonedData = removeBase64(JSON.stringify(copiedHtml));
+		const expectedHtml = ``
+		assert.strictEqual(jsonedData, expectedHtml, "Copied HTML should match for Newton's binom formula");
+		done();
+	});
+
 	QUnit.module("Word Copy Paste Tests");
 });
-
-// function removeBase64(html) {
-// 	// Regex to remove long base64-like strings (letters, digits, +, /, =)
-// 	// Adjust {50,} if your garbage is shorter/longer
-// 	return html.replace(/([A-Za-z0-9+/=]{50,})/g, '');
-// }
 
 function removeBase64(html) {
 	// 1. Remove long base64-like strings (letters, digits, +, /, =)
@@ -733,4 +934,19 @@ function ToJsonString(logicDocument) {
 	}
 
 	return JSON.stringify(oResult);
+}
+
+const charWidth = AscTest.CharWidth * AscTest.FontSize;
+const L_FIELD = 20 * charWidth;
+const R_FIELD = 30 * charWidth;
+const PAGE_W  = 150 * charWidth;
+
+function initDocument(logicDocument)
+{
+	AscTest.ClearDocument();
+	logicDocument.AddToContent(0, AscTest.CreateParagraph());
+
+	let sectPr = AscTest.GetFinalSection();
+	sectPr.SetPageSize(PAGE_W, 1000);
+	sectPr.SetPageMargins(L_FIELD, 50, R_FIELD, 50);
 }
