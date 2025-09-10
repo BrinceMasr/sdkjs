@@ -1691,6 +1691,9 @@
                                 oTextPr.SetFontSize(nCurFontSize);
                                 oField.SetTextSize(oTextPr.GetIncDecFontSize(args[0]));
                             }
+                            else if (f == CDocumentContent.prototype.SetParagraphBidi) {
+                                oField.SetRTL(args[0]);
+                            }
                         }
                         else {
                             let content = drawing.getDocContent();

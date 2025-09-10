@@ -692,7 +692,7 @@
         }
     };
     CAnnotationLine.prototype.SetRichContents = function(aRCInfo) {
-        AscCommon.History.Add(new CChangesPDFFreeTextRC(this, this.GetRichContents(), aRCInfo));
+        AscCommon.History.Add(new CChangesPDFAnnotRC(this, this.GetRichContents(), aRCInfo));
         this._richContents = aRCInfo;
 
         this.SetWasChanged(true);

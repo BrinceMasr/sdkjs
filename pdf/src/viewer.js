@@ -3275,9 +3275,9 @@
 				}
 				else if (this.Api.isStartAddShape)
 				{
+					this.DrawingObjects.endTrackNewShape();
 					this.Api.sync_StartAddShapeCallback(false);
 					this.Api.sync_EndAddShape();
-					this.DrawingObjects.endTrackNewShape();
 				}
 				else {
 					const oController = oDoc.GetController();
@@ -3440,6 +3440,12 @@
 				}
 
 				bRetValue = true;
+			}
+			else if (e.KeyCode === 113) {
+				Asc.editor.StartAddAnnot(AscPDF.ANNOTATIONS_TYPES.Line, true);
+			}
+			else if (e.KeyCode === 114) {
+				Asc.editor.StartAddAnnot(AscPDF.ANNOTATIONS_TYPES.PolyLine, true);
 			}
 			
 			oDoc.UpdateCopyCutState();
@@ -3623,6 +3629,11 @@
 					let sFont = field.GetTextFontActual();
 					if (sFont)
 						fontMap[sFont] = true;
+
+					if (field.IsHindiDigits() && !oDoc.HindiFontLoaded) {
+						oDoc.HindiFontLoaded = true;
+						AscFonts.FontPickerByCharacter.getFontsByString(String.fromCodePoint(0x0660, 0x0661, 0x0662, 0x0663, 0x0664, 0x0665, 0x0666, 0x0667, 0x0668, 0x0669));
+					}
 				}
 			});
 			
@@ -4595,6 +4606,10 @@
 
 			let bNeedEdit = false;
 
+			if (nOriginIndex == undefined) {
+				return false;
+			}
+
 			if (nRotAngle != nOrigRotAngle) bNeedEdit = true;
 			if (aDrawings.length != 0) bNeedEdit = true;
 			if (aAnnots.find(function(annot) {
@@ -4607,7 +4622,6 @@
 				return form.IsChanged();
 			})) bNeedEdit = true;
 			if (aDeletedObj.length != 0) bNeedEdit = true;
-			if (bNeedEdit && nOriginIndex !== undefined) bNeedEdit = true;
 
 			return bNeedEdit;
 		}
@@ -4937,6 +4951,10 @@
 
 			let bNeedEdit = false;
 
+			if (nOriginIndex == undefined) {
+				return false;
+			}
+
 			if (nRotAngle != nOrigRotAngle) bNeedEdit = true;
 			if (aDrawings.length != 0) bNeedEdit = true;
 			if (aAnnots.some(function(annot) {
@@ -4949,8 +4967,6 @@
 				return form.IsChanged();
 			})) bNeedEdit = true;
 			if (aDeletedObj.length != 0) bNeedEdit = true;
-
-			if (bNeedEdit && nOriginIndex === undefined) bNeedEdit = false;
 
 			return bNeedEdit;
 		}

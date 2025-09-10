@@ -114,6 +114,7 @@
         this._textFontActual= undefined;    // фактический используемый
         this._textSize      = 10;
         this._fontStyle     = 0;    // информация о стиле шрифта (bold, italic)
+        this._meOptions     = 0;    // middle-east text options (flags)
 
         this._display       = AscPDF.Api.Types.display["visible"];
         this._hidden        = false;             // This property has been superseded by the display property and its use is discouraged.
@@ -199,7 +200,124 @@
 
         return this._apIdx;
     };
+    CBaseField.prototype.SetMEOptions = function(nFlags) {
+        let oParent = this.GetParent();
+        if (oParent && oParent.IsAllKidsWidgets())
+            return oParent.SetMEOptions(nFlags);
 
+        if (this._meOptions === nFlags) {
+            return true;
+        }
+
+        AscCommon.History.Add(new CChangesPDFFormMEOptions(this, this._meOptions, nFlags));
+
+        let isRtlChanged = (this._meOptions & 1) !== (nFlags & 1);
+
+        this._meOptions = nFlags;
+
+        this.UpdateMEOptions(isRtlChanged);
+    };
+    CBaseField.prototype.UpdateMEOptions = function(isRtlChanged) {
+        AscCommon.History.StartNoHistoryMode();
+
+        this.GetAllWidgets().forEach(function(widget) {
+            if (isRtlChanged) {
+                AscCommon.History.EndNoHistoryMode();
+
+                if (false == Asc.editor.getDocumentRenderer().IsOpenFormsInProgress) {
+                    if (widget.IsRTL()) {
+                        widget.SetAlign(AscPDF.ALIGN_TYPE.right);
+                    }
+                    else {
+                        widget.SetAlign(AscPDF.ALIGN_TYPE.left);
+                    }
+                }
+                else {
+                    widget.SetNeedCheckAlign(true);
+                }
+
+                AscCommon.History.StartNoHistoryMode();
+            }
+
+            if (widget.content) {
+                widget.content.SetApplyToAll(true);
+                widget.content.SetParagraphBidi(widget.IsRTL());
+                widget.content.SetApplyToAll(false);
+                widget.private_NeedShapeText();
+            }
+            if (widget.contentFormat) {
+                widget.contentFormat.SetApplyToAll(true);
+                widget.contentFormat.SetParagraphBidi(widget.IsRTL());
+                widget.contentFormat.SetApplyToAll(false);
+                widget.private_NeedShapeText();
+            }
+
+            widget.SetWasChanged(true);
+            widget.SetNeedRecalc(true);
+        });
+
+        AscCommon.History.EndNoHistoryMode();
+    };
+    CBaseField.prototype.private_NeedShapeText = function() {
+        if (this.content) {
+            this.content.GetAllParagraphs().forEach(function(paragraph) {
+                paragraph.RecalcInfo.NeedShapeText();
+            });
+        }
+        
+        if (this.contentFormat) {
+            this.contentFormat.GetAllParagraphs().forEach(function(paragraph) {
+                paragraph.RecalcInfo.NeedShapeText();
+            });
+        }
+    };
+    CBaseField.prototype.GetMEOptions = function(bInherit) {
+        let oParent = this.GetParent();
+        if (bInherit !== false && oParent && oParent.IsAllKidsWidgets())
+            return oParent.GetMEOptions();
+
+        return this._meOptions;
+    };
+    CBaseField.prototype.SetRTL = function(bRTL) {
+        let nMEOptions = this.GetMEOptions();
+
+        if (bRTL) {
+            nMEOptions |= (1 << 0);
+        }
+        else {
+            nMEOptions &= ~(1 << 0);
+        }
+        
+        this.SetMEOptions(nMEOptions);
+    };
+    CBaseField.prototype.IsRTL = function() {
+        return !!(this.GetMEOptions() & 1 << 0);
+    };
+    CBaseField.prototype.SetDigitsType = function(nType) {
+        let nMEOptions = this.GetMEOptions();
+
+        switch (nType) {
+            case AscPDF.DIGITS_TYPES.arabic: {
+                nMEOptions &= ~(1 << 2);
+                break;
+            }
+            case AscPDF.DIGITS_TYPES.hindi: {
+                nMEOptions |= (1 << 2);
+                break;
+            }
+        }
+
+        this.SetMEOptions(nMEOptions);
+    };
+    CBaseField.prototype.GetDigitsType = function () {
+        let nMEOptions = this.GetMEOptions();
+        return (nMEOptions & (1 << 2)) !== 0 
+            ? AscPDF.DIGITS_TYPES.hindi 
+            : AscPDF.DIGITS_TYPES.arabic;
+    };
+    CBaseField.prototype.IsHindiDigits = function() {
+        return !!(this.GetMEOptions() & 1 << 2);
+    };
     CBaseField.prototype.SetMeta = function(oMeta) {
         AscCommon.History.Add(new CChangesPDFFormMeta(this, this._meta, oMeta))
 
@@ -1490,7 +1608,7 @@
         let aPartNames = sName.split('.').filter(function(item) {
             if (item != "")
                 return item;
-        })
+        });
 
         // по формату не больше 20 вложенностей
         if (aPartNames.length > 20)
@@ -2446,7 +2564,26 @@
             this.contentFormat.SetItalic(oStyle.italic);
         }
     };
-    CBaseField.prototype.GetAlign = function() {};
+    CBaseField.prototype.SetAlign = function(nAlignType) {
+        if (this._alignment != nAlignType) {
+            AscCommon.History.Add(new CChangesPDFFormAlign(this, this._alignment, nAlignType));
+            this._alignment = nAlignType;
+        }
+
+        let nFieldType = this.GetType();
+        if (AscPDF.FIELD_TYPES.text !== nFieldType &&
+        AscPDF.FIELD_TYPES.combobox !== nFieldType &&
+        AscPDF.FIELD_TYPES.listbox !== nFieldType) {
+            return;
+        }
+
+        this.SetNeedCheckAlign(true);
+        this.SetWasChanged(true);
+		this.SetNeedRecalc(true);
+	};
+    CBaseField.prototype.GetAlign = function() {
+        return this._alignment;
+    };
     CBaseField.prototype.GetFontStyle = function() {
         return this._fontStyle;
     };
@@ -2484,7 +2621,7 @@
 
         let nNewExtX = this.GetWidth();
         let nNewExtY = this.GetHeight();
-        this.SetWasChanged(true, !(nOldExtX == nNewExtX && nOldExtY == nNewExtY));
+        this.SetWasChanged(true, !(Math.abs(nOldExtX - nNewExtX) < 0.001 && Math.abs(nOldExtY == nNewExtY) < 0.001));
         
         this.SetNeedRecalc(true);
 		this.RecalcTextTransform();
@@ -3096,6 +3233,13 @@
             memory.WriteString(sName);
         }
 
+        // middle east options
+        let nMEOptions = this.GetMEOptions(false);
+        if (nMEOptions !== 0) {
+            memory.fieldDataFlags |= (1 << 21);
+            memory.WriteLong(nMEOptions);
+        }
+        
         // actions
         let aActions = this.GetListActions(false);
         memory.WriteLong(aActions.length);
@@ -3264,6 +3408,13 @@
         if (sTooltip) {
             nFlags |= (1 << 10);
             memory.WriteString(sTooltip);
+        }
+
+        // middle east options
+        let nMEOptions = this.GetMEOptions();
+        if (nMEOptions !== 0) {
+            nFlags |= (1 << 11);
+            memory.WriteLong(nMEOptions);
         }
 
         // write flags

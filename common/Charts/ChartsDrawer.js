@@ -18059,7 +18059,7 @@ CColorObj.prototype =
 			if (!this.storage[chartId][seriaId]) {
 				this.storage[chartId][seriaId] = new CTrendData();
 			}
-			if (!this.storage[chartId][seriaId].isEmpty() && xVal === this.storage[chartId][seriaId].coords.catVals[0]) {
+			if (!this.storage[chartId][seriaId].isEmpty() && xVal === this.storage[chartId][seriaId].coords.catVals[0] && yVal === this.storage[chartId][seriaId].coords.catVals[1] ) {
 				this.stopAdding = true;
 			}
 
@@ -20404,9 +20404,15 @@ CColorObj.prototype =
 			let diff;
 			let chosenPath;
 			for (let i in charts) {
+
+				if (!charts.hasOwnProperty(i) || !charts[i] || !charts[i].chart
+					|| !this.storage[i] || this.storage[i].length !== 2
+					|| this.storage[i][0].length !== this.ptsCount || this.storage[i][1].length !== this.ptsCount || !this.upDownBars) {
+					continue;
+				}
+
 				const valAxis = this.cChartDrawer.getAxisFromAxId(charts[i].chart.axId, AscDFH.historyitem_type_ValAx);
-				if (valAxis && charts.hasOwnProperty(i) && charts[i] && this.upDownBars && this.storage[i] && this.storage[i].length === 2
-					&& this.storage[i][0].length === this.ptsCount && this.storage[i][1].length === this.ptsCount) {
+				if (valAxis) {
 
 					const catStart = this.cChartDrawer.calcProp.chartGutter._left;
 

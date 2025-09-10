@@ -568,7 +568,6 @@
             return;
 
         let oViewer         = editor.getDocumentRenderer();
-        let oDoc            = this.GetDocument();
         let sCurContents    = this.GetContents();
         
         this._contents = contents;
@@ -625,7 +624,7 @@
         let oLastUsedPara   = oContent.GetElement(0);
         oLastUsedPara.RemoveFromContent(0, oLastUsedPara.GetElementsCount());
 
-        AscCommon.History.Add(new CChangesPDFFreeTextRC(this, this.GetRichContents(), aRCInfo));
+        AscCommon.History.Add(new CChangesPDFAnnotRC(this, this.GetRichContents(), aRCInfo));
         this._richContents = aRCInfo;
 
         if (!aRCInfo) {
@@ -677,16 +676,18 @@
                 let nCharCode = oRCInfo["text"][nChar].charCodeAt(0);
                 
                 if (nCharCode == 13) {
-                    oLastUsedPara.Correct_Content();
-                    oLastUsedPara.AddToParagraph(new AscWord.ParaTextPr(oRun.GetTextPr()));
+                    if (i != aRCInfo.length - 1) {
+                        oLastUsedPara.Correct_Content();
+                        oLastUsedPara.AddToParagraph(new AscWord.ParaTextPr(oRun.GetTextPr()));
 
-                    oLastUsedPara = new AscWord.Paragraph(oContent, true);
-                    oContent.Internal_Content_Add(oContent.GetElementsCount(), oLastUsedPara);
+                        oLastUsedPara = new AscWord.Paragraph(oContent, true);
+                        oContent.Internal_Content_Add(oContent.GetElementsCount(), oLastUsedPara);
 
-                    oRun = new ParaRun(oLastUsedPara, false);
-                    setRunPr(oRun, oRCInfo);
-                    oLastUsedPara.AddToContentToEnd(oRun);
-                    oLastUsedPara.Set_Align(AscPDF.getInternalAlignByPdfType(oRCInfo["alignment"]));
+                        oRun = new ParaRun(oLastUsedPara, false);
+                        setRunPr(oRun, oRCInfo);
+                        oLastUsedPara.AddToContentToEnd(oRun);
+                        oLastUsedPara.Set_Align(AscPDF.getInternalAlignByPdfType(oRCInfo["alignment"]));
+                    }
                 }
                 else {
                     oRun.AddToContentToEnd(AscPDF.codePointToRunElement(nCharCode));
@@ -1082,7 +1083,7 @@
                     oDoc.History.Add(new CChangesFreeTextCallout(this, this._prevCallout, this.GetCallout()));
                     oDoc.History.Add(new CChangesPDFAnnotRD(this, this._prevRectDiff, this.GetRectangleDiff()));
                     oDoc.History.Add(new CChangesPDFAnnotRect(this, this._prevRect, this.GetRect()));
-                    oDoc.History.Add(new CChangesPDFFreeTextRC(this, aCurRc, aNewRc));
+                    oDoc.History.Add(new CChangesPDFAnnotRC(this, aCurRc, aNewRc));
                     oDoc.private_UpdateTargetForCollaboration(true);
                 }
             }, AscDFH.historydescription_Pdf_UpdateAnnotRC, this);
@@ -1266,7 +1267,7 @@
                     oDoc.SetGlobalHistory();
                     oDoc.DoAction(function() {
                         this.FitTextBox();
-                    }, AscDFH.historydescription_Pdf_FreeTextFitTextBox, this);
+                    }, AscDFH.historydescription_Pdf_ChangeAnnot, this);
                     oDoc.SetLocalHistory();
 
                     this.selectedObjects.length = 0;
@@ -1493,7 +1494,7 @@
     CAnnotationFreeText.canRotate = function() {
         return false;
     };
-    CAnnotationFreeText.prototype.Get_AbsolutePage = function() {
+    CAnnotationFreeText.prototype.GetAbsolutePage = function() {
         return this.GetPage();
     };
     CAnnotationFreeText.prototype.select = function (drawingObjectsController, pageIndex) {

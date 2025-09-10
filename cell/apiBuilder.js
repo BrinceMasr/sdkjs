@@ -131,6 +131,7 @@
 	 * @property {string} FontName - Sets the specified font family as the font name for the current cell range.
 	 * @property {'center' | 'bottom' | 'top' | 'distributed' | 'justify'} AlignVertical - Sets the text vertical alignment to the current cell range.
 	 * @property {'left' | 'right' | 'center' | 'justify'} AlignHorizontal - Sets the text horizontal alignment to the current cell range.
+	 * @property {'context' | 'ltr' | 'rtl'} ReadingOrder - Sets the direction (reading order) of the text in the current cell range.
 	 * @property {boolean} Bold - Sets the bold property to the text characters from the current cell or cell range.
 	 * @property {boolean} Italic - Sets the italic property to the text characters in the current cell or cell range.
 	 * @property {'none' | 'single' | 'singleAccounting' | 'double' | 'doubleAccounting'} Underline - Sets the type of underline applied to the font.
@@ -9486,6 +9487,23 @@
 		}
 	};
 
+	/**
+	 * Retrieves the custom XML manager associated with the current sheet.
+	 * This manager allows manipulation and access to custom XML parts within the current sheet.
+	 * @memberof ApiWorksheet
+	 * @typeofeditors ["CSE"]
+	 * @since 9.1.0
+	 * @returns {ApiCustomXmlParts|null} Returns an instance of ApiCustomXmlParts if the custom XML manager exists, otherwise returns null.
+	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/GetCustomXmlParts.js
+	 */
+	ApiWorksheet.prototype.GetCustomXmlParts = function()
+	{
+		if (!(this.worksheet && this.worksheet.workbook))
+			return null;
+
+		let workbook = this.worksheet.workbook;
+		return new AscBuilder.ApiCustomXmlParts(workbook);
+	};
 
 
 	/**
@@ -10343,6 +10361,28 @@
 	Object.defineProperty(ApiRange.prototype, "AlignHorizontal", {
 		set: function (sAlignment) {
 			return this.SetAlignHorizontal(sAlignment);
+		}
+	});
+
+	/**
+	 * Sets the direction (reading order) of the text in the current cell range.
+	 *
+	 * @memberof ApiRange
+	 * @typeofeditors ["CSE"]
+	 * @param {'context' | 'ltr' | 'rtl'} direction - The direction (reading order) that will be applied to the cell contents.
+	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/SetReadingOrder.js
+	 */
+	ApiRange.prototype.SetReadingOrder = function (direction) {
+		const map = {
+			"context": Asc.c_oReadingOrderTypes.Context, // 0
+			"ltr": Asc.c_oReadingOrderTypes.LTR, // 1
+			"rtl": Asc.c_oReadingOrderTypes.RTL, // 2
+		};
+		this.range.setReadingOrder(map[direction] || 0);
+	};
+	Object.defineProperty(ApiRange.prototype, "ReadingOrder", {
+		set: function (direction) {
+			return this.SetReadingOrder(direction);
 		}
 	});
 
@@ -11902,7 +11942,7 @@
 
 		if (Criteria1 == null) {
 			//clean current filter
-			ws.autoFilters.clearFilterColumn(Asc.range(_range.c1 + Field, _range.r1, _range.c1 + Field, _range.r1).getName());
+			ws.autoFilters.clearFilterColumn(Asc.Range(_range.c1 + Field, _range.r1, _range.c1 + Field, _range.r1).getName());
 			//api.asc_clearFilterColumn(Asc.range(_range.c1 + Field, _range.r1, _range.c1 + Field, _range.r1).getName());
 			return;
 		}
@@ -12654,6 +12694,45 @@
 			return true;
 		}
 
+		return false;
+	};
+
+
+
+	/**
+	 * Gets the geometry object from a shape
+	 * @memberof ApiShape
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiGeometry}
+	 * @see office-js-api/Examples/{Editor}/ApiShape/Methods/GetGeometry.js
+	 * @since 9.1.0
+	 */
+
+	ApiShape.prototype.GetGeometry = function()
+	{
+		if (this.Shape && this.Shape.spPr && this.Shape.spPr.geometry)
+		{
+			return Api.prototype.private_CreateGeometry(this.Shape.spPr.geometry);
+		}
+		return null;
+	};
+
+	/**
+	 * Sets a custom geometry for the shape
+	 * @memberof ApiShape
+	 * @typeofeditors ["CSE"]
+	 * @param {ApiGeometry} oGeometry - The geometry to set
+	 * @returns {boolean}
+	 * @see office-js-api/Examples/{Editor}/ApiShape/Methods/SetGeometry.js
+	 * @since 9.1.0
+	 */
+	ApiShape.prototype.SetGeometry = function(oGeometry)
+	{
+		if (this.Shape && this.Shape.spPr && oGeometry && oGeometry.geometry)
+		{
+			this.Shape.spPr.setGeometry(oGeometry.geometry);
+			return true;
+		}
 		return false;
 	};
 
@@ -19534,6 +19613,7 @@
 	ApiRange.prototype["SetFontName"] = ApiRange.prototype.SetFontName;
 	ApiRange.prototype["SetAlignVertical"] = ApiRange.prototype.SetAlignVertical;
 	ApiRange.prototype["SetAlignHorizontal"] = ApiRange.prototype.SetAlignHorizontal;
+	ApiRange.prototype["SetReadingOrder"] = ApiRange.prototype.SetReadingOrder;
 	ApiRange.prototype["SetBold"] = ApiRange.prototype.SetBold;
 	ApiRange.prototype["SetItalic"] = ApiRange.prototype.SetItalic;
 	ApiRange.prototype["SetUnderline"] = ApiRange.prototype.SetUnderline;
@@ -19601,6 +19681,8 @@
 	ApiShape.prototype["GetDocContent"]                =  ApiShape.prototype.GetDocContent;
 	ApiShape.prototype["GetContent"]                   =  ApiShape.prototype.GetContent;
 	ApiShape.prototype["SetVerticalTextAlign"]         =  ApiShape.prototype.SetVerticalTextAlign;
+	ApiShape.prototype["GetGeometry"]                  =  ApiShape.prototype.GetGeometry;
+	ApiShape.prototype["SetGeometry"]                  =  ApiShape.prototype.SetGeometry;
 
 	ApiChart.prototype["SetSeriaValues"]              =  ApiChart.prototype.SetSeriaValues;
 	ApiChart.prototype["SetSeriaXValues"]             =  ApiChart.prototype.SetSeriaXValues;

@@ -309,6 +309,13 @@
         this.SetUserId(Asc.editor.documentUserId);
         this.EditCommentData(oCurData);
     };
+    CAnnotationBase.prototype.SetRichContents = function(aRCInfo) {
+        AscCommon.History.Add(new CChangesPDFAnnotRC(this, this._richContents, aRCInfo));
+        this._richContents = aRCInfo;
+
+        this.SetWasChanged(true);
+        this.SetNeedRecalc(true);
+    };
     CAnnotationBase.prototype.GetRichContents = function() {
         return this._richContents;
     };
@@ -502,7 +509,14 @@
         // oGraphicsPDF.Stroke();
     };
     CAnnotationBase.prototype.SetSubject = function(sSubject) {
+        if (this._subject == sSubject) {
+            return;
+        }
+
+        AscCommon.History.Add(new CChangesPDFAnnotSubject(this, this._subject, sSubject));
         this._subject = sSubject;
+
+        this.SetWasChanged(true, false);
     };
     CAnnotationBase.prototype.GetSubject = function() {
         return this._subject;
