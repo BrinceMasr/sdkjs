@@ -53,6 +53,12 @@ $(function () {
 	AscTest.Editor.WordControl.m_oDrawingDocument.m_oLogicDocument = logicDocument;
 	AscTest.Editor.WordControl.m_oLogicDocument = logicDocument;
 
+
+
+	AscCommon.PasteProcessor.prototype._Prepeare_recursive = function () {
+
+	};
+
 	QUnit.test("Test: \"callback tests paste plain text\"", function (assert) {
 		AscTest.ClearDocument();
 		let p = AscTest.CreateParagraph();
