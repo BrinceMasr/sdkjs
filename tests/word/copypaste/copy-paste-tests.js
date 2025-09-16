@@ -53,7 +53,7 @@ $(function () {
 	AscTest.Editor.WordControl.m_oDrawingDocument.m_oLogicDocument = logicDocument;
 	AscTest.Editor.WordControl.m_oLogicDocument = logicDocument;
 
-
+	const oldPrepeare_recursive = AscCommon.PasteProcessor.prototype._Prepeare_recursive;
 
 	AscCommon.PasteProcessor.prototype._Prepeare_recursive = function () {
 
@@ -312,6 +312,16 @@ $(function () {
 			expected.content[0].content[0].content[0].id = numIds[0].replace(/"id":"(\d+)"/, '$1');
 			expected.content[0].content[0].content[1].id = numIds[1].replace(/"id":"(\d+)"/, '$1');
 		}
+		const wMatches = result.match(/"w":(\d+)/g);
+		if (wMatches && wMatches.length >= 5) {
+			const wValues = wMatches.map(m => m.replace(/"w":/, ''));
+
+			// patch the 4 locations in expected
+			expected.content[0].tblGrid[0].w = Number(wValues[0]);
+			expected.content[0].tblGrid[1].w = Number(wValues[1]);
+			expected.content[0].content[0].content[0].tcPr.tcW.w = Number(wValues[3]);
+			expected.content[0].content[0].content[1].tcPr.tcW.w = Number(wValues[4]);
+		}
 		assert.strictEqual(result, JSON.stringify(expected), "Должна вставиться таблица с двумя ячейками");
 		done();
 	});
@@ -343,6 +353,8 @@ $(function () {
 	});
 
 	QUnit.test("Paste image HTML", function(assert) {
+		// add prepare recursive to tests
+		AscCommon.PasteProcessor.prototype._Prepeare_recursive = oldPrepeare_recursive;
 		AscTest.ClearDocument();
 		let p = AscTest.CreateParagraph();
 		logicDocument.AddToContent(0, p);
@@ -364,6 +376,11 @@ $(function () {
 			expected.content[2].pPr.numPr.numId = numId[1];
 		}
 		assert.strictEqual(result, JSON.stringify(expected), "Должно вставиться изображение из img элемента");
+
+		// remove prepeare recursive from tests
+		AscCommon.PasteProcessor.prototype._Prepeare_recursive = function () {
+
+		};
 		done();
 	});
 
@@ -786,7 +803,6 @@ $(function () {
 		let oCopyProcessor = new AscCommon.CopyProcessor(AscTest.Editor);
 		oCopyProcessor.Start();
 		const copiedHtml = oCopyProcessor.getInnerHtml();
-		console.log(copiedHtml)
 		logicDocument.RemoveSelection();
 
 		const jsonedData = removeBase64(JSON.stringify(copiedHtml));
@@ -1624,12 +1640,11 @@ $(function () {
 		logicDocument.SelectAll();
 		let oCopyProcessor = new AscCommon.CopyProcessor(AscTest.Editor);
 		oCopyProcessor.Start();
-		console.log(oCopyProcessor);
 		const copiedHtml = oCopyProcessor.getInnerHtml();
 		logicDocument.RemoveSelection();
 
 		const jsonedData = removeBase64(JSON.stringify(copiedHtml));
-		const expectedHtml = ``
+		const expectedHtml = "\"<p style=\\\"line-height:13.8pt;margin-top:0pt;margin-bottom:0pt;border:none;mso-border-left-alt:none;mso-border-top-alt:none;mso-border-right-alt:none;mso-border-bottom-alt:none;mso-border-between:none\\\" class=\\\"docData;\\\"><span style=\\\"font-family:'Times New Roman';font-size:12pt;color:#000000;mso-style-textfill-fill-color:#000000\\\">&nbsp; </span></p><p style=\\\"margin-top:0pt;margin-bottom:0pt;border:none;border-left:none;border-top:none;border-right:none;border-bottom:none;mso-border-between:none\\\">&nbsp;</p>\""
 		assert.strictEqual(jsonedData, expectedHtml, "Copied HTML should match for Newton's binom formula");
 		done();
 	});

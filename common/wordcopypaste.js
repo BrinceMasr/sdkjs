@@ -6638,6 +6638,7 @@ PasteProcessor.prototype =
 		let oThis = this;
 		let isPasteTextIntoList = !!this.pasteTextIntoList;
 		let oAPI = oThis.api;
+
 		if (oAPI.isPdfEditor()) {
 			let oDoc = oAPI.getPDFDoc();
 			oDoc.Action.PasteHtmlAction = true;
