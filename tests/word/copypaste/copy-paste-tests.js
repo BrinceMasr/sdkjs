@@ -171,7 +171,7 @@ $(function () {
 		done();
 	});
 
-	QUnit.test("Test: \"paste html, select text, copy html, check htmls\"", function (assert) {
+	QUnit.test("Test: \"paste html, select text, copy html, check htmls for simple lists\"", function (assert) {
 		AscTest.ClearDocument();
 		let p = AscTest.CreateParagraph();
 		logicDocument.AddToContent(0, p);
@@ -207,6 +207,70 @@ $(function () {
 		assert.strictEqual(jsonedData, trueExpectations, "Copied data should be a document type");
 
 		done();
+	});
+
+	QUnit.test("Test: \"paste html, select text, copy html, check htmls for marked lists\"", function (assert) {
+		AscTest.ClearDocument();
+		let p = AscTest.CreateParagraph();
+		logicDocument.AddToContent(0, p);
+
+		let done = assert.async();
+
+		// Вставляем только маркированный список
+		let htmlElement = document.createElement("div");
+		htmlElement.innerHTML = `
+		<ul>
+			<li>Элемент 1</li>
+			<li>Элемент 2</li>
+			<li>Элемент 3</li>
+		</ul>
+	`;
+
+		AscTest.Editor.asc_PasteData(AscCommon.c_oAscClipboardDataFormat.HtmlElement, htmlElement, undefined, undefined, undefined, function () {
+			// Копируем обратно
+			logicDocument.SelectAll();
+			var oCopyProcessor = new AscCommon.CopyProcessor(AscTest.Editor);
+			oCopyProcessor.Start();
+			const copiedHtml = oCopyProcessor.getInnerHtml();
+			logicDocument.RemoveSelection();
+
+			const jsonedData = removeBase64(JSON.stringify(copiedHtml));
+			const expectedHtml ="\"<ul style=\\\"padding-left:40px\\\" class=\\\"docData;\\\"><li style=\\\"list-style-type: disc\\\"><p style=\\\"margin-left:35.43307086614173pt;text-indent:-18pt;margin-top:0pt;margin-bottom:0pt;border:none;mso-border-left-alt:none;mso-border-top-alt:none;mso-border-right-alt:none;mso-border-bottom-alt:none;mso-border-between:none\\\"><span style=\\\"font-family:'Times New Roman';font-size:10pt;color:#000000;mso-style-textfill-fill-color:#000000\\\">Элемент 1</span></p></li><li style=\\\"list-style-type: disc\\\"><p style=\\\"margin-left:35.43307086614173pt;text-indent:-18pt;margin-top:0pt;margin-bottom:0pt;border:none;mso-border-left-alt:none;mso-border-top-alt:none;mso-border-right-alt:none;mso-border-bottom-alt:none;mso-border-between:none\\\"><span style=\\\"font-family:'Times New Roman';font-size:10pt;color:#000000;mso-style-textfill-fill-color:#000000\\\">Элемент 2</span></p></li><li style=\\\"list-style-type: disc\\\"><p style=\\\"margin-left:35.43307086614173pt;text-indent:-18pt;margin-top:0pt;margin-bottom:0pt;border:none;border-left:none;border-top:none;border-right:none;border-bottom:none;mso-border-between:none\\\"><span style=\\\"font-family:'Times New Roman';font-size:10pt;color:#000000;mso-style-textfill-fill-color:#000000\\\">Элемент 3</span></p></li></ul><p style=\\\"margin-top:0pt;margin-bottom:0pt;border:none;border-left:none;border-top:none;border-right:none;border-bottom:none;mso-border-between:none\\\">&nbsp;</p>\""
+			assert.strictEqual(jsonedData, expectedHtml, "Должен корректно копироваться маркированный список");
+			done();
+		});
+	});
+
+	QUnit.test("Test: \"paste html, select text, copy html, check htmls for numbered lists\"", function (assert) {
+		AscTest.ClearDocument();
+		let p = AscTest.CreateParagraph();
+		logicDocument.AddToContent(0, p);
+
+		let done = assert.async();
+
+		// Вставляем только нумерованный список
+		let htmlElement = document.createElement("div");
+		htmlElement.innerHTML = `
+    <ol>
+      <li>Элемент 1</li>
+      <li>Элемент 2</li>
+      <li>Элемент 3</li>
+    </ol>
+  `;
+
+		AscTest.Editor.asc_PasteData(AscCommon.c_oAscClipboardDataFormat.HtmlElement, htmlElement, undefined, undefined, undefined, function () {
+			// Копируем обратно
+			logicDocument.SelectAll();
+			var oCopyProcessor = new AscCommon.CopyProcessor(AscTest.Editor);
+			oCopyProcessor.Start();
+			const copiedHtml = oCopyProcessor.getInnerHtml();
+			logicDocument.RemoveSelection();
+
+			const jsonedData = removeBase64(JSON.stringify(copiedHtml));
+			const expectedHtml = ''
+			assert.strictEqual(jsonedData, expectedHtml, "Должен корректно копироваться нумерованный список");
+			done();
+		});
 	});
 
 	QUnit.test("Paste simple div HTML content", function(assert) {
