@@ -638,7 +638,7 @@ $(function () {
 					logicDocument.RemoveSelection();
 
 					const jsonedData = removeBase64(JSON.stringify(copiedHtml));
-					const expectedHtml = "";
+					const expectedHtml = "\"<ol style=\\\"padding-left:40px\\\" class=\\\"docData;\\\"><li style=\\\"list-style-type: decimal\\\"><p style=\\\"margin-left:35.43307086614173pt;text-indent:-18pt;margin-top:0pt;margin-bottom:0pt;border:none;mso-border-left-alt:none;mso-border-top-alt:none;mso-border-right-alt:none;mso-border-bottom-alt:none;mso-border-between:none\\\"><span style=\\\"font-family:'Times New Roman';font-size:10pt;color:#000000;mso-style-textfill-fill-color:#000000\\\">Элемент 1</span></p></li><li style=\\\"list-style-type: decimal\\\"><p style=\\\"margin-left:35.43307086614173pt;text-indent:-18pt;margin-top:0pt;margin-bottom:0pt;border:none;border-left:none;border-top:none;border-right:none;border-bottom:none;mso-border-between:none\\\"><span style=\\\"font-family:'Times New Roman';font-size:10pt;color:#000000;mso-style-textfill-fill-color:#000000\\\">Элемент 2</span></p></li></ol><p style=\\\"margin-top:0pt;margin-bottom:0pt;border:none;border-left:none;border-top:none;border-right:none;border-bottom:none;mso-border-between:none\\\"><span style=\\\"font-family:'Times New Roman';font-size:10pt;color:#000000;mso-style-textfill-fill-color:#000000\\\">Элемент 3</span></p>\"";
 					assert.strictEqual(
 						jsonedData,
 						expectedHtml,
