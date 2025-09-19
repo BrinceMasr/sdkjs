@@ -71,6 +71,8 @@ $(function () {
 
 	AscCommon.PasteProcessor.prototype._Prepeare_recursive = function () {};
 
+	AscCommon.g_font_loader.CheckFontsNeedLoading = function () {};
+
 	QUnit.test('Test: "callback tests paste plain text"', function (assert) {
 		initDocument();
 
@@ -565,12 +567,12 @@ $(function () {
 			// Insert bulleted list only
 			let htmlElement = document.createElement("div");
 			htmlElement.innerHTML = `
-		<ul>
-			<li>Элемент 1</li>
-			<li>Элемент 2</li>
-			<li>Элемент 3</li>
-		</ul>
-	`;
+					<ul>
+						<li>Элемент 1</li>
+						<li>Элемент 2</li>
+						<li>Элемент 3</li>
+					</ul>
+				`;
 
 			AscTest.Editor.asc_PasteData(
 				AscCommon.c_oAscClipboardDataFormat.HtmlElement,
@@ -612,12 +614,12 @@ $(function () {
 			// Insert ordered list only
 			let htmlElement = document.createElement("div");
 			htmlElement.innerHTML = `
-			<ol>
-			  <li>Элемент 1</li>
-			  <li>Элемент 2</li>
-			  <li>Элемент 3</li>
-			</ol>
-		  `;
+					<ol>
+					  <li>Элемент 1</li>
+					  <li>Элемент 2</li>
+					  <li>Элемент 3</li>
+					</ol>
+				  `;
 
 			AscTest.Editor.asc_PasteData(
 				AscCommon.c_oAscClipboardDataFormat.HtmlElement,
