@@ -19260,7 +19260,8 @@
 			return null;
 		}
 
-		let newValidation = this.validation.clone(true);
+		// let newValidation = this.validation.clone(true);
+		let newValidation = worksheet.dataValidations.getNewValidation();
 
 		let processFormula = function(formula) {
 			if (formula === undefined || formula === null) {
@@ -19315,7 +19316,8 @@
 		newValidation._init(worksheet);
 		newValidation.correctFromInterface(worksheet);
 
-		worksheet.dataValidations.change(worksheet, this.validation, newValidation, true);
+		// worksheet.dataValidations.change(worksheet, this.validation, newValidation, true);
+		worksheet.dataValidation.add(worksheet, newValidation, true);
 
 		this.validation = newValidation;
 
