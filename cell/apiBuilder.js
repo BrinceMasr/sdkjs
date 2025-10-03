@@ -12396,7 +12396,7 @@
 			} else {
 				ranges.push(this.range.bbox);
 			}
-			this._validation = new ApiValidation(worksheet.getDataValidationProps(undefined, ranges), this);
+			this._validation = new ApiValidation(worksheet.getDataValidationProps(undefined, ranges, true), this);
 			if (!this._validation.range) {
 				this._validation.range = this;
 			}
@@ -19108,9 +19108,10 @@
 	 * @property {ApiRange} Parent - Returns the parent range object.
 	 * @property {string} Value - Returns or sets the validation value.
 	 */
-	function ApiValidation(validation, range) {
-		this.validation = validation;
+	function ApiValidation(validations, range) {
+		this.validation = validations && Array.isArray(validations) && validations.length > 0 ? validations[0] : window['AscCommonExcel'].CDataValidation.getNewValidation();
 		this.range = range;
+		this.intersectionValidations = validations;
 	}
 
 	/**
@@ -19226,11 +19227,14 @@
 			return;
 		}
 
-		// Удаляем data validation из worksheet
-		worksheet.dataValidations.delete(worksheet, this.validation.Id, true);
+		// for all validations in the this.intersectionValidations remove intersecting range from validations
+		let rangeBbox = this.range.range.bbox;
+		worksheet.dataValidations.deleteMassValidations(this.intersectionValidations, worksheet, rangeBbox, true);
+		
 
 		// Очищаем ссылку на validation
 		this.validation = new window['AscCommonExcel'].CDataValidation();
+		this.intersectionValidations = [this.validation];
 	};
 
 	/**
