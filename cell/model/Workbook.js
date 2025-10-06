@@ -12467,7 +12467,7 @@
 			newDataValidation.showErrorMessage = true;
 			newDataValidation.showInputMessage = true;
 			newDataValidation.allowBlank = true;
-			return newDataValidation;
+			return isArray ? [newDataValidation] : newDataValidation;
 		} else {
             if (isArray) {
                 return this.dataValidations.getSelectedRangeValidations(_selection, this);

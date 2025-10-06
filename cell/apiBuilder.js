@@ -19109,9 +19109,9 @@
 	 * @property {string} Value - Returns or sets the validation value.
 	 */
 	function ApiValidation(validations, range) {
-		this.validation = validations && Array.isArray(validations) && validations.length > 0 ? validations[0] : window['AscCommonExcel'].CDataValidation.getNewValidation();
+		this.validation = validations && Array.isArray(validations) && validations.length > 0 ? validations[0] : new window['AscCommonExcel'].CDataValidations().getNewValidation();
 		this.range = range;
-		this.intersectionValidations = validations;
+		this.intersectionValidations = validations && Array.isArray(validations) && validations.length > 0 ? validations : [this.validation] ;
 	}
 
 	/**
@@ -19207,6 +19207,7 @@
 		worksheet.dataValidations.add(worksheet, dataValidation, true);
 
 		this.validation = dataValidation;
+		this.intersectionValidations = [this.validation];
 
 		return this;
 	};
@@ -19259,67 +19260,11 @@
 		if (!worksheet || !worksheet.dataValidations) {
 			return null;
 		}
-
-		// let newValidation = this.validation.clone(true);
-		let newValidation = worksheet.dataValidations.getNewValidation();
-
-		let processFormula = function(formula) {
-			if (formula === undefined || formula === null) {
-				return null;
-			}
-
-			if (typeof formula === "string") {
-				return new window['Asc'].CDataFormula(formula);
-			} else if (typeof formula === "number") {
-				return new window['Asc'].CDataFormula(formula.toString());
-			} else if (formula && formula.constructor === ApiRange) {
-				return new window['Asc'].CDataFormula(formula.GetAddress());
-			}
-
-			return null;
-		};
-
-		if (Type !== undefined) {
-			let internalType = FromXlValidationTypeTo(Type);
-			if (internalType !== -1) {
-				newValidation.type = internalType;
-			}
-		}
-
-		if (AlertStyle !== undefined) {
-			let internalAlertStyle = FromXlValidationAlertStyleTo(AlertStyle);
-			if (internalAlertStyle !== -1) {
-				newValidation.errorStyle = internalAlertStyle;
-			}
-		}
-
-		if (Operator !== undefined) {
-			let internalOperator = FromXlValidationOperatorTo(Operator);
-			if (internalOperator !== -1) {
-				newValidation.operator = internalOperator;
-			}
-		}
-
-		if (Formula1 !== undefined) {
-			newValidation.formula1 = processFormula(Formula1);
-		}
-
-		if (Formula2 !== undefined) {
-			newValidation.formula2 = processFormula(Formula2);
-		}
-
-		if (Asc.c_oAscError.ID.No !== newValidation.asc_checkValid()) {
-			logError(new Error('Invalid validation parameters.'));
-			return null;
-		}
-
-		newValidation._init(worksheet);
-		newValidation.correctFromInterface(worksheet);
-
-		// worksheet.dataValidations.change(worksheet, this.validation, newValidation, true);
-		worksheet.dataValidation.add(worksheet, newValidation, true);
-
-		this.validation = newValidation;
+				
+		worksheet.dataValidations.deleteMassValidations(this.intersectionValidations, worksheet, this.range.range.bbox, true);
+		this.validation = new window['AscCommonExcel'].CDataValidations().getNewValidation();
+		this.intersectionValidations = [this.validation];
+		this.Add(Type, AlertStyle, Operator, Formula1, Formula2);
 
 		return this;
 	};
