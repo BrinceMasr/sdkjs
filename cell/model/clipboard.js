@@ -889,10 +889,10 @@
 					var maxRow = 0;
 					var maxCol = 0;
 					range3._foreachNoEmpty(function (cell) {
-						if (cell.nCol > maxCol) {
+						if (cell.nCol > maxCol && !cell.ws.getColHidden(cell.nCol)) {
 							maxCol = cell.nCol;
 						}
-						if (cell.nRow > maxRow) {
+						if (cell.nRow > maxRow && !cell.ws.getRowHidden(cell.nRow)) {
 							maxRow = cell.nRow;
 						}
 					});
@@ -1527,6 +1527,199 @@
 				}
 
 				return str;
+			},
+
+			_generateHtmlDocStrNew: function (range, worksheet, sBase64) {
+				var fn = worksheet.model.workbook.getDefaultFont();
+				var fs = worksheet.model.workbook.getDefaultSize();
+				var bbox = range.getBBox0();
+				var merged = [];
+				var mergedMap = {};
+				var t = this;
+				var row, col, cell, j, mbbox, h, w, b;
+
+				var parts = [];
+				var currentLength = 0;
+
+				var addPart = function (_str) {
+					if (currentLength + _str.length > c_MaxStringLength) {
+						return false;
+					}
+					parts.push(_str);
+					currentLength += _str.length;
+					return true;
+				};
+
+				var borderStyleMap = {};
+				borderStyleMap[c_oAscBorderStyles.Thin] = "solid";
+				borderStyleMap[c_oAscBorderStyles.Medium] = "solid";
+				borderStyleMap[c_oAscBorderStyles.Thick] = "solid";
+				borderStyleMap[c_oAscBorderStyles.DashDot] = "dashed";
+				borderStyleMap[c_oAscBorderStyles.DashDotDot] = "dashed";
+				borderStyleMap[c_oAscBorderStyles.Dashed] = "dashed";
+				borderStyleMap[c_oAscBorderStyles.MediumDashDot] = "dashed";
+				borderStyleMap[c_oAscBorderStyles.MediumDashDotDot] = "dashed";
+				borderStyleMap[c_oAscBorderStyles.MediumDashed] = "dashed";
+				borderStyleMap[c_oAscBorderStyles.SlantDashDot] = "dashed";
+				borderStyleMap[c_oAscBorderStyles.Double] = "double";
+				borderStyleMap[c_oAscBorderStyles.Hair] = "dotted";
+				borderStyleMap[c_oAscBorderStyles.Dotted] = "dotted";
+
+				var makeBorder = function (border) {
+					if (!border || border.s === c_oAscBorderStyles.None) {
+						return "";
+					}
+					var _style = borderStyleMap[border.s];
+					if (!_style) return "";
+					return border.w + "px " + _style + " " + number2color(border.getRgbOrNull());
+				};
+
+				var skipMerged = function () {
+					var key = row + "_" + col;
+					if (mergedMap[key]) {
+						col = mergedMap[key];
+						return true;
+					}
+					return false;
+				};
+
+				if (!addPart('<table cellpadding="0" cellSpacing="0"')) {
+					return false;
+				}
+
+				if (sBase64) {
+					if (!addPart(' class="' + sBase64 + '"')) {
+						return false;
+					}
+				}
+				if (!addPart(' style="border-collapse: collapse;font-family:' + fn + ';font-size:' + fs + 'pt;color:#000;background-color:transparent;">')) {
+					return false;
+				}
+
+				var maxRow = bbox.r2;
+				var maxCol = bbox.c2;
+				var maxRowCol = this._getRangeMaxRowCol(worksheet, bbox, range);
+				if (null !== maxRowCol) {
+					maxRow = maxRowCol.row;
+					maxCol = maxRowCol.col;
+				}
+
+				var wsModel = worksheet.model;
+				var bExcludeHiddenRows = wsModel.bExcludeHiddenRows;
+
+				var colWidths = [];
+				for (col = bbox.c1; col <= maxCol; ++col) {
+					colWidths[col] = worksheet.getColumnWidth(col, 1);
+				}
+
+				for (row = bbox.r1; row <= maxRow; ++row) {
+					if (bExcludeHiddenRows && wsModel.getRowHidden(row)) {
+						continue;
+					}
+
+					h = wsModel.getRowHeight(row);
+					if (!addPart('<tr style="height:' + h + 'pt">')) {
+						return false;
+					}
+
+					for (col = bbox.c1; col <= maxCol; ++col) {
+						if (skipMerged()) {
+							continue;
+						}
+
+						var cellParts = ['<td'];
+						var styles = [];
+						cell = wsModel.getCell3(row, col);
+						mbbox = cell.hasMerged();
+
+						if (mbbox) {
+							merged.push(mbbox);
+							for (var mr = mbbox.r1; mr <= mbbox.r2; mr++) {
+								for (var mc = mbbox.c1; mc <= mbbox.c2; mc++) {
+									if (mr !== mbbox.r1 || mc !== mbbox.c1) {
+										mergedMap[mr + "_" + mc] = mbbox.c2;
+									}
+								}
+							}
+
+							cellParts.push(" colspan=", (mbbox.c2 - mbbox.c1 + 1), " rowSpan=", (mbbox.r2 - mbbox.r1 + 1));
+							for (w = 0, j = mbbox.c1; j <= mbbox.c2; ++j) {
+								w += colWidths[j];
+							}
+							styles.push("width:" + w + "pt");
+						} else {
+							styles.push("width:" + colWidths[col] + "pt");
+						}
+
+						if (cell.getType() !== null) {
+							var align = cell.getAlign();
+							styles.push(align.getWrap() ? "white-space:normal" : "white-space:nowrap");
+
+							var hAlign = align.getAlignHorizontal();
+							if (hAlign === AscCommon.align_Left) {
+								styles.push("text-align:left");
+							} else if (hAlign === AscCommon.align_Right) {
+								styles.push("text-align:right");
+							} else if (hAlign === AscCommon.align_Center) {
+								styles.push("text-align:center");
+							} else if (hAlign === AscCommon.align_Justify) {
+								styles.push("text-align:justify");
+							}
+
+							var vAlign = align.getAlignVertical();
+							if (vAlign === Asc.c_oAscVAlign.Bottom) {
+								styles.push("vertical-align:bottom");
+							} else if (vAlign === Asc.c_oAscVAlign.Center || vAlign === Asc.c_oAscVAlign.Dist || vAlign === Asc.c_oAscVAlign.Just) {
+								styles.push("vertical-align:middle");
+							} else if (vAlign === Asc.c_oAscVAlign.Top) {
+								styles.push("vertical-align:top");
+							}
+
+							b = cell.getBorderFull();
+							var _border;
+							if (mbbox) {
+								var cellMergeFinish = wsModel.getCell3(mbbox.r2, mbbox.c2);
+								var borderMergeCell = cellMergeFinish.getBorderFull();
+								_border = makeBorder(borderMergeCell.r);
+								if (_border) styles.push("border-right:" + _border);
+								_border = makeBorder(borderMergeCell.b);
+								if (_border) styles.push("border-bottom:" + _border);
+							} else {
+								_border = makeBorder(b.r);
+								if (_border) styles.push("border-right:" + _border);
+								_border = makeBorder(b.b);
+								if (_border) styles.push("border-bottom:" + _border);
+							}
+							_border = makeBorder(b.l);
+							if (_border) styles.push("border-left:" + _border);
+							_border = makeBorder(b.t);
+							if (_border) styles.push("border-top:" + _border);
+
+							b = cell.getFillColor();
+							if (b != null) {
+								styles.push("background-color:" + number2color(b.getRgb()));
+							}
+
+							cellParts.push(' style="', styles.join(';'), '">');
+							cellParts.push(this._makeNodesFromCellValueStr(cell.getValue2(), fn, fs, cell));
+						} else {
+							cellParts.push('>');
+						}
+						cellParts.push('</td>');
+
+						if (!addPart(cellParts.join(''))) {
+							return false;
+						}
+					}
+					if (!addPart("</tr>")) {
+						return false;
+					}
+				}
+				if (!addPart("</table>")) {
+					return false;
+				}
+
+				return parts.join('');
 			},
 
 			_getSelectedDrawingIndex: function (worksheet) {
