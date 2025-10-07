@@ -22806,6 +22806,8 @@
 				this.parent.private_changeStyle(function (newRule) {
 					let index = t.GetIndex();
 					newRule.aRuleElements[0].aCFVOs[index].asc_setType(internalType);
+					newRule.aRuleElements[0].aCFVOs[index].formula = null;
+					newRule.aRuleElements[0].aCFVOs[index].formulaParent = null;
 					t.cfvo.asc_setType(internalType);
 
 				}, true);
@@ -22852,6 +22854,8 @@
 			this.parent.private_changeStyle(function (newRule) {
 				let index = t.GetIndex();
 				newRule.aRuleElements[0].aCFVOs[index].asc_setVal(value);
+				newRule.aRuleElements[0].aCFVOs[index].formula = null;
+				newRule.aRuleElements[0].aCFVOs[index].formulaParent = null;
 				t.cfvo.asc_setVal(value);
 			}, true);
 		}
