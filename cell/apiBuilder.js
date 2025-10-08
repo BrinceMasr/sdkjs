@@ -19109,7 +19109,7 @@
 	 * @property {string} Value - Returns or sets the validation value.
 	 */
 	function ApiValidation(validations, range) {
-		this.validation = validations && Array.isArray(validations) && validations.length > 0 ? validations[0] : new window['AscCommonExcel'].CDataValidations().getNewValidation();
+		this.validation = new window['AscCommonExcel'].CDataValidations().getNewValidation();
 		this.range = range;
 		this.intersectionValidations = validations && Array.isArray(validations) && validations.length > 0 ? validations : [this.validation] ;
 	}
@@ -19131,7 +19131,7 @@
 			return;
 		}
 
-		if (this.validation.ranges) {
+		if (this.intersectionValidations.length) {
 			logError(new Error('Validation already exists.'));
 			return null;
 		}
