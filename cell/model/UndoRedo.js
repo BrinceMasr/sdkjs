@@ -2847,16 +2847,20 @@ function (window, undefined) {
 	//для применения изменений
 	var UndoRedoClassTypes = new function () {
 		this.aTypes = [];
+		this.offset = 0;
 		this.Add = function (fCreate) {
 			var nRes = this.aTypes.length;
 			this.aTypes.push(fCreate);
-			return nRes;
+			return nRes + this.offset;
 		};
 		this.Create = function (nType) {
-			if (nType < this.aTypes.length) {
-				return this.aTypes[nType]();
+			if (nType - this.offset < this.aTypes.length) {
+				return this.aTypes[nType - this.offset]();
 			}
 			return null;
+		};
+		this.SetOffset = function (offset) {
+			this.offset = offset || 0;
 		};
 		this.Clean = function () {
 			this.aTypes = [];

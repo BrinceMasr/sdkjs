@@ -10448,12 +10448,6 @@
             var oThis = this;
             if ( c_oSerWorksheetsTypes.Worksheet === type )
             {
-                // Shift by deterministic pseudo-random offset to make document changes unique
-                if (AscCommon.g_oIdCounter.IsLoad()) {
-                    for (let i = 0; i < length % 100; i++) {
-                        AscCommon.g_oIdCounter.Get_NewId();
-                    }
-                }
                 this.aMerged = [];
                 this.aHyperlinks = [];
                 var oNewWorksheet = new AscCommonExcel.Worksheet(this.wb, wb.aWorksheets.length);

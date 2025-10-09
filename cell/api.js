@@ -343,10 +343,12 @@ var editor;
     }
   };
 
-  spreadsheet_api.prototype.initGlobalObjects = function(wbModel) {
+  spreadsheet_api.prototype.initGlobalObjects = function(wbModel, fileSize) {
     // global counters
 
     AscCommonExcel.UndoRedoClassTypes.Clean();
+    // Use deterministic pseudo-random offset to make document changes unique
+    AscCommonExcel.UndoRedoClassTypes.SetOffset((fileSize || 0) % 1000);
     AscCommonExcel.g_oUndoRedoCell = new AscCommonExcel.UndoRedoCell(wbModel);
     AscCommonExcel.g_oUndoRedoWorksheet = new AscCommonExcel.UndoRedoWoorksheet(wbModel);
     AscCommonExcel.g_oUndoRedoWorkbook = new AscCommonExcel.UndoRedoWorkbook(wbModel);
@@ -1849,13 +1851,13 @@ var editor;
 	spreadsheet_api.prototype.OpenDocumentFromBin = function(url, gObject)
 	{
 		this.wbModel = new AscCommonExcel.Workbook(this.handlers, this, true);
-		this.initGlobalObjects(this.wbModel);
+		this.initGlobalObjects(this.wbModel, gObject.length);
 		this.OpenDocumentFromBinNoInit(gObject);
 		this._onEndOpen();
 	};
 	spreadsheet_api.prototype.OpenDocumentFromZip = function (data) {
 		this.wbModel = new AscCommonExcel.Workbook(this.handlers, this, true);
-		this.initGlobalObjects(this.wbModel);
+		this.initGlobalObjects(this.wbModel, data.length);
 		let res =  this.OpenDocumentFromZipNoInit(data);
 		this._onEndOpen();
 		return res;
@@ -6689,7 +6691,7 @@ var editor;
       AscCommon.CurFileVersion = version;
     }
 	  this.wbModel = new AscCommonExcel.Workbook(this.handlers, this, true);
-	  this.initGlobalObjects(this.wbModel);
+	  this.initGlobalObjects(this.wbModel, base64File.length);
 
 	  this.isOpenOOXInBrowser = this["asc_isSupportFeature"]("ooxml") && AscCommon.checkOOXMLSignature(base64File);
 	  if (this.isOpenOOXInBrowser) {
