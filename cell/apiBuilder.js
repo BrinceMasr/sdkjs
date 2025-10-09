@@ -19089,6 +19089,23 @@
 		return sOperator;
 	}
 
+	// Helper to get single instance of validation
+	function getSingleValidation(apiValidation) {
+		if (!apiValidation) {
+			return;
+		}
+		if (!apiValidation.validations || !Array.isArray(apiValidation.validations) || !apiValidation.validations.length) {
+			const validation = new window['AscCommonExcel'].CDataValidations().getNewValidation();
+			apiValidation.validations = [validation];
+			return apiValidation.validations[0];
+		}
+		if (apiValidation.validations.length > 1) {
+			logError(new Error('Multiple validations exist'));
+			return null;
+		}
+		return apiValidation.validations[0];
+	}
+
 	/**
 	 * Class representing data validation.
 	 * @constructor
@@ -19109,9 +19126,12 @@
 	 * @property {string} Value - Returns or sets the validation value.
 	 */
 	function ApiValidation(validations, range) {
-		this.validation = new window['AscCommonExcel'].CDataValidations().getNewValidation();
+        if (!validations || !Array.isArray(validations) || !validations.length ) {
+            const validation = new window['AscCommonExcel'].CDataValidations().getNewValidation();
+            validations = [validation];
+        }
 		this.range = range;
-		this.intersectionValidations = validations && Array.isArray(validations) && validations.length > 0 ? validations : [this.validation] ;
+		this.validations = validations;
 	}
 
 	/**
@@ -19131,7 +19151,7 @@
 			return;
 		}
 
-		if (this.intersectionValidations.length) {
+		if (this.validations && Array.isArray(this.validations) && this.validations.length > 1 && this.validations[0].ranges) {
 			logError(new Error('Validation already exists.'));
 			return null;
 		}
@@ -19206,8 +19226,7 @@
 
 		worksheet.dataValidations.add(worksheet, dataValidation, true);
 
-		this.validation = dataValidation;
-		this.intersectionValidations = [this.validation];
+		this.validations = [dataValidation];
 
 		return this;
 	};
@@ -19219,7 +19238,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/Delete.js
 	 */
 	ApiValidation.prototype.Delete = function() {
-		if (!this.validation || !this.validation.ranges) {
+		if (!this.validations || !Array.isArray(this.validations) || !this.validations.length) {
 			return;
 		}
 
@@ -19228,14 +19247,14 @@
 			return;
 		}
 
-		// for all validations in the this.intersectionValidations remove intersecting range from validations
+		// for all validations in the this.validations remove intersecting range from validations
 		let rangeBbox = this.range.range.bbox;
-		worksheet.dataValidations.deleteMassValidations(this.intersectionValidations, worksheet, rangeBbox, true);
+		worksheet.dataValidations.deleteMassValidations(this.validations, worksheet, rangeBbox, true);
 		
 
 		// Очищаем ссылку на validation
-		this.validation = new window['AscCommonExcel'].CDataValidation();
-		this.intersectionValidations = [this.validation];
+		this.validations = new window['AscCommonExcel'].CDataValidation();
+		return this;
 	};
 
 	/**
@@ -19251,7 +19270,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/Modify.js
 	 */
 	ApiValidation.prototype.Modify = function(Type, AlertStyle, Operator, Formula1, Formula2) {
-		if (!this.validation || !this.validation.ranges) {
+		if (!this.validations || !Array.isArray(this.validations) || !this.validations.length) {
 			logError(new Error('No validation to modify.'));
 			return null;
 		}
@@ -19261,9 +19280,7 @@
 			return null;
 		}
 				
-		worksheet.dataValidations.deleteMassValidations(this.intersectionValidations, worksheet, this.range.range.bbox, true);
-		this.validation = new window['AscCommonExcel'].CDataValidations().getNewValidation();
-		this.intersectionValidations = [this.validation];
+		worksheet.dataValidations.deleteMassValidations(this.validations, worksheet, this.range.range.bbox, true);
 		this.Add(Type, AlertStyle, Operator, Formula1, Formula2);
 
 		return this;
@@ -19277,7 +19294,11 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetType.js
 	 */
 	ApiValidation.prototype.GetType = function() {
-		return ToXlValidationTypeFrom(this.validation.asc_getType());
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		return ToXlValidationTypeFrom(validation.asc_getType());
 	};
 
 	/**
@@ -19288,9 +19309,14 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetType.js
 	 */
 	ApiValidation.prototype.SetType = function(Type) {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		// If there are multiple validations, we cannot set type
 		let internalType = FromXlValidationTypeTo(Type);
 		if (internalType !== -1) {
-			this.validation.asc_setType(internalType);
+			validation.asc_setType(internalType);
 		}
 	};
 
@@ -19302,7 +19328,11 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetAlertStyle.js
 	 */
 	ApiValidation.prototype.GetAlertStyle = function() {
-		return ToXlValidationAlertStyleFrom(this.validation.getErrorStyle());
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		return ToXlValidationAlertStyleFrom(validation.getErrorStyle());
 	};
 
 	/**
@@ -19313,9 +19343,13 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetAlertStyle.js
 	 */
 	ApiValidation.prototype.SetAlertStyle = function(AlertStyle) {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
 		let internalAlertStyle = FromXlValidationAlertStyleTo(AlertStyle);
 		if (internalAlertStyle !== -1) {
-			this.validation.asc_setErrorStyle(internalAlertStyle);
+			validation.asc_setErrorStyle(internalAlertStyle);
 		}
 	};
 
@@ -19327,7 +19361,11 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetIgnoreBlank.js
 	 */
 	ApiValidation.prototype.GetIgnoreBlank = function() {
-		return this.validation.getAllowBlank();
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		return validation.getAllowBlank();
 	};
 
 	/**
@@ -19338,7 +19376,11 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetIgnoreBlank.js
 	 */
 	ApiValidation.prototype.SetIgnoreBlank = function(IgnoreBlank) {
-		this.validation.asc_setAllowBlank(IgnoreBlank);
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		validation.asc_setAllowBlank(IgnoreBlank);
 	};
 
 	/**
@@ -19349,7 +19391,11 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetInCellDropdown.js
 	 */
 	ApiValidation.prototype.GetInCellDropdown = function() {
-		return !this.validation.getShowDropDown();
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		return !validation.getShowDropDown();
 	};
 
 	/**
@@ -19360,7 +19406,11 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetInCellDropdown.js
 	 */
 	ApiValidation.prototype.SetInCellDropdown = function(InCellDropdown) {
-		this.validation.asc_setShowDropDown(!InCellDropdown);
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		validation.asc_setShowDropDown(!InCellDropdown);
 	};
 
 	/**
@@ -19371,7 +19421,11 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetShowInput.js
 	 */
 	ApiValidation.prototype.GetShowInput = function() {
-		return this.validation.getShowInputMessage();
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		return validation.getShowInputMessage();
 	};
 
 	/**
@@ -19382,7 +19436,11 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetShowInput.js
 	 */
 	ApiValidation.prototype.SetShowInput = function(ShowInput) {
-		this.validation.asc_setShowInputMessage(ShowInput);
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		validation.asc_setShowInputMessage(ShowInput);
 	};
 
 	/**
@@ -19393,7 +19451,11 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetShowError.js
 	 */
 	ApiValidation.prototype.GetShowError = function() {
-		return this.validation.getShowErrorMessage();
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		return validation.getShowErrorMessage();
 	};
 
 	/**
@@ -19404,7 +19466,11 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetShowError.js
 	 */
 	ApiValidation.prototype.SetShowError = function(ShowError) {
-		this.validation.asc_setShowErrorMessage(ShowError);
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		validation.asc_setShowErrorMessage(ShowError);
 	};
 
 	/**
@@ -19415,7 +19481,11 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetInputTitle.js
 	 */
 	ApiValidation.prototype.GetInputTitle = function() {
-		return this.validation.getPromptTitle();
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		return validation.getPromptTitle();
 	};
 
 	/**
@@ -19426,7 +19496,11 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetInputTitle.js
 	 */
 	ApiValidation.prototype.SetInputTitle = function(InputTitle) {
-		this.validation.asc_setPromptTitle(InputTitle);
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		validation.asc_setPromptTitle(InputTitle);
 	};
 
 	/**
@@ -19437,7 +19511,11 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetInputMessage.js
 	 */
 	ApiValidation.prototype.GetInputMessage = function() {
-		return this.validation.getPrompt();
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		return validation.getPrompt();
 	};
 
 	/**
@@ -19448,7 +19526,11 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetInputMessage.js
 	 */
 	ApiValidation.prototype.SetInputMessage = function(InputMessage) {
-		this.validation.asc_setPrompt(InputMessage);
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		validation.asc_setPrompt(InputMessage);
 	};
 
 	/**
@@ -19459,7 +19541,11 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetErrorTitle.js
 	 */
 	ApiValidation.prototype.GetErrorTitle = function() {
-		return this.validation.getErrorTitle();
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		return validation.getErrorTitle();
 	};
 
 	/**
@@ -19470,7 +19556,11 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetErrorTitle.js
 	 */
 	ApiValidation.prototype.SetErrorTitle = function(ErrorTitle) {
-		this.validation.asc_setErrorTitle(ErrorTitle);
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		validation.asc_setErrorTitle(ErrorTitle);
 	};
 
 	/**
@@ -19481,7 +19571,11 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetErrorMessage.js
 	 */
 	ApiValidation.prototype.GetErrorMessage = function() {
-		return this.validation.getError();
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		return validation.getError();
 	};
 
 	/**
@@ -19492,7 +19586,11 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetErrorMessage.js
 	 */
 	ApiValidation.prototype.SetErrorMessage = function(ErrorMessage) {
-		this.validation.asc_setError(ErrorMessage);
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		validation.asc_setError(ErrorMessage);
 	};
 
 	/**
@@ -19503,7 +19601,11 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetFormula1.js
 	 */
 	ApiValidation.prototype.GetFormula1 = function() {
-		let formula1 = this.validation.getFormula1();
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		let formula1 = validation.getFormula1();
 		return formula1 ? formula1.asc_getValue() : "";
 	};
 
@@ -19515,8 +19617,12 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetFormula1.js
 	 */
 	ApiValidation.prototype.SetFormula1 = function(Formula1) {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
 		let formula = new window['Asc'].CDataFormula(Formula1);
-		this.validation.asc_setFormula1(formula);
+		validation.asc_setFormula1(formula);
 	};
 
 	/**
@@ -19527,7 +19633,11 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetFormula2.js
 	 */
 	ApiValidation.prototype.GetFormula2 = function() {
-		let formula2 = this.validation.getFormula2();
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		let formula2 = validation.getFormula2();
 		return formula2 ? formula2.asc_getValue() : "";
 	};
 
@@ -19539,8 +19649,12 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetFormula2.js
 	 */
 	ApiValidation.prototype.SetFormula2 = function(Formula2) {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
 		let formula = new window['Asc'].CDataFormula(Formula2);
-		this.validation.asc_setFormula2(formula);
+		validation.asc_setFormula2(formula);
 	};
 
 	/**
@@ -19551,7 +19665,11 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetOperator.js
 	 */
 	ApiValidation.prototype.GetOperator = function() {
-		return ToXlValidationOperatorFrom(this.validation.getOperator());
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		return ToXlValidationOperatorFrom(validation.getOperator());
 	};
 
 	/**
@@ -19562,9 +19680,13 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetOperator.js
 	 */
 	ApiValidation.prototype.SetOperator = function(Operator) {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
 		let internalOperator = FromXlValidationOperatorTo(Operator);
 		if (internalOperator !== -1) {
-			this.validation.asc_setOperator(internalOperator);
+			validation.asc_setOperator(internalOperator);
 		}
 	};
 
