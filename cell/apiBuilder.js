@@ -10989,6 +10989,23 @@
 			if (!_key || _key instanceof ApiRange) {
 				return _key;
 			}
+
+            // if named range
+            var _defName = ws.workbook.getDefinesNames(_key);
+            if (_defName) {
+                let defNameRef;
+                AscCommonExcel.executeInR1C1Mode(false, function () {
+                    defNameRef = AscCommonExcel.getRangeByRef(_defName.ref, ws, true, true)
+                });
+                if (defNameRef && defNameRef[0] && defNameRef[0].worksheet) {
+                    if (range.contains(defNameRef[0].bbox.c1, defNameRef[0].bbox.r1)) {
+                        if (defNameRef[0].worksheet.Id === ws.Id) {
+                            return new ApiRange(defNameRef[0]);
+                        }
+                    }
+                }
+            }
+
 			let filteredKey = '';
 			for (let i = 0; i < _key.length; i++) {
 				const char = _key[i];
