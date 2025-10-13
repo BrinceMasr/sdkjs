@@ -10959,75 +10959,75 @@
 	 * @param {SortOrientation} sOrientation - Specifies if the sort should be by row (default) or column.
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/SetSort.js
 	 */
-    ApiRange.prototype.SetSort = function (key1, sSortOrder1, key2, /*Type,*/ sSortOrder2, key3, sSortOrder3, sHeader, /*OrderCustom, MatchCase,*/ sOrientation/*, SortMethod, DataOption1, DataOption2, DataOption3*/) {
-        var ws = this.range.worksheet;
-        var sortSettings = new Asc.CSortProperties(ws);
-        var range = this.range.bbox;
+	ApiRange.prototype.SetSort = function (key1, sSortOrder1, key2, /*Type,*/ sSortOrder2, key3, sSortOrder3, sHeader, /*OrderCustom, MatchCase,*/ sOrientation/*, SortMethod, DataOption1, DataOption2, DataOption3*/) {
+		var ws = this.range.worksheet;
+		var sortSettings = new Asc.CSortProperties(ws);
+		var range = this.range.bbox;
 
-        var aMerged = ws.mergeManager.get(range);
-        if (aMerged.outer.length > 0 || (aMerged.inner.length > 0 && null == window['AscCommonExcel']._isSameSizeMerged(range, aMerged.inner, true))) {
-            return;
-        }
+		var aMerged = ws.mergeManager.get(range);
+		if (aMerged.outer.length > 0 || (aMerged.inner.length > 0 && null == window['AscCommonExcel']._isSameSizeMerged(range, aMerged.inner, true))) {
+			return;
+		}
 
-        sortSettings.hasHeaders = sHeader === "xlYes";
-        var columnSort = sortSettings.columnSort = sOrientation !== "xlSortRows";
+		sortSettings.hasHeaders = sHeader === "xlYes";
+		var columnSort = sortSettings.columnSort = sOrientation !== "xlSortRows";
 
-        var getSortLevel = function (_key, _order) {
-            var index = columnSort ? _key.range.bbox.c1 - range.c1 : _key.range.bbox.r1 - range.r1;
+		var getSortLevel = function (_key, _order) {
+			var index = columnSort ? _key.range.bbox.c1 - range.c1 : _key.range.bbox.r1 - range.r1;
 
-            if (null === index) {
-                return null;
-            }
+			if (null === index) {
+				return null;
+			}
 
-            var level = new Asc.CSortPropertiesLevel();
-            level.index = index;
-            level.descending = _order === "xlDescending" ? Asc.c_oAscSortOptions.Descending : Asc.c_oAscSortOptions.Ascending;
-            sortSettings.levels.push(level);
-        };
+			var level = new Asc.CSortPropertiesLevel();
+			level.index = index;
+			level.descending = _order === "xlDescending" ? Asc.c_oAscSortOptions.Descending : Asc.c_oAscSortOptions.Ascending;
+			sortSettings.levels.push(level);
+		};
 
-        const filterRange = function (_key) {
-            if (!_key || _key instanceof ApiRange) {
-                return _key;
-            }
-            let filteredKey = '';
-            for (let i = 0; i < _key.length; i++) {
-                const char = _key[i];
-                if (char !== ':') {
-                    filteredKey += char;
-                } else {
-                    break;
-                }
-            }
-            return filteredKey;
-        }
+		const filterRange = function (_key) {
+			if (!_key || _key instanceof ApiRange) {
+				return _key;
+			}
+			let filteredKey = '';
+			for (let i = 0; i < _key.length; i++) {
+				const char = _key[i];
+				if (char !== ':') {
+					filteredKey += char;
+				} else {
+					break;
+				}
+			}
+			return filteredKey;
+		}
 
-        sortSettings.levels = [];
-        key1 = filterRange(key1);
-        const rangeKey1 = this.GetRange(key1);
-        if (key1 && false === getSortLevel(rangeKey1, sSortOrder1)) {
-            return;
-        }
-        key2 = filterRange(key2);
-        const rangeKey2 = this.GetRange(key2);
-        if (key2 && false === getSortLevel(rangeKey2, sSortOrder2)) {
-            return;
-        }
-        key3 = filterRange(key3);
-        const rangeKey3 = this.GetRange(key3);
-        if (key3 && false === getSortLevel(rangeKey3, sSortOrder3)) {
-            return;
-        }
+		sortSettings.levels = [];
+		key1 = filterRange(key1);
+		const rangeKey1 = this.GetRange(key1);
+		if (key1 && false === getSortLevel(rangeKey1, sSortOrder1)) {
+			return;
+		}
+		key2 = filterRange(key2);
+		const rangeKey2 = this.GetRange(key2);
+		if (key2 && false === getSortLevel(rangeKey2, sSortOrder2)) {
+			return;
+		}
+		key3 = filterRange(key3);
+		const rangeKey3 = this.GetRange(key3);
+		if (key3 && false === getSortLevel(rangeKey3, sSortOrder3)) {
+			return;
+		}
 
-        var oWorksheet = Asc['editor'].wb.getWorksheet();
-        var tables = ws.autoFilters.getTablesIntersectionRange(range);
-        var obj;
-        if (tables && tables.length) {
-            obj = tables[0];
-        } else if (ws.AutoFilter && ws.AutoFilter.Ref && ws.AutoFilter.Ref.intersection(range)) {
-            obj = ws.AutoFilter;
-        }
-        ws.setCustomSort(sortSettings, obj, null, oWorksheet && oWorksheet.cellCommentator, range);
-    };
+		var oWorksheet = Asc['editor'].wb.getWorksheet();
+		var tables = ws.autoFilters.getTablesIntersectionRange(range);
+		var obj;
+		if (tables && tables.length) {
+			obj = tables[0];
+		} else if (ws.AutoFilter && ws.AutoFilter.Ref && ws.AutoFilter.Ref.intersection(range)) {
+			obj = ws.AutoFilter;
+		}
+		ws.setCustomSort(sortSettings, obj, null, oWorksheet && oWorksheet.cellCommentator, range);
+	};
 
 	/*Object.defineProperty(ApiRange.prototype, "Sort", {
 		set: function (obj) {
