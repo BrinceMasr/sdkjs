@@ -200,31 +200,36 @@
 				return null;
 		}
 	}
+
+	const kappa = 4 * (Math.sqrt(2) - 1) / 3;
+	function draw(graphics, x, y, extX, extY, nRadius) {
+		graphics._s();
+		graphics._m(x, y + nRadius);
+		graphics._c(x, y + nRadius - kappa * nRadius, x + nRadius - kappa * nRadius, y, x + nRadius, y);
+		graphics._l(x + extX - nRadius, y);
+		graphics._c(x + extX - nRadius + kappa * nRadius, y, x + extX, y + nRadius - kappa * nRadius, x + extX, y + nRadius);
+		graphics._l(x + extX, y + extY - nRadius);
+		graphics._c(x + extX, y + extY - nRadius + kappa * nRadius, x + extX - nRadius + kappa * nRadius, y + extY, x + extX - nRadius, y + extY);
+		graphics._l(x + nRadius, y + extY);
+		graphics._c(x + nRadius - kappa * nRadius, y + extY, x, y + extY - nRadius + kappa * nRadius, x, y + extY - nRadius);
+		graphics._z();
+	}
 	function startRoundControl(graphics, x, y, extX, extY, nRadiusPx, arrColor) {
-		const nRadius = Math.min(nRadiusPx * AscCommon.g_dKoef_pix_to_mm * AscCommon.AscBrowser.retinaPixelRatio, extX / 2, extY / 2);
-		function draw() {
-			graphics._s();
-			graphics._m(x, y + nRadius);
-			graphics._c2(x, y, x + nRadius, y);
-			graphics._l(x + extX - nRadius, y);
-			graphics._c2(x + extX, y, x + extX, y + nRadius);
-			graphics._l(x + extX, y + extY - nRadius);
-			graphics._c2(x + extX, y + extY, x + extX - nRadius, y + extY);
-			graphics._l(x + nRadius, y + extY);
-			graphics._c2(x, y + extY, x, y + extY - nRadius);
-			graphics._z();
-		}
+		const nRadius = Math.min(nRadiusPx * AscCommon.g_dKoef_pix_to_mm, extX / 2, extY / 2);
 		graphics.SaveGrState();
-		graphics.p_color.apply(graphics, arrColor);
-		graphics.p_width(0);
-		draw();
-		graphics.ds();
 		graphics.AddClipRect(x, y, extX, extY);
 		graphics.StartClipPath();
-		draw();
+		draw(graphics, x, y, extX, extY, nRadius);
 		graphics.EndClipPath();
 	}
-	function endRoundControl(graphics) {
+	function endRoundControl(graphics, x, y, extX, extY, nRadiusPx, arrColor) {
+		const nRadius = Math.min(nRadiusPx * AscCommon.g_dKoef_pix_to_mm, extX / 2, extY / 2);
+		graphics.RestoreGrState();
+		graphics.SaveGrState();
+		graphics.p_width(0);
+		graphics.p_color.apply(graphics, arrColor);
+		draw(graphics, x, y, extX, extY, nRadius);
+		graphics.ds();
 		graphics.RestoreGrState();
 	}
 	function CStepManager() {
@@ -725,7 +730,7 @@ function getFlatPenColor() {
 			graphics.ds();
 		}
 		graphics._e();
-		endRoundControl(graphics);
+		endRoundControl(graphics, 0, 0, this.extX, this.extY, 2, getFlatCheckBoxPenColor());
 		graphics.RestoreGrState();
 	};
 
@@ -998,7 +1003,7 @@ function getFlatPenColor() {
 		startRoundControl(graphics, 0, 0, oControl.extX, oControl.extY, 4, getFlatPenColor());
 		this.button.draw(graphics);
 		oControl.drawTxBody(graphics, transform, transformText, pageIndex);
-		endRoundControl(graphics);
+		endRoundControl(graphics, 0, 0, oControl.extX, oControl.extY, 4, getFlatPenColor());
 		graphics.RestoreGrState();
 	};
 	CButtonController.prototype.recalculateTransform = function () {
@@ -1201,7 +1206,7 @@ function getFlatPenColor() {
 		startRoundControl(graphics, 0, 0, this.control.extX, this.control.extY, 2, getFlatPenColor());
 		this.downButton.draw(graphics);
 		this.upButton.draw(graphics);
-		endRoundControl(graphics);
+		endRoundControl(graphics, 0, 0, this.control.extX, this.control.extY, 2, getFlatPenColor());
 		graphics.RestoreGrState();
 	};
 	CSpinController.prototype.getCursorInfo = function (e, nX, nY) {
@@ -1410,7 +1415,7 @@ function getFlatPenColor() {
 		graphics.transform3(transform);
 		startRoundControl(graphics, 0, 0, oControl.extX, oControl.extY, 2, getFlatPenColor());
 		this.scroll.draw(graphics);
-		endRoundControl(graphics);
+		endRoundControl(graphics, 0, 0, oControl.extX, oControl.extY, 2, getFlatPenColor());
 		graphics.RestoreGrState();
 	};
 
@@ -1461,7 +1466,7 @@ function getFlatPenColor() {
 		graphics.transform3(this.transform);
 		startRoundControl(graphics, 0, 0, this.extX, this.extY, 4, getFlatPenColor());
 		CButtonBase.prototype.draw.call(this, graphics);
-		endRoundControl(graphics);
+		endRoundControl(graphics, 0, 0, this.extX, this.extY, 4, getFlatPenColor());
 		graphics.RestoreGrState();
 	};
 
@@ -2145,7 +2150,7 @@ function getFlatPenColor() {
 		if (this.isShowScroll() && this.listItems.length > this.visibleItemsCount) {
 			this.scrollContainer.draw(graphics);
 		}
-		endRoundControl(graphics);
+		endRoundControl(graphics, 0, 0, this.extX, this.extY, 2, getFlatPenColor());
 		graphics.RestoreGrState();
 	};
 
@@ -2584,7 +2589,7 @@ function getFlatPenColor() {
 		}
 
 		this.dropButton.draw(graphics);
-		endRoundControl(graphics);
+		endRoundControl(graphics, 0, 0, oControl.extX, oControl.extY, 2, getFlatPenColor());
 		graphics.RestoreGrState();
 	};
 
