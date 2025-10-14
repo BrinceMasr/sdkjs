@@ -10960,7 +10960,6 @@
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/SetSort.js
 	 */
 	ApiRange.prototype.SetSort = function (key1, sSortOrder1, key2, /*Type,*/ sSortOrder2, key3, sSortOrder3, sHeader, /*OrderCustom, MatchCase,*/ sOrientation/*, SortMethod, DataOption1, DataOption2, DataOption3*/) {
-		console.log('sort')
 		var ws = this.range.worksheet;
 		var sortSettings = new Asc.CSortProperties(ws);
 		var range = this.range.bbox;
