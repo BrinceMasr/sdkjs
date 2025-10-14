@@ -434,6 +434,13 @@
 		return AscBidi.TYPE.ON;
 	};
 	/**
+	 * @returns {AscBidi.DIRECTION_FLAG}
+	 */
+	CRunElementBase.prototype.GetDirectionFlag = function()
+	{
+		return AscBidi.DIRECTION_FLAG.Other;
+	};
+	/**
 	 * @return {number}
 	 */
 	CRunElementBase.prototype.GetCombWidth = function()

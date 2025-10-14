@@ -517,7 +517,9 @@
 				document.oncut            = function(e)
 				{
 					if (g_clipboardBase.isUseNewCopy()) {
-						e.preventDefault();
+						if (g_clipboardBase.Api.asc_IsFocus(true) && !g_clipboardBase._isUseMobileNewCopy()) {
+							e.preventDefault();
+						}
 						return g_clipboardBase.Copy_New(true);
 					} else {
 						return g_clipboardBase._private_oncut(e)
@@ -982,9 +984,24 @@
 			}
 		},
 
+		isSupportExecCommand : function(type)
+		{
+			if (AscCommon.AscBrowser.isSafariMacOs && !AscCommon.AscBrowser.isAppleDevices)
+				return false;
+			return true;
+		},
+
 		isUseNewCopy : function()
 		{
 			if (navigator.clipboard) {
+
+				if (window["AscDesktopEditor"] && window["AscDesktopEditor"]["getEngineVersion"])
+				{
+					let nVersion = window["AscDesktopEditor"]["getEngineVersion"]();
+					if (nVersion < 109)
+						return false;
+				}
+
 				return true;
 			}
 			if (this._isUseMobileNewCopy())
@@ -1052,8 +1069,10 @@
 					//don't put custom format, because FF don't write all in clipboard, if we try write custom format
 					//"web text/x-custom" : new Blob(["asc_internalData2;" + copy_data.data[c_oAscClipboardDataFormat.Internal]], {type: "web text/x-custom"})
 
-					const data = [new ClipboardItem(clipboardData)];
-					navigator.clipboard.write(data).then(function(){},function(){});
+					if (this.isCopyOutEnabled()) {
+						const data = [new ClipboardItem(clipboardData)];
+						navigator.clipboard.write(data).then(function(){},function(){});
+					}
 
 					if (isCut === true)
 						this.Api.asc_SelectionCut();
@@ -1174,7 +1193,8 @@
 			var _ret = false;
 			try
 			{
-				_ret = document.execCommand("copy");
+				if (this.isSupportExecCommand("copy"))
+					_ret = document.execCommand("copy");
 			}
 			catch (err)
 			{
@@ -1219,7 +1239,8 @@
 			var _ret = false;
 			try
 			{
-				_ret = document.execCommand("cut");
+				if (this.isSupportExecCommand("cut"))
+					_ret = document.execCommand("cut");
 			}
 			catch (err)
 			{
@@ -1267,7 +1288,8 @@
 			var _ret = false;
 			try
 			{
-				_ret = document.execCommand("paste");
+				if (this.isSupportExecCommand("paste"))
+					_ret = document.execCommand("paste");
 			}
 			catch (err)
 			{
@@ -1549,7 +1571,7 @@
 			}
 
 			var props = this.buttonInfo;
-			if(props && props.options)
+			if(props && props.options && props.options.length)
 			{
 				if((Asc["editor"] && Asc["editor"].wb) || props.cellCoord)
 				{

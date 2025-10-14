@@ -207,6 +207,15 @@
 		return arrResult;
 	};
 	/**
+	 * @param groupKey
+	 * @returns {boolean}
+	 */
+	CFormsManager.prototype.IsRadioGroupRequired = function(groupKey)
+	{
+		let forms = this.GetRadioButtons(groupKey);
+		return forms.length ? forms[0].IsFormRequired() : false;
+	};
+	/**
 	 * Все ли обязательные поля заполнены
 	 * @param {boolean} [checkAll=false]
 	 * @returns {boolean}
@@ -292,6 +301,28 @@
 			this.OnChangePictureForm(oForm);
 		else
 			this.OnChangeTextForm(oForm);
+	};
+	/**
+	 * Sync all specific form properties for forms with the same key
+	 * @param form
+	 */
+	CFormsManager.prototype.OnChangeFormPr = function(form)
+	{
+		let userMaster = this.GetUserMasterByForm(form);
+		let allForms;
+		if (form.IsRadioButton())
+			allForms = this.GetRadioButtons(form.GetRadioButtonGroupKey());
+		else
+			allForms = this.GetAllFormsByKey(form.GetFormKey(), form.GetSpecificType());
+		
+		for (let i = 0, count = allForms.length; i < count; ++i)
+		{
+			let _form = allForms[i];
+			if (_form === form || userMaster !== this.GetUserMasterByForm(_form))
+				continue;
+			
+			_form.SyncFormPrWithSameKey(form);
+		}
 	};
 	/**
 	 * Проверяем корректность изменения формы
@@ -563,6 +594,8 @@
 	{
 		let sKey          = oForm.GetFormKey();
 		let isPlaceHolder = oForm.IsPlaceHolder();
+		let isComboBox    = oForm.IsComboBox();
+		let isDropDown    = oForm.IsDropDownList();
 		let oSrcRun       = !isPlaceHolder ? oForm.MakeSingleRunElement(false) : null;
 		let userMaster    = this.GetUserMasterByForm(oForm);
 		let arrForms      = this.GetAllForms();
@@ -573,6 +606,8 @@
 			if (oTempForm.IsComplexForm()
 				|| oTempForm.IsPicture()
 				|| oTempForm.IsCheckBox()
+				|| oTempForm.IsComboBox() !== isComboBox
+				|| oTempForm.IsDropDownList() !== isDropDown
 				|| oTempForm === oForm
 				|| sKey !== oTempForm.GetFormKey()
 				|| userMaster !== this.GetUserMasterByForm(oTempForm))

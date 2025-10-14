@@ -1459,6 +1459,7 @@
 	};
 	CLaTeXParser.prototype.GetContentOfMatrixOrArray = function (oFunc)
 	{
+		let oLookahead;
 		let arrMatrixContent	= [];
 		let styles				= {};
 		let nRow				= 0;
@@ -1469,7 +1470,11 @@
 
 		while (this.oLookahead.class !== undefined && !oFunc(this))
 		{
-			let oContent = this.GetRayLiteral(styles.cols, styles.rows, nRow, oFunc)
+			oLookahead = this.oLookahead;
+			let oContent = this.GetRayLiteral(styles.cols, styles.rows, nRow, oFunc);
+
+			if (oLookahead === this.oLookahead)
+				break;
 
 			if (oContent)
 				arrMatrixContent.push(oContent);
@@ -1518,9 +1523,15 @@
 	CLaTeXParser.prototype.GetRayLiteral = function (cols, rows, nRow, oFunc)
 	{
 		let arrRayContent;
+		let oLookahead;
 
 		while (this.oLookahead.class !== Literals.arrayMatrix.id && !oFunc(this))
 		{
+			if (oLookahead === this.oLookahead)
+				return arrRayContent;
+			else
+				oLookahead = this.oLookahead;
+
 			rows[nRow]		= {}
 			arrRayContent	= this.GetElementOfMatrix(rows[nRow]);
 			nRow++;

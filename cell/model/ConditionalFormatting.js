@@ -1113,14 +1113,12 @@
 			var isActive = true, sheet;
 			for (var i = 0; i < wb.aWorksheets.length; i++) {
 				if (i !== wb.nActive) {
-					wb.aWorksheets[i].aConditionalFormattingRules.forEach(function (item) {
-						if (item.id === t.id) {
-							isActive = false;
-						}
-					});
+					if (wb.aWorksheets[i].getCFRuleById(t.id)) {
+						isActive = false;
+					}
 					if (!isActive) {
 						sheet = wb.aWorksheets[i];
-						break;
+						return true;
 					}
 				}
 			}

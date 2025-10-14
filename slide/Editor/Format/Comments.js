@@ -984,6 +984,10 @@ function (window, undefined) {
 		this.y = y;
 	};
 
+	CComment.prototype.getPosition = function () {
+		return { x: this.x, y: this.y };
+	};
+
 	CComment.prototype.draw = function (graphics) {
 		var Flags = 0;
 		if (this.selected) {

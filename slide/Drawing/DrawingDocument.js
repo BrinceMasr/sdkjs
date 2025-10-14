@@ -877,6 +877,10 @@ function CDrawingDocument()
 
 	this.CheckTargetDraw = function(x, y, isFocusOnSlide)
 	{
+		function roundPxForScale(value) {
+			return ((value * AscCommon.AscBrowser.retinaPixelRatio) >> 0) / AscCommon.AscBrowser.retinaPixelRatio;
+		}
+
 		var isReporter = this.m_oWordControl.m_oApi.isReporterMode;
 		if (this.TargetHtmlElementOnSlide != isFocusOnSlide)
 		{
@@ -916,7 +920,7 @@ function CDrawingDocument()
 
 		if (oldW !== newW || oldH !== newH)
 		{
-			var pixNewW = ((newW * AscCommon.AscBrowser.retinaPixelRatio) >> 0) / AscCommon.AscBrowser.retinaPixelRatio;
+			var pixNewW = roundPxForScale(newW);
 
 			this.TargetHtmlElement.style.width = pixNewW + "px";
 			this.TargetHtmlElement.style.height = newH + "px";
@@ -950,15 +954,15 @@ function CDrawingDocument()
 				pos.Y = y * g_dKoef_mm_to_pix - this.m_oWordControl.m_oNotesApi.Scroll;
 			}
 
-			this.TargetHtmlElementLeft = pos.X >> 0;
-			this.TargetHtmlElementTop = pos.Y >> 0;
+			this.TargetHtmlElementLeft = roundPxForScale(pos.X);
+			this.TargetHtmlElementTop = roundPxForScale(pos.Y);
 
 			this.TargetHtmlElement.style["transform"] = "";
 			this.TargetHtmlElement.style["msTransform"] = "";
 			this.TargetHtmlElement.style["mozTransform"] = "";
 			this.TargetHtmlElement.style["webkitTransform"] = "";
 
-			if ((!this.m_oWordControl.MobileTouchManager && !AscCommon.AscBrowser.isSafariMacOs) || !AscCommon.AscBrowser.isWebkit)
+			if ((!this.m_oWordControl.m_oApi.isMobileVersion && !AscCommon.AscBrowser.isSafariMacOs) || !AscCommon.AscBrowser.isWebkit)
 			{
 				this.TargetHtmlElement.style.left = this.TargetHtmlElementLeft + "px";
 				this.TargetHtmlElement.style.top = this.TargetHtmlElementTop + "px";
@@ -1568,7 +1572,11 @@ function CDrawingDocument()
 	{
 
 		let thpages = this.m_oWordControl.Thumbnails.m_arrPages;
-		if(index < 0 || index >= thpages.length) return;
+		if (thpages.length > index)
+		{
+			thpages[index].IsRecalc = true;
+		}
+
 
 		if (this.m_oWordControl && this.m_oWordControl.MobileTouchManager)
 		{
@@ -1587,10 +1595,6 @@ function CDrawingDocument()
 			this.SendChangeDocumentToApi(true);
 		}
 
-		if (thpages.length > index)
-		{
-			thpages[index].IsRecalc = true;
-		}
 
 		if (index === this.SlideCurrent)
 		{
@@ -2940,7 +2944,7 @@ function CDrawingDocument()
 		var watermark = this.m_oWordControl.m_oApi.watermarkDraw;
 		let oPresentation = this.m_oWordControl.m_oLogicDocument;
 
-		var pagescount = oPresentation.isVisioDocument ? oPresentation.GetSlidesCount() : oPresentation.Slides.length;
+		var pagescount = oPresentation.IsVisioEditor() ? oPresentation.GetSlidesCount() : oPresentation.Slides.length;
 
 		if (-1 == this.m_lCurrentRendererPage)
 		{
@@ -2969,7 +2973,7 @@ function CDrawingDocument()
 			if ((true === isSelection && !this.m_oLogicDocument.IsMasterMode()) && !this.m_oWordControl.Thumbnails.isSelectedPage(i))
 				continue;
 
-			if (oPresentation.isVisioDocument)
+			if (oPresentation.IsVisioEditor())
 			{
 				//todo override
 				renderer.BeginPage(this.m_oLogicDocument.GetWidthMM(), this.m_oLogicDocument.GetHeightMM());
@@ -3367,6 +3371,10 @@ function CDrawingDocument()
 		if (oDemonstrationManager && oDemonstrationManager.Mode) {
 			const oSlide = oDemonstrationManager.GetCurrentSlide();
 			if (oSlide && oSlide.checkImageDraw(sCheckImage)) {
+				const oPlayer = oSlide.getAnimationPlayer();
+				if (oPlayer) {
+					oPlayer.clearImageCache(sCheckImage);
+				}
 				oDemonstrationManager.Resize(true);
 			}
 		}
@@ -3518,13 +3526,14 @@ function DrawBackground(graphics, unifill, w, h)
 
 	graphics.SetIntegerGrid(false);
 
-	var _shape = {};
+	var _shape = AscFormat.ExecuteNoHistory(function(){ return new AscFormat.CShape();}, this, [], false);
 
 	_shape.brush           = unifill;
 	_shape.pen             = null;
 	_shape.TransformMatrix = new AscCommon.CMatrix();
 	_shape.extX            = w;
 	_shape.extY            = h;
+	_shape.bounds.reset(0, 0, w, h);
 	_shape.check_bounds    = function(checker)
 	{
 		checker._s();
@@ -4812,14 +4821,6 @@ function CThumbnailsManager(editorPage)
 				bPreventDefault = false;
 				break;
 			}
-			case Asc.c_oAscPresentationShortcutType.Cut:
-			case Asc.c_oAscPresentationShortcutType.Copy:
-			case Asc.c_oAscPresentationShortcutType.Paste:
-			{
-				bReturnValue = undefined;
-				bPreventDefault = false;
-				break;
-			}
 			case Asc.c_oAscPresentationShortcutType.Duplicate:
 			{
 				if (oPresentation.CanEdit())
@@ -4830,7 +4831,7 @@ function CThumbnailsManager(editorPage)
 				bPreventDefault = true;
 				break;
 			}
-			case Asc.c_oAscPresentationShortcutType.Print:
+			case Asc.c_oAscPresentationShortcutType.PrintPreviewAndPrint:
 			{
 				oApi.onPrint();
 				bReturnValue = false;
@@ -4847,7 +4848,7 @@ function CThumbnailsManager(editorPage)
 				bPreventDefault = true;
 				break;
 			}
-			case Asc.c_oAscPresentationShortcutType.ShowContextMenu:
+			case Asc.c_oAscPresentationShortcutType.OpenContextMenu:
 			{
 				oThis.showContextMenu(true);
 				bReturnValue = false;
@@ -4861,6 +4862,9 @@ function CThumbnailsManager(editorPage)
 		}
 		if (!nShortCutAction)
 		{
+			if (AscCommon.isCopyPasteEvent(oEvent)) {
+				return;
+			}
 			switch (oEvent.KeyCode)
 			{
 				case 13: // enter
@@ -5252,7 +5256,7 @@ function CThumbnailsManager(editorPage)
 
 		this.m_oWordControl.m_oApi.clearEyedropperImgData();
 
-		const context = canvas.getContext("2d");
+		const context = AscCommon.AscBrowser.getContext2D(canvas);
 		context.clearRect(0, 0, canvas.width, canvas.height);
 
 		const digitDistance = this.const_offset_x * g_dKoef_pix_to_mm;
@@ -5463,7 +5467,7 @@ function CThumbnailsManager(editorPage)
 				var g = new AscCommon.CGraphics();
 				g.IsNoDrawingEmptyPlaceholder = true;
 				g.IsThumbnail = true;
-				if (this.m_oWordControl.m_oLogicDocument.isVisioDocument)
+				if (this.m_oWordControl.m_oLogicDocument.IsVisioEditor())
 				{
 					//todo override CThumbnailsManager
 					let SlideWidth = this.m_oWordControl.m_oLogicDocument.GetWidthMM(i);
@@ -5990,6 +5994,14 @@ function CThumbnailsManager(editorPage)
 			startOffset = this.const_offset_x;
 		}
 
+		if (this.m_bIsScrollVisible) {
+			const scrollApi = editor.WordControl.m_oScrollThumbApi;
+			if (scrollApi) {
+				this.m_dScrollY_max = isVerticalThumbnails ? scrollApi.getMaxScrolledY() : scrollApi.getMaxScrolledX();
+				this.m_dScrollY = isVerticalThumbnails ? scrollApi.getCurScrolledY() : scrollApi.getCurScrolledX();
+			}
+		}
+
 		const currentScrollPx = isRightToLeft && !isVerticalThumbnails
 			? this.m_dScrollY_max - this.m_dScrollY >> 0
 			: this.m_dScrollY >> 0;
@@ -5999,7 +6011,7 @@ function CThumbnailsManager(editorPage)
 
 		const totalSlidesCount = this.GetSlidesCount();
 		for (let slideIndex = 0; slideIndex < totalSlidesCount; slideIndex++) {
-			if (this.m_oWordControl.m_oLogicDocument.isVisioDocument) {
+			if (this.m_oWordControl.m_oLogicDocument.IsVisioEditor()) {
 				let visioSlideWidthMm = this.m_oWordControl.m_oLogicDocument.GetWidthMM(slideIndex);
 				let visioSlideHeightMm = this.m_oWordControl.m_oLogicDocument.GetHeightMM(slideIndex);
 				if (isVerticalThumbnails) {
@@ -6252,7 +6264,9 @@ function CThumbnailsManager(editorPage)
 				wordControl.m_oThumbnails_scroll.HtmlElement.style.display = 'none';
 			}
 			this.m_bIsScrollVisible = false;
-			this.m_dScrollY = isHorizontalOrientation ? this.m_dScrollY_max : 0;
+			this.m_dScrollY = isHorizontalOrientation && Asc.editor.isRtlInterface
+				? this.m_dScrollY_max
+				: 0;
 
 		} else {
 			// Scrollbar is needed
@@ -6350,7 +6364,7 @@ function CThumbnailsManager(editorPage)
 
 		let cumulativeThumbnailLength = 0;
 
-		if (oPresentation.isVisioDocument) {
+		if (oPresentation.IsVisioEditor()) {
 			for (let nIdx = 0; nIdx < slidesCount; ++nIdx) {
 				const originalSlideWidth = oPresentation.GetWidthMM(nIdx);
 				const originalSlideHeight = oPresentation.GetHeightMM(nIdx);
@@ -6661,7 +6675,7 @@ function CSlideDrawer()
 				this.CachedCanvas.width  = _need_pix_width + 100;
 				this.CachedCanvas.height = _need_pix_height + 100;
 
-				this.CachedCanvasCtx = this.CachedCanvas.getContext('2d');
+				this.CachedCanvasCtx = AscCommon.AscBrowser.getContext2D(this.CachedCanvas);
 			}
 			else
 			{
@@ -6906,7 +6920,7 @@ function CNotesDrawer(page)
 	this.OnPaint = function()
 	{
 		var element = this.HtmlPage.m_oNotes.HtmlElement;
-		var ctx = element.getContext('2d');
+		var ctx = AscCommon.AscBrowser.getContext2D(element);
 		ctx.clearRect(0, 0, element.width, element.height);
 
 		if (-1 == this.Slide || this.IsEmptyDraw)

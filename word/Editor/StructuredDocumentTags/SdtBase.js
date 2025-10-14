@@ -222,6 +222,7 @@ CSdtBase.prototype.SetFormPr = function(oFormPr)
 		change.Redo();
 
 		this.private_OnAddFormPr();
+		this.OnChangePr();
 	}
 };
 CSdtBase.prototype.private_CheckKeyValueBeforeSet = function(formPr)
@@ -1351,4 +1352,13 @@ CSdtBase.prototype.setBorderColor = function(color)
 CSdtBase.prototype.drawContentControlsTrackIn = function(padding)
 {
 	return this.DrawContentControlsTrack(AscCommon.ContentControlTrack.In, undefined, undefined, undefined, undefined, padding);
+};
+CSdtBase.prototype.OnChangePr = function()
+{
+	if (this.IsForm())
+	{
+		let logicDocument = this.GetLogicDocument();
+		if (logicDocument && logicDocument.IsDocumentEditor())
+			logicDocument.OnChangeFormPr(this);
+	}
 };

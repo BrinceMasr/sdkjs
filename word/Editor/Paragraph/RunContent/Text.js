@@ -291,6 +291,14 @@
 	{
 		return AscBidi.getType(this.Value);
 	};
+	CRunText.prototype.GetDirectionFlag = function()
+	{
+		let bidiType = AscBidi.getType(this.Value);
+		if (bidiType & AscBidi.FLAG.STRONG)
+			return (bidiType & AscBidi.FLAG.RTL ? AscBidi.DIRECTION_FLAG.RTL : AscBidi.DIRECTION_FLAG.LTR);
+		else
+			return AscBidi.DIRECTION_FLAG.Other;
+	};
 	CRunText.prototype.SetWidth = function(nWidth)
 	{
 		this.Width = ((nWidth * (((this.Flags >> 16) & 0xFFFF) / 64)) * AscWord.TEXTWIDTH_DIVIDER) | 0;

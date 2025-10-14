@@ -410,6 +410,9 @@ function (window, undefined) {
 					window.removeEventListener(AscCommon.getPtrEvtName("up"), t.fKeyMouseUp, false);
 					window.removeEventListener(AscCommon.getPtrEvtName("move"), t.fKeyMouseMove, false);
 				}
+				if (api && api.isMobileVersion) {
+					t.input.blur();
+				}
 				t._blur();
 				t._updateTopLineActive(false);
 				t.input.isFocused = false;
@@ -1255,7 +1258,7 @@ function (window, undefined) {
 		this._cleanText();
 
 		let externalSelectionController = this.handlers.trigger("getExternalSelectionController");
-		if (externalSelectionController && !externalSelectionController.getExternalFormulaEditMode()) {
+		if (!externalSelectionController || !externalSelectionController.getExternalFormulaEditMode()) {
 			this._cleanSelection();
 			this._adjustCanvas();
 			this._showCanvas();
@@ -1287,7 +1290,7 @@ function (window, undefined) {
 		if (!this.getMenuEditorMode()) {
 			this._fireUpdated();
 		}
-		this._updateCursorPosition(true, isExpand);
+		this._updateCursorPosition(true, isExpand, null, true);
 		this._updateCursor();
 
 		this._updateUndoRedoChanged();
@@ -1320,10 +1323,18 @@ function (window, undefined) {
 			fPos = obj.fPos;
 			fName = obj.fName;
 			fCurrent = this._getEditableFunction(this._parseResult).func;
+		} else {
+			this._parseResult = null;
 		}
 
 		this.handlers.trigger("updated", s, this.cursorPos, fPos, fName);
-		this.handlers.trigger("updatedEditableFunction", fCurrent, fPos !== undefined ? this.calculateOffset(fPos) : null);
+		let functionInfo = null;
+		if (this._parseResult && this._parseResult.argPos && fCurrent) {
+			functionInfo = new AscCommonExcel.CFunctionInfo(AscCommonExcel.cFormulaFunctionToLocale ? AscCommonExcel.cFormulaFunctionToLocale[fCurrent] : fCurrent);
+			functionInfo.activeArgPos = this._parseResult.argPos;
+			functionInfo.activeArgsCount = this._parseResult.argPosArr && this._parseResult.argPosArr.length;
+		}
+		this.handlers.trigger("updatedEditableFunction", fCurrent, fPos !== undefined ? this.calculateOffset(fPos) : null, functionInfo);
 		if (api && api.isMobileVersion) {
 			this.restoreFocus();
 		}
@@ -1744,7 +1755,7 @@ function (window, undefined) {
 		this.cursorStyle.display = "none";
 	};
 
-	CellEditor.prototype._updateCursorPosition = function (redrawText, isExpand, lineIndex) {
+	CellEditor.prototype._updateCursorPosition = function (redrawText, isExpand, lineIndex, opt_not_formulas_update) {
 		// ToDo should forward this function
 		let h = this.canvas.height;
 		let y = -this.textRender.calcLineOffset(this.topLineIndex);
@@ -1818,6 +1829,27 @@ function (window, undefined) {
 		if (this.isTopLineActive && !this.skipTLUpdate) {
 			this._updateTopLineCurPos();
 		}
+
+		var s = AscCommonExcel.getFragmentsText(this.options.fragments);
+		var isFormula = -1 === this.beginCompositePos && (s.charAt(0) === "=" || s.charAt(0) === "+" || s.charAt(0) === "-");
+		var fPos, fName, fCurrent, argPos = null;
+
+		if (!opt_not_formulas_update && isFormula && this._parseResult && this._parseResult.allFunctionsPos && this.cursorPos) {
+			let activeFunction = this._parseResult.getActiveFunction(this.cursorPos, this.cursorPos, true);
+			let argPos = activeFunction && activeFunction.argPos;
+
+			fCurrent = activeFunction && activeFunction.func ? activeFunction.func.name : null;
+			fPos = activeFunction && activeFunction.start;
+
+			let functionInfo = null;
+			if (fCurrent) {
+				functionInfo = new AscCommonExcel.CFunctionInfo(AscCommonExcel.cFormulaFunctionToLocale ? AscCommonExcel.cFormulaFunctionToLocale[fCurrent] : fCurrent);
+				functionInfo.activeArgPos = argPos != null ? argPos + 1 : null;
+				functionInfo.activeArgsCount = activeFunction && activeFunction.args ? activeFunction.args.length : 0;
+			}
+			this.handlers.trigger("updatedEditableFunction", fCurrent, fPos !== undefined ? this.calculateOffset(fPos) : null, functionInfo);
+		}
+
 
 		if (this.getMenuEditorMode()) {
 			this.handlers.trigger("updateMenuEditorCursorPosition", curTop, curHeight);
@@ -2093,9 +2125,7 @@ function (window, undefined) {
 	CellEditor.prototype._addNewLine = function () {
 		this._wrapText();
 		let sNewLine = "\n";
-		AscFonts.FontPickerByCharacter.checkText(sNewLine, this, function () {
-			this._addChars( /*codeNewLine*/sNewLine);
-		});
+		this._addChars( /*codeNewLine*/sNewLine);
 	};
 
 	CellEditor.prototype._removeChars = function (pos, length, isRange) {
@@ -2623,10 +2653,10 @@ function (window, undefined) {
 			}
 			case Asc.c_oAscSpreadsheetShortcutType.CellInsertDate: {
 				const oDate = new Asc.cDate();
-				this._addChars(oDate.getDateString(oApi));
+				this._addChars(oDate.getDateString(oApi, true));
 				break;
 			}
-			case Asc.c_oAscSpreadsheetShortcutType.Print: {
+			case Asc.c_oAscSpreadsheetShortcutType.PrintPreviewAndPrint: {
 				break;
 			}
 			case Asc.c_oAscSpreadsheetShortcutType.EditOpenCellEditor: {
@@ -3123,7 +3153,9 @@ function (window, undefined) {
 			return true;
 		}
 		this.loadFonts = true;
-		AscFonts.FontPickerByCharacter.checkText(this.input.value, this, function () {
+
+		let checkedText = this.input.value.replace(/[\r\n]+/g, '');
+		AscFonts.FontPickerByCharacter.checkText(checkedText, this, function () {
 			t.loadFonts = false;
 			t.skipTLUpdate = true;
 			var length = t.replaceText(0, t.textRender.getEndOfText(), t.input.value);

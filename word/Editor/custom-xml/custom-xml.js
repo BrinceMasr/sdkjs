@@ -37,21 +37,21 @@
 	/**
 	 * @param {AscWord.CustomXmlManager} xmlManager
 	 * @param {string} [itemId=null]
-	 * @param {CustomXmlPrefixMappings} [nsManager=null]
+	 * @param {string[]} [schemaRefs=null]
 	 * @param {CustomXmlContent} [content]
 	 *
 	 * Класс представляющий CustomXML
 	 * @constructor
 	 */
-	function CustomXml(xmlManager, itemId, nsManager, content)
+	function CustomXml(xmlManager, itemId, schemaRefs, content)
 	{
 		this.Id			= AscCommon.g_oIdCounter.Get_NewId();
 		this.Parent		= xmlManager;
 		this.itemId		= itemId ? itemId : AscCommon.CreateGUID();
 		this.content	= null;
-		this.nsManager	= (nsManager && nsManager instanceof CustomXmlPrefixMappings)
-			? nsManager
-			: new CustomXmlPrefixMappings(nsManager);
+		this.nsManager	= new CustomXmlPrefixMappings();	//
+		this.nsURI		= "";								// calculated from content
+		this.schemaRefs = new CustomXMLSchemaRefs(schemaRefs);
 
 		this.addContentByXMLString(content);
 		this.m_aCustomXmlData = '';
@@ -64,7 +64,7 @@
 		let oCopy = new CustomXml(
 			this.Parent,
 			this.itemId,
-			this.nsManager,
+			Object.assign([], this.schemaRefs),
 			undefined
 		);
 
@@ -76,7 +76,7 @@
 	{
 		if (this.Parent)
 			return this.Parent.deleteExactXml(this.itemId);
-		
+
 		return false;
 	};
 	CustomXml.prototype.Get_Id = function ()
@@ -89,19 +89,18 @@
 	};
 	CustomXml.prototype.Refresh_RecalcData = function(Data)
 	{
-		// Ничего не делаем (если что просто будет перерисовка)
+		// Ничего не делаем
 	};
 	CustomXml.prototype.Write_ToBinary2 = function(Writer)
 	{
 		Writer.WriteLong(AscDFH.historyitem_type_CustomXml);
-
 		// String : Id
 		// Long   : Количество элементов
 		// Array of Strings : массив с Id элементов
 
 		Writer.WriteString2(this.Id);
 		Writer.WriteString2(this.itemId);
-		this.nsManager.Write_ToBinary2(Writer);
+		this.schemaRefs.Write_ToBinary2(Writer);
 	};
 	CustomXml.prototype.Read_FromBinary2 = function(Reader)
 	{
@@ -110,8 +109,14 @@
 		// Array of Strings : массив с Id элементов
 		this.Id = Reader.GetString2();
 		this.itemId = Reader.GetString2();
-		this.Parent = editor.WordControl.m_oLogicDocument.getCustomXmlManager();
-		this.nsManager.Read_FromBinary2(Reader);
+
+		let editor = Asc.editor
+		if (editor && editor.wb && editor.wb.model)
+			this.Parent = editor.wb.model.getCustomXmlManager(); // Cell editor
+		else if (editor && editor.WordControl && editor.WordControl.m_oLogicDocument)
+			this.Parent = editor.WordControl.m_oLogicDocument.getCustomXmlManager(); // Word editor and Slide
+
+		this.schemaRefs.Read_FromBinary2(Reader);
 	};
 	CustomXml.prototype.Write_ToBinary = function(Writer)
 	{
@@ -149,17 +154,40 @@
 		this.itemId = itemId;
 	};
 	/**
-	 * Add given uri to CustomXMl uri list
+	 * Add given uri to CustomXML namespace list
 	 * @param {string} prefix
 	 * @param {string} ns
 	 */
 	CustomXml.prototype.addNamespace = function(prefix, ns)
 	{
-		if (!prefix)
-			prefix = "defaultNamespace";
+		let nNsCount = this.nsManager.getNsCount();
+		let nsPrefix = (nNsCount > 0 ) ? nNsCount : "";
+
+		if (!prefix || prefix === "")
+			prefix = "ns" + nsPrefix;
 
 		this.nsManager.addNamespace(prefix, ns);
 		return true;
+	};
+	CustomXml.prototype.getNamespaceURI = function()
+	{
+		return this.nsURI;
+	};
+	CustomXml.prototype.setNamespaceURI = function(nsURI)
+	{
+		this.nsURI = nsURI;
+	};
+	/**
+	 * Add given schemaRef to CustomXML
+	 * @param {string} schemaRef
+	 */
+	CustomXml.prototype.addSchemaRef = function(ref)
+	{
+		return this.schemaRefs.add(ref);
+	};
+	CustomXml.prototype.getSchemaRefs = function()
+	{
+		return this.schemaRefs.getAll();
 	};
 	/**
 	 * Get CustomXML data by string
@@ -193,82 +221,138 @@
 		let startPos = customXml.indexOf("<");
 		if (-1 !== startPos)
 			customXml = customXml.slice(customXml.indexOf("<")); // Skip "L"
-		
+
 		this.addContentByXMLString(customXml);
 	};
 	CustomXml.prototype.addContentByXMLString = function(strCustomXml)
 	{
 		if (strCustomXml === undefined)
 			return;
-		
+
 		if (strCustomXml instanceof CustomXmlContent)
 			strCustomXml = strCustomXml.getStringFromBuffer();
 
 		this.content = CustomXmlCreateContent(strCustomXml, this);
 	};
-	CustomXml.prototype.findElementByXPath = function (xpath)
-	{
-		// add namespace support in the future
-		let arrParts		= xpath.split('/');
-		let currentElement	= this.content;
-		let arrResult		= [];
-		arrParts.shift();
+	CustomXml.prototype.findElementByXPath = function (xpath) {
+		function getDescendantsByTagName(node, tagName) {
+			let result = [];
 
-		for (let i = 0; i < arrParts.length; i++)
-		{
-			let namespaceAndTag,
-				index,
-				tagName,
-				part = arrParts[i];
+			function recurse(current) {
+				for (let i = 0; i < current.childNodes.length; i++)
+				{
+					let child = current.childNodes[i];
+					let nameParts = child.nodeName.split(':');
+					let pureName = nameParts.length > 1 ? nameParts[1] : nameParts[0];
 
-			if (part.includes("*"))
-			{
-				currentElement.childNodes.forEach(function (node) {arrResult.push(node)})
-				return arrResult;
-			}
+					if (pureName === tagName || tagName === '*')
+						result.push(child);
 
-			if (part.includes("@"))
-			{
-				let strAttributeName = part.slice(1);
-
-				return {
-					content: currentElement,
-					attribute: strAttributeName
+					if (child.childNodes && child.childNodes.length)
+						recurse(child);
 				}
 			}
-			else if (part.includes("["))
+
+			recurse(node);
+			return result;
+		}
+
+		function parseSteps(xpath) {
+			let steps = [];
+
+			const marker = '#DOUBLE_SLASH#';
+			let temp = xpath.replace(/\/\//g, function() {return '/' + marker + '/'});
+			let parts = temp.split('/').filter(function(el) {return el !== ""});
+			let deepNext = false;
+
+			for (let i = 0; i < parts.length; i++) {
+				let part = parts[i];
+				if (part === marker) {
+					deepNext = true;
+					continue;
+				}
+				steps.push({ part : part, deepNext : deepNext });
+				deepNext = false;
+			}
+			return steps;
+		}
+
+		function findMatchingNodes(elements, steps) {
+
+			if (steps.length === 0)
+				return elements;
+
+			let step = steps[0];
+			let part = step.part;
+			let deep = step.deepNext;
+			let restSteps = steps.slice(1);
+
+			let tagName = null;
+			let index = null;
+
+			if (part[0] === '@')
 			{
-				namespaceAndTag				= part.split('[')[0];
-				let partBeforeCloseBracket	= part.split(']')[0];
-				index						= partBeforeCloseBracket.slice(-1) - 1;
+				let attrName = part.slice(1);
+				return elements.map(function (el) {
+					if (el.getAttribute(attrName))
+						return el
+				});
+			}
+
+			if (part === '*')
+			{
+				tagName = '*';
 			}
 			else
 			{
-				namespaceAndTag				= part;
-				index						= 0;
+				let bracketOpen = part.indexOf('[');
+				let bracketClose = part.indexOf(']');
+
+				if (bracketOpen !== -1 && bracketClose !== -1 && bracketClose > bracketOpen)
+				{
+					let rawTag		= part.slice(0, bracketOpen);
+					let rawIndex	= part.slice(bracketOpen + 1, bracketClose);
+					tagName			= rawTag.includes(':') ? rawTag.split(':')[1] : rawTag;
+					index			= parseInt(rawIndex, 10) - 1;
+				}
+				else
+				{
+					tagName = part.includes(':') ? part.split(':')[1] : part;
+				}
 			}
 
-			tagName = namespaceAndTag.includes(":")
-				? namespaceAndTag.split(':')[1]
-				: namespaceAndTag;
+			let matched = [];
 
-			let matchingChildren = currentElement.childNodes.filter(function (child) {
-				let arr = child.nodeName.split(":");
+			for (let i = 0; i < elements.length; i++)
+			{
+				let el = elements[i];
+				let candidates = deep
+					? getDescendantsByTagName(el, tagName)
+					: el.childNodes.filter(function(child) {
+						let nameParts	= child.nodeName.split(':');
+						let pureName	= nameParts.length > 1 ? nameParts[1] : nameParts[0];
+						return tagName === '*' || pureName === tagName;
+					});
 
-				if (arr.length > 1)
-					return arr[1] === tagName;
+				if (index !== null)
+				{
+					if (index >= 0 && index < candidates.length)
+					{
+						matched.push(candidates[index]);
+					}
+				}
 				else
-					return arr[0] === tagName;
-			});
+				{
+					matched = matched.concat(candidates);
+				}
+			}
 
-			if (matchingChildren.length <= index)
-				return false;
-
-			currentElement = matchingChildren[index];
+			return findMatchingNodes(matched, restSteps);
 		}
 
-		arrResult.push(currentElement);
-		return arrResult;
+		let steps = parseSteps(xpath);
+		let result = findMatchingNodes([this.content], steps);
+		return result;
 	};
 	CustomXml.prototype.deleteAttribute = function(xPath, name)
 	{
@@ -378,14 +462,6 @@
 		this.afterChange();
 		return data;
 	};
-	CustomXml.prototype.setNamespaceUri = function(ns)
-	{
-		this.nsManager.setNamespaceUri(ns);
-	};
-	CustomXml.prototype.getNamespaceUri = function()
-	{
-		return this.nsManager.getNamespaceUri();
-	};
 	CustomXml.prototype.getAllNamespaces = function()
 	{
 		return Object.keys(this.nsManager.urls);
@@ -422,9 +498,39 @@
 		{
 			return this.text;
 		};
+		this.getXPath = function ()
+		{
+			let parent		= this.getParent();
+			let parentText	= parent ? parent.getXPath() + "/" : "/";
+			let curNodeName = this.getNodeName();
+			let count		= parent ? parent.getPosOfChilderNode(this) : null;
+			let textOfCount = count !== null ? "[" + count + "]" : "";
+
+			if (!curNodeName)
+				return '';
+
+			return parentText + curNodeName + textOfCount;
+		};
 		this.getChildNodesCount = function()
 		{
 			return this.childNodes.length;
+		};
+		this.getPosOfChilderNode = function(childNode)
+		{
+			if (!childNode || !(childNode instanceof CustomXmlContent) || this.childNodes.length <= 1)
+				return null;
+
+			let childNameNodes = this.childNodes.filter(function(node){return node.nodeName === childNode.nodeName});
+
+			if (childNameNodes.length <= 1)
+				return null;
+
+			for (let i = 0; i < childNameNodes.length; i++)
+			{
+				let node = childNameNodes[i];
+				if (node === childNode)
+					return i + 1;
+			}
 		};
 		this.deleteChild = function (childNode)
 		{
@@ -606,7 +712,7 @@
 			start = 0;
 		if (undefined === len)
 			len = buffer.length;
-		
+
 		var result = "";
 		var index  = start;
 		var end = start + len;
@@ -680,12 +786,19 @@
 						let attributeName = oStax.GetName();
 						let attributeValue = oStax.GetValue();
 
-						if (attributeName === 'xmlns' && rootContent.xml)
-							rootContent.xml.addNamespace("defaultNamespace", attributeValue);
+						if (attributeName.length >= 5 && attributeName.slice(0,5) === 'xmlns')
+						{
+							// Add unique namespace URI to schema references
+							rootContent.xml.addSchemaRef(attributeValue);
 
-						let prefix = getPrefix(attributeName);
-						if (prefix && rootContent.xml)
+							// Register any namespace in NamespaceManager
+							let prefix = getPrefix(attributeName);
 							rootContent.xml.addNamespace(prefix, attributeValue);
+
+							// Set the main NamespaceURI from root element if not set yet
+							if (rootContent.parentNode === null && rootContent.xml.nsURI === "")
+								rootContent.xml.setNamespaceURI(attributeValue);
+						}
 
 						childElement.addAttribute(attributeName, attributeValue);
 					}
@@ -696,17 +809,21 @@
 	}
 	function CustomXmlPrefixMappings()
 	{
-		this.urls = {};
+		this.prefixMappings = {};
 		this.prefix = {};
-		this.namespaceUri = "";
 
-		this.setNamespaceUri = function(ns)
+		this.getPrefixes = function()
 		{
-			this.namespaceUri = ns;
+			return Object.keys(this.prefix);
 		};
-		this.getNamespaceUri = function()
+		this.getNamespaces = function()
 		{
-			return this.namespaceUri;
+			return Object.keys(this.prefixMappings);
+		};
+		this.getNsCount = function()
+		{
+			let arrNamespaces = this.getNamespaces();
+			return arrNamespaces.length;
 		};
 		this.addNamespace = function (prefix, ns)
 		{
@@ -715,9 +832,9 @@
 
 			if (prefix && ns)
 			{
-				let prevPrefix = this.urls[ns];
+				let prevPrefix = this.prefixMappings[ns];
 
-				this.urls[ns] = prefix;
+				this.prefixMappings[ns] = prefix;
 
 				if (prevPrefix)
 					delete this.prefix[prevPrefix];
@@ -729,44 +846,43 @@
 		{
 			return this.prefix[prefix];
 		};
-		this.getPrefix = function(urls)
+		this.getPrefix = function(ns)
 		{
-			return this.urls[urls];
+			return this.prefixMappings[ns];
+		};
+	}
+
+	function CustomXMLSchemaRefs(refs)
+	{
+		this.refs = refs ? Object.assign([], refs) : [];
+
+		this.getAll = function()
+		{
+			return Object.assign([], this.refs);
+		};
+		this.add = function(schemaUri)
+		{
+			if (schemaUri && schemaUri.trim() !== "" && !this.refs.includes(schemaUri))
+			{
+				this.refs.push(schemaUri);
+				return true;
+			}
+
+			return false;
 		};
 		this.Write_ToBinary2 = function(Writer)
 		{
-			Writer.WriteString2(this.namespaceUri);
-
-			let urls = Object.keys(this.urls);
-			let Count = urls.length;
+			let Count = this.refs.length;
 			Writer.WriteLong(Count);
 
 			for (let Index = 0; Index < Count; Index++)
-				Writer.WriteString2(urls[Index]);
-
-			Writer.WriteLong(Count);
-			for (let Index = 0; Index < Count; Index++)
-				Writer.WriteString2(this.urls[urls[Index]]);
+				Writer.WriteString2(this.refs[Index]);
 		};
 		this.Read_FromBinary2 = function(Reader)
 		{
-			this.namespaceUri = Reader.GetString2()
-			let url = [];
-
 			let Count = Reader.GetLong();
 			for (let Index = 0; Index < Count; Index++)
-			{
-				url.push(Reader.GetString2());
-				this.urls[url[url.length - 1]] = "";
-			}
-			
-			Count = Reader.GetLong();
-			for (let Index = 0; Index < Count; Index++)
-			{
-				let prefix = Reader.GetString2()
-				this.prefix[prefix] = url[Index];
-				this.urls[url[Index]] = prefix;
-			}
+				this.refs.push(Reader.GetString2());
 		};
 	}
 

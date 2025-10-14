@@ -2659,7 +2659,7 @@ CMathContent.prototype.Load_FromMenu = function(Type, Paragraph, TextPr, oSelect
         this.private_LoadFromMenuOperator(Type, Pr, oSelectedContent);
     else if (MainType === c_oAscMathMainType.Matrix)
         this.private_LoadFromMenuMatrix(Type, Pr, oSelectedContent);
-    else if(MainType == c_oAscMathMainType.Empty_Content)
+    else if (MainType === c_oAscMathMainType.Empty_Content)
 		this.private_LoadFromMenuDefaultText(Type, Pr, oSelectedContent);
 };
 CMathContent.prototype.private_LoadFromMenuSymbol = function(Type, Pr)
@@ -3547,9 +3547,9 @@ CMathContent.prototype.private_LoadFromMenuMatrix = function(Type, Pr, oSelected
 CMathContent.prototype.private_LoadFromMenuDefaultText = function(Type, Pr, oSelectedContent)
 {
 	if (oSelectedContent)
-		this.private_FillSelectedContent(oSelectedContent);
+		this.private_FillSelectedContent(oSelectedContent, Pr);
 };
-CMathContent.prototype.private_FillSelectedContent = function(oSelectedContent)
+CMathContent.prototype.private_FillSelectedContent = function(oSelectedContent, Pr)
 {
 	if (oSelectedContent instanceof ParaMath)
 	{
@@ -3558,6 +3558,8 @@ CMathContent.prototype.private_FillSelectedContent = function(oSelectedContent)
 	else if (oSelectedContent)
 	{
 		this.Add_Text(oSelectedContent, this.Paragraph);
+		if (Pr && Pr.ctrPrp)
+			this.Apply_TextPr(Pr.ctrPrp, undefined, true);
 	}
 };
 CMathContent.prototype.Add_Element = function(Element)
@@ -6353,26 +6355,7 @@ CMathContent.prototype.GetTextContent = function(bSelectedText, isLaTeX)
 	let strContent = oMathText.GetText();
 	return {str: strContent, content: oMathText};
 };
-CMathContent.prototype.fromMathML = function(reader)
-{
-	let depth = reader.GetDepth();
-	while (reader.ReadNextSiblingNode(depth))
-	{
-		let elements = AscWord.ParaMath.readMathMLNode(reader);
-		for (let i = 0; i < elements.length; ++i)
-		{
-			let current = elements[i];
-			this.addElementToContent(current);
 
-			let breakPos = AscWord.ParaMath.checkLinebreak(current)
-			if (breakPos !== null)
-			{
-				current.Set_MathForcedBreak(true, undefined);
-			}
-		}
-	}
-	AscWord.ParaMath.checkAfterAddContent();
-};
 
 var g_DefaultAutoCorrectMathFuncs =
 [
