@@ -10960,6 +10960,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/SetSort.js
 	 */
 	ApiRange.prototype.SetSort = function (key1, sSortOrder1, key2, /*Type,*/ sSortOrder2, key3, sSortOrder3, sHeader, /*OrderCustom, MatchCase,*/ sOrientation/*, SortMethod, DataOption1, DataOption2, DataOption3*/) {
+		console.log('sort')
 		var ws = this.range.worksheet;
 		var sortSettings = new Asc.CSortProperties(ws);
 		var range = this.range.bbox;
@@ -10998,11 +10999,11 @@
                     defNameRef = AscCommonExcel.getRangeByRef(_defName.ref, ws, true, true)
                 });
                 if (defNameRef && defNameRef[0] && defNameRef[0].worksheet) {
-                    if (range.contains(defNameRef[0].bbox.c1, defNameRef[0].bbox.r1)) {
+                    // if (range.contains(defNameRef[0].bbox.c1, defNameRef[0].bbox.r1)) {
                         if (defNameRef[0].worksheet.Id === ws.Id) {
                             return new ApiRange(defNameRef[0]);
                         }
-                    }
+                    // }
                 }
             }
 
@@ -11018,19 +11019,21 @@
 			return filteredKey;
 		}
 
+		const apiWorksheet = new ApiWorksheet(this.range.worksheet);
+		
 		sortSettings.levels = [];
 		key1 = filterRange(key1);
-		const rangeKey1 = this.GetRange(key1);
+		const rangeKey1 = apiWorksheet.GetRange(key1);
 		if (key1 && false === getSortLevel(rangeKey1, sSortOrder1)) {
 			return;
 		}
 		key2 = filterRange(key2);
-		const rangeKey2 = this.GetRange(key2);
+		const rangeKey2 = apiWorksheet.GetRange(key2);
 		if (key2 && false === getSortLevel(rangeKey2, sSortOrder2)) {
 			return;
 		}
 		key3 = filterRange(key3);
-		const rangeKey3 = this.GetRange(key3);
+		const rangeKey3 = apiWorksheet.GetRange(key3);
 		if (key3 && false === getSortLevel(rangeKey3, sSortOrder3)) {
 			return;
 		}
@@ -11042,6 +11045,14 @@
 			obj = tables[0];
 		} else if (ws.AutoFilter && ws.AutoFilter.Ref && ws.AutoFilter.Ref.intersection(range)) {
 			obj = ws.AutoFilter;
+		}
+
+		if (sortSettings.hasHeaders) {
+			if (sortSettings.columnSort) {
+				range.r1++;
+			} else {
+				range.c1++;
+			}
 		}
 		ws.setCustomSort(sortSettings, obj, null, oWorksheet && oWorksheet.cellCommentator, range);
 	};
