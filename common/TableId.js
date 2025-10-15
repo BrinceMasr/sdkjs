@@ -453,7 +453,9 @@
 			this.m_oFactoryClass[AscDFH.historyitem_type_Shape]					= AscPDF.CPdfShape;
 			this.m_oFactoryClass[AscDFH.historyitem_type_GraphicFrame]			= AscPDF.CPdfGraphicFrame;
 			this.m_oFactoryClass[AscDFH.historyitem_type_ImageShape]			= AscPDF.CPdfImage;
+			this.m_oFactoryClass[AscDFH.historyitem_type_ChartSpace]			= AscPDF.CPdfChartSpace;
 			this.m_oFactoryClass[AscDFH.historyitem_type_Cnx]					= AscPDF.CPdfConnectionShape;
+			this.m_oFactoryClass[AscDFH.historyitem_type_SmartArt]				= AscPDF.CPdfSmartArt;
 
 			// annots
 			this.m_oFactoryClass[AscDFH.historyitem_type_Pdf_Annot_Text]		= AscPDF.CAnnotationText;
@@ -464,6 +466,7 @@
 			this.m_oFactoryClass[AscDFH.historyitem_type_Pdf_Annot_Highlight]	= AscPDF.CAnnotationHighlight;
 			this.m_oFactoryClass[AscDFH.historyitem_type_Pdf_Annot_Underline]	= AscPDF.CAnnotationUnderline;
 			this.m_oFactoryClass[AscDFH.historyitem_type_Pdf_Annot_Strikeout]	= AscPDF.CAnnotationStrikeout;
+			this.m_oFactoryClass[AscDFH.historyitem_type_Pdf_Annot_Redact]		= AscPDF.CAnnotationRedact;
 			this.m_oFactoryClass[AscDFH.historyitem_type_Pdf_Annot_Ink]			= AscPDF.CAnnotationInk;
 			this.m_oFactoryClass[AscDFH.historyitem_type_Pdf_Annot_Line]		= AscPDF.CAnnotationLine;
 			this.m_oFactoryClass[AscDFH.historyitem_type_Pdf_Annot_Polygon]		= AscPDF.CAnnotationPolygon;

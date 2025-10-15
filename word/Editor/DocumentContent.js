@@ -472,11 +472,9 @@ CDocumentContent.prototype.GetStyles = function(nLvl)
 {
 	if (this.bPresentation && this.Parent)
 		return this.Parent.Get_Styles(nLvl);
-
-	if (this.LogicDocument && this.LogicDocument.GetStyles)
-		return this.LogicDocument.GetStyles();
-
-	return AscWord.DEFAULT_STYLES;
+	
+	let logicDocument = this.GetLogicDocument();
+	return logicDocument && logicDocument.GetStyles ? logicDocument.GetStyles() : AscWord.DEFAULT_STYLES;
 };
 CDocumentContent.prototype.Get_TableStyleForPara = function()
 {
@@ -7046,6 +7044,13 @@ CDocumentContent.prototype.SetSelectionToBeginEnd = function(isSelectionStart, i
 {
 	if (this.Content.length <= 0)
 		return;
+	
+	let startPos = Math.min(this.Selection.StartPos, this.Selection.EndPos);
+	let endPos   = Math.max(this.Selection.StartPos, this.Selection.EndPos);
+	for (let pos = startPos + 1; pos < endPos; ++pos)
+	{
+		this.Content[pos].RemoveSelection();
+	}
 
 	if (true === isElementStart)
 	{
@@ -7065,6 +7070,13 @@ CDocumentContent.prototype.SetSelectionToBeginEnd = function(isSelectionStart, i
 			this.Selection.StartPos = this.Content.length - 1;
 		else
 			this.Selection.EndPos = this.Content.length - 1;
+	}
+	
+	startPos = Math.min(this.Selection.StartPos, this.Selection.EndPos);
+	endPos   = Math.max(this.Selection.StartPos, this.Selection.EndPos);
+	for (let pos = startPos + 1; pos < endPos; ++pos)
+	{
+		this.Content[pos].SelectAll(1);
 	}
 };
 CDocumentContent.prototype.Select_DrawingObject      = function(Id)
@@ -7667,6 +7679,18 @@ CDocumentContent.prototype.GetAbsoluteSection = function(curPage)
 		return 0;
 	
 	return this.Parent.GetAbsoluteSection(this.GetRelativePage(curPage));
+};
+CDocumentContent.prototype.IsFirstOnDocumentPage = function(curPage)
+{
+	if (0 === curPage || undefined === curPage)
+	{
+		if (!this.Parent || !this.Parent.IsFirstOnDocumentPage)
+			return true;
+		
+		return this.Parent.IsFirstOnDocumentPage();
+	}
+	
+	return this.GetAbsolutePage(curPage) !== this.GetAbsolutePage(curPage - 1);
 };
 //-----------------------------------------------------------------------------------
 // Undo/Redo функции

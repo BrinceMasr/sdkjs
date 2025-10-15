@@ -38,7 +38,7 @@
 	/**
 	 * @constructor
 	 */
-	function DocumentElementSection(x, y, xLimit, yLimit, parentStartPage, startPage, endPage, sectPr, startColumn, index)
+	function DocumentElementSection(x, y, xLimit, yLimit, parentStartPage, startPage, endPage, sectPr, startColumn, columnCount, index)
 	{
 		this.x               = x;
 		this.y               = y;
@@ -48,7 +48,7 @@
 		this.sectPr          = sectPr;
 		this.startPage       = startPage;
 		this.endPage         = endPage;
-		this.columnCount     = sectPr ? sectPr.GetColumnCount() : 1;
+		this.columnCount     = columnCount ? columnCount : 1;
 		this.startColumn     = startColumn ? startColumn : 0;
 		this.index           = index;
 	}

@@ -116,38 +116,33 @@
     };
     
     CAnnotationText.prototype.SetState = function(nType) {
+        if (nType == this._state) {
+            return;
+        }
+
+        AscCommon.History.Add(new CChangesPDFTextAnnotState(this, this._state, nType));
+
         this._state = nType;
+        this.SetWasChanged(true);
     };
     CAnnotationText.prototype.GetState = function() {
         return this._state;
     };
     CAnnotationText.prototype.SetStateModel = function(nType) {
+        if (nType == this._stateModel) {
+            return;
+        }
+
+        AscCommon.History.Add(new CChangesPDFTextAnnotStateModel(this, this._stateModel, nType));
+
         this._stateModel = nType;
+        this.SetWasChanged(true);
     };
     CAnnotationText.prototype.GetStateModel = function() {
         return this._stateModel;
     };
     CAnnotationText.prototype.ClearReplies = function() {
         this._replies = [];
-    };
-    CAnnotationText.prototype.AddReply = function(CommentData, nPos) {
-        let oReply = new CAnnotationText(AscCommon.CreateGUID(), this.GetRect().slice(), this.GetDocument());
-
-        oReply.SetCreationDate(CommentData.m_sOOTime);
-        oReply.SetModDate(CommentData.m_sOOTime);
-        oReply.SetAuthor(CommentData.m_sUserName);
-        oReply.SetUserId(CommentData.m_sUserId);
-        oReply.SetDisplay(window["AscPDF"].Api.Types.display["visible"]);
-        oReply.SetReplyTo(this.GetReplyTo() || this);
-        CommentData.SetUserData(oReply.GetId());
-        oReply.SetContents(CommentData.m_sText);
-        oReply._wasChanged = true;
-        
-        if (!nPos) {
-            nPos = this._replies.length;
-        }
-
-        this._replies.splice(nPos, 0, oReply);
     };
     CAnnotationText.prototype.GetAscCommentData = function() {
         let oAscCommData = new Asc.asc_CCommentDataWord(null);
@@ -171,7 +166,10 @@
         oAscCommData.m_sUserData = this.GetId();
 
         this._replies.forEach(function(reply) {
-            oAscCommData.m_aReplies.push(reply.GetAscCommentData());
+            let oReplyAscCommData = reply.GetAscCommentData();
+            if (oReplyAscCommData) {
+                oAscCommData.m_aReplies.push(oReplyAscCommData);
+            }
         });
 
         return oAscCommData;
@@ -182,7 +180,7 @@
             return;
         }
 
-        AscCommon.History.Add(new CChangesPDFCommentIcon(this, this._noteIcon, nType));
+        AscCommon.History.Add(new CChangesPDFTextAnnotIcon(this, this._noteIcon, nType));
         this._noteIcon = nType;
         this.SetWasChanged(true);
     };
@@ -366,7 +364,7 @@
         let nIconType = this.GetIconType();
         if (nIconType != null) {
             memory.annotFlags |= (1 << 16);
-            memory.WriteByte(this.GetIconType());
+            memory.WriteByte(nIconType);
         }
         
         // state model
@@ -390,10 +388,6 @@
         memory.Seek(nStartPos);
         memory.WriteLong(nEndPos - nStartPos);
         memory.Seek(nEndPos);
-
-        this.GetReplies().forEach(function(reply) {
-            (reply.IsChanged() || !memory.docRenderer) && reply.WriteToBinary(memory);
-        });
     };
     CAnnotationText.prototype.ReadFromBinary = function(reader) {
         reader.CommandType = reader.GetUChar();

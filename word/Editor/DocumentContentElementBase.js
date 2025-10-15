@@ -199,7 +199,8 @@ CDocumentContentElementBase.prototype.ResetSection = function(X, Y, XLimit, YLim
 	
 	let startPage = this.Sections.length ? this.Sections[this.Sections.length - 1].endPage + 1 : 0;
 	let startColumn = this.Sections.length ? 0 : this.GetStartColumn();
-	this.Sections.push(new AscWord.DocumentElementSection(X, Y, XLimit, YLimit, pageAbs, startPage, startPage, sectPr, startColumn, this.Sections.length));
+	let columnCount = sectPr ? sectPr.GetColumnCount() : (this.Sections.length ? 1 : this.GetColumnCount());
+	this.Sections.push(new AscWord.DocumentElementSection(X, Y, XLimit, YLimit, pageAbs, startPage, startPage, sectPr, startColumn, columnCount, this.Sections.length));
 };
 CDocumentContentElementBase.prototype.GetElementSectionByPage = function(curPage)
 {
@@ -1558,6 +1559,20 @@ CDocumentContentElementBase.prototype.GetParentTables = function()
 			tables.push(docPos[i].Class);
 	}
 	return tables;
+};
+/**
+ * Отличие данной функции от Get_SectionPr в том, что здесь возвращаются настройки секции, к которой
+ * принадлежит данный элемент, а там конкретно настройки секции, которые лежат в данном параграфе (если это параграф).
+ * @returns {null|AscWord.SectPr}
+ */
+CDocumentContentElementBase.prototype.Get_SectPr = function()
+{
+	let logicDocument = this.GetLogicDocument();
+	if (!logicDocument || !logicDocument.IsDocumentEditor())
+		return null;
+	
+	let sectPr = logicDocument.GetSections().GetSectPrByElement(this);
+	return logicDocument.Layout.CheckSectPr(sectPr);
 };
 
 //--------------------------------------------------------export--------------------------------------------------------

@@ -1750,11 +1750,23 @@ function CBinaryFileWriter()
                 break;
             }
         }
+
+        if (Asc.editor.isPdfEditor()) {
+            let aRedactIds = oSp.GetRedactIds();
+            
+            oThis.WriteULong(aRedactIds.length);
+            aRedactIds.forEach(function(id) {
+                oThis.WriteString2(id);
+            });
+        }
     };
     this.WriteAnnotTreeElem = function(oAnnot) {
         oThis.WriteByMemory(function(memory) {
             memory.isCopyPaste = true;
-            oAnnot.WriteToBinary(memory)
+            oAnnot.WriteToBinary(memory);
+            oAnnot.GetReplies().forEach(function(reply) {
+                (reply.IsChanged() || !memory.docRenderer) && reply.WriteToBinary(memory);
+            });
         });
     };
     this.WriteFieldTreeElem = function(oField) {
@@ -4195,8 +4207,7 @@ function CBinaryFileWriter()
                 bIsExistLn = true;
         }
 
-        if (spPr.xfrm && spPr.xfrm.isNotNull())
-            oThis.WriteRecord2(0, spPr.xfrm, oThis.WriteXfrm);
+        oThis.WriteRecord2(0, spPr.xfrm, oThis.WriteXfrm);
 
         oThis.WriteRecord2(1, spPr.geometry, oThis.WriteGeometry);
 

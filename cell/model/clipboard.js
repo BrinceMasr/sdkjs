@@ -341,6 +341,8 @@
 					}
 				}
 
+				wb.model.checkProtectedValue = true;
+
 				//ignore hidden rows
 				var activeCell = ws.model.selectionRange.activeCell.clone();
 				var activeRange, selectionRange;
@@ -403,6 +405,7 @@
 
 				ws.model.excludeHiddenRows(false);
 				ws.model.ignoreWriteFormulas(false);
+				wb.model.checkProtectedValue = false;
 			}
 
 			if (ws && ws.workbook && !ws.workbook.getCellEditMode()) {
@@ -557,9 +560,11 @@
 				maxCanvasArea = 4096 * 4096;
 			} else {
 				// Chrome, Firefox, Edge and other modern browsers
-				maxCanvasHeight = 32767;
-				maxCanvasWidth = 32767;
-				maxCanvasArea = 268435456;
+				// Reducing limits. Experimentally determined that when height exceeds 16383px, text rendering speed (fillText) drops by tens of times
+				// Setting limits with safety margin
+				maxCanvasHeight = 8192;
+				maxCanvasWidth = 8192;
+				maxCanvasArea = 8192 * 8192;
 			}
 
 			let estimatedHeight = ws._getRowTop(activeRange.r2 + 1) - ws._getRowTop(activeRange.r1);
@@ -679,9 +684,8 @@
 				 this.wb.Core.contentStatus = this.oldWorkbookCoreParameters.oldContentStatus;
 
 
-					var oBinaryFileWriter = new AscCommonExcel.BinaryFileWriter(this.wb, false);
-					oBinaryFileWriter.Write();
-					this.cachedWbBinaryData = oBinaryFileWriter.Memory.data.slice();
+					var oBinaryFileWriter = new AscCommonExcel.BinaryFileWriter(this.wb);
+					this.cachedWbBinaryData = oBinaryFileWriter.Write(true, false, true);
 
 					this.wb.Core.creator = newCreator;
 					this.wb.Core.identifier = newIdentifier;
@@ -1119,12 +1123,12 @@
 
 			_generateHtmlDoc: function (range, worksheet) {
 				function skipMerged() {
-					var m = merged.filter(function (e) {
-						return row >= e.r1 && row <= e.r2 && col >= e.c1 && col <= e.c2
-					});
-					if (m.length > 0) {
-						col = m[0].c2;
-						return true;
+					for (var i = 0; i < merged.length; i++) {
+						var e = merged[i];
+						if (row >= e.r1 && row <= e.r2 && col >= e.c1 && col <= e.c2) {
+							col = e.c2;
+							return true;
+						}
 					}
 					return false;
 				}
@@ -1305,12 +1309,12 @@
 
 			_generateHtmlDocStr: function (range, worksheet, sBase64) {
 				function skipMerged() {
-					var m = merged.filter(function (e) {
-						return row >= e.r1 && row <= e.r2 && col >= e.c1 && col <= e.c2
-					});
-					if (m.length > 0) {
-						col = m[0].c2;
-						return true;
+					for (var i = 0; i < merged.length; i++) {
+						var e = merged[i];
+						if (row >= e.r1 && row <= e.r2 && col >= e.c1 && col <= e.c2) {
+							col = e.c2;
+							return true;
+						}
 					}
 					return false;
 				}
@@ -2554,7 +2558,7 @@
 
 					let arr_shapes = content.Drawings;
 					if (arr_shapes && arr_shapes.length && !(window["Asc"]["editor"] && window["Asc"]["editor"].isChartEditor)) {
-						if (content.Drawings.length === selectedContent2[1].content.Drawings.length) {
+						if (content.Drawings.length === pasteObj.content.Drawings.length) {
 							let oEndContent = {
 								Drawings: []
 							};
@@ -2563,7 +2567,7 @@
 							};
 							for (i = 0; i < content.Drawings.length; ++i) {
 								oEndContent.Drawings.push({Drawing: content.Drawings[i].graphicObject});
-								oSourceContent.Drawings.push({Drawing: selectedContent2[1].content.Drawings[i].graphicObject});
+								oSourceContent.Drawings.push({Drawing: pasteObj.content.Drawings[i].graphicObject});
 							}
 							AscFormat.checkDrawingsTransformBeforePaste(oEndContent, oSourceContent, null);
 						}
@@ -3333,6 +3337,7 @@
 				var base64 = returnBinary.base64;
 				var base64FromWord = returnBinary.base64FromWord;
 				var base64FromPresentation = returnBinary.base64FromPresentation;
+				var base64FromPDF = returnBinary.base64FromPDF;
 
 				var result = false;
 				if (base64 != null)//from excel
@@ -3344,6 +3349,9 @@
 					worksheet.workbook.handlers.trigger("cleanCopyData", true);
 				} else if (base64FromPresentation) {
 					result = this._pasteFromBinaryPresentation(worksheet, base64FromPresentation, isIntoShape);
+					worksheet.workbook.handlers.trigger("cleanCopyData", true);
+				} else if (base64FromPDF) {
+					result = this._pasteFromBinaryPDF(worksheet, base64FromPDF, isIntoShape);
 					worksheet.workbook.handlers.trigger("cleanCopyData", true);
 				}
 
@@ -3369,7 +3377,7 @@
 					}
 				}
 
-				return {base64: base64, base64FromWord: base64FromWord, base64FromPresentation: base64FromPresentation};
+				return {base64: base64, base64FromWord: base64FromWord, base64FromPresentation: base64FromPresentation, base64FromPDF: base64FromPDF};
 			},
 
 			_getImageFromHtml: function (html, isGetUrlsArray) {

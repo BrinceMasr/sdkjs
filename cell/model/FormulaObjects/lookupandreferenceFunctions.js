@@ -245,7 +245,7 @@ function (window, undefined) {
 
 			let res = 0;
 			if (cElementType.string === itemA.type && cElementType.string === itemB.type) {
-				res = (itemA.value.localeCompare(itemB.value)) * sortOrder;
+				res = AscCommonExcel.stringCompare(itemA.value, itemB.value) * sortOrder;
 			} else if (cElementType.number === itemA.type && cElementType.number === itemB.type) {
 				res = (itemA.value - itemB.value) * sortOrder;
 			} else if (cElementType.string === itemA.type) {
@@ -374,7 +374,7 @@ function (window, undefined) {
 					itemB = _b.item ? _b.item : _b;
 
 				if (cElementType.string === itemA.type && cElementType.string === itemB.type) {
-					res = (itemA.value.localeCompare(itemB.value)) * _sortOrder;
+					res = AscCommonExcel.stringCompare(itemA.value, itemB.value) * _sortOrder;
 				} else if (cElementType.number === itemA.type && cElementType.number === itemB.type) {
 					res = (itemA.value - itemB.value) * _sortOrder;
 				} else if (cElementType.string === itemA.type) {
@@ -2924,7 +2924,7 @@ function (window, undefined) {
 			opt_arg4 = arg[4];
 			opt_arg5 = arg[5];
 		}
-		let t = this, number, valueForSearching, r, c, res = -1, min, regexp, count;
+		let t = this, number, r, c, res = -1, count;
 
 		if (!opt_xlookup) {
 			if (cElementType.cell3D === arg2.type || cElementType.cell === arg2.type) {
@@ -2960,14 +2960,12 @@ function (window, undefined) {
 		let arg0Val;
 		if (cElementType.array === arg0.type) {
 			arg0Val = arg0.getElementRowCol(0, 0);
-			valueForSearching = ('' + arg0Val.getValue()).toLowerCase();
 		} else {
 			if (cElementType.cellsRange === arg0.type || cElementType.cellsRange3D === arg0.type) {
 				arg0Val = arg0.cross(argument1);
 			} else {
 				arg0Val = arg0;
 			}
-			valueForSearching = ('' + arg0Val.getValue()).toLowerCase();
 		}
 
 
@@ -2982,12 +2980,7 @@ function (window, undefined) {
 
 		let arg0ValType = arg0Val.type
 		if (cElementType.array === arg1.type && !opt_xlookup) {
-			// ToDo
-			if (cElementType.string === arg0.type) {
-				regexp = searchRegExp(valueForSearching);
-			}
-
-			let arrayToSearch, res = -1;
+			let arrayToSearch;
 			if (this.bHor) {
 				arrayToSearch = arg1.getRow(0);
 			} else {
@@ -2999,16 +2992,23 @@ function (window, undefined) {
 					// approximate(binary) search
 					res = _func.lookupBinarySearch(arg0Val, arrayToSearch, false);
 				} else {
+					let searchValue = arg0Val.getValue();
+					if (arg0Val.type === cElementType.string) {
+						searchValue = searchValue.toLowerCase();
+					}
 					// exact (simple) search
 					for (let i = 0; i < arrayToSearch.length; i++) {
 						let elem = arrayToSearch[i];
+						if (elem.type !== arg0ValType) {
+							continue;
+						}
 						let elemValue = elem.getValue();
 	
 						if (elem.type === cElementType.string) {
 							elemValue = elemValue.toLowerCase();
 						}
 	
-						if ((elem.type === arg0ValType) && elemValue === arg0Val.getValue()) {
+						if (elemValue === searchValue) {
 							res = i;
 							break
 						}
@@ -3109,7 +3109,9 @@ function (window, undefined) {
 				});
 			} else {
 				tmpArrays[i].sort(function (a, b) {
-					return a.v.localeCompare(b.v);
+					const valueA = a.v;
+					const valueB = b.v;
+					return AscCommonExcel.stringCompare(valueA, valueB);
 				});
 			}
 		}
@@ -3695,7 +3697,6 @@ function (window, undefined) {
 			valueForSearching = new cString(valueForSearching.getValue().toLowerCase());
 		}
 
-		//TODO opt_arg5 - пока не обрабатываю результат == 2( A wildcard match where *, ?, and ~ have)
 		if (xlookup) {
 			if (Math.abs(opt_arg5) === 1) {
 				if (opt_array) {
@@ -4061,7 +4062,7 @@ function (window, undefined) {
 				moreEqualArr.sort(function(a, b) {
 					if (cElementType.number === a0Type) {
 						if (cElementType.string === a.v.type && cElementType.string === b.v.type) {
-							return a.v.getValue().localeCompare(b.v.getValue());
+							return AscCommonExcel.stringCompare(a.v.getValue(), b.v.getValue());
 						} else if (cElementType.number === a.v.type && cElementType.number === b.v.type) {
 							return a.v.getValue() - b.v.getValue();
 						} else if (cElementType.error === a.v.type || cElementType.error === b.v.type) {
@@ -4071,7 +4072,7 @@ function (window, undefined) {
 						}
 					} else if (cElementType.string === a0Type) {
 						if (cElementType.string === a.v.type && cElementType.string === b.v.type) {
-							return a.v.getValue().localeCompare(b.v.getValue());
+							return AscCommonExcel.stringCompare(a.v.getValue(), b.v.getValue());
 						} else if (cElementType.string === a.v.type || cElementType.string === b.v.type) {
 							return 1;
 						} else if (cElementType.bool === a.v.type && cElementType.bool === b.v.type) {
@@ -4166,7 +4167,7 @@ function (window, undefined) {
 							return b.v.getValue() - a.v.getValue();
 						} else if (cElementType.string === a0Type) {
 							if (cElementType.string === a.v.type && cElementType.string === b.v.type) {
-								return a.v.getValue().localeCompare(b.v.getValue());
+								return AscCommonExcel.stringCompare(a.v.getValue(), b.v.getValue());
 							} else if (cElementType.string === a.v.type || cElementType.string === b.v.type) {
 								return 1;
 							} else if (cElementType.number === a.v.type && cElementType.number === b.v.type) {
