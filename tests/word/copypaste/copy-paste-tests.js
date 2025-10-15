@@ -55,19 +55,7 @@ $(function () {
 		sectPr.SetPageSize(PAGE_W, 1000);
 		sectPr.SetPageMargins(L_FIELD, 50, R_FIELD, 50);
 	}
-
-	function pasteHtmlElement(el, cb) {
-		AscTest.Editor.asc_PasteData(
-			AscCommon.c_oAscClipboardDataFormat.HtmlElement,
-			el,
-			undefined,
-			undefined,
-			undefined,
-			cb || function () {}
-		);
-	}
-	const oldPrepeare_recursive =
-		AscCommon.PasteProcessor.prototype._Prepeare_recursive;
+	const oldPrepeare_recursive = AscCommon.PasteProcessor.prototype._Prepeare_recursive;
 
 	AscCommon.PasteProcessor.prototype._Prepeare_recursive = function () {};
 
@@ -130,6 +118,32 @@ $(function () {
 		}
 	);
 
+	let defJsonBorders = {
+		bottom: {
+			color: { auto: false, r: 0, g: 0, b: 0 },
+			sz: 4,
+			space: 0,
+			value: "none",
+		},
+		left: {
+			color: { auto: false, r: 0, g: 0, b: 0 },
+			sz: 4,
+			space: 0,
+			value: "none",
+		},
+		right: {
+			color: { auto: false, r: 0, g: 0, b: 0 },
+			sz: 4,
+			space: 0,
+			value: "none",
+		},
+		top: {
+			color: { auto: false, r: 0, g: 0, b: 0 },
+			sz: 4,
+			space: 0,
+			value: "none",
+		},
+	}
 	QUnit.test('Test: "copy HTML with JSON verification"', function (assert) {
 		initDocument();
 
@@ -158,32 +172,7 @@ $(function () {
 				{
 					bFromDocument: true,
 					pPr: {
-						pBdr: {
-							bottom: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							left: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							right: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							top: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-						},
+						pBdr: defJsonBorders,
 						bFromDocument: true,
 						type: "paraPr",
 					},
@@ -241,9 +230,7 @@ $(function () {
 		done();
 	});
 
-	QUnit.test(
-		'Test: "copy complex HTML with JSON verification"',
-		function (assert) {
+	QUnit.test('Test: "copy complex HTML with JSON verification"', function (assert) {
 			initDocument();
 
 			let done = assert.async();
@@ -280,32 +267,7 @@ $(function () {
 					{
 						bFromDocument: true,
 						pPr: {
-							pBdr: {
-								bottom: {
-									color: { auto: false, r: 0, g: 0, b: 0 },
-									sz: 4,
-									space: 0,
-									value: "none",
-								},
-								left: {
-									color: { auto: false, r: 0, g: 0, b: 0 },
-									sz: 4,
-									space: 0,
-									value: "none",
-								},
-								right: {
-									color: { auto: false, r: 0, g: 0, b: 0 },
-									sz: 4,
-									space: 0,
-									value: "none",
-								},
-								top: {
-									color: { auto: false, r: 0, g: 0, b: 0 },
-									sz: 4,
-									space: 0,
-									value: "none",
-								},
-							},
+							pBdr: defJsonBorders,
 							bFromDocument: true,
 							type: "paraPr",
 							pStyle: "139",
@@ -337,32 +299,7 @@ $(function () {
 					{
 						bFromDocument: true,
 						pPr: {
-							pBdr: {
-								bottom: {
-									color: { auto: false, r: 0, g: 0, b: 0 },
-									sz: 4,
-									space: 0,
-									value: "none",
-								},
-								left: {
-									color: { auto: false, r: 0, g: 0, b: 0 },
-									sz: 4,
-									space: 0,
-									value: "none",
-								},
-								right: {
-									color: { auto: false, r: 0, g: 0, b: 0 },
-									sz: 4,
-									space: 0,
-									value: "none",
-								},
-								top: {
-									color: { auto: false, r: 0, g: 0, b: 0 },
-									sz: 4,
-									space: 0,
-									value: "none",
-								},
-							},
+							pBdr: defJsonBorders,
 							bFromDocument: true,
 							type: "paraPr",
 						},
@@ -396,32 +333,7 @@ $(function () {
 						bFromDocument: true,
 						pPr: {
 							numPr: { ilvl: 0, numId: "488" },
-							pBdr: {
-								bottom: {
-									color: { auto: false, r: 0, g: 0, b: 0 },
-									sz: 4,
-									space: 0,
-									value: "none",
-								},
-								left: {
-									color: { auto: false, r: 0, g: 0, b: 0 },
-									sz: 4,
-									space: 0,
-									value: "none",
-								},
-								right: {
-									color: { auto: false, r: 0, g: 0, b: 0 },
-									sz: 4,
-									space: 0,
-									value: "none",
-								},
-								top: {
-									color: { auto: false, r: 0, g: 0, b: 0 },
-									sz: 4,
-									space: 0,
-									value: "none",
-								},
-							},
+							pBdr: defJsonBorders,
 							bFromDocument: true,
 							type: "paraPr",
 							pStyle: "165",
@@ -507,9 +419,7 @@ $(function () {
 		}
 	);
 
-	QUnit.test(
-		'Test: "paste html, select text, copy html, check htmls for simple lists"',
-		function (assert) {
+	QUnit.test('Test: "paste html, select text, copy html, check htmls for simple lists"', function (assert) {
 			initDocument();
 
 			let done = assert.async();
@@ -557,9 +467,7 @@ $(function () {
 		}
 	);
 
-	QUnit.test(
-		'Test: "paste html, select text, copy html, check htmls for marked lists"',
-		function (assert) {
+	QUnit.test('Test: "paste html, select text, copy html, check htmls for marked lists"', function (assert) {
 			initDocument();
 
 			let done = assert.async();
@@ -650,9 +558,7 @@ $(function () {
 		}
 	);
 
-	QUnit.test(
-		'Test: "paste html, select text, copy html, check htmls for multi-level lists"',
-		function (assert) {
+	QUnit.test('Test: "paste html, select text, copy html, check htmls for multi-level lists"', function (assert) {
 			initDocument();
 
 			let done = assert.async();
@@ -723,32 +629,7 @@ $(function () {
 				{
 					bFromDocument: true,
 					pPr: {
-						pBdr: {
-							bottom: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							left: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							right: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							top: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-						},
+						pBdr: defJsonBorders,
 						bFromDocument: true,
 						type: "paraPr",
 					},
@@ -810,9 +691,7 @@ $(function () {
 		done();
 	});
 
-	QUnit.test(
-		"Paste simple div HTML, then select & copy back",
-		function (assert) {
+	QUnit.test("Paste simple div HTML, then select & copy back", function (assert) {
 			initDocument();
 
 			let done = assert.async();
@@ -854,6 +733,7 @@ $(function () {
 		htmlElement.innerHTML =
 			"<p><span style='color:blue;'>Blue text</span></p>";
 
+
 		AscTest.Editor.asc_PasteData(
 			AscCommon.c_oAscClipboardDataFormat.HtmlElement,
 			htmlElement,
@@ -871,32 +751,7 @@ $(function () {
 				{
 					bFromDocument: true,
 					pPr: {
-						pBdr: {
-							bottom: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							left: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							right: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							top: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-						},
+						pBdr: defJsonBorders,
 						bFromDocument: true,
 						type: "paraPr",
 					},
@@ -1264,32 +1119,7 @@ $(function () {
 					bFromDocument: true,
 					pPr: {
 						numPr: { ilvl: 0, numId: "620" },
-						pBdr: {
-							bottom: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							left: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							right: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							top: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-						},
+						pBdr: defJsonBorders,
 						bFromDocument: true,
 						type: "paraPr",
 						pStyle: "165",
@@ -1322,32 +1152,7 @@ $(function () {
 					bFromDocument: true,
 					pPr: {
 						numPr: { ilvl: 0, numId: "620" },
-						pBdr: {
-							bottom: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							left: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							right: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							top: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-						},
+						pBdr: defJsonBorders,
 						bFromDocument: true,
 						type: "paraPr",
 						pStyle: "165",
@@ -1413,8 +1218,7 @@ $(function () {
 
 	QUnit.test("Paste image HTML", function (assert) {
 		// add prepare recursive to tests
-		AscCommon.PasteProcessor.prototype._Prepeare_recursive =
-			oldPrepeare_recursive;
+		AscCommon.PasteProcessor.prototype._Prepeare_recursive = oldPrepeare_recursive;
 		initDocument();
 
 		let done = assert.async();
@@ -1495,32 +1299,7 @@ $(function () {
 				{
 					bFromDocument: true,
 					pPr: {
-						pBdr: {
-							bottom: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							left: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							right: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							top: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-						},
+						pBdr: defJsonBorders,
 						bFromDocument: true,
 						type: "paraPr",
 					},
@@ -1605,32 +1384,7 @@ $(function () {
 				{
 					bFromDocument: true,
 					pPr: {
-						pBdr: {
-							bottom: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							left: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							right: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							top: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-						},
+						pBdr: defJsonBorders,
 						bFromDocument: true,
 						type: "paraPr",
 					},
@@ -1797,32 +1551,7 @@ $(function () {
 				{
 					bFromDocument: true,
 					pPr: {
-						pBdr: {
-							bottom: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							left: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							right: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							top: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-						},
+						pBdr: defJsonBorders,
 						bFromDocument: true,
 						type: "paraPr",
 					},
@@ -2034,32 +1763,7 @@ $(function () {
 				{
 					bFromDocument: true,
 					pPr: {
-						pBdr: {
-							bottom: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							left: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							right: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							top: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-						},
+						pBdr: defJsonBorders,
 						bFromDocument: true,
 						type: "paraPr",
 					},
@@ -2143,32 +1847,7 @@ $(function () {
 				{
 					bFromDocument: true,
 					pPr: {
-						pBdr: {
-							bottom: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							left: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							right: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-							top: {
-								color: { auto: false, r: 0, g: 0, b: 0 },
-								sz: 4,
-								space: 0,
-								value: "none",
-							},
-						},
+						pBdr: defJsonBorders,
 						bFromDocument: true,
 						type: "paraPr",
 					},
@@ -2300,9 +1979,7 @@ $(function () {
 		done();
 	});
 
-	QUnit.test(
-		"Paste paragraph + span with style, then select & copy back",
-		function (assert) {
+	QUnit.test("Paste paragraph + span with style, then select & copy back", function (assert) {
 			initDocument();
 			let done = assert.async();
 
@@ -2332,25 +2009,7 @@ $(function () {
 		}
 	);
 
-	// 	logicDocument.AddToContent(0, p);
-	// 	let done = assert.async();
-	//
-	// 	htmlElement.innerHTML = "<table><tr><td>Cell 1</td><td>Cell 2</td></tr></table>";
-	//
-	// 	logicDocument.SelectAll();
-	// 	oCopyProcessor.Start();
-	// 	const copiedHtml = oCopyProcessor.getInnerHtml();
-	// 	logicDocument.RemoveSelection();
-	//
-	// 	const jsonedData = removeBase64(JSON.stringify(copiedHtml));
-	// 	const expectedHtml =''
-	// 	assert.strictEqual(jsonedData, expectedHtml, "Copied HTML should match for table paste");
-	// 	done();
-	// });
-
-	QUnit.test(
-		"Paste unordered list HTML, then select & copy back",
-		function (assert) {
+	QUnit.test("Paste unordered list HTML, then select & copy back", function (assert) {
 			initDocument();
 			let done = assert.async();
 
@@ -2379,9 +2038,7 @@ $(function () {
 		}
 	);
 
-	QUnit.test(
-		"Paste bold/italic HTML, then select & copy back",
-		function (assert) {
+	QUnit.test("Paste bold/italic HTML, then select & copy back", function (assert) {
 			initDocument();
 			let done = assert.async();
 
