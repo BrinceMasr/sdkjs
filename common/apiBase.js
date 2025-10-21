@@ -980,6 +980,9 @@
 				}
 				break;
 			}
+			case c_oAscFrameDataType.OpenLocalDesktopFileLink:
+				this.frameManager.openLocalDesktopFileLink(oInformation["localFileLink"]);
+				break;
 			default:
 			{
 				break;
@@ -5583,17 +5586,8 @@
 		let t = this;
 		let isLocalDesktop = window["AscDesktopEditor"] && window["AscDesktopEditor"]["IsLocalFile"]();
 		if (isLocalDesktop) {
-			window["AscDesktopEditor"]["openExternalReference"](AscCommon.getLocalFileLink(externalReference.externalReference.Id), function(error) {
-				let internalError = Asc.c_oAscError.ID.No;
-				switch (error) {
-					case 0: internalError = Asc.c_oAscError.ID.ConvertationOpenError; break;
-					default: break;
-				}
-
-				if (Asc.c_oAscError.ID.No !== internalError) {
-					t.sendEvent("asc_onError", internalError, c_oAscError.Level.NoCritical);
-				}
-			});
+			const sLocalLink = AscCommon.getLocalFileLink(externalReference.externalReference.Id);
+			this.frameManager.openLocalDesktopFileLink(sLocalLink);
 			return null;
 		} else {
 			return externalReference;
