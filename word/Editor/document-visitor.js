@@ -115,6 +115,10 @@
 	{
 		return false;
 	};
+	DocumentVisitor.prototype.hyperlink = function(hyperlink, isStart)
+	{
+		return false;
+	};
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Private area
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -238,6 +242,15 @@
 		AscWord.ParagraphContentWithParagraphLikeContent.prototype.visit.apply(this, arguments);
 		
 		visitor.fldSimple(this, false);
+	};
+	AscCommonWord.ParaHyperlink.prototype.visit = function(visitor)
+	{
+		if (visitor.hyperlink(this, true))
+			return;
+			
+		AscWord.ParagraphContentWithParagraphLikeContent.prototype.visit.apply(this, arguments);
+		
+		visitor.hyperlink(this, false);
 	};
 	//--------------------------------------------------------export----------------------------------------------------
 	AscWord.DocumentVisitor = DocumentVisitor;
