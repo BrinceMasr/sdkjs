@@ -1621,7 +1621,8 @@ NumFormat.prototype =
             min = {val: 0, coeff: 60}, s = {val: 0, coeff: 60}, ms = {val: 0, coeff: 1000};
         //number is negative in case of bDate1904
         var isNegativeDate = number < 0;
-        var numberAbs = (this.formatType == AscCommon.NumFormatType.PDFFormDate || number >= 0) ? number : Math.abs(number);        var tmp = numberAbs;
+        var numberAbs = (this.formatType == AscCommon.NumFormatType.PDFFormDate || number >= 0) ? number : Math.abs(number);        
+        var tmp = numberAbs;
         var ttimes = [d, h, min, s, ms];
         for(var i = 0; i < 4; i++)
         {
@@ -2811,7 +2812,6 @@ NumFormatCache.prototype =
 	},
     get : function(format, formatType)
     {
-    //return new CellFormat(format, formatType, false);
 		var key = format + String.fromCharCode(5) + formatType;
         var res = this.oNumFormats[key];
         if(null == res)
