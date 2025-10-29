@@ -10696,6 +10696,69 @@ PasteProcessor.prototype =
 
 
 
+		/*var oPr,
+			oFormPr = new AscCommon.CSdtFormPr();
+		//oFormPr.put_Role(Common.Utils.InternalSettings.get('de-last-form-role') || this._state.lastRoleInList);
+
+		if (type == 'picture')
+			this.api.asc_AddContentControlPicture(oFormPr);
+		else if (type == 'checkbox' || type == 'radiobox') {
+			oPr = new AscCommon.CSdtCheckBoxPr();
+			(type == 'radiobox') && oPr.put_GroupKey(this.toolbar.textGroup + ' 1');
+			this.api.asc_AddContentControlCheckBox(oPr, oFormPr);
+		} else if (type == 'combobox' || type == 'dropdown')
+			this.api.asc_AddContentControlList(type == 'combobox', oPr, oFormPr);
+		else if (type == 'datetime'){
+			var props = new AscCommon.CContentControlPr(),
+				datePr = new AscCommon.CSdtDatePickerPr();
+			props.put_FormPr(oFormPr);
+			props.put_DateTimePr(datePr);
+			props.put_PlaceholderText(datePr.get_String());
+			this.api.asc_AddContentControlDatePicker(props);
+		} else if (type == 'text') {
+			var props = new AscCommon.CContentControlPr();
+			oPr = new AscCommon.CSdtTextFormPr();
+			if (options) {
+				if (options.reg)
+					oPr.put_RegExpFormat(options.reg);
+				else if (options.mask)
+					oPr.put_MaskFormat(options.mask);
+				if (options.placeholder)
+					props.put_PlaceholderText(options.placeholder);
+				if (options.fixed!==undefined)
+					oFormPr.put_Fixed && oFormPr.put_Fixed(options.fixed);
+			}
+			props.put_TextFormPr(oPr);
+			props.put_FormPr(oFormPr);
+			this.api.asc_AddContentControlTextForm(props);
+		} else if (type == 'complex') {
+			this.api.asc_AddComplexForm();
+		} else if (type === 'signature')
+			this.api.asc_AddContentControlSignature(oFormPr);*/
+
+
+		let checkBoolAttr = function (attr) {
+			return attr && attr.value && attr.value === "t";
+		};
+		let getType = function (attrs) {
+			let res = null;
+			if (checkBoolAttr(attrs["checkbox"])) {
+				res = "checkbox";
+			} else if (checkBoolAttr(attrs["dropdown"])) {
+				res = "dropdown";
+			} else if (checkBoolAttr(attrs["combobox"])) {
+				res = "combobox";
+			} else if (checkBoolAttr(attrs["radiobox"])) {
+				res = "radiobox";
+			} else if (checkBoolAttr(attrs["maptodatetime"])) {
+				res = "datetime";
+			} else {
+				res = "text";
+			}
+
+			return res;
+		};
+
 		//w:Sdt -> ориентируемся по первому внутреннему тегу
 		//если параграф - то оборачиваем в CBlockLevelSdt, если текст с настройками - в CInlineLevelSdt
 		let isBlockLevelSdt = node.getElementsByTagName("p").length > 0;
@@ -10704,6 +10767,7 @@ PasteProcessor.prototype =
 		//ms в буфер записывает только lock контента
 		let checkBox, dropdown, comboBox;
 		if (node && node.attributes) {
+			let _type = getType(node.attributes);
 			let contentLocked = node.attributes["contentlocked"];
 			if (contentLocked /*&& contentLocked.value === "t"*/) {
 				levelSdt.SetContentControlLock(c_oAscSdtLockType.SdtContentLocked);
@@ -10726,6 +10790,67 @@ PasteProcessor.prototype =
 			if (placeHolder && placeHolder.value === "t") {
 				levelSdt.SetPlaceholder(c_oAscDefaultPlaceholderName.Text);
 			}
+
+			//form settings
+			if (checkBoolAttr(node.attributes["form"])) {
+				let formPr = new AscWord.CSdtFormPr();
+				let key = node.attributes["key"];
+				if (key && key.value) {
+					formPr.SetKey(key.value);
+				}
+				let label = node.attributes["label"];
+				if (label && label.value) {
+					formPr.SetLabel(label.value);
+				}
+				let helpText = node.attributes["helptext"];
+				if (helpText && helpText.value) {
+					formPr.SetHelpText(helpText.value);
+				}
+				let required = node.attributes["required"];
+				if (required && required.value) {
+					formPr.SetRequired(required.value === "t");
+				}
+				let fixed = node.attributes["fixed"];
+				if (fixed && fixed.value) {
+					formPr.SetFixed(fixed.value === "t");
+				}
+				let border = node.attributes["border"];
+				if (border && border.value) {
+					// Parse border value and apply
+					let oBorder = this._ExecuteParagraphBorder(border.value);
+					if (oBorder) {
+						formPr.SetAscBorder(oBorder);
+					}
+				}
+
+				let shd = node.attributes["shd"];
+				if (shd && shd.value) {
+					// Parse shading value
+					let shdColor = this._ParseColor(shd.value);
+					if (shdColor) {
+						let ascColor = new Asc.asc_CColor();
+						ascColor.asc_putR(shdColor.r);
+						ascColor.asc_putG(shdColor.g);
+						ascColor.asc_putB(shdColor.b);
+						formPr.SetAscShd(true, ascColor);
+					}
+				}
+
+				let field = node.attributes["field"];
+				if (field && field.value) {
+					formPr.SetField(field.value);
+				}
+
+				let roleName = node.attributes["rolename"];
+				if (roleName && roleName.value) {
+					formPr.SetRole(roleName.value);
+				}
+
+				levelSdt.SetFormPr(formPr);
+			}
+
+
+
 
 			//TODO поддержать Picture CC
 			/*let aspicture = node.attributes["displayaspicture"];
@@ -10758,8 +10883,8 @@ PasteProcessor.prototype =
 			};
 
 			let oPr;
-			checkBox = node.attributes["checkbox"];
-			if (checkBox && checkBox.value === "t") {
+			checkBox = _type === "checkbox";
+			if (checkBox) {
 				oPr = new AscWord.CSdtCheckBoxPr();
 				let checked = node.attributes["checkboxischecked"];
 				if (checked) {
@@ -10790,13 +10915,13 @@ PasteProcessor.prototype =
 				levelSdt.Pr.Id = id;
 			}
 
-			comboBox = node.attributes["combobox"];
-			if (comboBox && comboBox.value === "t") {
+			comboBox = _type === "combobox";
+			if (comboBox) {
 				oPr = new AscWord.CSdtComboBoxPr();
 			}
 
-			dropdown = node.attributes["dropdown"];
-			if (dropdown && dropdown.value === "t") {
+			dropdown = _type === "dropdown";
+			if (dropdown) {
 				oPr = new AscWord.CSdtComboBoxPr();
 			}
 
