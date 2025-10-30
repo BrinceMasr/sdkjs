@@ -10792,7 +10792,7 @@ PasteProcessor.prototype =
 			}
 
 			//form settings
-			if (checkBoolAttr(node.attributes["form"])) {
+			if (AscCommon.IsSupportOFormFeature() && checkBoolAttr(node.attributes["form"])) {
 				let formPr = new AscWord.CSdtFormPr();
 				let key = node.attributes["key"];
 				if (key && key.value) {
@@ -10816,11 +10816,17 @@ PasteProcessor.prototype =
 				}
 				let border = node.attributes["border"];
 				if (border && border.value) {
-					// Parse border value and apply
-					let oBorder = this._ExecuteParagraphBorder(border.value);
-					if (oBorder) {
-						formPr.SetAscBorder(oBorder);
+					let brd = new Asc.asc_CTextBorder();
+					brd.put_Value(1);
+					let borderColor = this._ParseColor(border.value);
+					if (borderColor) {
+						let ascColor = new Asc.asc_CColor();
+						ascColor.asc_putR(borderColor.r);
+						ascColor.asc_putG(borderColor.g);
+						ascColor.asc_putB(borderColor.b);
+						brd.put_Color(ascColor);
 					}
+					formPr.put_Border(brd);
 				}
 
 				let shd = node.attributes["shd"];
@@ -10837,13 +10843,40 @@ PasteProcessor.prototype =
 				}
 
 				let field = node.attributes["field"];
-				if (field && field.value) {
-					formPr.SetField(field.value);
-				}
-
 				let roleName = node.attributes["rolename"];
-				if (roleName && roleName.value) {
-					formPr.SetRole(roleName.value);
+				if (field && field.value) {
+					let fieldMaster = AscCommon.g_oTableId.GetById(field.value);
+					if (fieldMaster) {
+						formPr.SetFieldMaster(fieldMaster);
+					} else if (roleName && roleName.value) {
+						formPr.SetRole(roleName.value);
+					}
+				} else if (roleName && roleName.value) {
+					let oform = this.oLogicDocument ? this.oLogicDocument.GetOFormDocument() : null;
+					if (oform && oform.haveRole(roleName.value)) {
+						formPr.SetRole(roleName.value);
+					} else {
+						//ADD new role
+						const role = new AscCommon.CRoleSettings();
+						role.asc_putName(roleName.value);
+						let roleColor = node.attributes["rolecolor"];
+						roleColor = roleColor && roleColor.value && this._ParseColor(roleColor.value);
+						let ascRoleColor;
+						if (roleColor) {
+							ascRoleColor = new Asc.asc_CColor();
+							ascRoleColor.asc_putR(roleColor.r);
+							ascRoleColor.asc_putG(roleColor.g);
+							ascRoleColor.asc_putB(roleColor.b);
+						} else {
+							ascRoleColor = new Asc.asc_CColor();
+							ascRoleColor.asc_putR(228);
+							ascRoleColor.asc_putG(205);
+							ascRoleColor.asc_putB(219);
+						}
+						role.asc_putColor(ascRoleColor);
+						oform.asc_addRole(role);
+						formPr.SetRole(roleName.value);
+					}
 				}
 
 				levelSdt.SetFormPr(formPr);
