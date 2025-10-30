@@ -10695,46 +10695,61 @@ PasteProcessor.prototype =
 
 
 
+		//form examples:
+		//1.DropDown
+		// <html>
+		// 	<head/>
+		// 	<body lang=EN-US style='tab-interval:.5in;word-wrap:break-word'>
+		// 	<!--StartFragment-->
+		// 	<p style=''>
+		// 		<w:Sdt ShowingPlcHdr="t" DocPart="8522AE221F8D4E7AB041C6FBDCFFDADA" DropDown="t" Title="Title" Form="t" Key="DropDown1" Border="red" Shd="blue" HelpText="HelpText" Required="t" RoleName="RoleName" RoleColor="#7FB5B5" sdttag="Tag" Label="Label" ID="-1395741881">
+		// 			<w:ListItem ListValue="ListValue1" DataValue="DataValue1"/></w:ListItem>
+		// 			<w:ListItem ListValue="ListValue2" DataValue="DataValue2"/></w:ListItem>DropDown_example
+		// 		</w:Sdt>
+		// 	</p>
+		// 	<!--EndFragment-->
+		// </body>
+		// </html>
 
-		/*var oPr,
-			oFormPr = new AscCommon.CSdtFormPr();
-		//oFormPr.put_Role(Common.Utils.InternalSettings.get('de-last-form-role') || this._state.lastRoleInList);
+		//2.CheckBox
+		// <html>
+		// 	<head/>
+		// 	<body lang=EN-US style='tab-interval:.5in;word-wrap:break-word'>
+		// 	<!--StartFragment-->
+		// 	<p style=''>
+		// 		<w:Sdt ShowingPlcHdr="t" CheckBox="t" CheckBoxIsChecked="f" CheckBoxValueChecked="☑‘" CheckBoxValueUnchecked="☐" CheckBoxFontChecked="Segoe UI Symbol" CheckBoxFontUnchecked="Segoe UI Symbol"  Title="Title" Form="t" Key="DropDown1" Border="red" Shd="blue" HelpText="HelpText" Required="t" RoleName="RoleName" RoleColor="#7FB5B5" sdttag="Tag" Label="Label" ID="-1395741881"/>
+		// 		<span style='font-family:"Segoe UI Symbol",sans-serif'>☐</span>
+		// 	</w:Sdt>
+		// 	</p>
+		// 	<!--EndFragment-->
+		// 	</body>
+		// </html>
 
-		if (type == 'picture')
-			this.api.asc_AddContentControlPicture(oFormPr);
-		else if (type == 'checkbox' || type == 'radiobox') {
-			oPr = new AscCommon.CSdtCheckBoxPr();
-			(type == 'radiobox') && oPr.put_GroupKey(this.toolbar.textGroup + ' 1');
-			this.api.asc_AddContentControlCheckBox(oPr, oFormPr);
-		} else if (type == 'combobox' || type == 'dropdown')
-			this.api.asc_AddContentControlList(type == 'combobox', oPr, oFormPr);
-		else if (type == 'datetime'){
-			var props = new AscCommon.CContentControlPr(),
-				datePr = new AscCommon.CSdtDatePickerPr();
-			props.put_FormPr(oFormPr);
-			props.put_DateTimePr(datePr);
-			props.put_PlaceholderText(datePr.get_String());
-			this.api.asc_AddContentControlDatePicker(props);
-		} else if (type == 'text') {
-			var props = new AscCommon.CContentControlPr();
-			oPr = new AscCommon.CSdtTextFormPr();
-			if (options) {
-				if (options.reg)
-					oPr.put_RegExpFormat(options.reg);
-				else if (options.mask)
-					oPr.put_MaskFormat(options.mask);
-				if (options.placeholder)
-					props.put_PlaceholderText(options.placeholder);
-				if (options.fixed!==undefined)
-					oFormPr.put_Fixed && oFormPr.put_Fixed(options.fixed);
-			}
-			props.put_TextFormPr(oPr);
-			props.put_FormPr(oFormPr);
-			this.api.asc_AddContentControlTextForm(props);
-		} else if (type == 'complex') {
-			this.api.asc_AddComplexForm();
-		} else if (type === 'signature')
-			this.api.asc_AddContentControlSignature(oFormPr);*/
+		//3.ComboBox
+		// <html>
+		// <head/>
+		// <body lang=EN-US style='tab-interval:.5in;word-wrap:break-word'>
+		// <span>
+		// 	<w:Sdt Title="Title" Form="t" Key="DropDown1" Border="red" Shd="blue" HelpText="HelpText" Required="t" RoleName="RoleName" RoleColor="#7FB5B5" sdttag="Tag" Label="Label" ComboBox="t" ID="1837335014">
+		// 		<w:ListItem ListValue="Choose an item1" DataValue="Choose an item1"/>test
+		// 	</w:Sdt>
+		// </span>
+		// </body>
+		// </html>
+
+		//4.TextInline
+		// <html>
+		// <head/>
+		// <body lang=EN-US style='tab-interval:.5in;word-wrap:break-word'>
+		// <span>
+		// 	<w:Sdt Title="Title" Form="t" Key="DropDown1" Border="red" Shd="blue" HelpText="HelpText" Required="t" RoleName="RoleName" RoleColor="#7FB5B5" sdttag="Tag" Label="Label" ID="1837335014">
+		// 		inline
+		// 	</w:Sdt>
+		// </span>
+		// </body>
+		// </html>
+
+
 
 
 		let checkBoolAttr = function (attr) {
@@ -10969,7 +10984,7 @@ PasteProcessor.prototype =
 		}
 
 		//content
-		if (!checkBox && !comboBox && !dropdown) {
+		if (/*!checkBox && !comboBox && !dropdown*/true) {
 			let oPasteProcessor = new PasteProcessor(this.api, false, false, true);
 			oPasteProcessor.AddedFootEndNotes = this.AddedFootEndNotes;
 			oPasteProcessor.msoComments = this.msoComments;
@@ -10985,6 +11000,10 @@ PasteProcessor.prototype =
 			oPasteProcessor._Execute(node, pPr, true, true, false);
 			oPasteProcessor._PrepareContent();
 			oPasteProcessor._AddNextPrevToContent(levelSdt.Content);
+
+			if ((checkBox || comboBox || dropdown) && oPasteProcessor.aContent.length) {
+				levelSdt.Content = [];
+			}
 
 			//добавляем новый параграфы
 			let i, j, length, length2;
