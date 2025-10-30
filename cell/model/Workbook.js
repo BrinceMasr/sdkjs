@@ -1651,6 +1651,7 @@
 			g_cCalcRecursion.clearPrevIterResult();
 			g_cCalcRecursion.clearDiffBetweenIter();
 			g_cCalcRecursion.clearCycleCells();
+			g_cCalcRecursion.clearCheckedCells();
 			this.changedCell = null;
 			this.changedRange = null;
 			this.updateSharedFormulas();
@@ -16206,11 +16207,7 @@
 	 * @returns {boolean}
 	 */
 	Cell.prototype.checkRecursiveFormula = function (oCellWithFormula, aPassedCell) {
-		if (g_cCalcRecursion.checkRecursionCounter()) {
-			g_cCalcRecursion.resetRecursionCounter();
-			return false;
-		}
-		if (oCellWithFormula == null) {
+		if (g_cCalcRecursion.checkRecursionCounter() || oCellWithFormula == null) {
 			g_cCalcRecursion.resetRecursionCounter();
 			return false;
 		}
@@ -16230,10 +16227,6 @@
 			return false;
 		}
 		const oFormulaParsed = this.getFormulaParsed();
-		if (!oFormulaParsed) {
-			g_cCalcRecursion.resetRecursionCounter();
-			return false;
-		}
 		const aRefElements = _getRefElements(oFormulaParsed);
 		const oThis = this;
 		let bRecursiveFormula = false;
