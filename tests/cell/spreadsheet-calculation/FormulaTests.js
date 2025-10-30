@@ -280,20 +280,6 @@ $(function () {
 		}
 	}
 
-	function _getValue(from, row, col) {
-		var res;
-		if (from.type === AscCommonExcel.cElementType.array) {
-			res = from.getElementRowCol(row !== undefined ? row : 0, col !== undefined ? col : 0).getValue();
-		} else if (from.type === AscCommonExcel.cElementType.cellsRange || from.type === AscCommonExcel.cElementType.cellsRange3D) {
-			res = from.getValueByRowCol(row !== undefined ? row : 0, col !== undefined ? col : 0).getValue();
-		} else if (from.type === AscCommonExcel.cElementType.cell || from.type === AscCommonExcel.cElementType.cell3D) {
-			res = from.getValue().getValue();
-		} else {
-			res = from.getValue();
-		}
-		return res;
-	}
-
 	function consoleLog(val) {
 		//console.log(val);
 	}
@@ -3661,53 +3647,6 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#NAME?");
 	});
-
-	function putStackData() {
-		ws.getRange2("A1").setValue("2");
-		ws.getRange2("A2").setValue("w");
-		ws.getRange2("A3").setValue("test");
-
-		ws.getRange2("B1").setValue("test2");
-		ws.getRange2("B2").setValue("3");
-		ws.getRange2("B3").setValue("4");
-
-		ws.getRange2("A1").setValue("2");
-		ws.getRange2("A2").setValue("w");
-		ws.getRange2("A3").setValue("test");
-
-		ws.getRange2("B5").setValue("test11");
-		ws.getRange2("C5").setValue("test12");
-		ws.getRange2("D5").setValue("test13");
-
-		ws.getRange2("B8").setValue("test13");
-		ws.getRange2("B9").setValue("test14");
-		ws.getRange2("B10").setValue("#VALUE!");
-		ws.getRange2("B11").setValue("test16");
-
-		ws.getRange2("B14").setValue("f");
-		ws.getRange2("B15").setValue("s");
-		ws.getRange2("B16").setValue("d");
-		ws.getRange2("B17").setValue("s");
-		ws.getRange2("B18").setValue("d");
-
-		ws.getRange2("C14").setValue("g");
-		ws.getRange2("C15").setValue("");
-		ws.getRange2("C16").setValue("");
-		ws.getRange2("C17").setValue("dfg");
-		ws.getRange2("C18").setValue("");
-
-		ws.getRange2("D14").setValue("h");
-		ws.getRange2("D15").setValue("d");
-		ws.getRange2("D16").setValue("g");
-		ws.getRange2("D17").setValue("s");
-		ws.getRange2("D18").setValue("");
-
-		ws.getRange2("E14").setValue("g");
-		ws.getRange2("E15").setValue("f");
-		ws.getRange2("E16").setValue("f");
-		ws.getRange2("E17").setValue("d");
-		ws.getRange2("E18").setValue("g");
-	}
 
 	QUnit.test("Test: \"&\"", function (assert) {
 		ws.getRange2("AAA101").setValue("1");
