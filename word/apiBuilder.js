@@ -10747,22 +10747,21 @@
 	 *
 	 * @memberof ApiParagraph
 	 * @typeofeditors ["CDE"]
+	 * @param {boolean} useSelection - If true, only the selected part of the paragraph will be processed.
 	 * @returns {ApiRange[]}
 	 * @see office-js-api/Examples/{Editor}/ApiParagraph/Methods/GetWords.js
 	 */
-	ApiParagraph.prototype.GetWords = function () {
+	ApiParagraph.prototype.GetWords = function (useSelection) {
 		const paragraph = this.Paragraph;
 		const words = [];
 		let currentWord = '';
 		let startPos = null;
 		
-		paragraph.CheckRunContent(function (oRun) {
-			const runDocPos = oRun.GetDocumentPositionFromObject();
-			
-			for (let i = 0; i < oRun.Content.length; i++) {
-				const item = oRun.Content[i];
-				const charPos = runDocPos.concat({ Class: oRun, Position: i });
-				
+		function getWordRanges(run, startRunPos, endRunPos) {
+			const runDocPos = run.GetDocumentPositionFromObject();
+			for (let i = startRunPos; i < endRunPos; i++) {
+				const item = run.Content[i];
+				const charPos = runDocPos.concat({ Class: run, Position: i });
 				const isWordPart = item.IsText() && (item.IsLetter() || item.IsNumber() || item.IsHyphen());
 				if (isWordPart) {
 					if (currentWord === '') {
@@ -10777,7 +10776,11 @@
 					}
 				}
 			}
-		});
+		}
+		
+		useSelection
+			? paragraph.CheckSelectedRunContent(getWordRanges)
+			: paragraph.CheckRunContent(getWordRanges);
 		
 		if (currentWord !== '' && startPos) {
 			const lastPos = paragraph.GetEndPos
@@ -10794,22 +10797,27 @@
 	 *
 	 * @memberof ApiParagraph
 	 * @typeofeditors ["CDE"]
+	 * @param {boolean} useSelection - If true, only the selected part of the paragraph will be processed.
 	 * @returns {ApiRange[]}
 	 * @see office-js-api/Examples/{Editor}/ApiParagraph/Methods/GetCharacters.js
 	 */
-	ApiParagraph.prototype.GetCharacters = function () {
+	ApiParagraph.prototype.GetCharacters = function (useSelection) {
 		const paragraph = this.Paragraph;
 		const characters = [];
 		
-		paragraph.CheckRunContent(function (run) {
+		function getCharRanges(run, startRunPos, endRunPos) {
 			const runDocPos = run.GetDocumentPositionFromObject();
-			for (let i = 0; i < run.Content.length; i++) {
+			for (let i = startRunPos; i < endRunPos; i++) {
 				const startPos = runDocPos.concat({ Class: run, Position: i });
 				const endPos = runDocPos.concat({ Class: run, Position: i + 1 });
 				const range = new ApiRange(paragraph, startPos, endPos);
 				characters.push(range);
 			}
-		});
+		}
+		
+		useSelection
+			? paragraph.CheckSelectedRunContent(getCharRanges)
+			: paragraph.CheckRunContent(getCharRanges);
 		
 		return characters;
 	};
@@ -15968,6 +15976,10 @@
 				return GetJC(this.ParaPr.Jc);
 
 			return undefined;
+		}
+
+		if (this.Parent instanceof ApiSelection) {
+			return GetJC(this.ParaPr.Jc);
 		}
 
 		return GetJC(this.Parent.private_GetImpl().Get_CompiledPr2().ParaPr.Jc);
@@ -27254,7 +27266,7 @@
 		const words = [];
 		const paragraphs = this.GetRange().GetAllParagraphs();
 		paragraphs.forEach(function (paragraph) {
-			words.push.apply(words, paragraph.GetWords());
+			words.push.apply(words, paragraph.GetWords(true));
 		});
 		return words;
 	};
@@ -27271,7 +27283,7 @@
 		const characters = [];
 		const paragraphs = this.GetRange().GetAllParagraphs();
 		paragraphs.forEach(function (paragraph) {
-			characters.push.apply(characters, paragraph.GetCharacters());
+			characters.push.apply(characters, paragraph.GetCharacters(true));
 		});
 		return characters;
 	};
@@ -27298,8 +27310,17 @@
 	 * @see office-js-api/Examples/{Editor}/ApiSelection/Methods/GetTables.js
 	 */
 	ApiSelection.prototype.GetTables = function () {
-		const range = this.GetRange();
-		return range ? range.GetAllTables() : [];
+		const tables = [];
+		const apiDocument = this.GetDocument();
+		if (apiDocument) {
+			const visitor = apiDocument.GetDocumentVisitor();
+			visitor['Table'] = function (apiTable) {
+				tables.push(apiTable);
+				return false;
+			};
+			visitor['Traverse'](true);
+		}
+		return tables;
 	};
 
 	/**
@@ -27311,8 +27332,17 @@
 	 * @see office-js-api/Examples/{Editor}/ApiSelection/Methods/GetRows.js
 	 */
 	ApiSelection.prototype.GetRows = function () {
-		const range = this.GetRange();
-		return range ? range.GetAllTableRows() : [];
+		const rows = [];
+		const apiDocument = this.GetDocument();
+		if (apiDocument) {
+			const visitor = apiDocument.GetDocumentVisitor();
+			visitor['TableRow'] = function (apiTableRow) {
+				rows.push(apiTableRow);
+				return false;
+			};
+			visitor['Traverse'](true);
+		}
+		return rows;
 	};
 
 	/**
@@ -27324,8 +27354,17 @@
 	 * @see office-js-api/Examples/{Editor}/ApiSelection/Methods/GetCells.js
 	 */
 	ApiSelection.prototype.GetCells = function () {
-		const range = this.GetRange();
-		return range ? range.GetAllTableCells() : [];
+		const cells = [];
+		const apiDocument = this.GetDocument();
+		if (apiDocument) {
+			const visitor = apiDocument.GetDocumentVisitor();
+			visitor['TableCell'] = function (apiTableCell) {
+				cells.push(apiTableCell);
+				return false;
+			};
+			visitor['Traverse'](true);
+		}
+		return cells;
 	};
 
 	/**
@@ -27354,7 +27393,7 @@
 	 */
 	ApiSelection.prototype.GetShading = function () {
 		const textPr = this.GetTextPr();
-		return textPr ? textPr.GetShading() : null;
+		return textPr ? textPr.GetShd() : null;
 	};
 
 	/**
@@ -27391,19 +27430,15 @@
 	 */
 	ApiSelection.prototype.GetHyperlinks = function () {
 		const hyperlinks = [];
-
 		const apiDocument = this.GetDocument();
 		if (apiDocument) {
 			const visitor = apiDocument.GetDocumentVisitor();
-
 			visitor['Hyperlink'] = function (apiHyperlink) {
 				hyperlinks.push(apiHyperlink);
 				return false;
 			};
-
 			visitor['Traverse'](true);
 		}
-
 		return hyperlinks;
 	};
 
@@ -27611,6 +27646,11 @@
 		this.Shapes = shapes;
 	}
 
+	ApiShapeRange.prototype.GetCount = function () {
+		return this.Shapes.length;
+	};
+	ApiShapeRange.prototype['GetCount'] = ApiShapeRange.prototype.GetCount;
+
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiInlineShapes
@@ -27620,6 +27660,11 @@
 	function ApiInlineShapes(shapes) {
 		this.Shapes = shapes;
 	}
+
+	ApiInlineShapes.prototype.GetCount = function () {
+		return this.Shapes.length;
+	};
+	ApiInlineShapes.prototype['GetCount'] = ApiInlineShapes.prototype.GetCount;
 
 	//------------------------------------------------------------------------------------------------------------------
 	//
@@ -28092,9 +28137,6 @@
 	ApiRange.prototype["GetEndPos"]                  = ApiRange.prototype.GetEndPos;
 	ApiRange.prototype["MoveCursorToPos"]            = ApiRange.prototype.MoveCursorToPos;
 	ApiRange.prototype["AddField"]                   = ApiRange.prototype.AddField;
-	ApiRange.prototype["GetAllTables"]               = ApiRange.prototype.GetAllTables;
-	ApiRange.prototype["GetAllTableRows"]            = ApiRange.prototype.GetAllTableRows;
-	ApiRange.prototype["GetAllTableCells"]           = ApiRange.prototype.GetAllTableCells;
 	ApiRange.prototype["GetAllMaths"]                = ApiRange.prototype.GetAllMaths;
 	
 	ApiDocument.prototype["GetClassType"]                  = ApiDocument.prototype.GetClassType;
