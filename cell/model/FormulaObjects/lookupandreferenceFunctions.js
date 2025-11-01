@@ -2765,21 +2765,21 @@ function (window, undefined) {
 	cUNIQUE.prototype.numFormat = AscCommonExcel.cNumFormatNone;
 	cUNIQUE.prototype.Calculate = function (arg) {
 
-		var _getUniqueArr = function (_arr, _byCol, _exactlyOnce) {
-			var rowCount = _arr && _arr.length;
-			var colCount = _arr && _arr[0] && _arr[0].length;
+		const _getUniqueArr = function (_arr, _byCol, _exactlyOnce) {
+			let rowCount = _arr && _arr.length;
+			let colCount = _arr && _arr[0] && _arr[0].length;
 			if (!rowCount || !colCount) {
 				return cError(cErrorType.wrong_value_type);
 			}
 
-			var res = new cArray();
-			var repeateArr = [];
-			var i, j, n, _value;
-			var resArr = [];
+			let res = new cArray();
+			let repeateArr = [];
+			let i, j, n, _value;
+			let resArr = [];
 
-			var _key;
+			let _key;
 			if (!_byCol) {
-				var _rowCount = 0;
+				let _rowCount = 0;
 				for (i = 0; i < rowCount; i++) {
 					_key = "";
 					for (j = 0; j < colCount; j++) {
@@ -2802,7 +2802,7 @@ function (window, undefined) {
 					}
 				}
 			} else {
-				var _colCount = 0;
+				let _colCount = 0;
 				for (i = 0; i < colCount; i++) {
 					_key = "";
 					for (j = 0; j < rowCount; j++) {
@@ -2827,10 +2827,10 @@ function (window, undefined) {
 			}
 
 			if (_exactlyOnce) {
-				var tempArr = [];
-				var _counter = 0;
+				let tempArr = [];
+				let _counter = 0;
 				for (i in repeateArr) {
-					var _elem = repeateArr[i];
+					let _elem = repeateArr[i];
 					if (_elem.count > 1) {
 						continue;
 					}
@@ -2859,7 +2859,7 @@ function (window, undefined) {
 			return res;
 		};
 
-		var arg0 = arg[0];
+		let arg0 = arg[0];
 		if (cElementType.cellsRange === arg0.type) {
 			arg0 = arg0.getMatrix();
 		} else if(cElementType.cellsRange3D === arg0.type) {
@@ -2878,21 +2878,36 @@ function (window, undefined) {
 		if (cElementType.error === arg0.type) {
 			return arg0;
 		}
-		if(0 === arg0.length){
+		if (0 === arg0.length) {
 			return new cError(cErrorType.wrong_value_type);
 		}
+		let arg1 = !arg[1] ? false : arg[1].tocBool();
+		if (arg1) {
+			if (cElementType.error === arg1.type) {
+				return arg1;
+			} else if (cElementType.bool !== arg1.type) {
+				arg1 = arg1.tocBool();
+			}
 
-		var arg1 = !arg[1] ? false : arg[1].tocBool();
-		if (arg1 && cElementType.error === arg1.type) {
-			return arg1;
-		} else if (arg1) {
+			if (cElementType.bool !== arg1.type) {
+				return new cError(cErrorType.wrong_value_type);
+			}
+
 			arg1 = arg1.toBool();
 		}
+		
+		let arg2 = !arg[2] ? false : arg[2].tocBool();
+		if (arg2) {
+			if (cElementType.error === arg2.type) {
+				return arg2;
+			} else if (cElementType.bool !== arg2.type) {
+				arg2 = arg2.tocBool();
+			}
 
-		var arg2 = !arg[2] ? false : arg[2].tocBool();
-		if (arg2 && cElementType.error === arg2.type) {
-			return arg2;
-		} else if (arg2) {
+			if (cElementType.bool !== arg2.type) {
+				return new cError(cErrorType.wrong_value_type);
+			}
+
 			arg2 = arg2.toBool();
 		}
 
@@ -3136,8 +3151,10 @@ function (window, undefined) {
 		/** @type {TypedCacheAxis} */
 		const axisData = bHor? this.data[wsId].horizontal : this.data[wsId].vertical;
 		if (!axisData[rowCol]) {
-			axisData[rowCol] = {};
-			this.generateCache(ws, bHor, rowCol, savingValueCallback, tmpToTypedCallback, tmpArrayCallback)
+			let container = {};
+			container[rowCol] = {};
+			this.generateCache(ws, bHor, rowCol, savingValueCallback, tmpToTypedCallback, tmpArrayCallback, container);
+			axisData[rowCol] = container[rowCol];
 		}
 		return axisData[rowCol][elementType];
 	};
@@ -3149,11 +3166,12 @@ function (window, undefined) {
 	 * @param {(value: LookUpElement, i: number) => any} savingValueCallback
 	 * @param {(value: any) => number} tmpToTypedCallback
 	 * @param {(value: {cElementType: any[]}) => void} [tmpArrayCallback]
+	 * @param {Object} [opt_container] - Optional container object to use instead of the default axis data structure.
 	 * @return {Uint32Array}
 	 */
-	TypedCache.prototype.generateCache = function(ws, bHor, rowCol, savingValueCallback, tmpToTypedCallback, tmpArrayCallback) {
+	TypedCache.prototype.generateCache = function(ws, bHor, rowCol, savingValueCallback, tmpToTypedCallback, tmpArrayCallback, opt_container) {
 		const wsId = ws.Get_Id();
-		const axisData = bHor ? this.data[wsId].horizontal : this.data[wsId].vertical;
+		const axisData = opt_container ? opt_container : (bHor ? this.data[wsId].horizontal : this.data[wsId].vertical);
 		const tmpArrays = {};
 		const c1 = bHor ? 0 : rowCol;
 		const r1 = bHor ? rowCol : 0;

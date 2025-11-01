@@ -113,8 +113,8 @@
 	 * @property {ApiRange} Cols - Returns the ApiRange object that represents the columns of the specified range.
 	 * @property {ApiRange} Columns - Returns the ApiRange object that represents the columns of the specified range.
 	 * @property {ApiRange} Cells - Returns a Range object that represents all the cells in the specified range or a specified cell.
-	 * @property {ApiRange} EntireRow - Returns a Range object that represents the entire row(s) that contains the specified range.
-	 * @property {ApiRange} EntireColumn - Returns a Range object that represents the entire column(s) that contains the specified range.
+	 * @property {ApiRange} EntireRow - Returns a Range object that represents the entire row(s) containing the specified range.
+	 * @property {ApiRange} EntireColumn - Returns a Range object that represents the entire column(s) containing the specified range.
 	 * @property {number} Count - Returns the rows or columns count.
 	 * @property {string} Address - Returns the range address.
 	 * @property {string} Value - Returns a value from the first cell of the specified range or sets it to this cell.
@@ -148,6 +148,10 @@
 	 * @property {ApiAreas} Areas - Returns a collection of the areas.
 	 * @property {ApiCharacters} Characters - Returns the ApiCharacters object that represents a range of characters within the object text. Use the ApiCharacters object to format characters within a text string.
 	 * @property {ApiPivotTable | null} PivotTable - Returns the ApiPivotTable object that represents the pivot table report containing the upper-left corner of the specified range.
+	 * @property {number} CellsCount - Returns a number of cells in the current range.
+	 * @property {number} ColumnsCount - Returns a number of columns in the current range.
+	 * @property {number} RowsCount - Returns a number of rows in the current range.
+	 * @property {ApiFormatConditions} FormatConditions - Returns the collection of conditional formatting rules for the current range.
 	 */
 	function ApiRange(range, areas) {
 		this.range = range;
@@ -546,7 +550,7 @@
 	 * @property {string} Value - Returns a name of the specified item in the pivot table field.
 	 * @property {string} Parent - Returns a parent of the pivot item.
 	 * @property {string} Field - Returns a field of the pivot item.
-	 * @property {boolean} Visible - Returns or sets a visibility of the pivot item.
+	 * @property {boolean} Visible - Returns or sets the visibility of the pivot item.
 	 */
 	function ApiPivotItem(field, item, index) {
 		/** @type{ApiPivotField} */
@@ -8986,13 +8990,13 @@
 			}
 			this.worksheet.selectionRange.assign2(range.range.bbox);
 			var Hyperlink = new Asc.asc_CHyperlink();
-			if (sScreenTip) {
-				Hyperlink.asc_setText(sScreenTip);
+			if (sTextToDisplay) {
+				Hyperlink.asc_setText(sTextToDisplay);
 			} else {
 				Hyperlink.asc_setText((externalLink ? sAddress : subAddress));
 			}
-			if (sTextToDisplay) {
-				Hyperlink.asc_setTooltip(sTextToDisplay);
+			if (sScreenTip) {
+				Hyperlink.asc_setTooltip(sScreenTip);
 			}
 			if (externalLink) {
 				Hyperlink.asc_setHyperlinkUrl(sAddress);
@@ -9616,9 +9620,10 @@
 	};
 
     /**
-     * Sets the bold property to the text characters in the current cell or cell range.
+     * Clears all formatting from the current range.
      * @memberof ApiRange
      * @typeofeditors ["CSE"]
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/ClearFormats.js
      */
     ApiRange.prototype.ClearFormats = function () {
@@ -9630,9 +9635,10 @@
     };
 
     /**
-     * Sets the bold property to the text characters in the current cell or cell range.
+     * Clears all contents from the current range.
      * @memberof ApiRange
      * @typeofeditors ["CSE"]
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/ClearContents.js
      */
     ApiRange.prototype.ClearContents = function () {
@@ -9644,9 +9650,10 @@
     };
 
     /**
-     * Sets the bold property to the text characters in the current cell or cell range.
+     * Clears all hyperlinks from the current range.
      * @memberof ApiRange
      * @typeofeditors ["CSE"]
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/ClearHyperlinks.js
      */
     ApiRange.prototype.ClearHyperlinks = function () {
@@ -9684,10 +9691,11 @@
 	});
 
 	/**
-	 * Return a number of cells in the current range.
+	 * Returns a number of cells in the current range.
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
 	 * @returns {number}
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/GetCellsCount.js
 	 */
 	ApiRange.prototype.GetCellsCount = function() {
@@ -9704,10 +9712,11 @@
 	});
 
 	/**
-	 * Return a number of columns in the current range.
+	 * Returns a number of columns in the current range.
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
 	 * @returns {number}
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/GetColumnsCount.js
 	 */
 	ApiRange.prototype.GetColumnsCount = function() {
@@ -9724,10 +9733,11 @@
 	});
 
 	/**
-	 * Return a number of rows in the current range.
+	 * Returns a number of rows in the current range.
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
 	 * @returns {number}
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/GetRowsCount.js
 	 */
 	ApiRange.prototype.GetRowsCount = function() {
@@ -10973,32 +10983,11 @@
 		var columnSort = sortSettings.columnSort = sOrientation !== "xlSortRows";
 
 		var getSortLevel = function (_key, _order) {
-			var index = null;
-			if (_key instanceof ApiRange) {
-				index = columnSort ? _key.range.bbox.c1 - range.c1 : _key.range.bbox.r1 - range.r1;
-			} else if (typeof _key === "string") {
-				//named range
-				var _defName = ws.workbook.getDefinesNames(_key);
-				if (_defName) {
-					var defNameRef;
-					AscCommonExcel.executeInR1C1Mode(false, function () {
-						defNameRef = AscCommonExcel.getRangeByRef(_defName.ref, ws, true, true)
-					});
-					if (defNameRef && defNameRef[0] && defNameRef[0].worksheet) {
-						if (range.contains(defNameRef[0].bbox.c1, defNameRef[0].bbox.r1)) {
-							if (defNameRef[0].worksheet.Id === ws.Id) {
-								index = columnSort ? defNameRef[0].bbox.c1 - range.c1 : defNameRef[0].bbox.r1 - range.r1;
-							}
-						} else {
-							//error
-							return false;
-						}
-					}
-				}
-			}
+			const index = columnSort ? _key.range.bbox.c1 - range.c1 : _key.range.bbox.r1 - range.r1;
+			const maxIndex = columnSort ? range.c2 - range.c1 : range.r2 - range.r1;
 
-			if (null === index) {
-				return null;
+			if (null === index || index < 0 || index > maxIndex) {
+				return false;
 			}
 
 			var level = new Asc.CSortPropertiesLevel();
@@ -11007,14 +10996,44 @@
 			sortSettings.levels.push(level);
 		};
 
+		const filterRange = function (_key) {
+			if (!_key || _key instanceof ApiRange) {
+				return _key;
+			}
+
+			// if named range
+			var _defName = ws.workbook.getDefinesNames(_key);
+			if (_defName) {
+				let defNameRef;
+				AscCommonExcel.executeInR1C1Mode(false, function () {
+					defNameRef = AscCommonExcel.getRangeByRef(_defName.ref, ws, true, true)
+				});
+				if (defNameRef && defNameRef[0] && defNameRef[0].worksheet) {
+					if (defNameRef[0].worksheet.Id === ws.Id) {
+						return new ApiRange(defNameRef[0]);
+					}
+				}
+			}
+
+			return _key;
+		}
+
+		const apiWorksheet = new ApiWorksheet(this.range.worksheet);
+		
 		sortSettings.levels = [];
-		if (key1 && false === getSortLevel(key1, sSortOrder1)) {
+		key1 = filterRange(key1);
+		const rangeKey1 = apiWorksheet.GetRange(key1);
+		if (key1 && false === getSortLevel(rangeKey1, sSortOrder1)) {
 			return;
 		}
-		if (key2 && false === getSortLevel(key2, sSortOrder2)) {
+		key2 = filterRange(key2);
+		const rangeKey2 = apiWorksheet.GetRange(key2);
+		if (key2 && false === getSortLevel(rangeKey2, sSortOrder2)) {
 			return;
 		}
-		if (key3 && false === getSortLevel(key3, sSortOrder3)) {
+		key3 = filterRange(key3);
+		const rangeKey3 = apiWorksheet.GetRange(key3);
+		if (key3 && false === getSortLevel(rangeKey3, sSortOrder3)) {
 			return;
 		}
 
@@ -11025,6 +11044,14 @@
 			obj = tables[0];
 		} else if (ws.AutoFilter && ws.AutoFilter.Ref && ws.AutoFilter.Ref.intersection(range)) {
 			obj = ws.AutoFilter;
+		}
+
+		if (sortSettings.hasHeaders) {
+			if (sortSettings.columnSort) {
+				range.r1++;
+			} else {
+				range.c1++;
+			}
 		}
 		ws.setCustomSort(sortSettings, obj, null, oWorksheet && oWorksheet.cellCommentator, range);
 	};
@@ -12313,7 +12340,7 @@
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiRange | null} - Returns the expanded range or null if the range cannot be expanded.
-	 * @since 9.1
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/Cell/ApiRange/Methods/GetCurrentRegion.js
 	 */
 	ApiRange.prototype.GetCurrentRegion = function () {
@@ -12340,12 +12367,12 @@
 	});
 
 	/**
-	 * Returns a Range object that represents a range that's offset from this range.
+	 * Returns a Range object offset from the current range.
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
 	 * @param {number} rowOffset - The number of rows to offset the range.
 	 * @param {number} columnOffset - The number of columns to offset the range.
-	 * @returns {ApiRange | null} - Returns the offset range or null if invalid.
+	 * @returns {ApiRange | null} - Returns the offset range, or null if invalid.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/Cell/ApiRange/Methods/Offset.js
 	 */
@@ -12370,12 +12397,12 @@
 	};
 
 	/**
-	 * Resizes the range by changing the number of rows and columns.
+	 * Resizes the current range by changing the number of rows and columns.
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
 	 * @param {number} rowSize - The number of rows for the new range.
 	 * @param {number} columnSize - The number of columns for the new range.
-	 * @returns {ApiRange | null} - Returns the resized range or null if invalid.
+	 * @returns {ApiRange | null} - Returns the resized range, or null if invalid.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/Cell/ApiRange/Methods/Resize.js
 	 */
@@ -12410,7 +12437,7 @@
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
 	 * @param {string | ApiRange} cell1 - The first cell address (e.g., "A1" or "A1:B2").
-	 * @param {string | ApiRange} [cell2] - The second cell address (optional, defines corner with cell1).
+	 * @param {string | ApiRange} [cell2] - The second cell address (optional, defines the corner with "cell1").
 	 * @returns {ApiRange | null} - Returns the range relative to this range, or null if invalid.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/Cell/ApiRange/Methods/GetRange.js
@@ -12435,10 +12462,10 @@
 	};
 
 	/**
-	 * Returns a Range object that represents the entire row(s) that contains the specified range.
+	 * Returns a Range object that represents the entire row(s) containing the specified range.
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange | null} - Returns the entire row range or null if invalid.
+	 * @returns {ApiRange | null} - Returns the entire row range, or null if invalid.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/Cell/ApiRange/Methods/GetEntireRow.js
 	 */
@@ -12457,10 +12484,10 @@
 	});
 
 	/**
-	 * Returns a Range object that represents the entire column(s) that contains the specified range.
+	 * Returns a Range object that represents the entire column(s) containing the specified range.
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange | null} - Returns the entire column range or null if invalid.
+	 * @returns {ApiRange | null} - Returns the entire column range, or null if invalid.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/Cell/ApiRange/Methods/GetEntireColumn.js
 	 */
@@ -12477,89 +12504,48 @@
 			return this.GetEntireColumn();
 		}
 	});
-	// /**
-	//  * Returns a collection of the ranges.
-	//  * @memberof ApiRange
-	//  * @typeofeditors ["CSE"]
-	//  * @returns {ApiValidation}
-	//  * @see office-js-api/Examples/{Editor}/ApiRange/Methods/GetValidation.js
-	//  */
-	// ApiRange.prototype.GetValidation = function () {
-	// 	if (!this._validation) {
-	// 		let worksheet = this.range.worksheet;
-	// 		let ranges = [];
-	// 		if (this.areas) {
-	// 			for (let i = 0; i < this.areas.length; i++) {
-	// 				ranges.push(this.areas[i].bbox);
-	// 			}
-	// 		} else {
-	// 			ranges.push(this.range.bbox);
-	// 		}
-	// 		this._validation = new ApiValidation(worksheet.getDataValidationProps(undefined, ranges), this);
-	// 		if (!this._validation.range) {
-	// 			this._validation.range = this;
-	// 		}
-	// 	}
-	// 	return this._validation;
-	// };
-	// Object.defineProperty(ApiRange.prototype, "Validation", {
-	// 	get: function () {
-	// 		return this.GetValidation();
-	// 	}
-	// });
+	/**
+	 * Returns a collection of the ranges.
+	 * @memberof ApiRange
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiValidation}
+	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/GetValidation.js
+	 */
+	ApiRange.prototype.GetValidation = function () {
+		if (!this._validation) {
+			let worksheet = this.range.worksheet;
+			let ranges = [];
+			if (this.areas) {
+				for (let i = 0; i < this.areas.length; i++) {
+					ranges.push(this.areas[i].bbox);
+				}
+			} else {
+				ranges.push(this.range.bbox);
+			}
+			this._validation = new ApiValidation(worksheet.getDataValidationProps(undefined, ranges, true), this);
+			if (!this._validation.range) {
+				this._validation.range = this;
+			}
+		}
+		return this._validation;
+	};
+	Object.defineProperty(ApiRange.prototype, "Validation", {
+		get: function () {
+			return this.GetValidation();
+		}
+	});
 
 	/**
-	 * Returns the format conditions collection for the range.
+	 * Returns the collection of conditional formatting rules for the current range.
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiFormatConditions}
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/GetFormatConditions.js
 	 */
 	ApiRange.prototype.GetFormatConditions = function() {
 		if (!this._formatConditions) {
 			this._formatConditions = new ApiFormatConditions(this);
-			let rules = this.range.worksheet.workbook.getRulesByType(Asc.c_oAscSelectionForCFType.selection, null, null, this.worksheet, this.range.bbox);
-			if (rules) {
-				for (var i = 0; i < rules.length; i++) {
-					var rule = rules[i];
-
-					var oApiFormatCondition = null;
-
-					switch (rule.type) {
-						case Asc.ECfType.colorScale:
-							oApiFormatCondition = new ApiColorScale(rule, this, this._formatConditions);
-							break;
-
-						case Asc.ECfType.dataBar:
-							oApiFormatCondition = new ApiDatabar(rule, this, this._formatConditions);
-							break;
-
-						case Asc.ECfType.iconSet:
-							oApiFormatCondition = new ApiIconSetCondition(rule, this, this._formatConditions);
-							break;
-
-						case Asc.ECfType.top10:
-							oApiFormatCondition = new ApiTop10(rule, this, this._formatConditions);
-							break;
-
-						case Asc.ECfType.uniqueValues:
-							oApiFormatCondition = new ApiUniqueValues(rule, this, this._formatConditions);
-							break;
-						case Asc.ECfType.aboveAverage:
-							oApiFormatCondition = new ApiAboveAverage(rule, this, this._formatConditions);
-							break;
-
-						default:
-							oApiFormatCondition = new ApiFormatCondition(rule, this, this._formatConditions);
-							break;
-					}
-
-					if (oApiFormatCondition)
-					{
-						this._formatConditions.conditions.push(oApiFormatCondition);
-					}
-				}
-			}
 		}
 		return this._formatConditions;
 	};
@@ -12881,7 +12867,7 @@
 
 
 	/**
-	 * Gets the geometry object from a shape
+	 * Returns the geometry object from the current shape.
 	 * @memberof ApiShape
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiGeometry}
@@ -12899,10 +12885,10 @@
 	};
 
 	/**
-	 * Sets a custom geometry for the shape
+	 * Sets a custom geometry for the current shape.
 	 * @memberof ApiShape
 	 * @typeofeditors ["CSE"]
-	 * @param {ApiGeometry} oGeometry - The geometry to set
+	 * @param {ApiGeometry} oGeometry - The geometry to set.
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiShape/Methods/SetGeometry.js
 	 * @since 9.1.0
@@ -14146,7 +14132,7 @@
 	 *
 	 * @memberof ApiTheme
 	 * @typeofeditors ["CSE"]
-	 * @returns {string} - The name of the theme.
+	 * @returns {string} - The theme name.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiTheme/Methods/GetName.js
 	 */
@@ -18517,11 +18503,11 @@
 	});
 
 	/**
-	 * Establishes automatic field-sorting rules for PivotTable reports.
+	 * Establishes automatic field-sorting rules for the pivot table reports.
 	 * @memberof ApiPivotField
 	 * @typeofeditors ["CSE"]
 	 * @param {SortOrder} order - The sort order.
-	 * @param {string} field - The name of the field to sort by(pivotField.SourceName, pivotField.Name, dataField.Name).
+	 * @param {string} field - The name of the field to sort by (pivotField.SourceName, pivotField.Name, dataField.Name).
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/AutoSort.js
 	 */
@@ -18600,7 +18586,7 @@
 	}
 
 	/**
-	 * Pivot filter type.
+	 * The pivot filter type.
 	 * @typedef {("xlAfter" | "xlAfterOrEqualTo" | "xlAllDatesInPeriodApril" | "xlAllDatesInPeriodAugust" | "xlAllDatesInPeriodDecember" | "xlAllDatesInPeriodFebruary" | "xlAllDatesInPeriodJanuary" | "xlAllDatesInPeriodJuly" | "xlAllDatesInPeriodJune" | "xlAllDatesInPeriodMarch" | "xlAllDatesInPeriodMay" | "xlAllDatesInPeriodNovember" | "xlAllDatesInPeriodOctober" | "xlAllDatesInPeriodQuarter1" | "xlAllDatesInPeriodQuarter2" | "xlAllDatesInPeriodQuarter3" | "xlAllDatesInPeriodQuarter4" | "xlAllDatesInPeriodSeptember" | "xlBefore" | "xlBeforeOrEqualTo" | "xlBottomCount" | "xlBottomPercent" | "xlBottomSum" | "xlCaptionBeginsWith" | "xlCaptionContains" | "xlCaptionDoesNotBeginWith" | "xlCaptionDoesNotContain" | "xlCaptionDoesNotEndWith" | "xlCaptionDoesNotEqual" | "xlCaptionEndsWith" | "xlCaptionEquals" | "xlCaptionIsBetween" | "xlCaptionIsGreaterThan" | "xlCaptionIsGreaterThanOrEqualTo" | "xlCaptionIsLessThan" | "xlCaptionIsLessThanOrEqualTo" | "xlCaptionIsNotBetween" | "xlDateBetween" | "xlDateLastMonth" | "xlDateLastQuarter" | "xlDateLastWeek" | "xlDateLastYear" | "xlDateNextMonth" | "xlDateNextQuarter" | "xlDateNextWeek" | "xlDateNextYear" | "xlDateThisMonth" | "xlDateThisQuarter" | "xlDateThisWeek" | "xlDateThisYear" | "xlDateToday" | "xlDateTomorrow" | "xlDateYesterday" | "xlNotSpecificDate" | "xlSpecificDate" | "xlTopCount" | "xlTopPercent" | "xlTopSum" | "xlValueDoesNotEqual" | "xlValueEquals" | "xlValueIsBetween" | "xlValueIsGreaterThan" | "xlValueIsGreaterThanOrEqualTo" | "xlValueIsLessThan" | "xlValueIsLessThanOrEqualTo" | "xlValueIsNotBetween" | "xlYearToDate") } XlPivotFilterType
 	 */
 
@@ -18611,9 +18597,9 @@
 	 * @typeofeditors ["CSE"]
 	 * @param {XlPivotFilterType} filterType - The type of filter to add. Must match VBA XlPivotFilterType enum values.
 	 * @param {ApiPivotDataField} [dataField] - The data field object to filter by. Required for value filters (xlValue* types) and top/bottom filters.
-	 * @param {string | number | Date} [value1] - The first value for the filter condition. Required for comparison filters, between filters, and top/bottom count.
+	 * @param {string | number | Date} [value1] - The first value for the filter condition. Required for comparison, between, and top/bottom count filters.
 	 * @param {string | number | Date} [value2] - The second value for "Between" conditions (xlCaptionIsBetween, xlCaptionIsNotBetween, xlValueIsBetween).
-	 * @param {boolean} [wholeDayFilter] - Whether to filter by whole day for date filters. Reserved for future use, currently not implemented.
+	 * @param {boolean} [wholeDayFilter] - Specifies whether to filter by whole day for date filters. Reserved for future use, currently not implemented.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiPivotFilters/Methods/Add.js
 	 */
@@ -18925,10 +18911,10 @@
 
 	/**
 	 * Sets the visibility of the pivot item.
-	 * Important: ensure at least one stays visible while hiding others
+	 * <note> At least one item must remain visible when hiding others. </note>
 	 * @memberof ApiPivotItem
 	 * @typeofeditors ["CSE"]
-	 * @param {boolean} visible - Specifies whether the pivot item should be visible.
+	 * @param {boolean} visible - Specifies whether the pivot item is visible.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiPivotItem/Methods/SetVisible.js
 	 */
@@ -18981,7 +18967,7 @@
 	 */
 
 	/**
-	 * Condition value types for color scale criteria.
+	 * The condition value types for color scale conditional formatting criteria.
 	 * @typedef {("xlConditionValueAutomaticMax" | "xlConditionValueAutomaticMin" |
 	 * "xlConditionValueHighestValue" | "xlConditionValueLowestValue" |
 	 * "xlConditionValueNone" | "xlConditionValueNumber" | "xlConditionValuePercent" |
@@ -18989,7 +18975,7 @@
 	 */
 
 	/**
-	 * Icon set types for conditional formatting.
+	 * The icon set types for conditional formatting.
 	 * @typedef {("xl3Arrows" | "xl3ArrowsGray" | "xl3Flags" | "xl3TrafficLights1" | "xl3TrafficLights2" |
 	 * "xl3Signs" | "xl3Symbols" | "xl3Symbols2" | "xl4Arrows" | "xl4ArrowsGray" | "xl4RedToBlack" |
 	 * "xl4CRV" | "xl4TrafficLights" | "xl5Arrows" | "xl5ArrowsGray" | "xl5CRV" | "xl5Quarters" |
@@ -18997,22 +18983,22 @@
 	 */
 
 	/**
-	 * Calculation scope for pivot table conditions.
+	 * The calculation scope for pivot table conditional formatting.
 	 * @typedef {("xlAllValues" | "xlColItems" | "xlRowItems")} XlCalcFor
 	 */
 
 	/**
-	 * The XlTopBottom enumeration constants.
+	 * The top/bottom type for conditional formatting rules.
 	 * @typedef {("xlTop10Top" | "xlTop10Bottom")} XlTopBottom
 	 */
 
 	/**
-	 * The XlDuplicateValues enumeration constants.
+	 * Specifies whether to format duplicate or unique values.
 	 * @typedef {("xlDuplicate" | "xlUnique")} XlDuplicateValues
 	 */
 
 	/**
-	 * Icon constants for conditional formatting.
+	 * The icon constants for conditional formatting.
 	 * @typedef {("xlIcon0Bars" | "xlIcon0FilledBoxes" | "xlIcon1Bar" | "xlIcon1FilledBox" |
 	 * "xlIcon2Bars" | "xlIcon2FilledBoxes" | "xlIcon3Bars" | "xlIcon3FilledBoxes" |
 	 * "xlIcon4Bars" | "xlIcon4FilledBoxes" | "xlIconBlackCircle" | "xlIconBlackCircleWithBorder" |
@@ -19188,705 +19174,783 @@
 		return sOperator;
 	}
 
-	// /**
-	//  * Class representing data validation.
-	//  * @constructor
-	//  * @property {ValidationType} Type - Returns or sets the validation type.
-	//  * @property {ValidationAlertStyle} AlertStyle - Returns or sets the validation alert style.
-	//  * @property {boolean} IgnoreBlank - Returns or sets a Boolean value that specifies whether blank values are permitted by the range data validation.
-	//  * @property {boolean} InCellDropdown - Returns or sets a Boolean value indicating whether data validation displays a drop-down list that contains acceptable values.
-	//  * @property {boolean} ShowInput - Returns or sets a Boolean value indicating whether the data validation input message will be displayed whenever the user selects a cell in the data validation range.
-	//  * @property {boolean} ShowError - Returns or sets a Boolean value indicating whether the data validation error message will be displayed whenever the user enters invalid data.
-	//  * @property {string} InputTitle - Returns or sets the title of the data-validation input dialog box.
-	//  * @property {string} InputMessage - Returns or sets the data validation input message.
-	//  * @property {string} ErrorTitle - Returns or sets the title of the data-validation error dialog box.
-	//  * @property {string} ErrorMessage - Returns or sets the data validation error message.
-	//  * @property {string} Formula1 - Returns or sets the value or expression associated with the conditional format or data validation.
-	//  * @property {string} Formula2 - Returns or sets the value or expression associated with the second part of a conditional format or data validation.
-	//  * @property {ValidationOperator} Operator - Returns or sets the data validation operator.
-	//  * @property {ApiRange} Parent - Returns the parent range object.
-	//  * @property {string} Value - Returns or sets the validation value.
-	//  */
-	// function ApiValidation(validation, range) {
-	// 	this.validation = validation;
-	// 	this.range = range;
-	// }
-	//
-	// /**
-	//  * Adds data validation to the specified range.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @param {ValidationType} Type - The validation type.
-	//  * @param {ValidationAlertStyle} [AlertStyle] - The validation alert style.
-	//  * @param {ValidationOperator} [Operator] - The data validation operator.
-	//  * @param {string | number | ApiRange} [Formula1] - The first formula in the data validation.
-	//  * @param {string | number | ApiRange} [Formula2] - The second formula in the data validation.
-	//  * @returns {ApiValidation | null}
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/Add.js
-	//  */
-	// ApiValidation.prototype.Add = function(Type, AlertStyle, Operator, Formula1, Formula2) {
-	// 	if (!Type) {
-	// 		return;
-	// 	}
-	//
-	// 	if (this.validation.ranges) {
-	// 		logError(new Error('Validation already exists.'));
-	// 		return null;
-	// 	}
-	//
-	// 	let internalType = FromXlValidationTypeTo(Type);
-	// 	let internalAlertStyle = AlertStyle ? FromXlValidationAlertStyleTo(AlertStyle) : Asc.EDataValidationErrorStyle.Stop;
-	// 	let internalOperator = Operator ? FromXlValidationOperatorTo(Operator) : Asc.EDataValidationOperator.Between;
-	//
-	// 	if (internalType === -1) {
-	// 		return null;
-	// 	}
-	//
-	// 	let dataValidation = new window['AscCommonExcel'].CDataValidation();
-	//
-	// 	dataValidation.type = internalType;
-	// 	dataValidation.errorStyle = internalAlertStyle;
-	// 	dataValidation.operator = internalOperator;
-	// 	dataValidation.showErrorMessage = true;
-	// 	dataValidation.showInputMessage = true;
-	// 	dataValidation.allowBlank = true;
-	//
-	// 	let processFormula = function(formula) {
-	// 		if (formula === undefined || formula === null) {
-	// 			return null;
-	// 		}
-	//
-	// 		if (typeof formula === "string") {
-	// 			return new window['Asc'].CDataFormula(formula);
-	// 		} else if (typeof formula === "number") {
-	// 			return new window['Asc'].CDataFormula(formula.toString());
-	// 		} else if (formula && formula.constructor === ApiRange) {
-	// 			return new window['Asc'].CDataFormula(formula.GetAddress());
-	// 		}
-	//
-	// 		return null;
-	// 	};
-	//
-	// 	if (Formula1 !== undefined) {
-	// 		dataValidation.formula1 = processFormula(Formula1);
-	// 	}
-	//
-	// 	if (Formula2 !== undefined) {
-	// 		dataValidation.formula2 = processFormula(Formula2);
-	// 	}
-	//
-	// 	let ranges = [];
-	// 	if (this.range.areas) {
-	// 		for (let i = 0; i < this.range.areas.length; i++) {
-	// 			ranges.push(this.range.areas[i].bbox);
-	// 		}
-	// 	} else {
-	// 		ranges.push(this.range.range.bbox);
-	// 	}
-	// 	dataValidation.ranges = ranges;
-	//
-	// 	let worksheet = this.range && this.range.range && this.range.range.worksheet;
-	// 	if (!worksheet) {
-	// 		return null;
-	// 	}
-	//
-	// 	if (Asc.c_oAscError.ID.No !== dataValidation.asc_checkValid()) {
-	// 		logError(new Error('Check params error.'));
-	// 		return null;
-	// 	}
-	//
-	// 	if (!worksheet.dataValidations) {
-	// 		worksheet.dataValidations = new window['AscCommonExcel'].CDataValidations();
-	// 	}
-	//
-	// 	dataValidation._init(worksheet);
-	// 	dataValidation.correctFromInterface(worksheet);
-	//
-	// 	worksheet.dataValidations.add(worksheet, dataValidation, true);
-	//
-	// 	this.validation = dataValidation;
-	//
-	// 	return this;
-	// };
-	//
-	// /**
-	//  * Deletes the object.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/Delete.js
-	//  */
-	// ApiValidation.prototype.Delete = function() {
-	// 	if (!this.validation || !this.validation.ranges) {
-	// 		return;
-	// 	}
-	//
-	// 	let worksheet = this.range && this.range.range && this.range.range.worksheet;
-	// 	if (!worksheet || !worksheet.dataValidations) {
-	// 		return;
-	// 	}
-	//
-	// 	// Удаляем data validation из worksheet
-	// 	worksheet.dataValidations.delete(worksheet, this.validation.Id, true);
-	//
-	// 	// Очищаем ссылку на validation
-	// 	this.validation = new window['AscCommonExcel'].CDataValidation();
-	// };
-	//
-	// /**
-	//  * Modifies data validation for a range.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @param {ValidationType} [Type] - The validation type.
-	//  * @param {ValidationAlertStyle} [AlertStyle] - The validation alert style.
-	//  * @param {ValidationOperator} [Operator] - The data validation operator.
-	//  * @param {string | number | ApiRange} [Formula1] - The first formula in the data validation.
-	//  * @param {string | number | ApiRange} [Formula2] - The second formula in the data validation.
-	//  * @returns {ApiValidation | null}
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/Modify.js
-	//  */
-	// ApiValidation.prototype.Modify = function(Type, AlertStyle, Operator, Formula1, Formula2) {
-	// 	if (!this.validation || !this.validation.ranges) {
-	// 		logError(new Error('No validation to modify.'));
-	// 		return null;
-	// 	}
-	//
-	// 	let worksheet = this.range && this.range.range && this.range.range.worksheet;
-	// 	if (!worksheet || !worksheet.dataValidations) {
-	// 		return null;
-	// 	}
-	//
-	// 	let newValidation = this.validation.clone(true);
-	//
-	// 	let processFormula = function(formula) {
-	// 		if (formula === undefined || formula === null) {
-	// 			return null;
-	// 		}
-	//
-	// 		if (typeof formula === "string") {
-	// 			return new window['Asc'].CDataFormula(formula);
-	// 		} else if (typeof formula === "number") {
-	// 			return new window['Asc'].CDataFormula(formula.toString());
-	// 		} else if (formula && formula.constructor === ApiRange) {
-	// 			return new window['Asc'].CDataFormula(formula.GetAddress());
-	// 		}
-	//
-	// 		return null;
-	// 	};
-	//
-	// 	if (Type !== undefined) {
-	// 		let internalType = FromXlValidationTypeTo(Type);
-	// 		if (internalType !== -1) {
-	// 			newValidation.type = internalType;
-	// 		}
-	// 	}
-	//
-	// 	if (AlertStyle !== undefined) {
-	// 		let internalAlertStyle = FromXlValidationAlertStyleTo(AlertStyle);
-	// 		if (internalAlertStyle !== -1) {
-	// 			newValidation.errorStyle = internalAlertStyle;
-	// 		}
-	// 	}
-	//
-	// 	if (Operator !== undefined) {
-	// 		let internalOperator = FromXlValidationOperatorTo(Operator);
-	// 		if (internalOperator !== -1) {
-	// 			newValidation.operator = internalOperator;
-	// 		}
-	// 	}
-	//
-	// 	if (Formula1 !== undefined) {
-	// 		newValidation.formula1 = processFormula(Formula1);
-	// 	}
-	//
-	// 	if (Formula2 !== undefined) {
-	// 		newValidation.formula2 = processFormula(Formula2);
-	// 	}
-	//
-	// 	if (Asc.c_oAscError.ID.No !== newValidation.asc_checkValid()) {
-	// 		logError(new Error('Invalid validation parameters.'));
-	// 		return null;
-	// 	}
-	//
-	// 	newValidation._init(worksheet);
-	// 	newValidation.correctFromInterface(worksheet);
-	//
-	// 	worksheet.dataValidations.change(worksheet, this.validation, newValidation, true);
-	//
-	// 	this.validation = newValidation;
-	//
-	// 	return this;
-	// };
-	//
-	// /**
-	//  * Returns the validation type.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @returns {ValidationType}
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetType.js
-	//  */
-	// ApiValidation.prototype.GetType = function() {
-	// 	return ToXlValidationTypeFrom(this.validation.asc_getType());
-	// };
-	//
-	// /**
-	//  * Sets the validation type.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @param {ValidationType} Type - The validation type.
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetType.js
-	//  */
-	// ApiValidation.prototype.SetType = function(Type) {
-	// 	let internalType = FromXlValidationTypeTo(Type);
-	// 	if (internalType !== -1) {
-	// 		this.validation.asc_setType(internalType);
-	// 	}
-	// };
-	//
-	// /**
-	//  * Returns the validation alert style.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @returns {ValidationAlertStyle}
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetAlertStyle.js
-	//  */
-	// ApiValidation.prototype.GetAlertStyle = function() {
-	// 	return ToXlValidationAlertStyleFrom(this.validation.getErrorStyle());
-	// };
-	//
-	// /**
-	//  * Sets the validation alert style.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @param {ValidationAlertStyle} AlertStyle - The validation alert style.
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetAlertStyle.js
-	//  */
-	// ApiValidation.prototype.SetAlertStyle = function(AlertStyle) {
-	// 	let internalAlertStyle = FromXlValidationAlertStyleTo(AlertStyle);
-	// 	if (internalAlertStyle !== -1) {
-	// 		this.validation.asc_setErrorStyle(internalAlertStyle);
-	// 	}
-	// };
-	//
-	// /**
-	//  * Returns whether blank values are permitted by the range data validation.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @returns {boolean}
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetIgnoreBlank.js
-	//  */
-	// ApiValidation.prototype.GetIgnoreBlank = function() {
-	// 	return this.validation.getAllowBlank();
-	// };
-	//
-	// /**
-	//  * Sets whether blank values are permitted by the range data validation.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @param {boolean} IgnoreBlank - Specifies whether blank values are permitted.
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetIgnoreBlank.js
-	//  */
-	// ApiValidation.prototype.SetIgnoreBlank = function(IgnoreBlank) {
-	// 	this.validation.asc_setAllowBlank(IgnoreBlank);
-	// };
-	//
-	// /**
-	//  * Returns whether data validation displays a drop-down list that contains acceptable values.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @returns {boolean}
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetInCellDropdown.js
-	//  */
-	// ApiValidation.prototype.GetInCellDropdown = function() {
-	// 	return !this.validation.getShowDropDown();
-	// };
-	//
-	// /**
-	//  * Sets whether data validation displays a drop-down list that contains acceptable values.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @param {boolean} InCellDropdown - Specifies whether to display a drop-down list.
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetInCellDropdown.js
-	//  */
-	// ApiValidation.prototype.SetInCellDropdown = function(InCellDropdown) {
-	// 	this.validation.asc_setShowDropDown(!InCellDropdown);
-	// };
-	//
-	// /**
-	//  * Returns whether the data validation input message will be displayed.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @returns {boolean}
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetShowInput.js
-	//  */
-	// ApiValidation.prototype.GetShowInput = function() {
-	// 	return this.validation.getShowInputMessage();
-	// };
-	//
-	// /**
-	//  * Sets whether the data validation input message will be displayed.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @param {boolean} ShowInput - Specifies whether to show input message.
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetShowInput.js
-	//  */
-	// ApiValidation.prototype.SetShowInput = function(ShowInput) {
-	// 	this.validation.asc_setShowInputMessage(ShowInput);
-	// };
-	//
-	// /**
-	//  * Returns whether the data validation error message will be displayed.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @returns {boolean}
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetShowError.js
-	//  */
-	// ApiValidation.prototype.GetShowError = function() {
-	// 	return this.validation.getShowErrorMessage();
-	// };
-	//
-	// /**
-	//  * Sets whether the data validation error message will be displayed.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @param {boolean} ShowError - Specifies whether to show error message.
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetShowError.js
-	//  */
-	// ApiValidation.prototype.SetShowError = function(ShowError) {
-	// 	this.validation.asc_setShowErrorMessage(ShowError);
-	// };
-	//
-	// /**
-	//  * Returns the title of the data-validation input dialog box.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @returns {string}
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetInputTitle.js
-	//  */
-	// ApiValidation.prototype.GetInputTitle = function() {
-	// 	return this.validation.getPromptTitle();
-	// };
-	//
-	// /**
-	//  * Sets the title of the data-validation input dialog box.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @param {string} InputTitle - The input dialog title.
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetInputTitle.js
-	//  */
-	// ApiValidation.prototype.SetInputTitle = function(InputTitle) {
-	// 	this.validation.asc_setPromptTitle(InputTitle);
-	// };
-	//
-	// /**
-	//  * Returns the data validation input message.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @returns {string}
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetInputMessage.js
-	//  */
-	// ApiValidation.prototype.GetInputMessage = function() {
-	// 	return this.validation.getPrompt();
-	// };
-	//
-	// /**
-	//  * Sets the data validation input message.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @param {string} InputMessage - The input message.
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetInputMessage.js
-	//  */
-	// ApiValidation.prototype.SetInputMessage = function(InputMessage) {
-	// 	this.validation.asc_setPrompt(InputMessage);
-	// };
-	//
-	// /**
-	//  * Returns the title of the data-validation error dialog box.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @returns {string}
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetErrorTitle.js
-	//  */
-	// ApiValidation.prototype.GetErrorTitle = function() {
-	// 	return this.validation.getErrorTitle();
-	// };
-	//
-	// /**
-	//  * Sets the title of the data-validation error dialog box.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @param {string} ErrorTitle - The error dialog title.
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetErrorTitle.js
-	//  */
-	// ApiValidation.prototype.SetErrorTitle = function(ErrorTitle) {
-	// 	this.validation.asc_setErrorTitle(ErrorTitle);
-	// };
-	//
-	// /**
-	//  * Returns the data validation error message.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @returns {string}
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetErrorMessage.js
-	//  */
-	// ApiValidation.prototype.GetErrorMessage = function() {
-	// 	return this.validation.getError();
-	// };
-	//
-	// /**
-	//  * Sets the data validation error message.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @param {string} ErrorMessage - The error message.
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetErrorMessage.js
-	//  */
-	// ApiValidation.prototype.SetErrorMessage = function(ErrorMessage) {
-	// 	this.validation.asc_setError(ErrorMessage);
-	// };
-	//
-	// /**
-	//  * Returns the first formula in the data validation.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @returns {string}
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetFormula1.js
-	//  */
-	// ApiValidation.prototype.GetFormula1 = function() {
-	// 	let formula1 = this.validation.getFormula1();
-	// 	return formula1 ? formula1.asc_getValue() : "";
-	// };
-	//
-	// /**
-	//  * Sets the first formula in the data validation.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @param {string} Formula1 - The first formula.
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetFormula1.js
-	//  */
-	// ApiValidation.prototype.SetFormula1 = function(Formula1) {
-	// 	let formula = new window['Asc'].CDataFormula(Formula1);
-	// 	this.validation.asc_setFormula1(formula);
-	// };
-	//
-	// /**
-	//  * Returns the second formula in the data validation.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @returns {string}
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetFormula2.js
-	//  */
-	// ApiValidation.prototype.GetFormula2 = function() {
-	// 	let formula2 = this.validation.getFormula2();
-	// 	return formula2 ? formula2.asc_getValue() : "";
-	// };
-	//
-	// /**
-	//  * Sets the second formula in the data validation.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @param {string} Formula2 - The second formula.
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetFormula2.js
-	//  */
-	// ApiValidation.prototype.SetFormula2 = function(Formula2) {
-	// 	let formula = new window['Asc'].CDataFormula(Formula2);
-	// 	this.validation.asc_setFormula2(formula);
-	// };
-	//
-	// /**
-	//  * Returns the data validation operator.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @returns {ValidationOperator}
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetOperator.js
-	//  */
-	// ApiValidation.prototype.GetOperator = function() {
-	// 	return ToXlValidationOperatorFrom(this.validation.getOperator());
-	// };
-	//
-	// /**
-	//  * Sets the data validation operator.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @param {ValidationOperator} Operator - The validation operator.
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetOperator.js
-	//  */
-	// ApiValidation.prototype.SetOperator = function(Operator) {
-	// 	let internalOperator = FromXlValidationOperatorTo(Operator);
-	// 	if (internalOperator !== -1) {
-	// 		this.validation.asc_setOperator(internalOperator);
-	// 	}
-	// };
-	//
-	// /**
-	//  * Returns the parent range object.
-	//  * @memberof ApiValidation
-	//  * @typeofeditors ["CSE"]
-	//  * @returns {ApiRange}
-	//  * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetParent.js
-	//  */
-	// ApiValidation.prototype.GetParent = function() {
-	// 	return this.range;
-	// };
-	//
-	// // Property implementations с использованием новых методов
-	// Object.defineProperty(ApiValidation.prototype, "Type", {
-	// 	get: function() {
-	// 		return this.GetType();
-	// 	},
-	// 	set: function(value) {
-	// 		this.SetType(value);
-	// 	}
-	// });
-	//
-	// Object.defineProperty(ApiValidation.prototype, "AlertStyle", {
-	// 	get: function() {
-	// 		return this.GetAlertStyle();
-	// 	},
-	// 	set: function(value) {
-	// 		this.SetAlertStyle(value);
-	// 	}
-	// });
-	//
-	// Object.defineProperty(ApiValidation.prototype, "IgnoreBlank", {
-	// 	get: function() {
-	// 		return this.GetIgnoreBlank();
-	// 	},
-	// 	set: function(value) {
-	// 		this.SetIgnoreBlank(value);
-	// 	}
-	// });
-	//
-	// Object.defineProperty(ApiValidation.prototype, "InCellDropdown", {
-	// 	get: function() {
-	// 		return this.GetInCellDropdown();
-	// 	},
-	// 	set: function(value) {
-	// 		this.SetInCellDropdown(value);
-	// 	}
-	// });
-	//
-	// Object.defineProperty(ApiValidation.prototype, "ShowInput", {
-	// 	get: function() {
-	// 		return this.GetShowInput();
-	// 	},
-	// 	set: function(value) {
-	// 		this.SetShowInput(value);
-	// 	}
-	// });
-	//
-	// Object.defineProperty(ApiValidation.prototype, "ShowError", {
-	// 	get: function() {
-	// 		return this.GetShowError();
-	// 	},
-	// 	set: function(value) {
-	// 		this.SetShowError(value);
-	// 	}
-	// });
-	//
-	// Object.defineProperty(ApiValidation.prototype, "InputTitle", {
-	// 	get: function() {
-	// 		return this.GetInputTitle();
-	// 	},
-	// 	set: function(value) {
-	// 		this.SetInputTitle(value);
-	// 	}
-	// });
-	//
-	// Object.defineProperty(ApiValidation.prototype, "InputMessage", {
-	// 	get: function() {
-	// 		return this.GetInputMessage();
-	// 	},
-	// 	set: function(value) {
-	// 		this.SetInputMessage(value);
-	// 	}
-	// });
-	//
-	// Object.defineProperty(ApiValidation.prototype, "ErrorTitle", {
-	// 	get: function() {
-	// 		return this.GetErrorTitle();
-	// 	},
-	// 	set: function(value) {
-	// 		this.SetErrorTitle(value);
-	// 	}
-	// });
-	//
-	// Object.defineProperty(ApiValidation.prototype, "ErrorMessage", {
-	// 	get: function() {
-	// 		return this.GetErrorMessage();
-	// 	},
-	// 	set: function(value) {
-	// 		this.SetErrorMessage(value);
-	// 	}
-	// });
-	//
-	// Object.defineProperty(ApiValidation.prototype, "Formula1", {
-	// 	get: function() {
-	// 		return this.GetFormula1();
-	// 	},
-	// 	set: function(value) {
-	// 		this.SetFormula1(value);
-	// 	}
-	// });
-	//
-	// Object.defineProperty(ApiValidation.prototype, "Formula2", {
-	// 	get: function() {
-	// 		return this.GetFormula2();
-	// 	},
-	// 	set: function(value) {
-	// 		this.SetFormula2(value);
-	// 	}
-	// });
-	//
-	// Object.defineProperty(ApiValidation.prototype, "Operator", {
-	// 	get: function() {
-	// 		return this.GetOperator();
-	// 	},
-	// 	set: function(value) {
-	// 		this.SetOperator(value);
-	// 	}
-	// });
-	//
-	// Object.defineProperty(ApiValidation.prototype, "Parent", {
-	// 	get: function() {
-	// 		return this.GetParent();
-	// 	}
-	// });
-	//
-	// Object.defineProperty(ApiValidation.prototype, "Value", {
-	// 	get: function() {
-	// 		return this.GetFormula1();
-	// 	},
-	// 	set: function(value) {
-	// 		this.SetFormula1(value);
-	// 	}
-	// });
+	// Helper to get single instance of validation
+	function getSingleValidation(apiValidation) {
+		if (!apiValidation) {
+			return;
+		}
+		if (!apiValidation.validations || !Array.isArray(apiValidation.validations) || !apiValidation.validations.length) {
+			const validation = new window['AscCommonExcel'].CDataValidations().getNewValidation();
+			apiValidation.validations = [validation];
+			return apiValidation.validations[0];
+		}
+		if (apiValidation.validations.length > 1) {
+			logError(new Error('Multiple validations exist'));
+			return null;
+		}
+		return apiValidation.validations[0];
+	}
 
 	/**
-	 * Conditional formatting type.
+	 * Class representing data validation.
+	 * @constructor
+	 * @property {ValidationType} Type - Returns or sets the validation type.
+	 * @property {ValidationAlertStyle} AlertStyle - Returns or sets the validation alert style.
+	 * @property {boolean} IgnoreBlank - Returns or sets a Boolean value that specifies whether blank values are permitted by the range data validation.
+	 * @property {boolean} InCellDropdown - Returns or sets a Boolean value indicating whether data validation displays a drop-down list that contains acceptable values.
+	 * @property {boolean} ShowInput - Returns or sets a Boolean value indicating whether the data validation input message will be displayed whenever the user selects a cell in the data validation range.
+	 * @property {boolean} ShowError - Returns or sets a Boolean value indicating whether the data validation error message will be displayed whenever the user enters invalid data.
+	 * @property {string} InputTitle - Returns or sets the title of the data-validation input dialog box.
+	 * @property {string} InputMessage - Returns or sets the data validation input message.
+	 * @property {string} ErrorTitle - Returns or sets the title of the data-validation error dialog box.
+	 * @property {string} ErrorMessage - Returns or sets the data validation error message.
+	 * @property {string} Formula1 - Returns or sets the value or expression associated with the conditional format or data validation.
+	 * @property {string} Formula2 - Returns or sets the value or expression associated with the second part of a conditional format or data validation.
+	 * @property {ValidationOperator} Operator - Returns or sets the data validation operator.
+	 * @property {ApiRange} Parent - Returns the parent range object.
+	 * @property {string} Value - Returns or sets the validation value.
+	 */
+	function ApiValidation(validations, range) {
+        if (!validations || !Array.isArray(validations) || !validations.length ) {
+            validations = [];
+        }
+		this.range = range;
+		this.validations = validations;
+	}
+
+	/**
+	 * Adds data validation to the specified range.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @param {ValidationType} Type - The validation type.
+	 * @param {ValidationAlertStyle} [AlertStyle] - The validation alert style.
+	 * @param {ValidationOperator} [Operator] - The data validation operator.
+	 * @param {string | number | ApiRange} [Formula1] - The first formula in the data validation.
+	 * @param {string | number | ApiRange} [Formula2] - The second formula in the data validation.
+	 * @returns {ApiValidation | null}
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/Add.js
+	 */
+	ApiValidation.prototype.Add = function(Type, AlertStyle, Operator, Formula1, Formula2) {
+		if (!Type) {
+			return;
+		}
+
+		if (this.validations && Array.isArray(this.validations) && this.validations.length > 0 && this.validations[0].ranges) {
+			logError(new Error('Validation already exists.'));
+			return null;
+		}
+
+		let internalType = FromXlValidationTypeTo(Type);
+		let internalAlertStyle = AlertStyle ? FromXlValidationAlertStyleTo(AlertStyle) : Asc.EDataValidationErrorStyle.Stop;
+		let internalOperator = Operator ? FromXlValidationOperatorTo(Operator) : Asc.EDataValidationOperator.Between;
+
+		if (internalType === -1) {
+			return null;
+		}
+
+		let dataValidation = new window['AscCommonExcel'].CDataValidation();
+
+		dataValidation.type = internalType;
+		dataValidation.errorStyle = internalAlertStyle;
+		dataValidation.operator = internalOperator;
+		dataValidation.showErrorMessage = true;
+		dataValidation.showInputMessage = true;
+		dataValidation.allowBlank = true;
+
+		let processFormula = function(formula) {
+			if (formula === undefined || formula === null) {
+				return null;
+			}
+
+			if (typeof formula === "string") {
+				return new window['Asc'].CDataFormula(formula);
+			} else if (typeof formula === "number") {
+				return new window['Asc'].CDataFormula(formula.toString());
+			} else if (formula && formula.constructor === ApiRange) {
+				return new window['Asc'].CDataFormula(formula.GetAddress());
+			}
+
+			return null;
+		};
+
+		if (Formula1 !== undefined) {
+			dataValidation.formula1 = processFormula(Formula1);
+		}
+
+		if (Formula2 !== undefined) {
+			dataValidation.formula2 = processFormula(Formula2);
+		}
+
+		let ranges = [];
+		if (this.range.areas) {
+			for (let i = 0; i < this.range.areas.length; i++) {
+				ranges.push(this.range.areas[i].bbox);
+			}
+		} else {
+			ranges.push(this.range.range.bbox);
+		}
+		dataValidation.ranges = ranges;
+
+		let worksheet = this.range && this.range.Worksheet && this.range.Worksheet.worksheet;
+		if (!worksheet) {
+			return null;
+		}
+
+		if (Asc.c_oAscError.ID.No !== dataValidation.asc_checkValid()) {
+			logError(new Error('Check params error.'));
+			return null;
+		}
+
+		if (!worksheet.dataValidations) {
+			worksheet.dataValidations = new window['AscCommonExcel'].CDataValidations();
+		}
+
+		dataValidation._init(worksheet);
+		dataValidation.correctFromInterface(worksheet);
+
+		worksheet.dataValidations.add(worksheet, dataValidation, true);
+
+		this.validations = [dataValidation];
+
+		return this;
+	};
+
+	/**
+	 * Deletes the object.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/Delete.js
+	 */
+	ApiValidation.prototype.Delete = function() {
+		if (!this.validations || !Array.isArray(this.validations) || !this.validations.length) {
+			return;
+		}
+
+		let worksheet = this.range && this.range.Worksheet && this.range.Worksheet.worksheet;
+		if (!worksheet || !worksheet.dataValidations) {
+			return;
+		}
+
+		// for all validations in the this.validations remove intersecting range from validations
+		let rangeBbox = this.range.range.bbox;
+		worksheet.dataValidations.deleteMassValidations(this.validations, worksheet, rangeBbox, true);
+		
+
+		// Очищаем ссылку на validation
+		this.validations = [];
+		return this;
+	};
+
+	/**
+	 * Modifies data validation for a range.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @param {ValidationType} [Type] - The validation type.
+	 * @param {ValidationAlertStyle} [AlertStyle] - The validation alert style.
+	 * @param {ValidationOperator} [Operator] - The data validation operator.
+	 * @param {string | number | ApiRange} [Formula1] - The first formula in the data validation.
+	 * @param {string | number | ApiRange} [Formula2] - The second formula in the data validation.
+	 * @returns {ApiValidation | null}
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/Modify.js
+	 */
+	ApiValidation.prototype.Modify = function(Type, AlertStyle, Operator, Formula1, Formula2) {
+		if (!this.validations || !Array.isArray(this.validations) || !this.validations.length) {
+			logError(new Error('No validation to modify.'));
+			return null;
+		}
+
+		if (this.validations.length > 0 && !this.validations[0].ranges) {
+			logError(new Error('No ranges to modify.'));
+			return null;
+		}
+
+		let worksheet = this.range && this.range.Worksheet && this.range.Worksheet.worksheet;
+		if (!worksheet || !worksheet.dataValidations) {
+			return null;
+		}
+				
+		worksheet.dataValidations.deleteMassValidations(this.validations, worksheet, this.range.range.bbox, true);
+		this.validations = [];
+		this.Add(Type, AlertStyle, Operator, Formula1, Formula2);
+
+		return this;
+	};
+
+	/**
+	 * Returns the validation type.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @returns {ValidationType}
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetType.js
+	 */
+	ApiValidation.prototype.GetType = function() {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		return ToXlValidationTypeFrom(validation.asc_getType());
+	};
+
+	/**
+	 * Sets the validation type.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @param {ValidationType} Type - The validation type.
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetType.js
+	 */
+	ApiValidation.prototype.SetType = function(Type) {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		// If there are multiple validations, we cannot set type
+		let internalType = FromXlValidationTypeTo(Type);
+		if (internalType !== -1) {
+			validation.asc_setType(internalType);
+		}
+	};
+
+	/**
+	 * Returns the validation alert style.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @returns {ValidationAlertStyle}
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetAlertStyle.js
+	 */
+	ApiValidation.prototype.GetAlertStyle = function() {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		return ToXlValidationAlertStyleFrom(validation.getErrorStyle());
+	};
+
+	/**
+	 * Sets the validation alert style.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @param {ValidationAlertStyle} AlertStyle - The validation alert style.
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetAlertStyle.js
+	 */
+	ApiValidation.prototype.SetAlertStyle = function(AlertStyle) {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		let internalAlertStyle = FromXlValidationAlertStyleTo(AlertStyle);
+		if (internalAlertStyle !== -1) {
+			validation.asc_setErrorStyle(internalAlertStyle);
+		}
+	};
+
+	/**
+	 * Returns whether blank values are permitted by the range data validation.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @returns {boolean}
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetIgnoreBlank.js
+	 */
+	ApiValidation.prototype.GetIgnoreBlank = function() {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		return validation.getAllowBlank();
+	};
+
+	/**
+	 * Sets whether blank values are permitted by the range data validation.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @param {boolean} IgnoreBlank - Specifies whether blank values are permitted.
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetIgnoreBlank.js
+	 */
+	ApiValidation.prototype.SetIgnoreBlank = function(IgnoreBlank) {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		validation.asc_setAllowBlank(IgnoreBlank);
+	};
+
+	/**
+	 * Returns whether data validation displays a drop-down list that contains acceptable values.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @returns {boolean}
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetInCellDropdown.js
+	 */
+	ApiValidation.prototype.GetInCellDropdown = function() {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		return !validation.getShowDropDown();
+	};
+
+	/**
+	 * Sets whether data validation displays a drop-down list that contains acceptable values.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @param {boolean} InCellDropdown - Specifies whether to display a drop-down list.
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetInCellDropdown.js
+	 */
+	ApiValidation.prototype.SetInCellDropdown = function(InCellDropdown) {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		validation.asc_setShowDropDown(!InCellDropdown);
+	};
+
+	/**
+	 * Returns whether the data validation input message will be displayed.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @returns {boolean}
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetShowInput.js
+	 */
+	ApiValidation.prototype.GetShowInput = function() {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		return validation.getShowInputMessage();
+	};
+
+	/**
+	 * Sets whether the data validation input message will be displayed.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @param {boolean} ShowInput - Specifies whether to show input message.
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetShowInput.js
+	 */
+	ApiValidation.prototype.SetShowInput = function(ShowInput) {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		validation.asc_setShowInputMessage(ShowInput);
+	};
+
+	/**
+	 * Returns whether the data validation error message will be displayed.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @returns {boolean}
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetShowError.js
+	 */
+	ApiValidation.prototype.GetShowError = function() {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		return validation.getShowErrorMessage();
+	};
+
+	/**
+	 * Sets whether the data validation error message will be displayed.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @param {boolean} ShowError - Specifies whether to show error message.
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetShowError.js
+	 */
+	ApiValidation.prototype.SetShowError = function(ShowError) {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		validation.asc_setShowErrorMessage(ShowError);
+	};
+
+	/**
+	 * Returns the title of the data-validation input dialog box.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetInputTitle.js
+	 */
+	ApiValidation.prototype.GetInputTitle = function() {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		return validation.getPromptTitle();
+	};
+
+	/**
+	 * Sets the title of the data-validation input dialog box.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @param {string} InputTitle - The input dialog title.
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetInputTitle.js
+	 */
+	ApiValidation.prototype.SetInputTitle = function(InputTitle) {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		validation.asc_setPromptTitle(InputTitle);
+	};
+
+	/**
+	 * Returns the data validation input message.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetInputMessage.js
+	 */
+	ApiValidation.prototype.GetInputMessage = function() {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		return validation.getPrompt();
+	};
+
+	/**
+	 * Sets the data validation input message.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @param {string} InputMessage - The input message.
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetInputMessage.js
+	 */
+	ApiValidation.prototype.SetInputMessage = function(InputMessage) {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		validation.asc_setPrompt(InputMessage);
+	};
+
+	/**
+	 * Returns the title of the data-validation error dialog box.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetErrorTitle.js
+	 */
+	ApiValidation.prototype.GetErrorTitle = function() {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		return validation.getErrorTitle();
+	};
+
+	/**
+	 * Sets the title of the data-validation error dialog box.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @param {string} ErrorTitle - The error dialog title.
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetErrorTitle.js
+	 */
+	ApiValidation.prototype.SetErrorTitle = function(ErrorTitle) {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		validation.asc_setErrorTitle(ErrorTitle);
+	};
+
+	/**
+	 * Returns the data validation error message.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetErrorMessage.js
+	 */
+	ApiValidation.prototype.GetErrorMessage = function() {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		return validation.getError();
+	};
+
+	/**
+	 * Sets the data validation error message.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @param {string} ErrorMessage - The error message.
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetErrorMessage.js
+	 */
+	ApiValidation.prototype.SetErrorMessage = function(ErrorMessage) {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		validation.asc_setError(ErrorMessage);
+	};
+
+	/**
+	 * Returns the first formula in the data validation.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetFormula1.js
+	 */
+	ApiValidation.prototype.GetFormula1 = function() {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		let formula1 = validation.getFormula1();
+		return formula1 ? formula1.asc_getValue() : "";
+	};
+
+	/**
+	 * Sets the first formula in the data validation.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @param {string} Formula1 - The first formula.
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetFormula1.js
+	 */
+	ApiValidation.prototype.SetFormula1 = function(Formula1) {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		let formula = new window['Asc'].CDataFormula(Formula1);
+		validation.asc_setFormula1(formula);
+	};
+
+	/**
+	 * Returns the second formula in the data validation.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetFormula2.js
+	 */
+	ApiValidation.prototype.GetFormula2 = function() {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		let formula2 = validation.getFormula2();
+		return formula2 ? formula2.asc_getValue() : "";
+	};
+
+	/**
+	 * Sets the second formula in the data validation.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @param {string} Formula2 - The second formula.
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetFormula2.js
+	 */
+	ApiValidation.prototype.SetFormula2 = function(Formula2) {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		let formula = new window['Asc'].CDataFormula(Formula2);
+		validation.asc_setFormula2(formula);
+	};
+
+	/**
+	 * Returns the data validation operator.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @returns {ValidationOperator}
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetOperator.js
+	 */
+	ApiValidation.prototype.GetOperator = function() {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		return ToXlValidationOperatorFrom(validation.getOperator());
+	};
+
+	/**
+	 * Sets the data validation operator.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @param {ValidationOperator} Operator - The validation operator.
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetOperator.js
+	 */
+	ApiValidation.prototype.SetOperator = function(Operator) {
+		const validation = getSingleValidation(this);
+		if (!validation) {
+			return;
+		}
+		let internalOperator = FromXlValidationOperatorTo(Operator);
+		if (internalOperator !== -1) {
+			validation.asc_setOperator(internalOperator);
+		}
+	};
+
+	/**
+	 * Returns the parent range object.
+	 * @memberof ApiValidation
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiRange}
+	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/GetParent.js
+	 */
+	ApiValidation.prototype.GetParent = function() {
+		return this.range;
+	};
+
+	// Property implementations с использованием новых методов
+	Object.defineProperty(ApiValidation.prototype, "Type", {
+		get: function() {
+			return this.GetType();
+		},
+		set: function(value) {
+			this.SetType(value);
+		}
+	});
+
+	Object.defineProperty(ApiValidation.prototype, "AlertStyle", {
+		get: function() {
+			return this.GetAlertStyle();
+		},
+		set: function(value) {
+			this.SetAlertStyle(value);
+		}
+	});
+
+	Object.defineProperty(ApiValidation.prototype, "IgnoreBlank", {
+		get: function() {
+			return this.GetIgnoreBlank();
+		},
+		set: function(value) {
+			this.SetIgnoreBlank(value);
+		}
+	});
+
+	Object.defineProperty(ApiValidation.prototype, "InCellDropdown", {
+		get: function() {
+			return this.GetInCellDropdown();
+		},
+		set: function(value) {
+			this.SetInCellDropdown(value);
+		}
+	});
+
+	Object.defineProperty(ApiValidation.prototype, "ShowInput", {
+		get: function() {
+			return this.GetShowInput();
+		},
+		set: function(value) {
+			this.SetShowInput(value);
+		}
+	});
+
+	Object.defineProperty(ApiValidation.prototype, "ShowError", {
+		get: function() {
+			return this.GetShowError();
+		},
+		set: function(value) {
+			this.SetShowError(value);
+		}
+	});
+
+	Object.defineProperty(ApiValidation.prototype, "InputTitle", {
+		get: function() {
+			return this.GetInputTitle();
+		},
+		set: function(value) {
+			this.SetInputTitle(value);
+		}
+	});
+
+	Object.defineProperty(ApiValidation.prototype, "InputMessage", {
+		get: function() {
+			return this.GetInputMessage();
+		},
+		set: function(value) {
+			this.SetInputMessage(value);
+		}
+	});
+
+	Object.defineProperty(ApiValidation.prototype, "ErrorTitle", {
+		get: function() {
+			return this.GetErrorTitle();
+		},
+		set: function(value) {
+			this.SetErrorTitle(value);
+		}
+	});
+
+	Object.defineProperty(ApiValidation.prototype, "ErrorMessage", {
+		get: function() {
+			return this.GetErrorMessage();
+		},
+		set: function(value) {
+			this.SetErrorMessage(value);
+		}
+	});
+
+	Object.defineProperty(ApiValidation.prototype, "Formula1", {
+		get: function() {
+			return this.GetFormula1();
+		},
+		set: function(value) {
+			this.SetFormula1(value);
+		}
+	});
+
+	Object.defineProperty(ApiValidation.prototype, "Formula2", {
+		get: function() {
+			return this.GetFormula2();
+		},
+		set: function(value) {
+			this.SetFormula2(value);
+		}
+	});
+
+	Object.defineProperty(ApiValidation.prototype, "Operator", {
+		get: function() {
+			return this.GetOperator();
+		},
+		set: function(value) {
+			this.SetOperator(value);
+		}
+	});
+
+	Object.defineProperty(ApiValidation.prototype, "Parent", {
+		get: function() {
+			return this.GetParent();
+		}
+	});
+
+	Object.defineProperty(ApiValidation.prototype, "Value", {
+		get: function() {
+			return this.GetFormula1();
+		},
+		set: function(value) {
+			this.SetFormula1(value);
+		}
+	});
+
+	/**
+	 * The conditional formatting type.
 	 * @typedef {("xlCellValue" | "xlExpression" | "xlTop10" | "xlAboveAverageCondition" |
 	 * "xlUniqueValues" | "xlTextString" | "xlBlanksCondition" | "xlTimePeriod" | "xlErrorsCondition" |
 	 * "xlNoErrorsCondition" | "xlColorScale" | "xlDatabar" | "xlIconSets")} XlFormatConditionType
 	 */
 
 	/**
-	 * Format condition operator.
+	 * The format condition operator.
 	 * @typedef {("xlBetween" | "xlNotBetween" | "xlEqual" | "xlNotEqual" |
 	 * "xlGreater" | "xlLess" | "xlGreaterEqual" | "xlLessEqual" | "xlBeginsWith" |
 	 * "xlEndsWith" | "xlContains" | "xlNotContains")} XlFormatConditionOperator
 	 */
 
 	/**
-	 * Time period for conditional formatting.
+	 * The time period for conditional formatting.
 	 * @typedef {("xlToday" | "xlYesterday" | "xlTomorrow" | "xlLast7Days" | "xlLastWeek" |
 	 * "xlThisWeek" | "xlNextWeek" | "xlLastMonth" | "xlThisMonth" | "xlNextMonth")} XlTimePeriods
 	 */
 
 	/**
-	 * Contains operator for text-based conditional formatting.
+	 * The operator for text-based conditional formatting.
 	 * @typedef {("xlContains" | "xlDoesNotContain" | "xlBeginsWith" | "xlEndsWith")} XlContainsOperator
 	 */
 
 	/**
-	 * Specifies the scope for pivot table conditional formatting conditions.
+	 * The scope for pivot table conditional formatting rules.
 	 * @typedef {("xlFieldsScope" | "xlSelectionScope" | "xlDataFieldScope")} XlPivotConditionScope
 	 */
 
@@ -19901,7 +19965,7 @@
 	 */
 
 	/**
-	 * Data bar fill type.
+	 * The data bar fill type.
 	 * @typedef {("xlDataBarFillSolid" | "xlDataBarFillGradient")} XlDataBarFillType
 	 */
 
@@ -20163,6 +20227,8 @@
 	/**
 	 * Class representing a collection of format conditions.
 	 * @constructor
+	 * @property {number} Count - Returns the number of conditional formatting rules in the collection.
+	 * @property {ApiRange} Parent - Returns the parent range object associated with the current conditional formatting collection.
 	 */
 	function ApiFormatConditions(range) {
 		this.range = range;//parent
@@ -20178,7 +20244,8 @@
 	 * @param {XlFormatConditionOperator} [Operator] - The format condition operator.
 	 * @param {string | number | ApiRange} [Formula1] - The first formula.
 	 * @param {string | number | ApiRange} [Formula2] - The second formula.
-	 * @returns {ApiFormatCondition | null}
+	 * @returns {ApiFormatCondition | null} The created format condition, or null if the operation failed.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatConditions/Methods/Add.js
 	 */
 	ApiFormatConditions.prototype.Add = function(Type, Operator, Formula1, Formula2) {
@@ -20383,7 +20450,8 @@
 	 * Adds a new above average conditional formatting rule to the collection.
 	 * @memberof ApiFormatConditions
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiAboveAverage | null}
+	 * @returns {ApiAboveAverage | null} The created above average rule, or null if the operation fails.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatConditions/Methods/AddAboveAverage.js
 	 */
 	ApiFormatConditions.prototype.AddAboveAverage = function() {
@@ -20427,7 +20495,8 @@
 	 * @memberof ApiFormatConditions
 	 * @typeofeditors ["CSE"]
 	 * @param {number} [ColorScaleType=3] - The type of color scale (2 for two-color scale, 3 for three-color scale).
-	 * @returns {ApiColorScale | null}
+	 * @returns {ApiColorScale | null} The created color scale rule, or null if the operation fails.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatConditions/Methods/AddColorScale.js
 	 */
 	ApiFormatConditions.prototype.AddColorScale = function(ColorScaleType) {
@@ -20531,7 +20600,8 @@
 	 * Adds a new data bar conditional formatting rule to the collection.
 	 * @memberof ApiFormatConditions
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiDatabar | null}
+	 * @returns {ApiDatabar | null} The created data bar rule, or null if the operation fails.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatConditions/Methods/AddDatabar.js
 	 */
 	ApiFormatConditions.prototype.AddDatabar = function() {
@@ -20595,7 +20665,8 @@
 	 * Adds a new icon set conditional formatting rule to the collection.
 	 * @memberof ApiFormatConditions
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiIconSetCondition | null}
+	 * @returns {ApiIconSetCondition | null} The created icon set rule, or null if the operation fails.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatConditions/Methods/AddIconSetCondition.js
 	 */
 	ApiFormatConditions.prototype.AddIconSetCondition = function() {
@@ -20669,7 +20740,8 @@
 	 * Adds a new top 10 conditional formatting rule to the collection.
 	 * @memberof ApiFormatConditions
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiTop10 | null}
+	 * @returns {ApiTop10 | null} The created top 10 rule, or null if the operation fails.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatConditions/Methods/AddTop10.js
 	 */
 	ApiFormatConditions.prototype.AddTop10 = function() {
@@ -20715,7 +20787,8 @@
 	 * Adds a new unique values conditional formatting rule to the collection.
 	 * @memberof ApiFormatConditions
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiUniqueValues | null}
+	 * @returns {ApiUniqueValues | null} The created unique values rule, or null if the operation fails.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatConditions/Methods/AddUniqueValues.js
 	 */
 	ApiFormatConditions.prototype.AddUniqueValues = function() {
@@ -20756,6 +20829,7 @@
 	 * Deletes all format conditions from the collection.
 	 * @memberof ApiFormatConditions
 	 * @typeofeditors ["CSE"]
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatConditions/Methods/Delete.js
 	 */
 	ApiFormatConditions.prototype.Delete = function() {
@@ -20805,10 +20879,11 @@
 	}
 
 	/**
-	 * Returns the count of format conditions.
+	 * Returns the number of conditional formatting rules in the collection.
 	 * @memberof ApiFormatConditions
 	 * @typeofeditors ["CSE"]
-	 * @returns {number}
+	 * @returns {number} The number of conditional formatting rules in the collection.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatConditions/Methods/GetCount.js
 	 */
 	ApiFormatConditions.prototype.GetCount = function() {
@@ -20878,11 +20953,12 @@
 	};
 
 	/**
-	 * Returns a format condition by index.
+	 * Returns a format condition by its index.
 	 * @memberof ApiFormatConditions
 	 * @typeofeditors ["CSE"]
 	 * @param {number} index - The index of the format condition (1-based).
-	 * @returns {ApiFormatCondition | null}
+	 * @returns {ApiFormatCondition | null} - The format condition.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatConditions/Methods/GetItem.js
 	 */
 	ApiFormatConditions.prototype.GetItem = function(index) {
@@ -20900,10 +20976,11 @@
 	});
 
 	/**
-	 * Returns the parent range object.
+	 * Returns the parent range object associated with the current conditional formatting collection.
 	 * @memberof ApiFormatConditions
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange}
+	 * @returns {ApiRange} The parent range object.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatConditions/Methods/GetParent.js
 	 */
 	ApiFormatConditions.prototype.GetParent = function() {
@@ -20954,19 +21031,25 @@
 	/**
 	 * Class representing a single format condition.
 	 * @constructor
-	 * @property {XlFormatConditionType} Type - Returns or sets the format condition type.
-	 * @property {XlFormatConditionOperator} Operator - Returns or sets the format condition operator.
-	 * @property {string} Formula1 - Returns or sets the first formula.
-	 * @property {string} Formula2 - Returns or sets the second formula.
+	 * @property {XlFormatConditionType} Type - Returns the format condition type.
+	 * @property {XlFormatConditionOperator} Operator - Returns the format condition operator.
+	 * @property {string} Formula1 - Returns or sets the first formula used by the format condition.
+	 * @property {string} Formula2 - Returns or sets the second formula used by the format condition.
 	 * @property {XlTimePeriods} DateOperator - Returns or sets the date operator for time period conditions.
 	 * @property {string} Text - Returns or sets the text for text-based conditions.
-	 * @property {number} Rank - Returns or sets the rank for top/bottom conditions.
-	 * @property {boolean} PercentRank - Returns or sets whether rank is percentage-based.
-	 * @property {boolean} AboveBelow - Returns or sets above/below for average conditions.
-	 * @property {number} StdDev - Returns or sets standard deviations for average conditions.
+	 * @property {number} Rank - Returns or sets the rank for top/bottom conditional formatting rules.
+	 * @property {boolean} PercentRank - Returns or sets whether the rank is percentage-based.
+	 * @property {boolean} AboveBelow - Returns or sets whether the condition applies above or below the average.
+	 * @property {number} StdDev - Returns or sets the number of standard deviations for average conditions.
 	 * @property {number} Priority - Returns or sets the priority of the condition.
-	 * @property {boolean} StopIfTrue - Returns or sets whether to stop if this condition is true.
-	 * @property {ApiRange} AppliesTo - Returns the range the condition applies to.
+	 * @property {boolean} StopIfTrue - Returns or sets whether subsequent conditional formatting rules should be evaluated when this rule evaluates to true.
+	 * @property {ApiRange} AppliesTo - Returns the range to which this condition applies.
+	 * @property {string} NumberFormat - Returns or sets the number format applied to a cell when the conditional formatting rule evaluates to true.
+	 * @property {ApiRange} Parent - Returns the parent range object of the format condition.
+	 * @property {PTCondition} PTCondition - Returns the pivot table condition object.
+	 * @property {XlPivotConditionScope} ScopeType - Returns or sets the scope type for the format condition.
+	 * @property {XlContainsOperator} TextOperator - Returns or sets the text operator for text-based conditions.
+	 * @property {ApiColor|'No Fill'} FillColor - Returns or sets the background color of the format condition.
 	 */
 	function ApiFormatCondition(rule, range, _parent) {
 		this.rule = rule;
@@ -20976,9 +21059,10 @@
 	}
 
 	/**
-	 * Deletes the format condition.
+	 * Deletes the current format condition.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/Delete.js
 	 */
 	ApiFormatCondition.prototype.Delete = function() {
@@ -20997,14 +21081,15 @@
 	};
 
 	/**
-	 * Modifies the format condition.
+	 * Modifies the current format condition with the specified parameters.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
 	 * @param {XlFormatConditionType} [Type] - The format condition type.
 	 * @param {XlFormatConditionOperator} [Operator] - The format condition operator.
 	 * @param {string | number | ApiRange} [Formula1] - The first formula.
 	 * @param {string | number | ApiRange} [Formula2] - The second formula.
-	 * @returns {ApiFormatCondition | null}
+	 * @returns {ApiFormatCondition | null} The modified format condition, or null if the rule does not exist.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/Modify.js
 	 */
 	ApiFormatCondition.prototype.Modify = function(Type, Operator, Formula1, Formula2) {
@@ -21081,10 +21166,11 @@
 	};
 
 	/**
-	 * Sets the cell range to which this formatting rule applies.
+	 * Sets the cell range to which the current conditional formatting rule applies.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
-	 * @param {ApiRange} Range - The range to which this formatting rule will be applied.
+	 * @param {ApiRange} Range - The range to which the current conditional formatting rule will be applied.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/ModifyAppliesToRange.js
 	 */
 	ApiFormatCondition.prototype.ModifyAppliesToRange = function(Range) {
@@ -21115,6 +21201,13 @@
 		this.range = Range;
 	};
 
+	/**
+	 * Sets the priority value for the current conditional formatting rule to "1" so that it will be evaluated before all other rules on the worksheet.
+	 * @memberof ApiFormatCondition
+	 * @typeofeditors ["CSE"]
+	 * @since 9.1.0
+	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/SetFirstPriority.js
+	 */
 	ApiFormatCondition.prototype.SetFirstPriority = function() {
 		if (!this.rule) {
 			return;
@@ -21146,6 +21239,13 @@
 		worksheet.changeCFRule(this.rule, newRule, true);
 	};
 
+	/**
+	 * Sets the evaluation order for the current conditional formatting rule so it is evaluated after all other rules on the worksheet.
+	 * @memberof ApiFormatCondition
+	 * @typeofeditors ["CSE"]
+	 * @since 9.1.0
+	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/SetLastPriority.js
+	 */
 	ApiFormatCondition.prototype.SetLastPriority = function() {
 		if (!this.rule) {
 			return;
@@ -21186,10 +21286,11 @@
 	};
 
 	/**
-	 * Returns the range the condition applies to.
+	 * Returns the range of cells to which the current conditional formatting rule applies.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange | null}
+	 * @returns {ApiRange | null} The range of cells affected by the current condition, or null if no range is set.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/GetAppliesTo.js
 	 */
 	ApiFormatCondition.prototype.GetAppliesTo = function() {
@@ -21222,10 +21323,11 @@
 		}
 	});
 	/**
-	 * Returns the font applied by the format condition.
+	 * Returns the font applied by the current format condition.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiFont | null}
+	 * @returns {ApiFont | null} An ApiFont object representing the font applied by the format condition, or null if no font is defined.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/GetFont.js
 	 */
 	ApiFormatCondition.prototype.GetFont = function() {
@@ -21248,7 +21350,8 @@
 	 * Returns the format condition type.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlFormatConditionType}
+	 * @returns {XlFormatConditionType} The format condition type.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/GetType.js
 	 */
 	ApiFormatCondition.prototype.GetType = function() {
@@ -21256,10 +21359,11 @@
 	};
 
 	/**
-	 * Returns the first formula.
+	 * Returns the first formula used by the current conditional formatting rule.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {string}
+	 * @returns {string} The first formula.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/GetFormula1.js
 	 */
 	ApiFormatCondition.prototype.GetFormula1 = function() {
@@ -21337,10 +21441,11 @@
 	});
 
 	/**
-	 * Returns the second formula.
+	 * Returns the second formula used by the current conditional formatting rule.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {string}
+	 * @returns {string} The second formula.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/GetFormula2.js
 	 */
 	ApiFormatCondition.prototype.GetFormula2 = function() {
@@ -21424,10 +21529,11 @@
 	});
 
 	/**
-	 * Sets the number format applied to a cell if the conditional formatting rule evaluates to True.
+	 * Sets the number format applied to a cell when the conditional formatting rule evaluates to true.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
 	 * @param {string} NumberFormat - The number format code (e.g., "General", "#,##0.00", etc.)
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/SetNumberFormat.js
 	 */
 	ApiFormatCondition.prototype.SetNumberFormat = function(NumberFormat) {
@@ -21441,10 +21547,11 @@
 	};
 
 	/**
-	 * Returns the number format applied to a cell if the conditional formatting rule evaluates to True.
+	 * Returns the number format applied to a cell when the conditional formatting rule evaluates to true.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {string}
+	 * @returns {string} The number format.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/GetNumberFormat.js
 	 */
 	ApiFormatCondition.prototype.GetNumberFormat = function() {
@@ -21488,7 +21595,8 @@
 	 * Returns the format condition operator.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlFormatConditionOperator}
+	 * @returns {XlFormatConditionOperator} The format condition operator.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/GetOperator.js
 	 */
 	ApiFormatCondition.prototype.GetOperator = function() {
@@ -21509,10 +21617,11 @@
 	});
 
 	/**
-	 * Returns the parent range object.
+	 * Returns the parent range object of the current format condition.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange}
+	 * @returns {ApiRange} The parent range object.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/GetParent.js
 	 */
 	ApiFormatCondition.prototype.GetParent = function() {
@@ -21529,7 +21638,8 @@
 	 * Returns the format condition type.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlFormatConditionType}
+	 * @returns {XlFormatConditionType} The format condition type.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/GetType.js
 	 */
 	ApiFormatCondition.prototype.GetType = function() {
@@ -21546,7 +21656,8 @@
 	 * Returns the pivot table condition object.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {PTCondition | null}
+	 * @returns {PTCondition | null} The pivot table condition object.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/GetPTCondition.js
 	 */
 	ApiFormatCondition.prototype.GetPTCondition = function() {
@@ -21571,7 +21682,8 @@
 	 * Returns the priority value of the conditional formatting rule.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {number}
+	 * @returns {number} The priority value of the conditional formatting rule.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/GetPriority.js
 	 */
 	ApiFormatCondition.prototype.GetPriority = function() {
@@ -21586,6 +21698,7 @@
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
 	 * @param {number} Priority - The priority value (1-based).
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/SetPriority.js
 	 */
 	ApiFormatCondition.prototype.SetPriority = function(Priority) {
@@ -21632,7 +21745,8 @@
 	 * Returns the scope type of the conditional formatting rule.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlPivotConditionScope} - Returns "xlSelectionScope" for normal ranges, "xlDataFieldScope" for entire worksheet, "xlFieldsScope" for pivot tables
+	 * @returns {XlPivotConditionScope} - Returns "xlSelectionScope" for normal ranges, "xlDataFieldScope" for entire worksheet, "xlFieldsScope" for pivot tables.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/GetScopeType.js
 	 */
 	ApiFormatCondition.prototype.GetScopeType = function() {
@@ -21658,10 +21772,11 @@
 	};
 
 	/**
-	 * Sets the scope type of the conditional formatting rule.
+	 * Sets the scope type for the conditional formatting rule.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
-	 * @param {XlPivotConditionScope} ScopeType - The scope type: "xlSelectionScope", "xlDataFieldScope", or "xlFieldsScope"
+	 * @param {XlPivotConditionScope} ScopeType - The scope type: "xlSelectionScope", "xlDataFieldScope", or "xlFieldsScope".
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/SetScopeType.js
 	 */
 	ApiFormatCondition.prototype.SetScopeType = function(ScopeType) {
@@ -21754,7 +21869,8 @@
 	 * Returns the text value used in text-based conditional formatting rules.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {string}
+	 * @returns {string} The text value used in text-based conditional formatting rules.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/GetText.js
 	 */
 	ApiFormatCondition.prototype.GetText = function() {
@@ -21769,6 +21885,7 @@
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
 	 * @param {string} Text - The text value to compare against.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/SetText.js
 	 */
 	ApiFormatCondition.prototype.SetText = function(Text) {
@@ -21834,7 +21951,9 @@
 	 * Returns the text operator for text-based conditional formatting rules.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlContainsOperator | null}
+	 * @returns {XlContainsOperator | null} The operator defining how the text comparison is performed,
+	 * or null if the rule is not text-based.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/GetTextOperator.js
 	 */
 	ApiFormatCondition.prototype.GetTextOperator = function() {
@@ -21869,7 +21988,8 @@
 	 * Sets the text operator for text-based conditional formatting rules.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
-	 * @param {XlContainsOperator} TextOperator - The text operator: "xlContains", "xlDoesNotContain", "xlBeginsWith", "xlEndsWith"
+	 * @param {XlContainsOperator} TextOperator - The text operator: "xlContains", "xlDoesNotContain", "xlBeginsWith", "xlEndsWith".
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/SetTextOperator.js
 	 */
 	ApiFormatCondition.prototype.SetTextOperator = function(TextOperator) {
@@ -21962,7 +22082,9 @@
 	 * Returns the date operator for time period conditions.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlTimePeriods | null}
+	 * @returns {XlTimePeriods | null} The time period operator that defines how the date condition is evaluated,
+	 * or null if the rule is not date-based.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/GetDateOperator.js
 	 */
 	ApiFormatCondition.prototype.GetDateOperator = function() {
@@ -21983,6 +22105,7 @@
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
 	 * @param {XlTimePeriods} DateOperator - The date operator for time period conditions.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/SetDateOperator.js
 	 */
 	ApiFormatCondition.prototype.SetDateOperator = function(DateOperator) {
@@ -22015,7 +22138,7 @@
 	ApiFormatCondition.prototype.private_changeStyle = function(callback, notInitFont) {
 		let worksheet = this._parent.range.range.worksheet;
 		if (!worksheet || !worksheet.aConditionalFormattingRules) {
-			return;
+			return false;
 		}
 
 		let oldRule = this.rule;
@@ -22031,15 +22154,17 @@
 
 		worksheet.changeCFRule(oldRule, newRule, true);
 		//this.rule = newRule;
+		return true;
 	};
 
 	/**
-	 * Sets borders for the format condition.
+	 * Sets the border style for the conditional formatting rule.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
 	 * @param {BordersIndex} bordersIndex - Specifies the cell border position.
 	 * @param {LineStyle} lineStyle - Specifies the line style used to form the cell border.
 	 * @param {ApiColor} oColor - The color object which specifies the color to be set to the cell border.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/SetBorders.js
 	 */
 	ApiFormatCondition.prototype.SetBorders = function(bordersIndex, lineStyle, oColor) {
@@ -22090,7 +22215,8 @@
 	 * Sets 'No Fill' when previously created color object is null.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
-	 * @param {ApiColor} oColor - The color object which specifies the color to be set to the background in the format condition.
+	 * @param {ApiColor} oColor - The color object that specifies the background color for the format condition.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/SetFillColor.js
 	 */
 	ApiFormatCondition.prototype.SetFillColor = function(oColor) {
@@ -22112,10 +22238,11 @@
 	};
 
 	/**
-	 * Returns the background color for the format condition. Returns 'No Fill' when the color of the background in the format condition is null.
+	 * Returns the background color for the format condition. Returns 'No Fill' when the background color of the format condition is null.
 	 * @memberof ApiFormatCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiColor|'No Fill'} - return 'No Fill' when the color to the background in the format condition is null.
+	 * @returns {ApiColor|'No Fill'} - The background color applied by the format condition, or 'No Fill' if none is set.
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiFormatCondition/Methods/GetFillColor.js
 	 */
 	ApiFormatCondition.prototype.GetFillColor = function() {
@@ -22140,6 +22267,9 @@
 	 * Class representing an above average conditional formatting rule.
 	 * @constructor
 	 * @extends ApiFormatCondition
+	 * @property {boolean} AboveBelow - Returns or sets whether the rule is configured to detect values above or below the average.
+	 * @property {number} NumStdDev - Returns or sets the number of standard deviations from the average.
+	 * @property {XlFormatConditionType} Type - Returns the type of the above average conditional formatting rule.
 	 */
 	function ApiAboveAverage(rule, range, _parent) {
 		ApiFormatCondition.call(this, rule, range, _parent);
@@ -22149,10 +22279,10 @@
 	ApiAboveAverage.prototype.constructor = ApiAboveAverage;
 
 	/**
-	 * Returns whether the rule is looking for above or below average values.
+	 * Returns whether the rule is configured to detect values above or below the average.
 	 * @memberof ApiAboveAverage
 	 * @typeofeditors ["CSE"]
-	 * @returns {boolean} True if looking for above average values, false for below average.
+	 * @returns {boolean} True if the rule targets above-average values; false if it targets below-average values.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiAboveAverage/Methods/GetAboveBelow.js
 	 */
@@ -22164,10 +22294,10 @@
 	};
 
 	/**
-	 * Sets whether the rule is looking for above or below average values.
+	 * Sets whether the rule targets values above or below the average.
 	 * @memberof ApiAboveAverage
 	 * @typeofeditors ["CSE"]
-	 * @param {boolean} aboveBelow - True to look for above average values, false for below average.
+	 * @param {boolean} aboveBelow - True if the rule targets above-average values; false if it targets below-average values.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiAboveAverage/Methods/SetAboveBelow.js
 	 */
@@ -22190,58 +22320,58 @@
 		}
 	});
 
-	/**
-	 * Returns the calculation scope for the above average condition in pivot tables.
-	 * @memberof ApiAboveAverage
-	 * @typeofeditors ["CSE"]
-	 * @returns {number}
-	 * @since 9.1.0
-	 * @see office-js-api/Examples/{Editor}/ApiAboveAverage/Methods/GetCalcFor.js
-	 */
-	ApiAboveAverage.prototype.GetCalcFor = function() {
-		if (!this.rule || !this.rule.pivot) {
-			return 0; // xlAllValues
-		}
+	// /**
+	//  * Returns the calculation scope for the above average condition in pivot tables.
+	//  * @memberof ApiAboveAverage
+	//  * @typeofeditors ["CSE"]
+	//  * @returns {number}
+	//  * @since 9.1.0
+	//  * @see office-js-api/Examples/{Editor}/ApiAboveAverage/Methods/GetCalcFor.js
+	//  */
+	// ApiAboveAverage.prototype.GetCalcFor = function() {
+	// 	if (!this.rule || !this.rule.pivot) {
+	// 		return 0; // xlAllValues
+	// 	}
+	//
+	// 	// Возвращаем значение области расчета для сводных таблиц
+	// 	return this.rule.pivot.calcFor || 0;
+	// };
 
-		// Возвращаем значение области расчета для сводных таблиц
-		return this.rule.pivot.calcFor || 0;
-	};
-
-	/**
-	 * Sets the calculation scope for the above average condition in pivot tables.
-	 * @memberof ApiAboveAverage
-	 * @typeofeditors ["CSE"]
-	 * @param {number} calcFor - The calculation scope (0 = xlAllValues, 1 = xlColItems, 2 = xlRowItems)
-	 * @since 9.1.0
-	 * @see office-js-api/Examples/{Editor}/ApiAboveAverage/Methods/SetCalcFor.js
-	 */
-	ApiAboveAverage.prototype.SetCalcFor = function(calcFor) {
-		if (!this.rule || typeof calcFor !== "number") {
-			return;
-		}
-
-		this.private_changeStyle(function (newRule) {
-			if (!newRule.pivot) {
-				newRule.pivot = {};
-			}
-			newRule.pivot.calcFor = calcFor;
-		}, true);
-	};
-
-	Object.defineProperty(ApiAboveAverage.prototype, "CalcFor", {
-		get: function() {
-			return this.GetCalcFor();
-		},
-		set: function(value) {
-			this.SetCalcFor(value);
-		}
-	});
+	// /**
+	//  * Sets the calculation scope for the above average condition in pivot tables.
+	//  * @memberof ApiAboveAverage
+	//  * @typeofeditors ["CSE"]
+	//  * @param {number} calcFor - The calculation scope (0 = xlAllValues, 1 = xlColItems, 2 = xlRowItems)
+	//  * @since 9.1.0
+	//  * @see office-js-api/Examples/{Editor}/ApiAboveAverage/Methods/SetCalcFor.js
+	//  */
+	// ApiAboveAverage.prototype.SetCalcFor = function(calcFor) {
+	// 	if (!this.rule || typeof calcFor !== "number") {
+	// 		return;
+	// 	}
+	//
+	// 	this.private_changeStyle(function (newRule) {
+	// 		if (!newRule.pivot) {
+	// 			newRule.pivot = {};
+	// 		}
+	// 		newRule.pivot.calcFor = calcFor;
+	// 	}, true);
+	// };
+	//
+	// Object.defineProperty(ApiAboveAverage.prototype, "CalcFor", {
+	// 	get: function() {
+	// 		return this.GetCalcFor();
+	// 	},
+	// 	set: function(value) {
+	// 		this.SetCalcFor(value);
+	// 	}
+	// });
 
 	/**
 	 * Returns the number of standard deviations from the average.
 	 * @memberof ApiAboveAverage
 	 * @typeofeditors ["CSE"]
-	 * @returns {number}
+	 * @returns {number} The number of standard deviations from the average.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiAboveAverage/Methods/GetNumStdDev.js
 	 */
@@ -22256,7 +22386,7 @@
 	 * Sets the number of standard deviations from the average.
 	 * @memberof ApiAboveAverage
 	 * @typeofeditors ["CSE"]
-	 * @param {number} numStdDev - The number of standard deviations (0 for simple average, positive numbers for deviations)
+	 * @param {number} numStdDev - The number of standard deviations (0 for simple average, positive numbers for deviations).
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiAboveAverage/Methods/SetNumStdDev.js
 	 */
@@ -22283,7 +22413,7 @@
 	 * Returns the type of the above average conditional formatting rule.
 	 * @memberof ApiAboveAverage
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlFormatConditionType}
+	 * @returns {XlFormatConditionType} The type of the above average conditional formatting rule.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiAboveAverage/Methods/GetType.js
 	 */
@@ -22309,17 +22439,17 @@
 	ApiAboveAverage.prototype.Delete = ApiFormatCondition.prototype.Delete;
 
 	/**
-	 * Modifies the range to which this formatting rule applies.
+	 * Modifies the cell range to which the current conditional formatting rule applies.
 	 * @memberof ApiAboveAverage
 	 * @typeofeditors ["CSE"]
-	 * @param {ApiRange} Range - A Range object representing the new range to which the formatting rule will be applied.
+	 * @param {ApiRange} Range - The range to which the current conditional formatting rule will be applied.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiAboveAverage/Methods/ModifyAppliesToRange.js
 	 */
 	ApiAboveAverage.prototype.ModifyAppliesToRange = ApiFormatCondition.prototype.ModifyAppliesToRange;
 
 	/**
-	 * Sets the priority value for this conditional formatting rule to "1" so that it will be evaluated before all other rules on the worksheet.
+	 * Sets the priority value for the current conditional formatting rule to "1" so that it will be evaluated before all other rules on the worksheet.
 	 * @memberof ApiAboveAverage
 	 * @typeofeditors ["CSE"]
 	 * @since 9.1.0
@@ -22328,7 +22458,7 @@
 	ApiAboveAverage.prototype.SetFirstPriority = ApiFormatCondition.prototype.SetFirstPriority;
 
 	/**
-	 * Sets the evaluation order for this conditional formatting rule so it is evaluated after all other rules on the worksheet.
+	 * Sets the evaluation order for the current conditional formatting rule so it is evaluated after all other rules on the worksheet.
 	 * @memberof ApiAboveAverage
 	 * @typeofeditors ["CSE"]
 	 * @since 9.1.0
@@ -22337,10 +22467,10 @@
 	ApiAboveAverage.prototype.SetLastPriority = ApiFormatCondition.prototype.SetLastPriority;
 
 	/**
-	 * Returns the range to which the conditional formatting rule applies.
+	 * Returns the range of cells to which the current conditional formatting rule applies.
 	 * @memberof ApiAboveAverage
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange}
+	 * @returns {ApiRange} The range of cells affected by the current condition.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiAboveAverage/Methods/GetAppliesTo.js
 	 */
@@ -22357,27 +22487,27 @@
 	// ApiAboveAverage.prototype.GetBorders = ApiFormatCondition.prototype.GetBorders;
 
 	/**
-	 * Returns the Font object that represents the font of the specified object.
+	 * Returns the font applied by the current format condition.
 	 * @memberof ApiAboveAverage
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiFont}
+	 * @returns {ApiFont} An ApiFont object representing the font applied by the format condition.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiAboveAverage/Methods/GetFont.js
 	 */
 	ApiAboveAverage.prototype.GetFont = ApiFormatCondition.prototype.GetFont;
 
 	/**
-	 * Returns the number format applied to a cell if the conditional formatting rule evaluates to True.
+	 * Returns the number format applied to a cell when the conditional formatting rule evaluates to true.
 	 * @memberof ApiAboveAverage
 	 * @typeofeditors ["CSE"]
-	 * @returns {string}
+	 * @returns {string} The number format.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiAboveAverage/Methods/GetNumberFormat.js
 	 */
 	ApiAboveAverage.prototype.GetNumberFormat = ApiFormatCondition.prototype.GetNumberFormat;
 
 	/**
-	 * Sets the number format applied to a cell if the conditional formatting rule evaluates to True.
+	 * Sets the number format applied to a cell when the conditional formatting rule evaluates to true.
 	 * @memberof ApiAboveAverage
 	 * @typeofeditors ["CSE"]
 	 * @param {string} NumberFormat - The number format code.
@@ -22387,10 +22517,10 @@
 	ApiAboveAverage.prototype.SetNumberFormat = ApiFormatCondition.prototype.SetNumberFormat;
 
 	/**
-	 * Returns the background color for the format condition. Returns 'No Fill' when the color of the background in the format condition is null.
+	 * Returns the background color for the format condition. Returns 'No Fill' when the background color of the format condition is null.
 	 * @memberof ApiAboveAverage
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiColor|'No Fill'}
+	 * @returns {ApiColor|'No Fill'} - The background color applied by the format condition, or 'No Fill' if none is set.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiAboveAverage/Methods/GetFillColor.js
 	 */
@@ -22401,17 +22531,17 @@
 	 * Sets 'No Fill' when previously created color object is null.
 	 * @memberof ApiAboveAverage
 	 * @typeofeditors ["CSE"]
-	 * @param {ApiColor} oColor - The color object which specifies the color to be set to the background in the format condition.
+	 * @param {ApiColor} oColor - The color object that specifies the background color for the format condition.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiAboveAverage/Methods/SetFillColor.js
 	 */
 	ApiAboveAverage.prototype.SetFillColor = ApiFormatCondition.prototype.SetFillColor;
 
 	/**
-	 * Returns the parent object for the specified object.
+	 * Returns the parent range object of the current format condition.
 	 * @memberof ApiAboveAverage
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange}
+	 * @returns {ApiRange} - The parent range object.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiAboveAverage/Methods/GetParent.js
 	 */
@@ -22421,14 +22551,14 @@
 	 * Returns the priority value of the conditional formatting rule.
 	 * @memberof ApiAboveAverage
 	 * @typeofeditors ["CSE"]
-	 * @returns {number}
+	 * @returns {number} The priority value of the conditional formatting rule.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiAboveAverage/Methods/GetPriority.js
 	 */
 	ApiAboveAverage.prototype.GetPriority = ApiFormatCondition.prototype.GetPriority;
 
 	/**
-	 * Sets the priority value of the conditional formatting rule.
+	 * Sets the priority value for the conditional formatting rule.
 	 * @memberof ApiAboveAverage
 	 * @typeofeditors ["CSE"]
 	 * @param {number} Priority - The priority value (1-based).
@@ -22441,7 +22571,7 @@
 	 * Returns the pivot table condition object.
 	 * @memberof ApiAboveAverage
 	 * @typeofeditors ["CSE"]
-	 * @returns {PTCondition | null}
+	 * @returns {PTCondition | null} The pivot table condition object.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiAboveAverage/Methods/GetPTCondition.js
 	 */
@@ -22451,17 +22581,17 @@
 	 * Returns the scope type of the conditional formatting rule.
 	 * @memberof ApiAboveAverage
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlPivotConditionScope}
+	 * @returns {XlPivotConditionScope} Returns "xlSelectionScope" for normal ranges, "xlDataFieldScope" for entire worksheet, "xlFieldsScope" for pivot tables.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiAboveAverage/Methods/GetScopeType.js
 	 */
 	ApiAboveAverage.prototype.GetScopeType = ApiFormatCondition.prototype.GetScopeType;
 
 	/**
-	 * Sets the scope type of the conditional formatting rule.
+	 * Sets the scope type for the conditional formatting rule.
 	 * @memberof ApiAboveAverage
 	 * @typeofeditors ["CSE"]
-	 * @param {XlPivotConditionScope} ScopeType - The scope type.
+	 * @param {XlPivotConditionScope} ScopeType - The scope type: "xlSelectionScope", "xlDataFieldScope", or "xlFieldsScope".
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiAboveAverage/Methods/SetScopeType.js
 	 */
@@ -22512,6 +22642,8 @@
 	 * Class representing a color scale conditional formatting rule.
 	 * @constructor
 	 * @extends ApiFormatCondition
+	 * @property {ApiColorScaleCriterion[]} ColorScaleCriteria - Returns the collection of criteria that define this color scale rule.
+	 * @property {XlFormatConditionType} Type - Returns the type of the color scale conditional formatting rule.
 	 */
 	function ApiColorScale(rule, range, _parent) {
 		ApiFormatCondition.call(this, rule, range, _parent);
@@ -22523,11 +22655,13 @@
 	ApiColorScale.prototype.constructor = ApiColorScale;
 
 	/**
-	 * Returns the ColorScaleCriteria collection for this color scale.
+	 * Returns the collection of criteria that define this color scale rule.
 	 * @memberof ApiColorScale
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiColorScaleCriterion[] | null}
+	 * @returns {ApiColorScaleCriterion[] | null} An array of ApiColorScaleCriterion objects representing the color scale criteria,
+	 * or `null` if the rule is not a color scale type.
 	 * @since 9.1.0
+	 * @see office-js-api/Examples/{Editor}/ApiColorScale/Methods/GetColorScaleCriteria.js
 	 */
 	ApiColorScale.prototype.GetColorScaleCriteria = function() {
 		if (!this.rule || this.rule.type !== Asc.ECfType.colorScale) {
@@ -22594,7 +22728,7 @@
 	 * Returns the type of the color scale conditional formatting rule.
 	 * @memberof ApiColorScale
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlFormatConditionType}
+	 * @returns {XlFormatConditionType} The type of the color scale conditional formatting rule.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiColorScale/Methods/GetType.js
 	 */
@@ -22620,17 +22754,17 @@
 	ApiColorScale.prototype.Delete = ApiFormatCondition.prototype.Delete;
 
 	/**
-	 * Modifies the range to which this formatting rule applies.
+	 * Modifies the cell range to which the current conditional formatting rule applies.
 	 * @memberof ApiColorScale
 	 * @typeofeditors ["CSE"]
-	 * @param {ApiRange} Range - A Range object representing the new range to which the formatting rule will be applied.
+	 * @param {ApiRange} Range - The range to which the current conditional formatting rule will be applied.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiColorScale/Methods/ModifyAppliesToRange.js
 	 */
 	ApiColorScale.prototype.ModifyAppliesToRange = ApiFormatCondition.prototype.ModifyAppliesToRange;
 
 	/**
-	 * Sets the priority value for this conditional formatting rule to "1" so that it will be evaluated before all other rules on the worksheet.
+	 * Sets the priority value for the current conditional formatting rule to "1" so that it will be evaluated before all other rules on the worksheet.
 	 * @memberof ApiColorScale
 	 * @typeofeditors ["CSE"]
 	 * @since 9.1.0
@@ -22639,7 +22773,7 @@
 	ApiColorScale.prototype.SetFirstPriority = ApiFormatCondition.prototype.SetFirstPriority;
 
 	/**
-	 * Sets the evaluation order for this conditional formatting rule so it is evaluated after all other rules on the worksheet.
+	 * Sets the evaluation order for the current conditional formatting rule so it is evaluated after all other rules on the worksheet.
 	 * @memberof ApiColorScale
 	 * @typeofeditors ["CSE"]
 	 * @since 9.1.0
@@ -22648,20 +22782,20 @@
 	ApiColorScale.prototype.SetLastPriority = ApiFormatCondition.prototype.SetLastPriority;
 
 	/**
-	 * Returns the range to which the conditional formatting rule applies.
+	 * Returns the range of cells to which the current conditional formatting rule applies.
 	 * @memberof ApiColorScale
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange}
+	 * @returns {ApiRange} The range of cells affected by the current condition.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiColorScale/Methods/GetAppliesTo.js
 	 */
 	ApiColorScale.prototype.GetAppliesTo = ApiFormatCondition.prototype.GetAppliesTo;
 
 	/**
-	 * Returns the parent object for the specified object.
+	 * Returns the parent range object of the current format condition.
 	 * @memberof ApiColorScale
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange}
+	 * @returns {ApiRange} The parent range object.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiColorScale/Methods/GetParent.js
 	 */
@@ -22671,14 +22805,14 @@
 	 * Returns the priority value of the conditional formatting rule.
 	 * @memberof ApiColorScale
 	 * @typeofeditors ["CSE"]
-	 * @returns {number}
+	 * @returns {number} The priority value of the conditional formatting rule.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiColorScale/Methods/GetPriority.js
 	 */
 	ApiColorScale.prototype.GetPriority = ApiFormatCondition.prototype.GetPriority;
 
 	/**
-	 * Sets the priority value of the conditional formatting rule.
+	 * Sets the priority value for the conditional formatting rule.
 	 * @memberof ApiColorScale
 	 * @typeofeditors ["CSE"]
 	 * @param {number} Priority - The priority value (1-based).
@@ -22691,7 +22825,7 @@
 	 * Returns the pivot table condition object.
 	 * @memberof ApiColorScale
 	 * @typeofeditors ["CSE"]
-	 * @returns {PTCondition | null}
+	 * @returns {PTCondition | null} The pivot table condition object.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiColorScale/Methods/GetPTCondition.js
 	 */
@@ -22701,17 +22835,17 @@
 	 * Returns the scope type of the conditional formatting rule.
 	 * @memberof ApiColorScale
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlPivotConditionScope}
+	 * @returns {XlPivotConditionScope} Returns "xlSelectionScope" for normal ranges, "xlDataFieldScope" for entire worksheet, "xlFieldsScope" for pivot tables.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiColorScale/Methods/GetScopeType.js
 	 */
 	ApiColorScale.prototype.GetScopeType = ApiFormatCondition.prototype.GetScopeType;
 
 	/**
-	 * Sets the scope type of the conditional formatting rule.
+	 * Sets the scope type for the conditional formatting rule.
 	 * @memberof ApiColorScale
 	 * @typeofeditors ["CSE"]
-	 * @param {XlPivotConditionScope} ScopeType - The scope type.
+	 * @param {XlPivotConditionScope} ScopeType - The scope type: "xlSelectionScope", "xlDataFieldScope", or "xlFieldsScope".
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiColorScale/Methods/SetScopeType.js
 	 */
@@ -22759,8 +22893,8 @@
 	ApiColorScale.prototype.SetStdDev = null;
 	ApiColorScale.prototype.GetAboveBelow = null;
 	ApiColorScale.prototype.SetAboveBelow = null;
-	ApiColorScale.prototype.GetCalcFor = null;
-	ApiColorScale.prototype.SetCalcFor = null;
+	//ApiColorScale.prototype.GetCalcFor = null;
+	//ApiColorScale.prototype.SetCalcFor = null;
 	ApiColorScale.prototype.GetNumStdDev = null;
 	ApiColorScale.prototype.SetNumStdDev = null;
 	//ApiColorScale.prototype.GetBorders = null;
@@ -22772,8 +22906,12 @@
 	ApiColorScale.prototype.SetBorders = null;
 
 	/**
-	 * Class representing a single ColorScaleCriterion object.
+	 * Class representing single criterion in a color scale conditional formatting rule.
 	 * @constructor
+	 * @property {XlConditionValueTypes} Type - Returns or sets the type of the color scale criterion.
+	 * @property {string} Value - Returns or sets the value of the color scale criterion.
+	 * @property {number} Index - Returns the index indicating which threshold the criterion represents.
+	 * @property {ApiColor} Color - Returns or sets the format color of the color scale criterion.
 	 */
 	function ApiColorScaleCriterion(cfvo, color, parent, index) {
 		this.cfvo = cfvo;
@@ -22854,8 +22992,9 @@
 	 * Returns the type of the color scale criterion.
 	 * @memberof ApiColorScaleCriterion
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlConditionValueTypes | null}
+	 * @returns {XlConditionValueTypes | null} The type of the color scale criterion.
 	 * @since 9.1.0
+	 * @see office-js-api/Examples/{Editor}/ApiColorScaleCriterion/Methods/GetType.js
 	 */
 	ApiColorScaleCriterion.prototype.GetType = function() {
 		if (!this.cfvo) {
@@ -22865,11 +23004,12 @@
 	};
 
 	/**
-	 * Sets the type of the color scale criterion.
+	 * Sets the type for the color scale criterion.
 	 * @memberof ApiColorScaleCriterion
 	 * @typeofeditors ["CSE"]
-	 * @param {XlConditionValueTypes} type - The type of the criterion.
+	 * @param {XlConditionValueTypes} type - The type of the color scale criterion.
 	 * @since 9.1.0
+	 * @see office-js-api/Examples/{Editor}/ApiColorScaleCriterion/Methods/SetType.js
 	 */
 	ApiColorScaleCriterion.prototype.SetType = function(type) {
 		if (this.cfvo) {
@@ -22877,7 +23017,7 @@
 			if (internalType !== -1) {
 				let t = this;
 				this.parent.private_changeStyle(function (newRule) {
-					let index = t.GetIndex();
+					let index = t.GetIndex() - 1;
 					newRule.aRuleElements[0].aCFVOs[index].asc_setType(internalType);
 					newRule.aRuleElements[0].aCFVOs[index].formula = null;
 					newRule.aRuleElements[0].aCFVOs[index].formulaParent = null;
@@ -22902,8 +23042,9 @@
 	 * Returns the value of the color scale criterion.
 	 * @memberof ApiColorScaleCriterion
 	 * @typeofeditors ["CSE"]
-	 * @returns {string | null}
+	 * @returns {string | null} The value of the color scale criterion, or `null` if not set.
 	 * @since 9.1.0
+	 * @see office-js-api/Examples/{Editor}/ApiColorScaleCriterion/Methods/GetValue.js
 	 */
 	ApiColorScaleCriterion.prototype.GetValue = function() {
 		if (!this.cfvo) {
@@ -22914,18 +23055,19 @@
 	};
 
 	/**
-	 * Sets the value of the color scale criterion.
+	 * Sets the value for the color scale criterion.
 	 * @memberof ApiColorScaleCriterion
 	 * @typeofeditors ["CSE"]
-	 * @param {string} value - The value of the criterion.
+	 * @param {string} value - The value of the color scale criterion.
 	 * @since 9.1.0
+	 * @see office-js-api/Examples/{Editor}/ApiColorScaleCriterion/Methods/SetValue.js
 	 */
 	ApiColorScaleCriterion.prototype.SetValue = function(value) {
 		//TODO set in excel -> error, if max/min type
 		if (this.cfvo) {
 			let t = this;
 			this.parent.private_changeStyle(function (newRule) {
-				let index = t.GetIndex();
+				let index = t.GetIndex() - 1;
 				newRule.aRuleElements[0].aCFVOs[index].asc_setVal(value);
 				newRule.aRuleElements[0].aCFVOs[index].formula = null;
 				newRule.aRuleElements[0].aCFVOs[index].formulaParent = null;
@@ -22944,15 +23086,16 @@
 	});
 
 	/**
-	 * Returns the index indicating which threshold the criteria represents.
+	 * Returns the index indicating which threshold the criterion represents.
 	 * @memberof ApiColorScaleCriterion
 	 * @typeofeditors ["CSE"]
 	 * @returns {number} Returns 0 for minimum threshold, 1 for midpoint (3-color scale) or maximum (2-color scale), and 2 for maximum threshold (3-color scale only).
 	 * @since 9.1.0
+	 * @see office-js-api/Examples/{Editor}/ApiColorScaleCriterion/Methods/GetIndex.js
 	 */
 	ApiColorScaleCriterion.prototype.GetIndex = function() {
 		//starts with 0
-		return this.index;
+		return this.index + 1;
 		/*if (!this.colorScaleElement || !this.colorScaleElement.aCFVOs) {
 			return 1;
 		}
@@ -22978,8 +23121,9 @@
 	 * Returns the format color of the color scale criterion.
 	 * @memberof ApiColorScaleCriterion
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiColor | null}
+	 * @returns {ApiColor | null} An ApiColor object representing the criterion's color, or `null` if no color is set.
 	 * @since 9.1.0
+	 * @see office-js-api/Examples/{Editor}/ApiColorScaleCriterion/Methods/GetColor.js
 	 */
 	ApiColorScaleCriterion.prototype.GetColor = function() {
 		if (!this.color) {
@@ -22989,11 +23133,12 @@
 	};
 
 	/**
-	 * Sets the format color of the color scale criterion.
+	 * Sets the format color for the color scale criterion.
 	 * @memberof ApiColorScaleCriterion
 	 * @typeofeditors ["CSE"]
 	 * @param {ApiColor} oColor - The ApiColor object specifying the color.
 	 * @since 9.1.0
+	 * @see office-js-api/Examples/{Editor}/ApiColorScaleCriterion/Methods/SetColor.js
 	 */
 	ApiColorScaleCriterion.prototype.SetColor = function(oColor) {
 		if (!oColor || !(oColor instanceof ApiColor)) {
@@ -23003,7 +23148,7 @@
 		if (this.color) {
 			let t = this;
 			this.parent.private_changeStyle(function (newRule) {
-				let index = t.GetIndex();
+				let index = t.GetIndex() - 1;
 				if (newRule.aRuleElements && newRule.aRuleElements[0] &&
 					newRule.aRuleElements[0].aColors &&
 					newRule.aRuleElements[0].aColors[index]) {
@@ -23030,6 +23175,18 @@
 	 * Class representing a data bar conditional formatting rule.
 	 * @constructor
 	 * @extends ApiFormatCondition
+	 * @property {XlDataBarAxisPosition} AxisPosition - Returns or sets the axis position of the data bar conditional formatting rule.
+	 * @property {boolean} ShowValue - Returns or sets whether the data bar shows or hides the cell value.
+	 * @property {XlReadingOrder} Direction - Returns or sets the direction of the data bar.
+	 * @property {XlDataBarFillType} BarFillType - Returns or sets the bar fill type of the data bar.
+	 * @property {object} MinPoint - Returns the minimum value condition of the data bar.
+	 * @property {object} MaxPoint - Returns the maximum value condition of the data bar.
+	 * @property {ApiColor} NegativeBarColor - Returns or sets the negative bar color of the data bar.
+	 * @property {ApiColor} NegativeBorderColor - Returns or sets the negative bar border color of the data bar.
+	 * @property {number} PercentMax - Returns or sets the percent maximum value of the data bar.
+	 * @property {number} PercentMin - Returns or sets the percent minimum value of the data bar.
+	 * @property {string} Formula - Returns the formula of the data bar.
+	 * @property {XlFormatConditionType} Type - Returns the type of the data bar conditional formatting rule.
 	 */
 	function ApiDatabar(rule, range, _parent) {
 		ApiFormatCondition.call(this, rule, range, _parent);
@@ -23039,17 +23196,19 @@
 	ApiDatabar.prototype.constructor = ApiDatabar;
 
 	/**
-	 * Returns the axis color of the data bar.
+	 * Returns the axis color of the data bar conditional formatting rule.
 	 * @memberof ApiDatabar
-	 * @typeofeditors ["CDE"]
-	 * @returns {ApiColor | null} returns null if color is not specified
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiColor | null} The axis color as an ApiColor object, or null if no color is specified.
+	 * @since 9.1.0
+	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/GetAxisColor.js
 	 */
 	ApiDatabar.prototype.GetAxisColor = function()
 	{
 		var oColor;
 		if (this.rule.aRuleElements && this.rule.aRuleElements[0]) {
 			// Update the axis color in the data bar rule
-			oColor = this.rule.aRuleElements[0].asc_getAxisColor();
+			oColor = this.rule.aRuleElements[0].AxisColor;
 		}
 		if (oColor) {
 			return new ApiColor(oColor);
@@ -23058,11 +23217,12 @@
 	};
 
 	/**
-	 * Sets the axis color of the data bar.
+	 * Sets the axis color for the data bar conditional formatting rule.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @param {ApiColor} oColor - The axis color.
+	 * @param {ApiColor} oColor - The axis color as an ApiColor object.
 	 * @since 9.1.0
+	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/SetAxisColor.js
 	 */
 	ApiDatabar.prototype.SetAxisColor = function(oColor)
 	{
@@ -23128,7 +23288,7 @@
 	}
 
 	/**
-	 * Returns the axis position of the data bar.
+	 * Returns the axis position of the data bar conditional formatting rule.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
 	 * @returns {XlDataBarAxisPosition} The axis position setting for the data bar.
@@ -23149,7 +23309,7 @@
 	};
 
 	/**
-	 * Sets the axis position of the data bar.
+	 * Sets the axis position for the data bar conditional formatting rule.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
 	 * @param {XlDataBarAxisPosition} position - The axis position setting for the data bar.
@@ -23182,7 +23342,7 @@
 	});
 
 	/**
-	 * Returns the show value setting of the data bar.
+	 * Returns whether the data bar displays the cell value.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
 	 * @returns {boolean} True if the data bar shows the value, false otherwise.
@@ -23203,7 +23363,7 @@
 	};
 
 	/**
-	 * Sets the show value setting of the data bar.
+	 * Specifies whether the data bar displays the cell value.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} showValue - True to show the value, false to hide it.
@@ -23278,7 +23438,7 @@
 	 * Returns the direction of the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlReadingOrder} The direction setting for the data bar.
+	 * @returns {XlReadingOrder} The direction setting for the data bar (context, left-to-right, or right-to-left).
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/GetDirection.js
 	 */
@@ -23296,10 +23456,10 @@
 	};
 
 	/**
-	 * Sets the direction of the data bar.
+	 * Sets the direction for the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @param {XlReadingOrder} direction - The direction setting for the data bar.
+	 * @param {XlReadingOrder} direction - The direction setting for the data bar (context, left-to-right, or right-to-left).
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/SetDirection.js
 	 */
@@ -23336,7 +23496,7 @@
 	 * Returns the bar color of the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiColor | null} Returns the ApiColor object representing the bar color, or null if not specified.
+	 * @returns {ApiColor | null} Returns the ApiColor object representing the bar color, or null if the bar color is not specified.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/GetBarColor.js
 	 */
@@ -23354,10 +23514,10 @@
 	};
 
 	/**
-	 * Sets the bar color of the data bar.
+	 * Sets the bar color for the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @param {ApiColor} oColor - The ApiColor object for the bar.
+	 * @param {ApiColor} oColor - The ApiColor object representing the bar color.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/SetBarColor.js
 	 */
@@ -23391,7 +23551,7 @@
 	 * Returns the bar fill type of the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlDataBarFillType} The fill type setting for the data bar.
+	 * @returns {XlDataBarFillType} The fill type setting for the data bar (solid or gradient).
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/GetBarFillType.js
 	 */
@@ -23409,10 +23569,10 @@
 	};
 
 	/**
-	 * Sets the bar fill type of the data bar.
+	 * Sets the bar fill type for the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @param {XlDataBarFillType} fillType - The fill type setting for the data bar.
+	 * @param {XlDataBarFillType} fillType - The fill type setting for the data bar (solid or gradient).
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/SetBarFillType.js
 	 */
@@ -23442,10 +23602,10 @@
 	});
 
 	/**
-	 * Returns the type of the minimum point condition value.
+	 * Returns the type of the minimum value condition for the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlConditionValueTypes | null} The type of the minimum condition value.
+	 * @returns {XlConditionValueTypes | null} The type of the minimum value condition, or null if not specified.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/GetMinPointType.js
 	 */
@@ -23463,10 +23623,10 @@
 	};
 
 	/**
-	 * Sets the type of the minimum point condition value.
+	 * Sets the type for the minimum value condition for the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @param {XlConditionValueTypes} type - The type of the condition value.
+	 * @param {XlConditionValueTypes} type - The type of the minimum value condition.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/SetMinPointType.js
 	 */
@@ -23485,10 +23645,10 @@
 	};
 
 	/**
-	 * Returns the value of the minimum point condition value.
+	 * Returns the value of the minimum value condition for the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @returns {string | number | null} The value of the minimum condition value.
+	 * @returns {string | number | null} The value of the minimum value condition.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/GetMinPointValue.js
 	 */
@@ -23507,10 +23667,10 @@
 	};
 
 	/**
-	 * Sets the value of the minimum point condition value.
+	 * Sets the value for the minimum value condition for the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @param {string | number} value - The value of the condition value.
+	 * @param {string | number} value - The value of the minimum value condition.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/SetMinPointValue.js
 	 */
@@ -23530,10 +23690,10 @@
 	});
 
 	/**
-	 * Returns the type of the maximum point condition value.
+	 * Returns the type of the maximum value condition for the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlConditionValueTypes | null} The type of the maximum condition value.
+	 * @returns {XlConditionValueTypes | null} The type of the maximum value condition, or null if not specified.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/GetMaxPointType.js
 	 */
@@ -23551,10 +23711,10 @@
 	};
 
 	/**
-	 * Sets the type of the maximum point condition value.
+	 * Sets the type for the maximum value condition for the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @param {XlConditionValueTypes} type - The type of the condition value.
+	 * @param {XlConditionValueTypes} type - The type of the maximum value condition.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/SetMaxPointType.js
 	 */
@@ -23573,10 +23733,10 @@
 	};
 
 	/**
-	 * Returns the value of the maximum point condition value.
+	 * Returns the value of the maximum value condition for the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @returns {string | number | null} The value of the maximum condition value.
+	 * @returns {string | number | null} The value of the maximum value condition.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/GetMaxPointValue.js
 	 */
@@ -23595,10 +23755,10 @@
 	};
 
 	/**
-	 * Sets the value of the maximum point condition value.
+	 * Sets the value for the maximum value condition for the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @param {string | number} value - The value of the condition value.
+	 * @param {string | number} value - The value of the maximum value condition.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/SetMaxPointValue.js
 	 */
@@ -23666,7 +23826,7 @@
 	};
 
 	/**
-	 * Sets the negative bar color of the data bar.
+	 * Sets the negative bar color for the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
 	 * @param {ApiColor} oColor - The ApiColor object for the negative bars.
@@ -23721,7 +23881,7 @@
 	};
 
 	/**
-	 * Sets the negative bar border color of the data bar.
+	 * Sets the negative bar border color for the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
 	 * @param {ApiColor} oColor - The ApiColor object for the negative bar borders.
@@ -23784,10 +23944,10 @@
 
 
 	/**
-	 * Returns the bar color of the data bar.
+	 * Returns the bar border color of the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiColor | null} Returns the ApiColor object representing the bar color, or null if not specified.
+	 * @returns {ApiColor | null} Returns the ApiColor object representing the bar border color, or null if not specified.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/GetBarBorderColor.js
 	 */
@@ -23805,12 +23965,12 @@
 	};
 
 	/**
-	 * Sets the bar color of the data bar.
+	 * Sets the bar border color for the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @param {ApiColor} oColor - The ApiColor object for the bar.
+	 * @param {ApiColor} oColor - The ApiColor object for the bar borders.
 	 * @since 9.1.0
-	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/SetBarColor.js
+	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/SetBarBorderColor.js
 	 */
 	ApiDatabar.prototype.SetBarBorderColor = function(oColor) {
 		if (!oColor || !(oColor instanceof ApiColor)) {
@@ -23833,7 +23993,7 @@
 	 * Returns the percent maximum value of the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @returns {number} Returns the maximum length as percentage.
+	 * @returns {number} The maximum length of the data bar in percent.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/GetPercentMax.js
 	 */
@@ -23851,10 +24011,10 @@
 	};
 
 	/**
-	 * Sets the percent maximum value of the data bar.
+	 * Sets the percent maximum value for the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @param {number} percent - The maximum length as percentage.
+	 * @param {number} percent - The maximum length of the data bar in percent.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/SetPercentMax.js
 	 */
@@ -23889,7 +24049,7 @@
 	 * Returns the percent minimum value of the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @returns {number} Returns the minimum length as percentage.
+	 * @returns {number} Returns the minimum length of the data bar in percent.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/GetPercentMin.js
 	 */
@@ -23907,10 +24067,10 @@
 	};
 
 	/**
-	 * Sets the percent minimum value of the data bar.
+	 * Sets the percent minimum value for the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @param {number} percent - The minimum length as percentage.
+	 * @param {number} percent - The minimum length of the data bar in percent.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/SetPercentMin.js
 	 */
@@ -23942,7 +24102,7 @@
 	});
 
 	/**
-	 * Returns the formula for the data bar.
+	 * Returns the formula of the data bar.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
 	 * @returns {string} Returns the formula string.
@@ -23968,7 +24128,7 @@
 	 * Returns the type of the data bar conditional formatting rule.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlFormatConditionType} Returns "xlDatabar".
+	 * @returns {XlFormatConditionType} The type of the data bar conditional formatting rule.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/GetType.js
 	 */
@@ -23994,17 +24154,17 @@
 	ApiDatabar.prototype.Delete = ApiFormatCondition.prototype.Delete;
 
 	/**
-	 * Modifies the range to which this formatting rule applies.
+	 * Modifies the cell range to which the current conditional formatting rule applies.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @param {ApiRange} Range - A Range object representing the new range to which the formatting rule will be applied.
+	 * @param {ApiRange} Range - The range to which the current conditional formatting rule will be applied.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/ModifyAppliesToRange.js
 	 */
 	ApiDatabar.prototype.ModifyAppliesToRange = ApiFormatCondition.prototype.ModifyAppliesToRange;
 
 	/**
-	 * Sets the priority value for this conditional formatting rule to "1" so that it will be evaluated before all other rules on the worksheet.
+	 * Sets the priority value for the current conditional formatting rule to "1" so that it will be evaluated before all other rules on the worksheet.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
 	 * @since 9.1.0
@@ -24013,7 +24173,7 @@
 	ApiDatabar.prototype.SetFirstPriority = ApiFormatCondition.prototype.SetFirstPriority;
 
 	/**
-	 * Sets the evaluation order for this conditional formatting rule so it is evaluated after all other rules on the worksheet.
+	 * Sets the evaluation order for the current conditional formatting rule so it is evaluated after all other rules on the worksheet.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
 	 * @since 9.1.0
@@ -24024,20 +24184,20 @@
 	// Inherited methods for properties (with documentation for JSDoc)
 
 	/**
-	 * Returns the range to which the conditional formatting rule applies.
+	 * Returns the range of cells to which the current conditional formatting rule applies.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange}
+	 * @returns {ApiRange} The range of cells affected by the current condition.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/GetAppliesTo.js
 	 */
 	ApiDatabar.prototype.GetAppliesTo = ApiFormatCondition.prototype.GetAppliesTo;
 
 	/**
-	 * Returns the parent object for the specified object.
+	 * Returns the parent range object of the current format condition.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange}
+	 * @returns {ApiRange} The parent range object.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/GetParent.js
 	 */
@@ -24047,14 +24207,14 @@
 	 * Returns the priority value of the conditional formatting rule.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @returns {number}
+	 * @returns {number} The priority value of the conditional formatting rule.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/GetPriority.js
 	 */
 	ApiDatabar.prototype.GetPriority = ApiFormatCondition.prototype.GetPriority;
 
 	/**
-	 * Sets the priority value of the conditional formatting rule.
+	 * Sets the priority value for the conditional formatting rule.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
 	 * @param {number} Priority - The priority value (1-based).
@@ -24067,7 +24227,7 @@
 	 * Returns the pivot table condition object.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @returns {PTCondition | null}
+	 * @returns {PTCondition | null} The pivot table condition object.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/GetPTCondition.js
 	 */
@@ -24077,17 +24237,17 @@
 	 * Returns the scope type of the conditional formatting rule.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlPivotConditionScope}
+	 * @returns {XlPivotConditionScope} Returns "xlSelectionScope" for normal ranges, "xlDataFieldScope" for entire worksheet, "xlFieldsScope" for pivot tables.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/GetScopeType.js
 	 */
 	ApiDatabar.prototype.GetScopeType = ApiFormatCondition.prototype.GetScopeType;
 
 	/**
-	 * Sets the scope type of the conditional formatting rule.
+	 * Sets the scope type for the conditional formatting rule.
 	 * @memberof ApiDatabar
 	 * @typeofeditors ["CSE"]
-	 * @param {XlPivotConditionScope} ScopeType - The scope type.
+	 * @param {XlPivotConditionScope} ScopeType - The scope type: "xlSelectionScope", "xlDataFieldScope", or "xlFieldsScope".
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/SetScopeType.js
 	 */
@@ -24132,6 +24292,13 @@
 	 * Class representing an icon set conditional formatting rule.
 	 * @constructor
 	 * @extends ApiFormatCondition
+	 * @property {XlIconSet} IconSet - Returns or sets the icon set type used in the conditional formatting rule.
+	 * @property {boolean} PercentileValues - Returns or sets whether the thresholds for the icon set conditional format are determined by using percentiles.
+	 * @property {boolean} ReverseOrder - Returns or sets whether the icon order in the icon set rule is reversed.
+	 * @property {boolean} ShowIconOnly - Returns or sets whether to display only icons in the icon set rule (without cell values).
+	 * @property {ApiIconCriterion[]} IconCriteria - Returns a collection of icon criteria that represent the threshold values and icons for the icon set conditional formatting rule.
+	 * @property {string} Formula - Returns the formula associated with the icon set condition.
+	 * @property {XlFormatConditionType} Type - Returns the type of the icon set conditional formatting rule.
 	 */
 	function ApiIconSetCondition(rule, range, _parent) {
 		ApiFormatCondition.call(this, rule, range, _parent);
@@ -24522,10 +24689,11 @@
 	};
 
 	/**
-	 * Sets whether the thresholds for the icon set conditional format are determined by using percentiles.
+	 * Specifies whether the thresholds for the icon set conditional format are determined by using percentiles.
 	 * @memberof ApiIconSetCondition
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} percentileValues - True to set all thresholds to percentile, false otherwise.
+	 * @returns {boolean} True if the percentile values were successfully set, false otherwise.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiIconSetCondition/Methods/SetPercentileValues.js
 	 */
@@ -24543,10 +24711,10 @@
 			return false;
 		}
 
-		this.private_changeStyle(function(newRule) {
+		return this.private_changeStyle(function(newRule) {
 			let iconSetElement = newRule.aRuleElements && newRule.aRuleElements[0];
 			if (!iconSetElement || !iconSetElement.aCFVOs) {
-				return;
+				return false;
 			}
 
 			// Set type for all CFVOs (except the first one which is always the minimum)
@@ -24584,12 +24752,12 @@
 	});
 
 	/**
-	 * Returns whether the icon order is reversed.
+	 * Returns whether the icon order in the icon set rule is reversed.
 	 * @memberof ApiIconSetCondition
 	 * @typeofeditors ["CSE"]
 	 * @returns {boolean | null} True if the icon order is reversed, false otherwise, or null if not applicable.
 	 * @since 9.1.0
-	 * @see office-js-api/Examples/{Editor}/ApiIconSetCondition/Methods/GetReverse.js
+	 * @see office-js-api/Examples/{Editor}/ApiIconSetCondition/Methods/GetReverseOrder.js
 	 */
 	ApiIconSetCondition.prototype.GetReverseOrder = function() {
 		if (!this.rule || this.rule.type !== Asc.ECfType.iconSet) {
@@ -24605,13 +24773,13 @@
 	};
 
 	/**
-	 * Sets whether the icon order should be reversed.
+	 * Specifies whether the icon order in the icon set rule is reversed.
 	 * @memberof ApiIconSetCondition
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} reverse - True to reverse the icon order, false otherwise.
 	 * @returns {boolean} True if the setting was successfully applied, false otherwise.
 	 * @since 9.1.0
-	 * @see office-js-api/Examples/{Editor}/ApiIconSetCondition/Methods/SetReverse.js
+	 * @see office-js-api/Examples/{Editor}/ApiIconSetCondition/Methods/SetReverseOrder.js
 	 */
 	ApiIconSetCondition.prototype.SetReverseOrder = function(reverse) {
 		if (typeof reverse !== "boolean") {
@@ -24638,7 +24806,7 @@
 	});
 
 	/**
-	 * Returns whether only icons are displayed (without cell values).
+	 * Returns whether only icons are displayed in the icon set rule (without cell values).
 	 * @memberof ApiIconSetCondition
 	 * @typeofeditors ["CSE"]
 	 * @returns {boolean | null} True if only icons are shown, false if values are also shown, or null if not applicable.
@@ -24659,7 +24827,7 @@
 	};
 
 	/**
-	 * Sets whether to display only icons (without cell values).
+	 * Specifies whether to display only icons in the icon set rule (without cell values).
 	 * @memberof ApiIconSetCondition
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} showIconOnly - True to show only icons, false to show both icons and values.
@@ -24695,7 +24863,7 @@
 	 * Returns a collection of icon criteria that represent the threshold values and icons for the icon set conditional formatting rule.
 	 * @memberof ApiIconSetCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiIconCriterion[] | null} Collection of icon criteria objects, or null if the rule is not an icon set type.
+	 * @returns {ApiIconCriterion[] | null} A collection of icon criteria objects, or null if the rule is not an icon set type.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiIconSetCondition/Methods/GetIconCriteria.js
 	 */
@@ -24764,7 +24932,7 @@
 	 * Returns the type of the icon set conditional formatting rule.
 	 * @memberof ApiIconSetCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlFormatConditionType} Returns "xlIconSets".
+	 * @returns {XlFormatConditionType} The type of the icon set conditional formatting rule.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiIconSetCondition/Methods/GetType.js
 	 */
@@ -24790,17 +24958,17 @@
 	ApiIconSetCondition.prototype.Delete = ApiFormatCondition.prototype.Delete;
 
 	/**
-	 * Modifies the range to which this formatting rule applies.
+	 * Modifies the cell range to which the current conditional formatting rule applies.
 	 * @memberof ApiIconSetCondition
 	 * @typeofeditors ["CSE"]
-	 * @param {ApiRange} Range - A Range object representing the new range to which the formatting rule will be applied.
+	 * @param {ApiRange} Range - The range to which the current conditional formatting rule will be applied.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiIconSetCondition/Methods/ModifyAppliesToRange.js
 	 */
 	ApiIconSetCondition.prototype.ModifyAppliesToRange = ApiFormatCondition.prototype.ModifyAppliesToRange;
 
 	/**
-	 * Sets the priority value for this conditional formatting rule to "1" so that it will be evaluated before all other rules on the worksheet.
+	 * Sets the priority value for the current conditional formatting rule to "1" so that it will be evaluated before all other rules on the worksheet.
 	 * @memberof ApiIconSetCondition
 	 * @typeofeditors ["CSE"]
 	 * @since 9.1.0
@@ -24809,7 +24977,7 @@
 	ApiIconSetCondition.prototype.SetFirstPriority = ApiFormatCondition.prototype.SetFirstPriority;
 
 	/**
-	 * Sets the evaluation order for this conditional formatting rule so it is evaluated after all other rules on the worksheet.
+	 * Sets the evaluation order for the current conditional formatting rule so it is evaluated after all other rules on the worksheet.
 	 * @memberof ApiIconSetCondition
 	 * @typeofeditors ["CSE"]
 	 * @since 9.1.0
@@ -24820,20 +24988,20 @@
 	// Inherited methods for properties (with documentation for JSDoc)
 
 	/**
-	 * Returns the range to which the conditional formatting rule applies.
+	 * Returns the range of cells to which the current conditional formatting rule applies.
 	 * @memberof ApiIconSetCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange}
+	 * @returns {ApiRange} The range of cells affected by the current condition.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiIconSetCondition/Methods/GetAppliesTo.js
 	 */
 	ApiIconSetCondition.prototype.GetAppliesTo = ApiFormatCondition.prototype.GetAppliesTo;
 
 	/**
-	 * Returns the parent object for the specified object.
+	 * Returns the parent range object of the current format condition.
 	 * @memberof ApiIconSetCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange}
+	 * @returns {ApiRange} The parent range object.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiIconSetCondition/Methods/GetParent.js
 	 */
@@ -24843,14 +25011,14 @@
 	 * Returns the priority value of the conditional formatting rule.
 	 * @memberof ApiIconSetCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {number}
+	 * @returns {number} The priority value of the conditional formatting rule.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiIconSetCondition/Methods/GetPriority.js
 	 */
 	ApiIconSetCondition.prototype.GetPriority = ApiFormatCondition.prototype.GetPriority;
 
 	/**
-	 * Sets the priority value of the conditional formatting rule.
+	 * Sets the priority value for the conditional formatting rule.
 	 * @memberof ApiIconSetCondition
 	 * @typeofeditors ["CSE"]
 	 * @param {number} Priority - The priority value (1-based).
@@ -24863,7 +25031,7 @@
 	 * Returns the pivot table condition object.
 	 * @memberof ApiIconSetCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {PTCondition | null}
+	 * @returns {PTCondition | null} The pivot table condition object.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiIconSetCondition/Methods/GetPTCondition.js
 	 */
@@ -24873,17 +25041,17 @@
 	 * Returns the scope type of the conditional formatting rule.
 	 * @memberof ApiIconSetCondition
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlPivotConditionScope}
+	 * @returns {XlPivotConditionScope} Returns "xlSelectionScope" for normal ranges, "xlDataFieldScope" for entire worksheet, "xlFieldsScope" for pivot tables.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiIconSetCondition/Methods/GetScopeType.js
 	 */
 	ApiIconSetCondition.prototype.GetScopeType = ApiFormatCondition.prototype.GetScopeType;
 
 	/**
-	 * Sets the scope type of the conditional formatting rule.
+	 * Sets the scope type for the conditional formatting rule.
 	 * @memberof ApiIconSetCondition
 	 * @typeofeditors ["CSE"]
-	 * @param {XlPivotConditionScope} ScopeType - The scope type.
+	 * @param {XlPivotConditionScope} ScopeType - The scope type: "xlSelectionScope", "xlDataFieldScope", or "xlFieldsScope".
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiIconSetCondition/Methods/SetScopeType.js
 	 */
@@ -24974,6 +25142,11 @@
 	/**
 	 * Class representing a single icon criterion.
 	 * @constructor
+	 * @property {XlConditionValueTypes} Type - Returns or sets the condition value type of the icon criterion.
+	 * @property {string | number} Value - Returns or sets the threshold value of the icon criterion.
+	 * @property {string} Operator - Returns or sets the comparison operator of the icon criterion.
+	 * @property {number} Index - Returns the index of the icon criterion in the collection.
+	 * @property {XlIcon} Icon - Returns or sets the icon of the icon criterion.
 	 */
 	function ApiIconCriterion(cfvo, iconSet, iconSetElement, parent, index) {
 		this.cfvo = cfvo;
@@ -25003,7 +25176,7 @@
 	 * Sets the condition value type for the icon criterion.
 	 * @memberof ApiIconCriterion
 	 * @typeofeditors ["CSE"]
-	 * @param {XlConditionValueTypes} type - The condition value type. Only xlConditionValueNumber, xlConditionValuePercent, xlConditionValuePercentile, or xlConditionValueFormula are supported.
+	 * @param {XlConditionValueTypes} type - The condition value type. Only "xlConditionValueNumber", "xlConditionValuePercent", "xlConditionValuePercentile", or "xlConditionValueFormula" are supported.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiIconCriterion/Methods/SetType.js
 	 */
@@ -25030,13 +25203,13 @@
 		}
 
 		// MS Excel doesn't allow changing the type of the first criterion (minimum)
-		if (this.GetIndex() === 0) {
+		if (this.GetIndex() === 1) {
 			return;
 		}
 
 		let t = this;
 		this.parent.private_changeStyle(function (newRule) {
-			let index = t.GetIndex(); // Convert to 0-based index
+			let index = t.GetIndex() - 1; // Convert to 0-based index
 			if (newRule.aRuleElements[0].aCFVOs && newRule.aRuleElements[0].aCFVOs[index]) {
 				newRule.aRuleElements[0].aCFVOs[index].asc_setType(internalType);
 
@@ -25104,7 +25277,7 @@
 
 		let t = this;
 		this.parent.private_changeStyle(function (newRule) {
-			let index = t.GetIndex();
+			let index = t.GetIndex() - 1;
 			newRule.aRuleElements[0].aCFVOs[index].asc_setVal(value);
 		}, true);
 	};
@@ -25119,7 +25292,7 @@
 	});
 
 	/**
-	 * Returns the comparison operator for the icon criterion.
+	 * Returns the comparison operator of the icon criterion.
 	 * @memberof ApiIconCriterion
 	 * @typeofeditors ["CSE"]
 	 * @returns {string | null} The operator ("xlGreaterEqual" or "xlGreater"), or null if not available.
@@ -25145,7 +25318,7 @@
 		if (this.cfvo && typeof operator === "string") {
 			let t = this;
 			this.parent.private_changeStyle(function (newRule) {
-				let index = t.GetIndex();
+				let index = t.GetIndex() - 1;
 				newRule.aRuleElements[0].aCFVOs[index].asc_setGte(operator === "xlGreaterEqual");
 			}, true);
 		}
@@ -25164,12 +25337,12 @@
 	 * Returns the index of the icon criterion in the collection.
 	 * @memberof ApiIconCriterion
 	 * @typeofeditors ["CSE"]
-	 * @returns {number} The 1-based index of the criterion.
+	 * @returns {number} The 1-based index of the icon criterion.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiIconCriterion/Methods/GetIndex.js
 	 */
 	ApiIconCriterion.prototype.GetIndex = function() {
-		return this.index;
+		return this.index + 1;
 		// if (!this.iconSetElement || !this.iconSetElement.aCFVOs) {
 		// 	return 1;
 		// }
@@ -25190,7 +25363,7 @@
 	});
 
 	/**
-	 * Returns the icon associated with this criterion.
+	 * Returns the icon associated with the current icon criterion.
 	 * @memberof ApiIconCriterion
 	 * @typeofeditors ["CSE"]
 	 * @returns {XlIcon | null} The icon constant, or null if not available.
@@ -25683,7 +25856,7 @@
 	}
 
 	/**
-	 * Sets the icon for this criterion.
+	 * Sets the icon for the current icon criterion.
 	 * @memberof ApiIconCriterion
 	 * @typeofeditors ["CSE"]
 	 * @param {XlIcon} icon - The icon constant to set.
@@ -25737,6 +25910,10 @@
 	 * Class representing a top 10 conditional formatting rule.
 	 * @constructor
 	 * @extends ApiFormatCondition
+	 * @property {XlTopBottom} TopBottom - Returns or sets the "XlTopBottom" constant indicating whether the ranking is evaluated from the top or bottom.
+	 * @property {boolean} Percent - Returns or sets whether the top 10 ranking is percentage-based.
+	 * @property {number} Rank - Returns or sets the rank value of the top 10 condition.
+	 * @property {XlFormatConditionType} Type - Returns the type of the top 10 conditional formatting rule.
 	 */
 	function ApiTop10(rule, range, _parent) {
 		ApiFormatCondition.call(this, rule, range, _parent);
@@ -25779,55 +25956,55 @@
 		return sCalcFor;
 	}
 
-	/**
-	 * Returns the calculation scope for the top 10 condition in pivot tables.
-	 * @memberof ApiTop10
-	 * @typeofeditors ["CSE"]
-	 * @returns {XlCalcFor}
-	 * @since 9.1.0
-	 * @see office-js-api/Examples/{Editor}/ApiTop10/Methods/GetCalcFor.js
-	 */
-	ApiTop10.prototype.GetCalcFor = function() {
-		if (!this.rule || !this.rule.pivot) {
-			return "xlAllValues";
-		}
-		return ToXlCalcForFrom(this.rule.pivot.calcFor || 0);
-	};
+	// /**
+	//  * Returns the calculation scope for the top 10 condition in pivot tables.
+	//  * @memberof ApiTop10
+	//  * @typeofeditors ["CSE"]
+	//  * @returns {XlCalcFor}
+	//  * @since 9.1.0
+	//  * @see office-js-api/Examples/{Editor}/ApiTop10/Methods/GetCalcFor.js
+	//  */
+	// ApiTop10.prototype.GetCalcFor = function() {
+	// 	if (!this.rule || !this.rule.pivot) {
+	// 		return "xlAllValues";
+	// 	}
+	// 	return ToXlCalcForFrom(this.rule.pivot.calcFor || 0);
+	// };
 
-	/**
-	 * Sets the calculation scope for the top 10 condition in pivot tables.
-	 * @memberof ApiTop10
-	 * @typeofeditors ["CSE"]
-	 * @param {XlCalcFor} calcFor - The calculation scope
-	 * @since 9.1.0
-	 * @see office-js-api/Examples/{Editor}/ApiTop10/Methods/SetCalcFor.js
-	 */
-	ApiTop10.prototype.SetCalcFor = function(calcFor) {
-		if (!this.rule || typeof calcFor !== "string") {
-			return;
-		}
-
-		let internalCalcFor = FromXlCalcForTo(calcFor);
-		if (internalCalcFor === -1) {
-			return;
-		}
-
-		this.private_changeStyle(function (newRule) {
-			if (!newRule.pivot) {
-				newRule.pivot = {};
-			}
-			newRule.pivot.calcFor = internalCalcFor;
-		}, true);
-	};
-
-	Object.defineProperty(ApiTop10.prototype, "CalcFor", {
-		get: function() {
-			return this.GetCalcFor();
-		},
-		set: function(value) {
-			this.SetCalcFor(value);
-		}
-	});
+	// /**
+	//  * Sets the calculation scope for the top 10 condition in pivot tables.
+	//  * @memberof ApiTop10
+	//  * @typeofeditors ["CSE"]
+	//  * @param {XlCalcFor} calcFor - The calculation scope
+	//  * @since 9.1.0
+	//  * @see office-js-api/Examples/{Editor}/ApiTop10/Methods/SetCalcFor.js
+	//  */
+	// ApiTop10.prototype.SetCalcFor = function(calcFor) {
+	// 	if (!this.rule || typeof calcFor !== "string") {
+	// 		return;
+	// 	}
+	//
+	// 	let internalCalcFor = FromXlCalcForTo(calcFor);
+	// 	if (internalCalcFor === -1) {
+	// 		return;
+	// 	}
+	//
+	// 	this.private_changeStyle(function (newRule) {
+	// 		if (!newRule.pivot) {
+	// 			newRule.pivot = {};
+	// 		}
+	// 		newRule.pivot.calcFor = internalCalcFor;
+	// 	}, true);
+	// };
+	//
+	// Object.defineProperty(ApiTop10.prototype, "CalcFor", {
+	// 	get: function() {
+	// 		return this.GetCalcFor();
+	// 	},
+	// 	set: function(value) {
+	// 		this.SetCalcFor(value);
+	// 	}
+	// });
 
 	function FromXlTopBottomTo(sTopBottom) {
 		switch (sTopBottom) {
@@ -25845,10 +26022,10 @@
 	}
 
 	/**
-	 * Returns one of the constants of the XlTopBottom enumeration, which determines if the ranking is evaluated from the top or bottom.
+	 * Returns the "XlTopBottom" constant indicating whether the ranking is evaluated from the top or bottom.
 	 * @memberof ApiTop10
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlTopBottom} The XlTopBottom enumeration constant.
+	 * @returns {XlTopBottom} The ranking direction.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiTop10/Methods/GetTopBottom.js
 	 */
@@ -25860,10 +26037,10 @@
 	};
 
 	/**
-	 * Sets one of the constants of the XlTopBottom enumeration, which determines if the ranking is evaluated from the top or bottom.
+	 * Sets the "XlTopBottom" constant indicating whether the ranking is evaluated from the top or bottom.
 	 * @memberof ApiTop10
 	 * @typeofeditors ["CSE"]
-	 * @param {XlTopBottom} topBottom - The XlTopBottom enumeration constant.
+	 * @param {XlTopBottom} topBottom - The ranking direction.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiTop10/Methods/SetTopBottom.js
 	 */
@@ -25893,10 +26070,10 @@
 	});
 
 	/**
-	 * Returns whether the rank is percentage-based.
+	 * Returns whether the top 10 ranking is percentage-based.
 	 * @memberof ApiTop10
 	 * @typeofeditors ["CSE"]
-	 * @returns {boolean} True if percentage-based, false if count-based.
+	 * @returns {boolean} True if the ranking is percentage-based, false if count-based.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiTop10/Methods/GetPercent.js
 	 */
@@ -25908,10 +26085,10 @@
 	};
 
 	/**
-	 * Sets whether the rank is percentage-based.
+	 * Sets whether the top 10 ranking is percentage-based.
 	 * @memberof ApiTop10
 	 * @typeofeditors ["CSE"]
-	 * @param {boolean} percent - True for percentage-based, false for count-based.
+	 * @param {boolean} percent - True if the ranking is percentage-based, false if count-based.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiTop10/Methods/SetPercent.js
 	 */
@@ -25990,7 +26167,7 @@
 	 * Returns the type of the top 10 conditional formatting rule.
 	 * @memberof ApiTop10
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlFormatConditionType}
+	 * @returns {XlFormatConditionType} The type of the top 10 conditional formatting rule.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiTop10/Methods/GetType.js
 	 */
@@ -26016,17 +26193,17 @@
 	ApiTop10.prototype.Delete = ApiFormatCondition.prototype.Delete;
 
 	/**
-	 * Modifies the range to which this formatting rule applies.
+	 * Modifies the cell range to which the current conditional formatting rule applies.
 	 * @memberof ApiTop10
 	 * @typeofeditors ["CSE"]
-	 * @param {ApiRange} Range - A Range object representing the new range to which the formatting rule will be applied.
+	 * @param {ApiRange} Range - The range to which the current conditional formatting rule will be applied.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiTop10/Methods/ModifyAppliesToRange.js
 	 */
 	ApiTop10.prototype.ModifyAppliesToRange = ApiFormatCondition.prototype.ModifyAppliesToRange;
 
 	/**
-	 * Sets the priority value for this conditional formatting rule to "1" so that it will be evaluated before all other rules on the worksheet.
+	 * Sets the priority value for the current conditional formatting rule to "1" so that it will be evaluated before all other rules on the worksheet.
 	 * @memberof ApiTop10
 	 * @typeofeditors ["CSE"]
 	 * @since 9.1.0
@@ -26035,7 +26212,7 @@
 	ApiTop10.prototype.SetFirstPriority = ApiFormatCondition.prototype.SetFirstPriority;
 
 	/**
-	 * Sets the evaluation order for this conditional formatting rule so it is evaluated after all other rules on the worksheet.
+	 * Sets the evaluation order for the current conditional formatting rule so it is evaluated after all other rules on the worksheet.
 	 * @memberof ApiTop10
 	 * @typeofeditors ["CSE"]
 	 * @since 9.1.0
@@ -26046,20 +26223,20 @@
 	// Inherited methods for properties (with documentation for JSDoc)
 
 	/**
-	 * Returns the range to which the conditional formatting rule applies.
+	 * Returns the range of cells to which the current conditional formatting rule applies.
 	 * @memberof ApiTop10
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange}
+	 * @returns {ApiRange} The range of cells affected by the current condition.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiTop10/Methods/GetAppliesTo.js
 	 */
 	ApiTop10.prototype.GetAppliesTo = ApiFormatCondition.prototype.GetAppliesTo;
 
 	/**
-	 * Returns the parent object for the specified object.
+	 * Returns the parent range object of the current format condition.
 	 * @memberof ApiTop10
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange}
+	 * @returns {ApiRange} The parent range object.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiTop10/Methods/GetParent.js
 	 */
@@ -26069,14 +26246,14 @@
 	 * Returns the priority value of the conditional formatting rule.
 	 * @memberof ApiTop10
 	 * @typeofeditors ["CSE"]
-	 * @returns {number}
+	 * @returns {number} The priority value of the conditional formatting rule.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiTop10/Methods/GetPriority.js
 	 */
 	ApiTop10.prototype.GetPriority = ApiFormatCondition.prototype.GetPriority;
 
 	/**
-	 * Sets the priority value of the conditional formatting rule.
+	 * Sets the priority value for the conditional formatting rule.
 	 * @memberof ApiTop10
 	 * @typeofeditors ["CSE"]
 	 * @param {number} Priority - The priority value (1-based).
@@ -26089,7 +26266,7 @@
 	 * Returns the pivot table condition object.
 	 * @memberof ApiTop10
 	 * @typeofeditors ["CSE"]
-	 * @returns {PTCondition | null}
+	 * @returns {PTCondition | null} The pivot table condition object.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiTop10/Methods/GetPTCondition.js
 	 */
@@ -26099,17 +26276,17 @@
 	 * Returns the scope type of the conditional formatting rule.
 	 * @memberof ApiTop10
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlPivotConditionScope}
+	 * @returns {XlPivotConditionScope} Returns "xlSelectionScope" for normal ranges, "xlDataFieldScope" for entire worksheet, "xlFieldsScope" for pivot tables.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiTop10/Methods/GetScopeType.js
 	 */
 	ApiTop10.prototype.GetScopeType = ApiFormatCondition.prototype.GetScopeType;
 
 	/**
-	 * Sets the scope type of the conditional formatting rule.
+	 * Sets the scope type for the conditional formatting rule.
 	 * @memberof ApiTop10
 	 * @typeofeditors ["CSE"]
-	 * @param {XlPivotConditionScope} ScopeType - The scope type.
+	 * @param {XlPivotConditionScope} ScopeType - The scope type: "xlSelectionScope", "xlDataFieldScope", or "xlFieldsScope".
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiTop10/Methods/SetScopeType.js
 	 */
@@ -26139,7 +26316,7 @@
 	 * Returns the font formatting for the top 10 conditional formatting rule.
 	 * @memberof ApiTop10
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiFont}
+	 * @returns {ApiFont} An ApiFont object representing the font applied by the format condition.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiTop10/Methods/GetFont.js
 	 */
@@ -26159,7 +26336,7 @@
 	 * Returns the number format for the top 10 conditional formatting rule.
 	 * @memberof ApiTop10
 	 * @typeofeditors ["CSE"]
-	 * @returns {string}
+	 * @returns {string} The number format.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiTop10/Methods/GetNumberFormat.js
 	 */
@@ -26179,7 +26356,7 @@
 	 * Returns the fill color for the top 10 conditional formatting rule.
 	 * @memberof ApiTop10
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiColor | null}
+	 * @returns {ApiColor | null} The background color applied by the format condition, or null if none is set.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiTop10/Methods/GetFillColor.js
 	 */
@@ -26215,6 +26392,8 @@
 	 * Class representing a unique values conditional formatting rule.
 	 * @constructor
 	 * @extends ApiFormatCondition
+	 * @property {XlDuplicateValues} DupeUnique - Returns or sets the setting that specifies whether to format duplicate or unique values for the unique values conditional formatting rule.
+	 * @property {XlFormatConditionType} Type - Returns the type of the unique values conditional formatting rule.
 	 */
 	function ApiUniqueValues(rule, range, _parent) {
 		ApiFormatCondition.call(this, rule, range, _parent);
@@ -26246,10 +26425,10 @@
 	}
 
 	/**
-	 * Returns the duplicate/unique value setting for the unique values conditional formatting rule.
+	 * Returns the setting that specifies whether to format duplicate or unique values for the unique values conditional formatting rule.
 	 * @memberof ApiUniqueValues
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlDuplicateValues} The duplicate/unique value setting.
+	 * @returns {XlDuplicateValues} Specifies whether to format duplicate or unique values.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiUniqueValues/Methods/GetDupeUnique.js
 	 */
@@ -26261,10 +26440,10 @@
 	};
 
 	/**
-	 * Sets the duplicate/unique value setting for the unique values conditional formatting rule.
+	 * Sets the setting that specifies whether to format duplicate or unique values for the unique values conditional formatting rule.
 	 * @memberof ApiUniqueValues
 	 * @typeofeditors ["CSE"]
-	 * @param {XlDuplicateValues} dupeUnique - The duplicate/unique value setting.
+	 * @param {XlDuplicateValues} dupeUnique - Specifies whether to format duplicate or unique values.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiUniqueValues/Methods/SetDupeUnique.js
 	 */
@@ -26297,7 +26476,7 @@
 	 * Returns the type of the unique values conditional formatting rule.
 	 * @memberof ApiUniqueValues
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlFormatConditionType}
+	 * @returns {XlFormatConditionType} The type of the unique values conditional formatting rule.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiUniqueValues/Methods/GetType.js
 	 */
@@ -26323,17 +26502,17 @@
 	ApiUniqueValues.prototype.Delete = ApiFormatCondition.prototype.Delete;
 
 	/**
-	 * Modifies the range to which this formatting rule applies.
+	 * Modifies the cell range to which the current conditional formatting rule applies.
 	 * @memberof ApiUniqueValues
 	 * @typeofeditors ["CSE"]
-	 * @param {ApiRange} Range - A Range object representing the new range to which the formatting rule will be applied.
+	 * @param {ApiRange} Range - The range to which the current conditional formatting rule will be applied.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiUniqueValues/Methods/ModifyAppliesToRange.js
 	 */
 	ApiUniqueValues.prototype.ModifyAppliesToRange = ApiFormatCondition.prototype.ModifyAppliesToRange;
 
 	/**
-	 * Sets the priority value for this conditional formatting rule to "1" so that it will be evaluated before all other rules on the worksheet.
+	 * Sets the priority value for the current conditional formatting rule to "1" so that it will be evaluated before all other rules on the worksheet.
 	 * @memberof ApiUniqueValues
 	 * @typeofeditors ["CSE"]
 	 * @since 9.1.0
@@ -26342,7 +26521,7 @@
 	ApiUniqueValues.prototype.SetFirstPriority = ApiFormatCondition.prototype.SetFirstPriority;
 
 	/**
-	 * Sets the evaluation order for this conditional formatting rule so it is evaluated after all other rules on the worksheet.
+	 * Sets the evaluation order for the current conditional formatting rule so it is evaluated after all other rules on the worksheet.
 	 * @memberof ApiUniqueValues
 	 * @typeofeditors ["CSE"]
 	 * @since 9.1.0
@@ -26353,20 +26532,20 @@
 	// Inherited methods for properties (with documentation for JSDoc)
 	
 	/**
-	 * Returns the range to which the conditional formatting rule applies.
+	 * Returns the range of cells to which the current conditional formatting rule applies.
 	 * @memberof ApiUniqueValues
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange}
+	 * @returns {ApiRange} The range of cells affected by the current condition.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiUniqueValues/Methods/GetAppliesTo.js
 	 */
 	ApiUniqueValues.prototype.GetAppliesTo = ApiFormatCondition.prototype.GetAppliesTo;
 
 	/**
-	 * Returns the parent object for the specified object.
+	 * Returns the parent range object of the current format condition.
 	 * @memberof ApiUniqueValues
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange}
+	 * @returns {ApiRange} The parent range object.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiUniqueValues/Methods/GetParent.js
 	 */
@@ -26376,14 +26555,14 @@
 	 * Returns the priority value of the conditional formatting rule.
 	 * @memberof ApiUniqueValues
 	 * @typeofeditors ["CSE"]
-	 * @returns {number}
+	 * @returns {number} The priority value of the conditional formatting rule.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiUniqueValues/Methods/GetPriority.js
 	 */
 	ApiUniqueValues.prototype.GetPriority = ApiFormatCondition.prototype.GetPriority;
 
 	/**
-	 * Sets the priority value of the conditional formatting rule.
+	 * Sets the priority value for the conditional formatting rule.
 	 * @memberof ApiUniqueValues
 	 * @typeofeditors ["CSE"]
 	 * @param {number} Priority - The priority value (1-based).
@@ -26396,7 +26575,7 @@
 	 * Returns the pivot table condition object.
 	 * @memberof ApiUniqueValues
 	 * @typeofeditors ["CSE"]
-	 * @returns {PTCondition | null}
+	 * @returns {PTCondition | null} The pivot table condition object.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiUniqueValues/Methods/GetPTCondition.js
 	 */
@@ -26406,17 +26585,17 @@
 	 * Returns the scope type of the conditional formatting rule.
 	 * @memberof ApiUniqueValues
 	 * @typeofeditors ["CSE"]
-	 * @returns {XlPivotConditionScope}
+	 * @returns {XlPivotConditionScope} Returns "xlSelectionScope" for normal ranges, "xlDataFieldScope" for entire worksheet, "xlFieldsScope" for pivot tables.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiUniqueValues/Methods/GetScopeType.js
 	 */
 	ApiUniqueValues.prototype.GetScopeType = ApiFormatCondition.prototype.GetScopeType;
 
 	/**
-	 * Sets the scope type of the conditional formatting rule.
+	 * Sets the scope type for the conditional formatting rule.
 	 * @memberof ApiUniqueValues
 	 * @typeofeditors ["CSE"]
-	 * @param {XlPivotConditionScope} ScopeType - The scope type.
+	 * @param {XlPivotConditionScope} ScopeType - The scope type: "xlSelectionScope", "xlDataFieldScope", or "xlFieldsScope".
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiUniqueValues/Methods/SetScopeType.js
 	 */
@@ -26446,7 +26625,7 @@
 	 * Returns the font formatting for the unique values conditional formatting rule.
 	 * @memberof ApiUniqueValues
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiFont}
+	 * @returns {ApiFont} An ApiFont object representing the font applied by the format condition.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiUniqueValues/Methods/GetFont.js
 	 */
@@ -26466,7 +26645,7 @@
 	 * Returns the number format for the unique values conditional formatting rule.
 	 * @memberof ApiUniqueValues
 	 * @typeofeditors ["CSE"]
-	 * @returns {string}
+	 * @returns {string} The number format.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiUniqueValues/Methods/GetNumberFormat.js
 	 */
@@ -26486,7 +26665,7 @@
 	 * Returns the fill color for the unique values conditional formatting rule.
 	 * @memberof ApiUniqueValues
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiColor | null}
+	 * @returns {ApiColor | null} The background color applied by the format condition, or null if none is set.
 	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiUniqueValues/Methods/GetFillColor.js
 	 */
@@ -26522,8 +26701,8 @@
 	ApiUniqueValues.prototype.SetPercent = null;
 	ApiUniqueValues.prototype.GetRank = null;
 	ApiUniqueValues.prototype.SetRank = null;
-	ApiUniqueValues.prototype.GetCalcFor = null;
-	ApiUniqueValues.prototype.SetCalcFor = null;
+	//ApiUniqueValues.prototype.GetCalcFor = null;
+	//ApiUniqueValues.prototype.SetCalcFor = null;
 
 
 	Api.prototype["Format"]                = Api.prototype.Format;
@@ -27435,36 +27614,36 @@
 	ApiPivotItem.prototype["GetVisible"] = ApiPivotItem.prototype.GetVisible;
 	ApiPivotItem.prototype["SetVisible"] = ApiPivotItem.prototype.SetVisible;
 
-	// ApiValidation.prototype["Add"]                  = ApiValidation.prototype.Add;
-	// ApiValidation.prototype["Delete"]               = ApiValidation.prototype.Delete;
-	// ApiValidation.prototype["Modify"]               = ApiValidation.prototype.Modify;
-	// ApiValidation.prototype["GetType"]              = ApiValidation.prototype.GetType;
-	// ApiValidation.prototype["SetType"]              = ApiValidation.prototype.SetType;
-	// ApiValidation.prototype["GetAlertStyle"]        = ApiValidation.prototype.GetAlertStyle;
-	// ApiValidation.prototype["SetAlertStyle"]        = ApiValidation.prototype.SetAlertStyle;
-	// ApiValidation.prototype["GetIgnoreBlank"]       = ApiValidation.prototype.GetIgnoreBlank;
-	// ApiValidation.prototype["SetIgnoreBlank"]       = ApiValidation.prototype.SetIgnoreBlank;
-	// ApiValidation.prototype["GetInCellDropdown"]    = ApiValidation.prototype.GetInCellDropdown;
-	// ApiValidation.prototype["SetInCellDropdown"]    = ApiValidation.prototype.SetInCellDropdown;
-	// ApiValidation.prototype["GetShowInput"]         = ApiValidation.prototype.GetShowInput;
-	// ApiValidation.prototype["SetShowInput"]         = ApiValidation.prototype.SetShowInput;
-	// ApiValidation.prototype["GetShowError"]         = ApiValidation.prototype.GetShowError;
-	// ApiValidation.prototype["SetShowError"]         = ApiValidation.prototype.SetShowError;
-	// ApiValidation.prototype["GetInputTitle"]        = ApiValidation.prototype.GetInputTitle;
-	// ApiValidation.prototype["SetInputTitle"]        = ApiValidation.prototype.SetInputTitle;
-	// ApiValidation.prototype["GetInputMessage"]      = ApiValidation.prototype.GetInputMessage;
-	// ApiValidation.prototype["SetInputMessage"]      = ApiValidation.prototype.SetInputMessage;
-	// ApiValidation.prototype["GetErrorTitle"]        = ApiValidation.prototype.GetErrorTitle;
-	// ApiValidation.prototype["SetErrorTitle"]        = ApiValidation.prototype.SetErrorTitle;
-	// ApiValidation.prototype["GetErrorMessage"]      = ApiValidation.prototype.GetErrorMessage;
-	// ApiValidation.prototype["SetErrorMessage"]      = ApiValidation.prototype.SetErrorMessage;
-	// ApiValidation.prototype["GetFormula1"]          = ApiValidation.prototype.GetFormula1;
-	// ApiValidation.prototype["SetFormula1"]          = ApiValidation.prototype.SetFormula1;
-	// ApiValidation.prototype["GetFormula2"]          = ApiValidation.prototype.GetFormula2;
-	// ApiValidation.prototype["SetFormula2"]          = ApiValidation.prototype.SetFormula2;
-	// ApiValidation.prototype["GetOperator"]          = ApiValidation.prototype.GetOperator;
-	// ApiValidation.prototype["SetOperator"]          = ApiValidation.prototype.SetOperator;
-	// ApiValidation.prototype["GetParent"]            = ApiValidation.prototype.GetParent;
+	ApiValidation.prototype["Add"]                  = ApiValidation.prototype.Add;
+	ApiValidation.prototype["Delete"]               = ApiValidation.prototype.Delete;
+	ApiValidation.prototype["Modify"]               = ApiValidation.prototype.Modify;
+	ApiValidation.prototype["GetType"]              = ApiValidation.prototype.GetType;
+	ApiValidation.prototype["SetType"]              = ApiValidation.prototype.SetType;
+	ApiValidation.prototype["GetAlertStyle"]        = ApiValidation.prototype.GetAlertStyle;
+	ApiValidation.prototype["SetAlertStyle"]        = ApiValidation.prototype.SetAlertStyle;
+	ApiValidation.prototype["GetIgnoreBlank"]       = ApiValidation.prototype.GetIgnoreBlank;
+	ApiValidation.prototype["SetIgnoreBlank"]       = ApiValidation.prototype.SetIgnoreBlank;
+	ApiValidation.prototype["GetInCellDropdown"]    = ApiValidation.prototype.GetInCellDropdown;
+	ApiValidation.prototype["SetInCellDropdown"]    = ApiValidation.prototype.SetInCellDropdown;
+	ApiValidation.prototype["GetShowInput"]         = ApiValidation.prototype.GetShowInput;
+	ApiValidation.prototype["SetShowInput"]         = ApiValidation.prototype.SetShowInput;
+	ApiValidation.prototype["GetShowError"]         = ApiValidation.prototype.GetShowError;
+	ApiValidation.prototype["SetShowError"]         = ApiValidation.prototype.SetShowError;
+	ApiValidation.prototype["GetInputTitle"]        = ApiValidation.prototype.GetInputTitle;
+	ApiValidation.prototype["SetInputTitle"]        = ApiValidation.prototype.SetInputTitle;
+	ApiValidation.prototype["GetInputMessage"]      = ApiValidation.prototype.GetInputMessage;
+	ApiValidation.prototype["SetInputMessage"]      = ApiValidation.prototype.SetInputMessage;
+	ApiValidation.prototype["GetErrorTitle"]        = ApiValidation.prototype.GetErrorTitle;
+	ApiValidation.prototype["SetErrorTitle"]        = ApiValidation.prototype.SetErrorTitle;
+	ApiValidation.prototype["GetErrorMessage"]      = ApiValidation.prototype.GetErrorMessage;
+	ApiValidation.prototype["SetErrorMessage"]      = ApiValidation.prototype.SetErrorMessage;
+	ApiValidation.prototype["GetFormula1"]          = ApiValidation.prototype.GetFormula1;
+	ApiValidation.prototype["SetFormula1"]          = ApiValidation.prototype.SetFormula1;
+	ApiValidation.prototype["GetFormula2"]          = ApiValidation.prototype.GetFormula2;
+	ApiValidation.prototype["SetFormula2"]          = ApiValidation.prototype.SetFormula2;
+	ApiValidation.prototype["GetOperator"]          = ApiValidation.prototype.GetOperator;
+	ApiValidation.prototype["SetOperator"]          = ApiValidation.prototype.SetOperator;
+	ApiValidation.prototype["GetParent"]            = ApiValidation.prototype.GetParent;
 
 	ApiFormatConditions.prototype["Add"] = ApiFormatConditions.prototype.Add;
 	ApiFormatConditions.prototype["AddAboveAverage"] = ApiFormatConditions.prototype.AddAboveAverage;
@@ -27523,8 +27702,8 @@
 	ApiAboveAverage.prototype["GetNumStdDev"] = ApiAboveAverage.prototype.GetNumStdDev;
 	ApiAboveAverage.prototype["SetNumStdDev"] = ApiAboveAverage.prototype.SetNumStdDev;
 	ApiAboveAverage.prototype["GetType"] = ApiAboveAverage.prototype.GetType;
-	ApiAboveAverage.prototype["GetCalcFor"] = ApiAboveAverage.prototype.GetCalcFor;
-	ApiAboveAverage.prototype["SetCalcFor"] = ApiAboveAverage.prototype.SetCalcFor;
+	//ApiAboveAverage.prototype["GetCalcFor"] = ApiAboveAverage.prototype.GetCalcFor;
+	//ApiAboveAverage.prototype["SetCalcFor"] = ApiAboveAverage.prototype.SetCalcFor;
 	ApiAboveAverage.prototype["Delete"] = ApiAboveAverage.prototype.Delete;
 	ApiAboveAverage.prototype["ModifyAppliesToRange"] = ApiAboveAverage.prototype.ModifyAppliesToRange;
 	ApiAboveAverage.prototype["SetFirstPriority"] = ApiAboveAverage.prototype.SetFirstPriority;
@@ -27566,8 +27745,8 @@
 	ApiUniqueValues.prototype["GetFillColor"] = ApiUniqueValues.prototype.GetFillColor;
 	ApiUniqueValues.prototype["SetFillColor"] = ApiUniqueValues.prototype.SetFillColor;
 
-	ApiTop10.prototype["GetCalcFor"] = ApiTop10.prototype.GetCalcFor;
-	ApiTop10.prototype["SetCalcFor"] = ApiTop10.prototype.SetCalcFor;
+	//ApiTop10.prototype["GetCalcFor"] = ApiTop10.prototype.GetCalcFor;
+	//ApiTop10.prototype["SetCalcFor"] = ApiTop10.prototype.SetCalcFor;
 	ApiTop10.prototype["GetTopBottom"] = ApiTop10.prototype.GetTopBottom;
 	ApiTop10.prototype["SetTopBottom"] = ApiTop10.prototype.SetTopBottom;
 	ApiTop10.prototype["GetPercent"] = ApiTop10.prototype.GetPercent;
