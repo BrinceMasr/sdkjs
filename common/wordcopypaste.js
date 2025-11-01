@@ -10730,7 +10730,7 @@ PasteProcessor.prototype =
 		// <head/>
 		// <body lang=EN-US style='tab-interval:.5in;word-wrap:break-word'>
 		// <span>
-		// 	<w:Sdt Title="Title" Form="t" Key="DropDown1" Border="red" Shd="blue" HelpText="HelpText" Required="t" RoleName="RoleName" RoleColor="#7FB5B5" sdttag="Tag" Label="Label" ComboBox="t" ID="1837335014">
+		// 	<w:Sdt Title="Title" Form="t" Key="ComboBox2" Border="red" Shd="blue" HelpText="HelpText" Required="t" RoleName="RoleName" RoleColor="#7FB5B5" sdttag="Tag" Label="Label" ComboBox="t" ID="1837335014">
 		// 		<w:ListItem ListValue="Choose an item1" DataValue="Choose an item1"/>test
 		// 	</w:Sdt>
 		// </span>
@@ -10751,7 +10751,18 @@ PasteProcessor.prototype =
 
 		//4. TextFixed - TODO see add from api
 
-		//5. RadioButton - while script error
+		//5. RadioButton
+		// <html>
+		// <head/>
+		// <body lang=EN-US style='tab-interval:.5in;word-wrap:break-word'>
+		// <!--StartFragment-->
+		// <p style=''>
+		// 	<w:Sdt CheckBox="t" CheckBoxIsChecked="f" CheckBoxValueChecked="◙" CheckBoxValueUnchecked="○" CheckBoxFontChecked="Segoe UI Symbol" CheckBoxFontUnchecked="Segoe UI Symbol" GroupKey="Group 1" Form="t" Key="Choice1" ContentLocked="t" ID="123456789">Choice 1</w:Sdt>
+		// </p>
+		// <!--EndFragment-->
+		// </body>
+		// </html>
+
 
 		//6. Signature - fixed form (TODO see add from api)
 
@@ -10791,6 +10802,35 @@ PasteProcessor.prototype =
 		// </body>
 		// </html>
 
+		//10. credit card type
+		// <html>
+		// <head/>
+		// <body lang=EN-US style='tab-interval:.5in;word-wrap:break-word'>
+		// <!--StartFragment-->
+		// <span>
+ 		//  <w:Sdt Form="t" Key="CreditCard1" HelpText="Enter credit card number" Required="t" sdttag="CreditCardTag" Label="CreditCardLabel" ID="1837335025" PlcHdr="PlaceholderText" showingplchdr ="t">
+		// 	 <w:TextForm MaxCharacters="-1" Comb="f" WidthRule="1" MultiLine="f" AutoFit="f" FormatType="mask" Mask="9999-9999-9999-9999"/>
+    	// 1234-5678-9012-3456
+  		// </w:Sdt>
+		// </span>
+		// <!--EndFragment-->
+		// </body>
+		// </html>
+
+		//11. complex
+		// <html>
+		// <head/>
+		// <body lang=EN-US style='tab-interval:.5in;word-wrap:break-word'>
+		// <!--StartFragment-->
+		// <p style=''>
+		// 	<w:Sdt ComplexForm="t" ComplexFormType="0" Title="" sdttag="tag" Label="" ContentLocked="t" ShowingPlcHdr="t" Temporary="f" Form="t" Key="Complex1" HelpText="tip" Fixed="f" ID="123456789">
+		// 		Complex form content
+		// 	</w:Sdt>
+		// </p>
+		// <!--EndFragment-->
+		// </body>
+		// </html>
+
 		let checkBoolAttr = function (attr) {
 			return attr && attr.value && attr.value === "t";
 		};
@@ -10802,10 +10842,10 @@ PasteProcessor.prototype =
 				res = "dropdown";
 			} else if (checkBoolAttr(attrs["combobox"])) {
 				res = "combobox";
-			} else if (checkBoolAttr(attrs["radiobox"])) {
-				res = "radiobox";
 			} else if (checkBoolAttr(attrs["maptodatetime"])) {
 				res = "datetime";
+			} else if (checkBoolAttr(attrs["complexform"])) {
+				res = "complexform";
 			} else {
 				res = "text";
 			}
@@ -10821,6 +10861,7 @@ PasteProcessor.prototype =
 		//ms в буфер записывает только lock контента
 		let checkBox, dropdown, comboBox;
 		let isContentAdded = false;
+		let plcHdrText;
 		if (node && node.attributes) {
 			let _type = getType(node.attributes);
 			let contentLocked = node.attributes["contentlocked"];
@@ -10843,7 +10884,9 @@ PasteProcessor.prototype =
 
 			let placeHolder = node.attributes["showingplchdr"];
 			if (placeHolder && placeHolder.value === "t") {
-				levelSdt.SetPlaceholder(c_oAscDefaultPlaceholderName.Text);
+				plcHdrText = node.attributes["plchdr"] ? node.attributes["plchdr"].value : c_oAscDefaultPlaceholderName.Text;
+				levelSdt.SetPlaceholderText(plcHdrText);
+				levelSdt.SetShowingPlcHdr(true);
 			}
 
 			//form settings
@@ -10991,16 +11034,21 @@ PasteProcessor.prototype =
 					oPr.UncheckedFont = uncheckedFont.value;
 				}
 				let uncheckedSymbol = node.attributes["checkboxvalueunchecked"];
-				if (checkedSymbol) {
+				if (uncheckedSymbol) {
 					oPr.UncheckedSymbol = getCharCode(uncheckedSymbol.value);
+				}
+
+				let groupKey = node.attributes["groupkey"];
+				if (groupKey && groupKey.value) {
+					oPr.GroupKey = groupKey.value;
 				}
 
 				levelSdt.ApplyCheckBoxPr(oPr);
 			}
 
 			let id = node.attributes["id"];
-			if (id) {
-				levelSdt.Pr.Id = id;
+			if (id && id.value) {
+				levelSdt.Pr.Id = id.value;
 			}
 
 			comboBox = _type === "combobox";
@@ -11018,6 +11066,17 @@ PasteProcessor.prototype =
 					oPr.AddItem(sDisplay, sValue);
 				});
 				levelSdt.ApplyComboBoxPr(oPr);
+			}
+
+			if (_type === "complexform" && AscCommon.IsSupportOFormFeature()) {
+				let complexFormType = node.attributes["complexformtype"];
+				if (complexFormType && complexFormType.value) {
+					let nType = parseInt(complexFormType.value);
+					if (!isNaN(nType)) {
+						let complexFormPr = new AscWord.CSdtComplexFormPr(nType);
+						levelSdt.SetComplexFormPr(complexFormPr);
+					}
+				}
 			}
 
 			if (_type === "text" && AscCommon.IsSupportOFormFeature()) {
@@ -11199,7 +11258,7 @@ PasteProcessor.prototype =
 		}
 
 		//content
-		if (/*!checkBox && !comboBox && !dropdown*/!isContentAdded) {
+		if (/*!checkBox && !comboBox && !dropdown*/!isContentAdded /*&& !(plcHdrText && levelSdt.Content && levelSdt.Content.length)*/) {
 			let oPasteProcessor = new PasteProcessor(this.api, false, false, true);
 			oPasteProcessor.AddedFootEndNotes = this.AddedFootEndNotes;
 			oPasteProcessor.msoComments = this.msoComments;
@@ -11218,7 +11277,7 @@ PasteProcessor.prototype =
 			oPasteProcessor._PrepareContent();
 			oPasteProcessor._AddNextPrevToContent(levelSdt.Content);
 
-			if ((checkBox || comboBox || dropdown) && oPasteProcessor.aContent.length) {
+			if (/*(checkBox || comboBox || dropdown) &&*/ oPasteProcessor.aContent.length) {
 				levelSdt.Content = [];
 			}
 
@@ -11241,6 +11300,13 @@ PasteProcessor.prototype =
 						}
 					}
 				}
+			}
+			if (!levelSdt.Content.length) {
+				let oRun = new ParaRun(levelSdt.GetParagraph(), false);
+				if (plcHdrText) {
+					oRun.AddText(plcHdrText);
+				}
+				levelSdt.AddToContent(levelSdt.GetContentLength(), oRun);
 			}
 		}
 
@@ -11991,6 +12057,12 @@ PasteProcessor.prototype =
 				var ignoreFirstSpaces = false;
 				if (AscCommon.g_clipboardBase.pastedFrom === AscCommon.c_oClipboardPastedFrom.Excel && !(node.parentNode && node.parentNode.nodeName.toLowerCase() === "font")) {
 					ignoreFirstSpaces = true;
+				}
+
+				//TODO added special conditional. need add common spaces/tabs/new line calculating
+				if (value === " " && ((node.nextElementSibling && node.nextElementSibling.nodeName && node.nextElementSibling.nodeName.toLowerCase() === "w:sdt")
+					|| (node.previousElementSibling && node.previousElementSibling.nodeName && node.previousElementSibling.nodeName.toLowerCase() === "w:sdt"))) {
+					value = "";
 				}
 
 				//bIsPreviousSpace - игнорируем несколько пробелов подряд
