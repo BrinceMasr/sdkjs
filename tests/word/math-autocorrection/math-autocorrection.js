@@ -853,6 +853,7 @@ $(function () {
 			Test("\\qdrt 1/2 ", [["ParaRun", ""], ["CFraction", "∜1/2"], ["ParaRun", ""]], false, "Check radical");
 			Test("∜1 ", [["ParaRun", ""], ["CRadical", "∜1"], ["ParaRun", ""]], false, "Check radical");
 			Test("∜(1) ", [["ParaRun", ""], ["CRadical", "∜1"], ["ParaRun", ""]], false, "Check radical");
+			Test("√(-1&1+2) ", [["ParaRun", ""], ["CRadical", "√(-1&1+2)"], ["ParaRun", ""]], false, "Check radical");
 		})
 
 		QUnit.module( "Other", function ()

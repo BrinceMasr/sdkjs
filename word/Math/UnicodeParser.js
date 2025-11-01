@@ -620,10 +620,11 @@
 	{
 		let oIndex, oContent;
 
-		if (this.IsOpOpenLiteral()) {
+		if (this.IsOpOpenLiteral())
+		{
 			this.GetOpOpenLiteral();
 
-			if (this.IsOperandLiteral())
+			if (this.oLookahead.class !== Literals.rBrackets.id)
 			{
 				oIndex = this.GetExpLiteral(undefined, true);
 
