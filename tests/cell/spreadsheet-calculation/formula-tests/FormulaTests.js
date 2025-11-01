@@ -238,48 +238,6 @@ $(function () {
 		}
 	}
 
-	function testArrayFormulaEqualsValues(assert, str, formula, isNotLowerCase) {
-		//***array-formula***
-		ws.getRange2("A1").setValue("1");
-		ws.getRange2("B1").setValue("3.123");
-		ws.getRange2("C1").setValue("-4");
-		ws.getRange2("A2").setValue("2");
-		ws.getRange2("B2").setValue("4");
-		ws.getRange2("C2").setValue("5");
-
-		oParser = new parserFormula(formula, "A1", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("E6:H8").bbox);
-		assert.ok(oParser.parse());
-		var array = oParser.calculate();
-
-		var splitStr = str.split(";");
-
-		for (var i = 0; i < splitStr.length; i++) {
-			var subSplitStr = splitStr[i].split(",");
-			for (var j = 0; j < subSplitStr.length; j++) {
-				var valMs = subSplitStr[j];
-				var element;
-				if (array.getElementRowCol) {
-					var row = 1 === array.array.length ? 0 : i;
-					var col = 1 === array.array[0].length ? 0 : j;
-					if (array.array[row] && array.array[row][col]) {
-						element = array.getElementRowCol(row, col);
-					} else {
-						element = new window['AscCommonExcel'].cError(window['AscCommonExcel'].cErrorType.not_available);
-					}
-				} else {
-					element = array;
-				}
-				var ourVal = element && undefined != element.value ? element.value.toString() : "#N/A";
-				if (!isNotLowerCase) {
-					valMs = valMs.toLowerCase();
-					ourVal = ourVal.toLowerCase();
-				}
-				assert.strictEqual(valMs, ourVal, "formula: " + formula + " i: " + i + " j: " + j)
-			}
-		}
-	}
-
 	function consoleLog(val) {
 		//console.log(val);
 	}
@@ -355,17 +313,15 @@ $(function () {
 		wb.editDefinesNames(null, defNameArea3D2);
 	}
 
-	var newFormulaParser = false;
+	const c_msPerDay = AscCommonExcel.c_msPerDay,
+		parserFormula = AscCommonExcel.parserFormula,
+		GetDiffDate360 = AscCommonExcel.GetDiffDate360,
+		fSortAscending = AscCommon.fSortAscending,
+		g_oIdCounter = AscCommon.g_oIdCounter,
+		ParseResult = AscCommonExcel.ParseResult,
+		c_oAscError = Asc.c_oAscError;
 
-	var c_msPerDay = AscCommonExcel.c_msPerDay;
-	var parserFormula = AscCommonExcel.parserFormula;
-	var GetDiffDate360 = AscCommonExcel.GetDiffDate360;
-	var fSortAscending = AscCommon.fSortAscending;
-	var g_oIdCounter = AscCommon.g_oIdCounter;
-	var ParseResult = AscCommonExcel.ParseResult;
-	var c_oAscError = Asc.c_oAscError;
-
-	var oParser, wb, ws, dif = 1e-9, sData = AscCommon.getEmpty(), tmp, array, parseResult
+	let oParser, wb, ws, dif = 1e-9, sData = AscCommon.getEmpty(), tmp, array, parseResult
 	if (AscCommon.c_oSerFormat.Signature === sData.substring(0, AscCommon.c_oSerFormat.Signature.length)) {
 
 		Asc.spreadsheet_api.prototype._init = function() {
@@ -2098,6 +2054,8 @@ $(function () {
 
 	QUnit.test("Test: \"Parse intersection\"", function (assert) {
 
+		ws.getRange2("A1:B10").cleanAll();
+
 		ws.getRange2("A7").setValue("1");
 		ws.getRange2("A8").setValue("2");
 		ws.getRange2("A9").setValue("3");
@@ -3392,14 +3350,6 @@ $(function () {
 		});
 	});
 
-	QUnit.test("Test: \"SUM(1,2,3)\"", function (assert) {
-		oParser = new parserFormula('SUM(1,2,3)', "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 1 + 2 + 3);
-
-		testArrayFormula2(assert, "SUM", 1, 8, null, true);
-	});
-
 	QUnit.test("Test: \"\"s\"&5\"", function (assert) {
 		oParser = new parserFormula("\"s\"&5", "A1", ws);
 		assert.ok(oParser.parse());
@@ -3572,64 +3522,10 @@ $(function () {
 
 	});
 
-	QUnit.test("Test: \"ROUNDUP(31415.92654,-2)\"", function (assert) {
-		oParser = new parserFormula("ROUNDUP(31415.92654,-2)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 31500);
-	});
-
-	QUnit.test("Test: \"ROUNDUP(3.2,0)\"", function (assert) {
-		oParser = new parserFormula("ROUNDUP(3.2,0)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 4);
-	});
-
-	QUnit.test("Test: \"ROUNDUP(-3.14159,1)\"", function (assert) {
-		oParser = new parserFormula("ROUNDUP(-3.14159,1)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), -3.2);
-	});
-
-	QUnit.test("Test: \"ROUNDUP(3.14159,3)\"", function (assert) {
-		oParser = new parserFormula("ROUNDUP(3.14159,3)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 3.142);
-
-		testArrayFormula2(assert, "ROUNDUP", 2, 2);
-	});
-
-	QUnit.test("Test: \"T(\"HELLO\")\"", function (assert) {
-		oParser = new parserFormula("T(\"HELLO\")", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "HELLO");
-	});
-
-	QUnit.test("Test: YEAR", function (assert) {
-		oParser = new parserFormula("YEAR(2013)", "A1", ws);
-		assert.ok(oParser.parse());
-		if (AscCommon.bDate1904) {
-			assert.strictEqual(oParser.calculate().getValue(), 1909);
-		} else {
-			assert.strictEqual(oParser.calculate().getValue(), 1905);
-		}
-
-		testArrayFormula2(assert, "YEAR", 1, 1);
-	});
-
 	QUnit.test("Test: \"10-3\"", function (assert) {
 		oParser = new parserFormula("10-3", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 7);
-	});
-
-	QUnit.test("Test: SUM(S7:S9,{1,2,3})", function (assert) {
-		ws.getRange2("S7").setValue("1");
-		ws.getRange2("S8").setValue("2");
-		ws.getRange2("S9").setValue("3");
-
-		oParser = new parserFormula("SUM(S7:S9,{1,2,3})", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 12);
 	});
 
 	QUnit.test("Test: rename sheet #1", function (assert) {
@@ -3750,171 +3646,6 @@ $(function () {
 		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), "5test");
 		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), "testtest");
 		assert.strictEqual(array.getElementRowCol(1, 2).getValue(), "testtest");
-	});
-
-	QUnit.test("Test: \"SIN(3.1415926)\"", function (assert) {
-		oParser = new parserFormula('SIN(3.1415926)', "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), Math.sin(3.1415926));
-
-		testArrayFormula(assert, "SIN");
-	});
-
-	QUnit.test("Test: \"TREND\"", function (assert) {
-
-		ws.getRange2("A2").setValue("11");
-		ws.getRange2("A3").setValue("12");
-		ws.getRange2("A4").setValue("13");
-		ws.getRange2("A5").setValue("14");
-		ws.getRange2("A6").setValue("15");
-		ws.getRange2("A7").setValue("16");
-
-		ws.getRange2("B2").setValue("33100");
-		ws.getRange2("B3").setValue("47300");
-		ws.getRange2("B4").setValue("69000");
-		ws.getRange2("B5").setValue("102000");
-		ws.getRange2("B6").setValue("150000");
-		ws.getRange2("B7").setValue("220000");
-
-		ws.getRange2("C2").setValue("32618");
-		ws.getRange2("C3").setValue("47729");
-		ws.getRange2("C4").setValue("69841");
-		ws.getRange2("C5").setValue("102197");
-		ws.getRange2("C6").setValue("149542");
-		ws.getRange2("C7").setValue("218822");
-
-		ws.getRange2("A9").setValue("17");
-		ws.getRange2("A10").setValue("18");
-
-		oParser = new parserFormula("TREND(B2:B7,A2:A7,A9:A10)", "A2", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(2) - 0, 231126.67);
-		assert.strictEqual(oParser.calculate().getElementRowCol(1, 0).getValue().toFixed(2) - 0, 267572.38);
-
-		oParser = new parserFormula("TREND(B2:B7,A2:A7)", "A2", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(2) - 0, 12452.38);
-		assert.strictEqual(oParser.calculate().getElementRowCol(1, 0).getValue().toFixed(2) - 0, 48898.1);
-		assert.strictEqual(oParser.calculate().getElementRowCol(2, 0).getValue().toFixed(2) - 0, 85343.81);
-		assert.strictEqual(oParser.calculate().getElementRowCol(3, 0).getValue().toFixed(2) - 0, 121789.52);
-		assert.strictEqual(oParser.calculate().getElementRowCol(4, 0).getValue().toFixed(2) - 0, 158235.24);
-		assert.strictEqual(oParser.calculate().getElementRowCol(5, 0).getValue().toFixed(2) - 0, 194680.95);
-
-		oParser = new parserFormula("TREND(A2:C2,A3:C4,A5:C6,1)", "A2", ws);
-		assert.ok(oParser.parse(), "TREND(A2:C2,A3:C4,A5:C6,1)");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(2) - 0, 15.74, "Result of TREND(A2:C2,A3:C4,A5:C6,1)[0,0]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 1).getValue().toFixed(2) - 0, 67013.18, "Result of TREND(A2:C2,A3:C4,A5:C6,1)[0,1]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 2).getValue().toFixed(2) - 0, 69861.01, "Result of TREND(A2:C2,A3:C4,A5:C6,1)[0,2]");
-
-		oParser = new parserFormula("TREND(A3:C3,A4:C5,A6:C7,1)", "A2", ws);
-		assert.ok(oParser.parse(), "TREND(A3:C3,A4:C5,A6:C7,1)");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(2) - 0, 13.24, "Result of TREND(A3:C3,A4:C5,A6:C7,1)[0,0]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 1).getValue().toFixed(2) - 0, 102576.47, "Result of TREND(A3:C3,A4:C5,A6:C7,1)[0,1]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 2).getValue().toFixed(2) - 0, 102191.92, "Result of TREND(A3:C3,A4:C5,A6:C7,1)[0,2]");
-
-
-		oParser = new parserFormula("TREND(A3:C3,A4:C5,A6:C7,0)", "A2", ws);
-		assert.ok(oParser.parse(), "TREND(A3:C3,A4:C5,A6:C7,0)");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(2) - 0, 9.41, "Result of TREND(A3:C3,A4:C5,A6:C7,0)[0,0]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 1).getValue().toFixed(2) - 0, 102580.9, "Result of TREND(A3:C3,A4:C5,A6:C7,0)[0,1]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 2).getValue().toFixed(2) - 0, 102196.32, "Result of TREND(A3:C3,A4:C5,A6:C7,0)[0,2]");
-
-		oParser = new parserFormula("TREND({1,2,3},A4:C5,A6:C7,1)", "A2", ws);
-		assert.ok(oParser.parse(), "TREND({1,2,3},A4:C5,A6:C7,1)");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(2) - 0, 1, "Result of TREND({1,2,3},A4:C5,A6:C7,1)[0,0]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 1).getValue().toFixed(2) - 0, 4.82, "Result of TREND({1,2,3},A4:C5,A6:C7,1)[0,1]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 2).getValue().toFixed(2) - 0, 5.29, "Result of TREND({1,2,3},A4:C5,A6:C7,1)[0,2]");
-
-		ws.getRange2("A20").setValue("1");
-		ws.getRange2("B20").setValue("2");
-
-		oParser = new parserFormula("TREND(A20:B20)", "A2", ws);
-		assert.ok(oParser.parse(), "TREND(A20:B20)");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(2) - 0, 1, "Result of TREND(A20:B20)[0,0]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 1).getValue().toFixed(2) - 0, 2, "Result of TREND(A20:B20)[0,1]");
-
-		oParser = new parserFormula("TREND({1;2})", "A2", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(2) - 0, 1, "Result of TREND({1;2})[0,0]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(1, 0).getValue().toFixed(2) - 0, 2, "Result of TREND({1;2})[1,0]");
-
-		oParser = new parserFormula("TREND({1,2})", "A2", ws);
-		assert.ok(oParser.parse(), "TREND({1,2})");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(2) - 0, 1, "Result of TREND({1,2})[0,0]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 1).getValue().toFixed(2) - 0, 2, "Result of TREND({1,2})[0,1]");
-
-		ws.getRange2("A20").setValue("1");
-		ws.getRange2("A21").setValue("2");
-		ws.getRange2("A22").setValue("3");
-		ws.getRange2("B20").setValue("1");
-		ws.getRange2("B21").setValue("2");
-		ws.getRange2("B22").setValue("3");
-		ws.getRange2("C20").setValue("1");
-		ws.getRange2("C21").setValue("2");
-		ws.getRange2("C22").setValue("3");
-
-		// different matrix length tests
-		oParser = new parserFormula("TREND(A20:A21,A20:C20)", "A2", ws);
-		assert.ok(oParser.parse(), "TREND(A20:A21,A20:C20)");
-		assert.strictEqual(oParser.calculate().getValue(), "#REF!", "Result of TREND(A20:A21,A20:C20)");
-
-		oParser = new parserFormula("TREND(A20:A22,A20:C20)", "A2", ws);
-		assert.ok(oParser.parse(), "TREND(A20:A22,A20:C20)");
-		assert.strictEqual(oParser.calculate().getValue(), "#REF!", "Result of TREND(A20:A22,A20:C20)");
-
-		oParser = new parserFormula("TREND(A20:B21,A20:C21)", "A2", ws);
-		assert.ok(oParser.parse(), "TREND(A20:B21,A20:C21)");
-		assert.strictEqual(oParser.calculate().getValue(), "#REF!", "Result of TREND(A20:B21,A20:C21)");
-
-		oParser = new parserFormula("TREND({1,2,3},{1,2})", "A2", ws);
-		assert.ok(oParser.parse(), "TREND({1,2,3},{1,2})");
-		assert.strictEqual(oParser.calculate().getValue(), "#REF!", "Result of TREND({1,2,3},{1,2})");
-
-		oParser = new parserFormula("TREND({1,2,3},{1,2,3,4})", "A2", ws);
-		assert.ok(oParser.parse(), "TREND({1,2,3},{1,2,3,4})");
-		assert.strictEqual(oParser.calculate().getValue(), "#REF!", "Result of TREND({1,2,3},{1,2,3,4})");
-
-		oParser = new parserFormula("TREND({1,2;1,2},{1,2})", "A2", ws);
-		assert.ok(oParser.parse(), "TREND({1,2;1,2},{1,2})");
-		assert.strictEqual(oParser.calculate().getValue(), "#REF!", "Result of TREND({1,2;1,2},{1,2})");
-
-		oParser = new parserFormula("TREND(A20:B20,{1,2})", "A2", ws);
-		assert.ok(oParser.parse(), "TREND(A20:B20,{1,2})");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1, "Result of TREND(A20:B20,{1,2})[0,0]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 1).getValue(), 1, "Result of TREND(A20:B20,{1,2})[0,1]");
-
-		// identical X-trend tests
-		oParser = new parserFormula("TREND({1,1},{0,0})", "A2", ws);
-		assert.ok(oParser.parse(), "TREND({1,1},{0,0})");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(8) - 0, 1, "Result of TREND({1,1},{0,0}) [0,0]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 1).getValue().toFixed(4) - 0, 1, "Result of TREND({1,1},{0,0}) [0,1]");
-
-		oParser = new parserFormula("TREND({123,123},{123,123})", "A2", ws);
-		assert.ok(oParser.parse(), "TREND({123,123},{123,123})");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(8) - 0, 123, "Result of TREND({123,123},{123,123}) [0,0]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 1).getValue().toFixed(4) - 0, 123, "Result of TREND({123,123},{123,123}) [0,1]");
-
-		oParser = new parserFormula("TREND({2,8},{1,1})", "A2", ws);
-		assert.ok(oParser.parse(), "TREND({2,8},{1,1})");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(8) - 0, 5, "Result of TREND({2,8},{1,1}) [0,0]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 1).getValue().toFixed(4) - 0, 5, "Result of TREND({2,8},{1,1}) [0,1]");
-
-		oParser = new parserFormula("TREND({2,8;1,1},{1,1;1,1})", "A2", ws);
-		assert.ok(oParser.parse(), "TREND({2,8;1,1},{1,1;1,1})");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(8) - 0, 3, "Result of TREND({2,8;1,1},{1,1;1,1}) [0,0]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 1).getValue().toFixed(4) - 0, 3, "Result of TREND({2,8;1,1},{1,1;1,1}) [0,1]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(1, 0).getValue().toFixed(8) - 0, 3, "Result of TREND({2,8;1,1},{1,1;1,1}) [1,0]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(1, 1).getValue().toFixed(4) - 0, 3, "Result of TREND({2,8;1,1},{1,1;1,1}) [1,1]");
-
-		oParser = new parserFormula("TREND({2,8;2,2;10,10},{1,1;1,1;1,1})", "A2", ws);
-		assert.ok(oParser.parse(), "TREND({2,8;2,2;10,10},{1,1;1,1;1,1})");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(2) - 0, 5.67, "Result of TREND({2,8;2,2;10,10},{1,1;1,1;1,1}) [0,0]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 1).getValue().toFixed(2) - 0, 5.67, "Result of TREND({2,8;2,2;10,10},{1,1;1,1;1,1}) [0,1]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(1, 0).getValue().toFixed(2) - 0, 5.67, "Result of TREND({2,8;2,2;10,10},{1,1;1,1;1,1}) [1,0]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(1, 1).getValue().toFixed(2) - 0, 5.67, "Result of TREND({2,8;2,2;10,10},{1,1;1,1;1,1}) [1,1]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(2, 0).getValue().toFixed(2) - 0, 5.67, "Result of TREND({2,8;2,2;10,10},{1,1;1,1;1,1}) [2,0]");
-		assert.strictEqual(oParser.calculate().getElementRowCol(2, 1).getValue().toFixed(2) - 0, 5.67, "Result of TREND({2,8;2,2;10,10},{1,1;1,1;1,1}) [2,1]");
-
 	});
 
 	QUnit.test("Test: \">\"", function (assert) {
@@ -4119,6 +3850,12 @@ $(function () {
 		let formulaRange, formulas;
 
 		ws.getRange2("A1:AAZ10000").cleanAll();
+
+		// remove all created earlier defNames
+		wb.dependencyFormulas._foreachDefName(function(defName) {
+			wb.dependencyFormulas.removeDefName(undefined, defName.name);
+		});
+
 		formulaRange = ws.getRange2("A10:A110");
 		ws.getRange2("A9").setValue("=SIN(10)");
 		// ws.selectionRange.ranges = [ws.getRange2("A10:A110").getBBox0()];
@@ -4136,7 +3873,7 @@ $(function () {
 
 		formulas = wb.getAllFormulas();
 		assert.ok(1, "Created 6 formulas on a sheet: 3 regular, 3 array-formula");
-		assert.strictEqual(formulas.length, 21, "GetAllFormulas array length");
+		assert.strictEqual(formulas.length, 6, "GetAllFormulas array length");
 
 		let randRegValBefore = ws.getRange2("C1").getValue(),
 			randArrayFValBefore = ws.getRange2("D1").getValue();
@@ -4145,7 +3882,7 @@ $(function () {
 		wb.calculate(4);
 		formulas = wb.getAllFormulas();
 		assert.ok(1, "Check formulas after workbook recalculate");
-		assert.strictEqual(formulas.length, 21, "GetAllFormulas array length");
+		assert.strictEqual(formulas.length, 6, "GetAllFormulas array length");
 
 		let randRegValAfter = ws.getRange2("C1").getValue(),
 			randArrayFValAfter = ws.getRange2("D1").getValue();
@@ -4511,6 +4248,7 @@ $(function () {
 	QUnit.test("Long string splitting", function (assert) {
 		// Test case for long string (300 chars - should split into 2 parts)
 		let originalString = "a".repeat(300);
+		ws.getRange2("A1").cleanAll();
 		ws.getRange2("A1").setValue("=\"" + originalString + "\"");
 		let formula = ws.getRange2("A1").getFormula();
 		let expectedSplits = Math.ceil(originalString.length / 255) - 1;

@@ -17693,6 +17693,32 @@ $(function () {
 
 	});
 
+	QUnit.test("Test: \"ROUNDUP(31415.92654,-2)\"", function (assert) {
+		oParser = new parserFormula("ROUNDUP(31415.92654,-2)", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 31500);
+	});
+
+	QUnit.test("Test: \"ROUNDUP(3.2,0)\"", function (assert) {
+		oParser = new parserFormula("ROUNDUP(3.2,0)", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 4);
+	});
+
+	QUnit.test("Test: \"ROUNDUP(-3.14159,1)\"", function (assert) {
+		oParser = new parserFormula("ROUNDUP(-3.14159,1)", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), -3.2);
+	});
+
+	QUnit.test("Test: \"ROUNDUP(3.14159,3)\"", function (assert) {
+		oParser = new parserFormula("ROUNDUP(3.14159,3)", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 3.142);
+
+		testArrayFormula2(assert, "ROUNDUP", 2, 2);
+	});
+
 	QUnit.test("Test: \"SEC\"", function (assert) {
 		oParser = new parserFormula('SEC(45)', "A1", ws);
 		assert.ok(oParser.parse(), 'SEC(45)');
@@ -18956,7 +18982,7 @@ $(function () {
 		assert.ok(!oParser.parse());
 	});
 
-	QUnit.test("Test: \"SIN(3.1415926)\"", function (assert) {
+    QUnit.test("Test: \"SIN(3.1415926)\"", function (assert) {
 		oParser = new parserFormula('SIN(3.1415926)', "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), Math.sin(3.1415926));
@@ -20467,6 +20493,24 @@ $(function () {
 		// Case #11: Name3D. 3D named range with text returns #VALUE!. 1 argument used.
 		// Case #12: Table. Table column with text returns #VALUE!. 1 argument used.
 
+	});
+
+	QUnit.test("Test: SUM(S7:S9,{1,2,3})", function (assert) {
+		ws.getRange2("S7").setValue("1");
+		ws.getRange2("S8").setValue("2");
+		ws.getRange2("S9").setValue("3");
+
+		oParser = new parserFormula("SUM(S7:S9,{1,2,3})", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 12);
+	});
+
+	QUnit.test("Test: \"SUM(1,2,3)\"", function (assert) {
+		oParser = new parserFormula('SUM(1,2,3)', "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 1 + 2 + 3);
+
+		testArrayFormula2(assert, "SUM", 1, 8, null, true);
 	});
 
 	QUnit.test("Test: \"SUMIF\"", function (assert) {

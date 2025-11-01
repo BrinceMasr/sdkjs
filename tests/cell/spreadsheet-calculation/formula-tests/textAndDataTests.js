@@ -7723,6 +7723,12 @@ $(function () {
 		assert.ok(!oParser.calculate().getValue(), "123");
 	});
 
+	QUnit.test("Test: \"T(\"HELLO\")\"", function (assert) {
+		oParser = new parserFormula("T(\"HELLO\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), "HELLO");
+	});
+
 	QUnit.test("Test: \"TEXT\"", function (assert) {
 		var culturelciddefault = AscCommon.g_oDefaultCultureInfo.LCID;
 

@@ -9341,6 +9341,18 @@ $(function () {
 		testArrayFormula2(assert, "YEAR");
 	});
 
+	QUnit.test("Test: YEAR(2013)", function (assert) {
+		oParser = new parserFormula("YEAR(2013)", "A1", ws);
+		assert.ok(oParser.parse());
+		if (AscCommon.bDate1904) {
+			assert.strictEqual(oParser.calculate().getValue(), 1909);
+		} else {
+			assert.strictEqual(oParser.calculate().getValue(), 1905);
+		}
+
+		testArrayFormula2(assert, "YEAR", 1, 1);
+	});
+
 	QUnit.test("Test: \"YEARFRAC\"", function (assert) {
 		let dif = 1e-9;
 		function okWrapper(a, b) {
