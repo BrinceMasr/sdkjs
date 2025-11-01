@@ -3475,13 +3475,13 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: EOMONTH(40000,-6) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 39844, 'Test: Positive case: Number, Number. Negative months moves date backward.');
 		// Case #5: Formula, Number. Formula used as start_date.
-		oParser = new parserFormula('EOMONTH(TODAY(),6)', 'A2', ws);
+		oParser = new parserFormula('EOMONTH(DATE(10,10,2000),6)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: EOMONTH(TODAY(),6) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 46142, 'Test: Positive case: Formula, Number. Formula used as start_date.');
+		assert.strictEqual(oParser.calculate().getValue(), 6118, 'Test: Positive case: Formula, Number. Formula used as start_date.');
 		// Case #6: Date, Formula. Formula used as months argument.
-		oParser = new parserFormula('EOMONTH(DATE(2023,5,1),MONTH(TODAY()))', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: EOMONTH(DATE(2023,5,1),MONTH(TODAY())) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 45382, 'Test: Positive case: Date, Formula. Formula used as months argument.');
+		oParser = new parserFormula('EOMONTH(DATE(2023,5,1),MONTH(DATE(10,10,2000)))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: EOMONTH(DATE(2023,5,1),MONTH(DATE(10,10,2000))) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 45169, 'Test: Positive case: Date, Formula. Formula used as months argument.');
 		// Case #7: Date, Empty. Empty months defaults to 0.
 		oParser = new parserFormula('EOMONTH(DATE(2023,5,1),)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: EOMONTH(DATE(2023,5,1),) is parsed.');
