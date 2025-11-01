@@ -7343,7 +7343,7 @@ $(function () {
 		// Case #14: Area. Multi-cell range with valid numbers. 1 argument used.
 		oParser = new parserFormula('DEGREES(A100:A101)', 'A2', ws);
         oParser.setArrayFormulaRef(ws.getRange2("A2:A3").bbox);
-		assert.ok(oParser.parse(), 'Test: Formula DEGREES(A100:A101) is parsed.');debugger
+		assert.ok(oParser.parse(), 'Test: Formula DEGREES(A100:A101) is parsed.');
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue().toFixed(8), '57.29577951', 'Test: Positive case: Area. Multi-cell range with valid numbers. 1 argument used.');
 		// Case #15: Array. Array with single element. 1 argument used.
 		oParser = new parserFormula('DEGREES({1.5708})', 'A2', ws);
@@ -8651,6 +8651,7 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), 3840, 'Test: Positive case: Area. Single-cell range with valid number. 1 argument used.');
 		// Case #7: Array. Array with single valid element. 1 argument used.
 		oParser = new parserFormula('FACTDOUBLE({5})', 'A2', ws);
+        oParser.setArrayFormulaRef(ws.getRange2("A2:B3").bbox);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE({5}) is parsed.');
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 15, 'Test: Positive case: Array. Array with single valid element. 1 argument used.');
 		// Case #8: Name. Named range with valid number. 1 argument used.
@@ -8695,6 +8696,7 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), 3840, 'Test: Positive case: String. String convertible to number, truncated to integer. 1 argument used.');
 		// Case #18: Array. Array with multiple valid elements. 1 argument used.
 		oParser = new parserFormula('FACTDOUBLE({5,10})', 'A2', ws);
+        oParser.setArrayFormulaRef(ws.getRange2("A2:B3").bbox);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE({5,10}) is parsed.');
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 15, 'Test: Positive case: Array. Array with multiple valid elements. 1 argument used.');
 		// Case #19: Formula. Nested IF formula returning valid number. 1 argument used.
