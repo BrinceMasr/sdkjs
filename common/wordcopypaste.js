@@ -10750,6 +10750,16 @@ PasteProcessor.prototype =
 		// </html>
 
 		//4. TextFixed - TODO see add from api
+		// <html>
+		// <head/>
+		// <body lang=EN-US style='tab-interval:.5in;word-wrap:break-word'>
+		// <p>
+		// 	<w:Sdt Title="Title" Form="t" Key="DropDown1" Border="red" Shd="blue" HelpText="HelpText" Required="t" RoleName="RoleName" RoleColor="#7FB5B5" sdttag="Tag" Label="Label" ID="1837335014" Fixed="t" FixedWidth="20" FixedHeight="10">
+		// 		fixed
+		// 	</w:Sdt>
+		// </p>
+		// </body>
+		// </html>
 
 		//5. RadioButton
 		// <html>
@@ -10794,10 +10804,10 @@ PasteProcessor.prototype =
 		// <head/>
 		// <body lang=EN-US style='tab-interval:.5in;word-wrap:break-word'>
 		// <span>
-		//   <w:Sdt Title="Zip Code" Form="t" Key="ZipCode1" Border="blue" Shd="yellow" HelpText="Enter zip code" Required="t" RoleName="User" RoleColor="#7FB5B5" sdttag="ZipCodeTag" Label="ZipCodeLabel" ID="1837335020">
-		// 	<w:TextForm MaxCharacters="10" Comb="t" Width="202" WidthRule="1" MultiLine="f" AutoFit="f" FormatType="mask" Mask="99999-9999" Symbols="57"/>
-		// 	12345-6789
-		//   </w:Sdt>
+		// <w:Sdt Title="Zip Code" Form="t" Key="ZipCode1" Border="blue" Shd="yellow" HelpText="Enter zip code" Required="t" RoleName="User" RoleColor="#7FB5B5" sdttag="ZipCodeTag" Label="ZipCodeLabel" ID="1837335020" PlcHdr="PlaceholderText" showingplchdr ="t">
+		// <w:TextForm AutoFit="f" FormatType="mask" Mask="99999-9999" Symbols="57"/>
+		// 99999-9999
+		// </w:Sdt>
 		// </span>
 		// </body>
 		// </html>
@@ -10861,7 +10871,7 @@ PasteProcessor.prototype =
 		//ms в буфер записывает только lock контента
 		let checkBox, dropdown, comboBox;
 		let isContentAdded = false;
-		let plcHdrText;
+		let plcHdrText, isForm;
 		if (node && node.attributes) {
 			let _type = getType(node.attributes);
 			let contentLocked = node.attributes["contentlocked"];
@@ -10890,7 +10900,8 @@ PasteProcessor.prototype =
 			}
 
 			//form settings
-			if (AscCommon.IsSupportOFormFeature() && checkBoolAttr(node.attributes["form"])) {
+			isForm = checkBoolAttr(node.attributes["form"]);
+			if (AscCommon.IsSupportOFormFeature() && isForm) {
 				let formPr = new AscWord.CSdtFormPr();
 				let key = node.attributes["key"];
 				if (key && key.value) {
@@ -11310,12 +11321,18 @@ PasteProcessor.prototype =
 			}
 		}
 
-		if (isBlockLevelSdt) {
+		if (isForm && AscCommon.IsSupportOFormFeature() && node.attributes["fixed"] && node.attributes["fixed"].value === "t") {
+			let width = node.attributes["fixedwidth"] && node.attributes["fixedwidth"].value;
+			let height = node.attributes["fixedheight"] && node.attributes["fixedheight"].value;
+			levelSdt = levelSdt.ConvertFormToFixed(width, height);
+			this._AddToParagraph(levelSdt);
+		} else if (isBlockLevelSdt) {
 			this.aContent.push(levelSdt);
 		} else {
 			this._CommitElemToParagraph(levelSdt);
 			this.oCur_rPr = new CTextPr();
 		}
+
 	},
 
 	_ExecuteBorder: function (computedStyle, node, type, type2, bAddIfNull, setUnifill) {
