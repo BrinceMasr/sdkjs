@@ -366,11 +366,13 @@
 	 */
 
     /**
-     * @typedef {("body" | "chart" | "clipArt" | "ctrTitle" | "diagram" | "date" | "footer" | "header" | "media" | "object" | "picture" | "sldImage" | "sldNumber" | "subTitle" | "table" | "title")} PlaceholderType - Available placeholder types.
+     * Available placeholder types.
+     * @typedef {("body" | "chart" | "clipArt" | "ctrTitle" | "diagram" | "date" | "footer" | "header" | "media" | "object" | "picture" | "sldImage" | "sldNumber" | "subTitle" | "table" | "title")} PlaceholderType
      */
 
     /**
-	 * @typedef {("blank" | "chart" | "chartAndTx" | "clipArtAndTx" | "clipArtAndVertTx" | "cust" | "dgm" | "fourObj" | "mediaAndTx" | "obj" | "objAndTwoObj" | "objAndTx" | "objOnly" | "objOverTx" | "objTx" | "picTx" | "secHead" | "tbl" | "title" | "titleOnly" | "twoColTx" | "twoObj" | "twoObjAndObj" | "twoObjAndTx" | "twoObjOverTx" | "twoTxTwoObj" | "tx" | "txAndChart" | "txAndClipArt" | "txAndMedia" | "txAndObj" | "txAndTwoObj" | "txOverObj" | "vertTitleAndTx" | "vertTitleAndTxOverChart" | "vertTx")} LayoutType - Available layout types.
+	 * Available layout types.
+     * @typedef {("blank" | "chart" | "chartAndTx" | "clipArtAndTx" | "clipArtAndVertTx" | "cust" | "dgm" | "fourObj" | "mediaAndTx" | "obj" | "objAndTwoObj" | "objAndTx" | "objOnly" | "objOverTx" | "objTx" | "picTx" | "secHead" | "tbl" | "title" | "titleOnly" | "twoColTx" | "twoObj" | "twoObjAndObj" | "twoObjAndTx" | "twoObjOverTx" | "twoTxTwoObj" | "tx" | "txAndChart" | "txAndClipArt" | "txAndMedia" | "txAndObj" | "txAndTwoObj" | "txOverObj" | "vertTitleAndTx" | "vertTitleAndTxOverChart" | "vertTx")} LayoutType
      */
 
     /**
@@ -1533,7 +1535,8 @@
 	 *
 	 * @memberof ApiPresentation
 	 * @typeofeditors ["CPE"]
-	 * @returns {ApiTable[]}
+	 * @returns {ApiTable[]} An array with all tables from the current presentation.
+     * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiPresentation/Methods/GetAllTables.js
 	 */
 	ApiPresentation.prototype.GetAllTables = function () {
@@ -1702,7 +1705,7 @@
 	* @memberof ApiPresentation
 	* @typeofeditors ["CPE"]
 	* @param {string} sText - The math equation text.
-	* @param {string} sFormat - The math equation format. Possible values are "unicode", "latex" and "mathml".
+	* @param {string} sFormat - The math equation format. Possible values are "unicode", "latex", and "mathml".
 	* @returns {boolean}
 	* @since 9.0.0
 	* @see office-js-api/Examples/{Editor}/ApiPresentation/Methods/AddMathEquation.js
@@ -1824,10 +1827,10 @@
     };
 
     /**
-     * Returns a layout of the specified slide master by its position.
+     * Returns the layout corresponding to the specified layout type of the slide master.
      * @typeofeditors ["CPE"]
-     * @param {LayoutType} sType - Layout position.
-     * @returns {ApiLayout | null} - returns null if position is invalid.
+     * @param {LayoutType} sType - The layout type.
+     * @returns {ApiLayout | null} - The layout at the specified position, or null if the position is invalid.
      * @see office-js-api/Examples/{Editor}/ApiMaster/Methods/GetLayoutByType.js
 	 */
     ApiMaster.prototype.GetLayoutByType = function(sType)
@@ -2019,27 +2022,36 @@
         return new ApiMaster(masterCopy);
     };
 
-    /**
-     * Deletes the specified object from the parent if it exists.
-     * @typeofeditors ["CPE"]
-     * @returns {boolean} - return false if master doesn't exist or is not in the presentation.
-     * @see office-js-api/Examples/{Editor}/ApiMaster/Methods/Delete.js
+	/**
+	 * Deletes the specified object from the parent if it exists.
+	 * Note: Master can't be deleted if it's the last one in the presentation.
+	 *
+	 * @memberof ApiMaster
+	 * @typeofeditors ["CPE"]
+	 * @returns {boolean} - return false if master doesn't exist or is not in the presentation or couldn't be deleted (e.g. the last master).
+	 *
+	 * @see office-js-api/Examples/{Editor}/ApiMaster/Methods/Delete.js
 	 */
-    ApiMaster.prototype.Delete = function(){
-        if (this.Master && this.Master.presentation)
-        {
-            for (var nMaster = 0; nMaster < this.Master.presentation.slideMasters.length; nMaster++)
-            {
-                if (this.Master.Id === this.Master.presentation.slideMasters[nMaster].Id)
-                {
-                    this.Master.presentation.removeSlideMaster(nMaster, 1);
-                    return true;
-                }
-            }
-        }
-        
-        return false;
-    };
+	ApiMaster.prototype.Delete = function () {
+		const presentation = this.Master && this.Master.presentation;
+		if (!presentation) {
+			return false;
+		}
+
+		const masters = presentation.slideMasters;
+		if (masters.length <= 1) {
+			return false;
+		}
+
+		for (let nMaster = 0; nMaster < masters.length; nMaster++) {
+			if (this.Master.Id === masters[nMaster].Id) {
+				presentation.removeSlideMaster(nMaster, 1);
+				return true;
+			}
+		}
+
+		return false;
+	};
 
     /**
      * Returns a theme of the slide master.
@@ -2150,7 +2162,8 @@
 	 * Returns an array with all tables from the slide master.
 	 *
 	 * @typeofeditors ["CPE"]
-	 * @returns {ApiTable[]}
+	 * @returns {ApiTable[]} An array with all tables from the slide master.
+     * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiMaster/Methods/GetAllTables.js
 	 */
 	ApiMaster.prototype.GetAllTables = function () {
@@ -2276,9 +2289,9 @@
     };
 
     /**
-     * Returns a type if the current layout.
+     * Returns the type of the current layout.
      * @typeofeditors ["CPE"]
-     * @returns {boolean}
+     * @returns {LayoutType} The layout type.
      * @see office-js-api/Examples/{Editor}/ApiLayout/Methods/GetLayoutType.js
 	 */
     ApiLayout.prototype.GetLayoutType = function()
@@ -2562,7 +2575,8 @@
 	 * Returns an array with all tables from the current slide layout.
 	 *
 	 * @typeofeditors ["CPE"]
-	 * @returns {ApiTable[]}
+	 * @returns {ApiTable[]} An array with all tables from the current slide layout.
+     * @sine 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiLayout/Methods/GetAllTables.js
 	 */
 	ApiLayout.prototype.GetAllTables = function () {
@@ -3878,7 +3892,8 @@
 	 * Returns an array with all tables from the current slide.
 	 *
 	 * @typeofeditors ["CPE"]
-	 * @returns {ApiTable[]}
+	 * @returns {ApiTable[]} An array with all tables from the current slide.
+     * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiSlide/Methods/GetAllTables.js
 	 */
 	ApiSlide.prototype.GetAllTables = function () {
@@ -4113,15 +4128,15 @@
 	};
 
 	/**
-	 * Gets the text from the body shape of the current notes page.
+	 * Returns the text from the body shape of the current notes page.
 	 *
 	 * @typeofeditors ["CPE"]
 	 * @memberof ApiNotesPage
-	 * @returns {string}
+	 * @returns {string} The text from the body shape.
      * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiNotesPage/Methods/GetBodyShapeText.js
 	 */
-	ApiNotesPage.prototype.GetBodyShapeText = function (sText) {
+	ApiNotesPage.prototype.GetBodyShapeText = function () {
 		const oBodyShape = this.GetBodyShape();
 		if (oBodyShape) {
 			const oDocContent = oBodyShape.GetContent();
@@ -4680,7 +4695,7 @@
 
 
 	/**
-	 * Gets the geometry object from a shape
+	 * Returns the geometry object from the current shape.
 	 * @memberof ApiShape
 	 * @typeofeditors ["CPE"]
 	 * @returns {ApiGeometry}
@@ -4698,10 +4713,10 @@
 	};
 
 	/**
-	 * Sets a custom geometry for the shape
+	 * Sets a custom geometry for the current shape.
 	 * @memberof ApiShape
 	 * @typeofeditors ["CPE"]
-	 * @param {ApiGeometry} oGeometry - The geometry to set
+	 * @param {ApiGeometry} oGeometry - The geometry to set.
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiShape/Methods/SetGeometry.js
 	 * @since 9.1.0
@@ -5658,8 +5673,9 @@
 	ApiSlide.prototype["AddNotesText"]                    = ApiSlide.prototype.AddNotesText;
 
 	ApiNotesPage.prototype["GetClassType"]                = ApiNotesPage.prototype.GetClassType;
-	ApiNotesPage.prototype["AddBodyShapeText"]            = ApiNotesPage.prototype.AddBodyShapeText;
 	ApiNotesPage.prototype["GetBodyShape"]                = ApiNotesPage.prototype.GetBodyShape;
+	ApiNotesPage.prototype["AddBodyShapeText"]            = ApiNotesPage.prototype.AddBodyShapeText;
+	ApiNotesPage.prototype["GetBodyShapeText"]            = ApiNotesPage.prototype.GetBodyShapeText;
 
     ApiDrawing.prototype["GetClassType"]                  = ApiDrawing.prototype.GetClassType;
     ApiDrawing.prototype["SetSize"]                       = ApiDrawing.prototype.SetSize;

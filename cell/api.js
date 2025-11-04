@@ -343,10 +343,12 @@ var editor;
     }
   };
 
-  spreadsheet_api.prototype.initGlobalObjects = function(wbModel) {
+  spreadsheet_api.prototype.initGlobalObjects = function(wbModel, fileSize) {
     // global counters
 
     AscCommonExcel.UndoRedoClassTypes.Clean();
+    // Use deterministic pseudo-random offset to make document changes unique (100 to fit in 1 byte)
+    AscCommonExcel.UndoRedoClassTypes.SetOffset((fileSize || 0) % 100);
     AscCommonExcel.g_oUndoRedoCell = new AscCommonExcel.UndoRedoCell(wbModel);
     AscCommonExcel.g_oUndoRedoWorksheet = new AscCommonExcel.UndoRedoWoorksheet(wbModel);
     AscCommonExcel.g_oUndoRedoWorkbook = new AscCommonExcel.UndoRedoWorkbook(wbModel);
@@ -980,7 +982,7 @@ var editor;
  };
 
   spreadsheet_api.prototype.asc_Cut = function() {
-    return AscCommon.g_clipboardBase.Button_Cut();
+	return AscCommon.g_clipboardBase.Button_Cut();
   };
 
   spreadsheet_api.prototype.asc_PasteData = function (_format, data1, data2, text_data, doNotShowButton, callback) {
@@ -1849,13 +1851,13 @@ var editor;
 	spreadsheet_api.prototype.OpenDocumentFromBin = function(url, gObject)
 	{
 		this.wbModel = new AscCommonExcel.Workbook(this.handlers, this, true);
-		this.initGlobalObjects(this.wbModel);
+		this.initGlobalObjects(this.wbModel, gObject.length);
 		this.OpenDocumentFromBinNoInit(gObject);
 		this._onEndOpen();
 	};
 	spreadsheet_api.prototype.OpenDocumentFromZip = function (data) {
 		this.wbModel = new AscCommonExcel.Workbook(this.handlers, this, true);
-		this.initGlobalObjects(this.wbModel);
+		this.initGlobalObjects(this.wbModel, data.length);
 		let res =  this.OpenDocumentFromZipNoInit(data);
 		this._onEndOpen();
 		return res;
@@ -5940,7 +5942,7 @@ var editor;
   spreadsheet_api.prototype.asc_setCellFontSize = function(fontSize) {
     var ws = this.wb.getWorksheet();
     if (ws.objectRender.selectedGraphicObjectsExists() && ws.objectRender.controller.setCellFontSize) {
-      ws.objectRender.controller.setCellFontSize(fontSize);
+		ws.objectRender.controller.setCellFontSize(fontSize);
     } else {
       this.wb.setFontAttributes("fs", fontSize);
       this.wb.restoreFocus();
@@ -5948,10 +5950,9 @@ var editor;
   };
 
   spreadsheet_api.prototype.asc_setCellBold = function(isBold) {
-	  if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
-     return;
+	if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
+      return;
     }
-
   	let ws = this.wb.getWorksheet();
     if (ws.objectRender.selectedGraphicObjectsExists() && ws.objectRender.controller.setCellBold) {
       ws.objectRender.controller.setCellBold(isBold);
@@ -5967,7 +5968,6 @@ var editor;
     if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
       return;
     }
-
     let ws = this.wb.getWorksheet();
     if (ws.objectRender.selectedGraphicObjectsExists() && ws.objectRender.controller.setCellItalic) {
       ws.objectRender.controller.setCellItalic(isItalic);
@@ -5981,7 +5981,6 @@ var editor;
     if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
       return;
     }
-
     let ws = this.wb.getWorksheet();
     if (ws.objectRender.selectedGraphicObjectsExists() && ws.objectRender.controller.setCellUnderline) {
       ws.objectRender.controller.setCellUnderline(isUnderline);
@@ -5995,7 +5994,6 @@ var editor;
     if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
       return;
     }
-
     let ws = this.wb.getWorksheet();
     if (ws.objectRender.selectedGraphicObjectsExists() && ws.objectRender.controller.setCellStrikeout) {
       ws.objectRender.controller.setCellStrikeout(isStrikeout);
@@ -6009,8 +6007,7 @@ var editor;
     if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
       return;
     }
-
-    let ws = this.wb.getWorksheet();
+	let ws = this.wb.getWorksheet();
     if (ws.objectRender.selectedGraphicObjectsExists() && ws.objectRender.controller.setCellSubscript) {
       ws.objectRender.controller.setCellSubscript(isSubscript);
     } else {
@@ -6023,7 +6020,6 @@ var editor;
     if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
       return;
     }
-
     let ws = this.wb.getWorksheet();
     if (ws.objectRender.selectedGraphicObjectsExists() && ws.objectRender.controller.setCellSuperscript) {
       ws.objectRender.controller.setCellSuperscript(isSuperscript);
@@ -6059,7 +6055,6 @@ var editor;
     if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
       return;
     }
-
     let ws = this.wb.getWorksheet();
     if (ws.objectRender.selectedGraphicObjectsExists() && ws.objectRender.controller.setCellAlign) {
       ws.objectRender.controller.setCellAlign(align);
@@ -6073,7 +6068,6 @@ var editor;
     if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
       return;
     }
-
     let ws = this.wb.getWorksheet();
     if (ws.objectRender.selectedGraphicObjectsExists() && ws.objectRender.controller.setCellVertAlign) {
       ws.objectRender.controller.setCellVertAlign(align);
@@ -6114,7 +6108,6 @@ var editor;
         this.wb.restoreFocus();
       }
     }
-
   };
 
   spreadsheet_api.prototype.asc_setCellFill = function (fill) {
@@ -6222,7 +6215,7 @@ var editor;
   spreadsheet_api.prototype.asc_decreaseFontSize = function() {
     var ws = this.wb.getWorksheet();
     if (ws.objectRender.selectedGraphicObjectsExists() && ws.objectRender.controller.decreaseFontSize) {
-      ws.objectRender.controller.decreaseFontSize();
+		ws.objectRender.controller.decreaseFontSize();
     } else {
       this.wb.changeFontSize("changeFontSize", false);
       this.wb.restoreFocus();
@@ -6663,12 +6656,7 @@ var editor;
 
 		//update
 		if (this.wb && this.wb.wsViews) {
-			let allRange = new Asc.Range(0, 0, AscCommon.gc_nMaxCol0, AscCommon.gc_nMaxRow0);
-			for (let i in this.wb.wsViews) {
-				let item = this.wb.wsViews[i];
-				item._updateRange(allRange);
-			}
-
+			this.wb.cleanCache();
 			let ws = this.wb.getWorksheet();
 			ws && ws.draw();
 		}
@@ -6689,7 +6677,7 @@ var editor;
       AscCommon.CurFileVersion = version;
     }
 	  this.wbModel = new AscCommonExcel.Workbook(this.handlers, this, true);
-	  this.initGlobalObjects(this.wbModel);
+	  this.initGlobalObjects(this.wbModel, base64File.length);
 
 	  this.isOpenOOXInBrowser = this["asc_isSupportFeature"]("ooxml") && AscCommon.checkOOXMLSignature(base64File);
 	  if (this.isOpenOOXInBrowser) {

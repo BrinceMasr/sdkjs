@@ -3804,7 +3804,7 @@
 
 
 	/**
-	 * Class representing shape geometry
+	 * Class representing the shape geometry.
 	 * @constructor
 	 */
 	function ApiGeometry(geometry) {
@@ -3813,7 +3813,7 @@
 
 
 	/**
-	 * Class representing a path command
+	 * Class representing a path command.
 	 * @constructor
 	 */
 	function ApiPathCommand(command) {
@@ -3821,7 +3821,7 @@
 	}
 
 	/**
-	 * Class representing a path in geometry
+	 * Class representing a path in geometry.
 	 * @constructor
 	 */
 	function ApiPath(path) {
@@ -4129,7 +4129,7 @@
 	 */
 
 	/**
-	 * The types of elements that can be added to the paragraph structure.
+	 * The reading order (left-to-right or right-to-left).
 	 * @typedef {("ltr" | "rtl")} ReadingOrder
 	 * @see office-js-api/Examples/Enumerations/ReadingOrder.js
 	 */
@@ -4205,14 +4205,14 @@
 
 
 	/**
-	 * Fill type for paths
+	 * The path fill type.
 	 * @typedef {("none" | "norm" | "lighten" | "lightenLess" | "darken" | "darkenLess")} PathFillType
 	 * @see office-js-api/Examples/Enumerations/PathFillType.js
 	 */
 
 
 	/**
-	 * Path command types
+	 * The path command types.
 	 * @typedef {("moveTo" | "lineTo" | "bezier3" | "bezier4" | "arcTo" | "close")} PathCommandType
 	 * @see office-js-api/Examples/Enumerations/PathCommandType.js
 	 */
@@ -4579,7 +4579,7 @@
 	 * Returns the object by it's internal ID.
 	 * @memberof Api
 	 * @typeofeditors ["CDE"]
-	 * @param id {string} ID of the object.
+	 * @param id {string} The object internal ID.
 	 * @returns {?object}
 	 * @since 9.0.4
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/GetByInternalId.js
@@ -4848,10 +4848,11 @@
 	};
 
 	/**
-	 * Creates a new custom geometry
+	 * Creates a new custom geometry.
 	 * @memberof Api
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {ApiGeometry}
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/CreateCustomGeometry.js
 	 */
 	Api.prototype.CreateCustomGeometry = function()
@@ -4860,11 +4861,12 @@
 	};
 
 	/**
-	 * Creates a preset geometry
+	 * Creates a geometry using one of the available preset shapes.
 	 * @memberof Api
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
-	 * @param {ShapeType} sPreset - Preset name
+	 * @param {ShapeType} sPreset - The preset name.
 	 * @returns {ApiGeometry | null}
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/CreatePresetGeometry.js
 	 */
 	Api.prototype.CreatePresetGeometry = function(sPreset)
@@ -5024,7 +5026,8 @@
 	 */
 	Api.prototype.CreateGradientStop = function(uniColor, pos)
 	{
-		return new ApiGradientStop(uniColor, pos);
+		let pos_ = AscCommon.clampNumber(pos, 0, 100000);
+		return new ApiGradientStop(uniColor, pos_);
 	};
 
 	/**
@@ -6226,11 +6229,11 @@
 	};
 	
 	/**
-	 * Returns the currently selected content control.
+	 * Returns a visitor object for traversing the elements of the current document.
 	 * @memberof ApiDocumentContent
 	 * @typeofeditors ["CDE"]
 	 * @since 9.1.0
-	 * @returns {ApiDocumentVisitor}
+	 * @returns {ApiDocumentVisitor} A document visitor that can be used to inspect or process the document structure.
 	 * @see office-js-api/Examples/{Editor}/ApiDocumentContent/Methods/GetDocumentVisitor.js
 	 */
 	ApiDocumentContent.prototype.GetDocumentVisitor = function()
@@ -7724,11 +7727,11 @@
 		isTrack : false
 	};
 	/**
-	 * Special method for AI track revisions.
+	 * Enables or disables AI-assisted change tracking in the document.
 	 * @memberof ApiDocument
 	 * @typeofeditors ["CDE"]
-	 * @param isTrack {boolean} - Specifies if the change tracking mode is set or not.
-	 * @param assistantName {string} - Specifies if the change tracking mode is set or not.
+	 * @param isTrack {boolean} - Specifies whether the change tracking mode is set or not.
+	 * @param assistantName {string} - The AI assistant name.
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/SetAssistantTrackRevisions.js
 	 */
@@ -8423,7 +8426,7 @@
 	};
 	
 	/**
-	 * Show a comment by its ID.
+	 * Shows a comment by its ID.
 	 * @memberof ApiDocument
 	 * @typeofeditors ["CDE"]
 	 * @param {string | Array.string} commentId - The comment ID.
@@ -9535,7 +9538,7 @@
 	};
 	
 	/**
-	 * Insert blank page to the current location.
+	 * Inserts a blank page to the current location.
 	 * @memberof ApiDocument
 	 * @returns {boolean}
 	 * @typeofeditors ["CDE"]
@@ -9548,7 +9551,7 @@
 		return true;
 	};
 	/**
-	 * Moves cursor to the start of the document.
+	 * Moves a cursor to the start of the document.
 	 * @memberof ApiDocument
 	 * @returns {boolean}
 	 * @typeofeditors ["CDE"]
@@ -9561,7 +9564,7 @@
 		return true;
 	};
 	/**
-	 * Moves cursor to the end of the document.
+	 * Moves a cursor to the end of the document.
 	 * @memberof ApiDocument
 	 * @returns {boolean}
 	 * @typeofeditors ["CDE"]
@@ -9575,12 +9578,12 @@
 		return true;
 	};
 	/**
-	 * Moves cursor to the start of the specified page in document.
+	 * Moves a cursor to the start of the specified page in the document.
 	 * @memberof ApiDocument
-	 * @param {number} index - index of page to go
+	 * @param {number} index - The page index.
 	 * @returns {boolean}
 	 * @typeofeditors ["CDE"]
-	 * @since 9.1
+	 * @since 9.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/GoToPage.js
 	 */
 	ApiDocument.prototype.GoToPage = function(index)
@@ -9626,6 +9629,40 @@
 	{
 		return "paragraph";
 	};
+	/**
+	 * Specifies a unique ID for the current paragraph.
+	 * @memberof ApiParagraph
+	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @since 9.2.0
+	 * @param {number} paraId - The numerical ID which will be specified for the current paragraph. Value MUST be greater than 0 and less than 0x80000000.
+	 * @returns {boolean}
+	 * @see office-js-api/Examples/{Editor}/ApiParagraph/Methods/SetParaId.js
+	 */
+	ApiParagraph.prototype.SetParaId = function(paraId)
+	{
+		paraId = GetIntParameter(paraId, null);
+		if (null === paraId)
+			throwException(new Error("ParaId must be a numerical"));
+		if (paraId <= 0 || paraId >= 0x80000000)
+			throwException(new Error("ParaId must be greater than 0 and less than 0x80000000"));
+		
+		this.Paragraph.SetParaId(paraId);
+		return true;
+	};
+	/**
+	 * Returns a unique ID for the current paragraph.
+	 * @memberof ApiParagraph
+	 * @returns {number} 0 if no identifier is specified for the current paragraph.
+	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @since 9.2.0
+	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/GetParaId.js
+	 */
+	ApiParagraph.prototype.GetParaId = function()
+	{
+		let paraId = this.Paragraph.GetParaId();
+		return paraId ? paraId : 0;
+	};
+	
 	/**
 	 * Adds some text to the current paragraph.
 	 * @memberof ApiParagraph
@@ -10506,14 +10543,15 @@
 		return this;
 	};
 	/**
-	 * Specifies the reading order for the paragraph. Possible values are:
-	 * <b>null</b> - Use standart direction parameter.
-	 * <b>"ltr"</b> - Left-to-Right text direction.
-	 * <b>"rtl"</b> - Right-to-Left text direction.
+	 * Specifies the reading order for the current paragraph.
+	 * Possible values are:
+	 * <b>null</b> - use the standart direction parameter;
+	 * <b>"ltr"</b> - left-to-right text direction;
+	 * <b>"rtl"</b> - right-to-left text direction.
 	 * @memberof ApiParagraph
 	 * @typeofeditors ["CDE"]
-	 * @param {?ReadingOrder} [readingOrder = undefined]
-	 * @returns {ApiParagraph} - Returns paragraph itself (ApiParagraph)
+	 * @param {?ReadingOrder} [readingOrder = undefined] - The reading order.
+	 * @returns {ApiParagraph} - Returns the current paragraph itself (ApiParagraph).
 	 * @see office-js-api/Examples/{Editor}/ApiParagraph/Methods/SetReadingOrder.js
 	 */
 	ApiParagraph.prototype.SetReadingOrder = function (readingOrder) {
@@ -12466,8 +12504,8 @@
 
 
 	/**
-	 * Coordinate value for geometry paths.
-	 * Can be a guide name from gdLst, a numeric value, or a string representation of a number.
+	 * The coordinate value for the geometry paths.
+	 * Can be a guide name from "gdLst", a numeric value, or a string representation of a number.
 	 * @typedef {string | number} GeometryCoordinate
 	 * @see office-js-api/Examples/Enumerations/GeometryCoordinate.js
 	 */
@@ -12634,7 +12672,7 @@
 		return true;
 	};
 	/**
-	 * Gets the left page margin for all pages in this section.
+	 * Returns the left page margin for all pages in the current section.
 	 * @memberof ApiSection
 	 * @typeofeditors ["CDE"]
 	 * @returns {twips}
@@ -12645,7 +12683,7 @@
 		return private_MM2Twips(this.Section.GetPageMarginLeft());
 	};
 	/**
-	 * Gets the top page margin for all pages in this section.
+	 * Returns the top page margin for all pages in the current section.
 	 * @memberof ApiSection
 	 * @typeofeditors ["CDE"]
 	 * @returns {twips}
@@ -12656,7 +12694,7 @@
 		return private_MM2Twips(this.Section.GetPageMarginTop());
 	};
 	/**
-	 * Gets the right page margin for all pages in this section.
+	 * Returns the right page margin for all pages in the current section.
 	 * @memberof ApiSection
 	 * @typeofeditors ["CDE"]
 	 * @returns {twips}
@@ -12667,7 +12705,7 @@
 		return private_MM2Twips(this.Section.GetPageMarginRight());
 	};
 	/**
-	 * Gets the bottom page margin for all pages in this section.
+	 * Returns the bottom page margin for all pages in the current section.
 	 * @memberof ApiSection
 	 * @typeofeditors ["CDE"]
 	 * @returns {twips}
@@ -12691,7 +12729,7 @@
 		return true;
 	};
 	/**
-	 * Specifies the distance from the top edge of the page to the top edge of the header.
+	 * Returns the distance from the top edge of the page to the top edge of the header.
 	 * @memberof ApiSection
 	 * @typeofeditors ["CDE"]
 	 * @returns {twips}
@@ -12716,7 +12754,7 @@
 		return true;
 	};
 	/**
-	 * Gets the distance from the bottom edge of the page to the bottom edge of the footer.
+	 * Returns the distance from the bottom edge of the page to the bottom edge of the footer.
 	 * @memberof ApiSection
 	 * @typeofeditors ["CDE"]
 	 * @returns {twips}
@@ -14731,7 +14769,7 @@
 	 * Sets the text properties to the current style.
 	 * @memberof ApiStyle
 	 * @typeofeditors ["CDE"]
-	 * @param {ApiTextPr} oTextPr - The properties that will be set.
+	 * @param {ApiTextPr} oTextPr - The text properties that will be set.
 	 * @returns {ApiStyle} - this
 	 * @see office-js-api/Examples/{Editor}/ApiStyle/Methods/SetTextPr.js
 	 */
@@ -14755,7 +14793,7 @@
 	 * Sets the paragraph properties to the current style.
 	 * @memberof ApiStyle
 	 * @typeofeditors ["CDE"]
-	 * @param {ApiParaPr} oParaPr - The properties that will be set.
+	 * @param {ApiParaPr} oParaPr - The paragraph properties that will be set.
 	 * @returns {ApiStyle} - this
 	 * @see office-js-api/Examples/{Editor}/ApiStyle/Methods/SetParaPr.js
 	 */
@@ -14783,7 +14821,7 @@
 	 * Sets the table properties to the current style.
 	 * @memberof ApiStyle
 	 * @typeofeditors ["CDE"]
-	 * @param {ApiTablePr} oTablePr - The properties that will be set.
+	 * @param {ApiTablePr} oTablePr - The table properties that will be set.
 	 * @returns {ApiStyle} - this
 	 * @see office-js-api/Examples/{Editor}/ApiStyle/Methods/SetTablePr.js
 	 */
@@ -14811,7 +14849,7 @@
 	 * Sets the table row properties to the current style.
 	 * @memberof ApiStyle
 	 * @typeofeditors ["CDE"]
-	 * @param {ApiTableRowPr} oTableRowPr - The properties that will be set.
+	 * @param {ApiTableRowPr} oTableRowPr - The table row properties that will be set.
 	 * @returns {ApiStyle} - this
 	 * @see office-js-api/Examples/{Editor}/ApiStyle/Methods/SetTableRowPr.js
 	 */
@@ -14838,7 +14876,7 @@
 	 * Sets the table cell properties to the current style.
 	 * @memberof ApiStyle
 	 * @typeofeditors ["CDE"]
-	 * @param {ApiTableCellPr} oTableCellPr - The properties that will be set.
+	 * @param {ApiTableCellPr} oTableCellPr - The table cell properties that will be set.
 	 * @returns {ApiStyle} - this
 	 * @see office-js-api/Examples/{Editor}/ApiStyle/Methods/SetTableCellPr.js
 	 */
@@ -14904,11 +14942,11 @@
 		return new ApiTableStylePr(sType, this, this.Style.TableWholeTable.Copy());
 	};
 	/**
-	 * Specifies formatting properties that will be conditionally applied to parts of the table that match the oTableStylePr type. 
+	 * Sets conditional formatting properties that are applied to table parts matching the specified table style type.
 	 * @memberof ApiStyle
 	 * @typeofeditors ["CDE"]
-	 * @param {ApiTableStylePr} oTableStylePr - The table style properties.
-	 * @returns {ApiStyle} - this
+	 * @param {ApiTableStylePr} oTableStylePr - The conditional table style properties.
+	 * @returns {ApiStyle} - The current style.
 	 * @see office-js-api/Examples/{Editor}/ApiStyle/Methods/SetConditionalTableStyle.js
 	 */
 	ApiStyle.prototype.SetConditionalTableStyle = function(oTableStylePr)
@@ -17654,7 +17692,7 @@
 	 * Sets the text properties to the current table style properties.
 	 * @memberof ApiTableStylePr
 	 * @typeofeditors ["CDE"]
-	 * @param {ApiTextPr} oTextPr - The properties that will be set.
+	 * @param {ApiTextPr} oTextPr - The text properties that will be set.
 	 * @returns {ApiTableStylePr} - this
 	 * @see office-js-api/Examples/{Editor}/ApiTableStylePr/Methods/SetTextPr.js
 	 */
@@ -17678,7 +17716,7 @@
 	 * Sets the paragraph properties to the current table style properties.
 	 * @memberof ApiTableStylePr
 	 * @typeofeditors ["CDE"]
-	 * @param {ApiParaPr} oParaPr - The properties that will be set.
+	 * @param {ApiParaPr} oParaPr - The paragraph properties that will be set.
 	 * @returns {ApiTableStylePr} - this
 	 * @see office-js-api/Examples/{Editor}/ApiTableStylePr/Methods/SetParaPr.js
 	 */
@@ -17702,7 +17740,7 @@
 	 * Sets the table properties to the current table style properties.
 	 * @memberof ApiTableStylePr
 	 * @typeofeditors ["CDE"]
-	 * @param {ApiTablePr} oTablePr - The properties that will be set.
+	 * @param {ApiTablePr} oTablePr - The table properties that will be set.
 	 * @returns {ApiTableStylePr} - this
 	 * @see office-js-api/Examples/{Editor}/ApiTableStylePr/Methods/SetTablePr.js
 	 */
@@ -17726,7 +17764,7 @@
 	 * Sets the table row properties to the current table style properties.
 	 * @memberof ApiTableStylePr
 	 * @typeofeditors ["CDE"]
-	 * @param {ApiTableRowPr} oTableRowPr - The properties that will be set.
+	 * @param {ApiTableRowPr} oTableRowPr - The table row properties that will be set.
 	 * @returns {ApiTableStylePr} - this
 	 * @see office-js-api/Examples/{Editor}/ApiTableStylePr/Methods/SetTableRowPr.js
 	 */
@@ -17750,7 +17788,7 @@
 	 * Sets the table cell properties to the current table style properties.
 	 * @memberof ApiTableStylePr
 	 * @typeofeditors ["CDE"]
-	 * @param {ApiTableCellPr} oTableCellPr - The properties that will be set.
+	 * @param {ApiTableCellPr} oTableCellPr - The table cell properties that will be set.
 	 * @returns {ApiTableStylePr} - this
 	 * @see office-js-api/Examples/{Editor}/ApiTableStylePr/Methods/SetTableCellPr.js
 	 */
@@ -18825,7 +18863,7 @@
 
 
 	/**
-	 * Gets the geometry object from a shape
+	 * Returns the geometry object from the current shape.
 	 * @memberof ApiShape
 	 * @typeofeditors ["CDE"]
 	 * @returns {ApiGeometry}
@@ -18843,10 +18881,10 @@
 	};
 
 	/**
-	 * Sets a custom geometry for the shape
+	 * Sets a custom geometry for the current shape.
 	 * @memberof ApiShape
 	 * @typeofeditors ["CDE"]
-	 * @param {ApiGeometry} oGeometry - The geometry to set
+	 * @param {ApiGeometry} oGeometry - The custom geometry.
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiShape/Methods/SetGeometry.js
 	 * @since 9.1.0
@@ -18885,7 +18923,8 @@
 		return this.geometry.isCalculated();
 	};
 	/**
-	 * Checks if this is a custom geometry
+	 * Checks whether the current geometry is custom.
+	 * @memberof ApiGeometry
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiGeometry/Methods/IsCustom.js
@@ -18897,7 +18936,8 @@
 	};
 
 	/**
-	 * Gets the preset name if this is a preset geometry
+	 * Returns the name of the preset shape if the current geometry is based on a preset.
+	 * @memberof ApiGeometry
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {ShapeType | null}
 	 * @see office-js-api/Examples/{Editor}/ApiGeometry/Methods/GetPreset.js
@@ -18913,7 +18953,8 @@
 	};
 
 	/**
-	 * Gets the number of paths in the geometry
+	 * Returns the number of paths in the current geometry.
+	 * @memberof ApiGeometry
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/ApiGeometry/Methods/GetPathCount.js
@@ -18925,9 +18966,10 @@
 	};
 
 	/**
-	 * Gets a path by index
+	 * Returns a geometry path by its index.
+	 * @memberof ApiGeometry
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
-	 * @param {number} nIndex - Path index
+	 * @param {number} nIndex - The path index.
 	 * @returns {ApiPath}
 	 * @see office-js-api/Examples/{Editor}/ApiGeometry/Methods/GetPath.js
 	 * @since 9.1.0
@@ -18942,7 +18984,8 @@
 	};
 
 	/**
-	 * Gets all paths
+	 * Returns all paths of the current geometry.
+	 * @memberof ApiGeometry
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {ApiPath[]}
 	 * @see office-js-api/Examples/{Editor}/ApiGeometry/Methods/GetPaths.js
@@ -18962,7 +19005,8 @@
 	};
 
 	/**
-	 * Adds a new path to the geometry
+	 * Adds a new path to the current geometry.
+	 * @memberof ApiGeometry
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {ApiPath | null}
 	 * @see office-js-api/Examples/{Editor}/ApiGeometry/Methods/AddPath.js
@@ -18983,9 +19027,10 @@
 	};
 
 	/**
-	 * Gets adjustment value by name
+	 * Returns the adjustment value by its name from the current geometry.
+	 * @memberof ApiGeometry
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
-	 * @param {string} sName - Adjustment name
+	 * @param {string} sName - The adjustment name.
 	 * @returns {number | null}
 	 * @see office-js-api/Examples/{Editor}/ApiGeometry/Methods/GetAdjValue.js
 	 * @since 9.1.0
@@ -19000,10 +19045,11 @@
 	};
 
 	/**
-	 * Adds an adjustment value
+	 * Adds a new adjustment parameter to the current geometry.
+	 * @memberof ApiGeometry
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
-	 * @param {string} sName - Adjustment name
-	 * @param {number} nValue - Adjustment value
+	 * @param {string} sName - The adjustment name.
+	 * @param {number} nValue - The adjustment value.
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiGeometry/Methods/AddAdj.js
 	 * @since 9.1.0
@@ -19016,10 +19062,11 @@
 	};
 
 	/**
-	 * Sets an adjustment value
+	 * Sets the specified adjustment parameter for the current geometry.
+	 * @memberof ApiGeometry
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
-	 * @param {string} sName - Adjustment name
-	 * @param {number} nValue - Adjustment value
+	 * @param {string} sName - The adjustment name.
+	 * @param {number} nValue - The adjustment value.
 	 * @see office-js-api/Examples/{Editor}/ApiGeometry/Methods/SetAdjValue.js
 	 * @since 9.1.0
 	 */
@@ -19030,13 +19077,14 @@
 
 
 	/**
-	 * Adds a guide (formula)
+	 * Adds a guide (formula) to the current geometry.
+	 * @memberof ApiGeometry
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
-	 * @param {string} sName - Guide name
-	 * @param {GeometryFormulaType} sFormula - Formula type
-	 * @param {string} sX - X parameter
-	 * @param {string} sY - Y parameter
-	 * @param {string} sZ - Z parameter
+	 * @param {string} sName - The guide name.
+	 * @param {GeometryFormulaType} sFormula - The formula type.
+	 * @param {string} sX - The X parameter.
+	 * @param {string} sY - The Y parameter.
+	 * @param {string} sZ - The Z parameter.
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiGeometry/Methods/AddGuide.js
 	 * @since 9.1.0
@@ -19051,12 +19099,13 @@
 	};
 
 	/**
-	 * Sets the text rectangle
+	 * Sets the text rectangle for the current geometry.
+	 * @memberof ApiGeometry
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
-	 * @param {string} sLeft - Left guide name or value
-	 * @param {string} sTop - Top guide name or value
-	 * @param {string} sRight - Right guide name or value
-	 * @param {string} sBottom - Bottom guide name or value
+	 * @param {string} sLeft - The left guide name or value.
+	 * @param {string} sTop - The top guide name or value.
+	 * @param {string} sRight - The right guide name or value.
+	 * @param {string} sBottom - The bottom guide name or value.
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiGeometry/Methods/SetTextRect.js
 	 * @since 9.1.0
@@ -19069,11 +19118,13 @@
 	};
 
 	/**
-	 * Adds a connection point
+	 * Adds a connection point to the current geometry.
+	 * @memberof ApiGeometry
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
-	 * @param {string} sAngle - Angle
-	 * @param {string} sX - X position
-	 * @param {string} sY - Y position
+	 * @param {string} sAngle - The angle of the connection point.
+	 * @param {string} sX - The X position.
+	 * @param {string} sY - The Y position.
+	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiGeometry/Methods/AddConnectionPoint.js
 	 * @since 9.1.0
 	 */
@@ -19117,7 +19168,8 @@
 	}
 
 	/**
-	 * Gets the command type
+	 * Returns the type of the current path command.
+	 * @memberof ApiPathCommand
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {PathCommandType}
 	 * @see office-js-api/Examples/{Editor}/ApiPathCommand/Methods/GetType.js
@@ -19138,7 +19190,8 @@
 	};
 
 	/**
-	 * Gets the X coordinate for moveTo/lineTo commands
+	 * Returns the X coordinate for the "moveTo"/"lineTo" path commands.
+	 * @memberof ApiPathCommand
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {string | null}
 	 * @see office-js-api/Examples/{Editor}/ApiPathCommand/Methods/GetX.js
@@ -19150,7 +19203,8 @@
 	};
 
 	/**
-	 * Gets the Y coordinate for moveTo/lineTo commands
+	 * Returns the Y coordinate for the "moveTo"/"lineTo" path commands.
+	 * @memberof ApiPathCommand
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {string | null}
 	 * @see office-js-api/Examples/{Editor}/ApiPathCommand/Methods/GetY.js
@@ -19162,7 +19216,8 @@
 	};
 
 	/**
-	 * Gets first control point X for bezier curves
+	 * Returns the X coordinate of the first control point for the Bezier curves.
+	 * @memberof ApiPathCommand
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {string | null}
 	 * @see office-js-api/Examples/{Editor}/ApiPathCommand/Methods/GetX0.js
@@ -19174,7 +19229,8 @@
 	};
 
 	/**
-	 * Gets first control point Y for bezier curves
+	 * Returns the Y coordinate of the first control point for the Bezier curves.
+	 * @memberof ApiPathCommand
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {string | null}
 	 * @see office-js-api/Examples/{Editor}/ApiPathCommand/Methods/GetY0.js
@@ -19186,7 +19242,8 @@
 	};
 
 	/**
-	 * Gets second control point X for cubic bezier
+	 * Returns the X coordinate of the second control point for the cubic Bezier curves.
+	 * @memberof ApiPathCommand
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {string | null}
 	 * @see office-js-api/Examples/{Editor}/ApiPathCommand/Methods/GetX1.js
@@ -19198,7 +19255,8 @@
 	};
 
 	/**
-	 * Gets second control point Y for cubic bezier
+	 * Returns the Y coordinate of the second control point for the cubic Bezier curves.
+	 * @memberof ApiPathCommand
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {string | null}
 	 * @see office-js-api/Examples/{Editor}/ApiPathCommand/Methods/GetY1.js
@@ -19210,7 +19268,8 @@
 	};
 
 	/**
-	 * Gets end point X for cubic bezier
+	 * Returns the X coordinate of the end point for the cubic Bezier curves.
+	 * @memberof ApiPathCommand
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {string | null}
 	 * @see office-js-api/Examples/{Editor}/ApiPathCommand/Methods/GetX2.js
@@ -19222,7 +19281,8 @@
 	};
 
 	/**
-	 * Gets end point Y for cubic bezier
+	 * Returns the Y coordinate of the end point for the cubic Bezier curves.
+	 * @memberof ApiPathCommand
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {string | null}
 	 * @see office-js-api/Examples/{Editor}/ApiPathCommand/Methods/GetY2.js
@@ -19234,7 +19294,8 @@
 	};
 
 	/**
-	 * Gets width radius for arc
+	 * Returns the width radius of the arc.
+	 * @memberof ApiPathCommand
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {string | null}
 	 * @see office-js-api/Examples/{Editor}/ApiPathCommand/Methods/GetWR.js
@@ -19246,7 +19307,8 @@
 	};
 
 	/**
-	 * Gets height radius for arc
+	 * Returns the height radius of the arc.
+	 * @memberof ApiPathCommand
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {string | null}
 	 * @see office-js-api/Examples/{Editor}/ApiPathCommand/Methods/GetHR.js
@@ -19258,7 +19320,8 @@
 	};
 
 	/**
-	 * Gets start angle for arc
+	 * Returns the start angle of the arc.
+	 * @memberof ApiPathCommand
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {string | null}
 	 * @see office-js-api/Examples/{Editor}/ApiPathCommand/Methods/GetStartAngle.js
@@ -19270,7 +19333,8 @@
 	};
 
 	/**
-	 * Gets sweep angle for arc
+	 * Returns the sweep angle of the arc.
+	 * @memberof ApiPathCommand
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {string | null}
 	 * @see office-js-api/Examples/{Editor}/ApiPathCommand/Methods/GetSweepAngle.js
@@ -19284,7 +19348,8 @@
 
 
 	/**
-	 * Gets whether the path is stroked
+	 * Returns true if the current path is stroked, otherwise false.
+	 * @memberof ApiPath
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiPath/Methods/GetStroke.js
@@ -19296,9 +19361,10 @@
 	};
 
 	/**
-	 * Sets whether the path should be stroked
+	 * Sets whether the current path is stroked.
+	 * @memberof ApiPath
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
-	 * @param {boolean} bStroke - Whether to stroke the path
+	 * @param {boolean} bStroke - Specifies if the path is stroked (true) or not (false).
 	 * @see office-js-api/Examples/{Editor}/ApiPath/Methods/SetStroke.js
 	 * @since 9.1.0
 	 */
@@ -19310,7 +19376,8 @@
 	};
 
 	/**
-	 * Gets the fill type
+	 * Returns the fill type of the current path.
+	 * @memberof ApiPath
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {PathFillType}
 	 * @see office-js-api/Examples/{Editor}/ApiPath/Methods/GetFill.js
@@ -19322,9 +19389,10 @@
 	};
 
 	/**
-	 * Sets the fill type for the path
+	 * Sets the fill type to the current path.
+	 * @memberof ApiPath
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
-	 * @param {PathFillType} sFill - Fill type
+	 * @param {PathFillType} sFill - The path fill type.
 	 * @see office-js-api/Examples/{Editor}/ApiPath/Methods/SetFill.js
 	 * @since 9.1.0
 	 */
@@ -19340,7 +19408,8 @@
 	};
 
 	/**
-	 * Gets the path width
+	 * Returns the width of the current path.
+	 * @memberof ApiPath
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/ApiPath/Methods/GetWidth.js
@@ -19352,9 +19421,10 @@
 	};
 
 	/**
-	 * Sets the path width
+	 * Sets the width to the current path.
+	 * @memberof ApiPath
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
-	 * @param {number} nWidth - Width in EMU
+	 * @param {number} nWidth - The path width in EMU.
 	 * @see office-js-api/Examples/{Editor}/ApiPath/Methods/SetWidth.js
 	 * @since 9.1.0
 	 */
@@ -19366,7 +19436,8 @@
 	};
 
 	/**
-	 * Gets the path height
+	 * Returns the height of the current path.
+	 * @memberof ApiPath
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/ApiPath/Methods/GetHeight.js
@@ -19378,9 +19449,10 @@
 	};
 
 	/**
-	 * Sets the path height
+	 * Sets the height to the current path.
+	 * @memberof ApiPath
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
-	 * @param {number} nHeight - Height in EMU
+	 * @param {number} nHeight - The path height in EMU.
 	 * @see office-js-api/Examples/{Editor}/ApiPath/Methods/SetHeight.js
 	 * @since 9.1.0
 	 */
@@ -19392,7 +19464,8 @@
 	};
 
 	/**
-	 * Gets all path commands
+	 * Returns all commands of the current path.
+	 * @memberof ApiPath
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {ApiPathCommand[]}
 	 * @see office-js-api/Examples/{Editor}/ApiPath/Methods/GetCommands.js
@@ -19412,7 +19485,8 @@
 	};
 
 	/**
-	 * Gets command count
+	 * Returns the number of commands for the current path.
+	 * @memberof ApiPath
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/ApiPath/Methods/GetCommandCount.js
@@ -19424,9 +19498,10 @@
 	};
 
 	/**
-	 * Gets a specific command by index
+	 * Returns a specific path command by its index.
+	 * @memberof ApiPath
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
-	 * @param {number} nIndex - Command index
+	 * @param {number} nIndex - The path command index.
 	 * @returns {ApiPathCommand | null}
 	 * @see office-js-api/Examples/{Editor}/ApiPath/Methods/GetCommand.js
 	 * @since 9.1.0
@@ -19441,10 +19516,11 @@
 	};
 
 	/**
-	 * Moves to a point
+	 * Moves the current path to the specified coordinates.
+	 * @memberof ApiPath
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
-	 * @param {GeometryCoordinate} x - X coordinate
-	 * @param {GeometryCoordinate} y - Y coordinate
+	 * @param {GeometryCoordinate} x - The X coordinate.
+	 * @param {GeometryCoordinate} y - The Y coordinate.
 	 * @see office-js-api/Examples/{Editor}/ApiPath/Methods/MoveTo.js
 	 * @since 9.1.0
 	 */
@@ -19454,10 +19530,11 @@
 	};
 
 	/**
-	 * Draws a line to a point
+	 * Draws a line from the current point to the specified coordinates.
+	 * @memberof ApiPath
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
-	 * @param {GeometryCoordinate} x - X coordinate
-	 * @param {GeometryCoordinate} y - Y coordinate
+	 * @param {GeometryCoordinate} x - The X coordinate.
+	 * @param {GeometryCoordinate} y - The Y coordinate.
 	 * @see office-js-api/Examples/{Editor}/ApiPath/Methods/LineTo.js
 	 * @since 9.1.0
 	 */
@@ -19467,14 +19544,15 @@
 	};
 
 	/**
-	 * Draws a cubic bezier curve
+	 * Draws a cubic Bezier curve from the current point to the specified end point using two control points.
+	 * @memberof ApiPath
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
-	 * @param {GeometryCoordinate} x1 - First control point X
-	 * @param {GeometryCoordinate} y1 - First control point Y
-	 * @param {GeometryCoordinate} x2 - Second control point X
-	 * @param {GeometryCoordinate} y2 - Second control point Y
-	 * @param {GeometryCoordinate} x3 - End point X
-	 * @param {GeometryCoordinate} y3 - End point Y
+	 * @param {GeometryCoordinate} x1 - The X coordinate of the first control point.
+	 * @param {GeometryCoordinate} y1 - The Y coordinate of the first control point.
+	 * @param {GeometryCoordinate} x2 - The X coordinate of the second control point.
+	 * @param {GeometryCoordinate} y2 - The Y coordinate of the second control point.
+	 * @param {GeometryCoordinate} x3 - The X coordinate of the end point.
+	 * @param {GeometryCoordinate} y3 - The Y coordinate of the end point.
 	 * @see office-js-api/Examples/{Editor}/ApiPath/Methods/CubicBezTo.js
 	 * @since 9.1.0
 	 */
@@ -19488,12 +19566,13 @@
 	};
 
 	/**
-	 * Draws a quadratic bezier curve
+	 * Draws a quadratic Bezier curve from the current point to the specified end point using a control point.
+	 * @memberof ApiPath
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
-	 * @param {GeometryCoordinate} x1 - Control point X
-	 * @param {GeometryCoordinate} y1 - Control point Y
-	 * @param {GeometryCoordinate} x2 - End point X
-	 * @param {GeometryCoordinate} y2 - End point Y
+	 * @param {GeometryCoordinate} x1 - The X coordinate of the control point.
+	 * @param {GeometryCoordinate} y1 - The Y coordinate of the control point.
+	 * @param {GeometryCoordinate} x2 - The X coordinate of the end point.
+	 * @param {GeometryCoordinate} y2 - The Y coordinate of the end point.
 	 * @see office-js-api/Examples/{Editor}/ApiPath/Methods/QuadBezTo.js
 	 * @since 9.1.0
 	 */
@@ -19506,12 +19585,13 @@
 	};
 
 	/**
-	 * Draws an arc
+	 * Draws an arc from the current point using the specified width and height radii, start angle, and sweep angle.
+	 * @memberof ApiPath
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
-	 * @param {GeometryCoordinate} wR - Width radius
-	 * @param {GeometryCoordinate} hR - Height radius
-	 * @param {GeometryCoordinate} stAng - Start angle
-	 * @param {GeometryCoordinate} swAng - Sweep angle Y
+	 * @param {GeometryCoordinate} wR - The width radius.
+	 * @param {GeometryCoordinate} hR - The height radius.
+	 * @param {GeometryCoordinate} stAng - The start angle.
+	 * @param {GeometryCoordinate} swAng - The sweep angle.
 	 * @see office-js-api/Examples/{Editor}/ApiPath/Methods/ArcTo.js
 	 * @since 9.1.0
 	 */
@@ -19523,7 +19603,8 @@
 	};
 
 	/**
-	 * Closes the current path
+	 * Closes the current path.
+	 * @memberof ApiPath
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @see office-js-api/Examples/{Editor}/ApiPath/Methods/Close.js
 	 * @since 9.1.0
@@ -23867,7 +23948,23 @@
 		this.Sdt.SetFormRole(role);
 		return true;
 	};
-
+	
+	/**
+	 * Removes a form and its content. If keepContent is true, the content is not deleted.
+	 * @memberof ApiFormBase
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @since 9.2.0
+	 * @param {boolean} keepContent - Specifies if the content will be deleted or not.
+	 * @returns {boolean} - returns false if form wasn't added to the document.
+	 * @see office-js-api/Examples/{Editor}/ApiFormBase/Methods/Delete.js
+	 */
+	ApiFormBase.prototype.Delete = function(keepContent)
+	{
+		return executeNoFormLockCheck(function(){
+			return ApiInlineLvlSdt.prototype.Delete.call(this, keepContent);
+		}, this);
+	};
+	
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiTextForm
@@ -24308,6 +24405,10 @@
 	 */
 	ApiPictureForm.prototype.SetImage = function(sImageSrc, nWidth, nHeight)
 	{
+		if (!AscFormat.isRealNumber(nWidth) || !AscFormat.isRealNumber(nHeight)) {
+			return false;
+		}
+
 		return executeNoFormLockCheck(function(){
 			if (typeof(sImageSrc) !== "string" || sImageSrc === "")
 				return false;
@@ -24639,6 +24740,43 @@
 			this.Sdt.SetFormPr(formPr);
 			return true;
 		}, this);
+	};
+	/**
+	 * Sets the label for the current check box.
+	 * @memberof ApiCheckBoxForm
+	 * @param {string} label - The label.
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @since 9.2.0
+	 * @returns {boolean}
+	 * @see office-js-api/Examples/{Editor}/ApiCheckBoxForm/Methods/SetLabel.js
+	 */
+	ApiCheckBoxForm.prototype.SetLabel = function(label)
+	{
+		return executeNoFormLockCheck(function() {
+			let mainForm = this.Sdt.GetMainForm();
+			if (mainForm && mainForm !== this.Sdt && mainForm.IsLabeledCheckBox())
+				mainForm.SetCheckBoxLabel(label);
+			else
+				this.Sdt.SetCheckBoxLabel(label);
+			
+			return true;
+		}, this);
+	};
+	/**
+	 * Returns the label of the current check box.
+	 * @memberof ApiCheckBoxForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @since 9.2.0
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiCheckBoxForm/Methods/GetLabel.js
+	 */
+	ApiCheckBoxForm.prototype.GetLabel = function()
+	{
+		let mainForm = this.Sdt.GetMainForm();
+		if (mainForm && mainForm !== this.Sdt && mainForm.IsLabeledCheckBox())
+			return mainForm.GetCheckBoxLabel();
+		else
+			return this.Sdt.GetCheckBoxLabel();
 	};
 	//------------------------------------------------------------------------------------------------------------------
 	//
@@ -25483,7 +25621,7 @@
 	 * Creates the empty paragraph properties.
 	 * @memberof Api
 	 * @typeofeditors ["CDE"]
-	 * @returns {ApiTextPr}
+	 * @returns {ApiParaPr}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/CreateParaPr.js
 	 */
 	Api.prototype.CreateParaPr = function()
@@ -25494,7 +25632,7 @@
 	 * Creates the empty table properties.
 	 * @memberof Api
 	 * @typeofeditors ["CDE"]
-	 * @returns {ApiTextPr}
+	 * @returns {ApiTablePr}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/CreateTablePr.js
 	 */
 	Api.prototype.CreateTablePr = function()
@@ -25505,7 +25643,7 @@
 	 * Creates the empty table row properties.
 	 * @memberof Api
 	 * @typeofeditors ["CDE"]
-	 * @returns {ApiTextPr}
+	 * @returns {ApiTableRowPr}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/CreateTableRowPr.js
 	 */
 	Api.prototype.CreateTableRowPr = function()
@@ -25516,7 +25654,7 @@
 	 * Creates the empty table cell properties.
 	 * @memberof Api
 	 * @typeofeditors ["CDE"]
-	 * @returns {ApiTextPr}
+	 * @returns {ApiTableCellPr}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/CreateTableCellPr.js
 	 */
 	Api.prototype.CreateTableCellPr = function()
@@ -25524,12 +25662,12 @@
 		return this.private_CreateApiTableCellPr(new CTableCellPr());
 	};
 	/**
-	 * Creates the empty table cell properties.
+	 * Creates the empty table style properties.
 	 * @memberof Api
 	 * @typeofeditors ["CDE"]
-	 * @param {TableStyleOverrideType} sType - The table part.
-	 * @returns {ApiTextPr}
-	 * @see office-js-api/Examples/{Editor}/Api/Methods/CreateTableCellPr.js
+	 * @param {TableStyleOverrideType} sType - The table part which the formatting properties must be applied to.
+	 * @returns {ApiTableStylePr}
+	 * @see office-js-api/Examples/{Editor}/Api/Methods/CreateTableStylePr.js
 	 */
 	Api.prototype.CreateTableStylePr = function(sType)
 	{
@@ -25588,21 +25726,21 @@
 
 	/**
 	 * Converts pixels to EMUs (English Metric Units).
-	 *
 	 * @memberof Api
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @param {number} px - The number of pixels to convert to EMUs.
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/PixelsToEmu.js
 	 */
 	Api.prototype.PixelsToEmus = function Px2Emu(px) {
-		return private_MM2EMU(AscCommon.g_dKoef_pix_to_mm * px);
+		return Math.round(private_MM2EMU(AscCommon.g_dKoef_pix_to_mm * px));
 	};
 
 	/**
 	 * Converts millimeters to pixels.
-	 *
 	 * @memberof Api
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @param {number} mm - The number of millimeters to convert to pixels.
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/MillimetersToPixels.js
 	 */
@@ -25612,9 +25750,9 @@
 
 	/**
 	 * Converts points to centimeters.
-	 *
 	 * @memberof Api
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @param {number} pt - The number of points to convert to centimeters.
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/PointsToCentimeters.js
 	 */
@@ -25625,22 +25763,22 @@
 
 	/**
 	 * Converts points to EMUs (English Metric Units).
-	 *
 	 * @memberof Api
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @param {number} pt - The number of points to convert to EMUs.
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/PointsToEmus.js
 	 */
 	Api.prototype.PointsToEmus = function PointsToEmus(pt) {
-		const ptToEm = g_dKoef_pt_to_mm * g_dKoef_mm_to_emu;
-		return pt * ptToEm;
+		const ptToEmu = g_dKoef_pt_to_mm * g_dKoef_mm_to_emu;
+		return Math.round(pt * ptToEmu);
 	};
 
 	/**
 	 * Converts points to inches.
-	 *
 	 * @memberof Api
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @param {number} pt - The number of points to convert to inches.
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/PointsToInches.js
 	 */
@@ -25651,9 +25789,9 @@
 
 	/**
 	 * Converts points to lines (1 line = 12 points).
-	 *
 	 * @memberof Api
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @param {number} pt - The number of points to convert to lines.
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/PointsToLines.js
 	 */
@@ -25664,9 +25802,9 @@
 
 	/**
 	 * Converts points to millimeters.
-	 *
 	 * @memberof Api
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @param {number} pt - The number of points to convert to millimeters.
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/PointsToMillimeters.js
 	 */
@@ -25676,9 +25814,9 @@
 
 	/**
 	 * Converts points to picas (1 pica = 12 points).
-	 *
 	 * @memberof Api
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @param {number} pt - The number of points to convert to picas.
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/PointsToPicas.js
 	 */
@@ -25688,9 +25826,9 @@
 
 	/**
 	 * Converts points to pixels.
-	 *
 	 * @memberof Api
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @param {number} pt - The number of points to convert to pixels.
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/PointsToPixels.js
 	 */
@@ -25701,9 +25839,9 @@
 
 	/**
 	 * Converts points to twips.
-	 *
 	 * @memberof Api
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @param {number} pt - The number of points to convert to twips.
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/PointsToTwips.js
 	 */
@@ -25713,9 +25851,9 @@
 
 	/**
 	 * Converts centimeters to points.
-	 *
 	 * @memberof Api
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @param {number} cm - The number of centimeters to convert to points.
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/CentimetersToPoints.js
 	 */
@@ -25726,9 +25864,9 @@
 
 	/**
 	 * Converts EMUs (English Metric Units) to points.
-	 *
 	 * @memberof Api
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @param {number} emu - The number of EMUs to convert to points.
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/EmusToPoints.js
 	 */
@@ -25739,9 +25877,9 @@
 
 	/**
 	 * Converts inches to points.
-	 *
 	 * @memberof Api
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @param {number} inches - The number of inches to convert to points.
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/InchesToPoints.js
 	 */
@@ -25752,9 +25890,9 @@
 
 	/**
 	 * Converts lines to points (1 line = 12 points).
-	 *
 	 * @memberof Api
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @param {number} lines - The number of lines to convert to points.
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/LinesToPoints.js
 	 */
@@ -25766,9 +25904,9 @@
 
 	/**
 	 * Converts millimeters to points.
-	 *
 	 * @memberof Api
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @param {number} mm - The number of millimeters to convert to points.
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/MillimetersToPoints.js
 	 */
@@ -25778,9 +25916,9 @@
 
 	/**
 	 * Converts picas to points.
-	 *
 	 * @memberof Api
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @param {number} pc - The number of picas to convert to points.
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/PicasToPoints.js
 	 */
@@ -25790,9 +25928,9 @@
 
 	/**
 	 * Converts pixels to points.
-	 *
 	 * @memberof Api
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @param {number} px - The number of pixels to convert to points.
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/PixelsToPoints.js
 	 */
@@ -25803,14 +25941,40 @@
 
 	/**
 	 * Converts twips to points.
-	 *
 	 * @memberof Api
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @param {number} twips - The number of twips to convert to points.
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/TwipsToPoints.js
 	 */
 	Api.prototype.TwipsToPoints = function TwipsToPoints(twips) {
 		return twips * g_dKoef_twips_to_pt;
+	};
+
+	/**
+	 * Converts millimeters to English Metric Units (EMUs).
+	 * The result is an integer value.
+	 *
+	 * @memberof Api
+	 * @typeofeditors ["CDE", CSE", "CPE"]
+	 * @param {mm} mm
+	 * @returns {EMU} - The value in English Metric Units (EMUs), as an integer.
+	 * @see office-js-api/Examples/{Editor}/Api/Methods/MillimetersToEmus.js
+	 */
+	Api.prototype.MillimetersToEmus = function MillimetersToEmus(mm) {
+		return Math.round(mm * AscCommonWord.g_dKoef_mm_to_emu);
+	};
+
+	/**
+	 * Converts English measure units (EMU) to millimeters.
+	 * @memberof Api
+	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @param {EMU} emu
+	 * @returns {mm}
+	 * @see office-js-api/Examples/{Editor}/Api/Methods/EmusToMillimeters.js
+	 */
+	Api.prototype.EmusToMillimeters = function EmusToMillimeters(emu) {
+		return emu * AscCommonWord.g_dKoef_emu_to_mm;
 	};
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -28069,6 +28233,8 @@
 	Api.prototype["PicasToPoints"]                   = Api.prototype.PicasToPoints;
 	Api.prototype["PixelsToPoints"]                  = Api.prototype.PixelsToPoints;
 	Api.prototype["TwipsToPoints"]                   = Api.prototype.TwipsToPoints;
+	Api.prototype["MillimetersToEmus"]               = Api.prototype.MillimetersToEmus;
+	Api.prototype["EmusToMillimeters"]               = Api.prototype.EmusToMillimeters;
 	Api.prototype["CreateCustomGeometry"]            = Api.prototype.CreateCustomGeometry;
 	Api.prototype["CreatePresetGeometry"]            = Api.prototype.CreatePresetGeometry;
 
@@ -28243,6 +28409,8 @@
 	ApiDocument.prototype["GetSelection"]                  = ApiDocument.prototype.GetSelection;
 
 	ApiParagraph.prototype["GetClassType"]           = ApiParagraph.prototype.GetClassType;
+	ApiParagraph.prototype["SetParaId"]              = ApiParagraph.prototype.SetParaId;
+	ApiParagraph.prototype["GetParaId"]              = ApiParagraph.prototype.GetParaId;
 	ApiParagraph.prototype["AddText"]                = ApiParagraph.prototype.AddText;
 	ApiParagraph.prototype["AddPageBreak"]           = ApiParagraph.prototype.AddPageBreak;
 	ApiParagraph.prototype["AddLineBreak"]           = ApiParagraph.prototype.AddLineBreak;
@@ -29002,6 +29170,7 @@
 	ApiFormBase.prototype["SetTag"]             = ApiFormBase.prototype.SetTag;
 	ApiFormBase.prototype["GetRole"]            = ApiFormBase.prototype.GetRole;
 	ApiFormBase.prototype["SetRole"]            = ApiFormBase.prototype.SetRole;
+	ApiFormBase.prototype["Delete"]             = ApiFormBase.prototype.Delete;
 	
 	ApiTextForm.prototype["GetClassType"]        = ApiTextForm.prototype.GetClassType;
 	ApiTextForm.prototype["IsAutoFit"]           = ApiTextForm.prototype.IsAutoFit;
@@ -29062,6 +29231,8 @@
 	ApiCheckBoxForm.prototype["SetRadioGroup"] = ApiCheckBoxForm.prototype.SetRadioGroup;
 	ApiCheckBoxForm.prototype["GetChoiceName"] = ApiCheckBoxForm.prototype.GetChoiceName;
 	ApiCheckBoxForm.prototype["SetChoiceName"] = ApiCheckBoxForm.prototype.SetChoiceName;
+	ApiCheckBoxForm.prototype["GetLabel"]      = ApiCheckBoxForm.prototype.GetLabel;
+	ApiCheckBoxForm.prototype["SetLabel"]      = ApiCheckBoxForm.prototype.SetLabel;
 	ApiCheckBoxForm.prototype["Copy"]          = ApiCheckBoxForm.prototype.Copy;
 
 	ApiComment.prototype["GetClassType"]	= ApiComment.prototype.GetClassType;
@@ -29377,7 +29548,9 @@
 		if (!oForm)
 			return null;
 
-		if (oForm.IsComplexForm())
+		if (oForm.IsLabeledCheckBox())
+			return new ApiCheckBoxForm(oForm.GetInnerCheckBox());
+		else if (oForm.IsComplexForm())
 			return new ApiComplexForm(oForm);
 		else if (oForm.IsTextForm())
 			return new ApiTextForm(oForm);
@@ -29396,10 +29569,10 @@
 	{
 		if (!oControl)
 			return null;
-
+		
 		if (oControl instanceof CBlockLevelSdt)
 			return (new ApiBlockLvlSdt(oControl));
-		else if (oControl instanceof CInlineLevelSdt)
+		else if (oControl instanceof CInlineLevelSdt && !oControl.IsForm())
 			return (new ApiInlineLvlSdt(oControl));
 
 		return null;
@@ -30527,6 +30700,8 @@
 	};
 	ApiBlockLvlSdt.prototype._canBeEdited = ApiInlineLvlSdt.prototype._canBeEdited;
 	ApiBlockLvlSdt.prototype._canBeDeleted = ApiInlineLvlSdt.prototype._canBeDeleted;
+	ApiFormBase.prototype._canBeEdited = ApiInlineLvlSdt.prototype._canBeEdited;
+	ApiFormBase.prototype._canBeDeleted = ApiInlineLvlSdt.prototype._canBeDeleted;
 	ApiContentControlList.prototype.GetListPr = function()
 	{
 		if (this.Sdt.IsComboBox())
