@@ -4176,6 +4176,9 @@
 
 	// annot redact
 	AscDFH.historyitem_Pdf_Redact_Annot_Redact_Id = AscDFH.historyitem_type_Pdf_Annot_Redact | 1;
+	
+	// annot link
+	AscDFH.historyitem_Pdf_Link_Annot_Highlight_Type = AscDFH.historyitem_type_Pdf_Annot_Link | 1;
 
 	//------------------------------------------------------------------------------------------------------------------
 	// Типы изменений в PDF drawing prototype

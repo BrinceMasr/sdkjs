@@ -9173,6 +9173,10 @@ var CPresentation = CPresentation || function(){};
                 oAnnot.SetInRect(annotJson["InRect"]);
             }
         }
+
+        if (annotJson["highlight"] != null) {
+            oAnnot.SetHighlight && oAnnot.SetHighlight(annotJson["highlight"]);
+        }
         
         // border effect
         if (annotJson["BE"] != null) {

@@ -49,7 +49,8 @@
 
         this._triggers      = new AscPDF.CPdfTriggers();
         this._quads         = [];
-
+        this._rectDiff      = [0, 0, 0, 0];
+        
         // states
         this._pressed = false;
         this._hovered = false;
@@ -332,6 +333,60 @@
         if (oActionsQueue.actions.length !== 0) {
             oActionsQueue.Start();
         }
+    };
+
+    /**
+     * Defines how a button reacts when a user clicks it. The four highlight modes supported are:
+     * none — No visual indication that the button has been clicked.
+     * invert — The region encompassing the button’s rectangle inverts momentarily.
+     * push — The down face for the button (if any) is displayed momentarily.
+     * outline — The border of the rectangleinverts momentarily.
+     * @memberof CPushButtonField
+     * @param {number} nType - AscPDF.BUTTON_HIGHLIGHT_TYPES
+     * @typeofeditors ["PDF"]
+     */
+    CAnnotationLink.prototype.SetHighlight = function(nType) {
+        AscCommon.History.Add(new CChangesPDFLinkAnnotHighlight(this, this._highlight, nType));
+
+        this._highlight = nType;
+
+        this.SetWasChanged(true);
+    };
+    CAnnotationLink.prototype.SetHighlight = function() {
+        return this._highlight;
+    };
+
+    CAnnotationLink.prototype.WriteToBinary = function(memory) {
+        memory.WriteByte(AscCommon.CommandType.ctAnnotField);
+
+        let nStartPos = memory.GetCurPosition();
+        memory.Skip(4);
+
+        this.WriteToBinaryBase(memory);
+        this.WriteToBinaryBase2(memory);
+        
+        let nFlags = 0;
+        let nPosForFlags = memory.GetCurPosition();
+        memory.Skip(4);
+
+        let oAction = this.GetTrigger(AscPDF.PDF_TRIGGERS_TYPES.MouseUp);
+        if (oAction) {
+            nFlags |= (1 << 0);
+            oAction.WriteToBinary(memory);
+        }
+        
+        //
+        // PA action
+        //
+
+
+        let nEndPos = memory.GetCurPosition();
+        memory.Seek(memory.posForFlags);
+        memory.WriteLong(memory.annotFlags);
+        
+        memory.Seek(nStartPos);
+        memory.WriteLong(nEndPos - nStartPos);
+        memory.Seek(nEndPos);
     };
     
     CAnnotationLink.prototype.hitInPath = function(x, y) {

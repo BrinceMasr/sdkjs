@@ -96,6 +96,9 @@ AscDFH.drawingsConstructorsMap[AscDFH.historyitem_Pdf_Stamp_RenderStructure] = A
 // redact
 AscDFH.changesFactory[AscDFH.historyitem_Pdf_Redact_Annot_Redact_Id] = CChangesPDFRedactAnnotRedactId;
 
+// link
+AscDFH.changesFactory[AscDFH.historyitem_Pdf_Link_Annot_Highlight_Type] = CChangesPDFLinkAnnotHighlight;
+
 /**
  * @constructor
  * @extends {AscDFH.CChangesAnnotArrayOfDoubleProperty}
@@ -1726,4 +1729,22 @@ CChangesPDFRedactAnnotRedactId.prototype.private_SetValue = function(Value)
 {
 	let oAnnot = this.Class;
 	oAnnot._redactId = Value;
+};
+
+// link
+/**
+ * @constructor
+ * @extends {AscDFH.CChangesBaseLongProperty}
+ */
+function CChangesPDFLinkAnnotHighlight(Class, Old, New, Color)
+{
+	AscDFH.CChangesBaseLongProperty.call(this, Class, Old, New, Color);
+}
+CChangesPDFLinkAnnotHighlight.prototype = Object.create(AscDFH.CChangesBaseLongProperty.prototype);
+CChangesPDFLinkAnnotHighlight.prototype.constructor = CChangesPDFLinkAnnotHighlight;
+CChangesPDFLinkAnnotHighlight.prototype.Type = AscDFH.historyitem_Pdf_Link_Annot_Highlight_Type;
+CChangesPDFLinkAnnotHighlight.prototype.private_SetValue = function(Value)
+{
+	let oAnnot = this.Class;
+	oAnnot._highlight = Value;
 };

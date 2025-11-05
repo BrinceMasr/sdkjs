@@ -1241,7 +1241,7 @@ RotateState.prototype =
 
                                         oAnnot.SetRect(AscPDF.unionRectangles([aRect, oAnnot.private_CalcBoundingRect()]));
                                     }
-                                    else if (oAnnot.IsCircle() || oAnnot.IsSquare()) {
+                                    else if (oAnnot.IsCircle() || oAnnot.IsSquare() || oAnnot.IsLink()) {
                                         // aRect in this case is an annot OrigRect - Rectangle Diff
                                         AscCommon.History.StartNoHistoryMode();
                                         let aCurRect = oAnnot.GetRect().slice();
