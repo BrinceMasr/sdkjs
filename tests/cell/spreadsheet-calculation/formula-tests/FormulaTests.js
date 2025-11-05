@@ -353,7 +353,7 @@ $(function () {
 		api.wb = new AscCommonExcel.WorkbookView(api.wbModel, api.controller, api.handlers, api.HtmlElement,
 			api.topLineEditorElement, api, api.collaborativeEditing, api.fontRenderingMode);
 		AscCommon.History.init(wb);
-		//нет тестовых операция с историей, отключаем чтобы не было лишних сериализаций
+		// there are no test operations with history, we disable it so that there are no unnecessary serializations
 		AscCommon.History.TurnOff();
 		wb.maxDigitWidth = 7;
 		wb.paddingPlusBorder = 5;
@@ -791,7 +791,7 @@ $(function () {
 		// Clean define name
 		wb.delDefinesNames(oDefNameRange);
 		oDefNameRange = null;
-		// - Case: DefName Area 3D recursive formula SUM(А1000,Range3D)
+		// - Case: DefName Area 3D recursive formula SUM(A1000,Range3D)
 		ws2 = wb.createWorksheet(0, "Sheet2");
 		let oDefNameRange3D = new Asc.asc_CDefName("Range3D", ws.getName() + "!$A$1023:$C$1023");
 		wb.editDefinesNames(null, oDefNameRange3D);
@@ -799,10 +799,10 @@ $(function () {
 		ws.getRange2("B1023").setValue("2");
 		ws.getRange2("C1023").setValue("3");
 		ws2.getRange2("A1000").setValue("=SUM(A1000, Range3D)");
-		assert.strictEqual(ws2.getRange2("A1000").getValue(), "60", "Test: DefName Area 3D recursive formula SUM(А1000,Range3D). Sheet2!A1000 - 60");
+		assert.strictEqual(ws2.getRange2("A1000").getValue(), "60", "Test: DefName Area 3D recursive formula SUM(A1000,Range3D). Sheet2!A1000 - 60");
 		// Check work isFormulaRecursive function
 		bCaFromSelectedCell = getCaFromSelectedCell("A1000", ws2);
-		assert.strictEqual(bCaFromSelectedCell, true, "Test: DefName Area 3D recursive formula SUM(А1000,Range3D). isFormulaRecursion test. Sheet2!A1000 - flag ca: true");
+		assert.strictEqual(bCaFromSelectedCell, true, "Test: DefName Area 3D recursive formula SUM(A1000,Range3D). isFormulaRecursion test. Sheet2!A1000 - flag ca: true");
 		bCaFromSelectedCell = null;
 		// Clean define name
 		wb.delDefinesNames(oDefNameRange3D);

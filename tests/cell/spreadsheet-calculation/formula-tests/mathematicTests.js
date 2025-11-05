@@ -4224,10 +4224,10 @@ $(function () {
 		oParser = new parserFormula('CEILING.MATH(-8.1, 2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula CEILING.MATH(-8.1, 2) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), -8, 'Test: Positive case: Number(2). Rounds -8.1 up (toward 0) to the nearest integer that is a multiple of 2.');
-		// Case #4: Number(3). Rounds -5.5 down (away from 0) to the nearest integer that is a multiple of 2 with a mode of -1 which reverses rounding direction.
+		// Case #4: Number(3). Rounds -5.5 down (away from 0) to the nearest integer that is a multiple of 2 with a mode of -1 which reverses rounding direction.
 		oParser = new parserFormula('CEILING.MATH(-5.5, 2, -1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula CEILING.MATH(-5.5, 2, -1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), -6, 'Test: Positive case: Number(3). Rounds -5.5 down (away from 0) to the nearest integer that is a multiple of 2 with a mode of -1 which reverses rounding direction.');
+		assert.strictEqual(oParser.calculate().getValue(), -6, 'Test: Positive case: Number(3). Rounds -5.5 down (away from 0) to the nearest integer that is a multiple of 2 with a mode of -1 which reverses rounding direction.');
 		// Case #5: Number. Rounds a positive float number up to the nearest integer. Significance and mode are default.
 		oParser = new parserFormula('CEILING.MATH(7.7)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula CEILING.MATH(7.7) is parsed.');
@@ -8804,7 +8804,7 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE(0.0001) is parsed.');
 		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number. Small decimal truncated to 0 (returns 1). 1 argument used.');
 
-		// TODO в кейсах с числами меньше единицы редактор зависает в бесконечном цикле
+		// TODO in cases with numbers less than one, the editor freezes in an endless loop
 		// Need to fix: area handle, MS result diff, negative numbers handle, critical while loop
 		// Case #5: Reference link. Reference to cell with valid number. 1 argument used.
 		// Case #9: Name3D. 3D named range with valid number. 1 argument used.
@@ -12380,10 +12380,10 @@ $(function () {
 		oParser = new parserFormula('MMULT("1,2;3,abc","5;6")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MMULT("1,2;3,abc","5;6") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String. String with non-numeric element returns #VALUE!. 2 arguments used.');
-		// Case #16: Date. Invalid date (before Excel’s date system) returns #NUM!. 2 arguments used.
+		// Case #16: Date. Invalid date (before Excels date system) returns #NUM!. 2 arguments used.
 		oParser = new parserFormula('MMULT(DATE(1899,12,31),{3;4})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MMULT(DATE(1899,12,31),{3;4}) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Date. Invalid date (before Excel’s date system) returns #NUM!. 2 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Date. Invalid date (before Excels date system) returns #NUM!. 2 arguments used.');
 		// Case #17: Time. Time value (0.5) in array returns valid result but tests edge case. 2 arguments used.
 		oParser = new parserFormula('MMULT({0.5,2},{3;4})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MMULT({0.5,2},{3;4}) is parsed.');
@@ -13396,11 +13396,11 @@ $(function () {
 		oParser = new parserFormula('MUNIT(ABS(-5))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MUNIT(ABS(-5)) is parsed.');
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Formula. Nested formula evaluating to integer > 0. Returns 5x5 identity matrix. 1 argument used.');
-		// Case #20: Array. Array with multiple valid integers. Returns first element’s matrix (10x10 identity matrix). 1 argument used.
+		// Case #20: Array. Array with multiple valid integers. Returns first elements matrix (10x10 identity matrix). 1 argument used.
 		oParser = new parserFormula('MUNIT({10,20})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MUNIT({10,20}) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Array. Array with multiple valid integers. Returns first element’s matrix (10x10 identity matrix). 1 argument used.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,1).getValue(), 1, 'Test: Positive case: Array. Array with multiple valid integers. Returns first element’s matrix (10x10 identity matrix). 1 argument used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Array. Array with multiple valid integers. Returns first elements matrix (10x10 identity matrix). 1 argument used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,1).getValue(), 1, 'Test: Positive case: Array. Array with multiple valid integers. Returns first elements matrix (10x10 identity matrix). 1 argument used.');
 
 
 		// Negative cases:
@@ -14932,14 +14932,14 @@ $(function () {
 		oParser = new parserFormula('RADIANS(TIME(12,0,0))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RADIANS(TIME(12,0,0)) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0.008726646259971648, 'Test: Negative case: Time. Time value (0.5) returns valid result, treated as number. 1 argument used.');
-		// Case #19: Number. Number exceeding Excel’s limit returns #NUM!. 1 argument used.
+		// Case #19: Number. Number exceeding Excels limit returns #NUM!. 1 argument used.
 		oParser = new parserFormula('RADIANS(1E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RADIANS(1E+307) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 1.7453292519943297e+305, 'Test: Negative case: Number. Number exceeding Excel’s limit returns #NUM!. 1 argument used.');
-		// Case #20: Formula. Formula exceeding Excel’s numeric limit returns #NUM!. 1 argument used.
+		assert.strictEqual(oParser.calculate().getValue(), 1.7453292519943297e+305, 'Test: Negative case: Number. Number exceeding Excels limit returns #NUM!. 1 argument used.');
+		// Case #20: Formula. Formula exceeding Excels numeric limit returns #NUM!. 1 argument used.
 		oParser = new parserFormula('RADIANS(1E+307*10)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RADIANS(1E+307*10) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1.7453292519943297e+305, 'Test: Negative case: Formula. Formula exceeding Excel’s numeric limit returns #NUM!. 1 argument used.');
+		//? assert.strictEqual(oParser.calculate().getValue(), 1.7453292519943297e+305, 'Test: Negative case: Formula. Formula exceeding Excels numeric limit returns #NUM!. 1 argument used.');
 
 		// Bounded cases:
 		// Case #1: Number. Maximum valid Excel number. 1 argument used.
@@ -14960,7 +14960,7 @@ $(function () {
 		// Case #13: Area3D. 3D single-cell range. 1 argument used.
 		// Case #6: Area. Multi-cell range returns #VALUE!. 1 argument used.
 		// Case #14: Area3D. 3D multi-cell range returns #VALUE!. 1 argument used.
-		// Case #20: Formula. Formula exceeding Excel’s numeric limit returns #NUM!. 1 argument used.
+		// Case #20: Formula. Formula exceeding Excels numeric limit returns #NUM!. 1 argument used.
 		// Case #3: Number. Smallest non-zero positive number. 1 argument used.
 
 		testArrayFormula(assert, "RADIANS");
@@ -18925,10 +18925,10 @@ $(function () {
 		oParser = new parserFormula('SIN("")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SIN("") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String. Empty string returns #VALUE!. 1 argument used.');
-		// Case #14: Number. Number exceeding Excel’s limit returns #NUM!. 1 argument used.
+		// Case #14: Number. Number exceeding Excels limit returns #NUM!. 1 argument used.
 		oParser = new parserFormula('SIN(1E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SIN(1E+307) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. Number exceeding Excel’s limit returns #NUM!. 1 argument used.');
+		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. Number exceeding Excels limit returns #NUM!. 1 argument used.');
 		// Case #15: Array. Array with boolean returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('SIN({TRUE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SIN({TRUE}) is parsed.');
@@ -18970,7 +18970,7 @@ $(function () {
 
 		// Need to fix: area handle, different results from ms
 		// Case #3: Area. Multi-cell range returns #VALUE!. 1 argument used.
-		// Case #14: Number. Number exceeding Excel’s limit returns #NUM!. 1 argument used.
+		// Case #14: Number. Number exceeding Excels limit returns #NUM!. 1 argument used.
 		// Case #19: Area. Area with text in one cell returns #VALUE!. 1 argument used.
 		// Case #1: Number. Smallest positive number Excel can handle, returns ~1E-308. 1 argument used.
 		// Case #2: Number. Smallest negative number Excel can handle, returns ~-1E-308. 1 argument used.
@@ -19177,10 +19177,10 @@ $(function () {
 		oParser = new parserFormula('SINH("")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SINH("") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String. Empty string returns #VALUE!. 1 argument used.');
-		// Case #14: Number. Number exceeding Excel’s limit returns #NUM!. 1 argument used.
+		// Case #14: Number. Number exceeding Excels limit returns #NUM!. 1 argument used.
 		oParser = new parserFormula('SINH(1E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SINH(1E+307) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. Number exceeding Excel’s limit returns #NUM!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. Number exceeding Excels limit returns #NUM!. 1 argument used.');
 		// Case #15: Array. Array with boolean returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('SINH({TRUE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SINH({TRUE}) is parsed.');
@@ -22465,10 +22465,10 @@ $(function () {
 		oParser = new parserFormula('TAN("")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TAN("") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String. Empty string returns #VALUE!. 1 argument used.');
-		// Case #14: Number. Number exceeding Excel’s limit returns #NUM!. 1 argument used.
+		// Case #14: Number. Number exceeding Excels limit returns #NUM!. 1 argument used.
 		oParser = new parserFormula('TAN(1E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TAN(1E+307) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. Number exceeding Excel’s limit returns #NUM!. 1 argument used.');
+		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. Number exceeding Excels limit returns #NUM!. 1 argument used.');
 		// Case #15: Array. Array with boolean returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('TAN({TRUE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TAN({TRUE}) is parsed.');
@@ -22511,7 +22511,7 @@ $(function () {
 		// Need to fix: area handle, diff results from ms, boundary cases
 		// Case #3: Area. Multi-cell range returns #VALUE!. 1 argument used.
 		// Case #10: Area3D. 3D multi-cell range returns #VALUE!. 1 argument used.
-		// Case #14: Number. Number exceeding Excel’s limit returns #NUM!. 1 argument used.
+		// Case #14: Number. Number exceeding Excels limit returns #NUM!. 1 argument used.
 		// Case #19: Area. Area with text in one cell returns #VALUE!. 1 argument used.
 
 
@@ -22706,10 +22706,10 @@ $(function () {
 		oParser = new parserFormula('TANH("")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TANH("") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String. Empty string returns #VALUE!. 1 argument used.');
-		// Case #14: Number. Number exceeding Excel’s limit returns #NUM!. 1 argument used.
+		// Case #14: Number. Number exceeding Excels limit returns #NUM!. 1 argument used.
 		oParser = new parserFormula('TANH(1E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TANH(1E+307) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Number. Number exceeding Excel’s limit returns #NUM!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Number. Number exceeding Excels limit returns #NUM!. 1 argument used.');
 		// Case #15: Array. Array with boolean returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('TANH({TRUE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TANH({TRUE}) is parsed.');
