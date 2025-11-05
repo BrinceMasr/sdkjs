@@ -100,9 +100,17 @@
         this.DrawPressed();
     };
     CAnnotationLink.prototype.onMouseEnter = function() {
+        if (Asc.editor.canEdit()) {
+            return;
+        }
+
         this.SetHovered(true);
     };
     CAnnotationLink.prototype.onMouseExit = function() {
+        if (Asc.editor.canEdit()) {
+            return;
+        }
+
         this.SetHovered(false);
     };
     CAnnotationLink.prototype.DrawPressed = function() {
@@ -114,6 +122,10 @@
         Asc.editor.getDocumentRenderer()._paint();
     };
     CAnnotationLink.prototype.onMouseUp = function() {
+        if (Asc.editor.canEdit()) {
+            return;
+        }
+
         this.DrawUnpressed();
         this.AddActionsToQueue(AscPDF.PDF_TRIGGERS_TYPES.MouseUp);
     };

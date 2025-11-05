@@ -2540,7 +2540,7 @@ var CPresentation = CPresentation || function(){};
             else if (oMouseMoveAnnot.IsFreeText() && oMouseMoveAnnot.IsInTextBox()) {
                 cursorType = "text";
             }
-            else if (oMouseMoveAnnot.IsLink()) {
+            else if (oMouseMoveAnnot.IsLink() && !Asc.editor.canEdit()) {
                 cursorType = "pointer";
             }
         }
