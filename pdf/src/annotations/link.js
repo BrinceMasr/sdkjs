@@ -77,6 +77,128 @@
         this._quads.push(aQuads);
     };
 
+    CAnnotationLink.prototype.DrawFromStream = function(oGraphicsPDF, oGraphicsWord) {
+        let oViewer = editor.getDocumentRenderer();
+        oGraphicsPDF.SetGlobalAlpha(1);
+        
+        let nImgType;
+        if (this.IsPressed()) {
+            nImgType = AscPDF.APPEARANCE_TYPES.mouseDown;
+        }
+        else if (this.IsHovered()) {
+            nImgType = AscPDF.APPEARANCE_TYPES.rollover;
+        }
+        else
+            nImgType = undefined;
+
+        let originView = AscPDF.CBaseField.prototype.GetOriginView.call(this, nImgType, oGraphicsPDF.GetDrawingPageW(), oGraphicsPDF.GetDrawingPageH());
+        if (!originView) {
+            this.DrawLocks(oGraphicsPDF);
+            this.DrawEdit(oGraphicsWord);
+            return;
+        }
+
+        let oTr             = oGraphicsPDF.GetTransform();
+        let highlightType   = this.GetHighlight();
+
+        let aOrigRect = this.GetRect();
+
+        let origX   = aOrigRect[0];
+        let origY   = aOrigRect[1];
+        let X       = originView.x;
+        let Y       = originView.y;
+
+        let nWidth  = originView.width;
+        let nHeight = originView.height;
+
+        let nLineWidth = this.GetWidth() + 1;
+
+        // Create a new canvas element for the cropped area
+        var croppedCanvas       = document.createElement('canvas');
+        var oCroppedCtx         = croppedCanvas.getContext("2d");
+        croppedCanvas.width     = nWidth;
+        croppedCanvas.height    = nHeight;
+
+        if (this.IsPressed() == false) {
+            oGraphicsPDF.DrawImageXY(originView, origX, origY, undefined, true);
+            return;
+        }
+
+        if (originView) {
+            switch (highlightType) {
+                case AscPDF.BUTTON_HIGHLIGHT_TYPES.none:
+                case AscPDF.BUTTON_HIGHLIGHT_TYPES.push:
+                    oGraphicsPDF.DrawImageXY(originView, origX, origY, undefined, true);
+                    break;
+                case AscPDF.BUTTON_HIGHLIGHT_TYPES.invert: {
+                    let xCenter = oViewer.width >> 1;
+                    if (oViewer.documentWidth > oViewer.width)
+                    {
+                        xCenter = (oViewer.documentWidth >> 1) - (oViewer.scrollX) >> 0;
+                    }
+                    let yPos    = oViewer.scrollY >> 0;
+                    let page    = oViewer.drawingPages[this.GetPage()];
+                    let w       = (page.W * AscCommon.AscBrowser.retinaPixelRatio) >> 0;
+                    let h       = (page.H * AscCommon.AscBrowser.retinaPixelRatio) >> 0;
+                    let indLeft = ((xCenter * AscCommon.AscBrowser.retinaPixelRatio) >> 0) - (w >> 1);
+                    let indTop  = ((page.Y - yPos) * AscCommon.AscBrowser.retinaPixelRatio) >> 0;
+
+                    let x = X + indLeft;
+                    let y = Y + indTop;
+                    let nDWidth = 0;
+                    let nDHeight = 0;
+
+                    if (x < 0) {
+                        nDWidth = nWidth - (nWidth + x);
+                        X       += nDWidth;
+                        nWidth  += x >> 0;
+                        croppedCanvas.width = nWidth;
+                        x = 0;
+                    }
+                    if (y < 0) {
+                        nDHeight    = nHeight - (nHeight + y);
+                        Y           += nDHeight;
+                        nHeight     += y >> 0;
+                        croppedCanvas.height = nHeight;
+                        y = 0;
+                    }
+
+                    oCroppedCtx.drawImage(oViewer.canvas, x, y, nWidth, nHeight, 0, 0, nWidth, nHeight);
+                    
+                    if (page.ImageAnnots) {
+                        oCroppedCtx.drawImage(page.ImageAnnots, X, Y, nWidth, nHeight, 0, 0, nWidth, nHeight);
+                    }
+
+                    oCroppedCtx.drawImage(originView, nDWidth, nDHeight, originView.width, originView.height, 0, 0, originView.width, originView.height);
+                    oCroppedCtx.globalCompositeOperation='difference';
+                    oCroppedCtx.fillStyle='white';
+                    oCroppedCtx.fillRect(0, 0, croppedCanvas.width,croppedCanvas.height);
+                    oGraphicsPDF.DrawImageXY(oCroppedCtx.canvas, origX, origY, undefined, true);
+                    break;
+                }
+                case AscPDF.BUTTON_HIGHLIGHT_TYPES.outline: {
+                    if (originView) {
+                        oCroppedCtx.drawImage(originView, 0, 0);
+                    }
+                    else {
+                        oCroppedCtx.drawImage(oViewer.canvasForms, X, Y, nWidth, nHeight, 0, 0, nWidth, nHeight);
+                    }
+    
+                    oCroppedCtx.clearRect(nLineWidth * oTr.sy, nLineWidth * oTr.sy, croppedCanvas.width - 2 * nLineWidth * oTr.sy, croppedCanvas.height - 2 * nLineWidth * oTr.sy);
+    
+                    oCroppedCtx.globalCompositeOperation='difference';
+                    oCroppedCtx.fillStyle='white';
+                    oCroppedCtx.fillRect(0, 0, croppedCanvas.width,croppedCanvas.height);
+                    oCroppedCtx.globalCompositeOperation='source-over';
+                    oCroppedCtx.drawImage(originView, nLineWidth * oTr.sy, nLineWidth * oTr.sy, nWidth - 2 * nLineWidth * oTr.sy, nHeight - 2 * nLineWidth * oTr.sy, nLineWidth * oTr.sy, nLineWidth * oTr.sy, nWidth -  2 * nLineWidth * oTr.sy, nHeight - 2 * nLineWidth * oTr.sy);
+    
+                    oGraphicsPDF.DrawImageXY(oCroppedCtx.canvas, origX, origY, undefined, true);
+                    break;
+                }
+            }
+        }
+    };
+
     CAnnotationLink.prototype.RefillGeometry = function() {};
     CAnnotationLink.prototype.SetPressed = function(bValue) {
         this._pressed = bValue;
@@ -352,7 +474,7 @@
 
         this.SetWasChanged(true);
     };
-    CAnnotationLink.prototype.SetHighlight = function() {
+    CAnnotationLink.prototype.GetHighlight = function() {
         return this._highlight;
     };
 
@@ -379,8 +501,21 @@
         // PA action
         //
 
+        // highlight
+        let nHighlightType = this.GetHighlight();
+        if (nHighlightType != null) {
+            memory.fieldDataFlags |= (1 << 2);
+            memory.WriteByte(nHighlightType);
+        }
+
+        //
+        // quads
+        //
 
         let nEndPos = memory.GetCurPosition();
+        memory.Seek(nPosForFlags);
+        memory.WriteLong(nFlags);
+        
         memory.Seek(memory.posForFlags);
         memory.WriteLong(memory.annotFlags);
         
