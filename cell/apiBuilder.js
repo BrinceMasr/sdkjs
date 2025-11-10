@@ -19732,7 +19732,6 @@
      * @returns {ApiAutoFilter|null|undefined}
      */
 	ApiAutoFilter.prototype.Modify = function(Field, Criteria1, Operator, Criteria2, VisibleDropDown){
-        // check branch
         if (!this.range) {
             return;
         }
