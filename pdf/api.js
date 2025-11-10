@@ -1467,6 +1467,33 @@
 		}, AscDFH.historydescription_Pdf_ContextMenuRemove);
 	};
 
+	PDFEditorApi.prototype.SetGoToAction = function() {
+		let oDoc = this.getPDFDoc();
+		let oAnnot = oDoc.mouseDownAnnot;
+
+		if (!oAnnot || !oAnnot.IsLink()) {
+			return;
+		}
+
+		let nCurPage = oDoc.GetCurPage();
+		let nPageW = oDoc.GetPageWidth(nCurPage);
+		let nPageH = oDoc.GetPageHeight(nCurPage);
+		let oViewRect = oDoc.Viewer.getViewingRect(nCurPage);
+		
+		let oAction = {
+			"S":		AscPDF.ACTIONS_TYPES.GoTo,
+			"page":		nCurPage,
+			"top":		nPageH * oViewRect.y,
+			"right":	nPageW * oViewRect.r,
+			"bottom":	nPageH * oViewRect.b,
+			"left":		nPageW * oViewRect.x,
+			"kind":		AscPDF.GOTO_TYPES.fitR,
+			"zoom":		oDoc.Viewer.zoom,
+		};
+
+		oAnnot.SetActions(AscPDF.PDF_TRIGGERS_TYPES.MouseUp, [oAction]);
+	};
+
 	/////////////////////////////////////////////////////////////
 	///////// For filed
 	////////////////////////////////////////////////////////////

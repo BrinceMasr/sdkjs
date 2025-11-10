@@ -578,10 +578,6 @@
                             bottom: aActionsInfo[i]["bottom"],
                             left:   aActionsInfo[i]["left"]
                         }
-                        if (aActionsInfo[i]["bottom"] != null && aActionsInfo[i]["top"] != null) {
-                            oRect.top = aActionsInfo[i]["bottom"];
-                            oRect.bottom = aActionsInfo[i]["top"];
-                        }
     
                         oAction = new AscPDF.CActionGoTo(aActionsInfo[i]["page"], aActionsInfo[i]["kind"], aActionsInfo[i]["zoom"], oRect);
                         aActions.push(oAction);

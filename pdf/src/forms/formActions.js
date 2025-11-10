@@ -72,17 +72,6 @@
         LastPage:   3
     }
 
-    let GOTO_TYPES = { // see description in pdf specification (table 151 destination syntax)
-        xyz:    0,
-        fit:    1,
-        fitH:   2,
-        fitV:   3,
-        fitR:   4,
-        fitB:   5,
-        fitBH:  6,
-        fitBV:  7
-    }
-
     function CPdfTriggers() {
         this.MouseUp = null; 
         this.MouseDown = null; 
@@ -299,27 +288,27 @@
         let nScaleX = oViewer.drawingPages[this.page].W / oViewer.file.pages[this.page].W / oViewer.zoom;
 
         switch (this.goToType) {
-            case GOTO_TYPES.xyz: // inherit zoom
+            case AscPDF.GOTO_TYPES.xyz: // inherit zoom
                 break;
-            case GOTO_TYPES.fit:
-            case GOTO_TYPES.fitB: { // fit to max of heigth/width
+            case AscPDF.GOTO_TYPES.fit:
+            case AscPDF.GOTO_TYPES.fitB: { // fit to max of heigth/width
                 let nVerZoom = ((oViewer.canvas.height / (nNoZoomH * AscCommon.AscBrowser.retinaPixelRatio)) * 100 >> 0) / 100;
                 let nHorZoom = ((oViewer.canvas.width / (nNoZoomW * AscCommon.AscBrowser.retinaPixelRatio)) * 100 >> 0) / 100;
 
                 this.zoom = Math.min(nHorZoom, nVerZoom);
                 break;
             }
-            case GOTO_TYPES.fitH:
-            case GOTO_TYPES.fitBH: { // fit to width
+            case AscPDF.GOTO_TYPES.fitH:
+            case AscPDF.GOTO_TYPES.fitBH: { // fit to width
                 this.zoom = ((oViewer.canvas.width / (nNoZoomW * AscCommon.AscBrowser.retinaPixelRatio)) * 100 >> 0) / 100;
                 break;
             }
-            case GOTO_TYPES.fitV:
-            case GOTO_TYPES.fitBV: { // fit to heigth
+            case AscPDF.GOTO_TYPES.fitV:
+            case AscPDF.GOTO_TYPES.fitBV: { // fit to heigth
                 this.zoom = ((oViewer.canvas.height / (nNoZoomH * AscCommon.AscBrowser.retinaPixelRatio)) * 100 >> 0) / 100;
                 break;
             }
-            case GOTO_TYPES.fitR: { // fit to rect
+            case AscPDF.GOTO_TYPES.fitR: { // fit to rect
                 let nRectW = (this.rect.right - this.rect.left) * nScaleX * AscCommon.AscBrowser.retinaPixelRatio;
                 let nRectH = (this.rect.bottom - this.rect.top) * nScaleY * AscCommon.AscBrowser.retinaPixelRatio;
 

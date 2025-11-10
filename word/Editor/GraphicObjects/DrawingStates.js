@@ -281,7 +281,7 @@ StartAddNewShape.prototype =
 
                             oShape.recalculate();
                             
-                            let oAnnot = oShape.ConvertToAnnot();
+                            let oAnnot = oShape.ConvertToAnnot(Asc.editor.addAnnotType);
                             if (oAnnot) {
                                 oLogicDocument.AddAnnot(oAnnot, this.pageIndex);
                                 oLogicDocument.SetMouseDownObject(oAnnot);
