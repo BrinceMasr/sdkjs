@@ -2472,7 +2472,10 @@ var CPresentation = CPresentation || function(){};
                 }
             }
             else if (oCurObject.GetId() == oCursorInfo.objectId) {
-                if (!oCurObject.IsAnnot() && !oCurObject.IsLink()) {
+                if (!oCurObject.IsAnnot()) {
+                    return true;
+                }
+                else if (!oCurObject.IsLink()) {
                     return true;
                 }
             }
