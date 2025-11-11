@@ -4905,7 +4905,12 @@ var CPresentation = CPresentation || function(){};
         let oController = this.GetController();
         let oTargetTextObject = oController.getTargetTextObject();
 
-        if (oController.getSelectedArray().find(function(obj) { return obj.IsAnnot()})) {
+        let aSelObjects = oController.getSelectedArray();
+
+        if (aSelObjects.length == 0) {
+            return true;
+        }
+        else if (aSelObjects.find(function(obj) { return obj.IsAnnot()})) {
             return false;
         }
         else if (oTargetTextObject instanceof AscFormat.CTitle) {
