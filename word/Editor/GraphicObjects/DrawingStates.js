@@ -286,6 +286,10 @@ StartAddNewShape.prototype =
                                 oLogicDocument.AddAnnot(oAnnot, this.pageIndex);
                                 oLogicDocument.SetMouseDownObject(oAnnot);
                                 oAnnot.select(oLogicDocument.GetController(), this.pageIndex);
+
+                                if (oAnnot.IsLink()) {
+                                    Asc.editor.sendEvent("asc_onDialogAddAnnotLink");
+                                }
                             }
                         }
                         else {

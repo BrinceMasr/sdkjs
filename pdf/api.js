@@ -1315,7 +1315,6 @@
 		this.isStartAddShape = true;
 		this.isStartAddAnnot = true;
 		
-		type = AscPDF.ANNOTATIONS_TYPES.Link;
 		let sPreset;
 		switch (type) {
 			case AscPDF.ANNOTATIONS_TYPES.Square:
