@@ -27312,7 +27312,11 @@
     ApiFilters.prototype["GetCount"] = ApiFilters.prototype.GetCount;
     ApiFilters.prototype["GetParent"] = ApiFilters.prototype.GetParent;
 
-    ApiFilter.prototype[""]
+    ApiFilter.prototype["GetCriteria1"] = ApiFilter.prototype.GetCriteria1;
+    ApiFilter.prototype["GetCriteria2"] = ApiFilter.prototype.GetCriteria2;
+    ApiFilter.prototype["GetOperator"] = ApiFilter.prototype.GetOperator;
+    ApiFilter.prototype["GetOn"] = ApiFilter.prototype.GetOn;
+    ApiFilter.prototype["GetParent"] = ApiFilter.prototype.GetParent;
 
 	ApiRange.prototype["GetClassType"] = ApiRange.prototype.GetClassType;
 	ApiRange.prototype["GetRow"] = ApiRange.prototype.GetRow;
