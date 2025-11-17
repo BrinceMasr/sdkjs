@@ -13405,6 +13405,10 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: MUNIT({10,20}) is parsed.');
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Array. Array with multiple valid integers. Returns first elements matrix (10x10 identity matrix). 1 argument used.');
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,1).getValue(), 1, 'Test: Positive case: Array. Array with multiple valid integers. Returns first elements matrix (10x10 identity matrix). 1 argument used.');
+		// Case #21: Formula. Nested formula evaluating to integer > 0. Returns the SUM of the matrix 1000x1000.
+		oParser = new parserFormula('SUM(MUNIT(1000))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: SUM(MUNIT(1000)) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 1000, 'Test: Positive case: Formula. Nested formula evaluating to integer > 0. Returns the SUM of the matrix 1000x1000.');
 
 
 		// Negative cases:

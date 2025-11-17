@@ -3206,6 +3206,7 @@ function (window, undefined) {
 
 		let arg0 = arg[0];
 		let numZero = new cNumber(0);
+		let numOne = new cNumber(1);
 
 		if (arg0.type === cElementType.array || arg0.type === cElementType.cellsRange || arg0.type === cElementType.cellsRange3D) {
 			// if the argument is an array or range, then we return an array of the size of the received argument
@@ -3240,17 +3241,22 @@ function (window, undefined) {
 			return arg0;
 		} else {
 			let num = parseInt(arg0);
-			if (num <= 0 || num > 500) { //? temporary solution because calc is too long
+			if (num <= 0) {
 				return new cError(cErrorType.wrong_value_type);
-			}
-			
-			const twoDArray = Array.from(Array(num), function() { return new Array(num).fill(numZero) });
-			for (let i = 0; i < num; i++) {
-				twoDArray[i][i] = new cNumber(1);
 			}
 
 			let res = new cArray();
-			res.fillFromArray(twoDArray);
+			for (let row = 0; row < num; row++) {
+				res.addRow();
+				for (let col = 0; col < num; col++) {
+					if (row !== col) {
+						res.addElement(numZero);
+					} else {
+						res.addElement(numOne);
+					}
+				}
+			}
+
 			return res;
 		}
 	};
