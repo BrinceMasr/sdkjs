@@ -26796,21 +26796,25 @@
     /**
      * Class representing worksheet autofilters.
      * @constructor
-     * @property {ApiFilters} Filters - Returns the ApiFilters collection that represents the filters applied to the range.
+     * @property {ApiFilter[]} Filters - Returns the array of ApiFilter objects that represents the filters applied to the range.
      * @property {boolean} FilterMode - Returns a value that indicates whether the worksheet has an AutoFilter applied.
      * @property {ApiWorksheet} Parent - Returns the ApiWorksheet object that contains the AutoFilter.
      * @property {ApiRange | null} Range - Returns the ApiRange object that represents the AutoFilter range; null if no AutoFilter is defined.
      */
     function ApiAutoFilter(ws) {
         this.ws = ws;
-        this.filters = new ApiFilters(this, ws.worksheet);
+        this.filters = ws && ws.worksheet &&
+        ws.worksheet.AutoFilter &&
+        ws.worksheet.AutoFilter.FilterColumns
+            ? createAutoFilterArray(this, ws.worksheet.AutoFilter.FilterColumns)
+            : [];
     }
 
     /**
-     * Returns the ApiFilters object that represents the filters applied to the AutoFilter range.
+     * Returns the array of ApiFilter objects that represents the filters applied to the AutoFilter range.
      * @memberof ApiAutoFilter
      * @typeofeditors ["CSE"]
-     * @returns {ApiFilters}
+     * @returns {ApiFilter[]}
      * @see office-js-api/Examples/{Editor}/ApiAutoFilter/Methods/GetFilters.js
      */
     ApiAutoFilter.prototype.GetFilters = function () {
@@ -26875,7 +26879,7 @@
         }
 
         var bbox = this.ws.worksheet.AutoFilter.Ref;
-        return AscCommonExcel.Range.prototype.createFromBBox(this.ws.worksheet, bbox);
+        return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this.ws.worksheet, bbox));
     };
 
     Object.defineProperty(ApiAutoFilter.prototype, "Range", {
@@ -26885,63 +26889,9 @@
     });
 
     /**
-     * Class representing an AutoFilter filters collection.
-     * @constructor
-     * @property {ApiAutoFilter} Parent - Returns the parent ApiAutoFilter object for the filter collection.
-     * @property {number} Count - Returns the number of filter columns in the collection.
-     */
-    function ApiFilters(parent, worksheet) {
-        this.parent = parent;
-        this.filters =
-            worksheet &&
-            worksheet.AutoFilter &&
-            worksheet.AutoFilter.FilterColumns
-                ? createAutoFilterArray(this, worksheet.AutoFilter.FilterColumns)
-                : [];
-    }
-
-    /**
-     * Returns the number of filter columns in the collection.
-     * @memberof ApiFilters
-     * @typeofeditors ["CSE"]
-     * @returns {number} The number of filters in the collection.
-     * @see office-js-api/Examples/{Editor}/ApiFilters/Methods/Count.js
-     */
-    ApiFilters.prototype.GetCount = function () {
-        if (!this.filters || !Array.isArray(this.filters)) {
-            return 0;
-        }
-        return this.filters.length;
-    };
-
-    Object.defineProperty(ApiFilters.prototype, "Count", {
-        get: function () {
-            return this.GetCount();
-        }
-    });
-
-    /**
-     * Returns the parent ApiAutoFilter object for the filter collection.
-     * @memberof ApiFilters
-     * @typeofeditors ["CSE"]
-     * @returns {ApiAutoFilter} The parent AutoFilter object.
-     * @see office-js-api/Examples/{Editor}/ApiFilters/Methods/Parent.js
-     */
-    ApiFilters.prototype.GetParent = function () {
-        return this.parent;
-    };
-
-    Object.defineProperty(ApiFilters.prototype, "Parent", {
-        get: function () {
-            return this.GetParent();
-        }
-    });
-
-
-    /**
      * Class representing a single AutoFilter column.
      * @constructor
-     * @property {ApiFilters} Parent - Returns the parent filters collection for this filter column.
+     * @property {ApiAutoFilter} Parent - Returns the parent filters collection for this filter column.
      * @property {string|string[]|number|XlDynamicFilterCriteria|null} Criteria1 - Returns the first criteria associated with the filter.
      * @property {string|null} Criteria2 - Returns the second criteria associated with the filter (used with xlAnd/xlOr).
      * @property {boolean} On - Indicates whether any filter is applied to this column.
@@ -27171,7 +27121,7 @@
      * Returns the parent filters collection for this filter column.
      * @memberof ApiFilter
      * @typeofeditors ["CSE"]
-     * @returns {ApiFilters} The parent filters collection.
+     * @returns {ApiAutoFilter} The parent filters collection.
      * @see office-js-api/Examples/{Editor}/ApiFilter/Methods/Parent.js
      */
     ApiFilter.prototype.GetParent = function () {
@@ -27307,9 +27257,6 @@
     ApiAutoFilter.prototype["GetFilterMode"] = ApiAutoFilter.prototype.GetFilterMode;
     ApiAutoFilter.prototype["GetParent"] = ApiAutoFilter.prototype.GetParent;
     ApiAutoFilter.prototype["GetRange"] = ApiAutoFilter.prototype.GetRange;
-
-    ApiFilters.prototype["GetCount"] = ApiFilters.prototype.GetCount;
-    ApiFilters.prototype["GetParent"] = ApiFilters.prototype.GetParent;
 
     ApiFilter.prototype["GetCriteria1"] = ApiFilter.prototype.GetCriteria1;
     ApiFilter.prototype["GetCriteria2"] = ApiFilter.prototype.GetCriteria2;
