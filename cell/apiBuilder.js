@@ -26885,6 +26885,59 @@
         }
     });
 
+    /**
+     * Class representing an AutoFilter filters collection.
+     * @constructor
+     * @property {ApiAutoFilter} Parent - Returns the parent ApiAutoFilter object for the filter collection.
+     * @property {number} Count - Returns the number of filter columns in the collection.
+     */
+    function ApiFilters(parent, worksheet) {
+        this.parent = parent;
+        this.filters =
+            worksheet &&
+            worksheet.AutoFilter &&
+            worksheet.AutoFilter.FilterColumns
+                ? createAutoFilterArray(this, worksheet.AutoFilter.FilterColumns)
+                : [];
+    }
+
+    /**
+     * Returns the number of filter columns in the collection.
+     * @memberof ApiFilters
+     * @typeofeditors ["CSE"]
+     * @returns {number} The number of filters in the collection.
+     * @see office-js-api/Examples/{Editor}/ApiFilters/Methods/Count.js
+     */
+    ApiFilters.prototype.GetCount = function () {
+        if (!this.filters || !Array.isArray(this.filters)) {
+            return 0;
+        }
+        return this.filters.length;
+    };
+
+    Object.defineProperty(ApiFilters.prototype, "Count", {
+        get: function () {
+            return this.GetCount();
+        }
+    });
+
+    /**
+     * Returns the parent ApiAutoFilter object for the filter collection.
+     * @memberof ApiFilters
+     * @typeofeditors ["CSE"]
+     * @returns {ApiAutoFilter} The parent AutoFilter object.
+     * @see office-js-api/Examples/{Editor}/ApiFilters/Methods/Parent.js
+     */
+    ApiFilters.prototype.GetParent = function () {
+        return this.parent;
+    };
+
+    Object.defineProperty(ApiFilters.prototype, "Parent", {
+        get: function () {
+            return this.GetParent();
+        }
+    });
+
 
     /**
      * Class representing a single AutoFilter column.
@@ -27132,213 +27185,6 @@
         }
     });
 
-
-    /**
-     * Class representing autofilters.
-     * @constructor
-     *
-     */
-    function ApiFilter(parent, filter){
-        this.parent = parent;
-        this.filter = filter;
-    }
-
-    /**
-     * Returns Criteria1 for this filter column.
-     * - For values filter: array of visible values.
-     * - For custom filter (xlAnd/xlOr): string like ">0".
-     * - For Top10: number of items / percent.
-     * - For dynamic filter: XlDynamicFilterCriteria string.
-     * - For color filter: currently not exposed (returns null).
-     * @memberof ApiFilter
-     * @typeofeditors ["CSE"]
-     * @returns {string | string[] | number | XlDynamicFilterCriteria | null}
-     */
-    ApiFilter.prototype.GetCriteria1 = function () {
-        var f = this.filter;
-        if (!f) {
-            return null;
-        }
-
-        var op = this.GetOperator();
-
-        // 1) Values filter
-        if (op === "xlFilterValues" && f.Filters && f.Filters.Values) {
-            // Values: { "3":1,"5":1,... } -> ["3","5",...]
-            return Object.keys(f.Filters.Values);
-        }
-
-        // 2) Custom filters (numeric / text with AND / OR)
-        if ((op === "xlAnd" || op === "xlOr") &&
-            f.CustomFiltersObj &&
-            Array.isArray(f.CustomFiltersObj.CustomFilters) &&
-            f.CustomFiltersObj.CustomFilters.length
-        ) {
-            var cf1 = f.CustomFiltersObj.CustomFilters[0];
-            if (!cf1) {
-                return null;
-            }
-            var sign1 = _ascCustomOpToSign(cf1.Operator);
-            var val1  = cf1.Val != null ? (cf1.Val + "") : "";
-            return sign1 + val1; // e.g. ">0"
-        }
-
-        // 3) Dynamic filter
-        if (op === "xlFilterDynamic" && f.DynamicFilter) {
-            return _dynamicTypeToCriteria(f.DynamicFilter.Type);
-        }
-
-        // 4) Top10 filter
-        if (
-            (op === "xlTop10Items" ||
-                op === "xlTop10Percent" ||
-                op === "xlBottom10Items" ||
-                op === "xlBottom10Percent") &&
-            f.Top10
-        ) {
-            // In SetAutoFilter Criteria1 was the "Val" (items count or percentage)
-            return f.Top10.Val;
-        }
-
-        // 5) Color filters – Criteria1 in SetAutoFilter was ApiColor.
-        // We could reconstruct it via asc_getCColor, but API type is different.
-        // For now return null; extend later if needed.
-        return null;
-    };
-
-    Object.defineProperty(ApiFilter.prototype, "Criteria1", {
-        get: function () {
-            return this.GetCriteria1();
-        }
-    });
-
-    /**
-     * Returns Criteria2 for this filter column (only for custom filters).
-     * For xlAnd/xlOr it returns string like "<=8". Otherwise null.
-     * @memberof ApiFilter
-     * @typeofeditors ["CSE"]
-     * @returns {string | null}
-     */
-    ApiFilter.prototype.GetCriteria2 = function () {
-        var f = this.filter;
-        if (!f) {
-            return null;
-        }
-
-        var op = this.GetOperator();
-        if ((op !== "xlAnd" && op !== "xlOr") ||
-            !f.CustomFiltersObj ||
-            !Array.isArray(f.CustomFiltersObj.CustomFilters)
-        ) {
-            return null;
-        }
-
-        var cfArr = f.CustomFiltersObj.CustomFilters;
-        if (cfArr.length < 2) {
-            return null;
-        }
-
-        var cf2 = cfArr[1];
-        if (!cf2) {
-            return null;
-        }
-
-        var sign2 = _ascCustomOpToSign(cf2.Operator);
-        var val2  = cf2.Val != null ? (cf2.Val + "") : "";
-        return sign2 + val2; // e.g. "<=8"
-    };
-
-    Object.defineProperty(ApiFilter.prototype, "Criteria2", {
-        get: function () {
-            return this.GetCriteria2();
-        }
-    });
-
-    /**
-     * Indicates whether a filter is applied on this column.
-     * True when any of Filters / CustomFiltersObj / DynamicFilter /
-     * ColorFilter / Top10 is present.
-     * @memberof ApiFilter
-     * @typeofeditors ["CSE"]
-     * @returns {boolean}
-     */
-    ApiFilter.prototype.GetOn = function () {
-        var f = this.filter;
-        if (!f) {
-            return false;
-        }
-        return !!(f.Filters || f.CustomFiltersObj || f.DynamicFilter || f.ColorFilter || f.Top10);
-    };
-
-    Object.defineProperty(ApiFilter.prototype, "On", {
-        get: function () {
-            return this.GetOn();
-        }
-    });
-
-    /**
-     * Returns the operator for this filter column as XlAutoFilterOperator.
-     * @memberof ApiFilter
-     * @typeofeditors ["CSE"]
-     * @returns {XlAutoFilterOperator | null}
-     */
-    ApiFilter.prototype.GetOperator = function () {
-        var f = this.filter;
-        if (!f) {
-            return null;
-        }
-
-        // 1) Color filters
-        if (f.ColorFilter) {
-            // CellColor === false -> font color; otherwise cell color
-            return (f.ColorFilter.CellColor === false)
-                ? "xlFilterFontColor"
-                : "xlFilterCellColor";
-        }
-
-        // 2) Dynamic filter
-        if (f.DynamicFilter) {
-            return "xlFilterDynamic";
-        }
-
-        // 3) Top10 filter
-        if (f.Top10) {
-            var t = f.Top10;
-            if (t.Percent) {
-                return t.Top ? "xlTop10Percent" : "xlBottom10Percent";
-            }
-            return t.Top ? "xlTop10Items" : "xlBottom10Items";
-        }
-
-        // 4) Custom filters (numeric/text) – AND / OR
-        if (f.CustomFiltersObj) {
-            return f.CustomFiltersObj.And ? "xlAnd" : "xlOr";
-        }
-
-        // 5) Simple values filter
-        if (f.Filters) {
-            return "xlFilterValues";
-        }
-
-        return null;
-    };
-
-    Object.defineProperty(ApiFilter.prototype, "Operator", {
-        get: function () {
-            return this.GetOperator();
-        }
-    });
-
-    ApiFilter.prototype.GetParent = function () {
-        return this.parent;
-    };
-    Object.defineProperty(ApiFilter.prototype, "Parent", {
-        get: function () {
-            return this.GetParent();
-        }
-    });
-
-
 	Api.prototype["Format"]                = Api.prototype.Format;
 	Api.prototype["AddSheet"]              = Api.prototype.AddSheet;
 	Api.prototype["GetSheets"]             = Api.prototype.GetSheets;
@@ -27465,6 +27311,8 @@
 
     ApiFilters.prototype["GetCount"] = ApiFilters.prototype.GetCount;
     ApiFilters.prototype["GetParent"] = ApiFilters.prototype.GetParent;
+
+    ApiFilter.prototype[""]
 
 	ApiRange.prototype["GetClassType"] = ApiRange.prototype.GetClassType;
 	ApiRange.prototype["GetRow"] = ApiRange.prototype.GetRow;
