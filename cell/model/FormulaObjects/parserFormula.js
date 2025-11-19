@@ -713,6 +713,20 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 		return arr;
 	};
 
+	cBaseType.prototype.canReturnArray = function (arg) {
+		let isArray = false;
+		
+		for (let i = 0; i < arg.length; i++) {
+			if (arg[i].type === cElementType.array || arg[i].type === cElementType.cellsRange || arg[i].type === cElementType.cellsRange3D) {
+				isArray = true;
+			} else if (arg[i].type === cElementType.error) {
+				return false;
+			}
+		}
+
+		return isArray;
+	};
+
 	/*Basic types of an elements used into formulas*/
 	/**
 	 * @constructor
@@ -4151,6 +4165,23 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 			const t = this;
 			let res = null;
 			let functionsCanReturnArray = ["index"];
+
+			// formulas that always return an array
+			const exactArrayFunctions = {
+				"SEQUENCE": 1, 
+				"FILTER": 1, 
+				"RANDARRAY": 1, 
+				"MUNIT": 1, 
+				"TRANSPOSE": 1,
+				"LINEST": 1,
+				"LOGEST": 1,
+				"SORT": 1,
+				"SORTBY": 1,
+			};
+
+			if (exactArrayFunctions[this.name.toUpperCase()] === 1) {
+				return true;
+			}
 
 			let returnFormulaType = this.returnValueType;
 			if (cReturnFormulaType.setArrayRefAsArg === returnFormulaType) {
@@ -9048,7 +9079,12 @@ function parserFormula( formula, parent, _ws ) {
 								if (this.unknownOrCustomFunction && currentElement.returnValueType !== AscCommonExcel.cReturnFormulaType.array) {
 									return false;
 								}
-								_tmp = currentElement.Calculate(arg, opt_bbox, null, this.ws, bIsSpecialFunction);
+								// _tmp = currentElement.Calculate(arg, opt_bbox, null, this.ws, bIsSpecialFunction);
+								if (currentElement.canReturnArray) {
+									isRef = currentElement.canReturnArray(arg);
+								} else {
+									_tmp = currentElement.Calculate(arg, opt_bbox, null, this.ws, bIsSpecialFunction);
+								}
 							}
 
 							if (isRef || (_tmp && (_tmp.type === cElementType.array /*|| _tmp.type === cElementType.cellsRange || _tmp.type === cElementType.cellsRange3D*/))) {
