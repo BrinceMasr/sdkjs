@@ -1046,7 +1046,7 @@
 			let oThis = this;
 			if (!this.isCopyOutEnabled()) {
 				this.SendCopyDisabledEvent();
-				return;
+				return true;
 			}
 			//todo add check on mobile version, because before all work without focus check
 			if (!this.Api.asc_IsFocus(true) && !this._isUseMobileNewCopy()) {
