@@ -155,6 +155,11 @@
 		{
 			this._console_log("oncopy");
 
+			if (!this.isCopyOutEnabled()) {
+				this.SendCopyDisabledEvent();
+				return;
+			}
+
 			if (!this.Api.asc_IsFocus(true))
 				return;
 
@@ -182,6 +187,11 @@
 		_private_oncut : function(e)
 		{
 			this._console_log("oncut");
+
+			if (!this.isCopyOutEnabled()) {
+				this.SendCopyDisabledEvent();
+				return;
+			}
 
 			if (!this.Api.asc_IsFocus(true))
 				return;
@@ -1034,6 +1044,10 @@
 		Copy_New : function(isCut)
 		{
 			let oThis = this;
+			if (!this.isCopyOutEnabled()) {
+				this.SendCopyDisabledEvent();
+				return;
+			}
 			//todo add check on mobile version, because before all work without focus check
 			if (!this.Api.asc_IsFocus(true) && !this._isUseMobileNewCopy()) {
 				return;
@@ -1164,6 +1178,10 @@
 
 		Button_Copy : function(oldCopy)
 		{
+			if (!this.isCopyOutEnabled()) {
+				this.SendCopyDisabledEvent();
+				return;
+			}
 			if (window["AscDesktopEditor"])
 			{
 				window["asc_desktop_copypaste"](this.Api, "Copy");
@@ -1385,7 +1403,13 @@
 			if (null == this.LastCopyBinary)
 				this.LastCopyBinary = [];
 			this.LastCopyBinary.push({ type: _format, data : _data });
-		}
+		},
+
+		SendCopyDisabledEvent : function () {
+			if (this.Api) {
+				this.Api.sendEvent("asc_onError", c_oAscError.ID.CopyDisabled, c_oAscError.Level.NoCritical);
+			}
+		},
 	};
 
 	function definePastedFrom(doc)
