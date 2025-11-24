@@ -5670,6 +5670,45 @@ var CPresentation = CPresentation || function(){};
 
         this.Viewer.file.removeSelection();
     };
+    CPDFDoc.prototype.AddLinkAnnot = function(aSelQuads) {
+        if (aSelQuads.length == 0) {
+            return;
+        }
+
+        for (let nInfo = 0; nInfo < aSelQuads.length; nInfo++) {
+            let nPage   = aSelQuads[nInfo].page;
+            let aQuads  = aSelQuads[nInfo].quads;
+
+            let aAllPoints = [];
+            aQuads.forEach(function(rect) {
+                aAllPoints = aAllPoints.concat(rect);
+            });
+
+            let aMinRect = getMinRect(aAllPoints);
+            let MinX = aMinRect[0];
+            let MinY = aMinRect[1];
+            let MaxX = aMinRect[2];
+            let MaxY = aMinRect[3];
+
+            let oProps = {
+                rect:           [MinX - 3, MinY - 1, MaxX + 3, MaxY + 1],
+                page:           nPage,
+                name:           AscCommon.CreateGUID(),
+                type:           AscPDF.ANNOTATIONS_TYPES.Link,
+                creationDate:   (new Date().getTime()).toString(),
+                modDate:        (new Date().getTime()).toString(),
+                hidden:         false
+            }
+
+            let oAnnot = this.AddAnnotByProps(oProps);
+
+            oAnnot.SetQuads(aQuads);
+            oAnnot.SetStrokeColor([0, 0, 1]);
+            oAnnot.SetOpacity(1);
+        }
+
+        this.Viewer.file.removeSelection();
+    };
     CPDFDoc.prototype.SetParagraphSpacing = function(oSpacing) {
         let oController = this.GetController();
         oController.checkSelectedObjectsAndCallback(oController.setParagraphSpacing, [oSpacing], false, AscDFH.historydescription_Presentation_SetParagraphSpacing);
