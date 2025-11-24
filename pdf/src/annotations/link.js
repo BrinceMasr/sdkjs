@@ -118,8 +118,11 @@
 
             this.spPr.xfrm.setRot(angle);
 
-            this.spPr.xfrm.setOffX((x1 - width / 2) * g_dKoef_pt_to_mm);
-            this.spPr.xfrm.setOffY((y1 + height / 2) * g_dKoef_pt_to_mm);
+            let cx = (x1 + x3) / 2;
+            let cy = (y1 + y3) / 2;
+
+            this.spPr.xfrm.setOffX((cx - width / 2) * g_dKoef_pt_to_mm);
+            this.spPr.xfrm.setOffY((cy + height / 2) * g_dKoef_pt_to_mm);
 
             this.spPr.xfrm.setExtX(width * g_dKoef_pt_to_mm);
             this.spPr.xfrm.setExtY(height * g_dKoef_pt_to_mm);
@@ -259,7 +262,25 @@
         }
     };
 
-    CAnnotationLink.prototype.RefillGeometry = function() {};
+    CAnnotationLink.prototype.RefillGeometry = function() {
+        let aQuads = this.GetQuads();
+        if (aQuads.length == 0 || aQuads.length > 1 || this.GetBorder() == AscPDF.BORDER_TYPES.underline) {
+            return;
+        }
+
+        AscCommon.History.StartNoHistoryMode();
+
+        this.spPr.geometry.gdLstInfo = [];
+        this.spPr.geometry.pathLst = [];
+        this.spPr.geometry.AddRect("0", "txT", "w", "txB");
+
+        this.spPr.geometry.AddPathCommand(0, undefined, "norm");
+        this.spPr.geometry.AddPathCommand(1, "0", "h");
+        this.spPr.geometry.AddPathCommand(2, "w", "h");
+
+        AscCommon.History.EndNoHistoryMode();
+        return this.spPr.geometry;
+    };
     CAnnotationLink.prototype.SetPressed = function(bValue) {
         this._pressed = bValue;
         this.AddToRedraw();
