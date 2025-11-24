@@ -8813,16 +8813,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: FV(0.01,1,-1,-1.79769313486232E+307,0) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1.8156700662109432e+307, 'Test: Bounded case: Number. Minimum Excel number for pv. Returns large future value.');
 
-		// Need to fix: area handle, ms result difference in some cases
-		// Case #5: Reference link. Reference to cells with valid numbers. Returns future value.
-		// Case #19: Number. Omitted pv defaults to 0, type -1 treated as 0. Returns future value. - calc problem
-		// Case #3: Area. Multi-cell range for rate returns #VALUE!.
-		// Case #14: Area3D. Multi-cell 3D range for rate returns #VALUE!.
-		// Case #1: Number. Maximum Excel number for rate. Returns large future value or #NUM! if overflow.
-		// Case #2: Number. Minimum Excel number for rate. Returns large future value or #NUM! if overflow.
-		// Case #4: Number. Minimum Excel number for pmt. Returns large future value.
-		// Case #5: Number. Minimum Excel number for pv. Returns large future value.
-
 
 		testArrayFormula2(assert, "FV", 3, 5);
 	});
