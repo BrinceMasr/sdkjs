@@ -641,7 +641,7 @@ void main() {\n\
                 let oDrawing    = oDoc.activeDrawing;
                 let aSelQuads   = null == oDrawing ? _t.getSelectionQuads() : oDrawing.GetSelectionQuads();
 
-                isRedactTool ? oDoc.AddRedactAnnot(aSelQuads) : oDoc.AddLinkAnnot(aSelQuads);
+                isRedactTool ? oDoc.AddRedactAnnot(aSelQuads) : oDoc.AddLinkAnnotByQuads(aSelQuads);
                 
             }, AscDFH.historydescription_Pdf_AddAnnot);
         }

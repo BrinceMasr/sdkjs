@@ -5670,7 +5670,7 @@ var CPresentation = CPresentation || function(){};
 
         this.Viewer.file.removeSelection();
     };
-    CPDFDoc.prototype.AddLinkAnnot = function(aSelQuads) {
+    CPDFDoc.prototype.AddLinkAnnotByQuads = function(aSelQuads) {
         if (aSelQuads.length == 0) {
             return;
         }
@@ -5705,6 +5705,8 @@ var CPresentation = CPresentation || function(){};
             oAnnot.SetQuads(aQuads);
             oAnnot.SetStrokeColor([0, 0, 1]);
             oAnnot.SetOpacity(1);
+            oAnnot.SetWidth(1);
+            oAnnot.SetBorder(AscPDF.BORDER_TYPES.underline);
         }
 
         this.Viewer.file.removeSelection();

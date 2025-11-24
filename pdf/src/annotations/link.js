@@ -65,6 +65,11 @@
     };
     CAnnotationLink.prototype.SetQuads = function(aFullQuads) {
         let oThis = this;
+
+        for (let i = 0, nCount = this._quads.length; i < nCount; i++) {
+            this.RemoveQuads(0);
+        }
+
         aFullQuads.forEach(function(aQuads) {
             oThis.AddQuads(aQuads);
         });
@@ -111,13 +116,13 @@
 
             if (angle < 0) angle += Math.PI;
 
-            this.spPr.xfrm.setOffX((x1 - width * 0.75) * g_dKoef_pt_to_mm);
+            this.spPr.xfrm.setRot(angle);
+
+            this.spPr.xfrm.setOffX((x1 - width / 2) * g_dKoef_pt_to_mm);
             this.spPr.xfrm.setOffY((y1 + height / 2) * g_dKoef_pt_to_mm);
 
             this.spPr.xfrm.setExtX(width * g_dKoef_pt_to_mm);
             this.spPr.xfrm.setExtY(height * g_dKoef_pt_to_mm);
-
-            this.spPr.xfrm.setRot(angle);
         }
         
         AscCommon.History.EndNoHistoryMode();
@@ -126,6 +131,10 @@
     CAnnotationLink.prototype.AddQuads = function(aQuads) {
         AscCommon.History.Add(new CChangesPDFAnnotQuads(this, this._quads.length, aQuads, true));
         this._quads.push(aQuads);
+    };
+    CAnnotationLink.prototype.RemoveQuads = function(nIdx) {
+        AscCommon.History.Add(new CChangesPDFAnnotQuads(this, nIdx, this._quads[nIdx], false));
+        this._quads.splice(nIdx, 1);
     };
 
     CAnnotationLink.prototype.DrawFromStream = function(oGraphicsPDF, oGraphicsWord) {
