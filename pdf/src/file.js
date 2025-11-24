@@ -513,7 +513,10 @@ void main() {\n\
         return this.Selection;
     };
     CFile.prototype.onMouseDown = function(pageIndex, x, y) {
-        if (this.pages[pageIndex].isRecognized && !Asc.editor.IsRedactTool())
+        let isRedactTool = Asc.editor.IsRedactTool();
+        let isLinkTool   = Asc.editor.IsLinkTool();
+
+        if (this.pages[pageIndex].isRecognized && !isRedactTool && !isLinkTool)
             return;
         
         let ret = this.getNearestPos(pageIndex, x, y);
@@ -521,7 +524,7 @@ void main() {\n\
 
         let isTextSel = ret.Glyph >= 0 && ret.Line >= 0;
 
-        if (Asc.editor.isRedactTool && !isTextSel) {
+        if ((isRedactTool || isLinkTool) && !isTextSel) {
             sel.startPoint = {
                 page: pageIndex,
                 x: x,
@@ -554,7 +557,7 @@ void main() {\n\
         let sel = this.Selection;
         sel.IsSelection = true;
         
-        if (Asc.editor.isRedactTool && this.Selection.startPoint) {
+        if ((Asc.editor.IsRedactTool() || Asc.editor.IsLinkTool()) && this.Selection.startPoint) {
             sel.endPoint = {
                 page: pageIndex,
                 x: x,
@@ -573,7 +576,7 @@ void main() {\n\
         let ret = this.getNearestPos(pageIndex, x, y);
         
         if (ret.Glyph < 0 || ret.Line < 0) {
-            if (Asc.editor.isRedactTool) {
+            if (Asc.editor.IsRedactTool() || Asc.editor.IsLinkTool()) {
                 this.viewer.setCursorType("crosshair");
             }
             else {
@@ -589,12 +592,15 @@ void main() {\n\
         let oDoc    = this.viewer.getPDFDoc();
         let oViewer = this.viewer;
 
+        let isRedactTool = Asc.editor.IsRedactTool();
+        let isLinkTool   = Asc.editor.IsLinkTool();
+
         let ret = this.getNearestPos(pageIndex, x, y);
         let sel = this.Selection;
         
         let isTextSel = ret.Glyph >= 0 && ret.Line >= 0;
 
-        if (Asc.editor.isRedactTool && !isTextSel) {
+        if ((isRedactTool || isLinkTool) && !isTextSel) {
             sel.endPoint = {
                 page: pageIndex,
                 x: x,
@@ -630,7 +636,7 @@ void main() {\n\
                 }
             }, AscDFH.historydescription_Pdf_AddAnnot);
         }
-        else if (oViewer.Api.isRedactTool) {
+        else if (isRedactTool || isLinkTool) {
             oDoc.DoAction(function() {
                 let oDrawing    = oDoc.activeDrawing;
                 let aSelQuads   = null == oDrawing ? _t.getSelectionQuads() : oDrawing.GetSelectionQuads();
@@ -1172,7 +1178,7 @@ void main() {\n\
     };
     CFile.prototype.drawSelection = function(pageIndex, overlay, x, y)
     {
-        if (Asc.editor.isRedactTool && this.Selection.startPoint && this.Selection.endPoint) {
+        if ((Asc.editor.IsRedactTool() || Asc.editor.IsLinkTool()) && this.Selection.startPoint && this.Selection.endPoint) {
             let width = AscCommon.AscBrowser.convertToRetinaValue(this.viewer.drawingPages[pageIndex].W, true) >> 0;
             let height = AscCommon.AscBrowser.convertToRetinaValue(this.viewer.drawingPages[pageIndex].H, true) >> 0;
 

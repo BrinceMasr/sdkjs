@@ -1466,6 +1466,7 @@ var CPresentation = CPresentation || function(){};
         let IsOnAddAddShape = this.Api.isStartAddShape;
         let IsPageHighlight = this.Api.IsCommentMarker();
         let IsOnRedact      = this.Api.IsRedactTool();
+        let IsOnLink        = this.Api.IsLinkTool();
 
         let oMouseDownLink      = oViewer.getPageLinkByMouse();
         let oMouseDownField     = oViewer.getPageFieldByMouse();
@@ -1499,7 +1500,7 @@ var CPresentation = CPresentation || function(){};
             return;
         }
 
-        if (IsOnRedact) {
+        if (IsOnRedact || IsOnLink) {
             oViewer.isMouseMoveBetweenDownUp = true;
             if (null == oMouseDownDrawing) {
                 oViewer.onMouseDownEpsilon(e);
@@ -2430,6 +2431,7 @@ var CPresentation = CPresentation || function(){};
         let IsOnEraser      = this.Api.isEraseInkMode();
         let IsOnAddAddShape = this.Api.isStartAddShape;
         let IsOnRedact      = this.Api.IsRedactTool();
+        let IsOnLink        = this.Api.IsLinkTool();
 
         let oMouseMoveLink          = oViewer.getPageLinkByMouse();
         let oMouseMoveField         = oViewer.getPageFieldByMouse();

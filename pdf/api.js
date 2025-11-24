@@ -1466,6 +1466,7 @@
 		}, AscDFH.historydescription_Pdf_ContextMenuRemove);
 	};
 
+	// link 
 	PDFEditorApi.prototype.SetGoToAction = function() {
 		let oDoc = this.getPDFDoc();
 		let oAnnot = oDoc.mouseDownAnnot;
@@ -1491,6 +1492,18 @@
 		};
 
 		oAnnot.SetActions(AscPDF.PDF_TRIGGERS_TYPES.MouseUp, [oAction]);
+	};
+
+	PDFEditorApi.prototype.SetLinkTool = function(bUse) {
+		let oDoc = this.getPDFDoc();
+		if (bUse) {
+			oDoc.BlurActiveObject();
+		}
+		
+		this.isLinkTool = bUse;
+	};
+	PDFEditorApi.prototype.IsLinkTool = function() {
+		return this.isLinkTool;
 	};
 
 	/////////////////////////////////////////////////////////////
@@ -5114,6 +5127,10 @@
 	PDFEditorApi.prototype['ApplyRedact']		= PDFEditorApi.prototype.ApplyRedact;
 	PDFEditorApi.prototype['HasRedact']			= PDFEditorApi.prototype.HasRedact;
 	PDFEditorApi.prototype['RemoveAllRedact']	= PDFEditorApi.prototype.RemoveAllRedact;
+
+	// link
+	PDFEditorApi.prototype['SetLinkTool']		= PDFEditorApi.prototype.SetLinkTool;
+	PDFEditorApi.prototype['IsLinkTool']		= PDFEditorApi.prototype.IsLinkTool;
 
 	// forms
 	PDFEditorApi.prototype['IsEditFieldsMode']			= PDFEditorApi.prototype.IsEditFieldsMode;

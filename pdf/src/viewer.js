@@ -3371,8 +3371,11 @@
 					this.Api.sync_StartAddShapeCallback(false);
 					this.Api.sync_EndAddShape();
 				}
-				else if (this.Api.isRedactTool) {
+				else if (Asc.editor.IsRedactTool()) {
 					this.Api.SetRedactTool(false);
+				}
+				else if (Asc.editor.IsLinkTool()) {
+					this.Api.SetLinkTool(false);
 				}
 				else {
 					const oController = oDoc.GetController();
