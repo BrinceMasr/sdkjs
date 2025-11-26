@@ -102,9 +102,10 @@
             this.spPr.xfrm.setExtY(extY);
         }
         else {
-            let x1 = aQuads[0][0], y1 = aQuads[0][1];
-            let x2 = aQuads[0][2], y2 = aQuads[0][3];
-            let x3 = aQuads[0][4], y3 = aQuads[0][5];
+            let x1 = aQuads[0][0], y1 = aQuads[0][1]; // left up
+            let x2 = aQuads[0][2], y2 = aQuads[0][3]; // right up
+            let x3 = aQuads[0][4], y3 = aQuads[0][5]; // left down
+            let x4 = aQuads[0][6], y4 = aQuads[0][7]; // right down
 
             let dx = x2 - x1;
             let dy = y2 - y1;
@@ -118,11 +119,11 @@
 
             this.spPr.xfrm.setRot(angle);
 
-            let cx = (x1 + x3) / 2;
-            let cy = (y1 + y3) / 2;
+            let cx = (x1 + x2 + x3 + x4) / 4;
+            let cy = (y1 + y2 + y3 + y4) / 4;
 
-            this.spPr.xfrm.setOffX((cx - width / 2) * g_dKoef_pt_to_mm);
-            this.spPr.xfrm.setOffY((cy + height / 2) * g_dKoef_pt_to_mm);
+            this.spPr.xfrm.setOffX((cx - width  / 2) * g_dKoef_pt_to_mm);
+            this.spPr.xfrm.setOffY((cy - height / 2) * g_dKoef_pt_to_mm);
 
             this.spPr.xfrm.setExtX(width * g_dKoef_pt_to_mm);
             this.spPr.xfrm.setExtY(height * g_dKoef_pt_to_mm);
@@ -264,7 +265,7 @@
 
     CAnnotationLink.prototype.RefillGeometry = function() {
         let aQuads = this.GetQuads();
-        if (aQuads.length == 0 || aQuads.length > 1 || this.GetBorder() == AscPDF.BORDER_TYPES.underline) {
+        if (aQuads.length == 0 || aQuads.length > 1 || this.GetBorder() !== AscPDF.BORDER_TYPES.underline) {
             return;
         }
 
