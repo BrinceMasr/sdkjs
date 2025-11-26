@@ -646,9 +646,11 @@ void main() {\n\
                 }
                 else {
                     let aAnnots = oDoc.AddLinkAnnotByQuads(aSelQuads);
-                    Asc.editor.sendEvent("asc_onDialogAddAnnotLink", aAnnots.map(function(annot) {
-                        return annot.GetId();
-                    }));
+                    if (aAnnots.length > 0) {
+                        Asc.editor.sendEvent("asc_onDialogAddAnnotLink", aAnnots.map(function(annot) {
+                            return annot.GetId();
+                        }));
+                    }
                 }
                 
             }, AscDFH.historydescription_Pdf_AddAnnot);

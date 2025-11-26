@@ -5672,7 +5672,7 @@ var CPresentation = CPresentation || function(){};
     };
     CPDFDoc.prototype.AddLinkAnnotByQuads = function(aSelQuads) {
         if (aSelQuads.length == 0) {
-            return;
+            return [];
         }
 
         let aAnnots = [];
