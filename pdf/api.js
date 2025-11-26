@@ -4506,6 +4506,14 @@
 			oDoc.Remove(1, false);
 		}, AscDFH.historydescription_Pdf_ContextMenuRemove);
 	};
+	PDFEditorApi.prototype.asc_removeAnnots = function(arrIds) {
+		let oDoc = this.getPDFDoc();
+		oDoc.DoAction(function() {
+			arrIds.forEach(function(id) {
+				oDoc.RemoveAnnot(id);
+			})
+		}, AscDFH.historydescription_Pdf_ContextMenuRemove);
+	};
 	PDFEditorApi.prototype.asc_changeComment = function(Id, AscCommentData)
 	{
 		var oDoc = this.getDocumentRenderer().getPDFDoc();
@@ -5029,6 +5037,7 @@
 	PDFEditorApi.prototype['asc_hideComments']             = PDFEditorApi.prototype.asc_hideComments;
 	PDFEditorApi.prototype['asc_removeComment']            = PDFEditorApi.prototype.asc_removeComment;
 	PDFEditorApi.prototype['asc_remove']            	   = PDFEditorApi.prototype.asc_remove;
+	PDFEditorApi.prototype['asc_removeAnnots']             = PDFEditorApi.prototype.asc_removeAnnots;
 	PDFEditorApi.prototype['asc_changeComment']            = PDFEditorApi.prototype.asc_changeComment;
 	PDFEditorApi.prototype['asc_selectComment']            = PDFEditorApi.prototype.asc_selectComment;
 	PDFEditorApi.prototype['asc_EditPage']                 = PDFEditorApi.prototype.asc_EditPage;
