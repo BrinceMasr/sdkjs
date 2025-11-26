@@ -1280,8 +1280,6 @@ RotateState.prototype =
                                     }
                                     else if (oAnnot.IsLink()) {
                                         let aQuads = oAnnot.GetQuads();
-                                        
-
                                         let aCurRect = oAnnot.GetRect().slice();
                                         let aCurRD = oAnnot.GetRectangleDiff().slice();
                                         let nLineW = oAnnot.GetWidth() * g_dKoef_pt_to_mm;
@@ -1296,41 +1294,7 @@ RotateState.prototype =
                                             AscCommon.History.EndNoHistoryMode();
                                         }
                                         else {
-                                            function rotateRect(aRect, rad) {
-                                                let x1 = aRect[0], y1 = aRect[1],
-                                                    x2 = aRect[2], y2 = aRect[3];
-
-                                                let cx = (x1 + x2) / 2;
-                                                let cy = (y1 + y2) / 2;
-
-                                                let pts = [
-                                                    [x1, y1],
-                                                    [x2, y1],
-                                                    [x1, y2],
-                                                    [x2, y2]
-                                                ];
-
-                                                let sin = Math.sin(rad);
-                                                let cos = Math.cos(rad);
-
-                                                let res = [];
-                                                for (let i = 0; i < pts.length; i++) {
-                                                    let x = pts[i][0];
-                                                    let y = pts[i][1];
-
-                                                    let dx = x - cx;
-                                                    let dy = y - cy;
-
-                                                    res.push(
-                                                        cx + dx * cos - dy * sin,
-                                                        cy + dx * sin + dy * cos
-                                                    );
-                                                }
-
-                                                return res;
-                                            }
-
-                                            let aQuadsRect = rotateRect(aRect, oAnnot.spPr.xfrm.getRot());
+                                            let aQuadsRect = AscPDF.rotateRect(aRect, oAnnot.spPr.xfrm.getRot());
                                             let aNewQuads = [aQuadsRect];
                                             oAnnot.SetQuads(aNewQuads);
 
@@ -1342,7 +1306,6 @@ RotateState.prototype =
                                             AscCommon.History.EndNoHistoryMode();
                                         }
                                         
-
                                         let oGrBounds = oAnnot.bounds;
                                         let oShapeBounds = oAnnot.getRectBounds();
 
@@ -1521,7 +1484,7 @@ RotateState.prototype =
 
                                         oAnnot.SetRect(aRect);
                                     }
-                                    if (oAnnot.IsLine()) {
+                                    else if (oAnnot.IsLine()) {
                                         function rotateLinePoints(points, h, rad, isTop) {
                                             let x1 = points[0], y1 = points[1];
                                             let x2 = points[2], y2 = points[3];
@@ -1568,6 +1531,23 @@ RotateState.prototype =
                                         aRect[3] = (oGrBounds.b + nLineW) * g_dKoef_mm_to_pt;
 
                                         oAnnot.SetRect(AscPDF.unionRectangles([aRect, oAnnot.private_CalcBoundingRect()]));
+                                    }
+                                    else if (oAnnot.IsLink()) {
+                                        let aQuads = oAnnot.GetQuads();
+                                        let aCurRect = oAnnot.GetRect().slice();
+
+                                        let nNewRad = oTrack.angle;
+                                        let aNewQuads;
+                                        if (aQuads.length == 0 || aQuads.length > 1) {
+                                            let aQuadsRect = AscPDF.rotateRect(aCurRect, nNewRad);
+                                            aNewQuads = [aQuadsRect];
+                                        }
+                                        else {
+                                            let aQuadsRect = AscPDF.rotateRect(aQuads[0], nNewRad - AscPDF.getQuadsRot(aQuads[0]));
+                                            aNewQuads = [aQuadsRect];
+                                        }
+                                        
+                                        oAnnot.SetQuads(aNewQuads);
                                     }
                                 }
                                 else if (oTrack instanceof AscFormat.XYAdjustmentTrack) {

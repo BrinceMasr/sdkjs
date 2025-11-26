@@ -10194,6 +10194,69 @@ var CPresentation = CPresentation || function(){};
             }
         }
     }
+
+    function rotateRect(rect, rad) {
+        let pts;
+
+        if (rect.length === 4) {
+            const [x1, y1, x2, y2] = rect;
+            pts = [
+                [x1, y1],
+                [x2, y1],
+                [x1, y2],
+                [x2, y2]
+            ];
+        } else {
+            pts = [
+                [rect[0], rect[1]],
+                [rect[2], rect[3]],
+                [rect[4], rect[5]],
+                [rect[6], rect[7]]
+            ];
+        }
+
+        // Центр через bbox углов (универсально)
+        let minX = pts[0][0], maxX = pts[0][0];
+        let minY = pts[0][1], maxY = pts[0][1];
+        for (let i = 1; i < 4; i++) {
+            const [x, y] = pts[i];
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+        }
+
+        const cx = (pts[0][0] + pts[1][0] + pts[2][0] + pts[3][0]) / 4;
+        const cy = (pts[0][1] + pts[1][1] + pts[2][1] + pts[3][1]) / 4;
+
+        const sin = Math.sin(rad);
+        const cos = Math.cos(rad);
+
+        const res = [];
+
+        for (let i = 0; i < 4; i++) {
+            const [x, y] = pts[i];
+            const dx = x - cx;
+            const dy = y - cy;
+
+            res.push(
+                cx + dx * cos - dy * sin,
+                cy + dx * sin + dy * cos
+            );
+        }
+
+        return res;
+    }
+
+    function getQuadsRot(points) {
+        const [x1, y1, x2, y2] = points;
+
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+
+        return Math.atan2(dy, dx);
+    }
+
     
     window["AscPDF"].CPDFDoc                    = CPDFDoc;
     window["AscPDF"].CreateAnnotByProps         = CreateAnnotByProps;
@@ -10210,6 +10273,8 @@ var CPresentation = CPresentation || function(){};
     window["AscPDF"].AnnotCopyObject            = AnnotCopyObject;
     window["AscPDF"].FieldCopyObject            = FieldCopyObject;
     window["AscPDF"].AscLockTypeElemPDF         = AscLockTypeElemPDF;
+    window["AscPDF"].rotateRect                 = rotateRect;
+    window["AscPDF"].getQuadsRot                = getQuadsRot;
     window["AscPDF"]["GetPageCoordsByGlobalCoords"] = window["AscPDF"].GetPageCoordsByGlobalCoords = GetPageCoordsByGlobalCoords;
     window["AscPDF"]["GetGlobalCoordsByPageCoords"] = window["AscPDF"].GetGlobalCoordsByPageCoords = GetGlobalCoordsByPageCoords;
     window["AscPDF"]["ConvertCoordsToAnotherPage"]  = window["AscPDF"].ConvertCoordsToAnotherPage = ConvertCoordsToAnotherPage;

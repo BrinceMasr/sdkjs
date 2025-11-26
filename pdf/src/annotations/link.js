@@ -612,6 +612,9 @@
         let oGeometry = this.getGeometry();
         return oGeometry.hitInInnerArea(this.getCanvasContext(), x_t, y_t);
     };
+    CAnnotationLink.prototype.canRotate = function() {
+        return true;
+    };
 
     if (!window["AscPDF"])
 	    window["AscPDF"] = {};
