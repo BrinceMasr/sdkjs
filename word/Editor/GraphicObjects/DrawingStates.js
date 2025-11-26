@@ -288,7 +288,7 @@ StartAddNewShape.prototype =
                                 oAnnot.select(oLogicDocument.GetController(), this.pageIndex);
 
                                 if (oAnnot.IsLink()) {
-                                    Asc.editor.sendEvent("asc_onDialogAddAnnotLink");
+                                    Asc.editor.sendEvent("asc_onDialogAddAnnotLink", [oAnnot.GetId()]);
                                 }
                             }
                         }

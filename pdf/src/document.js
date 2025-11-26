@@ -5675,6 +5675,7 @@ var CPresentation = CPresentation || function(){};
             return;
         }
 
+        let aAnnots = [];
         for (let nInfo = 0; nInfo < aSelQuads.length; nInfo++) {
             let nPage   = aSelQuads[nInfo].page;
             let aQuads  = aSelQuads[nInfo].quads;
@@ -5707,9 +5708,13 @@ var CPresentation = CPresentation || function(){};
             oAnnot.SetOpacity(1);
             oAnnot.SetWidth(1);
             oAnnot.SetBorder(AscPDF.BORDER_TYPES.underline);
+
+            aAnnots.push(oAnnot);
         }
 
         this.Viewer.file.removeSelection();
+        
+        return aAnnots;
     };
     CPDFDoc.prototype.SetParagraphSpacing = function(oSpacing) {
         let oController = this.GetController();

@@ -641,7 +641,15 @@ void main() {\n\
                 let oDrawing    = oDoc.activeDrawing;
                 let aSelQuads   = null == oDrawing ? _t.getSelectionQuads() : oDrawing.GetSelectionQuads();
 
-                isRedactTool ? oDoc.AddRedactAnnot(aSelQuads) : oDoc.AddLinkAnnotByQuads(aSelQuads);
+                if (isRedactTool) {
+                    oDoc.AddRedactAnnot(aSelQuads)
+                }
+                else {
+                    let aAnnots = oDoc.AddLinkAnnotByQuads(aSelQuads);
+                    Asc.editor.sendEvent("asc_onDialogAddAnnotLink", aAnnots.map(function(annot) {
+                        return annot.GetId();
+                    }));
+                }
                 
             }, AscDFH.historydescription_Pdf_AddAnnot);
         }
