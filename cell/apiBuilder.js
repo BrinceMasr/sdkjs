@@ -12109,6 +12109,14 @@
 		// 	test.SetAutoFilter(1, "xlFilterAboveAverage", "xlFilterDynamic");
 		// })();
 
+        // case when filter values array lenght 2 or less
+        if (Operator === "xlFilterValues" &&  Array.isArray(Criteria1) && Criteria1.length && Criteria1.length <= 2 && Criteria1[0] !== null && Criteria1[0] !== undefined) {
+            if (Criteria1.length === 2 && Criteria1[1] !== null && Criteria1[1] !== undefined) {
+                Criteria2 = Criteria1[1].toString();
+            }
+            Criteria1 = Criteria1[0].toString();
+            Operator = "xlOr"
+        }
 
 		if (Criteria2 && Array.isArray(Criteria2)) {
 			private_MakeError('Error! Criteria2 must be string!');
@@ -12249,6 +12257,7 @@
 		//apply filtering
 		let isAutoFilter = this.range.worksheet && this.range.worksheet.AutoFilter && this.range.worksheet.AutoFilter.Ref.intersection(this.range.bbox);
 		let autoFilterOptions;
+
 		if (isAutoFilter) {
 			switch (Operator) {
 				case "xlOr":
@@ -26905,13 +26914,6 @@
     /**
      * Returns the first criteria associated with the filter for this column.
      *
-     * The returned value depends on the current {@link ApiFilter#Operator|Operator}:
-     * - For "xlFilterValues": an array of visible values.
-     * - For "xlAnd" / "xlOr": a string representation of the first custom condition (for example, ">0").
-     * - For Top10 operators ("xlTop10Items", "xlBottom10Items", "xlTop10Percent", "xlBottom10Percent"):
-     *   the numeric value specifying the number of items or percentage.
-     * - For "xlFilterDynamic": the corresponding {@link XlDynamicFilterCriteria} value.
-     * - For color filters ("xlFilterCellColor", "xlFilterFontColor"): currently returns null.
      *
      * @memberof ApiFilter
      * @typeofeditors ["CSE"]
@@ -26978,10 +26980,6 @@
 
     /**
      * Returns the second criteria associated with the filter for this column.
-     *
-     * This value is only used when the {@link ApiFilter#Operator|Operator} is "xlAnd" or "xlOr".
-     * In that case it returns a string representation of the second custom condition
-     * (for example, "<=8"). For all other operators, null is returned.
      *
      * @memberof ApiFilter
      * @typeofeditors ["CSE"]
@@ -27051,19 +27049,11 @@
         get: function () {
             return this.GetOn();
         }
-    });
+    });g
 
     /**
      * Returns the operator used for the filter on this column.
      *
-     * The operator is one of the {@link XlAutoFilterOperator} values:
-     * - "xlFilterValues"             – values filter;
-     * - "xlAnd" / "xlOr"             – custom filters with two criteria;
-     * - "xlFilterDynamic"            – dynamic (date/average) filters;
-     * - "xlTop10Items", "xlBottom10Items",
-     *   "xlTop10Percent", "xlBottom10Percent" – Top10 filters;
-     * - "xlFilterCellColor", "xlFilterFontColor" – color filters.
-     * When no filter is applied, null is returned.
      *
      * @memberof ApiFilter
      * @typeofeditors ["CSE"]
