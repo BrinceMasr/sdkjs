@@ -1467,33 +1467,6 @@
 	};
 
 	// link 
-	PDFEditorApi.prototype.SetGoToAction = function() {
-		let oDoc = this.getPDFDoc();
-		let oAnnot = oDoc.mouseDownAnnot;
-
-		if (!oAnnot || !oAnnot.IsLink()) {
-			return;
-		}
-
-		let nCurPage = oDoc.GetCurPage();
-		let nPageW = oDoc.GetPageWidth(nCurPage);
-		let nPageH = oDoc.GetPageHeight(nCurPage);
-		let oViewRect = oDoc.Viewer.getViewingRect(nCurPage);
-		
-		let oAction = {
-			"S":		AscPDF.ACTIONS_TYPES.GoTo,
-			"page":		nCurPage,
-			"top":		nPageH * oViewRect.y,
-			"right":	nPageW * oViewRect.r,
-			"bottom":	nPageH * oViewRect.b,
-			"left":		nPageW * oViewRect.x,
-			"kind":		AscPDF.GOTO_TYPES.fitR,
-			"zoom":		oDoc.Viewer.zoom,
-		};
-
-		oAnnot.SetActions(AscPDF.PDF_TRIGGERS_TYPES.MouseUp, [oAction]);
-	};
-
 	PDFEditorApi.prototype.SetLinkTool = function(bUse) {
 		let oDoc = this.getPDFDoc();
 		if (bUse) {
@@ -1504,6 +1477,33 @@
 	};
 	PDFEditorApi.prototype.IsLinkTool = function() {
 		return this.isLinkTool;
+	};
+	PDFEditorApi.prototype.SetLinkAnnotGoToAction = function(arrIds) {
+		let oDoc = this.getPDFDoc();
+
+		oDoc.DoAction(function() {
+			arrIds.forEach(function(id) {
+				let oLink = oDoc.GetAnnotById(id);
+
+				let nCurPage = oDoc.GetCurPage();
+				let nPageW = oDoc.GetPageWidth(nCurPage);
+				let nPageH = oDoc.GetPageHeight(nCurPage);
+				let oViewRect = oDoc.Viewer.getViewingRect(nCurPage);
+				
+				let oAction = {
+					"S":		AscPDF.ACTIONS_TYPES.GoTo,
+					"page":		nCurPage,
+					"top":		nPageH * oViewRect.y,
+					"right":	nPageW * oViewRect.r,
+					"bottom":	nPageH * oViewRect.b,
+					"left":		nPageW * oViewRect.x,
+					"kind":		AscPDF.GOTO_TYPES.fitR,
+					"zoom":		oDoc.Viewer.zoom,
+				};
+
+				oLink.SetActions(AscPDF.PDF_TRIGGERS_TYPES.MouseUp, [oAction]);
+			})
+		}, AscDFH.historydescription_Pdf_ContextMenuRemove);
 	};
 
 	/////////////////////////////////////////////////////////////
@@ -5138,8 +5138,9 @@
 	PDFEditorApi.prototype['RemoveAllRedact']	= PDFEditorApi.prototype.RemoveAllRedact;
 
 	// link
-	PDFEditorApi.prototype['SetLinkTool']		= PDFEditorApi.prototype.SetLinkTool;
-	PDFEditorApi.prototype['IsLinkTool']		= PDFEditorApi.prototype.IsLinkTool;
+	PDFEditorApi.prototype['SetLinkTool']				= PDFEditorApi.prototype.SetLinkTool;
+	PDFEditorApi.prototype['IsLinkTool']				= PDFEditorApi.prototype.IsLinkTool;
+	PDFEditorApi.prototype['SetLinkAnnotGoToAction']	= PDFEditorApi.prototype.SetLinkAnnotGoToAction;
 
 	// forms
 	PDFEditorApi.prototype['IsEditFieldsMode']			= PDFEditorApi.prototype.IsEditFieldsMode;
