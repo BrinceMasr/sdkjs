@@ -1479,6 +1479,9 @@
 	PDFEditorApi.prototype.IsLinkTool = function() {
 		return this.isLinkTool;
 	};
+	PDFEditorApi.prototype.StartSetLinkAnnotGoToAction = function() {
+		this.canInteract = false;
+	};
 	PDFEditorApi.prototype.SetLinkAnnotGoToAction = function(arrIds) {
 		let oDoc = this.getPDFDoc();
 
@@ -1505,6 +1508,10 @@
 				oLink.SetActions(AscPDF.PDF_TRIGGERS_TYPES.MouseUp, [oAction]);
 			})
 		}, AscDFH.historydescription_Pdf_ContextMenuRemove);
+	};
+	PDFEditorApi.prototype.OnAfterAddLinkAnnot = function(aIds) {
+		Asc.editor.sendEvent("asc_onDialogAddAnnotLink", aIds);
+		this.SetLinkTool(false);
 	};
 
 	/////////////////////////////////////////////////////////////
@@ -5139,9 +5146,10 @@
 	PDFEditorApi.prototype['RemoveAllRedact']	= PDFEditorApi.prototype.RemoveAllRedact;
 
 	// link
-	PDFEditorApi.prototype['SetLinkTool']				= PDFEditorApi.prototype.SetLinkTool;
-	PDFEditorApi.prototype['IsLinkTool']				= PDFEditorApi.prototype.IsLinkTool;
-	PDFEditorApi.prototype['SetLinkAnnotGoToAction']	= PDFEditorApi.prototype.SetLinkAnnotGoToAction;
+	PDFEditorApi.prototype['SetLinkTool']					= PDFEditorApi.prototype.SetLinkTool;
+	PDFEditorApi.prototype['IsLinkTool']					= PDFEditorApi.prototype.IsLinkTool;
+	PDFEditorApi.prototype['StartSetLinkAnnotGoToAction']	= PDFEditorApi.prototype.StartSetLinkAnnotGoToAction;
+	PDFEditorApi.prototype['SetLinkAnnotGoToAction']		= PDFEditorApi.prototype.SetLinkAnnotGoToAction;
 
 	// forms
 	PDFEditorApi.prototype['IsEditFieldsMode']			= PDFEditorApi.prototype.IsEditFieldsMode;
