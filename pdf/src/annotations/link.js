@@ -86,14 +86,16 @@
             return;
         }
 
+        let nLineW = this.GetWidth();
         let aQuads = this.GetQuads();
+        
         AscCommon.History.StartNoHistoryMode();
         if (aQuads.length == 0 || aQuads.length > 1) {
             let aRect = this.GetRect();
-            let aRD = this.GetRectangleDiff() || [0, 0, 0, 0];
+            let aRD = [nLineW / 2, nLineW / 2, nLineW / 2, nLineW / 2];
 
-            let extX = (aRect[2] - aRect[0]) * g_dKoef_pt_to_mm;
-            let extY = (aRect[3] - aRect[1]) * g_dKoef_pt_to_mm;
+            let extX = ((aRect[2] - aRect[0]) - aRD[0] - aRD[2]) * g_dKoef_pt_to_mm;
+            let extY = ((aRect[3] - aRect[1]) - aRD[1] - aRD[3]) * g_dKoef_pt_to_mm;
 
             this.spPr.xfrm.setOffX((aRect[0] + aRD[0]) * g_dKoef_pt_to_mm);
             this.spPr.xfrm.setOffY((aRect[1] + aRD[1]) * g_dKoef_pt_to_mm);
@@ -556,6 +558,41 @@
         return this._highlight;
     };
 
+    CAnnotationLink.prototype.SetPosition = function(x, y) {
+        let aCurRect = this.GetRect();
+
+        let nOldX = aCurRect[0];
+        let nOldY = aCurRect[1];
+
+        let nDeltaX = x - nOldX;
+        let nDeltaY = y - nOldY;
+
+        if (0 == nDeltaX && 0 == nDeltaY) {
+            return;
+        }
+
+        let nWidth  = aCurRect[2] - aCurRect[0];
+        let nHeight = aCurRect[3] - aCurRect[1];
+
+        let aNewRect = [x, y, x + nWidth, y + nHeight];
+        let aNewQuads = [];
+
+        for (let i = 0; i < this._quads.length; i++) {
+            let aQuadsRect = [];
+
+            for (let j = 0; j < this._quads[i].length; j+=2) {
+                aQuadsRect.push(this._quads[i][j] + nDeltaX);
+                aQuadsRect.push(this._quads[i][j+1] + nDeltaY);
+            }
+        }
+
+        this.SetRect(aNewRect);
+        this.SetQuads(aNewQuads);
+
+        this.SetNeedRecalc(true);
+        this.SetWasChanged(true, false);
+    };
+
     CAnnotationLink.prototype.WriteToBinary = function(memory) {
         memory.WriteByte(AscCommon.CommandType.ctAnnotField);
 
@@ -586,9 +623,23 @@
             memory.WriteByte(nHighlightType);
         }
 
-        //
         // quads
-        //
+        let aQuads = this.GetQuads();
+        if (aQuads != null) {
+            memory.fieldDataFlags |= (1 << 3);
+            memory.WriteByte(nHighlightType);
+            
+            let nLen = 0;
+            for (let i = 0; i < aQuads.length; i++) {
+                nLen += aQuads[i].length;
+            }
+            memory.WriteLong(nLen);  
+            for (let i = 0; i < aQuads.length; i++) {
+                for (let j = 0; j < aQuads[i].length; j++) {
+                    memory.WriteDouble(aQuads[i][j]);
+                }
+            }
+        }
 
         let nEndPos = memory.GetCurPosition();
         memory.Seek(nPosForFlags);

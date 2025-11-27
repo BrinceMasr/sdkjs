@@ -1547,7 +1547,21 @@ RotateState.prototype =
                                             aNewQuads = [aQuadsRect];
                                         }
                                         
+                                        let nMinX = Infinity, nMinY = Infinity;
+                                        let nMaxX = -Infinity, nMaxY = -Infinity;
+
+                                        for (let i = 0; i < aNewQuads[0].length; i += 2) {
+                                            const x = aNewQuads[0][i];
+                                            const y = aNewQuads[0][i + 1];
+
+                                            if (x < nMinX) nMinX = x;
+                                            if (y < nMinY) nMinY = y;
+                                            if (x > nMaxX) nMaxX = x;
+                                            if (y > nMaxY) nMaxY = y;
+                                        }
+
                                         oAnnot.SetQuads(aNewQuads);
+                                        oAnnot.SetRect([nMinX, nMinY, nMaxX, nMaxY]);
                                     }
                                 }
                                 else if (oTrack instanceof AscFormat.XYAdjustmentTrack) {
