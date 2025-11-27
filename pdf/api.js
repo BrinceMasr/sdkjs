@@ -1474,6 +1474,7 @@
 		}
 		
 		this.isLinkTool = bUse;
+		this.sendEvent("asc_onLinkToolState", bUse);
 	};
 	PDFEditorApi.prototype.IsLinkTool = function() {
 		return this.isLinkTool;
