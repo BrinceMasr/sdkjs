@@ -1795,10 +1795,10 @@
 			return null;
 		};
 		this.canInteract = function() {
-			if (!Asc.editor.canInteract) {
+			if (false === Asc.editor.canInteract) {
 				return false;
 			}
-			
+
 			// не даем взаимодействовать с документом пока не произошла отрисовка
 			return this.scheduledRepaintTimer == null && this.isRepaint != true && this.initPaintDone == true && !this.isCMapLoading &&
 				(!Asc.editor.getPDFDoc().CollaborativeEditing.Get_GlobalLock() || Asc.editor.isViewMode);
