@@ -155,7 +155,7 @@
 		{
 			this._console_log("oncopy");
 
-			if (!this.isCopyOutEnabled()) {
+			if (!this.isCopyEnabled()) {
 				this.SendCopyDisabledEvent();
 				return;
 			}
@@ -188,7 +188,7 @@
 		{
 			this._console_log("oncut");
 
-			if (!this.isCopyOutEnabled()) {
+			if (!this.isCopyEnabled()) {
 				this.SendCopyDisabledEvent();
 				return;
 			}
@@ -734,14 +734,14 @@
 				ElemToSelect.style["-o-user-select"]      = "text";
 				ElemToSelect.style["user-select"]         = "text";
 				ElemToSelect.style["-webkit-user-select"] = "text";
-				ElemToSelect.setAttribute("contentEditable", this.isCopyOutEnabled());
+				ElemToSelect.setAttribute("contentEditable", this.isCopyOutEnabled() && this.isCopyEnabled());
 
 				var _parent = ("" == this.CommonDivIdParent) ? document.body : document.getElementById(this.CommonDivIdParent);
 				_parent.appendChild(ElemToSelect);
 			}
 			else
 			{
-				ElemToSelect.setAttribute("contentEditable", this.isCopyOutEnabled());
+				ElemToSelect.setAttribute("contentEditable", this.isCopyOutEnabled() && this.isCopyEnabled());
 			}
 			return ElemToSelect;
 		},
@@ -954,7 +954,7 @@
 
 			if (this.ClosureParams.isDivCopy === true)
 			{
-				if (!this.isCopyOutEnabled())
+				if (!this.isCopyOutEnabled() || !this.isCopyEnabled())
 					return;
 
 				if (_format == AscCommon.c_oAscClipboardDataFormat.Html)
@@ -985,7 +985,7 @@
 					break;
 			}
 
-			if (_data_format != "" && _data !== null && this.isCopyOutEnabled())
+			if (_data_format != "" && _data !== null && this.isCopyOutEnabled() && this.isCopyEnabled())
 			{
 				if (_data_format == "text/x-custom")
 					this.ClosureParams.setData(_data_format, "asc_internalData2;" + _data);
@@ -1044,7 +1044,7 @@
 		Copy_New : function(isCut)
 		{
 			let oThis = this;
-			if (!this.isCopyOutEnabled()) {
+			if (!this.isCopyEnabled()) {
 				this.SendCopyDisabledEvent();
 				return true;
 			}
@@ -1178,7 +1178,7 @@
 
 		Button_Copy : function(oldCopy)
 		{
-			if (!this.isCopyOutEnabled()) {
+			if (!this.isCopyEnabled()) {
 				this.SendCopyDisabledEvent();
 				return;
 			}
@@ -1377,6 +1377,14 @@
 				return this.Api.isCopyOutEnabled();
 			return true;
 		},
+
+		isCopyEnabled : function()
+		{
+			if (this.Api && this.Api.isCopyEnabled)
+				return this.Api.isCopyEnabled();
+			return true;
+		},
+
 
 		ChangeLastCopy : function(arr)
 		{
