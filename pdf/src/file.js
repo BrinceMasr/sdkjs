@@ -645,7 +645,8 @@ void main() {\n\
                     oDoc.AddRedactAnnot(aSelQuads)
                 }
                 else {
-                    let aAnnots = oDoc.AddLinkAnnotByQuads(aSelQuads);
+                    let isTextSelection = !(_t.Selection.startPoint && _t.Selection.endPoint);
+                    let aAnnots = oDoc.AddLinkAnnotByQuads(aSelQuads, isTextSelection);
                     if (aAnnots.length > 0) {
                         Asc.editor.sendEvent("asc_onDialogAddAnnotLink", aAnnots.map(function(annot) {
                             return annot.GetId();

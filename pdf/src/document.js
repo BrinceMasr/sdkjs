@@ -5670,7 +5670,7 @@ var CPresentation = CPresentation || function(){};
 
         this.Viewer.file.removeSelection();
     };
-    CPDFDoc.prototype.AddLinkAnnotByQuads = function(aSelQuads) {
+    CPDFDoc.prototype.AddLinkAnnotByQuads = function(aSelQuads, isTextSelection) {
         if (aSelQuads.length == 0) {
             return [];
         }
@@ -5691,8 +5691,10 @@ var CPresentation = CPresentation || function(){};
             let MaxX = aMinRect[2];
             let MaxY = aMinRect[3];
 
+            let aRect = isTextSelection ? [MinX - 3, MinY - 1, MaxX + 3, MaxY + 1] : [MinX, MinY, MaxX, MaxY];
+
             let oProps = {
-                rect:           [MinX - 3, MinY - 1, MaxX + 3, MaxY + 1],
+                rect:           aRect,
                 page:           nPage,
                 name:           AscCommon.CreateGUID(),
                 type:           AscPDF.ANNOTATIONS_TYPES.Link,
@@ -5703,11 +5705,17 @@ var CPresentation = CPresentation || function(){};
 
             let oAnnot = this.AddAnnotByProps(oProps);
 
-            oAnnot.SetQuads(aQuads);
             oAnnot.SetStrokeColor([0, 0, 1]);
             oAnnot.SetOpacity(1);
             oAnnot.SetWidth(1);
-            oAnnot.SetBorder(AscPDF.BORDER_TYPES.underline);
+
+            if (isTextSelection) {
+                oAnnot.SetQuads(aQuads);
+                oAnnot.SetBorder(AscPDF.BORDER_TYPES.underline);
+            }
+            else {
+                oAnnot.SetBorder(AscPDF.BORDER_TYPES.solid);
+            }
 
             aAnnots.push(oAnnot);
         }
