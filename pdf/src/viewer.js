@@ -3421,9 +3421,6 @@
 			}
 			else if ( e.KeyCode == 34 ) // PgDn
 			{
-				Asc.editor.SetLinkTool(!Asc.editor.isLinkTool);
-				return true;
-
 				if (e.AltKey == true)
 				{
 					var pagesCount = this.getPagesCount();
