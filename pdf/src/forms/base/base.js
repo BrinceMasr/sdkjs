@@ -690,7 +690,7 @@
                     break;
                 case AscPDF.ACTIONS_TYPES.Named:
                     actionInfo["S"] = AscPDF.ACTIONS_TYPES.Named;
-                    actionInfo["N"] = oAction.GetName();
+                    actionInfo["N"] = oAction.GetNameStrType();
                     break;
                 default:
                     // If the type is not recognized, add handling or skip

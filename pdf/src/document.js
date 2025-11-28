@@ -5675,49 +5675,48 @@ var CPresentation = CPresentation || function(){};
             return [];
         }
 
+        let _t = this;
+
         let aAnnots = [];
         for (let nInfo = 0; nInfo < aSelQuads.length; nInfo++) {
             let nPage   = aSelQuads[nInfo].page;
             let aQuads  = aSelQuads[nInfo].quads;
 
-            let aAllPoints = [];
             aQuads.forEach(function(rect) {
-                aAllPoints = aAllPoints.concat(rect);
+                let aMinRect = getMinRect(rect);
+                let MinX = aMinRect[0];
+                let MinY = aMinRect[1];
+                let MaxX = aMinRect[2];
+                let MaxY = aMinRect[3];
+
+                let aRect = isTextSelection ? [MinX - 3, MinY - 1, MaxX + 3, MaxY + 1] : [MinX, MinY, MaxX, MaxY];
+
+                let oProps = {
+                    rect:           aRect,
+                    page:           nPage,
+                    name:           AscCommon.CreateGUID(),
+                    type:           AscPDF.ANNOTATIONS_TYPES.Link,
+                    creationDate:   (new Date().getTime()).toString(),
+                    modDate:        (new Date().getTime()).toString(),
+                    hidden:         false
+                }
+
+                let oAnnot = _t.AddAnnotByProps(oProps);
+
+                oAnnot.SetStrokeColor([0, 0, 1]);
+                oAnnot.SetOpacity(1);
+                oAnnot.SetWidth(1);
+
+                if (isTextSelection) {
+                    oAnnot.SetQuads(aQuads);
+                    oAnnot.SetBorder(AscPDF.BORDER_TYPES.underline);
+                }
+                else {
+                    oAnnot.SetBorder(AscPDF.BORDER_TYPES.solid);
+                }
+
+                aAnnots.push(oAnnot);
             });
-
-            let aMinRect = getMinRect(aAllPoints);
-            let MinX = aMinRect[0];
-            let MinY = aMinRect[1];
-            let MaxX = aMinRect[2];
-            let MaxY = aMinRect[3];
-
-            let aRect = isTextSelection ? [MinX - 3, MinY - 1, MaxX + 3, MaxY + 1] : [MinX, MinY, MaxX, MaxY];
-
-            let oProps = {
-                rect:           aRect,
-                page:           nPage,
-                name:           AscCommon.CreateGUID(),
-                type:           AscPDF.ANNOTATIONS_TYPES.Link,
-                creationDate:   (new Date().getTime()).toString(),
-                modDate:        (new Date().getTime()).toString(),
-                hidden:         false
-            }
-
-            let oAnnot = this.AddAnnotByProps(oProps);
-
-            oAnnot.SetStrokeColor([0, 0, 1]);
-            oAnnot.SetOpacity(1);
-            oAnnot.SetWidth(1);
-
-            if (isTextSelection) {
-                oAnnot.SetQuads(aQuads);
-                oAnnot.SetBorder(AscPDF.BORDER_TYPES.underline);
-            }
-            else {
-                oAnnot.SetBorder(AscPDF.BORDER_TYPES.solid);
-            }
-
-            aAnnots.push(oAnnot);
         }
 
         this.Viewer.file.removeSelection();
