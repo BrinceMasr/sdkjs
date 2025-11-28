@@ -584,6 +584,8 @@
                 aQuadsRect.push(this._quads[i][j] + nDeltaX);
                 aQuadsRect.push(this._quads[i][j+1] + nDeltaY);
             }
+
+            aNewQuads.push(aQuadsRect);
         }
 
         this.SetRect(aNewRect);
