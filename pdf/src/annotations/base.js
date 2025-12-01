@@ -928,8 +928,8 @@
     CAnnotationBase.prototype.GetDisplay = function() {
         return this._display;
     };
-    CAnnotationBase.prototype.onMouseUp = function(e) {
-        if (e.button != 2) {
+    CAnnotationBase.prototype.onMouseUp = function(x, y, e) {
+        if (e.Button != 2) {
             this.GetDocument().ShowComment([this.GetId()]);
         }
     };

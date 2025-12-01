@@ -44,7 +44,6 @@
         
         AscPDF.initShape(this);
         let oGeometry = AscFormat.CreateGeometry("rect");
-        oGeometry.preset = undefined;
         this.spPr.setGeometry(oGeometry);
 
         this._triggers      = new AscPDF.CPdfTriggers();
@@ -280,6 +279,7 @@
         this.spPr.geometry.AddPathCommand(0, undefined, "norm");
         this.spPr.geometry.AddPathCommand(1, "0", "h");
         this.spPr.geometry.AddPathCommand(2, "w", "h");
+        this.spPr.geometry.preset = undefined;
 
         AscCommon.History.EndNoHistoryMode();
         return this.spPr.geometry;
@@ -328,13 +328,21 @@
         this.SetPressed(false);
         Asc.editor.getDocumentRenderer()._paint();
     };
-    CAnnotationLink.prototype.onMouseUp = function() {
+    CAnnotationLink.prototype.onMouseUp = function(x, y, e) {
         if (Asc.editor.canEdit()) {
+            if (e.button != 2) {
+                this.GetDocument().ShowComment([this.GetId()]);
+            }
             return;
         }
 
-        this.DrawUnpressed();
-        this.AddActionsToQueue(AscPDF.PDF_TRIGGERS_TYPES.MouseUp);
+
+        if (e.Button != 2) {
+            this.GetDocument().ShowComment([this.GetId()]);
+
+            this.DrawUnpressed();
+            this.AddActionsToQueue(AscPDF.PDF_TRIGGERS_TYPES.MouseUp);
+        }
     };
     CAnnotationLink.prototype.SetActions = function(nTriggerType, aActionsInfo) {
         let aActions = [];
