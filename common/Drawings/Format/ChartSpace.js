@@ -5678,7 +5678,7 @@ function(window, undefined) {
 	CChartSpace.prototype.calculateDLblsForChartEx = function () {
 		const size = this.chart.plotArea.plotAreaRegion.series.length;
 		const seria = this.chart.plotArea.plotAreaRegion.series[size - 1];
-		const cachedData = this.chart.plotArea.plotAreaRegion.cachedData;
+		const cachedData = this.chart.plotArea.plotAreaRegion.getCachedData();
 
 		//seria.dataLabels.visibility optional
 		if (cachedData && seria && seria.dataLabels) {
