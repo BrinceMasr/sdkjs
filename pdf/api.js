@@ -974,15 +974,21 @@
 			aAnnotsProps[0].compare(aAnnotsProps[i]);
 		}
 
-		var _len = this.SelectedObjectsStack.length;
-		if (_len > 0) {
-			if (this.SelectedObjectsStack[_len - 1].Type == Asc.c_oAscTypeSelectElement.Annot) {
-				this.SelectedObjectsStack[_len - 1].Value = aAnnotsProps[0];
-				return;
+		let aLinkProps = [];
+		aAnnots.forEach(function(annot) {
+			if (annot.IsLink()) {
+				aLinkProps.push(AscPDF.CreateLinkPropFromLinkAnnot(annot));
 			}
+		})
+
+		for (let i = 1; i < aLinkProps.length; i++) {
+			aLinkProps[0].compare(aLinkProps[i]);
 		}
 
 		this.SelectedObjectsStack[this.SelectedObjectsStack.length] = new AscCommon.asc_CSelectedObject(Asc.c_oAscTypeSelectElement.Annot, aAnnotsProps[0]);
+		if (aLinkProps[0]) {
+			this.SelectedObjectsStack[this.SelectedObjectsStack.length] = new AscCommon.asc_CSelectedObject(Asc.c_oAscTypeSelectElement.Hyperlink, aLinkProps[0]);
+		}
 	};
 	PDFEditorApi.prototype.sync_fieldPropCallback = function(aFields) {
 		if (aFields.length == 0) {

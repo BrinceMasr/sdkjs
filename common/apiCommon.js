@@ -6287,6 +6287,7 @@ function (window, undefined) {
 			this.Class = null;
 			this.Anchor = null;
 			this.Heading = null;
+			this.IsPageView = false;
 		}
 	}
 
@@ -6335,6 +6336,35 @@ function (window, undefined) {
 	CHyperlinkProperty.prototype.get_Heading = function () {
 		return this.Heading;
 	};
+	CHyperlinkProperty.prototype.put_PageView = function (isPageView) {
+		this.IsPageView = isPageView;
+	};
+	CHyperlinkProperty.prototype.get_PageView = function () {
+		return this.IsPageView;
+	};
+	CHyperlinkProperty.prototype.compare = function(pr) {
+		if (this.Text !== pr.Text) {
+			this.Text = null;
+		}
+		if (this.Value !== pr.Value) {
+			this.Value = null;
+		}
+		if (this.ToolTip !== pr.ToolTip) {
+			this.ToolTip = null;
+		}
+		if (this.Class !== pr.Class) {
+			this.Class = null;
+		}
+		if (this.Anchor !== pr.Anchor) {
+			this.Anchor = null;
+		}
+		if (this.Heading !== pr.Heading) {
+			this.Heading = null;
+		}
+		if (this.IsPageView !== pr.IsPageView) {
+			this.IsPageView = null;
+		}
+	};
 
 	window['Asc']['CHyperlinkProperty'] = window['Asc'].CHyperlinkProperty = CHyperlinkProperty;
 	CHyperlinkProperty.prototype['get_Value'] = CHyperlinkProperty.prototype.get_Value;
@@ -6352,6 +6382,8 @@ function (window, undefined) {
 	CHyperlinkProperty.prototype['is_Heading'] = CHyperlinkProperty.prototype.is_Heading;
 	CHyperlinkProperty.prototype['put_Heading'] = CHyperlinkProperty.prototype.put_Heading;
 	CHyperlinkProperty.prototype['get_Heading'] = CHyperlinkProperty.prototype.get_Heading;
+	CHyperlinkProperty.prototype['put_PageView'] = CHyperlinkProperty.prototype.put_PageView;
+	CHyperlinkProperty.prototype['get_PageView'] = CHyperlinkProperty.prototype.get_PageView;
 
 
 	/**

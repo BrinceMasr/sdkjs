@@ -9585,6 +9585,55 @@ var CPresentation = CPresentation || function(){};
         return oProps;
     }
 
+    function CreateLinkPropFromLinkAnnot(annot) {
+        if (!annot.IsLink()) {
+            return null;
+        }
+
+        let oTrigger = annot.GetTrigger(AscPDF.PDF_TRIGGERS_TYPES.MouseUp);
+        let oAction = oTrigger.Actions[0];
+
+        let oProps = new Asc.CHyperlinkProperty(this);
+        if (!oAction) {
+            return oProps;
+        }
+        
+        switch (oAction.GetType()) {
+            case AscPDF.ACTIONS_TYPES.Named: {
+                switch (oAction.GetNameStrType()) {
+                    case "FirstPage": {
+                        oProps.Value = "ppaction://hlinkshowjump?jump=firstslide";
+                        break;
+                    }
+                    case "LastPage": {
+                        oProps.Value = "ppaction://hlinkshowjump?jump=lastslide";
+                        break;
+                    }
+                    case "NextPage": {
+                        oProps.Value = "ppaction://hlinkshowjump?jump=nextslide";
+                        break;
+                    }
+                    case "PrevPage": {
+                        oProps.Value = "ppaction://hlinkshowjump?jump=previousslide";
+                        break;
+                    }
+                }
+                break;
+            }
+            case AscPDF.ACTIONS_TYPES.GoTo: {
+                oProps.Value = "ppaction://hlinksldjumpslide" + oAction.GetPage();
+                oProps.IsPageView = true;
+                break;
+            }
+            case AscPDF.ACTIONS_TYPES.URI: {
+                oProps.Value = oAction.GetURI();
+                break;
+            }
+        }
+
+        return oProps;
+    }
+
     function CreateAscFieldPropFromObj(field) {
         let oCommonProps = new Asc.asc_CBaseFieldProperty();
 
@@ -10273,6 +10322,7 @@ var CPresentation = CPresentation || function(){};
     window["AscPDF"].CPDFDoc                    = CPDFDoc;
     window["AscPDF"].CreateAnnotByProps         = CreateAnnotByProps;
     window["AscPDF"].CreateAscAnnotPropFromObj  = CreateAscAnnotPropFromObj;
+    window["AscPDF"].CreateLinkPropFromLinkAnnot= CreateLinkPropFromLinkAnnot;
     window["AscPDF"].CreateAscFieldPropFromObj  = CreateAscFieldPropFromObj;
     window["AscPDF"].CreateAscPagePropFromObj   = CreateAscPagePropFromObj;
     window["AscPDF"].FillActionsFromJSON        = FillActionsFromJSON;
