@@ -263,9 +263,9 @@
         }
     };
 
-    function CActionGoTo(nPage, nGoToType, nZoom, oRect) {
+    function CActionGoTo(sPageId, nGoToType, nZoom, oRect) {
         CActionBase.call(this, ACTIONS_TYPES.GoTo);
-        this.page       = nPage;
+        this.pageId     = sPageId;
         this.goToType   = nGoToType;
         this.zoom       = nZoom;
         this.rect       = oRect; // top right bottom left
@@ -274,18 +274,19 @@
 	CActionGoTo.prototype.constructor = CActionGoTo;
 
     CActionGoTo.prototype.Copy = function() {
-        return new CActionGoTo(this.GetPage(), this.GetKind(), this.GetZoom(true), this.GetRect().slice());
+        return new CActionGoTo(this.GetPageId(), this.GetKind(), this.GetZoom(true), this.GetRect().slice());
     };
     CActionGoTo.prototype.GetZoom = function(bSource) {
         if (this.zoom != null || bSource)
             return this.zoom;
 
+        let nPageIdx    = this.GetPageIdx();
         let oViewer     = editor.getDocumentRenderer();
-        let nNoZoomH    = oViewer.drawingPages[this.page].H / oViewer.zoom;
-        let nNoZoomW    = oViewer.drawingPages[this.page].W / oViewer.zoom;
+        let nNoZoomH    = oViewer.drawingPages[nPageIdx].H / oViewer.zoom;
+        let nNoZoomW    = oViewer.drawingPages[nPageIdx].W / oViewer.zoom;
 
-        let nScaleY = oViewer.drawingPages[this.page].H / oViewer.file.pages[this.page].H / oViewer.zoom;
-        let nScaleX = oViewer.drawingPages[this.page].W / oViewer.file.pages[this.page].W / oViewer.zoom;
+        let nScaleY = oViewer.drawingPages[nPageIdx].H / oViewer.file.pages[nPageIdx].H / oViewer.zoom;
+        let nScaleX = oViewer.drawingPages[nPageIdx].W / oViewer.file.pages[nPageIdx].W / oViewer.zoom;
 
         switch (this.goToType) {
             case AscPDF.GOTO_TYPES.xyz: // inherit zoom
@@ -319,7 +320,7 @@
                 
                 // далее вычисляем ширину с новым потенциальным зумом,
                 // если при данных размерах будет добавлен скролл, то вычитаем его ширину и пересчитываем zoom
-                let nNewPageW = oViewer.drawingPages[this.page].W = (oViewer.file.pages[this.page].W * 96 * nMinZoom / oViewer.file.pages[this.page].Dpi) >> 0;
+                let nNewPageW = oViewer.drawingPages[nPageIdx].W = (oViewer.file.pages[nPageIdx].W * 96 * nMinZoom / oViewer.file.pages[nPageIdx].Dpi) >> 0;
                 if (nNewPageW > oViewer.width) {
                     nVerZoom = (((oViewer.canvas.height - oViewer.scrollWidth) / (nRectH)) * 100 >> 0) / 100;
                 }
@@ -331,8 +332,12 @@
         return this.zoom;
     };
 
-    CActionGoTo.prototype.GetPage = function() {
-        return this.page;
+    CActionGoTo.prototype.GetPageId = function() {
+        return this.pageId;
+    };
+    CActionGoTo.prototype.GetPageIdx = function() {
+        let oPageInfo = AscCommon.g_oTableId.GetById(this.GetPageId());
+        return oPageInfo.GetIndex();
     };
 
     CActionGoTo.prototype.GetKind = function() {
@@ -356,8 +361,10 @@
             oActionsQueue.Continue();
             return;
         }
-            
-        if (this.page >= oDoc.GetPagesCount()) {
+        
+        let nPageIdx = this.GetPageIdx();
+
+        if (nPageIdx >= oDoc.GetPagesCount() || nPageIdx == -1) {
             oActionsQueue.Continue();
             return;
         }
@@ -370,8 +377,8 @@
         let yOffset = this.rect.top != null ? this.rect.top : 0;
         let xOffset = this.rect.left != null ? this.rect.left : 0;
 
-        if ((nZoom && oViewer.zoom != nZoom) || yOffset != undefined && xOffset != undefined || oViewer.currentPage != this.page) {
-            let oTr = oDoc.pagesTransform[this.page].invert;
+        if ((nZoom && oViewer.zoom != nZoom) || yOffset != undefined && xOffset != undefined || oViewer.currentPage != nPageIdx) {
+            let oTr = oDoc.pagesTransform[nPageIdx].invert;
             let oPos = oTr.TransformPoint(xOffset, yOffset);
 
             oViewer.disabledPaintOnScroll = true; // вырубаем отрисовку на скроле
@@ -385,7 +392,7 @@
     
     CActionGoTo.prototype.WriteToBinary = function(memory) {
         memory.WriteByte(this.GetType());
-        memory.WriteLong(this.GetPage());
+        memory.WriteLong(this.GetPageIdx());
 
         let nKind = this.GetKind();
         memory.WriteByte(nKind);

@@ -579,7 +579,13 @@
                             left:   aActionsInfo[i]["left"]
                         }
     
-                        oAction = new AscPDF.CActionGoTo(aActionsInfo[i]["page"], aActionsInfo[i]["kind"], aActionsInfo[i]["zoom"], oRect);
+                        let oDoc = Asc.editor.getPDFDoc();
+                        let oPageInfo = oDoc.GetPageInfo(aActionsInfo[i]["page"]);
+                        if (!oPageInfo) {
+                            break;
+                        }
+                        
+                        oAction = new AscPDF.CActionGoTo(oPageInfo.GetId(), aActionsInfo[i]["kind"], aActionsInfo[i]["zoom"], oRect);
                         aActions.push(oAction);
                         break;
                     case AscPDF.ACTIONS_TYPES.Named:
