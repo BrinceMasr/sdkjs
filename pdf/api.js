@@ -974,6 +974,10 @@
 			aAnnotsProps[0].compare(aAnnotsProps[i]);
 		}
 
+		aAnnotsProps[0].asc_putIds(aAnnots.map(function(annot) {
+			return annot.GetId();
+		}));
+
 		let aLinkProps = [];
 		aAnnots.forEach(function(annot) {
 			if (annot.IsLink()) {
@@ -1152,7 +1156,7 @@
 		let oDoc = this.getPDFDoc();
 		oDoc.RemoveHyperlink();
 	};
-	PDFEditorApi.prototype.change_Hyperlink = function(HyperProps) {
+	PDFEditorApi.prototype.change_Hyperlink = function(HyperProps, arrAnnotsIds) {
 		let oDoc = this.getPDFDoc();
 		oDoc.ModifyHyperlink(HyperProps);
 	};

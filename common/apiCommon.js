@@ -3847,6 +3847,8 @@ function (window, undefined) {
 
 	/** @constructor */
 	function asc_CAnnotProperty() {
+		this.ids = null;
+
 		this.type = null;
 
 		this.fill	= null;
@@ -3857,6 +3859,12 @@ function (window, undefined) {
 		this.annotProps = null;
 	}
 
+	asc_CAnnotProperty.prototype.asc_getIds = function () {
+		return this.ids;
+	};
+	asc_CAnnotProperty.prototype.asc_putIds = function (v) {
+		this.ids = v;
+	};
 	asc_CAnnotProperty.prototype.asc_getType = function () {
 		return this.type;
 	};
@@ -6287,6 +6295,8 @@ function (window, undefined) {
 			this.Class = null;
 			this.Anchor = null;
 			this.Heading = null;
+
+			// pdf
 			this.IsPageView = false;
 		}
 	}
@@ -8992,6 +9002,8 @@ function (window, undefined) {
 
 	window["Asc"]["asc_CAnnotProperty"] = window["Asc"].asc_CAnnotProperty = asc_CAnnotProperty;
 	prot = asc_CAnnotProperty.prototype;
+	prot["asc_getIds"]				= prot.asc_getIds;
+	prot["asc_putIds"]				= prot.asc_putIds;
 	prot["asc_getType"]				= prot.asc_getType;
 	prot["asc_putType"]				= prot.asc_putType;
 	prot["asc_getFill"]				= prot.asc_getFill;
