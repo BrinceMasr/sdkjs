@@ -970,6 +970,10 @@
 			return AscPDF.CreateAscAnnotPropFromObj(annot);
 		});
 
+		if (aAnnots.length == 0) {
+			return;
+		}
+		
 		for (let i = 1; i < aAnnotsProps.length; i++) {
 			aAnnotsProps[0].compare(aAnnotsProps[i]);
 		}
