@@ -357,7 +357,7 @@
             return;
         }
             
-        if (this.page >= oViewer.pagesInfo.countTextPages) {
+        if (this.page >= oDoc.GetPagesCount()) {
             oActionsQueue.Continue();
             return;
         }
