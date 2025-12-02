@@ -1285,6 +1285,10 @@ RotateState.prototype =
                                         let nLineW = oAnnot.GetWidth() * g_dKoef_pt_to_mm;
 
                                         if (aQuads.length == 0 || aQuads.length > 1) {
+                                            if (aQuads.length > 1) {
+                                                oAnnot.SetQuads([]);
+                                            }
+                                            
                                             AscCommon.History.StartNoHistoryMode();
                                             oAnnot.SetRect(aRect);
                                             oAnnot.SetRectangleDiff([0, 0, 0, 0]);
