@@ -363,8 +363,7 @@
         }
         
         let nPageIdx = this.GetPageIdx();
-
-        if (nPageIdx >= oDoc.GetPagesCount() || nPageIdx == -1) {
+        if (nPageIdx == -1) {
             oActionsQueue.Continue();
             return;
         }

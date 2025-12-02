@@ -375,9 +375,12 @@
                         }
     
                         let oDoc = Asc.editor.getPDFDoc();
-                        let oPageInfo = oDoc.GetPageInfo(aActionsInfo[i]["page"]);
-                        if (!oPageInfo) {
-                            break;
+                        let oPageInfo;
+                        if (aActionsInfo[i]["pageId"]) {
+                            oPageInfo = AscCommon.g_oTableId.GetById(aActionsInfo[i]["pageId"]);
+                        }
+                        else {
+                            oPageInfo = oDoc.GetPageInfo(aActionsInfo[i]["page"]);
                         }
 
                         oAction = new AscPDF.CActionGoTo(oPageInfo.GetId(), aActionsInfo[i]["kind"], aActionsInfo[i]["zoom"], oRect);
@@ -457,7 +460,8 @@
                     break;
                 case AscPDF.ACTIONS_TYPES.GoTo:
                     actionInfo["S"] = AscPDF.ACTIONS_TYPES.GoTo;
-                    actionInfo["page"] = oAction.GetPage();
+                    actionInfo["page"] = oAction.GetPageIdx();
+                    actionInfo["pageId"] = oAction.GetPageId();
                     actionInfo["kind"] = oAction.GetKind();
                     actionInfo["zoom"] = oAction.GetZoom();
                     let oRect = oAction.GetRect();

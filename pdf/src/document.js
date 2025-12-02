@@ -9621,7 +9621,11 @@ var CPresentation = CPresentation || function(){};
                 break;
             }
             case AscPDF.ACTIONS_TYPES.GoTo: {
-                oProps.Value = "ppaction://hlinksldjumpslide" + oAction.GetPage();
+                let nPageIdx = oAction.GetPageIdx();
+                if (nPageIdx !== -1) {
+                    oProps.Value = "ppaction://hlinksldjumpslide" + nPageIdx;
+                }
+
                 oProps.IsPageView = true;
                 break;
             }
