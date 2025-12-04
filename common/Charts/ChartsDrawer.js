@@ -8871,43 +8871,36 @@ drawBoxWhiskerChart.prototype = {
 		this.cChartDrawer.cShapeDrawer.Graphics.SaveGrState();
 		this.cChartDrawer.cShapeDrawer.Graphics.AddClipRect(leftRect, topRect, rightRect, bottomRect);
 
-		let series = this.cChartSpace.chart.plotArea.plotAreaRegion.series;
 
-		let oSeries = series[0];
-
-		let pen = oSeries.compiledSeriesPen;
-		if (pen) {
-			pen.Fill.fill.color.RGBA.R = 255;
-			pen.Fill.fill.color.RGBA.B = 0;
-			pen.Fill.fill.color.RGBA.G = 0;
-		}
-		let brush = oSeries.compiledSeriesBrush;
+        let i = 0;
 
 		// drawLine
 		for (let key in this.paths) {
+            let oSeria = this.cChartSpace.chart.plotArea.plotAreaRegion.getSeriaById(key);
+			if (oSeria) {
+				let pen = oSeria.compiledSeriesPen;
+				let brush = oSeria.compiledSeriesBrush;
 
-			if(oSeries && this.paths.hasOwnProperty(key) && this.paths[key]) {
-				this.drawParts(key, true, pen, brush);
-				this.drawParts(key, false, pen, brush);
-			}
+				if (this.paths.hasOwnProperty(key) && this.paths[key]) {
+					this.drawParts(key, true, pen, brush);
+					this.drawParts(key, false, pen, brush);
+				}
 
-			if (this.linePaths.hasOwnProperty(key) && this.linePaths[key]) {
-				this.cChartDrawer.drawPath(this.linePaths[key], pen);
+				if (this.linePaths.hasOwnProperty(key) && this.linePaths[key]) {
+					this.cChartDrawer.drawPath(this.linePaths[key], pen);
+				}
+				i++;
 			}
 		}
 		this.cChartDrawer.cShapeDrawer.Graphics.RestoreGrState();
 	},
 
 	drawParts : function (key, order, pen, brush) {
-		// for (let i in this.paths) {
-		// 	if (this.paths.hasOwnProperty(i) && this.paths[i]) {
-				for (let j in this.paths[key]) {
-					if (this.paths[key].hasOwnProperty(j) && this.paths[key][j] && this.paths[key][j][1] === order) {
-						this.cChartDrawer.drawPath(this.paths[key][j][0], pen, brush);
-					}
-				}
-		// 	}
-		// }
+		for (let j in this.paths[key]) {
+			if (this.paths[key].hasOwnProperty(j) && this.paths[key][j] && this.paths[key][j][1] === order) {
+				this.cChartDrawer.drawPath(this.paths[key][j][0], pen, brush);
+			}
+		}
 	},
 
 	_calculateDLbl : function (compiledDlb) {
@@ -19593,7 +19586,7 @@ CErrBarsDraw.prototype = {
 	}
 
 	function CCachedChartExData (id, type, data) {
-		this.Id = id + '_cachedData';
+		this.Id = id;
 		this.type = type;
 		this.data = data;
 	}
@@ -20049,10 +20042,10 @@ CErrBarsDraw.prototype = {
 	function CCachedBoxWhisker(type, seria, numLit, strLit, axisProperties) {
 		CCachedChartExData.call(this, seria.Id, type, []);
 		this.exclusive = seria && seria.layoutPr && seria.layoutPr.statistics ? seria.layoutPr.statistics.quartileMethod : AscFormat.QUARTILE_METHOD_EXCLUSIVE;
-		this.outliers = seria && seria.layoutPr && seria.layoutPr.visibility ? seria.layoutPr.visibility.outliers : false;
-		this.nonoutliers = seria && seria.layoutPr && seria.layoutPr.visibility ? seria.layoutPr.visibility.nonoutliers : false;
+		this.outliers = seria && seria.layoutPr && seria.layoutPr.visibility ? seria.layoutPr.visibility.outliers : true;
+		this.nonoutliers = seria && seria.layoutPr && seria.layoutPr.visibility ? seria.layoutPr.visibility.nonoutliers : true;
 		this.meanLine = seria && seria.layoutPr && seria.layoutPr.visibility ? seria.layoutPr.visibility.meanLine : false;
-		this.meanMarker = seria && seria.layoutPr && seria.layoutPr.visibility ? seria.layoutPr.visibility.meanMarker : false;
+		this.meanMarker = seria && seria.layoutPr && seria.layoutPr.visibility ? seria.layoutPr.visibility.meanMarker : true;
 		this.ends = [];
 		this.pointType = 0;
 		this.tailType = 1;

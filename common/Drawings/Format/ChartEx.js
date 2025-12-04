@@ -3057,6 +3057,15 @@ function (window, undefined) {
 		this.cachedDatas.push(cachedData);
 	}
 
+	CPlotAreaRegion.prototype.getSeriaById = function (id) {
+		for (let i = 0; i < this.series.length; i++) {
+			if (this.series[i].Id === id) {
+				return this.series[i];
+			}
+		}
+		return null;
+	}
+
 	CPlotAreaRegion.prototype.getMaxSeriesIdx = function () {
 		return this.series.length;
 	};
