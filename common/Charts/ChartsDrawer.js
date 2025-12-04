@@ -8798,10 +8798,13 @@ drawBoxWhiskerChart.prototype = {
 		const pathW = this.chartProp.pathW;
 		const pathH = this.chartProp.pathH;
 		const pxToMm = this.chartProp.pxToMM;
+		// Due to the line thickness the cross is shifted, to return it back as temporary solution we use offset
+		// TODO: proper solution is to add line thickness in path drawing calculations
+		const offset = 0.9;
 
 		path.moveTo((x - halfSize) * pathW / pxToMm, (y - halfSize) * pathH / pxToMm );
-		path.lnTo((x + halfSize) * pathW / pxToMm, (y + halfSize) * pathH / pxToMm );
-		path.moveTo((x - halfSize) * pathW / pxToMm, (y + halfSize) * pathH / pxToMm );
+		path.lnTo((x + halfSize) * pathW / pxToMm, (y + (halfSize * offset)) * pathH / pxToMm );
+		path.moveTo((x - halfSize) * pathW / pxToMm, (y + (halfSize * offset)) * pathH / pxToMm );
 		path.lnTo((x + halfSize) * pathW / pxToMm, (y - halfSize) * pathH / pxToMm );
 
 		return pathId;
@@ -8880,6 +8883,12 @@ drawBoxWhiskerChart.prototype = {
 			if (oSeria) {
 				let pen = oSeria.compiledSeriesPen;
 				let brush = oSeria.compiledSeriesBrush;
+
+				if (pen) {
+					pen.Fill.fill.color.RGBA.R = pen.Fill.fill.color.RGBA.R * 0.8;
+					pen.Fill.fill.color.RGBA.B = pen.Fill.fill.color.RGBA.B * 0.8;
+					pen.Fill.fill.color.RGBA.G = pen.Fill.fill.color.RGBA.G * 0.8;
+				}
 
 				if (this.paths.hasOwnProperty(key) && this.paths[key]) {
 					this.drawParts(key, true, pen, brush);
@@ -20042,10 +20051,10 @@ CErrBarsDraw.prototype = {
 	function CCachedBoxWhisker(type, seria, numLit, strLit, axisProperties) {
 		CCachedChartExData.call(this, seria.Id, type, []);
 		this.exclusive = seria && seria.layoutPr && seria.layoutPr.statistics ? seria.layoutPr.statistics.quartileMethod : AscFormat.QUARTILE_METHOD_EXCLUSIVE;
-		this.outliers = seria && seria.layoutPr && seria.layoutPr.visibility ? seria.layoutPr.visibility.outliers : true;
-		this.nonoutliers = seria && seria.layoutPr && seria.layoutPr.visibility ? seria.layoutPr.visibility.nonoutliers : true;
-		this.meanLine = seria && seria.layoutPr && seria.layoutPr.visibility ? seria.layoutPr.visibility.meanLine : false;
-		this.meanMarker = seria && seria.layoutPr && seria.layoutPr.visibility ? seria.layoutPr.visibility.meanMarker : true;
+		this.outliers = seria && seria.layoutPr && seria.layoutPr.visibility && seria.layoutPr.visibility.outliers !== null && seria.layoutPr.visibility.outliers !== undefined ? seria.layoutPr.visibility.outliers : true;
+		this.nonoutliers = seria && seria.layoutPr && seria.layoutPr.visibility && seria.layoutPr.visibility.nonoutliers !== null && seria.layoutPr.visibility.nonoutliers !== undefined  ? seria.layoutPr.visibility.nonoutliers : true;
+		this.meanLine = seria && seria.layoutPr && seria.layoutPr.visibility && seria.layoutPr.visibility.meanLine !== null && seria.layoutPr.visibility.meanLine !== undefined ? seria.layoutPr.visibility.meanLine : false;
+		this.meanMarker = seria && seria.layoutPr && seria.layoutPr.visibility && seria.layoutPr.visibility.meanMarker !== null && seria.layoutPr.visibility.meanMarker !== undefined  ? seria.layoutPr.visibility.meanMarker : true;
 		this.ends = [];
 		this.pointType = 0;
 		this.tailType = 1;
@@ -20189,6 +20198,10 @@ CErrBarsDraw.prototype = {
 			if (nSize1 == 1) {
 				return null;
 			}
+
+			if (nSize1 === 3) {
+				return alpha > 0.5 ? values[1] : values[0];
+			}
 			if (alpha * nSize1 < 1 || alpha * nSize1 > nSize1 - 1) {
 				return null;
 			}
@@ -20251,21 +20264,30 @@ CErrBarsDraw.prototype = {
 			if (arr[j] === box.fStart || arr[j] === box.fEnd) {
 				// point from which to start drawing vertical line to tail
 				const value = arr[j] === box.fStart ? box.fFirstQuartile : box.fThirdQuartile;
-				this.data.push({type: this.tailType, val : arr[j], val2: value})
+				if (AscFormat.isRealNumber(arr[j]) && AscFormat.isRealNumber(value)) {
+					this.data.push({type: this.tailType, val: arr[j], val2: value})
+				}
 			} else {
 				// obtain condition to draw, either outlier or nonoutlier
 				const isDraw = arr[j] < box.fStart || arr[j] > box.fEnd ? this.outliers : this.nonoutliers;
-				if (isDraw) {
+				if (isDraw && AscFormat.isRealNumber(arr[j])) {
 					this.data.push({type : this.pointType, val: arr[j]});
 					this._chartExSetAxisMinAndMax(axisProperties.val, arr[j]);
 				}
 			}
 		}
-		this.data.push({type: this.bottomBoxType, val: box.fFirstQuartile, val2: box.fMedian});
-		this.data.push({type: this.medianType, val: box.fMedian});
-		this.data.push({type: this.topBoxType, val: box.fThirdQuartile, val2: box.fMedian});
 
-		if (this.meanMarker || this.meanLine) {
+		if (AscFormat.isRealNumber(box.fFirstQuartile) && AscFormat.isRealNumber(box.fMedian)) {
+			this.data.push({type: this.bottomBoxType, val: box.fFirstQuartile, val2: box.fMedian});
+		}
+		if (AscFormat.isRealNumber(box.fMedian)) {
+			this.data.push({type: this.medianType, val: box.fMedian});
+		}
+		if (AscFormat.isRealNumber(box.fThirdQuartile) && AscFormat.isRealNumber(box.fMedian)) {
+			this.data.push({type: this.topBoxType, val: box.fThirdQuartile, val2: box.fMedian});
+		}
+
+		if ((this.meanMarker || this.meanLine) && AscFormat.isRealNumber(box.fMean)) {
 			this.data.push({type: this.meanType, val: box.fMean});
 		}
 
