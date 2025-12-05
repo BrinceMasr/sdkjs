@@ -4888,7 +4888,7 @@ var CPresentation = CPresentation || function(){};
     //-----------------------------------------------------------------------------------
     // Функции для работы с гиперссылками
     //-----------------------------------------------------------------------------------
-    CPDFDoc.prototype.AddHyperlink = function (HyperProps) {
+    CPDFDoc.prototype.AddHyperlink = function (HyperProps, arrAnnotsIds) {
         if (arrAnnotsIds) {
             let _t = this;
 
