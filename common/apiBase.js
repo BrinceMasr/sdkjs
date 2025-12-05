@@ -212,6 +212,7 @@
         this.openFileCryptBinary = null;
 
         this.copyOutEnabled = true;
+		this.copyEnabled = true;
 
 		this.watermarkDraw = null;
 
@@ -252,6 +253,8 @@
 		this._correctEmbeddedWork();
 
 		this.broadcastChannel = null;
+		
+		this.textAnnotatorEventManager = null;
 
 		return this;
 	}
@@ -614,7 +617,7 @@
 			var permissions = this.DocInfo.asc_getPermissions();
 			if (permissions && undefined !== permissions['copy'])
 			{
-				this.copyOutEnabled = permissions['copy'];
+				this.copyEnabled = permissions['copy'];
 			}
 
 			this.User = new AscCommon.asc_CUser();
@@ -749,6 +752,10 @@
 	baseEditorsApi.prototype.isCopyOutEnabled                = function()
 	{
 		return this.copyOutEnabled;
+	};
+	baseEditorsApi.prototype.isCopyEnabled                = function()
+	{
+		return this.copyEnabled;
 	};
 	baseEditorsApi.prototype.sync_CanCopyCutCallback = function (bCanCopyCut, bCanCut)
 	{
@@ -1053,7 +1060,19 @@
 			}
 		}
 	};
-
+	baseEditorsApi.prototype.asc_setLocale = function(val) {};
+	baseEditorsApi.prototype.asc_getLocale = function() {};
+	/**
+	 * Gets LCID (Locale Identifier) for current locale
+	 * @returns {number|undefined} LCID number if locale found in map or undefined
+	 */
+	baseEditorsApi.prototype.asc_getLocaleLCID = function () {
+		const locale = this.asc_getLocale();
+		if (typeof locale === "string" && Asc.g_oLcidNameToIdMap) {
+			return Asc.g_oLcidNameToIdMap[locale];
+		}
+		return locale;
+	};
 	baseEditorsApi.prototype.asc_getLocaleExample = function(format, value, culture) {
 		if (!AscFormat.isRealNumber(value))
 		{
@@ -1232,13 +1251,16 @@
 
 		if (!this.isLongActionBase())
 		{
-			var _length = this.LongActionCallbacks.length;
-			for (var i = 0; i < _length; i++)
+			let callbacks = this.LongActionCallbacks;
+			let params = this.LongActionCallbacksParams;
+			
+			this.LongActionCallbacks = [];
+			this.LongActionCallbacksParams = [];
+			
+			for (let i = 0, _length = callbacks.length; i < _length; ++i)
 			{
-				this.LongActionCallbacks[i](this.LongActionCallbacksParams[i]);
+				callbacks[i](params[i]);
 			}
-			this.LongActionCallbacks.splice(0, _length);
-			this.LongActionCallbacksParams.splice(0, _length);
 		}
 	};
 
@@ -1329,14 +1351,7 @@
 		var rData                  = null;
 		if (!(this.DocInfo && this.DocInfo.get_OfflineApp()))
 		{
-			var locale = !window['NATIVE_EDITOR_ENJINE'] && this.asc_getLocale() || undefined;
-			if (typeof locale === "string") {
-				if (Asc.g_oLcidNameToIdMap) {
-					locale = Asc.g_oLcidNameToIdMap[locale];
-				} else {
-					locale = undefined;
-				}
-			}
+			var lcid = !window['NATIVE_EDITOR_ENJINE'] && this.asc_getLocaleLCID() || undefined;
 			let isOpenOoxml = !!(this.DocInfo && this.DocInfo.get_DirectUrl()) && this["asc_isSupportFeature"]("ooxml");
 			let outputformat = this._getOpenFormatByEditorId(this.editorId, false);//false to avoid ooxml->ooxml conversion
 			let convertToOrigin = '';
@@ -1350,7 +1365,7 @@
 				"format"        : this.documentFormat,
 				"url"           : this.documentUrl,
 				"title"         : this.documentTitle,
-				"lcid"          : locale,
+				"lcid"          : lcid,
 				"nobase64"      : true,
 				"outputformat"  : outputformat,
 				"convertToOrigin" : convertToOrigin,
@@ -6016,6 +6031,8 @@
 
 		if (this.groupActionsCounter > 1)
 			return;
+		
+		this._onStartGroupActions();
 
 		AscCommon.CollaborativeEditing.Set_GlobalLock(true);
 		AscCommon.CollaborativeEditing.Set_GlobalLockSelection(true);
@@ -6059,10 +6076,10 @@
 		if (this.groupActionsCounter > 0)
 			return;
 		
-		this._onEndGroupActions();
-
 		AscCommon.CollaborativeEditing.Set_GlobalLock(false);
 		AscCommon.CollaborativeEditing.Set_GlobalLockSelection(false);
+		
+		this._onEndGroupActions(false);
 	};
 	baseEditorsApi.prototype.endGroupActions = function()
 	{
@@ -6075,19 +6092,29 @@
 		if (this.groupActionsCounter > 0)
 			return;
 		
-		this._onEndGroupActions();
-
 		AscCommon.CollaborativeEditing.Set_GlobalLock(false);
 		AscCommon.CollaborativeEditing.Set_GlobalLockSelection(false);
+		
+		this._onEndGroupActions(true);
 	};
 	baseEditorsApi.prototype.isGroupActions = function()
 	{
 		return this.groupActionsCounter > 0;
 	};
-	baseEditorsApi.prototype._onEndGroupActions = function()
+	baseEditorsApi.prototype._onStartGroupActions = function()
 	{
 	};
-
+	baseEditorsApi.prototype._onEndGroupActions = function(isFullEnd)
+	{
+	};
+	
+	baseEditorsApi.prototype.getTextAnnotatorEventManager = function()
+	{
+		if (!this.textAnnotatorEventManager)
+			this.textAnnotatorEventManager = new AscCommon.TextAnnotatorEventManager(this);
+		
+		return this.textAnnotatorEventManager;
+	};
 	baseEditorsApi.prototype.getMacroRecorder = function()
 	{
 		return this.macroRecorder;
@@ -6170,6 +6197,9 @@
 	prot['asc_setContentDarkMode'] = prot.asc_setContentDarkMode;
 	prot['asc_getFilePath'] = prot.asc_getFilePath;
 	prot['asc_getFormatCells'] = prot.asc_getFormatCells;
+	prot['asc_setLocale'] = prot.asc_setLocale;
+	prot['asc_getLocale'] = prot.asc_getLocale;
+	prot['asc_getLocaleLCID'] = prot.asc_getLocaleLCID;
 	prot['asc_getLocaleExample'] = prot.asc_getLocaleExample;
 	prot['asc_getAdditionalCurrencySymbols'] = prot.asc_getAdditionalCurrencySymbols;
 	prot['asc_convertNumFormat2NumFormatLocal'] = prot.asc_convertNumFormat2NumFormatLocal;

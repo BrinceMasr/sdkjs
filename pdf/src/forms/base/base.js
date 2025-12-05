@@ -91,7 +91,7 @@
 	 * Class representing a base field class.
 	 * @constructor
     */
-    function CBaseField(sName, nType, aRect)
+    function CBaseField(sName, nType, aRect, oDoc)
     {
         this.Id = AscCommon.g_oIdCounter.Get_NewId();
         if ((AscCommon.g_oIdCounter.m_bLoad || AscCommon.History.CanAddChanges())) {
@@ -163,6 +163,7 @@
         this._meta = {};
         sName && this.SetPartialName(sName);
         aRect && this.SetRect(aRect);
+        oDoc && this.SetDocument(oDoc);
 
         this.kidsContentChanges = new AscCommon.CContentChanges();
         this.textMatrix = new AscCommon.CMatrix();
@@ -890,27 +891,27 @@
 
         switch (this.GetType()) {
             case AscPDF.FIELD_TYPES.text: {
-                oCopy = new AscPDF.CTextField(this.GetPartialName(), this.GetRect().slice());
+                oCopy = new AscPDF.CTextField(this.GetPartialName(), this.GetRect().slice(), this.GetDocument());
                 break;
             }
             case AscPDF.FIELD_TYPES.combobox: {
-                oCopy = new AscPDF.CComboBoxField(this.GetPartialName(), this.GetRect().slice());
+                oCopy = new AscPDF.CComboBoxField(this.GetPartialName(), this.GetRect().slice(), this.GetDocument());
                 break;
             }
             case AscPDF.FIELD_TYPES.listbox: {
-                oCopy = new AscPDF.CListBoxField(this.GetPartialName(), this.GetRect().slice());
+                oCopy = new AscPDF.CListBoxField(this.GetPartialName(), this.GetRect().slice(), this.GetDocument());
                 break;
             }
             case AscPDF.FIELD_TYPES.button: {
-                oCopy = new AscPDF.CPushButtonField(this.GetPartialName(), this.GetRect().slice());
+                oCopy = new AscPDF.CPushButtonField(this.GetPartialName(), this.GetRect().slice(), this.GetDocument());
                 break;
             }
             case AscPDF.FIELD_TYPES.checkbox: {
-                oCopy = new AscPDF.CCheckBoxField(this.GetPartialName(), this.GetRect().slice());
+                oCopy = new AscPDF.CCheckBoxField(this.GetPartialName(), this.GetRect().slice(), this.GetDocument());
                 break;
             }
             case AscPDF.FIELD_TYPES.radiobutton: {
-                oCopy = new AscPDF.CRadioButtonField(this.GetPartialName(), this.GetRect().slice());
+                oCopy = new AscPDF.CRadioButtonField(this.GetPartialName(), this.GetRect().slice(), this.GetDocument());
                 break;
             }
             default: {
@@ -2046,6 +2047,11 @@
         this._defaultValue = value;
         this.SetWasChanged(true);
 
+        const oViewer = Asc.editor.getDocumentRenderer();
+        if (oViewer.IsOpenFormsInProgress) {
+            return;
+        }
+        
         const shouldUpdate = !value && this.GetParentValue() === sOldDefValue || value && !this.GetParentValue();
 
         let oWidget = this.IsWidget() ? this : this.GetKid(0);
@@ -2107,13 +2113,8 @@
 
         if (this.GetType() == AscPDF.FIELD_TYPES.radiobutton && this._chStyle == AscPDF.CHECKBOX_STYLES.circle) {
             if (this.IsHovered() && this.IsPressed()) {
-                if (aBgColor.length == 1 && aBgColor[0] == 1) {
-                    oBgRGBColor = {r: 191, g: 0, b: 0};
-                }
-                else {
-                    if (this.GetBorderStyle() !== AscPDF.BORDER_TYPES.beveled)
-                        oBgRGBColor = AscPDF.MakeColorMoreGray(oBgRGBColor, 50);
-                }
+                if (this.GetBorderStyle() !== AscPDF.BORDER_TYPES.beveled)
+                    oBgRGBColor = AscPDF.MakeColorMoreGray(oBgRGBColor, 50);
             }
 
             oGraphicsPDF.BeginPath();
@@ -3484,6 +3485,7 @@
         let oContentToDraw = this.GetTrigger(AscPDF.FORMS_TRIGGERS_TYPES.Format) ? this.contentFormat : this.content;
         let oldTrMatrix = oContentToDraw.transform;
         oContentToDraw.transform = new AscCommon.CMatrix();
+        memory.docRenderer.ClearLastFont();
         oContentToDraw.Draw(0, memory.docRenderer);
         oContentToDraw.transform = oldTrMatrix;
 

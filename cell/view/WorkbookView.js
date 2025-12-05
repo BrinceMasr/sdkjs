@@ -1145,6 +1145,9 @@
         }
       }
     });
+	if (this.cellCommentator && this.cellCommentator.worksheet && !this.cellCommentator.worksheet.workbook) {
+		this.cellCommentator.worksheet.workbook = this;
+	}
     if (0 < this.model.aComments.length) {
       this.handlers.trigger("asc_onAddComments", this.model.aComments);
     }
@@ -4209,7 +4212,7 @@
         var aChartRefsToChange = [];
         var aCharts = [];
 				let bHandled = false;
-        this.model.handleDrawings(function(oDrawing) {
+				const fDrawingCallback = function(oDrawing) {
 					switch (oDrawing.getObjectType()) {
 						case AscDFH.historyitem_type_ChartSpace: {
 							const nPrevLength = aChartRefsToChange.length;
@@ -4228,7 +4231,9 @@
 							break;
 						}
 					}
-        });
+				};
+			this.model.handleDrawings(fDrawingCallback);
+			this.Api.frameManager.handleMainDiagram(fDrawingCallback);
         if(aChartRefsToChange.length > 0) {
             for(var nRef = 0; nRef < aChartRefsToChange.length; ++nRef) {
                 aChartRefsToChange[nRef].updateCacheAndCat();
@@ -4241,7 +4246,6 @@
 				if (bHandled) {
 					this.onShowDrawingObjects();
 				}
-				this.Api.frameManager.updateGeneralDiagramCache(aRanges);
     };
     WorkbookView.prototype.handleChartsOnChangeSheetName = function (oWorksheet, sOldName, sNewName) {
         //change sheet name in chart references
@@ -7637,9 +7641,6 @@
 			return;
 		}
 		if (!this._checkDesktop()) {
-			return;
-		}
-		if (!this.externalFormulaEditMode) {
 			return;
 		}
 

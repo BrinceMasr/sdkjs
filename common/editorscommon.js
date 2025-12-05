@@ -2702,31 +2702,14 @@
 					if (AscCommon.AscBrowser.isSafari)
 						return true;
 					
-					if (event.dataTransfer.items)
-					{
-						for (var j = 0, length2 = event.dataTransfer.items.length; j < length2; j++)
-						{
-							var item = event.dataTransfer.items[j];
-							if (item.type && item.kind && "file" == item.kind.toLowerCase())
-							{
-								bRes = false;
-								for (var k = 0,
-										 length3 = c_oAscImageUploadProp.SupportedFormats.length; k < length3; k++)
-								{
-									if (-1 != item.type.indexOf(c_oAscImageUploadProp.SupportedFormats[k]))
-									{
-										bRes = true;
-										break;
-									}
-								}
-								if (false == bRes)
-									break;
-							}
-						}
-					}
-					else
-						bRes = true;
-					break;
+  					if (event.dataTransfer.items)
+  					{
+ 						// Allow drop if at least one item looks like an image file (strictly validated on drop)
+ 						bRes = Array.prototype.some.call(event.dataTransfer.items, isValidImageDragItem);
+ 					}
+ 					else
+ 						bRes = true;
+ 					break;
 				}
 				else if (type == "text" || type == "text/plain" || type == "text/html")
 				{
@@ -2736,6 +2719,25 @@
 			}
 		}
 		return bRes;
+	}
+
+	/**
+	 * Validate drag item as an image file in dragover phase.
+	 * Prefer MIME check (image/*) when available; allow empty type and validate on drop.
+	 * @param {DataTransferItem} item Drag item to validate
+	 * @returns {boolean} True if item can be treated as an image candidate during dragover
+	 */
+	function isValidImageDragItem(item) {
+		if (!item || !item.kind || item.kind.toLowerCase() !== "file") {
+			return false;
+		}
+		const mime = item.type ? item.type.toLowerCase().trim() : "";
+		if (mime) {
+			// If browser provides MIME, accept only images
+			return mime.indexOf("image/") === 0;
+		}
+		// No MIME available (common in some environments): allow and validate strictly on drop
+		return true;
 	}
 
 	function GetUploadIFrame()
@@ -11746,6 +11748,14 @@
 		"Meiryo", "MS Gothic", "MS PGothic", "MS UI Gothic", "Yu Gothic",
 		"Dotum", "Gulim", "Malgun Gothic"
 	];
+	
+	// Символы, на которых работает <w:rFonts w:hint="eastAsia"/>
+	function isAmbiguousCharacter(codePoint)
+	{
+		return (0x00D7 === codePoint
+			|| (0x0370 <= codePoint && codePoint <= 0x03FF));
+	}
+	
 
 	function IsEastAsianFont(sName)
 	{
@@ -11831,6 +11841,11 @@
 			|| (0x18800 <= value && value <= 0x18AFF)
 			|| (0xA000 <= value && value <= 0xA48F)
 			|| (0xA490 <= value && value <= 0xA4CF));
+	}
+	
+	function isEastAsianPunctuation(value)
+	{
+		return (0x3000 <= value && value <= 0x4DB5);
 	}
 
 	function IsHangul(nCharCode)
@@ -15608,7 +15623,10 @@
 	window["AscCommon"].getAscColorScheme = getAscColorScheme;
 	window["AscCommon"].checkAddColorScheme = checkAddColorScheme;
 	window["AscCommon"].getIndexColorSchemeInArray = getIndexColorSchemeInArray;
+	window["AscCommon"].isAmbiguousCharacter = isAmbiguousCharacter;
 	window["AscCommon"].isEastAsianScript = isEastAsianScript;
+	window["AscCommon"].isEastAsianPunctuation = isEastAsianPunctuation;
+	window["AscCommon"].isHangul = IsHangul;
 	window["AscCommon"].IsEastAsianFont = IsEastAsianFont;
 	window["AscCommon"].IsComplexScript = IsComplexScript;
 	window["AscCommon"].IsGeorgianScript = IsGeorgianScript;
@@ -15700,7 +15718,7 @@
 	window["AscCommon"].fromModelCryptAlgorithmSid = fromModelCryptAlgorithmSid;
 	window["AscCommon"].getMemoryInfo = getMemoryInfo;
 	window["AscCommon"].getClientInfoString = getClientInfoString;
-	window["AscCommon"].sendClientLog = sendClientLog;
+	window["AscCommon"].sendClientLog = window["AscCommon"]["sendClientLog"] = sendClientLog;
 
 	window["AscCommon"].getNativePrintRanges = getNativePrintRanges;
 
