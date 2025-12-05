@@ -12183,7 +12183,11 @@
 		// })();
 
         // case when filter values array lenght 2 or less
-        if (Operator === "xlFilterValues" &&  Array.isArray(Criteria1) && Criteria1.length && Criteria1.length <= 2 && Criteria1[0] !== null && Criteria1[0] !== undefined) {
+		if (!this._checkProtection()) {
+			return null;
+		}
+
+		if (Operator === "xlFilterValues" &&  Array.isArray(Criteria1) && Criteria1.length && Criteria1.length <= 2 && Criteria1[0] !== null && Criteria1[0] !== undefined) {
             if (Criteria1.length === 2 && Criteria1[1] !== null && Criteria1[1] !== undefined) {
                 Criteria2 = Criteria1[1].toString();
             }
@@ -12191,8 +12195,8 @@
             Operator = "xlOr"
         }
 
-		if (!this._checkProtection()) {
-			return null;
+		if (Field !== null && (Criteria1 === undefined || Criteria1 === null)) {
+			return;
 		}
 
 		if (Criteria2 && Array.isArray(Criteria2)) {
@@ -12278,12 +12282,41 @@
 
 				let criteriaMap = {};
 				for (let i in Criteria1) {
-					criteriaMap[Criteria1[i]] = 1;
+					criteriaMap[Criteria1[i]] = {
+                        visible: true,
+                        used: false
+                    };
 				}
 
+                // var elem = AscCommonExcel.AutoFiltersOptionsElements();
+                // elem.asc_setVisible(true);
+                // elem.asc_setVal(item.x);
+                // elem.asc_setText("");
+                // elem.asc_setIsDateFormat(false);
+                // elem.asc_setRepeats(undefined);
+                // res.values.push(elem);
+
 				for (let i = 0; i < autoFiltersOptionsElements.values.length; i++) {
-					autoFiltersOptionsElements.values[i].asc_setVisible(!!criteriaMap[autoFiltersOptionsElements.values[i].text]);
+					const target = criteriaMap[autoFiltersOptionsElements.values[i].text];
+                    if (target !== undefined) {
+                        autoFiltersOptionsElements.values[i].asc_setVisible(target.visible);
+                        target.used = true;
+                    } else {
+                        autoFiltersOptionsElements.values[i].asc_setVisible(false);
+                    }
 				}
+
+                for (let key in criteriaMap) {
+                    if (criteriaMap.hasOwnProperty(key) && !criteriaMap[key].used) {
+                        let elem = AscCommonExcel.AutoFiltersOptionsElements();
+                        elem.asc_setVisible(true);
+                        elem.asc_setVal(key);
+                        elem.asc_setText(key);
+                        elem.asc_setIsDateFormat(false);
+                        elem.asc_setRepeats(undefined);
+                        autoFiltersOptionsElements.values.push(elem);
+                    }
+                }
 				// for (let i in Criteria1) {
 				// 	let elem = new AscCommonExcel.AutoFiltersOptionsElements();
 				// 	elem.asc_setVisible(true);
@@ -12357,6 +12390,7 @@
 					let _type = toDynamicConst(Criteria1);
 					autoFilterOptions = new Asc.AutoFiltersOptions();
 					createDynamicFilter(autoFilterOptions, _type, null);
+					autoFilterOptions.asc_setCellId(cellId);
 					break;
 				}
 				/*case "xlFilterIcon": {
@@ -12372,10 +12406,12 @@
 						autoFilterOptions = new Asc.AutoFiltersOptions();
 						createTop10Filter(autoFilterOptions, top10Num, "xlTop10Percent" === Operator || "xlBottom10Percent" === Operator,
 							"xlBottom10Items" === Operator || "xlBottom10Percent" === Operator, null);
+						
 					} else {
 						private_MakeError('Error! Criteria1 must be between 1 and 500!');
 						return false;
 					}
+					autoFilterOptions.asc_setCellId(cellId);
 					break;
 				}
 				case "xlFilterValues":
@@ -27166,11 +27202,10 @@
         get: function () {
             return this.GetOn();
         }
-    });g
+    });
 
     /**
      * Returns the operator used for the filter on this column.
-     *
      *
      * @memberof ApiFilter
      * @typeofeditors ["CSE"]

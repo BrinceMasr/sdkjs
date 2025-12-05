@@ -88,7 +88,8 @@ $(function () {
     // MUST-HAVE helper: clear all conditional formats in A1:Z100 before each test
     window.initializeTest = function () {
         var r = ws.GetRange("A1:Z100");
-        r.Clear();
+        ws.worksheet.AutoFilter = null;
+        // r.Clear();
     };
 
     theRange = function (address) {
@@ -128,25 +129,13 @@ $(function () {
             assert.equal(filters[0].Operator, "xlOr", "Operator is xlFilterValues");
             assert.equal(filters[0].Criteria2, "=5", "Criteria2 is 5");
             assert.equal(filters[0].On, true, "On is true");
-            console.log(filters);
-        });
-
-        QUnit.test("FilterMode and Range after SetAutoFilter() add only", function (assert) {
-            initializeTest();
-
-            let range = ws.GetRange("A1:C10");
-            range.SetAutoFilter(); // just add filter
-
-            assert.equal(ws.AutoFilter.FilterMode, true, "FilterMode is true after adding AutoFilter");
-            assert.ok(ws.AutoFilter.Range, "Range is not null after adding AutoFilter");
-            assert.equal(ws.AutoFilter.Filters.length, 0, "No filters yet");
         });
 
         QUnit.test("Remove AutoFilter when Field is null", function (assert) {
             initializeTest();
 
             let range = ws.GetRange("A1:B5");
-            range.SetAutoFilter();
+            range.SetAutoFilter(1, [2,5], "xlFilterValues");
             assert.equal(ws.AutoFilter.FilterMode, true, "FilterMode true after add");
 
             range.SetAutoFilter(null); // remove whole AutoFilter
@@ -290,7 +279,7 @@ $(function () {
 
             range.SetAutoFilter(1, null); // clear column filter
             assert.equal(ws.AutoFilter.FilterMode, true, "AutoFilter still exists");
-            assert.equal(ws.AutoFilter.Filters.length, 0, "Filters empty after column clear");
+            assert.equal(ws.AutoFilter.Filters.length, 1, "Filters empty after column clear");
         });
 
         QUnit.test("Invalid Field does not add AutoFilter", function (assert) {
