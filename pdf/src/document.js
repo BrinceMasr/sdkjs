@@ -4889,12 +4889,126 @@ var CPresentation = CPresentation || function(){};
     // Функции для работы с гиперссылками
     //-----------------------------------------------------------------------------------
     CPDFDoc.prototype.AddHyperlink = function (HyperProps) {
-        let oController = this.GetController();
-        oController.checkSelectedObjectsAndCallback(oController.hyperlinkAdd, [HyperProps], false, AscDFH.historydescription_Presentation_HyperlinkAdd);
+        if (arrAnnotsIds) {
+            let _t = this;
+
+			this.DoAction(function() {
+				arrAnnotsIds.forEach(function(id) {
+					let oLink = _t.GetAnnotById(id);
+					
+					let oAction;
+					if (AscCommon.IsLinkPPAction(HyperProps.Value)) {
+						if (HyperProps.Value == "ppaction://hlinkshowjump?jump=firstslide") {
+							oAction = {
+								"S":		AscPDF.ACTIONS_TYPES.Named,
+								"N":		"FirstPage"
+							};
+						}
+						else if (HyperProps.Value == "ppaction://hlinkshowjump?jump=lastslide") {
+							oAction = {
+								"S":		AscPDF.ACTIONS_TYPES.Named,
+								"N":		"LastPage"
+							};
+						}
+						else if (HyperProps.Value == "ppaction://hlinkshowjump?jump=nextslide") {
+							oAction = {
+								"S":		AscPDF.ACTIONS_TYPES.Named,
+								"N":		"NextPage"
+							};
+						}
+						else if (HyperProps.Value == "ppaction://hlinkshowjump?jump=previousslide") {
+							oAction = {
+								"S":		AscPDF.ACTIONS_TYPES.Named,
+								"N":		"PrevPage"
+							};
+						}
+						else {
+							let mask	= "ppaction://hlinksldjumpslide";
+							let pageNum = parseInt(HyperProps.Value.substring(mask.length));
+
+							oAction = {
+								"S":		AscPDF.ACTIONS_TYPES.GoTo,
+								"page":		pageNum,
+								"kind":		AscPDF.GOTO_TYPES.xyz
+							};
+						}
+					}
+					else {
+						oAction = {
+							"S":		AscPDF.ACTIONS_TYPES.URI,
+							"URI":		HyperProps.Value
+						};
+					}
+
+					oLink.SetActions(AscPDF.PDF_TRIGGERS_TYPES.MouseUp, [oAction]);
+				})
+			}, AscDFH.historydescription_Pdf_ContextMenuRemove);
+		}
+        else {
+            let oController = this.GetController();
+            oController.checkSelectedObjectsAndCallback(oController.hyperlinkAdd, [HyperProps], false, AscDFH.historydescription_Presentation_HyperlinkAdd);
+        }
     };
-    CPDFDoc.prototype.ModifyHyperlink = function (HyperProps) {
-        let oController = this.GetController();
-        oController.checkSelectedObjectsAndCallback(oController.hyperlinkModify, [HyperProps], false, AscDFH.historydescription_Presentation_HyperlinkModify);
+    CPDFDoc.prototype.ModifyHyperlink = function (HyperProps, arrAnnotsIds) {
+        if (arrAnnotsIds) {
+            let _t = this;
+
+			_t.DoAction(function() {
+				arrAnnotsIds.forEach(function(id) {
+					let oLink = _t.GetAnnotById(id);
+					
+					let oAction;
+					if (AscCommon.IsLinkPPAction(HyperProps.Value)) {
+						if (HyperProps.Value == "ppaction://hlinkshowjump?jump=firstslide") {
+							oAction = {
+								"S":		AscPDF.ACTIONS_TYPES.Named,
+								"N":		"FirstPage"
+							};
+						}
+						else if (HyperProps.Value == "ppaction://hlinkshowjump?jump=lastslide") {
+							oAction = {
+								"S":		AscPDF.ACTIONS_TYPES.Named,
+								"N":		"LastPage"
+							};
+						}
+						else if (HyperProps.Value == "ppaction://hlinkshowjump?jump=nextslide") {
+							oAction = {
+								"S":		AscPDF.ACTIONS_TYPES.Named,
+								"N":		"NextPage"
+							};
+						}
+						else if (HyperProps.Value == "ppaction://hlinkshowjump?jump=previousslide") {
+							oAction = {
+								"S":		AscPDF.ACTIONS_TYPES.Named,
+								"N":		"PrevPage"
+							};
+						}
+						else {
+							let mask	= "ppaction://hlinksldjumpslide";
+							let pageNum = parseInt(HyperProps.Value.substring(mask.length));
+
+							oAction = {
+								"S":		AscPDF.ACTIONS_TYPES.GoTo,
+								"page":		pageNum,
+								"kind":		AscPDF.GOTO_TYPES.xyz
+							};
+						}
+					}
+					else {
+						oAction = {
+							"S":		AscPDF.ACTIONS_TYPES.URI,
+							"URI":		HyperProps.Value
+						};
+					}
+
+					oLink.SetActions(AscPDF.PDF_TRIGGERS_TYPES.MouseUp, [oAction]);
+				})
+			}, AscDFH.historydescription_Pdf_ContextMenuRemove);
+		}
+        else {
+            let oController = this.GetController();
+            oController.checkSelectedObjectsAndCallback(oController.hyperlinkModify, [HyperProps], false, AscDFH.historydescription_Presentation_HyperlinkModify);
+        }
     };
     CPDFDoc.prototype.RemoveHyperlink = function () {
         let oController = this.GetController();

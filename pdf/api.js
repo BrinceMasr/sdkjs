@@ -1162,7 +1162,7 @@
 	};
 	PDFEditorApi.prototype.change_Hyperlink = function(HyperProps, arrAnnotsIds) {
 		let oDoc = this.getPDFDoc();
-		oDoc.ModifyHyperlink(HyperProps);
+		oDoc.ModifyHyperlink(HyperProps, arrAnnotsIds);
 	};
 	PDFEditorApi.prototype.sync_HyperlinkClickCallback = function(Url) {
 		let oViewer		= this.getDocumentRenderer();
@@ -1210,66 +1210,13 @@
 	PDFEditorApi.prototype.add_Hyperlink = function(HyperProps, arrAnnotsIds) {
 		let oDoc = this.getPDFDoc();
 
-		if (arrAnnotsIds) {
-			oDoc.DoAction(function() {
-				arrAnnotsIds.forEach(function(id) {
-					let oLink = oDoc.GetAnnotById(id);
-					
-					let oAction;
-					if (AscCommon.IsLinkPPAction(HyperProps.Value)) {
-						if (HyperProps.Value == "ppaction://hlinkshowjump?jump=firstslide") {
-							oAction = {
-								"S":		AscPDF.ACTIONS_TYPES.Named,
-								"N":		"FirstPage"
-							};
-						}
-						else if (HyperProps.Value == "ppaction://hlinkshowjump?jump=lastslide") {
-							oAction = {
-								"S":		AscPDF.ACTIONS_TYPES.Named,
-								"N":		"LastPage"
-							};
-						}
-						else if (HyperProps.Value == "ppaction://hlinkshowjump?jump=nextslide") {
-							oAction = {
-								"S":		AscPDF.ACTIONS_TYPES.Named,
-								"N":		"NextPage"
-							};
-						}
-						else if (HyperProps.Value == "ppaction://hlinkshowjump?jump=previousslide") {
-							oAction = {
-								"S":		AscPDF.ACTIONS_TYPES.Named,
-								"N":		"PrevPage"
-							};
-						}
-						else {
-							let mask	= "ppaction://hlinksldjumpslide";
-							let pageNum = parseInt(HyperProps.Value.substring(mask.length));
-
-							oAction = {
-								"S":		AscPDF.ACTIONS_TYPES.GoTo,
-								"page":		pageNum,
-								"kind":		AscPDF.GOTO_TYPES.xyz
-							};
-						}
-					}
-					else {
-						oAction = {
-							"S":		AscPDF.ACTIONS_TYPES.URI,
-							"URI":		HyperProps.Value
-						};
-					}
-
-					oLink.SetActions(AscPDF.PDF_TRIGGERS_TYPES.MouseUp, [oAction]);
-				})
-			}, AscDFH.historydescription_Pdf_ContextMenuRemove);
-		}
 		if (null != HyperProps.Text) {
 			AscFonts.FontPickerByCharacter.checkText(HyperProps.Text, this, function() {
-				oDoc.AddHyperlink(HyperProps);
+				oDoc.AddHyperlink(HyperProps, arrAnnotsIds);
 			});
 		}
 		else {
-			oDoc.AddHyperlink(HyperProps);
+			oDoc.AddHyperlink(HyperProps, arrAnnotsIds);
 		}
 	};
 	PDFEditorApi.prototype.sync_VerticalTextAlign = function(align) {
