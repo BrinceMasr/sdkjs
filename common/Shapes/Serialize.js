@@ -9162,6 +9162,59 @@ function BinaryPPTYLoader()
         //checkTextPr(rPr);
         return rPr;
     };
+    this.ReadPdfRunFontInfo = function()
+    {
+        let oPdfFontInfo = {};
+
+        let s = this.stream;
+        let _end_rec = s.cur + s.GetULong() + 4;
+
+        s.Skip2(1); // start attributes
+
+        while (true)
+        {
+            var _at = s.GetUChar();
+            if (_at == g_nodeAttributeEnd)
+                break;
+
+            switch (_at)
+            {
+                case 0:
+                {
+                    oPdfFontInfo["name"] = s.GetString2();
+                    break;
+                }
+                case 1:
+                {
+                    oPdfFontInfo["index"] = s.GetLong();
+                    break;
+                }
+                case 2:
+                {
+                    oPdfFontInfo["left"] = s.GetULong();
+                    break;
+                }
+                case 3:
+                {
+                    oPdfFontInfo["right"] = s.GetULong();
+                    break;
+                }
+                case 4:
+                {
+                    oPdfFontInfo["gids"] = s.GetString2();
+                    break;
+                }
+                case 5:
+                {
+                    oPdfFontInfo["lefts"] = s.GetString2();
+                    break;
+                }
+            }
+        }
+
+        s.Seek2(_end_rec);
+        return oPdfFontInfo;
+    };
 
 	this.CorrectHyperlink = function (hyper) {
 		if (hyper.action == null || hyper.action == "") {
@@ -10408,8 +10461,13 @@ function BinaryPPTYLoader()
                                 {
                                     var _rec = s.GetUChar();
 
+                                    // for pdf only
+                                    let oPdfFontInfo;
+
                                     if (0 == _rec)
                                         _run = this.ReadRunProperties();
+                                    else if (111 == _rec)
+                                        oPdfFontInfo = this.ReadPdfRunFontInfo();
                                     else
                                         s.SkipRecord();
                                 }
