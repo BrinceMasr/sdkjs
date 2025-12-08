@@ -2124,6 +2124,79 @@ ParaRun.prototype.AddText = function(sString, nPos)
 	}
 	return nCharPos;
 };
+ParaRun.prototype.AddPdfOriginText = function(sString, aWidths, nPos)
+{
+	var nCharPos = undefined !== nPos && null !== nPos && -1 !== nPos ? nPos : this.Content.length;
+
+	let oForm     = this.GetParentForm();
+	var oTextForm = oForm ? oForm.GetTextFormPr() : null;
+	var nMax      = oTextForm ? oTextForm.GetMaxCharacters() : 0;
+
+	if (this.IsMathRun())
+	{
+		for (var oIterator = sString.getUnicodeIterator(); oIterator.check(); oIterator.next())
+		{
+			var nCharCode = oIterator.value();
+
+			var oMathText = new CMathText();
+			oMathText.add(nCharCode);
+			this.AddToContent(nCharPos++, oMathText);
+		}
+	}
+	else if (nMax > 0)
+	{
+		var arrLetters = [], nLettersCount = 0;
+		for (var oIterator = sString.getUnicodeIterator(); oIterator.check(); oIterator.next())
+		{
+			var nCharCode = oIterator.value();
+
+			if (9 === nCharCode) // \t
+				continue;
+			else if (10 === nCharCode) // \n
+				continue;
+			else if (13 === nCharCode) // \r
+				continue;
+			else if (AscCommon.IsSpace(nCharCode)) // space
+			{
+				nLettersCount++;
+				// arrLetters.push(new AscWord.CRunSpace(nCharCode));
+				arrLetters.push(new AscWord.CPdfRunText(nCharCode, aWidths[oIterator.position()]));
+			}
+			else
+			{
+				nLettersCount++;
+				arrLetters.push(new AscWord.CPdfRunText(nCharCode, aWidths[oIterator.position()]));
+			}
+		}
+
+		for (var nIndex = 0; nIndex < arrLetters.length; ++nIndex)
+		{
+			this.AddToContent(nCharPos++, arrLetters[nIndex], true);
+		}
+
+		oForm.TrimTextForm();
+	}
+	else
+	{
+		for (var oIterator = sString.getUnicodeIterator(); oIterator.check(); oIterator.next())
+		{
+			var nCharCode = oIterator.value();
+
+			if (9 === nCharCode) // \t
+				this.AddToContent(nCharPos++, new AscWord.CRunTab(), true);
+			else if (10 === nCharCode) // \n
+				this.AddToContent(nCharPos++, new AscWord.CRunBreak(AscWord.break_Line), true);
+			else if (13 === nCharCode) // \r
+				continue;
+			else if (AscCommon.IsSpace(nCharCode)) // space
+				// this.AddToContent(nCharPos++, new AscWord.CRunSpace(nCharCode), true);
+				this.AddToContent(nCharPos++, new AscWord.CPdfRunText(nCharCode, aWidths[oIterator.position()]), true);
+			else
+				this.AddToContent(nCharPos++, new AscWord.CPdfRunText(nCharCode, aWidths[oIterator.position()]), true);
+		}
+	}
+	return nCharPos;
+};
 /**
  * Добавляем в конец рана заданную инструкцию для сложного поля
  * @param {string} sString

@@ -10520,7 +10520,21 @@ function BinaryPPTYLoader()
                                     }
                                 }
 
-                                new_run.AddText(_text);
+                                if (oPdfFontInfo) {
+                                    let aPoses = oPdfFontInfo.lefts.split(";").map(function(posX) {
+                                        return posX * g_dKoef_emu_to_mm;
+                                    });
+
+                                    let aWidths = [];
+                                    for (let i = 0; i < aPoses.length - 1; i++) {
+                                        aWidths.push(aPoses[i + 1] - aPoses[i]);
+                                    }
+
+                                    new_run.AddPdfOriginText(_text, aWidths);
+                                }
+                                else {
+                                    new_run.AddText(_text);
+                                }
 
                                 if (hyperlink !== null)
                                 {
