@@ -6628,6 +6628,254 @@ $(function () {
 		testArrayFormula2(assert, "LEN", 1, 1);
 	});
 
+	QUnit.test("Test: \"REGEXTEST\"", function (assert) {
+
+		ws.getRange2("A1:C214").cleanAll();
+		// Data for reference link. Use A100-A111
+		ws.getRange2("A100").setValue("0.5");
+		ws.getRange2("A101").setValue("1.5");
+		ws.getRange2("A104").setValue("-1");
+		// For area
+		ws.getRange2("A102").setValue("0.5");
+		ws.getRange2("A103").setValue("");
+		ws.getRange2("A105").setValue("1");
+		ws.getRange2("A110").setValue("TRUE");
+		ws.getRange2("A111").setValue("FALSE");
+
+		// Table type. Use A601:L6**
+		getTableType(599, 0, 600, 2);
+		ws.getRange2("A601").setValue("1"); // Number (Column1)
+		ws.getRange2("B601").setValue("1ssssss2"); // Text (Column2)
+		ws.getRange2("C601").setValue("[A-z]"); // Text (Column2)
+		// 3D links. Use A1:Z10
+		let ws2 = getSecondSheet();
+		ws2.getRange2("A1").setValue("1");
+		ws2.getRange2("A2").setValue("2");
+		ws2.getRange2("A3").setValue("Text");
+		ws2.getRange2("B1").setValue("3");
+		ws2.getRange2("B2").setValue("4");
+		ws2.getRange2("C1").setValue("1");
+		// DefNames.
+		initDefNames();
+		ws.getRange2("A201").setValue("-0.5"); // TestName
+		ws.getRange2("A202").setValue("0.5"); // TestName1
+		ws.getRange2("A203").setValue("10.5"); // TestName2
+		ws2.getRange2("A11").setValue("-0.5"); // TestName3D
+		ws.getRange2("A208").setValue("0.8"); // TestNameArea2
+		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
+		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
+		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
+
+		
+		// Positive cases:
+		// Case #0: String, String. Basic match, case-sensitive by default (0)
+		oParser = new parserFormula('REGEXTEST("Hello World","World")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("Hello World","World") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Positive case: String, String. Basic match, case-sensitive by default (0)');
+		// Case #1: String, String, Number. Case-insensitive match (1)
+		oParser = new parserFormula('REGEXTEST("Hello World","world",1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("Hello World","world",1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Positive case: String, String, Number. Case-insensitive match (1)');
+		// Case #2: String, String, Number. Upper case text, insensitive mode
+		oParser = new parserFormula('REGEXTEST("Hello World","WORLD",1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("Hello World","WORLD",1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Positive case: String, String, Number. Upper case text, insensitive mode');
+		// Case #3: String, String. Digits token \\d+ (case-sensitive default)
+		oParser = new parserFormula('REGEXTEST("abc123","\\\\d+")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("abc123","\\\\d+") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Positive case: String, String. Digits token \\d+ (case-sensitive default)');
+		// Case #4: String, String. Full email regex, anchors ^ and $
+		oParser = new parserFormula('REGEXTEST("test@example.com","^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\\\.[a-zA-Z]{2,}$")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("test@example.com","^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Positive case: String, String. Full email regex, anchors ^ and $');
+		// Case #5: String, String, Number. Unicode (é), case-insensitive
+		oParser = new parserFormula('REGEXTEST("Café","cafe",1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("Café","cafe",1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Positive case: String, String, Number. Unicode (é), case-insensitive');
+		// Case #6: String, String. Digits inside longer text
+		oParser = new parserFormula('REGEXTEST("price: 100$","\\\\d+")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("price: 100$","\\\\d+") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Positive case: String, String. Digits inside longer text');
+		// Case #7: String, String, Number. Character class [a-z] case-sensitive
+		oParser = new parserFormula('REGEXTEST("ABCdef","[a-z]+",0)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("ABCdef","[a-z]+",0) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Positive case: String, String, Number. Character class [a-z] case-sensitive');
+		// Case #8: String, String. Zero or more quantifier *
+		oParser = new parserFormula('REGEXTEST("aaa","a*")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("aaa","a*") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Positive case: String, String. Zero or more quantifier *');
+		// Case #9: String, String. One or more quantifier +
+		oParser = new parserFormula('REGEXTEST("aaa","a+")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("aaa","a+") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Positive case: String, String. One or more quantifier +');
+		// Case #10: String, String. Dot matches any character
+		oParser = new parserFormula('REGEXTEST("any.char.here",".")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("any.char.here",".") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Positive case: String, String. Dot matches any character');
+		// Case #11: Formula, Formula. Nested formulas
+		oParser = new parserFormula('REGEXTEST(CONCAT("Test","123"),"[0-9]+")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST(CONCAT("Test","123"),"[0-9]+") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Positive case: Formula, Formula. Nested formulas');
+		// Case #12: Reference link, Reference link, Number. All arguments via cell references
+		oParser = new parserFormula('REGEXTEST(A100,A101,1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST(A100,A101,1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Positive case: Reference link, Reference link, Number. All arguments via cell references');
+		// Case #13: Area, Area, Number. Single-cell ranges
+		oParser = new parserFormula('REGEXTEST(A102:A102,A103:A103,1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST(A102:A102,A103:A103,1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Positive case: Area, Area, Number. Single-cell ranges');
+		// Case #14: Array, Array. Array input returns array result
+		oParser = new parserFormula('REGEXTEST({"Hello","Bye"},"^H")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST({"Hello","Bye"},"^H") is parsed.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'TRUE', 'Test: Positive case: Array, Array. Array input returns array result');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,1).getValue(), 'FALSE', 'Test: Positive case: Array, Array. Array input returns array result');
+		// Case #15: Name, Name, Number. Named ranges
+		oParser = new parserFormula('REGEXTEST(TestName,TestName1,1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST(TestName,TestName1,1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Positive case: Name, Name, Number. Named ranges');
+		// Case #16: Name3D, Name3D. 3D named ranges
+		oParser = new parserFormula('REGEXTEST(TestName3D,TestName3D)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST(TestName3D,TestName3D) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Positive case: Name3D, Name3D. 3D named ranges');
+		// Case #17: Ref3D, Ref3D, Number. 3D references
+		oParser = new parserFormula('REGEXTEST(Sheet2!A1,Sheet2!A2,0)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST(Sheet2!A1,Sheet2!A2,0) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Positive case: Ref3D, Ref3D, Number. 3D references');
+		// Case #18: Area3D, Area3D. 3D single-cell ranges
+		oParser = new parserFormula('REGEXTEST(Sheet2!A3:A3,Sheet2!A4:A4)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST(Sheet2!A3:A3,Sheet2!A4:A4) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Positive case: Area3D, Area3D. 3D single-cell ranges');
+		// Case #19: Table. Structured table references
+		oParser = new parserFormula('REGEXTEST(Table1[Column2],Table1[Column3])', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST(Table1[Column2],Table1[Column3]) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Positive case: Table. Structured table references');
+		// Case #20: Formula. REGEXTEST inside another formula (OR)
+		oParser = new parserFormula('OR(REGEXTEST("abc123","\\\\d+"),FALSE)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: OR(REGEXTEST("abc123","\\\\d+"),FALSE) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Positive case: Formula. REGEXTEST inside another formula (OR)');
+		// Case #21: String, String, Boolean. case_sensitivity as boolean TRUE ? 1
+		oParser = new parserFormula('REGEXTEST("Test","test",TRUE)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("Test","test",TRUE) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Positive case: String, String, Boolean. case_sensitivity as boolean TRUE ? 1');
+		// Case #22: String, String, String. case_sensitivity as text "1"
+		oParser = new parserFormula('REGEXTEST("Test","test","1")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("Test","test","1") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Positive case: String, String, String. case_sensitivity as text "1"');
+		// Case #23: String, String, Empty. Optional argument omitted ? default 0 (case-sensitive)
+		oParser = new parserFormula('REGEXTEST("Hello World","world",)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("Hello World","world",) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Positive case: String, String, Empty. Optional argument omitted ? default 0 (case-sensitive)');
+		// Case #24: Empty, Empty. Optional argument omitted ? default 0 (case-sensitive)
+		oParser = new parserFormula('REGEXTEST(,)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST(,) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Positive case: Empty, Empty. Optional argument omitted ? default 0 (case-sensitive)');
+
+		// Negative cases:
+		// Case #1: String, String. No match, case-sensitive ? FALSE (not error)
+		oParser = new parserFormula('REGEXTEST("Hello","world")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("Hello","world") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Negative case: String, String. No match, case-sensitive ? FALSE (not error)');
+		// Case #2: String, String. Invalid regex pattern (unclosed bracket) ? #VALUE!
+		oParser = new parserFormula('REGEXTEST("Hello World","[")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("Hello World","[") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, String. Invalid regex pattern (unclosed bracket) ? #VALUE!');
+		// Case #3: String, String. Unclosed parenthesis ? #VALUE!
+		oParser = new parserFormula('REGEXTEST("Hello","(unclosed")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("Hello","(unclosed") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, String. Unclosed parenthesis ? #VALUE!');
+		// Case #4: String, Empty. Empty pattern ? #VALUE!
+		oParser = new parserFormula('REGEXTEST("abc","")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("abc","") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Negative case: String, Empty. Empty pattern ? #VALUE!');
+		// Case #5: String, String, Number. case_sensitivity not 0/1 ? #VALUE!
+		oParser = new parserFormula('REGEXTEST("abc","def",99)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("abc","def",99) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, String, Number. case_sensitivity not 0/1 ? #VALUE!');
+		// Case #6: String, String, String. case_sensitivity non-numeric string ? #VALUE!
+		oParser = new parserFormula('REGEXTEST("abc","def","abc")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("abc","def","abc") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, String, String. case_sensitivity non-numeric string ? #VALUE!');
+		// Case #7: Error, String. Error in text ? propagates #N/A
+		oParser = new parserFormula('REGEXTEST(NA(),"abc")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST(NA(),"abc") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Error, String. Error in text ? propagates #N/A');
+		// Case #8: String, Error. Error in pattern ? #VALUE!
+		oParser = new parserFormula('REGEXTEST("abc",NA())', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("abc",NA()) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: String, Error. Error in pattern ? #VALUE!');
+		// Case #9: Area, String. Multi-cell range ? #VALUE!
+		oParser = new parserFormula('REGEXTEST(A104:A105,"abc")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST(A104:A105,"abc") is parsed.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'FALSE', 'Test: Negative case: Area, String. Multi-cell range ? #VALUE!');
+		// Case #10: String, String, Area. case_sensitivity as multi-cell range ? #VALUE!
+		oParser = new parserFormula('REGEXTEST("abc","abc",A106:A107)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("abc","abc",A106:A107) is parsed.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'TRUE', 'Test: Negative case: String, String, Area. case_sensitivity as multi-cell range ? #VALUE!');
+		// Case #11: Area3D, String. 3D multi-cell range ? #VALUE!
+		oParser = new parserFormula('REGEXTEST(Sheet2!A5:B5,"abc")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST(Sheet2!A5:B5,"abc") is parsed.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'FALSE', 'Test: Negative case: Area3D, String. 3D multi-cell range ? #VALUE!');
+		// Case #12: Table. Table with multiple rows/columns ? #VALUE!
+		oParser = new parserFormula('REGEXTEST(Table1[Column2],Table1[Column3],Table1[Column1])', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST(Table1[Column2],Table1[Column3],Table1[Column1]) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Negative case: Table. Table with multiple rows/columns ? #VALUE!');
+		// Case #13: String, String, Formula. case_sensitivity formula returns error ? #VALUE!
+		oParser = new parserFormula('REGEXTEST("abc","abc",IFERROR(1/0,2))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("abc","abc",IFERROR(1/0,2)) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, String, Formula. case_sensitivity formula returns error ? #VALUE!');
+		// Case #14: String, String. Multiline with ^$ ? FALSE (no /m flag)
+		oParser = new parserFormula('REGEXTEST("line1\nline2","^line2$",0)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("line1\nline2","^line2$",0) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Negative case: String, String. Multiline with ^$ ? FALSE (no /m flag)');
+		// Case #15: String, String, Number. Inline flag (?i) ignored when case_sensitivity=0 ? FALSE
+		oParser = new parserFormula('REGEXTEST("Hello","(?i)hello",0)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("Hello","(?i)hello",0) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Negative case: String, String, Number. Inline flag (?i) ignored when case_sensitivity=0 ? FALSE');
+		// Case #16: Empty, String. Empty text, non-empty pattern ? FALSE (no error)
+		oParser = new parserFormula('REGEXTEST("","abc")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("","abc") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Negative case: Empty, String. Empty text, non-empty pattern ? FALSE (no error)');
+		// Case #17: String, String, Number. quantifier more than 65535 cause #VALUE!
+		// ?https://www.pcre.org/ 65535 - max 16 bit unsigned int
+		oParser = new parserFormula('REGEXTEST("abc","[a-z]{100000}")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("abc","[a-z]{100000}") is parsed.');
+		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, String, Number. uantifier more than 65535 cause #VALUE!');
+		// Case #18: Name, Name. Named range is multi-cell ? #VALUE!
+		oParser = new parserFormula('REGEXTEST(TestNameArea2,TestNamePattern)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST(TestNameArea2,TestNamePattern) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#NAME?', 'Test: Negative case: Name, Name. Named range is multi-cell ? #VALUE!');
+		// Case #19: Name3D. 3D named range is multi-cell ? #VALUE!
+		oParser = new parserFormula('REGEXTEST(TestNameArea3D2,TestNamePattern3D)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST(TestNameArea3D2,TestNamePattern3D) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#NAME?', 'Test: Negative case: Name3D. 3D named range is multi-cell ? #VALUE!');
+		// Case #20: String, String, Number. Invalid quantifier without preceding token ? #VALUE!
+		oParser = new parserFormula('REGEXTEST("abc","*")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("abc","*") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, String, Number. Invalid quantifier without preceding token ? #VALUE!');
+
+		// Bounded cases:
+		// Case #1: String, String. Very long string and exact pattern (near Excel limit)
+		oParser = new parserFormula('REGEXTEST(REPT("a",10000),"^a{10000}$")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST(REPT("a",10000),"^a{10000}$") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Bounded case: String, String. Very long string and exact pattern (near Excel limit)');
+		// Case #2: String, String. Empty string with empty-only pattern ? TRUE
+		oParser = new parserFormula('REGEXTEST("","^$")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("","^$") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Bounded case: String, String. Empty string with empty-only pattern ? TRUE');
+		// Case #3: String, String, Number. Minimal valid case-insensitive match
+		oParser = new parserFormula('REGEXTEST("A","a",1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("A","a",1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Bounded case: String, String, Number. Minimal valid case-insensitive match');
+		// Case #4: String, String. Unicode escape sequence (PCRE2 supports \u00A9)
+		oParser = new parserFormula('REGEXTEST("© Excel 2025","\\\\u00A9")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("© Excel 2025","\\\\u00A9") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Bounded case: String, String. Unicode escape sequence (PCRE2 supports \u00A9)');
+
+
+
+		testArrayFormula2(assert, "LEN", 1, 1);
+	});
+
 	QUnit.test("Test: \"SEARCH\"", function (assert) {
 		let array;
 

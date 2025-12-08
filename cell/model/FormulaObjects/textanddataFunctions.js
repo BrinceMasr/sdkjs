@@ -61,7 +61,7 @@ function (window, undefined) {
 	cFormulaFunctionGroup['TextAndData'] = cFormulaFunctionGroup['TextAndData'] || [];
 	cFormulaFunctionGroup['TextAndData'].push(cARRAYTOTEXT, cASC, cBAHTTEXT, cCHAR, cCLEAN, cCODE, cCONCATENATE, cCONCAT, cDOLLAR,
 		cEXACT, cFIND, cFINDB, cFIXED, cIMPORTRANGE, cJIS, cLEFT, cLEFTB, cLEN, cLENB, cLOWER, cMID, cMIDB, cNUMBERVALUE, cPHONETIC,
-		cPROPER, cREPLACE, cREPLACEB, cREPT, cRIGHT, cRIGHTB, cSEARCH, cSEARCHB, cSUBSTITUTE, cT, cTEXT, cTEXTJOIN,
+		cPROPER, cREPLACE, cREPLACEB, cREPT, cRIGHT, cRIGHTB, cREGEXTEST, cSEARCH, cSEARCHB, cSUBSTITUTE, cT, cTEXT, cTEXTJOIN,
 		cTRIM, cUNICHAR, cUNICODE, cUPPER, cVALUE, cTEXTBEFORE, cTEXTAFTER, cTEXTSPLIT);
 
 	cFormulaFunctionGroup['NotRealised'] = cFormulaFunctionGroup['NotRealised'] || [];
@@ -2022,6 +2022,211 @@ function (window, undefined) {
 	cRIGHTB.prototype.constructor = cRIGHTB;
 	cRIGHTB.prototype.name = 'RIGHTB';
 	cRIGHTB.prototype.argumentsType = [argType.text, argType.number];
+
+	/**
+	 * @constructor
+	 * @extends {AscCommonExcel.cBaseFunction}
+	 */
+	function cREGEXTEST() {
+	}
+
+	//***array-formula***
+	cREGEXTEST.prototype = Object.create(cBaseFunction.prototype);
+	cREGEXTEST.prototype.constructor = cREGEXTEST;
+	cREGEXTEST.prototype.name = 'REGEXTEST';
+	cREGEXTEST.prototype.argumentsMin = 2;
+	cREGEXTEST.prototype.argumentsMax = 3;
+	cREGEXTEST.prototype.arrayIndexes = {0: 1, 1: 1, 2: 1};
+	cREGEXTEST.prototype.argumentsType = [argType.text, argType.text, argType.number];
+	/**
+	 * Check whether any part of supplied text matches a regular expression ("regex"). 
+	 * It will return TRUE if there is a match and FALSE if there is not.
+	 * @private
+	 * @param {text} text - входные данные; приводятся к строке
+	 * @param {text} pattern - шаблон (без обрамляющих / /). Использует синтаксис регулярных выражений.
+	 * @param {number} [case_sensitivity=0] - 0: case-sensitive (default), 1: case-insensitive
+	 * @return {boolean} true, если есть совпадение; false — если нет
+	 */
+	cREGEXTEST.prototype.Calculate = function (arg) {
+
+		const regexTest = function(text, pattern, case_sensitivity = 0) {
+			if (text === pattern) {
+				return new cBool(true);
+			}
+
+			let str = text, res = false;
+			let flags = '';
+
+			if (case_sensitivity === 1) {
+				flags += 'i';
+			}
+
+			// TODO webapps
+			// попытка обработать простые inline-флаги в начале шаблона, например (?i) (?s) (?m)
+			let inlineFlagsMatch = pattern.match(/^\(\?([imsu]+)\)/i);
+			if (inlineFlagsMatch) {
+				let inline = inlineFlagsMatch[1].toLowerCase();
+				// inline-флаги в JS-флаги, если поддерживаются
+				for (const ch of inline) {
+					if (!flags.includes(ch)) flags += ch;
+				}
+				pattern = pattern.slice(inlineFlagsMatch[0].length);
+			}
+
+			// по умолчанию добавляю 'u' (unicode) — для совместимости с \p{...}
+			if (!flags.includes('u')) { 
+				flags += 'u';
+			}
+
+			let re;
+			// при вводе неправильных паттернов при создании объекта может выскакивать SyntaxError: invalid range in character class
+			// поэтому использую try catch
+			try {
+				re = new RegExp(pattern, flags);
+				res = re.test(str);
+			} catch (e) {
+				return new cError(cErrorType.wrong_value_type);
+			}
+
+			// re = new RegExp(pattern, flags);
+			// res = re.test(str);
+
+			return new cBool(res);
+		}
+
+		const getValue = function (arg, row, col) {
+			let val;
+			if (arg.type === cElementType.array || arg.type === cElementType.cellsRange || arg.type === cElementType.cellsRange3D) {
+				val = arg.getValue2(row, col);
+			} else {
+				val = arg;
+			}
+
+			return val;
+		}
+
+		const arrayHelper = function (text, pattern, caseSensitivity, maxArray) {
+			let resArr = new cArray();
+			let textVal, patternVal, caseSensitivityVal;
+
+			for (let row = 0; row < maxArray.row; row++) {
+				resArr.addRow();
+				for (let col = 0; col < maxArray.col; col++) {
+					textVal = getValue(text, row, col).tocString();
+					if (textVal.type === cElementType.error) {
+						return textVal;
+					}
+
+					patternVal = getValue(pattern, row, col).tocString();
+					if (patternVal.type === cElementType.error) {
+						return patternVal;
+					}
+
+					caseSensitivityVal = getValue(caseSensitivity, row, col).tocNumber();
+					if (caseSensitivityVal.type === cElementType.error) {
+						return caseSensitivityVal;
+					}
+
+					textVal = textVal.getValue();
+					patternVal = patternVal.getValue();
+					caseSensitivityVal = caseSensitivityVal.getValue();
+
+					if (caseSensitivityVal !== 0 && caseSensitivityVal !== 1) {
+						resArr.addElement(new cError(cErrorType.wrong_value_type));
+					} else {
+						let regTest = regexTest(textVal, patternVal, caseSensitivityVal);
+						resArr.addElement(regTest);
+					}
+
+				}
+			}
+
+			return resArr;
+		}
+
+		const t = this;
+		let text = arg[0], pattern = arg[1], caseSensitivity = arg[2] ? arg[2] : new cNumber(0);
+
+		let isArrayMethod = false;
+		let maxArray = {row: 1, col: 1};
+
+		if (text.type === cElementType.cellsRange || text.type === cElementType.cellsRange3D || text.type === cElementType.array) {
+			// text = text.cross(arguments[1]);
+
+			if (!text.isOneElement()) {
+				let textDimensions = text.getDimensions();
+
+				maxArray = {
+					row: textDimensions.row > maxArray.row ? textDimensions.row : maxArray.row, 
+					col: textDimensions.col > maxArray.col ? textDimensions.col : maxArray.col
+				}
+
+				isArrayMethod = true;
+			} else {
+				text = text.getFirstElement();
+			}
+		}
+
+		if (pattern.type === cElementType.cellsRange || pattern.type === cElementType.cellsRange3D || pattern.type === cElementType.array) {
+			// arg1 = arg1.cross(arguments[1]);
+			
+			if (!pattern.isOneElement()) {
+				let patternDimensions = pattern.getDimensions();
+
+				maxArray = {
+					row: patternDimensions.row > maxArray.row ? patternDimensions.row : maxArray.row, 
+					col: patternDimensions.col > maxArray.col ? patternDimensions.col : maxArray.col
+				}
+
+				isArrayMethod = true;
+			} else {
+				pattern = pattern.getFirstElement();
+			}
+		}
+
+		if (caseSensitivity.type === cElementType.cellsRange || caseSensitivity.type === cElementType.cellsRange3D || caseSensitivity.type === cElementType.array) {
+			// arg2 = arg2.cross(arguments[1]);
+			
+			if (!caseSensitivity.isOneElement()) {
+				let caseSensitivityDimensions = caseSensitivity.getDimensions();
+
+				maxArray = {
+					row: caseSensitivityDimensions.row > maxArray.row ? caseSensitivityDimensions.row : maxArray.row, 
+					col: caseSensitivityDimensions.col > maxArray.col ? caseSensitivityDimensions.col : maxArray.col
+				}
+
+				isArrayMethod = true;
+			} else {
+				caseSensitivity = caseSensitivity.getFirstElement();
+			}
+		}
+
+		// One of the argument is array/area
+		if (isArrayMethod) {
+			return arrayHelper(text, pattern, caseSensitivity, maxArray);
+		}
+
+		text = text.tocString();
+		pattern = pattern.tocString();
+		caseSensitivity = caseSensitivity.tocNumber();
+
+		if (text.type === cElementType.error) {
+			return text;
+		}
+		if (pattern.type === cElementType.error) {
+			return pattern;
+		}
+		if (caseSensitivity.type === cElementType.error) {
+			return caseSensitivity;
+		}
+
+		let caseSensitivityVal = caseSensitivity.getValue();
+		if (caseSensitivityVal !== 0 && caseSensitivityVal !== 1) {
+			return new cError(cErrorType.wrong_value_type);
+		}
+
+		return regexTest(text.getValue(), pattern.getValue(), caseSensitivityVal);
+	};
 
 	/**
 	 * @constructor
