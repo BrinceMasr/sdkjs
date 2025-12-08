@@ -9181,32 +9181,32 @@ function BinaryPPTYLoader()
             {
                 case 0:
                 {
-                    oPdfFontInfo["name"] = s.GetString2();
+                    oPdfFontInfo.name = s.GetString2();
                     break;
                 }
                 case 1:
                 {
-                    oPdfFontInfo["index"] = s.GetLong();
+                    oPdfFontInfo.index = s.GetLong();
                     break;
                 }
                 case 2:
                 {
-                    oPdfFontInfo["left"] = s.GetULong();
+                    oPdfFontInfo.left = s.GetULong();
                     break;
                 }
                 case 3:
                 {
-                    oPdfFontInfo["right"] = s.GetULong();
+                    oPdfFontInfo.right = s.GetULong();
                     break;
                 }
                 case 4:
                 {
-                    oPdfFontInfo["gids"] = s.GetString2();
+                    oPdfFontInfo.gids = s.GetString2();
                     break;
                 }
                 case 5:
                 {
-                    oPdfFontInfo["lefts"] = s.GetString2();
+                    oPdfFontInfo.lefts = s.GetString2();
                     break;
                 }
             }
@@ -10457,12 +10457,13 @@ function BinaryPPTYLoader()
                                 }
 
                                 var _run = null;
+
+                                // for pdf only
+                                let oPdfFontInfo;
+
                                 while (s.cur < _end)
                                 {
                                     var _rec = s.GetUChar();
-
-                                    // for pdf only
-                                    let oPdfFontInfo;
 
                                     if (0 == _rec)
                                         _run = this.ReadRunProperties();
@@ -10470,6 +10471,10 @@ function BinaryPPTYLoader()
                                         oPdfFontInfo = this.ReadPdfRunFontInfo();
                                     else
                                         s.SkipRecord();
+                                }
+
+                                if (oPdfFontInfo && _run) {
+                                    _run.RFonts.SetAll(AscFonts.getEmbeddedFontPrefix() + oPdfFontInfo.name, -1);
                                 }
 
                                 s.Seek2(_end);
