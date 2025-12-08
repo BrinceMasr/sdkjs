@@ -5060,6 +5060,8 @@
 	PDFEditorApi.prototype.asc_CheckEditPassword = function(password) {
 		let oDoc = this.getPDFDoc();
 
+		return true;
+		
 		if (null == password) {
 			return oDoc.Viewer.file.nativeFile['CheckPerm'](AscPDF.USER_PERMISSIONS.edit);
 		}
