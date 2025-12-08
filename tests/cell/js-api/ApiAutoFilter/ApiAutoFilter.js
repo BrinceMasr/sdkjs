@@ -182,11 +182,11 @@ $(function () {
             range.SetAutoFilter(1, ">3", "xlOr", "<=5");
 
             let f = ws.AutoFilter.Filters;
-            assert.equal(f.length, 1);
+            assert.equal(f.length, 1, "One filter created");
             assert.equal(f[0].Operator, "xlOr");
             assert.equal(f[0].Criteria1, ">3");
             assert.equal(f[0].Criteria2, "<=5");
-            assert.equal(f[0].On, true);
+            assert.equal(f[0].On, true, "Filter is on, i.e. applied");
         });
 
         QUnit.test("Custom filter xlAnd", function (assert) {
@@ -197,11 +197,11 @@ $(function () {
             range.SetAutoFilter(1, ">=2", "xlAnd", "<8");
 
             let f = ws.AutoFilter.Filters;
-            assert.equal(f.length, 1);
+            assert.equal(f.length, 1, "One filter created");
             assert.equal(f[0].Operator, "xlAnd");
             assert.equal(f[0].Criteria1, ">=2");
             assert.equal(f[0].Criteria2, "<8");
-            assert.equal(f[0].On, true);
+            assert.equal(f[0].On, true, "Filter is on, i.e. applied");
         });
 
         QUnit.test("Top10 items filter", function (assert) {
@@ -212,11 +212,11 @@ $(function () {
             range.SetAutoFilter(1, "3", "xlTop10Items");
 
             let f = ws.AutoFilter.Filters;
-            assert.equal(f.length, 1);
+            assert.equal(f.length, 1, "One filter created");
             assert.equal(f[0].Operator, "xlTop10Items");
             assert.equal(f[0].Criteria1, 3, "Criteria1 returns numeric Val");
-            assert.equal(f[0].Criteria2, null);
-            assert.equal(f[0].On, true);
+            assert.equal(f[0].Criteria2, null, "Criteria2 should be null");
+            assert.equal(f[0].On, true, "Filter is on");
         });
 
         QUnit.test("Bottom10 percent filter", function (assert) {
@@ -227,10 +227,10 @@ $(function () {
             range.SetAutoFilter(1, "50", "xlBottom10Percent");
 
             let f = ws.AutoFilter.Filters;
-            assert.equal(f.length, 1);
+            assert.equal(f.length, 1, "One filter created");
             assert.equal(f[0].Operator, "xlBottom10Percent");
-            assert.equal(f[0].Criteria1, 50);
-            assert.equal(f[0].On, true);
+            assert.equal(f[0].Criteria1, 50, "Criteria1 returns numeric Val");
+            assert.equal(f[0].On, true, "Filter is on");
         });
 
         QUnit.test("Dynamic filter AboveAverage", function (assert) {
@@ -241,11 +241,11 @@ $(function () {
             range.SetAutoFilter(1, "xlFilterAboveAverage", "xlFilterDynamic");
 
             let f = ws.AutoFilter.Filters;
-            assert.equal(f.length, 1);
+            assert.equal(f.length, 1, "One filter created");
             assert.equal(f[0].Operator, "xlFilterDynamic");
             assert.equal(f[0].Criteria1, "xlFilterAboveAverage");
-            assert.equal(f[0].Criteria2, null);
-            assert.equal(f[0].On, true);
+            assert.equal(f[0].Criteria2, null, "Criteria2 should be null");
+            assert.equal(f[0].On, true, "Filter is on");
         });
 
         QUnit.test("Color filter CellColor (Criteria1 null by API)", function (assert) {
@@ -261,11 +261,11 @@ $(function () {
             range.SetAutoFilter(1, api.CreateColorFromRGB(255, 255, 0), "xlFilterCellColor");
 
             let f = ws.AutoFilter.Filters;
-            assert.equal(f.length, 1);
+            assert.equal(f.length, 1, "One filter created");
             assert.equal(f[0].Operator, "xlFilterCellColor");
             assert.equal(f[0].Criteria1, null, "Criteria1 is null for color filters");
-            assert.equal(f[0].Criteria2, null);
-            assert.equal(f[0].On, true);
+            assert.equal(f[0].Criteria2, null, "Criteria2 is null for color filters");
+            assert.equal(f[0].On, true, "Filter is on");
         });
 
         QUnit.test("Clear specific column filter when Criteria1 is null", function (assert) {
@@ -300,8 +300,115 @@ $(function () {
             range.SetAutoFilter(3, ">1", "xlOr"); // invalid: field > columns count
 
             assert.equal(ws.AutoFilter.FilterMode, false, "AutoFilter not added");
-            assert.equal(ws.AutoFilter.Filters.length, 0);
+            assert.equal(ws.AutoFilter.Filters.length, 0, "No filters created");
         });
 
     });
+
+    QUnit.test("ApplyFilter does not call asc_reapplyAutoFilter when FilterMode is false", function (assert) {
+        initializeTest();
+
+        let apiCore = ws.worksheet.workbook.oApi;
+        let called = 0;
+        let lastArg = undefined;
+        let oldFn = apiCore.asc_reapplyAutoFilter;
+
+        apiCore.asc_reapplyAutoFilter = function (arg) {
+            called++;
+            lastArg = arg;
+        };
+
+        try {
+            // No AutoFilter set -> FilterMode should be false
+            assert.equal(ws.AutoFilter.FilterMode, false, "FilterMode is false before ApplyFilter");
+
+            ws.AutoFilter.ApplyFilter();
+
+            assert.equal(called, 0, "asc_reapplyAutoFilter was not called");
+            assert.strictEqual(lastArg, undefined, "No argument was passed");
+        } finally {
+            apiCore.asc_reapplyAutoFilter = oldFn;
+        }
+    });
+
+    QUnit.test("ApplyFilter calls asc_reapplyAutoFilter(null) when FilterMode is true", function (assert) {
+        initializeTest();
+
+        // Prepare some data and set an AutoFilter
+        [10, 20, 30].forEach((v, i) => theRange("A" + (i + 1)).SetValue(v));
+        let range = ws.GetRange("A1:A10");
+        range.SetAutoFilter(1, ">15", "xlOr"); // any valid filter
+
+        assert.equal(ws.AutoFilter.FilterMode, true, "FilterMode is true after SetAutoFilter");
+
+        let apiCore = ws.worksheet.workbook.oApi;
+        let called = 0;
+        let lastArg = undefined;
+        let oldFn = apiCore.asc_reapplyAutoFilter;
+
+        apiCore.asc_reapplyAutoFilter = function (arg) {
+            called++;
+            lastArg = arg;
+        };
+
+        try {
+            ws.AutoFilter.ApplyFilter();
+
+            assert.equal(called, 1, "asc_reapplyAutoFilter called once");
+            assert.strictEqual(lastArg, null, "asc_reapplyAutoFilter called with null argument");
+        } finally {
+            apiCore.asc_reapplyAutoFilter = oldFn;
+        }
+    });
+
+    QUnit.test("ShowAllData does not call asc_showRows when FilterMode is false", function (assert) {
+        initializeTest();
+
+        let apiCore = ws.worksheet.workbook.oApi;
+        let called = 0;
+        let oldFn = apiCore.asc_showRows;
+
+        apiCore.asc_showRows = function () {
+            called++;
+        };
+
+        try {
+            // No AutoFilter set -> FilterMode should be false
+            assert.equal(ws.AutoFilter.FilterMode, false, "FilterMode is false before ShowAllData");
+
+            ws.AutoFilter.ShowAllData();
+
+            assert.equal(called, 0, "asc_showRows was not called");
+        } finally {
+            apiCore.asc_showRows = oldFn;
+        }
+    });
+
+    QUnit.test("ShowAllData calls asc_showRows when FilterMode is true", function (assert) {
+        initializeTest();
+
+        // Prepare some data and set an AutoFilter
+        [1, 2, 3, 4, 5].forEach((v, i) => theRange("A" + (i + 1)).SetValue(v));
+        let range = ws.GetRange("A1:A10");
+        range.SetAutoFilter(1, ">2", "xlOr");
+
+        assert.equal(ws.AutoFilter.FilterMode, true, "FilterMode is true after SetAutoFilter");
+
+        let apiCore = ws.worksheet.workbook.oApi;
+        let called = 0;
+        let oldFn = apiCore.asc_showRows;
+
+        apiCore.asc_showRows = function () {
+            called++;
+        };
+
+        try {
+            ws.AutoFilter.ShowAllData();
+
+            assert.equal(called, 1, "asc_showRows called once");
+        } finally {
+            apiCore.asc_showRows = oldFn;
+        }
+    });
+
 });
