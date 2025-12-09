@@ -6836,10 +6836,10 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: REGEXTEST("","abc") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Negative case: Empty, String. Empty text, non-empty pattern ? FALSE (no error)');
 		// Case #17: String, String, Number. quantifier more than 65535 cause #VALUE!
-		// ?https://www.pcre.org/ 65535 - max 16 bit unsigned int
+		// 65535 - max 16 bit unsigned int
 		oParser = new parserFormula('REGEXTEST("abc","[a-z]{100000}")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: REGEXTEST("abc","[a-z]{100000}") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, String, Number. uantifier more than 65535 cause #VALUE!');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, String, Number. uantifier more than 65535 cause #VALUE!');
 		// Case #18: Name, Name. Named range is multi-cell ? #VALUE!
 		oParser = new parserFormula('REGEXTEST(TestNameArea2,TestNamePattern)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: REGEXTEST(TestNameArea2,TestNamePattern) is parsed.');
@@ -6852,6 +6852,19 @@ $(function () {
 		oParser = new parserFormula('REGEXTEST("abc","*")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: REGEXTEST("abc","*") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, String, Number. Invalid quantifier without preceding token ? #VALUE!');
+		// Case #21: String, String, Number. Quantifier equal 65535 cause result
+		oParser = new parserFormula('REGEXTEST("abc","[a-z]{65535}")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("abc","[a-z]{65535}") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Negative case: String, String, Number. Quantifier equal 65535 cause result');
+		// Case #22: String, String, Number. Invalid quantifier when m > n cause #VALUE!
+		oParser = new parserFormula('REGEXTEST("abc","[a-z]{2,1}")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("abc","[a-z]{2,1}") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, String, Number. Invalid quantifier when m > n cause #VALUE!');
+		// Case #23: String, String, Number. Quantifier when m is empty cause result
+		oParser = new parserFormula('REGEXTEST("abc","[a-z]{2,}")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXTEST("abc","[a-z]{2,}") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Negative case: String, String, Number. Quantifier when m is empty cause result');
+
 
 		// Bounded cases:
 		// Case #1: String, String. Very long string and exact pattern (near Excel limit)

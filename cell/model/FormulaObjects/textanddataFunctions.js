@@ -67,6 +67,8 @@ function (window, undefined) {
 	cFormulaFunctionGroup['NotRealised'] = cFormulaFunctionGroup['NotRealised'] || [];
 	cFormulaFunctionGroup['NotRealised'].push(cBAHTTEXT, cJIS, cPHONETIC);
 
+	const MAX_UNSIGNED_INT_16 = 65535;
+
 	function calcBeforeAfterText(arg, arg1, isAfter) {
 		let newArgs = cBaseFunction.prototype._prepareArguments.call(this, arg, arg1, null, null, true).args;
 		let text = newArgs[0];
@@ -2042,15 +2044,40 @@ function (window, undefined) {
 	 * Check whether any part of supplied text matches a regular expression ("regex"). 
 	 * It will return TRUE if there is a match and FALSE if there is not.
 	 * @private
-	 * @param {text} text - входные данные; приводятся к строке
-	 * @param {text} pattern - шаблон (без обрамляющих / /). Использует синтаксис регулярных выражений.
+	 * @param {text} text - input text to test by pattern
+	 * @param {text} pattern - template (without framing / /). Uses regular expression syntax.
 	 * @param {number} [case_sensitivity=0] - 0: case-sensitive (default), 1: case-insensitive
-	 * @return {boolean} true, если есть совпадение; false — если нет
+	 * @return {boolean} true if there is a match by test, false - if not
 	 */
 	cREGEXTEST.prototype.Calculate = function (arg) {
 
+		// https://www.pcre.org/
+		const checkPCRE2Limits = function(pattern) {
+			if (!pattern) {
+				return true;
+			}
+
+			// looking for the {123}, {123,123}, {123,} pattern
+			const quantRe = /\{(\d+)(?:,(\d*))?\}/g;
+			let match;
+
+			while ((match = quantRe.exec(pattern)) !== null) {
+				let n1 = parseInt(match[1], 10);
+				let n2 = match[2] ? parseInt(match[2], 10) : null;
+
+				// PCRE2 16 bit limitation
+				// check {n,m} — n <= m
+				if (n1 > MAX_UNSIGNED_INT_16 || (n2 !== null && n2 > MAX_UNSIGNED_INT_16) || n2 !== null && n1 > n2) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+
 		const regexTest = function(text, pattern, case_sensitivity = 0) {
-			if (text === pattern) {
+			if (text === pattern || pattern === "") {
 				return new cBool(true);
 			}
 
@@ -2061,35 +2088,36 @@ function (window, undefined) {
 				flags += 'i';
 			}
 
-			// TODO webapps
-			// попытка обработать простые inline-флаги в начале шаблона, например (?i) (?s) (?m)
+			// attempt to process simple inline flags at the beginning of the template, for example (?i) (?s) (?m)
 			let inlineFlagsMatch = pattern.match(/^\(\?([imsu]+)\)/i);
 			if (inlineFlagsMatch) {
 				let inline = inlineFlagsMatch[1].toLowerCase();
-				// inline-флаги в JS-флаги, если поддерживаются
+				// inline flags to JS flags, if supported
 				for (const ch of inline) {
 					if (!flags.includes(ch)) flags += ch;
 				}
 				pattern = pattern.slice(inlineFlagsMatch[0].length);
 			}
 
-			// по умолчанию добавляю 'u' (unicode) — для совместимости с \p{...}
+			// by default I add 'u' (unicode) - for compatibility with \p{...}
 			if (!flags.includes('u')) { 
 				flags += 'u';
 			}
 
+			let limitError = checkPCRE2Limits(pattern);
+			if (limitError) {
+				return new cError(cErrorType.wrong_value_type);
+			}
+
 			let re;
-			// при вводе неправильных паттернов при создании объекта может выскакивать SyntaxError: invalid range in character class
-			// поэтому использую try catch
+			// when entering incorrect patterns when creating an object, SyntaxError: invalid range in character class may appear
+			// so we use try catch
 			try {
 				re = new RegExp(pattern, flags);
 				res = re.test(str);
 			} catch (e) {
 				return new cError(cErrorType.wrong_value_type);
 			}
-
-			// re = new RegExp(pattern, flags);
-			// res = re.test(str);
 
 			return new cBool(res);
 		}
@@ -2151,7 +2179,6 @@ function (window, undefined) {
 		let maxArray = {row: 1, col: 1};
 
 		if (text.type === cElementType.cellsRange || text.type === cElementType.cellsRange3D || text.type === cElementType.array) {
-			// text = text.cross(arguments[1]);
 
 			if (!text.isOneElement()) {
 				let textDimensions = text.getDimensions();
@@ -2168,7 +2195,6 @@ function (window, undefined) {
 		}
 
 		if (pattern.type === cElementType.cellsRange || pattern.type === cElementType.cellsRange3D || pattern.type === cElementType.array) {
-			// arg1 = arg1.cross(arguments[1]);
 			
 			if (!pattern.isOneElement()) {
 				let patternDimensions = pattern.getDimensions();
@@ -2185,7 +2211,6 @@ function (window, undefined) {
 		}
 
 		if (caseSensitivity.type === cElementType.cellsRange || caseSensitivity.type === cElementType.cellsRange3D || caseSensitivity.type === cElementType.array) {
-			// arg2 = arg2.cross(arguments[1]);
 			
 			if (!caseSensitivity.isOneElement()) {
 				let caseSensitivityDimensions = caseSensitivity.getDimensions();
