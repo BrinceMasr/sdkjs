@@ -11800,11 +11800,6 @@
 		return res;
 	};
 
-    /**
-     * Map Asc custom filter operator enum -> textual operator used in Criteria strings.
-     * @param {number} op
-     * @returns {string} one of "=", "<>", "<", "<=", ">", ">=" or "" (fallback)
-     */
     function _ascCustomOpToSign(op) {
         var c = Asc.c_oAscCustomAutoFilter;
         switch (op) {
@@ -11818,12 +11813,6 @@
         }
     }
 
-    /**
-     * Map Asc dynamic filter type -> XlDynamicFilterCriteria string.
-     * (used when filter.DynamicFilter is present)
-     * @param {number} type
-     * @returns {XlDynamicFilterCriteria | null}
-     */
     function _dynamicTypeToCriteria(type) {
         var d = Asc.c_oAscDynamicAutoFilter;
         switch (type) {
@@ -12182,11 +12171,11 @@
 		// 	test.SetAutoFilter(1, "xlFilterAboveAverage", "xlFilterDynamic");
 		// })();
 
-        // case when filter values array lenght 2 or less
 		if (!this._checkProtection()) {
 			return null;
 		}
 
+        // case when filter values array lenght 2 or less
 		if (Operator === "xlFilterValues" &&  Array.isArray(Criteria1) && Criteria1.length && Criteria1.length <= 2 && Criteria1[0] !== null && Criteria1[0] !== undefined) {
             if (Criteria1.length === 2 && Criteria1[1] !== null && Criteria1[1] !== undefined) {
                 Criteria2 = Criteria1[1].toString();
@@ -12367,7 +12356,6 @@
 		//apply filtering
 		let isAutoFilter = this.range.worksheet && this.range.worksheet.AutoFilter && this.range.worksheet.AutoFilter.Ref.intersection(this.range.bbox);
 		let autoFilterOptions;
-
 		if (isAutoFilter) {
 			switch (Operator) {
 				case "xlOr":
@@ -12406,7 +12394,6 @@
 						autoFilterOptions = new Asc.AutoFiltersOptions();
 						createTop10Filter(autoFilterOptions, top10Num, "xlTop10Percent" === Operator || "xlBottom10Percent" === Operator,
 							"xlBottom10Items" === Operator || "xlBottom10Percent" === Operator, null);
-						
 					} else {
 						private_MakeError('Error! Criteria1 must be between 1 and 500!');
 						return false;
@@ -12447,6 +12434,7 @@
 			}
 		}
 	};
+
 	/**
 	 * Sets an array formula to the current range.
 	 * @memberof ApiRange

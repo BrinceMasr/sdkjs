@@ -17630,7 +17630,7 @@ function isAllowPasteLink(pastedWb) {
 					minUpdateIndex = checkRange.r1;
 					doMultiRanges( function (start, end, updateRange) {
 						t.model.setRowHidden(true, start, end);
-						// t.model.autoFilters.reDrawFilter(updateRange ? updateRange : arn);
+						t.model.autoFilters.reDrawFilter(updateRange ? updateRange : arn);
 					}, arn.r1, arn.r2);
 
 					//TODO _updateRowGroups нужно перенести в onChangeWorksheetCallback с соответсвующим флагом обновления
