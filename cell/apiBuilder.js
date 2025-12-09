@@ -27006,7 +27006,10 @@
      */
     ApiAutoFilter.prototype.ShowAllData = function () {
         if (this.GetFilterMode()) {
-            this.ws.worksheet.workbook.oApi.asc_showRows();
+            const localWs = this.ws.worksheet;
+            var bbox = localWs.AutoFilter.Ref;
+            localWs.autoFilters.deleteAutoFilter(bbox);
+            localWs.autoFilters.addAutoFilter(null, bbox);
         }
     };
 
