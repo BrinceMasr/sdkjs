@@ -26987,7 +26987,10 @@
      */
     ApiAutoFilter.prototype.ApplyFilter = function () {
         if (this.GetFilterMode()) {
-            this.ws.worksheet.workbook.oApi.asc_reapplyAutoFilter(null);
+            const Id = this.ws.worksheet.Id;
+            if (Id) {
+                this.ws.worksheet.workbook.oApi.asc_reapplyAutoFilter(null, Id);
+            }
         }
     };
 
@@ -27006,10 +27009,14 @@
      */
     ApiAutoFilter.prototype.ShowAllData = function () {
         if (this.GetFilterMode()) {
-            const localWs = this.ws.worksheet;
-            var bbox = localWs.AutoFilter.Ref;
-            localWs.autoFilters.deleteAutoFilter(bbox);
-            localWs.autoFilters.addAutoFilter(null, bbox);
+            // const localWs = this.ws.worksheet;
+            // var bbox = localWs.AutoFilter.Ref;
+            // localWs.autoFilters.deleteAutoFilter(bbox);
+            // localWs.autoFilters.addAutoFilter(null, bbox);
+            const Id = this.ws.worksheet.Id;
+            if (Id) {
+                this.ws.worksheet.workbook.oApi.asc_clearFilter(Id);
+            }
         }
     };
 
