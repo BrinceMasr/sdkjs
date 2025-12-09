@@ -2159,8 +2159,7 @@ ParaRun.prototype.AddPdfOriginText = function(sString, aWidths, nPos)
 			else if (AscCommon.IsSpace(nCharCode)) // space
 			{
 				nLettersCount++;
-				// arrLetters.push(new AscWord.CRunSpace(nCharCode));
-				arrLetters.push(new AscWord.CPdfRunText(nCharCode, aWidths[oIterator.position()]));
+				arrLetters.push(new AscWord.CPdfRunSpace(nCharCode, aWidths[oIterator.position()]));
 			}
 			else
 			{
@@ -2189,8 +2188,7 @@ ParaRun.prototype.AddPdfOriginText = function(sString, aWidths, nPos)
 			else if (13 === nCharCode) // \r
 				continue;
 			else if (AscCommon.IsSpace(nCharCode)) // space
-				// this.AddToContent(nCharPos++, new AscWord.CRunSpace(nCharCode), true);
-				this.AddToContent(nCharPos++, new AscWord.CPdfRunText(nCharCode, aWidths[oIterator.position()]), true);
+				this.AddToContent(nCharPos++, new AscWord.CPdfRunSpace(nCharCode, aWidths[oIterator.position()]), true);
 			else
 				this.AddToContent(nCharPos++, new AscWord.CPdfRunText(nCharCode, aWidths[oIterator.position()]), true);
 		}

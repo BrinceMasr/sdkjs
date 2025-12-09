@@ -10526,7 +10526,7 @@ function BinaryPPTYLoader()
                                     });
 
                                     let aWidths = [];
-                                    for (let i = 0; i < aPoses.length - 1; i++) {
+                                    for (let i = 0; i < aPoses.length - 2; i++) {
                                         aWidths.push(aPoses[i + 1] - aPoses[i]);
                                     }
 
