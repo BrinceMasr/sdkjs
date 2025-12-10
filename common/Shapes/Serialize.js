@@ -9209,6 +9209,11 @@ function BinaryPPTYLoader()
                     oPdfFontInfo.lefts = s.GetString2();
                     break;
                 }
+                case 6:
+                {
+                    oPdfFontInfo.isActual = s.GetBool();
+                    break;
+                }
             }
         }
 
