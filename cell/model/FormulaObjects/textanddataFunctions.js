@@ -61,7 +61,7 @@ function (window, undefined) {
 	cFormulaFunctionGroup['TextAndData'] = cFormulaFunctionGroup['TextAndData'] || [];
 	cFormulaFunctionGroup['TextAndData'].push(cARRAYTOTEXT, cASC, cBAHTTEXT, cCHAR, cCLEAN, cCODE, cCONCATENATE, cCONCAT, cDOLLAR,
 		cEXACT, cFIND, cFINDB, cFIXED, cIMPORTRANGE, cJIS, cLEFT, cLEFTB, cLEN, cLENB, cLOWER, cMID, cMIDB, cNUMBERVALUE, cPHONETIC,
-		cPROPER, cREPLACE, cREPLACEB, cREPT, cRIGHT, cRIGHTB, cREGEXTEST, cSEARCH, cSEARCHB, cSUBSTITUTE, cT, cTEXT, cTEXTJOIN,
+		cPROPER, cREPLACE, cREPLACEB, cREPT, cRIGHT, cRIGHTB, cREGEXTEST, cREGEXEXTRACT, cSEARCH, cSEARCHB, cSUBSTITUTE, cT, cTEXT, cTEXTJOIN,
 		cTRIM, cUNICHAR, cUNICODE, cUPPER, cVALUE, cTEXTBEFORE, cTEXTAFTER, cTEXTSPLIT);
 
 	cFormulaFunctionGroup['NotRealised'] = cFormulaFunctionGroup['NotRealised'] || [];
@@ -176,6 +176,41 @@ function (window, undefined) {
 		} else {
 			return new cString(isAfter ? text.substring(foundIndex + (((repeatZero > 1 || match_end_active) && match_end && isReverseSearch) ? 0 : modifiedDelimiter.length), text.length) : text.substring(0, foundIndex));
 		}
+	}
+
+	const checkPCRE2Limits = function(pattern) {
+		// https://www.pcre.org/
+		if (!pattern) {
+			return true;
+		}
+
+		// looking for the {123}, {123,123}, {123,} pattern
+		const quantRe = /\{(\d+)(?:,(\d*))?\}/g;
+		let match;
+
+		while ((match = quantRe.exec(pattern)) !== null) {
+			let n1 = parseInt(match[1], 10);
+			let n2 = match[2] ? parseInt(match[2], 10) : null;
+
+			// PCRE2 16 bit limitation
+			// check {n,m} — n <= m
+			if (n1 > MAX_UNSIGNED_INT_16 || (n2 !== null && n2 > MAX_UNSIGNED_INT_16) || n2 !== null && n1 > n2) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	const getValue = function (arg, row, col) {
+		let val;
+		if (arg.type === cElementType.array || arg.type === cElementType.cellsRange || arg.type === cElementType.cellsRange3D) {
+			val = arg.getValue2(row, col);
+		} else {
+			val = arg;
+		}
+
+		return val;
 	}
 
 	/**
@@ -2051,31 +2086,6 @@ function (window, undefined) {
 	 */
 	cREGEXTEST.prototype.Calculate = function (arg) {
 
-		// https://www.pcre.org/
-		const checkPCRE2Limits = function(pattern) {
-			if (!pattern) {
-				return true;
-			}
-
-			// looking for the {123}, {123,123}, {123,} pattern
-			const quantRe = /\{(\d+)(?:,(\d*))?\}/g;
-			let match;
-
-			while ((match = quantRe.exec(pattern)) !== null) {
-				let n1 = parseInt(match[1], 10);
-				let n2 = match[2] ? parseInt(match[2], 10) : null;
-
-				// PCRE2 16 bit limitation
-				// check {n,m} — n <= m
-				if (n1 > MAX_UNSIGNED_INT_16 || (n2 !== null && n2 > MAX_UNSIGNED_INT_16) || n2 !== null && n1 > n2) {
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-
 		const regexTest = function(text, pattern, case_sensitivity = 0) {
 			if (text === pattern || pattern === "") {
 				return new cBool(true);
@@ -2120,17 +2130,6 @@ function (window, undefined) {
 			}
 
 			return new cBool(res);
-		}
-
-		const getValue = function (arg, row, col) {
-			let val;
-			if (arg.type === cElementType.array || arg.type === cElementType.cellsRange || arg.type === cElementType.cellsRange3D) {
-				val = arg.getValue2(row, col);
-			} else {
-				val = arg;
-			}
-
-			return val;
 		}
 
 		const arrayHelper = function (text, pattern, caseSensitivity, maxArray) {
@@ -2251,6 +2250,283 @@ function (window, undefined) {
 		}
 
 		return regexTest(text.getValue(), pattern.getValue(), caseSensitivityVal);
+	};
+
+
+	/**
+	 * @constructor
+	 * @extends {AscCommonExcel.cBaseFunction}
+	 */
+	function cREGEXEXTRACT() {
+	}
+
+	//***array-formula***
+	cREGEXEXTRACT.prototype = Object.create(cBaseFunction.prototype);
+	cREGEXEXTRACT.prototype.constructor = cREGEXEXTRACT;
+	cREGEXEXTRACT.prototype.name = 'REGEXEXTRACT';
+	cREGEXEXTRACT.prototype.argumentsMin = 2;
+	cREGEXEXTRACT.prototype.argumentsMax = 4;
+	cREGEXEXTRACT.prototype.inheritFormat = true;
+	cREGEXEXTRACT.prototype.arrayIndexes = {0: 1, 1: 1, 2: 1, 3: 1};
+	cREGEXEXTRACT.prototype.argumentsType = [argType.text, argType.text, argType.number, argType.number];
+	/**
+	 * Function extracts strings within the provided text that matches the pattern.
+	 * @private
+	 * @param {text} text - input text to test by pattern
+	 * @param {text} pattern - template (without framing / /). Uses regular expression syntax.
+	 * @param {number} [return_mode=0] - 0: Return the first string that matches the pattern, 1: Return all strings that match the pattern as an array, 2: Return capturing groups from the first match as an array
+	 * @param {number} [case_sensitivity=0] - 0: case-sensitive (default), 1: case-insensitive
+	 * @return {string} Return the string that matches the pattern
+	 */
+	cREGEXEXTRACT.prototype.Calculate = function (arg) {
+
+		const regexExtract = function(text, pattern, returnMode = 0, caseSensitivity = 0) {
+
+			let flags = 'g';
+			if (caseSensitivity === 1) {
+				flags += 'i';
+			}
+
+			// todo нужно ли делать pattern.trim() и всегда возвращать массив в return_mode 2
+
+			// attempt to process simple inline flags at the beginning of the template, for example (?i) (?s) (?m)
+			let inlineFlagsMatch = pattern.match(/^\(\?([gimsuy]+)\)/i);
+			if (inlineFlagsMatch) {
+				let inline = inlineFlagsMatch[1].toLowerCase();
+				// inline flags to JS flags, if supported
+				for (const ch of inline) {
+					if (!flags.includes(ch)) flags += ch;
+				}
+				pattern = pattern.slice(inlineFlagsMatch[0].length);
+			}
+
+			// by default add 'u' (unicode) - for compatibility with \p{...}
+			if (!flags.includes('u')) { 
+				flags += 'u';
+			}
+
+			let limitError = checkPCRE2Limits(pattern);
+			if (limitError) {
+				return new cError(cErrorType.wrong_value_type);
+			}
+
+			let regex;
+			try {
+				regex = new RegExp(pattern, flags);
+				// const trimmed = pattern.trim();
+				// const slashForm = /^\/(.+)\/([gimsuy]*)$/; // /pattern/flags
+				// const m = trimmed.match(slashForm);
+
+				// if (m) {
+				// 	const pat = m[1];
+				// 	let flags = m[2];
+
+				// 	if (returnMode === 1 && !flags.includes("g")) flags += "g";
+
+				// 	regex = new RegExp(pat, flags);
+				// } else {
+				// 	let flags = "";
+				// 	if (caseSensitivity === 1) flags += "i";
+				// 	if (returnMode === 1) flags += "g";
+
+				// 	regex = new RegExp(pattern, flags);
+				// }
+			} catch (e) {
+				return new cError(cErrorType.wrong_value_type);
+			}
+
+			const resArray = new cArray();
+
+			// MODE 0/1 - first/all matches
+			if (returnMode === 0 || returnMode === 1) {
+				const match = text.match(regex);
+				if (!match) {
+					return new cError(cErrorType.not_available);
+				}
+
+				// 0 - first match
+				if (returnMode === 0) {
+					return new cString(match[0]);
+				}
+
+				for (let i = 0; i < match.length; i++) {
+					resArray.addElement(new cString(match[i]));
+				}
+
+				return resArray;				
+			}
+
+			// MODE 2 - return capturing groups
+			if (returnMode === 2) {
+				const match = regex.exec(text);
+				const groups = [];
+
+				if (!match) {
+					return new cError(cErrorType.not_available);
+				}
+
+				for (let i = 1; i <= match.length - 1; i++) {
+					let groupRes = match[i] === undefined ? "" : match[i];
+					if (!groupRes) {
+						resArray.addElement(new cError(cErrorType.not_available));
+					} else {
+						resArray.addElement(new cString(groupRes));
+					}
+				}
+
+				return resArray;
+			}
+		}
+
+		const arrayHelper = function (text, pattern, returnMode, caseSensitivity, maxArray) {
+			let resArr = new cArray();
+			let textVal, patternVal, returnModeVal, caseSensitivityVal;
+
+			for (let row = 0; row < maxArray.row; row++) {
+				resArr.addRow();
+				for (let col = 0; col < maxArray.col; col++) {
+					textVal = getValue(text, row, col).tocString();
+					if (textVal.type === cElementType.error) {
+						return textVal;
+					}
+
+					patternVal = getValue(pattern, row, col).tocString();
+					if (patternVal.type === cElementType.error) {
+						return patternVal;
+					}
+
+					returnModeVal = getValue(returnMode, row, col).tocNumber();
+					if (returnModeVal.type === cElementType.error) {
+						return returnModeVal;
+					}
+
+					caseSensitivityVal = getValue(caseSensitivity, row, col).tocNumber();
+					if (caseSensitivityVal.type === cElementType.error) {
+						return caseSensitivityVal;
+					}
+
+					textVal = textVal.getValue();
+					patternVal = patternVal.getValue();
+					returnModeVal = returnModeVal.getValue();
+					caseSensitivityVal = caseSensitivityVal.getValue();
+
+					if (returnModeVal > 2 || returnModeVal < 0 || (caseSensitivityVal !== 0 && caseSensitivityVal !== 1)) {
+						resArr.addElement(new cError(cErrorType.wrong_value_type));
+					} else {
+						let regTest = regexExtract(textVal, patternVal, caseSensitivityVal);
+						resArr.addElement(regTest);
+					}
+
+				}
+			}
+
+			return resArr;
+		}
+
+		const t = this;
+		let text = arg[0], pattern = arg[1], returnMode = arg[2] ? arg[2] : new cNumber(0), caseSensitivity = arg[3] ? arg[3] : new cNumber(0);
+
+		let isArrayMethod = false;
+		let maxArray = {row: 1, col: 1};
+
+		if (text.type === cElementType.cellsRange || text.type === cElementType.cellsRange3D || text.type === cElementType.array) {
+
+			if (!text.isOneElement()) {
+				let textDimensions = text.getDimensions();
+
+				maxArray = {
+					row: textDimensions.row > maxArray.row ? textDimensions.row : maxArray.row, 
+					col: textDimensions.col > maxArray.col ? textDimensions.col : maxArray.col
+				}
+
+				isArrayMethod = true;
+			} else {
+				text = text.getFirstElement();
+			}
+		}
+
+		if (pattern.type === cElementType.cellsRange || pattern.type === cElementType.cellsRange3D || pattern.type === cElementType.array) {
+			
+			if (!pattern.isOneElement()) {
+				let patternDimensions = pattern.getDimensions();
+
+				maxArray = {
+					row: patternDimensions.row > maxArray.row ? patternDimensions.row : maxArray.row, 
+					col: patternDimensions.col > maxArray.col ? patternDimensions.col : maxArray.col
+				}
+
+				isArrayMethod = true;
+			} else {
+				pattern = pattern.getFirstElement();
+			}
+		}
+
+		if (returnMode.type === cElementType.cellsRange || returnMode.type === cElementType.cellsRange3D || returnMode.type === cElementType.array) {
+			
+			if (!returnMode.isOneElement()) {
+				let returnModeDimensions = returnMode.getDimensions();
+
+				maxArray = {
+					row: returnModeDimensions.row > maxArray.row ? returnModeDimensions.row : maxArray.row, 
+					col: returnModeDimensions.col > maxArray.col ? returnModeDimensions.col : maxArray.col
+				}
+
+				isArrayMethod = true;
+			} else {
+				returnMode = returnMode.getFirstElement();
+			}
+		}
+
+		if (caseSensitivity.type === cElementType.cellsRange || caseSensitivity.type === cElementType.cellsRange3D || caseSensitivity.type === cElementType.array) {
+			
+			if (!caseSensitivity.isOneElement()) {
+				let caseSensitivityDimensions = caseSensitivity.getDimensions();
+
+				maxArray = {
+					row: caseSensitivityDimensions.row > maxArray.row ? caseSensitivityDimensions.row : maxArray.row, 
+					col: caseSensitivityDimensions.col > maxArray.col ? caseSensitivityDimensions.col : maxArray.col
+				}
+
+				isArrayMethod = true;
+			} else {
+				caseSensitivity = caseSensitivity.getFirstElement();
+			}
+		}
+
+		// One of the argument is array/area
+		if (isArrayMethod) {
+			return arrayHelper(text, pattern, returnMode, caseSensitivity, maxArray);
+		}
+
+		text = text.tocString();
+		pattern = pattern.tocString();
+		returnMode = returnMode.tocNumber();
+		caseSensitivity = caseSensitivity.tocNumber();
+
+		if (text.type === cElementType.error) {
+			return text;
+		}
+		if (pattern.type === cElementType.error) {
+			return pattern;
+		}
+		if (returnMode.type === cElementType.error) {
+			return returnMode;
+		}
+		if (caseSensitivity.type === cElementType.error) {
+			return caseSensitivity;
+		}
+
+		let returnModeVal = returnMode.getValue();
+		if (returnModeVal !== 0 && returnModeVal !== 1 && returnModeVal !== 2) {
+			return new cError(cErrorType.wrong_value_type);
+		}
+
+		let caseSensitivityVal = caseSensitivity.getValue();
+		if (caseSensitivityVal !== 0 && caseSensitivityVal !== 1) {
+			return new cError(cErrorType.wrong_value_type);
+		}
+
+		return regexExtract(text.getValue(), pattern.getValue(), returnModeVal, caseSensitivityVal);
 	};
 
 	/**
