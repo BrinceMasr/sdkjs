@@ -2124,7 +2124,7 @@ ParaRun.prototype.AddText = function(sString, nPos)
 	}
 	return nCharPos;
 };
-ParaRun.prototype.AddPdfOriginText = function(sString, aWidths, nPos)
+ParaRun.prototype.AddPdfOriginText = function(aGids, sString, aWidths, nFontSize, nPos)
 {
 	var nCharPos = undefined !== nPos && null !== nPos && -1 !== nPos ? nPos : this.Content.length;
 
@@ -2159,12 +2159,12 @@ ParaRun.prototype.AddPdfOriginText = function(sString, aWidths, nPos)
 			else if (AscCommon.IsSpace(nCharCode)) // space
 			{
 				nLettersCount++;
-				arrLetters.push(new AscWord.CPdfRunSpace(nCharCode, aWidths[oIterator.position()]));
+				arrLetters.push(new AscWord.CPdfRunSpace(aGids[oIterator.position()], nCharCode, aWidths[oIterator.position()], nFontSize));
 			}
 			else
 			{
 				nLettersCount++;
-				arrLetters.push(new AscWord.CPdfRunText(nCharCode, aWidths[oIterator.position()]));
+				arrLetters.push(new AscWord.CPdfRunText(aGids[oIterator.position()], nCharCode, aWidths[oIterator.position()], nFontSize));
 			}
 		}
 
@@ -2188,9 +2188,9 @@ ParaRun.prototype.AddPdfOriginText = function(sString, aWidths, nPos)
 			else if (13 === nCharCode) // \r
 				continue;
 			else if (AscCommon.IsSpace(nCharCode)) // space
-				this.AddToContent(nCharPos++, new AscWord.CPdfRunSpace(nCharCode, aWidths[oIterator.position()]), true);
+				this.AddToContent(nCharPos++, new AscWord.CPdfRunSpace(aGids[oIterator.position()], nCharCode, aWidths[oIterator.position()], nFontSize), true);
 			else
-				this.AddToContent(nCharPos++, new AscWord.CPdfRunText(nCharCode, aWidths[oIterator.position()]), true);
+				this.AddToContent(nCharPos++, new AscWord.CPdfRunText(aGids[oIterator.position()], nCharCode, aWidths[oIterator.position()], nFontSize), true);
 		}
 	}
 	return nCharPos;

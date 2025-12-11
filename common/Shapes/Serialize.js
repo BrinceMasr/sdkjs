@@ -10479,7 +10479,7 @@ function BinaryPPTYLoader()
                                 }
 
                                 if (oPdfFontInfo && _run) {
-                                    _run.RFonts.SetAll(AscFonts.getEmbeddedFontPrefix() + oPdfFontInfo.name, -1);
+                                    _run.RFonts.SetAll((!oPdfFontInfo.isActual ? AscFonts.getEmbeddedFontPrefix() : "") + oPdfFontInfo.name, -1);
                                 }
 
                                 s.Seek2(_end);
@@ -10535,7 +10535,7 @@ function BinaryPPTYLoader()
                                         aWidths.push(aPoses[i + 1] - aPoses[i]);
                                     }
 
-                                    new_run.AddPdfOriginText(_text, aWidths);
+                                    new_run.AddPdfOriginText(oPdfFontInfo.gids.split(";"), _text, aWidths, text_pr.GetFontSize());
                                 }
                                 else {
                                     new_run.AddText(_text);
