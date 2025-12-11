@@ -587,9 +587,34 @@
 		if (!doc || !content)
 			return false;
 		
+        let oRun = content.GetCurrentRun();
+        let oTextPr = oRun.GetTextPr();
+        let sFontName = oTextPr.GetFontFamily();
+
+        let oFontFile;
+        if (sFontName.startsWith(AscFonts.getEmbeddedFontPrefix())) {
+            let oFontInfo = AscFonts.g_font_infos_embed[AscFonts.g_map_font_index_embed[sFontName]];
+            oFontFile = AscCommon.g_fontManager.LoadFont(AscCommon.g_font_loader.fontFiles[oFontInfo.indexR], oFontInfo.faceIndexR, AscFonts.MEASURE_FONTSIZE,
+                false,
+                false,
+                false, false);
+        }
+
         for (let nIdx = 0; nIdx < codePoints.length; ++nIdx) {
             let nCode = codePoints[nIdx];
-            let oItem = AscCommon.IsSpace(nCode) ? new AscWord.CRunSpace(nCode) : new AscWord.CRunText(nCode);
+
+            let oItem;
+            if (oFontFile) {
+                let nGid = oFontFile.GetGIDByUnicode(nCode);
+                if (nGid !== 0) {
+                    oItem = AscCommon.IsSpace(nCode) ? new AscWord.CPdfRunSpace(nGid, nCode, 0, 0) : new AscWord.CPdfRunText(nGid, nCode, 0, 0);
+                }
+            }
+
+            if (!oItem) {
+                oItem = AscCommon.IsSpace(nCode) ? new AscWord.CRunSpace(nCode) : new AscWord.CRunText(nCode);
+            }
+            
             controller.paragraphAdd(oItem, false);
         }
 
