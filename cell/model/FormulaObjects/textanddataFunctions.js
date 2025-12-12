@@ -181,7 +181,7 @@ function (window, undefined) {
 	const checkPCRE2Limits = function(pattern) {
 		// https://www.pcre.org/
 		if (!pattern) {
-			return true;
+			return false;
 		}
 
 		// looking for the {123}, {123,123}, {123,} pattern
@@ -2074,6 +2074,7 @@ function (window, undefined) {
 	cREGEXTEST.prototype.argumentsMin = 2;
 	cREGEXTEST.prototype.argumentsMax = 3;
 	cREGEXTEST.prototype.arrayIndexes = {0: 1, 1: 1, 2: 1};
+	cREGEXTEST.prototype.isXLFN = true;
 	cREGEXTEST.prototype.argumentsType = [argType.text, argType.text, argType.number];
 	/**
 	 * Check whether any part of supplied text matches a regular expression ("regex"). 
@@ -2267,6 +2268,7 @@ function (window, undefined) {
 	cREGEXEXTRACT.prototype.argumentsMin = 2;
 	cREGEXEXTRACT.prototype.argumentsMax = 4;
 	cREGEXEXTRACT.prototype.inheritFormat = true;
+	cREGEXEXTRACT.prototype.isXLFN = true;
 	cREGEXEXTRACT.prototype.arrayIndexes = {0: 1, 1: 1, 2: 1, 3: 1};
 	cREGEXEXTRACT.prototype.argumentsType = [argType.text, argType.text, argType.number, argType.number];
 	/**
@@ -2276,18 +2278,16 @@ function (window, undefined) {
 	 * @param {text} pattern - template (without framing / /). Uses regular expression syntax.
 	 * @param {number} [return_mode=0] - 0: Return the first string that matches the pattern, 1: Return all strings that match the pattern as an array, 2: Return capturing groups from the first match as an array
 	 * @param {number} [case_sensitivity=0] - 0: case-sensitive (default), 1: case-insensitive
-	 * @return {string} Return the string that matches the pattern
+	 * @return {array} Return the array that matches the pattern and return mode
 	 */
 	cREGEXEXTRACT.prototype.Calculate = function (arg) {
 
 		const regexExtract = function(text, pattern, returnMode = 0, caseSensitivity = 0) {
-
+			const resArray = new cArray();
 			let flags = 'g';
 			if (caseSensitivity === 1) {
 				flags += 'i';
 			}
-
-			// todo нужно ли делать pattern.trim() и всегда возвращать массив в return_mode 2
 
 			// attempt to process simple inline flags at the beginning of the template, for example (?i) (?s) (?m)
 			let inlineFlagsMatch = pattern.match(/^\(\?([gimsuy]+)\)/i);
@@ -2301,54 +2301,39 @@ function (window, undefined) {
 			}
 
 			// by default add 'u' (unicode) - for compatibility with \p{...}
-			if (!flags.includes('u')) { 
-				flags += 'u';
-			}
+			// if (!flags.includes('u')) { 
+			// 	flags += 'u';
+			// }
 
 			let limitError = checkPCRE2Limits(pattern);
 			if (limitError) {
-				return new cError(cErrorType.wrong_value_type);
+				resArray.addElement(new cError(cErrorType.wrong_value_type));
+				return resArray;
 			}
 
 			let regex;
 			try {
 				regex = new RegExp(pattern, flags);
-				// const trimmed = pattern.trim();
-				// const slashForm = /^\/(.+)\/([gimsuy]*)$/; // /pattern/flags
-				// const m = trimmed.match(slashForm);
-
-				// if (m) {
-				// 	const pat = m[1];
-				// 	let flags = m[2];
-
-				// 	if (returnMode === 1 && !flags.includes("g")) flags += "g";
-
-				// 	regex = new RegExp(pat, flags);
-				// } else {
-				// 	let flags = "";
-				// 	if (caseSensitivity === 1) flags += "i";
-				// 	if (returnMode === 1) flags += "g";
-
-				// 	regex = new RegExp(pattern, flags);
-				// }
 			} catch (e) {
-				return new cError(cErrorType.wrong_value_type);
+				resArray.addElement(new cError(cErrorType.wrong_value_type));
+				return resArray;
 			}
-
-			const resArray = new cArray();
 
 			// MODE 0/1 - first/all matches
 			if (returnMode === 0 || returnMode === 1) {
 				const match = text.match(regex);
 				if (!match) {
-					return new cError(cErrorType.not_available);
+					resArray.addElement(new cError(cErrorType.not_available));
+					return resArray;
 				}
 
 				// 0 - first match
 				if (returnMode === 0) {
-					return new cString(match[0]);
+					resArray.addElement(new cString(match[0]));
+					return resArray;
 				}
 
+				// 1 - all matches
 				for (let i = 0; i < match.length; i++) {
 					resArray.addElement(new cString(match[i]));
 				}
@@ -2362,7 +2347,8 @@ function (window, undefined) {
 				const groups = [];
 
 				if (!match) {
-					return new cError(cErrorType.not_available);
+					resArray.addElement(new cError(cErrorType.not_available));
+					return resArray;
 				}
 
 				for (let i = 1; i <= match.length - 1; i++) {
