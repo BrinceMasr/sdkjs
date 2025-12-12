@@ -6900,6 +6900,8 @@ $(function () {
 		ws.getRange2("A102").setValue("0.5");
 		ws.getRange2("A103").setValue("");
 		ws.getRange2("A105").setValue("1");
+		ws.getRange2("A107").setValue("[a-z]");
+		ws.getRange2("A108").setValue("[a-z]{2}");
 		ws.getRange2("A110").setValue("TRUE");
 		ws.getRange2("A111").setValue("FALSE");
 
@@ -7091,10 +7093,11 @@ $(function () {
 		oParser = new parserFormula('REGEXEXTRACT(A105:A106,"\\\\d+")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: REGEXEXTRACT(A105:A106,"\\\\d+") is parsed.');
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '#N/A', 'Test: Negative case: Area. Multi-cell range in text ? #VALUE!');
-		// Case #13: String, Area. Multi-cell range in pattern ? #VALUE!
+		// Case #13: String, Area. Multi-cell range in pattern
 		oParser = new parserFormula('REGEXEXTRACT("text",A107:A108)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: REGEXEXTRACT("text",A107:A108) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '#VALUE!', 'Test: Negative case: String, Area. Multi-cell range in pattern ? #VALUE!');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 't', 'Test: Negative case: String, Area. Multi-cell range in pattern');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1,0).getValue(), 'te', 'Test: Negative case: String, Area. Multi-cell range in pattern');
 		// Case #14: Array. Array in text + return_mode default ? #N/A on most cells
 		oParser = new parserFormula('REGEXEXTRACT({"a";"b";"c"},"[0-9]")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: REGEXEXTRACT({"a";"b";"c"},"[0-9]") is parsed.');
@@ -7198,8 +7201,13 @@ $(function () {
 		oParser = new parserFormula('REGEXEXTRACT("AaBbCc","(.)",2,0)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: REGEXEXTRACT("AaBbCc","(.)",2,0) is parsed.');
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'A', 'Test: Bounded case: String, String, Number, Number. return_mode 2 with single char group ? many groups possible, bounded by cell limit');
+		// Case #10: String, String. Two empty strings as text and pattern 
+		oParser = new parserFormula('REGEXEXTRACT("","")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXEXTRACT("","") is parsed.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '', 'Test: Bounded case: String, String. Two empty strings as text and pattern ');
+		
 
-		// Need to fix: pcre2 quantificators errror, areas correct handle
+		// Need to fix: pcre2 quantificators errror
 		// Case #27: String, String, Number. Possessive quantifier
 
 

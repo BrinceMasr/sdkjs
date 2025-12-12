@@ -2399,8 +2399,8 @@ function (window, undefined) {
 					if (returnModeVal > 2 || returnModeVal < 0 || (caseSensitivityVal !== 0 && caseSensitivityVal !== 1)) {
 						resArr.addElement(new cError(cErrorType.wrong_value_type));
 					} else {
-						let regTest = regexExtract(textVal, patternVal, caseSensitivityVal);
-						resArr.addElement(regTest);
+						let regTest = regexExtract(textVal, patternVal, returnModeVal, caseSensitivityVal);
+						resArr.addElement(regTest.getFirstElement());
 					}
 
 				}
