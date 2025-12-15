@@ -10535,7 +10535,7 @@ function BinaryPPTYLoader()
                                         aWidths.push(aPoses[i + 1] - aPoses[i]);
                                     }
 
-                                    new_run.AddPdfOriginText(oPdfFontInfo.gids.split(";"), _text, aWidths, text_pr.GetFontSize());
+                                    new_run.AddPdfOriginText(oPdfFontInfo.gids.split(";").slice(0, -1), _text, aWidths, text_pr.GetFontSize());
                                 }
                                 else {
                                     new_run.AddText(_text);
