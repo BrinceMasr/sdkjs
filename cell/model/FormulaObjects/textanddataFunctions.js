@@ -2592,27 +2592,6 @@ function (window, undefined) {
 				}
 			}
 
-			// let lastIndex = 0;
-			// matches.forEach((m, i) => {
-			// 	if (!indexesToReplace.includes(i)) {
-			// 		return;
-			// 	}
-
-			// 	const start = m.index;
-			// 	const end = start + m[0].length;
-
-			// 	result += text.slice(lastIndex, end);
-			// 	result += excelReplacement(m);
-
-			// 	lastIndex = end;
-
-			// });
-
-			// leftover
-			// result += text.slice(lastIndex);
-
-			// result = text.replace(regex, replacement);
-
 			let count = 0;
 			result = text.replace(regex, function (match) {
 
@@ -2659,8 +2638,8 @@ function (window, undefined) {
 					textVal = textVal.getValue();
 					patternVal = patternVal.getValue();
 					replacementVal = replacementVal.getValue();
-					occurenceVal = occurenceVal.getValue();
-					caseSensitivityVal = caseSensitivityVal.getValue();
+					occurenceVal = Math.floor(occurenceVal.getValue());
+					caseSensitivityVal = Math.floor(caseSensitivityVal.getValue());
 
 					if (caseSensitivityVal !== 0 && caseSensitivityVal !== 1) {
 						resArr.addElement(new cError(cErrorType.wrong_value_type));
@@ -2788,12 +2767,12 @@ function (window, undefined) {
 			return caseSensitivity;
 		}
 
-		let caseSensitivityVal = caseSensitivity.getValue();
+		let caseSensitivityVal = Math.floor(caseSensitivity.getValue());
 		if (caseSensitivityVal !== 0 && caseSensitivityVal !== 1) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 
-		return regexReplace(text.getValue(), pattern.getValue(), replacement.getValue(), occurence.getValue(), caseSensitivityVal);
+		return regexReplace(text.getValue(), pattern.getValue(), replacement.getValue(), Math.floor(occurence.getValue()), caseSensitivityVal);
 	};
 
 	/**
