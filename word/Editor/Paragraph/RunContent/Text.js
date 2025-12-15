@@ -841,7 +841,8 @@
 		
 		this.Flags = (this.Flags & 0xFFFF) | (((_fontSize * 64) & 0xFFFF) << 16);
 		
-		this.spacing = textPr.Spacing;
+		// this.spacing = textPr.Spacing;
+		this.spacing = 0;
 	};
 	
 	AscWord.CPdfRunText = CPdfRunText;
