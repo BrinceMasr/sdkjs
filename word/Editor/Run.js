@@ -8704,6 +8704,19 @@ ParaRun.prototype.SetBold = function(isBold)
 
 		this.Recalc_CompiledPr(true);
 		this.private_UpdateTrackRevisionOnChangeTextPr(true);
+
+		if (Asc.editor.isPdfEditor())
+		{
+			for (let i = 0; i < this.Content.length; i++)
+			{
+				let oItem = this.Content[i];
+				if (oItem.IsPdfText())
+				{
+					this.Remove_FromContent(i, 1);
+					this.Add_ToContent(i, oItem.IsSpace() ? new AscWord.CRunSpace(oItem.Value) : new AscWord.CRunText(oItem.Value));
+				}
+			}
+		}
 	}
 };
 ParaRun.prototype.Get_Bold = function()
@@ -8732,6 +8745,19 @@ ParaRun.prototype.SetItalic = function(isItalic)
 		this.Pr.Italic = isItalic;
 		this.Recalc_CompiledPr(true);
 		this.private_UpdateTrackRevisionOnChangeTextPr(true);
+
+		if (Asc.editor.isPdfEditor())
+		{
+			for (let i = 0; i < this.Content.length; i++)
+			{
+				let oItem = this.Content[i];
+				if (oItem.IsPdfText())
+				{
+					this.Remove_FromContent(i, 1);
+					this.Add_ToContent(i, oItem.IsSpace() ? new AscWord.CRunSpace(oItem.Value) : new AscWord.CRunText(oItem.Value));
+				}
+			}
+		}
 	}
 };
 ParaRun.prototype.Get_Italic = function()
