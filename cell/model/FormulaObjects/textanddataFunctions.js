@@ -61,7 +61,7 @@ function (window, undefined) {
 	cFormulaFunctionGroup['TextAndData'] = cFormulaFunctionGroup['TextAndData'] || [];
 	cFormulaFunctionGroup['TextAndData'].push(cARRAYTOTEXT, cASC, cBAHTTEXT, cCHAR, cCLEAN, cCODE, cCONCATENATE, cCONCAT, cDOLLAR,
 		cEXACT, cFIND, cFINDB, cFIXED, cIMPORTRANGE, cJIS, cLEFT, cLEFTB, cLEN, cLENB, cLOWER, cMID, cMIDB, cNUMBERVALUE, cPHONETIC,
-		cPROPER, cREPLACE, cREPLACEB, cREPT, cRIGHT, cRIGHTB, cREGEXTEST, cREGEXEXTRACT, cSEARCH, cSEARCHB, cSUBSTITUTE, cT, cTEXT, cTEXTJOIN,
+		cPROPER, cREPLACE, cREPLACEB, cREPT, cRIGHT, cRIGHTB, cREGEXTEST, cREGEXEXTRACT, cREGEXREPLACE, cSEARCH, cSEARCHB, cSUBSTITUTE, cT, cTEXT, cTEXTJOIN,
 		cTRIM, cUNICHAR, cUNICODE, cUPPER, cVALUE, cTEXTBEFORE, cTEXTAFTER, cTEXTSPLIT);
 
 	cFormulaFunctionGroup['NotRealised'] = cFormulaFunctionGroup['NotRealised'] || [];
@@ -2513,6 +2513,287 @@ function (window, undefined) {
 		}
 
 		return regexExtract(text.getValue(), pattern.getValue(), returnModeVal, caseSensitivityVal);
+	};
+
+	/**
+	 * @constructor
+	 * @extends {AscCommonExcel.cBaseFunction}
+	 */
+	function cREGEXREPLACE() {
+	}
+
+	//***array-formula***
+	cREGEXREPLACE.prototype = Object.create(cBaseFunction.prototype);
+	cREGEXREPLACE.prototype.constructor = cREGEXREPLACE;
+	cREGEXREPLACE.prototype.name = 'REGEXREPLACE';
+	cREGEXREPLACE.prototype.argumentsMin = 3;
+	cREGEXREPLACE.prototype.argumentsMax = 5;
+	cREGEXREPLACE.prototype.inheritFormat = true;
+	cREGEXREPLACE.prototype.isXLFN = true;
+	cREGEXREPLACE.prototype.arrayIndexes = {0: 1, 1: 1, 2: 1, 3: 1, 4: 1};
+	cREGEXREPLACE.prototype.argumentsType = [argType.text, argType.text, argType.number, argType.number];
+	/**
+	 * Function extracts strings within the provided text that matches the pattern.
+	 * @private
+	 * @param {text} text - the text or the reference to a cell containing the text you want to replace strings within.
+	 * @param {text} pattern - template (without framing / /). Uses regular expression syntax.
+	 * @param {text} replacement - the text you want to replace instances of pattern.
+	 * @param {number} [occurrence=0] - 0: Specifies which instance of the pattern you want to replace. 
+	 * By default is 0, which replaces all instances. A negative number replaces that instance, searching from the end.
+	 * @param {number} [case_sensitivity=0] - 0: case-sensitive (default), 1: case-insensitive
+	 * @return {text} Returns the modified string according to the pattern of (RegExp)
+	 */
+	cREGEXREPLACE.prototype.Calculate = function (arg) {
+
+		const regexReplace = function(text, pattern, replacement, occurrence = 0, case_sensitivity = 0) {
+			// flags
+			let flags = "g";
+			if (case_sensitivity === 1) {
+				flags += "i";
+			} 
+
+			let regex;
+			try {
+				regex = new RegExp(pattern, flags);
+			} catch (e) {
+				return new cError(cErrorType.wrong_value_type);
+			}
+
+			// find all matches - to implement Excel-like occurrence logic
+			const matches = [...text.matchAll(regex)];
+
+			if (matches.length === 0) {
+				return new cString(text);
+			} 
+			
+			// which indexes to replace
+			let indexesToReplace = [];
+			let result = "";
+
+			if (occurrence === 0) {
+				// Replace all
+				// indexesToReplace = matches.map((elem, index) => index);
+				result = text.replace(regex, replacement);
+				return new cString(result);
+			} else if (occurrence > 0) {
+				// Replace by positive index(from start)
+				if (occurrence <= matches.length) {
+					indexesToReplace = [occurrence - 1];
+				} else {
+					return new cString(text);
+				}
+			} else if (occurrence < 0) {
+				// Replace by negative index(from end)
+				let negativeOccurenceId = matches.length + occurrence;
+				if (negativeOccurenceId >= 0) {
+					indexesToReplace = [negativeOccurenceId]; 
+				} else  {
+					return new cString(text);
+				}
+			}
+
+			// let lastIndex = 0;
+			// matches.forEach((m, i) => {
+			// 	if (!indexesToReplace.includes(i)) {
+			// 		return;
+			// 	}
+
+			// 	const start = m.index;
+			// 	const end = start + m[0].length;
+
+			// 	result += text.slice(lastIndex, end);
+			// 	result += excelReplacement(m);
+
+			// 	lastIndex = end;
+
+			// });
+
+			// leftover
+			// result += text.slice(lastIndex);
+
+			// result = text.replace(regex, replacement);
+
+			let count = 0;
+			result = text.replace(regex, function (match) {
+
+				const textToReplace = indexesToReplace.includes(count) ? replacement : match;
+				count++
+				return textToReplace;
+			});
+
+			return new cString(result);
+		}
+
+		const arrayHelper = function (text, pattern, replacement, occurence, caseSensitivity, maxArray) {
+			let resArr = new cArray();
+			let textVal, patternVal, replacementVal, occurenceVal, caseSensitivityVal;
+
+			for (let row = 0; row < maxArray.row; row++) {
+				resArr.addRow();
+				for (let col = 0; col < maxArray.col; col++) {
+					textVal = getValue(text, row, col).tocString();
+					if (textVal.type === cElementType.error) {
+						return textVal;
+					}
+
+					patternVal = getValue(pattern, row, col).tocString();
+					if (patternVal.type === cElementType.error) {
+						return patternVal;
+					}
+
+					replacementVal = getValue(replacement, row, col).tocString();
+					if (replacementVal.type === cElementType.error) {
+						return replacementVal;
+					}
+
+					occurenceVal = getValue(occurence, row, col).tocNumber();
+					if (occurenceVal.type === cElementType.error) {
+						return occurenceVal;
+					}
+
+					caseSensitivityVal = getValue(caseSensitivity, row, col).tocNumber();
+					if (caseSensitivityVal.type === cElementType.error) {
+						return caseSensitivityVal;
+					}
+
+					textVal = textVal.getValue();
+					patternVal = patternVal.getValue();
+					replacementVal = replacementVal.getValue();
+					occurenceVal = occurenceVal.getValue();
+					caseSensitivityVal = caseSensitivityVal.getValue();
+
+					if (caseSensitivityVal !== 0 && caseSensitivityVal !== 1) {
+						resArr.addElement(new cError(cErrorType.wrong_value_type));
+					} else {
+						let regReplace = regexReplace(textVal, patternVal, replacementVal, occurenceVal, caseSensitivityVal);
+						resArr.addElement(regReplace);
+					}
+
+				}
+			}
+
+			return resArr;
+		}
+
+		const t = this;
+		let text = arg[0], pattern = arg[1], replacement = arg[2], occurence = arg[3] ? arg[3] : new cNumber(0), caseSensitivity = arg[4] ? arg[4] : new cNumber(0);
+
+		let isArrayMethod = false;
+		let maxArray = {row: 1, col: 1};
+
+		if (text.type === cElementType.cellsRange || text.type === cElementType.cellsRange3D || text.type === cElementType.array) {
+
+			if (!text.isOneElement()) {
+				let textDimensions = text.getDimensions();
+
+				maxArray = {
+					row: textDimensions.row > maxArray.row ? textDimensions.row : maxArray.row, 
+					col: textDimensions.col > maxArray.col ? textDimensions.col : maxArray.col
+				}
+
+				isArrayMethod = true;
+			} else {
+				text = text.getFirstElement();
+			}
+		}
+
+		if (pattern.type === cElementType.cellsRange || pattern.type === cElementType.cellsRange3D || pattern.type === cElementType.array) {
+			
+			if (!pattern.isOneElement()) {
+				let patternDimensions = pattern.getDimensions();
+
+				maxArray = {
+					row: patternDimensions.row > maxArray.row ? patternDimensions.row : maxArray.row, 
+					col: patternDimensions.col > maxArray.col ? patternDimensions.col : maxArray.col
+				}
+
+				isArrayMethod = true;
+			} else {
+				pattern = pattern.getFirstElement();
+			}
+		}
+
+		if (replacement.type === cElementType.cellsRange || replacement.type === cElementType.cellsRange3D || replacement.type === cElementType.array) {
+			
+			if (!replacement.isOneElement()) {
+				let replacementDimensions = replacement.getDimensions();
+
+				maxArray = {
+					row: replacementDimensions.row > maxArray.row ? replacementDimensions.row : maxArray.row, 
+					col: replacementDimensions.col > maxArray.col ? replacementDimensions.col : maxArray.col
+				}
+
+				isArrayMethod = true;
+			} else {
+				replacement = replacement.getFirstElement();
+			}
+		}
+
+		if (occurence.type === cElementType.cellsRange || occurence.type === cElementType.cellsRange3D || occurence.type === cElementType.array) {
+			
+			if (!occurence.isOneElement()) {
+				let occurenceDimensions = occurence.getDimensions();
+
+				maxArray = {
+					row: occurenceDimensions.row > maxArray.row ? occurenceDimensions.row : maxArray.row, 
+					col: occurenceDimensions.col > maxArray.col ? occurenceDimensions.col : maxArray.col
+				}
+
+				isArrayMethod = true;
+			} else {
+				occurence = occurence.getFirstElement();
+			}
+		}
+
+		if (caseSensitivity.type === cElementType.cellsRange || caseSensitivity.type === cElementType.cellsRange3D || caseSensitivity.type === cElementType.array) {
+			
+			if (!caseSensitivity.isOneElement()) {
+				let caseSensitivityDimensions = caseSensitivity.getDimensions();
+
+				maxArray = {
+					row: caseSensitivityDimensions.row > maxArray.row ? caseSensitivityDimensions.row : maxArray.row, 
+					col: caseSensitivityDimensions.col > maxArray.col ? caseSensitivityDimensions.col : maxArray.col
+				}
+
+				isArrayMethod = true;
+			} else {
+				caseSensitivity = caseSensitivity.getFirstElement();
+			}
+		}
+
+		// One of the argument is array/area
+		if (isArrayMethod) {
+			return arrayHelper(text, pattern, replacement, occurence, caseSensitivity, maxArray);
+		}
+
+		text = text.tocString();
+		pattern = pattern.tocString();
+		replacement = replacement.tocString();
+		occurence = occurence.tocNumber();
+		caseSensitivity = caseSensitivity.tocNumber();
+
+		if (text.type === cElementType.error) {
+			return text;
+		}
+		if (pattern.type === cElementType.error) {
+			return pattern;
+		}
+		if (replacement.type === cElementType.error) {
+			return replacement;
+		}
+		if (occurence.type === cElementType.error) {
+			return occurence;
+		}
+		if (caseSensitivity.type === cElementType.error) {
+			return caseSensitivity;
+		}
+
+		let caseSensitivityVal = caseSensitivity.getValue();
+		if (caseSensitivityVal !== 0 && caseSensitivityVal !== 1) {
+			return new cError(cErrorType.wrong_value_type);
+		}
+
+		return regexReplace(text.getValue(), pattern.getValue(), replacement.getValue(), occurence.getValue(), caseSensitivityVal);
 	};
 
 	/**

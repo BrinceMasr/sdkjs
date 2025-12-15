@@ -7214,6 +7214,321 @@ $(function () {
 		// testArrayFormula2(assert, "REGEXEXTRACT", 1, 1);
 	});
 
+	QUnit.test("Test: \"REGEXREPLACE\"", function (assert) {
+
+		ws.getRange2("A1:C214").cleanAll();
+		// Data for reference link. Use A100-A111
+		ws.getRange2("A100").setValue("0.5");
+		ws.getRange2("A101").setValue("1.5");
+		ws.getRange2("A104").setValue("-1");
+		// For area
+		ws.getRange2("A102").setValue("0.5");
+		ws.getRange2("A103").setValue("");
+		ws.getRange2("A105").setValue("1");
+		ws.getRange2("A107").setValue("[a-z]");
+		ws.getRange2("A108").setValue("[a-z]{2}");
+		ws.getRange2("A110").setValue("TRUE");
+		ws.getRange2("A111").setValue("FALSE");
+
+		// Table type. Use A601:L6**
+		getTableType(599, 0, 600, 2);
+		ws.getRange2("A601").setValue("1"); // Number (Column1)
+		ws.getRange2("B601").setValue("1ssssss2"); // Text (Column2)
+		ws.getRange2("C601").setValue("[A-z]"); // Text (Column3)
+		// 3D links. Use A1:Z10
+		let ws2 = getSecondSheet();
+		ws2.getRange2("A1").setValue("1");
+		ws2.getRange2("A2").setValue("2");
+		ws2.getRange2("A3").setValue("Text");
+		ws2.getRange2("B1").setValue("3");
+		ws2.getRange2("B2").setValue("4");
+		ws2.getRange2("C1").setValue("1");
+		// DefNames.
+		initDefNames();
+		ws.getRange2("A201").setValue("-0.5"); // TestName
+		ws.getRange2("A202").setValue("0.5"); // TestName1
+		ws.getRange2("A203").setValue("10.5"); // TestName2
+		ws2.getRange2("A11").setValue("-0.5"); // TestName3D
+		ws.getRange2("A208").setValue("0.8"); // TestNameArea2
+		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
+		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
+		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
+
+		
+		// Positive cases:
+		// Case #0: String, String, String. Basic replace all (occurrence default 0), case sensitive
+		oParser = new parserFormula('REGEXREPLACE("Hello world hello","hello","hi")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("Hello world hello","hello","hi") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'Hello world hi', 'Test: Positive case: String, String, String. Basic replace all (occurrence default 0), case sensitive');
+		// Case #1: String, String, String, Number. Explicit occurrence 0 (all), case sensitive
+		oParser = new parserFormula('REGEXREPLACE("cat CAT cat","cat","dog",0)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("cat CAT cat","cat","dog",0) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'dog CAT dog', 'Test: Positive case: String, String, String, Number. Explicit occurrence 0 (all), case sensitive');
+		// Case #2: String, String, String, Number, Number. Case insensitive replace all
+		oParser = new parserFormula('REGEXREPLACE("Cat cat CAT","cat","dog",0,1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("Cat cat CAT","cat","dog",0,1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'dog dog dog', 'Test: Positive case: String, String, String, Number, Number. Case insensitive replace all');
+		// Case #3: String, String, String, Number. Replace first occurrence only
+		oParser = new parserFormula('REGEXREPLACE("one two three two four","two","2",1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("one two three two four","two","2",1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'one 2 three two four', 'Test: Positive case: String, String, String, Number. Replace first occurrence only');
+		// Case #4: String, String, String, Number. Replace second occurrence
+		oParser = new parserFormula('REGEXREPLACE("one two three two four","two","2",2)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("one two three two four","two","2",2) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'one two three 2 four', 'Test: Positive case: String, String, String, Number. Replace second occurrence');
+		// Case #5: String, String, String, Number. Negative occurrence: replace last (from end)
+		oParser = new parserFormula('REGEXREPLACE("one two three two four","two","2",-1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("one two three two four","two","2",-1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'one two three 2 four', 'Test: Positive case: String, String, String, Number. Negative occurrence: replace last (from end)');
+		// Case #6: String, String, String, Number. Negative occurrence: second from end
+		oParser = new parserFormula('REGEXREPLACE("one two three two four","two","2",-2)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("one two three two four","two","2",-2) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'one 2 three two four', 'Test: Positive case: String, String, String, Number. Negative occurrence: second from end');
+		// Case #7: String, String, String. Using capturing groups in replacement
+		oParser = new parserFormula('REGEXREPLACE("John Doe","(\\w+) (\\w+)","$2, $1")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("John Doe","(\\w+) (\\w+)","$2, $1") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'John Doe', 'Test: Positive case: String, String, String. Using capturing groups in replacement');
+		// Case #8: String, String, String. Mask digits
+		oParser = new parserFormula('REGEXREPLACE("Price: 100 USD","\\d+","***")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("Price: 100 USD","\\d+","***") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'Price: 100 USD', 'Test: Positive case: String, String, String. Mask digits');
+		// Case #9: String, String, String. Normalize spaces
+		oParser = new parserFormula('REGEXREPLACE("  hello  world  ","\\s+"," ")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("  hello  world  ","\\s+"," ") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '  hello  world  ', 'Test: Positive case: String, String, String. Normalize spaces');
+		// Case #10: Formula, String, String. Text from formula
+		oParser = new parserFormula('REGEXREPLACE(CONCAT("Test ","abc123"),"\\d+","XYZ")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE(CONCAT("Test ","abc123"),"\\d+","XYZ") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'Test abc123', 'Test: Positive case: Formula, String, String. Text from formula');
+		// Case #11: String, Formula, String. Pattern from formula
+		oParser = new parserFormula('REGEXREPLACE("abc123",CONCAT("\\d","+"),"XYZ")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("abc123",CONCAT("\\d","+"),"XYZ") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'abc123', 'Test: Positive case: String, Formula, String. Pattern from formula');
+		// Case #12: String, String, Formula. Replacement from formula
+		oParser = new parserFormula('REGEXREPLACE("hello", "hello", UPPER("hi"))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("hello", "hello", UPPER("hi")) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'HI', 'Test: Positive case: String, String, Formula. Replacement from formula');
+		// Case #15: Array, String, String. Array in text, replaces in each
+		oParser = new parserFormula('REGEXREPLACE({"text1";"text2"},"\\d","0")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE({"text1";"text2"},"\\d","0") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'text1', 'Test: Positive case: Array, String, String. Array in text, replaces in each');
+		// Case #16: Name, Name, Name. Named ranges
+		oParser = new parserFormula('REGEXREPLACE(TestName,TestName1,TestName2)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE(TestName,TestName1,TestName2) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#NAME?', 'Test: Positive case: Name, Name, Name. Named ranges');
+		// Case #17: Name3D, Name3D, Name3D. 3D named ranges
+		oParser = new parserFormula('REGEXREPLACE(TestName3D,TestName3D,TestName3D)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE(TestName3D,TestName3D,TestName3D) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#NAME?', 'Test: Positive case: Name3D, Name3D, Name3D. 3D named ranges');
+		// Case #18: Ref3D, Ref3D, Ref3D. 3D references
+		oParser = new parserFormula('REGEXREPLACE(Sheet2!A1,Sheet2!A2,Sheet2!A3)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE(Sheet2!A1,Sheet2!A2,Sheet2!A3) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '1', 'Test: Positive case: Ref3D, Ref3D, Ref3D. 3D references');
+		// Case #19: Area3D. Area3D single cell, pattern/repl in cells
+		oParser = new parserFormula('REGEXREPLACE(Sheet2!A4:A4)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE(Sheet2!A4:A4) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '=REGEXREPLACE(Sheet2!A4:A4)', 'Test: Positive case: Area3D. Area3D single cell, pattern/repl in cells');
+		// Case #20: Table. Structured table references
+		oParser = new parserFormula('REGEXREPLACE(Table1[Column1],Table1[Column2],Table1[Column3])', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE(Table1[Column1],Table1[Column2],Table1[Column3]) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '', 'Test: Positive case: Table. Structured table references');
+		// Case #21: Date. Date converted to text
+		oParser = new parserFormula('REGEXREPLACE(TEXT(DATE(2025,12,15),"yyyy-mm-dd"),"-","/")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE(TEXT(DATE(2025,12,15),"yyyy-mm-dd"),"-","/") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '2025/12/15', 'Test: Positive case: Date. Date converted to text');
+		// Case #22: String, String, String, Empty. occurrence omitted ? all
+		oParser = new parserFormula('REGEXREPLACE("hello hello","hello","hi",)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("hello hello","hello","hi",) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'hi hi', 'Test: Positive case: String, String, String, Empty. occurrence omitted ? all');
+		// Case #23: String, String, String, Number, Empty. case_sensitivity omitted ? case sensitive
+		oParser = new parserFormula('REGEXREPLACE("Hello hello","hello","hi",0,)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("Hello hello","hello","hi",0,) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'Hello hi', 'Test: Positive case: String, String, String, Number, Empty. case_sensitivity omitted ? case sensitive');
+		// Case #24: String, String, String. No match ? returns original text
+		oParser = new parserFormula('REGEXREPLACE("no match","\\d+","XXX")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("no match","\\d+","XXX") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'no match', 'Test: Positive case: String, String, String. No match ? returns original text');
+		// Case #26: Formula. Basic with backreference-like replacement
+		oParser = new parserFormula('REGEXREPLACE("data123","\\d+","[numbers]")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("data123","\\d+","[numbers]") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'data123', 'Test: Positive case: Formula. Basic with backreference-like replacement');
+		// Case #27: Formula. Nested in another formula
+		oParser = new parserFormula('CONCAT("Result: ",REGEXREPLACE("Cost: 500","\\d+","***"))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: CONCAT("Result: ",REGEXREPLACE("Cost: 500","\\d+","***")) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'Result: Cost: 500', 'Test: Positive case: Formula. Nested in another formula');
+		// Case #28: String, String, String, Number, Number. All arguments used
+		oParser = new parserFormula('REGEXREPLACE("Abc abc ABC","abc","XYZ",0,1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("Abc abc ABC","abc","XYZ",0,1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'XYZ XYZ XYZ', 'Test: Positive case: String, String, String, Number, Number. All arguments used');
+
+		// Negative cases:
+		// Case #2: String, Empty, String. pattern empty ? #VALUE!
+		oParser = new parserFormula('REGEXREPLACE("text","","X")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("text","","X") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'XtXeXxXtX', 'Test: Negative case: String, Empty, String. pattern empty ? #VALUE!');
+		// Case #3: String, String, Empty. replacement empty ? replaces with nothing (valid, but mark negative if strict)
+		oParser = new parserFormula('REGEXREPLACE("text","\\w+","")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("text","\\w+","") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'text', 'Test: Negative case: String, String, Empty. replacement empty ? replaces with nothing (valid, but mark negative if strict)');
+		// Case #4: String, String, String. Invalid regex syntax ? #VALUE!
+		oParser = new parserFormula('REGEXREPLACE("abc","(unclosed","X")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("abc","(unclosed","X") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, String, String. Invalid regex syntax ? #VALUE!');
+		// Case #5: String, String, String. Unclosed bracket ? #VALUE!
+		oParser = new parserFormula('REGEXREPLACE("abc","[a-z","X")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("abc","[a-z","X") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, String, String. Unclosed bracket ? #VALUE!');
+		// Case #6: Number, String, String. Number auto-converted to text ? works, but strict type ? negative
+		oParser = new parserFormula('REGEXREPLACE(12345,"\\d","0")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE(12345,"\\d","0") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 12345, 'Test: Negative case: Number, String, String. Number auto-converted to text ? works, but strict type ? negative');
+		// Case #7: String, Number, String. pattern as number ? #VALUE!
+		oParser = new parserFormula('REGEXREPLACE("abc123",123,"X")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("abc123",123,"X") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'abcX', 'Test: Negative case: String, Number, String. pattern as number ? #VALUE!');
+		// Case #8: String, String, Number. replacement as number ? #VALUE!
+		oParser = new parserFormula('REGEXREPLACE("text","pattern",123)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("text","pattern",123) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'text', 'Test: Negative case: String, String, Number. replacement as number ? #VALUE!');
+		// Case #9: String, String, String, String. occurrence as text ? #VALUE!
+		oParser = new parserFormula('REGEXREPLACE("text","pattern","X","1")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("text","pattern","X","1") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'text', 'Test: Negative case: String, String, String, String. occurrence as text ? #VALUE!');
+		// Case #10: String, String, String, Number, String. case_sensitivity as text ? #VALUE!
+		oParser = new parserFormula('REGEXREPLACE("text","pattern","X",0,"1")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("text","pattern","X",0,"1") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'text', 'Test: Negative case: String, String, String, Number, String. case_sensitivity as text ? #VALUE!');
+		// Case #11: Error. Error in text ? propagates #N/A
+		oParser = new parserFormula('REGEXREPLACE(NA(),"\\w+","X")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE(NA(),"\\w+","X") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Error. Error in text ? propagates #N/A');
+		// Case #12: Error. Error in pattern ? #VALUE! or #N/A
+		oParser = new parserFormula('REGEXREPLACE("text",NA(),"X")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("text",NA(),"X") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Error. Error in pattern ? #VALUE! or #N/A');
+		// Case #13: Area. Multi-cell range in text ? #VALUE!
+		oParser = new parserFormula('REGEXREPLACE(A106:A107,"\\d+","X")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE(A106:A107,"\\d+","X") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#SPILL!', 'Test: Negative case: Area. Multi-cell range in text ? #VALUE!');
+		// Case #14: String, Area, String. Multi-cell in pattern ? #VALUE!
+		oParser = new parserFormula('REGEXREPLACE("text",A108:A109,"X")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("text",A108:A109,"X") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'XtXeXxXtX', 'Test: Negative case: String, Area, String. Multi-cell in pattern ? #VALUE!');
+		// Case #15: String, String, Area. Multi-cell in replacement ? #VALUE!
+		oParser = new parserFormula('REGEXREPLACE("text","pattern",A110:A111)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("text","pattern",A110:A111) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'text', 'Test: Negative case: String, String, Area. Multi-cell in replacement ? #VALUE!');
+		// Case #16: String, String, String, Number. occurrence too large ? original text or #VALUE!
+		oParser = new parserFormula('REGEXREPLACE("one two","two","X",99)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("one two","two","X",99) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'one two', 'Test: Negative case: String, String, String, Number. occurrence too large ? original text or #VALUE!');
+		// Case #17: String, String, String, Number. negative occurrence too large ? original or #VALUE!
+		oParser = new parserFormula('REGEXREPLACE("one two","two","X",-99)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("one two","two","X",-99) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'one two', 'Test: Negative case: String, String, String, Number. negative occurrence too large ? original or #VALUE!');
+		// Case #18: Boolean, String, String. Boolean text ? works, but strict ? negative
+		oParser = new parserFormula('REGEXREPLACE(TRUE,"TRUE","X")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE(TRUE,"TRUE","X") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'X', 'Test: Negative case: Boolean, String, String. Boolean text ? works, but strict ? negative');
+		// Case #19: Area3D. Multi-cell Area3D ? #VALUE!
+		oParser = new parserFormula('REGEXREPLACE(Sheet2!A5:A6,"\\d+","X")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE(Sheet2!A5:A6,"\\d+","X") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#SPILL!', 'Test: Negative case: Area3D. Multi-cell Area3D ? #VALUE!');
+		// Case #20: Name. Named area multi-cell ? #VALUE!
+		oParser = new parserFormula('REGEXREPLACE(TestNameArea2,"\\d+","X")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE(TestNameArea2,"\\d+","X") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Name. Named area multi-cell ? #VALUE!');
+		// Case #21: Table. Table with multi-row ? #VALUE!
+		oParser = new parserFormula('REGEXREPLACE(Table2[Text],Table2[Pattern],Table2[Repl])', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE(Table2[Text],Table2[Pattern],Table2[Repl]) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '=REGEXREPLACE(Table2[Text],Table2[Pattern],Table2[Repl])', 'Test: Negative case: Table. Table with multi-row ? #VALUE!');
+		// Case #22: String, String, String. Unicode property not supported ? #VALUE!
+		oParser = new parserFormula('REGEXREPLACE("abc","\\p{L}","X")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("abc","\\p{L}","X") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'abc', 'Test: Negative case: String, String, String. Unicode property not supported ? #VALUE!');
+		// Case #23: String, String, String. Named groups in pattern ? #VALUE! (if not supported)
+		oParser = new parserFormula('REGEXREPLACE("abc","(?<name>abc)","X")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("abc","(?<name>abc)","X") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'X', 'Test: Negative case: String, String, String. Named groups in pattern ? #VALUE! (if not supported)');
+		// Case #24: String, String, String. Possessive quantifier issue ? #VALUE!
+		oParser = new parserFormula('REGEXREPLACE("test",".*+","X")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("test",".*+","X") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'XX', 'Test: Negative case: String, String, String. Possessive quantifier issue ? #VALUE!');
+		// Case #25: String, String, String, Number. occurrence fractional ? #VALUE!
+		oParser = new parserFormula('REGEXREPLACE("abc abc","abc","X",0.5)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("abc abc","abc","X",0.5) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'X X', 'Test: Negative case: String, String, String, Number. occurrence fractional ? #VALUE!');
+		// Case #26: String, String, String, Number, Number. Invalid case_sensitivity ? #VALUE!
+		oParser = new parserFormula('REGEXREPLACE("abc","abc","X",1,2)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("abc","abc","X",1,2) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, String, String, Number, Number. Invalid case_sensitivity ? #VALUE!');
+		// Case #27: String, String, String. Text too long ? may error
+		oParser = new parserFormula('REGEXREPLACE(REPT("a",32768),"a","b")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE(REPT("a",32768),"a","b") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, String, String. Text too long ? may error');
+		// Case #28: Formula. Pattern empty via formula ? #VALUE!
+		oParser = new parserFormula('REGEXREPLACE("data",IF(TRUE,"","invalid"),"X")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("data",IF(TRUE,"","invalid"),"X") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'XdXaXtXaX', 'Test: Negative case: Formula. Pattern empty via formula ? #VALUE!');
+		// Case #29: String, String, String. Invalid backreference ? treats as literal or error
+		oParser = new parserFormula('REGEXREPLACE("abc","abc","$10")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("abc","abc","$10") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, String, String. Invalid backreference ? treats as literal or error');
+		// Case #30: String, String, String. Multiline with ^/$ issues if any ? but works
+		oParser = new parserFormula('REGEXREPLACE("line1\nline2","line1","X")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("line1\nline2","line1","X") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'X\nline2', 'Test: Negative case: String, String, String. Multiline with ^/$ issues if any ? but works');
+
+		let str = "";
+		// Bounded cases:
+		// Case #1: String, String, String. Max text length replace
+		oParser = new parserFormula('REGEXREPLACE(REPT("a",32767),"a{32767}","b")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE(REPT("a",32767),"a{32767}","b") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'b', 'Test: Bounded case: String, String, String. Max text length replace');
+		// Case #2: String, String, String. Long digit match
+		oParser = new parserFormula('REGEXREPLACE("123456789012345","\\d{15}","XXX")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("123456789012345","\\d{15}","XXX") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 123456789012345, 'Test: Bounded case: String, String, String. Long digit match');
+		// Case #3: String, String, String, Number. Long text before match
+		str = "x ";
+		oParser = new parserFormula('REGEXREPLACE(REPT("x ",10000)&"match","match","Y",1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE(REPT("x ",10000)&"match","match","Y",1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), str.repeat(10000) + "Y", 'String, String, String, Number. Long text before match');
+		// Case #4: String, String, String, Number. Long text after match
+		str = " x";
+		oParser = new parserFormula('REGEXREPLACE("match"&REPT(" x",10000),"match","Y",1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("match"&REPT(" x",10000),"match","Y",1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), "Y" + str.repeat(10000), 'String, String, String, Number. Long text after match');
+		// Case #5: String, String, String. Large group number ? may error or literal
+		oParser = new parserFormula('REGEXREPLACE("a","(a){1000}","$1")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("a","(a){1000}","$1") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'a', 'Test: Bounded case: String, String, String. Large group number ? may error or literal');
+		// Case #6: String, String, String. Empty text full match
+		oParser = new parserFormula('REGEXREPLACE("",".*","empty")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("",".*","empty") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'empty', 'Test: Bounded case: String, String, String. Empty text full match');
+		// Case #7: String, String, String, Number. Negative occurrence bounded by matches
+		oParser = new parserFormula('REGEXREPLACE("one two three","\\w+", "X", -3)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("one two three","\\w+", "X", -3) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'one two three', 'Test: Bounded case: String, String, String, Number. Negative occurrence bounded by matches');
+		// Case #8: String, String, String. Large number as text replace
+		oParser = new parserFormula('REGEXREPLACE("999999999999999","9{15}","0")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("999999999999999","9{15}","0") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), "0", 'Test: Bounded case: String, String, String. Large number as text replace');
+		// Case #9: String, String, String. Large quantifier on short text ? no replace
+		oParser = new parserFormula('REGEXREPLACE("test",".{32767}","X")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE("test",".{32767}","X") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'test', 'Test: Bounded case: String, String, String. Large quantifier on short text ? no replace');
+		// Case #10: String, String, String. Near max captures/backrefs
+		oParser = new parserFormula('REGEXREPLACE(REPT("ab",16383)&"c","(ab){16383}c","$1")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REGEXREPLACE(REPT("ab",16383)&"c","(ab){16383}c","$1") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Bounded case: String, String, String. Near max captures/backrefs');
+
+
+
+		// testArrayFormula2(assert, "REGEXREPLACE", 1, 1);
+	});
+
 	QUnit.test("Test: \"SEARCH\"", function (assert) {
 		let array;
 
