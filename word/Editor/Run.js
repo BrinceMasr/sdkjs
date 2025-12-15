@@ -2126,60 +2126,24 @@ ParaRun.prototype.AddText = function(sString, nPos)
 };
 ParaRun.prototype.AddPdfOriginText = function(aGids, sString, aWidths, nFontSize, nPos)
 {
-	var nCharPos = undefined !== nPos && null !== nPos && -1 !== nPos ? nPos : this.Content.length;
-
-	let oForm     = this.GetParentForm();
-	var oTextForm = oForm ? oForm.GetTextFormPr() : null;
-	var nMax      = oTextForm ? oTextForm.GetMaxCharacters() : 0;
+	let nCharPos = undefined !== nPos && null !== nPos && -1 !== nPos ? nPos : this.Content.length;
 
 	if (this.IsMathRun())
 	{
-		for (var oIterator = sString.getUnicodeIterator(); oIterator.check(); oIterator.next())
+		for (let oIterator = sString.getUnicodeIterator(); oIterator.check(); oIterator.next())
 		{
-			var nCharCode = oIterator.value();
+			let nCharCode = oIterator.value();
 
-			var oMathText = new CMathText();
+			let oMathText = new CMathText();
 			oMathText.add(nCharCode);
 			this.AddToContent(nCharPos++, oMathText);
 		}
 	}
-	else if (nMax > 0)
-	{
-		var arrLetters = [], nLettersCount = 0;
-		for (var oIterator = sString.getUnicodeIterator(); oIterator.check(); oIterator.next())
-		{
-			var nCharCode = oIterator.value();
-
-			if (9 === nCharCode) // \t
-				continue;
-			else if (10 === nCharCode) // \n
-				continue;
-			else if (13 === nCharCode) // \r
-				continue;
-			else if (AscCommon.IsSpace(nCharCode)) // space
-			{
-				nLettersCount++;
-				arrLetters.push(new AscWord.CPdfRunSpace(aGids[oIterator.position()], nCharCode, aWidths[oIterator.position()], nFontSize));
-			}
-			else
-			{
-				nLettersCount++;
-				arrLetters.push(new AscWord.CPdfRunText(aGids[oIterator.position()], nCharCode, aWidths[oIterator.position()], nFontSize));
-			}
-		}
-
-		for (var nIndex = 0; nIndex < arrLetters.length; ++nIndex)
-		{
-			this.AddToContent(nCharPos++, arrLetters[nIndex], true);
-		}
-
-		oForm.TrimTextForm();
-	}
 	else
 	{
-		for (var oIterator = sString.getUnicodeIterator(); oIterator.check(); oIterator.next())
+		for (let oIterator = sString.getUnicodeIterator(); oIterator.check(); oIterator.next())
 		{
-			var nCharCode = oIterator.value();
+			let nCharCode = oIterator.value();
 
 			if (9 === nCharCode) // \t
 				this.AddToContent(nCharPos++, new AscWord.CRunTab(), true);
