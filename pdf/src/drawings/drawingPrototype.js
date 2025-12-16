@@ -594,7 +594,7 @@
         let oFontFile;
         if (sFontName && sFontName.startsWith(AscFonts.getEmbeddedFontPrefix())) {
             let oFontInfo = AscFonts.g_font_infos_embed[AscFonts.g_map_font_index_embed[sFontName]];
-            oFontFile = AscCommon.g_fontManager.LoadFont(AscCommon.g_font_loader.fontFiles[oFontInfo.indexR], oFontInfo.faceIndexR, AscFonts.MEASURE_FONTSIZE,
+            oFontFile = AscCommon.g_fontManager.LoadFont(AscCommon.g_font_loader.fontFiles[oFontInfo.indexR], oFontInfo.faceIndexR, oTextPr.GetFontSize() || AscFonts.MEASURE_FONTSIZE,
                 false,
                 false,
                 false, false);
