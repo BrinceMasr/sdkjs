@@ -204,13 +204,29 @@ function (window, undefined) {
 
 	const getValue = function (arg, row, col) {
 		let val;
-		if (arg.type === cElementType.array || arg.type === cElementType.cellsRange || arg.type === cElementType.cellsRange3D) {
+		if (arg.type === cElementType.cellsRange3D) {
+			val = arg.getValueByRowCol(row, col, true);
+		} else if (arg.type === cElementType.array || arg.type === cElementType.cellsRange) {
 			val = arg.getValue2(row, col);
 		} else {
 			val = arg;
 		}
 
 		return val;
+	}
+
+    // polyfill to String.matchAll method
+	function matchAll(pattern, str){
+		let regex = new RegExp(pattern,"g");
+		let matches = [];
+		
+		let match_result = str.match(regex);
+		
+		for (let index in match_result) {
+			let item = match_result[index];
+			matches[index] = item.match(new RegExp(pattern)); 
+		}
+		return matches;
 	}
 
 	/**
@@ -2559,12 +2575,12 @@ function (window, undefined) {
 				return new cError(cErrorType.wrong_value_type);
 			}
 
-			// find all matches - to implement Excel-like occurrence logic
-			const matches = [...text.matchAll(regex)];
+			// find all matches array with length - to implement Excel-like occurrence logic
+			const matches = text.match(regex);
 
-			if (matches.length === 0) {
+			if (!matches || matches.length === 0) {
 				return new cString(text);
-			} 
+			}
 			
 			// which indexes to replace
 			let indexesToReplace = [];
@@ -2572,7 +2588,6 @@ function (window, undefined) {
 
 			if (occurrence === 0) {
 				// Replace all
-				// indexesToReplace = matches.map((elem, index) => index);
 				result = text.replace(regex, replacement);
 				return new cString(result);
 			} else if (occurrence > 0) {

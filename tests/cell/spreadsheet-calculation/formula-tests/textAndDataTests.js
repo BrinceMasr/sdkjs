@@ -7442,7 +7442,8 @@ $(function () {
 		// Case #20: Name. Named area multi-cell
 		oParser = new parserFormula('REGEXREPLACE(TestNameArea2,"\\d+","X")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: REGEXREPLACE(TestNameArea2,"\\d+","X") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '0.8', 'Test: Negative case: Name. Named area multi-cell ? #VALUE!');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'X.X', 'Test: Negative case: Name. Named area multi-cell');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,1).getValue(), '-X.X', 'Test: Negative case: Name. Named area multi-cell');
 		// Case #21: Table. Table with multi-row 
 		oParser = new parserFormula('REGEXREPLACE(Table1[Column2],Table1[Column3],Table1[Column1])', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: REGEXREPLACE(Table1[Column2],Table1[Column3],Table1[Column1]) is parsed.');
@@ -7530,11 +7531,9 @@ $(function () {
 		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Bounded case: String, String, String. Near max captures/backrefs');
 
 		// Need to fix:
-		// Case #20: Name. Named area multi-cell
 		// Case #24: String, String, String. Possessive quantifier issue - PCRE2 only pattern
 		// Case #29: String, String, String. Invalid backreference ? treats as literal or error - excel special symbols
 		// Case #10: String, String, String. Near max captures/backrefs
-
 
 
 		// testArrayFormula2(assert, "REGEXREPLACE", 1, 1);
