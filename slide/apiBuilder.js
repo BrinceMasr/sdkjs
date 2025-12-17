@@ -592,22 +592,36 @@
         return new ApiTheme(oThemeLoadInfo);
     };
 
-    /**
-     * Creates a new theme color scheme.
-     * @typeofeditors ["CPE"]
-     * @memberof Api
-     * @param {(ApiUniColor[] | ApiRGBColor[])} arrColors - Set of colors which are referred to as a color scheme.
-     * The color scheme is responsible for defining a list of twelve colors.
-     * The array should contain a sequence of colors: 2 dark, 2 light, 6 primary, a color for a hyperlink and a color for the followed hyperlink.
-     * @param {string} sName - Theme color scheme name.
-     * @returns {?ApiThemeColorScheme}
-     * @see office-js-api/Examples/{Editor}/Api/Methods/CreateThemeColorScheme.js
+	/**
+	 * Creates a new theme color scheme.
+	 *
+	 * @typeofeditors ["CPE"]
+	 * @memberof Api
+	 *
+	 * @param {(ApiUniColor[] | ApiRGBColor[] | ApiColor[])} arrColors - Set of colors which are referred to as a color scheme.
+	 * The color scheme is responsible for defining a list of twelve colors.
+	 * The array should contain a sequence of colors: 2 dark, 2 light, 6 primary, a color for a hyperlink and a color for the followed hyperlink.
+	 * @param {string} sName - Theme color scheme name.
+	 * @returns {?ApiThemeColorScheme}
+	 *
+	 * @see office-js-api/Examples/{Editor}/Api/Methods/CreateThemeColorScheme.js
 	 */
     Api.prototype.CreateThemeColorScheme = function(arrColors, sName){
         if (typeof(sName) !== "string")
             sName = "New theme's color scheme";
         if (!Array.isArray(arrColors) || arrColors.length !== 12)
             return null;
+
+		arrColors = arrColors.map(function (color) {
+			if (color instanceof AscBuilder.ApiColor) {
+				const rgb = color.GetRGB();
+				const safeCopy = new AscBuilder.Api.prototype.RGB(rgb['r'], rgb['g'], rgb['b']);
+				const unifill = safeCopy.private_createUnifill();
+				return { Unicolor: unifill.fill.color };
+			}
+
+			return color;
+		});
 
         var oClrScheme = new AscFormat.ClrScheme();
         oClrScheme.setName(sName);
@@ -4801,12 +4815,7 @@
 	 */
     ApiShape.prototype.GetDocContent = function()
     {
-        var oApi = private_GetApi();
-        if(oApi && this.Drawing && this.Drawing.txBody && this.Drawing.txBody.content)
-        {
-            return oApi.private_CreateApiDocContent(this.Drawing.txBody.content);
-        }
-        return null;
+        return this.GetContent();
     };
     
     /**
@@ -4817,12 +4826,20 @@
 	 */
     ApiShape.prototype.GetContent = function()
     {
-        var oApi = private_GetApi();
-        if(oApi && this.Drawing && this.Drawing.txBody && this.Drawing.txBody.content)
-        {
-            return oApi.private_CreateApiDocContent(this.Drawing.txBody.content);
-        }
-        return null;
+		var oApi = Asc["editor"];
+		if (!oApi)
+			return null;
+		let docContent = this.Drawing.getDocContent();
+		if (!docContent)
+		{
+			this.Drawing.createTextBody();
+		}
+		docContent = this.Drawing.getDocContent();
+		if (docContent)
+		{
+			return oApi.private_CreateApiDocContent(docContent);
+		}
+		return null;
     };
 
     /**

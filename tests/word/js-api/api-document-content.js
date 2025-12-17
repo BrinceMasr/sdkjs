@@ -30,32 +30,37 @@
  *
  */
 
-$(function () {
-	QUnit.module('Test the ApiInlineLevelSdt methods');
-
-	QUnit.test('SetBorderColor, GetBorderColor', function (assert) {
-		let apiInlineCC = AscTest.JsApi.CreateInlineLvlSdt();
-
-		assert.strictEqual(apiInlineCC.GetBorderColor(), null, 'Color border color for a newly created inline content control');
-
-		apiInlineCC.SetBorderColor(255, 122, 100, 255);
-		assert.equalRgba(apiInlineCC.GetBorderColor(), {r : 255, g : 122, b : 100, a : 255}, 'Check border color after setting it with rgba components');
-
-		const rgbaColor = AscTest.JsApi.RGBA(60, 120, 180, 240);
-		apiInlineCC.SetBorderColor(rgbaColor);
-		assert.equalRgba(apiInlineCC.GetBorderColor(), { r: 60, g: 120, b: 180, a: 240 }, 'Check border color after setting it with ApiColor (rgba)');
-	});
-
-	QUnit.test('SetBackgroundColor, GetBackgroundColor', function (assert) {
-		let apiInlineCC = AscTest.JsApi.CreateInlineLvlSdt();
-
-		assert.strictEqual(apiInlineCC.GetBackgroundColor(), null, 'Color background color for a newly created inline content control');
-
-		apiInlineCC.SetBackgroundColor(255, 122, 100, 255);
-		assert.equalRgba(apiInlineCC.GetBackgroundColor(), { r: 255, g: 122, b: 100, a: 255 }, 'Check background color after setting it with rgba components');
-
-		const rgbaColor = AscTest.JsApi.RGBA(60, 120, 180, 240);
-		apiInlineCC.SetBackgroundColor(rgbaColor);
-		assert.equalRgba(apiInlineCC.GetBackgroundColor(), { r: 60, g: 120, b: 180, a: 240 }, 'Check background color after setting it with ApiColor (rgba)');
+$(function ()
+{
+	QUnit.module("ApiDocumentContent");
+	
+	
+	QUnit.test("GetText", function (assert)
+	{
+		let docContent = AscTest.JsApi.CreateDocContent();
+		let p = docContent.GetElement(0);
+		let run = p.AddText("123");
+		run.AddTabStop();
+		run.AddText("456");
+		run.AddLineBreak();
+		run.AddText("789");
+		
+		let table = AscTest.JsApi.CreateTable(2,2);
+		table.GetRow(0).GetCell(0).GetContent().GetElement(0).AddText("A");
+		table.GetRow(0).GetCell(1).GetContent().GetElement(0).AddText("B");
+		table.GetRow(1).GetCell(0).GetContent().GetElement(0).AddText("C");
+		table.GetRow(1).GetCell(1).GetContent().GetElement(0).AddText("D");
+		
+		docContent.Push(table);
+		
+		assert.strictEqual(docContent.GetText(), "123\t456\r789\r\nA\tB\r\nC\tD\r\n\r\n", "Check GetText");
+		assert.strictEqual(docContent.GetText({
+			"TabSymbol" : "_t_",
+			"NewLineSeparator" : "_nl_",
+			"TableCellSeparator" : "_c_",
+			"TableRowSeparator" : "_r_",
+			"ParaSeparator" : "_p_"
+			
+		}), "123_t_456_nl_789_p_A_c_B_r_C_c_D_r__p_", "Check GetText");
 	});
 });
