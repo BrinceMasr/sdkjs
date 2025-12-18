@@ -2103,7 +2103,7 @@ function (window, undefined) {
 	 */
 	cREGEXTEST.prototype.Calculate = function (arg) {
 
-		const regexTest = function(text, pattern, case_sensitivity = 0) {
+		const regexTest = function(text, pattern, case_sensitivity) {
 			if (text === pattern || pattern === "") {
 				return new cBool(true);
 			}
@@ -2119,9 +2119,13 @@ function (window, undefined) {
 			let inlineFlagsMatch = pattern.match(/^\(\?([imsu]+)\)/i);
 			if (inlineFlagsMatch) {
 				let inline = inlineFlagsMatch[1].toLowerCase();
+				
 				// inline flags to JS flags, if supported
-				for (const ch of inline) {
-					if (!flags.includes(ch)) flags += ch;
+				for (let i = 0; i < inline.length; i++) {
+					let ch = inline.charAt(i);
+					if (flags.indexOf(ch) === -1) {
+						flags += ch;
+					}
 				}
 				pattern = pattern.slice(inlineFlagsMatch[0].length);
 			}
@@ -2298,7 +2302,7 @@ function (window, undefined) {
 	 */
 	cREGEXEXTRACT.prototype.Calculate = function (arg) {
 
-		const regexExtract = function(text, pattern, returnMode = 0, caseSensitivity = 0) {
+		const regexExtract = function(text, pattern, returnMode, caseSensitivity) {
 			const resArray = new cArray();
 			let flags = 'g';
 			if (caseSensitivity === 1) {
@@ -2309,9 +2313,13 @@ function (window, undefined) {
 			let inlineFlagsMatch = pattern.match(/^\(\?([gimsuy]+)\)/i);
 			if (inlineFlagsMatch) {
 				let inline = inlineFlagsMatch[1].toLowerCase();
+
 				// inline flags to JS flags, if supported
-				for (const ch of inline) {
-					if (!flags.includes(ch)) flags += ch;
+				for (let i = 0; i < inline.length; i++) {
+					let ch = inline.charAt(i);
+					if (flags.indexOf(ch) === -1) {
+						flags += ch;
+					}
 				}
 				pattern = pattern.slice(inlineFlagsMatch[0].length);
 			}
@@ -2561,7 +2569,7 @@ function (window, undefined) {
 	 */
 	cREGEXREPLACE.prototype.Calculate = function (arg) {
 
-		const regexReplace = function(text, pattern, replacement, occurrence = 0, case_sensitivity = 0) {
+		const regexReplace = function(text, pattern, replacement, occurrence, case_sensitivity) {
 			// flags
 			let flags = "g";
 			if (case_sensitivity === 1) {
