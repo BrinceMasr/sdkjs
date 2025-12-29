@@ -5643,6 +5643,71 @@ $(function () {
 		// Step 4: Test undo/redo
 		checkUndoRedo(checkBlockedState, checkExpandedState, "Unblocking array undo/redo");
 
+		// Step 5: Test expanded -> blocked -> expanded scenario
+		clearData(0, 0, 100, 200);
+
+		// First: Add array formula that can expand freely
+		fillRange = ws.getRange2("C3");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("C3").getValueForEdit2();
+		fragment[0].setFragmentText(formula);
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		var checkExpandedStateC3 = function (desc) {
+			var cellValueC3 = ws.getRange2("C3").getValue();
+			var cellValueC4 = ws.getRange2("C4").getValue();
+			var cellValueD3 = ws.getRange2("D3").getValue();
+			var cellValueD4 = ws.getRange2("D4").getValue();
+			assert.strictEqual(cellValueC3, "1", desc + ": C3 = 1");
+			assert.strictEqual(cellValueC4, "3", desc + ": C4 = 3");
+			assert.strictEqual(cellValueD3, "2", desc + ": D3 = 2");
+			assert.strictEqual(cellValueD4, "4", desc + ": D4 = 4");
+
+			var cmIndexC3 = getCellMetadata(2, 2);
+			assert.ok(cmIndexC3 > 0, desc + ": C3 has metadata");
+
+			var vmIndexC3 = getCellRichValueIndex(2, 2);
+			assert.ok(!vmIndexC3 || vmIndexC3 === 0, desc + ": C3 has no richdata (expanded)");
+
+			var arrayRef = _getArrayFormulaRef("C3");
+			assert.ok(arrayRef != null, desc + ": Array reference exists");
+			assert.strictEqual(arrayRef.r1, 2, desc + ": Array starts at row 2");
+			assert.strictEqual(arrayRef.c1, 2, desc + ": Array starts at col 2");
+			assert.strictEqual(arrayRef.r2, 3, desc + ": Array ends at row 3");
+			assert.strictEqual(arrayRef.c2, 3, desc + ": Array ends at col 3");
+		};
+
+		checkExpandedStateC3("After adding expanded array in C3");
+
+		// Second: Add blocking data to collapse the array
+		ws.getRange2("D3").setValue("blocker");
+
+		var checkBlockedStateC3 = function (desc) {
+			var cellValueC3 = ws.getRange2("C3").getValue();
+			var cellValueD3 = ws.getRange2("D3").getValue();
+			assert.strictEqual(cellValueC3, "#SPILL!", desc + ": C3 shows SPILL error");
+			assert.strictEqual(cellValueD3, "blocker", desc + ": D3 has blocking value");
+
+			var cmIndexC3 = getCellMetadata(2, 2);
+			assert.ok(cmIndexC3 > 0, desc + ": C3 has metadata");
+
+			var vmIndexC3 = getCellRichValueIndex(2, 2);
+			assert.ok(vmIndexC3 > 0, desc + ": C3 has richdata (collapsed)");
+
+			var arrayRef = _getArrayFormulaRef("C3");
+			assert.ok(arrayRef.r1 === arrayRef.r2 && arrayRef.c1 === arrayRef.c2, desc + ": Array collapsed when blocked");
+		};
+
+		checkBlockedStateC3("After blocking D3");
+
+		// Third: Remove blocking data to expand again
+		ws.getRange2("D3").setValue("");
+
+		checkExpandedStateC3("After removing blocking data from D3");
+
+		// Fourth: Test undo/redo for the expanded -> blocked -> expanded cycle
+		checkUndoRedo(checkBlockedStateC3, checkExpandedStateC3, "Expanded->Blocked->Expanded undo/redo");
+
 		clearData(0, 0, 10, 20);
 	});
 
