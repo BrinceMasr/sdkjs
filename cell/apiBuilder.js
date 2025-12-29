@@ -19590,25 +19590,6 @@
 	};
 
 	/**
-	 * Sets the validation type.
-	 * @memberof ApiValidation
-	 * @typeofeditors ["CSE"]
-	 * @param {ValidationType} Type - The validation type.
-	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetType.js
-	 */
-	ApiValidation.prototype.SetType = function(Type) {
-		const validation = getSingleValidation(this);
-		if (!validation) {
-			return;
-		}
-		// If there are multiple validations, we cannot set type
-		let internalType = FromXlValidationTypeTo(Type);
-		if (internalType !== -1) {
-			validation.setType(internalType);
-		}
-	};
-
-	/**
 	 * Returns the validation alert style.
 	 * @memberof ApiValidation
 	 * @typeofeditors ["CSE"]
@@ -19621,24 +19602,6 @@
 			return;
 		}
 		return ToXlValidationAlertStyleFrom(validation.getErrorStyle());
-	};
-
-	/**
-	 * Sets the validation alert style.
-	 * @memberof ApiValidation
-	 * @typeofeditors ["CSE"]
-	 * @param {ValidationAlertStyle} AlertStyle - The validation alert style.
-	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetAlertStyle.js
-	 */
-	ApiValidation.prototype.SetAlertStyle = function(AlertStyle) {
-		const validation = getSingleValidation(this);
-		if (!validation) {
-			return;
-		}
-		let internalAlertStyle = FromXlValidationAlertStyleTo(AlertStyle);
-		if (internalAlertStyle !== -1) {
-			validation.setErrorStyle(internalAlertStyle);
-		}
 	};
 
 	/**
@@ -19898,22 +19861,6 @@
 	};
 
 	/**
-	 * Sets the first formula in the data validation.
-	 * @memberof ApiValidation
-	 * @typeofeditors ["CSE"]
-	 * @param {string} Formula1 - The first formula.
-	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetFormula1.js
-	 */
-	ApiValidation.prototype.SetFormula1 = function(Formula1) {
-		const validation = getSingleValidation(this);
-		if (!validation) {
-			return;
-		}
-		let formula = new window['Asc'].CDataFormula(Formula1);
-		validation.setFormula1(formula);
-	};
-
-	/**
 	 * Returns the second formula in the data validation.
 	 * @memberof ApiValidation
 	 * @typeofeditors ["CSE"]
@@ -19927,22 +19874,6 @@
 		}
 		let formula2 = validation.getFormula2();
 		return formula2 ? formula2.asc_getValue() : "";
-	};
-
-	/**
-	 * Sets the second formula in the data validation.
-	 * @memberof ApiValidation
-	 * @typeofeditors ["CSE"]
-	 * @param {string} Formula2 - The second formula.
-	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetFormula2.js
-	 */
-	ApiValidation.prototype.SetFormula2 = function(Formula2) {
-		const validation = getSingleValidation(this);
-		if (!validation) {
-			return;
-		}
-		let formula = new window['Asc'].CDataFormula(Formula2);
-		validation.setFormula2(formula);
 	};
 
 	/**
@@ -19961,24 +19892,6 @@
 	};
 
 	/**
-	 * Sets the data validation operator.
-	 * @memberof ApiValidation
-	 * @typeofeditors ["CSE"]
-	 * @param {ValidationOperator} Operator - The validation operator.
-	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetOperator.js
-	 */
-	ApiValidation.prototype.SetOperator = function(Operator) {
-		const validation = getSingleValidation(this);
-		if (!validation) {
-			return;
-		}
-		let internalOperator = FromXlValidationOperatorTo(Operator);
-		if (internalOperator !== -1) {
-			validation.setOperator(internalOperator);
-		}
-	};
-
-	/**
 	 * Returns the parent range object.
 	 * @memberof ApiValidation
 	 * @typeofeditors ["CSE"]
@@ -19993,18 +19906,12 @@
 	Object.defineProperty(ApiValidation.prototype, "Type", {
 		get: function() {
 			return this.GetType();
-		},
-		set: function(value) {
-			this.SetType(value);
 		}
 	});
 
 	Object.defineProperty(ApiValidation.prototype, "AlertStyle", {
 		get: function() {
 			return this.GetAlertStyle();
-		},
-		set: function(value) {
-			this.SetAlertStyle(value);
 		}
 	});
 
@@ -20084,27 +19991,18 @@
 		get: function() {
 			return this.GetFormula1();
 		},
-		set: function(value) {
-			this.SetFormula1(value);
-		}
 	});
 
 	Object.defineProperty(ApiValidation.prototype, "Formula2", {
 		get: function() {
 			return this.GetFormula2();
 		},
-		set: function(value) {
-			this.SetFormula2(value);
-		}
 	});
 
 	Object.defineProperty(ApiValidation.prototype, "Operator", {
 		get: function() {
 			return this.GetOperator();
 		},
-		set: function(value) {
-			this.SetOperator(value);
-		}
 	});
 
 	Object.defineProperty(ApiValidation.prototype, "Parent", {
@@ -20116,9 +20014,6 @@
 	Object.defineProperty(ApiValidation.prototype, "Value", {
 		get: function() {
 			return this.GetFormula1();
-		},
-		set: function(value) {
-			this.SetFormula1(value);
 		}
 	});
 
