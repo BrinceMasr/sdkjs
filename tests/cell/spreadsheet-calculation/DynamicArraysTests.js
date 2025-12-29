@@ -5574,5 +5574,77 @@ $(function () {
 		clearData(0, 0, 10, 20);
 	});
 
+	QUnit.test("Test: \"Dynamic array blocked, then unblocked with undo/redo\"", function (assert) {
+		clearData(0, 0, 100, 200);
+
+		var flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		var formula = "=SEQUENCE(2,2)";
+
+		// Step 1: Add blocking data
+		ws.getRange2("B1").setValue("block");
+
+		var checkBlockedState = function (desc) {
+			var cellValueA1 = ws.getRange2("A1").getValue();
+			var cellValueB1 = ws.getRange2("B1").getValue();
+			assert.strictEqual(cellValueA1, "#SPILL!", desc + ": A1 shows SPILL error");
+			assert.strictEqual(cellValueB1, "block", desc + ": B1 has blocking value");
+
+			var cmIndexA1 = getCellMetadata(0, 0);
+			assert.ok(cmIndexA1 > 0, desc + ": A1 has metadata");
+
+			var vmIndexA1 = getCellRichValueIndex(0, 0);
+			assert.ok(vmIndexA1 > 0, desc + ": A1 has richdata (collapsed)");
+
+			var arrayRef = _getArrayFormulaRef("A1");
+			assert.ok(arrayRef.r1 === arrayRef.r2 && arrayRef.c1 === arrayRef.c2, desc + ": No array reference when blocked");
+		};
+
+		// Step 2: Add array formula (it will be blocked)
+		var fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		var fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText(formula);
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		checkBlockedState("After adding blocked array");
+
+		// Step 3: Remove blocking data
+		ws.getRange2("B1").setValue("");
+
+		var checkExpandedState = function (desc) {
+			var cellValueA1 = ws.getRange2("A1").getValue();
+			var cellValueA2 = ws.getRange2("A2").getValue();
+			var cellValueB1 = ws.getRange2("B1").getValue();
+			var cellValueB2 = ws.getRange2("B2").getValue();
+			assert.strictEqual(cellValueA1, "1", desc + ": A1 = 1");
+			assert.strictEqual(cellValueA2, "3", desc + ": A2 = 3");
+			assert.strictEqual(cellValueB1, "2", desc + ": B1 = 2");
+			assert.strictEqual(cellValueB2, "4", desc + ": B2 = 4");
+
+			var cmIndexA1 = getCellMetadata(0, 0);
+			assert.ok(cmIndexA1 > 0, desc + ": A1 has metadata");
+
+			var vmIndexA1 = getCellRichValueIndex(0, 0);
+			assert.ok(!vmIndexA1 || vmIndexA1 === 0, desc + ": A1 has no richdata (expanded)");
+
+			var arrayRef = _getArrayFormulaRef("A1");
+			assert.ok(arrayRef != null, desc + ": Array reference exists when expanded");
+			assert.strictEqual(arrayRef.r1, 0, desc + ": Array starts at row 0");
+			assert.strictEqual(arrayRef.c1, 0, desc + ": Array starts at col 0");
+			assert.strictEqual(arrayRef.r2, 1, desc + ": Array ends at row 1");
+			assert.strictEqual(arrayRef.c2, 1, desc + ": Array ends at col 1");
+		};
+
+		checkExpandedState("After removing blocking data");
+
+		// Step 4: Test undo/redo
+		checkUndoRedo(checkBlockedState, checkExpandedState, "Unblocking array undo/redo");
+
+		clearData(0, 0, 10, 20);
+	});
+
 	QUnit.module("Sheet structure");
 });
