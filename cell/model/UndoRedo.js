@@ -5201,6 +5201,10 @@ function (window, undefined) {
 				break;
 			case AscCH.historyitem_ArrayFromula_DeleteFormula:
 				if (bUndo) {
+					if (vmIndex != null) {
+						range = ws.getRange3(bbox.r1, bbox.c1, bbox.r1, bbox.c1);
+						bbox = new Asc.Range(bbox.c1, bbox.r1, bbox.c1, bbox.r1);
+					}
 					range.setValue(formula, null, null, bbox, null, {cmIndex: cmIndex, vmIndex: vmIndex, range: bbox});
 				}
 				break;

@@ -15500,7 +15500,7 @@
 			if ((this.nCol !== formulaRef.c1 || this.nRow !== formulaRef.r1) && !formulaRef.isOneCell()) {
 				return;
 			}
-			let newFormulaRef = formulaRef.isOneCell() ? new Asc.Range(this.nCol, this.nRow, this.nCol, this.nRow) : formulaRef;
+			let newFormulaRef = (formulaRef.isOneCell() || (caProps && caProps.vm)) ? new Asc.Range(this.nCol, this.nRow, this.nCol, this.nRow) : formulaRef;
 			parser.setArrayFormulaRef(newFormulaRef);
 			this.ws.getRange3(newFormulaRef.r1, newFormulaRef.c1, newFormulaRef.r2, newFormulaRef.c2)._foreach2(function(cell){
 				cell && cell.setFormulaParsed(parser, bHistoryUndo);
@@ -18710,7 +18710,9 @@
 				new Asc.Range(this.bbox.c1, this.bbox.r1, this.bbox.c2, this.bbox.r2), new AscCommonExcel.UndoRedoData_ArrayFormula(this.bbox, "=" + _sFormula, cmIndex, vmIndex));
 		}
 
-		t.worksheet.dynamicArrayManager.recalculateVolatileArrays();
+		if (false == this.worksheet.workbook.bUndoChanges && false == this.worksheet.workbook.bRedoChanges) {
+			t.worksheet.dynamicArrayManager.recalculateVolatileArrays();
+		}
 
 		AscCommon.History.EndTransaction();
 		this.onWorksheetChange();
@@ -25099,8 +25101,9 @@
 							ws._getCell(row, col, function(cell) {
 								if (cell) {
 									ws.workbook.checkRemoveMetadataByVmIndex(formula.getVm());
-									formula.setVm(null);
-									cell.setFormulaInternal(formula);
+									// formula.setVm(null);
+									// cell.setFormulaInternal(formula);
+									cell.setValue("=" + formula.Formula, null, null, newRef, null, {range: newRef/*, beforeSpillRange: firstCellRef*/})
 								}
 							});
 						}
@@ -25109,12 +25112,14 @@
 				depGraph.addToChangedRange2(formula.getWs().getId(), formula.getDynamicRef());
 				depGraph.endListeningVolatileArray(listenerId);
 			} else {
-				formula.setDynamicRef(firstCellRef);
-				ws._getCell(firstCellRef.r1, firstCellRef.c1, function(cell) {
-					cell && cell.setFormulaInternal(formula);
-				});
+				if (!formula.getDynamicRef() || !formula.getDynamicRef().isEqual(firstCellRef)) {
+					formula.setDynamicRef(firstCellRef);
+					ws._getCell(firstCellRef.r1, firstCellRef.c1, function(cell) {
+						cell && cell.setFormulaInternal(formula);
+					});
 
-				depGraph.addToChangedRange2(formula.getWs().getId(), formula.getArrayFormulaRef());
+					depGraph.addToChangedRange2(formula.getWs().getId(), formula.getArrayFormulaRef());
+				}
 			}
 		}
 	};
