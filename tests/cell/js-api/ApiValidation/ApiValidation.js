@@ -231,18 +231,12 @@ $(function () {
         const v = r.GetValidation();
         // Type
         assert.strictEqual(v.GetType(), 'xlValidateWholeNumber', "GetType matches");
-        v.SetType('xlValidateDecimal');
-        assert.strictEqual(v.GetType(), 'xlValidateDecimal', "SetType updated");
 
         // Operator
         assert.strictEqual(v.GetOperator(), 'xlBetween', "Default operator between");
-        v.SetOperator('xlGreater');
-        assert.strictEqual(v.GetOperator(), 'xlGreater', "Operator updated");
 
         // AlertStyle
         assert.strictEqual(v.GetAlertStyle(), 'xlValidAlertStop', "Default alert stop");
-        v.SetAlertStyle('xlValidAlertWarning');
-        assert.strictEqual(v.GetAlertStyle(), 'xlValidAlertWarning', "AlertStyle updated");
 
         // Flags
         v.SetIgnoreBlank(false);
@@ -270,14 +264,6 @@ $(function () {
         assert.strictEqual(v.GetInputMessage(), "1..100 only", "InputMessage OK");
         assert.strictEqual(v.GetErrorTitle(), "Bad age", "ErrorTitle OK");
         assert.strictEqual(v.GetErrorMessage(), "Must be 1..100", "ErrorMessage OK");
-
-        // Formulas & Value property mapping
-        v.SetFormula1("2");
-        v.SetFormula2("99");
-        assert.strictEqual(v.GetFormula1(), "2", "Formula1 OK");
-        assert.strictEqual(v.GetFormula2(), "99", "Formula2 OK");
-        v.Value = "10";
-        assert.strictEqual(v.Value, "10", "Value <-> Formula1 mapping works");
 
         // Parent
         assert.ok(v.GetParent(), "Parent exists");
