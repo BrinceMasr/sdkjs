@@ -3180,6 +3180,10 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 		var result = this.array[i];
 		return result ? result[j] : result;
 	};
+	cArray.prototype.getValue = function () {
+		var result = this.array[0];
+		return result && result[0] ? result[0].getValue() : result;
+	};
 	cArray.prototype.getMatrix = function () {
 
 		//excludeErrorsVal - arguments[1]

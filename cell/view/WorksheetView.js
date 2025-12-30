@@ -22570,13 +22570,13 @@ function isAllowPasteLink(pastedWb) {
 		//TODO вместо getRange3 нужна функция, которая может заканчивать цикл по ячейкам
 		if(!ctrlKey) {
 			//проверяем from, затрагиваем ли мы часть формулы массива
-			res = !this.intersectionFormulaArray(from);
+			res = !this.intersectionFormulaArray(from, null, null, true);
 		}
 
 		//проверяем to, затрагиваем ли мы часть формулы массива
 		var ws = opt_wsTo ? opt_wsTo : this;
 		if(res && to) {
-			res = !ws.intersectionFormulaArray(to);
+			res = !ws.intersectionFormulaArray(to, null, null, true);
 		}
 
 		return res;
