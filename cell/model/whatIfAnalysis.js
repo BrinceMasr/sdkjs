@@ -1010,7 +1010,16 @@ function (window, undefined) {
 		updateDefName('solver_nwt', '1');
 		// Fills Solver parameters
 		for (let sDefName in oDefNameToAttribute) {
-			updateDefName(sDefName, this[oDefNameToAttribute[sDefName]]);
+			let value;
+			switch (sDefName) {
+				case 'solver_opt': value = this.sObjectiveFunction; break;
+				case 'solver_typ': value = this.nOptimizeResultTo; break;
+				case 'solver_val': value = this.sValueOf; break;
+				case 'solver_adj': value = this.sChangingCells; break;
+				case 'solver_neg': value = this.bVariablesNonNegative; break;
+				case 'solver_eng': value = this.nSolvingMethod; break;
+			}
+			updateDefName(sDefName, value);
 		}
 		// Fills constraints
 		const mConstraints = this.asc_getConstraints();
@@ -1033,7 +1042,7 @@ function (window, undefined) {
 		}
 		// Fills options
 		for (let sDefName in oOptionsDefNameToAttribute) {
-			updateDefName(sDefName, oOptions[oOptionsDefNameToAttribute[sDefName]]);
+			updateDefName(sDefName, oOptions.getValueByDefName(sDefName));
 		}
 	};
 	/**
@@ -1084,7 +1093,14 @@ function (window, undefined) {
 		}
 		// Fills solver params
 		for (let sDefName in oDefNameToAttribute) {
-			this[oDefNameToAttribute[sDefName]] = fillAttribute(this[oDefNameToAttribute[sDefName]], sDefName);
+			switch (sDefName) {
+				case 'solver_opt': this.sObjectiveFunction = fillAttribute(this.sObjectiveFunction, sDefName); break;
+				case 'solver_typ': this.nOptimizeResultTo = fillAttribute(this.nOptimizeResultTo, sDefName); break;
+				case 'solver_val': this.sValueOf = fillAttribute(this.sValueOf, sDefName); break;
+				case 'solver_adj': this.sChangingCells = fillAttribute(this.sChangingCells, sDefName); break;
+				case 'solver_neg': this.bVariablesNonNegative = fillAttribute(this.bVariablesNonNegative, sDefName); break;
+				case 'solver_eng': this.nSolvingMethod = fillAttribute(this.nSolvingMethod, sDefName); break;
+			}
 		}
 		// Fills constraints.
 		const nConstraintsSize = mSolverDefNames.get('solver_num') && mSolverDefNames.get('solver_num').Ref;
@@ -1103,7 +1119,7 @@ function (window, undefined) {
 		}
 		// Fills options
 		for (let sDefName in oOptionsDefNameToAttribute) {
-			oOptions[oOptionsDefNameToAttribute[sDefName]] = fillAttribute(oOptions[oOptionsDefNameToAttribute[sDefName]], sDefName);
+			oOptions.setValueByDefName(sDefName, fillAttribute(oOptions.getValueByDefName(sDefName), sDefName));
 		}
 	};
 	/**
@@ -1181,6 +1197,25 @@ function (window, undefined) {
 	}
 
 	asc_COptions.prototype.MAX_LIMITS_DEFAULT_VALUE = 2147483647;
+
+	asc_COptions.prototype.getValueByDefName = function(sDefName) {
+		switch (sDefName) {
+			case 'solver_pre': return this.sConstraintPrecision;
+			case 'solver_scl': return this.bAutomaticScaling;
+			case 'solver_tim': return this.sMaxTime;
+			case 'solver_itr': return this.sIterations;
+			default: return undefined;
+		}
+	};
+
+	asc_COptions.prototype.setValueByDefName = function(sDefName, value) {
+		switch (sDefName) {
+			case 'solver_pre': this.sConstraintPrecision = value; break;
+			case 'solver_scl': this.bAutomaticScaling = value; break;
+			case 'solver_tim': this.sMaxTime = value; break;
+			case 'solver_itr': this.sIterations = value; break;
+		}
+	};
 
 	/**
 	 * Returns value of "Constraint Precision" parameter.
@@ -2732,7 +2767,8 @@ function (window, undefined) {
 
 		// Solver parameters
 		this.nOptimizeResultTo = oParams.asc_getOptimizeResultTo();
-		this.nValueOf = oParams.asc_getValueOf() !== null ? parseFloat(oParams.asc_getValueOf().replace(/,/g, ".")) : null;
+		let _nValueOf = oParams.asc_getValueOf();
+		this.nValueOf = _nValueOf != null ? parseFloat((_nValueOf.toString()).replace(/,/g, ".")) : null;
 		this.bIsVarsNonNegative = oParams.asc_getVariablesNonNegative();
 		this.aConstraints = this.initConstraints(oParams.asc_getConstraints(), oWs);
 		this.nSolvingMethod = oParams.asc_getSolvingMethod();
@@ -3473,7 +3509,7 @@ function (window, undefined) {
 	prot['asc_setObjectiveFunction'] = prot.asc_setObjectiveFunction;
 	prot['asc_setChangingCells'] = prot.asc_setChangingCells;
 	prot['asc_setOptimizeResultTo'] = prot.asc_setOptimizeResultTo;
-	prot['asc_setVariablesNonNegative'] = prot.asc_setVariablesNonNegative;
+	prot['asc_setValueOf'] = prot.asc_setValueOf;
 	prot['asc_setVariablesNonNegative'] = prot.asc_setVariablesNonNegative;
 	prot['asc_setSolvingMethod'] = prot.asc_setSolvingMethod;
 

@@ -425,7 +425,7 @@
 			});
 		}
 
-		AscFonts.initEmbeddedFonts(aEmbedFonts);
+		AscFonts.initEmbeddedFonts(aEmbedFonts, true);
 		return AscCommon.DocumentEditorApi.prototype.pre_Paste.call(this, _fonts, _images, callback);
 	};
 	PDFEditorApi.prototype.asc_PasteData = function(_format, data1, data2, text_data, useCurrentPoint, callback, checkLocks) {
@@ -4304,9 +4304,14 @@
 		oDoc.RecalculateAll();
 		AscCommon.DocumentEditorApi.prototype.asc_Print.call(this, options);
 	};
-	PDFEditorApi.prototype.asc_drawPrintPreview = function(index) {
+	PDFEditorApi.prototype.asc_drawPrintPreview = function(index, printContentType) {
 		let oDoc = this.getPDFDoc();
 		oDoc.BlurActiveObject();
+
+		if (this.printPreview) {
+			this.printPreview.printContentType = printContentType;
+		}
+		
 		AscCommon.DocumentEditorApi.prototype.asc_drawPrintPreview.call(this, index);
 	};
 	PDFEditorApi.prototype.initCollaborativeEditing = function() {

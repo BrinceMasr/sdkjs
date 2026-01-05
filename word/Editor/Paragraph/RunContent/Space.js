@@ -288,7 +288,6 @@
 	}
 	CPdfRunSpace.prototype = Object.create(CRunSpace.prototype);
 	CPdfRunSpace.prototype.constructor = CPdfRunSpace;
-	CRunSpace.prototype.Type = para_PdfSpace;
 
 	CPdfRunSpace.prototype.IsPdfText       = AscWord.CPdfRunText.prototype.IsPdfText;
 	CPdfRunSpace.prototype.GetGid          = AscWord.CPdfRunText.prototype.GetGid;
@@ -323,7 +322,7 @@
 	};
 	CPdfRunSpace.prototype.Read_FromBinary = function(Reader)
 	{
-		this.SetCharCode(Reader.GetLong());
+		this.Value = Reader.GetLong();
 		
 		this.charGid = Reader.GetLong();
 		this.originWidth = Reader.GetLong();
