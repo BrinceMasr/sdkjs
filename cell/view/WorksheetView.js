@@ -19017,7 +19017,7 @@ function isAllowPasteLink(pastedWb) {
 			//перед созданием точки в истории, проверяю, валидная ли формула
 			cellWithFormula = isFormulaFromVal ? cellWithFormula : new AscCommonExcel.CCellWithFormula(this.model, bbox.r1, bbox.c1);
 			newFP = isFormulaFromVal ? newFP : new AscCommonExcel.parserFormula(valText.substring(1), cellWithFormula, this.model);
-			parseResult = isFormulaFromVal ? parseResult : new AscCommonExcel.ParseResult();
+			parseResult = isFormulaFromVal ? parseResult : new AscCommonExcel.ParseResult([],[]);
 
 			if (!isFormulaFromVal && !newFP.parse(AscCommonExcel.oFormulaLocaleInfo.Parse, AscCommonExcel.oFormulaLocaleInfo.DigitSep, parseResult)) {
 				if (parseResult.error !== c_oAscError.ID.FrmlWrongFunctionName && parseResult.error !== c_oAscError.ID.FrmlParenthesesCorrectCount) {

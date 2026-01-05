@@ -2199,6 +2199,84 @@ $(function () {
 		assembledVal = ws.getRange2("A59").getValueForEdit();
 		assert.strictEqual(assembledVal, formula, "result for edit: " + formula);
 
+		// Test @ with mixed range operands - ranges with and without @
+		formula = "=ISBLANK(A1:A3+@A1:A2)";
+		fillRange = ws.getRange2("A60");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A60").getValueForEdit2();
+		fragment[0].setFragmentText(formula);
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+		resCell = getCell(ws.getRange2("A60"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ISBLANK(A1:A3+_xlfn.SINGLE(A1:A2))", "ISBLANK(A1:A3+@A1:A2) -> ISBLANK(A1:A3+SINGLE(A1:A2))");
+		assembledVal = ws.getRange2("A60").getValueForEdit();
+		assert.strictEqual(assembledVal, formula, "result for edit: " + formula);
+
+		formula = "=ISBLANK(@A1:A3+A1:A2)";
+		fillRange = ws.getRange2("A61");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A61").getValueForEdit2();
+		fragment[0].setFragmentText(formula);
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+		resCell = getCell(ws.getRange2("A61"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ISBLANK(_xlfn.SINGLE(A1:A3)+A1:A2)", "ISBLANK(@A1:A3+A1:A2) -> ISBLANK(SINGLE(A1:A3)+A1:A2)");
+		assembledVal = ws.getRange2("A61").getValueForEdit();
+		assert.strictEqual(assembledVal, formula, "result for edit: " + formula);
+
+		formula = "=ISNUMBER(B2:B5*@C2:C5)";
+		fillRange = ws.getRange2("A62");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A62").getValueForEdit2();
+		fragment[0].setFragmentText(formula);
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+		resCell = getCell(ws.getRange2("A62"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ISNUMBER(B2:B5*_xlfn.SINGLE(C2:C5))", "ISNUMBER(B2:B5*@C2:C5) -> ISNUMBER(B2:B5*SINGLE(C2:C5))");
+		assembledVal = ws.getRange2("A62").getValueForEdit();
+		assert.strictEqual(assembledVal, formula, "result for edit: " + formula);
+
+		formula = "=ISERROR(@D1:D10-E1:E10)";
+		fillRange = ws.getRange2("A63");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A63").getValueForEdit2();
+		fragment[0].setFragmentText(formula);
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+		resCell = getCell(ws.getRange2("A63"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ISERROR(_xlfn.SINGLE(D1:D10)-E1:E10)", "ISERROR(@D1:D10-E1:E10) -> ISERROR(SINGLE(D1:D10)-E1:E10)");
+		assembledVal = ws.getRange2("A63").getValueForEdit();
+		assert.strictEqual(assembledVal, formula, "result for edit: " + formula);
+
+		formula = "=ISTEXT(F1:F5&@G1:G5)";
+		fillRange = ws.getRange2("A64");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A64").getValueForEdit2();
+		fragment[0].setFragmentText(formula);
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+		resCell = getCell(ws.getRange2("A64"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ISTEXT(F1:F5&_xlfn.SINGLE(G1:G5))", "ISTEXT(F1:F5&@G1:G5) -> ISTEXT(F1:F5&SINGLE(G1:G5))");
+		assembledVal = ws.getRange2("A64").getValueForEdit();
+		assert.strictEqual(assembledVal, formula, "result for edit: " + formula);
+
+		formula = "=ISBLANK(@A1:A3+@B1:B3+C1:C3)";
+		fillRange = ws.getRange2("A65");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A65").getValueForEdit2();
+		fragment[0].setFragmentText(formula);
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+		resCell = getCell(ws.getRange2("A65"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ISBLANK(_xlfn.SINGLE(A1:A3)+_xlfn.SINGLE(B1:B3)+C1:C3)", "ISBLANK(@A1:A3+@B1:B3+C1:C3) -> ISBLANK(SINGLE(A1:A3)+SINGLE(B1:B3)+C1:C3)");
+		assembledVal = ws.getRange2("A65").getValueForEdit();
+		assert.strictEqual(assembledVal, formula, "result for edit: " + formula);
+
+		formula = "=ISNA(A1:A5>@B1:B5)";
+		fillRange = ws.getRange2("A66");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A66").getValueForEdit2();
+		fragment[0].setFragmentText(formula);
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+		resCell = getCell(ws.getRange2("A66"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ISNA(A1:A5>_xlfn.SINGLE(B1:B5))", "ISNA(A1:A5>@B1:B5) -> ISNA(A1:A5>SINGLE(B1:B5))");
+		assembledVal = ws.getRange2("A66").getValueForEdit();
+		assert.strictEqual(assembledVal, formula, "result for edit: " + formula);
+
 		
 		formula = "=ISNONTEXT(@M3:M12)";
 		fillRange = ws.getRange2("A60");

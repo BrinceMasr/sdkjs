@@ -9735,6 +9735,41 @@ function parserFormula( formula, parent, _ws ) {
 			}
 		}
 
+		if (isAllSkip) {
+			//check parserResult on
+			for (let i = 0; i < parseResult.allFunctionsPos.length; i++) {
+				let funcInfo = parseResult.allFunctionsPos[i];
+				
+				if (funcInfo && funcInfo.start !== undefined && funcInfo.end !== undefined && parseResult.refPos && parseResult.refPos.length > 0) {
+					for (let k = 0; k < parseResult.refPos.length; k++) {
+						let ref = parseResult.refPos[k];
+
+						if (ref.start >= funcInfo.start && ref.end <= funcInfo.end) {
+							let isAtOperator = false;
+							for (let j = 0; j < atOperators.length; j++) {
+								if (atOperators[j].start + 1 === ref.start && atOperators[j].end === ref.end) {
+									isAtOperator = true;
+									break;
+								}
+							}
+
+							if (!isAtOperator) {
+								let shouldSkip = this.checkSkipAtOperator(funcInfo.func && funcInfo.func.name, funcInfo.argPos, ref.type);
+								if (!shouldSkip) {
+									isAllSkip = false;
+									break;
+								}
+							}
+						}
+					}
+				}
+				
+				if (!isAllSkip) {
+					break;
+				}
+			}
+		}
+
 		let formula = this.Formula;
 		if (isAllSkip) {
 			atOperators.sort(function(a, b) {
