@@ -1211,6 +1211,9 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 	cArea.prototype.getValueByRowCol = function (i, j, checkEmpty) {
 		let res, r;
 		r = this.getRange();
+		if (r.bbox.r1 + i > r.bbox.r2 || r.bbox.c1 + j > r.bbox.c2) {
+			return new cError(cErrorType.not_available);
+		}
 		r.worksheet._getCellNoEmpty(r.bbox.r1 + i, r.bbox.c1 + j, function(cell) {
 			if(cell) {
 				res = checkTypeCell(cell);
@@ -3992,9 +3995,9 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 		var replaceOnlyArray = cReturnFormulaType.replace_only_array === returnFormulaType;
 
 		// Проверка должен ли элемент поступать в формулу без изменени?
-		const checkArrayIndex = function(index) {
+		const checkArrayIndex = function(index, _arg_type) {
 			let res = false;
-			let arrayIndex = t.getArrayIndex(index);
+			let arrayIndex = t.getArrayIndex(index, _arg_type);
 			if(arrayIndex) {
 				if(arrayIndex === arrayIndexesType.any) {
 					res = true;
@@ -4054,7 +4057,7 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 			for (var j = 0; j < argumentsCount; j++) {
 				tempArg = arg[j];
 
-				_checkArrayIndex = checkArrayIndex(j);
+				_checkArrayIndex = checkArrayIndex(j, tempArg.type);
 				if (!_checkArrayIndex) {
 					if (cElementType.cellsRange === tempArg.type || cElementType.cellsRange3D === tempArg.type) {
 						if (checkArayIndexType(j, arrayIndexesType.range)) {
@@ -4121,7 +4124,7 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 					var newArgs = [], newArg;
 					for (var j = 0; j < argumentsCount; j++) {
 						newArg = tempArgs[j];
-						if (cElementType.array === newArg.type && !checkArrayIndex(j)) {
+						if (cElementType.array === newArg.type && !checkArrayIndex(j, cElementType.array)) {
 							if (1 === newArg.getRowCount() && 1 === newArg.getCountElementInRow()) {
 								newArg = newArg.array[0] ? newArg.array[0][0] : null;
 							} else if (1 === newArg.getRowCount()) {
@@ -9167,6 +9170,10 @@ function parserFormula( formula, parent, _ws ) {
 				"0": true,
 				"1": true
 			},
+			/*"DGET": {
+				"0": true,
+				"2": true
+			},*/
 			"EDATE": {
 				"0": true,
 				"1": true
@@ -9241,6 +9248,10 @@ function parserFormula( formula, parent, _ws ) {
 				"0": true,
 				"1": true
 			},
+			/*"IF": {
+				"1": true,
+				"2": true
+			},*/
 			"IMABS": {
 				"0": true
 			},
