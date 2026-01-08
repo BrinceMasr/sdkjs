@@ -1397,10 +1397,14 @@ $(function () {
 		oParser = new parserFormula('CHAR(A103)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula CHAR(A103) is parsed.');
 		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Reference link. Reference to cell with number outside range returns #VALUE!.');
+
 		// Case #16: Name. Named range with multiple cells returns #VALUE!.
-		oParser = new parserFormula('CHAR(TestNameArea)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: Formula CHAR(TestNameArea) is parsed.');
+		//correct test for dynamic arrays
+		//TODO check without single function!!!
+		oParser = new parserFormula('CHAR(SINGLE(TestNameArea))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula CHAR(SINGLE(TestNameArea)) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Name. Named range with multiple cells returns #VALUE!.');
+
 		// Case #17: Area3D. 3D range with multiple cells returns #VALUE!.
 		oParser = new parserFormula('CHAR(Sheet2!A2:A3)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula CHAR(Sheet2!A2:A3) is parsed.');
@@ -1791,10 +1795,13 @@ $(function () {
 		oParser = new parserFormula('CODE(Sheet2!A4)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula CODE(Sheet2!A4) is parsed.');
 		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Ref3D. 3D reference to an empty cell.');
+
 		// Case #7: Area3D. 3D Area reference where the first cell is empty.
-		oParser = new parserFormula('CODE(Sheet2!A4:A5)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: Formula CODE(Sheet2!A4:A5) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area3D. 3D Area reference where the first cell is empty.');
+		//correct test for dynamic arrays
+		oParser = new parserFormula('CODE(SINGLE(Sheet2!A4:A5))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula CODE(SINGLE(Sheet2!A4:A5)) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: SINGLE Area3D. 3D Area reference where the first cell is empty.');
+
 		// Case #8: Table. Table column where the first cell is empty.
 		oParser = new parserFormula('CODE(Table1[Column2])', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula CODE(Table1[Column2]) is parsed.');
@@ -2568,10 +2575,12 @@ $(function () {
 		oParser = new parserFormula('DOLLAR(TRUE,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DOLLAR(TRUE,TRUE) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '$1.0', 'Test: Positive case: Boolean(2). Both arguments as TRUE, converts to DOLLAR(1,1). Return $1.0');
+
 		// Case #57: Array, Number. Array as first argument returns first element. Return $100.00
+		//correct test for dynamic arrays
 		oParser = new parserFormula('DOLLAR({100;200},2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DOLLAR({100;200},2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0), "100", 'Test: Positive case: Array, Number. Array as first argument returns first element. Return $100.00');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "$100.00", 'Test: Positive case: Array, Number. Array as first argument returns first element. Return $100.00');
 
 		// Negative cases:
 
@@ -3142,10 +3151,17 @@ $(function () {
 		oParser = new parserFormula('FIND(TRUE,"This is TRUE",1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FIND(TRUE,"This is TRUE",1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 9, 'Test: Negative case: Boolean. Boolean find_text converted to string, case-sensitive match. Returns 9.');
+
 		// Case #11: Area. Multi-cell ranges for find_text and within_text. Returns #VALUE! error.
+		//correct test for dynamic arrays
+		oParser = new parserFormula('FIND(SINGLE(A107:A108),SINGLE(A109:A110),1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: FIND(SINGLE(A107:A108),SINGLE(A109:A110),1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: SINGLE Area. Multi-cell ranges for find_text and within_text. Returns #VALUE! error.');
+
 		oParser = new parserFormula('FIND(A107:A108,A109:A110,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FIND(A107:A108,A109:A110,1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area. Multi-cell ranges for find_text and within_text. Returns #VALUE! error.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Area. Multi-cell ranges for find_text and within_text. Returns #VALUE! error.');
+
 		// Case #12: Name. Multi-cell named ranges. Returns #VALUE! error.
 		oParser = new parserFormula('FIND(TestNameArea2,TestNameArea2,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FIND(TestNameArea2,TestNameArea2,1) is parsed.');
@@ -3158,10 +3174,17 @@ $(function () {
 		oParser = new parserFormula('FIND(Sheet2!A5,Sheet2!A6,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FIND(Sheet2!A5,Sheet2!A6,1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Ref3D. 3D references with non-matching strings. Returns #VALUE! error.');
+
 		// Case #15: Area3D. Multi-cell 3D ranges. Returns #VALUE! error.
+		//correct test for dynamic arrays
+		oParser = new parserFormula('FIND(SINGLE(Sheet2!A7:A8),SINGLE(Sheet2!A9:A10),1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: FIND(SINGLE(Sheet2!A7:A8),SINGLE(Sheet2!A9:A10),1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: SINGLE Area3D. Multi-cell 3D ranges. Returns #VALUE! error.');
+
 		oParser = new parserFormula('FIND(Sheet2!A7:A8,Sheet2!A9:A10,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FIND(Sheet2!A7:A8,Sheet2!A9:A10,1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area3D. Multi-cell 3D ranges. Returns #VALUE! error.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Area3D. Multi-cell 3D ranges. Returns #VALUE! error.');
+
 		// Case #16: Table. Table references with non-matching strings. Returns #VALUE! error.
 		oParser = new parserFormula('FIND(Table1[Column1],Table1[Column3],1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FIND(Table1[Column1],Table1[Column3],1) is parsed.');
@@ -3415,10 +3438,17 @@ $(function () {
 		oParser = new parserFormula('FINDB(Sheet2!A5,Sheet2!A6,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FINDB(Sheet2!A5,Sheet2!A6,1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Ref3D. 3D references with non-matching strings. Returns #VALUE! error.');
+
 		// Case #15: Area3D. Multi-cell 3D ranges. Returns #VALUE! error.
+		//correct test for dynamic arrays
+		oParser = new parserFormula('FINDB(SINGLE(Sheet2!A7:A8),SINGLE(Sheet2!A9:A10),1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: FINDB(SINGLE(Sheet2!A7:A8),SINGLE(Sheet2!A9:A10),1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: SINGLE Area3D. Multi-cell 3D ranges. Returns #VALUE! error.');
+
 		oParser = new parserFormula('FINDB(Sheet2!A7:A8,Sheet2!A9:A10,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FINDB(Sheet2!A7:A8,Sheet2!A9:A10,1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Test: Negative case: Area3D. Multi-cell 3D ranges. Returns #VALUE! error.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Area3D. Multi-cell 3D ranges. Returns #VALUE! error.');
+
 		// Case #16: Table. Table references with non-matching strings. Returns #VALUE! error.
 		oParser = new parserFormula('FINDB(Table1[Column1],Table1[Column3],1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FINDB(Table1[Column1],Table1[Column3],1) is parsed.');
@@ -5440,10 +5470,17 @@ $(function () {
 		oParser = new parserFormula('PROPER(TestNameArea)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: PROPER(TestNameArea) is parsed.');
 		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Name. Named range with area returns #VALUE!. 1 argument used.');
+
 		// Case #14: Name3D. 3D named range with area returns #VALUE!. 1 argument used.
-		oParser = new parserFormula('PROPER(TestNameArea3D)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: PROPER(TestNameArea3D) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Name3D. 3D named range with area returns #VALUE!. 1 argument used.');
+		//correct test for dynamic arrays
+		oParser = new parserFormula('PROPER(SINGLE(TestNameArea3D))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: PROPER(SINGLE(TestNameArea3D)) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: SINGLE Name3D. 3D named range with area returns #VALUE!. 1 argument used.');
+
+		// oParser = new parserFormula('PROPER(TestNameArea3D)', 'A2', ws);
+		// assert.ok(oParser.parse(), 'Test: PROPER(TestNameArea3D) is parsed.');
+		// assert.strictEqual(oParser.calculate().getValue(), '', 'Test: Negative case: Name3D. 3D named range with area returns #VALUE!. 1 argument used.');
+
 		// Case #15: Formula. Formula resulting in #NUM! propagates error. 1 argument used.
 		oParser = new parserFormula('PROPER(SQRT(-1))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: PROPER(SQRT(-1)) is parsed.');
