@@ -28139,9 +28139,7 @@
 	ApiValidation.prototype["Delete"]               = ApiValidation.prototype.Delete;
 	ApiValidation.prototype["Modify"]               = ApiValidation.prototype.Modify;
 	ApiValidation.prototype["GetType"]              = ApiValidation.prototype.GetType;
-	ApiValidation.prototype["SetType"]              = ApiValidation.prototype.SetType;
 	ApiValidation.prototype["GetAlertStyle"]        = ApiValidation.prototype.GetAlertStyle;
-	ApiValidation.prototype["SetAlertStyle"]        = ApiValidation.prototype.SetAlertStyle;
 	ApiValidation.prototype["GetIgnoreBlank"]       = ApiValidation.prototype.GetIgnoreBlank;
 	ApiValidation.prototype["SetIgnoreBlank"]       = ApiValidation.prototype.SetIgnoreBlank;
 	ApiValidation.prototype["GetInCellDropdown"]    = ApiValidation.prototype.GetInCellDropdown;
@@ -28159,11 +28157,8 @@
 	ApiValidation.prototype["GetErrorMessage"]      = ApiValidation.prototype.GetErrorMessage;
 	ApiValidation.prototype["SetErrorMessage"]      = ApiValidation.prototype.SetErrorMessage;
 	ApiValidation.prototype["GetFormula1"]          = ApiValidation.prototype.GetFormula1;
-	ApiValidation.prototype["SetFormula1"]          = ApiValidation.prototype.SetFormula1;
 	ApiValidation.prototype["GetFormula2"]          = ApiValidation.prototype.GetFormula2;
-	ApiValidation.prototype["SetFormula2"]          = ApiValidation.prototype.SetFormula2;
 	ApiValidation.prototype["GetOperator"]          = ApiValidation.prototype.GetOperator;
-	ApiValidation.prototype["SetOperator"]          = ApiValidation.prototype.SetOperator;
 	ApiValidation.prototype["GetParent"]            = ApiValidation.prototype.GetParent;
 
 	ApiFormatConditions.prototype["Add"] = ApiFormatConditions.prototype.Add;
