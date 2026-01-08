@@ -19178,7 +19178,7 @@ function isAllowPasteLink(pastedWb) {
 			// set the value to the selected range
 			c.setValue(AscCommonExcel.getFragmentsText(val), function (r) {
 				ret = r;
-			}, null, applyByArray ? bbox : ((!applyByArray && ctrlKey) ? null : undefined), null, AscCommonExcel.bIsSupportDynamicArrays ? {range: dynamicSelectionRange, beforeSpillRange: beforeSpillRange} : null);
+			}, null, applyByArray ? bbox : ((!applyByArray && ctrlKey) ? null : undefined), null, AscCommonExcel.bIsSupportDynamicArrays && (dynamicSelectionRange || beforeSpillRange) ? {range: dynamicSelectionRange, beforeSpillRange: beforeSpillRange} : null);
 
 			this.workbook.FinalizeAction();
 			// recalc all volatile arrays on page
