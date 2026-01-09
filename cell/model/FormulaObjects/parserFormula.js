@@ -4263,7 +4263,7 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 
 		let width = 1, height = 1;
 		for (let i = 0; i < arg.length; i++) {
-			if (!this.arrayIndexes || !this.getArrayIndex(i)) {
+			if (!this.arrayIndexes || !this.getArrayIndex(i, arg[i].type)) {
 				let objSize = arg[i].getDimensions();
 				if (objSize) {
 					height = Math.max(objSize.row, height);

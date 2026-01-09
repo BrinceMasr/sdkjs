@@ -6578,6 +6578,7 @@ function (window, undefined) {
 	cFORECAST_ETS_STAT.prototype.name = 'FORECAST.ETS.STAT';
 	cFORECAST_ETS_STAT.prototype.argumentsMin = 3;
 	cFORECAST_ETS_STAT.prototype.argumentsMax = 6;
+	cFORECAST_ETS_STAT.prototype.arrayIndexes = {0: 1, 1: 1};
 	cFORECAST_ETS_STAT.prototype.numFormat = AscCommonExcel.cNumFormatNone;
 	cFORECAST_ETS_STAT.prototype.argumentsType = [argType.reference, argType.reference, argType.number, argType.number,
 		argType.number, argType.number];
@@ -7186,6 +7187,16 @@ function (window, undefined) {
 	cGROWTH.prototype.arrayIndexes = {0: 1, 1: 1, 2: 1};
 	cGROWTH.prototype.argumentsType = [argType.reference, argType.reference, argType.reference, argType.logical];
 	cGROWTH.prototype.numFormat = AscCommonExcel.cNumFormatNone;
+	cGROWTH.prototype.getArrayIndex = function (index, type) {
+		let res = false;
+		if (index === 3 && (type === cElementType.cellsRange || type === cElementType.cellsRange3D)) {
+			return 1;
+		}
+		if (this.arrayIndexes) {
+			res = this.arrayIndexes[index];
+		}
+		return res;
+	};
 	cGROWTH.prototype.Calculate = function (arg) {
 		let prepeareArgs = prepeareGrowthTrendCalculation(this, arg);
 		if (cElementType.error === prepeareArgs.type) {
