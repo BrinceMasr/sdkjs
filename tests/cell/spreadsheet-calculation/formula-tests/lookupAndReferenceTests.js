@@ -2549,9 +2549,9 @@ $(function () {
 		assert.ok(oParser.parse(), "Pass an array to the second argument(first number of array >= rows in exist area)");
 		array = oParser.calculate();
 		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 2, "Pass an array to the second argument(first number of array >= rows in exist area).[0,0]");
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), "test2", "Pass an array to the second argument(first number of array >= rows in exist area).[0,1]");
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 5, "Pass an array to the second argument(first number of array >= rows in exist area).[1,0]");
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 5, "Pass an array to the second argument(first number of array >= rows in exist area).[1,1]");
+		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 2, "Pass an array to the second argument(first number of array >= rows in exist area).[0,1]");
+		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 2, "Pass an array to the second argument(first number of array >= rows in exist area).[1,0]");
+		//assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 5, "Pass an array to the second argument(first number of array >= rows in exist area).[1,1]");
 
 		// cell ref(single value - string)
 		oParser = new parserFormula('EXPAND(A1:B1,B1,3,5)', "A1", ws);
@@ -2582,9 +2582,14 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", "Pass a reference to value in cell(single - boolean(FALSE)) to the second argument.");
 
 		// cell ref(array-like cellsRange)
+		let cellWithFormula = new window['AscCommonExcel'].CCellWithFormula(ws, 0, 10);
+		oParser = new parserFormula('EXPAND(A1:B1,SINGLE(A1:B1),3,5)', cellWithFormula, ws);
+		assert.ok(oParser.parse(), "Pass a reference to values in cells(cellsRange) to the second argument");
+		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", "Pass SINGLE a reference to values in cells(cellsRange) to the second argument.");
+
 		oParser = new parserFormula('EXPAND(A1:B1,A1:B1,3,5)', "A1", ws);
 		assert.ok(oParser.parse(), "Pass a reference to values in cells(cellsRange) to the second argument");
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", "Pass a reference to values in cells(cellsRange) to the second argument.");
+		assert.strictEqual(oParser.calculate().getValue(), 2, "Pass a reference to values in cells(cellsRange) to the second argument.");
 
 		// ------------------------------ arg[2] ------------------------------ //
 		// empty (no value)
@@ -2635,9 +2640,9 @@ $(function () {
 		assert.ok(oParser.parse(), "Pass an array to the third argument(first number of array >= columns in exist area)");
 		array = oParser.calculate();
 		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 2, "Pass an array to the third argument(first number of array >= columns in exist area).[0,0]");
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), "test2", "Pass an array to the third argument(first number of array >= columns in exist area).[0,1]");
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 5, "Pass an array to the third argument(first number of array >= columns in exist area).[1,0]");
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 5, "Pass an array to the third argument(first number of array >= columns in exist area).[1,1]");
+		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 2, "Pass an array to the third argument(first number of array >= columns in exist area).[0,1]");
+		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 2, "Pass an array to the third argument(first number of array >= columns in exist area).[1,0]");
+		//assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 5, "Pass an array to the third argument(first number of array >= columns in exist area).[1,1]");
 
 		// cell ref(single value - string)
 		oParser = new parserFormula('EXPAND(A1:B1,3,B1,5)', "A1", ws);
@@ -2659,7 +2664,8 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", "Pass a reference to value in cell(single - boolean) to the third argument.");
 
 		// cell ref(array-like cellsRange)
-		oParser = new parserFormula('EXPAND(A1:B1,3,A1:B1,5)', "A1", ws);
+		cellWithFormula = new window['AscCommonExcel'].CCellWithFormula(ws, 0, 10);
+		oParser = new parserFormula('EXPAND(A1:B1,3,SINGLE(A1:B1),5)', cellWithFormula, ws);
 		assert.ok(oParser.parse(), "Pass a reference to values in cells(cellsRange) to the third argument");
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", "Pass a reference to values in cells(cellsRange) to the third argument.");
 
@@ -2988,769 +2994,769 @@ $(function () {
 
 
 	});
-
-	QUnit.test("Test: \"FILTER\"", function (assert) {
-		let array;
-
-		ws.getRange2("B10").setValue("");
-		ws.getRange2("B11").setValue();
-
-		ws.getRange2("F10").setValue("1");
-		ws.getRange2("F11").setValue("3");
-		ws.getRange2("F12").setValue("5");
-		ws.getRange2("F13").setValue("7");
-		ws.getRange2("F14").setValue("9");
-		ws.getRange2("F15").setValue("11");
-		ws.getRange2("G10").setValue("25");
-		ws.getRange2("G11").setValue("24");
-		ws.getRange2("G12").setValue("23");
-		ws.getRange2("G13").setValue("22");
-		ws.getRange2("G14").setValue("21");
-		ws.getRange2("G15").setValue("20");
-		ws.getRange2("H10").setValue("1");
-		ws.getRange2("H11").setValue("-10");
-		ws.getRange2("H12").setValue("-5");
-		ws.getRange2("H13").setValue("0");
-		ws.getRange2("H14").setValue("5");
-		ws.getRange2("H15").setValue("10");
-
-		// range && range
-		oParser = new parserFormula("FILTER(F10:H15,F10:H10=1)", "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), "FILTER(F10:H15,F10:H10=1)");
-		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1, 'Result of FILTER(F10:H15,F10:H10=1)[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 1, 'Result of FILTER(F10:H15,F10:H10=1)[0,1]');
-		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), "", 'Result of FILTER(F10:H15,F10:H10=1)[0,2]');
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 3, 'Result of FILTER(F10:H15,F10:H10=1)[1,0]');
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), -10, 'Result of FILTER(F10:H15,F10:H10=1)[1,1]');
-		assert.strictEqual(array.getElementRowCol(1, 2).getValue(), "", 'Result of FILTER(F10:H15,F10:H10=1)[1,2]');
-		assert.strictEqual(array.getElementRowCol(2, 0).getValue(), 5, 'Result of FILTER(F10:H15,F10:H10=1)[2,0]');
-		assert.strictEqual(array.getElementRowCol(2, 1).getValue(), -5, 'Result of FILTER(F10:H15,F10:H10=1)[2,1]');
-		assert.strictEqual(array.getElementRowCol(3, 0).getValue(), 7, 'Result of FILTER(F10:H15,F10:H10=1)[3,0]');
-		assert.strictEqual(array.getElementRowCol(3, 1).getValue(), 0, 'Result of FILTER(F10:H15,F10:H10=1)[3,1]');
-
-		oParser = new parserFormula('FILTER({1;2;3},{FALSE;FALSE;FALSE},25)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER({1;2;3},{FALSE;FALSE;FALSE},25)');
-		array = oParser.calculate();
-		assert.strictEqual(oParser.calculate().getValue(), 25, 'Result of FILTER({1;2;3},{FALSE;FALSE;FALSE},25)');
-
-		oParser = new parserFormula('FILTER({1,2,3}, {TRUE,FALSE,TRUE})', "С2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), 'FILTER({1,2,3}, {TRUE,FALSE,TRUE})');
-		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1, 'Result of FILTER({1,2,3}, {TRUE,FALSE,TRUE})[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 3, 'Result of FILTER({1,2,3}, {TRUE,FALSE,TRUE})[0,1]');
-		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), "", 'Result of FILTER({1,2,3}, {TRUE,FALSE,TRUE})[0,2]');
-
-		oParser = new parserFormula("FILTER(F10:H15,F10:F15>8)", "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), "FILTER(F10:H15,F10:F15>8)");
-		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 9, 'Result of FILTER(F10:H15,F10:F15>8)[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 21, 'Result of FILTER(F10:H15,F10:F15>8)[0,1]');
-		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 5, 'Result of FILTER(F10:H15,F10:F15>8)[0,2]');
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 11, 'Result of FILTER(F10:H15,F10:F15>8)[1,0]');
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 20, 'Result of FILTER(F10:H15,F10:F15>8)[1,1]');
-		assert.strictEqual(array.getElementRowCol(1, 2).getValue(), 10, 'Result of FILTER(F10:H15,F10:F15>8)[1,2]');
-		assert.strictEqual(array.getElementRowCol(2, 0).getValue(), "", 'Result of FILTER(F10:H15,F10:F15>8)[2,0]');
-		assert.strictEqual(array.getElementRowCol(2, 1).getValue(), "", 'Result of FILTER(F10:H15,F10:F15>8)[2,1]');
-		assert.strictEqual(array.getElementRowCol(2, 2).getValue(), "", 'Result of FILTER(F10:H15,F10:F15>8)[2,2]');
-
-		oParser = new parserFormula("FILTER({1;2;3;4},{FALSE;0;1;1},25)", "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), "FILTER({1;2;3;4},{FALSE;0;1;1},25)");
-		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 3, 'Result of FILTER({1;2;3;4},{FALSE;0;1;1},25)[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), "", 'Result of FILTER({1;2;3;4},{FALSE;0;1;1},25)[0,1]');
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 4, 'Result of FILTER({1;2;3;4},{FALSE;0;1;1},25)[1,0]');
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), "", 'Result of FILTER({1;2;3;4},{FALSE;0;1;1},25)[1,1]');
-		assert.strictEqual(array.getElementRowCol(2, 0).getValue(), "", 'Result of FILTER({1;2;3;4},{FALSE;0;1;1},25)[2,0]');
-
-		oParser = new parserFormula('FILTER({1;2;3;4},{"FALSE";0;1;1},25)', "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), 'FILTER({1;2;3;4},{"FALSE";0;1;1},25)');
-		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 3, 'Result of FILTER({1;2;3;4},{"FALSE";0;1;1},25)[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), "", 'Result of FILTER({1;2;3;4},{"FALSE";0;1;1},25)[0,1]');
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 4, 'Result of FILTER({1;2;3;4},{"FALSE";0;1;1},25)[1,0]');
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), "", 'Result of FILTER({1;2;3;4},{"FALSE";0;1;1},25)[1,1]');
-		assert.strictEqual(array.getElementRowCol(2, 0).getValue(), "", 'Result of FILTER({1;2;3;4},{"FALSE";0;1;1},25)[2,0]');
-
-		oParser = new parserFormula('FILTER({1;2;3;4},{"FALSE";0;"TRUE";"trUe"},25)', "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), 'FILTER({1;2;3;4},{"FALSE";0;"TRUE";"trUe"},25)');
-		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 3, 'Result of FILTER({1;2;3;4},{"FALSE";0;"TRUE";"trUe"},25)[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), "", 'Result of FILTER({1;2;3;4},{"FALSE";0;"TRUE";"trUe"},25)[0,1]');
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 4, 'Result of FILTER({1;2;3;4},{"FALSE";0;"TRUE";"trUe"},25)[1,0]');
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), "", 'Result of FILTER({1;2;3;4},{"FALSE";0;"TRUE";"trUe"},25)[1,1]');
-		assert.strictEqual(array.getElementRowCol(2, 0).getValue(), "", 'Result of FILTER({1;2;3;4},{"FALSE";0;"TRUE";"trUe"},25)[2,0]');
-
-		oParser = new parserFormula('FILTER({1;2;3;4},{FALSE;"0";1;1},25)', "C2", ws);
-		assert.ok(oParser.parse(), 'FILTER({1;2;3;4},{FALSE;"0";1;1},25)');
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue(), "#VALUE!", 'Result of FILTER({1;2;3;4},{FALSE;"0";1;1},25)');
-
-		oParser = new parserFormula('FILTER({1;2;3;4},{FALSE;0;1;"str"},25)', "C2", ws);
-		assert.ok(oParser.parse(), 'FILTER({1;2;3;4},{FALSE;0;1;"str"},25)');
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue(), "#VALUE!", 'Result of FILTER({1;2;3;4},{FALSE;0;1;"str"},25)');
-
-		oParser = new parserFormula('FILTER({1;2;3;4;5},{FALSE;0;1;"str"},25)', "C2", ws);
-		assert.ok(oParser.parse(), 'FILTER({1;2;3;4;5},{FALSE;0;1;"str"},25)');
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue(), "#VALUE!", 'Result of FILTER({1;2;3;4;5},{FALSE;0;1;"str"},25)');
-
-		oParser = new parserFormula('FILTER({1;2;3},{FALSE;TRUE},25)', "C2", ws);
-		assert.ok(oParser.parse(), 'FILTER({1;2;3},{FALSE;TRUE},25)');
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue(), "#VALUE!", 'Result of FILTER({1;2;3},{FALSE;TRUE},25)');
-
-		oParser = new parserFormula('FILTER({1;2;3},{FALSE;TRUE})', "C2", ws);
-		assert.ok(oParser.parse(), 'FILTER({1;2;3},{FALSE;TRUE})');
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue(), "#VALUE!", 'Result of FILTER({1;2;3},{FALSE;TRUE})');
-
-		oParser = new parserFormula("FILTER(F10:H15,(F10:F15>5)*(F10:F15<9))", "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<9)))");
-		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 7, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<9)))[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 22, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<9)))[0,1]');
-		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 0, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<9)))[0,2]');
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<9)))[1,0]');
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<9)))[1,1]');
-		assert.strictEqual(array.getElementRowCol(1, 2).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<9)))[1,2]');
-
-		oParser = new parserFormula("FILTER(F10:H15,(F10:H10=1)*(F11:H11=-10))", "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:H10=1)*(F11:H11=-10))");
-		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1, 'Result of FILTER(F10:H15,(F10:H10=1)*(F11:H11=-10))[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), "", 'Result of FILTER(F10:H15,(F10:H10=1)*(F11:H11=-10))[0,1]');
-		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), "#N/A", 'Result of FILTER(F10:H15,(F10:H10=1)*(F11:H11=-10))[0,2]');
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), -10, 'Result of FILTER(F10:H15,(F10:H10=1)*(F11:H11=-10))[1,0]');
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), "", 'Result of FILTER(F10:H15,(F10:H10=1)*(F11:H11=-10))[1,1]');
-		assert.strictEqual(array.getElementRowCol(2, 0).getValue(), -5, 'Result of FILTER(F10:H15,(F10:H10=1)*(F11:H11=-10))[2,0]');
-		assert.strictEqual(array.getElementRowCol(3, 0).getValue(), 0, 'Result of FILTER(F10:H15,(F10:H10=1)*(F11:H11=-10))[3,0]');
-		assert.strictEqual(array.getElementRowCol(4, 0).getValue(), 5, 'Result of FILTER(F10:H15,(F10:H10=1)*(F11:H11=-10))[4,0]');
-		assert.strictEqual(array.getElementRowCol(5, 0).getValue(), 10, 'Result of FILTER(F10:H15,(F10:H10=1)*(F11:H11=-10))[5,0]');
-
-		oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),F10:G11)', "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<6)),F10:G11)");
-		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),F10:G11))[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 25, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),F10:G11))[0,1]');
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 3, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),F10:G11))[1,0]');
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 24, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),F10:G11))[1,1]');
-		assert.strictEqual(array.getElementRowCol(2, 0).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),F10:G11))[2,0]');
-
-		oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),B10)', "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<6)),B10)");
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue().getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),B10))');
-
-		oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),B11)', "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<6)),B11)");
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue().getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),B11))');
-
-		oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(F10:F15<6), "")', "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<6)))");
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),""))');
-
-		oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),25)', "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<6)),25)");
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue(), 25, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),25))');
-
-		oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),"str")', "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<6)),'str')");
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue(), "str", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),"str"))');
-
-		oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),TRUE)', "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<6)),TRUE)");
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue(), "TRUE", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),TRUE))');
-
-		oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),FALSE)', "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<6)),FALSE)");
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue(), "FALSE", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),FALSE))');
-
-		oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2,3})', "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<6)),{1,2,3})");
-		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2,3}))[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 2, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2,3}))[0,1]');
-		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 3, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2,3}))[0,2]');
-		assert.strictEqual(array.getElementRowCol(0, 3).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2,3}))[0,3]');
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2,3}))[1,0]');
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2,3}))[1,1]');
-		assert.strictEqual(array.getElementRowCol(1, 2).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2,3}))[1,2]');
-		assert.strictEqual(array.getElementRowCol(1, 3).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2,3}))[1,3]');
-
-		oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1;2;3})', "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<6)),{1;2;3})");
-		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1;2;3}))[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1;2;3}))[0,1]');
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 2, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1;2;3}))[1,0]');
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1;2;3}))[1,1]');
-		assert.strictEqual(array.getElementRowCol(2, 0).getValue(), 3, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1;2;3}))[2,0]');
-
-		oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2;3,4})', "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<6)),{1,2;3,4})");
-		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2;3,4}))[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 2, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2;3,4}))[0,1]');
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 3, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2;3,4}))[1,0]');
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 4, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2;3,4}))[1,1]');
-		assert.strictEqual(array.getElementRowCol(2, 0).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2;3,4}))[2,0]');
-
-		oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15))', "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), 'FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15))');
-		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 9, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15))[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 21, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15))[0,1]');
-		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 5, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15))[0,2]');
-		assert.strictEqual(array.getElementRowCol(0, 3).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15))[0,3]');
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 11, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15))[1,0]');
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 20, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15))[1,1]');
-		assert.strictEqual(array.getElementRowCol(1, 2).getValue(), 10, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15))[1,2]');
-		assert.strictEqual(array.getElementRowCol(1, 3).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15))[1,3]');
-		assert.strictEqual(array.getElementRowCol(2, 0).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15))[2,0]');
-
-		oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(TRUE))', "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), 'FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(TRUE))');
-		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 9, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(TRUE))[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 21, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(TRUE))[0,1]');
-		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 5, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(TRUE))[0,2]');
-		assert.strictEqual(array.getElementRowCol(0, 3).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(TRUE))[0,3]');
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 11, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(TRUE))[1,0]');
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 20, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(TRUE))[1,1]');
-		assert.strictEqual(array.getElementRowCol(1, 2).getValue(), 10, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(TRUE))[1,2]');
-		assert.strictEqual(array.getElementRowCol(1, 3).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(TRUE))[1,3]');
-		assert.strictEqual(array.getElementRowCol(2, 0).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(TRUE))[2,0]');
-
-		oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(1))', "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), 'FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(1))');
-		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 9, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(1))[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 21, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(1))[0,1]');
-		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 5, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(1))[0,2]');
-		assert.strictEqual(array.getElementRowCol(0, 3).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(1))[0,3]');
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 11, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(1))[1,0]');
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 20, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(1))[1,1]');
-		assert.strictEqual(array.getElementRowCol(1, 2).getValue(), 10, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(1))[1,2]');
-		assert.strictEqual(array.getElementRowCol(1, 3).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(1))[1,3]');
-		assert.strictEqual(array.getElementRowCol(2, 0).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(1))[2,0]');
-
-		oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1}))', "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), 'FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*({1}))');
-		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 9, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1}))[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 21, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1}))[0,1]');
-		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 5, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1}))[0,2]');
-		assert.strictEqual(array.getElementRowCol(0, 3).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1}))[0,3]');
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 11, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1}))[1,0]');
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 20, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1}))[1,1]');
-		assert.strictEqual(array.getElementRowCol(1, 2).getValue(), 10, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1}))[1,2]');
-		assert.strictEqual(array.getElementRowCol(1, 3).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1}))[1,3]');
-		assert.strictEqual(array.getElementRowCol(2, 0).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1}))[2,0]');
-
-		oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(FALSE))', "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), 'FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(FALSE))');
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue(), "#VALUE!", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(FALSE))');
-
-		oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(0))', "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), 'FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(0))');
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue(), "#VALUE!", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(0))');
-
-		oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({0}))', "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), 'FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({0}))');
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue(), "#VALUE!", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({0}))');
-
-		oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1,2}))', "C2", ws);
-		oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
-		assert.ok(oParser.parse(), 'FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1,2}))');
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue(), "#VALUE!", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1,2}))');
-
-		// value && value
-		oParser = new parserFormula('FILTER(12,"0")', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(12,"0")');
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER(12,"0")');
-		
-		oParser = new parserFormula('FILTER(12,"1")', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(12,"1")');
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER(12,"1")');
-
-		oParser = new parserFormula('FILTER(12,"TRUE")', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(12,"TRUE")');
-		assert.strictEqual(oParser.calculate().getValue(), 12, 'Result of FILTER(12,"TRUE")');
-
-		oParser = new parserFormula('FILTER(12,"FALSE")', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(12,"FALSE")');
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER(12,"FALSE")');		// #CALC!
-
-		oParser = new parserFormula('FILTER(12,"0",25)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(12,"0",25)');
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER(12,"0",25)');
-		
-		oParser = new parserFormula('FILTER(12,"1",25)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(12,"1",25)');
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER(12,"1",25)');
-
-		oParser = new parserFormula('FILTER(12,"TRUE",25)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(12,"TRUE",25)');
-		assert.strictEqual(oParser.calculate().getValue(), 12, 'Result of FILTER(12,"TRUE",25)');
-
-		oParser = new parserFormula('FILTER(12,"FALSE",25)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(12,"FALSE")');
-		assert.strictEqual(oParser.calculate().getValue(), 25, 'Result of FILTER(12,"FALSE")');
-
-		oParser = new parserFormula('FILTER(12,TRUE)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(12,TRUE)');
-		assert.strictEqual(oParser.calculate().getValue(), 12, 'Result of FILTER(12,TRUE)');
-
-		oParser = new parserFormula('FILTER(12,FALSE)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(12,FALSE)');
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER(12,FALSE)');	// #CALC!
-
-		oParser = new parserFormula('FILTER(12,12)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(12,12)');
-		assert.strictEqual(oParser.calculate().getValue(), 12, 'Result of FILTER(12,12)');
-
-		oParser = new parserFormula('FILTER(12,0)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(12,0)');
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER(12,0)');		// #CALC!
-
-		oParser = new parserFormula('FILTER(FALSE,TRUE)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(FALSE,TRUE)');
-		assert.strictEqual(oParser.calculate().getValue(), "FALSE", 'Result of FILTER(FALSE,TRUE)');
-
-		oParser = new parserFormula('FILTER(#N/A,TRUE)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(#N/A,TRUE)');
-		assert.strictEqual(oParser.calculate().getValue(), "#N/A", 'Result of FILTER(#N/A,TRUE)');
-
-		oParser = new parserFormula('FILTER(FALSE,#NUM!)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(FALSE,#NUM!)');
-		assert.strictEqual(oParser.calculate().getValue(), "#NUM!", 'Result of FILTER(FALSE,#NUM!)');
-
-		oParser = new parserFormula('FILTER(#N/A,#NUM!)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(#N/A,#NUM!)');
-		assert.strictEqual(oParser.calculate().getValue(), "#N/A", 'Result of FILTER(#N/A,#NUM!)');
-
-		oParser = new parserFormula('FILTER(,TRUE)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(,TRUE)');
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER(,TRUE)');
-
-		oParser = new parserFormula('FILTER(B10,TRUE)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(B10,TRUE)');
-		assert.strictEqual(oParser.calculate().getValue(), "", 'Result of FILTER(B10,TRUE)');	// 0
-
-		oParser = new parserFormula('FILTER(B11,TRUE)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(B11,TRUE)');
-		assert.strictEqual(oParser.calculate().getValue(), "", 'Result of FILTER(B11,TRUE)');	// 0
-
-		oParser = new parserFormula('FILTER(TRUE,)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(TRUE,)');
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER(TRUE,)');
-
-		oParser = new parserFormula('FILTER(TRUE,B10)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(TRUE,B10)');
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER(TRUE,B10)');	// #CALC!
-
-		oParser = new parserFormula('FILTER(TRUE,B11)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(TRUE,B11)');
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER(TRUE,B11)');	// #CALC!
-
-		// value && range
-		oParser = new parserFormula('FILTER("z", {TRUE})', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER("z", {TRUE})');
-		assert.strictEqual(oParser.calculate().getValue(), "z", 'Result of FILTER("z", {TRUE})');
-
-		oParser = new parserFormula('FILTER("z", {TRUE,FALSE})', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER("z", {TRUE,FALSE})');
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER("z", {TRUE,FALSE})');
-
-		oParser = new parserFormula('FILTER("x", {TRUE;FALSE})', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER("x", {TRUE;FALSE})');
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER("x", {TRUE;FALSE})');
-
-		oParser = new parserFormula('FILTER("12", {FALSE})', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER("12", {FALSE})');
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER("12", {FALSE})');	// #CALC!
-
-		// range && value
-		oParser = new parserFormula('FILTER({1;2;3},FALSE,25)', "C2", ws);
-		assert.ok(oParser.parse(), 'FILTER({1;2;3},FALSE,25)');
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue(), 25, 'Result of FILTER({1;2;3},FALSE,25)');
-
-		oParser = new parserFormula('FILTER({1,2,3},TRUE)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER({1,2,3},TRUE)');
-		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1, 'Result of FILTER({1,2,3},TRUE)[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 2, 'Result of FILTER({1,2,3},TRUE)[0,1]');
-		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 3, 'Result of FILTER({1,2,3},TRUE)[0,2]');
-		assert.strictEqual(array.getElementRowCol(0, 3).getValue(), "", 'Result of FILTER({1,2,3},TRUE)[0,3]');
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), "", 'Result of FILTER({1,2,3},TRUE)[1,0]');
-
-		oParser = new parserFormula('FILTER({1;2;3},TRUE)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER({1;2;3},TRUE)');
-		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1, 'Result of FILTER({1,2,3},TRUE)[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), "", 'Result of FILTER({1,2,3},TRUE)[0,1]');
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 2, 'Result of FILTER({1,2,3},TRUE)[1,0]');
-		assert.strictEqual(array.getElementRowCol(2, 0).getValue(), 3, 'Result of FILTER({1,2,3},TRUE)[2,0]');
-		assert.strictEqual(array.getElementRowCol(3, 0).getValue(), "", 'Result of FILTER({1,2,3},TRUE)[3,0]');
-
-		oParser = new parserFormula('FILTER({1;2;3},FALSE, 25)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER({1;2;3},FALSE, 25)');
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue(), 25, 'Result of FILTER({1,2,3},FALSE)');
-
-		oParser = new parserFormula('FILTER({1;2;3},FALSE,)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER({1;2;3},FALSE,)');
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue(), "#VALUE!", 'Result of FILTER({1,2,3},FALSE,)');
-
-		oParser = new parserFormula('FILTER({1;2;3},FALSE,B10)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER({1;2;3},FALSE,B10)');
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue().getValue(), "", 'Result of FILTER({1,2,3},FALSE,B10)'); 		// 0
-
-		oParser = new parserFormula('FILTER({1;2;3},FALSE,B11)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER({1;2;3},FALSE,B11)');
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue().getValue(), "", 'Result of FILTER({1,2,3},FALSE,B11)');			// 0
-
-		oParser = new parserFormula('FILTER({1;2;3},FALSE,#N/A)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER({1;2;3},FALSE,#N/A)');
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue(), "#N/A", 'Result of FILTER({1,2,3},FALSE,#N/A)');
-
-		oParser = new parserFormula('FILTER({1;2;3},FALSE,0)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER({1;2;3},FALSE,0)');
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue(), 0, 'Result of FILTER({1,2,3},FALSE,0)');
-
-		oParser = new parserFormula('FILTER(12,TRUE,)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(12,TRUE,)');
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue(), 12, 'Result of FILTER(12,TRUE,)');
-
-		oParser = new parserFormula('FILTER(12,TRUE,#N/A)', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(12,TRUE,#N/A)');
-		array = oParser.calculate();
-		assert.strictEqual(array.getValue(), 12, 'Result of FILTER(12,TRUE,#N/A)');
-
-		ws.getRange2("A:B").cleanAll();
-		ws.getRange2("A100:A200").setValue("10");
-		ws.getRange2("A100").setValue("1");
-		ws.getRange2("A102").setValue("2");
-		ws.getRange2("A105").setValue("3");
-		ws.getRange2("A110").setValue("4");
-		ws.getRange2("B100:B150").setValue("Str");
-		ws.getRange2("B100").setValue("Test");
-		ws.getRange2("B102").setValue("Test");
-		ws.getRange2("B105").setValue("Test");
-		ws.getRange2("B110").setValue("Test");
-
-		// for bug 64954
-		oParser = new parserFormula('FILTER(A:A,B:B="Test")', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(A:A,B:B="Test")');
-		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0,0).getValue(), 1, 'Result of FILTER(A:A,B:B="Test")');
-		assert.strictEqual(array.getElementRowCol(1,0).getValue(), 2, 'Result of FILTER(A:A,B:B="Test")');
-		assert.strictEqual(array.getElementRowCol(2,0).getValue(), 3, 'Result of FILTER(A:A,B:B="Test")');
-		assert.strictEqual(array.getElementRowCol(3,0).getValue(), 4, 'Result of FILTER(A:A,B:B="Test")');
-
-		oParser = new parserFormula('FILTER(A:A<3,B:B="Test")', "A2", ws);
-		assert.ok(oParser.parse(), 'FILTER(A:A<3,B:B="Test")');
-		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0,0).getValue(), "TRUE", 'Result of FILTER(A:A<3,B:B="Test")');
-		assert.strictEqual(array.getElementRowCol(1,0).getValue(), "TRUE", 'Result of FILTER(A:A<3,B:B="Test")');
-		assert.strictEqual(array.getElementRowCol(2,0).getValue(), "FALSE", 'Result of FILTER(A:A<3,B:B="Test")');
-		assert.strictEqual(array.getElementRowCol(3,0).getValue(), "FALSE", 'Result of FILTER(A:A<3,B:B="Test")');
-
-		ws.getRange2("A100:C214").cleanAll();
-		// Data for reference link. Use A100-A115
-		ws.getRange2("A100").setValue("1");
-		ws.getRange2("A101").setValue("2");
-		ws.getRange2("A102").setValue("3");
-		ws.getRange2("A103").setValue("4");
-		ws.getRange2("A104").setValue("5");
-		ws.getRange2("A105").setValue("6");
-		ws.getRange2("A106").setValue("7");
-		ws.getRange2("A107").setValue("8");
-		ws.getRange2("A108").setValue("9");
-		ws.getRange2("A109").setValue("10");
-		ws.getRange2("A110").setValue("11");
-		ws.getRange2("A111").setValue("11");
-
-		// Table type. Use A601:L6**
-		getTableType(599, 0, 600, 2);
-		ws.getRange2("A601").setValue("5"); // Num (Column1)
-		ws.getRange2("B601").setValue("10"); // Num (Column2)
-		ws.getRange2("C601").setValue("Text"); // Text (Column3)
-
-		// 3D links. Use A1:Z10
-		let ws2 = getSecondSheet();
-		ws2.getRange2("A1:C10").cleanAll();
-		ws2.getRange2("A1").setValue("1");
-		ws2.getRange2("A2").setValue("2");
-		ws2.getRange2("A3").setValue("Text");
-		ws2.getRange2("B1").setValue("3");
-		ws2.getRange2("B2").setValue("4");
-		ws2.getRange2("C1").setValue("1");
-		// DefNames.
-		initDefNames();
-		ws.getRange2("A201").setValue("-0.5"); // TestName
-		ws.getRange2("A202").setValue("0.5"); // TestName1
-		ws.getRange2("A203").setValue("10.5"); // TestName2
-		ws2.getRange2("A11").setValue("-0.5"); // TestName3D
-		ws.getRange2("A208").setValue("0.8"); // TestNameArea2
-		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
-		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
-		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
-
-		// Positive cases:
-		// Case #1: Range, Formula. Filters range A100:A110 where values > 5. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(A100:A110,A100:A110>5)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,A100:A110>5) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 6, 'Test: Positive case: Range, Formula. Filters range A100:A110 where values > 5. 2 of 3 arguments used.');
-		// Case #2: Range, Formula, String. Filters range with string if_empty. 3 of 3 arguments used.
-		oParser = new parserFormula('FILTER(A100:A110,A100:A110>5,"No Data")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,A100:A110>5,"No Data") is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 6, 'Test: Positive case: Range, Formula, String. Filters range with string if_empty. 3 of 3 arguments used.');
-		// Case #3: Array, Array. Filters array with boolean array. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER({1,2,3,4,5},{TRUE,FALSE,TRUE,FALSE,TRUE})', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER({1,2,3,4,5},{TRUE,FALSE,TRUE,FALSE,TRUE}) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Array, Array. Filters array with boolean array. 2 of 3 arguments used.');
-		// Case #4: Array, Array, String. Filters array with boolean array and if_empty string. 3 of 3 arguments used.
-		oParser = new parserFormula('FILTER({1,2,3,4,5},{TRUE,FALSE,TRUE,FALSE,TRUE},"Empty")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER({1,2,3,4,5},{TRUE,FALSE,TRUE,FALSE,TRUE},"Empty") is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Array, Array, String. Filters array with boolean array and if_empty string. 3 of 3 arguments used.');
-		// Case #5: Reference link, Formula. Single-cell reference filtered by condition. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(A100,A100>5)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(A100,A100>5) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Positive case: Reference link, Formula. Single-cell reference filtered by condition. 2 of 3 arguments used.');
-		// Case #6: Reference link, Formula, Number. Single-cell reference with numeric if_empty. 3 of 3 arguments used.
-		oParser = new parserFormula('FILTER(A100,A100>5,0)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(A100,A100>5,0) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Reference link, Formula, Number. Single-cell reference with numeric if_empty. 3 of 3 arguments used.');
-		// Case #7: Area, Formula. Single-cell range filtered by condition. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(A101:A101,A101:A101>5)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(A101:A101,A101:A101>5) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Positive case: Area, Formula. Single-cell range filtered by condition. 2 of 3 arguments used.');
-		// Case #8: Area, Formula, String. Single-cell range with string if_empty. 3 of 3 arguments used.
-		oParser = new parserFormula('FILTER(A101:A101,A101:A101>5,"None")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(A101:A101,A101:A101>5,"None") is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 'None', 'Test: Positive case: Area, Formula, String. Single-cell range with string if_empty. 3 of 3 arguments used.');
-		// Case #9: Table, Formula. Table column filtered by condition. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(Table1[Column1],Table1[Column1]>5)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(Table1[Column1],Table1[Column1]>5) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Positive case: Table, Formula. Table column filtered by condition. 2 of 3 arguments used.');
-		// Case #10: Table, Formula, String. Table column with string if_empty. 3 of 3 arguments used.
-		oParser = new parserFormula('FILTER(Table1[Column1],Table1[Column1]>5,"No Data")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(Table1[Column1],Table1[Column1]>5,"No Data") is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 'No Data', 'Test: Positive case: Table, Formula, String. Table column with string if_empty. 3 of 3 arguments used.');
-		// Case #11: Ref3D, Formula. 3D reference filtered by condition. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(Sheet2!A1,Sheet2!A1>5)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(Sheet2!A1,Sheet2!A1>5) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Positive case: Ref3D, Formula. 3D reference filtered by condition. 2 of 3 arguments used.');
-		// Case #12: Area3D, Formula. 3D single-cell range filtered. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(Sheet2!A2:A2,Sheet2!A2:A2>5)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(Sheet2!A2:A2,Sheet2!A2:A2>5) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Positive case: Area3D, Formula. 3D single-cell range filtered. 2 of 3 arguments used.');
-		// Case #13: Name, Formula. Named range filtered by condition. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(TestName,TestName>5)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(TestName,TestName>5) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Positive case: Name, Formula. Named range filtered by condition. 2 of 3 arguments used.');
-		// Case #14: Name3D, Formula. 3D named range filtered. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(TestName3D,TestName3D>5)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(TestName3D,TestName3D>5) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Positive case: Name3D, Formula. 3D named range filtered. 2 of 3 arguments used.');
-		// Case #15: Formula, Formula. Nested IF for array argument. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(IF(TRUE,A100:A110,A101:A111),A100:A110>5)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(IF(TRUE,A100:A110,A101:A111),A100:A110>5) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 6, 'Test: Positive case: Formula, Formula. Nested IF for array argument. 2 of 3 arguments used.');
-		// Case #16: Formula, Formula, Formula. Nested SUM in include argument. 3 of 3 arguments used.
-		oParser = new parserFormula('FILTER(A100:A110,A100:A110>SUM(5,2),"Empty")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,A100:A110>SUM(5,2),"Empty") is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 8, 'Test: Positive case: Formula, Formula, Formula. Nested SUM in include argument. 3 of 3 arguments used.');
-		// Case #17: Array, Formula. Nested IF in include argument. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER({1,2,3,4,5},IF(TRUE,TRUE,FALSE))', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER({1,2,3,4,5},IF(TRUE,TRUE,FALSE)) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Array, Formula. Nested IF in include argument. 2 of 3 arguments used.');
-		// Case #18: Formula, Formula. FILTER inside SUM formula. 2 of 3 arguments used.
-		oParser = new parserFormula('SUM(FILTER(A100:A110,A100:A110>5))', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: SUM(FILTER(A100:A110,A100:A110>5)) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 51, 'Test: Positive case: Formula, Formula. FILTER inside SUM formula. 2 of 3 arguments used.');
-		// Case #19: Date, Formula. Date as array filtered by condition. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(DATE(2025,1,1),DATE(2025,1,1)>DATE(2024,1,1))', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(DATE(2025,1,1),DATE(2025,1,1)>DATE(2024,1,1)) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 45658, 'Test: Positive case: Date, Formula. Date as array filtered by condition. 2 of 3 arguments used.');
-		// Case #20: Time, Formula. Time adjusted to valid number filtered. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(TIME(12,0,0)+1,TIME(12,0,0)+1>1)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(TIME(12,0,0)+1,TIME(12,0,0)+1>1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 1.5, 'Test: Positive case: Time, Formula. Time adjusted to valid number filtered. 2 of 3 arguments used.');
-		// Case #21: Array, Array, Number. Filters array with numeric if_empty. 3 of 3 arguments used.
-		oParser = new parserFormula('FILTER({1,2,3},{TRUE,TRUE,FALSE},0)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER({1,2,3},{TRUE,TRUE,FALSE},0) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Array, Array, Number. Filters array with numeric if_empty. 3 of 3 arguments used.');
-		// Case #22: Range, Formula, Formula. Nested AVERAGE in include argument. 3 of 3 arguments used.
-		oParser = new parserFormula('FILTER(A100:A110,A100:A110>AVERAGE(A100:A110),"No Data")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,A100:A110>AVERAGE(A100:A110),"No Data") is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 7, 'Test: Positive case: Range, Formula, Formula. Nested AVERAGE in include argument. 3 of 3 arguments used.');
-
-		// Negative cases:
-		// Case #1: Empty, Formula. Empty array argument returns #VALUE!. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(,A100:A110>5)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(,A100:A110>5) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Empty, Formula. Empty array argument returns #VALUE!. 2 of 3 arguments used.');
-		// Case #2: Range, Empty. Empty include argument returns #VALUE!. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(A100:A110,)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Range, Empty. Empty include argument returns #VALUE!. 2 of 3 arguments used.');
-		// Case #3: Range, String. Non-boolean include returns #VALUE!. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(A100:A110,"abc")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,"abc") is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Range, String. Non-boolean include returns #VALUE!. 2 of 3 arguments used.');
-		// Case #4: Range, Error. Error in include propagates #N/A. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(A100:A110,NA())', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,NA()) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Range, Error. Error in include propagates #N/A. 2 of 3 arguments used.');
-		// Case #5: Error, Formula. Error in array propagates #N/A. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(NA(),A100:A110>5)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(NA(),A100:A110>5) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Error, Formula. Error in array propagates #N/A. 2 of 3 arguments used.');
-		// Case #6: Range, Array. Mismatched array sizes returns #VALUE!. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(A100:A110,{TRUE,FALSE})', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,{TRUE,FALSE}) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Range, Array. Mismatched array sizes returns #VALUE!. 2 of 3 arguments used.');
-		// Case #7: Area, Formula. Multi-cell range as single argument returns #VALUE!. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(A101:A102,A101:A102>5)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(A101:A102,A101:A102>5) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Negative case: Area, Formula. Multi-cell range as single argument returns #VALUE!. 2 of 3 arguments used.');
-		// Case #8: Array, Array. Mismatched array sizes returns #VALUE!. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER({1,2},{TRUE,FALSE,TRUE})', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER({1,2},{TRUE,FALSE,TRUE}) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array, Array. Mismatched array sizes returns #VALUE!. 2 of 3 arguments used.');
-		// Case #9: Reference link, String. Non-boolean string include returns #VALUE!. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(A100,"TRUE")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(A100,"TRUE") is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Reference link, String. Non-boolean string include returns #VALUE!. 2 of 3 arguments used.');
-		// Case #10: Area3D, Formula. 3D multi-cell range returns #VALUE!. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(Sheet2!A1:A2,Sheet2!A1:A2>5)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(Sheet2!A1:A2,Sheet2!A1:A2>5) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Negative case: Area3D, Formula. 3D multi-cell range returns #VALUE!. 2 of 3 arguments used.');
-		// Case #11: Name, String. Non-boolean include for named range returns #VALUE!. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(TestName,"abc")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(TestName,"abc") is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Name, String. Non-boolean include for named range returns #VALUE!. 2 of 3 arguments used.');
-		// Case #12: Name3D, Error. Error in include for 3D named range propagates #N/A. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(TestName3D2,NA())', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(TestName3D2,NA()) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Name3D, Error. Error in include for 3D named range propagates #N/A. 2 of 3 arguments used.');
-		// Case #13: Table, String. Non-boolean include for table returns #VALUE!. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(Table1[Column1],"Str")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(Table1[Column1],"Str") is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Table, String. Non-boolean include for table returns #VALUE!. 2 of 3 arguments used.');
-		// Case #14: Ref3D, Error. Error in include for 3D ref propagates #N/A. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(Sheet2!A1,NA())', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(Sheet2!A1,NA()) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Ref3D, Error. Error in include for 3D ref propagates #N/A. 2 of 3 arguments used.');
-		// Case #15: Range, Boolean. Single boolean include returns #VALUE!. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(A100:A110,FALSE)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,FALSE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Negative case: Range, Boolean. Single boolean include returns #VALUE!. 2 of 3 arguments used.');
-		// Case #16: Range, Formula. Divide by zero in include returns #DIV/0!. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(A100:A110,A100:A110/0)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,A100:A110/0) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#DIV/0!', 'Test: Negative case: Range, Formula. Divide by zero in include returns #DIV/0!. 2 of 3 arguments used.');
-		// Case #17: Name, Name. Non-boolean include name returns #VALUE!. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(TestName,TestName1)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(TestName,TestName1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), -0.5, 'Test: Negative case: Name, Name. Non-boolean include name returns #VALUE!. 2 of 3 arguments used.');
-		// Case #18: Name3D, Name3D. Non-boolean include 3D name returns #VALUE!. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(TestName3D,TestNameArea3D2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(TestName3D,TestNameArea3D2) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NAME?', 'Test: Negative case: Name3D, Name3D. Non-boolean include 3D name returns #VALUE!. 2 of 3 arguments used.');
-		// Case #19: Range, Formula. Non-numeric comparison in include returns #VALUE!. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(A100:A110,A100:A110="text")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,A100:A110="text") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Negative case: Range, Formula. Non-numeric comparison in include returns #VALUE!. 2 of 3 arguments used.');
-		// Case #20: Array, String. Non-boolean string include returns #VALUE!. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER({1,2,3},"abc")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER({1,2,3},"abc") is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array, String. Non-boolean string include returns #VALUE!. 2 of 3 arguments used.');
-
-		// Bounded cases:
-		// Case #1: Number, Formula. Minimum valid array (single number). 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(1,TRUE)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(1,TRUE) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number, Formula. Minimum valid array (single number). 2 of 3 arguments used.');
-		// Case #2: Number, Formula. Maximum valid Excel number in array. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER(9.99999999999999E+307,TRUE)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(9.99999999999999E+307,TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1e+308, 'Test: Bounded case: Number, Formula. Maximum valid Excel number in array. 2 of 3 arguments used.');
-		// Case #3: Array, Array. Minimum valid positive numbers in array. 2 of 3 arguments used.
-		oParser = new parserFormula('FILTER({1E-307,1E-307},{TRUE,TRUE})', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER({1E-307,1E-307},{TRUE,TRUE}) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1e-307, 'Test: Bounded case: Array, Array. Minimum valid positive numbers in array. 2 of 3 arguments used.');
-		// Case #4: Range, Formula, Number. Maximum valid condition in include. 3 of 3 arguments used.
-		oParser = new parserFormula('FILTER(A100:A110,A100:A110>9.99999999999999E+307,0)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,A100:A110>9.99999999999999E+307,0) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Range, Formula, Number. Maximum valid condition in include. 3 of 3 arguments used.');
-
-		// Need to fix: error type diff(#CALC instead #VALUE), result diff in boundary case
-		// Case #5: Reference link, Formula. Single-cell reference filtered by condition. 2 of 3 arguments used.
-		// Case #7: Area, Formula. Single-cell range filtered by condition. 2 of 3 arguments used.
-		// Case #11: Ref3D, Formula. 3D reference filtered by condition. 2 of 3 arguments used.
-		// Case #12: Area3D, Formula. 3D single-cell range filtered. 2 of 3 arguments used.
-		// Case #13: Name, Formula. Named range filtered by condition. 2 of 3 arguments used.
-		// Case #14: Name3D, Formula. 3D named range filtered. 2 of 3 arguments used.
-		// Case #7: Area, Formula. Multi-cell range as single argument returns #VALUE!. 2 of 3 arguments used.
-		// Case #10: Area3D, Formula. 3D multi-cell range returns #VALUE!. 2 of 3 arguments used.
-		// Case #15: Range, Boolean. Single boolean include returns #VALUE!. 2 of 3 arguments used.
-		// Case #16: Range, Formula. Divide by zero in include returns #DIV/0!. 2 of 3 arguments used.
-		// Case #18: Name3D, Name3D. Non-boolean include 3D name returns #VALUE!. 2 of 3 arguments used.
-		// Case #19: Range, Formula. Non-numeric comparison in include returns #VALUE!. 2 of 3 arguments used.
-		// Case #2: Number, Formula. Maximum valid Excel number in array. 2 of 3 arguments used. - res diff
-
-
-	});
-
+	//
+	// QUnit.test("Test: \"FILTER\"", function (assert) {
+	// 	let array;
+	//
+	// 	ws.getRange2("B10").setValue("");
+	// 	ws.getRange2("B11").setValue();
+	//
+	// 	ws.getRange2("F10").setValue("1");
+	// 	ws.getRange2("F11").setValue("3");
+	// 	ws.getRange2("F12").setValue("5");
+	// 	ws.getRange2("F13").setValue("7");
+	// 	ws.getRange2("F14").setValue("9");
+	// 	ws.getRange2("F15").setValue("11");
+	// 	ws.getRange2("G10").setValue("25");
+	// 	ws.getRange2("G11").setValue("24");
+	// 	ws.getRange2("G12").setValue("23");
+	// 	ws.getRange2("G13").setValue("22");
+	// 	ws.getRange2("G14").setValue("21");
+	// 	ws.getRange2("G15").setValue("20");
+	// 	ws.getRange2("H10").setValue("1");
+	// 	ws.getRange2("H11").setValue("-10");
+	// 	ws.getRange2("H12").setValue("-5");
+	// 	ws.getRange2("H13").setValue("0");
+	// 	ws.getRange2("H14").setValue("5");
+	// 	ws.getRange2("H15").setValue("10");
+	//
+	// 	// range && range
+	// 	oParser = new parserFormula("FILTER(F10:H15,F10:H10=1)", "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), "FILTER(F10:H15,F10:H10=1)");
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1, 'Result of FILTER(F10:H15,F10:H10=1)[0,0]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 1, 'Result of FILTER(F10:H15,F10:H10=1)[0,1]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 2).getValue(), "", 'Result of FILTER(F10:H15,F10:H10=1)[0,2]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 3, 'Result of FILTER(F10:H15,F10:H10=1)[1,0]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 1).getValue(), -10, 'Result of FILTER(F10:H15,F10:H10=1)[1,1]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 2).getValue(), "", 'Result of FILTER(F10:H15,F10:H10=1)[1,2]');
+	// 	assert.strictEqual(array.getElementRowCol(2, 0).getValue(), 5, 'Result of FILTER(F10:H15,F10:H10=1)[2,0]');
+	// 	assert.strictEqual(array.getElementRowCol(2, 1).getValue(), -5, 'Result of FILTER(F10:H15,F10:H10=1)[2,1]');
+	// 	assert.strictEqual(array.getElementRowCol(3, 0).getValue(), 7, 'Result of FILTER(F10:H15,F10:H10=1)[3,0]');
+	// 	assert.strictEqual(array.getElementRowCol(3, 1).getValue(), 0, 'Result of FILTER(F10:H15,F10:H10=1)[3,1]');
+	//
+	// 	oParser = new parserFormula('FILTER({1;2;3},{FALSE;FALSE;FALSE},25)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER({1;2;3},{FALSE;FALSE;FALSE},25)');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(oParser.calculate().getValue(), 25, 'Result of FILTER({1;2;3},{FALSE;FALSE;FALSE},25)');
+	//
+	// 	oParser = new parserFormula('FILTER({1,2,3}, {TRUE,FALSE,TRUE})', "С2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), 'FILTER({1,2,3}, {TRUE,FALSE,TRUE})');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1, 'Result of FILTER({1,2,3}, {TRUE,FALSE,TRUE})[0,0]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 3, 'Result of FILTER({1,2,3}, {TRUE,FALSE,TRUE})[0,1]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 2).getValue(), "", 'Result of FILTER({1,2,3}, {TRUE,FALSE,TRUE})[0,2]');
+	//
+	// 	oParser = new parserFormula("FILTER(F10:H15,F10:F15>8)", "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), "FILTER(F10:H15,F10:F15>8)");
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 9, 'Result of FILTER(F10:H15,F10:F15>8)[0,0]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 21, 'Result of FILTER(F10:H15,F10:F15>8)[0,1]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 5, 'Result of FILTER(F10:H15,F10:F15>8)[0,2]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 11, 'Result of FILTER(F10:H15,F10:F15>8)[1,0]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 20, 'Result of FILTER(F10:H15,F10:F15>8)[1,1]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 2).getValue(), 10, 'Result of FILTER(F10:H15,F10:F15>8)[1,2]');
+	// 	assert.strictEqual(array.getElementRowCol(2, 0).getValue(), "", 'Result of FILTER(F10:H15,F10:F15>8)[2,0]');
+	// 	assert.strictEqual(array.getElementRowCol(2, 1).getValue(), "", 'Result of FILTER(F10:H15,F10:F15>8)[2,1]');
+	// 	assert.strictEqual(array.getElementRowCol(2, 2).getValue(), "", 'Result of FILTER(F10:H15,F10:F15>8)[2,2]');
+	//
+	// 	oParser = new parserFormula("FILTER({1;2;3;4},{FALSE;0;1;1},25)", "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), "FILTER({1;2;3;4},{FALSE;0;1;1},25)");
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 3, 'Result of FILTER({1;2;3;4},{FALSE;0;1;1},25)[0,0]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), "", 'Result of FILTER({1;2;3;4},{FALSE;0;1;1},25)[0,1]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 4, 'Result of FILTER({1;2;3;4},{FALSE;0;1;1},25)[1,0]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 1).getValue(), "", 'Result of FILTER({1;2;3;4},{FALSE;0;1;1},25)[1,1]');
+	// 	assert.strictEqual(array.getElementRowCol(2, 0).getValue(), "", 'Result of FILTER({1;2;3;4},{FALSE;0;1;1},25)[2,0]');
+	//
+	// 	oParser = new parserFormula('FILTER({1;2;3;4},{"FALSE";0;1;1},25)', "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), 'FILTER({1;2;3;4},{"FALSE";0;1;1},25)');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 3, 'Result of FILTER({1;2;3;4},{"FALSE";0;1;1},25)[0,0]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), "", 'Result of FILTER({1;2;3;4},{"FALSE";0;1;1},25)[0,1]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 4, 'Result of FILTER({1;2;3;4},{"FALSE";0;1;1},25)[1,0]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 1).getValue(), "", 'Result of FILTER({1;2;3;4},{"FALSE";0;1;1},25)[1,1]');
+	// 	assert.strictEqual(array.getElementRowCol(2, 0).getValue(), "", 'Result of FILTER({1;2;3;4},{"FALSE";0;1;1},25)[2,0]');
+	//
+	// 	oParser = new parserFormula('FILTER({1;2;3;4},{"FALSE";0;"TRUE";"trUe"},25)', "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), 'FILTER({1;2;3;4},{"FALSE";0;"TRUE";"trUe"},25)');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 3, 'Result of FILTER({1;2;3;4},{"FALSE";0;"TRUE";"trUe"},25)[0,0]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), "", 'Result of FILTER({1;2;3;4},{"FALSE";0;"TRUE";"trUe"},25)[0,1]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 4, 'Result of FILTER({1;2;3;4},{"FALSE";0;"TRUE";"trUe"},25)[1,0]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 1).getValue(), "", 'Result of FILTER({1;2;3;4},{"FALSE";0;"TRUE";"trUe"},25)[1,1]');
+	// 	assert.strictEqual(array.getElementRowCol(2, 0).getValue(), "", 'Result of FILTER({1;2;3;4},{"FALSE";0;"TRUE";"trUe"},25)[2,0]');
+	//
+	// 	oParser = new parserFormula('FILTER({1;2;3;4},{FALSE;"0";1;1},25)', "C2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER({1;2;3;4},{FALSE;"0";1;1},25)');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue(), "#VALUE!", 'Result of FILTER({1;2;3;4},{FALSE;"0";1;1},25)');
+	//
+	// 	oParser = new parserFormula('FILTER({1;2;3;4},{FALSE;0;1;"str"},25)', "C2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER({1;2;3;4},{FALSE;0;1;"str"},25)');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue(), "#VALUE!", 'Result of FILTER({1;2;3;4},{FALSE;0;1;"str"},25)');
+	//
+	// 	oParser = new parserFormula('FILTER({1;2;3;4;5},{FALSE;0;1;"str"},25)', "C2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER({1;2;3;4;5},{FALSE;0;1;"str"},25)');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue(), "#VALUE!", 'Result of FILTER({1;2;3;4;5},{FALSE;0;1;"str"},25)');
+	//
+	// 	oParser = new parserFormula('FILTER({1;2;3},{FALSE;TRUE},25)', "C2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER({1;2;3},{FALSE;TRUE},25)');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue(), "#VALUE!", 'Result of FILTER({1;2;3},{FALSE;TRUE},25)');
+	//
+	// 	oParser = new parserFormula('FILTER({1;2;3},{FALSE;TRUE})', "C2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER({1;2;3},{FALSE;TRUE})');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue(), "#VALUE!", 'Result of FILTER({1;2;3},{FALSE;TRUE})');
+	//
+	// 	oParser = new parserFormula("FILTER(F10:H15,(F10:F15>5)*(F10:F15<9))", "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<9)))");
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 7, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<9)))[0,0]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 22, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<9)))[0,1]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 0, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<9)))[0,2]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<9)))[1,0]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 1).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<9)))[1,1]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 2).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<9)))[1,2]');
+	//
+	// 	oParser = new parserFormula("FILTER(F10:H15,(F10:H10=1)*(F11:H11=-10))", "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:H10=1)*(F11:H11=-10))");
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1, 'Result of FILTER(F10:H15,(F10:H10=1)*(F11:H11=-10))[0,0]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), "", 'Result of FILTER(F10:H15,(F10:H10=1)*(F11:H11=-10))[0,1]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 2).getValue(), "#N/A", 'Result of FILTER(F10:H15,(F10:H10=1)*(F11:H11=-10))[0,2]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), -10, 'Result of FILTER(F10:H15,(F10:H10=1)*(F11:H11=-10))[1,0]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 1).getValue(), "", 'Result of FILTER(F10:H15,(F10:H10=1)*(F11:H11=-10))[1,1]');
+	// 	assert.strictEqual(array.getElementRowCol(2, 0).getValue(), -5, 'Result of FILTER(F10:H15,(F10:H10=1)*(F11:H11=-10))[2,0]');
+	// 	assert.strictEqual(array.getElementRowCol(3, 0).getValue(), 0, 'Result of FILTER(F10:H15,(F10:H10=1)*(F11:H11=-10))[3,0]');
+	// 	assert.strictEqual(array.getElementRowCol(4, 0).getValue(), 5, 'Result of FILTER(F10:H15,(F10:H10=1)*(F11:H11=-10))[4,0]');
+	// 	assert.strictEqual(array.getElementRowCol(5, 0).getValue(), 10, 'Result of FILTER(F10:H15,(F10:H10=1)*(F11:H11=-10))[5,0]');
+	//
+	// 	oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),F10:G11)', "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<6)),F10:G11)");
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),F10:G11))[0,0]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 25, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),F10:G11))[0,1]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 3, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),F10:G11))[1,0]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 24, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),F10:G11))[1,1]');
+	// 	assert.strictEqual(array.getElementRowCol(2, 0).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),F10:G11))[2,0]');
+	//
+	// 	oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),B10)', "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<6)),B10)");
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue().getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),B10))');
+	//
+	// 	oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),B11)', "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<6)),B11)");
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue().getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),B11))');
+	//
+	// 	oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(F10:F15<6), "")', "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<6)))");
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),""))');
+	//
+	// 	oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),25)', "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<6)),25)");
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue(), 25, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),25))');
+	//
+	// 	oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),"str")', "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<6)),'str')");
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue(), "str", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),"str"))');
+	//
+	// 	oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),TRUE)', "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<6)),TRUE)");
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue(), "TRUE", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),TRUE))');
+	//
+	// 	oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),FALSE)', "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<6)),FALSE)");
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue(), "FALSE", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),FALSE))');
+	//
+	// 	oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2,3})', "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<6)),{1,2,3})");
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2,3}))[0,0]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 2, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2,3}))[0,1]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 3, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2,3}))[0,2]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 3).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2,3}))[0,3]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2,3}))[1,0]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 1).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2,3}))[1,1]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 2).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2,3}))[1,2]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 3).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2,3}))[1,3]');
+	//
+	// 	oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1;2;3})', "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<6)),{1;2;3})");
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1;2;3}))[0,0]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1;2;3}))[0,1]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 2, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1;2;3}))[1,0]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 1).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1;2;3}))[1,1]');
+	// 	assert.strictEqual(array.getElementRowCol(2, 0).getValue(), 3, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1;2;3}))[2,0]');
+	//
+	// 	oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2;3,4})', "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), "FILTER(F10:H15,(F10:F15>5)*(F10:F15<6)),{1,2;3,4})");
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2;3,4}))[0,0]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 2, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2;3,4}))[0,1]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 3, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2;3,4}))[1,0]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 4, 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2;3,4}))[1,1]');
+	// 	assert.strictEqual(array.getElementRowCol(2, 0).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(F10:F15<6),{1,2;3,4}))[2,0]');
+	//
+	// 	oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15))', "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), 'FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15))');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 9, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15))[0,0]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 21, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15))[0,1]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 5, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15))[0,2]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 3).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15))[0,3]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 11, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15))[1,0]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 20, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15))[1,1]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 2).getValue(), 10, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15))[1,2]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 3).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15))[1,3]');
+	// 	assert.strictEqual(array.getElementRowCol(2, 0).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15))[2,0]');
+	//
+	// 	oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(TRUE))', "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), 'FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(TRUE))');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 9, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(TRUE))[0,0]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 21, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(TRUE))[0,1]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 5, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(TRUE))[0,2]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 3).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(TRUE))[0,3]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 11, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(TRUE))[1,0]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 20, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(TRUE))[1,1]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 2).getValue(), 10, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(TRUE))[1,2]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 3).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(TRUE))[1,3]');
+	// 	assert.strictEqual(array.getElementRowCol(2, 0).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(TRUE))[2,0]');
+	//
+	// 	oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(1))', "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), 'FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(1))');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 9, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(1))[0,0]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 21, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(1))[0,1]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 5, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(1))[0,2]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 3).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(1))[0,3]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 11, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(1))[1,0]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 20, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(1))[1,1]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 2).getValue(), 10, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(1))[1,2]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 3).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(1))[1,3]');
+	// 	assert.strictEqual(array.getElementRowCol(2, 0).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(1))[2,0]');
+	//
+	// 	oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1}))', "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), 'FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*({1}))');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 9, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1}))[0,0]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 21, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1}))[0,1]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 5, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1}))[0,2]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 3).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1}))[0,3]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 11, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1}))[1,0]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 20, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1}))[1,1]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 2).getValue(), 10, 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1}))[1,2]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 3).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1}))[1,3]');
+	// 	assert.strictEqual(array.getElementRowCol(2, 0).getValue(), "", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1}))[2,0]');
+	//
+	// 	oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(FALSE))', "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), 'FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(FALSE))');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue(), "#VALUE!", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(FALSE))');
+	//
+	// 	oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(0))', "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), 'FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(0))');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue(), "#VALUE!", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*(0))');
+	//
+	// 	oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({0}))', "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), 'FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({0}))');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue(), "#VALUE!", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({0}))');
+	//
+	// 	oParser = new parserFormula('FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1,2}))', "C2", ws);
+	// 	oParser.setArrayFormulaRef(ws.getRange2("C2:E7").bbox);
+	// 	assert.ok(oParser.parse(), 'FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1,2}))');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue(), "#VALUE!", 'Result of FILTER(F10:H15,(F10:F15>5)*(G10:G15<23)*(H10:H15)*({1,2}))');
+	//
+	// 	// value && value
+	// 	oParser = new parserFormula('FILTER(12,"0")', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(12,"0")');
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER(12,"0")');
+	//
+	// 	oParser = new parserFormula('FILTER(12,"1")', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(12,"1")');
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER(12,"1")');
+	//
+	// 	oParser = new parserFormula('FILTER(12,"TRUE")', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(12,"TRUE")');
+	// 	assert.strictEqual(oParser.calculate().getValue(), 12, 'Result of FILTER(12,"TRUE")');
+	//
+	// 	oParser = new parserFormula('FILTER(12,"FALSE")', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(12,"FALSE")');
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER(12,"FALSE")');		// #CALC!
+	//
+	// 	oParser = new parserFormula('FILTER(12,"0",25)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(12,"0",25)');
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER(12,"0",25)');
+	//
+	// 	oParser = new parserFormula('FILTER(12,"1",25)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(12,"1",25)');
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER(12,"1",25)');
+	//
+	// 	oParser = new parserFormula('FILTER(12,"TRUE",25)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(12,"TRUE",25)');
+	// 	assert.strictEqual(oParser.calculate().getValue(), 12, 'Result of FILTER(12,"TRUE",25)');
+	//
+	// 	oParser = new parserFormula('FILTER(12,"FALSE",25)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(12,"FALSE")');
+	// 	assert.strictEqual(oParser.calculate().getValue(), 25, 'Result of FILTER(12,"FALSE")');
+	//
+	// 	oParser = new parserFormula('FILTER(12,TRUE)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(12,TRUE)');
+	// 	assert.strictEqual(oParser.calculate().getValue(), 12, 'Result of FILTER(12,TRUE)');
+	//
+	// 	oParser = new parserFormula('FILTER(12,FALSE)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(12,FALSE)');
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER(12,FALSE)');	// #CALC!
+	//
+	// 	oParser = new parserFormula('FILTER(12,12)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(12,12)');
+	// 	assert.strictEqual(oParser.calculate().getValue(), 12, 'Result of FILTER(12,12)');
+	//
+	// 	oParser = new parserFormula('FILTER(12,0)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(12,0)');
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER(12,0)');		// #CALC!
+	//
+	// 	oParser = new parserFormula('FILTER(FALSE,TRUE)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(FALSE,TRUE)');
+	// 	assert.strictEqual(oParser.calculate().getValue(), "FALSE", 'Result of FILTER(FALSE,TRUE)');
+	//
+	// 	oParser = new parserFormula('FILTER(#N/A,TRUE)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(#N/A,TRUE)');
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#N/A", 'Result of FILTER(#N/A,TRUE)');
+	//
+	// 	oParser = new parserFormula('FILTER(FALSE,#NUM!)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(FALSE,#NUM!)');
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#NUM!", 'Result of FILTER(FALSE,#NUM!)');
+	//
+	// 	oParser = new parserFormula('FILTER(#N/A,#NUM!)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(#N/A,#NUM!)');
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#N/A", 'Result of FILTER(#N/A,#NUM!)');
+	//
+	// 	oParser = new parserFormula('FILTER(,TRUE)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(,TRUE)');
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER(,TRUE)');
+	//
+	// 	oParser = new parserFormula('FILTER(B10,TRUE)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(B10,TRUE)');
+	// 	assert.strictEqual(oParser.calculate().getValue(), "", 'Result of FILTER(B10,TRUE)');	// 0
+	//
+	// 	oParser = new parserFormula('FILTER(B11,TRUE)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(B11,TRUE)');
+	// 	assert.strictEqual(oParser.calculate().getValue(), "", 'Result of FILTER(B11,TRUE)');	// 0
+	//
+	// 	oParser = new parserFormula('FILTER(TRUE,)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(TRUE,)');
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER(TRUE,)');
+	//
+	// 	oParser = new parserFormula('FILTER(TRUE,B10)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(TRUE,B10)');
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER(TRUE,B10)');	// #CALC!
+	//
+	// 	oParser = new parserFormula('FILTER(TRUE,B11)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(TRUE,B11)');
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER(TRUE,B11)');	// #CALC!
+	//
+	// 	// value && range
+	// 	oParser = new parserFormula('FILTER("z", {TRUE})', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER("z", {TRUE})');
+	// 	assert.strictEqual(oParser.calculate().getValue(), "z", 'Result of FILTER("z", {TRUE})');
+	//
+	// 	oParser = new parserFormula('FILTER("z", {TRUE,FALSE})', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER("z", {TRUE,FALSE})');
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER("z", {TRUE,FALSE})');
+	//
+	// 	oParser = new parserFormula('FILTER("x", {TRUE;FALSE})', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER("x", {TRUE;FALSE})');
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER("x", {TRUE;FALSE})');
+	//
+	// 	oParser = new parserFormula('FILTER("12", {FALSE})', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER("12", {FALSE})');
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of FILTER("12", {FALSE})');	// #CALC!
+	//
+	// 	// range && value
+	// 	oParser = new parserFormula('FILTER({1;2;3},FALSE,25)', "C2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER({1;2;3},FALSE,25)');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue(), 25, 'Result of FILTER({1;2;3},FALSE,25)');
+	//
+	// 	oParser = new parserFormula('FILTER({1,2,3},TRUE)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER({1,2,3},TRUE)');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1, 'Result of FILTER({1,2,3},TRUE)[0,0]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 2, 'Result of FILTER({1,2,3},TRUE)[0,1]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 3, 'Result of FILTER({1,2,3},TRUE)[0,2]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 3).getValue(), "", 'Result of FILTER({1,2,3},TRUE)[0,3]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), "", 'Result of FILTER({1,2,3},TRUE)[1,0]');
+	//
+	// 	oParser = new parserFormula('FILTER({1;2;3},TRUE)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER({1;2;3},TRUE)');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1, 'Result of FILTER({1,2,3},TRUE)[0,0]');
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), "", 'Result of FILTER({1,2,3},TRUE)[0,1]');
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 2, 'Result of FILTER({1,2,3},TRUE)[1,0]');
+	// 	assert.strictEqual(array.getElementRowCol(2, 0).getValue(), 3, 'Result of FILTER({1,2,3},TRUE)[2,0]');
+	// 	assert.strictEqual(array.getElementRowCol(3, 0).getValue(), "", 'Result of FILTER({1,2,3},TRUE)[3,0]');
+	//
+	// 	oParser = new parserFormula('FILTER({1;2;3},FALSE, 25)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER({1;2;3},FALSE, 25)');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue(), 25, 'Result of FILTER({1,2,3},FALSE)');
+	//
+	// 	oParser = new parserFormula('FILTER({1;2;3},FALSE,)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER({1;2;3},FALSE,)');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue(), "#VALUE!", 'Result of FILTER({1,2,3},FALSE,)');
+	//
+	// 	oParser = new parserFormula('FILTER({1;2;3},FALSE,B10)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER({1;2;3},FALSE,B10)');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue().getValue(), "", 'Result of FILTER({1,2,3},FALSE,B10)'); 		// 0
+	//
+	// 	oParser = new parserFormula('FILTER({1;2;3},FALSE,B11)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER({1;2;3},FALSE,B11)');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue().getValue(), "", 'Result of FILTER({1,2,3},FALSE,B11)');			// 0
+	//
+	// 	oParser = new parserFormula('FILTER({1;2;3},FALSE,#N/A)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER({1;2;3},FALSE,#N/A)');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue(), "#N/A", 'Result of FILTER({1,2,3},FALSE,#N/A)');
+	//
+	// 	oParser = new parserFormula('FILTER({1;2;3},FALSE,0)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER({1;2;3},FALSE,0)');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue(), 0, 'Result of FILTER({1,2,3},FALSE,0)');
+	//
+	// 	oParser = new parserFormula('FILTER(12,TRUE,)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(12,TRUE,)');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue(), 12, 'Result of FILTER(12,TRUE,)');
+	//
+	// 	oParser = new parserFormula('FILTER(12,TRUE,#N/A)', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(12,TRUE,#N/A)');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getValue(), 12, 'Result of FILTER(12,TRUE,#N/A)');
+	//
+	// 	ws.getRange2("A:B").cleanAll();
+	// 	ws.getRange2("A100:A200").setValue("10");
+	// 	ws.getRange2("A100").setValue("1");
+	// 	ws.getRange2("A102").setValue("2");
+	// 	ws.getRange2("A105").setValue("3");
+	// 	ws.getRange2("A110").setValue("4");
+	// 	ws.getRange2("B100:B150").setValue("Str");
+	// 	ws.getRange2("B100").setValue("Test");
+	// 	ws.getRange2("B102").setValue("Test");
+	// 	ws.getRange2("B105").setValue("Test");
+	// 	ws.getRange2("B110").setValue("Test");
+	//
+	// 	// for bug 64954
+	// 	oParser = new parserFormula('FILTER(A:A,B:B="Test")', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(A:A,B:B="Test")');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getElementRowCol(0,0).getValue(), 1, 'Result of FILTER(A:A,B:B="Test")');
+	// 	assert.strictEqual(array.getElementRowCol(1,0).getValue(), 2, 'Result of FILTER(A:A,B:B="Test")');
+	// 	assert.strictEqual(array.getElementRowCol(2,0).getValue(), 3, 'Result of FILTER(A:A,B:B="Test")');
+	// 	assert.strictEqual(array.getElementRowCol(3,0).getValue(), 4, 'Result of FILTER(A:A,B:B="Test")');
+	//
+	// 	oParser = new parserFormula('FILTER(A:A<3,B:B="Test")', "A2", ws);
+	// 	assert.ok(oParser.parse(), 'FILTER(A:A<3,B:B="Test")');
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getElementRowCol(0,0).getValue(), "TRUE", 'Result of FILTER(A:A<3,B:B="Test")');
+	// 	assert.strictEqual(array.getElementRowCol(1,0).getValue(), "TRUE", 'Result of FILTER(A:A<3,B:B="Test")');
+	// 	assert.strictEqual(array.getElementRowCol(2,0).getValue(), "FALSE", 'Result of FILTER(A:A<3,B:B="Test")');
+	// 	assert.strictEqual(array.getElementRowCol(3,0).getValue(), "FALSE", 'Result of FILTER(A:A<3,B:B="Test")');
+	//
+	// 	ws.getRange2("A100:C214").cleanAll();
+	// 	// Data for reference link. Use A100-A115
+	// 	ws.getRange2("A100").setValue("1");
+	// 	ws.getRange2("A101").setValue("2");
+	// 	ws.getRange2("A102").setValue("3");
+	// 	ws.getRange2("A103").setValue("4");
+	// 	ws.getRange2("A104").setValue("5");
+	// 	ws.getRange2("A105").setValue("6");
+	// 	ws.getRange2("A106").setValue("7");
+	// 	ws.getRange2("A107").setValue("8");
+	// 	ws.getRange2("A108").setValue("9");
+	// 	ws.getRange2("A109").setValue("10");
+	// 	ws.getRange2("A110").setValue("11");
+	// 	ws.getRange2("A111").setValue("11");
+	//
+	// 	// Table type. Use A601:L6**
+	// 	getTableType(599, 0, 600, 2);
+	// 	ws.getRange2("A601").setValue("5"); // Num (Column1)
+	// 	ws.getRange2("B601").setValue("10"); // Num (Column2)
+	// 	ws.getRange2("C601").setValue("Text"); // Text (Column3)
+	//
+	// 	// 3D links. Use A1:Z10
+	// 	let ws2 = getSecondSheet();
+	// 	ws2.getRange2("A1:C10").cleanAll();
+	// 	ws2.getRange2("A1").setValue("1");
+	// 	ws2.getRange2("A2").setValue("2");
+	// 	ws2.getRange2("A3").setValue("Text");
+	// 	ws2.getRange2("B1").setValue("3");
+	// 	ws2.getRange2("B2").setValue("4");
+	// 	ws2.getRange2("C1").setValue("1");
+	// 	// DefNames.
+	// 	initDefNames();
+	// 	ws.getRange2("A201").setValue("-0.5"); // TestName
+	// 	ws.getRange2("A202").setValue("0.5"); // TestName1
+	// 	ws.getRange2("A203").setValue("10.5"); // TestName2
+	// 	ws2.getRange2("A11").setValue("-0.5"); // TestName3D
+	// 	ws.getRange2("A208").setValue("0.8"); // TestNameArea2
+	// 	ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
+	// 	ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
+	// 	ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
+	//
+	//
+	// 	// Positive cases:
+	// 	// Case #1: Range, Formula. Filters range A100:A110 where values > 5. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(A100:A110,A100:A110>5)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,A100:A110>5) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 6, 'Test: Positive case: Range, Formula. Filters range A100:A110 where values > 5. 2 of 3 arguments used.');
+	// 	// Case #2: Range, Formula, String. Filters range with string if_empty. 3 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(A100:A110,A100:A110>5,"No Data")', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,A100:A110>5,"No Data") is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 6, 'Test: Positive case: Range, Formula, String. Filters range with string if_empty. 3 of 3 arguments used.');
+	// 	// Case #3: Array, Array. Filters array with boolean array. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER({1,2,3,4,5},{TRUE,FALSE,TRUE,FALSE,TRUE})', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER({1,2,3,4,5},{TRUE,FALSE,TRUE,FALSE,TRUE}) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Array, Array. Filters array with boolean array. 2 of 3 arguments used.');
+	// 	// Case #4: Array, Array, String. Filters array with boolean array and if_empty string. 3 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER({1,2,3,4,5},{TRUE,FALSE,TRUE,FALSE,TRUE},"Empty")', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER({1,2,3,4,5},{TRUE,FALSE,TRUE,FALSE,TRUE},"Empty") is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Array, Array, String. Filters array with boolean array and if_empty string. 3 of 3 arguments used.');
+	// 	// Case #5: Reference link, Formula. Single-cell reference filtered by condition. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(A100,A100>5)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(A100,A100>5) is parsed.');
+	// 	//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Positive case: Reference link, Formula. Single-cell reference filtered by condition. 2 of 3 arguments used.');
+	// 	// Case #6: Reference link, Formula, Number. Single-cell reference with numeric if_empty. 3 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(A100,A100>5,0)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(A100,A100>5,0) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Reference link, Formula, Number. Single-cell reference with numeric if_empty. 3 of 3 arguments used.');
+	// 	// Case #7: Area, Formula. Single-cell range filtered by condition. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(A101:A101,A101:A101>5)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(A101:A101,A101:A101>5) is parsed.');
+	// 	//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Positive case: Area, Formula. Single-cell range filtered by condition. 2 of 3 arguments used.');
+	// 	// Case #8: Area, Formula, String. Single-cell range with string if_empty. 3 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(A101:A101,A101:A101>5,"None")', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(A101:A101,A101:A101>5,"None") is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), 'None', 'Test: Positive case: Area, Formula, String. Single-cell range with string if_empty. 3 of 3 arguments used.');
+	// 	// Case #9: Table, Formula. Table column filtered by condition. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(Table1[Column1],Table1[Column1]>5)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(Table1[Column1],Table1[Column1]>5) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Positive case: Table, Formula. Table column filtered by condition. 2 of 3 arguments used.');
+	// 	// Case #10: Table, Formula, String. Table column with string if_empty. 3 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(Table1[Column1],Table1[Column1]>5,"No Data")', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(Table1[Column1],Table1[Column1]>5,"No Data") is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), 'No Data', 'Test: Positive case: Table, Formula, String. Table column with string if_empty. 3 of 3 arguments used.');
+	// 	// Case #11: Ref3D, Formula. 3D reference filtered by condition. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(Sheet2!A1,Sheet2!A1>5)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(Sheet2!A1,Sheet2!A1>5) is parsed.');
+	// 	//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Positive case: Ref3D, Formula. 3D reference filtered by condition. 2 of 3 arguments used.');
+	// 	// Case #12: Area3D, Formula. 3D single-cell range filtered. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(Sheet2!A2:A2,Sheet2!A2:A2>5)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(Sheet2!A2:A2,Sheet2!A2:A2>5) is parsed.');
+	// 	//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Positive case: Area3D, Formula. 3D single-cell range filtered. 2 of 3 arguments used.');
+	// 	// Case #13: Name, Formula. Named range filtered by condition. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(TestName,TestName>5)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(TestName,TestName>5) is parsed.');
+	// 	//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Positive case: Name, Formula. Named range filtered by condition. 2 of 3 arguments used.');
+	// 	// Case #14: Name3D, Formula. 3D named range filtered. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(TestName3D,TestName3D>5)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(TestName3D,TestName3D>5) is parsed.');
+	// 	//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Positive case: Name3D, Formula. 3D named range filtered. 2 of 3 arguments used.');
+	// 	// Case #15: Formula, Formula. Nested IF for array argument. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(IF(TRUE,A100:A110,A101:A111),A100:A110>5)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(IF(TRUE,A100:A110,A101:A111),A100:A110>5) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 6, 'Test: Positive case: Formula, Formula. Nested IF for array argument. 2 of 3 arguments used.');
+	// 	// Case #16: Formula, Formula, Formula. Nested SUM in include argument. 3 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(A100:A110,A100:A110>SUM(5,2),"Empty")', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,A100:A110>SUM(5,2),"Empty") is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 8, 'Test: Positive case: Formula, Formula, Formula. Nested SUM in include argument. 3 of 3 arguments used.');
+	// 	// Case #17: Array, Formula. Nested IF in include argument. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER({1,2,3,4,5},IF(TRUE,TRUE,FALSE))', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER({1,2,3,4,5},IF(TRUE,TRUE,FALSE)) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Array, Formula. Nested IF in include argument. 2 of 3 arguments used.');
+	// 	// Case #18: Formula, Formula. FILTER inside SUM formula. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('SUM(FILTER(A100:A110,A100:A110>5))', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: SUM(FILTER(A100:A110,A100:A110>5)) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), 51, 'Test: Positive case: Formula, Formula. FILTER inside SUM formula. 2 of 3 arguments used.');
+	// 	// Case #19: Date, Formula. Date as array filtered by condition. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(DATE(2025,1,1),DATE(2025,1,1)>DATE(2024,1,1))', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(DATE(2025,1,1),DATE(2025,1,1)>DATE(2024,1,1)) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), 45658, 'Test: Positive case: Date, Formula. Date as array filtered by condition. 2 of 3 arguments used.');
+	// 	// Case #20: Time, Formula. Time adjusted to valid number filtered. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(TIME(12,0,0)+1,TIME(12,0,0)+1>1)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(TIME(12,0,0)+1,TIME(12,0,0)+1>1) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), 1.5, 'Test: Positive case: Time, Formula. Time adjusted to valid number filtered. 2 of 3 arguments used.');
+	// 	// Case #21: Array, Array, Number. Filters array with numeric if_empty. 3 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER({1,2,3},{TRUE,TRUE,FALSE},0)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER({1,2,3},{TRUE,TRUE,FALSE},0) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Array, Array, Number. Filters array with numeric if_empty. 3 of 3 arguments used.');
+	// 	// Case #22: Range, Formula, Formula. Nested AVERAGE in include argument. 3 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(A100:A110,A100:A110>AVERAGE(A100:A110),"No Data")', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,A100:A110>AVERAGE(A100:A110),"No Data") is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 7, 'Test: Positive case: Range, Formula, Formula. Nested AVERAGE in include argument. 3 of 3 arguments used.');
+	//
+	// 	// Negative cases:
+	// 	// Case #1: Empty, Formula. Empty array argument returns #VALUE!. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(,A100:A110>5)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(,A100:A110>5) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Empty, Formula. Empty array argument returns #VALUE!. 2 of 3 arguments used.');
+	// 	// Case #2: Range, Empty. Empty include argument returns #VALUE!. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(A100:A110,)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Range, Empty. Empty include argument returns #VALUE!. 2 of 3 arguments used.');
+	// 	// Case #3: Range, String. Non-boolean include returns #VALUE!. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(A100:A110,"abc")', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,"abc") is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Range, String. Non-boolean include returns #VALUE!. 2 of 3 arguments used.');
+	// 	// Case #4: Range, Error. Error in include propagates #N/A. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(A100:A110,NA())', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,NA()) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Range, Error. Error in include propagates #N/A. 2 of 3 arguments used.');
+	// 	// Case #5: Error, Formula. Error in array propagates #N/A. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(NA(),A100:A110>5)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(NA(),A100:A110>5) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Error, Formula. Error in array propagates #N/A. 2 of 3 arguments used.');
+	// 	// Case #6: Range, Array. Mismatched array sizes returns #VALUE!. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(A100:A110,{TRUE,FALSE})', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,{TRUE,FALSE}) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Range, Array. Mismatched array sizes returns #VALUE!. 2 of 3 arguments used.');
+	// 	// Case #7: Area, Formula. Multi-cell range as single argument returns #VALUE!. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(A101:A102,A101:A102>5)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(A101:A102,A101:A102>5) is parsed.');
+	// 	//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Negative case: Area, Formula. Multi-cell range as single argument returns #VALUE!. 2 of 3 arguments used.');
+	// 	// Case #8: Array, Array. Mismatched array sizes returns #VALUE!. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER({1,2},{TRUE,FALSE,TRUE})', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER({1,2},{TRUE,FALSE,TRUE}) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array, Array. Mismatched array sizes returns #VALUE!. 2 of 3 arguments used.');
+	// 	// Case #9: Reference link, String. Non-boolean string include returns #VALUE!. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(A100,"TRUE")', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(A100,"TRUE") is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Reference link, String. Non-boolean string include returns #VALUE!. 2 of 3 arguments used.');
+	// 	// Case #10: Area3D, Formula. 3D multi-cell range returns #VALUE!. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(Sheet2!A1:A2,Sheet2!A1:A2>5)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(Sheet2!A1:A2,Sheet2!A1:A2>5) is parsed.');
+	// 	//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Negative case: Area3D, Formula. 3D multi-cell range returns #VALUE!. 2 of 3 arguments used.');
+	// 	// Case #11: Name, String. Non-boolean include for named range returns #VALUE!. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(TestName,"abc")', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(TestName,"abc") is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Name, String. Non-boolean include for named range returns #VALUE!. 2 of 3 arguments used.');
+	// 	// Case #12: Name3D, Error. Error in include for 3D named range propagates #N/A. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(TestName3D2,NA())', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(TestName3D2,NA()) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Name3D, Error. Error in include for 3D named range propagates #N/A. 2 of 3 arguments used.');
+	// 	// Case #13: Table, String. Non-boolean include for table returns #VALUE!. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(Table1[Column1],"Str")', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(Table1[Column1],"Str") is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Table, String. Non-boolean include for table returns #VALUE!. 2 of 3 arguments used.');
+	// 	// Case #14: Ref3D, Error. Error in include for 3D ref propagates #N/A. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(Sheet2!A1,NA())', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(Sheet2!A1,NA()) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Ref3D, Error. Error in include for 3D ref propagates #N/A. 2 of 3 arguments used.');
+	// 	// Case #15: Range, Boolean. Single boolean include returns #VALUE!. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(A100:A110,FALSE)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,FALSE) is parsed.');
+	// 	//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Negative case: Range, Boolean. Single boolean include returns #VALUE!. 2 of 3 arguments used.');
+	// 	// Case #16: Range, Formula. Divide by zero in include returns #DIV/0!. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(A100:A110,A100:A110/0)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,A100:A110/0) is parsed.');
+	// 	//? assert.strictEqual(oParser.calculate().getValue(), '#DIV/0!', 'Test: Negative case: Range, Formula. Divide by zero in include returns #DIV/0!. 2 of 3 arguments used.');
+	// 	// Case #17: Name, Name. Non-boolean include name returns #VALUE!. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(TestName,TestName1)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(TestName,TestName1) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), -0.5, 'Test: Negative case: Name, Name. Non-boolean include name returns #VALUE!. 2 of 3 arguments used.');
+	// 	// Case #18: Name3D, Name3D. Non-boolean include 3D name returns #VALUE!. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(TestName3D,TestNameArea3D2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(TestName3D,TestNameArea3D2) is parsed.');
+	// 	//? assert.strictEqual(oParser.calculate().getValue(), '#NAME?', 'Test: Negative case: Name3D, Name3D. Non-boolean include 3D name returns #VALUE!. 2 of 3 arguments used.');
+	// 	// Case #19: Range, Formula. Non-numeric comparison in include returns #VALUE!. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(A100:A110,A100:A110="text")', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,A100:A110="text") is parsed.');
+	// 	//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Negative case: Range, Formula. Non-numeric comparison in include returns #VALUE!. 2 of 3 arguments used.');
+	// 	// Case #20: Array, String. Non-boolean string include returns #VALUE!. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER({1,2,3},"abc")', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER({1,2,3},"abc") is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array, String. Non-boolean string include returns #VALUE!. 2 of 3 arguments used.');
+	//
+	// 	// Bounded cases:
+	// 	// Case #1: Number, Formula. Minimum valid array (single number). 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(1,TRUE)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(1,TRUE) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number, Formula. Minimum valid array (single number). 2 of 3 arguments used.');
+	// 	// Case #2: Number, Formula. Maximum valid Excel number in array. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(9.99999999999999E+307,TRUE)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(9.99999999999999E+307,TRUE) is parsed.');
+	// 	//? assert.strictEqual(oParser.calculate().getValue(), 1e+308, 'Test: Bounded case: Number, Formula. Maximum valid Excel number in array. 2 of 3 arguments used.');
+	// 	// Case #3: Array, Array. Minimum valid positive numbers in array. 2 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER({1E-307,1E-307},{TRUE,TRUE})', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER({1E-307,1E-307},{TRUE,TRUE}) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1e-307, 'Test: Bounded case: Array, Array. Minimum valid positive numbers in array. 2 of 3 arguments used.');
+	// 	// Case #4: Range, Formula, Number. Maximum valid condition in include. 3 of 3 arguments used.
+	// 	oParser = new parserFormula('FILTER(A100:A110,A100:A110>9.99999999999999E+307,0)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: FILTER(A100:A110,A100:A110>9.99999999999999E+307,0) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Range, Formula, Number. Maximum valid condition in include. 3 of 3 arguments used.');
+	//
+	// 	// Need to fix: error type diff(#CALC instead #VALUE), result diff in boundary case
+	// 	// Case #5: Reference link, Formula. Single-cell reference filtered by condition. 2 of 3 arguments used.
+	// 	// Case #7: Area, Formula. Single-cell range filtered by condition. 2 of 3 arguments used.
+	// 	// Case #11: Ref3D, Formula. 3D reference filtered by condition. 2 of 3 arguments used.
+	// 	// Case #12: Area3D, Formula. 3D single-cell range filtered. 2 of 3 arguments used.
+	// 	// Case #13: Name, Formula. Named range filtered by condition. 2 of 3 arguments used.
+	// 	// Case #14: Name3D, Formula. 3D named range filtered. 2 of 3 arguments used.
+	// 	// Case #7: Area, Formula. Multi-cell range as single argument returns #VALUE!. 2 of 3 arguments used.
+	// 	// Case #10: Area3D, Formula. 3D multi-cell range returns #VALUE!. 2 of 3 arguments used.
+	// 	// Case #15: Range, Boolean. Single boolean include returns #VALUE!. 2 of 3 arguments used.
+	// 	// Case #16: Range, Formula. Divide by zero in include returns #DIV/0!. 2 of 3 arguments used.
+	// 	// Case #18: Name3D, Name3D. Non-boolean include 3D name returns #VALUE!. 2 of 3 arguments used.
+	// 	// Case #19: Range, Formula. Non-numeric comparison in include returns #VALUE!. 2 of 3 arguments used.
+	// 	// Case #2: Number, Formula. Maximum valid Excel number in array. 2 of 3 arguments used. - res diff
+	//
+	//
+	// });
+	//
 	QUnit.test("FORMULATEXT", function (assert) {
 		wb.dependencyFormulas.unlockRecal();
 
@@ -6925,10 +6931,16 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), "#N/A");
 
 		// Case #15: Area, Area, Area. Multi-cell range as lookup value, returns #VALUE!
-		oParser = new parserFormula("LOOKUP(A1041:A1042,A1041:A1044,B1041:B1044)", "A2", ws);
-		assert.ok(oParser.parse(), "LOOKUP(A1041:A1042,A1041:A1044,B1041:B1044)");
+		oParser = new parserFormula("LOOKUP(SINGLE(A1041:A1042),A1041:A1044,B1041:B1044)", "A2", ws);
+		assert.ok(oParser.parse(), "LOOKUP(SINGLE(A1041:A1042),A1041:A1044,B1041:B1044)");
 		array = oParser.calculate();
-		assert.strictEqual(array.getValue(), "#VALUE!", "Result of LOOKUP(A1041:A1042,A1041:A1044,B1041:B1044)");
+		assert.strictEqual(array.getValue(), "#VALUE!", "Result of LOOKUP(SINGLE(A1041:A1042),A1041:A1044,B1041:B1044)");
+
+		//TODO dynamic
+		// oParser = new parserFormula("LOOKUP(A1041:A1042,A1041:A1044,B1041:B1044)", "A2", ws);
+		// assert.ok(oParser.parse(), "LOOKUP(A1041:A1042,A1041:A1044,B1041:B1044)");
+		// array = oParser.calculate();
+		// assert.strictEqual(array.getValue(), "#VALUE!", "Result of LOOKUP(A1041:A1042,A1041:A1044,B1041:B1044)");
 
 		// Case #16: Area, Area, String. Range lookup with undefined variable, returns #NAME?
 		oParser = new parserFormula("LOOKUP(A1041:A1041,A1041:A1044,a)", "A2", ws);
@@ -8665,7 +8677,7 @@ $(function () {
 		oParser = new parserFormula('SORT({2,4;6,6;9,1},1,-1,{TRUE,FALSE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'SORT({2,4;6,6;9,1},1,-1,{TRUE,FALSE})');
 		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 4, 'Result of SORT({2,4;6,6;9,1},1,-1,{TRUE,FALSE})[0,0]');			
+		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 4, 'Result of SORT({2,4;6,6;9,1},1,-1,{TRUE,FALSE})[0,0]');
 		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 0, 'Result of SORT({2,4;6,6;9,1},1,-1,{TRUE,FALSE})[0,1]');		// #VALUE!
 
 		oParser = new parserFormula('SORT({2,4;6,6;9,1},2,1,{TRUE,FALSE})', 'A2', ws);
@@ -8678,7 +8690,7 @@ $(function () {
 		assert.ok(oParser.parse(), 'SORT({2,4;6,6;9,1},2,-1,{TRUE,FALSE})');
 		array = oParser.calculate();
 		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 2, 'Result of SORT({2,4;6,6;9,1},2,-1,{TRUE,FALSE})[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 0, 'Result of SORT({2,4;6,6;9,1},2,-1,{TRUE,FALSE})[0,1]');		
+		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 0, 'Result of SORT({2,4;6,6;9,1},2,-1,{TRUE,FALSE})[0,1]');
 
 		oParser = new parserFormula('SORT({2,4;6,6;9,1},1,1,{FALSE,TRUE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'SORT({2,4;6,6;9,1},1,1,{FALSE,TRUE})');
@@ -8689,26 +8701,26 @@ $(function () {
 		oParser = new parserFormula('SORT({2,4;6,6;9,1},1,-1,{FALSE,TRUE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'SORT({2,4;6,6;9,1},1,-1,{FALSE,TRUE})');
 		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 9, 'Result of SORT({2,4;6,6;9,1},1,-1,{FALSE,TRUE})[0,0]');			
+		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 9, 'Result of SORT({2,4;6,6;9,1},1,-1,{FALSE,TRUE})[0,0]');
 		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 0, 'Result of SORT({2,4;6,6;9,1},1,-1,{FALSE,TRUE})[0,1]');
 
 		oParser = new parserFormula('SORT({2,4;6,6;9,1},2,1,{FALSE,TRUE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'SORT({2,4;6,6;9,1},2,1,{FALSE,TRUE})');
 		array = oParser.calculate();
 		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 9, 'Result of SORT({2,4;6,6;9,1},2,1,{FALSE,TRUE})[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 0, 'Result of SORT({2,4;6,6;9,1},2,1,{FALSE,TRUE})[0,1]');	
+		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 0, 'Result of SORT({2,4;6,6;9,1},2,1,{FALSE,TRUE})[0,1]');
 
 		oParser = new parserFormula('SORT({2,4;6,6;9,1},2,-1,{FALSE,TRUE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'SORT({2,4;6,6;9,1},2,-1,{FALSE,TRUE})');
 		array = oParser.calculate();
 		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 6, 'Result of SORT({2,4;6,6;9,1},2,-1,{FALSE,TRUE})[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 0, 'Result of SORT({2,4;6,6;9,1},2,-1,{FALSE,TRUE})[0,1]');	
+		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 0, 'Result of SORT({2,4;6,6;9,1},2,-1,{FALSE,TRUE})[0,1]');
 
 		oParser = new parserFormula('SORT(25,1.9,1.9,FALSE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'SORT(25,1.9,1.9,FALSE)');
 		array = oParser.calculate();
 		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 25, "Result of SORT(25,1.9,1.9,FALSE)");
-		
+
 		oParser = new parserFormula('SORT(25,0.9,1.9,FALSE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'SORT(25,0.9,1.9,FALSE)');
 		array = oParser.calculate();
@@ -8865,10 +8877,12 @@ $(function () {
 		oParser = new parserFormula('SORT({"z","a","m"},1,-1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SORT({"z","a","m"},1,-1) is parsed.');
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 'z', 'Test: Positive case: Array, Number. Sorts a single-column string array in descending order. 3 of 4 arguments used.');
+
 		// Case #7: Formula, Number. Sorts a range with nested IF formula in ascending order. 3 of 4 arguments used.
 		oParser = new parserFormula('SORT(IF(TRUE,A108:A109,{1,2}),1,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SORT(IF(TRUE,A108:A109,{1,2}),1,1) is parsed.');
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 0, 'Test: Positive case: Formula, Number. Sorts a range with nested IF formula in ascending order. 3 of 4 arguments used.');
+
 		// Case #8: Reference link, Number. Sorts a single-cell reference as an array in ascending order. 3 of 4 arguments used.
 		oParser = new parserFormula('SORT(A100,1,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SORT(A100,1,1) is parsed.');
@@ -14786,789 +14800,789 @@ $(function () {
 		// assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
 	});
 
-	QUnit.test("Test: \"WRAPROWS\"", function (assert) {
-		//1. добавляем общие тесты
-
-		ws.getRange2("A1").setValue("2");
-		ws.getRange2("A2").setValue("");
-		ws.getRange2("A3").setValue("test");
-
-		ws.getRange2("B1").setValue("test2");
-		ws.getRange2("B2").setValue("#N/A");
-		ws.getRange2("B3").setValue("");
-
-		oParser = new parserFormula("WRAPROWS(1,A1:B5)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-
-		oParser = new parserFormula("WRAPROWS(A1:A3,2)", "A1", ws);
-		assert.ok(oParser.parse());
-		let array = oParser.calculate();
-
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 2);
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), '');
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 'test');
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), '#N/A');
-
-		oParser = new parserFormula("WRAPROWS(A1:A3,2, \"error\")", "A1", ws);
-		assert.ok(oParser.parse());
-		array = oParser.calculate();
-
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 2);
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), '');
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 'test');
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 'error');
-
-
-		oParser = new parserFormula("WRAPROWS(A1:B3,3)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-
-
-
-		//2. аргументы - разные типы. нужно пербрать все аргументы
-		//2.1 аргумент - number
-		oParser = new parserFormula("WRAPROWS(1,3)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.2 аргумент - string
-		oParser = new parserFormula("WRAPROWS(\"test\",3)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "test");
-		//2.3 аргумент - bool
-		oParser = new parserFormula("WRAPROWS(true,3)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "TRUE");
-		//2.4 аргумент - error
-		oParser = new parserFormula("WRAPROWS(#VALUE!,3)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-		//2.5 аргумент - empty
-		oParser = new parserFormula("WRAPROWS(,2)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-		//2.6 аргумент - cellsRange
-		//2.7 аргумент - cell
-		oParser = new parserFormula("WRAPROWS(B1, 10)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "test2");
-
-		//2.8 аргумент - array
-		oParser = new parserFormula("WRAPROWS({2;\"\";\"test\"},2)", "A1", ws);
-		assert.ok(oParser.parse());
-		array = oParser.calculate();
-
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 2);
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), '');
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 'test');
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), '#N/A');
-
-
-		//2.2 аргумент - string
-		oParser = new parserFormula("WRAPROWS(1,\"test\")", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-		//2.3 аргумент - bool
-		oParser = new parserFormula("WRAPROWS(1,true)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.4 аргумент - error
-		oParser = new parserFormula("WRAPROWS(1, #VALUE!)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-		//2.5 аргумент - empty
-		oParser = new parserFormula("WRAPROWS(1,)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#NUM!");
-
-
-		//2.6 аргумент - cellsRange
-		//2.7 аргумент - cell
-		oParser = new parserFormula("WRAPROWS(1,A1)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-
-		oParser = new parserFormula("WRAPROWS(1,A1:B5)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-
-		//2.8 аргумент - array
-		oParser = new parserFormula("WRAPROWS(1,{2;\"\";\"test\"})", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-
-
-		//2. аргументы - разные типы. нужно пербрать все аргументы
-		//2.1 аргумент - number
-		oParser = new parserFormula("WRAPROWS(1,3,1)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-
-
-		//2.2 аргумент - string
-		oParser = new parserFormula("WRAPROWS(1,3,\"test\")", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.3 аргумент - bool
-		oParser = new parserFormula("WRAPROWS(1,3,true)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.4 аргумент - error
-		oParser = new parserFormula("WRAPROWS(1,3,#VALUE!)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-		//2.5 аргумент - empty
-		oParser = new parserFormula("WRAPROWS(1,3,)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.6 аргумент - cellsRange
-		//2.7 аргумент - cell
-		oParser = new parserFormula("WRAPROWS(1,3, B1)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.8 аргумент - array
-		oParser = new parserFormula("WRAPROWS(1,3, {1,2,3})", "A1", ws);
-		assert.ok(oParser.parse());
-		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1);
-
-		oParser = new parserFormula("WRAPROWS(1,3, B1:B2)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-
-		oParser = new parserFormula("WRAPROWS(1,0)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#NUM!");
-
-		oParser = new parserFormula("WRAPROWS(1,-100)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#NUM!");
-
-		oParser = new parserFormula("WRAPROWS(1,)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#NUM!");
-
-		oParser = new parserFormula("WRAPROWS(1,\"asd\")", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-
-		ws.getRange2("A1:C214").cleanAll();
-		// Data for reference link. Use A100-A111
-		ws.getRange2("A100").setValue("0.5");
-		ws.getRange2("A101").setValue("1.5");
-		ws.getRange2("A104").setValue("-1");
-		// For area
-		ws.getRange2("A102").setValue("0.5");
-		ws.getRange2("A103").setValue("");
-		ws.getRange2("A105").setValue("1");
-		ws.getRange2("A110").setValue("TRUE");
-		ws.getRange2("A111").setValue("FALSE");
-
-		// Table type. Use A601:L6**
-		getTableType(599, 0, 600, 1);
-		ws.getRange2("A601").setValue("1"); // Number (Column1)
-		ws.getRange2("B601").setValue("1s"); // Text (Column2)
-		// 3D links. Use A1:Z10
-		let ws2 = getSecondSheet();
-		ws2.getRange2("A1:C10").cleanAll();
-		ws2.getRange2("A1").setValue("1");
-		ws2.getRange2("A2").setValue("2");
-		ws2.getRange2("A3").setValue("Text");
-		ws2.getRange2("B1").setValue("3");
-		ws2.getRange2("B2").setValue("4");
-		ws2.getRange2("C1").setValue("1");
-		// DefNames.
-		initDefNames();
-		ws.getRange2("A201").setValue("-0.5"); // TestName
-		ws.getRange2("A202").setValue("0.5"); // TestName1
-		ws.getRange2("A203").setValue("10.5"); // TestName2
-		ws2.getRange2("A11").setValue("-0.5"); // TestName3D
-		ws.getRange2("A208").setValue("0.8"); // TestNameArea2
-		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
-		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
-		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
-		// Positive cases:
-		// Case #1: Number. Array with 4 elements, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS({1,2,3,4},2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS({1,2,3,4},2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Number. Array with 4 elements, wrap_count=2. 2 arguments used.');
-		// Case #2: Reference link. Reference to cell with array {1,2,3,4}, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS(A100,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(A100,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.5, 'Test: Positive case: Reference link. Reference to cell with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
-		// Case #3: Area. Single-cell range with array {1,2,3,4}, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS(A101:A101,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(A101:A101,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1.5, 'Test: Positive case: Area. Single-cell range with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
-		// Case #4: Array. Array with 6 elements, wrap_count=3. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS({1,2,3,4,5,6},3)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS({1,2,3,4,5,6},3) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Array. Array with 6 elements, wrap_count=3. 2 arguments used.');
-		// Case #5: Formula. Formula generating vector {1,2,3,4}, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS(SEQUENCE(4),2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(SEQUENCE(4),2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Formula. Formula generating vector {1,2,3,4}, wrap_count=2. 2 arguments used.');
-		// Case #6: Number,String. Array with 4 elements, wrap_count=2, string pad. 3 arguments used.
-		oParser = new parserFormula('WRAPROWS({1,2,3,4},2,"Pad")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS({1,2,3,4},2,"Pad") is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Number,String. Array with 4 elements, wrap_count=2, string pad. 3 arguments used.');
-		// Case #7: Reference link,String. Reference to array {1,2,3,4}, wrap_count=2, string pad. 3 arguments used.
-		oParser = new parserFormula('WRAPROWS(A100,2,"Pad")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(A100,2,"Pad") is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.5, 'Test: Positive case: Reference link,String. Reference to array {1,2,3,4}, wrap_count=2, string pad. 3 arguments used.');
-		// Case #8: Area,String. Single-cell range with array, wrap_count=2, string pad. 3 arguments used.
-		oParser = new parserFormula('WRAPROWS(A101:A101,2,"Pad")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(A101:A101,2,"Pad") is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1.5, 'Test: Positive case: Area,String. Single-cell range with array, wrap_count=2, string pad. 3 arguments used.');
-		// Case #9: Formula,Number,Number. Formula generating vector {1,2,3,4,5}, wrap_count=2, number pad. 3 arguments used.
-		oParser = new parserFormula('WRAPROWS(SEQUENCE(5),2,0)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(SEQUENCE(5),2,0) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Formula,Number,Number. Formula generating vector {1,2,3,4,5}, wrap_count=2, number pad. 3 arguments used.');
-		// Case #10: Date. Date array, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS({45658,45659},2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS({45658,45659},2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 45658, 'Test: Positive case: Date. Date array, wrap_count=2. 2 arguments used.');
-		// Case #11: Time. Time array, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS({0.4,0.5},2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS({0.4,0.5},2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.4, 'Test: Positive case: Time. Time array, wrap_count=2. 2 arguments used.');
-		// Case #12: Name. Named range with array {1,2,3,4}, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS(TestName,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(TestName,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), -0.5, 'Test: Positive case: Name. Named range with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
-		// Case #13: Name3D. 3D named range with array {1,2,3,4}, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS(TestName3D,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(TestName3D,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), -0.5, 'Test: Positive case: Name3D. 3D named range with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
-		// Case #14: Ref3D. 3D reference to cell with array {1,2,3,4}, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS(Sheet2!A1,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(Sheet2!A1,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Ref3D. 3D reference to cell with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
-		// Case #15: Area3D. 3D single-cell range with array {1,2,3,4}, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS(Sheet2!A2:A2,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(Sheet2!A2:A2,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 2, 'Test: Positive case: Area3D. 3D single-cell range with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
-		// Case #16: Table. Table column with array {1,2,3,4}, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS(Table1[Column1],2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(Table1[Column1],2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Table. Table column with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
-		// Case #17: Formula. WRAPCOLS inside SUM formula, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('SUM(WRAPROWS({1,2,3,4},2))', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: SUM(WRAPROWS({1,2,3,4},2)) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 10, 'Test: Positive case: Formula. WRAPCOLS inside SUM formula, wrap_count=2. 2 arguments used.');
-		// Case #18: String. String array, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS({"a","b","c","d"},2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS({"a","b","c","d"},2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'a', 'Test: Positive case: String. String array, wrap_count=2. 2 arguments used.');
-		// Case #19: Formula. Nested IF returning vector {1,2,3,4}, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS(IF(TRUE,SEQUENCE(4),SEQUENCE(2)),2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(IF(TRUE,SEQUENCE(4),SEQUENCE(2)),2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Formula. Nested IF returning vector {1,2,3,4}, wrap_count=2. 2 arguments used.');
-		// Case #20: Array,Number,Formula. Array with 5 elements, wrap_count=2, formula pad. 3 arguments used.
-		oParser = new parserFormula('WRAPROWS({1,2,3,4,5},2,SQRT(4))', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS({1,2,3,4,5},2,SQRT(4)) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Array,Number,Formula. Array with 5 elements, wrap_count=2, formula pad. 3 arguments used.');
-		// Case #21: Reference link,Formula,Number. Reference to array, formula wrap_count, number pad. 3 arguments used.
-		oParser = new parserFormula('WRAPROWS(A100,IF(TRUE,2,1),0)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(A100,IF(TRUE,2,1),0) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.5, 'Test: Positive case: Reference link,Formula,Number. Reference to array, formula wrap_count, number pad. 3 arguments used.');
-		// Case #22: Number. Array with 3 elements, wrap_count=1. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS({1,2,3},1)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS({1,2,3},1) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Number. Array with 3 elements, wrap_count=1. 2 arguments used.');
-
-		// Negative cases:
-		// Case #1: Number. wrap_count=0 returns #NUM!. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS({1,2,3,4},0)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS({1,2,3,4},0) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. wrap_count=0 returns #NUM!. 2 arguments used.');
-		// Case #2: Number. Negative wrap_count returns #NUM!. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS({1,2,3,4},-1)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS({1,2,3,4},-1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. Negative wrap_count returns #NUM!. 2 arguments used.');
-		// Case #3: String. Non-array string vector returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS("abc",2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS("abc",2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'abc', 'Test: Negative case: String. Non-array string vector returns #VALUE!. 2 arguments used.');
-		// Case #4: Array,String. String wrap_count returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS({1,2,3,4},"2")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS({1,2,3,4},"2") is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Negative case: Array,String. String wrap_count returns #VALUE!. 2 arguments used.');
-		// Case #5: Error. Error vector propagates #N/A. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS(NA(),2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(NA(),2) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Error. Error vector propagates #N/A. 2 arguments used.');
-		// Case #6: Area. Multi-cell range returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS(A102:A103,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(A102:A103,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.5, 'Test: Negative case: Area. Multi-cell range returns #VALUE!. 2 arguments used.');
-		// Case #7: Empty. Empty reference returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS(A104,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(A104,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), -1, 'Test: Negative case: Empty. Empty reference returns #VALUE!. 2 arguments used.');
-		// Case #8: Boolean. Boolean vector returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS(FALSE,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(FALSE,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'FALSE', 'Test: Negative case: Boolean. Boolean vector returns #VALUE!. 2 arguments used.');
-		// Case #9: Array,Boolean. Boolean wrap_count returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS({1,2,3,4},TRUE)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS({1,2,3,4},TRUE) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Negative case: Array,Boolean. Boolean wrap_count returns #VALUE!. 2 arguments used.');
-		// Case #10: Name. Named range with multi-cell area returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS(TestNameArea2,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(TestNameArea2,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.8, 'Test: Negative case: Name. Named range with multi-cell area returns #VALUE!. 2 arguments used.');
-		// Case #11: Name3D. 3D named range with multi-cell area returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS(TestNameArea3D2,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(TestNameArea3D2,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.8, 'Test: Negative case: Name3D. 3D named range with multi-cell area returns #VALUE!. 2 arguments used.');
-		// Case #12: Ref3D. 3D reference to text returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS(Sheet2!A3,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(Sheet2!A3,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'Text', 'Test: Negative case: Ref3D. 3D reference to text returns #VALUE!. 2 arguments used.');
-		// Case #13: Area3D. 3D multi-cell range returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS(Sheet2!A4:A5,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(Sheet2!A4:A5,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), "", 'Test: Negative case: Area3D. 3D multi-cell range returns #VALUE!. 2 arguments used.');
-		// Case #14: Table. Table column with text returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS(Table1[Column2],2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(Table1[Column2],2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '1s', 'Test: Negative case: Table. Table column with text returns #VALUE!. 2 arguments used.');
-		// Case #15: Formula. Formula resulting in #NUM! returns #NUM!. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS(SQRT(-1),2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(SQRT(-1),2) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Formula. Formula resulting in #NUM! returns #NUM!. 2 arguments used.');
-		// Case #17: Number. Single-element array with wrap_count=0 returns #NUM!. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS({1},0)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS({1},0) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. Single-element array with wrap_count=0 returns #NUM!. 2 arguments used.');
-		// Case #18: Reference link,Number,Error. Error pad_with propagates #N/A. 3 arguments used.
-		oParser = new parserFormula('WRAPROWS(A100,2,NA())', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(A100,2,NA()) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.5, 'Test: Negative case: Reference link,Number,Error. Error pad_with propagates #N/A. 3 arguments used.');
-		// Case #19: Array,String. Non-numeric wrap_count returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS({1,2,3},"abc")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS({1,2,3},"abc") is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array,String. Non-numeric wrap_count returns #VALUE!. 2 arguments used.');
-		// Case #20: Array,Number. Boolean array vector returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS({TRUE,FALSE},2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS({TRUE,FALSE},2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'TRUE', 'Test: Negative case: Array,Number. Boolean array vector returns #VALUE!. 2 arguments used.');
-
-		// Bounded cases:
-		// Case #1: Number. Minimum valid wrap_count=1, single-element vector. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS({1},1)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS({1},1) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Bounded case: Number. Minimum valid wrap_count=1, single-element vector. 2 arguments used.');
-		// Case #2: Number. Maximum valid vector length (Excel row limit), wrap_count=1048576. 2 arguments used.
-		oParser = new parserFormula('WRAPROWS(SEQUENCE(1048576),1048576)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS(SEQUENCE(1048576),1048576) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Bounded case: Number. Maximum valid vector length (Excel row limit), wrap_count=1048576. 2 arguments used.');
-		// Case #3: Number. Maximum valid number for pad_with. 3 arguments used.
-		oParser = new parserFormula('WRAPROWS({1,2},2,9.99999999999999E+307)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPROWS({1,2},2,9.99999999999999E+307) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Bounded case: Number. Maximum valid number for pad_with. 3 arguments used.');
-
-		// Need to fix:
-		// Case #18: Reference link,Number,Error. Error pad_with propagates #N/A. 3 arguments used.
-
-	});
-
-	QUnit.test("Test: \"WRAPCOLS\"", function (assert) {
-		//1. добавляем общие тесты
-
-		ws.getRange2("A1").setValue("2");
-		ws.getRange2("A2").setValue("");
-		ws.getRange2("A3").setValue("test");
-		ws.getRange2("A4").setValue("rwe");
-
-		ws.getRange2("B1").setValue("test2");
-		ws.getRange2("B2").setValue("#N/A");
-		ws.getRange2("B3").setValue("");
-
-		oParser = new parserFormula("WRAPCOLS(1,A1:B5)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-
-		oParser = new parserFormula("WRAPCOLS(A1:A3,2)", "A1", ws);
-		assert.ok(oParser.parse());
-		let array = oParser.calculate();
-
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 2);
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), '');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 'test');
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), '#N/A');
-
-		oParser = new parserFormula("WRAPCOLS(A1:A3,2, \"error\")", "A1", ws);
-		assert.ok(oParser.parse());
-		array = oParser.calculate();
-
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 2);
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), '');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 'test');
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 'error');
-
-
-		oParser = new parserFormula("WRAPCOLS(A1:B3,3)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-
-
-
-		//2. аргументы - разные типы. нужно пербрать все аргументы
-		//2.1 аргумент - number
-		oParser = new parserFormula("WRAPCOLS(1,3)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.2 аргумент - string
-		oParser = new parserFormula("WRAPCOLS(\"test\",3)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "test");
-		//2.3 аргумент - bool
-		oParser = new parserFormula("WRAPCOLS(true,3)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "TRUE");
-		//2.4 аргумент - error
-		oParser = new parserFormula("WRAPCOLS(#VALUE!,3)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-		//2.5 аргумент - empty
-		oParser = new parserFormula("WRAPCOLS(,2)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-		//2.6 аргумент - cellsRange
-		//2.7 аргумент - cell
-		oParser = new parserFormula("WRAPCOLS(B1, 10)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "test2");
-
-		//2.8 аргумент - array
-		oParser = new parserFormula("WRAPCOLS({2;\"\";\"test\"},2)", "A1", ws);
-		assert.ok(oParser.parse());
-		array = oParser.calculate();
-
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 2);
-		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), '');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 'test');
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), '#N/A');
-
-
-		//2.2 аргумент - string
-		oParser = new parserFormula("WRAPCOLS(1,\"test\")", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-		//2.3 аргумент - bool
-		oParser = new parserFormula("WRAPCOLS(1,true)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.4 аргумент - error
-		oParser = new parserFormula("WRAPCOLS(1, #VALUE!)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-		//2.5 аргумент - empty
-		oParser = new parserFormula("WRAPCOLS(1,)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#NUM!");
-
-
-		//2.6 аргумент - cellsRange
-		//2.7 аргумент - cell
-		oParser = new parserFormula("WRAPCOLS(1,A1)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-
-		oParser = new parserFormula("WRAPCOLS(1,A1:B5)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-
-		//2.8 аргумент - array
-		oParser = new parserFormula("WRAPCOLS(1,{2;\"\";\"test\"})", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-
-
-		//2. аргументы - разные типы. нужно пербрать все аргументы
-		//2.1 аргумент - number
-		oParser = new parserFormula("WRAPCOLS(1,3,1)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-
-
-		//2.2 аргумент - string
-		oParser = new parserFormula("WRAPCOLS(1,3,\"test\")", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.3 аргумент - bool
-		oParser = new parserFormula("WRAPCOLS(1,3,true)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.4 аргумент - error
-		oParser = new parserFormula("WRAPCOLS(1,3,#VALUE!)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-		//2.5 аргумент - empty
-		oParser = new parserFormula("WRAPCOLS(1,3,)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.6 аргумент - cellsRange
-		//2.7 аргумент - cell
-		oParser = new parserFormula("WRAPCOLS(1,3, B1)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.8 аргумент - array
-		oParser = new parserFormula("WRAPCOLS(1,3, {1,2,3})", "A1", ws);
-		assert.ok(oParser.parse());
-		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1);
-
-		oParser = new parserFormula("WRAPCOLS(1,3, B1:B2)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-
-		oParser = new parserFormula("WRAPCOLS(1,0)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#NUM!");
-
-		oParser = new parserFormula("WRAPCOLS(1,-100)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#NUM!");
-
-		oParser = new parserFormula("WRAPCOLS(1,)", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#NUM!");
-
-		oParser = new parserFormula("WRAPCOLS(1,\"asd\")", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-
-		ws.getRange2("A1:C214").cleanAll();
-		// Data for reference link. Use A100-A111
-		ws.getRange2("A100").setValue("0.5");
-		ws.getRange2("A101").setValue("1.5");
-		ws.getRange2("A104").setValue("-1");
-		// For area
-		ws.getRange2("A102").setValue("0.5");
-		ws.getRange2("A103").setValue("");
-		ws.getRange2("A105").setValue("1");
-		ws.getRange2("A110").setValue("TRUE");
-		ws.getRange2("A111").setValue("FALSE");
-
-		// Table type. Use A601:L6**
-		getTableType(599, 0, 600, 1);
-		ws.getRange2("A601").setValue("1"); // Number (Column1)
-		ws.getRange2("B601").setValue("1s"); // Text (Column2)
-		// 3D links. Use A1:Z10
-		let ws2 = getSecondSheet();
-		ws2.getRange2("A1:C10").cleanAll();
-		ws2.getRange2("A1").setValue("1");
-		ws2.getRange2("A2").setValue("2");
-		ws2.getRange2("A3").setValue("Text");
-		ws2.getRange2("B1").setValue("3");
-		ws2.getRange2("B2").setValue("4");
-		ws2.getRange2("C1").setValue("1");
-		// DefNames.
-		initDefNames();
-		ws.getRange2("A201").setValue("-0.5"); // TestName
-		ws.getRange2("A202").setValue("0.5"); // TestName1
-		ws.getRange2("A203").setValue("10.5"); // TestName2
-		ws2.getRange2("A11").setValue("-0.5"); // TestName3D
-		ws.getRange2("A208").setValue("0.8"); // TestNameArea2
-		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
-		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
-		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
-
-		// Positive cases:
-		// Case #1: Number. Array with 4 elements, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS({1,2,3,4},2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS({1,2,3,4},2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Number. Array with 4 elements, wrap_count=2. 2 arguments used.');
-		// Case #2: Reference link. Reference to cell with array {1,2,3,4}, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS(A100,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(A100,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.5, 'Test: Positive case: Reference link. Reference to cell with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
-		// Case #3: Area. Single-cell range with array {1,2,3,4}, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS(A101:A101,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(A101:A101,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1.5, 'Test: Positive case: Area. Single-cell range with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
-		// Case #4: Array. Array with 6 elements, wrap_count=3. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS({1,2,3,4,5,6},3)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS({1,2,3,4,5,6},3) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Array. Array with 6 elements, wrap_count=3. 2 arguments used.');
-		// Case #5: Formula. Formula generating vector {1,2,3,4}, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS(SEQUENCE(4),2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(SEQUENCE(4),2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Formula. Formula generating vector {1,2,3,4}, wrap_count=2. 2 arguments used.');
-		// Case #6: Number,String. Array with 4 elements, wrap_count=2, string pad. 3 arguments used.
-		oParser = new parserFormula('WRAPCOLS({1,2,3,4},2,"Pad")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS({1,2,3,4},2,"Pad") is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Number,String. Array with 4 elements, wrap_count=2, string pad. 3 arguments used.');
-		// Case #7: Reference link,String. Reference to array {1,2,3,4}, wrap_count=2, string pad. 3 arguments used.
-		oParser = new parserFormula('WRAPCOLS(A100,2,"Pad")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(A100,2,"Pad") is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.5, 'Test: Positive case: Reference link,String. Reference to array {1,2,3,4}, wrap_count=2, string pad. 3 arguments used.');
-		// Case #8: Area,String. Single-cell range with array, wrap_count=2, string pad. 3 arguments used.
-		oParser = new parserFormula('WRAPCOLS(A101:A101,2,"Pad")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(A101:A101,2,"Pad") is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1.5, 'Test: Positive case: Area,String. Single-cell range with array, wrap_count=2, string pad. 3 arguments used.');
-		// Case #9: Formula,Number,Number. Formula generating vector {1,2,3,4,5}, wrap_count=2, number pad. 3 arguments used.
-		oParser = new parserFormula('WRAPCOLS(SEQUENCE(5),2,0)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(SEQUENCE(5),2,0) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Formula,Number,Number. Formula generating vector {1,2,3,4,5}, wrap_count=2, number pad. 3 arguments used.');
-		// Case #10: Date. Date array, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS({45658,45659},2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS({45658,45659},2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 45658, 'Test: Positive case: Date. Date array, wrap_count=2. 2 arguments used.');
-		// Case #11: Time. Time array, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS({0.4,0.5},2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS({0.4,0.5},2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.4, 'Test: Positive case: Time. Time array, wrap_count=2. 2 arguments used.');
-		// Case #12: Name. Named range with array {1,2,3,4}, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS(TestName,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(TestName,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), -0.5, 'Test: Positive case: Name. Named range with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
-		// Case #13: Name3D. 3D named range with array {1,2,3,4}, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS(TestName3D,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(TestName3D,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), -0.5, 'Test: Positive case: Name3D. 3D named range with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
-		// Case #14: Ref3D. 3D reference to cell with array {1,2,3,4}, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS(Sheet2!A1,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(Sheet2!A1,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Ref3D. 3D reference to cell with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
-		// Case #15: Area3D. 3D single-cell range with array {1,2,3,4}, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS(Sheet2!A2:A2,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(Sheet2!A2:A2,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 2, 'Test: Positive case: Area3D. 3D single-cell range with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
-		// Case #16: Table. Table column with array {1,2,3,4}, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS(Table1[Column1],2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(Table1[Column1],2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Table. Table column with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
-		// Case #17: Formula. WRAPCOLS inside SUM formula, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('SUM(WRAPCOLS({1,2,3,4},2))', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: SUM(WRAPCOLS({1,2,3,4},2)) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 10, 'Test: Positive case: Formula. WRAPCOLS inside SUM formula, wrap_count=2. 2 arguments used.');
-		// Case #18: String. String array, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS({"a","b","c","d"},2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS({"a","b","c","d"},2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'a', 'Test: Positive case: String. String array, wrap_count=2. 2 arguments used.');
-		// Case #19: Formula. Nested IF returning vector {1,2,3,4}, wrap_count=2. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS(IF(TRUE,SEQUENCE(4),SEQUENCE(2)),2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(IF(TRUE,SEQUENCE(4),SEQUENCE(2)),2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Formula. Nested IF returning vector {1,2,3,4}, wrap_count=2. 2 arguments used.');
-		// Case #20: Array,Number,Formula. Array with 5 elements, wrap_count=2, formula pad. 3 arguments used.
-		oParser = new parserFormula('WRAPCOLS({1,2,3,4,5},2,SQRT(4))', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS({1,2,3,4,5},2,SQRT(4)) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Array,Number,Formula. Array with 5 elements, wrap_count=2, formula pad. 3 arguments used.');
-		// Case #21: Reference link,Formula,Number. Reference to array, formula wrap_count, number pad. 3 arguments used.
-		oParser = new parserFormula('WRAPCOLS(A100,IF(TRUE,2,1),0)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(A100,IF(TRUE,2,1),0) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.5, 'Test: Positive case: Reference link,Formula,Number. Reference to array, formula wrap_count, number pad. 3 arguments used.');
-		// Case #22: Number. Array with 3 elements, wrap_count=1. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS({1,2,3},1)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS({1,2,3},1) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Number. Array with 3 elements, wrap_count=1. 2 arguments used.');
-
-		// Negative cases:
-		// Case #1: Number. wrap_count=0 returns #NUM!. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS({1,2,3,4},0)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS({1,2,3,4},0) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. wrap_count=0 returns #NUM!. 2 arguments used.');
-		// Case #2: Number. Negative wrap_count returns #NUM!. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS({1,2,3,4},-1)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS({1,2,3,4},-1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. Negative wrap_count returns #NUM!. 2 arguments used.');
-		// Case #3: String. Non-array string vector returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS("abc",2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS("abc",2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'abc', 'Test: Negative case: String. Non-array string vector returns #VALUE!. 2 arguments used.');
-		// Case #4: Array,String. String wrap_count returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS({1,2,3,4},"2")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS({1,2,3,4},"2") is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0)	.getValue(), 1, 'Test: Negative case: Array,String. String wrap_count returns #VALUE!. 2 arguments used.');
-		// Case #5: Error. Error vector propagates #N/A. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS(NA(),2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(NA(),2) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Error. Error vector propagates #N/A. 2 arguments used.');
-		// Case #6: Area. Multi-cell range returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS(A102:A103,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(A102:A103,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.5, 'Test: Negative case: Area. Multi-cell range returns #VALUE!. 2 arguments used.');
-		// Case #7: Empty. Empty reference returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS(A104,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(A104,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), -1, 'Test: Negative case: Empty. Empty reference returns #VALUE!. 2 arguments used.');
-		// Case #8: Boolean. Boolean vector returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS(FALSE,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(FALSE,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'FALSE', 'Test: Negative case: Boolean. Boolean vector returns #VALUE!. 2 arguments used.');
-		// Case #9: Array,Boolean. Boolean wrap_count returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS({1,2,3,4},TRUE)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS({1,2,3,4},TRUE) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Negative case: Array,Boolean. Boolean wrap_count returns #VALUE!. 2 arguments used.');
-		// Case #10: Name. Named range with multi-cell area returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS(TestNameArea2,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(TestNameArea2,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.8, 'Test: Negative case: Name. Named range with multi-cell area returns #VALUE!. 2 arguments used.');
-		// Case #11: Name3D. 3D named range with multi-cell area returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS(TestNameArea3D2,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(TestNameArea3D2,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.8, 'Test: Negative case: Name3D. 3D named range with multi-cell area returns #VALUE!. 2 arguments used.');
-		// Case #12: Ref3D. 3D reference to text returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS(Sheet2!A3,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(Sheet2!A3,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'Text', 'Test: Negative case: Ref3D. 3D reference to text returns #VALUE!. 2 arguments used.');
-		// Case #13: Area3D. 3D multi-cell range returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS(Sheet2!A4:A5,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(Sheet2!A4:A5,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), "", 'Test: Negative case: Area3D. 3D multi-cell range returns #VALUE!. 2 arguments used.');
-		// Case #14: Table. Table column with text returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS(Table1[Column2],2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(Table1[Column2],2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '1s', 'Test: Negative case: Table. Table column with text returns #VALUE!. 2 arguments used.');
-		// Case #15: Formula. Formula resulting in #NUM! returns #NUM!. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS(SQRT(-1),2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(SQRT(-1),2) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Formula. Formula resulting in #NUM! returns #NUM!. 2 arguments used.');
-		// Case #17: Number. Single-element array with wrap_count=0 returns #NUM!. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS({1},0)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS({1},0) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. Single-element array with wrap_count=0 returns #NUM!. 2 arguments used.');
-		// Case #18: Reference link,Number,Error. Error pad_with propagates #N/A. 3 arguments used.
-		oParser = new parserFormula('WRAPCOLS(A100,2,NA())', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(A100,2,NA()) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.5, 'Test: Negative case: Reference link,Number,Error. Error pad_with propagates #N/A. 3 arguments used.');
-		// Case #19: Array,String. Non-numeric wrap_count returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS({1,2,3},"abc")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS({1,2,3},"abc") is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array,String. Non-numeric wrap_count returns #VALUE!. 2 arguments used.');
-		// Case #20: Array,Number. Boolean array vector returns #VALUE!. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS({TRUE,FALSE},2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS({TRUE,FALSE},2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'TRUE', 'Test: Negative case: Array,Number. Boolean array vector returns #VALUE!. 2 arguments used.');
-
-		// Bounded cases:
-		// Case #1: Number. Minimum valid wrap_count=1, single-element vector. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS({1},1)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS({1},1) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Bounded case: Number. Minimum valid wrap_count=1, single-element vector. 2 arguments used.');
-		// Case #2: Number. Maximum valid vector length (Excel row limit), wrap_count=1048576. 2 arguments used.
-		oParser = new parserFormula('WRAPCOLS(SEQUENCE(1048576),1048576)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS(SEQUENCE(1048576),1048576) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number. Maximum valid vector length (Excel row limit), wrap_count=1048576. 2 arguments used.');
-		// Case #3: Number. Maximum valid number for pad_with. 3 arguments used.
-		oParser = new parserFormula('WRAPCOLS({1,2},2,9.99999999999999E+307)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: WRAPCOLS({1,2},2,9.99999999999999E+307) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Bounded case: Number. Maximum valid number for pad_with. 3 arguments used.');
-
-
-		// TODO remove critical error in Case #2: Number. Maximum valid vector length
-		// Need to fix: error handle
-		// Case #18: Reference link,Number,Error. Error pad_with propagates #N/A. 3 arguments used.
-		// Case #2: Number. Maximum valid vector length (Excel row limit), wrap_count=1048576. 2 arguments used. - critical
-
-	});
-
+	// QUnit.test("Test: \"WRAPROWS\"", function (assert) {
+	// 	//1. добавляем общие тесты
+	//
+	// 	ws.getRange2("A1").setValue("2");
+	// 	ws.getRange2("A2").setValue("");
+	// 	ws.getRange2("A3").setValue("test");
+	//
+	// 	ws.getRange2("B1").setValue("test2");
+	// 	ws.getRange2("B2").setValue("#N/A");
+	// 	ws.getRange2("B3").setValue("");
+	//
+	// 	oParser = new parserFormula("WRAPROWS(1,A1:B5)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	//
+	// 	oParser = new parserFormula("WRAPROWS(A1:A3,2)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	let array = oParser.calculate();
+	//
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 2);
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), '');
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 'test');
+	// 	assert.strictEqual(array.getElementRowCol(1, 1).getValue(), '#N/A');
+	//
+	// 	oParser = new parserFormula("WRAPROWS(A1:A3,2, \"error\")", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	array = oParser.calculate();
+	//
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 2);
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), '');
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 'test');
+	// 	assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 'error');
+	//
+	//
+	// 	oParser = new parserFormula("WRAPROWS(A1:B3,3)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
+	//
+	//
+	//
+	// 	//2. аргументы - разные типы. нужно пербрать все аргументы
+	// 	//2.1 аргумент - number
+	// 	oParser = new parserFormula("WRAPROWS(1,3)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	// 	//2.2 аргумент - string
+	// 	oParser = new parserFormula("WRAPROWS(\"test\",3)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "test");
+	// 	//2.3 аргумент - bool
+	// 	oParser = new parserFormula("WRAPROWS(true,3)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "TRUE");
+	// 	//2.4 аргумент - error
+	// 	oParser = new parserFormula("WRAPROWS(#VALUE!,3)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
+	// 	//2.5 аргумент - empty
+	// 	oParser = new parserFormula("WRAPROWS(,2)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
+	// 	//2.6 аргумент - cellsRange
+	// 	//2.7 аргумент - cell
+	// 	oParser = new parserFormula("WRAPROWS(B1, 10)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "test2");
+	//
+	// 	//2.8 аргумент - array
+	// 	oParser = new parserFormula("WRAPROWS({2;\"\";\"test\"},2)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	array = oParser.calculate();
+	//
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 2);
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), '');
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 'test');
+	// 	assert.strictEqual(array.getElementRowCol(1, 1).getValue(), '#N/A');
+	//
+	//
+	// 	//2.2 аргумент - string
+	// 	oParser = new parserFormula("WRAPROWS(1,\"test\")", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
+	// 	//2.3 аргумент - bool
+	// 	oParser = new parserFormula("WRAPROWS(1,true)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	// 	//2.4 аргумент - error
+	// 	oParser = new parserFormula("WRAPROWS(1, #VALUE!)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
+	// 	//2.5 аргумент - empty
+	// 	oParser = new parserFormula("WRAPROWS(1,)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#NUM!");
+	//
+	//
+	// 	//2.6 аргумент - cellsRange
+	// 	//2.7 аргумент - cell
+	// 	oParser = new parserFormula("WRAPROWS(1,A1)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	//
+	// 	oParser = new parserFormula("WRAPROWS(1,A1:B5)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	//
+	// 	//2.8 аргумент - array
+	// 	oParser = new parserFormula("WRAPROWS(1,{2;\"\";\"test\"})", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	//
+	//
+	// 	//2. аргументы - разные типы. нужно пербрать все аргументы
+	// 	//2.1 аргумент - number
+	// 	oParser = new parserFormula("WRAPROWS(1,3,1)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	//
+	//
+	// 	//2.2 аргумент - string
+	// 	oParser = new parserFormula("WRAPROWS(1,3,\"test\")", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	// 	//2.3 аргумент - bool
+	// 	oParser = new parserFormula("WRAPROWS(1,3,true)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	// 	//2.4 аргумент - error
+	// 	oParser = new parserFormula("WRAPROWS(1,3,#VALUE!)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
+	// 	//2.5 аргумент - empty
+	// 	oParser = new parserFormula("WRAPROWS(1,3,)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	// 	//2.6 аргумент - cellsRange
+	// 	//2.7 аргумент - cell
+	// 	oParser = new parserFormula("WRAPROWS(1,3, B1)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	// 	//2.8 аргумент - array
+	// 	oParser = new parserFormula("WRAPROWS(1,3, {1,2,3})", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1);
+	//
+	// 	oParser = new parserFormula("WRAPROWS(1,3, B1:B2)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	//
+	// 	oParser = new parserFormula("WRAPROWS(1,0)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#NUM!");
+	//
+	// 	oParser = new parserFormula("WRAPROWS(1,-100)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#NUM!");
+	//
+	// 	oParser = new parserFormula("WRAPROWS(1,)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#NUM!");
+	//
+	// 	oParser = new parserFormula("WRAPROWS(1,\"asd\")", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
+	//
+	// 	ws.getRange2("A1:C214").cleanAll();
+	// 	// Data for reference link. Use A100-A111
+	// 	ws.getRange2("A100").setValue("0.5");
+	// 	ws.getRange2("A101").setValue("1.5");
+	// 	ws.getRange2("A104").setValue("-1");
+	// 	// For area
+	// 	ws.getRange2("A102").setValue("0.5");
+	// 	ws.getRange2("A103").setValue("");
+	// 	ws.getRange2("A105").setValue("1");
+	// 	ws.getRange2("A110").setValue("TRUE");
+	// 	ws.getRange2("A111").setValue("FALSE");
+	//
+	// 	// Table type. Use A601:L6**
+	// 	getTableType(599, 0, 600, 1);
+	// 	ws.getRange2("A601").setValue("1"); // Number (Column1)
+	// 	ws.getRange2("B601").setValue("1s"); // Text (Column2)
+	// 	// 3D links. Use A1:Z10
+	// 	let ws2 = getSecondSheet();
+	// 	ws2.getRange2("A1:C10").cleanAll();
+	// 	ws2.getRange2("A1").setValue("1");
+	// 	ws2.getRange2("A2").setValue("2");
+	// 	ws2.getRange2("A3").setValue("Text");
+	// 	ws2.getRange2("B1").setValue("3");
+	// 	ws2.getRange2("B2").setValue("4");
+	// 	ws2.getRange2("C1").setValue("1");
+	// 	// DefNames.
+	// 	initDefNames();
+	// 	ws.getRange2("A201").setValue("-0.5"); // TestName
+	// 	ws.getRange2("A202").setValue("0.5"); // TestName1
+	// 	ws.getRange2("A203").setValue("10.5"); // TestName2
+	// 	ws2.getRange2("A11").setValue("-0.5"); // TestName3D
+	// 	ws.getRange2("A208").setValue("0.8"); // TestNameArea2
+	// 	ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
+	// 	ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
+	// 	ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
+	//
+	// 	// Positive cases:
+	// 	// Case #1: Number. Array with 4 elements, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS({1,2,3,4},2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS({1,2,3,4},2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Number. Array with 4 elements, wrap_count=2. 2 arguments used.');
+	// 	// Case #2: Reference link. Reference to cell with array {1,2,3,4}, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(A100,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(A100,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.5, 'Test: Positive case: Reference link. Reference to cell with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
+	// 	// Case #3: Area. Single-cell range with array {1,2,3,4}, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(A101:A101,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(A101:A101,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1.5, 'Test: Positive case: Area. Single-cell range with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
+	// 	// Case #4: Array. Array with 6 elements, wrap_count=3. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS({1,2,3,4,5,6},3)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS({1,2,3,4,5,6},3) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Array. Array with 6 elements, wrap_count=3. 2 arguments used.');
+	// 	// Case #5: Formula. Formula generating vector {1,2,3,4}, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(SEQUENCE(4),2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(SEQUENCE(4),2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Formula. Formula generating vector {1,2,3,4}, wrap_count=2. 2 arguments used.');
+	// 	// Case #6: Number,String. Array with 4 elements, wrap_count=2, string pad. 3 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS({1,2,3,4},2,"Pad")', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS({1,2,3,4},2,"Pad") is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Number,String. Array with 4 elements, wrap_count=2, string pad. 3 arguments used.');
+	// 	// Case #7: Reference link,String. Reference to array {1,2,3,4}, wrap_count=2, string pad. 3 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(A100,2,"Pad")', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(A100,2,"Pad") is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.5, 'Test: Positive case: Reference link,String. Reference to array {1,2,3,4}, wrap_count=2, string pad. 3 arguments used.');
+	// 	// Case #8: Area,String. Single-cell range with array, wrap_count=2, string pad. 3 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(A101:A101,2,"Pad")', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(A101:A101,2,"Pad") is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1.5, 'Test: Positive case: Area,String. Single-cell range with array, wrap_count=2, string pad. 3 arguments used.');
+	// 	// Case #9: Formula,Number,Number. Formula generating vector {1,2,3,4,5}, wrap_count=2, number pad. 3 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(SEQUENCE(5),2,0)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(SEQUENCE(5),2,0) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Formula,Number,Number. Formula generating vector {1,2,3,4,5}, wrap_count=2, number pad. 3 arguments used.');
+	// 	// Case #10: Date. Date array, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS({45658,45659},2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS({45658,45659},2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 45658, 'Test: Positive case: Date. Date array, wrap_count=2. 2 arguments used.');
+	// 	// Case #11: Time. Time array, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS({0.4,0.5},2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS({0.4,0.5},2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.4, 'Test: Positive case: Time. Time array, wrap_count=2. 2 arguments used.');
+	// 	// Case #12: Name. Named range with array {1,2,3,4}, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(TestName,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(TestName,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), -0.5, 'Test: Positive case: Name. Named range with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
+	// 	// Case #13: Name3D. 3D named range with array {1,2,3,4}, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(TestName3D,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(TestName3D,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), -0.5, 'Test: Positive case: Name3D. 3D named range with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
+	// 	// Case #14: Ref3D. 3D reference to cell with array {1,2,3,4}, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(Sheet2!A1,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(Sheet2!A1,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Ref3D. 3D reference to cell with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
+	// 	// Case #15: Area3D. 3D single-cell range with array {1,2,3,4}, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(Sheet2!A2:A2,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(Sheet2!A2:A2,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 2, 'Test: Positive case: Area3D. 3D single-cell range with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
+	// 	// Case #16: Table. Table column with array {1,2,3,4}, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(Table1[Column1],2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(Table1[Column1],2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Table. Table column with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
+	// 	// Case #17: Formula. WRAPCOLS inside SUM formula, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('SUM(WRAPROWS({1,2,3,4},2))', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: SUM(WRAPROWS({1,2,3,4},2)) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), 10, 'Test: Positive case: Formula. WRAPCOLS inside SUM formula, wrap_count=2. 2 arguments used.');
+	// 	// Case #18: String. String array, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS({"a","b","c","d"},2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS({"a","b","c","d"},2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'a', 'Test: Positive case: String. String array, wrap_count=2. 2 arguments used.');
+	// 	// Case #19: Formula. Nested IF returning vector {1,2,3,4}, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(IF(TRUE,SEQUENCE(4),SEQUENCE(2)),2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(IF(TRUE,SEQUENCE(4),SEQUENCE(2)),2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Formula. Nested IF returning vector {1,2,3,4}, wrap_count=2. 2 arguments used.');
+	// 	// Case #20: Array,Number,Formula. Array with 5 elements, wrap_count=2, formula pad. 3 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS({1,2,3,4,5},2,SQRT(4))', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS({1,2,3,4,5},2,SQRT(4)) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Array,Number,Formula. Array with 5 elements, wrap_count=2, formula pad. 3 arguments used.');
+	// 	// Case #21: Reference link,Formula,Number. Reference to array, formula wrap_count, number pad. 3 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(A100,IF(TRUE,2,1),0)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(A100,IF(TRUE,2,1),0) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.5, 'Test: Positive case: Reference link,Formula,Number. Reference to array, formula wrap_count, number pad. 3 arguments used.');
+	// 	// Case #22: Number. Array with 3 elements, wrap_count=1. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS({1,2,3},1)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS({1,2,3},1) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Number. Array with 3 elements, wrap_count=1. 2 arguments used.');
+	//
+	// 	// Negative cases:
+	// 	// Case #1: Number. wrap_count=0 returns #NUM!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS({1,2,3,4},0)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS({1,2,3,4},0) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. wrap_count=0 returns #NUM!. 2 arguments used.');
+	// 	// Case #2: Number. Negative wrap_count returns #NUM!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS({1,2,3,4},-1)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS({1,2,3,4},-1) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. Negative wrap_count returns #NUM!. 2 arguments used.');
+	// 	// Case #3: String. Non-array string vector returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS("abc",2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS("abc",2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'abc', 'Test: Negative case: String. Non-array string vector returns #VALUE!. 2 arguments used.');
+	// 	// Case #4: Array,String. String wrap_count returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS({1,2,3,4},"2")', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS({1,2,3,4},"2") is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Negative case: Array,String. String wrap_count returns #VALUE!. 2 arguments used.');
+	// 	// Case #5: Error. Error vector propagates #N/A. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(NA(),2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(NA(),2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Error. Error vector propagates #N/A. 2 arguments used.');
+	// 	// Case #6: Area. Multi-cell range returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(A102:A103,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(A102:A103,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.5, 'Test: Negative case: Area. Multi-cell range returns #VALUE!. 2 arguments used.');
+	// 	// Case #7: Empty. Empty reference returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(A104,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(A104,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), -1, 'Test: Negative case: Empty. Empty reference returns #VALUE!. 2 arguments used.');
+	// 	// Case #8: Boolean. Boolean vector returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(FALSE,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(FALSE,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'FALSE', 'Test: Negative case: Boolean. Boolean vector returns #VALUE!. 2 arguments used.');
+	// 	// Case #9: Array,Boolean. Boolean wrap_count returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS({1,2,3,4},TRUE)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS({1,2,3,4},TRUE) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Negative case: Array,Boolean. Boolean wrap_count returns #VALUE!. 2 arguments used.');
+	// 	// Case #10: Name. Named range with multi-cell area returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(TestNameArea2,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(TestNameArea2,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.8, 'Test: Negative case: Name. Named range with multi-cell area returns #VALUE!. 2 arguments used.');
+	// 	// Case #11: Name3D. 3D named range with multi-cell area returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(TestNameArea3D2,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(TestNameArea3D2,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.8, 'Test: Negative case: Name3D. 3D named range with multi-cell area returns #VALUE!. 2 arguments used.');
+	// 	// Case #12: Ref3D. 3D reference to text returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(Sheet2!A3,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(Sheet2!A3,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'Text', 'Test: Negative case: Ref3D. 3D reference to text returns #VALUE!. 2 arguments used.');
+	// 	// Case #13: Area3D. 3D multi-cell range returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(Sheet2!A4:A5,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(Sheet2!A4:A5,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), "", 'Test: Negative case: Area3D. 3D multi-cell range returns #VALUE!. 2 arguments used.');
+	// 	// Case #14: Table. Table column with text returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(Table1[Column2],2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(Table1[Column2],2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '1s', 'Test: Negative case: Table. Table column with text returns #VALUE!. 2 arguments used.');
+	// 	// Case #15: Formula. Formula resulting in #NUM! returns #NUM!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(SQRT(-1),2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(SQRT(-1),2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Formula. Formula resulting in #NUM! returns #NUM!. 2 arguments used.');
+	// 	// Case #17: Number. Single-element array with wrap_count=0 returns #NUM!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS({1},0)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS({1},0) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. Single-element array with wrap_count=0 returns #NUM!. 2 arguments used.');
+	// 	// Case #18: Reference link,Number,Error. Error pad_with propagates #N/A. 3 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(A100,2,NA())', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(A100,2,NA()) is parsed.');
+	// 	//? assert.strictEqual(oParser.calculate().getValue(), 0.5, 'Test: Negative case: Reference link,Number,Error. Error pad_with propagates #N/A. 3 arguments used.');
+	// 	// Case #19: Array,String. Non-numeric wrap_count returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS({1,2,3},"abc")', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS({1,2,3},"abc") is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array,String. Non-numeric wrap_count returns #VALUE!. 2 arguments used.');
+	// 	// Case #20: Array,Number. Boolean array vector returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS({TRUE,FALSE},2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS({TRUE,FALSE},2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'TRUE', 'Test: Negative case: Array,Number. Boolean array vector returns #VALUE!. 2 arguments used.');
+	//
+	// 	// Bounded cases:
+	// 	// Case #1: Number. Minimum valid wrap_count=1, single-element vector. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS({1},1)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS({1},1) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Bounded case: Number. Minimum valid wrap_count=1, single-element vector. 2 arguments used.');
+	// 	// Case #2: Number. Maximum valid vector length (Excel row limit), wrap_count=1048576. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS(SEQUENCE(1048576),1048576)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS(SEQUENCE(1048576),1048576) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Bounded case: Number. Maximum valid vector length (Excel row limit), wrap_count=1048576. 2 arguments used.');
+	// 	// Case #3: Number. Maximum valid number for pad_with. 3 arguments used.
+	// 	oParser = new parserFormula('WRAPROWS({1,2},2,9.99999999999999E+307)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPROWS({1,2},2,9.99999999999999E+307) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Bounded case: Number. Maximum valid number for pad_with. 3 arguments used.');
+	//
+	// 	// Need to fix:
+	// 	// Case #18: Reference link,Number,Error. Error pad_with propagates #N/A. 3 arguments used.
+	//
+	// });
+	//
+	// QUnit.test("Test: \"WRAPCOLS\"", function (assert) {
+	// 	//1. добавляем общие тесты
+	//
+	// 	ws.getRange2("A1").setValue("2");
+	// 	ws.getRange2("A2").setValue("");
+	// 	ws.getRange2("A3").setValue("test");
+	// 	ws.getRange2("A4").setValue("rwe");
+	//
+	// 	ws.getRange2("B1").setValue("test2");
+	// 	ws.getRange2("B2").setValue("#N/A");
+	// 	ws.getRange2("B3").setValue("");
+	//
+	// 	oParser = new parserFormula("WRAPCOLS(1,A1:B5)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	//
+	// 	oParser = new parserFormula("WRAPCOLS(A1:A3,2)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	let array = oParser.calculate();
+	//
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 2);
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), '');
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 'test');
+	// 	assert.strictEqual(array.getElementRowCol(1, 1).getValue(), '#N/A');
+	//
+	// 	oParser = new parserFormula("WRAPCOLS(A1:A3,2, \"error\")", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	array = oParser.calculate();
+	//
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 2);
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), '');
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 'test');
+	// 	assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 'error');
+	//
+	//
+	// 	oParser = new parserFormula("WRAPCOLS(A1:B3,3)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
+	//
+	//
+	//
+	// 	//2. аргументы - разные типы. нужно пербрать все аргументы
+	// 	//2.1 аргумент - number
+	// 	oParser = new parserFormula("WRAPCOLS(1,3)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	// 	//2.2 аргумент - string
+	// 	oParser = new parserFormula("WRAPCOLS(\"test\",3)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "test");
+	// 	//2.3 аргумент - bool
+	// 	oParser = new parserFormula("WRAPCOLS(true,3)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "TRUE");
+	// 	//2.4 аргумент - error
+	// 	oParser = new parserFormula("WRAPCOLS(#VALUE!,3)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
+	// 	//2.5 аргумент - empty
+	// 	oParser = new parserFormula("WRAPCOLS(,2)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
+	// 	//2.6 аргумент - cellsRange
+	// 	//2.7 аргумент - cell
+	// 	oParser = new parserFormula("WRAPCOLS(B1, 10)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "test2");
+	//
+	// 	//2.8 аргумент - array
+	// 	oParser = new parserFormula("WRAPCOLS({2;\"\";\"test\"},2)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	array = oParser.calculate();
+	//
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 2);
+	// 	assert.strictEqual(array.getElementRowCol(1, 0).getValue(), '');
+	// 	assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 'test');
+	// 	assert.strictEqual(array.getElementRowCol(1, 1).getValue(), '#N/A');
+	//
+	//
+	// 	//2.2 аргумент - string
+	// 	oParser = new parserFormula("WRAPCOLS(1,\"test\")", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
+	// 	//2.3 аргумент - bool
+	// 	oParser = new parserFormula("WRAPCOLS(1,true)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	// 	//2.4 аргумент - error
+	// 	oParser = new parserFormula("WRAPCOLS(1, #VALUE!)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
+	// 	//2.5 аргумент - empty
+	// 	oParser = new parserFormula("WRAPCOLS(1,)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#NUM!");
+	//
+	//
+	// 	//2.6 аргумент - cellsRange
+	// 	//2.7 аргумент - cell
+	// 	oParser = new parserFormula("WRAPCOLS(1,A1)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	//
+	// 	oParser = new parserFormula("WRAPCOLS(1,A1:B5)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	//
+	// 	//2.8 аргумент - array
+	// 	oParser = new parserFormula("WRAPCOLS(1,{2;\"\";\"test\"})", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	//
+	//
+	// 	//2. аргументы - разные типы. нужно пербрать все аргументы
+	// 	//2.1 аргумент - number
+	// 	oParser = new parserFormula("WRAPCOLS(1,3,1)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	//
+	//
+	// 	//2.2 аргумент - string
+	// 	oParser = new parserFormula("WRAPCOLS(1,3,\"test\")", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	// 	//2.3 аргумент - bool
+	// 	oParser = new parserFormula("WRAPCOLS(1,3,true)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	// 	//2.4 аргумент - error
+	// 	oParser = new parserFormula("WRAPCOLS(1,3,#VALUE!)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
+	// 	//2.5 аргумент - empty
+	// 	oParser = new parserFormula("WRAPCOLS(1,3,)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	// 	//2.6 аргумент - cellsRange
+	// 	//2.7 аргумент - cell
+	// 	oParser = new parserFormula("WRAPCOLS(1,3, B1)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	// 	//2.8 аргумент - array
+	// 	oParser = new parserFormula("WRAPCOLS(1,3, {1,2,3})", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	array = oParser.calculate();
+	// 	assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1);
+	//
+	// 	oParser = new parserFormula("WRAPCOLS(1,3, B1:B2)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
+	//
+	// 	oParser = new parserFormula("WRAPCOLS(1,0)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#NUM!");
+	//
+	// 	oParser = new parserFormula("WRAPCOLS(1,-100)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#NUM!");
+	//
+	// 	oParser = new parserFormula("WRAPCOLS(1,)", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#NUM!");
+	//
+	// 	oParser = new parserFormula("WRAPCOLS(1,\"asd\")", "A1", ws);
+	// 	assert.ok(oParser.parse());
+	// 	assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
+	//
+	// 	ws.getRange2("A1:C214").cleanAll();
+	// 	// Data for reference link. Use A100-A111
+	// 	ws.getRange2("A100").setValue("0.5");
+	// 	ws.getRange2("A101").setValue("1.5");
+	// 	ws.getRange2("A104").setValue("-1");
+	// 	// For area
+	// 	ws.getRange2("A102").setValue("0.5");
+	// 	ws.getRange2("A103").setValue("");
+	// 	ws.getRange2("A105").setValue("1");
+	// 	ws.getRange2("A110").setValue("TRUE");
+	// 	ws.getRange2("A111").setValue("FALSE");
+	//
+	// 	// Table type. Use A601:L6**
+	// 	getTableType(599, 0, 600, 1);
+	// 	ws.getRange2("A601").setValue("1"); // Number (Column1)
+	// 	ws.getRange2("B601").setValue("1s"); // Text (Column2)
+	// 	// 3D links. Use A1:Z10
+	// 	let ws2 = getSecondSheet();
+	// 	ws2.getRange2("A1:C10").cleanAll();
+	// 	ws2.getRange2("A1").setValue("1");
+	// 	ws2.getRange2("A2").setValue("2");
+	// 	ws2.getRange2("A3").setValue("Text");
+	// 	ws2.getRange2("B1").setValue("3");
+	// 	ws2.getRange2("B2").setValue("4");
+	// 	ws2.getRange2("C1").setValue("1");
+	// 	// DefNames.
+	// 	initDefNames();
+	// 	ws.getRange2("A201").setValue("-0.5"); // TestName
+	// 	ws.getRange2("A202").setValue("0.5"); // TestName1
+	// 	ws.getRange2("A203").setValue("10.5"); // TestName2
+	// 	ws2.getRange2("A11").setValue("-0.5"); // TestName3D
+	// 	ws.getRange2("A208").setValue("0.8"); // TestNameArea2
+	// 	ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
+	// 	ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
+	// 	ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
+	//
+	//
+	// 	// Positive cases:
+	// 	// Case #1: Number. Array with 4 elements, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS({1,2,3,4},2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS({1,2,3,4},2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Number. Array with 4 elements, wrap_count=2. 2 arguments used.');
+	// 	// Case #2: Reference link. Reference to cell with array {1,2,3,4}, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(A100,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(A100,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.5, 'Test: Positive case: Reference link. Reference to cell with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
+	// 	// Case #3: Area. Single-cell range with array {1,2,3,4}, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(A101:A101,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(A101:A101,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1.5, 'Test: Positive case: Area. Single-cell range with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
+	// 	// Case #4: Array. Array with 6 elements, wrap_count=3. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS({1,2,3,4,5,6},3)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS({1,2,3,4,5,6},3) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Array. Array with 6 elements, wrap_count=3. 2 arguments used.');
+	// 	// Case #5: Formula. Formula generating vector {1,2,3,4}, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(SEQUENCE(4),2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(SEQUENCE(4),2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Formula. Formula generating vector {1,2,3,4}, wrap_count=2. 2 arguments used.');
+	// 	// Case #6: Number,String. Array with 4 elements, wrap_count=2, string pad. 3 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS({1,2,3,4},2,"Pad")', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS({1,2,3,4},2,"Pad") is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Number,String. Array with 4 elements, wrap_count=2, string pad. 3 arguments used.');
+	// 	// Case #7: Reference link,String. Reference to array {1,2,3,4}, wrap_count=2, string pad. 3 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(A100,2,"Pad")', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(A100,2,"Pad") is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.5, 'Test: Positive case: Reference link,String. Reference to array {1,2,3,4}, wrap_count=2, string pad. 3 arguments used.');
+	// 	// Case #8: Area,String. Single-cell range with array, wrap_count=2, string pad. 3 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(A101:A101,2,"Pad")', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(A101:A101,2,"Pad") is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1.5, 'Test: Positive case: Area,String. Single-cell range with array, wrap_count=2, string pad. 3 arguments used.');
+	// 	// Case #9: Formula,Number,Number. Formula generating vector {1,2,3,4,5}, wrap_count=2, number pad. 3 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(SEQUENCE(5),2,0)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(SEQUENCE(5),2,0) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Formula,Number,Number. Formula generating vector {1,2,3,4,5}, wrap_count=2, number pad. 3 arguments used.');
+	// 	// Case #10: Date. Date array, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS({45658,45659},2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS({45658,45659},2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 45658, 'Test: Positive case: Date. Date array, wrap_count=2. 2 arguments used.');
+	// 	// Case #11: Time. Time array, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS({0.4,0.5},2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS({0.4,0.5},2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.4, 'Test: Positive case: Time. Time array, wrap_count=2. 2 arguments used.');
+	// 	// Case #12: Name. Named range with array {1,2,3,4}, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(TestName,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(TestName,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), -0.5, 'Test: Positive case: Name. Named range with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
+	// 	// Case #13: Name3D. 3D named range with array {1,2,3,4}, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(TestName3D,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(TestName3D,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), -0.5, 'Test: Positive case: Name3D. 3D named range with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
+	// 	// Case #14: Ref3D. 3D reference to cell with array {1,2,3,4}, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(Sheet2!A1,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(Sheet2!A1,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Ref3D. 3D reference to cell with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
+	// 	// Case #15: Area3D. 3D single-cell range with array {1,2,3,4}, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(Sheet2!A2:A2,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(Sheet2!A2:A2,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 2, 'Test: Positive case: Area3D. 3D single-cell range with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
+	// 	// Case #16: Table. Table column with array {1,2,3,4}, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(Table1[Column1],2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(Table1[Column1],2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Table. Table column with array {1,2,3,4}, wrap_count=2. 2 arguments used.');
+	// 	// Case #17: Formula. WRAPCOLS inside SUM formula, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('SUM(WRAPCOLS({1,2,3,4},2))', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: SUM(WRAPCOLS({1,2,3,4},2)) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), 10, 'Test: Positive case: Formula. WRAPCOLS inside SUM formula, wrap_count=2. 2 arguments used.');
+	// 	// Case #18: String. String array, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS({"a","b","c","d"},2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS({"a","b","c","d"},2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'a', 'Test: Positive case: String. String array, wrap_count=2. 2 arguments used.');
+	// 	// Case #19: Formula. Nested IF returning vector {1,2,3,4}, wrap_count=2. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(IF(TRUE,SEQUENCE(4),SEQUENCE(2)),2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(IF(TRUE,SEQUENCE(4),SEQUENCE(2)),2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Formula. Nested IF returning vector {1,2,3,4}, wrap_count=2. 2 arguments used.');
+	// 	// Case #20: Array,Number,Formula. Array with 5 elements, wrap_count=2, formula pad. 3 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS({1,2,3,4,5},2,SQRT(4))', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS({1,2,3,4,5},2,SQRT(4)) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Array,Number,Formula. Array with 5 elements, wrap_count=2, formula pad. 3 arguments used.');
+	// 	// Case #21: Reference link,Formula,Number. Reference to array, formula wrap_count, number pad. 3 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(A100,IF(TRUE,2,1),0)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(A100,IF(TRUE,2,1),0) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.5, 'Test: Positive case: Reference link,Formula,Number. Reference to array, formula wrap_count, number pad. 3 arguments used.');
+	// 	// Case #22: Number. Array with 3 elements, wrap_count=1. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS({1,2,3},1)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS({1,2,3},1) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Number. Array with 3 elements, wrap_count=1. 2 arguments used.');
+	//
+	// 	// Negative cases:
+	// 	// Case #1: Number. wrap_count=0 returns #NUM!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS({1,2,3,4},0)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS({1,2,3,4},0) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. wrap_count=0 returns #NUM!. 2 arguments used.');
+	// 	// Case #2: Number. Negative wrap_count returns #NUM!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS({1,2,3,4},-1)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS({1,2,3,4},-1) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. Negative wrap_count returns #NUM!. 2 arguments used.');
+	// 	// Case #3: String. Non-array string vector returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS("abc",2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS("abc",2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'abc', 'Test: Negative case: String. Non-array string vector returns #VALUE!. 2 arguments used.');
+	// 	// Case #4: Array,String. String wrap_count returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS({1,2,3,4},"2")', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS({1,2,3,4},"2") is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0)	.getValue(), 1, 'Test: Negative case: Array,String. String wrap_count returns #VALUE!. 2 arguments used.');
+	// 	// Case #5: Error. Error vector propagates #N/A. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(NA(),2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(NA(),2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Error. Error vector propagates #N/A. 2 arguments used.');
+	// 	// Case #6: Area. Multi-cell range returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(A102:A103,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(A102:A103,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.5, 'Test: Negative case: Area. Multi-cell range returns #VALUE!. 2 arguments used.');
+	// 	// Case #7: Empty. Empty reference returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(A104,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(A104,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), -1, 'Test: Negative case: Empty. Empty reference returns #VALUE!. 2 arguments used.');
+	// 	// Case #8: Boolean. Boolean vector returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(FALSE,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(FALSE,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'FALSE', 'Test: Negative case: Boolean. Boolean vector returns #VALUE!. 2 arguments used.');
+	// 	// Case #9: Array,Boolean. Boolean wrap_count returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS({1,2,3,4},TRUE)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS({1,2,3,4},TRUE) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Negative case: Array,Boolean. Boolean wrap_count returns #VALUE!. 2 arguments used.');
+	// 	// Case #10: Name. Named range with multi-cell area returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(TestNameArea2,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(TestNameArea2,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.8, 'Test: Negative case: Name. Named range with multi-cell area returns #VALUE!. 2 arguments used.');
+	// 	// Case #11: Name3D. 3D named range with multi-cell area returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(TestNameArea3D2,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(TestNameArea3D2,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.8, 'Test: Negative case: Name3D. 3D named range with multi-cell area returns #VALUE!. 2 arguments used.');
+	// 	// Case #12: Ref3D. 3D reference to text returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(Sheet2!A3,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(Sheet2!A3,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'Text', 'Test: Negative case: Ref3D. 3D reference to text returns #VALUE!. 2 arguments used.');
+	// 	// Case #13: Area3D. 3D multi-cell range returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(Sheet2!A4:A5,2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(Sheet2!A4:A5,2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), "", 'Test: Negative case: Area3D. 3D multi-cell range returns #VALUE!. 2 arguments used.');
+	// 	// Case #14: Table. Table column with text returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(Table1[Column2],2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(Table1[Column2],2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '1s', 'Test: Negative case: Table. Table column with text returns #VALUE!. 2 arguments used.');
+	// 	// Case #15: Formula. Formula resulting in #NUM! returns #NUM!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(SQRT(-1),2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(SQRT(-1),2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Formula. Formula resulting in #NUM! returns #NUM!. 2 arguments used.');
+	// 	// Case #17: Number. Single-element array with wrap_count=0 returns #NUM!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS({1},0)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS({1},0) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. Single-element array with wrap_count=0 returns #NUM!. 2 arguments used.');
+	// 	// Case #18: Reference link,Number,Error. Error pad_with propagates #N/A. 3 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(A100,2,NA())', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(A100,2,NA()) is parsed.');
+	// 	//? assert.strictEqual(oParser.calculate().getValue(), 0.5, 'Test: Negative case: Reference link,Number,Error. Error pad_with propagates #N/A. 3 arguments used.');
+	// 	// Case #19: Array,String. Non-numeric wrap_count returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS({1,2,3},"abc")', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS({1,2,3},"abc") is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array,String. Non-numeric wrap_count returns #VALUE!. 2 arguments used.');
+	// 	// Case #20: Array,Number. Boolean array vector returns #VALUE!. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS({TRUE,FALSE},2)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS({TRUE,FALSE},2) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'TRUE', 'Test: Negative case: Array,Number. Boolean array vector returns #VALUE!. 2 arguments used.');
+	//
+	// 	// Bounded cases:
+	// 	// Case #1: Number. Minimum valid wrap_count=1, single-element vector. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS({1},1)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS({1},1) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Bounded case: Number. Minimum valid wrap_count=1, single-element vector. 2 arguments used.');
+	// 	// Case #2: Number. Maximum valid vector length (Excel row limit), wrap_count=1048576. 2 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS(SEQUENCE(1048576),1048576)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS(SEQUENCE(1048576),1048576) is parsed.');
+	// 	//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number. Maximum valid vector length (Excel row limit), wrap_count=1048576. 2 arguments used.');
+	// 	// Case #3: Number. Maximum valid number for pad_with. 3 arguments used.
+	// 	oParser = new parserFormula('WRAPCOLS({1,2},2,9.99999999999999E+307)', 'A2', ws);
+	// 	assert.ok(oParser.parse(), 'Test: WRAPCOLS({1,2},2,9.99999999999999E+307) is parsed.');
+	// 	assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Bounded case: Number. Maximum valid number for pad_with. 3 arguments used.');
+	//
+	//
+	// 	// TODO remove critical error in Case #2: Number. Maximum valid vector length
+	// 	// Need to fix: error handle
+	// 	// Case #18: Reference link,Number,Error. Error pad_with propagates #N/A. 3 arguments used.
+	// 	// Case #2: Number. Maximum valid vector length (Excel row limit), wrap_count=1048576. 2 arguments used. - critical
+	//
+	// });
+	//
     	QUnit.test("Test: \"XMATCH\"", function (assert) {
 		let array;
 

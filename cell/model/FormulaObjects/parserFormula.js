@@ -4150,7 +4150,11 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 					if (0 === argumentsCount && parserFormula.ref) {
 						temp_opt_bbox = new Asc.Range(c + parserFormula.ref.c1, r + parserFormula.ref.r1, c + parserFormula.ref.c1, r + parserFormula.ref.r1);
 					}
-					array.addElement(t.Calculate(newArgs, temp_opt_bbox, opt_defName, parserFormula.ws, null, _row ? _row : r, _col ? _col : c));
+					let _elem = t.Calculate(newArgs, temp_opt_bbox, opt_defName, parserFormula.ws, null, _row ? _row : r, _col ? _col : c);
+					if (_elem.type === cElementType.array) {
+						_elem = _elem.getElementRowCol(0, 0);
+					}
+					array.addElement(_elem);
 				};
 
 				if (firstArray.foreach) {
@@ -9746,7 +9750,7 @@ function parserFormula( formula, parent, _ws ) {
 			}
 		}
 
-		if (isAllSkip) {
+		if (isAllSkip && parseResult.allFunctionsPos) {
 			//check parserResult on
 			for (let i = 0; i < parseResult.allFunctionsPos.length; i++) {
 				let funcInfo = parseResult.allFunctionsPos[i];
