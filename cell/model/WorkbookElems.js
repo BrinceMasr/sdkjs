@@ -19662,9 +19662,11 @@ function RangeDataManagerElem(bbox, data)
 			"boolean[][]": 1,
 			"any[][]": 1
 		};
+		let arrayIndexes = {};
 		if (argsInfo) {
 			let optionalCount = 0;
 			for (let i = 0; i < argsInfo.length; i++) {
+				arrayIndexes[i] = 1;
 				argumentsType.push(this.getTypeByString(argsInfo[i].type));
 				if (!supportedTypes[argsInfo[i].type]) {
 					let paramName = (params && params[i]) ? params[i].name : "";
@@ -19704,6 +19706,10 @@ function RangeDataManagerElem(bbox, data)
 		newFunc.prototype.argumentsType = argumentsType;
 		newFunc.prototype.returnValueType = returnValueType;
 		newFunc.prototype.ca = calculateCell;
+		newFunc.prototype.arrayIndexes = arrayIndexes;
+		newFunc.prototype.getArrayIndex = function (index, type) {
+			return 1;
+		};
 		newFunc.prototype.Calculate = function (arg) {
 			try {
 
