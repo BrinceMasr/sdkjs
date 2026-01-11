@@ -50,7 +50,7 @@ function (window, undefined) {
   var CellAddress = AscCommon.CellAddress;
   var cDate = Asc.cDate;
   var bIsSupportArrayFormula = true;
-  var bIsSupportDynamicArrays = true;
+  var bIsSupportDynamicArrays = false;
 
   var c_oAscError = Asc.c_oAscError;
 
@@ -3065,7 +3065,13 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 		return getRealSize && this.realSize ? this.realSize.row : this.rowCount;
 	};
 	cArray.prototype.geMaxElementInRow = function () {
-		return Math.max.apply(null, this.countElementInRow);
+		var max = 0;
+		for (var i = 0, len = this.countElementInRow.length; i < len; i++) {
+			if (this.countElementInRow[i] > max) {
+				max = this.countElementInRow[i];
+			}
+		}
+		return max;
 	};
 	cArray.prototype.getRealArraySize = function () {
 		if (!this.realSize) {
