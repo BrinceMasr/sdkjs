@@ -10664,6 +10664,9 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
+		ws2.getRange2("A16").setValue("");
+		ws2.getRange2("A17").setValue("");
+
 		// Positive cases:
 		// Case #0: Number. Basic valid input: positive integer. 1 argument used.
 		oParser = new parserFormula('LN(10)', 'A2', ws);
@@ -12586,6 +12589,10 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
+		ws2.getRange2("A16").setValue(""); // TestNameArea3D
+		ws2.getRange2("B17").setValue(""); // TestNameArea3D
+		ws2.getRange2("A12").setValue(""); // TestName3D1
+
 		// Positive cases:
 		// Case #1: Number(2). Basic valid input: integers. 2 of 2 arguments used.
 		oParser = new parserFormula('MOD(10,3)', 'A2', ws);
@@ -12744,6 +12751,7 @@ $(function () {
 		oParser = new parserFormula('MOD(TestNameArea3D,TestName3D1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MOD(TestNameArea3D,TestName3D1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#DIV/0!', 'Test: Negative case: Name3D(2). 3D named range with area for number. Returns #VALUE!. 2 of 2 arguments used.');
+
 		// Case #14: Array(2). Multi-element array for number. Returns array. 2 of 2 arguments used.
 		oParser = new parserFormula('MOD({10,15},{3})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MOD({10,15},{3}) is parsed.');
@@ -14869,6 +14877,9 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
+		ws2.getRange2("A16").setValue("");
+		ws2.getRange2("B17").setValue("");
+
 		// Positive cases:
 		// Case #1: Number. Basic valid input: integer. 1 argument used.
 		oParser = new parserFormula('RADIANS(90)', 'A2', ws);
@@ -14992,10 +15003,16 @@ $(function () {
 		oParser = new parserFormula('RADIANS(TestName2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RADIANS(TestName2) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0.1832595714594046, 'Test: Negative case: Name. Named range with text returns #VALUE!. 1 argument used.');
+
 		// Case #9: Name3D. 3D named range with multi-cell range returns #VALUE!. 1 argument used.
+		oParser = new parserFormula('RADIANS(SINGLE(TestNameArea3D))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: RADIANS(SINGLE(TestNameArea3D)) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: SINGLE Name3D. 3D named range with multi-cell range returns #VALUE!. 1 argument used.');
+
 		oParser = new parserFormula('RADIANS(TestNameArea3D)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RADIANS(TestNameArea3D) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Name3D. 3D named range with multi-cell range returns #VALUE!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Negative case: Name3D. 3D named range with multi-cell range returns #VALUE!. 1 argument used.');
+
 		// Case #11: Formula. Formula resulting in #NUM! propagates error. 1 argument used.
 		oParser = new parserFormula('RADIANS(SQRT(-1))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RADIANS(SQRT(-1)) is parsed.');

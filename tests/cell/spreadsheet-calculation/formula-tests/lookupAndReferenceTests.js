@@ -8881,7 +8881,7 @@ $(function () {
 		// Case #7: Formula, Number. Sorts a range with nested IF formula in ascending order. 3 of 4 arguments used.
 		oParser = new parserFormula('SORT(IF(TRUE,A108:A109,{1,2}),1,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SORT(IF(TRUE,A108:A109,{1,2}),1,1) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 0, 'Test: Positive case: Formula, Number. Sorts a range with nested IF formula in ascending order. 3 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "", 'Test: Positive case: Formula, Number. Sorts a range with nested IF formula in ascending order. 3 of 4 arguments used.');
 
 		// Case #8: Reference link, Number. Sorts a single-cell reference as an array in ascending order. 3 of 4 arguments used.
 		oParser = new parserFormula('SORT(A100,1,1)', 'A2', ws);

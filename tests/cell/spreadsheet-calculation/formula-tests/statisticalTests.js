@@ -30687,6 +30687,9 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
+		ws2.getRange2("A16").setValue(""); // TestNameArea3D
+		ws2.getRange2("B17").setValue(""); // TestNameArea3D
+		ws2.getRange2("A12").setValue(""); // TestName3D1
 
 		// Positive cases:
 		// Case #0: Number, Number. Both arguments are integers. 2 of 2 arguments used.

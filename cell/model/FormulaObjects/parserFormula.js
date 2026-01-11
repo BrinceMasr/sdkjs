@@ -50,7 +50,7 @@ function (window, undefined) {
   var CellAddress = AscCommon.CellAddress;
   var cDate = Asc.cDate;
   var bIsSupportArrayFormula = true;
-  var bIsSupportDynamicArrays = false;
+  var bIsSupportDynamicArrays = true;
 
   var c_oAscError = Asc.c_oAscError;
 
@@ -2993,7 +2993,7 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 		}
 		return null;
 	};
-	cArray.prototype.foreach = function (action) {
+	/*cArray.prototype.foreach = function (action) {
 		if (typeof (action) !== 'function') {
 			return true;
 		}
@@ -3016,7 +3016,20 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 			}
 		}
 		return undefined;
-	};
+	};*/
+	cArray.prototype.foreach = function (action) {
+		if (typeof (action) !== 'function') {
+			return true;
+		}
+		for (var ir = 0; ir < this.rowCount; ir++) {
+			for (var ic = 0; ic < this.countElementInRow[ir]; ic++) {
+				if (action.call(this, this.array[ir][ic], ir, ic)) {
+					return true;
+				}
+			}
+		}
+		return undefined;
+	}
 	cArray.prototype.foreach2 = function (action, byCol) {
 		if (typeof (action) !== 'function') {
 			return true;
@@ -4159,6 +4172,8 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 					let _elem = t.Calculate(newArgs, temp_opt_bbox, opt_defName, parserFormula.ws, null, _row ? _row : r, _col ? _col : c);
 					if (_elem.type === cElementType.array) {
 						_elem = _elem.getElementRowCol(0, 0);
+					} else if (_elem.type === cElementType.cellsRange || _elem.type === cElementType.cellsRange3D) {
+						_elem = _elem.getValueByRowCol(0, 0, true);
 					}
 					array.addElement(_elem);
 				};
