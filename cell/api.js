@@ -9740,6 +9740,10 @@ var editor;
 		this.wb.removeAllInks();
 	};
 
+	spreadsheet_api.prototype.asc_SetIsSupportDynamicArrays = function(val) {
+		AscCommonExcel.bIsSupportDynamicArrays = val;
+	};
+
   /*
    * Export
    * -----------------------------------------------------------------------------
@@ -10358,6 +10362,9 @@ var editor;
   prot["asc_SetShowHorizontalScroll"]= prot.asc_SetShowHorizontalScroll;
   prot["asc_GetShowHorizontalScroll"]= prot.asc_GetShowHorizontalScroll;
   prot["sync_currentSheetCallback"]= prot.sync_currentSheetCallback;
+
+  prot["asc_SetIsSupportDynamicArrays"]= prot.asc_SetIsSupportDynamicArrays;
+
 
 
 

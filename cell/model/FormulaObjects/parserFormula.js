@@ -3036,34 +3036,16 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 		}
 
 		let ir, ic;
-		let realSize = this.getRealArraySize();
-		let rowCount = realSize ? realSize.row : this.rowCount;
-		let colCount = realSize ? realSize.col : this.geMaxElementInRow();
-		let missedValue = this.getMissedValue();
-
 		if (byCol) {
-			for (ic = 0; ic < colCount; ic++) {
-				for (ir = 0; ir < rowCount; ir++) {
-					let elem = this.array[ir] && this.array[ir][ic];
-					if (!elem && missedValue) {
-						elem = missedValue;
-					} else if (!elem) {
-						elem = new cEmpty();
-					}
-					action.call(this, elem, ir, ic);
+			for (ic = 0; ic < this.geMaxElementInRow(); ic++) {
+				for (ir = 0; ir < this.rowCount; ir++) {
+					action.call(this, this.array[ir][ic], ir, ic)
 				}
 			}
 		} else {
-			for (ir = 0; ir < rowCount; ir++) {
-				let currentColCount = realSize ? realSize.col : this.countElementInRow[ir];
-				for (ic = 0; ic < currentColCount; ic++) {
-					let elem = this.array[ir] && this.array[ir][ic];
-					if (!elem && missedValue) {
-						elem = missedValue;
-					} else if (!elem) {
-						elem = new cEmpty();
-					}
-					action.call(this, elem, ir, ic);
+			for (ir = 0; ir < this.rowCount; ir++) {
+				for (ic = 0; ic < this.countElementInRow[ir]; ic++) {
+					action.call(this, this.array[ir][ic], ir, ic)
 				}
 			}
 		}
@@ -8779,7 +8761,7 @@ function parserFormula( formula, parent, _ws ) {
 						startArrayArg = null;
 					}
 
-					if (currentAtOperatorPos !== null) {
+					if (currentAtOperatorPos !== null && AscCommonExcel.bIsSupportDynamicArrays) {
 						atOperatorStack.push(currentAtOperatorPos);
 						currentAtOperatorPos = null;
 					}
@@ -8801,7 +8783,7 @@ function parserFormula( formula, parent, _ws ) {
 					elemArr.pop();
 				}
 
-				if (currentAtOperatorPos !== null) {
+				if (currentAtOperatorPos !== null && AscCommonExcel.bIsSupportDynamicArrays) {
 					/*let _curFunc = levelFuncMap[currentFuncLevel];
 					let _curArgPos = argPosArrMap[currentFuncLevel];
 					let isCanSkip = t.checkSkipAtOperator(_curFunc, _curArgPos, found_operand);*/
@@ -8927,7 +8909,7 @@ function parserFormula( formula, parent, _ws ) {
 				continue;
 			}
 
-			let isSingleStartPos = (local && ph.operand_str === '@') ? ph.pCurrPos : null;
+			let isSingleStartPos = (AscCommonExcel.bIsSupportDynamicArrays && local && ph.operand_str === '@') ? ph.pCurrPos : null;
 
 			/* Operators*/
 			if (parserHelp.isOperator.call(ph, this.Formula, ph.pCurrPos) || parserHelp.isNextPtg.call(ph, this.Formula, ph.pCurrPos)) {
@@ -10888,7 +10870,7 @@ function parserFormula( formula, parent, _ws ) {
 					continue;
 				}
 
-				if (bLocale && currentElement.type === cElementType.func && currentElement.name === "SINGLE") {
+				if (bLocale && currentElement.type === cElementType.func && currentElement.name === "SINGLE" && AscCommonExcel.bIsSupportDynamicArrays) {
 					var argIndex = j - _count_arg - _argDiff;
 					var singleArg = elemArr[argIndex];
 					if (singleArg) {
@@ -10917,12 +10899,15 @@ function parserFormula( formula, parent, _ws ) {
 				}
 				j -= _count_arg + _argDiff;
 				elemArr[j] = res;
-				for (var k = 0; k < _count_arg; k++) {
-					parentFuncStack.pop();
-					argIndexInParentStack.pop();
+				
+				if (AscCommonExcel.bIsSupportDynamicArrays) {
+					for (var k = 0; k < _count_arg; k++) {
+						parentFuncStack.pop();
+						argIndexInParentStack.pop();
+					}
+					parentFuncStack.push({func: currentElement, isSingle: false});
+					argIndexInParentStack.push(-1);
 				}
-				parentFuncStack.push({func: currentElement, isSingle: false});
-				argIndexInParentStack.push(-1);
 			} else {
 				if (cElementType.string === currentElement.type) {
 					if (bLocale) {
@@ -10932,32 +10917,36 @@ function parserFormula( formula, parent, _ws ) {
 					}
 
 				}
-
-				var needAddAt = false;
-				if (!isArrayFormula && bLocale &&
-					(currentElement.type === cElementType.cellsRange ||
-						currentElement.type === cElementType.cellsRange3D ||
-						currentElement.type === cElementType.array)) {
-					needAddAt = true;
-					var parentInfo = this._findParentFuncInOutStack(i);
-					if (parentInfo) {
-						if (parentInfo.funcName === "SINGLE") {
-							needAddAt = false;
-						} else if (enabledToSingle[parentInfo.funcName] && enabledToSingle[parentInfo.funcName][parentInfo.argIndex]) {
-							needAddAt = false;
+				
+				if (AscCommonExcel.bIsSupportDynamicArrays) {
+					var needAddAt = false;
+					if (!isArrayFormula && bLocale &&
+						(currentElement.type === cElementType.cellsRange ||
+							currentElement.type === cElementType.cellsRange3D ||
+							currentElement.type === cElementType.array)) {
+						needAddAt = true;
+						var parentInfo = this._findParentFuncInOutStack(i);
+						if (parentInfo) {
+							if (parentInfo.funcName === "SINGLE") {
+								needAddAt = false;
+							} else if (enabledToSingle[parentInfo.funcName] && enabledToSingle[parentInfo.funcName][parentInfo.argIndex]) {
+								needAddAt = false;
+							}
 						}
 					}
-				}
 
-				if (needAddAt) {
-					var elemStr = bLocale ? currentElement.toLocaleString(digitDelim) : currentElement.toString();
-					currentElement = new cString("@" + elemStr);
+					if (needAddAt) {
+						var elemStr = bLocale ? currentElement.toLocaleString(digitDelim) : currentElement.toString();
+						currentElement = new cString("@" + elemStr);
+					}
 				}
-
+				
 				res = currentElement;
 				elemArr[j] = res;
-				parentFuncStack.push(null);
-				argIndexInParentStack.push(-1);
+				if (AscCommonExcel.bIsSupportDynamicArrays) {
+					parentFuncStack.push(null);
+					argIndexInParentStack.push(-1);
+				}
 				if(onlyRangesElements) {
 					rangesStr = !rangesStr ? "" : rangesStr + ",";
 					rangesStr += bLocale ? res.toLocaleString(digitDelim) : res.toString();

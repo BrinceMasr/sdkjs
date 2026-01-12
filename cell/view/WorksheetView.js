@@ -144,6 +144,8 @@
     var filterSizeButton = 17;
     var collapsePivotSizeButton = 10;
 
+	//limit rows for prepare metrics. if more then limit -> metrics will prepare dynamic
+	var nMaxPrintRows = 150000;
 
 
 function isAllowPasteLink(pastedWb) {

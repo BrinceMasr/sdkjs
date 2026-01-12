@@ -3913,13 +3913,13 @@
                     });
                 }
             }
-			if (this.wb.richValueData) {
+			if (this.wb.richValueData && AscCommonExcel.bIsSupportDynamicArrays) {
 				this.bs.WriteItem(c_oSerWorkbookTypes.RdRichValue, function () {oThis.WriteRichValueData(oThis.wb.richValueData.pData);});
 			}
-			if (this.wb.richValueStructures) {
+			if (this.wb.richValueStructures && AscCommonExcel.bIsSupportDynamicArrays) {
 				this.bs.WriteItem(c_oSerWorkbookTypes.RdRichValueStructure, function () {oThis.WriteRichValueStructures(oThis.wb.richValueStructures.children);});
 			}
-			if (this.wb.richValueTypesInfo) {
+			if (this.wb.richValueTypesInfo && AscCommonExcel.bIsSupportDynamicArrays) {
 				this.bs.WriteItem(c_oSerWorkbookTypes.RdRichValueTypes, function () {oThis.WriteRichValueTypes(oThis.wb.richValueTypesInfo);});
 			}
         };
@@ -9778,17 +9778,17 @@
                     this.oWorkbook.xmlMaps = [];
                 }
                 this.oWorkbook.xmlMaps.push(oXmlMap);
-            } else if (c_oSerWorkbookTypes.RdRichValue === type) {
+            } else if (c_oSerWorkbookTypes.RdRichValue === type && AscCommonExcel.bIsSupportDynamicArrays) {
                 this.oWorkbook.richValueData = new AscCommonExcel.CRichValueData();
                 res = this.bcr.Read1(length, function (t, l) {
                     return oThis.ReadRichValueData(t, l, oThis.oWorkbook.richValueData);
                 });
-            } else if (c_oSerWorkbookTypes.RdRichValueStructure === type) {
+            } else if (c_oSerWorkbookTypes.RdRichValueStructure === type && AscCommonExcel.bIsSupportDynamicArrays) {
                 this.oWorkbook.richValueStructures = new AscCommonExcel.CRichValueStructures();
                 res = this.bcr.Read1(length, function (t, l) {
                     return oThis.ReadRichValueStructures(t, l, oThis.oWorkbook.richValueStructures);
                 });
-            } else if (c_oSerWorkbookTypes.RdRichValueTypes === type) {
+            } else if (c_oSerWorkbookTypes.RdRichValueTypes === type && AscCommonExcel.bIsSupportDynamicArrays) {
                 this.oWorkbook.richValueTypesInfo = new AscCommonExcel.CRichValueTypesInfo();
                 res = this.bcr.Read1(length, function (t, l) {
                     return oThis.ReadRichValueTypesInfo(t, l, oThis.oWorkbook.richValueTypesInfo);
@@ -12388,9 +12388,9 @@
                 } else {
 					oCell.setValueNumberInternal(val);
                 }
-            } else if (c_oSerCellTypes.CellMetadata === type) {
+            } else if (c_oSerCellTypes.CellMetadata === type && AscCommonExcel.bIsSupportDynamicArrays) {
                 oCell.cm = this.stream.GetULong();
-            } else if (c_oSerCellTypes.ValueMetadata === type) {
+            } else if (c_oSerCellTypes.ValueMetadata === type && AscCommonExcel.bIsSupportDynamicArrays) {
                 oCell.vm = this.stream.GetULong();
             } else
                 res = c_oSerConstants.ReadUnknown;

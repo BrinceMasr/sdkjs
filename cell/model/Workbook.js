@@ -17681,17 +17681,15 @@
 		}
 		if (0 !== (nFlags2 & 0x2000000))
 		{
-			//this.setCm(stream.GetULong());
 			let _cm = stream.GetULong();
-			if (tmp.formula) {
+			if (tmp.formula && AscCommonExcel.bIsSupportDynamicArrays) {
 				tmp.formula.cm = _cm;
 			}
 		}
 		if (0 !== (nFlags2 & 0x4000000))
 		{
-			//this.setVm(stream.GetULong());
 			let _vm = stream.GetULong();
-			if (tmp.formula) {
+			if (tmp.formula && AscCommonExcel.bIsSupportDynamicArrays) {
 				tmp.formula.vm = _vm;
 			}
 		}
@@ -17830,11 +17828,11 @@
 		if (null !== nXfsId) {
 			nFlags2 = nXfsId;
 		}
-		if (formulaToWrite && formulaToWrite.cm != null) {
+		if (formulaToWrite && formulaToWrite.cm != null && AscCommonExcel.bIsSupportDynamicArrays) {
 			nFlags2 |= 0x2000000;
 			len += 4;
 		}
-		if (formulaToWrite && formulaToWrite.vm != null) {
+		if (formulaToWrite && formulaToWrite.vm != null && AscCommonExcel.bIsSupportDynamicArrays) {
 			nFlags2 |= 0x4000000;
 			len += 4;
 		}
@@ -17911,10 +17909,10 @@
 			flags = this.toXLSBFormulaExt(stream, formulaToWrite);
 		}
 
-		if (formulaToWrite && formulaToWrite.cm != null) {
+		if (formulaToWrite && formulaToWrite.cm != null && AscCommonExcel.bIsSupportDynamicArrays) {
 			stream.WriteULong(formulaToWrite.cm);
 		}
-		if (formulaToWrite && formulaToWrite.vm != null) {
+		if (formulaToWrite && formulaToWrite.vm != null && AscCommonExcel.bIsSupportDynamicArrays) {
 			stream.WriteULong(formulaToWrite.vm);
 		}
 
@@ -25019,6 +25017,9 @@
 	}
 
 	CDynamicArrayManager.prototype.changeFormula = function (to, from, parent) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return;
+		}
 		let fromCmIndex = from && from.getCm();
 		let toCmIndex = to && to.getCm();
 		if (fromCmIndex != toCmIndex) {
@@ -25039,6 +25040,9 @@
 	};
 
 	CDynamicArrayManager.prototype.addDynamicFormula = function (cmIndex) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return;
+		}
 		//add special structure - it help remove metadata/richdata after delete all dynamic formulas
 		if (!this.allFormulasCountMap) {
 			this.allFormulasCountMap = {};
@@ -25050,6 +25054,9 @@
 	};
 
 	CDynamicArrayManager.prototype.deleteDynamicFormula = function (cmIndex) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return;
+		}
 		if (this.allFormulasCountMap && this.allFormulasCountMap[cmIndex]) {
 			this.allFormulasCountMap[cmIndex]--;
 		}
@@ -25059,11 +25066,16 @@
 	};
 
 	CDynamicArrayManager.prototype.getDynamicFormulaCount = function (cmIndex) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return null;
+		}
 		return this.allFormulasCountMap && this.allFormulasCountMap[cmIndex];
 	};
 	
 	CDynamicArrayManager.prototype.recalculateVolatileArrays = function () {
-		//return;
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return;
+		}
 		const ws = this.ws;
 
 		// recalculate all volatile arrays on page
@@ -25126,6 +25138,9 @@
 
 	CDynamicArrayManager.prototype.getRefDynamicInfo = function (formula, calculateResult) {
 		if (!formula) {
+			return false;
+		}
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
 			return false;
 		}
 
@@ -25208,6 +25223,9 @@
 				}
 			}
 		};
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return null;
+		}
 
 		if (opt_cell) {
 			callback(opt_cell);
@@ -25228,6 +25246,9 @@
 		if (!rangeName || !arrayInfo) {
 			return;
 		}
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return;
+		}
 		if (!this.changedArrays) {
 			this.changedArrays = {};
 		}
@@ -25237,6 +25258,9 @@
 	};
 
 	CDynamicArrayManager.prototype.getChangedArrayList = function () {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return null;
+		}
 		return this.changedArrays;
 	};
 
@@ -25244,14 +25268,24 @@
 		if (!this.changedArrays) {
 			return;
 		}
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return;
+		}
 		return this.changedArrays[name];
 	};
 
 	CDynamicArrayManager.prototype.clearChangedArrayList = function () {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			this.changedArrays = null;
+			return;
+		}
 		this.changedArrays = null;
 	};
 
 	CDynamicArrayManager.prototype.getDynamicRangeByFormula = function (oFormula, calculateResult, addToDependency) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return null;
+		}
 		const formulaRes = oFormula.calculate(null, null, null, null, calculateResult || null);
 
 		if (!formulaRes || formulaRes.type !== AscCommonExcel.cElementType.array) {
@@ -25279,6 +25313,10 @@
 	CDynamicArrayManager.prototype.applyChangedArrayList = function () {
 		const ws = this.ws;
 		const changedDynamicArraysList = this.getChangedArrayList();
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			this.clearChangedArrayList();
+			return;
+		}
 
 		if (!changedDynamicArraysList) {
 			return;
@@ -25446,6 +25484,9 @@
 		if (!element || !parentCell) {
 			return true;
 		}
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return true;
+		}
 
 		if (element.type !== cElementType.array && element.type !== cElementType.cellsRange && element.type !== cElementType.cellsRange3D) {
 			return true;
@@ -25534,6 +25575,9 @@
 	 * @returns {boolean|null} Returns true if collapsed, false if expanded, null if not a dynamic array
 	 */
 	CDynamicArrayManager.prototype.isCollapsed = function(row, col) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return null;
+		}
 		const dynamicArrayProps = this.getDynamicArrayProperties(row, col);
 		if (!dynamicArrayProps) {
 			return null;
@@ -25543,6 +25587,9 @@
 	};
 
 	CDynamicArrayManager.prototype.getDynamicArrayProperties = function(row, col) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return null;
+		}
 		let cmIndex = null;
 		this.ws._getCellNoEmpty(row, col, function(cell) {
 			if (cell && cell.formulaParsed) {
@@ -25553,6 +25600,9 @@
 	};
 
 	CDynamicArrayManager.prototype.getDynamicArrayPropertiesByIndex = function(index) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return null;
+		}
 		if (index == null) {
 			return null;
 		}
@@ -25567,11 +25617,17 @@
 	};
 
 	CDynamicArrayManager.prototype.getRichValueOffset = function (row, col) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return null;
+		}
 		let richValueBlock = this.getRichValueBlock(row, col);
 		return this._getRichValueOffset(richValueBlock);
 	};
 
 	CDynamicArrayManager.prototype.getRichValueOffsetByIndex = function (index) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return null;
+		}
 		let richValueBlock = this.getRichValueBlockByIndex(index);
 		return this._getRichValueOffset(richValueBlock);
 	};
@@ -25593,6 +25649,9 @@
 	};
 
 	CDynamicArrayManager.prototype.getRichValueBlock = function(row, col) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return null;
+		}
 		let vmIndex;
 		this.ws._getCellNoEmpty(row, col, function(cell) {
 			if (cell && cell.formulaParsed) {
@@ -25604,6 +25663,9 @@
 	};
 
 	CDynamicArrayManager.prototype.getRichValueBlockByIndex = function(index) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return null;
+		}
 		if (index == null) {
 			return null;
 		}
@@ -25617,6 +25679,9 @@
 	};
 
 	CDynamicArrayManager.prototype._ensureWorkbookMetadata = function () {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return this.ws.workbook.metadata || null;
+		}
 		if (!this.ws.workbook.metadata) {
 			this.ws.workbook.metadata = new AscCommonExcel.CMetadata();
 		}
@@ -25624,6 +25689,9 @@
 	};
 
 	CDynamicArrayManager.prototype._addDynamicArrayMetadata = function (fCollapsed) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return null;
+		}
 		const oldMetadata = this.ws.workbook.metadata ? this.ws.workbook.metadata.clone() : null;
 		const meta = this._ensureWorkbookMetadata();
 
@@ -25651,6 +25719,9 @@
 	};
 
 	CDynamicArrayManager.prototype._addRichValueMetadata = function (rvIndex) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return null;
+		}
 		const oldMetadata = this.ws.workbook.metadata ? this.ws.workbook.metadata.clone() : null;
 		const meta = this._ensureWorkbookMetadata();
 
@@ -25678,6 +25749,9 @@
 	};
 
 	CDynamicArrayManager.prototype._addRichValueMetadataForGeneric = function () {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return null;
+		}
 		const oldMetadata = this.ws.workbook.metadata ? this.ws.workbook.metadata.clone() : null;
 		const meta = this._ensureWorkbookMetadata();
 
@@ -25711,6 +25785,9 @@
 	 * @returns {Object} - object with cmIndex and vmIndex properties
 	 */
 	CDynamicArrayManager.prototype.generateDynamicProps = function(oldFP, beforeSpillRange) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return {cmIndex: null, vmIndex: null};
+		}
 		let cmIndex = null;
 		let vmIndex = null;
 		let needGenerateCm = true;
@@ -25943,12 +26020,18 @@
 	};
 
 	CDynamicArrayManager.prototype.getNextVmIndex = function(generateNewStructure) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return null;
+		}
 		if (generateNewStructure) {
 			return this._addRichValueMetadataForGeneric();
 		}
 	};
 
 	CDynamicArrayManager.prototype.getNextCmIndex = function(generateNewStructure) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return null;
+		}
 		const metadata = this.ws.workbook.metadata;
 		if (metadata) {
 			let oDynamicProps = metadata.getLastDynamicArrayPropertiesByType("XLDAPR");
