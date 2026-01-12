@@ -516,6 +516,10 @@ $(function () {
 	const parserFormula = AscCommonExcel.parserFormula;
 
 	QUnit.test('Test @ -> single() + single() -> @', function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
 		let fillRange, resCell, fragment, assembledVal;
 		let flags = wsView._getCellFlags(0, 0);
 		flags.ctrlKey = false;
@@ -1487,6 +1491,10 @@ $(function () {
 
 
 	QUnit.test('Test @ -> not single() -> exceptions', function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
 		let fillRange, resCell, fragment, assembledVal;
 		let flags = wsView._getCellFlags(0, 0);
 		flags.ctrlKey = false;
@@ -2764,6 +2772,10 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"Dynamic array test\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
 		let bboxParent, cellWithFormula, formulaInfo, resultRow, resultCol, applyByArray, array, oParser;
 
 		// wb.dependencyFormulas.unlockRecal();
@@ -3116,6 +3128,10 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"Check expand dynamic array test\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
 		let fillRange, resCell, fragment;
 		let flags = wsView._getCellFlags(0, 0);
 		flags.ctrlKey = false;
@@ -3815,6 +3831,10 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"Dynamic array blocked expansion (#SPILL! error)\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
 		// Clean up the test area
 		ws.getRange2("A1:Z30").cleanAll();
 
@@ -4202,6 +4222,10 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"Metadata add test\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
 		clearData(0, 0, 100, 200);
 		var getMetadata = function () {
 			return ws.workbook.metadata;
@@ -4334,6 +4358,10 @@ $(function () {
 	};
 
 	QUnit.test("Test: \"Richdata add test\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
 		clearData(0, 0, 100, 200);
 
 		var flags = wsView._getCellFlags(0, 0);
@@ -4410,6 +4438,10 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"Multiple richdata formulas collapse and delete\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
 		clearData(0, 0, 100, 200);
 
 		var flags = wsView._getCellFlags(0, 0);
@@ -4546,6 +4578,10 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"Delete head cell of expanded and collapsed array\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
 		clearData(0, 0, 100, 200);
 
 		var flags = wsView._getCellFlags(0, 0);
@@ -4687,6 +4723,10 @@ $(function () {
 	}
 
 	QUnit.test("Test: \"Replace dynamic array with different sizes\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
 		clearData(0, 0, 100, 200);
 
 		var flags = wsView._getCellFlags(0, 0);
@@ -4807,6 +4847,10 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"Add dynamic array in previous cell when next cell has array\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
 		clearData(0, 0, 100, 200);
 
 		var flags = wsView._getCellFlags(0, 0);
@@ -4943,6 +4987,10 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"Insert dynamic array into existing spill range\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
 		clearData(0, 0, 100, 200);
 
 		var flags = wsView._getCellFlags(0, 0);
@@ -5013,6 +5061,10 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"Paste with clipboard collision - dynamic array collapse/delete\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
 		clearData(0, 0, 100, 200);
 
 		var flags = wsView._getCellFlags(0, 0);
@@ -5153,6 +5205,10 @@ $(function () {
 
 
 	QUnit.test("Test: \"Copy-paste dynamic array - expand vs blocked\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
 		clearData(0, 0, 100, 200);
 
 		var flags = wsView._getCellFlags(0, 0);
@@ -5217,6 +5273,10 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"Dynamic array add/delete with undo/redo\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
 		clearData(0, 0, 100, 200);
 
 		var flags = wsView._getCellFlags(0, 0);
@@ -5325,6 +5385,10 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"Autofill with collision - dynamic array collapse/delete\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
 		clearData(0, 0, 100, 200);
 
 		var flags = wsView._getCellFlags(0, 0);
@@ -5419,6 +5483,10 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"Dynamic array undo/redo with expand, collapse, and blocked states\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
 		clearData(0, 0, 100, 200);
 
 		var flags = wsView._getCellFlags(0, 0);
@@ -5653,6 +5721,10 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"Dynamic array blocked, then unblocked with undo/redo\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
 		clearData(0, 0, 100, 200);
 
 		var flags = wsView._getCellFlags(0, 0);

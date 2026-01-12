@@ -2549,8 +2549,8 @@ $(function () {
 		assert.ok(oParser.parse(), "Pass an array to the second argument(first number of array >= rows in exist area)");
 		array = oParser.calculate();
 		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 2, "Pass an array to the second argument(first number of array >= rows in exist area).[0,0]");
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 2, "Pass an array to the second argument(first number of array >= rows in exist area).[0,1]");
-		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 2, "Pass an array to the second argument(first number of array >= rows in exist area).[1,0]");
+		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 2 : 'test2', "Pass an array to the second argument(first number of array >= rows in exist area).[0,1]");
+		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 2 : 5, "Pass an array to the second argument(first number of array >= rows in exist area).[1,0]");
 		//assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 5, "Pass an array to the second argument(first number of array >= rows in exist area).[1,1]");
 
 		// cell ref(single value - string)
@@ -2587,9 +2587,10 @@ $(function () {
 		assert.ok(oParser.parse(), "Pass a reference to values in cells(cellsRange) to the second argument");
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", "Pass SINGLE a reference to values in cells(cellsRange) to the second argument.");
 
+		let res = AscCommonExcel.bIsSupportDynamicArrays ? 2 : "#VALUE!";
 		oParser = new parserFormula('EXPAND(A1:B1,A1:B1,3,5)', "A1", ws);
 		assert.ok(oParser.parse(), "Pass a reference to values in cells(cellsRange) to the second argument");
-		assert.strictEqual(oParser.calculate().getValue(), 2, "Pass a reference to values in cells(cellsRange) to the second argument.");
+		assert.strictEqual(oParser.calculate().getValue(), res, "Pass a reference to values in cells(cellsRange) to the second argument.");
 
 		// ------------------------------ arg[2] ------------------------------ //
 		// empty (no value)
@@ -2640,8 +2641,8 @@ $(function () {
 		assert.ok(oParser.parse(), "Pass an array to the third argument(first number of array >= columns in exist area)");
 		array = oParser.calculate();
 		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 2, "Pass an array to the third argument(first number of array >= columns in exist area).[0,0]");
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 2, "Pass an array to the third argument(first number of array >= columns in exist area).[0,1]");
-		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 2, "Pass an array to the third argument(first number of array >= columns in exist area).[1,0]");
+		assert.strictEqual(array.getElementRowCol(0, 1).getValue(),  AscCommonExcel.bIsSupportDynamicArrays ? 2 : 'test2', "Pass an array to the third argument(first number of array >= columns in exist area).[0,1]");
+		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 2 : 5, "Pass an array to the third argument(first number of array >= columns in exist area).[1,0]");
 		//assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 5, "Pass an array to the third argument(first number of array >= columns in exist area).[1,1]");
 
 		// cell ref(single value - string)

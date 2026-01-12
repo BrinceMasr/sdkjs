@@ -2578,9 +2578,12 @@ $(function () {
 
 		// Case #57: Array, Number. Array as first argument returns first element. Return $100.00
 		//correct test for dynamic arrays
-		oParser = new parserFormula('DOLLAR({100;200},2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: Formula DOLLAR({100;200},2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "$100.00", 'Test: Positive case: Array, Number. Array as first argument returns first element. Return $100.00');
+		//TODO!!! without dynamic
+		if (AscCommonExcel.bIsSupportDynamicArrays) {
+			oParser = new parserFormula('DOLLAR({100;200},2)', 'A2', ws);
+			assert.ok(oParser.parse(), 'Test: Formula DOLLAR({100;200},2) is parsed.');
+			assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "$100.00", 'Test: Positive case: Array, Number. Array as first argument returns first element. Return $100.00');
+		}
 
 		// Negative cases:
 
@@ -3158,9 +3161,10 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: FIND(SINGLE(A107:A108),SINGLE(A109:A110),1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: SINGLE Area. Multi-cell ranges for find_text and within_text. Returns #VALUE! error.');
 
+		let res = AscCommonExcel.bIsSupportDynamicArrays ? 1 : '#VALUE!';
 		oParser = new parserFormula('FIND(A107:A108,A109:A110,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FIND(A107:A108,A109:A110,1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Area. Multi-cell ranges for find_text and within_text. Returns #VALUE! error.');
+		assert.strictEqual(oParser.calculate().getValue(), res, 'Test: Negative case: Area. Multi-cell ranges for find_text and within_text. Returns #VALUE! error.');
 
 		// Case #12: Name. Multi-cell named ranges. Returns #VALUE! error.
 		oParser = new parserFormula('FIND(TestNameArea2,TestNameArea2,1)', 'A2', ws);
@@ -3181,9 +3185,10 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: FIND(SINGLE(Sheet2!A7:A8),SINGLE(Sheet2!A9:A10),1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: SINGLE Area3D. Multi-cell 3D ranges. Returns #VALUE! error.');
 
+		res = AscCommonExcel.bIsSupportDynamicArrays ? 1 : '#VALUE!';
 		oParser = new parserFormula('FIND(Sheet2!A7:A8,Sheet2!A9:A10,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FIND(Sheet2!A7:A8,Sheet2!A9:A10,1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Area3D. Multi-cell 3D ranges. Returns #VALUE! error.');
+		assert.strictEqual(oParser.calculate().getValue(), res, 'Test: Negative case: Area3D. Multi-cell 3D ranges. Returns #VALUE! error.');
 
 		// Case #16: Table. Table references with non-matching strings. Returns #VALUE! error.
 		oParser = new parserFormula('FIND(Table1[Column1],Table1[Column3],1)', 'A2', ws);
@@ -3445,9 +3450,10 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: FINDB(SINGLE(Sheet2!A7:A8),SINGLE(Sheet2!A9:A10),1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: SINGLE Area3D. Multi-cell 3D ranges. Returns #VALUE! error.');
 
+		res = AscCommonExcel.bIsSupportDynamicArrays ? 1 : '#VALUE!';
 		oParser = new parserFormula('FINDB(Sheet2!A7:A8,Sheet2!A9:A10,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FINDB(Sheet2!A7:A8,Sheet2!A9:A10,1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Area3D. Multi-cell 3D ranges. Returns #VALUE! error.');
+		assert.strictEqual(oParser.calculate().getValue(), res, 'Test: Negative case: Area3D. Multi-cell 3D ranges. Returns #VALUE! error.');
 
 		// Case #16: Table. Table references with non-matching strings. Returns #VALUE! error.
 		oParser = new parserFormula('FINDB(Table1[Column1],Table1[Column3],1)', 'A2', ws);
