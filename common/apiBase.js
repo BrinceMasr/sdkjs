@@ -6115,6 +6115,63 @@
 		return this.macroRecorder;
 	};
 
+
+	baseEditorsApi.prototype.loadFiles = function (paths, callback)
+	{
+
+		if (!paths || !paths.length)
+		{
+			if (callback)
+			{
+				callback({});
+			}
+			return;
+		}
+
+
+		let this_ = this;
+		this.sync_StartAction(c_oAscAsyncActionType.BlockInteraction, c_oAscAsyncAction.LoadImage);
+		let left = paths.length;
+		let result = {};
+		let onDone = function ()
+		{
+			left--;
+			if (left === 0 && callback)
+			{
+				this_.sync_EndAction(c_oAscAsyncActionType.BlockInteraction, c_oAscAsyncAction.LoadImage);
+				callback(result);
+			}
+		};
+
+		for (let i = 0; i < paths.length; i++)
+		{
+			(function (src)
+			{
+				let url = AscCommon.getFullImageSrc2(src);
+				fetch(url)
+					.then(function (response)
+					{
+						if (response.ok) {
+							return response.arrayBuffer();
+						}
+						return null;
+					})
+					.then(function (data)
+					{
+						if (data)
+						{
+							result[src] = data;
+						}
+						onDone();
+					})
+					.catch(function ()
+					{
+						onDone();
+					});
+			})(paths[i]);
+		}
+	};
+
 	//----------------------------------------------------------export----------------------------------------------------
 	window['AscCommon']                = window['AscCommon'] || {};
 	window['AscCommon'].baseEditorsApi = baseEditorsApi;

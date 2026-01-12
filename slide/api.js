@@ -7418,19 +7418,25 @@ background-repeat: no-repeat;\
 		if (!bIsReporter) {
 			this.turnOffSpecialModes();
 		}
+		let presentation = this.private_GetLogicDocument();
+		let allGIFs = presentation.GetAllGIFImageUrls();
+		let this_ = this;
+		this.loadFiles(allGIFs, function (aGIFData) {
+			if (bIsReporter)
+				this_.DemonstrationReporterStart(reporterStartObject);
 
-		if (bIsReporter)
-			this.DemonstrationReporterStart(reporterStartObject);
+			if (bIsReporter && (this_.reporterWindow || window["AscDesktopEditor"]))
+				this_.WordControl.DemonstrationManager.StartWaitReporter(div_id, slidestart_num, true);
+			else
+				this_.WordControl.DemonstrationManager.Start(div_id, slidestart_num, true, undefined, aGIFData);
 
-		if (bIsReporter && (this.reporterWindow || window["AscDesktopEditor"]))
-			this.WordControl.DemonstrationManager.StartWaitReporter(div_id, slidestart_num, true);
-		else
-			this.WordControl.DemonstrationManager.Start(div_id, slidestart_num, true);
+			if (undefined !== this_.EndShowMessage) {
+				this_.WordControl.DemonstrationManager.EndShowMessage = this_.EndShowMessage;
+				this_.EndShowMessage = undefined;
+			}
+		});
 
-		if (undefined !== this.EndShowMessage) {
-			this.WordControl.DemonstrationManager.EndShowMessage = this.EndShowMessage;
-			this.EndShowMessage = undefined;
-		}
+
 	};
 
 	asc_docs_api.prototype.EndDemonstration = function(isNoUseFullScreen)

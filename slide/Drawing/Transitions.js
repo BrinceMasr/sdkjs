@@ -2969,7 +2969,7 @@ function CDemonstrationManager(htmlpage)
         }
     };
 
-    this.Start = function(main_div_id, start_slide_num, is_play_mode, is_no_fullscreen)
+    this.Start = function(main_div_id, start_slide_num, is_play_mode, is_no_fullscreen, gifData)
     {
         let nStartSlideNum = start_slide_num;
         if(Asc.editor.isMasterMode())
@@ -3037,6 +3037,7 @@ function CDemonstrationManager(htmlpage)
 
 		this.GoToSlideShortcutStack = [];
         this.StartSlide(true, true);
+        this.GifData = gifData;
     };
 
     this.StartSlide = function(is_transition_use, is_first_play)
@@ -3099,11 +3100,18 @@ function CDemonstrationManager(htmlpage)
         oThis.OnPaintSlide(false);
     };
 
+    this.CheckSlideImages = function ()
+    {
+        let slide = this.GetCurrentSlide();
+
+    };
+
     this.StartAnimation = function(nSlideNum)
     {
         var oSlide = this.GetSlide(nSlideNum);
         if(oSlide)
         {
+            this.gifSlidePlayer.checkSlide(oSlide);
             return oSlide.getAnimationPlayer().start();
         }
         return false;
@@ -3113,6 +3121,7 @@ function CDemonstrationManager(htmlpage)
     {
         if(this.HtmlPage.m_oLogicDocument)
         {
+            this.timer.stop();
             var oSlide = this.GetSlide(nSlideNum);
             if(oSlide)
             {
@@ -3407,13 +3416,15 @@ function CDemonstrationManager(htmlpage)
             }, oSlide.getAdvanceDuration());
         }
     };
-		this.EndDrawInk = function() {
-			const oSlide = oThis.GetCurrentSlide();
-			const oController = oSlide && oSlide.graphicObjects;
-			if (oController && oController.curState instanceof AscFormat.CInkDrawState) {
-				oController.curState.onMouseUp({ClickCount : 1, X : 0, Y : 0}, 0, 0, oThis.SlideNum);
-			}
-		};
+    this.EndDrawInk = function()
+    {
+        const oSlide = oThis.GetCurrentSlide();
+        const oController = oSlide && oSlide.graphicObjects;
+        if (oController && oController.curState instanceof AscFormat.CInkDrawState)
+        {
+            oController.curState.onMouseUp({ClickCount : 1, X : 0, Y : 0}, 0, 0, oThis.SlideNum);
+        }
+    };
     this.AdvanceAfter = function()
     {
         if (oThis.IsPlayMode)
@@ -3435,6 +3446,7 @@ function CDemonstrationManager(htmlpage)
 
     this.End = function(isNoUseFullScreen)
     {
+        this.GifData = null;
 		this.PointerRemove();
         if (this.waitReporterObject)
         {
@@ -3672,7 +3684,7 @@ function CDemonstrationManager(htmlpage)
         return false;
     };
 
-		this.sendNextFromReporter = function (isNoSendFormReporter) {
+	this.sendNextFromReporter = function (isNoSendFormReporter) {
 			if (this.HtmlPage.m_oApi.isReporterMode && !isNoSendFormReporter)
 				this.HtmlPage.m_oApi.sendFromReporter("{ \"reporter_command\" : \"next\" }");
 		};
