@@ -8429,11 +8429,11 @@
 	};
 
     /**
-     * Returns the ApiRange object that represents all the cells on the columns range.
+     * Returns the instante of ApiAutoFilter object that represents the worksheet AutoFilter.
      * @memberof ApiWorksheet
      * @typeofeditors ["CSE"]
-     * @returns {number}
-     * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/GetCols.js
+     * @returns {ApiAutoFilter}
+     * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/GetAutoFilter.js
      */
     ApiWorksheet.prototype.GetAutoFilter = function () {
 		return new ApiAutoFilter(this);
@@ -19863,6 +19863,11 @@
 			return;
 		}
 		let formula1 = validation.getFormula1();
+		let worksheet = this.range && this.range.range && this.range.range.worksheet;
+		if (formula1 && worksheet) {
+			formula1 = formula1.clone();
+			formula1.correctToInterface(worksheet, validation);
+		}
 		return formula1 ? formula1.asc_getValue() : "";
 	};
 
@@ -19879,6 +19884,11 @@
 			return;
 		}
 		let formula2 = validation.getFormula2();
+		let worksheet = this.range && this.range.range && this.range.range.worksheet;
+		if (formula2 && worksheet) {
+			formula2 = formula2.clone();
+			formula2.correctToInterface(worksheet, validation);
+		}
 		return formula2 ? formula2.asc_getValue() : "";
 	};
 
@@ -28139,9 +28149,7 @@
 	ApiValidation.prototype["Delete"]               = ApiValidation.prototype.Delete;
 	ApiValidation.prototype["Modify"]               = ApiValidation.prototype.Modify;
 	ApiValidation.prototype["GetType"]              = ApiValidation.prototype.GetType;
-	ApiValidation.prototype["SetType"]              = ApiValidation.prototype.SetType;
 	ApiValidation.prototype["GetAlertStyle"]        = ApiValidation.prototype.GetAlertStyle;
-	ApiValidation.prototype["SetAlertStyle"]        = ApiValidation.prototype.SetAlertStyle;
 	ApiValidation.prototype["GetIgnoreBlank"]       = ApiValidation.prototype.GetIgnoreBlank;
 	ApiValidation.prototype["SetIgnoreBlank"]       = ApiValidation.prototype.SetIgnoreBlank;
 	ApiValidation.prototype["GetInCellDropdown"]    = ApiValidation.prototype.GetInCellDropdown;
@@ -28159,11 +28167,8 @@
 	ApiValidation.prototype["GetErrorMessage"]      = ApiValidation.prototype.GetErrorMessage;
 	ApiValidation.prototype["SetErrorMessage"]      = ApiValidation.prototype.SetErrorMessage;
 	ApiValidation.prototype["GetFormula1"]          = ApiValidation.prototype.GetFormula1;
-	ApiValidation.prototype["SetFormula1"]          = ApiValidation.prototype.SetFormula1;
 	ApiValidation.prototype["GetFormula2"]          = ApiValidation.prototype.GetFormula2;
-	ApiValidation.prototype["SetFormula2"]          = ApiValidation.prototype.SetFormula2;
 	ApiValidation.prototype["GetOperator"]          = ApiValidation.prototype.GetOperator;
-	ApiValidation.prototype["SetOperator"]          = ApiValidation.prototype.SetOperator;
 	ApiValidation.prototype["GetParent"]            = ApiValidation.prototype.GetParent;
 
 	ApiFormatConditions.prototype["Add"] = ApiFormatConditions.prototype.Add;
