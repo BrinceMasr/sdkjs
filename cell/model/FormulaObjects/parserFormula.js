@@ -9581,6 +9581,9 @@ function parserFormula( formula, parent, _ws ) {
 				"0": true,
 				"1": true
 			},
+			"SEARCH": {
+				"0": true
+			},
 			"T": {
 				"0": true
 			},

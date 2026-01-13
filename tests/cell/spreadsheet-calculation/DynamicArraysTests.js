@@ -5861,5 +5861,92 @@ $(function () {
 		clearData(0, 0, 10, 20);
 	});
 
+	QUnit.test("Test: \"Range reference as dynamic array\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+		//By bug #71536
+		clearData(0, 0, 100, 200);
+
+		let fillRange, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		// Prepare source data in A1:B1
+		ws.getRange2("A1").setValue("10");
+		ws.getRange2("B1").setValue("20");
+
+		// Helper function to check expanded state
+		var checkExpandedState = function (desc) {
+			var cellValueD1 = ws.getRange2("D1").getValue();
+			var cellValueE1 = ws.getRange2("E1").getValue();
+			assert.strictEqual(cellValueD1, "10", desc + ": D1 value = 10");
+			assert.strictEqual(cellValueE1, "20", desc + ": E1 value = 20");
+			
+			var resCell = getCell(ws.getRange2("D1"));
+			var dynamicRef = resCell.getFormulaParsed().getDynamicRef();
+			assert.notStrictEqual(dynamicRef, null, desc + ": dynamic array reference exists");
+			assert.strictEqual(dynamicRef.getHeight(), 1, desc + ": height = 1");
+			assert.strictEqual(dynamicRef.getWidth(), 2, desc + ": width = 2");
+			
+			var arrayRef = _getArrayFormulaRef("D1");
+			assert.ok(arrayRef != null, desc + ": D1 has array formula reference");
+			assert.strictEqual(arrayRef.r1, 0, desc + ": Array starts at row 0");
+			assert.strictEqual(arrayRef.c1, 3, desc + ": Array starts at col 3 (D)");
+			assert.strictEqual(arrayRef.r2, 0, desc + ": Array ends at row 0");
+			assert.strictEqual(arrayRef.c2, 4, desc + ": Array ends at col 4 (E)");
+			
+			var cmIndex = getCellMetadata(0, 3);
+			assert.ok(cmIndex > 0, desc + ": D1 has metadata");
+			
+			var vmIndex = getCellRichValueIndex(0, 3);
+			assert.ok(!vmIndex || vmIndex === 0, desc + ": D1 has no richdata (expanded)");
+		};
+
+		// Helper function to check collapsed state
+		var checkCollapsedState = function (desc) {
+			var cellValueD1 = ws.getRange2("D1").getValue();
+			var cellValueE1 = ws.getRange2("E1").getValue();
+			assert.strictEqual(cellValueD1, "#SPILL!", desc + ": D1 shows #SPILL! error");
+			assert.strictEqual(cellValueE1, "blocking", desc + ": E1 has blocking value");
+			
+			var cmIndex = getCellMetadata(0, 3);
+			assert.ok(cmIndex > 0, desc + ": D1 has metadata");
+			
+			var vmIndex = getCellRichValueIndex(0, 3);
+			assert.ok(vmIndex > 0, desc + ": D1 has richdata (collapsed)");
+			
+			var arrayRef = _getArrayFormulaRef("D1");
+			assert.ok(arrayRef.r1 === arrayRef.r2 && arrayRef.c1 === arrayRef.c2, desc + ": Array is collapsed");
+		};
+
+		// Test 1: Create expanded dynamic array
+		let formula = "=A1:B1";
+		fillRange = ws.getRange2("D1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("D1").getValueForEdit2();
+		fragment[0].setFragmentText(formula);
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+		
+		checkExpandedState("After creating array");
+
+		// Test 2: Block the array by adding data to E1
+		ws.getRange2("E1").setValue("blocking");
+		
+		checkCollapsedState("After blocking E1");
+
+		// Test 3: Remove blocking data to expand again
+		ws.getRange2("E1").setValue("");
+		
+		checkExpandedState("After removing blocking data");
+
+		// Test 4: Undo/redo for expanded -> blocked -> expanded cycle
+		checkUndoRedo(checkCollapsedState, checkExpandedState, "Expanded->Blocked->Expanded undo/redo");
+
+		clearData(0, 0, 100, 200);
+	});
+
 	QUnit.module("Sheet structure");
 });
