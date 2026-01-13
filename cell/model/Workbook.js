@@ -25286,6 +25286,9 @@
 		if (!AscCommonExcel.bIsSupportDynamicArrays) {
 			return null;
 		}
+		if (!oFormula.isParsed) {
+			return null;
+		}
 		const formulaRes = oFormula.calculate(null, null, null, null, calculateResult || null);
 
 		if (!formulaRes || (formulaRes.type !== AscCommonExcel.cElementType.array && formulaRes.type !== AscCommonExcel.cElementType.cellsRange && formulaRes.type !== AscCommonExcel.cElementType.cellsRange3D)) {
@@ -25299,7 +25302,7 @@
 				this.ws.workbook.dependencyFormulas.addToVolatileArrays(oFormula);
 			}
 		} else {
-			const dimension = formulaRes.getDimensions();
+			const dimension = formulaRes.getDimensions(true);
 			res = new Asc.Range(
 				oFormula.parent.nCol,
 				oFormula.parent.nRow,

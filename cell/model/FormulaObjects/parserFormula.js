@@ -4115,6 +4115,8 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 
 			if (firstArray) {
 				var array = new cArray();
+				array.realSize = firstArray.realSize;
+				array.missedValue = firstArray.missedValue;
 				//bbox_elem -
 				var doCalc = function (elem, r, c, _row, _col) {
 					if (!array.array[r]) {

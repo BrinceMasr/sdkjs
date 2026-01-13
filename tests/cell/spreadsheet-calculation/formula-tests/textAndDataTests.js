@@ -7691,9 +7691,9 @@ $(function () {
 		oParser.setArrayFormulaRef(ws.getRange2("K4:M4").bbox);
 		assert.ok(oParser.parse(), 'SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M2)');
 		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), "#VALUE!", 'Result of SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M2)[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), "#VALUE!", 'Result of SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M2)[0,1]');
-		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), "#VALUE!", 'Result of SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M2)[0,2]');
+		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 1 : "#VALUE!", 'Result of SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M2)[0,0]');
+		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 1 : "#VALUE!", 'Result of SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M2)[0,1]');
+		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 1 : "#VALUE!", 'Result of SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M2)[0,2]');
 
 		oParser = new parserFormula('SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},{"hcdpmhatlvmctst71a";"dsdsvmwprd";"hcdpmhatlvmcprd71a";"hcd*prd*vmwprd**vmcprd*"})', "K4", ws);
 		oParser.setArrayFormulaRef(ws.getRange2("K4:M7").bbox);
@@ -7725,8 +7725,8 @@ $(function () {
 		assert.ok(oParser.parse(), 'SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M1)');
 		array = oParser.calculate();
 		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1, 'Result of SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M1)[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), "#VALUE!", 'Result of SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M1)[0,1]');
-		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), "#VALUE!", 'Result of SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M1)[0,2]');
+		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 1 : "#VALUE!", 'Result of SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M1)[0,1]');
+		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 1 : "#VALUE!", 'Result of SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M1)[0,2]');
 
 		bbox = ws.getRange2("D1:F2").bbox;
 		cellWithFormula = new window['AscCommonExcel'].CCellWithFormula(ws, bbox.r1, bbox.c1);
@@ -7757,7 +7757,7 @@ $(function () {
 		array = oParser.calculate();
 		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), "#VALUE!", 'Result of SEARCH({"*vmwtst*","hcd*tst","*vmctst*"}, A1:B2)[0,0]');
 		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), "#VALUE!", 'Result of SEARCH({"*vmwtst*","hcd*tst","*vmctst*"}, A1:B2)[0,1]');
-		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), "#VALUE!", 'Result of SEARCH({"*vmwtst*","hcd*tst","*vmctst*"}, A1:B2)[0,2]');
+		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? "" : "#VALUE!", 'Result of SEARCH({"*vmwtst*","hcd*tst","*vmctst*"}, A1:B2)[0,2]');
 
 		ws.getRange2("A3:A5").cleanAll();
 
@@ -7780,7 +7780,7 @@ $(function () {
 		oParser = new parserFormula('SEARCH(S1:U2,A1:A2)', cellWithFormula, ws);
 		oParser.setArrayFormulaRef(ws.getRange2("D1:F5").bbox);
 		assert.ok(oParser.parse(), 'SEARCH(S1:U2,A1:A2)');
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Result of SEARCH(S1:U2,A1:A2)');
+		assert.strictEqual(oParser.calculate().getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 1 : "#VALUE!", 'Result of SEARCH(S1:U2,A1:A2)');
 
 		oParser = new parserFormula('SEARCH(S1:U2,"hcdpmh71")', cellWithFormula, ws);
 		oParser.setArrayFormulaRef(ws.getRange2("D1:F5").bbox);
@@ -7959,10 +7959,12 @@ $(function () {
 		oParser = new parserFormula('SEARCH(Sheet2!A3,"abc")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SEARCH(Sheet2!A3,"abc") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Ref3D, String. 3D ref to text ("abc") returns #VALUE!. 2 of 3 arguments used.');
+		
 		// Case #12: Name, String. Named range with text ("invalid") returns #VALUE!. 2 of 3 arguments used.
 		oParser = new parserFormula('SEARCH(TestNameArea,"abc")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SEARCH(TestNameArea,"abc") is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Name, String. Named range with text ("invalid") returns #VALUE!. 2 of 3 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 1 : "#VALUE!", 'Test: Negative case: Name, String. Named range with text ("invalid") returns #VALUE!. 2 of 3 arguments used.');
+		
 		// Case #13: Table, String. Table column with text returns #VALUE!. 2 of 3 arguments used.
 		oParser = new parserFormula('SEARCH(Table1[Column2],"abc")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SEARCH(Table1[Column2],"abc") is parsed.');
@@ -7995,10 +7997,11 @@ $(function () {
 		oParser = new parserFormula('SEARCH("a","abc",Sheet2!A3)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SEARCH("a","abc",Sheet2!A3) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String(2), Ref3D. 3D ref to text as start_num returns #VALUE!. 3 of 3 arguments used.');
+		
 		// Case #21: Name, String, Number. Named range with text as find_text returns #VALUE!. 3 of 3 arguments used.
 		oParser = new parserFormula('SEARCH(TestNameArea,"abc",1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SEARCH(TestNameArea,"abc",1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Name, String, Number. Named range with text as find_text returns #VALUE!. 3 of 3 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 1 : '#VALUE!', 'Test: Negative case: Name, String, Number. Named range with text as find_text returns #VALUE!. 3 of 3 arguments used.');
 
 		// Bounded cases:
 		// Case #1: String(2), Number. Max string length (32,767) for within_text. Returns 1. 3 of 3 arguments used.
@@ -8193,10 +8196,12 @@ $(function () {
 		oParser = new parserFormula('SEARCHB(Sheet2!A3,"abc")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SEARCHB(Sheet2!A3,"abc") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Ref3D, String. 3D ref to text ("abc") returns #VALUE!. 2 of 3 arguments used.');
+		
 		// Case #12: Name, String. Named range with text ("invalid") returns #VALUE!. 2 of 3 arguments used.
 		oParser = new parserFormula('SEARCHB(TestNameArea,"abc")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SEARCHB(TestNameArea,"abc") is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Name, String. Named range with text ("invalid") returns #VALUE!. 2 of 3 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 1 : '#VALUE!', 'Test: Negative case: Name, String. Named range with text ("invalid") returns #VALUE!. 2 of 3 arguments used.');
+		
 		// Case #13: Table, String. Table column with text returns #VALUE!. 2 of 3 arguments used.
 		oParser = new parserFormula('SEARCHB(Table1[Column2],"abc")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SEARCHB(Table1[Column2],"abc") is parsed.');
@@ -8232,7 +8237,7 @@ $(function () {
 		// Case #21: Name, String, Number. Named range with text as find_text returns #VALUE!. 3 of 3 arguments used.
 		oParser = new parserFormula('SEARCHB(TestNameArea,"abc",1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SEARCHB(TestNameArea,"abc",1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Name, String, Number. Named range with text as find_text returns #VALUE!. 3 of 3 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(),  AscCommonExcel.bIsSupportDynamicArrays ? 1 : "#VALUE!", 'Test: Negative case: Name, String, Number. Named range with text as find_text returns #VALUE!. 3 of 3 arguments used.');
 
 		// Bounded cases:
 		// Case #1: String(2), Number. Max string length (32,767) for within_text. Returns 1. 3 of 3 arguments used.
