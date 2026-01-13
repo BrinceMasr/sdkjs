@@ -5948,5 +5948,82 @@ $(function () {
 		clearData(0, 0, 100, 200);
 	});
 
+	QUnit.test("Test: \"SIN with entire column reference (A:A)\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		// Clear and prepare data in column A
+		clearData(0, 0, 100, 200);
+		
+		// Fill column A with several values, leaving most cells empty
+		ws.getRange2("A1").setValue("0");        // SIN(0) = 0
+		ws.getRange2("A2").setValue("");         // Empty
+		ws.getRange2("A3").setValue("1.5708");   // SIN(π/2) ≈ 1
+		ws.getRange2("A4").setValue("");         // Empty
+		ws.getRange2("A5").setValue("3.14159");  // SIN(π) ≈ 0
+		// A6 and beyond are empty
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		// Set formula =SIN(A:A) in cell D1
+		let formula = "=SIN(A:A)";
+		fillRange = ws.getRange2("D1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("D1").getValueForEdit2();
+		fragment[0].setFragmentText(formula);
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+		
+		// Get the result cell
+		resCell = getCell(ws.getRange2("D1"));
+		let dynamicRef = resCell.getFormulaParsed().getDynamicRef();
+		
+		// Check that formula is correct
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "SIN(A:A)", "formula result -> SIN(A:A)");
+		
+		// Check dynamic array dimensions
+		// For entire column reference, the dynamic array should span the entire column
+		assert.ok(dynamicRef, "Dynamic reference exists");
+		let height = dynamicRef.getHeight();
+		let width = dynamicRef.getWidth();
+		assert.ok(height > 9999, "height dynamic array should be very large for entire column: " + height);
+		assert.strictEqual(width, 1, "width dynamic array for column reference: " + width);
+		
+		// Check specific cell values in the result
+		// D1 should contain SIN(A1) = SIN(0) = 0
+		let d1Value = ws.getRange2("D1").getValue();
+		assert.ok(Math.abs(d1Value - 0) < 0.0001, "D1 should contain SIN(0) ≈ 0, got: " + d1Value);
+		
+		// D2 should contain SIN(A2) = SIN("") = 0 (empty cells are treated as 0)
+		let d2Value = ws.getRange2("D2").getValue();
+		assert.ok(Math.abs(d2Value - 0) < 0.0001, "D2 should contain SIN(empty) ≈ 0, got: " + d2Value);
+		
+		// D3 should contain SIN(A3) = SIN(1.5708) ≈ 1
+		let d3Value = ws.getRange2("D3").getValue();
+		assert.ok(Math.abs(d3Value - 1) < 0.01, "D3 should contain SIN(π/2) ≈ 1, got: " + d3Value);
+		
+		// D4 should contain SIN(A4) = SIN("") = 0
+		let d4Value = ws.getRange2("D4").getValue();
+		assert.ok(Math.abs(d4Value - 0) < 0.0001, "D4 should contain SIN(empty) ≈ 0, got: " + d4Value);
+		
+		// D5 should contain SIN(A5) = SIN(3.14159) ≈ 0
+		let d5Value = ws.getRange2("D5").getValue();
+		assert.ok(Math.abs(d5Value - 0) < 0.01, "D5 should contain SIN(π) ≈ 0, got: " + d5Value);
+		
+		// D6 should contain SIN(A6) = SIN("") = 0
+		let d6Value = ws.getRange2("D6").getValue();
+		assert.ok(Math.abs(d6Value - 0) < 0.0001, "D6 should contain SIN(empty) ≈ 0, got: " + d6Value);
+		
+		// Check a cell further down to ensure the array extends properly
+		let d100Value = ws.getRange2("D100").getValue();
+		assert.ok(Math.abs(d100Value - 0) < 0.0001, "D100 should contain SIN(empty) ≈ 0, got: " + d100Value);
+
+		clearData(0, 0, 100, 200);
+	});
+
 	QUnit.module("Sheet structure");
 });

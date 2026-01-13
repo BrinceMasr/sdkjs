@@ -18974,10 +18974,15 @@ function isAllowPasteLink(pastedWb) {
 							});
 						}
 					} else {
-						filledRows = c_maxColFillDataCount;
-						bbox = new Asc.Range(c.bbox.c1, 0, c.bbox.c2, filledRows - 1);
-						c = t._getRange(bbox.c1, bbox.r1, bbox.c2, bbox.r2);
-						t.model.workbook.handlers.trigger("asc_onError", c_oAscError.ID.FillAllRowsWarning, c_oAscError.Level.NoCritical, [filledRows, allRows]);
+						if (false && dynamicSelectionRange) {
+							bbox = new Asc.Range(dynamicSelectionRange.c1, 0, dynamicSelectionRange.c2, dynamicSelectionRange.r2);
+							c = t._getRange(bbox.c1, bbox.r1, bbox.c2, bbox.r2);
+						} else {
+							filledRows = c_maxColFillDataCount;
+							bbox = new Asc.Range(c.bbox.c1, 0, c.bbox.c2, filledRows - 1);
+							c = t._getRange(bbox.c1, bbox.r1, bbox.c2, bbox.r2);
+							t.model.workbook.handlers.trigger("asc_onError", c_oAscError.ID.FillAllRowsWarning, c_oAscError.Level.NoCritical, [filledRows, allRows]);
+						}
 					}
 					return;
 				}
