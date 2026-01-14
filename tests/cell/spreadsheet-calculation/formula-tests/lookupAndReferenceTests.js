@@ -1233,10 +1233,12 @@ $(function () {
 		oParser = new parserFormula('CHOOSE(,"1st","2nd")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula CHOOSE(,"1st","2nd") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Empty, String(2). Empty index_num results in #VALUE! error. 1 of 2 arguments used.');
+
 		// Case #10: Number, Area. Value is whole column. 2 arguments were used.
 		oParser = new parserFormula('CHOOSE(1,A:A)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula CHOOSE(1,A:A) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue()[0].getValue(), '1st', 'Test: Negative case: Number, Area. Value is whole column. 2 arguments were used.');
+
 		// Case #11: Array, Number(3). Index_num is an array with mostly incorrect number. 4 arguments were used.
 		oParser = new parserFormula('CHOOSE({-1,0,1},1,2,3)', "A1", ws);
 		assert.ok(oParser.parse(), 'Test: Formula CHOOSE({-1,0,1},1,2,3) is parsed.');
@@ -2547,7 +2549,7 @@ $(function () {
 		// array(first number >= arr.length)
 		oParser = new parserFormula('EXPAND(A1:B1,{3,2,4},4,5)', "A1", ws);
 		assert.ok(oParser.parse(), "Pass an array to the second argument(first number of array >= rows in exist area)");
-		array = oParser.calculate();
+		array = oParser.calculate(null, null, null, null, null, null, true);
 		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 2, "Pass an array to the second argument(first number of array >= rows in exist area).[0,0]");
 		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 2 : 'test2', "Pass an array to the second argument(first number of array >= rows in exist area).[0,1]");
 		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 2 : 5, "Pass an array to the second argument(first number of array >= rows in exist area).[1,0]");
@@ -2590,10 +2592,7 @@ $(function () {
 		let res = AscCommonExcel.bIsSupportDynamicArrays ? 2 : "#VALUE!";
 		oParser = new parserFormula('EXPAND(A1:B1,A1:B1,3,5)', "A1", ws);
 		assert.ok(oParser.parse(), "Pass a reference to values in cells(cellsRange) to the second argument");
-		assert.strictEqual(oParser.calculate().getValue(), res, "Pass a reference to values in cells(cellsRange) to the second argument.");
-
-		// ------------------------------ arg[2] ------------------------------ //
-		// empty (no value)
+		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, "Pass a reference to values in cells(cellsRange) to the second argument.");
 		oParser = new parserFormula('EXPAND(A1:B2,2,,"new_val")', "A1", ws);
 		assert.ok(oParser.parse(), "Pass an empty value() to the third argument");
 		array = oParser.calculate();
@@ -2639,7 +2638,7 @@ $(function () {
 		// arry(first number >= arr.length)
 		oParser = new parserFormula('EXPAND(A1:B1,3,{3,2,4},5)', "A1", ws);
 		assert.ok(oParser.parse(), "Pass an array to the third argument(first number of array >= columns in exist area)");
-		array = oParser.calculate();
+		array = oParser.calculate(null, null, null, null, null, null, true);
 		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 2, "Pass an array to the third argument(first number of array >= columns in exist area).[0,0]");
 		assert.strictEqual(array.getElementRowCol(0, 1).getValue(),  AscCommonExcel.bIsSupportDynamicArrays ? 2 : 'test2', "Pass an array to the third argument(first number of array >= columns in exist area).[0,1]");
 		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 2 : 5, "Pass an array to the third argument(first number of array >= columns in exist area).[1,0]");

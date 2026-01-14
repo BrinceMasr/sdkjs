@@ -1412,7 +1412,7 @@ $(function () {
 		let _res = AscCommonExcel.bIsSupportDynamicArrays ? 'TRUE' : 'FALSE';
 		oParser = new parserFormula('ISBLANK(Sheet2!A4:A5)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: ISBLANK(Sheet2!A4:A5) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), _res, 'Test: Positive case: Area3D. 3D multi-cell range, returns TRUE');
+		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), _res, 'Test: Positive case: Area3D. 3D multi-cell range, returns TRUE');
 
 
 		// Case #21: Table. Table column with empty cell, returns TRUE
@@ -1475,7 +1475,7 @@ $(function () {
 		let res = AscCommonExcel.bIsSupportDynamicArrays ? 'TRUE' : 'FALSE';
 		oParser = new parserFormula('ISBLANK(A107:A108)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: ISBLANK(A107:A108) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), res, 'Test: Negative case: Area. Multi-cell range with mixed values, returns FALSE');
+		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, 'Test: Negative case: Area. Multi-cell range with mixed values, returns FALSE');
 
 		// Case #9: Array. Multi-element array, returns FALSE
 		oParser = new parserFormula('ISBLANK({FALSE,TRUE})', 'A2', ws);
@@ -1507,7 +1507,7 @@ $(function () {
 		_res = AscCommonExcel.bIsSupportDynamicArrays ? 'TRUE' : 'FALSE';
 		oParser = new parserFormula('ISBLANK(Sheet2!A7:A8)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: ISBLANK(Sheet2!A7:A8) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), _res, 'Test: Negative case: Area3D. 3D multi-cell range with mixed values, returns FALSE');
+		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), _res, 'Test: Negative case: Area3D. 3D multi-cell range with mixed values, returns FALSE');
 
 		// Case #15: Table. Table column with string, returns FALSE
 		oParser = new parserFormula('ISBLANK(Table1[Column3])', 'A2', ws);

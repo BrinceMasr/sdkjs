@@ -1014,14 +1014,14 @@ $(function () {
 		let res = AscCommonExcel.bIsSupportDynamicArrays ? 23 : '#VALUE!';
 		oParser = new parserFormula('DATEDIF(B2:B2,25,"D")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DATEDIF(B2:B2,25,"D") is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), res, 'Test: Negative case: Area, Number, String. Pass array to first argument and number to second argument.. Return #VALUE!.');
+		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, 'Test: Negative case: Area, Number, String. Pass array to first argument and number to second argument.. Return #VALUE!.');
 		
 		// Case #17: Area, Number, String. Pass cellsRange to first and number to second argument. Return #VALUE!.
 		// Different result with MS
 		res = AscCommonExcel.bIsSupportDynamicArrays ? 23 : '#VALUE!';
 		oParser = new parserFormula('DATEDIF(C2:C6,25,"D")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DATEDIF(C2:C6,25,"D") is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), res, 'Test: Negative case: Area, Number, String. Pass cellsRange to first and number to second argument.. Return #VALUE!.');
+		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, 'Test: Negative case: Area, Number, String. Pass cellsRange to first and number to second argument.. Return #VALUE!.');
 		
 		// Case #18: Formula, Formula, Number. Number as third argument. Return #NUM!.
 		oParser = new parserFormula('DATEDIF(DATE(2020,1,1),DATE(2021,1,1),1)', 'A2', ws);
@@ -4989,7 +4989,7 @@ $(function () {
 		res = AscCommonExcel.bIsSupportDynamicArrays ? 1 : '#VALUE!';
 		oParser = new parserFormula('MONTH(TestNameArea3D)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MONTH(TestNameArea3D) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), res, 'Test: Negative case: Name3D. 3D named range with non-time string, returns #VALUE!. 1 argument used.');
+		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, 'Test: Negative case: Name3D. 3D named range with non-time string, returns #VALUE!. 1 argument used.');
 		
 		// Case #15: Area3D. 3D multi-cell range, returns #VALUE!. 1 argument used.
 		// Different result with MS
@@ -6862,7 +6862,7 @@ $(function () {
 		res = AscCommonExcel.bIsSupportDynamicArrays ? 1 : '#VALUE!';
 		oParser = new parserFormula('WEEKDAY(C101:C103,C101:C103)', "A1", ws);
 		assert.ok(oParser.parse(), 'WEEKDAY(C101:C103,C101:C103)');
-		assert.strictEqual(oParser.calculate().getValue(), res, 'Result of WEEKDAY(C101:C103,C101:C103)');
+		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, 'Result of WEEKDAY(C101:C103,C101:C103)');
 
 		oParser = new parserFormula("WEEKDAY(C101:C103,C101:C103)", "A1", ws);
 		oParser.setArrayFormulaRef(ws.getRange2("E106:E109").bbox);
@@ -6886,7 +6886,7 @@ $(function () {
 		res = AscCommonExcel.bIsSupportDynamicArrays ? 1 : '#VALUE!';
 		oParser = new parserFormula('WEEKDAY(1,C101:C103)', "A1", ws);
 		assert.ok(oParser.parse(), 'WEEKDAY(1,C101:C103)');
-		assert.strictEqual(oParser.calculate().getValue(), res, 'Result of WEEKDAY(1,C101:C103)');
+		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, 'Result of WEEKDAY(1,C101:C103)');
 
 		oParser = new parserFormula("WEEKDAY(1,C101:C103)", "A1", ws);
 		oParser.setArrayFormulaRef(ws.getRange2("E106:E109").bbox);
@@ -7266,7 +7266,7 @@ $(function () {
 		res = AscCommonExcel.bIsSupportDynamicArrays ? 7 : '#VALUE!';
 		oParser = new parserFormula('WEEKDAY(1,E201:E203)', "A1", ws);
 		assert.ok(oParser.parse(), 'WEEKDAY(1,E201:E203)');
-		assert.strictEqual(oParser.calculate().getValue(), res, 'Result of WEEKDAY(1,E201:E203)');
+		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, 'Result of WEEKDAY(1,E201:E203)');
 
 		oParser = new parserFormula("WEEKDAY(1,E201:E203)", "A1", ws);
 		oParser.setArrayFormulaRef(ws.getRange2("E106:E109").bbox);
@@ -7311,7 +7311,7 @@ $(function () {
 		res = AscCommonExcel.bIsSupportDynamicArrays ? '#NUM!' : '#VALUE!';
 		oParser = new parserFormula('WEEKDAY(C101:C103,C101:C103)', "A1", ws);
 		assert.ok(oParser.parse(), 'WEEKDAY(C101:C103,C101:C103)');
-		assert.strictEqual(oParser.calculate().getValue(), res, 'Result of WEEKDAY(C101:C103,C101:C103)');
+		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, 'Result of WEEKDAY(C101:C103,C101:C103)');
 
 		oParser = new parserFormula("WEEKDAY(C101:C103,C101:C103)", "A1", ws);
 		oParser.setArrayFormulaRef(ws.getRange2("E106:E109").bbox);
@@ -7335,7 +7335,7 @@ $(function () {
 		res = AscCommonExcel.bIsSupportDynamicArrays ? '#NUM!' : '#VALUE!';
 		oParser = new parserFormula('WEEKDAY(1,C101:C103)', "A1", ws);
 		assert.ok(oParser.parse(), 'WEEKDAY(1,C101:C103)');
-		assert.strictEqual(oParser.calculate().getValue(), res, 'Result of WEEKDAY(1,C101:C103)');
+		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, 'Result of WEEKDAY(1,C101:C103)');
 
 		oParser = new parserFormula("WEEKDAY(1,C101:C103)", "A1", ws);
 		oParser.setArrayFormulaRef(ws.getRange2("E106:E109").bbox);
@@ -8433,7 +8433,7 @@ $(function () {
 		let res = AscCommonExcel.bIsSupportDynamicArrays ? '#VALUE!' : "#NUM!";
 		oParser = new parserFormula('WORKDAY.INTL(DATE(2006,1,1),20,{"1/2/2006","1/16/2006"})', "A2", ws);
 		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), res);
+		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res);
 
 		oParser = new parserFormula('WORKDAY.INTL(DATE(2006,1,1),-20,1,{"1/2/2006",,"1/16/2006"})', "A2", ws);
 		assert.ok(oParser.parse());

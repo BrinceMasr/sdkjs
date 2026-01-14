@@ -8770,7 +8770,7 @@ $(function () {
 		let res = AscCommonExcel.bIsSupportDynamicArrays ? -2.3609390290986965 : 0;
 		oParser = new parserFormula('FV(TestNameArea3D2,TestNameArea3D2,TestNameArea3D2,TestNameArea3D2,TestNameArea3D2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FV(TestNameArea3D2,TestNameArea3D2,TestNameArea3D2,TestNameArea3D2,TestNameArea3D2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), res, 'Test: Negative case: Name3D. 3D named range with multi-cell area for rate returns num array.');
+		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getElementRowCol(0,0).getValue(), res, 'Test: Negative case: Name3D. 3D named range with multi-cell area for rate returns num array.');
 
 
 		// Case #16: Date. Large date serial number as rate returns num.
@@ -15001,7 +15001,7 @@ $(function () {
 		let res = AscCommonExcel.bIsSupportDynamicArrays ? '#NUM!' : '#VALUE!';
 		oParser = new parserFormula('RRI(TestNameArea3D,TestName3D1,TestName3D2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RRI(TestNameArea3D,TestName3D1,TestName3D2) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), res, 'Test: Negative case: Name3D(3). nper as 3D named range with area, returns #NUM!. 3 of 3 arguments used.');
+		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, 'Test: Negative case: Name3D(3). nper as 3D named range with area, returns #NUM!. 3 of 3 arguments used.');
 
 
 		// Case #19: Area3D(3). 3D multi-cell range for nper, returns #NUM!. 3 of 3 arguments used.
@@ -16957,7 +16957,7 @@ $(function () {
 		let res = AscCommonExcel.bIsSupportDynamicArrays ? 25000 : '#VALUE!';
 		oParser = new parserFormula("VDB(F2:F4,11000,8,0,1)", "A2", ws);
 		assert.ok(oParser.parse(), "VDB(F2:F4,11000,8,0,1)");
-		assert.strictEqual(oParser.calculate().getValue(), res, "Result of VDB(F2:F4,11000,8,0,1)");
+		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, "Result of VDB(F2:F4,11000,8,0,1)");
 
 
 		// cellsRange (arg0)

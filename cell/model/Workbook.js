@@ -25289,7 +25289,7 @@
 		if (!oFormula.isParsed) {
 			return null;
 		}
-		const formulaRes = oFormula.calculate(null, null, null, null, calculateResult || null);
+		const formulaRes = oFormula.calculate(null, null, null, null, calculateResult || null, null, true);
 
 		if (!formulaRes || (formulaRes.type !== AscCommonExcel.cElementType.array && formulaRes.type !== AscCommonExcel.cElementType.cellsRange && formulaRes.type !== AscCommonExcel.cElementType.cellsRange3D)) {
 			return null;
