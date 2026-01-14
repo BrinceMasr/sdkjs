@@ -513,6 +513,11 @@ $(function () {
 		return oCell;
 	};
 
+	const getNormalizedFormula = function (oCell) {
+		let formula = oCell.getFormulaParsed().getFormula();
+		return formula.replace(/_xlfn\./g, '');
+	};
+
 	const parserFormula = AscCommonExcel.parserFormula;
 
 	QUnit.test('Test @ -> single() + single() -> @', function (assert) {
@@ -6148,5 +6153,2609 @@ $(function () {
 		clearData(0, 0, 100, 200);
 	});
 
+	QUnit.test("Test: \"ACOS with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=ACOS({1;0;-1})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ACOS({1;0;-1})", "ACOS array literal: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A1").getValue()) * 10000) / 10000, 0, "ACOS array literal: A1 = ACOS(1) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 1.5707, "ACOS array literal: A2 = ACOS(0) ≈ 1.5707");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, 3.1415, "ACOS array literal: A3 = ACOS(-1) ≈ 3.1415");
+
+		ws.getRange2("D1").setValue("1");
+		ws.getRange2("E1").setValue("0");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=ACOS(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ACOS(D1:E1)", "ACOS range: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("G1").getValue()) * 10000) / 10000, 0, "ACOS range: G1 = ACOS(D1) = ACOS(1) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("H1").getValue()) * 10000) / 10000, 1.5707, "ACOS range: H1 = ACOS(E1) = ACOS(0) ≈ 1.5707");
+
+		ws.getRange2("J1").setValue("-1");
+		ws.getRange2("J2").setValue("0");
+		ws.getRange2("K1").setValue("1");
+		ws.getRange2("K2").setValue("0.5");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=ACOS(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ACOS(J1:K2)", "ACOS implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=ACOS(@J1:K2)", "ACOS implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "ACOS implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"ASIN with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=ASIN({0;1;-1})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ASIN({0;1;-1})", "ASIN array literal: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A1").getValue()) * 10000) / 10000, 0, "ASIN array literal: A1 = ASIN(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 1.5707, "ASIN array literal: A2 = ASIN(1) ≈ 1.5707");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, -1.5707, "ASIN array literal: A3 = ASIN(-1) ≈ -1.5707");
+
+		ws.getRange2("D1").setValue("0");
+		ws.getRange2("E1").setValue("1");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=ASIN(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ASIN(D1:E1)", "ASIN range: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("G1").getValue()) * 10000) / 10000, 0, "ASIN range: G1 = ASIN(D1) = ASIN(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("H1").getValue()) * 10000) / 10000, 1.5707, "ASIN range: H1 = ASIN(E1) = ASIN(1) ≈ 1.5707");
+
+		ws.getRange2("J1").setValue("0");
+		ws.getRange2("J2").setValue("1");
+		ws.getRange2("K1").setValue("-1");
+		ws.getRange2("K2").setValue("0.5");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=ASIN(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ASIN(J1:K2)", "ASIN implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=ASIN(@J1:K2)", "ASIN implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "ASIN implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"ATAN with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=ATAN({0;1;-1})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ATAN({0;1;-1})", "ATAN array literal: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A1").getValue()) * 10000) / 10000, 0, "ATAN array literal: A1 = ATAN(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 0.7853, "ATAN array literal: A2 = ATAN(1) ≈ 0.7853");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, -0.7853, "ATAN array literal: A3 = ATAN(-1) ≈ -0.7853");
+
+		ws.getRange2("D1").setValue("0");
+		ws.getRange2("E1").setValue("1");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=ATAN(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ATAN(D1:E1)", "ATAN range: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("G1").getValue()) * 10000) / 10000, 0, "ATAN range: G1 = ATAN(D1) = ATAN(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("H1").getValue()) * 10000) / 10000, 0.7853, "ATAN range: H1 = ATAN(E1) = ATAN(1) ≈ 0.7853");
+
+		ws.getRange2("J1").setValue("0");
+		ws.getRange2("J2").setValue("1");
+		ws.getRange2("K1").setValue("-1");
+		ws.getRange2("K2").setValue("2");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=ATAN(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ATAN(J1:K2)", "ATAN implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=ATAN(@J1:K2)", "ATAN implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "ATAN implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"ACOSH with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=ACOSH({1;2;3})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ACOSH({1;2;3})", "ACOSH array literal: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A1").getValue()) * 10000) / 10000, 0, "ACOSH array literal: A1 = ACOSH(1) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 1.3169, "ACOSH array literal: A2 = ACOSH(2) ≈ 1.3169");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, 1.7627, "ACOSH array literal: A3 = ACOSH(3) ≈ 1.7627");
+
+		ws.getRange2("D1").setValue("1");
+		ws.getRange2("E1").setValue("2");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=ACOSH(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ACOSH(D1:E1)", "ACOSH range: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("G1").getValue()) * 10000) / 10000, 0, "ACOSH range: G1 = ACOSH(D1) = ACOSH(1) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("H1").getValue()) * 10000) / 10000, 1.3169, "ACOSH range: H1 = ACOSH(E1) = ACOSH(2) ≈ 1.3169");
+
+		ws.getRange2("J1").setValue("1");
+		ws.getRange2("J2").setValue("2");
+		ws.getRange2("K1").setValue("3");
+		ws.getRange2("K2").setValue("1.5");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=ACOSH(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ACOSH(J1:K2)", "ACOSH implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=ACOSH(@J1:K2)", "ACOSH implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "ACOSH implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"ASINH with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=ASINH({0;1;-1})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ASINH({0;1;-1})", "ASINH array literal: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A1").getValue()) * 10000) / 10000, 0, "ASINH array literal: A1 = ASINH(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 0.8813, "ASINH array literal: A2 = ASINH(1) ≈ 0.8813");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, -0.8813, "ASINH array literal: A3 = ASINH(-1) ≈ -0.8813");
+
+		ws.getRange2("D1").setValue("0");
+		ws.getRange2("E1").setValue("1");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=ASINH(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ASINH(D1:E1)", "ASINH range: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("G1").getValue()) * 10000) / 10000, 0, "ASINH range: G1 = ASINH(D1) = ASINH(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("H1").getValue()) * 10000) / 10000, 0.8813, "ASINH range: H1 = ASINH(E1) = ASINH(1) ≈ 0.8813");
+
+		ws.getRange2("J1").setValue("0");
+		ws.getRange2("J2").setValue("1");
+		ws.getRange2("K1").setValue("-1");
+		ws.getRange2("K2").setValue("2");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=ASINH(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ASINH(J1:K2)", "ASINH implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=ASINH(@J1:K2)", "ASINH implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "ASINH implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"ATANH with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=ATANH({0;0.5;-0.5})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ATANH({0;0.5;-0.5})", "ATANH array literal: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A1").getValue()) * 10000) / 10000, 0, "ATANH array literal: A1 = ATANH(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 0.5493, "ATANH array literal: A2 = ATANH(0.5) ≈ 0.5493");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, -0.5493, "ATANH array literal: A3 = ATANH(-0.5) ≈ -0.5493");
+
+		ws.getRange2("D1").setValue("0");
+		ws.getRange2("E1").setValue("0.5");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=ATANH(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ATANH(D1:E1)", "ATANH range: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("G1").getValue()) * 10000) / 10000, 0, "ATANH range: G1 = ATANH(D1) = ATANH(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("H1").getValue()) * 10000) / 10000, 0.5493, "ATANH range: H1 = ATANH(E1) = ATANH(0.5) ≈ 0.5493");
+
+		ws.getRange2("J1").setValue("0");
+		ws.getRange2("J2").setValue("0.5");
+		ws.getRange2("K1").setValue("-0.5");
+		ws.getRange2("K2").setValue("0.25");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=ATANH(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ATANH(J1:K2)", "ATANH implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=ATANH(@J1:K2)", "ATANH implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "ATANH implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"TAN with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=TAN({0;1;-1})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "TAN({0;1;-1})", "TAN array literal: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A1").getValue()) * 10000) / 10000, 0, "TAN array literal: A1 = TAN(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 1.5574, "TAN array literal: A2 = TAN(1) ≈ 1.5574");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, -1.5574, "TAN array literal: A3 = TAN(-1) ≈ -1.5574");
+
+		ws.getRange2("D1").setValue("0");
+		ws.getRange2("E1").setValue("1");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=TAN(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "TAN(D1:E1)", "TAN range: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("G1").getValue()) * 10000) / 10000, 0, "TAN range: G1 = TAN(D1) = TAN(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("H1").getValue()) * 10000) / 10000, 1.5574, "TAN range: H1 = TAN(E1) = TAN(1) ≈ 1.5574");
+
+		ws.getRange2("J1").setValue("0");
+		ws.getRange2("J2").setValue("1");
+		ws.getRange2("K1").setValue("-1");
+		ws.getRange2("K2").setValue("0.5");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=TAN(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "TAN(J1:K2)", "TAN implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=TAN(@J1:K2)", "TAN implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "TAN implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"COSH with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=COSH({0;1;2})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "COSH({0;1;2})", "COSH array literal: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A1").getValue()) * 10000) / 10000, 1, "COSH array literal: A1 = COSH(0) = 1");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 1.5430, "COSH array literal: A2 = COSH(1) ≈ 1.5430");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, 3.7621, "COSH array literal: A3 = COSH(2) ≈ 3.7621");
+
+		ws.getRange2("D1").setValue("0");
+		ws.getRange2("E1").setValue("1");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=COSH(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "COSH(D1:E1)", "COSH range: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("G1").getValue()) * 10000) / 10000, 1, "COSH range: G1 = COSH(D1) = COSH(0) = 1");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("H1").getValue()) * 10000) / 10000, 1.5430, "COSH range: H1 = COSH(E1) = COSH(1) ≈ 1.5430");
+
+		ws.getRange2("J1").setValue("0");
+		ws.getRange2("J2").setValue("1");
+		ws.getRange2("K1").setValue("2");
+		ws.getRange2("K2").setValue("0.5");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=COSH(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "COSH(J1:K2)", "COSH implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=COSH(@J1:K2)", "COSH implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "COSH implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"SINH with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=SINH({0;1;-1})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "SINH({0;1;-1})", "SINH array literal: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A1").getValue()) * 10000) / 10000, 0, "SINH array literal: A1 = SINH(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 1.1752, "SINH array literal: A2 = SINH(1) ≈ 1.1752");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, -1.1752, "SINH array literal: A3 = SINH(-1) ≈ -1.1752");
+
+		ws.getRange2("D1").setValue("0");
+		ws.getRange2("E1").setValue("1");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=SINH(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "SINH(D1:E1)", "SINH range: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("G1").getValue()) * 10000) / 10000, 0, "SINH range: G1 = SINH(D1) = SINH(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("H1").getValue()) * 10000) / 10000, 1.1752, "SINH range: H1 = SINH(E1) = SINH(1) ≈ 1.1752");
+
+		ws.getRange2("J1").setValue("0");
+		ws.getRange2("J2").setValue("1");
+		ws.getRange2("K1").setValue("-1");
+		ws.getRange2("K2").setValue("2");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=SINH(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "SINH(J1:K2)", "SINH implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=SINH(@J1:K2)", "SINH implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "SINH implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"TANH with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=TANH({0;1;-1})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "TANH({0;1;-1})", "TANH array literal: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A1").getValue()) * 10000) / 10000, 0, "TANH array literal: A1 = TANH(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 0.7615, "TANH array literal: A2 = TANH(1) ≈ 0.7615");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, -0.7615, "TANH array literal: A3 = TANH(-1) ≈ -0.7615");
+
+		ws.getRange2("D1").setValue("0");
+		ws.getRange2("E1").setValue("1");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=TANH(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "TANH(D1:E1)", "TANH range: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("G1").getValue()) * 10000) / 10000, 0, "TANH range: G1 = TANH(D1) = TANH(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("H1").getValue()) * 10000) / 10000, 0.7615, "TANH range: H1 = TANH(E1) = TANH(1) ≈ 0.7615");
+
+		ws.getRange2("J1").setValue("0");
+		ws.getRange2("J2").setValue("1");
+		ws.getRange2("K1").setValue("-1");
+		ws.getRange2("K2").setValue("2");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=TANH(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "TANH(J1:K2)", "TANH implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=TANH(@J1:K2)", "TANH implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "TANH implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"DEGREES with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=DEGREES({0;1.5708;3.1416})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "DEGREES({0;1.5708;3.1416})", "DEGREES array literal: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A1").getValue()) * 10000) / 10000, 0, "DEGREES array literal: A1 = DEGREES(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 90.0002, "DEGREES array literal: A2 = DEGREES(π/2) ≈ 90");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, 180.0004, "DEGREES array literal: A3 = DEGREES(π) ≈ 180");
+
+		ws.getRange2("D1").setValue("0");
+		ws.getRange2("E1").setValue("1.5708");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=DEGREES(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "DEGREES(D1:E1)", "DEGREES range: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("G1").getValue()) * 10000) / 10000, 0, "DEGREES range: G1 = DEGREES(D1) = DEGREES(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("H1").getValue()) * 10000) / 10000, 90.0002, "DEGREES range: H1 = DEGREES(E1) = DEGREES(π/2) ≈ 90");
+
+		ws.getRange2("J1").setValue("0");
+		ws.getRange2("J2").setValue("1.5708");
+		ws.getRange2("K1").setValue("3.1416");
+		ws.getRange2("K2").setValue("0.7854");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=DEGREES(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "DEGREES(J1:K2)", "DEGREES implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=DEGREES(@J1:K2)", "DEGREES implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "DEGREES implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"RADIANS with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=RADIANS({0;90;180})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "RADIANS({0;90;180})", "RADIANS array literal: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A1").getValue()) * 10000) / 10000, 0, "RADIANS array literal: A1 = RADIANS(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 1.5707, "RADIANS array literal: A2 = RADIANS(90) ≈ π/2");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, 3.1415, "RADIANS array literal: A3 = RADIANS(180) ≈ π");
+
+		ws.getRange2("D1").setValue("0");
+		ws.getRange2("E1").setValue("90");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=RADIANS(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "RADIANS(D1:E1)", "RADIANS range: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("G1").getValue()) * 10000) / 10000, 0, "RADIANS range: G1 = RADIANS(D1) = RADIANS(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("H1").getValue()) * 10000) / 10000, 1.5707, "RADIANS range: H1 = RADIANS(E1) = RADIANS(90) ≈ π/2");
+
+		ws.getRange2("J1").setValue("0");
+		ws.getRange2("J2").setValue("90");
+		ws.getRange2("K1").setValue("180");
+		ws.getRange2("K2").setValue("45");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=RADIANS(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "RADIANS(J1:K2)", "RADIANS implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=RADIANS(@J1:K2)", "RADIANS implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "RADIANS implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"EXP with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=EXP({0;1;2})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "EXP({0;1;2})", "EXP array literal: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A1").getValue()) * 10000) / 10000, 1, "EXP array literal: A1 = EXP(0) = 1");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 2.7182, "EXP array literal: A2 = EXP(1) ≈ e ≈ 2.7182");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, 7.3890, "EXP array literal: A3 = EXP(2) ≈ 7.3890");
+
+		ws.getRange2("D1").setValue("0");
+		ws.getRange2("E1").setValue("1");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=EXP(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "EXP(D1:E1)", "EXP range: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("G1").getValue()) * 10000) / 10000, 1, "EXP range: G1 = EXP(D1) = EXP(0) = 1");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("H1").getValue()) * 10000) / 10000, 2.7182, "EXP range: H1 = EXP(E1) = EXP(1) ≈ e ≈ 2.7182");
+
+		ws.getRange2("J1").setValue("0");
+		ws.getRange2("J2").setValue("1");
+		ws.getRange2("K1").setValue("2");
+		ws.getRange2("K2").setValue("0.5");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=EXP(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "EXP(J1:K2)", "EXP implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=EXP(@J1:K2)", "EXP implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "EXP implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"FACT with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=FACT({0;3;5})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "FACT({0;3;5})", "FACT array literal: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 1, "FACT array literal: A1 = FACT(0) = 1");
+		assert.strictEqual(Number(ws.getRange2("A2").getValue()), 6, "FACT array literal: A2 = FACT(3) = 6");
+		assert.strictEqual(Number(ws.getRange2("A3").getValue()), 120, "FACT array literal: A3 = FACT(5) = 120");
+
+		ws.getRange2("D1").setValue("0");
+		ws.getRange2("E1").setValue("3");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=FACT(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "FACT(D1:E1)", "FACT range: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("G1").getValue()), 1, "FACT range: G1 = FACT(D1) = FACT(0) = 1");
+		assert.strictEqual(Number(ws.getRange2("H1").getValue()), 6, "FACT range: H1 = FACT(E1) = FACT(3) = 6");
+
+		ws.getRange2("J1").setValue("0");
+		ws.getRange2("J2").setValue("3");
+		ws.getRange2("K1").setValue("5");
+		ws.getRange2("K2").setValue("4");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=FACT(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "FACT(J1:K2)", "FACT implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=FACT(@J1:K2)", "FACT implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "FACT implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"FACTDOUBLE with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=FACTDOUBLE({5;6;7})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "FACTDOUBLE({5;6;7})", "FACTDOUBLE array literal: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 15, "FACTDOUBLE array literal: A1 = FACTDOUBLE(5) = 15");
+		assert.strictEqual(Number(ws.getRange2("A2").getValue()), 48, "FACTDOUBLE array literal: A2 = FACTDOUBLE(6) = 48");
+		assert.strictEqual(Number(ws.getRange2("A3").getValue()), 105, "FACTDOUBLE array literal: A3 = FACTDOUBLE(7) = 105");
+
+		ws.getRange2("D1").setValue("5");
+		ws.getRange2("E1").setValue("6");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=FACTDOUBLE(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "FACTDOUBLE(D1:E1)", "FACTDOUBLE range: formula correctly parsed");
+		assert.strictEqual(ws.getRange2("G1").getValue(), "#VALUE!", "FACTDOUBLE range: G1 = FACTDOUBLE(D1) = FACTDOUBLE(5) = 15");
+
+		ws.getRange2("J1").setValue("5");
+		ws.getRange2("J2").setValue("6");
+		ws.getRange2("K1").setValue("7");
+		ws.getRange2("K2").setValue("4");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=FACTDOUBLE(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "FACTDOUBLE(_xlfn.SINGLE(J1:K2))", "FACTDOUBLE implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=FACTDOUBLE(@J1:K2)", "FACTDOUBLE implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "FACTDOUBLE implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"INT with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=INT({1.5;2.8;-1.5})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "INT({1.5;2.8;-1.5})", "INT array literal: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 1, "INT array literal: A1 = INT(1.5) = 1");
+		assert.strictEqual(Number(ws.getRange2("A2").getValue()), 2, "INT array literal: A2 = INT(2.8) = 2");
+		assert.strictEqual(Number(ws.getRange2("A3").getValue()), -2, "INT array literal: A3 = INT(-1.5) = -2");
+
+		ws.getRange2("D1").setValue("1.5");
+		ws.getRange2("E1").setValue("2.8");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=INT(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "INT(D1:E1)", "INT range: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("G1").getValue()), 1, "INT range: G1 = INT(D1) = INT(1.5) = 1");
+		assert.strictEqual(Number(ws.getRange2("H1").getValue()), 2, "INT range: H1 = INT(E1) = INT(2.8) = 2");
+
+		ws.getRange2("J1").setValue("1.5");
+		ws.getRange2("J2").setValue("2.8");
+		ws.getRange2("K1").setValue("-1.5");
+		ws.getRange2("K2").setValue("3.9");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=INT(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "INT(J1:K2)", "INT implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=INT(@J1:K2)", "INT implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "INT implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"EVEN with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=EVEN({1;2;3})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "EVEN({1;2;3})", "EVEN array literal: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 2, "EVEN array literal: A1 = EVEN(1) = 2");
+		assert.strictEqual(Number(ws.getRange2("A2").getValue()), 2, "EVEN array literal: A2 = EVEN(2) = 2");
+		assert.strictEqual(Number(ws.getRange2("A3").getValue()), 4, "EVEN array literal: A3 = EVEN(3) = 4");
+
+		ws.getRange2("D1").setValue("1");
+		ws.getRange2("E1").setValue("2");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=EVEN(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "EVEN(D1:E1)", "EVEN range: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("G1").getValue()), 2, "EVEN range: G1 = EVEN(D1) = EVEN(1) = 2");
+		assert.strictEqual(Number(ws.getRange2("H1").getValue()), 2, "EVEN range: H1 = EVEN(E1) = EVEN(2) = 2");
+
+		ws.getRange2("J1").setValue("1");
+		ws.getRange2("J2").setValue("2");
+		ws.getRange2("K1").setValue("3");
+		ws.getRange2("K2").setValue("5");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=EVEN(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "EVEN(J1:K2)", "EVEN implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=EVEN(@J1:K2)", "EVEN implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "EVEN implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"ODD with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=ODD({1;2;3})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ODD({1;2;3})", "ODD array literal: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 1, "ODD array literal: A1 = ODD(1) = 1");
+		assert.strictEqual(Number(ws.getRange2("A2").getValue()), 3, "ODD array literal: A2 = ODD(2) = 3");
+		assert.strictEqual(Number(ws.getRange2("A3").getValue()), 3, "ODD array literal: A3 = ODD(3) = 3");
+
+		ws.getRange2("D1").setValue("1");
+		ws.getRange2("E1").setValue("2");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=ODD(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ODD(D1:E1)", "ODD range: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("G1").getValue()), 1, "ODD range: G1 = ODD(D1) = ODD(1) = 1");
+		assert.strictEqual(Number(ws.getRange2("H1").getValue()), 3, "ODD range: H1 = ODD(E1) = ODD(2) = 3");
+
+		ws.getRange2("J1").setValue("1");
+		ws.getRange2("J2").setValue("2");
+		ws.getRange2("K1").setValue("3");
+		ws.getRange2("K2").setValue("4");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=ODD(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ODD(J1:K2)", "ODD implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=ODD(@J1:K2)", "ODD implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "ODD implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"LN with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=LN({1;2.7182;7.3890})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "LN({1;2.7182;7.389})", "LN array literal: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A1").getValue()) * 10000) / 10000, 0, "LN array literal: A1 = LN(1) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 0.9999, "LN array literal: A2 = LN(e) ≈ 1");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, 1.9999, "LN array literal: A3 = LN(e²) ≈ 2");
+
+		ws.getRange2("D1").setValue("1");
+		ws.getRange2("E1").setValue("2.7182");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=LN(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "LN(D1:E1)", "LN range: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("G1").getValue()) * 10000) / 10000, 0, "LN range: G1 = LN(D1) = LN(1) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("H1").getValue()) * 10000) / 10000, 0.9999, "LN range: H1 = LN(E1) = LN(e) ≈ 1");
+
+		ws.getRange2("J1").setValue("1");
+		ws.getRange2("J2").setValue("2.7182");
+		ws.getRange2("K1").setValue("7.3890");
+		ws.getRange2("K2").setValue("2");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=LN(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "LN(J1:K2)", "LN implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=LN(@J1:K2)", "LN implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "LN implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"LOG10 with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=LOG10({1;10;100})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "LOG10({1;10;100})", "LOG10 array literal: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 0, "LOG10 array literal: A1 = LOG10(1) = 0");
+		assert.strictEqual(Number(ws.getRange2("A2").getValue()), 1, "LOG10 array literal: A2 = LOG10(10) = 1");
+		assert.strictEqual(Number(ws.getRange2("A3").getValue()), 2, "LOG10 array literal: A3 = LOG10(100) = 2");
+
+		ws.getRange2("D1").setValue("1");
+		ws.getRange2("E1").setValue("10");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=LOG10(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "LOG10(D1:E1)", "LOG10 range: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("G1").getValue()), 0, "LOG10 range: G1 = LOG10(D1) = LOG10(1) = 0");
+		assert.strictEqual(Number(ws.getRange2("H1").getValue()), 1, "LOG10 range: H1 = LOG10(E1) = LOG10(10) = 1");
+
+		ws.getRange2("J1").setValue("1");
+		ws.getRange2("J2").setValue("10");
+		ws.getRange2("K1").setValue("100");
+		ws.getRange2("K2").setValue("1000");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=LOG10(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "LOG10(J1:K2)", "LOG10 implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=LOG10(@J1:K2)", "LOG10 implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "LOG10 implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"SIGN with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=SIGN({-5;0;5})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "SIGN({-5;0;5})", "SIGN array literal: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), -1, "SIGN array literal: A1 = SIGN(-5) = -1");
+		assert.strictEqual(Number(ws.getRange2("A2").getValue()), 0, "SIGN array literal: A2 = SIGN(0) = 0");
+		assert.strictEqual(Number(ws.getRange2("A3").getValue()), 1, "SIGN array literal: A3 = SIGN(5) = 1");
+
+		ws.getRange2("D1").setValue("-5");
+		ws.getRange2("E1").setValue("0");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=SIGN(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "SIGN(D1:E1)", "SIGN range: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("G1").getValue()), -1, "SIGN range: G1 = SIGN(D1) = SIGN(-5) = -1");
+		assert.strictEqual(Number(ws.getRange2("H1").getValue()), 0, "SIGN range: H1 = SIGN(E1) = SIGN(0) = 0");
+
+		ws.getRange2("J1").setValue("-5");
+		ws.getRange2("J2").setValue("0");
+		ws.getRange2("K1").setValue("5");
+		ws.getRange2("K2").setValue("10");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=SIGN(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "SIGN(J1:K2)", "SIGN implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=SIGN(@J1:K2)", "SIGN implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "SIGN implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"SQRT with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=SQRT({0;4;9})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "SQRT({0;4;9})", "SQRT array literal: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 0, "SQRT array literal: A1 = SQRT(0) = 0");
+		assert.strictEqual(Number(ws.getRange2("A2").getValue()), 2, "SQRT array literal: A2 = SQRT(4) = 2");
+		assert.strictEqual(Number(ws.getRange2("A3").getValue()), 3, "SQRT array literal: A3 = SQRT(9) = 3");
+
+		ws.getRange2("D1").setValue("0");
+		ws.getRange2("E1").setValue("4");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=SQRT(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "SQRT(D1:E1)", "SQRT range: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("G1").getValue()), 0, "SQRT range: G1 = SQRT(D1) = SQRT(0) = 0");
+		assert.strictEqual(Number(ws.getRange2("H1").getValue()), 2, "SQRT range: H1 = SQRT(E1) = SQRT(4) = 2");
+
+		ws.getRange2("J1").setValue("0");
+		ws.getRange2("J2").setValue("4");
+		ws.getRange2("K1").setValue("9");
+		ws.getRange2("K2").setValue("16");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=SQRT(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "SQRT(J1:K2)", "SQRT implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=SQRT(@J1:K2)", "SQRT implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "SQRT implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"SQRTPI with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=SQRTPI({0;1;4})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "SQRTPI({0;1;4})", "SQRTPI array literal: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 0, "SQRTPI array literal: A1 = SQRTPI(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 1.7724, "SQRTPI array literal: A2 = SQRTPI(1) ≈ √π ≈ 1.7724");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, 3.5449, "SQRTPI array literal: A3 = SQRTPI(4) ≈ 2√π ≈ 3.5449");
+
+		ws.getRange2("D1").setValue("0");
+		ws.getRange2("E1").setValue("1");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=SQRTPI(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "SQRTPI(D1:E1)", "SQRTPI range: formula correctly parsed");
+		assert.strictEqual(ws.getRange2("G1").getValue(), "#VALUE!", "SQRTPI range: G1 = SQRTPI(D1) = SQRTPI(0) = 0");
+
+		ws.getRange2("J1").setValue("0");
+		ws.getRange2("J2").setValue("1");
+		ws.getRange2("K1").setValue("4");
+		ws.getRange2("K2").setValue("2");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=SQRTPI(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "SQRTPI(SINGLE(J1:K2))", "SQRTPI implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=SQRTPI(@J1:K2)", "SQRTPI implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "SQRTPI implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"FISHER with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=FISHER({0;0.5;0.9})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "FISHER({0;0.5;0.9})", "FISHER array literal: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 0, "FISHER array literal: A1 = FISHER(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 0.5493, "FISHER array literal: A2 = FISHER(0.5) ≈ 0.5493");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, 1.4722, "FISHER array literal: A3 = FISHER(0.9) ≈ 1.4722");
+
+		ws.getRange2("D1").setValue("0");
+		ws.getRange2("E1").setValue("0.5");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=FISHER(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "FISHER(D1:E1)", "FISHER range: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("G1").getValue()), 0, "FISHER range: G1 = FISHER(D1) = FISHER(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("H1").getValue()) * 10000) / 10000, 0.5493, "FISHER range: H1 = FISHER(E1) = FISHER(0.5) ≈ 0.5493");
+
+		ws.getRange2("J1").setValue("0");
+		ws.getRange2("J2").setValue("0.5");
+		ws.getRange2("K1").setValue("0.9");
+		ws.getRange2("K2").setValue("0.25");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=FISHER(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "FISHER(J1:K2)", "FISHER implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=FISHER(@J1:K2)", "FISHER implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "FISHER implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"FISHERINV with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=FISHERINV({0;0.5493;1.4722})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "FISHERINV({0;0.5493;1.4722})", "FISHERINV array literal: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 0, "FISHERINV array literal: A1 = FISHERINV(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 0.4999, "FISHERINV array literal: A2 = FISHERINV(0.5493) ≈ 0.5");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, 0.8999, "FISHERINV array literal: A3 = FISHERINV(1.4722) ≈ 0.9");
+
+		ws.getRange2("D1").setValue("0");
+		ws.getRange2("E1").setValue("0.5493");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=FISHERINV(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "FISHERINV(D1:E1)", "FISHERINV range: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("G1").getValue()), 0, "FISHERINV range: G1 = FISHERINV(D1) = FISHERINV(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("H1").getValue()) * 10000) / 10000, 0.4999, "FISHERINV range: H1 = FISHERINV(E1) = FISHERINV(0.5493) ≈ 0.5");
+
+		ws.getRange2("J1").setValue("0");
+		ws.getRange2("J2").setValue("0.5493");
+		ws.getRange2("K1").setValue("1.4722");
+		ws.getRange2("K2").setValue("0.2554");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=FISHERINV(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "FISHERINV(J1:K2)", "FISHERINV implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=FISHERINV(@J1:K2)", "FISHERINV implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "FISHERINV implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"GAUSS with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=GAUSS({0;1;2})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "GAUSS({0;1;2})", "GAUSS array literal: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 0, "GAUSS array literal: A1 = GAUSS(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 0.3413, "GAUSS array literal: A2 = GAUSS(1) ≈ 0.3413");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, 0.4772, "GAUSS array literal: A3 = GAUSS(2) ≈ 0.4772");
+
+		ws.getRange2("D1").setValue("0");
+		ws.getRange2("E1").setValue("1");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=GAUSS(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "GAUSS(D1:E1)", "GAUSS range: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("G1").getValue()), 0, "GAUSS range: G1 = GAUSS(D1) = GAUSS(0) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("H1").getValue()) * 10000) / 10000, 0.3413, "GAUSS range: H1 = GAUSS(E1) = GAUSS(1) ≈ 0.3413");
+
+		ws.getRange2("J1").setValue("0");
+		ws.getRange2("J2").setValue("1");
+		ws.getRange2("K1").setValue("2");
+		ws.getRange2("K2").setValue("0.5");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=GAUSS(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "GAUSS(J1:K2)", "GAUSS implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=GAUSS(@J1:K2)", "GAUSS implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "GAUSS implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"PHI with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=PHI({0;1;2})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "PHI({0;1;2})", "PHI array literal: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A1").getValue()) * 10000) / 10000, 0.3989, "PHI array literal: A1 = PHI(0) ≈ 0.3989");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 0.2419, "PHI array literal: A2 = PHI(1) ≈ 0.2419");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, 0.0539, "PHI array literal: A3 = PHI(2) ≈ 0.0539");
+
+		ws.getRange2("D1").setValue("0");
+		ws.getRange2("E1").setValue("1");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=PHI(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "PHI(D1:E1)", "PHI range: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("G1").getValue()) * 10000) / 10000, 0.3989, "PHI range: G1 = PHI(D1) = PHI(0) ≈ 0.3989");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("H1").getValue()) * 10000) / 10000, 0.2419, "PHI range: H1 = PHI(E1) = PHI(1) ≈ 0.2419");
+
+		ws.getRange2("J1").setValue("0");
+		ws.getRange2("J2").setValue("1");
+		ws.getRange2("K1").setValue("2");
+		ws.getRange2("K2").setValue("0.5");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=PHI(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "PHI(J1:K2)", "PHI implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=PHI(@J1:K2)", "PHI implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "PHI implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"GAMMALN with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=GAMMALN({1;2;3})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "GAMMALN({1;2;3})", "GAMMALN array literal: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 0, "GAMMALN array literal: A1 = GAMMALN(1) = 0");
+		assert.strictEqual(Number(ws.getRange2("A2").getValue()), 0, "GAMMALN array literal: A2 = GAMMALN(2) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, 0.6931, "GAMMALN array literal: A3 = GAMMALN(3) ≈ 0.6931");
+
+		ws.getRange2("D1").setValue("1");
+		ws.getRange2("E1").setValue("2");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=GAMMALN(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "GAMMALN(D1:E1)", "GAMMALN range: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("G1").getValue()), 0, "GAMMALN range: G1 = GAMMALN(D1) = GAMMALN(1) = 0");
+		assert.strictEqual(Number(ws.getRange2("H1").getValue()), 0, "GAMMALN range: H1 = GAMMALN(E1) = GAMMALN(2) = 0");
+
+		ws.getRange2("J1").setValue("1");
+		ws.getRange2("J2").setValue("2");
+		ws.getRange2("K1").setValue("3");
+		ws.getRange2("K2").setValue("4");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=GAMMALN(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "GAMMALN(J1:K2)", "GAMMALN implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=GAMMALN(@J1:K2)", "GAMMALN implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "GAMMALN implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"GAMMALN.PRECISE with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=GAMMALN.PRECISE({1;2;3})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "GAMMALN.PRECISE({1;2;3})", "GAMMALN.PRECISE array literal: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 0, "GAMMALN.PRECISE array literal: A1 = GAMMALN.PRECISE(1) = 0");
+		assert.strictEqual(Number(ws.getRange2("A2").getValue()), 0, "GAMMALN.PRECISE array literal: A2 = GAMMALN.PRECISE(2) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, 0.6931, "GAMMALN.PRECISE array literal: A3 = GAMMALN.PRECISE(3) ≈ 0.6931");
+
+		ws.getRange2("D1").setValue("1");
+		ws.getRange2("E1").setValue("2");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=GAMMALN.PRECISE(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "GAMMALN.PRECISE(D1:E1)", "GAMMALN.PRECISE range: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("G1").getValue()), 0, "GAMMALN.PRECISE range: G1 = GAMMALN.PRECISE(D1) = GAMMALN.PRECISE(1) = 0");
+		assert.strictEqual(Number(ws.getRange2("H1").getValue()), 0, "GAMMALN.PRECISE range: H1 = GAMMALN.PRECISE(E1) = GAMMALN.PRECISE(2) = 0");
+
+		ws.getRange2("J1").setValue("1");
+		ws.getRange2("J2").setValue("2");
+		ws.getRange2("K1").setValue("3");
+		ws.getRange2("K2").setValue("4");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=GAMMALN.PRECISE(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "GAMMALN.PRECISE(J1:K2)", "GAMMALN.PRECISE implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=GAMMALN.PRECISE(@J1:K2)", "GAMMALN.PRECISE implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "GAMMALN.PRECISE implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"NORMSDIST with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=NORMSDIST({0;1;2})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "NORMSDIST({0;1;2})", "NORMSDIST array literal: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A1").getValue()) * 10000) / 10000, 0.5, "NORMSDIST array literal: A1 = NORMSDIST(0) = 0.5");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 0.8413, "NORMSDIST array literal: A2 = NORMSDIST(1) ≈ 0.8413");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, 0.9772, "NORMSDIST array literal: A3 = NORMSDIST(2) ≈ 0.9772");
+
+		ws.getRange2("D1").setValue("0");
+		ws.getRange2("E1").setValue("1");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=NORMSDIST(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "NORMSDIST(D1:E1)", "NORMSDIST range: formula correctly parsed");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("G1").getValue()) * 10000) / 10000, 0.5, "NORMSDIST range: G1 = NORMSDIST(D1) = NORMSDIST(0) = 0.5");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("H1").getValue()) * 10000) / 10000, 0.8413, "NORMSDIST range: H1 = NORMSDIST(E1) = NORMSDIST(1) ≈ 0.8413");
+
+		ws.getRange2("J1").setValue("0");
+		ws.getRange2("J2").setValue("1");
+		ws.getRange2("K1").setValue("2");
+		ws.getRange2("K2").setValue("0.5");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=NORMSDIST(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "NORMSDIST(J1:K2)", "NORMSDIST implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=NORMSDIST(@J1:K2)", "NORMSDIST implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "NORMSDIST implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"NORMSINV with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=NORMSINV({0.5;0.8413;0.9772})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "NORMSINV({0.5;0.8413;0.9772})", "NORMSINV array literal: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 0, "NORMSINV array literal: A1 = NORMSINV(0.5) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 0.9998, "NORMSINV array literal: A2 = NORMSINV(0.8413) ≈ 1");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, 1.999, "NORMSINV array literal: A3 = NORMSINV(0.9772) ≈ 2");
+
+		ws.getRange2("D1").setValue("0.5");
+		ws.getRange2("E1").setValue("0.8413");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=NORMSINV(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "NORMSINV(D1:E1)", "NORMSINV range: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("G1").getValue()), 0, "NORMSINV range: G1 = NORMSINV(D1) = NORMSINV(0.5) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("H1").getValue()) * 10000) / 10000, 0.9998, "NORMSINV range: H1 = NORMSINV(E1) = NORMSINV(0.8413) ≈ 1");
+
+		ws.getRange2("J1").setValue("0.5");
+		ws.getRange2("J2").setValue("0.8413");
+		ws.getRange2("K1").setValue("0.9772");
+		ws.getRange2("K2").setValue("0.6915");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=NORMSINV(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "NORMSINV(J1:K2)", "NORMSINV implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=NORMSINV(@J1:K2)", "NORMSINV implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "NORMSINV implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"NORM.S.INV with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=NORM.S.INV({0.5;0.8413;0.9772})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "NORM.S.INV({0.5;0.8413;0.9772})", "NORM.S.INV array literal: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 0, "NORM.S.INV array literal: A1 = NORM.S.INV(0.5) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 0.9998, "NORM.S.INV array literal: A2 = NORM.S.INV(0.8413) ≈ 1");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, 1.999, "NORM.S.INV array literal: A3 = NORM.S.INV(0.9772) ≈ 2");
+
+		ws.getRange2("D1").setValue("0.5");
+		ws.getRange2("E1").setValue("0.8413");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=NORM.S.INV(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "NORM.S.INV(D1:E1)", "NORM.S.INV range: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("G1").getValue()), 0, "NORM.S.INV range: G1 = NORM.S.INV(D1) = NORM.S.INV(0.5) = 0");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("H1").getValue()) * 10000) / 10000, 0.9998, "NORM.S.INV range: H1 = NORM.S.INV(E1) = NORM.S.INV(0.8413) ≈ 1");
+
+		ws.getRange2("J1").setValue("0.5");
+		ws.getRange2("J2").setValue("0.8413");
+		ws.getRange2("K1").setValue("0.9772");
+		ws.getRange2("K2").setValue("0.6915");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=NORM.S.INV(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "NORM.S.INV(J1:K2)", "NORM.S.INV implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=NORM.S.INV(@J1:K2)", "NORM.S.INV implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "NORM.S.INV implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"ERFC with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=ERFC({0;1;2})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "ERFC({0;1;2})", "ERFC array literal: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 1, "ERFC array literal: A1 = ERFC(0) = 1");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A2").getValue()) * 10000) / 10000, 0.1572, "ERFC array literal: A2 = ERFC(1) ≈ 0.1572");
+		assert.strictEqual(Math.trunc(Number(ws.getRange2("A3").getValue()) * 10000) / 10000, 0.0046, "ERFC array literal: A3 = ERFC(2) ≈ 0.0046");
+
+		ws.getRange2("D1").setValue("0");
+		ws.getRange2("E1").setValue("1");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=ERFC(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "ERFC(D1:E1)", "ERFC range: formula correctly parsed");
+		assert.strictEqual(ws.getRange2("G1").getValue(), "#VALUE!", "ERFC range: G1 = ERFC(D1:E1) returns #VALUE! for range");
+
+		ws.getRange2("J1").setValue("0");
+		ws.getRange2("J2").setValue("1");
+		ws.getRange2("K1").setValue("2");
+		ws.getRange2("K2").setValue("0.5");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=ERFC(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "ERFC(SINGLE(J1:K2))", "ERFC implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=ERFC(@J1:K2)", "ERFC implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "ERFC implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"LEN with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=LEN({\"Hello\";\"World\";\"Test\"})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "LEN({\"Hello\";\"World\";\"Test\"})", "LEN array literal: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 5, "LEN array literal: A1 = LEN(\"Hello\") = 5");
+		assert.strictEqual(Number(ws.getRange2("A2").getValue()), 5, "LEN array literal: A2 = LEN(\"World\") = 5");
+		assert.strictEqual(Number(ws.getRange2("A3").getValue()), 4, "LEN array literal: A3 = LEN(\"Test\") = 4");
+
+		ws.getRange2("D1").setValue("Hello");
+		ws.getRange2("E1").setValue("World");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=LEN(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "LEN(D1:E1)", "LEN range: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("G1").getValue()), 5, "LEN range: G1 = LEN(D1) = LEN(\"Hello\") = 5");
+		assert.strictEqual(Number(ws.getRange2("H1").getValue()), 5, "LEN range: H1 = LEN(E1) = LEN(\"World\") = 5");
+
+		ws.getRange2("J1").setValue("Hello");
+		ws.getRange2("J2").setValue("World");
+		ws.getRange2("K1").setValue("Test");
+		ws.getRange2("K2").setValue("ABC");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=LEN(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "LEN(J1:K2)", "LEN implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=LEN(@J1:K2)", "LEN implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "LEN implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"LOWER with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=LOWER({\"HELLO\";\"WORLD\";\"TEST\"})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "LOWER({\"HELLO\";\"WORLD\";\"TEST\"})", "LOWER array literal: formula correctly parsed");
+		assert.strictEqual(ws.getRange2("A1").getValue(), "hello", "LOWER array literal: A1 = LOWER(\"HELLO\") = \"hello\"");
+		assert.strictEqual(ws.getRange2("A2").getValue(), "world", "LOWER array literal: A2 = LOWER(\"WORLD\") = \"world\"");
+		assert.strictEqual(ws.getRange2("A3").getValue(), "test", "LOWER array literal: A3 = LOWER(\"TEST\") = \"test\"");
+
+		ws.getRange2("D1").setValue("HELLO");
+		ws.getRange2("E1").setValue("WORLD");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=LOWER(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "LOWER(D1:E1)", "LOWER range: formula correctly parsed");
+		assert.strictEqual(ws.getRange2("G1").getValue(), "hello", "LOWER range: G1 = LOWER(D1) = LOWER(\"HELLO\") = \"hello\"");
+		assert.strictEqual(ws.getRange2("H1").getValue(), "world", "LOWER range: H1 = LOWER(E1) = LOWER(\"WORLD\") = \"world\"");
+
+		ws.getRange2("J1").setValue("HELLO");
+		ws.getRange2("J2").setValue("WORLD");
+		ws.getRange2("K1").setValue("TEST");
+		ws.getRange2("K2").setValue("ABC");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=LOWER(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "LOWER(J1:K2)", "LOWER implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=LOWER(@J1:K2)", "LOWER implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "LOWER implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"UPPER with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=UPPER({\"hello\";\"world\";\"test\"})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "UPPER({\"hello\";\"world\";\"test\"})", "UPPER array literal: formula correctly parsed");
+		assert.strictEqual(ws.getRange2("A1").getValue(), "HELLO", "UPPER array literal: A1 = UPPER(\"hello\") = \"HELLO\"");
+		assert.strictEqual(ws.getRange2("A2").getValue(), "WORLD", "UPPER array literal: A2 = UPPER(\"world\") = \"WORLD\"");
+		assert.strictEqual(ws.getRange2("A3").getValue(), "TEST", "UPPER array literal: A3 = UPPER(\"test\") = \"TEST\"");
+
+		ws.getRange2("D1").setValue("hello");
+		ws.getRange2("E1").setValue("world");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=UPPER(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "UPPER(D1:E1)", "UPPER range: formula correctly parsed");
+		assert.strictEqual(ws.getRange2("G1").getValue(), "HELLO", "UPPER range: G1 = UPPER(D1) = UPPER(\"hello\") = \"HELLO\"");
+		assert.strictEqual(ws.getRange2("H1").getValue(), "WORLD", "UPPER range: H1 = UPPER(E1) = UPPER(\"world\") = \"WORLD\"");
+
+		ws.getRange2("J1").setValue("hello");
+		ws.getRange2("J2").setValue("world");
+		ws.getRange2("K1").setValue("test");
+		ws.getRange2("K2").setValue("abc");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=UPPER(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "UPPER(J1:K2)", "UPPER implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=UPPER(@J1:K2)", "UPPER implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "UPPER implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"PROPER with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=PROPER({\"hello world\";\"JOHN SMITH\";\"test case\"})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "PROPER({\"hello world\";\"JOHN SMITH\";\"test case\"})", "PROPER array literal: formula correctly parsed");
+		assert.strictEqual(ws.getRange2("A1").getValue(), "Hello World", "PROPER array literal: A1 = PROPER(\"hello world\") = \"Hello World\"");
+		assert.strictEqual(ws.getRange2("A2").getValue(), "John Smith", "PROPER array literal: A2 = PROPER(\"JOHN SMITH\") = \"John Smith\"");
+		assert.strictEqual(ws.getRange2("A3").getValue(), "Test Case", "PROPER array literal: A3 = PROPER(\"test case\") = \"Test Case\"");
+
+		ws.getRange2("D1").setValue("hello world");
+		ws.getRange2("E1").setValue("JOHN SMITH");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=PROPER(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "PROPER(D1:E1)", "PROPER range: formula correctly parsed");
+		assert.strictEqual(ws.getRange2("G1").getValue(), "Hello World", "PROPER range: G1 = PROPER(D1) = PROPER(\"hello world\") = \"Hello World\"");
+		assert.strictEqual(ws.getRange2("H1").getValue(), "John Smith", "PROPER range: H1 = PROPER(E1) = PROPER(\"JOHN SMITH\") = \"John Smith\"");
+
+		ws.getRange2("J1").setValue("hello world");
+		ws.getRange2("J2").setValue("JOHN SMITH");
+		ws.getRange2("K1").setValue("test case");
+		ws.getRange2("K2").setValue("abc def");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=PROPER(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "PROPER(J1:K2)", "PROPER implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=PROPER(@J1:K2)", "PROPER implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "PROPER implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"TRIM with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=TRIM({\"  Hello  \";\"  World  \";\"  Test  \"})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "TRIM({\"  Hello  \";\"  World  \";\"  Test  \"})", "TRIM array literal: formula correctly parsed");
+		assert.strictEqual(ws.getRange2("A1").getValue(), "Hello", "TRIM array literal: A1 = TRIM(\"  Hello  \") = \"Hello\"");
+		assert.strictEqual(ws.getRange2("A2").getValue(), "World", "TRIM array literal: A2 = TRIM(\"  World  \") = \"World\"");
+		assert.strictEqual(ws.getRange2("A3").getValue(), "Test", "TRIM array literal: A3 = TRIM(\"  Test  \") = \"Test\"");
+
+		ws.getRange2("D1").setValue("  Hello  ");
+		ws.getRange2("E1").setValue("  World  ");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=TRIM(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "TRIM(D1:E1)", "TRIM range: formula correctly parsed");
+		assert.strictEqual(ws.getRange2("G1").getValue(), "Hello", "TRIM range: G1 = TRIM(D1) = TRIM(\"  Hello  \") = \"Hello\"");
+		assert.strictEqual(ws.getRange2("H1").getValue(), "World", "TRIM range: H1 = TRIM(E1) = TRIM(\"  World  \") = \"World\"");
+
+		ws.getRange2("J1").setValue("  Hello  ");
+		ws.getRange2("J2").setValue("  World  ");
+		ws.getRange2("K1").setValue("  Test  ");
+		ws.getRange2("K2").setValue("  ABC  ");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=TRIM(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "TRIM(J1:K2)", "TRIM implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=TRIM(@J1:K2)", "TRIM implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "TRIM implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"CLEAN with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=CLEAN({\"Hello\";\"World\";\"Test\"})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "CLEAN({\"Hello\";\"World\";\"Test\"})", "CLEAN array literal: formula correctly parsed");
+		assert.strictEqual(ws.getRange2("A1").getValue(), "Hello", "CLEAN array literal: A1 = CLEAN(\"Hello\") = \"Hello\"");
+		assert.strictEqual(ws.getRange2("A2").getValue(), "World", "CLEAN array literal: A2 = CLEAN(\"World\") = \"World\"");
+		assert.strictEqual(ws.getRange2("A3").getValue(), "Test", "CLEAN array literal: A3 = CLEAN(\"Test\") = \"Test\"");
+
+		ws.getRange2("D1").setValue("Hello");
+		ws.getRange2("E1").setValue("World");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=CLEAN(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "CLEAN(D1:E1)", "CLEAN range: formula correctly parsed");
+		assert.strictEqual(ws.getRange2("G1").getValue(), "Hello", "CLEAN range: G1 = CLEAN(D1) = CLEAN(\"Hello\") = \"Hello\"");
+		assert.strictEqual(ws.getRange2("H1").getValue(), "World", "CLEAN range: H1 = CLEAN(E1) = CLEAN(\"World\") = \"World\"");
+
+		ws.getRange2("J1").setValue("Hello");
+		ws.getRange2("J2").setValue("World");
+		ws.getRange2("K1").setValue("Test");
+		ws.getRange2("K2").setValue("ABC");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=CLEAN(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "CLEAN(J1:K2)", "CLEAN implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=CLEAN(@J1:K2)", "CLEAN implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "CLEAN implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"VALUE with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=VALUE({\"123\";\"456\";\"789\"})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "VALUE({\"123\";\"456\";\"789\"})", "VALUE array literal: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 123, "VALUE array literal: A1 = VALUE(\"123\") = 123");
+		assert.strictEqual(Number(ws.getRange2("A2").getValue()), 456, "VALUE array literal: A2 = VALUE(\"456\") = 456");
+		assert.strictEqual(Number(ws.getRange2("A3").getValue()), 789, "VALUE array literal: A3 = VALUE(\"789\") = 789");
+
+		ws.getRange2("D1").setValue("123");
+		ws.getRange2("E1").setValue("456");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=VALUE(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "VALUE(D1:E1)", "VALUE range: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("G1").getValue()), 123, "VALUE range: G1 = VALUE(D1) = VALUE(\"123\") = 123");
+		assert.strictEqual(Number(ws.getRange2("H1").getValue()), 456, "VALUE range: H1 = VALUE(E1) = VALUE(\"456\") = 456");
+
+		ws.getRange2("J1").setValue("123");
+		ws.getRange2("J2").setValue("456");
+		ws.getRange2("K1").setValue("789");
+		ws.getRange2("K2").setValue("100");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=VALUE(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "VALUE(J1:K2)", "VALUE implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=VALUE(@J1:K2)", "VALUE implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "VALUE implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"CODE with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=CODE({\"A\";\"B\";\"C\"})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "CODE({\"A\";\"B\";\"C\"})", "CODE array literal: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 65, "CODE array literal: A1 = CODE(\"A\") = 65");
+		assert.strictEqual(Number(ws.getRange2("A2").getValue()), 66, "CODE array literal: A2 = CODE(\"B\") = 66");
+		assert.strictEqual(Number(ws.getRange2("A3").getValue()), 67, "CODE array literal: A3 = CODE(\"C\") = 67");
+
+		ws.getRange2("D1").setValue("A");
+		ws.getRange2("E1").setValue("B");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=CODE(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "CODE(D1:E1)", "CODE range: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("G1").getValue()), 65, "CODE range: G1 = CODE(D1) = CODE(\"A\") = 65");
+		assert.strictEqual(Number(ws.getRange2("H1").getValue()), 66, "CODE range: H1 = CODE(E1) = CODE(\"B\") = 66");
+
+		ws.getRange2("J1").setValue("A");
+		ws.getRange2("J2").setValue("B");
+		ws.getRange2("K1").setValue("C");
+		ws.getRange2("K2").setValue("D");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=CODE(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "CODE(J1:K2)", "CODE implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=CODE(@J1:K2)", "CODE implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "CODE implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"CHAR with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=CHAR({65;66;67})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "CHAR({65;66;67})", "CHAR array literal: formula correctly parsed");
+		assert.strictEqual(ws.getRange2("A1").getValue(), "A", "CHAR array literal: A1 = CHAR(65) = \"A\"");
+		assert.strictEqual(ws.getRange2("A2").getValue(), "B", "CHAR array literal: A2 = CHAR(66) = \"B\"");
+		assert.strictEqual(ws.getRange2("A3").getValue(), "C", "CHAR array literal: A3 = CHAR(67) = \"C\"");
+
+		ws.getRange2("D1").setValue("65");
+		ws.getRange2("E1").setValue("66");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=CHAR(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "CHAR(D1:E1)", "CHAR range: formula correctly parsed");
+		assert.strictEqual(ws.getRange2("G1").getValue(), "A", "CHAR range: G1 = CHAR(D1) = CHAR(65) = \"A\"");
+		assert.strictEqual(ws.getRange2("H1").getValue(), "B", "CHAR range: H1 = CHAR(E1) = CHAR(66) = \"B\"");
+
+		ws.getRange2("J1").setValue("65");
+		ws.getRange2("J2").setValue("66");
+		ws.getRange2("K1").setValue("67");
+		ws.getRange2("K2").setValue("68");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=CHAR(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "CHAR(J1:K2)", "CHAR implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=CHAR(@J1:K2)", "CHAR implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "CHAR implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"UNICHAR with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=UNICHAR({65;66;67})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "UNICHAR({65;66;67})", "UNICHAR array literal: formula correctly parsed");
+		assert.strictEqual(ws.getRange2("A1").getValue(), "A", "UNICHAR array literal: A1 = UNICHAR(65) = \"A\"");
+		assert.strictEqual(ws.getRange2("A2").getValue(), "B", "UNICHAR array literal: A2 = UNICHAR(66) = \"B\"");
+		assert.strictEqual(ws.getRange2("A3").getValue(), "C", "UNICHAR array literal: A3 = UNICHAR(67) = \"C\"");
+
+		ws.getRange2("D1").setValue("65");
+		ws.getRange2("E1").setValue("66");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=UNICHAR(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "UNICHAR(D1:E1)", "UNICHAR range: formula correctly parsed");
+		assert.strictEqual(ws.getRange2("G1").getValue(), "A", "UNICHAR range: G1 = UNICHAR(D1) = UNICHAR(65) = \"A\"");
+		assert.strictEqual(ws.getRange2("H1").getValue(), "B", "UNICHAR range: H1 = UNICHAR(E1) = UNICHAR(66) = \"B\"");
+
+		ws.getRange2("J1").setValue("65");
+		ws.getRange2("J2").setValue("66");
+		ws.getRange2("K1").setValue("67");
+		ws.getRange2("K2").setValue("68");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=UNICHAR(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "UNICHAR(J1:K2)", "UNICHAR implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=UNICHAR(@J1:K2)", "UNICHAR implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "UNICHAR implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"UNICODE with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=UNICODE({\"A\";\"B\";\"C\"})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "UNICODE({\"A\";\"B\";\"C\"})", "UNICODE array literal: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 65, "UNICODE array literal: A1 = UNICODE(\"A\") = 65");
+		assert.strictEqual(Number(ws.getRange2("A2").getValue()), 66, "UNICODE array literal: A2 = UNICODE(\"B\") = 66");
+		assert.strictEqual(Number(ws.getRange2("A3").getValue()), 67, "UNICODE array literal: A3 = UNICODE(\"C\") = 67");
+
+		ws.getRange2("D1").setValue("A");
+		ws.getRange2("E1").setValue("B");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=UNICODE(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "UNICODE(D1:E1)", "UNICODE range: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("G1").getValue()), 65, "UNICODE range: G1 = UNICODE(D1) = UNICODE(\"A\") = 65");
+		assert.strictEqual(Number(ws.getRange2("H1").getValue()), 66, "UNICODE range: H1 = UNICODE(E1) = UNICODE(\"B\") = 66");
+
+		ws.getRange2("J1").setValue("A");
+		ws.getRange2("J2").setValue("B");
+		ws.getRange2("K1").setValue("C");
+		ws.getRange2("K2").setValue("D");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=UNICODE(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "UNICODE(J1:K2)", "UNICODE implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=UNICODE(@J1:K2)", "UNICODE implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "UNICODE implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"TYPE with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=TYPE({123;\"text\";TRUE})");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "TYPE({123;\"text\";TRUE})", "TYPE array literal: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 64, "TYPE array literal: A1 = TYPE({123;\"text\";TRUE}) = 64 (array)");
+
+		ws.getRange2("D1").setValue("123");
+		ws.getRange2("E1").setValue("text");
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=TYPE(D1:E1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "TYPE(D1:E1)", "TYPE range: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("G1").getValue()), 16, "TYPE range: G1 = TYPE(D1:E1) = 16 (error)");
+
+		ws.getRange2("J1").setValue("123");
+		ws.getRange2("J2").setValue("text");
+		ws.getRange2("K1").setValue("TRUE");
+		ws.getRange2("K2").setValue("456");
+
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=TYPE(@J1:K2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "TYPE(J1:K2)", "TYPE implicit intersection: parsed formula normalizes to range without @");
+		assert.strictEqual(resCell.getValueForEdit(), "=TYPE(@J1:K2)", "TYPE implicit intersection: stored formula text keeps user-entered @ reference");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "16", "TYPE implicit intersection: M1 shows 16 (error) for implicit intersection over a range");
+
+		clearData(0, 0, 100, 200);
+	});
+	
 	QUnit.module("Sheet structure");
 });
