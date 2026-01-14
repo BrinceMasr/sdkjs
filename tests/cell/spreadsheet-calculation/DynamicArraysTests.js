@@ -515,7 +515,7 @@ $(function () {
 
 	const getNormalizedFormula = function (oCell) {
 		let formula = oCell.getFormulaParsed().getFormula();
-		return formula.replace(/_xlfn\./g, '');
+		return formula.replace(/_xlfn\./g, '').replace(/_xlws\./g, '');
 	};
 
 	const parserFormula = AscCommonExcel.parserFormula;
@@ -8756,6 +8756,233 @@ $(function () {
 
 		clearData(0, 0, 100, 200);
 	});
-	
+
+	QUnit.test("Test: \"Multiplication table with SEQUENCE\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=SEQUENCE(10) * SEQUENCE(1,10)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "SEQUENCE(10)*SEQUENCE(1,10)", "Multiplication table: formula correctly parsed");
+		
+		// Проверка выборочных значений в таблице умножения 10x10
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 1, "A1 = 1*1 = 1");
+		assert.strictEqual(Number(ws.getRange2("A10").getValue()), 10, "A10 = 10*1 = 10");
+		assert.strictEqual(Number(ws.getRange2("J1").getValue()), 10, "J1 = 1*10 = 10");
+		assert.strictEqual(Number(ws.getRange2("J10").getValue()), 100, "J10 = 10*10 = 100");
+		assert.strictEqual(Number(ws.getRange2("E5").getValue()), 25, "E5 = 5*5 = 25");
+		assert.strictEqual(Number(ws.getRange2("C7").getValue()), 21, "C7 = 7*3 = 21");
+		assert.strictEqual(Number(ws.getRange2("H4").getValue()), 32, "H4 = 4*8 = 32");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"FILTER and SORT with multiple conditions\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		// Setup data: Product, Category, Price, Quantity
+		ws.getRange2("A1").setValue("Product");
+		ws.getRange2("B1").setValue("Category");
+		ws.getRange2("C1").setValue("Price");
+		ws.getRange2("D1").setValue("Quantity");
+
+		ws.getRange2("A2").setValue("Laptop");
+		ws.getRange2("B2").setValue("Electronics");
+		ws.getRange2("C2").setValue("1200");
+		ws.getRange2("D2").setValue("5");
+
+		ws.getRange2("A3").setValue("Mouse");
+		ws.getRange2("B3").setValue("Electronics");
+		ws.getRange2("C3").setValue("25");
+		ws.getRange2("D3").setValue("50");
+
+		ws.getRange2("A4").setValue("Desk");
+		ws.getRange2("B4").setValue("Furniture");
+		ws.getRange2("C4").setValue("350");
+		ws.getRange2("D4").setValue("10");
+
+		ws.getRange2("A5").setValue("Chair");
+		ws.getRange2("B5").setValue("Furniture");
+		ws.getRange2("C5").setValue("150");
+		ws.getRange2("D5").setValue("20");
+
+		ws.getRange2("A6").setValue("Monitor");
+		ws.getRange2("B6").setValue("Electronics");
+		ws.getRange2("C6").setValue("450");
+		ws.getRange2("D6").setValue("15");
+
+		ws.getRange2("A7").setValue("Keyboard");
+		ws.getRange2("B7").setValue("Electronics");
+		ws.getRange2("C7").setValue("75");
+		ws.getRange2("D7").setValue("30");
+
+		ws.getRange2("A8").setValue("Table");
+		ws.getRange2("B8").setValue("Furniture");
+		ws.getRange2("C8").setValue("280");
+		ws.getRange2("D8").setValue("8");
+
+		ws.getRange2("A9").setValue("Headphones");
+		ws.getRange2("B9").setValue("Electronics");
+		ws.getRange2("C9").setValue("120");
+		ws.getRange2("D9").setValue("25");
+
+		ws.getRange2("A10").setValue("Cabinet");
+		ws.getRange2("B10").setValue("Furniture");
+		ws.getRange2("C10").setValue("420");
+		ws.getRange2("D10").setValue("6");
+
+		ws.getRange2("A11").setValue("Webcam");
+		ws.getRange2("B11").setValue("Electronics");
+		ws.getRange2("C11").setValue("95");
+		ws.getRange2("D11").setValue("18");
+
+		// Apply formula: Filter Electronics with Price > 100, then Sort by Price descending
+		fillRange = ws.getRange2("F1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("F1").getValueForEdit2();
+		fragment[0].setFragmentText("=SORT(FILTER(A2:D11,(B2:B11=\"Electronics\")*(C2:C11>100)),3,-1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("F1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "SORT(FILTER(A2:D11,(B2:B11=\"Electronics\")*(C2:C11>100)),3,-1)", "FILTER+SORT: formula correctly parsed");
+
+		// Check results: should be Laptop (1200), Monitor (450), Headphones (120) sorted by price descending
+		assert.strictEqual(ws.getRange2("F1").getValue(), "Laptop", "F1 = Laptop (highest price Electronics > 100)");
+		assert.strictEqual(ws.getRange2("G1").getValue(), "Electronics", "G1 = Electronics");
+		assert.strictEqual(Number(ws.getRange2("H1").getValue()), 1200, "H1 = 1200");
+		assert.strictEqual(Number(ws.getRange2("I1").getValue()), 5, "I1 = 5");
+
+		assert.strictEqual(ws.getRange2("F2").getValue(), "Monitor", "F2 = Monitor (second highest price)");
+		assert.strictEqual(Number(ws.getRange2("H2").getValue()), 450, "H2 = 450");
+
+		assert.strictEqual(ws.getRange2("F3").getValue(), "Headphones", "F3 = Headphones (third highest price)");
+		assert.strictEqual(Number(ws.getRange2("H3").getValue()), 120, "H3 = 120");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"Dynamic summary with SORTBY, HSTACK, UNIQUE, SUMIF\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		// Setup data: Region, Amount
+		ws.getRange2("A1").setValue("Region");
+		ws.getRange2("B1").setValue("Amount");
+
+		ws.getRange2("A2").setValue("North");
+		ws.getRange2("B2").setValue("1500");
+
+		ws.getRange2("A3").setValue("South");
+		ws.getRange2("B3").setValue("2000");
+
+		ws.getRange2("A4").setValue("North");
+		ws.getRange2("B4").setValue("800");
+
+		ws.getRange2("A5").setValue("West");
+		ws.getRange2("B5").setValue("2500");
+
+		ws.getRange2("A6").setValue("South");
+		ws.getRange2("B6").setValue("1200");
+
+		ws.getRange2("A7").setValue("North");
+		ws.getRange2("B7").setValue("600");
+
+		ws.getRange2("A8").setValue("West");
+		ws.getRange2("B8").setValue("1800");
+
+		ws.getRange2("A9").setValue("South");
+		ws.getRange2("B9").setValue("900");
+
+		ws.getRange2("A10").setValue("West");
+		ws.getRange2("B10").setValue("1100");
+
+		// Apply formula: Extract unique regions with sums, sorted by sum descending
+		fillRange = ws.getRange2("D1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("D1").getValueForEdit2();
+		fragment[0].setFragmentText("=SORTBY(HSTACK(UNIQUE(A2:A10),SUMIF(A2:A10,UNIQUE(A2:A10),B2:B10)),SUMIF(A2:A10,UNIQUE(A2:A10),B2:B10),-1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("D1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "SORTBY(HSTACK(UNIQUE(A2:A10),SUMIF(A2:A10,UNIQUE(A2:A10),B2:B10)),SUMIF(A2:A10,UNIQUE(A2:A10),B2:B10),-1)", "Dynamic summary: formula correctly parsed");
+
+		// Check results: should be West (5400), South (4100), North (2900) sorted by amount descending
+		assert.strictEqual(ws.getRange2("D1").getValue(), "West", "D1 = West (highest total)");
+		assert.strictEqual(Number(ws.getRange2("E1").getValue()), 5400, "E1 = 5400 (2500+1800+1100)");
+
+		assert.strictEqual(ws.getRange2("D2").getValue(), "South", "D2 = South (second highest total)");
+		assert.strictEqual(Number(ws.getRange2("E2").getValue()), 4100, "E2 = 4100 (2000+1200+900)");
+
+		assert.strictEqual(ws.getRange2("D3").getValue(), "North", "D3 = North (third highest total)");
+		assert.strictEqual(Number(ws.getRange2("E3").getValue()), 2900, "E3 = 2900 (1500+800+600)");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"Matrix calculations with SQRT and SEQUENCE\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=SQRT(SEQUENCE(5,5,1,1))");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "SQRT(SEQUENCE(5,5,1,1))", "Matrix calculation: formula correctly parsed");
+
+		// Check sample values from the 5x5 matrix of square roots
+		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 1, "A1 = SQRT(1) = 1");
+		assert.strictEqual(Number(ws.getRange2("E1").getValue()), Math.sqrt(5), "E1 = SQRT(5)");
+		assert.strictEqual(Number(ws.getRange2("A5").getValue()), Math.sqrt(21), "A5 = SQRT(21)");
+		assert.strictEqual(Number(ws.getRange2("E5").getValue()), 5, "E5 = SQRT(25) = 5");
+		assert.strictEqual(Number(ws.getRange2("C3").getValue()), Math.sqrt(13), "C3 = SQRT(13)");
+
+		clearData(0, 0, 100, 200);
+	});
+
 	QUnit.module("Sheet structure");
 });
