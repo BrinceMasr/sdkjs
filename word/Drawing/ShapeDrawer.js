@@ -1655,13 +1655,21 @@ CShapeDrawer.prototype =
 			: this.isArrPix ? (1 / AscCommon.g_dKoef_mm_to_pix) : 1;
 
 		const geometry = this.Shape.getGeometry();
-		const paths = geometry.getContinuousSubpaths ? geometry.getContinuousSubpaths() : [];
+		const unclosedPaths = geometry.pathLst.filter(function (path) {
+			return !path.isClosed();
+		});
 
 		if (this.Ln.headEnd != null) {
 			const arrowLength = this.Ln.headEnd.GetLen(penWidth, maxWidth) / transformScaleFactor;
 
-			for (let i = 0; i < paths.length; i++) {
-				const path = paths[i];
+			const firstUnclosedPath = unclosedPaths[0];
+			const subPaths = firstUnclosedPath && firstUnclosedPath.stroke ? firstUnclosedPath.getContinuousSubpaths() : [];
+			const unclosedSubPaths = subPaths.filter(function (path) {
+				return !path.isClosed(0);
+			});
+
+			for (let i = 0; i < unclosedSubPaths.length; i++) {
+				const path = unclosedSubPaths[i];
 				const headAngle = path.getHeadArrowAngle(arrowLength);
 
 				if (AscFormat.isRealNumber(headAngle)) {
@@ -1692,13 +1700,17 @@ CShapeDrawer.prototype =
 		if (this.Ln.tailEnd != null) {
 			const arrowLength = this.Ln.tailEnd.GetLen(penWidth, maxWidth) / transformScaleFactor;
 
-			for (let i = 0; i < paths.length; i++) {
-				const path = paths[i];
+			const lastUnclosedPath = unclosedPaths[unclosedPaths.length - 1];
+			const subPaths = lastUnclosedPath && lastUnclosedPath.stroke ? lastUnclosedPath.getContinuousSubpaths() : [];
+			const unclosedSubPaths = subPaths.filter(function (path) {
+				return !path.isClosed(0);
+			});
+
+			for (let i = 0; i < unclosedSubPaths.length; i++) {
+				const path = unclosedSubPaths[i];
 				const tailAngle = path.getTailArrowAngle(arrowLength);
 
 				if (AscFormat.isRealNumber(tailAngle)) {
-					// Each continuous subpath starts with a moveTo command
-					// so we can use the first point of the path as the arrow tip point
 
 					function getPathEndPoint(commands) {
 						for (let i = commands.length - 1; i >= 0; i--) {

@@ -6410,9 +6410,9 @@
 		const oSolver = wbModel.getSolver();
 		const oSolverParams = wbModel.getSolverParams();
 		const oChangedCells = oSolver && oSolver.getChangingCell();
+		const oStartChangedCells = oSolver && oSolver.getStartChangingCells();
 
-		if (!bSave) {
-			const oStartChangedCells = oSolver && oSolver.getStartChangingCells();
+		if (!bSave && oStartChangedCells) {
 			oChangedCells && oChangedCells._foreachNoEmpty(function (oCell) {
 				const sOriginalValue = oStartChangedCells[oCell.getName()];
 				oCell.setValue(sOriginalValue);

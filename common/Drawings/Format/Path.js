@@ -2134,8 +2134,35 @@ function (window, undefined) {
 		}
 		return true;
 	};
+	Path.prototype.isClosed = function (epsilon) {
+		const hasCloseCommand = this.ArrPathCommand.some(function (command) {
+			return command.id === AscFormat.close;
+		});
 
+		if (hasCloseCommand) {
+			return true;
+		}
 
+		if (AscFormat.isRealNumber(epsilon)) {
+			let firstPointCommand = null;
+			for (let i = 0; i < this.ArrPathCommand.length; i++) {
+				const command = this.ArrPathCommand[i];
+				if (command.id === AscFormat.moveTo || command.id === AscFormat.lineTo) {
+					firstPointCommand = command;
+					break;
+				}
+			}
+
+			const firstPoint = firstPointCommand ? { x: firstPointCommand.X, y: firstPointCommand.Y } : null;
+			const lastPoint = getPathEndPoint(this.ArrPathCommand);
+
+			if (firstPoint && lastPoint && Math.abs(firstPoint.x - lastPoint.x) <= epsilon && Math.abs(firstPoint.y - lastPoint.y) <= epsilon) {
+				return true;
+			}
+		}
+
+		return false;
+	};
 
 	function getNonDuplicateCommands(path) {
 		const commands = [];
@@ -2379,6 +2406,19 @@ function (window, undefined) {
 		return { x: x, y: y, t: t };
 	}
 
+	function getPathEndPoint(commands) {
+		for (let i = commands.length - 1; i >= 0; i--) {
+			const command = commands[i];
+			if (command.id === AscFormat.lineTo) {
+				return { x: command.X, y: command.Y };
+			}
+			if (command.id === AscFormat.bezier4) {
+				return { x: command.X2, y: command.Y2 };
+			}
+		}
+		return null;
+	}
+
 	Path.prototype.getHeadArrowAngle = function (arrowLength) {
 		// This path should contain cubicBezierTo, lineTo, and moveTo commands only,
 		// describe a continuous curve and start with the "moveTo" command
@@ -2416,19 +2456,6 @@ function (window, undefined) {
 
 		const commands = this.ArrPathCommand;
 		if (commands.length <= 1) {
-			return null;
-		}
-
-		function getPathEndPoint(commands) {
-			for (let i = commands.length - 1; i >= 0; i--) {
-				const command = commands[i];
-				if (command.id === AscFormat.lineTo) {
-					return { x: command.X, y: command.Y };
-				}
-				if (command.id === AscFormat.bezier4) {
-					return { x: command.X2, y: command.Y2 };
-				}
-			}
 			return null;
 		}
 

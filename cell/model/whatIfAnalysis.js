@@ -1027,9 +1027,9 @@ function (window, undefined) {
 			let nIndex = 1;
 			updateDefName('solver_num', mConstraints.size);
 			mConstraints.forEach(function (constraint) {
-				updateDefName('solver_lhs' + nIndex, constraint.cellRef);
-				updateDefName('solver_rhs' + nIndex, constraint.constraint);
-				updateDefName('solver_rel' + nIndex, constraint.operator);
+				updateDefName('solver_lhs' + nIndex, constraint['cellRef']);
+				updateDefName('solver_rhs' + nIndex, constraint['constraint']);
+				updateDefName('solver_rel' + nIndex, constraint['operator']);
 				nIndex++;
 			});
 		} else { // Finds constraint from Def Names and delete them.
@@ -1103,16 +1103,16 @@ function (window, undefined) {
 			}
 		}
 		// Fills constraints.
-		const nConstraintsSize = mSolverDefNames.get('solver_num') && mSolverDefNames.get('solver_num').Ref;
+		const nConstraintsSize = mSolverDefNames.get('solver_num') && +mSolverDefNames.get('solver_num').Ref;
 		if (nConstraintsSize !== undefined) {
 			for (let i = 1; i <= nConstraintsSize; i++) {
 				/** @type {{cellRef:string, operator: number, constraint:string, isNotSupported:boolean}} */
 				const oConstraint = {};
-				oConstraint.cellRef = fillAttribute(oConstraint.cellRef, 'solver_lhs' + i);
-				oConstraint.operator = +fillAttribute(oConstraint.operator, 'solver_rel' + i);
-				oConstraint.constraint = fillAttribute(oConstraint.constraint, 'solver_rhs' + i);
-				oConstraint.isNotSupported = this.isOperatorNotSupported(oConstraint.operator);
-				if (oConstraint.cellRef && oConstraint.operator && oConstraint.constraint) {
+				oConstraint['cellRef'] = fillAttribute(oConstraint['cellRef'], 'solver_lhs' + i);
+				oConstraint['operator'] = +fillAttribute(oConstraint['operator'], 'solver_rel' + i);
+				oConstraint['constraint'] = fillAttribute(oConstraint['constraint'], 'solver_rhs' + i);
+				oConstraint['isNotSupported'] = this.isOperatorNotSupported(oConstraint['operator']);
+				if (oConstraint['cellRef'] && oConstraint['operator'] && oConstraint['constraint']) {
 					this.asc_addConstraint(i, oConstraint);
 				}
 			}
@@ -2894,16 +2894,16 @@ function (window, undefined) {
 		const nValueOf = this.getValueOf();
 
 		oConstraints.forEach(function (oConstraint) {
-			const oConstraintsWs = actualWsByRef(oConstraint.constraint, oWs);
-			const sConstraintsActualRef = convertToAbsoluteRef(oConstraint.constraint);
-			const oCellRefWs = actualWsByRef(oConstraint.cellRef, oWs);
-			const sCellRefActualRef = convertToAbsoluteRef(oConstraint.cellRef);
+			const oConstraintsWs = actualWsByRef(oConstraint['constraint'], oWs);
+			const sConstraintsActualRef = convertToAbsoluteRef(oConstraint['constraint']);
+			const oCellRefWs = actualWsByRef(oConstraint['cellRef'], oWs);
+			const sCellRefActualRef = convertToAbsoluteRef(oConstraint['cellRef']);
 			let constraintData = oConstraintsWs.getRange2(sConstraintsActualRef);
 			if (constraintData == null) {
-				constraintData = aExcludeWords.includes(oConstraint.constraint) ? oConstraint.constraint :
-					Number(oConstraint.constraint.replace(/,/g, "."));
+				constraintData = aExcludeWords.includes(oConstraint['constraint']) ? oConstraint['constraint'] :
+					Number(oConstraint['constraint'].replace(/,/g, "."));
 			}
-			aConstraints.push(new CConstraint(oCellRefWs.getRange2(sCellRefActualRef), oConstraint.operator, constraintData));
+			aConstraints.push(new CConstraint(oCellRefWs.getRange2(sCellRefActualRef), oConstraint['operator'], constraintData));
 		});
 		if (this.getVariablesNonNegative()) {
 			const oVariableConstraint = aConstraints.find(function (oConstraint) {
