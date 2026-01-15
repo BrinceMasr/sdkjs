@@ -37,7 +37,6 @@
 	window["AscCommon"] = window['AscCommon'] || {};
 
 	function GIFDataBase() {
-
 	}
 	window["AscCommon"].GIFDataBase = GIFDataBase;
 	GIFDataBase.prototype.getWidth = function() {
@@ -68,48 +67,11 @@
 		return 0;
 	};
 
-	function GIFPlayer(gifData, viewPortData) {
-		this.gifData = gifData;
-		this.viewPortData = viewPortData;
-		this.lastDrawFrame = -1;
-
-		this.startTime = null;
-	}
-	GIFPlayer.prototype.isStarted = function() {
-		return this.startTime !== null;
-	};
-	GIFPlayer.prototype.getCurrentFrameIndex = function() {
-		if (!this.isStarted()) {
-			return -1;
-		}
-		let currentTime = (new Date()).getTime();
-		let elapsedTime = currentTime - this.startTime;
-		return this.gifData.getFrameIndexAtTime(elapsedTime);
-	}
-	GIFPlayer.prototype.onTick = function() {
-		if (!this.isStarted()) {
-			return;
-		}
-		if (!this.viewPortData.isVisible()) {
-			return;
-		}
-		let currentTime = (new Date()).getTime();
-		let elapsedTime = currentTime - this.startTime;
-		let currentFrame = this.gifData.getFrameIndexAtTime(elapsedTime);
-		if (this.lastDrawFrame !== currentFrame) {
-			this.viewPortData.onUpdateFrame();
-		}
-	};
-	GIFPlayer.prototype.getFrameForDraw = function() {
-		this.lastDrawFrame = this.getCurrentFrameIndex();
-		return this.gifData.getFrame(this.lastDrawFrame);
-	};
-	window["AscCommon"].GifPlayer = GIFPlayer;
 
 
 	function GIFDataGIFuct(gifuctData) {
 		AscCommon.GIFDataBase.call(this);
-		this.gifuctData = gifuctData;
+		this.gifuctData = new GIFUCT.GIF(gifuctData);
 		this.frames = this.gifuctData.decompressFrames(true);
 	}
 	GIFDataGIFuct.prototype = Object.create(AscCommon.GIFDataBase.prototype);
@@ -120,7 +82,7 @@
 		return this.gifuctData.lsd.height;
 	};
 	GIFDataGIFuct.prototype.getFramesCount = function() {
-		return this.gifuctData.decompressFrames(false).length;
+		return this.frames.length;
 	};
 	GIFDataGIFuct.prototype.getFrame = function(frameIndex) {
 		if (frameIndex < 0 || frameIndex >= this.frames.length) {
@@ -133,7 +95,7 @@
 		if (!frame || !frame.delay) {
 			return 0;
 		}
-		return frame.delay * 10;
+		return frame.delay;
 	};
 	GIFDataGIFuct.prototype.getDurationMs = function() {
 		let totalDuration = 0;
@@ -144,12 +106,6 @@
 		return totalDuration;
 	};
 	GIFDataGIFuct.prototype.getLoopCount = function() {
-		let appExt = this.gifuctData.appExtensions.find(function(ext) {
-			return ext.identifier === "NETSCAPE" && ext.authCode === "2.0";
-		});
-		if (appExt && appExt.loopCount !== undefined) {
-			return appExt.loopCount;
-		}
 		return 0;
 	};
 	GIFDataGIFuct.prototype.getFrameTimeMs = function(frameIndex) {
@@ -186,5 +142,79 @@
 	};
 	window["AscCommon"].GIFDataGIFuct = GIFDataGIFuct;
 
+	function GIFPlayer(gifData, srcImageData) {
+		this.gifData = new GIFDataGIFuct(gifData);
+		this.srcImageData = srcImageData;
+		this.lastDrawFrame = -1;
+
+		this.startTime = null;
+	}
+	GIFPlayer.prototype.isStarted = function() {
+		return this.startTime !== null;
+	};
+	GIFPlayer.prototype.getCurrentFrameIndex = function() {
+		if (!this.isStarted()) {
+			return -1;
+		}
+		let currentTime = (new Date()).getTime();
+		let elapsedTime = currentTime - this.startTime;
+		return this.gifData.getFrameIndexAtTime(elapsedTime);
+	}
+	GIFPlayer.prototype.onTick = function() {
+		let updated = false;
+		if (!this.isStarted()) {
+			return updated;
+		}
+		let currentTime = (new Date()).getTime();
+		let elapsedTime = currentTime - this.startTime;
+		let currentFrame = this.gifData.getFrameIndexAtTime(elapsedTime);
+		if (this.lastDrawFrame !== currentFrame) {
+			this.srcImageData.updateFrame(this.getFrameForDraw());
+			updated = true;
+		}
+		return updated;
+	};
+	GIFPlayer.prototype.getFrameForDraw = function() {
+		this.lastDrawFrame = this.getCurrentFrameIndex();
+		return this.gifData.getFrame(this.lastDrawFrame);
+	};
+	GIFPlayer.prototype.start = function() {
+		if (this.isStarted()) {
+			return;
+		}
+		this.startTime = (new Date()).getTime();
+		this.lastDrawFrame = -1;
+		this.onTick();
+	};
+	GIFPlayer.prototype.stop = function() {
+		this.startTime = null;
+		this.lastDrawFrame = -1;
+		this.srcImageData.clearRawData();
+	};
+	window["AscCommon"].GIFPlayer = GIFPlayer;
+
+
+	function GIFAdapter(image) {
+		this.blipFill = image;
+	}
+	GIFAdapter.prototype.updateFrame = function(rawData) {
+		this.blipFill.rawData = rawData;
+		let d = rawData.dims;
+		if (!this.blipFill.canvas) {
+			this.blipFill.canvas = document.createElement("canvas");
+			this.blipFill.canvas.width = rawData.dims.width;
+			this.blipFill.canvas.height = rawData.dims.height;
+		}
+
+		let ctx = this.blipFill.canvas.getContext("2d");
+		ctx.clearRect(d.left, d.top, d.width, d.height);
+		let img = new ImageData(rawData.patch, d.width, d.height);
+		ctx.putImageData(img, d.left, d.top);
+	};
+	GIFAdapter.prototype.clearRawData = function() {
+		this.blipFill.rawData = null;
+		this.blipFill.canvas = null;
+	};
+	window["AscCommon"].GIFAdapter = GIFAdapter;
 
 })(window);

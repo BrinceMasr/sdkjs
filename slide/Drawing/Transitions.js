@@ -2714,6 +2714,105 @@ function CTransitionAnimation(htmlpage)
     };
 }
 
+function CGIFTimer(demoManager)
+{
+    this.demoManager = demoManager;
+    this.timerId = null;
+
+    this.gifPlayers = [];
+}
+
+CGIFTimer.prototype.start = function()
+{
+    const this_ = this;
+    this.timerId = __nextFrame(function()
+    {
+        this_.onTick();
+    });
+};
+CGIFTimer.prototype.end = function()
+{
+    if(this.timerId !== null)
+    {
+        __cancelFrame(this.timerId);
+        this.timerId = null;
+    }
+};
+CGIFTimer.prototype.onTick = function()
+{
+    if (this.gifPlayers.length > 0)
+    {
+        let redraw = false;
+        for (let i = 0; i < this.gifPlayers.length; i++)
+        {
+            if (this.gifPlayers[i].onTick())
+                redraw = true;
+        }
+        if (redraw)
+        {
+            let player = this.demoManager.GetCurrentAnimPlayer();
+            if (player) {
+                player.animationDrawer.clearTextureCache();
+                this.demoManager.OnRecalculateAnimationFrame(player);
+            }
+        }
+        this.start();
+    }
+};
+CGIFTimer.prototype.onStartSlide = function(slide)
+{
+    this.onEndSlide();
+    this.slide = slide;
+
+    if (this.slide.backgroundFill)
+    {
+        this.checkBlipFill(this.slide.backgroundFill.fill);
+    }
+    let layout = this.slide.Layout;
+    let master = layout.Master;
+    let slideObjects = [];
+    slideObjects.push(slide);
+    slideObjects.push(layout);
+    slideObjects.push(master);
+    let this_ = this;
+    for (let i = 0; i < slideObjects.length; i++) {
+        let slideObject = slideObjects[i];
+        slideObject.cSld.forEachSp(function (sp) {
+            this_.checkBlipFill(sp.blipFill);
+            // TODO: check grouped shapes
+        })
+    }
+    if (this.gifPlayers.length > 0) {
+        this.start();
+    }
+};
+
+CGIFTimer.prototype.checkBlipFill = function(fill)
+{
+    if(!fill || !(fill instanceof AscFormat.CBlipFill)) return;
+    let imageUrl = fill.RasterImageId;
+    if (!imageUrl) return;
+    if (this.demoManager.GifData[imageUrl])
+    {
+        let data = this.demoManager.GifData[imageUrl];
+
+        let adapter = new AscCommon.GIFAdapter(fill);
+        let player = new AscCommon.GIFPlayer(data, adapter);
+        player.start();
+        this.gifPlayers.push(player);
+    }
+};
+CGIFTimer.prototype.onEndSlide = function()
+{
+    this.slide = null;
+    for (let i = 0; i < this.gifPlayers.length; i++)
+    {
+        this.gifPlayers[i].stop();
+    }
+    this.gifPlayers.length = 0;
+    this.end();
+};
+
 function CDemonstrationManager(htmlpage)
 {
     this.HtmlPage   = htmlpage;
@@ -2762,6 +2861,10 @@ function CDemonstrationManager(htmlpage)
 	this.GoToSlideShortcutStack = [];
 
     this.SlideAnnotations = new AscCommonSlide.CSlideShowAnnotations();
+
+    this.GifData = {};
+
+    this.GIFTimer = new CGIFTimer(this);
 
     var oThis = this;
 
@@ -3036,8 +3139,8 @@ function CDemonstrationManager(htmlpage)
         this.SlideIndexes[1] = -1;
 
 		this.GoToSlideShortcutStack = [];
-        this.StartSlide(true, true);
         this.GifData = gifData;
+        this.StartSlide(true, true);
     };
 
     this.StartSlide = function(is_transition_use, is_first_play)
@@ -3096,7 +3199,6 @@ function CDemonstrationManager(htmlpage)
                 oThis.StartAnimation(oThis.SlideNum);
             }
         }
-
         oThis.OnPaintSlide(false);
     };
 
@@ -3111,7 +3213,8 @@ function CDemonstrationManager(htmlpage)
         var oSlide = this.GetSlide(nSlideNum);
         if(oSlide)
         {
-            this.gifSlidePlayer.checkSlide(oSlide);
+
+            this.GIFTimer.onStartSlide(oSlide);
             return oSlide.getAnimationPlayer().start();
         }
         return false;
@@ -3123,6 +3226,7 @@ function CDemonstrationManager(htmlpage)
         {
             this.timer.stop();
             var oSlide = this.GetSlide(nSlideNum);
+            this.GIFTimer.onEndSlide();
             if(oSlide)
             {
                 oSlide.getAnimationPlayer().stop();
@@ -3446,7 +3550,8 @@ function CDemonstrationManager(htmlpage)
 
     this.End = function(isNoUseFullScreen)
     {
-        this.GifData = null;
+        this.GIFTimer.onEndSlide();
+        this.GifData = {};
 		this.PointerRemove();
         if (this.waitReporterObject)
         {
