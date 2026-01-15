@@ -25495,7 +25495,7 @@
 			return true;
 		} else if (element.type === cElementType.array || element.type === cElementType.cellsRange || element.type === cElementType.cellsRange3D) {
 			// go through the range and see if the array can fit into it
-			let dimensions = element.getDimensions();
+			let dimensions = element.getDimensions(true);
 
 			if (element.isOneElement()) {
 				return true
@@ -25517,6 +25517,13 @@
 	CDynamicArrayManager.prototype.isAutoExpandBBox = function (bbox) {
 		if (this.ws.autoFilters.isIntersectionTable(bbox)) {
 			return false
+		}
+
+		if (bbox.r2 > gc_nMaxRow0 || bbox.r1 < 0) {
+			return false;
+		}
+		if (bbox.c2 > gc_nMaxCol0 || bbox.c1 < 0) {
+			return false;
 		}
 
 		let isHaveNonEmptyCell;

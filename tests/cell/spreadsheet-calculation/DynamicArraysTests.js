@@ -3829,6 +3829,36 @@ $(function () {
 		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "SQRT((A140:A142-AVERAGE(A140:A142))^2+(B140:B142-AVERAGE(B140:B142))^2)", "formula result");
 		assert.strictEqual(dynamicRef.getHeight(), 3, "height dynamic array: " + formula);
 		assert.strictEqual(dynamicRef.getWidth(), 1, "width dynamic array: " + formula);
+
+		// Test 35: SPILL error when entire row/column formula is not in first row/column
+		ws.getRange2("A2").setValue("5");
+		ws.getRange2("B2").setValue("10");
+		ws.getRange2("C2").setValue("15");
+		ws.getRange2("D2").setValue("20");
+		ws.getRange2("B1").setValue("3");
+		ws.getRange2("B2").setValue("6");
+		ws.getRange2("B3").setValue("9");
+		ws.getRange2("B4").setValue("12");
+
+		// Test with entire row reference not in first row - should cause SPILL error
+		formula = "=2:2+2";
+		fillRange = ws.getRange2("F5");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("F5").getValueForEdit2();
+		fragment[0].setFragmentText(formula);
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+		resCell = getCell(ws.getRange2("F5"));
+		assert.strictEqual(resCell.getValue(), "#SPILL!", "Should return #SPILL! error for entire row formula not in first row");
+
+		// Test with entire column reference not in first column - should cause SPILL error
+		formula = "=B:B+2";
+		fillRange = ws.getRange2("E3");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("E3").getValueForEdit2();
+		fragment[0].setFragmentText(formula);
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+		resCell = getCell(ws.getRange2("E3"));
+		assert.strictEqual(resCell.getValue(), "#SPILL!", "Should return #SPILL! error for entire column formula not in first column");
 		
 
 		ws.getRange2("A1:Z30").cleanAll();
