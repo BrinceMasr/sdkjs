@@ -10094,13 +10094,13 @@
             let oThis = this;
 
             if (c_oSer_RichValueTypesInfo.Global === type) {
-                pTypesInfo.global = {};
+                pTypesInfo.global = new AscCommonExcel.CRichValueGlobalType();
                 res = this.bcr.Read1(length, function (t, l) {
                     return oThis.ReadRichValueGlobal(t, l, pTypesInfo.global);
                 });
             }
             else if (c_oSer_RichValueTypesInfo.Types === type) {
-                pTypesInfo.types = {};
+                pTypesInfo.types = new AscCommonExcel.CRichValueTypes();
                 res = this.bcr.Read1(length, function (t, l) {
                     return oThis.ReadRichValueTypes(t, l, pTypesInfo.types);
                 });
@@ -10117,7 +10117,7 @@
             let oThis = this;
 
             if (c_oSer_RichValueTypesInfo.KeyFlags === type) {
-                pGlobalType.keyFlags = {};
+                pGlobalType.keyFlags = new AscCommonExcel.CRichValueTypeKeyFlags();
                 res = this.bcr.Read1(length, function (t, l) {
                     return oThis.ReadRichValueTypeKeyFlags(t, l, pGlobalType.keyFlags);
                 });

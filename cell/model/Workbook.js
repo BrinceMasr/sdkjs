@@ -3314,9 +3314,9 @@
 				return;
 			}
 			
-			ws.forEachFormula(function(cell) {
-				if (cell && cell.formulaParsed) {
-					const formulaVm = cell.formulaParsed.getVm ? cell.formulaParsed.getVm() : null;
+			ws.forEachFormula(function(fP) {
+				if (fP) {
+					const formulaVm = fP.getVm ? fP.getVm() : null;
 					if (formulaVm === vmIndex) {
 						isHaveReference = true;
 						return true;
@@ -3511,6 +3511,7 @@
 
 		AscCommon.History.Add(AscCommonExcel.g_oUndoRedoWorkbook, AscCH.historyitem_Workbook_Metadata,
 			null, null, new UndoRedoData_FromTo(oldMetadata, newMetadata));
+		return true;
 	};
 	Workbook.prototype.removeMetadataByVmIndex = function(vmIndex) {
 		if (!this.metadata || !this.metadata.valueMetadata || !vmIndex || vmIndex < 1 || vmIndex > this.metadata.valueMetadata.length) {
@@ -3558,6 +3559,10 @@
 								if (block.t === valueMetadataBlock.t && block.v > valueIndex) {
 									block.v--;
 								}
+							}
+
+							if (futureMetadata.futureMetadataBlocks.length === 0) {
+								meta.aFutureMetadata.splice(i, 1);
 							}
 
 							if (rvIndex != null && rvIndex >= 0 && this.richValueData && this.richValueData.pData && 
@@ -25022,9 +25027,11 @@
 		}
 		let fromCmIndex = from && from.getCm();
 		let toCmIndex = to && to.getCm();
+		let fromVmIndex = from && from.getVm();
+		let toVmIndex = to && to.getVm();
 		if (fromCmIndex != toCmIndex) {
 			if (fromCmIndex != null && from.checkFirstCellArray(parent)) {
-				this.deleteDynamicFormula(fromCmIndex);
+				this.deleteDynamicFormula(fromCmIndex, fromVmIndex != toVmIndex ? fromVmIndex : null);
 				let listenerId = from && from.getListenerId();
 				if (from.getVm() != null) {
 					this.ws.workbook.dependencyFormulas.endListeningVolatileArray(listenerId);
@@ -25053,15 +25060,19 @@
 		this.allFormulasCountMap[cmIndex]++;
 	};
 
-	CDynamicArrayManager.prototype.deleteDynamicFormula = function (cmIndex) {
+	CDynamicArrayManager.prototype.deleteDynamicFormula = function (cmIndex, vmIndex) {
 		if (!AscCommonExcel.bIsSupportDynamicArrays) {
 			return;
 		}
 		if (this.allFormulasCountMap && this.allFormulasCountMap[cmIndex]) {
 			this.allFormulasCountMap[cmIndex]--;
 		}
+		let isRemovedMetaData;
 		if (this.allFormulasCountMap[cmIndex] < 1) {
-			this.ws.workbook.checkRemoveMetadataByCmIndex(cmIndex);
+			isRemovedMetaData = this.ws.workbook.checkRemoveMetadataByCmIndex(cmIndex);
+		}
+		if (!isRemovedMetaData && vmIndex != null) {
+			this.ws.workbook.checkRemoveMetadataByVmIndex(vmIndex);
 		}
 	};
 

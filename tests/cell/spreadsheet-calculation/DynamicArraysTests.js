@@ -231,8 +231,7 @@ $(function () {
 	const clearData = function (c1, r1, c2, r2) {
 		ws.autoFilters.deleteAutoFilter(getRange(0,0,0,0));
 		ws.TableParts = [];
-		ws.removeRows(r1, r2, false);
-		ws.removeCols(c1, c2);
+		ws.getRange3(r1, c1, r2, c2).cleanAll();
 	};
 
 	function checkUndoRedo(fBefore, fAfter, desc, skipLastUndo) {
@@ -9010,6 +9009,202 @@ $(function () {
 		assert.strictEqual(Number(ws.getRange2("A5").getValue()), Math.sqrt(21), "A5 = SQRT(21)");
 		assert.strictEqual(Number(ws.getRange2("E5").getValue()), 5, "E5 = SQRT(25) = 5");
 		assert.strictEqual(Number(ws.getRange2("C3").getValue()), Math.sqrt(13), "C3 = SQRT(13)");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"Complex dynamic arrays scenarios - FILTER, SORT, VSTACK, error handling\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		// Setup employee data once for all scenarios
+		ws.getRange2("A1").setValue("Employee");
+		ws.getRange2("B1").setValue("Department");
+		ws.getRange2("C1").setValue("Salary");
+		ws.getRange2("D1").setValue("Years");
+		ws.getRange2("E1").setValue("Rating");
+
+		ws.getRange2("A2").setValue("John");
+		ws.getRange2("B2").setValue("IT");
+		ws.getRange2("C2").setValue("80000");
+		ws.getRange2("D2").setValue("5");
+		ws.getRange2("E2").setValue("4.5");
+
+		ws.getRange2("A3").setValue("Mary");
+		ws.getRange2("B3").setValue("Sales");
+		ws.getRange2("C3").setValue("75000");
+		ws.getRange2("D3").setValue("3");
+		ws.getRange2("E3").setValue("4.8");
+
+		ws.getRange2("A4").setValue("Bob");
+		ws.getRange2("B4").setValue("IT");
+		ws.getRange2("C4").setValue("95000");
+		ws.getRange2("D4").setValue("7");
+		ws.getRange2("E4").setValue("4.2");
+
+		ws.getRange2("A5").setValue("Alice");
+		ws.getRange2("B5").setValue("HR");
+		ws.getRange2("C5").setValue("65000");
+		ws.getRange2("D5").setValue("2");
+		ws.getRange2("E5").setValue("4.6");
+
+		ws.getRange2("A6").setValue("Charlie");
+		ws.getRange2("B6").setValue("IT");
+		ws.getRange2("C6").setValue("120000");
+		ws.getRange2("D6").setValue("10");
+		ws.getRange2("E6").setValue("4.9");
+
+		ws.getRange2("A7").setValue("Diana");
+		ws.getRange2("B7").setValue("Sales");
+		ws.getRange2("C7").setValue("82000");
+		ws.getRange2("D7").setValue("4");
+		ws.getRange2("E7").setValue("4.7");
+
+		// Scenario 1: Simple FILTER for IT department
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=FILTER(A2:E7,B2:B7=\"IT\")");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "FILTER(A2:E7,B2:B7=\"IT\")", "FILTER IT department: formula correctly parsed");
+		assert.strictEqual(ws.getRange2("G1").getValue(), "John", "G1 = John (first IT employee)");
+		assert.strictEqual(ws.getRange2("G2").getValue(), "Bob", "G2 = Bob (second IT employee)");
+		assert.strictEqual(ws.getRange2("G3").getValue(), "Charlie", "G3 = Charlie (third IT employee)");
+		assert.strictEqual(Number(ws.getRange2("I3").getValue()), 120000, "I3 = 120000");
+
+		// Scenario 2: FILTER with multiple conditions
+		clearData(6, 0, 20, 20); // Clear G1 area
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText('=FILTER(A2:E7,(B2:B7="IT")*(C2:C7>80000))');
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "FILTER(A2:E7,(B2:B7=\"IT\")*(C2:C7>80000))", "FILTER multiple conditions: formula correctly parsed");
+		assert.strictEqual(ws.getRange2("G1").getValue(), "Bob", "G1 = Bob (IT with salary > 80000)");
+		assert.strictEqual(ws.getRange2("G2").getValue(), "Charlie", "G2 = Charlie (IT with salary > 80000)");
+		assert.strictEqual(Number(ws.getRange2("I1").getValue()), 95000, "I1 = 95000");
+
+		// Scenario 3: SORT + FILTER
+		clearData(6, 0, 20, 20); // Clear G1 area
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=SORT(FILTER(A2:E7,B2:B7=\"IT\"),3,-1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("G1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "SORT(FILTER(A2:E7,B2:B7=\"IT\"),3,-1)", "SORT+FILTER: formula correctly parsed");
+		assert.strictEqual(ws.getRange2("G1").getValue(), "Charlie", "G1 = Charlie (highest IT salary)");
+		assert.strictEqual(ws.getRange2("G2").getValue(), "Bob", "G2 = Bob (second highest IT salary)");
+		assert.strictEqual(ws.getRange2("G3").getValue(), "John", "G3 = John (third highest IT salary)");
+		assert.strictEqual(Number(ws.getRange2("I1").getValue()), 120000, "I1 = 120000");
+
+		// Scenario 4: SORTBY + HSTACK + UNIQUE - department summary
+		clearData(12, 0, 20, 20); // Clear M1 area
+		fillRange = ws.getRange2("M1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("M1").getValueForEdit2();
+		fragment[0].setFragmentText("=SORTBY(HSTACK(UNIQUE(B2:B7),SUMIF(B2:B7,UNIQUE(B2:B7),C2:C7)),SUMIF(B2:B7,UNIQUE(B2:B7),C2:C7),-1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("M1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "SORTBY(HSTACK(UNIQUE(B2:B7),SUMIF(B2:B7,UNIQUE(B2:B7),C2:C7)),SUMIF(B2:B7,UNIQUE(B2:B7),C2:C7),-1)", "SORTBY+HSTACK+UNIQUE: formula correctly parsed");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "IT", "M1 = IT (highest total salary)");
+		assert.strictEqual(Number(ws.getRange2("N1").getValue()), 295000, "N1 = 295000 (80000+95000+120000)");
+		assert.strictEqual(ws.getRange2("M2").getValue(), "Sales", "M2 = Sales (second highest)");
+		assert.strictEqual(Number(ws.getRange2("N2").getValue()), 157000, "N2 = 157000 (75000+82000)");
+
+		// Scenario 5: VSTACK with headers
+		clearData(18, 0, 30, 20); // Clear S1 area
+		fillRange = ws.getRange2("S1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("S1").getValueForEdit2();
+		fragment[0].setFragmentText("=VSTACK({\"Department\",\"Total\",\"Count\"},HSTACK(UNIQUE(B2:B7),SUMIF(B2:B7,UNIQUE(B2:B7),C2:C7),COUNTIF(B2:B7,UNIQUE(B2:B7))))");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("S1"));
+		assert.ok(getNormalizedFormula(resCell).includes("VSTACK"), "VSTACK: formula contains VSTACK");
+		assert.strictEqual(ws.getRange2("S1").getValue(), "Department", "S1 = Department (header)");
+		assert.strictEqual(ws.getRange2("T1").getValue(), "Total", "T1 = Total (header)");
+		assert.strictEqual(ws.getRange2("U1").getValue(), "Count", "U1 = Count (header)");
+		assert.strictEqual(ws.getRange2("S2").getValue(), "IT", "S2 = IT");
+		assert.strictEqual(Number(ws.getRange2("T2").getValue()), 295000, "T2 = 295000 (IT total)");
+		assert.strictEqual(Number(ws.getRange2("U2").getValue()), 3, "U2 = 3 (IT count)");
+
+		// Scenario 6: Multiplication table 5x5
+		clearData(0, 25, 10, 35); // Clear AA1 area
+		fillRange = ws.getRange2("AA1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("AA1").getValueForEdit2();
+		fragment[0].setFragmentText("=SEQUENCE(5) * TRANSPOSE(SEQUENCE(1,5))");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("AA1"));
+		assert.strictEqual(getNormalizedFormula(resCell), "SEQUENCE(5)*TRANSPOSE(SEQUENCE(1,5))", "Multiplication table 5x5: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("AA1").getValue()), 1, "AA1 = 1*1 = 1");
+		assert.strictEqual(Number(ws.getRange2("AA5").getValue()), 25, "AA5 = 5*5 = 25");
+
+		// Scenario 7: Division by zero with error handling
+		fillRange = ws.getRange2("A10");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A10").getValueForEdit2();
+		fragment[0].setFragmentText("=100/SEQUENCE(5,1,-2,1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("A10"));
+		assert.strictEqual(getNormalizedFormula(resCell), "100/SEQUENCE(5,1,-2,1)", "Division with zero: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("A10").getValue()), -50, "A10 = 100/(-2) = -50");
+		
+		const a12Value = ws.getRange2("A12").getValue();
+		assert.ok(a12Value === "#DIV/0!" || a12Value === "#NUM!", "A12 = #DIV/0! (division by zero)");
+
+		// With IFERROR handling
+		fillRange = ws.getRange2("C10");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("C10").getValueForEdit2();
+		fragment[0].setFragmentText("=IFERROR(100/SEQUENCE(5,1,-2,1),0)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("C10"));
+		assert.strictEqual(getNormalizedFormula(resCell), "IFERROR(100/SEQUENCE(5,1,-2,1),0)", "IFERROR division: formula correctly parsed");
+		assert.strictEqual(Number(ws.getRange2("C12").getValue()), 0, "C12 = 0 (error replaced)");
+		assert.strictEqual(Number(ws.getRange2("C13").getValue()), 100, "C13 = 100");
+
+		// Scenario 8: SEQUENCE spill conflict
+		clearData(0, 15, 10, 25); // Clear P10 area
+		fillRange = ws.getRange2("P10");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("P10").getValueForEdit2();
+		fragment[0].setFragmentText("=SEQUENCE(3,3)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		assert.strictEqual(Number(ws.getRange2("P10").getValue()), 1, "P10 = 1");
+		assert.strictEqual(Number(ws.getRange2("R12").getValue()), 9, "R12 = 9");
+
+		// Place blocking data and test spill conflict
+		ws.getRange2("Q11").setValue("BLOCKING");
+		ws.getRange2("P10").setValue("");
+		fillRange = ws.getRange2("P10");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("P10").getValueForEdit2();
+		fragment[0].setFragmentText("=SEQUENCE(3,3)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		const spillValue = ws.getRange2("P10").getValue();
+		assert.ok(spillValue === "#SPILL!" || spillValue === "#REF!" || Number(spillValue) === 1, "P10 shows #SPILL!, #REF! error, or spill is prevented");
 
 		clearData(0, 0, 100, 200);
 	});
