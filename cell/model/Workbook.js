@@ -3302,28 +3302,27 @@
 		});
 		return !isHaveReference ? this.removeMetadataByCmIndex(cmIndex) : null;
 	};
-	Workbook.prototype.checkRemoveMetadataByVmIndex = function(vmIndex) {
+	Workbook.prototype.checkRemoveMetadataByVmIndex = function(vmIndex, formula) {
 		if (!vmIndex || vmIndex < 1) {
 			return null;
 		}
 		
 		let isHaveReference = false;
-		
-		this.forEach(function(ws) {
-			if (!ws || isHaveReference) {
-				return;
+
+		const depGraph = this.dependencyFormulas;
+		// get volatileArraysList
+		const volatileArrayList = depGraph.getVolatileArrays();
+		for (let listenerId in volatileArrayList) {
+			const fP = volatileArrayList[listenerId];
+			if (formula === fP) {
+				continue;
 			}
-			
-			ws.forEachFormula(function(fP) {
-				if (fP) {
-					const formulaVm = fP.getVm ? fP.getVm() : null;
-					if (formulaVm === vmIndex) {
-						isHaveReference = true;
-						return true;
-					}
-				}
-			});
-		});
+			const formulaVm = fP.getVm ? fP.getVm() : null;
+			if (formulaVm === vmIndex) {
+				isHaveReference = true;
+				break;
+			}
+		}
 		
 		return !isHaveReference ? this.removeMetadataByVmIndex(vmIndex) : null;
 	};
@@ -3529,10 +3528,24 @@
 			return;
 		}
 
+
 		const typeIndex = valueMetadataBlock.t - 1;
 		const valueIndex = valueMetadataBlock.v;
 
 		meta.valueMetadata.splice(vmIndex - 1, 1);
+
+		//need to change all vm property > vmIndex
+		const depGraph = this.dependencyFormulas;
+		const volatileArrayList = depGraph.getVolatileArrays();
+		for (let listenerId in volatileArrayList) {
+			const formula = volatileArrayList[listenerId];
+			if (formula.vm > vmIndex) {
+				formula.vm--;
+				// AscCommon.History.Add(AscCommonExcel.g_oUndoRedoWorkbook, AscCH.historyitem_Workbook_Metadata,
+				// 	null, null, new UndoRedoData_FromTo(oldMetadata, newMetadata));
+			}
+		}
+		//this.dependencyFormulas.volatileArrays
 
 		if (typeIndex >= 0 && meta.metadataTypes && typeIndex < meta.metadataTypes.length) {
 			const metadataType = meta.metadataTypes[typeIndex];
@@ -25031,7 +25044,7 @@
 		let toVmIndex = to && to.getVm();
 		if (fromCmIndex != toCmIndex) {
 			if (fromCmIndex != null && from.checkFirstCellArray(parent)) {
-				this.deleteDynamicFormula(fromCmIndex, fromVmIndex != toVmIndex ? fromVmIndex : null);
+				this.deleteDynamicFormula(fromCmIndex, fromVmIndex != toVmIndex ? fromVmIndex : null, from);
 				let listenerId = from && from.getListenerId();
 				if (from.getVm() != null) {
 					this.ws.workbook.dependencyFormulas.endListeningVolatileArray(listenerId);
@@ -25060,7 +25073,7 @@
 		this.allFormulasCountMap[cmIndex]++;
 	};
 
-	CDynamicArrayManager.prototype.deleteDynamicFormula = function (cmIndex, vmIndex) {
+	CDynamicArrayManager.prototype.deleteDynamicFormula = function (cmIndex, vmIndex, fP) {
 		if (!AscCommonExcel.bIsSupportDynamicArrays) {
 			return;
 		}
@@ -25072,7 +25085,7 @@
 			isRemovedMetaData = this.ws.workbook.checkRemoveMetadataByCmIndex(cmIndex);
 		}
 		if (!isRemovedMetaData && vmIndex != null) {
-			this.ws.workbook.checkRemoveMetadataByVmIndex(vmIndex);
+			this.ws.workbook.checkRemoveMetadataByVmIndex(vmIndex, fP);
 		}
 	};
 
@@ -25123,7 +25136,7 @@
 							// get cell and setPF to it
 							ws._getCell(row, col, function(cell) {
 								if (cell) {
-									ws.workbook.checkRemoveMetadataByVmIndex(formula.getVm());
+									ws.workbook.checkRemoveMetadataByVmIndex(formula.getVm(), formula);
 									// formula.setVm(null);
 									// cell.setFormulaInternal(formula);
 									cell.setValue("=" + formula.Formula, null, null, newRef, null, {range: newRef/*, beforeSpillRange: firstCellRef*/})
