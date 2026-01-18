@@ -3534,15 +3534,20 @@
 
 		meta.valueMetadata.splice(vmIndex - 1, 1);
 
+		
+		
 		//need to change all vm property > vmIndex
 		const depGraph = this.dependencyFormulas;
 		const volatileArrayList = depGraph.getVolatileArrays();
 		for (let listenerId in volatileArrayList) {
 			const formula = volatileArrayList[listenerId];
 			if (formula.vm > vmIndex) {
+				let oldIndex = formula.vm;
 				formula.vm--;
-				// AscCommon.History.Add(AscCommonExcel.g_oUndoRedoWorkbook, AscCH.historyitem_Workbook_Metadata,
-				// 	null, null, new UndoRedoData_FromTo(oldMetadata, newMetadata));
+
+				let _index = formula.getIndexNumber();
+				AscCommon.History.Add(AscCommonExcel.g_oUndoRedoArrayFormula, AscCH.historyitem_ArrayFromula_ChangeValueMetaDataIndex,
+					null, null, new UndoRedoData_IndexSimpleProp(_index, false, oldIndex, formula.vm), true);
 			}
 		}
 		//this.dependencyFormulas.volatileArrays
@@ -18111,7 +18116,7 @@
 						wb.dependencyFormulas.addToChangedCell(cell);
 			});
 		}
-			});
+			});re
 		}
 	};
 	CCellWithFormula.prototype._onShared = function(eventData) {

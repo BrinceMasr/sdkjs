@@ -312,6 +312,7 @@ function (window, undefined) {
 	
 	window['AscCH'].historyitem_ArrayFromula_AddFormula = 1;
 	window['AscCH'].historyitem_ArrayFromula_DeleteFormula = 2;
+	window['AscCH'].historyitem_ArrayFromula_ChangeValueMetaDataIndex = 3;
 
 	window['AscCH'].historyitem_Header_First = 1;
 	window['AscCH'].historyitem_Header_Even = 2;

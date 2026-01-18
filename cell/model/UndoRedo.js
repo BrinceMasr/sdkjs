@@ -5208,14 +5208,14 @@ function (window, undefined) {
 					range.setValue(formula, null, null, bbox, null, {cmIndex: cmIndex, vmIndex: vmIndex, range: bbox});
 				}
 				break;
-			case AscCH.historyitem_ArrayFromula_DeleteFormula:
-				if (bUndo) {
-					if (vmIndex != null) {
-						range = ws.getRange3(bbox.r1, bbox.c1, bbox.r1, bbox.c1);
-						bbox = new Asc.Range(bbox.c1, bbox.r1, bbox.c1, bbox.r1);
-					}
-					range.setValue(formula, null, null, bbox, null, {cmIndex: cmIndex, vmIndex: vmIndex, range: bbox});
+			case AscCH.historyitem_ArrayFromula_ChangeValueMetaDataIndex:
+
+				let parsed = this.wb.workbookFormulas.get(Data.index);
+				if (parsed) {
+					let val = bUndo ? Data.oOldVal : Data.oNewVal;
+					parsed.setVm(val);
 				}
+
 				break;
 		}
 	};
