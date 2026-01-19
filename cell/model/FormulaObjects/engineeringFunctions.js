@@ -1070,6 +1070,24 @@ function (window, undefined) {
 
 	};
 
+	Complex.methodsMap = {
+		'Cos': Complex.prototype.Cos,
+		'Cosh': Complex.prototype.Cosh,
+		'Cot': Complex.prototype.Cot,
+		'Csc': Complex.prototype.Csc,
+		'Csch': Complex.prototype.Csch,
+		'Exp': Complex.prototype.Exp,
+		'Ln': Complex.prototype.Ln,
+		'Log10': Complex.prototype.Log10,
+		'Log2': Complex.prototype.Log2,
+		'SQRT': Complex.prototype.SQRT,
+		'Sec': Complex.prototype.Sec,
+		'Sech': Complex.prototype.Sech,
+		'Sin': Complex.prototype.Sin,
+		'Sinh': Complex.prototype.Sinh,
+		'Tan': Complex.prototype.Tan
+	};
+
 	var unitConverterArr = null;
 	var availablePrefixMap = null;
 	var prefixValueMap = null;
@@ -4382,7 +4400,15 @@ function (window, undefined) {
 			return c;
 		}
 
-		c[methodName]();
+		let r;
+		var method = Complex.methodsMap[methodName];
+		if (method) {
+			r = method.call(c);
+		}
+
+		if (r && r.type === cElementType.error) {
+			return r;
+		}
 
 		if (!Number.isFinite(c.img) || !Number.isFinite(c.real)) {
 			return new cError(cErrorType.not_numeric);
@@ -6346,29 +6372,7 @@ function (window, undefined) {
 			return new cError(cErrorType.not_numeric);
 		}
 
-		arg0 = arg0.tocString();
-		if (arg0.type === cElementType.error) {
-			return arg0;
-		}
-
-		let c = new Complex(arg0.toString());
-		if (c.type === cElementType.error) {
-			return c;
-		}
-
-
-		let r = c.Ln();
-		if (r && r.type === cElementType.error) {
-			return r;
-		}
-
-		if (!Number.isFinite(c.img) || !Number.isFinite(c.real)) {
-			return new cError(cErrorType.not_numeric);
-		}
-
-		let res = new cString(c.toString());
-		res.numFormat = 0;
-
+		let res = IMFUNC(arg0, "Ln");
 		return res;
 
 	};
@@ -6406,28 +6410,7 @@ function (window, undefined) {
 			return new cError(cErrorType.not_numeric);
 		}
 
-		arg0 = arg0.tocString();
-		if (arg0.type === cElementType.error) {
-			return arg0;
-		}
-
-		let c = new Complex(arg0.toString());
-		if (c.type === cElementType.error) {
-			return c;
-		}
-
-		let r = c.Log10();
-		if (r && r.type === cElementType.error) {
-			return r;
-		}
-
-		if (!Number.isFinite(c.img) || !Number.isFinite(c.real)) {
-			return new cError(cErrorType.not_numeric);
-		}
-
-		let res = new cString(c.toString());
-		res.numFormat = 0;
-
+		let res = IMFUNC(arg0, "Log10");
 		return res;
 
 	};
@@ -6465,30 +6448,8 @@ function (window, undefined) {
 			return new cError(cErrorType.not_numeric);
 		}
 
-		arg0 = arg0.tocString();
-		if (arg0.type === cElementType.error) {
-			return arg0;
-		}
-
-		let c = new Complex(arg0.toString());
-		if (c.type === cElementType.error) {
-			return c;
-		}
-
-		let r = c.Log2();
-		if (r && r.type === cElementType.error) {
-			return r;
-		}
-
-		if (!Number.isFinite(c.img) || !Number.isFinite(c.real)) {
-			return new cError(cErrorType.not_numeric);
-		}
-
-		let res = new cString(c.toString());
-		res.numFormat = 0;
-
+		let res = IMFUNC(arg0, "Log2");
 		return res;
-
 	};
 
 	/**

@@ -2569,17 +2569,23 @@
 			this.watermarkDraw && this.watermarkDraw.inputContentSrc) {
 			jsonparams["watermark"] = JSON.parse(this.watermarkDraw.getCorrectedInputContentSrc());
 		}
-		const nativeOptions = options.advancedOptions && options.advancedOptions.asc_getNativeOptions();
-		if (nativeOptions) {
-			jsonparams["printPages"] = nativeOptions["pages"];
-		}
-
-		if (Asc.editor.isPdfEditor() && options.advancedOptions) {
-			jsonparams["pdfLayout"] = {
-				"content": options.advancedOptions.asc_getPdfContent()
+		
+		if (options.advancedOptions instanceof Asc.asc_CAdjustPrint)
+		{
+			const nativeOptions = options.advancedOptions.asc_getNativeOptions();
+			if (nativeOptions)
+			{
+				jsonparams["printPages"] = nativeOptions["pages"];
+			}
+			
+			if (Asc.editor.isPdfEditor() && options.advancedOptions)
+			{
+				jsonparams["pdfLayout"] = {
+					"content" : options.advancedOptions.asc_getPdfContent()
+				}
 			}
 		}
-
+		
 		if (Object.keys(jsonparams).length > 0) {
 			oAdditionalData["jsonparams"] = jsonparams;
 		}
