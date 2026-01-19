@@ -9595,5 +9595,5 @@ $(function () {
 		clearData(0, 0, 100, 200);
 	});
 
-	QUnit.module("Sheet structure");
+	QUnit.module("Dynamic Arrays Tests");
 });
