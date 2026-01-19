@@ -4319,6 +4319,22 @@ $(function () {
 			assert.strictEqual(offset3.row, 3, desc + " - Third formula offset row is 3 (4 rows)");
 			assert.strictEqual(offset3.col, 0, desc + " - Third formula offset col is 0 (1 column)");
 
+			// Check metadata structure
+			let metadata = getMetadata();
+			assert.ok(metadata != null, desc + " - Metadata exists");
+			assert.ok(metadata.cellMetadata && metadata.cellMetadata.length > 0, desc + " - cellMetadata array exists");
+			assert.ok(metadata.metadataTypes && metadata.metadataTypes.length > 0, desc + " - metadataTypes array exists");
+			assert.ok(metadata.aFutureMetadata && metadata.aFutureMetadata.length > 0, desc + " - aFutureMetadata array exists");
+
+			// Check richValueData structure
+			let richValueData = getRichValueData();
+			assert.ok(richValueData != null, desc + " - richValueData exists");
+			assert.ok(richValueData.pData && richValueData.pData.length === 3, desc + " - richValueData has 3 entries");
+
+			// Check richValueStructures
+			let richValueStructures = getRichValueStructures();
+			assert.ok(richValueStructures != null, desc + " - richValueStructures exists");
+			assert.ok(richValueStructures.children && richValueStructures.children.length > 0, desc + " - richValueStructures has children");
 		};
 
 		let checkTwoFormulas = function(desc) {
@@ -4348,6 +4364,23 @@ $(function () {
 			let offset3 = ws.dynamicArrayManager.getRichValueOffset(resCell.nRow, resCell.nCol);
 			assert.strictEqual(offset3.row, 3, desc + " - Third formula (K1) offset row is 3 (4 rows) - after first deletion");
 			assert.strictEqual(offset3.col, 0, desc + " - Third formula (K1) offset col is 0 (1 column) - after first deletion");
+
+			// Check metadata structure
+			let metadata = getMetadata();
+			assert.ok(metadata != null, desc + " - Metadata exists");
+			assert.ok(metadata.cellMetadata && metadata.cellMetadata.length > 0, desc + " - cellMetadata array exists");
+			assert.ok(metadata.metadataTypes && metadata.metadataTypes.length > 0, desc + " - metadataTypes array exists");
+			assert.ok(metadata.aFutureMetadata && metadata.aFutureMetadata.length > 0, desc + " - aFutureMetadata array exists");
+
+			// Check richValueData structure
+			let richValueData = getRichValueData();
+			assert.ok(richValueData != null, desc + " - richValueData exists");
+			assert.ok(richValueData.pData && richValueData.pData.length === 2, desc + " - richValueData has 2 entries (after first deletion)");
+
+			// Check richValueStructures
+			let richValueStructures = getRichValueStructures();
+			assert.ok(richValueStructures != null, desc + " - richValueStructures exists");
+			assert.ok(richValueStructures.children && richValueStructures.children.length > 0, desc + " - richValueStructures has children");
 		};
 
 		let checkOneFormula = function(desc) {
@@ -4368,6 +4401,23 @@ $(function () {
 			let offset3 = ws.dynamicArrayManager.getRichValueOffset(resCell.nRow, resCell.nCol);
 			assert.strictEqual(offset3.row, 3, desc + " - Third formula (K1) offset row is 3 (4 rows) - only remaining formula");
 			assert.strictEqual(offset3.col, 0, desc + " - Third formula (K1) offset col is 0 (1 column) - only remaining formula");
+
+			// Check metadata structure
+			let metadata = getMetadata();
+			assert.ok(metadata != null, desc + " - Metadata exists");
+			assert.ok(metadata.cellMetadata && metadata.cellMetadata.length > 0, desc + " - cellMetadata array exists");
+			assert.ok(metadata.metadataTypes && metadata.metadataTypes.length > 0, desc + " - metadataTypes array exists");
+			assert.ok(metadata.aFutureMetadata && metadata.aFutureMetadata.length > 0, desc + " - aFutureMetadata array exists");
+
+			// Check richValueData structure
+			let richValueData = getRichValueData();
+			assert.ok(richValueData != null, desc + " - richValueData exists");
+			assert.ok(richValueData.pData && richValueData.pData.length === 1, desc + " - richValueData has 1 entry (only K1 remains)");
+
+			// Check richValueStructures
+			let richValueStructures = getRichValueStructures();
+			assert.ok(richValueStructures != null, desc + " - richValueStructures exists");
+			assert.ok(richValueStructures.children && richValueStructures.children.length > 0, desc + " - richValueStructures has children");
 		};
 
 		let checkAllDeleted = function(desc) {
@@ -4411,14 +4461,183 @@ $(function () {
 		checkThreeFormulas("Initial state");
 
 		ws.getRange2("C1").setValue("");
-		checkUndoRedo(checkThreeFormulas, checkTwoFormulas, "delete first formula", true);
+		checkUndoRedo(checkThreeFormulas, checkTwoFormulas, "After deleting C1 (first formula, 2 formulas remain: G1 and K1)", true);
 
 		ws.getRange2("G1").setValue("");
-		checkUndoRedo(checkTwoFormulas, checkOneFormula, "delete second formula", true);
+		checkUndoRedo(checkTwoFormulas, checkOneFormula, "After deleting G1 (second formula, 1 formula remains: K1)", true);
 
 		ws.getRange2("K1").setValue("");
-		checkUndoRedo(checkOneFormula, checkAllDeleted, "delete third formula", true);
+		checkUndoRedo(checkOneFormula, checkAllDeleted, "After deleting K1 (third formula, all formulas deleted)", true);
 
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"Complex dynamic array metadata with expanded and blocked arrays - delete with undo/redo\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		clearData(0, 0, 100, 200);
+
+		let fillRange, fragment, resCell, cellValue;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		// ============ Step 1: Add all source data ============
+		
+		// Group 1 data: Vertical arrays
+		ws.getRange2("A1").setValue("10");
+		ws.getRange2("A2").setValue("20");
+		ws.getRange2("E1").setValue("5");
+		ws.getRange2("E2").setValue("10");
+		ws.getRange2("G2").setValue("Block");
+
+		// Group 2 data: 2D arrays
+		ws.getRange2("A5").setValue("1");
+		ws.getRange2("A6").setValue("2");
+		ws.getRange2("B5").setValue("3");
+		ws.getRange2("B6").setValue("4");
+		
+		// Group 3 data: Another array
+		ws.getRange2("A10").setValue("100");
+		ws.getRange2("A11").setValue("200");
+		ws.getRange2("C11").setValue("Y");
+
+		// ============ Step 2: Add all formulas ============
+		
+		// Group 1 formulas: Expanded array 1
+		fillRange = ws.getRange2("C1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("C1").getValueForEdit2();
+		fragment[0].setFragmentText("=A1:A2*2");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		// Group 1 formulas: Blocked array 1
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=SQRT(E1:E2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		// Group 2 formulas: Expanded 2D array
+		fillRange = ws.getRange2("D5");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("D5").getValueForEdit2();
+		fragment[0].setFragmentText("=A5:B6*10");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+		
+		// Group 3 formulas: Blocked array
+		fillRange = ws.getRange2("C10");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("C10").getValueForEdit2();
+		fragment[0].setFragmentText("=A10:A11/10");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		// ============ Step 3: Verification functions ============
+		let checkAllArrays = function(desc) {
+			// Group 1
+			cellValue = ws.getRange2("C1").getValue();
+			assert.strictEqual(cellValue, "20", desc + " - C1 expanded");
+			cellValue = ws.getRange2("C2").getValue();
+			assert.strictEqual(cellValue, "40", desc + " - C2 expanded");
+			cellValue = ws.getRange2("G1").getValue();
+			assert.strictEqual(cellValue, "#SPILL!", desc + " - G1 blocked");
+			
+			// Group 2
+			cellValue = ws.getRange2("D5").getValue();
+			assert.strictEqual(cellValue, "10", desc + " - D5 expanded 2D");
+			cellValue = ws.getRange2("E6").getValue();
+			assert.strictEqual(cellValue, "40", desc + " - E6 expanded 2D");
+			
+			// Group 3
+			cellValue = ws.getRange2("C10").getValue();
+			assert.strictEqual(cellValue, "#SPILL!", desc + " - C10 blocked");
+
+			// Check metadata exists
+			let metadata = getMetadata();
+			assert.ok(metadata != null, desc + " - Metadata exists");
+			assert.ok(metadata.cellMetadata && metadata.cellMetadata.length > 0, desc + " - cellMetadata exists");
+		};
+
+		let checkAfterFirstDeletions = function(desc) {
+			// C1 deleted, others remain
+			resCell = getCell(ws.getRange2("C1"));
+			assert.strictEqual(resCell.getFormula(), "", desc + " - C1 deleted");
+			
+			// Group 1 - G1 still blocked
+			cellValue = ws.getRange2("G1").getValue();
+			assert.strictEqual(cellValue, "#SPILL!", desc + " - G1 still blocked");
+			
+			// Group 2 and 3 still exist
+			cellValue = ws.getRange2("D5").getValue();
+			assert.strictEqual(cellValue, "10", desc + " - D5 still expanded");
+			cellValue = ws.getRange2("C10").getValue();
+			assert.strictEqual(cellValue, "#SPILL!", desc + " - C10 still blocked");
+		};
+
+		let checkAfterSecondDeletions = function(desc) {
+			// C1 and G1 deleted
+			resCell = getCell(ws.getRange2("C1"));
+			assert.strictEqual(resCell.getFormula(), "", desc + " - C1 deleted");
+			resCell = getCell(ws.getRange2("G1"));
+			assert.strictEqual(resCell.getFormula(), "", desc + " - G1 deleted");
+			
+			// Group 2 and 3 still exist
+			cellValue = ws.getRange2("D5").getValue();
+			assert.strictEqual(cellValue, "10", desc + " - D5 still expanded");
+			cellValue = ws.getRange2("C10").getValue();
+			assert.strictEqual(cellValue, "#SPILL!", desc + " - C10 still blocked");
+		};
+
+		let checkAfterThirdDeletions = function(desc) {
+			// C1, G1, D5 deleted
+			resCell = getCell(ws.getRange2("C1"));
+			assert.strictEqual(resCell.getFormula(), "", desc + " - C1 deleted");
+			resCell = getCell(ws.getRange2("G1"));
+			assert.strictEqual(resCell.getFormula(), "", desc + " - G1 deleted");
+			resCell = getCell(ws.getRange2("D5"));
+			assert.strictEqual(resCell.getFormula(), "", desc + " - D5 deleted");
+			
+			// Only C10 still exists
+			cellValue = ws.getRange2("C10").getValue();
+			assert.strictEqual(cellValue, "#SPILL!", desc + " - C10 still blocked");
+		};
+
+		let checkAllDeleted = function(desc) {
+			// All arrays deleted
+			resCell = getCell(ws.getRange2("C1"));
+			assert.strictEqual(resCell.getFormula(), "", desc + " - C1 deleted");
+			resCell = getCell(ws.getRange2("D5"));
+			assert.strictEqual(resCell.getFormula(), "", desc + " - D5 deleted");
+			resCell = getCell(ws.getRange2("C10"));
+			assert.strictEqual(resCell.getFormula(), "", desc + " - C10 deleted");
+			
+			// Check metadata removed
+			let metadata = getMetadata();
+			assert.ok(metadata == null, desc + " - Metadata removed");
+		};
+
+		checkAllArrays("Initial state with all arrays");
+
+		// Step 1: Delete C1 only
+		ws.getRange2("C1").setValue("");
+		checkUndoRedo(checkAllArrays, checkAfterFirstDeletions, "After deleting C1", true);
+
+		// Step 2: Delete G1
+		ws.getRange2("G1").setValue("");
+		checkUndoRedo(checkAfterFirstDeletions, checkAfterSecondDeletions, "After deleting G1", true);
+
+		// Step 3: Delete D5
+		ws.getRange2("D5").setValue("");
+		checkUndoRedo(checkAfterSecondDeletions, checkAfterThirdDeletions, "After deleting D5", true);
+
+		// Step 4: Delete C10 (last array)
+		ws.getRange2("C10").setValue("");
+		checkUndoRedo(checkAfterThirdDeletions, checkAllDeleted, "After deleting all arrays", true);
+
+		// Cleanup
 		clearData(0, 0, 100, 200);
 	});
 
