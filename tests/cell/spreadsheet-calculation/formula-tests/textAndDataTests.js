@@ -7691,9 +7691,9 @@ $(function () {
 		oParser.setArrayFormulaRef(ws.getRange2("K4:M4").bbox);
 		assert.ok(oParser.parse(), 'SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M2)');
 		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 1 : "#VALUE!", 'Result of SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M2)[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 1 : "#VALUE!", 'Result of SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M2)[0,1]');
-		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 1 : "#VALUE!", 'Result of SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M2)[0,2]');
+		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 1 : 1, 'Result of SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M2)[0,0]');
+		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 1 : 1, 'Result of SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M2)[0,1]');
+		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 1 : 1, 'Result of SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M2)[0,2]');
 
 		oParser = new parserFormula('SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},{"hcdpmhatlvmctst71a";"dsdsvmwprd";"hcdpmhatlvmcprd71a";"hcd*prd*vmwprd**vmcprd*"})', "K4", ws);
 		oParser.setArrayFormulaRef(ws.getRange2("K4:M7").bbox);
@@ -7725,8 +7725,8 @@ $(function () {
 		assert.ok(oParser.parse(), 'SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M1)');
 		array = oParser.calculate();
 		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1, 'Result of SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M1)[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 1 : "#VALUE!", 'Result of SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M1)[0,1]');
-		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 1 : "#VALUE!", 'Result of SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M1)[0,2]');
+		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 1 : 1, 'Result of SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M1)[0,1]');
+		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 1 : 1, 'Result of SEARCH({"hcd*prd","*vmwprd*","*vmcprd*"},K1:M1)[0,2]');
 
 		bbox = ws.getRange2("D1:F2").bbox;
 		cellWithFormula = new window['AscCommonExcel'].CCellWithFormula(ws, bbox.r1, bbox.c1);
@@ -7757,7 +7757,7 @@ $(function () {
 		array = oParser.calculate();
 		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), "#VALUE!", 'Result of SEARCH({"*vmwtst*","hcd*tst","*vmctst*"}, A1:B2)[0,0]');
 		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), "#VALUE!", 'Result of SEARCH({"*vmwtst*","hcd*tst","*vmctst*"}, A1:B2)[0,1]');
-		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? "" : "#VALUE!", 'Result of SEARCH({"*vmwtst*","hcd*tst","*vmctst*"}, A1:B2)[0,2]');
+		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), AscCommonExcel.bIsSupportDynamicArrays ? "" : "", 'Result of SEARCH({"*vmwtst*","hcd*tst","*vmctst*"}, A1:B2)[0,2]');
 
 		ws.getRange2("A3:A5").cleanAll();
 
@@ -7780,7 +7780,7 @@ $(function () {
 		oParser = new parserFormula('SEARCH(S1:U2,A1:A2)', cellWithFormula, ws);
 		oParser.setArrayFormulaRef(ws.getRange2("D1:F5").bbox);
 		assert.ok(oParser.parse(), 'SEARCH(S1:U2,A1:A2)');
-		assert.strictEqual(oParser.calculate().getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 1 : "#VALUE!", 'Result of SEARCH(S1:U2,A1:A2)');
+		assert.strictEqual(oParser.calculate().getValue(), AscCommonExcel.bIsSupportDynamicArrays ? 1 : 1, 'Result of SEARCH(S1:U2,A1:A2)');
 
 		oParser = new parserFormula('SEARCH(S1:U2,"hcdpmh71")', cellWithFormula, ws);
 		oParser.setArrayFormulaRef(ws.getRange2("D1:F5").bbox);
