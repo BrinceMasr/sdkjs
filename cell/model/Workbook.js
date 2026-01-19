@@ -1383,7 +1383,7 @@
 			return this.volatileArrays
 		},
 		endListeningVolatileArray: function(listenerId) {
-			if (listenerId) {
+			if (listenerId != null) {
 				delete this.volatileArrays[listenerId];
 			}
 		},
@@ -3545,9 +3545,8 @@
 				let oldIndex = formula.vm;
 				formula.vm--;
 
-				let _index = formula.getIndexNumber();
 				AscCommon.History.Add(AscCommonExcel.g_oUndoRedoArrayFormula, AscCH.historyitem_ArrayFromula_ChangeValueMetaDataIndex,
-					null, null, new UndoRedoData_IndexSimpleProp(_index, false, oldIndex, formula.vm), true);
+					formula.ws.getId(), null, new AscCommonExcel.UndoRedoData_ArrayFormula(new Asc.Range(formula.ref.c1, formula.ref.r1, formula.ref.c1, formula.ref.r1), null, null, formula.vm, oldIndex), true);
 			}
 		}
 		//this.dependencyFormulas.volatileArrays
@@ -18116,7 +18115,7 @@
 						wb.dependencyFormulas.addToChangedCell(cell);
 			});
 		}
-			});re
+			});
 		}
 	};
 	CCellWithFormula.prototype._onShared = function(eventData) {
@@ -25057,7 +25056,7 @@
 			}
 			if (toCmIndex != null && to.checkFirstCellArray(parent)) {
 				this.addDynamicFormula(toCmIndex);
-				if (to.getVm() != null) {
+				if (to.getVm() != null && !this.ws.workbook.bUndoChanges) {
 					this.ws.workbook.dependencyFormulas.addToVolatileArrays(to);
 				}
 			}

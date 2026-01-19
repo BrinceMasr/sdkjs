@@ -2397,18 +2397,20 @@ function (window, undefined) {
 	};
 
 	//***array-formula***
-	function UndoRedoData_ArrayFormula(range, formula, cmIndex, vmIndex) {
+	function UndoRedoData_ArrayFormula(range, formula, cmIndex, vmIndex, undoVmIndex) {
 		this.range = range;
 		this.formula = formula;
 		this.cmIndex = cmIndex;
 		this.vmIndex = vmIndex;
+		this.undoVmIndex = undoVmIndex;
 	}
 
 	UndoRedoData_ArrayFormula.prototype.Properties = {
 		range: 0,
 		formula: 1,
 		cmIndex: 2,
-		vmIndex: 3
+		vmIndex: 3,
+		undoVmIndex: 4
 	};
 	UndoRedoData_ArrayFormula.prototype.getType = function () {
 		return UndoRedoDataTypes.ArrayFormula;
@@ -2426,6 +2428,8 @@ function (window, undefined) {
 				return this.cmIndex;
 			case this.Properties.vmIndex:
 				return this.vmIndex;
+			case this.Properties.undoVmIndex:
+				return this.undoVmIndex;
 		}
 
 		return null;
@@ -2443,6 +2447,9 @@ function (window, undefined) {
 				break;
 			case this.Properties.vmIndex:
 				this.vmIndex = value;
+				break;
+			case this.Properties.undoVmIndex:
+				this.undoVmIndex = value;
 				break;
 		}
 		return null;
@@ -5166,15 +5173,14 @@ function (window, undefined) {
 		this.UndoRedo(Type, Data, nSheetId, false, opt_wb);
 	};
 	UndoRedoArrayFormula.prototype.UndoRedo = function (Type, Data, nSheetId, bUndo, opt_wb) {
-		var ws = this.wb.getWorksheetById(nSheetId);
-		if (null == ws) {
-			return;
-		}
-
 		var bbox = Data.range;
 		var formula = Data.formula;
 		let cmIndex = Data.cmIndex;
 		let vmIndex = Data.vmIndex;
+		let ws = this.wb.getWorksheetById(nSheetId);
+		if (null == ws) {
+			return;
+		}
 		var range = ws.getRange3(bbox.r1, bbox.c1, bbox.r2, bbox.c2);
 		switch (Type) {
 			case AscCH.historyitem_ArrayFromula_AddFormula:
@@ -5210,11 +5216,12 @@ function (window, undefined) {
 				break;
 			case AscCH.historyitem_ArrayFromula_ChangeValueMetaDataIndex:
 
-				let parsed = this.wb.workbookFormulas.get(Data.index);
-				if (parsed) {
-					let val = bUndo ? Data.oOldVal : Data.oNewVal;
-					parsed.setVm(val);
-				}
+				let val = bUndo ? Data.undoVmIndex : Data.vmIndex;
+				range._foreach(function(cell) {
+					if (cell && cell.formulaParsed) {
+						cell.formulaParsed.setVm(val);
+					}
+				});
 
 				break;
 		}

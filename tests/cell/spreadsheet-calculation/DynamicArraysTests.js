@@ -4255,6 +4255,173 @@ $(function () {
 		ws.getRange2("A1:Z30").cleanAll();
 	});
 
+	QUnit.test("Test: \"Dynamic array metadata and deletion with undo/redo\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+		clearData(0, 0, 100, 200);
+
+		let fillRange, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		ws.getRange2("A1").setValue("1");
+		ws.getRange2("A2").setValue("2");
+		ws.getRange2("A3").setValue("3");
+		ws.getRange2("C2").setValue("Block1");
+
+		ws.getRange2("E1").setValue("5");
+		ws.getRange2("E2").setValue("10");
+		ws.getRange2("G2").setValue("Block2");
+
+		ws.getRange2("I1").setValue("100");
+		ws.getRange2("I2").setValue("200");
+		ws.getRange2("I3").setValue("300");
+		ws.getRange2("I4").setValue("400");
+		ws.getRange2("K2").setValue("Block3");
+
+		let checkThreeFormulas = function(desc) {
+			let resCell = getCell(ws.getRange2("C1"));
+			let cellValue = ws.getRange2("C1").getValue();
+			assert.strictEqual(cellValue, "#SPILL!", desc + " - First formula #SPILL!");
+			let vmIndex1 = resCell && resCell.formulaParsed && resCell.formulaParsed.getVm();
+			assert.strictEqual(vmIndex1, 1, desc + " - First formula has metadata");
+			let cmIndex1 = resCell && resCell.formulaParsed && resCell.formulaParsed.getCm();
+			assert.strictEqual(cmIndex1, 1, desc + " - C1 has cellMetadata");
+
+			let offset1 = ws.dynamicArrayManager.getRichValueOffset(resCell.nRow, resCell.nCol);
+			assert.strictEqual(offset1.row, 2, desc + " - First formula offset row is 2 (3 rows)");
+			assert.strictEqual(offset1.col, 0, desc + " - First formula offset col is 0 (1 column)");
+
+			resCell = getCell(ws.getRange2("G1"));
+			cellValue = ws.getRange2("G1").getValue();
+			assert.strictEqual(cellValue, "#SPILL!", desc + " - Second formula #SPILL!");
+			let vmIndex2 = resCell && resCell.formulaParsed && resCell.formulaParsed.getVm();
+			assert.strictEqual(vmIndex2, 2, desc + " - Second formula has metadata");
+			let cmIndex2 = resCell && resCell.formulaParsed && resCell.formulaParsed.getCm();
+			assert.strictEqual(cmIndex2, 1, desc + " - G1 has cellMetadata");
+
+			let offset2 = ws.dynamicArrayManager.getRichValueOffset(resCell.nRow, resCell.nCol);
+			assert.strictEqual(offset2.row, 1, desc + " - Second formula offset row is 1 (2 rows)");
+			assert.strictEqual(offset2.col, 0, desc + " - Second formula offset col is 0 (1 column)");
+
+			resCell = getCell(ws.getRange2("K1"));
+			cellValue = ws.getRange2("K1").getValue();
+			assert.strictEqual(cellValue, "#SPILL!", desc + " - Third formula #SPILL!");
+			let vmIndex3 = resCell && resCell.formulaParsed && resCell.formulaParsed.getVm();
+			assert.strictEqual(vmIndex3, 3, desc + " - Third formula has metadata");
+			let cmIndex3 = resCell && resCell.formulaParsed && resCell.formulaParsed.getCm();
+			assert.strictEqual(cmIndex3, 1, desc + " - K1 has cellMetadata");
+
+			let offset3 = ws.dynamicArrayManager.getRichValueOffset(resCell.nRow, resCell.nCol);
+			assert.strictEqual(offset3.row, 3, desc + " - Third formula offset row is 3 (4 rows)");
+			assert.strictEqual(offset3.col, 0, desc + " - Third formula offset col is 0 (1 column)");
+
+		};
+
+		let checkTwoFormulas = function(desc) {
+			let resCell = getCell(ws.getRange2("C1"));
+			assert.strictEqual(resCell.getFormula(), "", desc + " - First formula deleted");
+
+			resCell = getCell(ws.getRange2("G1"));
+			let cellValue = ws.getRange2("G1").getValue();
+			assert.strictEqual(cellValue, "#SPILL!", desc + " - Second formula #SPILL!");
+			let vmIndex2 = resCell && resCell.formulaParsed && resCell.formulaParsed.getVm();
+			assert.strictEqual(vmIndex2, 1, desc + " - Second formula has metadata");
+			let cmIndex2 = resCell && resCell.formulaParsed && resCell.formulaParsed.getCm();
+			assert.strictEqual(cmIndex2, 1, desc + " - G1 has cellMetadata");
+
+			let offset2 = ws.dynamicArrayManager.getRichValueOffset(resCell.nRow, resCell.nCol);
+			assert.strictEqual(offset2.row, 1, desc + " - Second formula offset row is 1 (2 rows)");
+			assert.strictEqual(offset2.col, 0, desc + " - Second formula offset col is 0 (1 column)");
+
+			resCell = getCell(ws.getRange2("K1"));
+			cellValue = ws.getRange2("K1").getValue();
+			assert.strictEqual(cellValue, "#SPILL!", desc + " - Third formula #SPILL!");
+			let vmIndex3 = resCell && resCell.formulaParsed && resCell.formulaParsed.getVm();
+			assert.strictEqual(vmIndex3, 2, desc + " - Third formula has metadata");
+			let cmIndex3 = resCell && resCell.formulaParsed && resCell.formulaParsed.getCm();
+			assert.strictEqual(cmIndex3, 1, desc + " - K1 has cellMetadata");
+
+			let offset3 = ws.dynamicArrayManager.getRichValueOffset(resCell.nRow, resCell.nCol);
+			assert.strictEqual(offset3.row, 3, desc + " - Third formula (K1) offset row is 3 (4 rows) - after first deletion");
+			assert.strictEqual(offset3.col, 0, desc + " - Third formula (K1) offset col is 0 (1 column) - after first deletion");
+		};
+
+		let checkOneFormula = function(desc) {
+			let resCell = getCell(ws.getRange2("C1"));
+			assert.strictEqual(resCell.getFormula(), "", desc + " - First formula deleted");
+
+			resCell = getCell(ws.getRange2("G1"));
+			assert.strictEqual(resCell.getFormula(), "", desc + " - Second formula deleted");
+
+			resCell = getCell(ws.getRange2("K1"));
+			let cellValue = ws.getRange2("K1").getValue();
+			assert.strictEqual(cellValue, "#SPILL!", desc + " - Third formula #SPILL!");
+			let vmIndex3 = resCell && resCell.formulaParsed && resCell.formulaParsed.getVm();
+			assert.strictEqual(vmIndex3, 1, desc + " - Third formula has metadata");
+			let cmIndex3 = resCell && resCell.formulaParsed && resCell.formulaParsed.getCm();
+			assert.strictEqual(cmIndex3, 1, desc + " - K1 has cellMetadata");
+
+			let offset3 = ws.dynamicArrayManager.getRichValueOffset(resCell.nRow, resCell.nCol);
+			assert.strictEqual(offset3.row, 3, desc + " - Third formula (K1) offset row is 3 (4 rows) - only remaining formula");
+			assert.strictEqual(offset3.col, 0, desc + " - Third formula (K1) offset col is 0 (1 column) - only remaining formula");
+		};
+
+		let checkAllDeleted = function(desc) {
+			let resCell = getCell(ws.getRange2("C1"));
+			assert.strictEqual(resCell.getFormula(), "", desc + " - First formula deleted");
+
+			resCell = getCell(ws.getRange2("G1"));
+			assert.strictEqual(resCell.getFormula(), "", desc + " - Second formula deleted");
+
+			resCell = getCell(ws.getRange2("K1"));
+			assert.strictEqual(resCell.getFormula(), "", desc + " - Third formula deleted");
+
+			let metadata = getMetadata();
+			assert.ok(metadata == null, desc + " - Metadata removed");
+
+			let richValueData = getRichValueData();
+			assert.ok(richValueData == null, desc + " - richValueData removed");
+
+			let richValueStructures = getRichValueStructures();
+			assert.ok(richValueStructures == null, desc + " - richValueStructures removed");
+		};
+
+		fillRange = ws.getRange2("C1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("C1").getValueForEdit2();
+		fragment[0].setFragmentText("=A1:A3*10");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=SIN(E1:E2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		fillRange = ws.getRange2("K1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("K1").getValueForEdit2();
+		fragment[0].setFragmentText("=SQRT(I1:I4)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		checkThreeFormulas("Initial state");
+
+		ws.getRange2("C1").setValue("");
+		checkUndoRedo(checkThreeFormulas, checkTwoFormulas, "delete first formula", true);
+
+		ws.getRange2("G1").setValue("");
+		checkUndoRedo(checkTwoFormulas, checkOneFormula, "delete second formula", true);
+
+		ws.getRange2("K1").setValue("");
+		checkUndoRedo(checkOneFormula, checkAllDeleted, "delete third formula", true);
+
+		clearData(0, 0, 100, 200);
+	});
+
 	QUnit.test("Test: \"Metadata add test\"", function (assert) {
 		if (!AscCommonExcel.bIsSupportDynamicArrays) {
 			assert.ok(true, "Dynamic arrays support is disabled");
