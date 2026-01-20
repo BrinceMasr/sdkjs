@@ -2876,7 +2876,6 @@
 			this._paintFormsHighlight();
 			oDoc.UpdateInterface(true);
 			oDoc.UpdateInterfaceTracks();
-			oDoc.UpdateSearch();
 
 			// Обязательно делаем в конце, т.к. во время отрисовки происходит пересчет
 			this._checkTargetUpdate();

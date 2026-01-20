@@ -72,11 +72,6 @@ function (window, undefined) {
 		diff: 6
 	};
 	/**@enum {number} */
-	const c_oAscSolverResult = {
-		keepSolverSolution: 0,
-		restoreOriginalValues: 1
-	};
-	/**@enum {number} */
 	const c_oAscResultStatus = {
 		foundOptimalSolution: 0,
 		solutionHasConverged: 1,
@@ -1733,11 +1728,14 @@ function (window, undefined) {
 
 		this.setLastElementIndex(this.getVarsCount());
 
-		// Fills matrix
 		this.fillMatrix(aMatrix, aSimplexConstraints);
 		// Init last index row and column of matrix
 		this.setLastColumnIndex(nWidth - 1);
 		this.setLastRowIndex(nHeight - 1);
+
+		if (!oModel.getVariablesNonNegative()) {
+			this.fillUnrestrictedVars(aSimplexConstraints);
+		}
 	};
 	/**
 	 * Calculates solution using Simplex LP method.
@@ -1773,12 +1771,17 @@ function (window, undefined) {
 		const nLastColumnId = this.getLastColumnIndex();
 		const nLastRowId = this.getLastRowIndex();
 		const aVarIndexesCycle = this.getVarIndexesCycle();
+		const oUnrestrictedVars = this.getUnrestrictedVars();
+		const aVarIndexByRow = this.getVarIndexByRow();
+		const aVarIndexByCol = this.getVarIndexByCol();
 
 		let nLeavingRowIndex = 0;
 		let nRhsValue = -this.getPrecision();
+		let bHasUnrestrictedVar = false;
 		// Step 1: Find pivot row. Selecting leaving variable (feasibility condition). Basic variable with most negative value.
 		for (let i = 1; i <= nLastRowId; i++) {
-			const nValue = aMatrix[i][nRhsColumnId];
+			bHasUnrestrictedVar = !!(oUnrestrictedVars && oUnrestrictedVars[aVarIndexByRow[i]]);
+			const nValue = bHasUnrestrictedVar ? -aMatrix[i][nRhsColumnId] : aMatrix[i][nRhsColumnId];
 			if (nValue < nRhsValue) {
 				nRhsValue = nValue;
 				nLeavingRowIndex = i;
@@ -1797,7 +1800,8 @@ function (window, undefined) {
 		let nMaxQuotient = -Infinity;
 		for (let i = 1; i <= nLastColumnId; i++) {
 			const nCoefficient = aLeavingRow[i];
-			if (nCoefficient < -this.getPrecision()) {
+			bHasUnrestrictedVar = !!(oUnrestrictedVars && oUnrestrictedVars[aVarIndexByCol[i]]);
+			if (bHasUnrestrictedVar || nCoefficient < -this.getPrecision()) {
 				const nQuotient = -aObjectiveRow[i] / nCoefficient;
 				if (nMaxQuotient < nQuotient) {
 					nMaxQuotient = nQuotient;
@@ -1813,8 +1817,6 @@ function (window, undefined) {
 		}
 
 		// Check for cycles
-		const aVarIndexByRow = this.getVarIndexByRow();
-		const aVarIndexByCol = this.getVarIndexByCol();
 		aVarIndexesCycle.push([aVarIndexByRow[nLeavingRowIndex], aVarIndexByCol[nEnteringColumnIndex]]);
 		if (this.checkForCycles(aVarIndexesCycle)) {
 			this.setFeasible(false);
@@ -1844,13 +1846,27 @@ function (window, undefined) {
 		const aVarIndexesCycle = this.getVarIndexesCycle();
 		const nPrecision = this.getPrecision();
 		const aObjectiveRow = aMatrix[this.getObjectiveRowIndex()];
+		const aVarIndexByRow = this.getVarIndexByRow();
+		const aVarIndexByCol = this.getVarIndexByCol();
+		const oUnrestrictedVars = this.getUnrestrictedVars();
 
 		let nEnteringColumnIndex = 0;
 		let nEnteringValue = nPrecision;
 		let bReducedCostNegative = false;
+		let bHasUnrestrictedVar = false;
 
 		for (let col = 1; col <= nLastColumnId; col++) {
 			const nObjectiveCoefValue = aObjectiveRow[col];
+			bHasUnrestrictedVar = !!(oUnrestrictedVars && oUnrestrictedVars[aVarIndexByCol[col]]);
+
+			if (bHasUnrestrictedVar && nObjectiveCoefValue < 0) {
+				if (-nObjectiveCoefValue > nEnteringValue) {
+					nEnteringValue = -nObjectiveCoefValue;
+					nEnteringColumnIndex = col;
+					bReducedCostNegative = true;
+				}
+				continue;
+			}
 			if (nObjectiveCoefValue > nEnteringValue) {
 				nEnteringValue = nObjectiveCoefValue;
 				nEnteringColumnIndex = col;
@@ -1898,8 +1914,6 @@ function (window, undefined) {
 		}
 
 		// Check for cycles
-		const aVarIndexByRow = this.getVarIndexByRow();
-		const aVarIndexByCol = this.getVarIndexByCol();
 		aVarIndexesCycle.push([aVarIndexByRow[nLeavingRowIndex], aVarIndexByCol[nEnteringColumnIndex]]);
 		if (this.checkForCycles(aVarIndexesCycle)) {
 			this.setFeasible(false);
@@ -2116,6 +2130,39 @@ function (window, undefined) {
 		return aVariablesIndexes;
 	};
 	/**
+	 * Returns object with unrestricted variables.
+	 * @memberof CSimplexTableau
+	 * @returns {Object}
+	 */
+	CSimplexTableau.prototype.getUnrestrictedVars = function () {
+		return this.oUnrestrictedVars;
+	};
+	/**
+	 * Fills unrestricted variables to the object.
+	 * @memberof CSimplexTableau
+	 * @param {CConstraint[]} aSimplexConstraints
+	 */
+	CSimplexTableau.prototype.fillUnrestrictedVars = function (aSimplexConstraints) {
+		const oThis = this;
+		const oVariables = this.getVariables();
+		const oVarIndexByCellName = this.getVarIndexByCellName();
+
+		this.oUnrestrictedVars = {};
+		oVariables._foreachNoEmpty(function (oVariableCell) {
+			const sCellKey = oVariableCell.ws.getName() + '_' + oVariableCell.getName();
+			const bConstraintsHasVarCell = aSimplexConstraints.some(function (oConstraint) {
+				const oRefCell = oConstraint.getCell();
+				const nOperator = oConstraint.getOperator();
+				const sRefCellKey = oRefCell.ws.getName() + '_' + oRefCell.getName();
+				return sCellKey === sRefCellKey && nOperator === c_oAscOperator['>='];
+			});
+			if (!bConstraintsHasVarCell) {
+				const nVarIndex = oVarIndexByCellName[oVariableCell.getName()];
+				oThis.oUnrestrictedVars[nVarIndex] = oVariableCell;
+			}
+		});
+	};
+	/**
 	 * @memberof CSimplexTableau
 	 * @returns {number[][]}
 	 */
@@ -2241,12 +2288,28 @@ function (window, undefined) {
 				}
 			}
 		} else {
-			for (let i = 0, length = aArgsFormula.length; i < length; i++) {
-				const oCell = aArgsFormula[i];
-				if (oCell.isFormula()) {// Try to find coefficient for variable
-					const nFormulaResult = oModel.calculateFormula(NaN, null, oCell.getFormulaParsed());
-					if (nFormulaResult) {
-						nCoefficient = nFormulaResult;
+			for (let i = 0, length = aSortedFormulaArgs.length; i < length; i++) {
+				const oCell = aSortedFormulaArgs[i];
+				if (oCell.isFormula()) { // Try to find coefficient for variable
+					const aCellArgs = getArgsFormula(oCell.getFormulaParsed().outStack, true);
+					const bHasVariableCells = aCellArgs.some(function (oCellArg) {
+						return oVarsBbox.contains(oCellArg.nCol, oCellArg.nRow);
+					});
+					if (bHasVariableCells) {
+						let oVariableCell = null;
+						aCellArgs.forEach(function (oCellArg) {
+							if (!oVarsBbox.contains(oCellArg.nCol, oCellArg.nRow) && oCellArg.getNumberValue() !== null) {
+								nCoefficient = oCellArg.getNumberValue();
+							} else {
+								oVariableCell = oCellArg;
+							}
+						});
+						fAction(nCoefficient, oVariableCell, i);
+					} else {
+						const nFormulaResult = oModel.calculateFormula(NaN, null, oCell.getFormulaParsed());
+						if (nFormulaResult) {
+							nCoefficient = nFormulaResult;
+						}
 					}
 				} else if (oCell.getNumberValue() && !oVarsBbox.contains(oCell.nCol, oCell.nRow))  {
 					nCoefficient = oCell.getNumberValue();
@@ -2298,7 +2361,8 @@ function (window, undefined) {
 				fillObjectiveFuncRow(nValue, nIndex, nVarIndex);
 			}, oObjectiveFunc)
 		} else { // For one variable - calculates the objective function with a constant variable.
-			nObjectiveResult = oModel.calculateFormula(nCoeff, oVariables);
+			const DEFAULT_VALUE = 1;
+			nObjectiveResult = oModel.calculateFormula(DEFAULT_VALUE, oVariables);
 			oVariables.setValue("0");
 			let nVarIndex = aVariablesIndexes[FIRST_COLUMN_INDEX];
 			fillObjectiveFuncRow(nObjectiveResult, FIRST_COLUMN_INDEX, nVarIndex);
@@ -2862,10 +2926,10 @@ function (window, undefined) {
 		return bCompleteCalculation;
 	};
 	/**
-	 * Converts cell reference from UI to Cell object.
+	 * Converts cell reference from UI to a Cell object.
 	 * @memberof CSolver
 	 * @param {string} sCellRef
-	 * @param {Worksheet}oWs
+	 * @param {Worksheet} oWs
 	 * @returns {Cell}
 	 */
 	CSolver.prototype.convertToCell = function (sCellRef, oWs) {
@@ -3459,7 +3523,6 @@ function (window, undefined) {
 	window["AscCommonExcel"]["c_oAscOperator"] = window["AscCommonExcel"].c_oAscOperator = c_oAscOperator;
 	window["AscCommonExcel"]["c_oAscOptimizeTo"] = window["AscCommonExcel"].c_oAscOptimizeTo = c_oAscOptimizeTo;
 	window["AscCommonExcel"]["c_oAscSolvingMethod"] = window["AscCommonExcel"].c_oAscSolvingMethod = c_oAscSolvingMethod;
-	window["AscCommonExcel"]["c_oAscSolverResult"] = window["AscCommonExcel"].c_oAscSolverResult = c_oAscSolverResult;
 	window["AscCommonExcel"]["c_oAscResultStatus"] = window["AscCommonExcel"].c_oAscResultStatus = c_oAscResultStatus;
 
 	let prot = c_oAscOptimizeTo;

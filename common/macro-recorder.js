@@ -340,7 +340,10 @@
 	// for now duplicate, leter we delete onAction
 	MacroRecorder.prototype.addStepData = function(type, additional)
 	{
-		if (!this.isInProgress() || this.isPaused() || undefined === additional)
+		if (!this.isInProgress()
+			|| this.isPaused()
+			|| undefined === additional
+			|| (Array.isArray(additional) && additional.length === 0))
 			return;
 
 		// for meta action
@@ -380,6 +383,7 @@
 				&& type !== 'moveCursorRight'
 				&& type !== 'moveCursorUp'
 				&& type !== 'moveCursorDown'
+				&& type !== 'SelectShape'
 			)
 			{
 				for (let i = 0; i < additional.length; i++)
@@ -697,6 +701,31 @@
 		return runs;
 	}
 
+	function getWrappingStyleName(props) {
+		var type   = props.type;
+		var style  = props.style;
+		var behind = props.behind;
+
+		if (type === 0 && style === Asc.c_oAscWrapStyle2.Inline)
+			return "inline";
+		if (style === Asc.c_oAscWrapStyle2.Behind && behind)
+			return "behind";
+		if (style === Asc.c_oAscWrapStyle2.InFront && !behind)
+			return "inFront";
+
+		switch (style) {
+			case Asc.c_oAscWrapStyle2.Square:
+				return "square";
+			case Asc.c_oAscWrapStyle2.Tight:
+				return "tight";
+			case Asc.c_oAscWrapStyle2.Through:
+				return "through";
+			case Asc.c_oAscWrapStyle2.TopAndBottom:
+				return "topAndBottom";
+			default:
+				return "square";
+		}
+	}
 
 	const wordActions = {
 		setTextBold				: function(bold){return "\tdoc.GetRangeBySelect().SetBold(" + bold + ");\n"},
@@ -768,7 +797,9 @@
 				default						: type = "auto";	break;
 			}
 
-			return "\tdoc.GetRangeBySelect().GetAllParagraphs().forEach(para => para.SetSpacingLine(" + value + " * 240, \"" + type + "\"));\n"
+			return "\tdoc.GetRangeBySelect().GetAllParagraphs().forEach(function(para) {\n" +
+				"\t\tpara.SetSpacingLine(" + value + " * 240, \"" + type + "\");\n" +
+				"\t});\n";
 		},
 		// incIndentetLineSpacing	: function(){
 		// 	// for now we don't have relative increaee/decrease for api
@@ -776,8 +807,11 @@
 		// 	//paragraph.SetIndFirstLine(1440);
 		// },
 		setParagraphNumbering	: function(num){
-			return "\tlet " + CounterStore.inc('numbering') + " = doc.CreateNumbering(\"" + num.Type + "\");\n"
-				+ "\tdoc.GetRangeBySelect().GetAllParagraphs().forEach(para => {\n\t\tpara.SetNumbering(" + CounterStore.get('numbering') + ".GetLevel(0));\n\t\tpara.SetContextualSpacing(true)\n\t});\n"
+			return "\tlet " + CounterStore.inc('numbering') + " = doc.CreateNumbering(\"" + num.Type + "\");\n" +
+				"\tdoc.GetRangeBySelect().GetAllParagraphs().forEach(function(para) {\n" +
+				"\t\tpara.SetNumbering(" + CounterStore.get('numbering') + ".GetLevel(0));\n" +
+				"\t\tpara.SetContextualSpacing(true);\n" +
+				"\t});\n";
 		},
 		addParagraph			: function(){
 			return "\tdoc.InsertParagraphBreak();\n";
@@ -900,10 +934,13 @@
 			let borderColor = border.Fill.getRGBAColor();
 			return "\t(function () {\n" +
 					"\t\tlet fill = Api.CreateSolidFill(Api.CreateRGBColor("+ fill.R +", " + fill.G + ", " + fill.B + "));\n" +
-					"\t\tlet stroke = Api.CreateStroke(" + borderwidth +"* 36000, Api.CreateSolidFill(Api.CreateRGBColor("+ borderColor.R +", " + borderColor.G + ", " + borderColor.B + ")));\n" +
+					"\t\tlet stroke = Api.CreateStroke(" + borderwidth +" * 36000, Api.CreateSolidFill(Api.CreateRGBColor("+ borderColor.R +", " + borderColor.G + ", " + borderColor.B + ")));\n" +
 					"\t\tlet shape = Api.CreateShape(\"" + shapeProps.type + "\", " + shapeProps.extX + " * 36000, " + shapeProps.extY + " * 36000, fill, stroke);\n" +
-					//"\t\tshape.SetPosition(" + shapeProps.pos.x + " * 36000.0, " + shapeProps.pos.y + " * 36000.0)\n" +
+					"\t\tshape.SetWrappingStyle(\"inFront\");\n" +
+					"\t\tshape.SetVerPosition(\"page\", " + shapeProps.pos.y + " * 36000.0);\n" +
+					"\t\tshape.SetHorPosition(\"page\", " + shapeProps.pos.x + " * 36000.0);\n" +
 					"\t\tdoc.GetCurrentParagraph().AddDrawing(shape);\n" +
+					"\t\tshape.Select();\n" +
 				"\t}());\n";
 		},
 		removeHdr				: function(hdr){
@@ -1034,6 +1071,264 @@
 			if (oMacroRecorderContext.prevChangeType === AscDFH.historydescription_Document_AddLetter && oMacroRecorderContext.prevData.length)
 				oMacroRecorderContext.prevData.pop();
 			return "";
+		},
+		selectShape				: function(shapes)
+		{
+			return "";
+		},
+		setDrawingFill			: function(unifill)
+		{
+			//TODO add transparent when add api
+			if (unifill.fill.type === Asc.c_oAscFill.FILL_TYPE_SOLID)
+			{
+				let color = unifill.fill.color.color.RGBA;
+				//let transparent = unifill.transparent;
+
+				return "\tdoc.GetSelectedDrawings()\n" +
+					"\t\t.forEach(function(shape) {\n" +
+					"\t\t\tshape.Fill(Api.CreateSolidFill(Api.CreateRGBColor(" + color.R + ", " + color.G + ", " + color.B + ")));\n" +
+					"\t\t});\n";
+			}
+			else if (unifill.fill instanceof AscFormat.CGradFill)
+			{
+				let colors = unifill.fill.colors;
+				let strColor = "";
+
+				for(let nColor = 0; nColor < colors.length; nColor++)
+				{
+					let gs = colors[nColor];
+					let color = gs.color.color.RGBA;
+					strColor += (nColor !== 0)
+						? ",\n\t\t\t\t"
+						: "\n\t\t\t\t";
+					strColor += "Api.CreateGradientStop(Api.CreateRGBColor(" + color.R + ", " + color.G + ", " + color.B + "), " + gs.pos + ")";
+				}
+
+				let gradient = "";
+				if (unifill.fill.lin) // leinear
+					gradient = "\n\t\t\tApi.CreateLinearGradientFill([" + strColor + "\n\t\t\t], " + unifill.fill.lin.angle + ")";
+				else if (unifill.fill.path) // radial
+					gradient = "\n\t\t\tApi.CreateRadialGradientFill([" + strColor + "\n\t\t\t])";
+
+				return "\tdoc.GetSelectedDrawings()\n"
+      				+ "\t\t.forEach(function(shape) { shape.Fill(" + gradient + "); }\n\t\t);\n";
+			}
+			else if (unifill.fill instanceof AscFormat.CBlipFill)
+			{
+				let base64data = unifill.fill.getBase64RasterImageId()
+				let blipFill = "\n\t\t\tApi.CreateBlipFill(\"" + base64data + "\", \"" + (unifill.fill.tile ? "tile" : "stretch") + "\")";
+				return "\tdoc.GetSelectedDrawings()\n"
+    		 		+ "\t\t.forEach(function(shape) { shape.Fill(" + blipFill + "); }\n\t\t);\n";
+			}
+			else if (unifill.fill instanceof AscFormat.CPattFill)
+			{
+				let bgClr = unifill.fill.bgClr.color.RGBA;
+				let fgClr = unifill.fill.fgClr.color.RGBA;
+				let ftype = unifill.fill.ftype;
+				let type = AscCommon.global_hatch_names[ftype];
+
+				let blipFill = "\n\t\t\tApi.CreatePatternFill(\n\t\t\t\t\"" + type + "\",\n\t\t\t\t" + "Api.CreateRGBColor(" + bgClr.R + ", " + bgClr.G + ", " + bgClr.B + "),\n\t\t\t\tApi.CreateRGBColor(" + fgClr.R + ", " + fgClr.G + ", " + fgClr.B + ")";
+				return "\tdoc.GetSelectedDrawings()\n"
+       				+ "\t\t.forEach(function(shape) { shape.Fill(" + blipFill + "); }\n\t\t\t)\n\t\t);\n";
+			}
+			else if (unifill.fill instanceof AscFormat.CNoFill)
+			{
+				return "\tdoc.GetSelectedDrawings()\n"
+       				+ "\t\t.forEach(function(shape) { shape.Fill(Api.CreateNoFill()); });\n";
+			}
+		},
+		setDrawingLine			: function(line)
+		{
+			let strStrokeShape = "\t(function () {\n";
+			let type = AscFormat.CLn.prototype.GetDashByCode(line.prstDash);
+			let color = line.Fill.fill.color.color.RGBA;
+			strStrokeShape += "\t\tlet stroke = Api.CreateStroke(\n" +
+					"\t\t\t" + line.w / 12700.0 + " * 12700.0,\n" +
+					"\t\t\t" + "Api.CreateSolidFill(Api.CreateRGBColor(" + color.R + ", " + color.G + ", " + color.B + ")),\n" +
+					"\t\t\t\"" + type + "\"\n" +
+				"\t\t);\n";
+
+			strStrokeShape += "\t\tdoc.GetSelectedDrawings()\n"
+                 + "\t\t\t.forEach(function(draw) { draw.SetOutLine(stroke); });\n";
+
+			strStrokeShape += "\t}());\n";
+
+			return strStrokeShape;
+		},
+		setDrawingRotation		: function(nRot)
+		{
+			return "\tdoc.GetSelectedDrawings()\n"
+    			+ "\t\t.forEach(function(shape) { shape.SetRotation(" + nRot * 180 / Math.PI + "); });\n";
+		},
+		setDrawingFlipH			: function(isFlip)
+		{
+			return "\tdoc.GetSelectedDrawings()\n"
+    			+ "\t\t.forEach(function(shape) { shape.SetHorFlip(" + isFlip + "); });\n";
+		},
+		setDrawingFlipV			: function(isFlip)
+		{
+			return "\tdoc.GetSelectedDrawings()\n"
+    			+ "\t\t.forEach(function(shape) { shape.SetVertFlip(" + isFlip + "); });\n";
+		},
+		setDrawingWrapping		: function(props)
+		{
+			return "\tdoc.GetSelectedDrawings().forEach(function(draw) { draw.SetWrappingStyle(\"" + getWrappingStyleName(props) + "\"); })\n";
+		},
+		setDrawingPos			: function(pos)
+		{
+			return "\tdoc.GetSelectedDrawings().forEach(function(draw) {\n" +
+				"\t\tdraw.SetVerPosition(\"page\", " + pos.y + " * 36000.0);\n" +
+				"\t\tdraw.SetHorPosition(\"page\", " + pos.x + " * 36000.0);\n" +
+				"\t});\n"
+		},
+		setPositionH			: function(data)
+		{
+			let relative = "";
+			switch(data.relativeFrom)
+			{
+				 case Asc.c_oAscRelativeFromH.Character:	relative = "character";		break;
+				 case Asc.c_oAscRelativeFromH.Column:		relative = "column";		break;
+				 case Asc.c_oAscRelativeFromH.LeftMargin:	relative = "leftMargin";	break;
+				 case Asc.c_oAscRelativeFromH.Margin:		relative = "margin";		break;
+				 case Asc.c_oAscRelativeFromH.RightMargin:	relative = "rightMargin";	break;
+				 case Asc.c_oAscRelativeFromH.Page:			relative = "page";			break;
+				 default:									relative = "page";
+			}
+
+			if (data.useAlign)
+			{
+				let useAlign = "";
+				switch (data.value) {
+					case Asc.c_oAscAlignH.Center:	useAlign = "center";	break;
+					case Asc.c_oAscAlignH.Left:		useAlign = "left";		break;
+					case Asc.c_oAscAlignH.Right:	useAlign = "right";		break;
+					default:						useAlign = "center";
+				}
+
+				return "\tdoc.GetSelectedDrawings().forEach(function(draw) {\n" +
+					"\t\tdraw.SetHorAlign(\"" + relative + "\", \"" + useAlign + "\");\n" +
+					"\t});\n"
+
+			}
+
+			if (data.percent)
+			{
+				return "\tdoc.GetSelectedDrawings().forEach(function(draw) {\n" +
+					"\t\tdraw.SetHorPosition(\"" + relative + "\", " + data.value + ", " + data.percent + ");\n" +
+					"\t});\n"
+			}
+			else
+			{
+				return "\tdoc.GetSelectedDrawings().forEach(function(draw) {\n" +
+					"\t\tdraw.SetHorPosition(\"" + relative + "\", " + data.value + " * 36000.0, " + data.percent + ");\n" +
+					"\t});\n"
+			}
+		},
+		setPositionV			: function(data)
+		{
+			let relative = "";
+			switch(data.relativeFrom)
+			{
+				 case Asc.c_oAscRelativeFromV.BottomMargin:	relative = "bottomMargin";	break;
+				 case Asc.c_oAscRelativeFromV.TopMargin:	relative = "topMargin";		break;
+				 case Asc.c_oAscRelativeFromV.Margin:		relative = "margin";		break;
+				 case Asc.c_oAscRelativeFromV.Page:			relative = "page";			break;
+				 case Asc.c_oAscRelativeFromV.Line:			relative = "line";			break;
+				 case Asc.c_oAscRelativeFromV.Paragraph:	relative = "paragraph";		break;
+				 default:									relative = "paragraph";
+			}
+
+			if (data.useAlign)
+			{
+				let useAlign = "";
+				switch (data.value) {
+					case Asc.c_oAscAlignV.Bottom:	useAlign = "bottom";	break;
+					case Asc.c_oAscAlignV.Center:	useAlign = "center";	break;
+					case Asc.c_oAscAlignV.Top:		useAlign = "top";		break;
+					default:						useAlign = "center";
+				}
+
+				return "\tdoc.GetSelectedDrawings().forEach(function(draw) {\n" +
+					"\tdraw.SetVerAlign(\"" + relative + "\", \"" + useAlign + "\");\n" +
+					"\t});\n"
+
+			}
+
+			if (data.percent)
+			{
+				return "\tdoc.GetSelectedDrawings().forEach(function(draw) {\n" +
+       				"\t\tdraw.SetVerPosition(\"" + relative + "\", " + data.value + ", " + data.percent + ");\n" +
+       			"\t});\n";
+			}
+			else
+			{
+				return "\tdoc.GetSelectedDrawings().forEach(function(draw) {\n" +
+					"\t\tdraw.SetVerPosition(\"" + relative + "\", " + data.value + " * 36000.0, " + data.percent + ");\n" +
+					"\t});\n";
+			}
+		},
+		setShapeSize			: function(oSize)
+		{
+			return "\tdoc.GetSelectedDrawings().forEach(function(draw) {\n" +
+				"\t\tdraw.SetSize(" + oSize.width + " * 36000.0, " + oSize.height + " * 36000.0);\n" +
+				"});\n";
+
+		},
+		setDrawingDistances		: function(oDistances)
+		{
+			return "\tdoc.GetSelectedDrawings().forEach(function(draw) {\n"
+				+ "\t\tdraw.SetDistances(" + oDistances.Left + " * 36000.0, " + oDistances.Top + " * 36000.0, " + oDistances.Right + " * 36000.0, " + oDistances.Bottom + " * 36000.0);\n"
+				+ "\t});\n";
+		},
+		setShapeInnerPadding	: function(oPadding)
+		{
+			return "\tdoc.GetSelectedDrawings()\n"
+				+ "\t\t.filter(function(item) { return item.GetClassType() === \"shape\"; })\n"
+				+ "\t\t.forEach(function(draw) {\n"
+				+ "\t\t\tdraw.SetPaddings(" + oPadding.Left + " * 36000.0, " + oPadding.Top + " * 36000.0, " + oPadding.Right + " * 36000.0, " + oPadding.Bottom + " * 36000.0);\n"
+				+ "\t\t});\n";
+		},
+		setShapeRelSizeH		: function(oSize)
+		{
+			let relative = "";
+			switch(oSize.RelativeFrom)
+			{
+				 case Asc.c_oAscRelativeFromH.Character:	relative = "character";		break;
+				 case Asc.c_oAscRelativeFromH.Column:		relative = "column";		break;
+				 case Asc.c_oAscRelativeFromH.LeftMargin:	relative = "leftMargin";	break;
+				 case Asc.c_oAscRelativeFromH.Margin:		relative = "margin";		break;
+				 case Asc.c_oAscRelativeFromH.RightMargin:	relative = "rightMargin";	break;
+				 case Asc.c_oAscRelativeFromH.Page:			relative = "page";			break;
+				 default:									relative = "page";
+			}
+			return "\tdoc.GetSelectedDrawings().forEach(function(draw) {\n" +
+				"\t\tdraw.SetRelativeWidth(\"" + relative + "\", " + oSize.Value + ");\n" +
+				"\t});\n";
+		},
+		setShapeRelSizeV		: function(oSize)
+		{
+			let relative = "";
+			switch(oSize.RelativeFrom)
+			{
+				 case Asc.c_oAscRelativeFromV.BottomMargin:	relative = "bottomMargin";		break;
+				 case Asc.c_oAscRelativeFromV.Line:			relative = "line";				break;
+				 case Asc.c_oAscRelativeFromV.TopMargin:	relative = "topMargin";			break;
+				 case Asc.c_oAscRelativeFromV.Margin:		relative = "margin";			break;
+				 case Asc.c_oAscRelativeFromV.Paragraph:	relative = "paragraph";			break;
+				 case Asc.c_oAscRelativeFromV.Page:			relative = "page";				break;
+				 default:									relative = "page";
+			}
+			return "\tdoc.GetSelectedDrawings().forEach(function(draw) {\n" +
+				"\t\tdraw.SetRelativeHeight(\"" + relative + "\", " + oSize.Value + ");\n" +
+				"\t});\n";
+		},
+		setGeometry			: function(type)
+		{
+			return "\tdoc.GetSelectedDrawings()\n"
+				+ "\t\t.filter(function(item) { return item.GetClassType() === \"shape\"; })\n"
+				+ "\t\t.forEach(function(draw) {\n"
+				+ "\t\t\tdraw.SetGeometry(Api.CreatePresetGeometry(\""+ type +"\"));\n"
+				+ "\t\t});\n";
 		}
 	};
 
@@ -1097,6 +1392,22 @@
 	WordActionsMacroList[AscDFH.historydescription_Document_AddImages]					= wordActions.addImage;
 	WordActionsMacroList[AscDFH.historydescription_Document_AddHyperlink]				= wordActions.addHyperlink;
 	WordActionsMacroList[AscDFH.historydescription_Document_AddNewShape]				= wordActions.addShape;
+	WordActionsMacroList['SelectShape']													= wordActions.selectShape;
+	WordActionsMacroList['SetDrawingFill']												= wordActions.setDrawingFill;
+	WordActionsMacroList['SetDrawingLine']												= wordActions.setDrawingLine;
+	WordActionsMacroList['SetDrawingRotation']											= wordActions.setDrawingRotation;
+	WordActionsMacroList['SetDrawingPos']												= wordActions.setDrawingPos;
+	WordActionsMacroList['SetDrawingFlipH']												= wordActions.setDrawingFlipH;
+	WordActionsMacroList['SetDrawingFlipV']												= wordActions.setDrawingFlipV;
+	WordActionsMacroList['SetDrawingWrapping']											= wordActions.setDrawingWrapping;
+	WordActionsMacroList['SetPositionH']												= wordActions.setPositionH;
+	WordActionsMacroList['SetPositionV']												= wordActions.setPositionV;
+	WordActionsMacroList['SetShapeSize']												= wordActions.setShapeSize;
+	WordActionsMacroList['SetDrawingDistances']											= wordActions.setDrawingDistances;
+	WordActionsMacroList['SetShapeInnerPadding']										= wordActions.setShapeInnerPadding;
+	WordActionsMacroList['SetRelSizeH']													= wordActions.setShapeRelSizeH;
+	WordActionsMacroList['SetRelSizeV']													= wordActions.setShapeRelSizeV;
+	WordActionsMacroList['SetGeometry']													= wordActions.setGeometry;
 	WordActionsMacroList[AscDFH.historydescription_Document_RemoveHdrFtr]				= wordActions.removeHdr;
 	WordActionsMacroList[AscDFH.historydescription_Document_AddComment]					= wordActions.addComment;
 	//WordActionsMacroList[AscDFH.AscDFH.historydescription_Document_AddTextArt]		= wordActions.addTextArt;
@@ -1423,7 +1734,11 @@
 				case AscCommon.align_Center:	align = 'center';	break;
 				default:						align = 'center';
 			}
-			return "\tApi.GetSelection().GetShapes().forEach(shape => {\n\t\tshape.GetDocContent().GetContent().forEach(para => para.SetJc(\"" + align + "\"));\n\t})\n";
+			return "\tApi.GetSelection().GetShapes().forEach(function(shape) {\n" +
+				"\t\tshape.GetDocContent().GetContent().forEach(function(para) {\n" +
+				"\t\t\tpara.SetJc(\"" + align + "\");\n" +
+				"\t\t});\n" +
+				"\t});\n";
 		},
 		paragraphAdd			: function(additional){
 			if (!additional.length)
@@ -1442,12 +1757,41 @@
 				+ "\t\t}\n"
 				+ "\t}());\n";
 		},
-		putTextPrBold			: function(bold){return "\tApi.GetSelection().GetShapes().forEach(shape => {\n\t\tshape.GetDocContent().GetContent().forEach(para => para.SetBold(" + bold + "));\n\t})\n"},
-		putTextPrItalic			: function(italic){return "\tApi.GetSelection().GetShapes().forEach(shape => {\n\t\tshape.GetDocContent().GetContent().forEach(para => para.SetItalic(" + italic + "));\n\t})\n"},
-		putTextPrUnderline		: function(underline){return "\tApi.GetSelection().GetShapes().forEach(shape => {\n\t\tshape.GetDocContent().GetContent().forEach(para => para.SetUnderline(" + underline + "));\n\t})\n"},
-		putTextPrStrikeout		: function(strikeout){return "\tApi.GetSelection().GetShapes().forEach(shape => {\n\t\tshape.GetDocContent().GetContent().forEach(para => para.SetStrikeout(" + strikeout + "));\n\t})\n"},
-		putTextPrFontName		: function(fontName){return "\tApi.GetSelection().GetShapes().forEach(shape => {\n\t\tshape.GetDocContent().GetContent().forEach(para => para.SetFontName(" + fontName + "));\n\t})\n"},
-		putTextPrFontSize		: function(fontsize){return "\tApi.GetSelection().GetShapes().forEach(shape => {\n\t\tshape.GetDocContent().GetContent().forEach(para => para.SetFontSize(" + fontsize + "));\n\t})\n"},
+		putTextPrBold			: function(bold){return "\tApi.GetSelection().GetShapes().forEach(function(shape) {\n" +
+			"\t\tshape.GetDocContent().GetContent().forEach(function(para) {\n" +
+			"\t\t\tpara.SetBold(" + bold + ");\n" +
+			"\t\t});\n" +
+			"\t});\n"
+			},
+		putTextPrItalic			: function(italic){return "\tApi.GetSelection().GetShapes().forEach(function(shape) {\n" +
+			"\t\tshape.GetDocContent().GetContent().forEach(function(para) {\n" +
+			"\t\t\tpara.SetItalic(" + italic + ");\n" +
+			"\t\t});\n" +
+			"\t});\n"},
+		putTextPrUnderline		: function(underline){return "\tApi.GetSelection().GetShapes().forEach(function(shape) {\n" +
+			"\t\tshape.GetDocContent().GetContent().forEach(function(para) {\n" +
+			"\t\t\tpara.SetUnderline(" + underline + ");\n" +
+			"\t\t});\n" +
+			"\t});\n"
+			},
+		putTextPrStrikeout		: function(strikeout){return "\tApi.GetSelection().GetShapes().forEach(function(shape) {\n" +
+			"\t\tshape.GetDocContent().GetContent().forEach(function(para) {\n" +
+			"\t\t\tpara.SetStrikeout(" + strikeout + ");\n" +
+			"\t\t});\n" +
+			"\t});\n"
+			},
+		putTextPrFontName		: function(fontName){return "\tApi.GetSelection().GetShapes().forEach(function(shape) {\n" +
+			"\t\tshape.GetDocContent().GetContent().forEach(function(para) {\n" +
+			"\t\t\tpara.SetFontName(" + fontName + ");\n" +
+			"\t\t});\n" +
+			"\t});\n"
+			},
+		putTextPrFontSize		: function(fontsize){return "\tApi.GetSelection().GetShapes().forEach(function(shape) {\n" +
+			"\t\tshape.GetDocContent().GetContent().forEach(function(para) {\n" +
+			"\t\t\tpara.SetFontSize(" + fontsize + ");\n" +
+			"\t\t});\n" +
+			"\t});\n"
+			},
 		//putTextPrIncreaseFontSize : function(){return "\tApi.GetSelection().GetShapes().forEach(shape => {\n\t\tshape.GetDocContent().GetContent().forEach(para => para.SetFontSize(" + fontsize + "));\n\t})\n"},
 		//incDecFontSize			: makeAction("", function(){return "\tApi.GetSelection().GetShapes().forEach(shape => {\n\t\tshape.GetDocContent().GetContent().forEach(para => para.SetFontSize(" + fontsize + "));\n\t})\n"}),
 		setTextVertAlign		: function(vertalign){
@@ -1460,7 +1804,11 @@
 			else if (AscCommon.vertalign_SuperScript === vertalign)
 				textOfVertAlign = "superscript";
 
-			return "\tApi.GetSelection().GetShapes().forEach(shape => {\n\t\tshape.GetDocContent().GetContent().forEach(para => para.SetVertAlign(\"" + textOfVertAlign + "\"));\n\t})\n"
+			return "\tApi.GetSelection().GetShapes().forEach(function(shape) {\n" +
+				"\t\tshape.GetDocContent().GetContent().forEach(function(para) {\n" +
+				"\t\t\tpara.SetVertAlign(\"" + textOfVertAlign + "\");\n" +
+				"\t\t});\n" +
+				"\t});\n"
 		},
 		addNextSlide			: function(data){
 			if (data === undefined)
@@ -1481,7 +1829,7 @@
 				+ "\tif (" + CounterStore.get('slide') + ") " + CounterStore.get('slide') + ".Delete();\n";
 		},
 		changeLayout			: function(changeObj) {
-			return "\t[" + changeObj.slides.toString() + "].forEach(index => {\n"
+			return "\t[" + changeObj.slides.toString() + "].forEach(function(index) {\n"
 				+ "\t\tlet " + CounterStore.inc('slide') +" = presentation.GetSlideByIndex(index);\n"
 				+ "\t\tlet " + CounterStore.inc('master') +" = presentation.GetMaster(0);\n"
 				+ "\t\tlet " + CounterStore.inc('layout') +" = " + CounterStore.get('master') + ".GetLayout(" + changeObj.layout + ");\n"
@@ -1498,12 +1846,26 @@
 			}
 
 			if (highlightColor === "") highlightColor = 'none';
-			return "\tApi.GetSelection().GetShapes().forEach(shape => {\n\t\tshape.GetDocContent().GetContent().forEach(para => para.SetHighlight(\"" + highlightColor + "\"));\n\t})\n"
+			return "\tApi.GetSelection().GetShapes().forEach(function(shape) {\n" +
+				"\t\tshape.GetDocContent().GetContent().forEach(function(para) {\n" +
+				"\t\t\tpara.SetHighlight(\"" + highlightColor + "\");\n" +
+				"\t\t});\n" +
+				"\t});\n";
+
 		},
 		putTextColor			: function(color){
-			return "\tApi.GetSelection().GetShapes().forEach(shape => {\n\t\tshape.GetDocContent().GetContent().forEach(para => para.SetColor(" + color.r + ", " + color.g + ", " + color.b + "));\n\t})\n"
+			return "\tApi.GetSelection().GetShapes().forEach(function(shape) {\n" +
+				"\t\tshape.GetDocContent().GetContent().forEach(function(para) {\n" +
+				"\t\t\tpara.SetColor(" + color.r + ", " + color.g + ", " + color.b + ");\n" +
+				"\t\t});\n" +
+				"\t});\n";
 		},
-		clearFormatting			: function(isClear){return "\tApi.GetSelection().GetShapes().forEach(shape => {\n\t\tshape.GetDocContent().GetContent().forEach(para => para.ClearFormating(" + isClear + "));\n\t})\n";},
+		clearFormatting			: function(isClear){return "\tApi.GetSelection().GetShapes().forEach(function(shape) {\n" +
+			"\t\tshape.GetDocContent().GetContent().forEach(function(para) {\n" +
+			"\t\t\tpara.ClearFormating(" + isClear + ");\n" +
+			"\t\t});\n" +
+			"\t});\n"
+		},
 		putTextPrLineSpacing	: function(lineSpacing){
 			let type = lineSpacing.type;
 			let value = lineSpacing.value;
@@ -1515,10 +1877,18 @@
 				case Asc.linerule_Exact		: type = "exact";	break;
 				default						: type = "auto";	break;
 			}
-			return "\tApi.GetSelection().GetShapes().forEach(shape => {\n\t\tshape.GetDocContent().GetContent().forEach(para => para.SetSpacingLine(" + value + " * 240, \"" + type + "\"));\n\t})\n"
+			return "\tApi.GetSelection().GetShapes().forEach(function(shape) {\n" +
+				"\t\tshape.GetDocContent().GetContent().forEach(function(para) {\n" +
+				"\t\t\tpara.SetSpacingLine(" + value + " * 240, \"" + type + "\");\n" +
+				"\t\t});\n" +
+				"\t});\n";
 		},
 		paragraphRemove			: function(args){
-			return "\tApi.GetSelection().GetShapes().forEach(shape => {\n\t\tshape.GetDocContent().GetContent().forEach(para => para.RemoveAllElements());\n\t})\n"
+			return "\tApi.GetSelection().GetShapes().forEach(function(shape) {\n" +
+				"\t\tshape.GetDocContent().GetContent().forEach(function(para) {\n" +
+				"\t\t\tpara.RemoveAllElements();\n" +
+				"\t\t});\n" +
+				"\t});\n";
 		},
 		setVerticalAlign		: function(align){
 			let typeOfVertAlign = "";
@@ -1541,7 +1911,9 @@
                 }
             }
 
-			return "\tApi.GetSelection().GetShapes().forEach(shape => {\n\t\tshape.SetVerticalTextAlign(\"" + typeOfVertAlign + "\");\n\t})\n";
+			return "\tApi.GetSelection().GetShapes().forEach(function(shape) {\n" +
+				"\t\tshape.SetVerticalTextAlign(\"" + typeOfVertAlign + "\");\n" +
+				"\t});\n";
 		},
 		bringForward			: function(){
 			// no api
@@ -1559,7 +1931,7 @@
 			return "\tpresentation.GetCurrentSlide().GroupDrawings(Api.GetSelection().GetShapes());\n";
 		},
 		unGroup					: function(){
-			return "\tApi.GetSelection().GetShapes().forEach(shape => {shape.Ungroup()});\n"
+			return "\tApi.GetSelection().GetShapes().forEach(function(shape) { shape.Ungroup(); });\n";
 		},
 		addFlowTable			: function(table){
 			return "\tconst table = Api.CreateTable(" + table.col + ", " + table.row + ");\n" +

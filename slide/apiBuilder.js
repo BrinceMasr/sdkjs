@@ -213,6 +213,13 @@
         this.Cell = oCell;
     }
 
+	/**
+	 * Class representing a slide show transition.
+	 * @constructor
+	 */
+	function ApiSlideShowTransition(transition) {
+		this.Transition = transition;
+	}
 
     /**
      * Twentieths of a point (equivalent to 1/1440th of an inch).
@@ -409,9 +416,74 @@
 	 * Represents the type of objects in a selection.
 	 * @typedef {("none" | "shapes" | "slides" | "text")} SelectionType - Available selection types.
      * @see office-js-api/Examples/Enumerations/SelectionType.js
-	 *
 	 */
-	
+
+	/**
+	 * The available slide transition speed values (similar to PowerPoint VBA ppTransitionSpeed).
+	 * @typedef TransitionSpeed
+	 * @type {"slow" | "medium" | "fast"}
+	 */
+
+	/**
+	 * The available slide transition effects (similar to PowerPoint VBA ppEffect).
+	 * @typedef EntryEffect
+	 * @type {(
+	 * "effectAppear" |
+	 * "effectBlindsHorizontal" | "effectBlindsVertical" |
+	 * "effectBoxDown" | "effectBoxIn" | "effectBoxLeft" | "effectBoxOut" | "effectBoxRight" | "effectBoxUp" |
+	 * "effectCheckerboardAcross" | "effectCheckerboardDown" |
+	 * "effectCircleOut" |
+	 * "effectCombHorizontal" | "effectCombVertical" |
+	 * "effectConveyorLeft" | "effectConveyorRight" |
+	 * "effectCoverDown" | "effectCoverLeft" | "effectCoverLeftDown" | "effectCoverLeftUp" | "effectCoverRight" | "effectCoverRightDown" | "effectCoverRightUp" | "effectCoverUp" |
+	 * "effectCubeDown" | "effectCubeLeft" | "effectCubeRight" | "effectCubeUp" |
+	 * "effectCut" | "effectCutThroughBlack" |
+	 * "effectDiamondOut" |
+	 * "effectDissolve" |
+	 * "effectDoorsHorizontal" | "effectDoorsVertical" |
+	 * "effectFade" | "effectFadeSmoothly" |
+	 * "effectFerrisWheelLeft" | "effectFerrisWheelRight" |
+	 * "effectFlashbulb" |
+	 * "effectFlipDown" | "effectFlipLeft" | "effectFlipRight" | "effectFlipUp" |
+	 * "effectFlyThroughIn" | "effectFlyThroughInBounce" | "effectFlyThroughOut" | "effectFlyThroughOutBounce" |
+	 * "effectGalleryLeft" | "effectGalleryRight" |
+	 * "effectGlitterDiamondDown" | "effectGlitterDiamondLeft" | "effectGlitterDiamondRight" | "effectGlitterDiamondUp" |
+	 * "effectGlitterHexagonDown" | "effectGlitterHexagonLeft" | "effectGlitterHexagonRight" | "effectGlitterHexagonUp" |
+	 * "effectHoneycomb" |
+	 * "effectNewsflash" |
+	 * "effectOrbitDown" | "effectOrbitLeft" | "effectOrbitRight" | "effectOrbitUp" |
+	 * "effectPanDown" | "effectPanLeft" | "effectPanRight" | "effectPanUp" |
+	 * "effectPlusOut" |
+	 * "effectPushDown" | "effectPushLeft" | "effectPushRight" | "effectPushUp" |
+	 * "effectRandom" | "effectRandomBarsHorizontal" | "effectRandomBarsVertical" |
+	 * "effectRevealBlackLeft" | "effectRevealBlackRight" | "effectRevealSmoothLeft" | "effectRevealSmoothRight" |
+	 * "effectRippleCenter" | "effectRippleLeftDown" | "effectRippleLeftUp" | "effectRippleRightDown" | "effectRippleRightUp" |
+	 * "effectRotateDown" | "effectRotateLeft" | "effectRotateRight" | "effectRotateUp" |
+	 * "effectShredRectangleIn" | "effectShredRectangleOut" | "effectShredStripsIn" | "effectShredStripsOut" |
+	 * "effectSplitHorizontalIn" | "effectSplitHorizontalOut" | "effectSplitVerticalIn" | "effectSplitVerticalOut" |
+	 * "effectStripsDownLeft" | "effectStripsDownRight" | "effectStripsLeftDown" | "effectStripsLeftUp" | "effectStripsRightDown" | "effectStripsRightUp" | "effectStripsUpLeft" | "effectStripsUpRight" |
+	 * "effectSwitchDown" | "effectSwitchLeft" | "effectSwitchRight" | "effectSwitchUp" |
+	 * "effectUncoverDown" | "effectUncoverLeft" | "effectUncoverLeftDown" | "effectUncoverLeftUp" | "effectUncoverRight" | "effectUncoverRightDown" | "effectUncoverRightUp" | "effectUncoverUp" |
+	 * "effectVortexDown" | "effectVortexLeft" | "effectVortexRight" | "effectVortexUp" |
+	 * "effectWarpIn" | "effectWarpOut" |
+	 * "effectWedge" |
+	 * "effectWheel1Spoke" | "effectWheel2Spokes" | "effectWheel3Spokes" | "effectWheel4Spokes" | "effectWheel8Spokes" | "effectWheelReverse1Spoke" |
+	 * "effectWindowHorizontal" | "effectWindowVertical" |
+	 * "effectWipeDown" | "effectWipeLeft" | "effectWipeRight" | "effectWipeUp" |
+	 *
+	 * "effectNone" |
+	 *
+	 * "effectCrawlFromDown" | "effectCrawlFromLeft" | "effectCrawlFromRight" | "effectCrawlFromUp" |
+	 * "effectFlashOnceFast" | "effectFlashOnceMedium" | "effectFlashOnceSlow" |
+	 * "effectFlyFromBottom" | "effectFlyFromBottomLeft" | "effectFlyFromBottomRight" | "effectFlyFromLeft" | "effectFlyFromRight" | "effectFlyFromTop" | "effectFlyFromTopLeft" | "effectFlyFromTopRight" |
+	 * "effectMixed" |
+	 * "effectPeekFromDown" | "effectPeekFromLeft" | "effectPeekFromRight" | "effectPeekFromUp" |
+	 * "effectSpiral" |
+	 * "effectStretchAcross" | "effectStretchDown" | "effectStretchLeft" | "effectStretchRight" | "effectStretchUp" |
+	 * "effectSwivel" |
+	 * "effectZoomBottom" | "effectZoomCenter" | "effectZoomIn" | "effectZoomInSlightly" | "effectZoomOut" | "effectZoomOutSlightly"
+	 * )}
+	*/
 
     //------------------------------------------------------------------------------------------------------------------
     //
@@ -981,6 +1053,20 @@
 		return new ApiDrawing(oArt);
 	};
 
+	/**
+	 * Creates a new slide show transition object.
+	 *
+	 * @memberof Api
+	 * @typeofeditors ["CPE"]
+	 * @since 9.3.0
+	 *
+	 * @returns {ApiSlideShowTransition} - Name of the transition effect.
+	 * @see office-js-api/Examples/{Editor}/Api/Methods/CreateSlideShowTransition.js
+	 */
+	Api.prototype.CreateSlideShowTransition = function () {
+		return new ApiSlideShowTransition(new Asc.CAscSlideTransition());
+	};
+
     /**
 	 * Converts the specified JSON object into the Document Builder object of the corresponding type.
 	 * @memberof Api
@@ -1136,6 +1222,28 @@
 	Api.prototype.GetSelection = function()
 	{
 		return new ApiSelection();
+	};
+
+	/**
+	 * Creates a new hyperlink object to be used for setting hyperlinks on drawing objects (shapes or images).
+	 *
+	 * @memberof Api
+	 * @typeofeditors ["CPE"]
+	 *
+	 * @param {string} link - The hyperlink address.
+	 * @param {string} tooltip - The tooltip text.
+	 *
+	 * @returns {ApiHyperlink}
+	 * @see office-js-api/Examples/{Editor}/Api/Methods/CreateHyperlink.js
+	 */
+	Api.prototype.CreateHyperlink = function (link, tooltip) {
+		const paraHyperlink   = new AscCommonWord.ParaHyperlink();
+		const apiHyperlink = new AscBuilder.ApiHyperlink(paraHyperlink);
+
+		apiHyperlink.SetLink(link);
+		apiHyperlink.SetScreenTipText(tooltip);
+
+		return apiHyperlink;
 	};
 
     /**
@@ -1869,6 +1977,39 @@
 	ApiPresentation.prototype.GetCustomXmlParts = function()
 	{
 		return new AscBuilder.ApiCustomXmlParts(this.Presentation);
+	};
+
+	/**
+	 * Returns whether the presentation loops continuously until the user stops it.
+	 *
+	 * @memberof ApiPresentation
+	 * @typeofeditors ["CPE"]
+	 * @since 9.3.0
+	 *
+	 * @returns {boolean} - True if the presentation is set to loop until stopped; otherwise, false.
+	 * @see office-js-api/Examples/{Editor}/ApiPresentation/Methods/GetLoopUntilStopped.js
+	 */
+	ApiPresentation.prototype.GetLoopUntilStopped = function () {
+		return this.Presentation.isLoopShowMode();
+	};
+
+	/**
+	 * Sets whether the presentation loops continuously until the user stops it.
+	 *
+	 * @memberof ApiPresentation
+	 * @typeofeditors ["CPE"]
+	 * @since 9.3.0
+	 *
+	 * @param {boolean} loopUntilStopped - True to set the presentation to loop until stopped; false otherwise.
+	 * @returns {boolean} - True if the new setting was applied successfully; otherwise, false.
+	 * @see office-js-api/Examples/{Editor}/ApiPresentation/Methods/SetLoopUntilStopped.js
+	 */
+	ApiPresentation.prototype.SetLoopUntilStopped = function (loopUntilStopped) {
+		if (this.Presentation) {
+			this.Presentation.setShowLoop(loopUntilStopped);
+			return true;
+		}
+		return false;
 	};
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -4156,7 +4297,43 @@
 			}
 		}
 		return false;
-	}
+	};
+
+	/**
+	 * Returns the slide show transition of the current slide.
+	 *
+	 * @memberof ApiSlide
+	 * @typeofeditors ["CPE"]
+	 * @since 9.3.0
+	 *
+	 * @returns {ApiSlideShowTransition | null} - Returns the slide show transition or null if the slide has no transition.
+	 * @see office-js-api/Examples/{Editor}/ApiSlide/Methods/GetSlideShowTransition.js
+	 */
+	ApiSlide.prototype.GetSlideShowTransition = function () {
+		if (this.Slide && this.Slide.transition) {
+			return new ApiSlideShowTransition(this.Slide.transition);
+		}
+		return null;
+	};
+
+	/**
+	 * Sets the slide show transition to the current slide.
+	 *
+	 * @memberof ApiSlide
+	 * @typeofeditors ["CPE"]
+	 * @since 9.3.0
+	 *
+	 * @param {ApiSlideShowTransition} transition - The slide show transition to be applied.
+	 * @returns {boolean} - Returns true if the transition was applied successfully, otherwise false.
+	 * @see office-js-api/Examples/{Editor}/ApiSlide/Methods/SetSlideShowTransition.js
+	 */
+	ApiSlide.prototype.SetSlideShowTransition = function (transition) {
+		if (this.Slide && transition && transition.Transition) {
+			this.Slide.applyTransition(transition.Transition);
+			return true;
+		}
+		return false;
+	};
 	
 	//------------------------------------------------------------------------------------------------------------------
 	//
@@ -4245,20 +4422,613 @@
 		return '';
 	};
 
-    ApiNotesPage.prototype.GetTheme = function(){
-            if (this.NotesPage && this.NotesPage.Master && this.NotesPage.Master.Theme)
-            {
-                var oThemeLoadInfo     = new AscCommonSlide.CThemeLoadInfo();
-                oThemeLoadInfo.Master  = this.NotesPage.Master;
-                oThemeLoadInfo.Layouts = [];
-                oThemeLoadInfo.Theme   = this.NotesPage.Master.Theme;
+	ApiNotesPage.prototype.GetTheme = function () {
+		if (this.NotesPage && this.NotesPage.Master && this.NotesPage.Master.Theme) {
+			const oThemeLoadInfo = new AscCommonSlide.CThemeLoadInfo();
+			oThemeLoadInfo.Master = this.NotesPage.Master;
+			oThemeLoadInfo.Layouts = [];
+			oThemeLoadInfo.Theme = this.NotesPage.Master.Theme;
+			return new ApiTheme(oThemeLoadInfo);
+		}
+		return null;
+	};
 
-                return new ApiTheme(oThemeLoadInfo);
-            }
-            
-            return null;
-        };
+	//------------------------------------------------------------------------------------------------------------------
+	//
+	// ApiSlideShowTransition
+	//
+	//------------------------------------------------------------------------------------------------------------------
 
+	/**
+	 * Returns the type of the ApiSlideShowTransition class.
+	 *
+	 * @memberof ApiSlideShowTransition
+	 * @typeofeditors ["CPE"]
+	 * @since 9.3.0
+	 *
+	 * @returns {"slideShowTransition"}
+	 * @see office-js-api/Examples/{Editor}/ApiSlideShowTransition/Methods/GetClassType.js
+	 */
+	ApiSlideShowTransition.prototype.GetClassType = function () {
+		return 'slideShowTransition';
+	};
+
+	ApiSlideShowTransition.ENTRY_EFFECT_MAP = {
+		// Default 'p:cut' effect attribute is: thruBlk='0'
+		'effectAppear':          { tag: 'p:cut', attrNames: ['thruBlk'], attrValues: ['0'] },
+		'effectCut':             { tag: 'p:cut', attrNames: ['thruBlk'], attrValues: ['0'] },
+		'effectCutThroughBlack': { tag: 'p:cut', attrNames: ['thruBlk'], attrValues: ['1'] },
+
+		// Default 'p:fade' effect attribute is: dir='horz'
+		'effectBlindsHorizontal': { tag: 'p:blinds', attrNames: ['dir'], attrValues: ['horz'] },
+		'effectBlindsVertical':   { tag: 'p:blinds', attrNames: ['dir'], attrValues: ['vert'] },
+
+		// Default 'p14:prism' effect attributes are: dir='l', isContent='0', isInverted='0'
+		'effectBoxDown':     { tag: 'p14:prism', attrNames: ['dir', 'isContent', 'isInverted'], attrValues: ['d', '0', '1'] },
+		'effectBoxLeft':     { tag: 'p14:prism', attrNames: ['dir', 'isContent', 'isInverted'], attrValues: ['l', '0', '1'] },
+		'effectBoxRight':    { tag: 'p14:prism', attrNames: ['dir', 'isContent', 'isInverted'], attrValues: ['r', '0', '1'] },
+		'effectBoxUp':       { tag: 'p14:prism', attrNames: ['dir', 'isContent', 'isInverted'], attrValues: ['u', '0', '1'] },
+		'effectCubeDown':    { tag: 'p14:prism', attrNames: ['dir', 'isContent', 'isInverted'], attrValues: ['d', '0', '0'] },
+		'effectCubeLeft':    { tag: 'p14:prism', attrNames: ['dir', 'isContent', 'isInverted'], attrValues: ['l', '0', '0'] },
+		'effectCubeRight':   { tag: 'p14:prism', attrNames: ['dir', 'isContent', 'isInverted'], attrValues: ['r', '0', '0'] },
+		'effectCubeUp':      { tag: 'p14:prism', attrNames: ['dir', 'isContent', 'isInverted'], attrValues: ['u', '0', '0'] },
+		'effectOrbitDown':   { tag: 'p14:prism', attrNames: ['dir', 'isContent', 'isInverted'], attrValues: ['d', '1', '1'] },
+		'effectOrbitLeft':   { tag: 'p14:prism', attrNames: ['dir', 'isContent', 'isInverted'], attrValues: ['l', '1', '1'] },
+		'effectOrbitRight':  { tag: 'p14:prism', attrNames: ['dir', 'isContent', 'isInverted'], attrValues: ['r', '1', '1'] },
+		'effectOrbitUp':     { tag: 'p14:prism', attrNames: ['dir', 'isContent', 'isInverted'], attrValues: ['u', '1', '1'] },
+		'effectRotateDown':  { tag: 'p14:prism', attrNames: ['dir', 'isContent', 'isInverted'], attrValues: ['d', '1', '0'] },
+		'effectRotateLeft':  { tag: 'p14:prism', attrNames: ['dir', 'isContent', 'isInverted'], attrValues: ['l', '1', '0'] },
+		'effectRotateRight': { tag: 'p14:prism', attrNames: ['dir', 'isContent', 'isInverted'], attrValues: ['r', '1', '0'] },
+		'effectRotateUp':    { tag: 'p14:prism', attrNames: ['dir', 'isContent', 'isInverted'], attrValues: ['u', '1', '0'] },
+
+		// Default 'p:zoom' effect attribute is: dir='out'
+		'effectBoxIn':  { tag: 'p:zoom', attrNames: ['dir'], attrValues: ['in'] },
+		'effectBoxOut': { tag: 'p:zoom', attrNames: ['dir'], attrValues: ['out'] },
+
+		// Default 'p:checker' effect attribute is: dir='horz'
+		'effectCheckerboardAcross': { tag: 'p:checker', attrNames: ['dir'], attrValues: ['horz'] },
+		'effectCheckerboardDown':   { tag: 'p:checker', attrNames: ['dir'], attrValues: ['vert'] },
+
+		// Default 'p:comb' effect attribute is: dir='horz'
+		'effectCombHorizontal': { tag: 'p:comb', attrNames: ['dir'], attrValues: ['horz'] },
+		'effectCombVertical':   { tag: 'p:comb', attrNames: ['dir'], attrValues: ['vert'] },
+
+		// Default 'p14:conveyor' effect attribute is: dir='l'
+		// Attribute must be specified explicitly - <p14:conveyor/> without 'dir' attribute is forbidden
+		'effectConveyorLeft':  { tag: 'p14:conveyor', attrNames: ['dir'], attrValues: ['l'] },
+		'effectConveyorRight': { tag: 'p14:conveyor', attrNames: ['dir'], attrValues: ['r'] },
+
+		// Default 'p:cover' effect attribute is: dir='l'
+		'effectCoverDown':      { tag: 'p:cover', attrNames: ['dir'], attrValues: ['d'] },
+		'effectCoverLeft':      { tag: 'p:cover', attrNames: ['dir'], attrValues: ['l']},
+		'effectCoverLeftDown':  { tag: 'p:cover', attrNames: ['dir'], attrValues: ['ld'] },
+		'effectCoverLeftUp':    { tag: 'p:cover', attrNames: ['dir'], attrValues: ['lu'] },
+		'effectCoverRight':     { tag: 'p:cover', attrNames: ['dir'], attrValues: ['r'] },
+		'effectCoverRightDown': { tag: 'p:cover', attrNames: ['dir'], attrValues: ['rd'] },
+		'effectCoverRightUp':   { tag: 'p:cover', attrNames: ['dir'], attrValues: ['ru'] },
+		'effectCoverUp':        { tag: 'p:cover', attrNames: ['dir'], attrValues: ['u'] },
+
+		// Tags have no attributes
+		'effectCircleOut': { tag: 'p:circle' },
+		'effectDiamondOut': { tag: 'p:diamond' },
+		'effectDissolve': { tag: 'p:dissolve' },
+		'effectFlashbulb': { tag: 'p14:flash' },
+		'effectHoneycomb': { tag: 'p14:honeycomb' },
+		'effectNewsflash': { tag: 'p:newsflash' },
+		'effectPlusOut': { tag: 'p:plus' },
+		'effectRandom': { tag: 'p:random' },
+		'effectWedge': { tag: 'p:wedge' },
+
+		// Default 'p14:doors' effect attribute is: dir='horz'
+		'effectDoorsHorizontal': { tag: 'p14:doors', attrNames: ['dir'], attrValues: ['horz'] },
+		'effectDoorsVertical':   { tag: 'p14:doors', attrNames: ['dir'], attrValues: ['vert'] },
+
+		// Default 'p:fade' effect attribute is: thruBlk='0'
+		'effectFade':         { tag: 'p:fade', attrNames: ['thruBlk'], attrValues: ['1'] },
+		'effectFadeSmoothly': { tag: 'p:fade', attrNames: ['thruBlk'], attrValues: ['0'] },
+
+		// Default 'p14:ferris' effect attribute is: dir='l'
+		// Attribute must be specified explicitly - <p14:ferris/> without 'dir' attribute is forbidden
+		'effectFerrisWheelLeft': { tag: 'p14:ferris', attrNames: ['dir'], attrValues: ['l'] },
+		'effectFerrisWheelRight': { tag: 'p14:ferris', attrNames: ['dir'], attrValues: ['r'] },
+
+		// Default 'p14:flip' effect attribute is: dir='l'
+		// Attribute must be specified explicitly - <p14:flip/> without 'dir' attribute is forbidden
+		'effectFlipDown': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['r'] },
+		'effectFlipLeft': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['l'] },
+		'effectFlipRight': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['r'] },
+		'effectFlipUp': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['r'] },
+
+		// Default 'p14:flythrough' effect attributes are: dir='in', hasBounce='0'
+		'effectFlyThroughIn':        { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['in', '0'] },
+		'effectFlyThroughInBounce':  { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['in', '1'] },
+		'effectFlyThroughOut':       { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['out', '0'] },
+		'effectFlyThroughOutBounce': { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['out', '1'] },
+
+		// Default 'p14:gallery' effect attribute is: dir='l'
+		// Attribute must be specified explicitly - <p14:gallery/> without 'dir' attribute is forbidden
+		'effectGalleryLeft': { tag: 'p14:gallery', attrNames: ['dir'], attrValues: ['l'] },
+		'effectGalleryRight': { tag: 'p14:gallery', attrNames: ['dir'], attrValues: ['r'] },
+
+		// Default 'p14:glitter' effect attribute is: dir='l', pattern='diamond'
+		'effectGlitterDiamondDown':  { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['u', 'diamond'] },
+		'effectGlitterDiamondLeft':  { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['r', 'diamond'] },
+		'effectGlitterDiamondRight': { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['l', 'diamond'] },
+		'effectGlitterDiamondUp':    { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['d', 'diamond'] },
+		'effectGlitterHexagonDown':  { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['u', 'hexagon'] },
+		'effectGlitterHexagonLeft':  { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['r', 'hexagon'] },
+		'effectGlitterHexagonRight': { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['l', 'hexagon'] },
+		'effectGlitterHexagonUp':    { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['d', 'hexagon'] },
+
+		// Default 'p14:pan' effect attribute is: dir='l'
+		'effectPanDown':  { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['d'] },
+		'effectPanLeft':  { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['l'] },
+		'effectPanRight': { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['r'] },
+		'effectPanUp':    { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['u'] },
+
+		// Default 'p:push' effect attribute is: dir='l'
+		'effectPushDown':  { tag: 'p:push', attrNames: ['dir'], attrValues: ['d'] },
+		'effectPushLeft':  { tag: 'p:push', attrNames: ['dir'], attrValues: ['l'] },
+		'effectPushRight': { tag: 'p:push', attrNames: ['dir'], attrValues: ['r'] },
+		'effectPushUp':    { tag: 'p:push', attrNames: ['dir'], attrValues: ['u'] },
+
+		// Default 'p:randomBar' effect attribute is: dir='horz'
+		'effectRandomBarsHorizontal': { tag: 'p:randomBar', attrNames: ['dir'], attrValues: ['horz'] },
+		'effectRandomBarsVertical':   { tag: 'p:randomBar', attrNames: ['dir'], attrValues: ['vert'] },
+
+		// Default 'p14:reveal' effect attribute is: thruBlk='0', dir='l'
+		'effectRevealBlackLeft':   { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['1', 'l'] },
+		'effectRevealBlackRight':  { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['1', 'r'] },
+		'effectRevealSmoothLeft':  { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['0', 'l'] },
+		'effectRevealSmoothRight': { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['0', 'r'] },
+
+		// Default 'p14:ripple' effect attribute is: dir='center'
+		'effectRippleCenter':    { tag: 'p14:ripple', attrNames: ['dir'], attrValues: ['center'] },
+		'effectRippleLeftDown':  { tag: 'p14:ripple', attrNames: ['dir'], attrValues: ['ld'] },
+		'effectRippleLeftUp':    { tag: 'p14:ripple', attrNames: ['dir'], attrValues: ['lu'] },
+		'effectRippleRightDown': { tag: 'p14:ripple', attrNames: ['dir'], attrValues: ['rd'] },
+		'effectRippleRightUp':   { tag: 'p14:ripple', attrNames: ['dir'], attrValues: ['ru'] },
+
+		// Default 'p14:shred' effect attribute is: pattern='strip', dir='in'
+		'effectShredRectangleIn':  { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['rectangle', 'in'] },
+		'effectShredRectangleOut': { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['rectangle', 'out'] },
+		'effectShredStripsIn':     { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['strip', 'in'] },
+		'effectShredStripsOut':    { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['strip', 'out'] },
+
+		// Default 'p:split' effect attribute is: orient='horz', dir='out'
+		'effectSplitHorizontalIn':  { tag: 'p:split', attrNames: ['orient', 'dir'], attrValues: ['horz', 'in'] },
+		'effectSplitHorizontalOut': { tag: 'p:split', attrNames: ['orient', 'dir'], attrValues: ['horz', 'out'] },
+		'effectSplitVerticalIn':    { tag: 'p:split', attrNames: ['orient', 'dir'], attrValues: ['vert', 'in'] },
+		'effectSplitVerticalOut':   { tag: 'p:split', attrNames: ['orient', 'dir'], attrValues: ['vert', 'out'] },
+
+		// Default 'p:strips' effect attribute is: dir='lu'
+		'effectStripsDownLeft':  { tag: 'p:strips', attrNames: ['dir'], attrValues: ['ld'] },
+		'effectStripsDownRight': { tag: 'p:strips', attrNames: ['dir'], attrValues: ['rd'] },
+		'effectStripsLeftDown':  { tag: 'p:strips', attrNames: ['dir'], attrValues: ['ld'] },
+		'effectStripsLeftUp':    { tag: 'p:strips', attrNames: ['dir'], attrValues: ['lu'] },
+		'effectStripsRightDown': { tag: 'p:strips', attrNames: ['dir'], attrValues: ['rd'] },
+		'effectStripsRightUp':   { tag: 'p:strips', attrNames: ['dir'], attrValues: ['ru'] },
+		'effectStripsUpLeft':    { tag: 'p:strips', attrNames: ['dir'], attrValues: ['lu'] },
+		'effectStripsUpRight':   { tag: 'p:strips', attrNames: ['dir'], attrValues: ['ru'] },
+
+		// Default 'p14:switch' effect attribute is: dir='l'
+		// Attribute must be specified explicitly - <p14:switch/> without 'dir' attribute is forbidden
+		'effectSwitchDown':  { tag: 'p14:switch', attrNames: ['dir'], attrValues: ['r'] },
+		'effectSwitchLeft':  { tag: 'p14:switch', attrNames: ['dir'], attrValues: ['l'] },
+		'effectSwitchRight': { tag: 'p14:switch', attrNames: ['dir'], attrValues: ['r'] },
+		'effectSwitchUp':    { tag: 'p14:switch', attrNames: ['dir'], attrValues: ['r'] },
+
+		// Default 'p:pull' effect attribute is: dir='l'
+		'effectUncoverDown':      { tag: 'p:pull', attrNames: ['dir'], attrValues: ['d'] },
+		'effectUncoverLeft':      { tag: 'p:pull', attrNames: ['dir'], attrValues: ['l'] },
+		'effectUncoverLeftDown':  { tag: 'p:pull', attrNames: ['dir'], attrValues: ['ld'] },
+		'effectUncoverLeftUp':    { tag: 'p:pull', attrNames: ['dir'], attrValues: ['lu'] },
+		'effectUncoverRight':     { tag: 'p:pull', attrNames: ['dir'], attrValues: ['r'] },
+		'effectUncoverRightDown': { tag: 'p:pull', attrNames: ['dir'], attrValues: ['rd'] },
+		'effectUncoverRightUp':   { tag: 'p:pull', attrNames: ['dir'], attrValues: ['ru'] },
+		'effectUncoverUp':        { tag: 'p:pull', attrNames: ['dir'], attrValues: ['u'] },
+
+		// Default 'p14:vortex' effect attribute is: dir='l'
+		'effectVortexDown':  { tag: 'p14:vortex', attrNames: ['dir'], attrValues: ['d'] },
+		'effectVortexLeft':  { tag: 'p14:vortex', attrNames: ['dir'], attrValues: ['l'] },
+		'effectVortexRight': { tag: 'p14:vortex', attrNames: ['dir'], attrValues: ['r'] },
+		'effectVortexUp':    { tag: 'p14:vortex', attrNames: ['dir'], attrValues: ['u'] },
+
+		// Default 'p14:warp' effect attribute is: dir='out'
+		'effectWarpIn':  { tag: 'p14:warp', attrNames: ['dir'], attrValues: ['in'] },
+		'effectWarpOut': { tag: 'p14:warp', attrNames: ['dir'], attrValues: ['out'] },
+
+		// Default 'p:wheel' effect attribute is: spokes='4'
+		'effectWheel1Spoke':  { tag: 'p:wheel', attrNames: ['spokes'], attrValues: ['1'] },
+		'effectWheel2Spokes': { tag: 'p:wheel', attrNames: ['spokes'], attrValues: ['2'] },
+		'effectWheel3Spokes': { tag: 'p:wheel', attrNames: ['spokes'], attrValues: ['3'] },
+		'effectWheel4Spokes': { tag: 'p:wheel', attrNames: ['spokes'], attrValues: ['4'] },
+		'effectWheel8Spokes': { tag: 'p:wheel', attrNames: ['spokes'], attrValues: ['8'] },
+
+		// Default 'p14:wheelReverse' effect attribute is: spokes='4'
+		// There is no effect with 4 spokes in reverse wheel effects but we can set it manually
+		'effectWheelReverse1Spoke': { tag: 'p14:wheelReverse', attrNames: ['spokes'], attrValues: ['1'] },
+
+		// Default 'p14:window' effect attribute is: dir='horz'
+		'effectWindowHorizontal': { tag: 'p14:window', attrNames: ['dir'], attrValues: ['horz'] },
+		'effectWindowVertical':   { tag: 'p14:window', attrNames: ['dir'], attrValues: ['vert'] },
+
+		// Default 'p:wipe' effect attribute is: dir='l'
+		'effectWipeDown':  { tag: 'p:wipe', attrNames: ['dir'], attrValues: ['d'] },
+		'effectWipeLeft':  { tag: 'p:wipe', attrNames: ['dir'], attrValues: ['l'] },
+		'effectWipeRight': { tag: 'p:wipe', attrNames: ['dir'], attrValues: ['r'] },
+		'effectWipeUp':    { tag: 'p:wipe', attrNames: ['dir'], attrValues: ['u'] },
+
+		// Default 'p159:morph' effect attribute is: option='byObject'
+		// Attribute must be specified explicitly - <p159:morph/> without 'option' attribute is forbidden
+		'effectMorphByObject': { tag: 'p159:morph', attrNames: ['option'], attrValues: ['byObject'] },
+		'effectMorphByWord':   { tag: 'p159:morph', attrNames: ['option'], attrValues: ['byWord'] },
+		'effectMorphByChar':   { tag: 'p159:morph', attrNames: ['option'], attrValues: ['byChar'] },
+
+		'effectNone': {}
+
+		// effectCrawlFromDown
+		// effectCrawlFromLeft
+		// effectCrawlFromRight
+		// effectCrawlFromUp
+		// effectFlashOnceFast
+		// effectFlashOnceMedium
+		// effectFlashOnceSlow
+		// effectFlyFromBottom
+		// effectFlyFromBottomLeft
+		// effectFlyFromBottomRight
+		// effectFlyFromLeft
+		// effectFlyFromRight
+		// effectFlyFromTop
+		// effectFlyFromTopLeft
+		// effectFlyFromTopRight
+		// effectMixed
+		// effectPeekFromDown
+		// effectPeekFromLeft
+		// effectPeekFromRight
+		// effectPeekFromUp
+		// effectSpiral
+		// effectStretchAcross
+		// effectStretchDown
+		// effectStretchLeft
+		// effectStretchRight
+		// effectStretchUp
+		// effectSwivel
+		// effectZoomBottom
+		// effectZoomCenter
+		// effectZoomIn
+		// effectZoomInSlightly
+		// effectZoomOut
+		// effectZoomOutSlightly
+	};
+
+	/**
+	 * Returns the entry effect for the slide show transition.
+	 *
+	 * @memberof ApiSlideShowTransition
+	 * @typeofeditors ["CPE"]
+	 * @since 9.3.0
+	 *
+	 * @returns {EntryEffect} - The name of the entry effect in string format.
+	 * @see office-js-api/Examples/{Editor}/ApiSlideShowTransition/Methods/GetEntryEffect.js
+	 */
+	ApiSlideShowTransition.prototype.GetEntryEffect = function () {
+		if (this.Transition) {
+			const attrNames = [];
+			const attrValues = [];
+			const nodeName = this.Transition.fillXmlParams(attrNames, attrValues);
+
+			const map = ApiSlideShowTransition.ENTRY_EFFECT_MAP;
+			if (nodeName) {
+				for (const effectName in map) {
+					const effectEntry = map[effectName];
+					if (effectEntry === undefined || !effectEntry.tag) {
+						continue;
+					}
+
+					if (effectEntry.tag !== nodeName) {
+						continue;
+					}
+
+					const effectEntryAttrNames = effectEntry.attrNames || [];
+					const effectEntryAttrValues = effectEntry.attrValues || [];
+
+					if (effectEntryAttrNames.length !== attrNames.length) {
+						continue;
+					}
+
+					let matches = true;
+					for (let j = 0; j < attrNames.length; j++) {
+						if (attrNames[j] !== effectEntryAttrNames[j] || attrValues[j] !== effectEntryAttrValues[j]) {
+							matches = false;
+							break;
+						}
+					}
+
+					if (matches) {
+						return effectName;
+					}
+				}
+			}
+		}
+
+		return 'effectNone';
+	};
+
+	/**
+	 * Sets the entry effect for the slide show transition.
+	 *
+	 * @memberof ApiSlideShowTransition
+	 * @typeofeditors ["CPE"]
+	 * @since 9.3.0
+	 *
+	 * @param {EntryEffect} entryEffectName - The name of the entry effect in string format.
+	 * @returns {boolean} - True if the entry effect name is supported and was set successfully; otherwise false.
+	 * @see office-js-api/Examples/{Editor}/ApiSlideShowTransition/Methods/SetEntryEffect.js
+	 */
+	ApiSlideShowTransition.prototype.SetEntryEffect = function (entryEffectName) {
+		if (!this.Transition || !entryEffectName) {
+			return false;
+		}
+
+		if (entryEffectName === 'effectNone') {
+			this.Transition.TransitionType = c_oAscSlideTransitionTypes.None;
+			this.TransitionOption = -1;
+			return true;
+		}
+
+		const entryEffect = ApiSlideShowTransition.ENTRY_EFFECT_MAP[entryEffectName];
+		if (entryEffect === undefined) {
+			return false;
+		}
+
+		const attrNames = entryEffect.attrNames || [];
+		const attrValues = entryEffect.attrValues || [];
+		const copy = this.Transition.createDuplicate();
+		const isMatched = copy.parseXmlParameters(entryEffect.tag, attrNames, attrValues);
+
+		if (!isMatched) {
+			return false;
+		}
+
+		copy.fillObject(this.Transition);
+		return true;
+	};
+
+	/**
+	 * Returns the transition duration in milliseconds for the slide show transition.
+	 *
+	 * @memberof ApiSlideShowTransition
+	 * @typeofeditors ["CPE"]
+	 * @since 9.3.0
+	 *
+	 * @returns {number} - The transition duration in milliseconds.
+	 * @see office-js-api/Examples/{Editor}/ApiSlideShowTransition/Methods/GetDuration.js
+	 */
+	ApiSlideShowTransition.prototype.GetDuration = function () {
+		return this.Transition.get_TransitionDuration();
+	};
+
+	/**
+	 * Sets the transition duration in milliseconds for the slide show transition.
+	 *
+	 * @memberof ApiSlideShowTransition
+	 * @typeofeditors ["CPE"]
+	 * @since 9.3.0
+	 *
+	 * @param {number} duration - The transition duration in milliseconds.
+	 * @returns {boolean} - True if the duration was set successfully; otherwise false.
+	 * @see office-js-api/Examples/{Editor}/ApiSlideShowTransition/Methods/SetDuration.js
+	 */
+	ApiSlideShowTransition.prototype.SetDuration = function (duration) {
+		if (this.Transition && AscFormat.isRealNumber(duration)) {
+			this.Transition.put_TransitionDuration(duration);
+			return true;
+		}
+		return false;
+	};
+
+	ApiSlideShowTransition.SPEED_FAST_DURATION = 500;
+	ApiSlideShowTransition.SPEED_MEDIUM_DURATION = 750;
+	ApiSlideShowTransition.SPEED_SLOW_DURATION = 1000;
+	ApiSlideShowTransition.SPEED_FAST_THRESHOLD = 250;
+	ApiSlideShowTransition.SPEED_SLOW_THRESHOLD = 1000;
+
+	ApiSlideShowTransition._getSpeedName = function (duration) {
+		if (AscFormat.isRealNumber(duration)) {
+			if (duration < ApiSlideShowTransition.SPEED_FAST_THRESHOLD) {
+				return 'fast';
+			} else if (duration > ApiSlideShowTransition.SPEED_SLOW_THRESHOLD) {
+				return 'slow';
+			} else {
+				return 'medium';
+			}
+		}
+		return undefined;
+	};
+
+	ApiSlideShowTransition._getSpeedValue = function (speedName) {
+		switch (speedName) {
+			case 'fast': return ApiSlideShowTransition.SPEED_FAST_DURATION;
+			case 'medium': return ApiSlideShowTransition.SPEED_MEDIUM_DURATION;
+			case 'slow': return ApiSlideShowTransition.SPEED_SLOW_DURATION;
+			default: return undefined;
+		}
+	};
+
+	/**
+	 * Returns the transition speed (similar to PowerPoint VBA Speed property).
+	 * Maps duration to speed based on OOXML spd attribute logic:
+	 * - fast: duration < 250ms
+	 * - slow: duration > 1000ms
+	 * - medium: 250ms <= duration <= 1000ms
+	 *
+	 * @memberof ApiSlideShowTransition
+	 * @typeofeditors ["CPE"]
+	 * @since 9.3.0
+	 *
+	 * @returns {TransitionSpeed} - The transition speed in string format.
+	 * @see office-js-api/Examples/{Editor}/ApiSlideShowTransition/Methods/GetSpeed.js
+	 */
+	ApiSlideShowTransition.prototype.GetSpeed = function () {
+		const duration = this.Transition.get_TransitionDuration();
+		return ApiSlideShowTransition._getSpeedName(duration);
+	};
+
+	/**
+	 * Sets the transition speed (similar to PowerPoint VBA Speed property).
+	 * Converts speed to duration based on standard values:
+	 * - fast = 500ms
+	 * - medium = 750ms
+	 * - slow = 1000ms
+	 *
+	 * @memberof ApiSlideShowTransition
+	 * @typeofeditors ["CPE"]
+	 * @since 9.3.0
+	 *
+	 * @param {TransitionSpeed} speed - The transition speed in string format.
+	 * @returns {boolean} - True if the given parameter is valid and was set successfully; otherwise false.
+	 * @see office-js-api/Examples/{Editor}/ApiSlideShowTransition/Methods/SetSpeed.js
+	 */
+	ApiSlideShowTransition.prototype.SetSpeed = function (speed) {
+		if (this.Transition) {
+			const duration = ApiSlideShowTransition._getSpeedValue(speed);
+			if (duration !== undefined) {
+				this.Transition.put_TransitionDuration(duration);
+				return true;
+			}
+		}
+		return false;
+	};
+
+	/**
+	 * Returns whether the slide advances on mouse click.
+	 *
+	 * @memberof ApiSlideShowTransition
+	 * @typeofeditors ["CPE"]
+	 * @since 9.3.0
+	 *
+	 * @returns {boolean} - True if the slide advances on mouse click; otherwise false.
+	 * @see office-js-api/Examples/{Editor}/ApiSlideShowTransition/Methods/GetAdvanceOnClick.js
+	 */
+	ApiSlideShowTransition.prototype.GetAdvanceOnClick = function () {
+		return this.Transition.get_SlideAdvanceOnMouseClick();
+	};
+
+	/**
+	 * Sets whether the slide advances on mouse click.
+	 *
+	 * @memberof ApiSlideShowTransition
+	 * @typeofeditors ["CPE"]
+	 * @since 9.3.0
+	 *
+	 * @param {boolean} advanceOnClick - True to advance the slide on mouse click; otherwise false.
+	 * @returns {boolean} - True if the value was set successfully; otherwise false.
+	 * @see office-js-api/Examples/{Editor}/ApiSlideShowTransition/Methods/SetAdvanceOnClick.js
+	 */
+	ApiSlideShowTransition.prototype.SetAdvanceOnClick = function (advanceOnClick) {
+		if (this.Transition) {
+			this.Transition.put_SlideAdvanceOnMouseClick(advanceOnClick);
+			return true;
+		}
+		return false;
+	};
+
+	/**
+	 * Returns whether the slide advances after a specified time.
+	 *
+	 * @memberof ApiSlideShowTransition
+	 * @typeofeditors ["CPE"]
+	 * @since 9.3.0
+	 *
+	 * @returns {boolean} - True if the slide advances after a specified time; otherwise false.
+	 * @see office-js-api/Examples/{Editor}/ApiSlideShowTransition/Methods/GetAdvanceOnTime.js
+	 */
+	ApiSlideShowTransition.prototype.GetAdvanceOnTime = function () {
+		return this.Transition.get_SlideAdvanceAfter();
+	};
+
+	/**
+	 * Sets whether the slide advances after a specified time.
+	 *
+	 * @memberof ApiSlideShowTransition
+	 * @typeofeditors ["CPE"]
+	 * @since 9.3.0
+	 *
+	 * @param {boolean} advanceOnTime - True to advance the slide after a specified time; otherwise false.
+	 * @returns {boolean} - True if the setting was set successfully; otherwise false.
+	 * @see office-js-api/Examples/{Editor}/ApiSlideShowTransition/Methods/SetAdvanceOnTime.js
+	 */
+	ApiSlideShowTransition.prototype.SetAdvanceOnTime = function (advanceOnTime) {
+		if (this.Transition) {
+			this.Transition.put_SlideAdvanceAfter(advanceOnTime);
+			return true;
+		}
+		return false;
+	};
+
+	/**
+	 * Returns the slide advance time in milliseconds.
+	 *
+	 * @memberof ApiSlideShowTransition
+	 * @typeofeditors ["CPE"]
+	 * @since 9.3.0
+	 *
+	 * @returns {number | undefined} - The slide advance time in milliseconds if set; otherwise undefined.
+	 * @see office-js-api/Examples/{Editor}/ApiSlideShowTransition/Methods/GetAdvanceTime.js
+	 */
+	ApiSlideShowTransition.prototype.GetAdvanceTime = function () {
+		if (this.Transition) {
+			return this.Transition.get_SlideAdvanceDuration();
+		}
+		return undefined;
+	};
+
+	/**
+	 * Sets the slide advance time in milliseconds.
+	 *
+	 * @memberof ApiSlideShowTransition
+	 * @typeofeditors ["CPE"]
+	 * @since 9.3.0
+	 *
+	 * @param {number} advanceTime - The slide advance time in milliseconds.
+	 * @returns {boolean} - True if the time was set successfully; otherwise false.
+	 * @see office-js-api/Examples/{Editor}/ApiSlideShowTransition/Methods/SetAdvanceTime.js
+	 */
+	ApiSlideShowTransition.prototype.SetAdvanceTime = function (advanceTime) {
+		if (this.Transition && AscFormat.isRealNumber(advanceTime)) {
+			this.Transition.put_SlideAdvanceDuration(advanceTime);
+			return true;
+		}
+		return false;
+	};
+
+	Object.defineProperties(ApiSlideShowTransition.prototype, {
+		"EntryEffect": {
+			get: function () { return this.GetEntryEffect(); },
+			set: function (value) { this.SetEntryEffect(value); }
+		},
+		"Speed": {
+			get: function () { return this.GetSpeed(); },
+			set: function (value) { this.SetSpeed(value); }
+		},
+		"Duration": {
+			get: function () { return this.GetDuration(); },
+			set: function (value) { this.SetDuration(value); }
+		},
+		"AdvanceOnClick": {
+			get: function () { return this.GetAdvanceOnClick(); },
+			set: function (value) { this.SetAdvanceOnClick(value); }
+		},
+		"AdvanceOnTime": {
+			get: function () { return this.GetAdvanceOnTime(); },
+			set: function (value) { this.SetAdvanceOnTime(value); }
+		},
+		"AdvanceTime": {
+			get: function () { return this.GetAdvanceTime(); },
+			set: function (value) { this.SetAdvanceTime(value); }
+		}
+	});
 
     //------------------------------------------------------------------------------------------------------------------
     //
@@ -4719,6 +5489,95 @@
 	ApiDrawing.prototype.GetInternalId = function()
 	{
 		return this.Drawing.GetId();
+	};
+
+	/**
+	 * Sets a hyperlink to the current drawing object (shape or image).
+	 * Pass null to remove the hyperlink.
+	 *
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CPE"]
+	 *
+	 * @param {ApiHyperlink | null} hyperlink - The hyperlink object to be set to the drawing, or null to remove the hyperlink.
+	 *
+	 * @returns {boolean} - Returns true if the hyperlink was set or removed successfully.
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/SetHyperlink.js
+	 */
+	ApiDrawing.prototype.SetHyperlink = function (hyperlink) {
+		const classType = this.GetClassType();
+		if (classType !== 'shape' && classType !== 'image') {
+			return false;
+		}
+
+		if (!this.Drawing) {
+			return false;
+		}
+
+		const controller = this.Drawing.getDrawingObjectsController();
+		const nonVisualProperties = controller.hyperlinkCollectNonVisualProperties(this.Drawing);
+
+		if (hyperlink === null) {
+			nonVisualProperties.forEach(function (oNvPr) {
+				oNvPr.setHlinkClick(null);
+			});
+			return true;
+		}
+
+		let link = null;
+		let tooltip = null;
+		if (hyperlink && hyperlink.ParaHyperlink) {
+			link = hyperlink.ParaHyperlink.GetValue();
+			tooltip = hyperlink.ParaHyperlink.GetToolTip();
+		}
+
+		nonVisualProperties.forEach(function (oNvPr) {
+			const oHyperlink = new AscFormat.CT_Hyperlink();
+			oHyperlink.id = link;
+			oHyperlink.tooltip = tooltip;
+			oNvPr.setHlinkClick(oHyperlink);
+		});
+
+		return true;
+	};
+
+	/**
+	 * Returns the hyperlink from the current drawing object (shape or image).
+	 *
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CPE"]
+	 *
+	 * @returns {ApiHyperlink | null} - Returns the hyperlink object or null if no hyperlink is set.
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetHyperlink.js
+	 */
+	ApiDrawing.prototype.GetHyperlink = function () {
+		const classType = this.GetClassType();
+		if (classType !== 'shape' && classType !== 'image') {
+			return null;
+		}
+
+		if (!this.Drawing) {
+			return null;
+		}
+
+		const controller = this.Drawing.getDrawingObjectsController();
+		const nonVisualProperties = controller.hyperlinkCollectNonVisualProperties(this.Drawing);
+
+		if (nonVisualProperties.length === 0) {
+			return null;
+		}
+
+		const oNvPr = nonVisualProperties[0];
+		if (!oNvPr || !oNvPr.hlinkClick) {
+			return null;
+		}
+
+		const paraHyperlink = new AscCommonWord.ParaHyperlink();
+		const apiHyperlink = new AscBuilder.ApiHyperlink(paraHyperlink);
+
+		apiHyperlink.SetLink(oNvPr.hlinkClick.id);
+		apiHyperlink.SetScreenTipText(oNvPr.hlinkClick.tooltip);
+
+		return apiHyperlink;
 	};
 
     //------------------------------------------------------------------------------------------------------------------
@@ -5669,8 +6528,6 @@
         this.Cell.Set_Pr(oPr);
     };
 
-
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Export
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -5683,6 +6540,7 @@
     Api.prototype["CreateOleObject"]                      = Api.prototype.CreateOleObject;
     Api.prototype["CreateTable"]                          = Api.prototype.CreateTable;
     Api.prototype["CreateParagraph"]                      = Api.prototype.CreateParagraph;
+    Api.prototype["CreateHyperlink"]                      = Api.prototype.CreateHyperlink;
     Api.prototype["Save"]                                 = Api.prototype.Save;
     Api.prototype["CreateMaster"]                         = Api.prototype.CreateMaster;
     Api.prototype["CreateDefaultMasterSlide"]             = Api.prototype.CreateDefaultMasterSlide;
@@ -5693,6 +6551,7 @@
     Api.prototype["CreateThemeFormatScheme"]              = Api.prototype.CreateThemeFormatScheme;
     Api.prototype["CreateThemeFontScheme"]                = Api.prototype.CreateThemeFontScheme;
     Api.prototype["CreateWordArt"]                        = Api.prototype.CreateWordArt;
+	Api.prototype["CreateSlideShowTransition"]            = Api.prototype.CreateSlideShowTransition;
 	Api.prototype["FromJSON"]                             = Api.prototype.FromJSON;
 	Api.prototype["GetSelection"]                         = Api.prototype.GetSelection;
 	Api.prototype["GetByInternalId"]                      = Api.prototype.GetByInternalId;
@@ -5732,6 +6591,8 @@
     ApiPresentation.prototype["GetCore"]                  = ApiPresentation.prototype.GetCore;
     ApiPresentation.prototype["GetCustomProperties"]      = ApiPresentation.prototype.GetCustomProperties;
     ApiPresentation.prototype["GetCustomXmlParts"]        = ApiPresentation.prototype.GetCustomXmlParts;
+    ApiPresentation.prototype["GetLoopUntilStopped"]      = ApiPresentation.prototype.GetLoopUntilStopped;
+    ApiPresentation.prototype["SetLoopUntilStopped"]      = ApiPresentation.prototype.SetLoopUntilStopped;
 
     ApiMaster.prototype["GetClassType"]                   = ApiMaster.prototype.GetClassType;
     ApiMaster.prototype["GetInternalId"]                  = ApiMaster.prototype.GetInternalId;
@@ -5854,12 +6715,28 @@
     ApiSlide.prototype["GroupDrawings"]                   = ApiSlide.prototype.GroupDrawings;
 	ApiSlide.prototype["GetNotesPage"]                    = ApiSlide.prototype.GetNotesPage;
 	ApiSlide.prototype["AddNotesText"]                    = ApiSlide.prototype.AddNotesText;
+	ApiSlide.prototype["GetSlideShowTransition"]          = ApiSlide.prototype.GetSlideShowTransition;
+	ApiSlide.prototype["SetSlideShowTransition"]          = ApiSlide.prototype.SetSlideShowTransition;
 
 	ApiNotesPage.prototype["GetClassType"]                = ApiNotesPage.prototype.GetClassType;
 	ApiNotesPage.prototype["GetBodyShape"]                = ApiNotesPage.prototype.GetBodyShape;
 	ApiNotesPage.prototype["AddBodyShapeText"]            = ApiNotesPage.prototype.AddBodyShapeText;
 	ApiNotesPage.prototype["GetBodyShapeText"]            = ApiNotesPage.prototype.GetBodyShapeText;
 	ApiNotesPage.prototype["GetTheme"]                    = ApiNotesPage.prototype.GetTheme;
+
+	ApiSlideShowTransition.prototype["GetClassType"]      = ApiSlideShowTransition.prototype.GetClassType;
+	ApiSlideShowTransition.prototype["GetEntryEffect"]    = ApiSlideShowTransition.prototype.GetEntryEffect;
+	ApiSlideShowTransition.prototype["SetEntryEffect"]    = ApiSlideShowTransition.prototype.SetEntryEffect;
+	ApiSlideShowTransition.prototype["GetDuration"]       = ApiSlideShowTransition.prototype.GetDuration;
+	ApiSlideShowTransition.prototype["SetDuration"]       = ApiSlideShowTransition.prototype.SetDuration;
+	ApiSlideShowTransition.prototype["GetSpeed"]          = ApiSlideShowTransition.prototype.GetSpeed;
+	ApiSlideShowTransition.prototype["SetSpeed"]          = ApiSlideShowTransition.prototype.SetSpeed;
+	ApiSlideShowTransition.prototype["GetAdvanceOnClick"] = ApiSlideShowTransition.prototype.GetAdvanceOnClick;
+	ApiSlideShowTransition.prototype["SetAdvanceOnClick"] = ApiSlideShowTransition.prototype.SetAdvanceOnClick;
+	ApiSlideShowTransition.prototype["GetAdvanceOnTime"]  = ApiSlideShowTransition.prototype.GetAdvanceOnTime;
+	ApiSlideShowTransition.prototype["SetAdvanceOnTime"]  = ApiSlideShowTransition.prototype.SetAdvanceOnTime;
+	ApiSlideShowTransition.prototype["GetAdvanceTime"]    = ApiSlideShowTransition.prototype.GetAdvanceTime;
+	ApiSlideShowTransition.prototype["SetAdvanceTime"]    = ApiSlideShowTransition.prototype.SetAdvanceTime;
     
     ApiDrawing.prototype["GetClassType"]                  = ApiDrawing.prototype.GetClassType;
     ApiDrawing.prototype["SetSize"]                       = ApiDrawing.prototype.SetSize;
@@ -5883,6 +6760,8 @@
     ApiDrawing.prototype["GetPosY"]                       = ApiDrawing.prototype.GetPosY;
     ApiDrawing.prototype["SetPosX"]                       = ApiDrawing.prototype.SetPosX;
     ApiDrawing.prototype["SetPosY"]                       = ApiDrawing.prototype.SetPosY;
+    ApiDrawing.prototype["SetHyperlink"]                  = ApiDrawing.prototype.SetHyperlink;
+    ApiDrawing.prototype["GetHyperlink"]                  = ApiDrawing.prototype.GetHyperlink;
   
     ApiDrawing.prototype["ReplacePlaceholder"]            = ApiDrawing.prototype.ReplacePlaceholder;
     ApiDrawing.prototype["GetInternalId"]                 = ApiDrawing.prototype.GetInternalId;
@@ -5952,8 +6831,6 @@
     ApiTableCell.prototype["SetCellBorderTop"]            = ApiTableCell.prototype.SetCellBorderTop;
     ApiTableCell.prototype["SetVerticalAlign"]            = ApiTableCell.prototype.SetVerticalAlign;
     ApiTableCell.prototype["SetTextDirection"]            = ApiTableCell.prototype.SetTextDirection;
-
-
 
     Api.prototype.private_CreateApiSlide = function(oSlide){
         return new ApiSlide(oSlide);

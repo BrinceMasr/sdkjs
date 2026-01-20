@@ -252,18 +252,16 @@
 			return;
 
 		let oDoc			= this.getPDFDoc();
+		let oController		= oDoc.GetController();
 		let oThumbnails		= oDoc.Viewer.thumbnails;
-		let oActiveForm		= oDoc.activeForm;
-		let oActiveAnnot	= oDoc.mouseDownAnnot;
-		let oActiveDrawing	= oDoc.activeDrawing;
+		let oActiveObj		= oDoc.GetActiveObject();
 
-		function processClipboardData(oContent, _formats, _clipboard) {
-			let sText = oContent ? oContent.GetSelectedText(false) : "";
+		function processClipboardData(_selectedText, _formats, _clipboard) {
 			let _data, sBase64;
 		
 			// Text
 			if (AscCommon.c_oAscClipboardDataFormat.Text & _formats) {
-				_clipboard.pushData(AscCommon.c_oAscClipboardDataFormat.Text, sText);
+				_clipboard.pushData(AscCommon.c_oAscClipboardDataFormat.Text, _selectedText);
 			}
 			// HTML
 			if (AscCommon.c_oAscClipboardDataFormat.Html & _formats) {
@@ -314,40 +312,8 @@
 			return;
 		}
 		
-		if (oActiveForm) {
-			if (oActiveForm.content && oActiveForm.content.IsSelectionUse()) {
-				let sText = oActiveForm.content.GetSelectedText(false, {ParaSeparator: ""});
-				if (!sText)
-					return;
-
-				if (AscCommon.c_oAscClipboardDataFormat.Text & _formats)
-					_clipboard.pushData(AscCommon.c_oAscClipboardDataFormat.Text, sText);
-
-				if (AscCommon.c_oAscClipboardDataFormat.Html & _formats)
-					_clipboard.pushData(AscCommon.c_oAscClipboardDataFormat.Html, "<div><p><span>" + sText + "</span></p></div>");
-			}
-			else {
-				processClipboardData.call(this, null, _formats, _clipboard);
-			}
-		}
-		else if (oActiveAnnot) {
-			if (oActiveAnnot.IsFreeText() && oActiveAnnot.IsInTextBox()) {
-				let sText = oActiveAnnot.GetDocContent().GetSelectedText(false, { NewLine: true });
-				if (!sText) return;
-		
-				if (AscCommon.c_oAscClipboardDataFormat.Text & _formats)
-					_clipboard.pushData(AscCommon.c_oAscClipboardDataFormat.Text, sText);
-		
-				if (AscCommon.c_oAscClipboardDataFormat.Html & _formats)
-					_clipboard.pushData(AscCommon.c_oAscClipboardDataFormat.Html, "<div><p><span>" + sText + "</span></p></div>");
-			} else if (!oActiveAnnot.IsTextMarkup()) {
-				let oContent = oActiveAnnot.GetDocContent();
-				processClipboardData.call(this, oContent, _formats, _clipboard);
-			}
-		}
-		else if (oActiveDrawing) {
-			let oContent = oActiveDrawing.GetDocContent();
-			processClipboardData.call(this, oContent, _formats, _clipboard);
+		if (oActiveObj) {
+			processClipboardData.call(this, oController.GetSelectedText(false), _formats, _clipboard);
 		}
 		else {
 			let _text_object = {Text: ""};
@@ -528,6 +494,8 @@
 		
 		oViewer.IsSearch = true;
 
+		oDoc.RecalculateAll();
+		
 		let isAsync	= (true === oViewer.findText(props, isNext));
 		let result	= oSearchEngine.Count;
 		

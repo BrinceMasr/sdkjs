@@ -4029,12 +4029,14 @@
 			return copy;
 		};
 		CBlipFillStretch.prototype.isIdentical = function (other) {
-			return other && (
-				this.fillRect == null && other.fillRect == null ||
-				other.fillRect.l == this.fillRect.l &&
-				other.fillRect.t == this.fillRect.t &&
-				other.fillRect.r == this.fillRect.r &&
-				other.fillRect.b == this.fillRect.b);
+			if (!other)
+				return false;
+			if (!this.fillRect) {
+				return !other.fillRect;
+			}
+			let f = this.fillRect;
+			let o = other.fillRect;
+			return o && f.l === o.l && f.t === o.t && f.r === o.r && f.b === o.b;
 		};
 
 
@@ -17515,13 +17517,14 @@
 			return oUniFill;
 		}
 
-		function builder_CreateLine(nWidth, oFill) {
+		function builder_CreateLine(nWidth, oFill, prstDash) {
 			if (nWidth === 0) {
 				return new AscFormat.CreateNoFillLine();
 			}
 			var oLn = new AscFormat.CLn();
 			oLn.w = nWidth;
 			oLn.Fill = oFill.UniFill;
+			oLn.prstDash = (prstDash === undefined) ? null : prstDash;
 			return oLn;
 		}
 

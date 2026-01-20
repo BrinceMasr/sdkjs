@@ -2339,9 +2339,10 @@ CShapeDrawer.prototype =
 	                        this.Graphics.put_TextureBounds(fillRect.x, fillRect.y, fillRect.w, fillRect.h);
                         }
 
-                        const fillRect = AscCommon.isRealObject(this.UniFill.fill.stretch.fillRect)
-                            ? this.UniFill.fill.stretch.fillRect
-                            : null;
+						const fillRect = AscCommon.isRealObject(this.UniFill.fill.stretch) &&
+							AscCommon.isRealObject(this.UniFill.fill.stretch.fillRect)
+							? this.UniFill.fill.stretch.fillRect
+							: null;
 
                         if (null != fillRect)
                         {
@@ -2423,7 +2424,7 @@ CShapeDrawer.prototype =
                         this.Graphics.put_PathScale(sx, sy);
                     }
                     this.Graphics.put_BrushTextureAlpha(this.UniFill.transparent);
-                    if (!rotWithShape || rotWithShape === null)
+                    if (!rotWithShape)
                         this.Graphics.ResetRotation();
                 }
                 else

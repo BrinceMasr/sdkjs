@@ -10505,7 +10505,7 @@
 	};
 	ReaderFromJSON.prototype.ParaSpacingFromJSON = function(oParsedSpacing)
 	{
-		let oSpacing = new CParaSpacing();
+		let oSpacing = new AscWord.ParaSpacing();
 
 		if (oParsedSpacing["before"] != null)
 			oSpacing.Before = private_Twips2MM(oParsedSpacing["before"]);

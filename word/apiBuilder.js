@@ -1521,9 +1521,6 @@
 		logicDocument.RemoveSelection();
 
 		text = GetStringParameter(text, "");
-		if ("" === text)
-			return false;
-		
 		position = GetStringParameter(position, "after");
 		
 		if ("after" === position)
@@ -1625,7 +1622,7 @@
 	{
 		sLink = GetStringParameter(sLink, "");
 		sScreenTipText = GetStringParameter(sScreenTipText, "");
-		sBookmarkName = GetStringParameter(sBookmarkName, "");
+		sBookmarkName = GetStringParameter(sBookmarkName, null);
 
 		if ((!sLink && !sBookmarkName) || (sLink && sBookmarkName)) {
 			return null;
@@ -3371,7 +3368,7 @@
 	};
 	/**
 	 * Sets the hyperlink display text.
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @typeofeditors ["CDE"]
 	 * @param {string} sDisplay - The text to display the hyperlink.
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/SetDisplayedText.js
@@ -3430,18 +3427,11 @@
 	 */
 	ApiHyperlink.prototype.GetLinkedText = function()
 	{
-		var sText = null;
-
-		if (this.ParaHyperlink.Content.length !== 0)
-		{
-			sText = this.ParaHyperlink.GetValue();
-		}
-
-		return sText;
+		return this.ParaHyperlink.GetValue();
 	};
 	/**
 	 * Returns the hyperlink display text.
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @typeofeditors ["CDE"]
 	 * @returns {string} 
 	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/GetDisplayedText.js
 	 */
@@ -3464,14 +3454,7 @@
 	 */
 	ApiHyperlink.prototype.GetScreenTipText = function()
 	{
-		var sText = null;
-
-		if (this.ParaHyperlink.Content.length !== 0)
-		{
-			sText = this.ParaHyperlink.GetToolTip();
-		}
-
-		return sText;
+		return this.ParaHyperlink.GetToolTip();
 	};
 	/**
 	 * Returns the hyperlink element using the position specified.
@@ -3502,7 +3485,7 @@
 	};
 	/**
 	 * Sets the default hyperlink style.
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @typeofeditors ["CDE"]
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/SetDefaultStyle.js
 	 */
@@ -4265,6 +4248,13 @@
 	 * @typedef {"black" | "blue" | "cyan" | "green" | "magenta" | "red" | "yellow" | "white" | "darkBlue" |
 	 * "darkCyan" | "darkGreen" | "darkMagenta" | "darkRed" | "darkYellow" | "darkGray" | "lightGray" | "none"} highlightColor
 	 * @see office-js-api/Examples/Enumerations/highlightColor.js
+	 */
+
+	/**
+	 * Available dash type for line.
+	 * @typedef {"dash" | "dashDot" | "dot" | "lgDash" | "lgDashDot" | "lgDashDotDot" |
+	 * "solid" | "sysDash" | "sysDashDot" | "sysDashDotDot" | "sysDot"} DashType
+	 * @see office-js-api/Examples/Enumerations/LineDash.js
 	 */
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -5094,16 +5084,35 @@
 
 	/**
 	 * Creates a stroke adding shadows to the element.
+	 *
 	 * @memberof Api
 	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 *
+	 * @deprecated since 9.3.0 version.
 	 * @param {EMU} width - The width of the shadow measured in English measure units.
 	 * @param {ApiFill} fill - The fill type used to create the shadow.
 	 * @returns {ApiStroke}
+	 *
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/CreateStroke.js
 	 */
-	Api.prototype.CreateStroke = function(width, fill)
+	/**
+	 * Creates a stroke adding shadows to the element.
+	 *
+	 * @memberof Api
+	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 *
+	 * @since 9.3.0
+	 * @param {EMU} width - The width of the shadow measured in English measure units.
+	 * @param {ApiFill} fill - The fill type used to create the shadow.
+	 * @param {DashType} [sDash="solid"] - The type of line dash.
+	 * @returns {ApiStroke}
+	 *
+	 * @see office-js-api/Examples/{Editor}/Api/Methods/CreateStroke.js
+	 */
+	Api.prototype.CreateStroke = function(width, fill, sDash)
 	{
-		return new ApiStroke(AscFormat.builder_CreateLine(width, fill));
+		let strDashType = AscFormat.CLn.prototype.GetDashCode(sDash);
+		return new ApiStroke(AscFormat.builder_CreateLine(width, fill, strDashType));
 	};
 
 	/**
@@ -10041,10 +10050,7 @@
 	 */
 	ApiParagraph.prototype.AddText = function(text)
 	{
-		text = GetStringParameter(text, null);
-		if (!text)
-			throwException("The text parameter must be a non empty string");
-
+		text = GetStringParameter(text, "");
 		let oRun = new ParaRun(this.Paragraph, false);
 		oRun.AddText(text);
 
@@ -10478,7 +10484,7 @@
 	{
 		sLink = GetStringParameter(sLink, "");
 		sScreenTipText = GetStringParameter(sScreenTipText, "");
-		sBookmarkName = GetStringParameter(sBookmarkName, "");
+		sBookmarkName = GetStringParameter(sBookmarkName, null);
 
 		if ((!sLink && !sBookmarkName) || (sLink && sBookmarkName)) {
 			return null;
@@ -12026,11 +12032,7 @@
 	 */
 	ApiRun.prototype.AddText = function(text)
 	{
-		text = GetStringParameter(text, null);
-		if (!text) {
-			throwException("The text parameter must be a non empty string");
-		}
-
+		text = GetStringParameter(text, "");
 		this.Run.AddText(text);
 		return true;
 	};
@@ -12165,7 +12167,7 @@
 	{
 		sLink = GetStringParameter(sLink, "");
 		sScreenTipText = GetStringParameter(sScreenTipText, "");
-		sBookmarkName = GetStringParameter(sBookmarkName, "");
+		sBookmarkName = GetStringParameter(sBookmarkName, null);
 
 		if ((!sLink && !sBookmarkName) || (sLink && sBookmarkName)) {
 			return null;
@@ -18499,7 +18501,54 @@
 		{
 			this.Drawing.spPr.xfrm.setExtX(fWidth);
 			this.Drawing.spPr.xfrm.setExtY(fHeight);
+			this.getParaDrawing().SetSizeRelV(undefined);
+			this.getParaDrawing().SetSizeRelH(undefined);
 		}
+
+		
+		return true;
+	};
+	/**
+	 * Sets the relative height of the object (image, shape, chart) bounding box.
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CDE"]
+	 * @param {RelFromV} [sRelativeFrom="page"] - The document element which will be taken as a countdown point for the object height.
+	 * @param {percentage} nPercent
+	 * @since 9.3.0
+	 * @returns {boolean}
+	 * 
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/SetRelativeHeight.js
+	 */
+	ApiDrawing.prototype.SetRelativeHeight = function(sRelativeFrom, nPercent)
+	{
+		let nRelativeFrom = private_GetRelativeFromV(sRelativeFrom);
+		let nRelSize = AscFormat.ConvertRelPositionVToRelSize(nRelativeFrom);
+
+		this.getParaDrawing().SetSizeRelV({
+			RelativeFrom: nRelSize,
+			Percent: nPercent / 100
+		});
+		return true;
+	};
+	/**
+	 * Sets the relative width of the object (image, shape, chart) bounding box.
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CDE"]
+	 * @param {RelFromV} [sRelativeFrom="page"] - The document element which will be taken as a countdown point for the object width.
+	 * @param {percentage} nPercent
+	 * @since 9.3.0
+	 * @returns {boolean}
+	 * 
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/SetRelativeWidth.js
+	 */
+	ApiDrawing.prototype.SetRelativeWidth = function(sRelativeFrom, nPercent)
+	{
+		let nRelativeFrom = private_GetRelativeFromH(sRelativeFrom);
+		let nRelSize = AscFormat.ConvertRelPositionHToRelSize(nRelativeFrom);
+		this.getParaDrawing().SetSizeRelH({
+			RelativeFrom: nRelSize,
+			Percent: nPercent / 100
+		});
 		return true;
 	};
 	/**
@@ -18590,9 +18639,9 @@
 	 */
 	ApiDrawing.prototype.SetHorAlign = function(sRelativeFrom, sAlign)
 	{
-		let nAlign        = private_GetAlignH(sAlign);
+		let nAlign = private_GetAlignH(sAlign);
 		let nRelativeFrom = private_GetRelativeFromH(sRelativeFrom);
-		this.getParaDrawing().Set_PositionH(nRelativeFrom, true, nAlign, false);
+		this.getParaDrawing().Set_PositionH(nRelativeFrom, true, nAlign);
 		return true;
 	};
 	/**
@@ -18606,41 +18655,77 @@
 	 */
 	ApiDrawing.prototype.SetVerAlign = function(sRelativeFrom, sAlign)
 	{
-		let nAlign        = private_GetAlignV(sAlign);
+		let nAlign = private_GetAlignV(sAlign);
 		let nRelativeFrom = private_GetRelativeFromV(sRelativeFrom);
-		this.getParaDrawing().Set_PositionV(nRelativeFrom, true, nAlign, false);
+		this.getParaDrawing().Set_PositionV(nRelativeFrom, true, nAlign);
 		return true;
 	};
 	/**
 	 * Sets the absolute measurement for the horizontal positioning of the floating object.
+	 *
 	 * @memberof ApiDrawing
 	 * @typeofeditors ["CDE"]
+	 *
+	 * @deprecated since 9.3.0 version.
 	 * @param {RelFromH} sRelativeFrom - The document element which will be taken as a countdown point for the object horizontal alignment.
 	 * @param {EMU} nDistance - The distance from the right side of the document element to the floating object measured in English measure units.
 	 * @returns {boolean}
+	 *
 	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/SetHorPosition.js
 	 */
-	ApiDrawing.prototype.SetHorPosition = function(sRelativeFrom, nDistance)
+	/**
+	 * Sets the absolute measurement for the horizontal positioning of the floating object.
+	 *
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CDE"]
+	 *
+	 * @since 9.3.0
+	 * @param {RelFromH} sRelativeFrom - The document element which will be taken as a countdown point for the object horizontal alignment.
+	 * @param {EMU|number} nDistance - The distance from the right side of the document element to the floating object. Use EMU for absolute distance or a number for percent (1 = 1%) when bPercent=true.
+	 * @param {boolean} [bPercent=false] - The option defining whether the vertical alignment offset is specified in percent.
+	 * @returns {boolean}
+	 *
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/SetHorPosition.js
+	 */
+	ApiDrawing.prototype.SetHorPosition = function(sRelativeFrom, nDistance, bPercent)
 	{
-		let nValue        = private_EMU2MM(nDistance);
-		let nRelativeFrom = private_GetRelativeFromH(sRelativeFrom);
-		this.getParaDrawing().Set_PositionH(nRelativeFrom, false, nValue, false);
+		let nValue			= private_EMU2MM(nDistance);
+		let nRelativeFrom	= private_GetRelativeFromH(sRelativeFrom);
+		this.getParaDrawing().Set_PositionH(nRelativeFrom, false, !!bPercent ? nDistance : nValue, !!bPercent);
 		return true;
 	};
 	/**
 	 * Sets the absolute measurement for the vertical positioning of the floating object.
+	 *
 	 * @memberof ApiDrawing
 	 * @typeofeditors ["CDE"]
-	 * @param {RelFromV} sRelativeFrom - The document element which will be taken as a countdown point for the object vertical alignment.
+	 *
+	 * @deprecated since 9.3.0 version.
+	 * @param {RelFromH} sRelativeFrom - The document element which will be taken as a countdown point for the object vertical alignment.
 	 * @param {EMU} nDistance - The distance from the bottom part of the document element to the floating object measured in English measure units.
 	 * @returns {boolean}
+	 *
 	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/SetVerPosition.js
 	 */
-	ApiDrawing.prototype.SetVerPosition = function(sRelativeFrom, nDistance)
+	/**
+	 * Sets the absolute measurement for the vertical positioning of the floating object.
+	 *
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CDE"]
+	 *
+	 * @since 9.3.0
+	 * @param {RelFromV} sRelativeFrom - The document element which will be taken as a countdown point for the object vertical alignment.
+	 * @param {EMU|number} nDistance - The distance from the bottom part of the document element to the floating object. Use EMU for absolute units or a number (1 = 1%) when bPercent=true for percent relative positioning.
+	 * @param {boolean} [bPercent=false] - The option defining whether the vertical alignment offset is specified in percent.
+	 * @returns {boolean}
+	 *
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/SetVerPosition.js
+	 */
+	ApiDrawing.prototype.SetVerPosition = function(sRelativeFrom, nDistance, bPercent)
 	{
 		let nValue        = private_EMU2MM(nDistance);
 		let nRelativeFrom = private_GetRelativeFromV(sRelativeFrom);
-		this.getParaDrawing().Set_PositionV(nRelativeFrom, false, nValue, false);
+		this.getParaDrawing().Set_PositionV(nRelativeFrom, false, !!bPercent ? nDistance : nValue, !!bPercent);
 		return true;
 	};
 	/**
@@ -18874,6 +18959,37 @@
 
 		return true;
 	};
+	/**
+	 * Get horizontal flip of current drawing.
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CDE"]
+	 * @since 9.3.0
+	 * @returns {boolean} bFlip - Specifies if the figure will be flipped horizontally or not.
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/AddBreak.js
+	 */
+	ApiDrawing.prototype.GetFlipH = function()
+	{
+		if (this.Drawing && this.Drawing.spPr && this.Drawing.spPr.xfrm)
+			return this.Drawing.spPr.xfrm.flipH;
+
+		return null;
+	};
+	/**
+	 * Get vertical flip of current drawing.
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CDE"]
+	 * @since 9.3.0
+	 * @returns {boolean} bFlip - Specifies if the figure will be flipped vertically or not.
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/AddBreak.js
+	 */
+	ApiDrawing.prototype.GetFlipV = function()
+	{
+		if (this.Drawing && this.Drawing.spPr && this.Drawing.spPr.xfrm)
+			return this.Drawing.spPr.xfrm.flipV;
+
+		return null;
+	};
+
 	/**
 	 * Flips the current drawing horizontally.
 	 * @memberof ApiDrawing
@@ -21471,8 +21587,8 @@
 		if (!logicDocument)
 			return null;
 
-		const theme = logicDocument.GetTheme();
-		const colorMap = logicDocument.GetColorMap();
+		const theme = logicDocument.Get_Theme && logicDocument.Get_Theme();
+		const colorMap = logicDocument.Get_ColorMap && logicDocument.Get_ColorMap();
 		const canResolveThemeColors = colorMap && colorMap.color_map &&
 			theme && theme.themeElements && theme.themeElements.clrScheme;
 		if (!canResolveThemeColors)
@@ -22133,10 +22249,8 @@
 		if (!this._canBeEdited())
 			return false;
 		
-		text = GetStringParameter(text, null);
-		if (!text)
-			throwException("The text parameter must be a non empty string");
-
+		text = GetStringParameter(text, "");
+		
 		if (this.Sdt.IsShowingPlcHdr())
 		{
 			this.Sdt.RemoveFromContent(0, this.Sdt.GetElementsCount(), false);
@@ -24019,10 +24133,7 @@
 		if (!this._canBeEdited())
 			return false;
 		
-		text = GetStringParameter(text, null);
-		if (!text)
-			throwException("The text parameter must be a non empty string");
-
+		text = GetStringParameter(text, "");
 		let oParagraph;
 		if (this.Sdt.IsPlaceHolder())
 		{
@@ -29493,6 +29604,10 @@
 	ApiDrawing.prototype["SetDrawingPrFromDrawing"]  = ApiDrawing.prototype.SetDrawingPrFromDrawing;
 	ApiDrawing.prototype["SetRotation"]  			 = ApiDrawing.prototype.SetRotation;
 	ApiDrawing.prototype["GetRotation"]  			 = ApiDrawing.prototype.GetRotation;
+	ApiDrawing.prototype["SetRelativeHeight"]		 = ApiDrawing.prototype.SetRelativeHeight;
+	ApiDrawing.prototype["SetRelativeWidth"]		 = ApiDrawing.prototype.SetRelativeWidth;
+	ApiDrawing.prototype["GetFlipH"]				 = ApiDrawing.prototype.GetFlipH;
+	ApiDrawing.prototype["GetFlipV"]				 = ApiDrawing.prototype.GetFlipV;
 
 	ApiDrawing.prototype["ToJSON"]                   = ApiDrawing.prototype.ToJSON;
 

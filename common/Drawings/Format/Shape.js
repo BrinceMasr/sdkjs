@@ -7130,7 +7130,7 @@
 				}
 			}
 			else if(fDocContentMethod === oDCP.SetParagraphSpacing) {
-				oParaPrToApply.Spacing = new CParaSpacing();
+				oParaPrToApply.Spacing = new AscWord.ParaSpacing();
 				oParaPrToApply.Spacing.Set_FromObject(params[0]);
 			}
 			else if(fDocContentMethod === oDCP.IncreaseDecreaseFontSize) {

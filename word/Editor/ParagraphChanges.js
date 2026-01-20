@@ -823,7 +823,7 @@ CChangesParagraphSpacingLine.prototype.private_SetValue = function(Value)
 	var oParagraph = this.Class;
 
 	if (undefined === oParagraph.Pr.Spacing)
-		oParagraph.Pr.Spacing = new CParaSpacing();
+		oParagraph.Pr.Spacing = new AscWord.ParaSpacing();
 
 	oParagraph.Pr.Spacing.Line = Value;
 
@@ -849,7 +849,7 @@ CChangesParagraphSpacingLineRule.prototype.private_SetValue = function(Value)
 	var oParagraph = this.Class;
 
 	if (undefined === oParagraph.Pr.Spacing)
-		oParagraph.Pr.Spacing = new CParaSpacing();
+		oParagraph.Pr.Spacing = new AscWord.ParaSpacing();
 
 	oParagraph.Pr.Spacing.LineRule = Value;
 
@@ -875,7 +875,7 @@ CChangesParagraphSpacingBefore.prototype.private_SetValue = function(Value)
 	var oParagraph = this.Class;
 
 	if (undefined === oParagraph.Pr.Spacing)
-		oParagraph.Pr.Spacing = new CParaSpacing();
+		oParagraph.Pr.Spacing = new AscWord.ParaSpacing();
 
 	oParagraph.Pr.Spacing.Before = Value;
 
@@ -901,7 +901,7 @@ CChangesParagraphSpacingAfter.prototype.private_SetValue = function(Value)
 	var oParagraph = this.Class;
 
 	if (undefined === oParagraph.Pr.Spacing)
-		oParagraph.Pr.Spacing = new CParaSpacing();
+		oParagraph.Pr.Spacing = new AscWord.ParaSpacing();
 
 	oParagraph.Pr.Spacing.After = Value;
 
@@ -927,7 +927,7 @@ CChangesParagraphSpacingAfterAutoSpacing.prototype.private_SetValue = function(V
 	var oParagraph = this.Class;
 
 	if (undefined === oParagraph.Pr.Spacing)
-		oParagraph.Pr.Spacing = new CParaSpacing();
+		oParagraph.Pr.Spacing = new AscWord.ParaSpacing();
 
 	oParagraph.Pr.Spacing.AfterAutoSpacing = Value;
 
@@ -953,7 +953,7 @@ CChangesParagraphSpacingBeforeAutoSpacing.prototype.private_SetValue = function(
 	var oParagraph = this.Class;
 
 	if (undefined === oParagraph.Pr.Spacing)
-		oParagraph.Pr.Spacing = new CParaSpacing();
+		oParagraph.Pr.Spacing = new AscWord.ParaSpacing();
 
 	oParagraph.Pr.Spacing.BeforeAutoSpacing = Value;
 
@@ -1437,7 +1437,7 @@ CChangesParagraphPr.prototype.Merge = function(oChange)
 		case AscDFH.historyitem_Paragraph_Spacing_Line:
 		{
 			if (!this.New.Spacing)
-				this.New.Spacing = new CParaSpacing();
+				this.New.Spacing = new AscWord.ParaSpacing();
 
 			this.New.Spacing.Line = oChange.New;
 			break;
@@ -1445,7 +1445,7 @@ CChangesParagraphPr.prototype.Merge = function(oChange)
 		case AscDFH.historyitem_Paragraph_Spacing_LineRule:
 		{
 			if (!this.New.Spacing)
-				this.New.Spacing = new CParaSpacing();
+				this.New.Spacing = new AscWord.ParaSpacing();
 
 			this.New.Spacing.LineRule = oChange.New;
 			break;
@@ -1453,7 +1453,7 @@ CChangesParagraphPr.prototype.Merge = function(oChange)
 		case AscDFH.historyitem_Paragraph_Spacing_Before:
 		{
 			if (!this.New.Spacing)
-				this.New.Spacing = new CParaSpacing();
+				this.New.Spacing = new AscWord.ParaSpacing();
 
 			this.New.Spacing.Before = oChange.New;
 			break;
@@ -1461,7 +1461,7 @@ CChangesParagraphPr.prototype.Merge = function(oChange)
 		case AscDFH.historyitem_Paragraph_Spacing_After:
 		{
 			if (!this.New.Spacing)
-				this.New.Spacing = new CParaSpacing();
+				this.New.Spacing = new AscWord.ParaSpacing();
 
 			this.New.Spacing.After = oChange.New;
 			break;
@@ -1469,7 +1469,7 @@ CChangesParagraphPr.prototype.Merge = function(oChange)
 		case AscDFH.historyitem_Paragraph_Spacing_AfterAutoSpacing:
 		{
 			if (!this.New.Spacing)
-				this.New.Spacing = new CParaSpacing();
+				this.New.Spacing = new AscWord.ParaSpacing();
 
 			this.New.Spacing.AfterAutoSpacing = oChange.New;
 			break;
@@ -1477,7 +1477,7 @@ CChangesParagraphPr.prototype.Merge = function(oChange)
 		case AscDFH.historyitem_Paragraph_Spacing_BeforeAutoSpacing:
 		{
 			if (!this.New.Spacing)
-				this.New.Spacing = new CParaSpacing();
+				this.New.Spacing = new AscWord.ParaSpacing();
 
 			this.New.Spacing.BeforeAutoSpacing = oChange.New;
 			break;
