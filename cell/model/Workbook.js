@@ -25168,9 +25168,9 @@
 		if (!formula) {
 			return false;
 		}
-		if (!AscCommonExcel.bIsSupportDynamicArrays) {
-			return false;
-		}
+		// if (!AscCommonExcel.bIsSupportDynamicArrays) {
+		// 	return false;
+		// }
 
 		let applyByArray = true;
 		let ctrlKey = true;
