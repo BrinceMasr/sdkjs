@@ -2777,10 +2777,15 @@ CGIFTimer.prototype.onStartSlide = function(slide)
     let this_ = this;
     for (let i = 0; i < slideObjects.length; i++) {
         let slideObject = slideObjects[i];
-        slideObject.cSld.forEachSp(function (sp) {
+        let fCheckFunction = function(sp) {
             this_.checkBlipFill(sp.blipFill);
-            // TODO: check grouped shapes
-        })
+            if (sp.spTree) {
+                for (let spIdx = 0; spIdx < sp.spTree.length; spIdx++) {
+                    fCheckFunction(sp.spTree[spIdx]);
+                }
+            }
+        };
+        slideObject.cSld.forEachSp(fCheckFunction);
     }
     if (this.gifPlayers.length > 0) {
         this.start();
