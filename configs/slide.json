@@ -410,7 +410,7 @@
 			"common/openxml.js",
 			
 			
-			"common/Drawings/gif-palyer.js",
+			"common/Drawings/gif-player.js",
 		
 			"vendor/gifuct-js/bytestream.js",
 			"vendor/gifuct-js/dataparser.js",
