@@ -3229,7 +3229,6 @@ function CDemonstrationManager(htmlpage)
     {
         if(this.HtmlPage.m_oLogicDocument)
         {
-            this.timer.stop();
             var oSlide = this.GetSlide(nSlideNum);
             this.GIFTimer.onEndSlide();
             if(oSlide)

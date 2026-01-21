@@ -76,10 +76,10 @@
 	}
 	GIFDataGIFuct.prototype = Object.create(AscCommon.GIFDataBase.prototype);
 	GIFDataGIFuct.prototype.getWidth = function() {
-		return this.gifuctData.lsd.width;
+		return this.gifuctData.raw.lsd.width;
 	};
 	GIFDataGIFuct.prototype.getHeight = function() {
-		return this.gifuctData.lsd.height;
+		return this.gifuctData.raw.lsd.height;
 	};
 	GIFDataGIFuct.prototype.getFramesCount = function() {
 		return this.frames.length;
@@ -169,14 +169,25 @@
 		let elapsedTime = currentTime - this.startTime;
 		let currentFrame = this.gifData.getFrameIndexAtTime(elapsedTime);
 		if (this.lastDrawFrame !== currentFrame) {
-			this.srcImageData.updateFrame(this.getFrameForDraw());
+			for (let i = this.lastDrawFrame + 1; i <= currentFrame; i++) {
+				this.srcImageData.updateFrame(this.getFrameData(i));
+			}
+			this.lastDrawFrame = currentFrame;
 			updated = true;
 		}
 		return updated;
 	};
 	GIFPlayer.prototype.getFrameForDraw = function() {
 		this.lastDrawFrame = this.getCurrentFrameIndex();
-		return this.gifData.getFrame(this.lastDrawFrame);
+		return this.getFrameData(this.lastDrawFrame);
+	};
+	GIFPlayer.prototype.getFrameData = function(index) {
+		let frame = this.gifData.getFrame(index);
+		if (frame) {
+			frame.imageWidth = this.gifData.getWidth();
+			frame.imageHeight = this.gifData.getHeight();
+		}
+		return frame;
 	};
 	GIFPlayer.prototype.start = function() {
 		if (this.isStarted()) {
@@ -196,24 +207,55 @@
 
 	function GIFAdapter(image) {
 		this.blipFill = image;
+
+		this.canvasCtx = null;
+		this.imageData = null;
 	}
 	GIFAdapter.prototype.updateFrame = function(rawData) {
+		if (!rawData) {
+			return;
+		}
 		this.blipFill.rawData = rawData;
 		let d = rawData.dims;
+
 		if (!this.blipFill.canvas) {
 			this.blipFill.canvas = document.createElement("canvas");
-			this.blipFill.canvas.width = rawData.dims.width;
-			this.blipFill.canvas.height = rawData.dims.height;
+			this.blipFill.canvas.width = rawData.imageWidth;
+			this.blipFill.canvas.height = rawData.imageHeight;
+			this.canvasCtx = this.blipFill.canvas.getContext("2d", {
+				alpha: true,
+				willReadFrequently: false
+			});
 		}
 
-		let ctx = this.blipFill.canvas.getContext("2d");
-		ctx.clearRect(d.left, d.top, d.width, d.height);
-		let img = new ImageData(rawData.patch, d.width, d.height);
-		ctx.putImageData(img, d.left, d.top);
+		if (!this.tempCanvas) {
+			this.tempCanvas = document.createElement("canvas");
+			this.tempCtx = this.tempCanvas.getContext("2d", {
+				alpha: true,
+				willReadFrequently: false
+			});
+		}
+
+		if (this.tempCanvas.width !== d.width || this.tempCanvas.height !== d.height) {
+			this.tempCanvas.width = d.width;
+			this.tempCanvas.height = d.height;
+		}
+
+		if (rawData.disposalType === 2) {
+			this.canvasCtx.clearRect(d.left, d.top, d.width, d.height);
+		}
+
+		let imageData = new ImageData(rawData.patch, d.width, d.height);
+		this.tempCtx.putImageData(imageData, 0, 0);
+
+		this.canvasCtx.drawImage(this.tempCanvas, d.left, d.top);
 	};
 	GIFAdapter.prototype.clearRawData = function() {
 		this.blipFill.rawData = null;
 		this.blipFill.canvas = null;
+		this.canvasCtx = null;
+		this.tempCanvas = null;
+		this.tempCtx = null;
 	};
 	window["AscCommon"].GIFAdapter = GIFAdapter;
 
