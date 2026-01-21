@@ -453,7 +453,6 @@ function (window, undefined) {
 			case 1:
 				return _Bessely1(fNum);
 			default: {
-				// let fByp;
 				let fTox = 2 / fNum,
 					fBym = _Bessely0(fNum),
 					fBy = _Bessely1(fNum);
@@ -499,16 +498,6 @@ function (window, undefined) {
 			n = n.getValue();
 		}
 
-		// if (x.type === cElementType.bool || n.type === cElementType.bool) {
-		// 	return new cError(cErrorType.wrong_value_type);
-		// }
-
-		// if ((x.type === cElementType.cellsRange || x.type === cElementType.cellsRange3D) && !x.isOneElement()) {
-		// 	return new cError(cErrorType.wrong_value_type);
-		// } else if ((n.type === cElementType.cellsRange || n.type === cElementType.cellsRange3D) && !n.isOneElement()) {
-		// 	return new cError(cErrorType.wrong_value_type);
-		// }
-
 		if (x.type === cElementType.bool || n.type === cElementType.bool ||
 			(x.type === cElementType.cellsRange || x.type === cElementType.cellsRange3D) && !x.isOneElement() ||
 			(n.type === cElementType.cellsRange || n.type === cElementType.cellsRange3D) && !n.isOneElement()) {
@@ -528,25 +517,6 @@ function (window, undefined) {
 
 		x = x.getValue();
 		n = n.getValue();
-
-		// if (n < 0 || x < 0 || n >= MAX_USED_VALUE || x >= MAX_USED_VALUE) {
-		// 	return new cError(cErrorType.not_numeric);
-		// }
-
-		// n = Math.floor(n);
-
-		// const calcFunc = function (argArray) {
-		// 	let x = argArray[0];
-		// 	let n = argArray[1];
-
-		// 	if (n < 0 || x < 0 || n >= MAX_USED_VALUE || x >= MAX_USED_VALUE) {
-		// 		return new cError(cErrorType.not_numeric);
-		// 	}
-
-		// 	n = Math.floor(n);
-
-		// 	return BesselY(x, n);
-		// };
 
 		return funcAction(x, n);
 	}
