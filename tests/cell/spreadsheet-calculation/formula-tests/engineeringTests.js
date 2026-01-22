@@ -559,6 +559,14 @@ $(function () {
 		oParser = new parserFormula('BESSELI(A105, 2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula BESSELI(A105, 2) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Reference link, Number. X is a reference to an empty cell, treated as 0');
+		// Case #23: Number, Number. X negative number.
+		oParser = new parserFormula('BESSELI(-10,1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula BESSELI(-10,1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), -2670.988303701255, 'Test: Positive case: Reference link, Number. X negative number.');
+		// Case #24: Number, Number. X negative number.
+		oParser = new parserFormula('BESSELI(-10,3)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula BESSELI(-10,3) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), -1758.3807166108534, 'Test: Positive case: Reference link, Number. X negative number.');
 
 		// Negative cases:
 		// Case #1: Number(2). Bessel function with incorrect order (< 0)
@@ -662,19 +670,19 @@ $(function () {
 		// Case #3: Number, Number. Maximum value for X (with N=1).
 		oParser = new parserFormula('BESSELI(709, 1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula BESSELI(709, 1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1.2307e+306, 'Test: Bounded case: Number, Number. Maximum value for X (with N=1) that does not result in a #NUM! error.');
+		assert.strictEqual(oParser.calculate().getValue(), 1.2306788896524705e+306, 'Test: Bounded case: Number, Number. Maximum value for X (with N=1) that does not result in a #NUM! error.');
 		// Case #4: Number, Number. Large negative value for X that is processed without error.
+		oParser = new parserFormula('BESSELI(-709, 1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula BESSELI(-709, 1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), -1.2306788896524705e+306, 'Test: Bounded case: Number, Number. Large negative value for X that is processed without error.');
+		// Case #5: Number, Number. A combination of large X and large N that does not cause an overflow error.
 		oParser = new parserFormula('BESSELI(-709, 2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula BESSELI(-709, 2) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1.2305e+306, 'Test: Bounded case: Number, Number. Large negative value for X that is processed without error.');
-		// Case #5: Number, Number. A combination of large X and large N that does not cause an overflow error.
+		assert.strictEqual(oParser.calculate().getValue(), 1.2280761160397274e+306, 'Test: Bounded case: Number, Number. A combination of large X and large N that does not cause an overflow error.');
+		// Case #6: Number, Number. A combination of large X and large N that does not cause an overflow error.
 		oParser = new parserFormula('BESSELI(10, 244)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula BESSELI(10, 244) is parsed.');
-		// In this test we got a 0 but in ms result is 2.7848e-308 which is almost zero, even excel treat it like zero in Number format
-		// assert.strictEqual(oParser.calculate().getValue(), 2.7848e-308, 'Test: Bounded case: Number, Number. A combination of large X and large N that does not cause an overflow error.');
-		
-		// todo infinity in result(#NUM err)
-		// BESSELI(709, 1) and BESSELI(-709, 1)
+		assert.strictEqual(oParser.calculate().getValue(), 2.7847769865682407e-308, 'Test: Bounded case: Number, Number. A combination of large X and large N that does not cause an overflow error.');
 
 
 		testArrayFormula2(assert, "BESSELI", 2, 2, true, null);
@@ -948,7 +956,7 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula BESSELJ(1E+15, 1E+307) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), "#NUM!", 'Test: Bounded case: Number(2). Big integer values. 2 arguments used.');
 
-		// todo BESSELJ(10000000, 10000000)
+		// todo BESSELJ(10000000, 10000000) diff results from MS, but same as LO
 
 		testArrayFormula2(assert, "BESSELJ", 2, 2, true, null);
 	});

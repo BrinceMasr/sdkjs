@@ -150,7 +150,12 @@ function (window, undefined) {
 	}
 
 	function BesselI(x, n) {
-		var nMaxIteration = 2000, fXHalf = x / 2, fResult = 0, fEpsilon = 1.0E-30;
+		const nMaxIteration = 2000;
+		const fXHalf = x / 2;
+		const fEpsilon = 1.0e-15;
+
+		n = Math.trunc(n);
+
 		if (n < 0) {
 			return new cError(cErrorType.not_numeric);
 		}
@@ -159,19 +164,20 @@ function (window, undefined) {
 
 		 TERM(n,0) = (x/2)^n / n!
 		 */
-		var nK = 0, fTerm = 1;
-		// avoid overflow in Fak(n)
-		for (nK = 1; nK <= n; ++nK) {
+		let fResult = 0,
+			nK = 0, 
+			fTerm = 1;
+
+		// Avoid overflow by calculating incrementally
+		for (nK = 1; nK <= n; nK++) {
 			fTerm = fTerm / nK * fXHalf;
 		}
-
-		fTerm = Math.pow(fXHalf, n) / Math.fact(n);
 
 		fResult = fTerm;    // Start result with TERM(n,0).
 		if (fTerm !== 0) {
 			nK = 1;
 			do {
-				fTerm = Math.pow(fXHalf, n + 2 * nK) / (Math.fact(nK) * Math.fact(n + nK));
+				// fTerm = Math.pow(fXHalf, n + 2 * nK) / (Math.fact(nK) * Math.fact(n + nK));
 
 				/*  Calculation of TERM(n,k) from TERM(n,k-1):
 
@@ -191,8 +197,8 @@ function (window, undefined) {
 				 =  -------- TERM(n,k-1)
 				 k(n+k)
 				 */
-//            fTerm = fTerm * fXHalf / nK * fXHalf / (nK + n);
-				fResult = fResult + fTerm;
+           		fTerm = fTerm * fXHalf / nK * fXHalf / (nK + n);
+				fResult += fTerm;
 				nK++;
 			} while ((Math.abs(fTerm) > Math.abs(fResult) * fEpsilon) && (nK < nMaxIteration));
 
@@ -4504,9 +4510,7 @@ function (window, undefined) {
 			if (n < 0 || n >= BESSEL_MAX_USED_VALUE || x >= BESSEL_MAX_USED_VALUE) {
 				return new cError(cErrorType.not_numeric);
 			}
-			if (x < 0) {
-				x = Math.abs(x);
-			}
+
 			n = Math.floor(n);
 
 			return BesselI(x, n);
