@@ -1840,6 +1840,11 @@ background-repeat: no-repeat;\
 		return AscCommon.g_clipboardBase.Button_Paste();
 	};
 
+	asc_docs_api.prototype.PastePlainText = function(text)
+	{
+		AscCommon.Editor_Paste_Exec(this, AscCommon.c_oAscClipboardDataFormat.Text, text, undefined, undefined, undefined, undefined, undefined);
+	};
+
 	asc_docs_api.prototype.asc_ShowSpecialPasteButton = function(props)
 	{
 		if (window["NATIVE_EDITOR_ENJINE"])
@@ -9458,6 +9463,7 @@ background-repeat: no-repeat;\
 	asc_docs_api.prototype['Update_ParaTab']                      = asc_docs_api.prototype.Update_ParaTab;
 	asc_docs_api.prototype['Cut']                                 = asc_docs_api.prototype.Cut;
 	asc_docs_api.prototype['Paste']                               = asc_docs_api.prototype.Paste;
+	asc_docs_api.prototype['PastePlainText']                      = asc_docs_api.prototype.PastePlainText;
 	asc_docs_api.prototype['Share']                               = asc_docs_api.prototype.Share;
 	asc_docs_api.prototype['asc_Save']                            = asc_docs_api.prototype.asc_Save;
 	asc_docs_api.prototype['forceSave']                           = asc_docs_api.prototype.forceSave;

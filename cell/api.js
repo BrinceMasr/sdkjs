@@ -463,6 +463,11 @@ var editor;
     return AscCommon.g_clipboardBase.Button_Copy();
   };
 
+  spreadsheet_api.prototype.PastePlainText = function(text) {
+
+	this.wb.pasteData(AscCommon.c_oAscClipboardDataFormat.Text, text, null, null, true);
+  };
+
   spreadsheet_api.prototype.asc_Paste = function() {
     if (!AscCommon.g_clipboardBase.IsWorking()) {
       return AscCommon.g_clipboardBase.Button_Paste();
@@ -9640,6 +9645,7 @@ var editor;
   prot["asc_Resize"] = prot.asc_Resize;
   prot["asc_Copy"] = prot.asc_Copy;
   prot["asc_Paste"] = prot.asc_Paste;
+  prot["PastePlainText"] = prot.PastePlainText;
   prot["asc_SpecialPaste"] = prot.asc_SpecialPaste;
   prot["asc_Cut"] = prot.asc_Cut;
   prot["asc_Undo"] = prot.asc_Undo;
