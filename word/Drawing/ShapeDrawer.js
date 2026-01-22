@@ -37,6 +37,8 @@
 // Import
 var getFullImageSrc2 = AscCommon.getFullImageSrc2;
 
+var getFillRect = AscCommon.getFillRect;
+
 var CShapeColor = AscFormat.CShapeColor;
 
 var c_oAscFill = Asc.c_oAscFill;
@@ -1689,8 +1691,8 @@ CShapeDrawer.prototype =
 						arrowEndPoint.x, arrowEndPoint.y,
 						arrowStartPoint.x, arrowStartPoint.y,
 						this.Ln.headEnd.type,
-						arrCoef * this.Ln.headEnd.GetWidth(penWidth, maxWidth),
-						arrCoef * this.Ln.headEnd.GetLen(penWidth, maxWidth),
+						arrCoef * this.Ln.headEnd.GetWidth(penWidth, maxWidth) * transformScaleFactor,
+						arrCoef * this.Ln.headEnd.GetLen(penWidth, maxWidth) * transformScaleFactor,
 						this, inverseTransform
 					);
 				}
@@ -1743,8 +1745,8 @@ CShapeDrawer.prototype =
 						arrowEndPoint.x, arrowEndPoint.y,
 						arrowStartPoint.x, arrowStartPoint.y,
 						this.Ln.tailEnd.type,
-						arrCoef * this.Ln.tailEnd.GetWidth(penWidth, maxWidth),
-						arrCoef * this.Ln.tailEnd.GetLen(penWidth, maxWidth),
+						arrCoef * this.Ln.tailEnd.GetWidth(penWidth, maxWidth) * transformScaleFactor,
+						arrCoef * this.Ln.tailEnd.GetLen(penWidth, maxWidth) * transformScaleFactor,
 						this, inverseTransform
 					);
 				}
@@ -2335,7 +2337,7 @@ CShapeDrawer.prototype =
                         else
                         {
 	                        this.Graphics.put_brushTexture(getFullImageSrc2(this.UniFill.fill.RasterImageId), 0);
-	                        const fillRect = this.Graphics.getFillRect(this.min_x, this.min_y, (this.max_x - this.min_x), (this.max_y - this.min_y), this.UniFill.fill.srcRect);
+	                        const fillRect = getFillRect(this.min_x, this.min_y, (this.max_x - this.min_x), (this.max_y - this.min_y), this.UniFill.fill.srcRect);
 	                        this.Graphics.put_TextureBounds(fillRect.x, fillRect.y, fillRect.w, fillRect.h);
                         }
 

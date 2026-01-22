@@ -269,6 +269,10 @@ function isAllowPasteLink(pastedWb) {
 		this._heightForPrint = null;
 	}
 
+	CacheRow.prototype.setHeight = function (val) {
+		this.height = val;
+	};
+
     function CacheElement() {
         this.columnsWithText = {};							// Колонки, в которых есть текст
         this.columns = {};
@@ -1208,7 +1212,7 @@ function isAllowPasteLink(pastedWb) {
 	WorksheetView.prototype.getVerticalSmoothScrollRange = function (bCheckEqual) {
 		var offsetFrozen = this.getFrozenPaneOffset(true, false);
 		var ctxH = this.drawingCtx.getHeight() - offsetFrozen.offsetY - this.cellsTop;
-		for (var h = 0, i = this.nRowsCount - 1; i >= 0; --i) {
+		for (var h = 0, i = this.getCurrentRowsCount() - 1; i >= 0; --i) {
 			h += this._getRowHeight(i);
 			if (h >= ctxH) {
 				if (bCheckEqual && h > ctxH) {
@@ -1320,7 +1324,7 @@ function isAllowPasteLink(pastedWb) {
 		}
         var offsetFrozen = this.getFrozenPaneOffset(true, false);
         var ctxH = this.drawingCtx.getHeight() - offsetFrozen.offsetY - this.cellsTop;
-        for (var h = 0, i = this.nRowsCount - 1; i >= 0; --i) {
+        for (var h = 0, i = this.getCurrentRowsCount() - 1; i >= 0; --i) {
             h += this._getRowHeight(i);
             if (h >= ctxH) {
                 if (bCheckEqual && h > ctxH) {
@@ -1333,7 +1337,7 @@ function isAllowPasteLink(pastedWb) {
 		if (this.topLeftFrozenCell) {
 			tmp = this.topLeftFrozenCell.getRow0();
 		}
-		if (gc_nMaxRow === this.nRowsCount || this.model.isDefaultHeightHidden()) {
+		if (gc_nMaxRow === this.getCurrentRowsCount() || this.model.isDefaultHeightHidden()) {
 			tmp -= 1;
 		}
 		return Math.max(0, i - tmp); // Диапазон скрола должен быть меньше количества строк, чтобы не было прибавления строк при перетаскивании бегунка
@@ -1352,7 +1356,11 @@ function isAllowPasteLink(pastedWb) {
 		if (this.topLeftFrozenCell) {
 			tmp = this.topLeftFrozenCell.getRow0();
 		}
-		return (this.model.isDefaultHeightHidden() ? this.nRowsCount : gc_nMaxRow) - tmp - 1;
+		return (this.model.isDefaultHeightHidden() ? this.getCurrentRowsCount() : gc_nMaxRow) - tmp - 1;
+	};
+
+	WorksheetView.prototype.getCurrentRowsCount = function () {
+		return this.workbook.getIsPartialReading() ? this.model.getCurrentRowsCount() : this.nRowsCount;
 	};
 
     WorksheetView.prototype.getCellsOffset = function (units) {
@@ -2942,7 +2950,7 @@ function isAllowPasteLink(pastedWb) {
 		}
 		r = this.rows[i] = new CacheRow();
 		r.top = y;
-		r.height = this.workbook.printPreviewState.isStart() ? AscCommonExcel.convertPtToPx(hR) * this.getZoom() : Asc.round(AscCommonExcel.convertPtToPx(hR) * this.getZoom());
+		r.setHeight(this.workbook.printPreviewState.isStart() ? AscCommonExcel.convertPtToPx(hR) * this.getZoom() : Asc.round(AscCommonExcel.convertPtToPx(hR) * this.getZoom()));
 		if (!hR) {
 			r._heightForPrint = 0;
 		} else {
@@ -9790,7 +9798,7 @@ function isAllowPasteLink(pastedWb) {
 			}
 		}
 
-		rowInfo.height = this.workbook.printPreviewState.isStart() ? th * this.getZoom() : Asc.round(th * this.getZoom());
+		rowInfo.setHeight(this.workbook.printPreviewState.isStart() ? th * this.getZoom() : Asc.round(th * this.getZoom()));
 		rowInfo._heightForPrint = this.updateRowHeightValuePx ? AscCommonExcel.convertPxToPt(this.updateRowHeightValuePx) : this._getRowHeightReal(cell.nRow);
 		rowInfo.descender = d;
 		return th;
@@ -9862,7 +9870,7 @@ function isAllowPasteLink(pastedWb) {
 				//TODO правлю на хотфикс ошибку. это следствие, а не причина. нужно пересмотреть! баг 50489
 				var _rowHeight = this.workbook.printPreviewState.isStart() ? newHeight * this.getZoom() : Asc.round(newHeight * this.getZoom());
 				if (rowInfo) {
-					rowInfo.height = _rowHeight;
+					rowInfo.setHeight(_rowHeight);
 					rowInfo._heightForPrint = AscCommonExcel.convertPxToPt(_rowHeight);
 				}
 				History.TurnOff();

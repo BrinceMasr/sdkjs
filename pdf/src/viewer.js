@@ -4084,7 +4084,7 @@
 
 		let ctx = image.getContext('2d');
 
-		contentType !== AscPDF.PRINT_CONTENT_TYPES.formsOnly && this._drawDrawingsOnCtx(nPage, ctx);
+		contentType !== AscPDF.PRINT_CONTENT_TYPES.formsOnly && this._drawDrawingsOnCtx(nPage, ctx, true);
 		contentType == AscPDF.PRINT_CONTENT_TYPES.docAndMarkups && this._drawMarkupAnnotsOnCtx(nPage, ctx);
 		this._drawAnnotsOnCtx(nPage, ctx, false, contentType);
 		this._drawFieldsOnCtx(nPage, ctx, false, true);

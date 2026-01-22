@@ -341,6 +341,8 @@
 
 	this.externalReferenceUpdateTimer = null;
 
+	this.isPartialReading = null;
+
 	return this;
   }
 
@@ -6808,6 +6810,14 @@
 	{
 		this.Api.sendEvent("asc_onUserActionEnd");
 		this.Api.getMacroRecorder().onAction(nDescription, additional);
+	};
+	WorkbookView.prototype.setIsPartialReading = function(val)
+	{
+		this.isPartialReading = val;
+	};
+	WorkbookView.prototype.getIsPartialReading = function()
+	{
+		return this.isPartialReading;
 	};
 
 

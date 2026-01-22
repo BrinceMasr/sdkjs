@@ -322,6 +322,8 @@
 		return this.After;
 	};
 	//--------------------------------------------------------export----------------------------------------------------
-	AscWord.ParaSpacing = ParaSpacing;
+
+	window['AscWord'] = window['AscWord'] || {};
+	window['AscWord'].ParaSpacing = ParaSpacing;
 
 })(window);

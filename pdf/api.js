@@ -3999,11 +3999,13 @@
 			}
 		}
 	};
-	PDFEditorApi.prototype.asc_Save = function (isAutoSave, isIdle, isResaveAttack) {
+	PDFEditorApi.prototype.asc_Save = function () {
 		let oDoc = this.getPDFDoc();
-		if (!isAutoSave)
+		// is auto save
+		if (!arguments[0])
 			oDoc.BlurActiveObject();
-		return AscCommon.DocumentEditorApi.prototype.asc_Save.call(this, isAutoSave, isIdle, isResaveAttack);
+		
+		return AscCommon.DocumentEditorApi.prototype.asc_Save.apply(this, arguments);
 	};
 	PDFEditorApi.prototype._onEndLoadSdk = function() {
 		AscCommon.DocumentEditorApi.prototype._onEndLoadSdk.call(this);

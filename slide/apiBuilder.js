@@ -4855,9 +4855,9 @@
 	/**
 	 * Returns the transition speed (similar to PowerPoint VBA Speed property).
 	 * Maps duration to speed based on OOXML spd attribute logic:
-	 * - fast: duration < 250ms
-	 * - slow: duration > 1000ms
-	 * - medium: 250ms <= duration <= 1000ms
+	 * - fast: duration <= 500ms
+	 * - medium: 500ms < duration <= 750ms
+	 * - slow: duration > 750ms
 	 *
 	 * @memberof ApiSlideShowTransition
 	 * @typeofeditors ["CPE"]

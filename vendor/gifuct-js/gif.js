@@ -13,13 +13,87 @@
     window["GIFUCT"] = window.GIFUCT = window.GIFUCT || {};
     // object used to represent array buffer data for a gif file
 
-
 	function GIF(arrayBuffer) {
 		// convert to byte array
 		var byteData = new Uint8Array(arrayBuffer);
 		var parser = new window.GIFUCT.DataParser(byteData);
 		// parse the data
 		this.raw = parser.parse(window.GIFUCT.schemaGIF);
+
+		// Normalize properties with label strings from schema to be safe for minification
+		// Only reassign fields that have label: "string" in schema
+
+		// header
+		this.raw.header = this.raw["header"];
+		this.raw.header.signature = this.raw.header["signature"];
+		this.raw.header.version = this.raw.header["version"];
+
+		// lsd
+		this.raw.lsd = this.raw["lsd"];
+		this.raw.lsd.width = this.raw.lsd["width"];
+		this.raw.lsd.height = this.raw.lsd["height"];
+		this.raw.lsd.gct = this.raw.lsd["gct"];
+		this.raw.lsd.backgroundColorIndex = this.raw.lsd["backgroundColorIndex"];
+		this.raw.lsd.pixelAspectRatio = this.raw.lsd["pixelAspectRatio"];
+
+		// gct
+		this.raw.gct = this.raw["gct"];
+
+		// frames
+		this.raw.frames = this.raw["frames"];
+		for (var f = 0; f < this.raw.frames.length; f++) {
+			var frame = this.raw.frames[f];
+
+			// gce
+			if (frame["gce"]) {
+				frame.gce = frame["gce"];
+				frame.gce.byteSize = frame.gce["byteSize"];
+				frame.gce.extras = frame.gce["extras"];
+				frame.gce.delay = frame.gce["delay"];
+				frame.gce.transparentColorIndex = frame.gce["transparentColorIndex"];
+			}
+
+			// application
+			if (frame["application"]) {
+				frame.application = frame["application"];
+				frame.application.blockSize = frame.application["blockSize"];
+				frame.application.id = frame.application["id"];
+				frame.application.blocks = frame.application["blocks"];
+			}
+
+			// comment
+			if (frame["comment"]) {
+				frame.comment = frame["comment"];
+				frame.comment.blocks = frame.comment["blocks"];
+			}
+
+			// image
+			if (frame["image"]) {
+				frame.image = frame["image"];
+				frame.image.descriptor = frame.image["descriptor"];
+				frame.image.descriptor.left = frame.image.descriptor["left"];
+				frame.image.descriptor.top = frame.image.descriptor["top"];
+				frame.image.descriptor.width = frame.image.descriptor["width"];
+				frame.image.descriptor.height = frame.image.descriptor["height"];
+				frame.image.descriptor.lct = frame.image.descriptor["lct"];
+
+				if (frame.image["lct"]) {
+					frame.image.lct = frame.image["lct"];
+				}
+
+				frame.image.data = frame.image["data"];
+				frame.image.data.minCodeSize = frame.image.data["minCodeSize"];
+				frame.image.data.blocks = frame.image.data["blocks"];
+			}
+
+			// text
+			if (frame["text"]) {
+				frame.text = frame["text"];
+				frame.text.blockSize = frame.text["blockSize"];
+				frame.text.preData = frame.text["preData"];
+				frame.text.blocks = frame.text["blocks"];
+			}
+		}
 
 		// set a flag to make sure the gif contains at least one image
 		this.raw.hasImages = false;

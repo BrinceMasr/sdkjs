@@ -13085,22 +13085,14 @@ function RangeDataManagerElem(bbox, data)
 					index = this.addMultiText(item);
 				}
 				if (opt_sharedStringIndexMap) {
-					opt_sharedStringIndexMap[i] = index;
+					opt_sharedStringIndexMap.push(index);
 				}
 			}
 			return;
 		}
-		if (this.all.length > 0) {
-			for (let i = 0; i < sharedStrings.length; i++) {
-				const item = sharedStrings[i];
-				if (typeof item === 'string') {
-					this.addText(item);
-				} else {
-					this.addMultiText(item);
-				}
-			}
-			return;
-		}
+		this.replaceSharedStrings(sharedStrings, opt_sharedStringIndexMap);
+	};
+	CSharedStrings.prototype.replaceSharedStrings = function(sharedStrings, opt_sharedStringIndexMap) {
 		this.all = sharedStrings.slice(); //copy
 		this.text = Object.create(null);
 		this.multiTextMap = Object.create(null);
@@ -13108,6 +13100,9 @@ function RangeDataManagerElem(bbox, data)
 		for (let i = 0; i < sharedStrings.length; i++) {
 			const text = sharedStrings[i];
 			this._addSharedStringCacheByIndex(text, i + 1);// 1-based indexing
+			if (opt_sharedStringIndexMap) {
+				opt_sharedStringIndexMap.push(i + 1);
+			}
 		}
 	};
 	CSharedStrings.prototype._addSharedStringCacheByIndex = function(text, index) {

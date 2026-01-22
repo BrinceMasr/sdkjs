@@ -3108,7 +3108,6 @@ CDocument.prototype.private_Recalculate = function(_RecalcData, isForceStrictRec
 				this.UpdatePlaceholders();
 				return document_recalcresult_LongRecalc;
 			}
-
 			clearTimeout(this.FullRecalc.Id);
 			this.FullRecalc.Id = null;
 			this.DrawingDocument.OnEndRecalculate(false);
@@ -3179,36 +3178,52 @@ CDocument.prototype.private_Recalculate = function(_RecalcData, isForceStrictRec
 	
 	if (isUseTimeout && !isForceStrictRecalc)
 	{
-		let _t = this;
-		this.FullRecalc.Id = setTimeout(function(){_t.ContinueRecalculationLoop();}, 0);
+		this.FullRecalc.Id = this.ContinueRecalculationLoopTimer();
 	}
 	else
 	{
-		this.ContinueRecalculationLoop();
+		this.ContinueRecalculationLoop(null);
 	}
 	
 	this.UpdatePlaceholders();
-    return document_recalcresult_LongRecalc;
+	return document_recalcresult_LongRecalc;
 };
-CDocument.prototype.ContinueRecalculationLoop = function()
+CDocument.prototype.ContinueRecalculationLoopTimer = function(noTimer)
 {
+	if (noTimer)
+	{
+		this.ContinueRecalculationLoop(null);
+		return null;
+	}
+	
+	let _t = this;
+	let timerId = setTimeout(function(){
+		_t.ContinueRecalculationLoop(timerId);
+	}, 10);
+	return timerId;
+};
+CDocument.prototype.ContinueRecalculationLoop = function(timerId)
+{
+	this.FullRecalc.TimerStartTime = performance.now();
+	this.FullRecalc.TimerStartPage = this.FullRecalc.PageIndex;
+	
 	while (true)
 	{
 		this.FullRecalc.Continue = false;
 		
 		this.Recalculate_Page();
 		
+		// Такое возможно, если пересчет сам вызвал пересчет, и у нас крутится несколько таких циклов
+		// завершаем все неактуальные
+		if (this.FullRecalc.Id !== timerId)
+			break;
+		
 		if (!this.FullRecalc.Continue)
 			break;
 		
 		if (this.IsContinueRecalculateOnTimer())
 		{
-			let _t = this;
-			this.FullRecalc.TimerStartPage = this.FullRecalc.PageIndex;
-			this.FullRecalc.Id = setTimeout(function(){
-				_t.FullRecalc.TimerStartTime = performance.now();
-				_t.ContinueRecalculationLoop();
-			}, 10);
+			this.FullRecalc.Id = this.ContinueRecalculationLoopTimer();
 			break;
 		}
 	}
@@ -3471,7 +3486,7 @@ CDocument.prototype.Recalculate_Page = function()
             if (OldPage.EndPos >= Count - 1 && PageIndex - this.Content[Count - 1].GetAbsoluteStartPage() >= this.Content[Count - 1].GetPagesCount() - 1)
             {
 				// // Recalculation LOG
-				// console.log("HdrFtr Recalculation " + PageIndex);
+				//  console.log("HdrFtr Recalculation " + PageIndex);
 
                 this.Pages[PageIndex] = OldPage;
                 this.DrawingDocument.OnRecalculatePage(PageIndex, this.Pages[PageIndex]);
@@ -3493,8 +3508,8 @@ CDocument.prototype.Recalculate_Page = function()
             }
             else if (undefined !== this.Pages[PageIndex + 1])
             {
-				// // Recalculation LOG
-				// console.log("HdrFtr Recalculation " + PageIndex);
+				// // // Recalculation LOG
+				//  console.log("HdrFtr Recalculation " + PageIndex);
 
                 // Переходим к следующей странице
                 this.Pages[PageIndex] = OldPage;
@@ -3520,8 +3535,8 @@ CDocument.prototype.Recalculate_Page = function()
             }
         }
 
-		// // Recalculation LOG
-		// console.log("Regular Recalculation" + PageIndex);
+		// // // Recalculation LOG
+		//  console.log("Regular Recalculation" + PageIndex);
 
         let pageFrame = this.GetPageContentFrame(PageIndex);
 		this.Footnotes.Reset(PageIndex, SectPr);
@@ -4256,6 +4271,7 @@ CDocument.prototype.Recalculate_PageColumn                   = function()
 			// console.log("Recalc time : " + ((performance.now() - this.FullRecalc.StartTime) / 1000));
 
 			this.FullRecalc.Id           = null;
+			console.log("Strange Clear 2");
 			this.FullRecalc.MainStartPos = -1;
 
 			this.private_CheckUnusedFields();
@@ -4287,11 +4303,6 @@ CDocument.prototype.Recalculate_PageColumn                   = function()
 				}
 			}
 		}
-    }
-
-	if (this.NeedUpdateTracksOnRecalc)
-	{
-		this.private_UpdateTracks(this.NeedUpdateTracksParams.Selection, this.NeedUpdateTracksParams.EmptySelection);
 	}
 	
 	if (true === bContinue)
@@ -4312,6 +4323,10 @@ CDocument.prototype.Recalculate_PageColumn                   = function()
 	{
 		this.UpdatePlaceholders();
 	}
+	
+	// Обновление треков может вызывать пересчет, обязательно в самом конце вызываем, чтобы все параметры FullRecalc были высталены актуально
+	if (this.NeedUpdateTracksOnRecalc)
+		this.private_UpdateTracks(this.NeedUpdateTracksParams.Selection, this.NeedUpdateTracksParams.EmptySelection);
 };
 CDocument.prototype.IsContinueRecalculateOnTimer = function()
 {
@@ -4985,7 +5000,7 @@ CDocument.prototype.private_RecalculateHdrFtrPageCountUpdate = function()
 			this.FullRecalc.MainStartPos      = this.Pages[nPageAbs].Pos;
 
 			this.DrawingDocument.OnStartRecalculate(nPageAbs);
-			this.ContinueRecalculationLoop();
+			this.ContinueRecalculationLoop(null);
 			return;
 		}
 	}
@@ -5127,8 +5142,7 @@ CDocument.prototype.ResumeRecalculate = function()
 	
 	if (this.RecalcInfo.PausedMain)
 	{
-		let _t = this;
-		this.FullRecalc.Id = setTimeout(function(){_t.ContinueRecalculationLoop();}, 10);
+		this.FullRecalc.Id = this.ContinueRecalculationLoopTimer();
 	}
 	else
 	{

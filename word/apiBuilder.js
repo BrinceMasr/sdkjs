@@ -19323,7 +19323,7 @@
 	/**
 	 * Returns a type of the ApiImage class.
 	 * @memberof ApiImage
-	 * @typeofeditors ["CDE", "CPE"]
+	 * @typeofeditors ["CDE"]
 	 * @returns {"image"}
 	 * @see office-js-api/Examples/{Editor}/ApiImage/Methods/GetClassType.js
 	 */

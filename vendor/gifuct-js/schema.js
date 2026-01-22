@@ -101,10 +101,10 @@
 			{
 				label: "lct", // optional local color table
 				requires: function(stream, obj, parent) {
-					return parent.descriptor.lct.exists;
+					return parent["descriptor"]["lct"].exists;
 				},
 				parser: Parsers.readArray(3, function(stream, obj, parent) {
-					return Math.pow(2, parent.descriptor.lct.size + 1);
+					return Math.pow(2, parent["descriptor"]["lct"].size + 1);
 				})
 			},
 			{
@@ -131,7 +131,7 @@
 			{
 				label: "preData",
 				parser: function(stream, obj, parent) {
-					return stream.readBytes(parent.text.blockSize);
+					return stream.readBytes(parent["text"].blockSize);
 				}
 			},
 			subBlocks
@@ -225,10 +225,10 @@
 		{
 			label: "gct", // global color table
 			requires: function(stream, obj) {
-				return obj.lsd.gct.exists;
+				return obj["lsd"]["gct"].exists;
 			},
 			parser: Parsers.readArray(3, function(stream, obj) {
-				return Math.pow(2, obj.lsd.gct.size + 1);
+				return Math.pow(2, obj["lsd"]["gct"].size + 1);
 			})
 		},
 		frames // content frames

@@ -14757,6 +14757,9 @@
 		});
 		return arrControls;
 	};
+	Worksheet.prototype.getCurrentRowsCount = function () {
+		return this.rowsData && this.rowsData.getMaxIndex();
+	};
 
 
 //-------------------------------------------------------------------------------------------------
@@ -17045,11 +17048,11 @@
 			this.ws.workbook.dependencyFormulas.addToCleanCellCache(this.ws.getId(), this.nRow, this.nCol);
 			AscCommonExcel.g_oLOOKUPCache.remove(this, DataOld, res);
 			AscCommonExcel.g_oVLOOKUPCache.remove(this, DataOld, res);
-			AscCommonExcel.g_oHLOOKUPCache.remove(this), DataOld, res;
+			AscCommonExcel.g_oHLOOKUPCache.remove(this, DataOld, res);
 			AscCommonExcel.g_oMatchCache.remove(this);
 			AscCommonExcel.g_oSUMIFSCache.remove(this);
 			AscCommonExcel.g_oFormulaRangesCache.remove(this);
-			AscCommonExcel.g_oCountIfCache.remove(this);
+			AscCommonExcel.g_oCountIfCache.remove(this, DataOld, res);
 		}
 	};
 	Cell.prototype.cleanText = function() {
