@@ -860,7 +860,6 @@ function(window, undefined) {
 			bNeedMaxWidth = true;
 		}
 		if (Array.isArray(this.aLabels) && this.aLabels.length > 0) {
-			let loopsCount = 0;
 			let jump = 0;
 			const end = this.aLabels.length > 0 && scaler ? this.aLabels.length - 1 : this.aLabels.length;
 			for (let i = 0; i < end; i += jump) {
@@ -901,9 +900,8 @@ function(window, undefined) {
 					}
 				}
 
-				jump = skipCond(oLabelParams, loopsCount);
+				jump = skipCond(oLabelParams);
 				fCurX += (jump * (fInterval * (scaler ? scaler : 1)));
-				loopsCount++;
 			}
 		}
 
@@ -994,10 +992,26 @@ function(window, undefined) {
 		}
 	};
 	CLabelsBox.prototype.layoutHorRotated2 = function (aLabels, fAxisY, fDistance, fXStart, fInterval, bOnTickMark, oLabelParams) {
+
+		const sanitizeLabels = function (aLabels) {
+			const sanitized = [];
+			for (let i = 0; i < aLabels.length; i++) {
+				if (aLabels[i]) {
+					sanitized.push(aLabels[i]);
+				}
+			}
+			return sanitized;
+		}
+
+		this.aLabels = aLabels;
+		const sanitizedLabels = sanitizeLabels(aLabels);
+		const fNewInterval = (aLabels.length * fInterval) / (sanitizedLabels.length > 0 ? sanitizedLabels.length : 1);
+
+
 		this.bRotated = true;
 		this.align = (fDistance >= 0);
 		var fMaxHeight = 0.0;
-		var fCurX = bOnTickMark ? fXStart : fXStart + fInterval / 2.0;
+		var fCurX = bOnTickMark ? fXStart : fXStart + fNewInterval / 2.0;
 		let fAngle = oLabelParams && oLabelParams.valid ? Math.PI : Math.PI / 4.0;
 		const fMultiplier = Math.sin(fAngle);
 		let sinAlpha = null;
@@ -1013,7 +1027,7 @@ function(window, undefined) {
 			cosAlpha = Math.abs(Math.cos(fAngle));
 			rotatedMaxWidth = (cosAlpha + sinAlpha) * oLabelParams.maxHeight;
 			// 20000 is default for height
-			const rotatedContentWidth = AscFormat.isRealNumber(fInterval) ? fInterval : 20000;
+			const rotatedContentWidth = AscFormat.isRealNumber(fNewInterval) ? fNewInterval : 20000;
 			const oneLineHeight = oLabelParams.getSingleLineHeight(aLabels);
 			rotatedMaxHeight = (oLabelParams.rot === oLabelParams.range || oLabelParams.rot === -oLabelParams.range) ? rotatedContentWidth : oneLineHeight;
 			// bDirection indecates whether angle is positive or negative.
@@ -1258,73 +1272,72 @@ function(window, undefined) {
 			}
 			return dotWidth;
 		}
-		if (Array.isArray(aLabels) && aLabels.length > 0) {
-			let loopsCount = 0;
+
+		if (Array.isArray(sanitizedLabels) && sanitizedLabels.length > 0) {
 			let jump = 0;
 			// find width of three dots
-			const nThreeDotWidth = findDotWidth(aLabels) * 3;
-			for (let i = 0; i < aLabels.length; i += jump) {
-				if (aLabels[i]) {
-					const oLabel = aLabels[i];
+			let counter = 0;
+			const nThreeDotWidth = findDotWidth(sanitizedLabels) * 3;
+			for (let i = 0; i < sanitizedLabels.length; i += jump) {
+				counter++;
+				const oLabel = sanitizedLabels[i];
 
-					//adjust text settings such as slicing and aligning
-					const oSize = resizeLabel(oLabel, rotatedMaxWidth, rotatedMaxHeight, nThreeDotWidth);
+				//adjust text settings such as slicing and aligning
+				const oSize = resizeLabel(oLabel, rotatedMaxWidth, rotatedMaxHeight, nThreeDotWidth);
+				console.log(oSize.w, oSize.h);
+				// find the width of the squaredPivot point
+				const nSquaredPivotWidth = getSquaredPivotWidth(bDirection, oLabel, oSize.h);
 
-					// find the width of the squaredPivot point
-					const nSquaredPivotWidth = getSquaredPivotWidth(bDirection, oLabel, oSize.h);
+				// find the rotated height of the squaredPivot
+				const nRotatedSquaredPivot = oLabelParams && oLabelParams.valid ? (cosAlpha + sinAlpha) * nSquaredPivotWidth : nSquaredPivotWidth;
 
-					// find the rotated height of the squaredPivot
-					const nRotatedSquaredPivot = oLabelParams && oLabelParams.valid ? (cosAlpha + sinAlpha) * nSquaredPivotWidth : nSquaredPivotWidth;
+				// calculate new width and height after the rotation
+				let fBoxW = oLabelParams && oLabelParams.valid ? (cosAlpha * oSize.w) + (sinAlpha * oSize.h) : fMultiplier * (oSize.w + oSize.h);
+				let fBoxH = oLabelParams && oLabelParams.valid ? (sinAlpha * oSize.w) + (cosAlpha * oSize.h) - (nRotatedSquaredPivot / 2.0) : fBoxW;
 
-					// calculate new width and height after the rotation
-					let fBoxW = oLabelParams && oLabelParams.valid ? (cosAlpha * oSize.w) + (sinAlpha * oSize.h) : fMultiplier * (oSize.w + oSize.h);
-					let fBoxH = oLabelParams && oLabelParams.valid ? (sinAlpha * oSize.w) + (cosAlpha * oSize.h) - (nRotatedSquaredPivot / 2.0) : fBoxW;
+				// update the max height
+				fMaxHeight = Math.max(fMaxHeight, fBoxH);
 
-					// update the max height
-					fMaxHeight = Math.max(fMaxHeight, fBoxH);
-
-					var fX1, fY0, fXC, fYC;
-					fY0 = fAxisY + fDistance;
-					if (fDistance >= 0.0) {
-						fXC = oLabelParams && oLabelParams.valid ? fCurX : fCurX - oSize.w * fMultiplier / 2.0;
-						fYC = oLabelParams && oLabelParams.valid ? fY0 + (nRotatedSquaredPivot / 2) : fY0 + fBoxH / 2.0;
-					} else {
-						//fX1 = fCurX - oSize.h*fMultiplier;
-						fXC = oLabelParams && oLabelParams.valid ? fCurX : fCurX + oSize.w * fMultiplier / 2.0;
-						fYC = oLabelParams && oLabelParams.valid ? fY0 : fY0 - fBoxH / 2.0;
-					}
-
-					const pivotShift = {
-						x : oLabelParams && oLabelParams.valid ? getTranslationX(this.align, bDirection, nSquaredPivotWidth, oSize.w) : -oSize.w / 2.0,
-						y : - oSize.h / 2.0
-					}
-					mapLabel(oLabel, pivotShift, fAngle, {x : fXC, y : fYC});
-
-					// after label rotated portion of its size goes out of box
-					// while offset stays for the portion of label size that is in the box
-					const labelOffset = oLabelParams && oLabelParams.valid ? (cosAlpha * (oSize.h / 2)) + (sinAlpha * nSquaredPivotWidth) : 0;
-					// we need to find the portion of label that gone out of box
-					const leftStep = oLabelParams && oLabelParams.valid ? (bDirection ? fXC : fXC - (fBoxW - labelOffset)) : (fXC - fBoxW / 2.0);
-					if (null === fMinLeft || leftStep < fMinLeft) {
-						fMinLeft = leftStep;
-					}
-					const rightStep = oLabelParams && oLabelParams.valid ? (bDirection ? fXC + (fBoxW - labelOffset) : fXC) : (fXC + fBoxW / 2.0);
-					if (null === fMaxRight || rightStep > fMaxRight) {
-						fMaxRight = rightStep;
-					}
+				var fX1, fY0, fXC, fYC;
+				fY0 = fAxisY + fDistance;
+				if (fDistance >= 0.0) {
+					fXC = oLabelParams && oLabelParams.valid ? fCurX : fCurX - oSize.w * fMultiplier / 2.0;
+					fYC = oLabelParams && oLabelParams.valid ? fY0 + (nRotatedSquaredPivot / 2) : fY0 + fBoxH / 2.0;
+				} else {
+					//fX1 = fCurX - oSize.h*fMultiplier;
+					fXC = oLabelParams && oLabelParams.valid ? fCurX : fCurX + oSize.w * fMultiplier / 2.0;
+					fYC = oLabelParams && oLabelParams.valid ? fY0 : fY0 - fBoxH / 2.0;
 				}
 
-				jump = skipCond(oLabelParams, loopsCount);
-				fCurX += (jump * fInterval);
-				loopsCount++;
+				const pivotShift = {
+					x : oLabelParams && oLabelParams.valid ? getTranslationX(this.align, bDirection, nSquaredPivotWidth, oSize.w) : -oSize.w / 2.0,
+					y : - oSize.h / 2.0
+				}
+				mapLabel(oLabel, pivotShift, fAngle, {x : fXC, y : fYC});
+
+				// after label rotated portion of its size goes out of box
+				// while offset stays for the portion of label size that is in the box
+				const labelOffset = oLabelParams && oLabelParams.valid ? (cosAlpha * (oSize.h / 2)) + (sinAlpha * nSquaredPivotWidth) : 0;
+				// we need to find the portion of label that gone out of box
+				const leftStep = oLabelParams && oLabelParams.valid ? (bDirection ? fXC : fXC - (fBoxW - labelOffset)) : (fXC - fBoxW / 2.0);
+				if (null === fMinLeft || leftStep < fMinLeft) {
+					fMinLeft = leftStep;
+				}
+				const rightStep = oLabelParams && oLabelParams.valid ? (bDirection ? fXC + (fBoxW - labelOffset) : fXC) : (fXC + fBoxW / 2.0);
+				if (null === fMaxRight || rightStep > fMaxRight) {
+					fMaxRight = rightStep;
+				}
+
+				jump = skipCond(oLabelParams);
+				fCurX += (jump * fNewInterval);
 			}
+			console.log(counter, aLabels.length);
 		}
 
-		this.aLabels = aLabels;
 		var aPoints = [];
 		aPoints.push(fXStart);
-		var nIntervalCount = bOnTickMark ? aLabels.length - 1 : aLabels.length;
-		aPoints.push(fXStart + fInterval * nIntervalCount);
+		var nIntervalCount = bOnTickMark ? sanitizedLabels.length - 1 : sanitizedLabels.length;
+		aPoints.push(fXStart + fNewInterval * nIntervalCount);
 		if (null !== fMinLeft) {
 			aPoints.push(fMinLeft);
 		}
@@ -1608,7 +1621,7 @@ function(window, undefined) {
 		return isRot && rot >= -halfRange && rot <= halfRange ? - (Math.PI * rot) / fullRange : Math.PI / 4.0;
 	}
 
-	function skipCond (oLabelParams, loopsCount) {
+	function skipCond (oLabelParams) {
 		if (!oLabelParams) {
 			return 1;
 		}
@@ -1624,7 +1637,6 @@ function(window, undefined) {
 
 		const nLblTickSkip = oLabelParams.nLblTickSkip;
 		const nAxisType = oLabelParams.nAxisType;
-		const sDataType = oLabelParams.sDataType;
 		const oStartingDate = oLabelParams.oStartingDate;
 		const currentDay = oLabelParams.oStartingDate ? oStartingDate.getDate() : 0;
 		const currentMonth = oLabelParams.oStartingDate ? oStartingDate.getMonth() : 0;
@@ -1747,6 +1759,8 @@ function(window, undefined) {
 
 			// oLabelParams indicates necessary stuff such as label rotation, label skip, label format
 			const oLabelParams = oLabelsBox && oLabelsBox.axis && oLabelsBox.axis.params ? oLabelsBox.axis.params : new CLabelsParameters(nAxisType, sDataType);
+			oLabelParams.nLblTickSkip = 3;
+			console.log(JSON.parse(JSON.stringify(oLabelParams)), JSON.parse(JSON.stringify(oLabelsBox?.axis?.xPoints)));
 			oLabelParams.calculate(oLabelsBox, fAxisLength, fRectHeight,  nIndex);
 
 			//check whether rotation is applied or not
@@ -13353,7 +13367,7 @@ function(window, undefined) {
 
 			if (isStandard) {
 				const labelMaxHeight = fTrueRectHeight - (fTrueRectStart + fRectHeight);
-				this.maxHeight = labelMaxHeight > margin ? labelMaxHeight - margin : labelMaxHeight;
+				this.maxHeight = labelMaxHeight > margin ? labelMaxHeight - (margin / 2) : labelMaxHeight;
 			} else {
 				const labelMaxHeight = fTrueRectStart;
 				this.maxHeight = labelMaxHeight > ((3 * margin) / 4) ? labelMaxHeight - ((3 * margin) / 4) : labelMaxHeight;
