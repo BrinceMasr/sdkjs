@@ -21332,6 +21332,33 @@
 
 	//------------------------------------------------------------------------------------------------------------------
 	//
+	// ApiSmartArt
+	//
+	//------------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Class representing a smart art.
+	 * @constructor
+	 */
+	function ApiSmartArt(oGroup){
+		ApiDrawing.call(this, oGroup);
+	}
+	ApiSmartArt.prototype = Object.create(ApiDrawing.prototype);
+	ApiSmartArt.prototype.constructor = ApiSmartArt;
+
+	/**
+	 * Returns a type of the ApiSmartArt class.
+	 * @memberof ApiSmartArt
+	 * @typeofeditors ["CDE"]
+	 * @returns {"smartArt"}
+	 * @see office-js-api/Examples/{Editor}/ApiSmartArt/Methods/GetClassType.js
+	 */
+	ApiSmartArt.prototype.GetClassType = function() {
+		return "smartArt";
+	};
+
+	//------------------------------------------------------------------------------------------------------------------
+	//
 	// ApiFill
 	//
 	//------------------------------------------------------------------------------------------------------------------
@@ -30158,6 +30185,7 @@
 	window['AscBuilder'].ApiShape            = ApiShape;
 	window['AscBuilder'].ApiChart            = ApiChart;
 	window['AscBuilder'].ApiGroup            = ApiGroup;
+	window['AscBuilder'].ApiSmartArt         = ApiSmartArt;
 	window['AscBuilder'].ApiOleObject        = ApiOleObject;
 	window['AscBuilder'].ApiInlineLvlSdt     = ApiInlineLvlSdt;
 	window['AscBuilder'].ApiBlockLvlSdt      = ApiBlockLvlSdt;
@@ -30431,6 +30459,8 @@
                 return new AscBuilder.ApiImage(drawing);
             case AscDFH.historyitem_type_GroupShape:
                 return new AscBuilder.ApiGroup(drawing);
+            case AscDFH.historyitem_type_SmartArt:
+                return new AscBuilder.ApiSmartArt(drawing);
             case AscDFH.historyitem_type_OleObject:
                 return new AscBuilder.ApiOleObject(drawing);
             case AscDFH.historyitem_type_GraphicFrame:
