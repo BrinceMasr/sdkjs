@@ -7282,6 +7282,7 @@
 	window['AscBuilder'].ApiGroup = ApiGroup;
 	window['AscBuilder'].ApiOleObject = ApiOleObject;
 	window['AscBuilder'].ApiTable = ApiTable;
+	window['AscBuilder'].ApiChart = ApiChart;
 })(window, null);
 
 

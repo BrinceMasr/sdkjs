@@ -28697,5 +28697,6 @@
 	window['AscBuilder'].ApiShape           = ApiShape;
 	window['AscBuilder'].ApiImage           = ApiImage;
 	window['AscBuilder'].ApiOleObject       = ApiOleObject;
+	window['AscBuilder'].ApiChart			= ApiChart;
 
 }(window, null));
