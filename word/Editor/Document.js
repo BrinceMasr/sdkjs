@@ -9257,8 +9257,15 @@ CDocument.prototype.OnKeyDown = function(e)
 										}
 									}
 									ListForUnicode[0].oRun.Selection.Use = true;
-									ListForUnicode[0].oRun.Selection.StartPos = ListForUnicode[0].currentPos;
-									ListForUnicode[0].oRun.Selection.EndPos = ListForUnicode[0].currentPos + 1;
+									const nStartPos = ListForUnicode[0].currentPos;
+									const nEndPos = ListForUnicode[0].currentPos + 1;
+									if (oSettings.nDirection !== -1) {
+										ListForUnicode[0].oRun.Selection.StartPos = nStartPos;
+										ListForUnicode[0].oRun.Selection.EndPos = nEndPos;
+									} else {
+										ListForUnicode[0].oRun.Selection.StartPos = nEndPos;
+										ListForUnicode[0].oRun.Selection.EndPos = nStartPos;
+									}
 								}
 
 								this.UpdateSelection();
@@ -9342,8 +9349,15 @@ CDocument.prototype.OnKeyDown = function(e)
 								}
 								
 								ListForUnicode[0].oRun.Selection.Use = true;
-								ListForUnicode[0].oRun.Selection.StartPos = ListForUnicode[0].currentPos;
-								ListForUnicode[0].oRun.Selection.EndPos = ListForUnicode[0].currentPos + textAfterChange.length;
+								const nStartPos = ListForUnicode[0].currentPos;
+								const nEndPos = ListForUnicode[0].currentPos + textAfterChange.length;
+								if (oSettings.nDirection !== -1) {
+									ListForUnicode[0].oRun.Selection.StartPos = nStartPos;
+									ListForUnicode[0].oRun.Selection.EndPos = nEndPos;
+								} else {
+									ListForUnicode[0].oRun.Selection.StartPos = nEndPos;
+									ListForUnicode[0].oRun.Selection.EndPos = nStartPos;
+								}
 							}
 
 							this.UpdateSelection();
