@@ -5432,38 +5432,63 @@
 		return this.Drawing.rot * 180 / Math.PI
 	};
 
-
-    
-	ApiDrawing.prototype.GetPosX = function()
-	{
+	/**
+	 * Gets the x position of the drawing on the slide.
+	 * @typeofeditors ["CPE"]
+	 * @returns {EMU}
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetPosX.js
+	 */
+	ApiDrawing.prototype.GetPosX = function() {
 		return private_MM2EMU(this.Drawing.GetPosX());
 	};
 
-    
-	ApiDrawing.prototype.GetPosY = function()
-	{
+    /**
+	 * Gets the y position of the drawing on the slide.
+	 * @typeofeditors ["CPE"]
+	 * @returns {EMU}
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetPosY.js
+	 */
+	ApiDrawing.prototype.GetPosY = function() {
 		return private_MM2EMU(this.Drawing.GetPosY());
 	};
 
-
-    
-    
-	ApiDrawing.prototype.SetPosX = function(posX)
-	{
-        
+	/**
+	 * Sets the x position of the drawing on the slide.
+	 * @typeofeditors ["CPE"]
+	 * @param {EMU} posX - The distance from the left side of the slide to the left side of the drawing measured in English measure units.
+	 * @returns {boolean}
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/SetPosX.js
+	 */
+	ApiDrawing.prototype.SetPosX = function(posX) {
         this.Drawing.checkTransformBeforeApply();
 		let oXfrm = this.Drawing.getXfrm();
 		oXfrm.setOffX(private_EMU2MM(posX));
+
+		return true;
 	};
 
-    
-	ApiDrawing.prototype.SetPosY = function(posY)
-	{
+	/**
+	 * Sets the y position of the drawing on the slide.
+	 * @typeofeditors ["CPE"]
+	 * @param {EMU} posY - The distance from the top side of the slide to the upper side of the drawing measured in English measure units.
+	 * @returns {boolean}
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/SetPosY.js
+	 */
+	ApiDrawing.prototype.SetPosY = function(posY) {
         this.Drawing.checkTransformBeforeApply();
 		let oXfrm = this.Drawing.getXfrm();
 		oXfrm.setOffY(private_EMU2MM(posY));
+
+		return true;
 	};
 
+	/**
+	 * Replaces the placeholder by a drawing on the slide.
+	 * @typeofeditors ["CPE"]
+	 * @param {Drawing} oDrawing
+	 * @returns {boolean}
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/SetPosY.js
+	 */
 	ApiDrawing.prototype.ReplacePlaceholder = function(oDrawing)
 	{
 		let ph = this.GetPlaceholder();
@@ -5472,9 +5497,7 @@
 		let slide = this.Drawing.parent;
 		if (!slide || !slide.graphicObjects) return false;
 
-        
 		slide.replaceSp(this.Drawing, oDrawing.Drawing);
-
         
 		oDrawing.Drawing.setSpPr(this.Drawing.spPr.createDuplicate());
         if(oDrawing.GetClassType() === "table")
@@ -5492,9 +5515,13 @@
         return true;
 	};
 
-
-	ApiDrawing.prototype.GetInternalId = function()
-	{
+	/**
+	 * Returns an internal ID of the current drawing object.
+	 * @typeofeditors ["CPE"]
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiDocumentContent/Methods/GetInternalId.js
+	 */
+	ApiDrawing.prototype.GetInternalId = function() {
 		return this.Drawing.GetId();
 	};
 
