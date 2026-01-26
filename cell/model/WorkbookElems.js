@@ -13085,14 +13085,22 @@ function RangeDataManagerElem(bbox, data)
 					index = this.addMultiText(item);
 				}
 				if (opt_sharedStringIndexMap) {
-					opt_sharedStringIndexMap.push(index);
+					opt_sharedStringIndexMap[i] = index;
 				}
 			}
 			return;
 		}
-		this.replaceSharedStrings(sharedStrings, opt_sharedStringIndexMap);
-	};
-	CSharedStrings.prototype.replaceSharedStrings = function(sharedStrings, opt_sharedStringIndexMap) {
+		if (this.all.length > 0) {
+			for (let i = 0; i < sharedStrings.length; i++) {
+				const item = sharedStrings[i];
+				if (typeof item === 'string') {
+					this.addText(item);
+				} else {
+					this.addMultiText(item);
+				}
+			}
+			return;
+		}
 		this.all = sharedStrings.slice(); //copy
 		this.text = Object.create(null);
 		this.multiTextMap = Object.create(null);
@@ -13100,9 +13108,6 @@ function RangeDataManagerElem(bbox, data)
 		for (let i = 0; i < sharedStrings.length; i++) {
 			const text = sharedStrings[i];
 			this._addSharedStringCacheByIndex(text, i + 1);// 1-based indexing
-			if (opt_sharedStringIndexMap) {
-				opt_sharedStringIndexMap.push(i + 1);
-			}
 		}
 	};
 	CSharedStrings.prototype._addSharedStringCacheByIndex = function(text, index) {
@@ -18248,6 +18253,9 @@ function RangeDataManagerElem(bbox, data)
 
 		this.aFutureMetadata = null;
 	}
+	CMetadata.prototype.getType = function () {
+		return UndoRedoDataTypes.Metadata;
+	};
 	CMetadata.prototype.clone = function () {
 		let res = new CMetadata();
 
@@ -18294,6 +18302,120 @@ function RangeDataManagerElem(bbox, data)
 		}
 
 		return res;
+	};
+
+	CMetadata.prototype.Read_FromBinary2 = function(r) {
+		if (r.GetBool()) {
+			var length = r.GetLong();
+			this.metadataTypes = [];
+			for (var i = 0; i < length; ++i) {
+				var elem = new CMetadataType();
+				elem.Read_FromBinary2(r);
+				this.metadataTypes.push(elem);
+			}
+		}
+		if (r.GetBool()) {
+			var length = r.GetLong();
+			this.metadataStrings = [];
+			for (var i = 0; i < length; ++i) {
+				var elem = new CMetadataString();
+				elem.Read_FromBinary2(r);
+				this.metadataStrings.push(elem);
+			}
+		}
+		if (r.GetBool()) {
+			var length = r.GetLong();
+			this.mdxMetadata = [];
+			for (var i = 0; i < length; ++i) {
+				var elem = new CMdx();
+				elem.Read_FromBinary2(r);
+				this.mdxMetadata.push(elem);
+			}
+		}
+		if (r.GetBool()) {
+			var length = r.GetLong();
+			this.cellMetadata = [];
+			for (var i = 0; i < length; ++i) {
+				var elem = new CMetadataRecord();
+				elem.Read_FromBinary2(r);
+				this.cellMetadata.push(elem);
+			}
+		}
+		if (r.GetBool()) {
+			var length = r.GetLong();
+			this.valueMetadata = [];
+			for (var i = 0; i < length; ++i) {
+				var elem = new CMetadataRecord();
+				elem.Read_FromBinary2(r);
+				this.valueMetadata.push(elem);
+			}
+		}
+		if (r.GetBool()) {
+			var length = r.GetLong();
+			this.aFutureMetadata = [];
+			for (var i = 0; i < length; ++i) {
+				var elem = new CFutureMetadata();
+				elem.Read_FromBinary2(r);
+				this.aFutureMetadata.push(elem);
+			}
+		}
+	};
+
+	CMetadata.prototype.Write_ToBinary2 = function(w) {
+		if (this.metadataTypes) {
+			w.WriteBool(true);
+			w.WriteLong(this.metadataTypes.length);
+			for (var i = 0; i < this.metadataTypes.length; ++i) {
+				this.metadataTypes[i].Write_ToBinary2(w);
+			}
+		} else {
+			w.WriteBool(false);
+		}
+		if (this.metadataStrings) {
+			w.WriteBool(true);
+			w.WriteLong(this.metadataStrings.length);
+			for (var i = 0; i < this.metadataStrings.length; ++i) {
+				this.metadataStrings[i].Write_ToBinary2(w);
+			}
+		} else {
+			w.WriteBool(false);
+		}
+		if (this.mdxMetadata) {
+			w.WriteBool(true);
+			w.WriteLong(this.mdxMetadata.length);
+			for (var i = 0; i < this.mdxMetadata.length; ++i) {
+				this.mdxMetadata[i].Write_ToBinary2(w);
+			}
+		} else {
+			w.WriteBool(false);
+		}
+		if (this.cellMetadata) {
+			w.WriteBool(true);
+			w.WriteLong(this.cellMetadata.length);
+			for (var i = 0; i < this.cellMetadata.length; ++i) {
+				this.cellMetadata[i].Write_ToBinary2(w);
+			}
+		} else {
+			w.WriteBool(false);
+		}
+		if (this.valueMetadata) {
+			w.WriteBool(true);
+			w.WriteLong(this.valueMetadata.length);
+			for (var i = 0; i < this.valueMetadata.length; ++i) {
+				this.valueMetadata[i].Write_ToBinary2(w);
+			}
+		} else {
+			w.WriteBool(false);
+		}
+		if (this.aFutureMetadata) {
+			w.WriteBool(true);
+			w.WriteLong(this.aFutureMetadata.length);
+			for (var i = 0; i < this.aFutureMetadata.length; ++i) {
+				this.aFutureMetadata[i].Write_ToBinary2(w);
+			}
+		} else {
+			w.WriteBool(false);
+		}
 	};
 
 	/**
@@ -19515,7 +19637,7 @@ function RangeDataManagerElem(bbox, data)
 		}
 	};
 	CMetadataBlockExt.prototype.Write_ToBinary2 = function(w) {
-		if (null != this.richValueBlock) {
+		if (null != this.richValueBlock) {мета
 			w.WriteBool(true);
 			this.richValueBlock.Write_ToBinary2(w);
 		} else {
@@ -19657,11 +19779,9 @@ function RangeDataManagerElem(bbox, data)
 			"boolean[][]": 1,
 			"any[][]": 1
 		};
-		let arrayIndexes = {};
 		if (argsInfo) {
 			let optionalCount = 0;
 			for (let i = 0; i < argsInfo.length; i++) {
-				arrayIndexes[i] = 1;
 				argumentsType.push(this.getTypeByString(argsInfo[i].type));
 				if (!supportedTypes[argsInfo[i].type]) {
 					let paramName = (params && params[i]) ? params[i].name : "";
@@ -19701,10 +19821,6 @@ function RangeDataManagerElem(bbox, data)
 		newFunc.prototype.argumentsType = argumentsType;
 		newFunc.prototype.returnValueType = returnValueType;
 		newFunc.prototype.ca = calculateCell;
-		newFunc.prototype.arrayIndexes = arrayIndexes;
-		newFunc.prototype.getArrayIndex = function (index, type) {
-			return 1;
-		};
 		newFunc.prototype.Calculate = function (arg) {
 			try {
 
@@ -21542,6 +21658,11 @@ function RangeDataManagerElem(bbox, data)
 		this.types = null; // CRichValueTypes
 		this.extLst = null;
 	}
+
+	CRichValueTypesInfo.prototype.getType = function () {
+		return UndoRedoDataTypes.RichValueTypesInfo;
+	};
+
 	CRichValueTypesInfo.prototype.clone = function() {
 		let res = new CRichValueTypesInfo();
 		if (this.global) {
@@ -21665,6 +21786,9 @@ function RangeDataManagerElem(bbox, data)
 		this.children = []; //  CRichValueStructure
 	}
 
+	CRichValueStructures.prototype.getType = function () {
+		return UndoRedoDataTypes.RichValueStructures;
+	};
 	CRichValueStructures.prototype.getValueStructure = function(index) {
 		return this.children && this.children[index];
 	};
@@ -21827,6 +21951,10 @@ function RangeDataManagerElem(bbox, data)
 	function CRichValueData() {
 		this.pData = []; //CRichValue
 	}
+
+	CRichValueData.prototype.getType = function () {
+		return UndoRedoDataTypes.RichValueData;
+	};
 
 	CRichValueData.prototype.getRichValue = function(index) {
 		return this.pData && this.pData[index];

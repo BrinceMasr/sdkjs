@@ -677,6 +677,11 @@ function (window, undefined) {
 		this.CacheFieldElem = 184;
 		this.CalculatedItems = 185;
 
+		this.Metadata = 195;
+		this.RichValueStructures = 196;
+		this.RichValueTypesInfo = 197;
+		this.RichValueData = 198;
+
 		this.Create = function (nType) {
 			switch (nType) {
 				case this.ValueMultiTextElem:
@@ -854,6 +859,14 @@ function (window, undefined) {
 					return new AscCommonExcel.UndoRedoData_LegacyDrawingHFDrawing();
 				case this.PivotFieldItem:
 					return new AscCommonExcel.UndoRedoData_PivotFieldItem();
+				case this.Metadata:
+					return new AscCommonExcel.CMetadata();
+				case this.RichValueStructures:
+					return new AscCommonExcel.CRichValueStructures();
+				case this.RichValueTypesInfo:
+					return new AscCommonExcel.CRichValueTypesInfo();
+				case this.RichValueData:
+					return new AscCommonExcel.CRichValueData();
 			}
 			return null;
 		};

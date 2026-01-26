@@ -6853,13 +6853,13 @@ function isAllowPasteLink(pastedWb) {
 		if (ref) {
 			let offset = this.model.dynamicArrayManager.getRichValueOffset(ref.r1, ref.c1);
 			if (offset) {
-				const lineColor = new CColor(78, 128, 245);
+				const lineColor = new CColor(47, 100, 187);
 				let _ref = new Asc.Range(ref.c1, ref.r1, ref.c1 + offset.col, ref.r1 + offset.row);
 				this._drawElements(this._drawSelectionElement, _ref, AscCommonExcel.selectionLineType.Dash, lineColor);
 				return;
 			}
-			const lineColor = new CColor(78, 128, 245);
-			this._drawElements(this._drawSelectionElement, ref, AscCommonExcel.selectionLineType.None, lineColor);
+			const lineColor = new CColor(47, 100, 187);
+			this._drawElements(this._drawSelectionElement, ref, AscCommonExcel.selectionLineType.ThinSolid, lineColor);
 		}
 	};
 
@@ -8223,6 +8223,7 @@ function isAllowPasteLink(pastedWb) {
         let canFill = AscCommonExcel.selectionLineType.Selection & selectionLineType;
         let isDashLine = AscCommonExcel.selectionLineType.Dash & selectionLineType;
         let dashThickLine = AscCommonExcel.selectionLineType.DashThick & selectionLineType;
+        let isThinSolid = AscCommonExcel.selectionLineType.ThinSolid & selectionLineType;
 
         if (isDashLine || dashThickLine) {
             fHorLine = this._dashLineCleverHor;
@@ -8271,7 +8272,7 @@ function isAllowPasteLink(pastedWb) {
         let isPagePreview = AscCommonExcel.selectionLineType.ResizeRange & selectionLineType;
 		//меняю толщину линии для селекта(только в случае сплошной линии) и масштаба 200%
 		let isRetina = (!isDashLine || isAllowRetina) && this.getRetinaPixelRatio() >= 2;
-		let widthLine = isDashLine ? 1 : 2;
+		let widthLine = (isDashLine || isThinSolid) ? 1 : 2;
 
 		//TODO for scale > 200% use a multiplier of 2 . revise the rendering for scales over 200%
 		if (isRetina) {
@@ -8295,16 +8296,16 @@ function isAllowPasteLink(pastedWb) {
             ctx.beginPath();
 
             if (drawTopSide && !firstRow) {
-                fHorLine.apply(this, [ctx, x1 - !isDashLine * (2 + isRetina * 1) + _diff + this.getRightToLeftOffset()*1, y1, x2 + !isDashLine * (1 + isRetina * 1) - _diff + this.getRightToLeftOffset()*1, this]);
+                fHorLine.apply(this, [ctx, x1 - !(isDashLine || isThinSolid) * (2 + isRetina * 1) + _diff + this.getRightToLeftOffset()*1 - (isThinSolid ? (1 + isRetina * 1) : 0), y1, x2 + !(isDashLine || isThinSolid) * (1 + isRetina * 1) - _diff + this.getRightToLeftOffset()*1, this]);
             }
             if (drawBottomSide) {
-                fHorLine.apply(this, [ctx, x1, y2 + !isDashLine * 1 - thinLineDiff, x2, this]);
+                fHorLine.apply(this, [ctx, x1, y2 + !(isDashLine || isThinSolid) * 1 - thinLineDiff, x2, this]);
             }
             if (drawLeftSide && !firstCol) {
-                fVerLine.apply(this, [ctx, x1 - this.getRightToLeftOffset()*1, y1, y2 + !isDashLine * (1 + isRetina * 1) - _diff, this]);
+                fVerLine.apply(this, [ctx, x1 - this.getRightToLeftOffset()*1, y1, y2 + !(isDashLine || isThinSolid) * (1 + isRetina * 1) - _diff, this]);
             }
             if (drawRightSide) {
-                fVerLine.apply(this, [ctx, x2 + !isDashLine * 1 - thinLineDiff -this.getRightToLeftOffset()*1, y1, y2 + !isDashLine * (1 + isRetina * 1), this]);
+                fVerLine.apply(this, [ctx, x2 + !(isDashLine || isThinSolid) * 1 - thinLineDiff -this.getRightToLeftOffset()*1, y1, y2 + !(isDashLine || isThinSolid) * (1 + isRetina * 1), this]);
             }
             ctx.closePath().stroke();
 		}
