@@ -1633,7 +1633,6 @@ CShapeDrawer.prototype =
 			? this.Graphics.Graphics
 			: this.Graphics;
 
-
 		const fullTransform = bIsSaveToPdfMode
 			? (this.isPdf() ? this.Graphics.GetTransform() : this.Graphics.m_oFullTransform)
 			: graphicsCtx.m_oFullTransform;
@@ -1648,9 +1647,9 @@ CShapeDrawer.prototype =
 			: graphicsCtx.m_oContext.lineWidth;
 
 		const penWidth = lineSize * transformScaleFactor;
-		const maxWidth = bIsSaveToPdfMode
+		const minArrowSize = bIsSaveToPdfMode
 			? 2.5 / AscCommon.g_dKoef_mm_to_pix
-			: (graphicsCtx.IsThumbnail === true ? 2 : undefined);
+			: null;
 
 		const arrCoef = bIsSaveToPdfMode
 			? 1
@@ -1662,7 +1661,8 @@ CShapeDrawer.prototype =
 		});
 
 		if (this.Ln.headEnd != null) {
-			const arrowLength = this.Ln.headEnd.GetLen(penWidth, maxWidth) / transformScaleFactor;
+			const arrowLength = this.Ln.headEnd.GetLen(penWidth, minArrowSize);
+			const arrowWidth = this.Ln.headEnd.GetWidth(penWidth, minArrowSize);
 
 			const firstUnclosedPath = unclosedPaths[0];
 			const subPaths = firstUnclosedPath && firstUnclosedPath.stroke ? firstUnclosedPath.getContinuousSubpaths() : [];
@@ -1672,7 +1672,7 @@ CShapeDrawer.prototype =
 
 			for (let i = 0; i < unclosedSubPaths.length; i++) {
 				const path = unclosedSubPaths[i];
-				const headAngle = path.getHeadArrowAngle(arrowLength);
+				const headAngle = path.getHeadArrowAngle(arrowLength / transformScaleFactor);
 
 				if (AscFormat.isRealNumber(headAngle)) {
 					// Each continuous subpath starts with a moveTo command
@@ -1691,8 +1691,8 @@ CShapeDrawer.prototype =
 						arrowEndPoint.x, arrowEndPoint.y,
 						arrowStartPoint.x, arrowStartPoint.y,
 						this.Ln.headEnd.type,
-						arrCoef * this.Ln.headEnd.GetWidth(penWidth, maxWidth) * transformScaleFactor,
-						arrCoef * this.Ln.headEnd.GetLen(penWidth, maxWidth) * transformScaleFactor,
+						arrCoef * arrowWidth,
+						arrCoef * arrowLength,
 						this, inverseTransform
 					);
 				}
@@ -1700,7 +1700,8 @@ CShapeDrawer.prototype =
 		}
 
 		if (this.Ln.tailEnd != null) {
-			const arrowLength = this.Ln.tailEnd.GetLen(penWidth, maxWidth) / transformScaleFactor;
+			const arrowLength = this.Ln.tailEnd.GetLen(penWidth, minArrowSize);
+			const arrowWidth = this.Ln.tailEnd.GetWidth(penWidth, minArrowSize);
 
 			const lastUnclosedPath = unclosedPaths[unclosedPaths.length - 1];
 			const subPaths = lastUnclosedPath && lastUnclosedPath.stroke ? lastUnclosedPath.getContinuousSubpaths() : [];
@@ -1710,7 +1711,7 @@ CShapeDrawer.prototype =
 
 			for (let i = 0; i < unclosedSubPaths.length; i++) {
 				const path = unclosedSubPaths[i];
-				const tailAngle = path.getTailArrowAngle(arrowLength);
+				const tailAngle = path.getTailArrowAngle(arrowLength / transformScaleFactor);
 
 				if (AscFormat.isRealNumber(tailAngle)) {
 
@@ -1745,8 +1746,8 @@ CShapeDrawer.prototype =
 						arrowEndPoint.x, arrowEndPoint.y,
 						arrowStartPoint.x, arrowStartPoint.y,
 						this.Ln.tailEnd.type,
-						arrCoef * this.Ln.tailEnd.GetWidth(penWidth, maxWidth) * transformScaleFactor,
-						arrCoef * this.Ln.tailEnd.GetLen(penWidth, maxWidth) * transformScaleFactor,
+						arrCoef * arrowWidth,
+						arrCoef * arrowLength,
 						this, inverseTransform
 					);
 				}
