@@ -7400,6 +7400,18 @@ background-repeat: no-repeat;\
 	asc_docs_api.prototype.sync_DemonstrationSlideChanged = function(slideNum)
 	{
 		this.sendEvent("asc_onDemonstrationSlideChanged", slideNum);
+
+		/*
+			Use an event name aligned with MS PowerPoint's SlideShowNextSlide event:
+			https://learn.microsoft.com/en-us/office/vba/api/powerpoint.application.slideshownextslide
+
+			Do not trigger event for the end screen.
+		*/
+		const slidesCount = this.getCountPages();
+		if (slideNum >= 0 && slideNum < slidesCount) {
+			if (window.g_asc_plugins)
+				window.g_asc_plugins.onPluginEvent('onSlideShowNextSlide', slideNum);
+		}
 	};
 	asc_docs_api.prototype.getAnnotations = function ()
 	{
