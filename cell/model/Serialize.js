@@ -16307,7 +16307,7 @@
 	prot['GreaterThan'] = prot.GreaterThan;
 	prot['GreaterThanOrEqual'] = prot.GreaterThanOrEqual;
 
-	window['Asc']['ST_olapSlicerCacheSortOrder'] = window['AscCommonExcel'].ST_olapSlicerCacheSortOrder = ST_olapSlicerCacheSortOrder;
+	window['Asc']['ST_olapSlicerCacheSortOrder'] = window['Asc'].ST_olapSlicerCacheSortOrder = ST_olapSlicerCacheSortOrder;
 	prot = ST_olapSlicerCacheSortOrder;
 	prot['Natural'] = prot.Natural;
 	prot['Ascending'] = prot.Ascending;
