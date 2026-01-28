@@ -3012,7 +3012,7 @@
 						_promises[i].parserFormula.promiseResult[_promises[i].index] = resStreamInfo;
 
 						let parsed = _promises[i].parserFormula;
-						if (parsed && !parsed.ref && resStreamInfo.type === cElementType.array /*|| resStreamInfo.type === cElementType.cellsRange || resStreamInfo.type === cElementType.cellsRange3D*/) {
+						if (parsed && !parsed.ref && resStreamInfo.type === cElementType.array) {
 							/*
 							 - we getting formula result and set ref to the formula 
 							 - although do .setValue to affected cells(ref)
@@ -3073,8 +3073,6 @@
 				});
 			};
 			doPromises(promises);
-		} else {
-			//t.endCallback && t.endCallback()
 		}
 	};
 
