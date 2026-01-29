@@ -174,8 +174,8 @@ module.exports = function(grunt) {
 		return result;
 	}
 	const path = require('path');
-	const deploy = process.env.DEPLOY_ROOT
-  					? path.join(process.env.DEPLOY_ROOT, 'sdkjs')
+	const deploy = process.env.BUILD_ROOT
+  					? path.join(process.env.BUILD_ROOT, 'sdkjs')
   					: path.join('..', 'deploy', 'sdkjs');
 	const word = path.join(deploy, 'word');
 	const cell = path.join(deploy, 'cell');
