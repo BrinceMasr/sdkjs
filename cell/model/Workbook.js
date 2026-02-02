@@ -25569,6 +25569,58 @@
 		}
 	};
 
+	CDynamicArrayManager.prototype.checkVm = function (formula, newSpilledRef) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays || !formula) {
+			return;
+		}
+
+		const existingVm = formula.getVm ? formula.getVm() : null;
+		if (existingVm != null) {
+			return;
+		}
+
+		let oldRef = formula.getDynamicRef();
+
+		if (newSpilledRef && oldRef) {
+			const newProps = this.generateDynamicProps(formula, newSpilledRef);
+			if (newProps && newProps.vmIndex != null) {
+				const oldVm = formula.getVm ? formula.getVm() : null;
+				formula.setVm(newProps.vmIndex);
+				formula.setAca(true);
+				formula.setCa(true);
+
+
+				for (let r = oldRef.r1; r <= oldRef.r2; r++) {
+					for (let c = oldRef.c1; c <= oldRef.c2; c++) {
+						if (!(c === oldRef.c1 && r === oldRef.r1)) {
+							this.ws._getCell(r, c, function(cell) {
+								if (cell) {
+									cell.setValue("");
+									cell.setIsDirty(true);
+								}
+							});
+						}
+					}
+				}
+
+
+				const cmIndex = newProps.cmIndex != null ? newProps.cmIndex : formula.getCm();
+
+				AscCommon.History.Add(AscCommonExcel.g_oUndoRedoArrayFormula, AscCH.historyitem_ArrayFromula_AddFormula,
+					this.ws.getId(),
+					new Asc.Range(oldRef.c1, oldRef.r1, oldRef.oldRef, oldRef.r1),
+					new AscCommonExcel.UndoRedoData_ArrayFormula(
+						new Asc.Range(oldRef.c1, oldRef.r1, oldRef.c1, oldRef.r1),
+						null,
+						cmIndex,
+						newProps.vmIndex,
+						oldVm
+					)
+				);
+			}
+		}
+	};
+
 	CDynamicArrayManager.prototype.checkDynamicRangeByElement = function (element, parentCell) {
 		/* this function checks if element can fit in the cells */
 		if (!element || !parentCell) {
@@ -25581,24 +25633,40 @@
 		if (element.type !== cElementType.array && element.type !== cElementType.cellsRange && element.type !== cElementType.cellsRange3D) {
 			return true;
 		} else if (element.type === cElementType.array || element.type === cElementType.cellsRange || element.type === cElementType.cellsRange3D) {
-			// go through the range and see if the array can fit into it
-			let dimensions = element.getDimensions(true);
+
+			if (element.isOneElement()) {
+				return true
+			}
+			let _ref = this.getArrayByElement(element, parentCell);
+			return _ref && this.isAutoExpandBBox(_ref);
+		}
+
+		return false
+	};
+
+	CDynamicArrayManager.prototype.getArrayByElement = function (element, parentCell) {
+		if (!parentCell || !parentCell.nCol == null || !element) {
+			return null;
+		}
+		if (element.type === cElementType.array || element.type === cElementType.cellsRange || element.type === cElementType.cellsRange3D) {
 
 			if (element.isOneElement()) {
 				return true
 			}
 
+			// go through the range and see if the array can fit into it
+			let dimensions = element.getDimensions(true);
+
 			// todo if an element is defname, it has no parent element?
 			const t = this;
-			let rangeRow = parentCell.r1,
-				rangeCol = parentCell.c1;
+			let rangeRow = parentCell.nRow,
+				rangeCol = parentCell.nCol;
 			let rangeRow2 = (rangeRow + dimensions.row) - 1;
 			let rangeCol2 = (rangeCol + dimensions.col) - 1;
 
-			return this.isAutoExpandBBox(new Asc.Range(rangeCol, rangeRow, rangeCol2, rangeRow2));
+			return new Asc.Range(rangeCol, rangeRow, rangeCol2, rangeRow2);
 		}
-
-		return false
+		return null;
 	};
 
 	CDynamicArrayManager.prototype.isAutoExpandBBox = function (bbox) {

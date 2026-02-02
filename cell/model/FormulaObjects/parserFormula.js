@@ -10259,7 +10259,7 @@ function parserFormula( formula, parent, _ws ) {
 
 			if (AscCommonExcel.bIsSupportDynamicArrays && this.getDynamicRef()) {
 				// check further dynamic range
-				isRangeCanFitIntoCells =  this.ws.dynamicArrayManager.checkDynamicRangeByElement(this.value, opt_bbox);
+				isRangeCanFitIntoCells =  this.ws.dynamicArrayManager.checkDynamicRangeByElement(this.value, this.parent);
 				if (!isRangeCanFitIntoCells) {
 					this.setAca(true);
 					this.setCa(true);
@@ -10301,10 +10301,17 @@ function parserFormula( formula, parent, _ws ) {
 
 			if (AscCommonExcel.bIsSupportDynamicArrays && this.getDynamicRef()) {
 				// check further dynamic range
-				isRangeCanFitIntoCells = this.ws.dynamicArrayManager.checkDynamicRangeByElement(this.value, opt_bbox);
+				isRangeCanFitIntoCells = this.ws.dynamicArrayManager.checkDynamicRangeByElement(this.value, this.parent);
 				if (!isRangeCanFitIntoCells) {
 					this.setAca(true);
 					this.setCa(true);
+
+					let realRef = this.ws.dynamicArrayManager.getArrayByElement(this.value, this.parent);
+					// this.setAca(true);
+					// this.setCa(true);
+					// this.value = new cError(cErrorType.cannot_be_spilled);
+					this.ws.dynamicArrayManager.checkVm(this, realRef);
+
 					this.value = new cError(cErrorType.cannot_be_spilled);
 				} else {
 					this.setAca(false);
