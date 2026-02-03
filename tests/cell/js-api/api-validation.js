@@ -32,6 +32,9 @@
 
 $(function () {
     var ws = AscTest.JsApi.GetActiveSheet();
+    function isNum(value) {
+        return !isNaN(parseFloat(value)) && isFinite(value);
+    }
 
     // ======= TEST HELPERS =======
     // Must exist & each test must start with it
