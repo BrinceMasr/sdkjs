@@ -10371,11 +10371,17 @@ function(window, undefined) {
 
 			trendline.setDispEq(false);
 			trendline.setDispRSqr(false);
-			trendline.setTrendlineType(AscFormat.isRealNumber(trendlineType) ? trendlineType : AscFormat.TRENDLINE_TYPE_LINEAR);
-			if (AscFormat.isRealNumber(nForecastForward))
-				trendline.setForward(nForecastForward);
-			if (AscFormat.isRealNumber(nForecastBackward))
-				trendline.setBackward(nForecastBackward);
+			const safeTrendlineType = AscFormat.isRealNumber(trendlineType) ? trendlineType : AscFormat.TRENDLINE_TYPE_LINEAR;
+			trendline.setTrendlineType(safeTrendlineType);
+
+			if (safeTrendlineType === AscFormat.TRENDLINE_TYPE_MOVING_AVG) {
+				trendline.setPeriod(2);
+			} else {
+				if (AscFormat.isRealNumber(nForecastForward))
+					trendline.setForward(nForecastForward);
+				if (AscFormat.isRealNumber(nForecastBackward))
+					trendline.setBackward(nForecastBackward);
+			}
 
 			const chartSpace = trendline.getChartSpace();
 			if (chartSpace.chartStyle && chartSpace.chartColors) {
