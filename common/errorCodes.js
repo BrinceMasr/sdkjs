@@ -149,6 +149,8 @@
 			LockedCellSolver			: -201,
 			TooManyVarCellsSolver		: -202,
 			DataConstraintError			: -203,
+			TooManyCells		        : -204,
+			UnequalCellsNumber			: -205,
 
 			/* для формул */
 			FrmlMaxReference            : -297,

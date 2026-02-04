@@ -2876,6 +2876,9 @@ function (window, undefined) {
 
 		// Calculating option
 		this.oOptions = oParams.asc_getOptions();
+
+		// Attributes for validators
+		this.nCellReferenceCount = 0;
 	}
 
 	CSolver.prototype = Object.create(CBaseAnalysis.prototype);
@@ -3483,7 +3486,22 @@ function (window, undefined) {
 	CSolver.prototype.getResultStatus = function () {
 		return this.nResultStatus;
 	};
-
+	/**
+	 * Sets the cell total count in the "Cell Reference" field.
+	 * @memberof CSolver
+	 * @param {number} nCellReferenceCount
+	 */
+	CSolver.prototype.setCellReferenceCount = function (nCellReferenceCount) {
+		this.nCellReferenceCount = nCellReferenceCount;
+	};
+	/**
+	 * Returns the cell total count in the "Cell Reference" field.
+	 * @memberof CSolver
+	 * @return {number}
+	 */
+	CSolver.prototype.getCellReferenceCount = function () {
+		return this.nCellReferenceCount;
+	};
 	/**
 	 * Returns error type
 	 * @memberof CSolver
@@ -3494,6 +3512,7 @@ function (window, undefined) {
 	 * @returns {Asc.c_oAscError}
 	 */
 	CSolver.prototype.isValidDataRef = function(ws, range, type, dataRange) {
+		const MAX_CELL_COUNT = 2147467264;
 		let res = Asc.c_oAscError.ID.No;
 		if (range === null && type !== Asc.c_oAscSelectionDialogType.Solver_Constraint) {
 			// error text: "Problem to solve not specified"
@@ -3532,6 +3551,26 @@ function (window, undefined) {
 				if (!range && !~dataRange.search(/^\d*[.,]?\d+$/)) {
 					res = Asc.c_oAscError.ID.DataConstraintError;
 				}
+				if (range) {
+					const constraintCellCount = range.getHeight() * range.getWidth();
+					if (constraintCellCount >= MAX_CELL_COUNT) {
+						// error text: "Too many cells"
+						res = Asc.c_oAscError.ID.TooManyCells;
+					}
+					// check equal number of cells in Cell Reference and Constraint fields.
+					if (this.getCellReferenceCount() !== constraintCellCount) {
+						// error text: "Unequal number of cells in Cell Reference and Constraint"
+						res = Asc.c_oAscError.ID.UnequalCellsNumber;
+					}
+				}
+				break;
+			case Asc.c_oAscSelectionDialogType.Solver_CellReference:
+				const cellReferenceCount = range.getHeight() * range.getWidth();
+				if (cellReferenceCount >= MAX_CELL_COUNT) {
+					// error text: "Too many cells"
+					res = Asc.c_oAscError.ID.TooManyCells;
+				}
+				this.setCellReferenceCount(cellReferenceCount);
 				break;
 		}
 

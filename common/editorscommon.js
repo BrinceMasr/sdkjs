@@ -4136,7 +4136,7 @@
 
 		if (!range && cDialogType.DataValidation !== dialogType && cDialogType.ConditionalFormattingRule !== dialogType && cDialogType.GoalSeek_Cell !== dialogType &&
 			cDialogType.GoalSeek_ChangingCell !== dialogType && cDialogType.Solver_ObjectiveCell !== dialogType && cDialogType.Solver_VariableCell !== dialogType &&
-			cDialogType.Solver_Constraint !== dialogType)
+			cDialogType.Solver_Constraint !== dialogType && cDialogType.Solver_CellReference !== dialogType)
 		{
 			return Asc.c_oAscError.ID.DataRangeError;
 		}
@@ -4247,7 +4247,8 @@
 					sheetModel = model.getActiveWs();
 				}
 				return AscCommonExcel.CGoalSeek.prototype.isValidDataRef(sheetModel, range, dialogType);
-			} else if (cDialogType.Solver_ObjectiveCell === dialogType || cDialogType.Solver_VariableCell === dialogType || cDialogType.Solver_Constraint === dialogType) {
+			} else if (cDialogType.Solver_ObjectiveCell === dialogType || cDialogType.Solver_VariableCell === dialogType || cDialogType.Solver_Constraint === dialogType ||
+					cDialogType.Solver_CellReference === dialogType) {
 				result = parserHelp.parse3DRef(dataRange);
 				if (result) {
 					sheetModel = model.getWorksheetByName(result.sheet);

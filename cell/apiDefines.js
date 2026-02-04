@@ -105,7 +105,8 @@ var c_oAscSelectionDialogType = {
   GoalSeek_ChangingCell: 14,
   Solver_ObjectiveCell: 15,
   Solver_VariableCell: 16,
-  Solver_Constraint: 17
+  Solver_Constraint: 17,
+  Solver_CellReference: 18
 };
 
 var c_oAscScrollType = {
