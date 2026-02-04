@@ -1715,7 +1715,7 @@
 			this.specialPasteProps = null;
 			this.bSaveFormat = false;
 			//процесс специальной вставки заканчивается вместе с общей вставкой
-			if(this.specialPasteStart)
+			if(this.specialPasteStart && !this.updateClipboardData)
 			{
 				this.Special_Paste_End();
 				//TODO только для презентаций! проверить на остальных редакторах!
@@ -1728,6 +1728,8 @@
 			{
 				this.SpecialPasteButton_Show();
 			}
+
+			this.updateClipboardData = null;
 
 			if(!checkEnd || (checkEnd && this.endRecalcDocument)) {
 				this.doNotShowButton = false;

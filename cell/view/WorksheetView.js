@@ -28087,6 +28087,8 @@ function isAllowPasteLink(pastedWb) {
 		var specialPasteHelper = window['AscCommon'].g_specialPasteHelper;
 		var specialPasteProps = specialPasteHelper.specialPasteProps;
 
+		let updateClipboardData = window['AscCommon'].g_specialPasteHelper.updateClipboardData;
+
 		if (val.props && val.props.onlyImages === true) {
 			if (!specialPasteHelper.specialPasteStart) {
 				ws.handlers.trigger("showSpecialPasteOptions", [Asc.c_oSpecialPasteProps.picture]);
@@ -28411,7 +28413,7 @@ function isAllowPasteLink(pastedWb) {
 		}
 
 		//for special paste
-		if (!window['AscCommon'].g_specialPasteHelper.specialPasteStart) {
+		if (!window['AscCommon'].g_specialPasteHelper.specialPasteStart || updateClipboardData) {
 			var checkTablesPaste = function () {
 				var _res = false;
 				if (val.TableParts && val.TableParts.length && activeCellsPasteFragment) {
@@ -28462,6 +28464,11 @@ function isAllowPasteLink(pastedWb) {
 
 				window['AscCommon'].g_specialPasteHelper.CleanButtonInfo();
 				window['AscCommon'].g_specialPasteHelper.buttonInfo.asc_setOptions(allowedSpecialPasteProps);
+
+				if (updateClipboardData) {
+					window['AscCommon'].g_specialPasteHelper.buttonInfo.asc_setLastSelectedPasteProperty(specialPasteProps.property);
+				}
+
 				if (fromBinary) {
 					window['AscCommon'].g_specialPasteHelper.buttonInfo.asc_setShowPasteSpecial(true);
 				}
@@ -30129,6 +30136,8 @@ function isAllowPasteLink(pastedWb) {
 
 			window['AscCommon'].g_specialPasteHelper.Paste_Process_Start();
 			window['AscCommon'].g_specialPasteHelper.Special_Paste_Start();
+
+			window['AscCommon'].g_specialPasteHelper.updateClipboardData = updateClipboardData;
 
 			//для того, чтобы была возможность делать несколько математических операций подряд
 			var doUndo = updateClipboardData ? false : true;

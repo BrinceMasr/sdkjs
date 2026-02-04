@@ -13907,6 +13907,8 @@ function SpecialPasteShowOptions()
 	//показывать или нет дополнительный пункт специальной вставки
 	this.showPasteSpecial = null;
 	this.containTables = null;
+
+	this.lastSelectedPasteProperty = null;
 }
 
 SpecialPasteShowOptions.prototype = {
@@ -13973,6 +13975,12 @@ SpecialPasteShowOptions.prototype = {
 	},
 	asc_setContainTables: function (val) {
 		this.containTables = val;
+	},
+	asc_setLastSelectedPasteProperty: function (val) {
+		this.lastSelectedPasteProperty = val;
+	},
+	asc_getLastSelectedPasteProperty: function () {
+		return this.lastSelectedPasteProperty;
 	}
 };
 
@@ -14504,6 +14512,7 @@ function addThemeImagesToMap(oImageMap, aDwnldUrls, aImages) {
   prot["asc_getOptions"]					= prot.asc_getOptions;
   prot["asc_getShowPasteSpecial"]			= prot.asc_getShowPasteSpecial;
   prot["asc_getContainTables"]			    = prot.asc_getContainTables;
+  prot["asc_getLastSelectedPasteProperty"]	= prot.asc_getLastSelectedPasteProperty;
 
   window["AscCommon"].checkOnlyOneImage = checkOnlyOneImage;
 

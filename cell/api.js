@@ -9778,6 +9778,7 @@ var editor;
 								sProps.formulaWithoutBorders, sProps.formulaColumnWidth, sProps.pasteOnlyValues,
 								sProps.valueNumberFormat, sProps.valueAllFormating, sProps.pasteOnlyFormating, sProps.comments,
 								sProps.columnWidth];
+						_specialPasteShowOptions.asc_setShowPasteSpecial(true);
 					} else {
 						allowedSpecialPasteProps = [sProps.sourceformatting, sProps.destinationFormatting];
 					}
