@@ -183,7 +183,6 @@
 		if (data.isNum) {
 			fromNumberToString(data);
 		} else if (oValidation.type === Asc.EDataValidationType.List) {
-			console.log('data', data);
 			toListPreview(data);
 		} else {
 			if (this && this._formula) {
