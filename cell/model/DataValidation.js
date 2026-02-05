@@ -173,7 +173,7 @@
 				.filter(Boolean);
 
 			if (parts.length > 1) {
-				t.asc_setValue(parts.join(AscCommon.FormulaSeparators.functionArgumentSeparatorDef));
+				t.asc_setValue(parts.join(AscCommon.FormulaSeparators.functionArgumentSeparator));
 				return;
 			}
 
