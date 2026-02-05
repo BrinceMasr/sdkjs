@@ -164,10 +164,27 @@
 			}
 		}
 
+		const toListPreview = function (data) {
+			const parts = data.val
+				.split(/[;,]/g)
+				.map(s => s.trim())
+				.filter(Boolean);
+
+			if (parts.length > 1) {
+				t.asc_setValue(parts.join(";"));
+				return;
+			}
+
+			t.asc_setValue((parts[0] || data.val).trim());
+		}
+
 		// fix the text from quotes
 		data = normalizeText(data)
 		if (data.isNum) {
 			fromNumberToString(data);
+		} else if (oValidation.type === Asc.EDataValidationType.List) {
+			console.log('data', data);
+			toListPreview(data);
 		} else {
 			if (this && this._formula) {
 				//если формула содержит ссылки на диапазоны, то в зависимости от активной области нужно их сдвинуть
