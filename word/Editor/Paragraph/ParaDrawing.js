@@ -1136,32 +1136,15 @@ ParaDrawing.prototype.CheckWH = function()
 	if (!this.GraphicObj)
 		return;
 
-	var LineCorrect = 0;
+	let lineCorrect = 0;
 	if (this.GraphicObj.pen && this.GraphicObj.pen.Fill && this.GraphicObj.pen.Fill.fill)
 	{
-		LineCorrect = (this.GraphicObj.pen.w == null) ? 12700 : parseInt(this.GraphicObj.pen.w);
-		LineCorrect /= 72000.0;
+		lineCorrect = (this.GraphicObj.pen.w == null) ? 12700 : parseInt(this.GraphicObj.pen.w);
+		lineCorrect /= 72000.0;
 	}
-
-	let dKoef = this.GetScaleCoefficient();
-	var oldExtW = this.Extent.W;
-	var oldExtH = this.Extent.H;
-	if (this.GraphicObj.spPr && this.GraphicObj.spPr.xfrm
-		&& AscFormat.isRealNumber(this.GraphicObj.spPr.xfrm.extX)
-		&& AscFormat.isRealNumber(this.GraphicObj.spPr.xfrm.extY))
-	{
-		this.Extent.W = this.GraphicObj.spPr.xfrm.extX / dKoef;
-		this.Extent.H = this.GraphicObj.spPr.xfrm.extY / dKoef;
-	}
-	if(this.GraphicObj.getObjectType() === AscDFH.historyitem_type_Shape ||
-		this.GraphicObj.getObjectType() === AscDFH.historyitem_type_SmartArt)
-	{
-		this.GraphicObj.handleUpdateExtents();
-	}
-	this.GraphicObj.recalculate();
-	this.Extent.W = oldExtW;
-	this.Extent.H = oldExtH;
-	var extX, extY, rot;
+	let extX = 5;
+	let extY = 5;
+	let rot = 0;
 	if (this.GraphicObj.spPr && this.GraphicObj.spPr.xfrm )
 	{
 		if(AscFormat.isRealNumber(this.GraphicObj.spPr.xfrm.extX) && AscFormat.isRealNumber(this.GraphicObj.spPr.xfrm.extY))
@@ -1169,46 +1152,40 @@ ParaDrawing.prototype.CheckWH = function()
             extX = this.GraphicObj.spPr.xfrm.extX;
             extY = this.GraphicObj.spPr.xfrm.extY;
 		}
-		else
-		{
-			extX = 5;
-			extY = 5;
-		}
 		if(AscFormat.isRealNumber(this.GraphicObj.spPr.xfrm.rot))
 		{
 			rot = this.GraphicObj.spPr.xfrm.rot;
 		}
-		else
-		{
-			rot = 0;
-		}
 	}
-	else
+	this.setExtent(extX, extY);
+	if(this.GraphicObj.getObjectType() === AscDFH.historyitem_type_Shape ||
+		this.GraphicObj.getObjectType() === AscDFH.historyitem_type_SmartArt)
 	{
-		extX = 5;
-		extY = 5;
-		rot = 0;
+		this.GraphicObj.handleUpdateExtents();
 	}
-	this.setExtent(extX / dKoef, extY / dKoef);
+	this.GraphicObj.recalculate();
 	if(!AscFormat.checkNormalRotate(rot)){
-		var temp = extX;
+		const temp = extX;
 		extX = extY;
 		extY = temp;
 	}
-	var EEL = 0.0, EET = 0.0, EER = 0.0, EEB = 0.0;
-	var addEEL = 0.0, addEET = 0.0, addEER = 0.0, addEEB = 0.0;
 
+	let addEEL = 0.0;
+	let addEET = 0.0;
+	let addEER = 0.0;
+	let addEEB = 0.0;
 	if (this.GraphicObj.getObjectType() === AscDFH.historyitem_type_SmartArt) {
 		addEER = 57150 * AscCommonWord.g_dKoef_emu_to_mm;
 		addEEL = 38100 * AscCommonWord.g_dKoef_emu_to_mm;
 	}
-	var oBounds     = this.GraphicObj.bounds;
-	const horizontalEE = Math.max((oBounds.w - extX) / 2, 0);
-	const verticalEE = Math.max((oBounds.h - extY) / 2, 0);
-		EEL = horizontalEE + LineCorrect + addEEL;
-		EET = verticalEE + LineCorrect + addEET;
-		EER = horizontalEE + LineCorrect + addEER;
-		EEB = verticalEE + LineCorrect + addEEB;
+	const bounds     = this.GraphicObj.bounds;
+	const horizontalEE = Math.max((bounds.w - extX) / 2, 0) + lineCorrect;
+	const verticalEE = Math.max((bounds.h - extY) / 2, 0) + lineCorrect;
+
+	const EEL = horizontalEE + addEEL;
+	const EET = verticalEE + addEET;
+	const EER = horizontalEE + addEER;
+	const EEB = verticalEE + addEEB;
 	this.setEffectExtent(EEL, EET, EER, EEB);
 	this.Check_WrapPolygon();
 };
@@ -4344,6 +4321,31 @@ CAnchorPosition.prototype.Calculate_Y_Value = function(RelativeFrom, isInTable)
 		}
 	}
 
+	return Value;
+};
+
+CAnchorPosition.prototype.Scale_X_Value = function(Value, RelativeFrom, isScale)
+{
+	switch (RelativeFrom) {
+		case c_oAscRelativeFromH.Column:
+		case c_oAscRelativeFromH.Margin:
+		case c_oAscRelativeFromH.Page: {
+			const scaleFactor = isScale ? this.ScaleFactor : 1 / this.ScaleFactor;
+			return Value * scaleFactor;
+		}
+	}
+	return Value;
+};
+CAnchorPosition.prototype.Scale_Y_Value = function(Value, RelativeFrom, isScale)
+{
+	switch (RelativeFrom) {
+		case c_oAscRelativeFromV.Margin:
+		case c_oAscRelativeFromV.Page:
+		case c_oAscRelativeFromV.TopMargin: {
+			const scaleFactor = isScale ? this.ScaleFactor : 1 / this.ScaleFactor;
+			return Value * scaleFactor;
+		}
+	}
 	return Value;
 };
 

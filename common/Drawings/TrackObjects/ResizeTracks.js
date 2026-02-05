@@ -1422,21 +1422,23 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
                 }
                 if(this.originalObject.getObjectType() !== AscDFH.historyitem_type_GraphicFrame)
                 {
+									const paraDrawing = AscFormat.getParaDrawing(this.originalObject);
+									const scaleCoefficient = paraDrawing ? 1 / paraDrawing.GetScaleCoefficient() : 1;
                     if(!this.originalObject.isCrop)
                     {
-                        xfrm.setOffX(this.resizedPosX/scale_coefficients.cx + ch_off_x);
-                        xfrm.setOffY(this.resizedPosY/scale_coefficients.cy + ch_off_y);
-                        xfrm.setExtX(this.resizedExtX/scale_coefficients.cx);
-                        xfrm.setExtY(this.resizedExtY/scale_coefficients.cy);
+                        xfrm.setOffX(this.resizedPosX/scale_coefficients.cx * scaleCoefficient + ch_off_x);
+                        xfrm.setOffY(this.resizedPosY/scale_coefficients.cy * scaleCoefficient + ch_off_y);
+                        xfrm.setExtX(this.resizedExtX/scale_coefficients.cx * scaleCoefficient);
+                        xfrm.setExtY(this.resizedExtY/scale_coefficients.cy * scaleCoefficient);
 						Asc.editor.addMacroStepData("SetShapeSize", {width: this.resizedExtX, height: this.resizedExtY});
                     }
                     else
                     {
                         AscFormat.ExecuteNoHistory(function () {
-                            xfrm.setOffX(this.resizedPosX/scale_coefficients.cx + ch_off_x);
-                            xfrm.setOffY(this.resizedPosY/scale_coefficients.cy + ch_off_y);
-                            xfrm.setExtX(this.resizedExtX/scale_coefficients.cx);
-                            xfrm.setExtY(this.resizedExtY/scale_coefficients.cy);
+                            xfrm.setOffX(this.resizedPosX/scale_coefficients.cx * scaleCoefficient + ch_off_x);
+                            xfrm.setOffY(this.resizedPosY/scale_coefficients.cy * scaleCoefficient + ch_off_y);
+                            xfrm.setExtX(this.resizedExtX/scale_coefficients.cx * scaleCoefficient);
+                            xfrm.setExtY(this.resizedExtY/scale_coefficients.cy * scaleCoefficient);
                         }, this, []);
                     }
                 }
