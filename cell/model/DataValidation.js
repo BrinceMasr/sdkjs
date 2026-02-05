@@ -167,7 +167,9 @@
 		const toListPreview = function (data) {
 			const parts = data.val
 				.split(/[;,]/g)
-				.map(s => s.trim())
+				.map(function (s) {
+					return s.trim();
+				})
 				.filter(Boolean);
 
 			if (parts.length > 1) {
