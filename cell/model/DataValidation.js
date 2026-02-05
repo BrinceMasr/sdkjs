@@ -1186,6 +1186,21 @@
 					return;
 				}
 
+				if (t.type === Asc.EDataValidationType.List && typeof _formula.text === "string" && _formula.text[0] !== "=") {
+					const uiSep = AscCommon.FormulaSeparators.functionArgumentSeparator;
+					const defSep = AscCommon.FormulaSeparators.functionArgumentSeparatorDef;
+
+					if (uiSep && defSep && uiSep !== defSep) {
+						_formula.text = _formula.text
+							.split(uiSep)
+							.map(function(s) {
+								return s.trim();
+							})
+							.filter(Boolean)
+							.join(defSep);
+					}
+				}
+
 				if (!isFormula) {
 					_formula.text = addQuotes(_formula.text);
 				} else if (_tempFormula && _tempFormula._formula) {
