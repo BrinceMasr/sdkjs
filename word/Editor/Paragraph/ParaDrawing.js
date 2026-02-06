@@ -1688,9 +1688,6 @@ ParaDrawing.prototype.Set_XYForAdd = function(X, Y, NearPos, PageNum)
 {
 	if (null !== NearPos)
 	{
-		const scaleFactor = NearPos.Paragraph.getLayoutScaleCoefficient();
-		X /= scaleFactor;
-		Y /= scaleFactor;
 		var Layout = NearPos.Paragraph.Get_Layout(NearPos.ContentPos, this);
 		this.private_SetXYByLayout(X, Y, PageNum, Layout, true, true);
 
@@ -1725,9 +1722,6 @@ ParaDrawing.prototype.Set_XY = function(X, Y, Paragraph, PageNum, bResetAlign)
 {
 	if (Paragraph)
 	{
-		const scaleFactor = Paragraph.getLayoutScaleCoefficient();
-		X /= scaleFactor;
-		Y /= scaleFactor;
 		var PageNumOld = this.PageNum;
 		var ContentPos = Paragraph.Get_DrawingObjectContentPos(this.Get_Id());
 		if (null === ContentPos)

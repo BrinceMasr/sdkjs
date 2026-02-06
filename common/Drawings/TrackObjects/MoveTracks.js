@@ -324,7 +324,8 @@ function MoveShapeImageTrack(originalObject)
                     return;
                 }
             }
-            scale_coefficients = {cx: 1, cy: 1};
+						const scaleCoefficient = this.originalObject.getScaleCoefficient();
+            scale_coefficients = {cx: scaleCoefficient, cy: scaleCoefficient};
             ch_off_x = 0;
             ch_off_y = 0;
             if(bWord && !this.originalObject.isCrop)
@@ -481,6 +482,7 @@ MoveShapeImageTrack.prototype.getBounds = function()
 {
     var boundsChecker = new  AscFormat.CSlideBoundsChecker();
     this.draw(boundsChecker);
+		const scaleCoefficient = this.originalObject.getScaleCoefficient();
     var tr = this.transform;
     var arr_p_x = [];
     var arr_p_y = [];
@@ -502,10 +504,10 @@ MoveShapeImageTrack.prototype.getBounds = function()
     boundsChecker.Bounds.max_x = Math.max.apply(Math, arr_p_x);
     boundsChecker.Bounds.min_y = Math.min.apply(Math, arr_p_y);
     boundsChecker.Bounds.max_y = Math.max.apply(Math, arr_p_y);
-    boundsChecker.Bounds.posX = this.x;
-    boundsChecker.Bounds.posY = this.y;
-    boundsChecker.Bounds.extX =  this.originalObject.extX;
-    boundsChecker.Bounds.extY =  this.originalObject.extY;
+    boundsChecker.Bounds.posX = this.x / scaleCoefficient;
+    boundsChecker.Bounds.posY = this.y / scaleCoefficient;
+    boundsChecker.Bounds.extX =  this.originalObject.extX / scaleCoefficient;
+    boundsChecker.Bounds.extY =  this.originalObject.extY / scaleCoefficient;
     return boundsChecker.Bounds;
 };
 
@@ -580,10 +582,12 @@ function MoveGroupTrack(originalObject)
         {
             this.overlayObjects[i].draw(bounds_checker);
         }
-        bounds_checker.Bounds.posX = this.x;
-        bounds_checker.Bounds.posY = this.y;
-        bounds_checker.Bounds.extX = this.originalObject.extX;
-        bounds_checker.Bounds.extY = this.originalObject.extY;
+			const scaleCoefficient = this.originalObject.getScaleCoefficient();
+        bounds_checker.Bounds.posX = this.x / scaleCoefficient;
+        bounds_checker.Bounds.posY = this.y / scaleCoefficient;
+				//todo hz
+        bounds_checker.Bounds.extX = this.originalObject.extX / scaleCoefficient;
+        bounds_checker.Bounds.extY = this.originalObject.extY / scaleCoefficient;
         return bounds_checker.Bounds;
     };
 	this.checkDrawingPartWithHistory = function () {
@@ -604,9 +608,9 @@ function MoveGroupTrack(originalObject)
         AscFormat.CheckSpPrXfrm3(this.originalObject);
         var xfrm = this.originalObject.spPr.xfrm;
 
-
-        xfrm.setOffX(this.x);
-        xfrm.setOffY(this.y);
+			const scaleCoefficient = this.originalObject.getScaleCoefficient();
+        xfrm.setOffX(this.x / scaleCoefficient);
+        xfrm.setOffY(this.y / scaleCoefficient);
 
         if(bWord)
         {

@@ -200,11 +200,13 @@ StartAddNewShape.prototype =
                     drawing.Set_Distance( 3.2,  0,  3.2, 0 );
                     nearest_pos.Paragraph.Check_NearestPos(nearest_pos);
                     nearest_pos.Page = this.pageIndex;
-
-                    drawing.Set_XYForAdd(shape.x, shape.y, nearest_pos, this.pageIndex);
-                    drawing.AddToDocument(nearest_pos);
+										const x = shape.x;
+										const y = shape.y;
+									drawing.Parent = nearest_pos.Paragraph
                     drawing.CheckWH();
-                    let oAPI = this.drawingObjects.getEditorApi();
+									drawing.Set_XYForAdd(x, y, nearest_pos, this.pageIndex);
+									drawing.AddToDocument(nearest_pos);
+									let oAPI = this.drawingObjects.getEditorApi();
                     if(!oAPI.isDrawInkMode())
                     {
                         this.drawingObjects.resetSelection();

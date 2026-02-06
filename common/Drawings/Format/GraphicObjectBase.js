@@ -3518,6 +3518,7 @@
 			var dRot = AscFormat.normalizeRotate(dAngle);
 			oXfrm.setRot(dRot);
 			if (this.isObjectInSmartArt()) {
+				//todo
 				oSmartArt = this.group.group;
 				var point = this.getSmartArtShapePoint();
 				if (point) {

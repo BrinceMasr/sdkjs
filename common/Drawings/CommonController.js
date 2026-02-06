@@ -545,16 +545,17 @@
 				_x = 0.0;
 				_y = 0.0;
 			}
-			if (oXfrm.offX === null || !AscFormat.fApproxEqual(_x, oXfrm.offX, 0.01)) {
+			const scaleCoefficient = object.getScaleCoefficient();
+			if (oXfrm.offX === null || !AscFormat.fApproxEqual(_x, oXfrm.offX * scaleCoefficient, 0.01)) {
 				object.spPr.xfrm.setOffX(_x);
 			}
-			if (oXfrm.offY === null || !AscFormat.fApproxEqual(_y, oXfrm.offY, 0.01)) {
+			if (oXfrm.offY === null || !AscFormat.fApproxEqual(_y, oXfrm.offY * scaleCoefficient, 0.01)) {
 				object.spPr.xfrm.setOffY(_y);
 			}
-			if (oXfrm.extX === null || !AscFormat.fApproxEqual(object.extX, oXfrm.extX, 0.01)) {
+			if (oXfrm.extX === null || !AscFormat.fApproxEqual(object.extX, oXfrm.extX * scaleCoefficient, 0.01)) {
 				object.spPr.xfrm.setExtX(object.extX);
 			}
-			if (oXfrm.extY === null || !AscFormat.fApproxEqual(object.extY, oXfrm.extY, 0.01)) {
+			if (oXfrm.extY === null || !AscFormat.fApproxEqual(object.extY, oXfrm.extY * scaleCoefficient, 0.01)) {
 				object.spPr.xfrm.setExtY(object.extY);
 			}
 		}
