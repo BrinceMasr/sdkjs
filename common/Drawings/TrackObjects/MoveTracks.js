@@ -500,10 +500,10 @@ MoveShapeImageTrack.prototype.getBounds = function()
     arr_p_y.push(boundsChecker.Bounds.min_y);
     arr_p_y.push(boundsChecker.Bounds.max_y);
 
-    boundsChecker.Bounds.min_x = Math.min.apply(Math, arr_p_x);
-    boundsChecker.Bounds.max_x = Math.max.apply(Math, arr_p_x);
-    boundsChecker.Bounds.min_y = Math.min.apply(Math, arr_p_y);
-    boundsChecker.Bounds.max_y = Math.max.apply(Math, arr_p_y);
+    boundsChecker.Bounds.min_x = Math.min.apply(Math, arr_p_x) / scaleCoefficient;
+    boundsChecker.Bounds.max_x = Math.max.apply(Math, arr_p_x) / scaleCoefficient;
+    boundsChecker.Bounds.min_y = Math.min.apply(Math, arr_p_y) / scaleCoefficient;
+    boundsChecker.Bounds.max_y = Math.max.apply(Math, arr_p_y) / scaleCoefficient;
     boundsChecker.Bounds.posX = this.x / scaleCoefficient;
     boundsChecker.Bounds.posY = this.y / scaleCoefficient;
     boundsChecker.Bounds.extX =  this.originalObject.extX / scaleCoefficient;
@@ -577,15 +577,20 @@ function MoveGroupTrack(originalObject)
 
     this.getBounds = function()
     {
+			const scaleCoefficient = this.originalObject.getScaleCoefficient();
         var bounds_checker = new AscFormat.CSlideBoundsChecker();
         for(var i = 0; i < this.overlayObjects.length; ++i)
         {
             this.overlayObjects[i].draw(bounds_checker);
         }
-			const scaleCoefficient = this.originalObject.getScaleCoefficient();
+				const oBounds = bounds_checker.Bounds;
+				oBounds.min_x /= scaleCoefficient;
+				oBounds.min_y /= scaleCoefficient;
+				oBounds.max_x /= scaleCoefficient;
+				oBounds.max_y /= scaleCoefficient;
+
         bounds_checker.Bounds.posX = this.x / scaleCoefficient;
         bounds_checker.Bounds.posY = this.y / scaleCoefficient;
-				//todo hz
         bounds_checker.Bounds.extX = this.originalObject.extX / scaleCoefficient;
         bounds_checker.Bounds.extY = this.originalObject.extY / scaleCoefficient;
         return bounds_checker.Bounds;
@@ -922,15 +927,16 @@ function MoveChartObjectTrack(oObject, oChartSpace)
 
     this.getBounds = function ()
     {
+			const scaleCoefficient = this.chartSpace.getScaleCoefficient();
         var boundsChecker = new  AscFormat.CSlideBoundsChecker();
-        boundsChecker.Bounds.min_x = this.x;
-        boundsChecker.Bounds.max_x = this.x + oObject.extX;
-        boundsChecker.Bounds.min_y = this.y;
-        boundsChecker.Bounds.max_y = this.y + oObject.extY;
-        boundsChecker.Bounds.posX = this.x;
-        boundsChecker.Bounds.posY = this.y;
-        boundsChecker.Bounds.extX = oObject.extX;
-        boundsChecker.Bounds.extY = oObject.extY;
+        boundsChecker.Bounds.min_x = this.x / scaleCoefficient;
+        boundsChecker.Bounds.max_x = (this.x + oObject.extX) / scaleCoefficient;
+        boundsChecker.Bounds.min_y = this.y / scaleCoefficient;
+        boundsChecker.Bounds.max_y = (this.y + oObject.extY) / scaleCoefficient;
+        boundsChecker.Bounds.posX = this.x / scaleCoefficient;
+        boundsChecker.Bounds.posY = this.y / scaleCoefficient;
+        boundsChecker.Bounds.extX = oObject.extX / scaleCoefficient;
+        boundsChecker.Bounds.extY = oObject.extY / scaleCoefficient;
         return boundsChecker.Bounds;
     };
 	this.checkDrawingPartWithHistory = function () {};
