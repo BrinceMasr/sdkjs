@@ -1244,6 +1244,7 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
 
         this.getBounds = function()
         {
+					const scaleCoefficient = this.originalObject.getScaleCoefficient();
             var boundsChecker = new  AscFormat.CSlideBoundsChecker();
             var tr = null;
             if(this.originalObject && this.originalObject.parent)
@@ -1274,15 +1275,16 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
             arr_p_y.push(boundsChecker.Bounds.min_y);
             arr_p_y.push(boundsChecker.Bounds.max_y);
 
-            boundsChecker.Bounds.min_x = Math.min.apply(Math, arr_p_x);
-            boundsChecker.Bounds.max_x = Math.max.apply(Math, arr_p_x);
-            boundsChecker.Bounds.min_y = Math.min.apply(Math, arr_p_y);
-            boundsChecker.Bounds.max_y = Math.max.apply(Math, arr_p_y);
+            boundsChecker.Bounds.min_x = Math.min.apply(Math, arr_p_x) / scaleCoefficient;
+            boundsChecker.Bounds.max_x = Math.max.apply(Math, arr_p_x) / scaleCoefficient;
+            boundsChecker.Bounds.min_y = Math.min.apply(Math, arr_p_y) / scaleCoefficient;
+            boundsChecker.Bounds.max_y = Math.max.apply(Math, arr_p_y) / scaleCoefficient;
 
-            boundsChecker.Bounds.posX = this.resizedPosX;
-            boundsChecker.Bounds.posY = this.resizedPosY;
-            boundsChecker.Bounds.extX = this.resizedExtX;
-            boundsChecker.Bounds.extY = this.resizedExtY;
+
+            boundsChecker.Bounds.posX = this.resizedPosX / scaleCoefficient;
+            boundsChecker.Bounds.posY = this.resizedPosY / scaleCoefficient;
+            boundsChecker.Bounds.extX = this.resizedExtX / scaleCoefficient;
+            boundsChecker.Bounds.extY = this.resizedExtY / scaleCoefficient;
             return boundsChecker.Bounds;
         };
 
@@ -1529,7 +1531,6 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
                 }
             }
             else{
-							//todo
                 var _xfrm = this.originalObject.spPr.xfrm;
                 var _xfrm2 = this.oSpPr.xfrm;
                 _xfrm.setOffX(_xfrm2.offX);
@@ -2240,6 +2241,7 @@ function ResizeTrackGroup(originalObject, cardDirection, parentTrack)
         {
             var boundsChecker = new  AscFormat.CSlideBoundsChecker();
             this.draw(boundsChecker);
+					const scaleCoefficient = this.originalObject.getScaleCoefficient();
             var tr = this.transform;
             var arr_p_x = [];
             var arr_p_y = [];
@@ -2257,17 +2259,16 @@ function ResizeTrackGroup(originalObject, cardDirection, parentTrack)
             arr_p_y.push(boundsChecker.Bounds.min_y);
             arr_p_y.push(boundsChecker.Bounds.max_y);
 
-            boundsChecker.Bounds.min_x = Math.min.apply(Math, arr_p_x);
-            boundsChecker.Bounds.max_x = Math.max.apply(Math, arr_p_x);
-            boundsChecker.Bounds.min_y = Math.min.apply(Math, arr_p_y);
-            boundsChecker.Bounds.max_y = Math.max.apply(Math, arr_p_y);
+            boundsChecker.Bounds.min_x = Math.min.apply(Math, arr_p_x) / scaleCoefficient;
+            boundsChecker.Bounds.max_x = Math.max.apply(Math, arr_p_x) / scaleCoefficient;
+            boundsChecker.Bounds.min_y = Math.min.apply(Math, arr_p_y) / scaleCoefficient;
+            boundsChecker.Bounds.max_y = Math.max.apply(Math, arr_p_y) / scaleCoefficient;
 
+            boundsChecker.Bounds.posX = this.resizedPosX / scaleCoefficient;
+            boundsChecker.Bounds.posY = this.resizedPosY / scaleCoefficient;
 
-            boundsChecker.Bounds.posX = this.resizedPosX;
-            boundsChecker.Bounds.posY = this.resizedPosY;
-
-            boundsChecker.Bounds.extX = this.resizedExtX;
-            boundsChecker.Bounds.extY = this.resizedExtY;
+            boundsChecker.Bounds.extX = this.resizedExtX / scaleCoefficient;
+            boundsChecker.Bounds.extY = this.resizedExtY / scaleCoefficient;
 
             return boundsChecker.Bounds;
         };
@@ -2395,10 +2396,6 @@ function ShapeForResizeInGroup(originalObject, parentTrack)
             this.x = this.centerDistX*kw + this.parentTrack.extX*0.5 - this.extX*0.5;
             this.y = this.centerDistY*kh + this.parentTrack.extY*0.5 - this.extY*0.5;
 
-           //if(this.geometry)
-           //{
-           //    this.geometry.Recalculate(this.extX, this.extY);
-           //}
             this.overlayObject.updateExtents(this.extX, this.extY);
             this.transform.Reset();
             var t = this.transform;
@@ -2424,10 +2421,11 @@ function ShapeForResizeInGroup(originalObject, parentTrack)
 
         this.getBounds = function()
         {
+					const scaleCoefficient = this.originalObject.getScaleCoefficient();
             var bounds_checker = new  AscFormat.CSlideBoundsChecker();
             bounds_checker.init(Page_Width, Page_Height, Page_Width, Page_Height);
             this.draw(bounds_checker);
-            return {l: bounds_checker.Bounds.min_x, t: bounds_checker.Bounds.min_y, r: bounds_checker.Bounds.max_x , b: bounds_checker.Bounds.max_y};
+            return {l: bounds_checker.Bounds.min_x / scaleCoefficient, t: bounds_checker.Bounds.min_y / scaleCoefficient, r: bounds_checker.Bounds.max_x / scaleCoefficient , b: bounds_checker.Bounds.max_y / scaleCoefficient};
         };
 
         this.trackEnd = function()
@@ -2468,26 +2466,6 @@ function ShapeForResizeInGroup(originalObject, parentTrack)
             xfrm.setExtY(this.extY / scaleCoefficient);
 
             this.originalObject.ResetParametersWithResize();
-        };
-
-        this.updateTransform = function()
-        {
-            this.transform.Reset();
-            var t = this.transform;
-
-            global_MatrixTransformer.TranslateAppend(t, -this.extX*0.5, -this.extY*0.5);
-            if(this.flipH)
-            {
-                global_MatrixTransformer.ScaleAppend(t, -1, 1);
-            }
-            if(this.flipV)
-            {
-                global_MatrixTransformer.ScaleAppend(t, 1, -1);
-            }
-            global_MatrixTransformer.RotateRadAppend(t, -this.rot);
-            global_MatrixTransformer.TranslateAppend(t, this.x + this.extX*0.5, this.y+this.extY*0.5);
-            if(this.parentTrack)
-                global_MatrixTransformer.MultiplyAppend(t, this.parentTrack.transform);
         };
 	    this.checkDrawingPartWithHistory = function () {};
     }, this, []);
