@@ -1688,6 +1688,8 @@ ParaDrawing.prototype.Set_XYForAdd = function(X, Y, NearPos, PageNum)
 {
 	if (null !== NearPos)
 	{
+		const OldParent = this.Parent;
+		this.Parent = NearPos.Paragraph;
 		var Layout = NearPos.Paragraph.Get_Layout(NearPos.ContentPos, this);
 		this.private_SetXYByLayout(X, Y, PageNum, Layout, true, true);
 
@@ -1708,6 +1710,7 @@ ParaDrawing.prototype.Set_XYForAdd = function(X, Y, NearPos, PageNum)
 
 		Layout = NearPos.Paragraph.Get_Layout(NearPos.ContentPos, this);
 		this.private_SetXYByLayout(X, Y, PageNum, Layout, true, true);
+		this.Parent = OldParent;
 	}
 };
 ParaDrawing.prototype.SetSkipOnRecalculate = function(isSkip)

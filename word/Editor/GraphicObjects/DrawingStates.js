@@ -205,7 +205,6 @@ StartAddNewShape.prototype =
 										shape.spPr.xfrm.setExtY(shape.spPr.xfrm.extY / scaleCoefficient);
 										const x = shape.x / scaleCoefficient;
 										const y = shape.y / scaleCoefficient;
-									drawing.SetParent(nearest_pos.Paragraph);
                     drawing.CheckWH();
 									drawing.Set_XYForAdd(x, y, nearest_pos, this.pageIndex);
 									drawing.AddToDocument(nearest_pos);
@@ -1873,7 +1872,6 @@ RotateState.prototype =
                                     originalCopy.CopyComments();
                                     original.Remove_FromDocument(false);
                                     aNearestPos[i].Paragraph.Check_NearestPos(aNearestPos[i]);
-
                                     originalCopy.Set_XYForAdd(bounds.posX, bounds.posY, aNearestPos[i], pageIndex);
                                     originalCopy.AddToDocument(aNearestPos[i], null, oOriginalRun);
 
