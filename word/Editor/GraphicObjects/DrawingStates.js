@@ -200,9 +200,12 @@ StartAddNewShape.prototype =
                     drawing.Set_Distance( 3.2,  0,  3.2, 0 );
                     nearest_pos.Paragraph.Check_NearestPos(nearest_pos);
                     nearest_pos.Page = this.pageIndex;
-										const x = shape.x;
-										const y = shape.y;
-									drawing.Parent = nearest_pos.Paragraph
+										const scaleCoefficient = nearest_pos.Paragraph.getLayoutScaleCoefficient();
+										shape.spPr.xfrm.setExtX(shape.spPr.xfrm.extX / scaleCoefficient);
+										shape.spPr.xfrm.setExtY(shape.spPr.xfrm.extY / scaleCoefficient);
+										const x = shape.x / scaleCoefficient;
+										const y = shape.y / scaleCoefficient;
+									drawing.SetParent(nearest_pos.Paragraph);
                     drawing.CheckWH();
 									drawing.Set_XYForAdd(x, y, nearest_pos, this.pageIndex);
 									drawing.AddToDocument(nearest_pos);
@@ -2517,9 +2520,11 @@ MoveInGroupState.prototype =
             this.group.recalculate();
             const posX = posObject.posX;
             const posY = posObject.posY;
+						const scaleCoefficient = this.group.getScaleCoefficient();
+						const groupPosX = this.group.posX / scaleCoefficient;
+						const groupPosY = this.group.posY / scaleCoefficient;
             this.group.spPr.xfrm.setOffX(0);
             this.group.spPr.xfrm.setOffY(0);
-
             if(this.group.parent.Is_Inline())
             {
                 this.group.parent.CheckWH();
@@ -2540,7 +2545,7 @@ MoveInGroupState.prototype =
                 {
                     pageNum = 0;
                 }
-                this.group.parent.Set_XY(this.group.posX + posX, this.group.posY + posY, parentParagraph, pageNum, false);
+                this.group.parent.Set_XY(groupPosX + posX, groupPosY + posY, parentParagraph, pageNum, false);
             }
             this.drawingObjects.document.Recalculate();
             this.drawingObjects.document.FinalizeAction();
