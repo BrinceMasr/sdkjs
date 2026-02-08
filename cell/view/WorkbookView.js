@@ -5992,7 +5992,17 @@
 							if (editor !== AscCommon.c_oEditorId.Spreadsheet) {
 								continue;
 							}
-							const oMockWb = wb ? wb : t.model;
+							const oMockWb = wb;
+							if (!wb) {
+								wb = new AscCommonExcel.Workbook(null, window["Asc"]["editor"], false);
+								wb.DrawingDocument = Asc.editor.wbModel.DrawingDocument;
+							}
+
+							wb.sharedStrings.all = [];
+							wb.sharedStrings.text = Object.create(null);
+							wb.sharedStrings.multiTextMap = Object.create(null);
+							wb.sharedStrings.bssr = null;
+
 							let updatedData = oMockWb.getExternalReferenceSheetsFromZip(stream);
 							_updateData(updatedData, _arrAfterPromise[i].data, t.model /* working file workbook */);
 						}
