@@ -6643,11 +6643,6 @@ background-repeat: no-repeat;\
 		this.SelectedObjectsStack[this.SelectedObjectsStack.length] = new asc_CSelectedObject(c_oAscTypeSelectElement.Hyperlink, new Asc.CHyperlinkProperty(hyperProp));
 	};
 
-	asc_docs_api.prototype.sync_HyperlinkClickCallback = function(Url)
-	{
-		this.sendEvent("asc_onHyperlinkClick", Url);
-	};
-
 	asc_docs_api.prototype.sync_CanAddHyperlinkCallback = function(bCanAdd)
 	{
 		//if ( true === CollaborativeEditing.Get_GlobalLock() )

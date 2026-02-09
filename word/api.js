@@ -7069,6 +7069,18 @@ background-repeat: no-repeat;\
 
 	asc_docs_api.prototype.sync_HyperlinkClickCallback = function(Url)
 	{
+		if (typeof Url === 'string' && Url[0] === '#') {
+			const logicDocument = this.WordControl && this.WordControl.m_oLogicDocument;
+			if (logicDocument) {
+				const bookmarkName = Url.substring(1);
+				if (bookmarkName === '_top') {
+					logicDocument.MoveCursorToStartOfDocument();
+				} else {
+					logicDocument.GoToBookmark(bookmarkName, true);
+				}
+			}
+			return;
+		}
 		this.sendEvent("asc_onHyperlinkClick", Url);
 	};
 
