@@ -11816,6 +11816,18 @@ background-repeat: no-repeat;\
 		this.WordControl.EndUpdateOverlay();
 	};
 
+	asc_docs_api.prototype.asc_SetSignatureProps = function(signatureResult)
+	{
+		if (!signatureResult || !signatureResult.formObj)
+			return;
+
+		const formObj = signatureResult.formObj;
+		const oControl = formObj.get_Obj ? formObj.get_Obj() : formObj["obj"];
+		if (!oControl)
+			return;
+
+	};
+
 	asc_docs_api.prototype.asc_BeginViewModeInReview = function(isFinal)
 	{
 		this.asc_SetDisplayModeInReview(isFinal ? Asc.c_oAscDisplayModeInReview.Final : Asc.c_oAscDisplayModeInReview.Original);
@@ -15466,6 +15478,7 @@ background-repeat: no-repeat;\
 	asc_docs_api.prototype["asc_GetContentControlRightAnchorPosition"]  = asc_docs_api.prototype.asc_GetContentControlRightAnchorPosition;
 	asc_docs_api.prototype["asc_GetContentControlBoundingRect"]         = asc_docs_api.prototype.asc_GetContentControlBoundingRect;
 	asc_docs_api.prototype["asc_UncheckContentControlButtons"]          = asc_docs_api.prototype.asc_UncheckContentControlButtons;
+	asc_docs_api.prototype["asc_SetSignatureProps"]                     = asc_docs_api.prototype.asc_SetSignatureProps;
 	asc_docs_api.prototype['asc_SetGlobalContentControlHighlightColor'] = asc_docs_api.prototype.asc_SetGlobalContentControlHighlightColor;
 	asc_docs_api.prototype['asc_GetGlobalContentControlHighlightColor'] = asc_docs_api.prototype.asc_GetGlobalContentControlHighlightColor;
 	asc_docs_api.prototype['asc_SetGlobalContentControlShowHighlight']  = asc_docs_api.prototype.asc_SetGlobalContentControlShowHighlight;

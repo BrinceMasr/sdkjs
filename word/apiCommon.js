@@ -2658,6 +2658,862 @@
 		this.Rows = (nRows > 1) ? nRows : 1;
 	};
 
+	//----------------------------------------------------------
+	// CSignatureFormProps
+	//----------------------------------------------------------
+	function CSignatureFormProps(api, formObj)
+	{
+		this.Api = api;
+		this.FormObj = formObj;       // CButtonData object from asc_onShowContentControlsActions
+
+		// Upload state
+		this.ImageUrl = null;
+		this.RemoveBackground = false;
+		this.PreviewImgId = null;
+		this.ProcessedCanvas = null;  // offscreen canvas, full resolution, with/without background
+
+		// Draw state
+		this.PreviewDrawId = null;
+		this.DrawCanvas = null;
+		this.DrawCtx = null;
+		this.LineSize = 2;
+		this.LineColor = "#000000";
+		this.IsDrawing = false;
+		this.LastX = 0;
+		this.LastY = 0;
+		this.DrawPaths = [];       // array of stroke path arrays
+		this.CurrentPath = null;
+		this.UndoStack = [];
+		this.RedoStack = [];
+
+		// Type state
+		this.PreviewTypeId = null;
+		this.TypeText = "";
+		this.TypeFont = "Arial";
+		this.TypeFontSize = 11;
+		this.TypeBold = false;
+		this.TypeItalic = false;
+	}
+
+	// ---- Preview div setters ----
+
+	CSignatureFormProps.prototype.put_PreviewImgId = function(divId)
+	{
+		this.PreviewImgId = divId;
+	};
+	CSignatureFormProps.prototype.put_PreviewDrawId = function(divId)
+	{
+		this.PreviewDrawId = divId;
+	};
+	CSignatureFormProps.prototype.put_PreviewTypeId = function(divId)
+	{
+		this.PreviewTypeId = divId;
+	};
+
+	// ---- Update view (call after tab switch to init canvas) ----
+
+	CSignatureFormProps.prototype.updateView = function(mode)
+	{
+		if (mode === 0)
+		{
+			// Upload tab — process and render image preview
+			if (this.ImageUrl)
+			{
+				if (!this.ProcessedCanvas)
+					this._processImage();
+				this._renderImagePreview();
+			}
+		}
+		else if (mode === 1)
+		{
+			// Draw tab — init canvas if not yet created, then redraw
+			this._initDrawCanvas();
+			this._redrawAllPaths();
+		}
+		else if (mode === 2)
+		{
+			// Type tab — re-render type preview
+			this._renderTypePreview();
+		}
+	};
+
+	// ---- Upload mode methods ----
+
+	CSignatureFormProps.prototype.showFileDialog = function()
+	{
+		const t = this.Api;
+		const _this = this;
+		if (!t)
+			return;
+
+		AscCommon.ShowImageFileDialog(t.documentId, t.documentUserId, t.CoAuthoringApi.get_jwt(),
+			t.documentShardKey, t.documentWopiSrc, t.documentUserSessionId, function(error, files)
+		{
+			if (Asc.c_oAscError.ID.No !== error)
+			{
+				t.sendEvent("asc_onError", error, Asc.c_oAscError.Level.NoCritical);
+			}
+			else
+			{
+				t.sync_StartAction(Asc.c_oAscAsyncActionType.BlockInteraction, Asc.c_oAscAsyncAction.UploadImage);
+				AscCommon.UploadImageFiles(files, t.documentId, t.documentUserId, t.CoAuthoringApi.get_jwt(),
+					t.documentShardKey, t.documentWopiSrc, t.documentUserSessionId, function(error, urls)
+				{
+					if (Asc.c_oAscError.ID.No !== error)
+					{
+						t.sendEvent("asc_onError", error, Asc.c_oAscError.Level.NoCritical);
+						t.sync_EndAction(Asc.c_oAscAsyncActionType.BlockInteraction, Asc.c_oAscAsyncAction.UploadImage);
+					}
+					else
+					{
+						t.ImageLoader.LoadImagesWithCallback(urls, function()
+						{
+							if (urls.length > 0)
+							{
+								_this.ImageUrl = urls[0];
+								t.sendEvent("asc_onSignatureImageLoaded");
+							}
+							t.sync_EndAction(Asc.c_oAscAsyncActionType.BlockInteraction, Asc.c_oAscAsyncAction.UploadImage);
+						});
+					}
+				});
+			}
+		});
+	};
+
+	CSignatureFormProps.prototype.put_ImageUrl = function(sUrl, token)
+	{
+		const _this = this;
+		const t = this.Api;
+		if (!t)
+			return;
+
+		AscCommon.sendImgUrls(t, [sUrl], function(data)
+		{
+			if (data && data[0] && data[0].url !== "error")
+			{
+				const url = AscCommon.g_oDocumentUrls.imagePath2Local(data[0].path);
+				t.ImageLoader.LoadImagesWithCallback([AscCommon.getFullImageSrc2(url)], function()
+				{
+					_this.ImageUrl = url;
+					t.sendEvent("asc_onSignatureImageLoaded");
+				});
+			}
+		}, undefined, token);
+	};
+
+	CSignatureFormProps.prototype.put_RemoveBackground = function(val)
+	{
+		this.RemoveBackground = val;
+		this._processImage();
+		this._renderImagePreview();
+	};
+
+	CSignatureFormProps.prototype.clearImg = function()
+	{
+		this.ImageUrl = null;
+		this.ProcessedCanvas = null;
+		if (this.PreviewImgId)
+		{
+			const oCanvas = AscCommon.checkCanvasInDiv(this.PreviewImgId);
+			if (oCanvas)
+			{
+				const ctx = oCanvas.getContext('2d');
+				ctx.clearRect(0, 0, oCanvas.width, oCanvas.height);
+			}
+		}
+	};
+
+	CSignatureFormProps.prototype._processImage = function()
+	{
+		this.ProcessedCanvas = null;
+		if (!this.ImageUrl || !this.Api)
+			return;
+
+		const _img = this.Api.ImageLoader.map_image_index[AscCommon.getFullImageSrc2(this.ImageUrl)];
+		if (!_img || !_img.Image || _img.Status === AscFonts.ImageLoadStatus.Loading)
+			return;
+
+		const nW = Math.max(_img.Image.width, 1);
+		const nH = Math.max(_img.Image.height, 1);
+
+		const oCanvas = document.createElement('canvas');
+		oCanvas.width = nW;
+		oCanvas.height = nH;
+		const ctx = oCanvas.getContext('2d');
+		ctx.drawImage(_img.Image, 0, 0, nW, nH);
+
+		if (this.RemoveBackground)
+		{
+			const oData = ctx.getImageData(0, 0, nW, nH);
+			const px = oData.data;
+			const nThreshold = 240;
+			for (let i = 0; i < px.length; i += 4)
+			{
+				if (px[i] >= nThreshold && px[i + 1] >= nThreshold && px[i + 2] >= nThreshold)
+					px[i + 3] = 0;
+			}
+			ctx.putImageData(oData, 0, 0);
+		}
+
+		this.ProcessedCanvas = oCanvas;
+	};
+
+	CSignatureFormProps.prototype._renderImagePreview = function()
+	{
+		if (!this.PreviewImgId)
+			return;
+
+		const oCanvas = AscCommon.checkCanvasInDiv(this.PreviewImgId);
+		if (!oCanvas)
+			return;
+
+		const oContext = oCanvas.getContext('2d');
+		oContext.clearRect(0, 0, oCanvas.width, oCanvas.height);
+
+		if (!this.ProcessedCanvas)
+			return;
+
+		const nSrcW = this.ProcessedCanvas.width;
+		const nSrcH = this.ProcessedCanvas.height;
+		const rPR = AscCommon.AscBrowser.retinaPixelRatio;
+		const nLogicW = oCanvas.width / rPR;
+		const nLogicH = oCanvas.height / rPR;
+
+		let _w, _h;
+		if (nSrcW <= nLogicW && nSrcH <= nLogicH)
+		{
+			// image fits in logical area — draw at original size scaled to canvas
+			_w = nSrcW * rPR;
+			_h = nSrcH * rPR;
+		}
+		else
+		{
+			// image larger — scale down keeping aspect ratio
+			const dAspect2 = nSrcW / nSrcH;
+
+			_w = oCanvas.width;
+			_h = oCanvas.height;
+			if (oCanvas.width / oCanvas.height >= dAspect2)
+			{
+				_w = dAspect2 * oCanvas.height;
+			}
+			else
+			{
+				_h = _w / dAspect2;
+			}
+		}
+		const _x = (oCanvas.width - _w) / 2;
+		const _y = (oCanvas.height - _h) / 2;
+
+		this._drawCheckerboard(oContext, _x, _y, _w, _h);
+		oContext.drawImage(this.ProcessedCanvas, _x, _y, _w, _h);
+	};
+
+	CSignatureFormProps.prototype._drawCheckerboard = function(ctx, x, y, w, h)
+	{
+		const nCell = 8;
+		const cLight = "#ffffff";
+		const cDark = "#e0e0e0";
+
+		ctx.save();
+		ctx.beginPath();
+		ctx.rect(x, y, w, h);
+		ctx.clip();
+
+		for (let row = 0; row * nCell < h; row++)
+		{
+			for (let col = 0; col * nCell < w; col++)
+			{
+				ctx.fillStyle = ((row + col) % 2 === 0) ? cLight : cDark;
+				ctx.fillRect(x + col * nCell, y + row * nCell, nCell, nCell);
+			}
+		}
+		ctx.restore();
+	};
+
+	// ---- Draw mode methods ----
+
+	CSignatureFormProps.prototype._initDrawCanvas = function()
+	{
+		if (this.DrawCanvas || !this.PreviewDrawId)
+			return;
+
+		const oCanvas = AscCommon.checkCanvasInDiv(this.PreviewDrawId);
+		if (!oCanvas)
+			return;
+
+		oCanvas.style.cursor = 'crosshair';
+		oCanvas.style.touchAction = 'none';
+		this.DrawCanvas = oCanvas;
+		this.DrawCtx = oCanvas.getContext('2d');
+		this.DrawCtx.lineCap = 'round';
+		this.DrawCtx.lineJoin = 'round';
+
+		const _this = this;
+		oCanvas.addEventListener('mousedown',  function(e) { _this._onDrawStart(e); });
+		oCanvas.addEventListener('mousemove',  function(e) { _this._onDrawMove(e); });
+		oCanvas.addEventListener('mouseup',    function(e) { _this._onDrawEnd(e); });
+		oCanvas.addEventListener('mouseleave', function(e) { _this._onDrawEnd(e); });
+
+		oCanvas.addEventListener('touchstart', function(e) { e.preventDefault(); _this._onDrawStart(e); }, {passive: false});
+		oCanvas.addEventListener('touchmove',  function(e) { e.preventDefault(); _this._onDrawMove(e); },  {passive: false});
+		oCanvas.addEventListener('touchend',   function(e) { e.preventDefault(); _this._onDrawEnd(e); });
+		oCanvas.addEventListener('touchcancel', function(e) { _this._onDrawEnd(e); });
+	};
+
+	CSignatureFormProps.prototype._getDrawPos = function(e)
+	{
+		let clientX, clientY;
+		if (e.touches && e.touches.length > 0)
+		{
+			clientX = e.touches[0].clientX;
+			clientY = e.touches[0].clientY;
+		}
+		else if (e.changedTouches && e.changedTouches.length > 0)
+		{
+			clientX = e.changedTouches[0].clientX;
+			clientY = e.changedTouches[0].clientY;
+		}
+		else
+		{
+			clientX = e.clientX;
+			clientY = e.clientY;
+		}
+		const rect = this.DrawCanvas.getBoundingClientRect();
+		const scaleX = this.DrawCanvas.width / rect.width;
+		const scaleY = this.DrawCanvas.height / rect.height;
+		return {
+			x: (clientX - rect.left) * scaleX,
+			y: (clientY - rect.top) * scaleY
+		};
+	};
+
+	CSignatureFormProps.prototype._onDrawStart = function(e)
+	{
+		this.IsDrawing = true;
+		const pos = this._getDrawPos(e);
+		this.CurrentPath = [{x: pos.x, y: pos.y, size: this.LineSize, color: this.LineColor}];
+		this.RedoStack = [];
+	};
+
+	CSignatureFormProps.prototype._onDrawMove = function(e)
+	{
+		if (!this.IsDrawing)
+			return;
+
+		const pos = this._getDrawPos(e);
+		const prev = this.CurrentPath[this.CurrentPath.length - 1];
+		const dx = pos.x - prev.x;
+		const dy = pos.y - prev.y;
+		if (dx * dx + dy * dy < 9)
+			return;
+
+		this.CurrentPath.push({x: pos.x, y: pos.y});
+
+		// redraw all finished paths + current path smoothly
+		this._redrawAllPaths();
+		this._drawSmoothPath(this.CurrentPath);
+	};
+
+	CSignatureFormProps.prototype._onDrawEnd = function(e)
+	{
+		if (!this.IsDrawing)
+			return;
+		this.IsDrawing = false;
+		if (this.CurrentPath && this.CurrentPath.length > 1)
+		{
+			this.DrawPaths.push(this.CurrentPath);
+			this.UndoStack.push(this.CurrentPath);
+		}
+		this.CurrentPath = null;
+	};
+
+	CSignatureFormProps.prototype._drawSmoothPath = function(path)
+	{
+		if (!this.DrawCtx || !path || path.length < 2)
+			return;
+
+		const ctx = this.DrawCtx;
+		ctx.strokeStyle = path[0].color || this.LineColor;
+		ctx.lineWidth = path[0].size || this.LineSize;
+		ctx.beginPath();
+		ctx.moveTo(path[0].x, path[0].y);
+
+		if (path.length === 2)
+		{
+			ctx.lineTo(path[1].x, path[1].y);
+		}
+		else
+		{
+			for (let i = 1; i < path.length - 1; i++)
+			{
+				const mx = (path[i].x + path[i + 1].x) / 2;
+				const my = (path[i].y + path[i + 1].y) / 2;
+				ctx.quadraticCurveTo(path[i].x, path[i].y, mx, my);
+			}
+			const last = path[path.length - 1];
+			ctx.lineTo(last.x, last.y);
+		}
+		ctx.stroke();
+	};
+
+	CSignatureFormProps.prototype._redrawAllPaths = function()
+	{
+		if (!this.DrawCtx || !this.DrawCanvas)
+			return;
+
+		this.DrawCtx.clearRect(0, 0, this.DrawCanvas.width, this.DrawCanvas.height);
+		for (let i = 0; i < this.DrawPaths.length; i++)
+		{
+			this._drawSmoothPath(this.DrawPaths[i]);
+		}
+	};
+
+	CSignatureFormProps.prototype.put_LineSize = function(value)
+	{
+		this.LineSize = value;
+	};
+
+	CSignatureFormProps.prototype.put_LineColor = function(color)
+	{
+		if (typeof color === "string")
+		{
+			this.LineColor = color;
+		}
+		else if (color && undefined !== color.r && undefined !== color.g && undefined !== color.b)
+		{
+			this.LineColor = "#" + color.r.toString(16).padStart(2, '0') +
+			                       color.g.toString(16).padStart(2, '0') +
+			                       color.b.toString(16).padStart(2, '0');
+		}
+	};
+
+	CSignatureFormProps.prototype.clearDraw = function()
+	{
+		if (this.DrawPaths.length === 0)
+			return;
+		this.UndoStack.push({type: 'clear', paths: this.DrawPaths.slice()});
+		this.DrawPaths = [];
+		this.RedoStack = [];
+		this._redrawAllPaths();
+	};
+
+	CSignatureFormProps.prototype.undo = function()
+	{
+		if (this.UndoStack.length === 0)
+			return;
+		const item = this.UndoStack.pop();
+		if (item.type === 'clear')
+		{
+			this.DrawPaths = item.paths;
+		}
+		else
+		{
+			const idx = this.DrawPaths.indexOf(item);
+			if (idx !== -1)
+				this.DrawPaths.splice(idx, 1);
+		}
+		this.RedoStack.push(item);
+		this._redrawAllPaths();
+	};
+
+	CSignatureFormProps.prototype.redo = function()
+	{
+		if (this.RedoStack.length === 0)
+			return;
+		const item = this.RedoStack.pop();
+		if (item.type === 'clear')
+		{
+			this.DrawPaths = [];
+		}
+		else
+		{
+			this.DrawPaths.push(item);
+		}
+		this.UndoStack.push(item);
+		this._redrawAllPaths();
+	};
+
+	// ---- Type mode methods ----
+
+	CSignatureFormProps.prototype.put_TypeFont = function(name)
+	{
+		this.TypeFont = name;
+
+		const loader = AscCommon.g_font_loader;
+		const fontinfo = g_fontApplication.GetFontInfo(name);
+		const _this = this;
+		const isAsync = loader.LoadFont(fontinfo, function() {
+			_this.Api.sync_EndAction(Asc.c_oAscAsyncActionType.Information, Asc.c_oAscAsyncAction.LoadFont);
+			_this._renderTypePreview();
+		});
+
+		if (isAsync)
+		{
+			this.Api.sync_StartAction(Asc.c_oAscAsyncActionType.Information, Asc.c_oAscAsyncAction.LoadFont);
+		}
+		else
+		{
+			this._renderTypePreview();
+		}
+	};
+
+	CSignatureFormProps.prototype.put_TypeFontSize = function(size)
+	{
+		this.TypeFontSize = size;
+		this._renderTypePreview();
+	};
+
+	CSignatureFormProps.prototype.put_TypeBold = function(val)
+	{
+		this.TypeBold = val;
+		this._renderTypePreview();
+	};
+
+	CSignatureFormProps.prototype.put_TypeItalic = function(val)
+	{
+		this.TypeItalic = val;
+		this._renderTypePreview();
+	};
+
+	CSignatureFormProps.prototype.setText = function(text)
+	{
+		this.TypeText = text;
+		this._renderTypePreview();
+	};
+
+	CSignatureFormProps.prototype.clearType = function()
+	{
+		this.TypeText = "";
+		this._renderTypePreview();
+	};
+
+	CSignatureFormProps.prototype._renderTypePreview = function()
+	{
+		if (!this.PreviewTypeId)
+			return;
+
+		const oCanvas = AscCommon.checkCanvasInDiv(this.PreviewTypeId);
+		if (!oCanvas)
+			return;
+
+		const ctx = oCanvas.getContext('2d');
+		ctx.clearRect(0, 0, oCanvas.width, oCanvas.height);
+
+		if (!this.TypeText || !this.Api)
+			return;
+
+		const _this = this;
+		AscFonts.FontPickerByCharacter.checkText(this.TypeText, this, function()
+		{
+			_this._drawTypeContent(oCanvas);
+		});
+	};
+
+	CSignatureFormProps.prototype._drawTypeContent = function(oCanvas)
+	{
+		const ctx = oCanvas.getContext('2d');
+		ctx.clearRect(0, 0, oCanvas.width, oCanvas.height);
+
+		const oLogicDocument = this.Api.WordControl.m_oLogicDocument;
+		if (!oLogicDocument)
+			return;
+
+		const hdr = new CHeaderFooter(oLogicDocument.HdrFtr, oLogicDocument, this.Api.WordControl.m_oDrawingDocument, AscCommon.hdrftr_Header);
+		const _dc = hdr.Content;
+
+		const par = new AscWord.Paragraph(_dc, false);
+		const run = new ParaRun(par, false);
+		run.AddText(this.TypeText);
+
+		const textPr = new CTextPr();
+		textPr.FontFamily = {Name: this.TypeFont, Index: -1};
+		textPr.FontSize = this.TypeFontSize;
+		textPr.Bold = this.TypeBold;
+		textPr.Italic = this.TypeItalic;
+		textPr.Color = new CDocumentColor(0, 0, 0, false);
+		run.Set_Pr(textPr);
+
+		_dc.Internal_Content_Add(0, par, false);
+		par.Add_ToContent(0, run);
+
+		const _ind = new CParaInd();
+		_ind.FirstLine = 0;
+		_ind.Left = 0;
+		_ind.Right = 0;
+		par.Set_Ind(_ind, false);
+
+		const _sp = new AscWord.ParaSpacing();
+		_sp.Line = 1;
+		_sp.LineRule = Asc.linerule_Auto;
+		_sp.Before = 0;
+		_sp.BeforeAutoSpacing = false;
+		_sp.After = 0;
+		_sp.AfterAutoSpacing = false;
+		par.Set_Spacing(_sp, false);
+
+		// measure text width
+		_dc.Reset(0, 0, 10000, 10000);
+		_dc.Recalculate_Page(0, true);
+
+		const contentW = par.getRange(0, 0).W;
+
+		_dc.Reset(0, 0, contentW + AscWord.EPSILON, 10000);
+		_dc.Recalculate_Page(0, true);
+
+		// render
+		const graphics = new AscCommon.CGraphics();
+		const rPR = AscCommon.AscBrowser.retinaPixelRatio;
+		const koef = AscCommon.g_dKoef_pix_to_mm / rPR;
+		graphics.init(ctx, oCanvas.width, oCanvas.height, oCanvas.width * koef, oCanvas.height * koef);
+		graphics.m_oFontManager = AscCommon.g_fontManager;
+
+		const wMM = oCanvas.width * koef;
+		const hMM = oCanvas.height * koef;
+		const line = par.Lines[0];
+		const contentH = line.Bottom - line.Top;
+		const xOff = (wMM - contentW) / 2;
+		const yOff = (hMM - contentH) / 2 - line.Top;
+
+		graphics.transform(1, 0, 0, 1, 0, 0);
+		graphics.save();
+		graphics._s();
+		graphics._m(0, 0);
+		graphics._l(wMM, 0);
+		graphics._l(wMM, hMM);
+		graphics._l(0, hMM);
+		graphics._z();
+		graphics.clip();
+
+		par.Shift(0, xOff, yOff);
+		par.Draw(0, graphics);
+
+		graphics.restore();
+	};
+
+	// ---- Result methods ----
+
+	CSignatureFormProps.prototype._getFieldSizeMM = function()
+	{
+		const oControl = this.FormObj ? this.FormObj.get_Obj() : null;
+		if (!oControl || !oControl.Paragraph || !oControl.Paragraph.Parent)
+			return null;
+
+		const parentShape = oControl.Paragraph.Parent.Is_DrawingShape(true);
+		if (!parentShape)
+			return null;
+
+		return {
+			w: parentShape.getXfrmExtX(),
+			h: parentShape.getXfrmExtY()
+		};
+	};
+
+	CSignatureFormProps.prototype._fitToField = function(srcCanvas)
+	{
+		if (!srcCanvas)
+			return null;
+
+		const fieldMM = this._getFieldSizeMM();
+		if (!fieldMM)
+			return srcCanvas.toDataURL("image/png");
+
+		const nDPI = 150;
+		const nMMToInch = 25.4;
+		const maxW = Math.ceil(fieldMM.w / nMMToInch * nDPI * 2);
+		const maxH = Math.ceil(fieldMM.h / nMMToInch * nDPI * 2);
+
+		if (srcCanvas.width <= maxW && srcCanvas.height <= maxH)
+			return srcCanvas.toDataURL("image/png");
+
+		// scale down keeping aspect ratio
+		const dAspect = srcCanvas.width / srcCanvas.height;
+		let nW = maxW;
+		let nH = maxH;
+		if (nW / nH >= dAspect)
+			nW = Math.round(nH * dAspect);
+		else
+			nH = Math.round(nW / dAspect);
+
+		const oCanvas = document.createElement('canvas');
+		oCanvas.width = nW;
+		oCanvas.height = nH;
+		const ctx = oCanvas.getContext('2d');
+		ctx.drawImage(srcCanvas, 0, 0, nW, nH);
+		return oCanvas.toDataURL("image/png");
+	};
+
+	CSignatureFormProps.prototype.getResult = function()
+	{
+		let imageData = null;
+		const mode = this.ImageUrl ? 0 : (this.DrawPaths.length > 0 ? 1 : 2);
+
+		switch (mode)
+		{
+			case 0:
+				if (this.RemoveBackground && this.ProcessedCanvas)
+					imageData = this._fitToField(this.ProcessedCanvas);
+				else
+					imageData = this.ImageUrl;
+				break;
+			case 1:
+				imageData = this._getDrawImageData();
+				break;
+			case 2:
+				imageData = this._getTypeImageData();
+				break;
+		}
+
+		return {
+			mode: mode,
+			imageData: imageData,
+			formObj: this.FormObj
+		};
+	};
+
+	CSignatureFormProps.prototype._getDrawImageData = function()
+	{
+		if (!this.DrawCanvas || this.DrawPaths.length === 0)
+			return null;
+
+		// bounding box from path points + line width padding
+		let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+		for (let i = 0; i < this.DrawPaths.length; i++)
+		{
+			const path = this.DrawPaths[i];
+			const half = (path[0].size || this.LineSize) / 2;
+			for (let j = 0; j < path.length; j++)
+			{
+				if (path[j].x - half < minX) minX = path[j].x - half;
+				if (path[j].y - half < minY) minY = path[j].y - half;
+				if (path[j].x + half > maxX) maxX = path[j].x + half;
+				if (path[j].y + half > maxY) maxY = path[j].y + half;
+			}
+		}
+
+		minX = Math.max(0, Math.floor(minX));
+		minY = Math.max(0, Math.floor(minY));
+		maxX = Math.min(this.DrawCanvas.width, Math.ceil(maxX));
+		maxY = Math.min(this.DrawCanvas.height, Math.ceil(maxY));
+
+		const w = maxX - minX;
+		const h = maxY - minY;
+		if (w <= 0 || h <= 0)
+			return null;
+
+		const oCanvas = document.createElement('canvas');
+		oCanvas.width = w;
+		oCanvas.height = h;
+		const ctx = oCanvas.getContext('2d');
+		ctx.drawImage(this.DrawCanvas, minX, minY, w, h, 0, 0, w, h);
+		return this._fitToField(oCanvas);
+	};
+
+	CSignatureFormProps.prototype._getTypeImageData = function()
+	{
+		if (!this.TypeText || !this.Api)
+			return null;
+
+		const oLogicDocument = this.Api.WordControl.m_oLogicDocument;
+		if (!oLogicDocument)
+			return null;
+
+		const hdr = new CHeaderFooter(oLogicDocument.HdrFtr, oLogicDocument, this.Api.WordControl.m_oDrawingDocument, AscCommon.hdrftr_Header);
+		const _dc = hdr.Content;
+
+		const par = new AscWord.Paragraph(_dc, false);
+		const run = new ParaRun(par, false);
+		run.AddText(this.TypeText);
+
+		const textPr = new CTextPr();
+		textPr.FontFamily = {Name: this.TypeFont, Index: -1};
+		textPr.FontSize = this.TypeFontSize;
+		textPr.Bold = this.TypeBold;
+		textPr.Italic = this.TypeItalic;
+		textPr.Color = new CDocumentColor(0, 0, 0, false);
+		run.Set_Pr(textPr);
+
+		_dc.Internal_Content_Add(0, par, false);
+		par.Add_ToContent(0, run);
+
+		const _ind = new CParaInd();
+		_ind.FirstLine = 0;
+		_ind.Left = 0;
+		_ind.Right = 0;
+		par.Set_Ind(_ind, false);
+
+		const _sp = new AscWord.ParaSpacing();
+		_sp.Line = 1;
+		_sp.LineRule = Asc.linerule_Auto;
+		_sp.Before = 0;
+		_sp.BeforeAutoSpacing = false;
+		_sp.After = 0;
+		_sp.AfterAutoSpacing = false;
+		par.Set_Spacing(_sp, false);
+
+		// measure
+		_dc.Reset(0, 0, 10000, 10000);
+		_dc.Recalculate_Page(0, true);
+
+		const contentW = par.getRange(0, 0).W;
+
+		_dc.Reset(0, 0, contentW + AscWord.EPSILON, 10000);
+		_dc.Recalculate_Page(0, true);
+
+		const line = par.Lines[0];
+		const contentH = line.Bottom - line.Top;
+
+		const rPR = AscCommon.AscBrowser.retinaPixelRatio;
+		const koef = AscCommon.g_dKoef_pix_to_mm / rPR;
+		const pxW = Math.ceil(contentW / koef);
+		const pxH = Math.ceil(contentH / koef);
+		if (pxW <= 0 || pxH <= 0)
+			return null;
+
+		const oCanvas = document.createElement('canvas');
+		oCanvas.width = pxW;
+		oCanvas.height = pxH;
+
+		const graphics = new AscCommon.CGraphics();
+		graphics.init(oCanvas.getContext('2d'), pxW, pxH, contentW, contentH);
+		graphics.m_oFontManager = AscCommon.g_fontManager;
+
+		graphics.transform(1, 0, 0, 1, 0, 0);
+		graphics.save();
+
+		par.Shift(0, 0, -line.Top);
+		par.Draw(0, graphics);
+
+		graphics.restore();
+		return this._fitToField(oCanvas);
+	};
+
+	// ---- Export ----
+
+	window['Asc']['CSignatureFormProps'] = window['Asc'].CSignatureFormProps = CSignatureFormProps;
+	var prot = CSignatureFormProps.prototype;
+	prot['put_PreviewImgId']    = prot.put_PreviewImgId;
+	prot['put_PreviewDrawId']   = prot.put_PreviewDrawId;
+	prot['put_PreviewTypeId']   = prot.put_PreviewTypeId;
+	prot['updateView']          = prot.updateView;
+	prot['showFileDialog']      = prot.showFileDialog;
+	prot['put_ImageUrl']        = prot.put_ImageUrl;
+	prot['put_RemoveBackground'] = prot.put_RemoveBackground;
+	prot['clearImg']            = prot.clearImg;
+	prot['put_LineSize']        = prot.put_LineSize;
+	prot['put_LineColor']       = prot.put_LineColor;
+	prot['clearDraw']           = prot.clearDraw;
+	prot['undo']                = prot.undo;
+	prot['redo']                = prot.redo;
+	prot['put_TypeFont']        = prot.put_TypeFont;
+	prot['put_TypeFontSize']    = prot.put_TypeFontSize;
+	prot['put_TypeBold']        = prot.put_TypeBold;
+	prot['put_TypeItalic']      = prot.put_TypeItalic;
+	prot['setText']             = prot.setText;
+	prot['clearType']           = prot.clearType;
+	prot['getResult']           = prot.getResult;
+
 	window['Asc']['CAscTextToTableProperties']				 = window['Asc'].CAscTextToTableProperties = CAscTextToTableProperties;
 	CAscTextToTableProperties.prototype['get_Size']			 = CAscTextToTableProperties.prototype.get_Size;
 	CAscTextToTableProperties.prototype['put_RowsCount']	 = CAscTextToTableProperties.prototype.put_RowsCount;
