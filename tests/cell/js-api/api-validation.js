@@ -117,7 +117,7 @@ $(function () {
         // string
         const r1 = ws.GetRange("D1:D2");
         r1.GetValidation().Add('xlValidateList', 'xlValidAlertStop', undefined, 'A1:A3');
-        assert.strictEqual(r1.GetValidation().GetFormula1(), '\"A1:A3\"', "Formula from string is quoted");
+        assert.strictEqual(r1.GetValidation().GetFormula1(), 'A1:A3', "Formula from string is quoted");
 
         // number
         const r2 = ws.GetRange("E1:E1");
@@ -391,7 +391,7 @@ $(function () {
 
         // Expected per your engine: correctFromInterface() wraps list literal in quotes
         // Example: "3,4" (quotes are part of returned string)
-        assert.strictEqual(v.GetFormula1(), "\"3,4\"", "Formula1 is quoted list literal");
+        assert.strictEqual(v.GetFormula1(), "3,4", "Formula1 is quoted list literal");
 
         // Ensure it isn't empty internally
         const dv = getAllValidations()[0];

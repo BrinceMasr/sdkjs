@@ -4212,43 +4212,7 @@
       }
   };
     WorkbookView.prototype.handleDrawingsOnWorkbookChange = function (aRanges) {
-        if(!Array.isArray(aRanges) || aRanges.length === 0) {
-            return;
-        }
-        var aChartRefsToChange = [];
-        var aCharts = [];
-				let bHandled = false;
-				const fDrawingCallback = function(oDrawing) {
-					switch (oDrawing.getObjectType()) {
-						case AscDFH.historyitem_type_ChartSpace: {
-							const nPrevLength = aChartRefsToChange.length;
-							oDrawing.collectIntersectionRefs(aRanges, aChartRefsToChange);
-							if(aChartRefsToChange.length > nPrevLength) {
-								aCharts.push(oDrawing);
-								bHandled = true;
-							}
-							break;
-						}
-						case AscDFH.historyitem_type_Control: {
-							bHandled |= oDrawing.handleChangeRanges(aRanges);
-							break;
-						}
-						default: {
-							break;
-						}
-					}
-				};
-			this.model.handleDrawings(fDrawingCallback);
-			this.Api.frameManager.handleMainDiagram(fDrawingCallback);
-        if(aChartRefsToChange.length > 0) {
-            for(var nRef = 0; nRef < aChartRefsToChange.length; ++nRef) {
-                aChartRefsToChange[nRef].updateCacheAndCat();
-            }
-            for(var nChart = 0; nChart < aCharts.length; ++nChart) {
-                aCharts[nChart].recalculate();
-            }
-            this.onShowDrawingObjects();
-        }
+				const bHandled = this.model.handleDrawingsOnWorkbookChange(aRanges);
 				if (bHandled) {
 					this.onShowDrawingObjects();
 				}

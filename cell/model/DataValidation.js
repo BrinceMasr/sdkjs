@@ -167,10 +167,28 @@
 			}
 		}
 
+		const toListPreview = function (data) {
+			const parts = data.val
+				.split(/[,]/g)
+				.map(function (s) {
+					return s.trim();
+				})
+				.filter(Boolean);
+
+			if (parts.length > 1) {
+				t.asc_setValue(parts.join(AscCommon.FormulaSeparators.functionArgumentSeparator));
+				return;
+			}
+
+			t.asc_setValue((parts[0] || data.val).trim());
+		}
+
 		// fix the text from quotes
 		data = normalizeText(data)
 		if (data.isNum) {
 			fromNumberToString(data);
+		} else if (oValidation.type === Asc.EDataValidationType.List) {
+			toListPreview(data);
 		} else {
 			if (this && this._formula) {
 				//если формула содержит ссылки на диапазоны, то в зависимости от активной области нужно их сдвинуть
@@ -1169,6 +1187,21 @@
 				if (isDate) {
 					_formula.text = isDate.value;
 					return;
+				}
+
+				if (t.type === Asc.EDataValidationType.List && typeof _formula.text === "string" && _formula.text[0] !== "=") {
+					const uiSep = AscCommon.FormulaSeparators.functionArgumentSeparator;
+					const defSep = AscCommon.FormulaSeparators.functionArgumentSeparatorDef;
+
+					if (uiSep && defSep && uiSep !== defSep) {
+						_formula.text = _formula.text
+							.split(uiSep)
+							.map(function(s) {
+								return s.trim();
+							})
+							.filter(Boolean)
+							.join(defSep);
+					}
 				}
 
 				if (!isFormula) {
