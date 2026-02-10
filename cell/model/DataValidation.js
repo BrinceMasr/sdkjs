@@ -75,10 +75,13 @@
 			this._formula.buildDependencies();
 		}
 	};
-	CDataFormula.prototype.clone = function () {
+	CDataFormula.prototype.clone = function (fullClone) {
 		var res = new CDataFormula();
 		res.text = this.text;
 		//this._formula = null;
+		if (fullClone && this._formula) {
+			res._formula = this._formula.clone();
+		}
 		return res;
 	};
 	CDataFormula.prototype.onFormulaEvent = function (type, eventData) {
