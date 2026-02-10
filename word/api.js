@@ -11825,7 +11825,7 @@ background-repeat: no-repeat;\
 		const oControl = formObj.get_Obj ? formObj.get_Obj() : formObj["obj"];
 		if (!oControl)
 			return;
-
+		this.asc_SetContentControlPictureUrl(signatureResult.imageData, oControl.Get_Id(), null);
 	};
 
 	asc_docs_api.prototype.asc_BeginViewModeInReview = function(isFinal)

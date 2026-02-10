@@ -2995,6 +2995,7 @@
 		const pos = this._getDrawPos(e);
 		this.CurrentPath = [{x: pos.x, y: pos.y, size: this.LineSize, color: this.LineColor}];
 		this.RedoStack = [];
+		this._fireUndoRedoChanged();
 	};
 
 	CSignatureFormProps.prototype._onDrawMove = function(e)
@@ -3025,6 +3026,7 @@
 		{
 			this.DrawPaths.push(this.CurrentPath);
 			this.UndoStack.push(this.CurrentPath);
+			this._fireUndoRedoChanged();
 		}
 		this.CurrentPath = null;
 	};
@@ -3097,6 +3099,7 @@
 		this.DrawPaths = [];
 		this.RedoStack = [];
 		this._redrawAllPaths();
+		this._fireUndoRedoChanged();
 	};
 
 	CSignatureFormProps.prototype.undo = function()
@@ -3116,6 +3119,7 @@
 		}
 		this.RedoStack.push(item);
 		this._redrawAllPaths();
+		this._fireUndoRedoChanged();
 	};
 
 	CSignatureFormProps.prototype.redo = function()
@@ -3133,6 +3137,23 @@
 		}
 		this.UndoStack.push(item);
 		this._redrawAllPaths();
+		this._fireUndoRedoChanged();
+	};
+
+	CSignatureFormProps.prototype.asc_canUndo = function()
+	{
+		return this.UndoStack.length > 0;
+	};
+
+	CSignatureFormProps.prototype.asc_canRedo = function()
+	{
+		return this.RedoStack.length > 0;
+	};
+
+	CSignatureFormProps.prototype._fireUndoRedoChanged = function()
+	{
+		Asc.editor.sendEvent("asc_CanUndoSignature", this.asc_canUndo());
+		Asc.editor.sendEvent("asc_CanRedoSignature", this.asc_canRedo());
 	};
 
 	// ---- Type mode methods ----
@@ -3506,6 +3527,8 @@
 	prot['clearDraw']           = prot.clearDraw;
 	prot['undo']                = prot.undo;
 	prot['redo']                = prot.redo;
+	prot['asc_canUndo']         = prot.asc_canUndo;
+	prot['asc_canRedo']         = prot.asc_canRedo;
 	prot['put_TypeFont']        = prot.put_TypeFont;
 	prot['put_TypeFontSize']    = prot.put_TypeFontSize;
 	prot['put_TypeBold']        = prot.put_TypeBold;
