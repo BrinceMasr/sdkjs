@@ -3532,6 +3532,7 @@ CGraphicObjects.prototype =
 						}
 						else if(cur_group.spTree.length === 1)
 						{
+							const scaleCoefficient = cur_group.getScaleCoefficient();
 							sp = cur_group.spTree[0];
 							hc = sp.spPr.xfrm.extX/2;
 							vc = sp.spPr.xfrm.extY/2;
@@ -3539,8 +3540,8 @@ CGraphicObjects.prototype =
 							yc = sp.transform.TransformPointY(hc, vc);
 							rel_xc = cur_group.group.invertTransform.TransformPointX(xc, yc);
 							rel_yc = cur_group.group.invertTransform.TransformPointY(xc, yc);
-							sp.spPr.xfrm.setOffX(rel_xc - hc);
-							sp.spPr.xfrm.setOffY(rel_yc - vc);
+							sp.spPr.xfrm.setOffX((rel_xc - hc) / scaleCoefficient);
+							sp.spPr.xfrm.setOffY((rel_yc - vc) / scaleCoefficient);
 							sp.spPr.xfrm.setRot(AscFormat.normalizeRotate(cur_group.rot + sp.rot));
 							sp.spPr.xfrm.setFlipH(cur_group.spPr.xfrm.flipH === true ? !(sp.spPr.xfrm.flipH === true) : sp.spPr.xfrm.flipH === true);
 							sp.spPr.xfrm.setFlipV(cur_group.spPr.xfrm.flipV === true ? !(sp.spPr.xfrm.flipV === true) : sp.spPr.xfrm.flipV === true);
@@ -3558,6 +3559,7 @@ CGraphicObjects.prototype =
 					else
 					{
 						var para_drawing = cur_group.parent;
+						const scaleCoefficient = para_drawing.GetScaleCoefficient();
 						if(cur_group.spTree.length === 0)
 						{
 							para_drawing.GoToText();
@@ -3568,40 +3570,10 @@ CGraphicObjects.prototype =
 						}
 							return true;
 						}
-						else if(cur_group.spTree.length === 1)
-						{
-							sp = cur_group.spTree[0];
-							sp.spPr.xfrm.setOffX(0);
-							sp.spPr.xfrm.setOffY(0);
-							sp.spPr.xfrm.setRot(AscFormat.normalizeRotate(cur_group.rot + sp.rot));
-							sp.spPr.xfrm.setFlipH(cur_group.spPr.xfrm.flipH === true ? !(sp.spPr.xfrm.flipH === true) : sp.spPr.xfrm.flipH === true);
-							sp.spPr.xfrm.setFlipV(cur_group.spPr.xfrm.flipV === true ? !(sp.spPr.xfrm.flipV === true) : sp.spPr.xfrm.flipV === true);
-							sp.setGroup(null);
-							para_drawing.Set_GraphicObject(sp);
-							sp.setParent(para_drawing);
-							if (cur_group.selected || sp.selected) {
-								this.resetSelection();
-								this.selectObject(sp, cur_group.selectStartPage);
-							}
-							new_x = sp.transform.tx;
-							new_y = sp.transform.ty;
-							para_drawing.CheckWH();
-							if(!para_drawing.Is_Inline())
-							{
-								para_drawing.Set_XY(new_x, new_y, para_drawing.Get_ParentParagraph(), para_drawing.GraphicObj.selectStartPage, true);
-							}
-							return true;
-						}
 						else
 						{
-							if (this.selection.groupSelection === cur_group) {
-								this.resetInternalSelection();
-							}
-							var new_x, new_y;
-							// var pos = cur_group.getBoundsPos();
-							var oPos = cur_group.updateCoordinatesAfterInternalResize();
-
-							var g_pos_x = 0, g_pos_y = 0;
+							const oPos = cur_group.updateCoordinatesAfterInternalResize();
+							let g_pos_x = 0, g_pos_y = 0;
 							if(oPos)
 							{
 								if(AscFormat.isRealNumber(oPos.posX))
@@ -3613,14 +3585,41 @@ CGraphicObjects.prototype =
 									g_pos_y = oPos.posY;
 								}
 							}
-							new_x = cur_group.x + g_pos_x;
-							new_y = cur_group.y + g_pos_y;
-
-							cur_group.spPr.xfrm.setOffX(0);
-							cur_group.spPr.xfrm.setOffY(0);
-							para_drawing.CheckWH();
-							para_drawing.Set_XY(new_x, new_y, cur_group.parent.Get_ParentParagraph(), cur_group.selectStartPage, false);//X, Y, Paragraph, PageNum, bResetAlign
-							return true;
+							const new_x = cur_group.x / scaleCoefficient + g_pos_x;
+							const new_y = cur_group.y / scaleCoefficient + g_pos_y;
+							if(cur_group.spTree.length === 1)
+							{
+								sp = cur_group.spTree[0];
+								sp.spPr.xfrm.setOffX(0);
+								sp.spPr.xfrm.setOffY(0);
+								sp.spPr.xfrm.setRot(AscFormat.normalizeRotate(cur_group.rot + sp.rot));
+								sp.spPr.xfrm.setFlipH(cur_group.spPr.xfrm.flipH === true ? !(sp.spPr.xfrm.flipH === true) : sp.spPr.xfrm.flipH === true);
+								sp.spPr.xfrm.setFlipV(cur_group.spPr.xfrm.flipV === true ? !(sp.spPr.xfrm.flipV === true) : sp.spPr.xfrm.flipV === true);
+								sp.setGroup(null);
+								para_drawing.Set_GraphicObject(sp);
+								sp.setParent(para_drawing);
+								if (cur_group.selected || sp.selected) {
+									this.resetSelection();
+									this.selectObject(sp, cur_group.selectStartPage);
+								}
+								para_drawing.CheckWH();
+								if(!para_drawing.Is_Inline())
+								{
+									para_drawing.Set_XY(new_x, new_y, para_drawing.Get_ParentParagraph(), para_drawing.GraphicObj.selectStartPage, true);
+								}
+								return true;
+							}
+							else
+							{
+								if (this.selection.groupSelection === cur_group) {
+									this.resetInternalSelection();
+								}
+								cur_group.spPr.xfrm.setOffX(0);
+								cur_group.spPr.xfrm.setOffY(0);
+								para_drawing.CheckWH();
+								para_drawing.Set_XY(new_x, new_y, cur_group.parent.Get_ParentParagraph(), cur_group.selectStartPage, false);//X, Y, Paragraph, PageNum, bResetAlign
+								return true;
+							}
 						}
 					}
 				}
