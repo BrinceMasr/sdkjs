@@ -2132,8 +2132,9 @@ CGraphicObjects.prototype =
                         drawing.Set_Distance(groupParaDrawing.Distance.L, groupParaDrawing.Distance.T, groupParaDrawing.Distance.R, groupParaDrawing.Distance.B);
                         drawing.Set_WrappingType(groupParaDrawing.wrappingType);
                         drawing.Set_BehindDoc(groupParaDrawing.behindDoc);
-                        drawing.Set_PositionH(groupParaDrawing.PositionH.RelativeFrom, groupParaDrawing.PositionH.Align, groupParaDrawing.PositionH.Value + selectedObjects[i].bounds.x, groupParaDrawing.PositionH.Percent);
-                        drawing.Set_PositionV(groupParaDrawing.PositionV.RelativeFrom, groupParaDrawing.PositionV.Align, groupParaDrawing.PositionV.Value + selectedObjects[i].bounds.y, groupParaDrawing.PositionV.Percent);
+												const scaleCoefficient = groupParaDrawing.GetScaleCoefficient();
+                        drawing.Set_PositionH(groupParaDrawing.PositionH.RelativeFrom, groupParaDrawing.PositionH.Align, groupParaDrawing.PositionH.Value + selectedObjects[i].bounds.x / scaleCoefficient, groupParaDrawing.PositionH.Percent);
+                        drawing.Set_PositionV(groupParaDrawing.PositionV.RelativeFrom, groupParaDrawing.PositionV.Align, groupParaDrawing.PositionV.Value + selectedObjects[i].bounds.y / scaleCoefficient, groupParaDrawing.PositionV.Percent);
                     }
                     run.Add_ToContent(run.State.ContentPos, drawing, true, false);
                     para.Internal_Content_Add(para.CurPos.ContentPos, run, true);
@@ -2162,7 +2163,7 @@ CGraphicObjects.prototype =
                         drawing.setExtent(oDr.Extent.W, oDr.Extent.H)
                     }
                     drawing.GraphicObj.setParent(drawing);
-                    drawing.GraphicObj.setTransformParams(0, 0, oSp.extX, oSp.extY, oSp.rot, oSp.flipH, oSp.flipV);
+                    drawing.GraphicObj.setTransformParams(0, 0, oDr.Extent.W, oDr.Extent.H, oSp.rot, oSp.flipH, oSp.flipV);
                     //drawing.CheckWH();
 					drawing.Set_ParaMath(oDr.ParaMath);
                     drawing.docPr.setFromOther(oDr.docPr);
