@@ -9778,6 +9778,13 @@ var editor;
 								sProps.formulaWithoutBorders, sProps.formulaColumnWidth, sProps.pasteOnlyValues,
 								sProps.valueNumberFormat, sProps.valueAllFormating, sProps.pasteOnlyFormating, sProps.comments,
 								sProps.columnWidth];
+
+						//if (!isTablePasted) {
+							//add transpose property
+							allowedSpecialPasteProps.push(sProps.transpose);
+							allowedSpecialPasteProps.push(sProps.link);
+						//}
+
 						_specialPasteShowOptions.asc_setShowPasteSpecial(true);
 					} else {
 						allowedSpecialPasteProps = [sProps.sourceformatting, sProps.destinationFormatting];
@@ -9797,10 +9804,6 @@ var editor;
 					return;
 					// 	if (isAllowPasteLink(pasteInfo.wb)) {
 					// 		allowedSpecialPasteProps.push(sProps.link);
-					// 	}
-					// 	if (!isTablePasted) {
-					// 		//add transpose property
-					// 		allowedSpecialPasteProps.push(sProps.transpose);
 					// 	}
 				}
 				let _html = data[AscCommon.c_oAscClipboardDataFormat.Html];
