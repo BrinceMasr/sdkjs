@@ -3216,8 +3216,9 @@ CGraphicObjects.prototype =
                 for(j = 0; j < sp_tree.length; ++j)
                 {
                     sp = sp_tree[j];
-                    xc = sp.transform.TransformPointX(sp.extX/2, sp.extY/2);
-                    yc = sp.transform.TransformPointY(sp.extX/2, sp.extY/2);
+										const scaleCoefficient = sp.getScaleCoefficient();
+                    xc = sp.transform.TransformPointX(sp.extX/2, sp.extY/2) / scaleCoefficient;
+                    yc = sp.transform.TransformPointY(sp.extX/2, sp.extY/2) / scaleCoefficient;
                     aPos.push({xc: xc, yc: yc});
                 }
                 arrCenterPos.push(aPos);
@@ -3250,15 +3251,16 @@ CGraphicObjects.prototype =
                 {
                     sp = sp_tree[j];
                     drawing = new ParaDrawing(0, 0, sp_tree[j], this.drawingDocument, null, null);
-
-                    var xc, yc, hc = sp.extX/2, vc = sp.extY/2;
+									const scaleCoefficient = sp.getScaleCoefficient();
+                    var xc, yc, hc = sp.extX/2 / scaleCoefficient, vc = sp.extY/2 / scaleCoefficient;
                     if(aPos && aPos[j]){
                         xc = aPos[j].xc;
                         yc = aPos[j].yc;
                     }
                     else {
-                        xc = sp.transform.TransformPointX(hc, vc);
-                        yc = sp.transform.TransformPointY(hc, vc);
+
+                        xc = sp.transform.TransformPointX(hc, vc) / scaleCoefficient;
+                        yc = sp.transform.TransformPointY(hc, vc) / scaleCoefficient;
                     }
 
                     drawing.Set_GraphicObject(sp);
