@@ -1715,11 +1715,13 @@
 			this.specialPasteProps = null;
 			this.bSaveFormat = false;
 			//процесс специальной вставки заканчивается вместе с общей вставкой
-			if(this.specialPasteStart && !this.updateClipboardData)
+			if(this.specialPasteStart)
 			{
 				this.Special_Paste_End();
 				//TODO только для презентаций! проверить на остальных редакторах!
-				if(!this.buttonInfo.isClean()){
+				if (this.updateClipboardData) {
+					this.SpecialPasteButton_Show();
+				} else if(!this.buttonInfo.isClean()){
 					this.buttonInfo.asc_setOptions(null);
 					this.Api.asc_ShowSpecialPasteButton(this.buttonInfo);
 				}
