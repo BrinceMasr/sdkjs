@@ -6892,11 +6892,12 @@
 						arrDrawings = this.getArrayForGrouping();
 					if (arrDrawings.length < 2)
 						return null;
+					const scaleCoefficient = arrDrawings[0].getScaleCoefficient();
 					var bounds = this.getBoundsForGroup(arrDrawings);
-					var max_x = bounds.r;
-					var max_y = bounds.b;
-					var min_x = bounds.l;
-					var min_y = bounds.t;
+					var max_x = bounds.r / scaleCoefficient;
+					var max_y = bounds.b / scaleCoefficient;
+					var min_x = bounds.l / scaleCoefficient;
+					var min_y = bounds.t / scaleCoefficient;
 					var group = new AscFormat.CGroupShape();
 					group.setSpPr(new AscFormat.CSpPr());
 					group.spPr.setParent(group);
@@ -6913,8 +6914,8 @@
 					xfrm.setChOffY(0);
 					for (var i = 0; i < arrDrawings.length; ++i) {
 						CheckSpPrXfrm(arrDrawings[i]);
-						arrDrawings[i].spPr.xfrm.setOffX(arrDrawings[i].x - min_x);
-						arrDrawings[i].spPr.xfrm.setOffY(arrDrawings[i].y - min_y);
+						arrDrawings[i].spPr.xfrm.setOffX(arrDrawings[i].x / scaleCoefficient - min_x);
+						arrDrawings[i].spPr.xfrm.setOffY(arrDrawings[i].y / scaleCoefficient - min_y);
 						arrDrawings[i].setGroup(group);
 						group.addToSpTree(group.spTree.length, arrDrawings[i]);
 					}
