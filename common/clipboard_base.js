@@ -1212,6 +1212,7 @@
 		Get_Clipboard_Data : function(callback)
 		{
 			if (!navigator.clipboard) {
+				callback && callback(null);
 				return false;
 			}
 
@@ -1260,16 +1261,19 @@
 									paste_data[c_oAscClipboardDataFormat.Text] = value;
 								})
 								.then(function(){
-									callback(paste_data);
+									callback && callback(paste_data);
 								})
 								.catch(function(e){
+									callback && callback(null);
 								});
 						})
 						.catch(function(e){
+							callback && callback(null);
 						});
 
 					return true;
 				} catch (e) {
+					callback && callback(null);
 					return false;
 				}
 			});
