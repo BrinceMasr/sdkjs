@@ -1288,9 +1288,13 @@
 					AscCommon.g_specialPasteHelper.specialPasteData._format = _format;
 					AscCommon.g_specialPasteHelper.specialPasteData.data1 = _data1 ? _data1 : data1;
 					AscCommon.g_specialPasteHelper.specialPasteData.data2 = _data2 ? _data2 : data2;
-					AscCommon.g_specialPasteHelper.specialPasteData.text_data = _text_data ? _text_data : text_data;
+					AscCommon.g_specialPasteHelper.specialPasteData.text_data = _text_data;
 					callback();
 				};
+
+				if (!paste_data) {
+					_callback();
+				}
 
 				if (undefined !== paste_data[AscCommon.c_oAscClipboardDataFormat.Image]) {
 					AscCommon.g_specialPasteHelper.specialPasteData.images = [paste_data[AscCommon.c_oAscClipboardDataFormat.Image]];
