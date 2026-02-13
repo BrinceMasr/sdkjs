@@ -74,7 +74,7 @@
             this.CheckFormViewWindow();
 
         oGraphicsWord.AddClipRect(this.contentClipRect.X, this.contentClipRect.Y, this.contentClipRect.W, this.contentClipRect.H);
-        oContentToDraw.Draw(0, oGraphicsWord);
+        oContentToDraw.Draw(oContentToDraw.GetAbsolutePage(), oGraphicsWord);
         // redraw target cursor if field is selected
         if (oDoc.activeForm == this && oContentToDraw.IsSelectionUse() == false && this.IsCanEditText())
             oContentToDraw.RecalculateCurPos();
@@ -89,7 +89,7 @@
         if (this.IsNeedRecalc() == false)
             return;
 
-        if (!this.contentClipRect) {
+        if (!this.contentClipRect || !this.content.Recalculated) {
             this.RecalculateContentRect();
         }
         
@@ -142,7 +142,7 @@
         let contentYFormat  = Y * g_dKoef_pt_to_mm + (nHeight * g_dKoef_pt_to_mm - nContentHFormat) / 2;
 
         if (contentX != this.content.X || contentY != this.content.Y ||
-        contentXLimit != this.content.XLimit || contentYFormat != this.contentFormat.Y) {
+        contentXLimit != this.content.XLimit || contentYFormat != this.contentFormat.Y || !this.content.Recalculated || !this.contentFormat.Recalculated) {
             this.content.X      = this.contentFormat.X = contentX;
             this.content.Y      = contentY;
             this.contentFormat.Y= contentYFormat;

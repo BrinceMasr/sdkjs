@@ -43,6 +43,8 @@ function (window, undefined) {
 	const c_oAscAsyncActionType = Asc.c_oAscAsyncActionType;
 	const c_oAscAsyncAction = Asc.c_oAscAsyncAction;
 	const parserHelp = AscCommon.parserHelp;
+	const cElementType = AscCommonExcel.cElementType;
+	const findLastOperandId = AscCommonExcel.findLastOperandId;
 
 	// Collections for UI Solver feature
 	/** @enum {number} */
@@ -935,6 +937,32 @@ function (window, undefined) {
 	}
 
 	/**
+	 * Returns the full name of the reference link in format '<NameSheet>'!$A$1
+	 * @param {string} sValue
+	 * @param {Workbook} oWb
+	 * @returns {string}
+	 */
+	function getFullRefLinkName (sValue, oWb) {
+		let oWs = oWb.getActiveWs();
+		const oDefName = oWb.getDefinesNames(sValue);
+
+		if (oDefName) {
+			sValue = oDefName.ref;
+		}
+		if (!!~sValue.indexOf('!')) {
+			const sWsName = sValue.split('!')[0];
+			oWs = oWb.getWorksheetByName(sWsName);
+		}
+		const oRange = oWs.getRange2(sValue);
+		if (!oRange) {
+			return sValue;
+		}
+		const sWsName = !!~oWs.getName().search(/[\W\s]/) ? "'" + oWs.getName() + "'" : oWs.getName();
+
+		return sWsName + '!' + oRange.getName();
+	}
+
+	/**
 	 * Adds Def names ranges according to the values of the Solver params and options.
 	 * @memberof asc_CSolverParams
 	 * @param {Workbook} oWbModel
@@ -970,6 +998,9 @@ function (window, undefined) {
 			if (aMaxLimitsAttrs.includes(sDefName) && !ref) {
 				ref = DEFAULT_VALUE;
 			}
+			if (oCellType[sDefName]) {
+				ref = getFullRefLinkName(ref, oWbModel);
+			}
 			let oNewDefName = new Asc.asc_CDefName(sDefName, String(ref), nWsId, undefined, true, undefined, undefined, true);
 			if ((oOldDefName && oOldDefName.Ref !== oNewDefName.Ref) || !oOldDefName) {
 				oWbModel.editDefinesNames(oOldDefName, oNewDefName);
@@ -990,6 +1021,10 @@ function (window, undefined) {
 			'solver_abj': Asc.c_oAscSelectionDialogType.Solver_VariableCell
 		}
 		const nNoError = Asc.c_oAscError.ID.No;
+		const oCellType = {
+			'solver_opt': true,
+			'solver_adj': true,
+		}
 
 		// Finds existed defined names for the solver.
 		if (aWsDefNames.length) {
@@ -1022,8 +1057,8 @@ function (window, undefined) {
 			let nIndex = 1;
 			updateDefName('solver_num', mConstraints.size);
 			mConstraints.forEach(function (constraint) {
-				updateDefName('solver_lhs' + nIndex, constraint['cellRef']);
-				updateDefName('solver_rhs' + nIndex, constraint['constraint']);
+				updateDefName('solver_lhs' + nIndex, getFullRefLinkName(constraint['cellRef'], oWbModel));
+				updateDefName('solver_rhs' + nIndex, getFullRefLinkName(constraint['constraint'], oWbModel));
 				updateDefName('solver_rel' + nIndex, constraint['operator']);
 				nIndex++;
 			});
@@ -1507,10 +1542,10 @@ function (window, undefined) {
 		this.asc_setShowIterResults(false);
 		this.asc_setIgnoreIntConstraints(false);
 		this.asc_setIntOptimal('1');
-		this.asc_setMaxTime('2147483647');
-		this.asc_setIterations('2147483647');
-		this.asc_setMaxSubproblems('2147483647');
-		this.asc_setMaxFeasibleSolution('2147483647');
+		this.asc_setMaxTime('');
+		this.asc_setIterations('');
+		this.asc_setMaxSubproblems('');
+		this.asc_setMaxFeasibleSolution('');
 		this.asc_setConvergence('0.0001');
 		this.asc_setDerivatives(c_oAscDerivativeType.forward);
 		this.asc_setMultistart(false);
@@ -2229,27 +2264,38 @@ function (window, undefined) {
 		const aArgsFormula = getArgsFormula(oParserFormula.outStack, true);
 		const oModel = this.getModel();
 		const oVarsBbox = this.getVariables().getBBox0();
+		const nMainFuncIndex = findLastOperandId(oParserFormula.outStack, function (oElement) {
+			return oElement.type && (oElement.type === cElementType.func || oElement.type === cElementType.operator);
+		});
+		const oCalcType = oParserFormula.outStack[nMainFuncIndex];
 		/** @type {Cell[]} */
 		const aSortedFormulaArgs = [];
 
-		let nCoefficient;
-		let bHasOnlyVars = true;
+		let nCoefficient = 1;
+		let bHasOnlyVarCells = true;
 		let bHasVariableCell = false;
-		let bVariableCellFound = false;
+		let sOperand = '';
+		let bVarCellIsDividend = false;
 
-		aArgsFormula.forEach(function (oArgCell) {
-			if(!bVariableCellFound && oVarsBbox.contains(oArgCell.nCol, oArgCell.nRow)) {
-				bHasVariableCell = true;
-				bVariableCellFound = true;
-			}
-			if (!oVarsBbox.contains(oArgCell.nCol, oArgCell.nRow)) {
-				bHasOnlyVars = false;
-				aSortedFormulaArgs.push(oArgCell);
-			} else {
+		if (oCalcType.type === cElementType.operator) {
+			sOperand = oCalcType.name;
+		}
+		if (sOperand === '/') {
+			bVarCellIsDividend = oVarsBbox.contains(aArgsFormula[0].nCol, aArgsFormula[0].nRow);
+		}
+
+		aArgsFormula.forEach(function (oArgCell) { // Sorts formula args. Cells from variables must be first in array.
+			if (oVarsBbox.contains(oArgCell.nCol, oArgCell.nRow)) {
+				if (!bHasVariableCell) {
+					bHasVariableCell = true;
+				}
 				aSortedFormulaArgs.unshift(oArgCell);
+			} else {
+				bHasOnlyVarCells = false;
+				aSortedFormulaArgs.push(oArgCell);
 			}
 		});
-		if (bHasVariableCell && !bHasOnlyVars) {
+		if (bHasVariableCell && !bHasOnlyVarCells && oCalcType.type === cElementType.func) {
 			const oVariablesCache = {};
 			let bHorizontal = false;
 			let bDirectionFound = false;
@@ -2288,31 +2334,45 @@ function (window, undefined) {
 				}
 			}
 		} else {
-			for (let i = 0, length = aSortedFormulaArgs.length; i < length; i++) {
+			const nStartIndex = bHasVariableCell ? aSortedFormulaArgs.length - 1 : 0;
+			const nEndIndex = bHasVariableCell ? -1 : aSortedFormulaArgs.length;
+			const nStep = bHasVariableCell ? -1 : 1;
+			for (let i = nStartIndex; i !== nEndIndex; i += nStep) {
 				const oCell = aSortedFormulaArgs[i];
-				if (oCell.isFormula()) { // Try to find coefficient for variable
+				if (oCell.isFormula()) { // Tries to find coefficient for variable
 					const aCellArgs = getArgsFormula(oCell.getFormulaParsed().outStack, true);
-					const bHasVariableCells = aCellArgs.some(function (oCellArg) {
+					const bIncludeVariableCell = aCellArgs.some(function (oCellArg) {
 						return oVarsBbox.contains(oCellArg.nCol, oCellArg.nRow);
 					});
-					if (bHasVariableCells) {
+					if (bIncludeVariableCell) {
 						let oVariableCell = null;
 						aCellArgs.forEach(function (oCellArg) {
 							if (!oVarsBbox.contains(oCellArg.nCol, oCellArg.nRow) && oCellArg.getNumberValue() !== null) {
-								nCoefficient = oCellArg.getNumberValue();
+								nCoefficient = bVarCellIsDividend ? 1 / oCellArg.getNumberValue() : oCellArg.getNumberValue();
 							} else {
 								oVariableCell = oCellArg;
 							}
 						});
 						fAction(nCoefficient, oVariableCell, i);
-					} else {
+					} else if (bHasVariableCell) {
 						const nFormulaResult = oModel.calculateFormula(NaN, null, oCell.getFormulaParsed());
 						if (nFormulaResult) {
 							nCoefficient = nFormulaResult;
 						}
+					} else {
+						// Tries to find a variable cell in the next cells of the formula in a recursive way.
+						const oVariableCell = findCell(oCell, this.getVariables());
+						if (oVariableCell) {
+							const DEFAULT_VALUE = 1;
+							// Creates Range object from Cell object for calculateFormula method.
+							const oVariableRange = new AscCommonExcel.Range(oVariableCell.ws, oVariableCell.nRow, oVariableCell.nCol, oVariableCell.nRow, oVariableCell.nCol);
+							nCoefficient = oModel.calculateFormula(DEFAULT_VALUE, oVariableRange, oCell.getFormulaParsed());
+							oVariableCell.setValue("0"); // Resets value from default value.
+							fAction(nCoefficient, oVariableCell, i);
+						}
 					}
 				} else if (oCell.getNumberValue() && !oVarsBbox.contains(oCell.nCol, oCell.nRow))  {
-					nCoefficient = oCell.getNumberValue();
+					nCoefficient = bVarCellIsDividend ? 1 / oCell.getNumberValue() : oCell.getNumberValue();
 				}
 
 				if (oVarsBbox.contains(oCell.nCol, oCell.nRow)) {
@@ -2849,6 +2909,9 @@ function (window, undefined) {
 
 		// Calculating option
 		this.oOptions = oParams.asc_getOptions();
+
+		// Attributes for validators
+		this.nCellReferenceCount = 0;
 	}
 
 	CSolver.prototype = Object.create(CBaseAnalysis.prototype);
@@ -3089,7 +3152,7 @@ function (window, undefined) {
 		}
 		// Checks whether variable cells have only the number of type values
 		oVariablesCells._foreachNoEmpty(function (oCell) {
-			if (oCell.getNumberValue() === null) {
+			if (oCell.getValueText() !== null) {
 				bVariablesIsCorrect = false;
 				return true;
 			}
@@ -3456,7 +3519,22 @@ function (window, undefined) {
 	CSolver.prototype.getResultStatus = function () {
 		return this.nResultStatus;
 	};
-
+	/**
+	 * Sets the cell total count in the "Cell Reference" field.
+	 * @memberof CSolver
+	 * @param {number} nCellReferenceCount
+	 */
+	CSolver.prototype.setCellReferenceCount = function (nCellReferenceCount) {
+		this.nCellReferenceCount = nCellReferenceCount;
+	};
+	/**
+	 * Returns the cell total count in the "Cell Reference" field.
+	 * @memberof CSolver
+	 * @return {number}
+	 */
+	CSolver.prototype.getCellReferenceCount = function () {
+		return this.nCellReferenceCount;
+	};
 	/**
 	 * Returns error type
 	 * @memberof CSolver
@@ -3467,6 +3545,7 @@ function (window, undefined) {
 	 * @returns {Asc.c_oAscError}
 	 */
 	CSolver.prototype.isValidDataRef = function(ws, range, type, dataRange) {
+		const MAX_CELL_COUNT = 2147467264;
 		let res = Asc.c_oAscError.ID.No;
 		if (range === null && type !== Asc.c_oAscSelectionDialogType.Solver_Constraint) {
 			// error text: "Problem to solve not specified"
@@ -3505,6 +3584,26 @@ function (window, undefined) {
 				if (!range && !~dataRange.search(/^\d*[.,]?\d+$/)) {
 					res = Asc.c_oAscError.ID.DataConstraintError;
 				}
+				if (range) {
+					const constraintCellCount = range.getHeight() * range.getWidth();
+					if (constraintCellCount >= MAX_CELL_COUNT) {
+						// error text: "Too many cells"
+						res = Asc.c_oAscError.ID.TooManyCells;
+					}
+					// check equal number of cells in Cell Reference and Constraint fields.
+					if (this.getCellReferenceCount() !== constraintCellCount) {
+						// error text: "Unequal number of cells in Cell Reference and Constraint"
+						res = Asc.c_oAscError.ID.UnequalCellsNumber;
+					}
+				}
+				break;
+			case Asc.c_oAscSelectionDialogType.Solver_CellReference:
+				const cellReferenceCount = range.getHeight() * range.getWidth();
+				if (cellReferenceCount >= MAX_CELL_COUNT) {
+					// error text: "Too many cells"
+					res = Asc.c_oAscError.ID.TooManyCells;
+				}
+				this.setCellReferenceCount(cellReferenceCount);
 				break;
 		}
 

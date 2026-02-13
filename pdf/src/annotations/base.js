@@ -444,7 +444,7 @@
 
         let nComplexType = null;
 
-        if (AscPDF.BORDER_TYPES.solid == nBorderStyle) {
+        if (AscPDF.BORDER_TYPES.solid == nBorderStyle || undefined == nBorderStyle) {
             if (AscPDF.BORDER_EFFECT_STYLES.Cloud == nBorderEffectStyle) {
                 if (1 == nBorderEffectIntensity) {
                     nComplexType = AscPDF.ANNOT_COMPLEX_BORDER_TYPES.cloud1;
@@ -519,11 +519,11 @@
         }
 
         if (this.IsFreeText()) {
-            for (let i = 1; i < this.spTree.length; i++) {
+            for (let i = 0; i < this.spTree.length; i++) {
                 const oLine = this.spTree[i].spPr.ln;
                 oLine.Fill.transparent = t;
 
-                const oFill = this.spPr.Fill;
+                const oFill = this.spTree[i].spPr.Fill;
                 oFill.transparent = t;
 
                 this.spTree[i].handleUpdateLn();
@@ -871,6 +871,10 @@
         this._bDrawFromStream = bFromStream;
     };
     CAnnotationBase.prototype.SetRect = function(aOrigRect) {
+        if (this._rect != null && aOrigRect != null && AscCommon.isEqualSortedArrays(this._rect, aOrigRect)) {
+            return;
+        }
+
         AscCommon.History.Add(new CChangesPDFAnnotRect(this, this.GetRect(), aOrigRect));
 
         this._rect = aOrigRect;
@@ -1063,9 +1067,10 @@
         this.Recalculate();
         let aRect = this.GetRect();
 
-        oGraphicsWord.AddClipRect(aRect[0] * g_dKoef_pt_to_mm, aRect[1] * g_dKoef_pt_to_mm, (aRect[2] - aRect[0]) * g_dKoef_pt_to_mm, (aRect[3] - aRect[1]) * g_dKoef_pt_to_mm);
+		// add clip only for changed annots
+		this.IsChanged() && oGraphicsWord.AddClipRect(aRect[0] * g_dKoef_pt_to_mm, aRect[1] * g_dKoef_pt_to_mm, (aRect[2] - aRect[0]) * g_dKoef_pt_to_mm, (aRect[3] - aRect[1]) * g_dKoef_pt_to_mm);
         this.draw(oGraphicsWord);
-        oGraphicsWord.RemoveLastClip();
+        this.IsChanged() && oGraphicsWord.RemoveLastClip();
 
         // draw annot rect
         // if (oGraphicsPDF) {
@@ -1584,13 +1589,15 @@
                         oMeta["InRect"] = this.GetInRect();
                     }
                 }
-                else if (this.IsFromOO()) {
+                if (this.IsFromOO()) {
                     if (this.IsRedact()) {
                         let sRedactId = this.GetRedactId();
                         if (sRedactId) {
                             oMeta["redactId"] = sRedactId;
                         }
                     }
+
+                    oMeta["isOO"] = true;
                 }
             }
             
@@ -1964,6 +1971,8 @@
 
 		oDoc.RemoveAnnot(this.GetId());
 	};
+	
+	CAnnotationBase.prototype.setBDeleted = AscFormat.CGraphicObjectBase.prototype.setBDeleted;
     
     function formatTimestampToPDF(timestamp) {
         const date = new Date(parseInt(timestamp));

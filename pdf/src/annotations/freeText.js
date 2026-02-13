@@ -411,6 +411,9 @@
 				oLine.setFill(oFill);
 			}
 		}, undefined, this);
+
+		this.SetWasChanged(true);
+		this.SetNeedRecalc(true);
 	};
 	CAnnotationFreeText.prototype.SetFillColor = function(aColor) {
 		AscCommon.History.Add(new CChangesPDFAnnotFill(this, this.GetFillColor(), aColor));
@@ -425,6 +428,9 @@
 				this.spTree[i].setFill(oFill);
 			}
 		}, undefined, this);
+
+		this.SetWasChanged(true);
+		this.SetNeedRecalc(true);
 	};
     CAnnotationFreeText.prototype.GetTextBoxRect = function() {
         let aOrigRect   = this.GetRect();
@@ -1047,24 +1053,6 @@
 			docContent.RemoveSelection();
 		}
 	};
-    /**
-	 * Removes char in current position by direction.
-	 * @memberof CTextField
-	 * @typeofeditors ["PDF"]
-	 */
-    CAnnotationFreeText.prototype.Remove = function(nDirection, isCtrlKey) {
-        let oContent = this.GetDocContent();
-        oContent.Remove(nDirection, true, false, false, isCtrlKey);
-        oContent.RecalculateCurPos();
-        this.SetNeedRecalc(true);
-
-        if (AscCommon.History.Is_LastPointEmpty()) {
-            AscCommon.History.Remove_LastPoint();
-        }
-        else {
-            this.SetNeedRecalc(true);
-        }
-    };
     CAnnotationFreeText.prototype.SelectAllText = function() {
         this.GetDocContent().SelectAll();
     };

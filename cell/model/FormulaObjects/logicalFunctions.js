@@ -164,8 +164,14 @@ function (window, undefined) {
 	cIF.prototype.numFormat = AscCommonExcel.cNumFormatNone;
 	cIF.prototype.argumentsType = [argType.logical, argType.any, argType.any];
 	cIF.prototype.arrayIndexes = {1: 1, 2: 1};
-	cIF.prototype.getArrayIndex = function (index, type) {
+	cIF.prototype.getArrayIndex = function (index, type, args) {
 		let res = false;
+
+		//TODO need recheck
+		if (args && args[0].type === cElementType.array) {
+			return false;
+		}
+
 		if (type === cElementType.array) {
 			return false;
 		}

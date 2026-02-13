@@ -10395,22 +10395,34 @@
                 pMdx.f = this.stream.GetUChar();
             } else if (c_oSer_MdxMetadata.MdxTuple === type) {
                 //READ1_DEF(length, res, this.ReadMdxTuple, pMdx.MdxTuple.GetPovarer());
+                if (!pMdx.mdxTuple) {
+                    pMdx.mdxTuple = new AscCommonExcel.CMdxTuple();
+                }
                 res = this.bcr.Read1(length, function (t, l) {
-                    return oThis.ReadMdx(t, l, pMdx.mdxTuple);
+                    return oThis.ReadMdxTuple(t, l, pMdx.mdxTuple);
                 });
             } else if (c_oSer_MdxMetadata.MdxSet === type) {
                 //READ1_DEF(length, res, this.ReadMdxSet, pMdx.MdxSet.GetPovarer());
+                if (!pMdx.mdxSet) {
+                    pMdx.mdxSet = new AscCommonExcel.CMdxSet();
+                }
                 res = this.bcr.Read1(length, function (t, l) {
-                    return oThis.ReadMdx(t, l, pMdx.mdxSet);
+                    return oThis.ReadMdxSet(t, l, pMdx.mdxSet);
                 });
             } else if (c_oSer_MdxMetadata.MdxKPI === type) {
+                if (!pMdx.mdxKPI) {
+                    pMdx.mdxKPI = new AscCommonExcel.CMdxKPI();
+                }
                 res = this.bcr.Read1(length, function (t, l) {
-                    return oThis.ReadMdx(t, l, pMdx.mdxKPI);
+                    return oThis.ReadMdxKPI(t, l, pMdx.mdxKPI);
                 });
             } else if (c_oSer_MdxMetadata.MdxMemeberProp === type) {
                 //READ1_DEF(length, res, this.ReadMdxMemeberProp, pMdx.MdxMemeberProp.GetPovarer());
+                if (!pMdx.mdxMemeberProp) {
+                    pMdx.mdxMemeberProp = new AscCommonExcel.CMdxMemeberProp();
+                }
                 res = this.bcr.Read1(length, function (t, l) {
-                    return oThis.ReadMdx(t, l, pMdx.mdxMemeberProp);
+                    return oThis.ReadMdxMemeberProp(t, l, pMdx.mdxMemeberProp);
                 });
             } else {
                 res = c_oSerConstants.ReadUnknown;
@@ -10523,7 +10535,10 @@
             }
             else if (c_oSer_MetadataMdxSet.MetadataStringIndex === type)
             {
-               let pMetadataStringIndex = new AscCommonExcel.CMetadataStringIndex();
+                if (!pMdxSet.metadataStringIndexes) {
+                    pMdxSet.metadataStringIndexes = [];
+                }
+                let pMetadataStringIndex = new AscCommonExcel.CMetadataStringIndex();
                 res = this.bcr.Read1(length, function (t, l) {
                     return oThis.ReadMetadataStringIndex(t, l, pMetadataStringIndex);
                 });
@@ -10557,6 +10572,9 @@
             } else if (c_oSer_MetadataMdxTuple.Strike === type) {
                 pMdxTuple.st = this.stream.GetBool();
             } else if (c_oSer_MetadataMdxTuple.MetadataStringIndex === type) {
+                if (!pMdxTuple.metadataStringIndexes) {
+                    pMdxTuple.metadataStringIndexes = [];
+                }
                 let pMetadataStringIndex = new AscCommonExcel.CMetadataStringIndex();
                 res = this.bcr.Read1(length, function (t, l) {
                     return oThis.ReadMetadataStringIndex(t, l, pMetadataStringIndex);
@@ -16307,7 +16325,7 @@
 	prot['GreaterThan'] = prot.GreaterThan;
 	prot['GreaterThanOrEqual'] = prot.GreaterThanOrEqual;
 
-	window['Asc']['ST_olapSlicerCacheSortOrder'] = window['AscCommonExcel'].ST_olapSlicerCacheSortOrder = ST_olapSlicerCacheSortOrder;
+	window['Asc']['ST_olapSlicerCacheSortOrder'] = window['Asc'].ST_olapSlicerCacheSortOrder = ST_olapSlicerCacheSortOrder;
 	prot = ST_olapSlicerCacheSortOrder;
 	prot['Natural'] = prot.Natural;
 	prot['Ascending'] = prot.Ascending;

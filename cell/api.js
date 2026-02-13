@@ -86,6 +86,7 @@ var editor;
     this.tmpDecimalSeparator = null;
     this.tmpGroupSeparator = null;
     this.tmpLocalization = null;
+	this.backgroundOpenFileSize = 3 * 1024 * 1024;//3mb
 
 	this.activeLocalization = null;
 
@@ -1827,7 +1828,8 @@ var editor;
 	this.isOpenOOXInBrowser = this["asc_isSupportFeature"]("ooxml") && AscCommon.checkOOXMLSignature(file.data);
 	if (this.isOpenOOXInBrowser) {
 		this.openOOXInBrowserZip = file.data;
-		this.OpenDocumentFromZip(file.data);
+		const backgroundOpen = file.data.length > this.backgroundOpenFileSize;
+		this.OpenDocumentFromZip(file.data, backgroundOpen);
 	} else {
 		this.OpenDocumentFromBin(file.url, file.data);
 	}
@@ -1886,14 +1888,120 @@ var editor;
 		this.OpenDocumentFromBinNoInit(gObject);
 		this._onEndOpen();
 	};
-	spreadsheet_api.prototype.OpenDocumentFromZip = function (data) {
+
+	/**
+	 * Reads remaining sheet data in background
+	 * @param {Object} api - spreadsheet_api instance
+	 * @param {Object} reader - BackgroundOpenReader object
+	 * @param {Object} ws - worksheet
+	 * @param {boolean} bNoBuildDep - whether to skip dependency building
+	 * @param {Array} curSheetData - current sheet data array
+	 * @param {Array} delayedSheetData - all sheet data array
+	 * @param {Object} selectionState - saved selection state
+	 * @param {boolean} startAction - whether to start action indicator
+	 */
+	function readRemainings(api, reader, ws, bNoBuildDep, curSheetData, delayedSheetData, selectionState, startAction) {
+		if (startAction && api.asc_checkNeedCallback("asc_onStartAction")) {
+			api.wb.setIsPartialReading(true);
+			startAction = false;
+			api.sync_StartAction(Asc.c_oAscAsyncActionType.Information, Asc.c_oAscAsyncAction.BackgroundOpen, Asc.c_oAscRestrictionType.View);
+		}
+		
+		// Read remainings
+		if (curSheetData[0].state) {
+			reader.setSheetData(curSheetData);
+			reader.readSheetData(bNoBuildDep);
+			const sheetDataElem = curSheetData[0];
+			updateDrawingsBySheetDataElem(api, sheetDataElem);
+			api.wb._onScrollReinitialize(AscCommonExcel.c_oAscScrollType.ScrollVertical | AscCommonExcel.c_oAscScrollType.ScrollHorizontal);
+		} else {
+			let sheetDataElem = delayedSheetData.find(function (item) {
+				return !!item.state;
+			});
+			
+			if (!sheetDataElem) {
+				// All reading complete - restore state
+				api.wb.setIsPartialReading(false);
+				api.wbModel.dependencyFormulas.unlockRecal();
+				
+				sheetDataElem = curSheetData[0];
+				//scroll if selection not changed
+				if (sheetDataElem.ws.selectionRange.isEqual(new AscCommonExcel.SelectionRange(sheetDataElem.ws))) {
+					sheetDataElem.ws.selectionRange = selectionState.selectionRange;
+					sheetDataElem.ws.setTopLeftCell(selectionState.topLeftCell, false);
+					let wsView = api.wb.getWorksheet()
+					wsView._initTopLeftCell();
+					wsView._calcHeightRows(AscCommonExcel.recalcType.full);
+					api.handlers.trigger("drawWS");
+				}
+				api.sync_EndAction(Asc.c_oAscAsyncActionType.Information, Asc.c_oAscAsyncAction.BackgroundOpen, Asc.c_oAscRestrictionType.View);
+				AscCommon.sendClientLog("debug", AscCommon.getClientInfoString("onDocumentContentReadyBackground", performance.now(), AscCommon.getMemoryInfo()), api);
+				return;
+			}
+			
+			reader.setSheetData([sheetDataElem]);
+			reader.readSheetData(bNoBuildDep);
+			updateDrawingsBySheetDataElem(api, sheetDataElem);
+		}
+		
+		// Schedule next iteration
+		setTimeout(function() {
+			readRemainings(api, reader, ws, bNoBuildDep, curSheetData, delayedSheetData, selectionState, startAction);
+		}, 30);
+	}
+	/**
+	 * Update drawings on reading sheet data
+	 */
+	function updateDrawingsBySheetDataElem(api, sheetDataElem) {
+		const intersectionRange = new AscCommonExcel.Range(sheetDataElem.ws, sheetDataElem.r1, 0, sheetDataElem.r2, AscCommon.gc_nMaxCol0);
+		const insideRange = new AscCommonExcel.Range(sheetDataElem.ws, 0, 0, sheetDataElem.r2, AscCommon.gc_nMaxCol0);
+		sheetDataElem.ws.onUpdateRanges([intersectionRange.bbox]);//"cleanCellCache" works only for visible sheets
+		api.wb.handleDrawingsOnWorkbookOpening([{intersectionRange: intersectionRange, insideRange: insideRange}]);
+	}
+
+	/**
+	 * Initializes background open reading process for large documents
+	 * @param {Object} api - spreadsheet_api instance
+	 * @param {Object} reader - BackgroundOpenReader object from OpenDocumentFromZipNoInit
+	 */
+	function initBackgroundOpenReading(api, reader) {
+		const backgroundOpenContext = reader.backgroundOpenContext;
+		
+		if (!backgroundOpenContext) {
+			return;
+		}
+		
+		const ws = backgroundOpenContext.ws;
+		const curSheetData = backgroundOpenContext.curSheetData;
+		const delayedSheetData = backgroundOpenContext.delayedSheetData;
+		const selectionState = backgroundOpenContext.selectionState;
+		
+		api.wbModel.dependencyFormulas.lockRecal();
+		
+		// Start background reading after selection is ready
+		api.asc_registerCallback('asc_onSelectionEnd', function() {
+			api.asc_unregisterCallback('asc_onSelectionEnd');
+			setTimeout(function() {
+				reader.updateBackgroundOpenParams(false, 10000);
+				readRemainings(api, reader, ws, false, curSheetData, delayedSheetData, selectionState, true);
+			}, 100);
+		});
+	}
+
+	spreadsheet_api.prototype.OpenDocumentFromZip = function (data, backgroundOpen) {
 		this.wbModel = new AscCommonExcel.Workbook(this.handlers, this, true);
 		this.initGlobalObjects(this.wbModel, data.length);
-		let res =  this.OpenDocumentFromZipNoInit(data);
+		let reader = this.OpenDocumentFromZipNoInit(data, backgroundOpen);
 		this._onEndOpen();
-		return res;
+		
+		// Handle background open reading if enabled and context was prepared
+		if (reader && reader.backgroundOpenContext) {
+			initBackgroundOpenReading(this, reader);
+		}
+		
+		return !!reader;
 	};
-	spreadsheet_api.prototype.OpenDocumentFromZipNoInit = function (data) {
+	spreadsheet_api.prototype.OpenDocumentFromZipNoInit = function (data, backgroundOpen) {
 		var t = this;
 		let wb = this.wbModel;
 		var openXml = AscCommon.openXml;
@@ -1908,6 +2016,11 @@ var editor;
 			return false;
 		}
 		xmlParserContext.zip = jsZlib;
+		if (backgroundOpen) {
+			xmlParserContext.backgroundOpen.readOnlyActive = true;
+			xmlParserContext.backgroundOpen.readNextRows = 100;
+		}
+		var backgroundOpenReader = true;
 
 		//check fonts inside
 		AscFonts.IsCheckSymbols = true;
@@ -1954,6 +2067,30 @@ var editor;
 					wb.metadata = new AscCommonExcel.CMetadata();
 					reader = new StaxParser(contentMetaData, metaData, xmlParserContext);
 					wb.metadata.fromXml(reader);
+				}
+
+				let rdRichValue = wbPart.getPartByRelationshipType(openXml.Types.rdRichValue.relationType);
+				if (rdRichValue) {
+					let content = rdRichValue.getDocumentContent();
+					wb.richValueData = new AscCommonExcel.CRichValueData();
+					reader = new StaxParser(content, rdRichValue, xmlParserContext);
+					wb.richValueData.fromXml(reader);
+				}
+
+				let rdRichValueStructure = wbPart.getPartByRelationshipType(openXml.Types.rdRichValueStructure.relationType);
+				if (rdRichValueStructure) {
+					let content = rdRichValueStructure.getDocumentContent();
+					wb.richValueStructures = new AscCommonExcel.CRichValueStructures();
+					reader = new StaxParser(content, rdRichValueStructure, xmlParserContext);
+					wb.richValueStructures.fromXml(reader);
+				}
+
+				let rdRichValueTypes = wbPart.getPartByRelationshipType(openXml.Types.rdRichValueTypes.relationType);
+				if (rdRichValueTypes) {
+					let content = rdRichValueTypes.getDocumentContent();
+					wb.richValueTypesInfo = new AscCommonExcel.CRichValueTypesInfo();
+					reader = new StaxParser(content, rdRichValueTypes, xmlParserContext);
+					wb.richValueTypesInfo.fromXml(reader);
 				}
 			}
 
@@ -2148,17 +2285,6 @@ var editor;
 				});
 			}
 
-			//sharedString
-			var sharedStringPart = wbPart.getPartByRelationshipType(openXml.Types.sharedStringTable.relationType);
-			if (sharedStringPart) {
-				var contentSharedStrings = sharedStringPart.getDocumentContent();
-				if (contentSharedStrings) {
-					var sharedStrings = new AscCommonExcel.CT_SharedStrings();
-					reader = new StaxParser(contentSharedStrings, sharedStringPart, xmlParserContext);
-					sharedStrings.fromXml(reader);
-				}
-			}
-
 			//TODO CalcChain - из бинарника не читается, и не пишется в бинарник. реализовать позже
 
 			//Custom xml
@@ -2338,78 +2464,181 @@ var editor;
 				xmlParserContext.InitOpenManager.PostLoadPrepareDefNames(wb);
 			}
 
-			var readSheetDataExternal = function (bNoBuildDep) {
-				for (var i = 0; i < xmlParserContext.InitOpenManager.oReadResult.sheetData.length; ++i) {
-					var sheetDataElem = xmlParserContext.InitOpenManager.oReadResult.sheetData[i];
-					var ws = sheetDataElem.ws;
+			/**
+			 * Reads single sheet data from XML
+			 * @param {Object} sheetDataElem - sheet data element with ws and reader
+			 * @param {boolean} bNoBuildDep - whether to skip dependency building
+			 * @returns {Object} processing context with parsed data
+			 */
+			function readSingleSheetData(sheetDataElem, bNoBuildDep) {
+				var ws = sheetDataElem.ws;
+				var tmp = {
+					pos: null,
+					len: null,
+					bNoBuildDep: bNoBuildDep,
+					ws: ws,
+					row: new AscCommonExcel.Row(ws),
+					cell: new AscCommonExcel.Cell(ws),
+					formula: new AscCommonExcel.OpenFormula(),
+					sharedFormulas: {},
+					prevFormulas: {},
+					siFormulas: {},
+					prevRow: -1,
+					prevCol: -1,
+					formulaArray: []
+				};
+				var sheetData = new AscCommonExcel.CT_SheetData();
+				
+				xmlParserContext.InitOpenManager.tmp = tmp;
+				//TODO пересмотреть фунцию fromXml
+				sheetData.fromXmlPart(sheetDataElem);
+				
+				return tmp;
+			}
 
-					var tmp = {
-						pos: null,
-						len: null,
-						bNoBuildDep: bNoBuildDep,
-						ws: ws,
-						row: new AscCommonExcel.Row(ws),
-						cell: new AscCommonExcel.Cell(ws),
-						formula: new AscCommonExcel.OpenFormula(),
-						sharedFormulas: {},
-						prevFormulas: {},
-						siFormulas: {},
-						prevRow: -1,
-						prevCol: -1,
-						formulaArray: []
-					};
-
-
-					var sheetData = new AscCommonExcel.CT_SheetData();
-					xmlParserContext.InitOpenManager.tmp = tmp;
-
-					sheetDataElem.reader.setState(sheetDataElem.state);
-					//TODO пересмотреть фунцию fromXml
-					sheetData.fromXml2(sheetDataElem.reader);
-
-					if (!bNoBuildDep) {
-						//TODO возможно стоит делать это в worksheet после полного чтения
-						//***array-formula***
-						//добавление ко всем ячейкам массива головной формулы
-						for (var j = 0; j < tmp.formulaArray.length; j++) {
-							var curFormula = tmp.formulaArray[j];
-							var ref = curFormula.ref;
-							if (ref) {
-								var rangeFormulaArray = tmp.ws.getRange3(ref.r1, ref.c1, ref.r2, ref.c2);
-								rangeFormulaArray._foreach(function (cell) {
-									cell.setFormulaInternal(curFormula);
-									if (curFormula.ca || cell.isNullTextString()) {
-										tmp.ws.workbook.dependencyFormulas.addToChangedCell(cell);
-									}
-								});
+			/**
+			 * Builds all formula dependencies for processed sheet data
+			 * @param {Object} tmp - processing context
+			 */
+			function buildSheetDependencies(tmp) {
+				if (tmp.bNoBuildDep) {
+					return;
+				}
+				
+				//TODO возможно стоит делать это в worksheet после полного чтения
+				//***array-formula***
+				//добавление ко всем ячейкам массива головной формулы
+				for (var j = 0; j < tmp.formulaArray.length; j++) {
+					var curFormula = tmp.formulaArray[j];
+					var ref = curFormula.ref;
+					if (ref) {
+						var rangeFormulaArray = tmp.ws.getRange3(ref.r1, ref.c1, ref.r2, ref.c2);
+						rangeFormulaArray._foreach(function (cell) {
+							cell.setFormulaInternal(curFormula);
+							if (curFormula.ca || cell.isNullTextString()) {
+								tmp.ws.workbook.dependencyFormulas.addToChangedCell(cell);
 							}
-						}
-						for (var nCol in tmp.prevFormulas) {
-							if (tmp.prevFormulas.hasOwnProperty(nCol)) {
-								var prevFormula = tmp.prevFormulas[nCol];
-								if (!tmp.siFormulas[prevFormula.parsed.getListenerId()]) {
-									prevFormula.parsed.buildDependencies();
-								}
-							}
-						}
-						for (var listenerId in tmp.siFormulas) {
-							if (tmp.siFormulas.hasOwnProperty(listenerId)) {
-								tmp.siFormulas[listenerId].buildDependencies();
-							}
+						});
+					}
+				}
+				
+				// Previous formulas dependencies
+				for (var nCol in tmp.prevFormulas) {
+					if (tmp.prevFormulas.hasOwnProperty(nCol)) {
+						var prevFormula = tmp.prevFormulas[nCol];
+						if (!tmp.siFormulas[prevFormula.parsed.getListenerId()]) {
+							prevFormula.parsed.buildDependencies();
 						}
 					}
 				}
+				
+				// SI formulas dependencies
+				for (var listenerId in tmp.siFormulas) {
+					if (tmp.siFormulas.hasOwnProperty(listenerId)) {
+						tmp.siFormulas[listenerId].buildDependencies();
+					}
+				}
+			}
+
+			/**
+			 * Processes shared strings from workbook part
+			 */
+			function processSharedStrings() {
+				if (!xmlParserContext.backgroundOpen.sharedStringsState.sharedStrings) {
+					//sharedString
+					var sharedStringPart = wbPart.getPartByRelationshipType(openXml.Types.sharedStringTable.relationType);
+					if (sharedStringPart) {
+						var contentSharedStrings = sharedStringPart.getDocumentContent();
+						if (contentSharedStrings) {
+							var sharedStrings = new AscCommonExcel.CT_SharedStrings();
+							xmlParserContext.backgroundOpen.sharedStringsState.sharedStrings = sharedStrings;
+							reader = new StaxParser(contentSharedStrings, sharedStringPart, xmlParserContext);
+							sharedStrings.fromXml(reader);
+						}
+					}
+				}
+			}
+
+			/**
+			 * Reads all sheets data with dependencies
+			 * @param {boolean} bNoBuildDep - whether to skip dependency building
+			 */
+			function readAllSheetsData(bNoBuildDep) {
+				var sheetDataArray = xmlParserContext.InitOpenManager.oReadResult.sheetData;
+				
+				for (var i = 0; i < sheetDataArray.length; i++) {
+					var tmp = readSingleSheetData(sheetDataArray[i], bNoBuildDep);
+					buildSheetDependencies(tmp);
+				}
+			}
+			/**
+			 * Checks and prepares background open reading if enabled
+			 * @returns {Object|null} background open context if enabled, null otherwise
+			 */
+			var prepareBackgroundOpenReading = function() {
+				if (backgroundOpen) {
+					backgroundOpen = false;
+					const activeIndex = wb.nActive;
+					const ws = wb.aWorksheets[activeIndex];
+					if (!ws) {
+						return null;
+					}
+					const sheetDatas = xmlParserContext.InitOpenManager.oReadResult.sheetData;
+					if (!sheetDatas || activeIndex >= sheetDatas.length) {
+						return null;
+					}
+					const curSheetData = [sheetDatas[activeIndex]];
+					const delayedSheetData = sheetDatas;
+					const selectionState = {
+						selectionRange: ws.selectionRange,
+						topLeftCell: ws.getTopLeftCell()
+					};
+					ws.selectionRange = new AscCommonExcel.SelectionRange(ws);
+					ws.sheetViews = [];
+					xmlParserContext.InitOpenManager.oReadResult.sheetData = curSheetData;
+					return {
+						ws: ws,
+						curSheetData: curSheetData,
+						delayedSheetData: delayedSheetData,
+						selectionState: selectionState
+					};
+				}
+				return null;
 			};
 
-			//TODO общий код с serialize
+			/**
+			 * Reads sheet data - pure data reading function
+			 * @param {boolean} bNoBuildDep - whether to skip dependency building
+			 */
+			var readSheetDataExternal = function (bNoBuildDep) {
+				processSharedStrings();
+				readAllSheetsData(bNoBuildDep);
+			};
+
+			// Build BackgroundOpenReader object to expose reading callback and context
+			backgroundOpenReader = {
+				readSheetData: readSheetDataExternal,
+				backgroundOpenContext: null,
+				setSheetData: function(sheetData) {
+					xmlParserContext.InitOpenManager.oReadResult.sheetData = sheetData;
+				},
+				updateBackgroundOpenParams: function(readOnlyActive, readNextRows) {
+					xmlParserContext.backgroundOpen.readOnlyActive = readOnlyActive;
+					xmlParserContext.backgroundOpen.readNextRows = readNextRows;
+				}
+			};
+
+			//TODO shared code with serialize
 			//ReadSheetDataExternal
 			if (!initOpenManager.copyPasteObj.isCopyPaste || initOpenManager.copyPasteObj.selectAllSheet) {
+				backgroundOpenReader.backgroundOpenContext = prepareBackgroundOpenReading();
 				readSheetDataExternal(false);
 				if (!initOpenManager.copyPasteObj.isCopyPaste) {
 					initOpenManager.PostLoadPrepare(wb);
 				}
 				wb.init(initOpenManager.oReadResult, false, true);
 			} else {
+				backgroundOpenReader.backgroundOpenContext = prepareBackgroundOpenReading();
 				readSheetDataExternal(true);
 				if (Asc["editor"] && Asc["editor"].wb) {
 					wb.init(initOpenManager.oReadResult, true);
@@ -2429,7 +2658,7 @@ var editor;
 		jsZlib.close();
 		//clean up
 		openXml.SaxParserDataTransfer = {};
-		return true;
+		return backgroundOpenReader;
 	};
 
   // Эвент о пришедщих изменениях
@@ -5976,125 +6205,17 @@ var editor;
   };
 
   spreadsheet_api.prototype.asc_setCellBold = function(isBold) {
-	if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
-      return;
+    if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
+		return;
     }
-  	let ws = this.wb.getWorksheet();
-
-	let fArr = [];
-	  ws.model.getRange3(0, 0, 1159, 0)._foreachNoEmpty(function (cell, r, c) {
-		  fArr.push(cell.getFormula())
-	  });
-
-	  let vArr = [];
-	  ws.model.getRange3(0, 2, 1159, 2)._foreachNoEmpty(function (cell, r, c) {
-		  vArr.push(cell.getValue())
-	  });
-
-	  let count = 0;
-	  let arr = [];
-	  for (let i = 0; i < vArr.length; i++) {
-		  if (vArr[i] != fArr[i].replaceAll("_xlfn.","")) {
-			  let pref = ""
-			  if (-1 != fArr[i].indexOf("SINGLE")) {
-				  //pref = " SINGLE!!!!:  "
-			  }
-			  arr.push({"addedFormula": vArr[i], "fileFormula": fArr[i]});
-			  console.log(pref + "formula: " + fArr[i] + " value: " + vArr[i])
-			  count++;
-		  }
-	  }
-	  console.log(" Count: " + count)
-
+    let ws = this.wb.getWorksheet();
     if (ws.objectRender.selectedGraphicObjectsExists() && ws.objectRender.controller.setCellBold) {
       ws.objectRender.controller.setCellBold(isBold);
     } else {
       this.wb.setFontAttributes("b", isBold);
       this.wb.restoreFocus();
     }
-	  let jsonData =  "[{\"addedFormula\":\"AGGREGATE(1,1,A1:A2)\",\"fileFormula\":\"_xlfn.AGGREGATE(1,1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"AND(A1:A2)\",\"fileFormula\":\"AND(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"AREAS(A1:A2)\",\"fileFormula\":\"AREAS(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"AVEDEV(A1:A2)\",\"fileFormula\":\"AVEDEV(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"AVERAGE(A1:A2)\",\"fileFormula\":\"AVERAGE(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"AVERAGEA(A1:A2)\",\"fileFormula\":\"AVERAGEA(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"AVERAGEIF(A1:A2,\\\">0\\\")\",\"fileFormula\":\"AVERAGEIF(_xlfn.SINGLE(A1:A2),\\\">0\\\")\"},{\"addedFormula\":\"AVERAGEIFS(A1:A2,B1:B2,\\\">0\\\")\",\"fileFormula\":\"AVERAGEIFS(_xlfn.SINGLE(A1:A2),B1:B2,\\\">0\\\")\"},{\"addedFormula\":\"AVERAGEIFS(C1:C2,A1:A2,\\\">0\\\")\",\"fileFormula\":\"AVERAGEIFS(C1:C2,_xlfn.SINGLE(A1:A2),\\\">0\\\")\"},{\"addedFormula\":\"BESSELI(A1:A2,1)\",\"fileFormula\":\"BESSELI(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"BESSELI(1,A1:A2)\",\"fileFormula\":\"BESSELI(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"BESSELJ(A1:A2,1)\",\"fileFormula\":\"BESSELJ(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"BESSELJ(1,A1:A2)\",\"fileFormula\":\"BESSELJ(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"BESSELK(A1:A2,1)\",\"fileFormula\":\"BESSELK(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"BESSELK(1,A1:A2)\",\"fileFormula\":\"BESSELK(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"BESSELY(A1:A2,1)\",\"fileFormula\":\"BESSELY(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"BESSELY(1,A1:A2)\",\"fileFormula\":\"BESSELY(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"BIN2DEC(A1:A2)\",\"fileFormula\":\"BIN2DEC(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"BIN2HEX(A1:A2)\",\"fileFormula\":\"BIN2HEX(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"BIN2OCT(A1:A2)\",\"fileFormula\":\"BIN2OCT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"CELL(\\\"address\\\",A1:A2)\",\"fileFormula\":\"CELL(\\\"address\\\",_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"CELL(A1:A2,B1)\",\"fileFormula\":\"CELL(_xlfn.SINGLE(A1:A2),B1)\"},{\"addedFormula\":\"CHISQ.TEST(A1:A2,B1:B2)\",\"fileFormula\":\"_xlfn.CHISQ.TEST(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"CHISQ.TEST(B1:B2,A1:A2)\",\"fileFormula\":\"_xlfn.CHISQ.TEST(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"CHOOSE(1,A1:A2,2,3)\",\"fileFormula\":\"CHOOSE(1,_xlfn.SINGLE(A1:A2),2,3)\"},{\"addedFormula\":\"COLUMN(A1:A2)\",\"fileFormula\":\"COLUMN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"COLUMNS(A1:A2)\",\"fileFormula\":\"COLUMNS(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"COMPLEX(A1:A2,1)\",\"fileFormula\":\"COMPLEX(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"COMPLEX(1,A1:A2)\",\"fileFormula\":\"COMPLEX(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"CONCAT(A1:A2)\",\"fileFormula\":\"_xlfn.CONCAT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"CONVERT(A1:A2,\\\"m\\\",\\\"ft\\\")\",\"fileFormula\":\"CONVERT(_xlfn.SINGLE(A1:A2),\\\"m\\\",\\\"ft\\\")\"},{\"addedFormula\":\"CONVERT(1,A1:A2,\\\"ft\\\")\",\"fileFormula\":\"CONVERT(1,_xlfn.SINGLE(A1:A2),\\\"ft\\\")\"},{\"addedFormula\":\"CONVERT(1,\\\"m\\\",A1:A2)\",\"fileFormula\":\"CONVERT(1,\\\"m\\\",_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"CORREL(A1:A2,B1:B2)\",\"fileFormula\":\"CORREL(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"CORREL(B1:B2,A1:A2)\",\"fileFormula\":\"CORREL(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"COUNT(A1:A2)\",\"fileFormula\":\"COUNT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"COUNTA(A1:A2)\",\"fileFormula\":\"COUNTA(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"COUNTBLANK(A1:A2)\",\"fileFormula\":\"COUNTBLANK(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"COUNTIF(A1:A2,\\\">0\\\")\",\"fileFormula\":\"COUNTIF(_xlfn.SINGLE(A1:A2),\\\">0\\\")\"},{\"addedFormula\":\"COUNTIFS(A1:A2,\\\">0\\\")\",\"fileFormula\":\"COUNTIFS(_xlfn.SINGLE(A1:A2),\\\">0\\\")\"},{\"addedFormula\":\"COVAR(A1:A2,B1:B2)\",\"fileFormula\":\"COVAR(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"COVAR(B1:B2,A1:A2)\",\"fileFormula\":\"COVAR(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"DEC2BIN(A1:A2)\",\"fileFormula\":\"DEC2BIN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"DEC2HEX(A1:A2)\",\"fileFormula\":\"DEC2HEX(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"DEC2OCT(A1:A2)\",\"fileFormula\":\"DEC2OCT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"DELTA(A1:A2)\",\"fileFormula\":\"DELTA(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"DELTA(1,A1:A2)\",\"fileFormula\":\"DELTA(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"DEVSQ(A1:A2)\",\"fileFormula\":\"DEVSQ(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"DOLLARDE(A1:A2,4)\",\"fileFormula\":\"DOLLARDE(_xlfn.SINGLE(A1:A2),4)\"},{\"addedFormula\":\"DOLLARDE(1.02,A1:A2)\",\"fileFormula\":\"DOLLARDE(1.02,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"DOLLARFR(A1:A2,4)\",\"fileFormula\":\"DOLLARFR(_xlfn.SINGLE(A1:A2),4)\"},{\"addedFormula\":\"DOLLARFR(1.5,A1:A2)\",\"fileFormula\":\"DOLLARFR(1.5,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"EDATE(A1:A2,1)\",\"fileFormula\":\"EDATE(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"EDATE(TODAY(),A1:A2)\",\"fileFormula\":\"EDATE(TODAY(),_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"EFFECT(A1:A2,4)\",\"fileFormula\":\"EFFECT(_xlfn.SINGLE(A1:A2),4)\"},{\"addedFormula\":\"EFFECT(0.1,A1:A2)\",\"fileFormula\":\"EFFECT(0.1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"EOMONTH(A1:A2,1)\",\"fileFormula\":\"EOMONTH(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"EOMONTH(TODAY(),A1:A2)\",\"fileFormula\":\"EOMONTH(TODAY(),_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"ERF(A1:A2)\",\"fileFormula\":\"ERF(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"ERF(0,A1:A2)\",\"fileFormula\":\"ERF(0,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"ERF.PRECISE(A1:A2)\",\"fileFormula\":\"_xlfn.ERF.PRECISE(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"ERFC(A1:A2)\",\"fileFormula\":\"ERFC(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"ERFC.PRECISE(A1:A2)\",\"fileFormula\":\"_xlfn.ERFC.PRECISE(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"F.TEST(A1:A2,B1:B2)\",\"fileFormula\":\"_xlfn.F.TEST(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"F.TEST(B1:B2,A1:A2)\",\"fileFormula\":\"_xlfn.F.TEST(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"FACTDOUBLE(A1:A2)\",\"fileFormula\":\"FACTDOUBLE(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"FORMULATEXT(A1:A2)\",\"fileFormula\":\"_xlfn.FORMULATEXT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"GCD(A1:A2)\",\"fileFormula\":\"GCD(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"GEOMEAN(A1:A2)\",\"fileFormula\":\"GEOMEAN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"GESTEP(A1:A2)\",\"fileFormula\":\"GESTEP(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"GESTEP(1,A1:A2)\",\"fileFormula\":\"GESTEP(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"HARMEAN(A1:A2)\",\"fileFormula\":\"HARMEAN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"HEX2BIN(A1:A2)\",\"fileFormula\":\"HEX2BIN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"HEX2DEC(A1:A2)\",\"fileFormula\":\"HEX2DEC(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"HEX2OCT(A1:A2)\",\"fileFormula\":\"HEX2OCT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"HLOOKUP(1,A1:A2,1)\",\"fileFormula\":\"HLOOKUP(1,_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"IF(TRUE,A1:A2,0)\",\"fileFormula\":\"IF(TRUE,_xlfn.SINGLE(A1:A2),0)\"},{\"addedFormula\":\"IF(TRUE,1,A1:A2)\",\"fileFormula\":\"IF(TRUE,1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IFERROR(1,A1:A2)\",\"fileFormula\":\"IFERROR(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IFNA(1,A1:A2)\",\"fileFormula\":\"_xlfn.IFNA(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IFS(A1:A2,1,TRUE,2)\",\"fileFormula\":\"_xlfn.IFS(_xlfn.SINGLE(A1:A2),1,TRUE,2)\"},{\"addedFormula\":\"IFS(TRUE,A1:A2,TRUE,2)\",\"fileFormula\":\"_xlfn.IFS(TRUE,_xlfn.SINGLE(A1:A2),TRUE,2)\"},{\"addedFormula\":\"IMABS(A1:A2)\",\"fileFormula\":\"IMABS(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMAGINARY(A1:A2)\",\"fileFormula\":\"IMAGINARY(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMARGUMENT(A1:A2)\",\"fileFormula\":\"IMARGUMENT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMCONJUGATE(A1:A2)\",\"fileFormula\":\"IMCONJUGATE(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMCOS(A1:A2)\",\"fileFormula\":\"IMCOS(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMCOSH(A1:A2)\",\"fileFormula\":\"_xlfn.IMCOSH(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMCOT(A1:A2)\",\"fileFormula\":\"_xlfn.IMCOT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMCSC(A1:A2)\",\"fileFormula\":\"_xlfn.IMCSC(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMCSCH(A1:A2)\",\"fileFormula\":\"_xlfn.IMCSCH(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMDIV(A1:A2,\\\"1+i\\\")\",\"fileFormula\":\"IMDIV(_xlfn.SINGLE(A1:A2),\\\"1+i\\\")\"},{\"addedFormula\":\"IMDIV(\\\"1+i\\\",A1:A2)\",\"fileFormula\":\"IMDIV(\\\"1+i\\\",_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMEXP(A1:A2)\",\"fileFormula\":\"IMEXP(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMLN(A1:A2)\",\"fileFormula\":\"IMLN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMLOG10(A1:A2)\",\"fileFormula\":\"IMLOG10(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMLOG2(A1:A2)\",\"fileFormula\":\"IMLOG2(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMPOWER(A1:A2,2)\",\"fileFormula\":\"IMPOWER(_xlfn.SINGLE(A1:A2),2)\"},{\"addedFormula\":\"IMPOWER(\\\"1+i\\\",A1:A2)\",\"fileFormula\":\"IMPOWER(\\\"1+i\\\",_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMPRODUCT(A1:A2)\",\"fileFormula\":\"IMPRODUCT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMREAL(A1:A2)\",\"fileFormula\":\"IMREAL(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMSEC(A1:A2)\",\"fileFormula\":\"_xlfn.IMSEC(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMSECH(A1:A2)\",\"fileFormula\":\"_xlfn.IMSECH(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMSIN(A1:A2)\",\"fileFormula\":\"IMSIN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMSINH(A1:A2)\",\"fileFormula\":\"_xlfn.IMSINH(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMSQRT(A1:A2)\",\"fileFormula\":\"IMSQRT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMSUB(A1:A2,\\\"1+i\\\")\",\"fileFormula\":\"IMSUB(_xlfn.SINGLE(A1:A2),\\\"1+i\\\")\"},{\"addedFormula\":\"IMSUB(\\\"1+i\\\",A1:A2)\",\"fileFormula\":\"IMSUB(\\\"1+i\\\",_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMSUM(A1:A2)\",\"fileFormula\":\"IMSUM(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMTAN(A1:A2)\",\"fileFormula\":\"_xlfn.IMTAN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"INDEX(A1:A2,1)\",\"fileFormula\":\"INDEX(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"INDEX(B1:B2,A1:A2)\",\"fileFormula\":\"INDEX(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"INDIRECT(A1:A2)\",\"fileFormula\":\"INDIRECT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"INTERCEPT(A1:A2,B1:B2)\",\"fileFormula\":\"INTERCEPT(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"INTERCEPT(B1:B2,A1:A2)\",\"fileFormula\":\"INTERCEPT(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IRR(A1:A2)\",\"fileFormula\":\"IRR(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"ISEVEN(A1:A2)\",\"fileFormula\":\"ISEVEN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"ISFORMULA(A1:A2)\",\"fileFormula\":\"_xlfn.ISFORMULA(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"ISODD(A1:A2)\",\"fileFormula\":\"ISODD(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"ISREF(A1:A2)\",\"fileFormula\":\"ISREF(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"KURT(A1:A2)\",\"fileFormula\":\"KURT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"LARGE(A1:A2,1)\",\"fileFormula\":\"LARGE(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"LCM(A1:A2)\",\"fileFormula\":\"LCM(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"LOOKUP(1,A1:A2)\",\"fileFormula\":\"LOOKUP(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"LOOKUP(1,B1:B2,A1:A2)\",\"fileFormula\":\"LOOKUP(1,B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MATCH(1,A1:A2,0)\",\"fileFormula\":\"MATCH(1,_xlfn.SINGLE(A1:A2),0)\"},{\"addedFormula\":\"MATCH(1,B1:B2,A1:A2)\",\"fileFormula\":\"MATCH(1,B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MAX(A1:A2)\",\"fileFormula\":\"MAX(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MAXA(A1:A2)\",\"fileFormula\":\"MAXA(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MAXIFS(A1:A2,B1:B2,\\\">0\\\")\",\"fileFormula\":\"_xlfn.MAXIFS(_xlfn.SINGLE(A1:A2),B1:B2,\\\">0\\\")\"},{\"addedFormula\":\"MAXIFS(C1:C2,A1:A2,\\\">0\\\")\",\"fileFormula\":\"_xlfn.MAXIFS(C1:C2,_xlfn.SINGLE(A1:A2),\\\">0\\\")\"},{\"addedFormula\":\"MDETERM(A1:A2)\",\"fileFormula\":\"MDETERM(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MEDIAN(A1:A2)\",\"fileFormula\":\"MEDIAN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MIN(A1:A2)\",\"fileFormula\":\"MIN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MINA(A1:A2)\",\"fileFormula\":\"MINA(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MINIFS(A1:A2,B1:B2,\\\">0\\\")\",\"fileFormula\":\"_xlfn.MINIFS(_xlfn.SINGLE(A1:A2),B1:B2,\\\">0\\\")\"},{\"addedFormula\":\"MINIFS(C1:C2,A1:A2,\\\">0\\\")\",\"fileFormula\":\"_xlfn.MINIFS(C1:C2,_xlfn.SINGLE(A1:A2),\\\">0\\\")\"},{\"addedFormula\":\"MIRR(A1:A2,0.1,0.12)\",\"fileFormula\":\"MIRR(_xlfn.SINGLE(A1:A2),0.1,0.12)\"},{\"addedFormula\":\"MODE(A1:A2)\",\"fileFormula\":\"MODE(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MODE.MULT(A1:A2)\",\"fileFormula\":\"_xlfn.MODE.MULT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MODE.SNGL(A1:A2)\",\"fileFormula\":\"_xlfn.MODE.SNGL(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MROUND(A1:A2,1)\",\"fileFormula\":\"MROUND(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"MROUND(10,A1:A2)\",\"fileFormula\":\"MROUND(10,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MULTINOMIAL(A1:A2)\",\"fileFormula\":\"MULTINOMIAL(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MUNIT(A1:A2)\",\"fileFormula\":\"_xlfn.MUNIT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"N(A1:A2)\",\"fileFormula\":\"N(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"NETWORKDAYS(A1:A2,B1)\",\"fileFormula\":\"NETWORKDAYS(_xlfn.SINGLE(A1:A2),B1)\"},{\"addedFormula\":\"NETWORKDAYS(A1,A1:A2)\",\"fileFormula\":\"NETWORKDAYS(A1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"NETWORKDAYS.INTL(A1:A2,B1)\",\"fileFormula\":\"NETWORKDAYS.INTL(_xlfn.SINGLE(A1:A2),B1)\"},{\"addedFormula\":\"NETWORKDAYS.INTL(A1,A1:A2)\",\"fileFormula\":\"NETWORKDAYS.INTL(A1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"NOMINAL(A1:A2,4)\",\"fileFormula\":\"NOMINAL(_xlfn.SINGLE(A1:A2),4)\"},{\"addedFormula\":\"NOMINAL(0.1,A1:A2)\",\"fileFormula\":\"NOMINAL(0.1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"NPV(0.1,A1:A2)\",\"fileFormula\":\"NPV(0.1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"OCT2BIN(A1:A2)\",\"fileFormula\":\"OCT2BIN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"OCT2DEC(A1:A2)\",\"fileFormula\":\"OCT2DEC(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"OCT2HEX(A1:A2)\",\"fileFormula\":\"OCT2HEX(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"OFFSET(A1:A2,0,0)\",\"fileFormula\":\"OFFSET(_xlfn.SINGLE(A1:A2),0,0)\"},{\"addedFormula\":\"OR(A1:A2)\",\"fileFormula\":\"OR(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"PEARSON(A1:A2,B1:B2)\",\"fileFormula\":\"PEARSON(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"PEARSON(B1:B2,A1:A2)\",\"fileFormula\":\"PEARSON(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"PERCENTILE(A1:A2,0.5)\",\"fileFormula\":\"PERCENTILE(_xlfn.SINGLE(A1:A2),0.5)\"},{\"addedFormula\":\"PERCENTRANK(A1:A2,1)\",\"fileFormula\":\"PERCENTRANK(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"PRODUCT(A1:A2)\",\"fileFormula\":\"PRODUCT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"QUARTILE(A1:A2,1)\",\"fileFormula\":\"QUARTILE(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"QUOTIENT(A1:A2,2)\",\"fileFormula\":\"QUOTIENT(_xlfn.SINGLE(A1:A2),2)\"},{\"addedFormula\":\"QUOTIENT(10,A1:A2)\",\"fileFormula\":\"QUOTIENT(10,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"RANDBETWEEN(A1:A2,100)\",\"fileFormula\":\"RANDBETWEEN(_xlfn.SINGLE(A1:A2),100)\"},{\"addedFormula\":\"RANDBETWEEN(1,A1:A2)\",\"fileFormula\":\"RANDBETWEEN(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"RANK(1,A1:A2)\",\"fileFormula\":\"RANK(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"RANK.AVG(1,A1:A2)\",\"fileFormula\":\"_xlfn.RANK.AVG(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"RANK.EQ(1,A1:A2)\",\"fileFormula\":\"_xlfn.RANK.EQ(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"ROW(A1:A2)\",\"fileFormula\":\"ROW(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"ROWS(A1:A2)\",\"fileFormula\":\"ROWS(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"RSQ(A1:A2,B1:B2)\",\"fileFormula\":\"RSQ(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"RSQ(B1:B2,A1:A2)\",\"fileFormula\":\"RSQ(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SEQUENCE(A1:A2)\",\"fileFormula\":\"_xlfn.SEQUENCE(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SEQUENCE(4,A1:A2)\",\"fileFormula\":\"_xlfn.SEQUENCE(4,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SKEW(A1:A2)\",\"fileFormula\":\"SKEW(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SKEW.P(A1:A2)\",\"fileFormula\":\"_xlfn.SKEW.P(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SLOPE(A1:A2,B1:B2)\",\"fileFormula\":\"SLOPE(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"SLOPE(B1:B2,A1:A2)\",\"fileFormula\":\"SLOPE(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SMALL(A1:A2,1)\",\"fileFormula\":\"SMALL(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"SQRTPI(A1:A2)\",\"fileFormula\":\"SQRTPI(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"STDEV(A1:A2)\",\"fileFormula\":\"STDEV(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"STDEV.P(A1:A2)\",\"fileFormula\":\"_xlfn.STDEV.P(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"STDEV.S(A1:A2)\",\"fileFormula\":\"_xlfn.STDEV.S(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"STDEVA(A1:A2)\",\"fileFormula\":\"STDEVA(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"STDEVP(A1:A2)\",\"fileFormula\":\"STDEVP(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"STDEVPA(A1:A2)\",\"fileFormula\":\"STDEVPA(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"STEYX(A1:A2,B1:B2)\",\"fileFormula\":\"STEYX(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"STEYX(B1:B2,A1:A2)\",\"fileFormula\":\"STEYX(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SUBTOTAL(9,A1:A2)\",\"fileFormula\":\"SUBTOTAL(9,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SUM(A1:A2)\",\"fileFormula\":\"SUM(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SUMIF(A1:A2,\\\">0\\\")\",\"fileFormula\":\"SUMIF(_xlfn.SINGLE(A1:A2),\\\">0\\\")\"},{\"addedFormula\":\"SUMIFS(A1:A2,B1:B2,\\\">0\\\")\",\"fileFormula\":\"SUMIFS(_xlfn.SINGLE(A1:A2),B1:B2,\\\">0\\\")\"},{\"addedFormula\":\"SUMIFS(C1:C2,A1:A2,\\\">0\\\")\",\"fileFormula\":\"SUMIFS(C1:C2,_xlfn.SINGLE(A1:A2),\\\">0\\\")\"},{\"addedFormula\":\"SUMPRODUCT(A1:A2)\",\"fileFormula\":\"SUMPRODUCT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SUMSQ(A1:A2)\",\"fileFormula\":\"SUMSQ(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SUMX2MY2(A1:A2,B1:B2)\",\"fileFormula\":\"SUMX2MY2(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"SUMX2MY2(B1:B2,A1:A2)\",\"fileFormula\":\"SUMX2MY2(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SUMX2PY2(A1:A2,B1:B2)\",\"fileFormula\":\"SUMX2PY2(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"SUMX2PY2(B1:B2,A1:A2)\",\"fileFormula\":\"SUMX2PY2(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SUMXMY2(A1:A2,B1:B2)\",\"fileFormula\":\"SUMXMY2(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"SUMXMY2(B1:B2,A1:A2)\",\"fileFormula\":\"SUMXMY2(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SWITCH(A1:A2,1,\\\"one\\\",2,\\\"two\\\")\",\"fileFormula\":\"_xlfn.SWITCH(_xlfn.SINGLE(A1:A2),1,\\\"one\\\",2,\\\"two\\\")\"},{\"addedFormula\":\"SWITCH(1,A1:A2,\\\"one\\\",2,\\\"two\\\")\",\"fileFormula\":\"_xlfn.SWITCH(1,_xlfn.SINGLE(A1:A2),\\\"one\\\",2,\\\"two\\\")\"},{\"addedFormula\":\"T(A1:A2)\",\"fileFormula\":\"T(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"T.DIST.RT(A1:A2,=ABS(A1:A2)\",\"fileFormula\":\"_xlfn.T.DIST.RT(A1:A2,1)\"},{\"addedFormula\":\"AGGREGATE(1,1,A1:A2)\",\"fileFormula\":\"_xlfn.AGGREGATE(1,1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"AND(A1:A2)\",\"fileFormula\":\"AND(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"AREAS(A1:A2)\",\"fileFormula\":\"AREAS(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"AVEDEV(A1:A2)\",\"fileFormula\":\"AVEDEV(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"AVERAGE(A1:A2)\",\"fileFormula\":\"AVERAGE(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"AVERAGEA(A1:A2)\",\"fileFormula\":\"AVERAGEA(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"AVERAGEIF(A1:A2,\\\">0\\\")\",\"fileFormula\":\"AVERAGEIF(_xlfn.SINGLE(A1:A2),\\\">0\\\")\"},{\"addedFormula\":\"AVERAGEIFS(A1:A2,B1:B2,\\\">0\\\")\",\"fileFormula\":\"AVERAGEIFS(_xlfn.SINGLE(A1:A2),B1:B2,\\\">0\\\")\"},{\"addedFormula\":\"AVERAGEIFS(C1:C2,A1:A2,\\\">0\\\")\",\"fileFormula\":\"AVERAGEIFS(C1:C2,_xlfn.SINGLE(A1:A2),\\\">0\\\")\"},{\"addedFormula\":\"BESSELI(A1:A2,1)\",\"fileFormula\":\"BESSELI(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"BESSELI(1,A1:A2)\",\"fileFormula\":\"BESSELI(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"BESSELJ(A1:A2,1)\",\"fileFormula\":\"BESSELJ(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"BESSELJ(1,A1:A2)\",\"fileFormula\":\"BESSELJ(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"BESSELK(A1:A2,1)\",\"fileFormula\":\"BESSELK(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"BESSELK(1,A1:A2)\",\"fileFormula\":\"BESSELK(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"BESSELY(A1:A2,1)\",\"fileFormula\":\"BESSELY(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"BESSELY(1,A1:A2)\",\"fileFormula\":\"BESSELY(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"BIN2DEC(A1:A2)\",\"fileFormula\":\"BIN2DEC(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"BIN2HEX(A1:A2)\",\"fileFormula\":\"BIN2HEX(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"BIN2OCT(A1:A2)\",\"fileFormula\":\"BIN2OCT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"CELL(\\\"address\\\",A1:A2)\",\"fileFormula\":\"CELL(\\\"address\\\",_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"CELL(A1:A2,B1)\",\"fileFormula\":\"CELL(_xlfn.SINGLE(A1:A2),B1)\"},{\"addedFormula\":\"CHISQ.TEST(A1:A2,B1:B2)\",\"fileFormula\":\"_xlfn.CHISQ.TEST(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"CHISQ.TEST(B1:B2,A1:A2)\",\"fileFormula\":\"_xlfn.CHISQ.TEST(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"CHOOSE(1,A1:A2,2,3)\",\"fileFormula\":\"CHOOSE(1,_xlfn.SINGLE(A1:A2),2,3)\"},{\"addedFormula\":\"COLUMN(A1:A2)\",\"fileFormula\":\"COLUMN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"COLUMNS(A1:A2)\",\"fileFormula\":\"COLUMNS(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"COMPLEX(A1:A2,1)\",\"fileFormula\":\"COMPLEX(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"COMPLEX(1,A1:A2)\",\"fileFormula\":\"COMPLEX(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"CONCAT(A1:A2)\",\"fileFormula\":\"_xlfn.CONCAT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"CONVERT(A1:A2,\\\"m\\\",\\\"ft\\\")\",\"fileFormula\":\"CONVERT(_xlfn.SINGLE(A1:A2),\\\"m\\\",\\\"ft\\\")\"},{\"addedFormula\":\"CONVERT(1,A1:A2,\\\"ft\\\")\",\"fileFormula\":\"CONVERT(1,_xlfn.SINGLE(A1:A2),\\\"ft\\\")\"},{\"addedFormula\":\"CONVERT(1,\\\"m\\\",A1:A2)\",\"fileFormula\":\"CONVERT(1,\\\"m\\\",_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"CORREL(A1:A2,B1:B2)\",\"fileFormula\":\"CORREL(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"CORREL(B1:B2,A1:A2)\",\"fileFormula\":\"CORREL(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"COUNT(A1:A2)\",\"fileFormula\":\"COUNT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"COUNTA(A1:A2)\",\"fileFormula\":\"COUNTA(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"COUNTBLANK(A1:A2)\",\"fileFormula\":\"COUNTBLANK(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"COUNTIF(A1:A2,\\\">0\\\")\",\"fileFormula\":\"COUNTIF(_xlfn.SINGLE(A1:A2),\\\">0\\\")\"},{\"addedFormula\":\"COUNTIFS(A1:A2,\\\">0\\\")\",\"fileFormula\":\"COUNTIFS(_xlfn.SINGLE(A1:A2),\\\">0\\\")\"},{\"addedFormula\":\"COVAR(A1:A2,B1:B2)\",\"fileFormula\":\"COVAR(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"COVAR(B1:B2,A1:A2)\",\"fileFormula\":\"COVAR(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"DEC2BIN(A1:A2)\",\"fileFormula\":\"DEC2BIN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"DEC2HEX(A1:A2)\",\"fileFormula\":\"DEC2HEX(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"DEC2OCT(A1:A2)\",\"fileFormula\":\"DEC2OCT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"DELTA(A1:A2)\",\"fileFormula\":\"DELTA(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"DELTA(1,A1:A2)\",\"fileFormula\":\"DELTA(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"DEVSQ(A1:A2)\",\"fileFormula\":\"DEVSQ(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"DOLLARDE(A1:A2,4)\",\"fileFormula\":\"DOLLARDE(_xlfn.SINGLE(A1:A2),4)\"},{\"addedFormula\":\"DOLLARDE(1.02,A1:A2)\",\"fileFormula\":\"DOLLARDE(1.02,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"DOLLARFR(A1:A2,4)\",\"fileFormula\":\"DOLLARFR(_xlfn.SINGLE(A1:A2),4)\"},{\"addedFormula\":\"DOLLARFR(1.5,A1:A2)\",\"fileFormula\":\"DOLLARFR(1.5,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"EDATE(A1:A2,1)\",\"fileFormula\":\"EDATE(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"EDATE(TODAY(),A1:A2)\",\"fileFormula\":\"EDATE(TODAY(),_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"EFFECT(A1:A2,4)\",\"fileFormula\":\"EFFECT(_xlfn.SINGLE(A1:A2),4)\"},{\"addedFormula\":\"EFFECT(0.1,A1:A2)\",\"fileFormula\":\"EFFECT(0.1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"EOMONTH(A1:A2,1)\",\"fileFormula\":\"EOMONTH(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"EOMONTH(TODAY(),A1:A2)\",\"fileFormula\":\"EOMONTH(TODAY(),_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"ERF(A1:A2)\",\"fileFormula\":\"ERF(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"ERF(0,A1:A2)\",\"fileFormula\":\"ERF(0,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"ERF.PRECISE(A1:A2)\",\"fileFormula\":\"_xlfn.ERF.PRECISE(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"ERFC(A1:A2)\",\"fileFormula\":\"ERFC(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"ERFC.PRECISE(A1:A2)\",\"fileFormula\":\"_xlfn.ERFC.PRECISE(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"F.TEST(A1:A2,B1:B2)\",\"fileFormula\":\"_xlfn.F.TEST(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"F.TEST(B1:B2,A1:A2)\",\"fileFormula\":\"_xlfn.F.TEST(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"FACTDOUBLE(A1:A2)\",\"fileFormula\":\"FACTDOUBLE(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"FORMULATEXT(A1:A2)\",\"fileFormula\":\"_xlfn.FORMULATEXT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"GCD(A1:A2)\",\"fileFormula\":\"GCD(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"GEOMEAN(A1:A2)\",\"fileFormula\":\"GEOMEAN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"GESTEP(A1:A2)\",\"fileFormula\":\"GESTEP(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"GESTEP(1,A1:A2)\",\"fileFormula\":\"GESTEP(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"HARMEAN(A1:A2)\",\"fileFormula\":\"HARMEAN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"HEX2BIN(A1:A2)\",\"fileFormula\":\"HEX2BIN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"HEX2DEC(A1:A2)\",\"fileFormula\":\"HEX2DEC(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"HEX2OCT(A1:A2)\",\"fileFormula\":\"HEX2OCT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"HLOOKUP(1,A1:A2,1)\",\"fileFormula\":\"HLOOKUP(1,_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"IF(TRUE,A1:A2,0)\",\"fileFormula\":\"IF(TRUE,_xlfn.SINGLE(A1:A2),0)\"},{\"addedFormula\":\"IF(TRUE,1,A1:A2)\",\"fileFormula\":\"IF(TRUE,1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IFERROR(1,A1:A2)\",\"fileFormula\":\"IFERROR(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IFNA(1,A1:A2)\",\"fileFormula\":\"_xlfn.IFNA(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IFS(A1:A2,1,TRUE,2)\",\"fileFormula\":\"_xlfn.IFS(_xlfn.SINGLE(A1:A2),1,TRUE,2)\"},{\"addedFormula\":\"IFS(TRUE,A1:A2,TRUE,2)\",\"fileFormula\":\"_xlfn.IFS(TRUE,_xlfn.SINGLE(A1:A2),TRUE,2)\"},{\"addedFormula\":\"IMABS(A1:A2)\",\"fileFormula\":\"IMABS(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMAGINARY(A1:A2)\",\"fileFormula\":\"IMAGINARY(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMARGUMENT(A1:A2)\",\"fileFormula\":\"IMARGUMENT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMCONJUGATE(A1:A2)\",\"fileFormula\":\"IMCONJUGATE(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMCOS(A1:A2)\",\"fileFormula\":\"IMCOS(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMCOSH(A1:A2)\",\"fileFormula\":\"_xlfn.IMCOSH(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMCOT(A1:A2)\",\"fileFormula\":\"_xlfn.IMCOT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMCSC(A1:A2)\",\"fileFormula\":\"_xlfn.IMCSC(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMCSCH(A1:A2)\",\"fileFormula\":\"_xlfn.IMCSCH(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMDIV(A1:A2,\\\"1+i\\\")\",\"fileFormula\":\"IMDIV(_xlfn.SINGLE(A1:A2),\\\"1+i\\\")\"},{\"addedFormula\":\"IMDIV(\\\"1+i\\\",A1:A2)\",\"fileFormula\":\"IMDIV(\\\"1+i\\\",_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMEXP(A1:A2)\",\"fileFormula\":\"IMEXP(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMLN(A1:A2)\",\"fileFormula\":\"IMLN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMLOG10(A1:A2)\",\"fileFormula\":\"IMLOG10(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMLOG2(A1:A2)\",\"fileFormula\":\"IMLOG2(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMPOWER(A1:A2,2)\",\"fileFormula\":\"IMPOWER(_xlfn.SINGLE(A1:A2),2)\"},{\"addedFormula\":\"IMPOWER(\\\"1+i\\\",A1:A2)\",\"fileFormula\":\"IMPOWER(\\\"1+i\\\",_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMPRODUCT(A1:A2)\",\"fileFormula\":\"IMPRODUCT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMREAL(A1:A2)\",\"fileFormula\":\"IMREAL(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMSEC(A1:A2)\",\"fileFormula\":\"_xlfn.IMSEC(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMSECH(A1:A2)\",\"fileFormula\":\"_xlfn.IMSECH(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMSIN(A1:A2)\",\"fileFormula\":\"IMSIN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMSINH(A1:A2)\",\"fileFormula\":\"_xlfn.IMSINH(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMSQRT(A1:A2)\",\"fileFormula\":\"IMSQRT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMSUB(A1:A2,\\\"1+i\\\")\",\"fileFormula\":\"IMSUB(_xlfn.SINGLE(A1:A2),\\\"1+i\\\")\"},{\"addedFormula\":\"IMSUB(\\\"1+i\\\",A1:A2)\",\"fileFormula\":\"IMSUB(\\\"1+i\\\",_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMSUM(A1:A2)\",\"fileFormula\":\"IMSUM(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IMTAN(A1:A2)\",\"fileFormula\":\"_xlfn.IMTAN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"INDEX(A1:A2,1)\",\"fileFormula\":\"INDEX(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"INDEX(B1:B2,A1:A2)\",\"fileFormula\":\"INDEX(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"INDIRECT(A1:A2)\",\"fileFormula\":\"INDIRECT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"INTERCEPT(A1:A2,B1:B2)\",\"fileFormula\":\"INTERCEPT(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"INTERCEPT(B1:B2,A1:A2)\",\"fileFormula\":\"INTERCEPT(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"IRR(A1:A2)\",\"fileFormula\":\"IRR(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"ISEVEN(A1:A2)\",\"fileFormula\":\"ISEVEN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"ISFORMULA(A1:A2)\",\"fileFormula\":\"_xlfn.ISFORMULA(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"ISODD(A1:A2)\",\"fileFormula\":\"ISODD(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"ISREF(A1:A2)\",\"fileFormula\":\"ISREF(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"KURT(A1:A2)\",\"fileFormula\":\"KURT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"LARGE(A1:A2,1)\",\"fileFormula\":\"LARGE(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"LCM(A1:A2)\",\"fileFormula\":\"LCM(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"LOOKUP(1,A1:A2)\",\"fileFormula\":\"LOOKUP(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"LOOKUP(1,B1:B2,A1:A2)\",\"fileFormula\":\"LOOKUP(1,B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MATCH(1,A1:A2,0)\",\"fileFormula\":\"MATCH(1,_xlfn.SINGLE(A1:A2),0)\"},{\"addedFormula\":\"MATCH(1,B1:B2,A1:A2)\",\"fileFormula\":\"MATCH(1,B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MAX(A1:A2)\",\"fileFormula\":\"MAX(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MAXA(A1:A2)\",\"fileFormula\":\"MAXA(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MAXIFS(A1:A2,B1:B2,\\\">0\\\")\",\"fileFormula\":\"_xlfn.MAXIFS(_xlfn.SINGLE(A1:A2),B1:B2,\\\">0\\\")\"},{\"addedFormula\":\"MAXIFS(C1:C2,A1:A2,\\\">0\\\")\",\"fileFormula\":\"_xlfn.MAXIFS(C1:C2,_xlfn.SINGLE(A1:A2),\\\">0\\\")\"},{\"addedFormula\":\"MDETERM(A1:A2)\",\"fileFormula\":\"MDETERM(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MEDIAN(A1:A2)\",\"fileFormula\":\"MEDIAN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MIN(A1:A2)\",\"fileFormula\":\"MIN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MINA(A1:A2)\",\"fileFormula\":\"MINA(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MINIFS(A1:A2,B1:B2,\\\">0\\\")\",\"fileFormula\":\"_xlfn.MINIFS(_xlfn.SINGLE(A1:A2),B1:B2,\\\">0\\\")\"},{\"addedFormula\":\"MINIFS(C1:C2,A1:A2,\\\">0\\\")\",\"fileFormula\":\"_xlfn.MINIFS(C1:C2,_xlfn.SINGLE(A1:A2),\\\">0\\\")\"},{\"addedFormula\":\"MIRR(A1:A2,0.1,0.12)\",\"fileFormula\":\"MIRR(_xlfn.SINGLE(A1:A2),0.1,0.12)\"},{\"addedFormula\":\"MODE(A1:A2)\",\"fileFormula\":\"MODE(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MODE.MULT(A1:A2)\",\"fileFormula\":\"_xlfn.MODE.MULT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MODE.SNGL(A1:A2)\",\"fileFormula\":\"_xlfn.MODE.SNGL(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MROUND(A1:A2,1)\",\"fileFormula\":\"MROUND(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"MROUND(10,A1:A2)\",\"fileFormula\":\"MROUND(10,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MULTINOMIAL(A1:A2)\",\"fileFormula\":\"MULTINOMIAL(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"MUNIT(A1:A2)\",\"fileFormula\":\"_xlfn.MUNIT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"N(A1:A2)\",\"fileFormula\":\"N(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"NETWORKDAYS(A1:A2,B1)\",\"fileFormula\":\"NETWORKDAYS(_xlfn.SINGLE(A1:A2),B1)\"},{\"addedFormula\":\"NETWORKDAYS(A1,A1:A2)\",\"fileFormula\":\"NETWORKDAYS(A1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"NETWORKDAYS.INTL(A1:A2,B1)\",\"fileFormula\":\"NETWORKDAYS.INTL(_xlfn.SINGLE(A1:A2),B1)\"},{\"addedFormula\":\"NETWORKDAYS.INTL(A1,A1:A2)\",\"fileFormula\":\"NETWORKDAYS.INTL(A1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"NOMINAL(A1:A2,4)\",\"fileFormula\":\"NOMINAL(_xlfn.SINGLE(A1:A2),4)\"},{\"addedFormula\":\"NOMINAL(0.1,A1:A2)\",\"fileFormula\":\"NOMINAL(0.1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"NPV(0.1,A1:A2)\",\"fileFormula\":\"NPV(0.1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"OCT2BIN(A1:A2)\",\"fileFormula\":\"OCT2BIN(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"OCT2DEC(A1:A2)\",\"fileFormula\":\"OCT2DEC(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"OCT2HEX(A1:A2)\",\"fileFormula\":\"OCT2HEX(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"OFFSET(A1:A2,0,0)\",\"fileFormula\":\"OFFSET(_xlfn.SINGLE(A1:A2),0,0)\"},{\"addedFormula\":\"OR(A1:A2)\",\"fileFormula\":\"OR(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"PEARSON(A1:A2,B1:B2)\",\"fileFormula\":\"PEARSON(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"PEARSON(B1:B2,A1:A2)\",\"fileFormula\":\"PEARSON(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"PERCENTILE(A1:A2,0.5)\",\"fileFormula\":\"PERCENTILE(_xlfn.SINGLE(A1:A2),0.5)\"},{\"addedFormula\":\"PERCENTRANK(A1:A2,1)\",\"fileFormula\":\"PERCENTRANK(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"PRODUCT(A1:A2)\",\"fileFormula\":\"PRODUCT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"QUARTILE(A1:A2,1)\",\"fileFormula\":\"QUARTILE(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"QUOTIENT(A1:A2,2)\",\"fileFormula\":\"QUOTIENT(_xlfn.SINGLE(A1:A2),2)\"},{\"addedFormula\":\"QUOTIENT(10,A1:A2)\",\"fileFormula\":\"QUOTIENT(10,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"RANDBETWEEN(A1:A2,100)\",\"fileFormula\":\"RANDBETWEEN(_xlfn.SINGLE(A1:A2),100)\"},{\"addedFormula\":\"RANDBETWEEN(1,A1:A2)\",\"fileFormula\":\"RANDBETWEEN(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"RANK(1,A1:A2)\",\"fileFormula\":\"RANK(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"RANK.AVG(1,A1:A2)\",\"fileFormula\":\"_xlfn.RANK.AVG(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"RANK.EQ(1,A1:A2)\",\"fileFormula\":\"_xlfn.RANK.EQ(1,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"ROW(A1:A2)\",\"fileFormula\":\"ROW(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"ROWS(A1:A2)\",\"fileFormula\":\"ROWS(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"RSQ(A1:A2,B1:B2)\",\"fileFormula\":\"RSQ(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"RSQ(B1:B2,A1:A2)\",\"fileFormula\":\"RSQ(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SEQUENCE(A1:A2)\",\"fileFormula\":\"_xlfn.SEQUENCE(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SEQUENCE(4,A1:A2)\",\"fileFormula\":\"_xlfn.SEQUENCE(4,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SKEW(A1:A2)\",\"fileFormula\":\"SKEW(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SKEW.P(A1:A2)\",\"fileFormula\":\"_xlfn.SKEW.P(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SLOPE(A1:A2,B1:B2)\",\"fileFormula\":\"SLOPE(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"SLOPE(B1:B2,A1:A2)\",\"fileFormula\":\"SLOPE(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SMALL(A1:A2,1)\",\"fileFormula\":\"SMALL(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"SQRTPI(A1:A2)\",\"fileFormula\":\"SQRTPI(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"STDEV(A1:A2)\",\"fileFormula\":\"STDEV(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"STDEV.P(A1:A2)\",\"fileFormula\":\"_xlfn.STDEV.P(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"STDEV.S(A1:A2)\",\"fileFormula\":\"_xlfn.STDEV.S(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"STDEVA(A1:A2)\",\"fileFormula\":\"STDEVA(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"STDEVP(A1:A2)\",\"fileFormula\":\"STDEVP(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"STDEVPA(A1:A2)\",\"fileFormula\":\"STDEVPA(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"STEYX(A1:A2,B1:B2)\",\"fileFormula\":\"STEYX(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"STEYX(B1:B2,A1:A2)\",\"fileFormula\":\"STEYX(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SUBTOTAL(9,A1:A2)\",\"fileFormula\":\"SUBTOTAL(9,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SUM(A1:A2)\",\"fileFormula\":\"SUM(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SUMIF(A1:A2,\\\">0\\\")\",\"fileFormula\":\"SUMIF(_xlfn.SINGLE(A1:A2),\\\">0\\\")\"},{\"addedFormula\":\"SUMIFS(A1:A2,B1:B2,\\\">0\\\")\",\"fileFormula\":\"SUMIFS(_xlfn.SINGLE(A1:A2),B1:B2,\\\">0\\\")\"},{\"addedFormula\":\"SUMIFS(C1:C2,A1:A2,\\\">0\\\")\",\"fileFormula\":\"SUMIFS(C1:C2,_xlfn.SINGLE(A1:A2),\\\">0\\\")\"},{\"addedFormula\":\"SUMPRODUCT(A1:A2)\",\"fileFormula\":\"SUMPRODUCT(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SUMSQ(A1:A2)\",\"fileFormula\":\"SUMSQ(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SUMX2MY2(A1:A2,B1:B2)\",\"fileFormula\":\"SUMX2MY2(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"SUMX2MY2(B1:B2,A1:A2)\",\"fileFormula\":\"SUMX2MY2(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SUMX2PY2(A1:A2,B1:B2)\",\"fileFormula\":\"SUMX2PY2(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"SUMX2PY2(B1:B2,A1:A2)\",\"fileFormula\":\"SUMX2PY2(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SUMXMY2(A1:A2,B1:B2)\",\"fileFormula\":\"SUMXMY2(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"SUMXMY2(B1:B2,A1:A2)\",\"fileFormula\":\"SUMXMY2(B1:B2,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"SWITCH(A1:A2,1,\\\"one\\\",2,\\\"two\\\")\",\"fileFormula\":\"_xlfn.SWITCH(_xlfn.SINGLE(A1:A2),1,\\\"one\\\",2,\\\"two\\\")\"},{\"addedFormula\":\"SWITCH(1,A1:A2,\\\"one\\\",2,\\\"two\\\")\",\"fileFormula\":\"_xlfn.SWITCH(1,_xlfn.SINGLE(A1:A2),\\\"one\\\",2,\\\"two\\\")\"},{\"addedFormula\":\"T(A1:A2)\",\"fileFormula\":\"T(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"T.DIST.RT(A1:A2,\",\"fileFormula\":\"_xlfn.T.DIST.RT(A1:A2,1)\"},{\"addedFormula\":\"T.TEST(A1:A2,B1:B2,2,1)\",\"fileFormula\":\"_xlfn.T.TEST(_xlfn.SINGLE(A1:A2),B1:B2,2,1)\"},{\"addedFormula\":\"T.TEST(A1:A2,B1:B2,2,1)\",\"fileFormula\":\"_xlfn.T.TEST(A1:A2,_xlfn.SINGLE(B1:B2),2,1)\"},{\"addedFormula\":\"TBILLEQ(A1:A2,B1,0.05)\",\"fileFormula\":\"TBILLEQ(_xlfn.SINGLE(A1:A2),B1,0.05)\"},{\"addedFormula\":\"TBILLEQ(A1,B1:B2,0.05)\",\"fileFormula\":\"TBILLEQ(A1,_xlfn.SINGLE(B1:B2),0.05)\"},{\"addedFormula\":\"TBILLEQ(A1,B1,C1:C2)\",\"fileFormula\":\"TBILLEQ(A1,B1,_xlfn.SINGLE(C1:C2))\"},{\"addedFormula\":\"TBILLPRICE(A1:A2,B1,0.05)\",\"fileFormula\":\"TBILLPRICE(_xlfn.SINGLE(A1:A2),B1,0.05)\"},{\"addedFormula\":\"TBILLPRICE(A1,B1:B2,0.05)\",\"fileFormula\":\"TBILLPRICE(A1,_xlfn.SINGLE(B1:B2),0.05)\"},{\"addedFormula\":\"TBILLPRICE(A1,B1,C1:C2)\",\"fileFormula\":\"TBILLPRICE(A1,B1,_xlfn.SINGLE(C1:C2))\"},{\"addedFormula\":\"TBILLYIELD(A1:A2,B1,100)\",\"fileFormula\":\"TBILLYIELD(_xlfn.SINGLE(A1:A2),B1,100)\"},{\"addedFormula\":\"TBILLYIELD(A1,B1:B2,100)\",\"fileFormula\":\"TBILLYIELD(A1,_xlfn.SINGLE(B1:B2),100)\"},{\"addedFormula\":\"TBILLYIELD(A1,B1,C1:C2)\",\"fileFormula\":\"TBILLYIELD(A1,B1,_xlfn.SINGLE(C1:C2))\"},{\"addedFormula\":\"TEXTJOIN(\\\",\\\",TRUE,A1:A2)\",\"fileFormula\":\"_xlfn.TEXTJOIN(\\\",\\\",TRUE,_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"TEXTJOIN(A1:A2,TRUE,B1:B2)\",\"fileFormula\":\"_xlfn.TEXTJOIN(_xlfn.SINGLE(A1:A2),TRUE,B1:B2)\"},{\"addedFormula\":\"TRANSPOSE(A1:A2)\",\"fileFormula\":\"TRANSPOSE(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"TREND(A1:A2,B1:B2)\",\"fileFormula\":\"TREND(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"TREND(A1:A2,B1:B2)\",\"fileFormula\":\"TREND(A1:A2,_xlfn.SINGLE(B1:B2))\"},{\"addedFormula\":\"TRIMMEAN(A1:A2,0.2)\",\"fileFormula\":\"TRIMMEAN(_xlfn.SINGLE(A1:A2),0.2)\"},{\"addedFormula\":\"TTEST(A1:A2,B1:B2,2,1)\",\"fileFormula\":\"TTEST(_xlfn.SINGLE(A1:A2),B1:B2,2,1)\"},{\"addedFormula\":\"TTEST(A1:A2,B1:B2,2,1)\",\"fileFormula\":\"TTEST(A1:A2,_xlfn.SINGLE(B1:B2),2,1)\"},{\"addedFormula\":\"UNIQUE(A1:A2)\",\"fileFormula\":\"_xlfn.UNIQUE(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"VAR(A1:A2)\",\"fileFormula\":\"VAR(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"VAR.P(A1:A2)\",\"fileFormula\":\"_xlfn.VAR.P(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"VAR.S(A1:A2)\",\"fileFormula\":\"_xlfn.VAR.S(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"VARA(A1:A2)\",\"fileFormula\":\"VARA(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"VARP(A1:A2)\",\"fileFormula\":\"VARP(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"VARPA(A1:A2)\",\"fileFormula\":\"VARPA(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"VLOOKUP(1,B1:C2,2)\",\"fileFormula\":\"VLOOKUP(1,_xlfn.SINGLE(B1:C2),2)\"},{\"addedFormula\":\"WEEKNUM(A1:A2)\",\"fileFormula\":\"WEEKNUM(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"WEEKNUM(A1,B1:B2)\",\"fileFormula\":\"WEEKNUM(A1,_xlfn.SINGLE(B1:B2))\"},{\"addedFormula\":\"WORKDAY(A1:A2,1)\",\"fileFormula\":\"WORKDAY(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"WORKDAY(A1,B1:B2)\",\"fileFormula\":\"WORKDAY(A1,_xlfn.SINGLE(B1:B2))\"},{\"addedFormula\":\"WORKDAY.INTL(A1:A2,1)\",\"fileFormula\":\"WORKDAY.INTL(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"WORKDAY.INTL(A1,B1:B2)\",\"fileFormula\":\"WORKDAY.INTL(A1,_xlfn.SINGLE(B1:B2))\"},{\"addedFormula\":\"XIRR(A1:A2,B1:B2)\",\"fileFormula\":\"XIRR(_xlfn.SINGLE(A1:A2),B1:B2)\"},{\"addedFormula\":\"XIRR(A1:A2,B1:B2)\",\"fileFormula\":\"XIRR(A1:A2,_xlfn.SINGLE(B1:B2))\"},{\"addedFormula\":\"XIRR(A1:A2,B1:B2,C1:C2)\",\"fileFormula\":\"XIRR(A1:A2,B1:B2,_xlfn.SINGLE(C1:C2))\"},{\"addedFormula\":\"XLOOKUP(1,B1:B2,C1:C2)\",\"fileFormula\":\"_xlfn.XLOOKUP(1,_xlfn.SINGLE(B1:B2),C1:C2)\"},{\"addedFormula\":\"XLOOKUP(1,B1:B2,C1:C2)\",\"fileFormula\":\"_xlfn.XLOOKUP(1,B1:B2,_xlfn.SINGLE(C1:C2))\"},{\"addedFormula\":\"XMATCH(1,B1:B2)\",\"fileFormula\":\"_xlfn.XMATCH(1,_xlfn.SINGLE(B1:B2))\"},{\"addedFormula\":\"XNPV(A1:A2,B1:B2,C1:C2)\",\"fileFormula\":\"XNPV(_xlfn.SINGLE(A1:A2),B1:B2,C1:C2)\"},{\"addedFormula\":\"XNPV(0.1,B1:B2,C1:C2)\",\"fileFormula\":\"XNPV(0.1,_xlfn.SINGLE(B1:B2),C1:C2)\"},{\"addedFormula\":\"XNPV(0.1,B1:B2,C1:C2)\",\"fileFormula\":\"XNPV(0.1,B1:B2,_xlfn.SINGLE(C1:C2))\"},{\"addedFormula\":\"XOR(A1:A2)\",\"fileFormula\":\"_xlfn.XOR(_xlfn.SINGLE(A1:A2))\"},{\"addedFormula\":\"YEARFRAC(A1:A2,B1)\",\"fileFormula\":\"YEARFRAC(_xlfn.SINGLE(A1:A2),B1)\"},{\"addedFormula\":\"YEARFRAC(A1,B1:B2)\",\"fileFormula\":\"YEARFRAC(A1,_xlfn.SINGLE(B1:B2))\"},{\"addedFormula\":\"YEARFRAC(A1,B1,C1:C2)\",\"fileFormula\":\"YEARFRAC(A1,B1,_xlfn.SINGLE(C1:C2))\"},{\"addedFormula\":\"YIELD(A1:A2,B1,0.05,100,100,2)\",\"fileFormula\":\"YIELD(_xlfn.SINGLE(A1:A2),B1,0.05,100,100,2)\"},{\"addedFormula\":\"YIELD(A1,B1:B2,0.05,100,100,2)\",\"fileFormula\":\"YIELD(A1,_xlfn.SINGLE(B1:B2),0.05,100,100,2)\"},{\"addedFormula\":\"YIELD(A1,B1,C1:C2,100,100,2)\",\"fileFormula\":\"YIELD(A1,B1,_xlfn.SINGLE(C1:C2),100,100,2)\"},{\"addedFormula\":\"YIELD(A1,B1,0.05,C1:C2,100,2)\",\"fileFormula\":\"YIELD(A1,B1,0.05,_xlfn.SINGLE(C1:C2),100,2)\"},{\"addedFormula\":\"YIELD(A1,B1,0.05,100,C1:C2,2)\",\"fileFormula\":\"YIELD(A1,B1,0.05,100,_xlfn.SINGLE(C1:C2),2)\"},{\"addedFormula\":\"YIELD(A1,B1,0.05,100,100,C1:C2)\",\"fileFormula\":\"YIELD(A1,B1,0.05,100,100,_xlfn.SINGLE(C1:C2))\"},{\"addedFormula\":\"YIELDDISC(A1:A2,B1,100,110)\",\"fileFormula\":\"YIELDDISC(_xlfn.SINGLE(A1:A2),B1,100,110)\"},{\"addedFormula\":\"YIELDDISC(A1,B1:B2,100,110)\",\"fileFormula\":\"YIELDDISC(A1,_xlfn.SINGLE(B1:B2),100,110)\"},{\"addedFormula\":\"YIELDDISC(A1,B1,C1:C2,110)\",\"fileFormula\":\"YIELDDISC(A1,B1,_xlfn.SINGLE(C1:C2),110)\"},{\"addedFormula\":\"YIELDDISC(A1,B1,100,C1:C2)\",\"fileFormula\":\"YIELDDISC(A1,B1,100,_xlfn.SINGLE(C1:C2))\"},{\"addedFormula\":\"YIELDMAT(A1:A2,B1,C1,0.05,100)\",\"fileFormula\":\"YIELDMAT(_xlfn.SINGLE(A1:A2),B1,C1,0.05,100)\"},{\"addedFormula\":\"YIELDMAT(A1,B1:B2,C1,0.05,100)\",\"fileFormula\":\"YIELDMAT(A1,_xlfn.SINGLE(B1:B2),C1,0.05,100)\"},{\"addedFormula\":\"YIELDMAT(A1,B1,C1:C2,0.05,100)\",\"fileFormula\":\"YIELDMAT(A1,B1,_xlfn.SINGLE(C1:C2),0.05,100)\"},{\"addedFormula\":\"YIELDMAT(A1,B1,C1,D1:D2,100)\",\"fileFormula\":\"YIELDMAT(A1,B1,C1,_xlfn.SINGLE(D1:D2),100)\"},{\"addedFormula\":\"YIELDMAT(A1,B1,C1,0.05,D1:D2)\",\"fileFormula\":\"YIELDMAT(A1,B1,C1,0.05,_xlfn.SINGLE(D1:D2))\"},{\"addedFormula\":\"Z.TEST(A1:A2,1)\",\"fileFormula\":\"_xlfn.Z.TEST(_xlfn.SINGLE(A1:A2),1)\"},{\"addedFormula\":\"ZTEST(A1:A2,1)\",\"fileFormula\":\"ZTEST(_xlfn.SINGLE(A1:A2),1)\"}]"
-
-
-
-
-	  function buildSingleArgMap(data) {
-		  const result = {};
-
-		  data.forEach(item => {
-			  const addedFormula = item.addedFormula;
-			  const fileFormula = item.fileFormula;
-
-			  // Извлекаем имя функции из addedFormula
-			  const funcNameMatch = addedFormula.match(/^([A-Z][A-Z0-9.]*)\(/i);
-			  if (!funcNameMatch) return;
-
-			  const funcName = funcNameMatch[1].toUpperCase();
-
-			  // Извлекаем аргументы из обеих формул
-			  const addedArgs = extractArgs(addedFormula);
-			  const fileArgs = extractArgs(fileFormula);
-
-			  if (addedArgs.length !== fileArgs.length) return;
-
-			  // Находим какие аргументы обёрнуты в SINGLE
-			  for (let i = 0; i < fileArgs.length; i++) {
-				  if (fileArgs[i].includes('_xlfn.SINGLE(')) {
-					  if (!result[funcName]) {
-						  result[funcName] = {};
-					  }
-					  // Аргументы нумеруются с 0
-					  result[funcName][i.toString()] = true;
-				  }
-			  }
-		  });
-
-		  return result;
-	  }
-
-	  function extractArgs(formula) {
-		  // Убираем префикс _xlfn. для корректного парсинга
-		  const cleaned = formula.replace(/_xlfn\./g, '');
-
-		  // Находим открывающую скобку функции
-		  const firstParen = formula.indexOf('(');
-		  if (firstParen === -1) return [];
-
-		  // Извлекаем содержимое между первой ( и последней )
-		  let depth = 0;
-		  let start = firstParen + 1;
-		  const args = [];
-		  let currentArg = '';
-
-		  for (let i = start; i < formula.length - 1; i++) {
-			  const char = formula[i];
-
-			  if (char === '(') {
-				  depth++;
-				  currentArg += char;
-			  } else if (char === ')') {
-				  depth--;
-				  currentArg += char;
-			  } else if (char === ',' && depth === 0) {
-				  args.push(currentArg.trim());
-				  currentArg = '';
-			  } else {
-				  currentArg += char;
-			  }
-		  }
-
-		  if (currentArg.trim()) {
-			  args.push(currentArg.trim());
-		  }
-
-		  return args;
-	  }
-
-	  const singleArgMap = buildSingleArgMap(arr);
-	  console.log(JSON.stringify(singleArgMap, null, 2));
-
   };
-
-
 
   spreadsheet_api.prototype.asc_setCellItalic = function(isItalic) {
     if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {

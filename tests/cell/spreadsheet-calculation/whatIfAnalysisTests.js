@@ -1898,4 +1898,67 @@ $(function () {
 
 		}, 'Case #1: Checking result after found solution. Result: ');
 	});
+	QUnit.test('Test: Check calculate by Simplex method. Minimize.', function (assert) {
+		// Case #1: Finding the total spending for advertising.
+		// Filling data
+		let testData = [
+			// Tv (Col: A), Social media (Col: B), Radio (Col: C), Newspapers (Col: D), Total (Col: E) (E4 - Objective cell)
+			['600000', '700000', '30000', '10000', '2000000'], // Audience (Row: 1)
+			['30000', '15000', '5000', '4000'], // Price per view or publication (Row: 2)
+			['2', '1', '10', '10'], // Maximum views (Row: 3)
+			['', '', '', '', '=SUM(A4:D4)'], // Spending for advertising (Variable cells) (Row: 4)
+			['=A4/A2', '=B4/B2', '=C4/C2', '=D4/D2'], // Views based to spending for advertising (Row: 5)
+			['=A5*A1', '=B5*B1', '=C5*C1', '=D5*D1', '=SUM(A6:D6)'], // Total audience views (Row: 6)
+		];
+		let oRange = ws.getRange4(0, 0);
+		oRange.fillData(testData);
+		// Filling solver parameters
+		let oSolverParams = api.asc_GetSolverParams();
+		assert.ok(oSolverParams, 'Case #1: solverParams is created. Open Solver params dialogue window');
+		oSolverParams.asc_resetAll(); // Reset all previous field data
+		oSolverParams.asc_setObjectiveFunction('Sheet1!$E$4');
+		assert.strictEqual(oSolverParams.asc_getObjectiveFunction(), 'Sheet1!$E$4', 'Case #1: Checking fill "Set Objective" field. Result: ' + oSolverParams.asc_getObjectiveFunction());
+		oSolverParams.asc_setOptimizeResultTo(c_oAscOptimizeTo.min);
+		assert.strictEqual(oSolverParams.asc_getOptimizeResultTo(), c_oAscOptimizeTo.min, 'Case #1: Checking fill "Optimize to" field. Result: Min(' + oSolverParams.asc_getOptimizeResultTo() + ')');
+		oSolverParams.asc_setChangingCells('Sheet1!$A$4:$D$4');
+		assert.strictEqual(oSolverParams.asc_getChangingCells(), 'Sheet1!$A$4:$D$4', 'Case #1: Checking fill "By changing Variable" cells field. Result: ' + oSolverParams.asc_getChangingCells());
+		oSolverParams.asc_addConstraint(1, {cellRef: 'Sheet1!$A$5:$D$5', operator: c_oAscOperator['<='], constraint: 'Sheet1!$A$3:$D$3'});
+		oSolverParams.asc_addConstraint(2, {cellRef: 'Sheet1!$A$5:$D$5', operator: c_oAscOperator['>='], constraint: '1'});
+		oSolverParams.asc_addConstraint(3, {cellRef: 'Sheet1!$E$6', operator: c_oAscOperator['>='], constraint: 'Sheet1!$E$1'});
+		assert.strictEqual(oSolverParams.asc_getConstraints().size, 3, 'Case #1: Checking count elements of "Constraints" field. Result: ' + oSolverParams.asc_getConstraints().size);
+		assert.strictEqual(oSolverParams.asc_getVariablesNonNegative(), true, 'Case #1: Checking fill "Variables Non-Negative" field. Result: ' + oSolverParams.asc_getVariablesNonNegative());
+		assert.strictEqual(oSolverParams.asc_getSolvingMethod(), c_oAscSolvingMethod.simplexLP, 'Case #1: Checking fill "Select a solving method" field. Result: Simplex LP(' + oSolverParams.asc_getSolvingMethod() + ')');
+		// Finding solution
+		api.asc_StartSolver(oSolverParams);
+		let oSimplexTableau = wb.getSolver().getSimplexTableau();
+		let oVarIndexByCellName = oSimplexTableau.getVarIndexByCellName();
+		api.asc_CloseSolver(true);
+		const undoExpectedVariableCells = {
+			'A4': '',
+			'B4': '',
+			'C4': '',
+			'D4': '',
+		};
+		const expectedVariableCells = {
+			'A4': '60000',
+			'B4': '15000',
+			'C4': '15000',
+			'D4': '4000'
+		};
+		checkUndoRedo(function (_desc) {
+			for (let sCellName in oVarIndexByCellName) {
+				let sVarCellVal = ws.getCell2(sCellName).getValue();
+				assert.strictEqual(sVarCellVal, undoExpectedVariableCells[sCellName], _desc + 'Variable cell: ' + sVarCellVal);
+				let nResult = +ws.getCell2('E4').getValue();
+				assert.strictEqual(nResult, 0, _desc + 'Result cell: ' + nResult);
+			}
+		}, function (_desc) {
+			for (let sCellName in oVarIndexByCellName) {
+				let nVarCellVal = +ws.getCell2(sCellName).getValue();
+				assert.strictEqual(nVarCellVal.toFixed(), expectedVariableCells[sCellName], _desc + 'Variable cell: ' + nVarCellVal.toFixed());
+			}
+			let nResult = +ws.getCell2('E4').getValue();
+			assert.strictEqual(nResult.toFixed(), '94000', _desc + 'Objective cell: ' + nResult.toFixed());
+		}, 'Case #1: Checking result after found solution.');
+	});
 });

@@ -728,7 +728,7 @@
                 oDrawing.GraphicObj.draw(oGraphicsWord);
         }
 
-        this.content.Draw(0, oGraphicsWord);
+        this.content.Draw(this.content.GetAbsolutePage(), oGraphicsWord);
         oGraphicsWord.RemoveLastClip();
 
         if (this.IsPressed()) {
@@ -815,6 +815,10 @@
         this.DrawEdit(oGraphicsWord);
     };
     CPushButtonField.prototype.SetImageRasterId = function(sRasterId, nAPType) {
+		if (sRasterId == undefined) {
+			sRasterId = "";
+		}
+
         let sPrevRasterId;
 
         if (undefined == nAPType) {
@@ -1179,7 +1183,7 @@
 		}
 
         if (contentX != this.content.X || contentY != this.content.Y ||
-            contentXLimit != this.content.XLimit) {
+            contentXLimit != this.content.XLimit || !this.getFormRelRect()) {
             this.content.X      = contentX;
             this.content.Y      = contentY;
             this.content.XLimit = contentXLimit;

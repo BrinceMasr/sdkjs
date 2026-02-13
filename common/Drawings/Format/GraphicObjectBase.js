@@ -1046,27 +1046,25 @@
 		return !this.isObjectInSmartArt() && this.getNoAdjustHandles() === false;
 	};
 	CGraphicObjectBase.prototype.Reassign_ImageUrls = function (mapUrl) {
-		var blip_fill;
 		if (this.blipFill) {
 			if (mapUrl[this.blipFill.RasterImageId]) {
 				if (this.setBlipFill) {
-					blip_fill = this.blipFill.createDuplicate();
+					const blip_fill = this.blipFill.createDuplicate();
 					blip_fill.setRasterImageId(mapUrl[this.blipFill.RasterImageId]);
 					this.setBlipFill(blip_fill);
 				}
 			}
 		}
-		if (this.spPr && this.spPr.Fill && this.spPr.Fill.fill && this.spPr.Fill.fill.RasterImageId) {
-			if (mapUrl[this.spPr.Fill.fill.RasterImageId] && mapUrl[this.spPr.Fill.fill.RasterImageId] !== this.spPr.Fill.fill.RasterImageId) {
-				blip_fill = this.spPr.Fill.fill.createDuplicate();
-				blip_fill.setRasterImageId(mapUrl[this.spPr.Fill.fill.RasterImageId]);
-				var oUniFill = this.spPr.Fill.createDuplicate();
-				oUniFill.setFill(blip_fill);
-				this.spPr.setFill(oUniFill);
-			}
+		if (this.spPr) {
+			const oNewFill = this.spPr.Fill && this.spPr.Fill.reassignImageUrl(mapUrl);
+			if (oNewFill)
+				this.spPr.setFill(oNewFill);
+			const oNewLn = this.spPr.ln && this.spPr.ln.reassignImageUrl(mapUrl);
+			if (oNewLn)
+				this.spPr.setLn(oNewLn);
 		}
 		if (Array.isArray(this.spTree)) {
-			for (var i = 0; i < this.spTree.length; ++i) {
+			for (let i = 0; i < this.spTree.length; ++i) {
 				if (this.spTree[i].Reassign_ImageUrls) {
 					this.spTree[i].Reassign_ImageUrls(mapUrl);
 				}
@@ -2187,10 +2185,12 @@
 	CGraphicObjectBase.prototype.getInvertTransform = function () {
 		return this.invertTransform;
 	};
-	CGraphicObjectBase.prototype.getResizeCoefficients = function (numHandle, x, y, aDrawings, oController) {
+	CGraphicObjectBase.prototype.getResizeCoefficients = function (numHandle, x, y, aDrawings, oController, bShiftKey) {
 		var cx, cy;
 		cx = this.extX > 0 ? this.extX : 0.01;
 		cy = this.extY > 0 ? this.extY : 0.01;
+		const ignoreExtX = bShiftKey && (this.extX <= 0);
+		const ignoreExtY = bShiftKey && (this.extY <= 0);
 
 		var invert_transform = this.getInvertTransform();
 		if (!invert_transform) {
@@ -2297,8 +2297,8 @@
 		switch (numHandle) {
 			case 0:
 				return {
-					kd1: (cx - t_x) / cx,
-					kd2: (cy - t_y) / cy,
+					kd1: ignoreExtX ? 0 : (cx - t_x) / cx,
+					kd2: ignoreExtY ? 0 : (cy - t_y) / cy,
 					snapH: bSnapH,
 					snapV: bSnapV,
 					snapX: dSnapX,
@@ -2341,8 +2341,8 @@
 				};
 			case 4:
 				return {
-					kd1: t_x / cx,
-					kd2: t_y / cy,
+					kd1: ignoreExtX ? 0 : t_x / cx,
+					kd2: ignoreExtY ? 0 : t_y / cy,
 					snapH: bSnapH,
 					snapV: bSnapV,
 					snapX: dSnapX,
@@ -3658,9 +3658,9 @@
 		return sTrText;
 	};
     CGraphicObjectBase.prototype.checkRecalculateTransform = function() {
-        if(this.recalcInfo.recalcTransform) {
+        if(this.recalcInfo.recalculateTransform) {
             this.recalculateTransform();
-            this.recalcInfo.recalcTransform = false;
+            this.recalcInfo.recalculateTransform = false;
         }
     };
     CGraphicObjectBase.prototype.checkTransformBeforeApply = function() {

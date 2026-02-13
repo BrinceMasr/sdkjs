@@ -10089,6 +10089,17 @@ CDocumentShd.prototype.GetSimpleColor = function(oTheme, oColorMap)
 
 	return oResultColor;
 };
+CDocumentShd.prototype.GetAlpha = function(theme, colorMap)
+{
+	let unifill = this.ThemeFill;
+	if (unifill)
+	{
+		unifill.check(theme, colorMap);
+		let rgba = unifill.getRGBAColor();
+		return (rgba.A !== undefined && rgba.A !== null) ? rgba.A : 255;
+	}
+	return 255;
+};
 CDocumentShd.prototype.private_GetPctShdColor = function(nPct, strokeColor, fillColor)
 {
 	var _nPct = 1 - nPct;

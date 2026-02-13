@@ -401,7 +401,7 @@
 
 		// рендер html тагов
 		if (!this.Config.renderHTMLTags) {
-			sOutputText = sOutputText.replace(/</gi, '&lt;').replace(/>/gi, '&gt;');
+			sOutputText = private_EscapeHtml(sOutputText);
 		}
 
 		return sOutputText;
@@ -931,7 +931,7 @@
 
 			}
 
-			return sText;
+			return private_EscapeHtml(sText);
 		}
 
 		var oCMarkdownConverter    = this;
@@ -3356,6 +3356,12 @@
 
 		if (sLink !== "")
 		{
+			const isPresentationEditor = Asc.editor && Asc.editor.editorId === AscCommon.c_oEditorId.Presentation;
+			if (isPresentationEditor && AscCommon.IsLinkPPAction(sLink)) {
+				this.ParaHyperlink.SetValue(sLink);
+				return true;
+			}
+
 			urlType		= AscCommon.getUrlType(sLink);
 			if (!AscCommon.rx_allowedProtocols.test(sLink))
 				sLink = (urlType === 0) ? null :(( (urlType === 2) ? 'mailto:' : 'http://' ) + sLink);
@@ -4147,6 +4153,27 @@
 	 */
 
 	/**
+	 * The available fill types.
+	 * @typedef {("solid" | "gradient" | "pattern" | "blip" | "nofill")} FillType
+	 */
+
+	/**
+	 * The available line dash types.
+	 * <b>"dash"</b> - 0: Dashed line.
+	 * <b>"dashDot"</b> - 1: Alternating dashes and dots.
+	 * <b>"dot"</b> - 2: Dotted line.
+	 * <b>"lgDash"</b> - 3: Long dashes.
+	 * <b>"lgDashDot"</b> - 4: Alternating long dashes and dots.
+	 * <b>"lgDashDotDot"</b> - 5: Alternating long dashes and double dots.
+	 * <b>"solid"</b> - 6: Solid line (no dashes).
+	 * <b>"sysDash"</b> - 7: System dash style.
+	 * <b>"sysDashDot"</b> - 8: System dash-dot style.
+	 * <b>"sysDashDotDot"</b> - 9: System dash-dot-dot style.
+	 * <b>"sysDot"</b> - 10: System dot style.
+	 * @typedef {("dash" | "dashDot" | "dot" | "lgDash" | "lgDashDot" | "lgDashDotDot" | "solid" | "sysDash" | "sysDashDot" | "sysDashDotDot" | "sysDot")} LineDashType
+	 */
+
+	/**
      * The available color scheme identifiers.
 	 * @typedef {("accent1" | "accent2" | "accent3" | "accent4" | "accent5" | "accent6" | "bg1" | "bg2" | "dk1" | "dk2"
 	 *     | "lt1" | "lt2" | "tx1" | "tx2")} SchemeColorId
@@ -4446,7 +4473,7 @@
 
 	/**
      * Any valid drawing element.
-     * @typedef {(ApiShape | ApiImage | ApiGroup | ApiOleObject | ApiChart )} Drawing
+     * @typedef {(ApiShape | ApiImage | ApiGroup | ApiOleObject | ApiChart | ApiSmartArt )} Drawing
 	 * @see office-js-api/Examples/Enumerations/Drawing.js
 	 */
 
@@ -4928,30 +4955,15 @@
 	 * Creates a theme color.
 	 *
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
-	 * @param {"accent1" | "accent2" | "accent3" | "accent4" | "accent5" | "accent6" |
-	 * "bg1" | "bg2" | "dk1" | "dk2" | "lt1" | "lt2" | "tx1" | "tx2"} [name="tx1"]
+	 * @typeofeditors ["CDE"]
+	 * @param {SchemeColorId} [name="tx1"] The theme color name. If the provided name is not supported, the 'tx1' color will be used.
 	 * @returns {ApiColor} Instance of ApiColor with 'theme' type.
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/ThemeColor.js
 	 */
 	Api.prototype.ThemeColor = function (name) {
-		const themeColorMap = {
-			'accent1': 0,
-			'accent2': 1,
-			'accent3': 2,
-			'accent4': 3,
-			'accent5': 4,
-			'accent6': 5,
-			'bg1': 6,
-			'bg2': 7,
-			'dk1': 8,
-			'dk2': 9,
-			'lt1': 12,
-			'lt2': 13,
-			'tx1': 15,
-			'tx2': 16,
-		};
-		const index = themeColorMap[name] !== undefined ? themeColorMap[name] : 15; // default is 'tx1' color
+		const index = ApiColor.ThemeColorMap[name] !== undefined
+			? ApiColor.ThemeColorMap[name]
+			: ApiColor.ThemeColorMap['tx1'];
 		return new ApiColor('theme', index);
 	};
 
@@ -7193,7 +7205,7 @@
 		oSectPr.Copy(oCurSectPr);
 		oCurSectPr.Set_Type(oSectPr.Type);
 		oCurSectPr.SetPageNumStart(-1);
-		oCurSectPr.Clear_AllHdrFtr();
+		oCurSectPr.RemoveAllHdrFtr();
 
 		oParagraph.private_GetImpl().Set_SectionPr(oSectPr);
 		return new ApiSection(oSectPr);
@@ -7824,7 +7836,7 @@
 	
 	/**
 	 * The specific form type.
-	 * @typedef {("text" | "checkBox" | "picture" | "comboBox" | "dropDownList" | "dateTime" | "radio")} FormSpecificType
+	 * @typedef {("text" | "checkBox" | "picture" | "comboBox" | "dropDownList" | "dateTime" | "radio" | "complex" | "signature")} FormSpecificType
 	 * @see office-js-api/Examples/Enumerations/FormSpecificType.js
 	 */
 	/**
@@ -7834,12 +7846,63 @@
 	 * @property {string | boolean} value - The current field value.
 	 * @property {string} tag - The form tag.
 	 * @property {FormSpecificType} type - The form type.
+	 * @property {string} [role] - The form role.
+	 * @property {string} [roleColor] - The form role color in hex format.
+	 * @property {Array.<{value: string, label: string}> | Array.<boolean>} [options] - The list of available options for the field.
+	 * Present for checkboxes, radio button groups, dropdown lists, and combo boxes.
+	 * For <b>checkboxes</b> this is <b>[true, false]</b>.
+	 * For <b>radio buttons</b>, <b>dropdown lists</b>, and <b>combo boxes</b> each entry contains
+	 * a <b>value</b> (the stored value) and a <b>label</b> (the display text).
+	 * @property {string} [label] - The checkbox label. Present only for checkbox fields.
+	 * @property {string} [format] - The date format string (e.g. <b>MM/DD/YYYY</b>). Present only for date picker fields.
+	 * @property {string} [lang] - The date language/locale name (e.g. <b>en-US</b>). Present only for date picker fields.
 	 * @example
+	 * 	// Text form
 	 * 	{
-	 * 	  "key" : "CompanyName",
-	 * 	  "tag" : "companyName",
-	 * 	  "value" : "ONLYOFFICE",
-	 * 	  "type" : "text"
+	 * 	  "key"       : "CompanyName",
+	 * 	  "tag"       : "companyName",
+	 * 	  "value"     : "ONLYOFFICE",
+	 * 	  "type"      : "text",
+	 * 	  "role"      : "",
+	 * 	  "roleColor" : "FF0000"
+	 * 	}
+	 * @example
+	 * 	// Checkbox form
+	 * 	{
+	 * 	  "key"     : "Agree",
+	 * 	  "tag"     : "agree",
+	 * 	  "value"   : true,
+	 * 	  "type"    : "checkBox",
+	 * 	  "label"   : "I agree",
+	 * 	  "options" : [true, false]
+	 * 	}
+	 * @example
+	 * 	// Radio button group
+	 * 	{
+	 * 	  "key"     : "ColorGroup",
+	 * 	  "tag"     : "",
+	 * 	  "value"   : "red",
+	 * 	  "type"    : "radio",
+	 * 	  "options" : [{"value": "red", "label": "Red"}, {"value": "blue", "label": "Blue"}]
+	 * 	}
+	 * @example
+	 * 	// Dropdown list form
+	 * 	{
+	 * 	  "key"     : "Country",
+	 * 	  "tag"     : "country",
+	 * 	  "value"   : "France",
+	 * 	  "type"    : "dropDownList",
+	 * 	  "options" : [{"value": "US", "label": "United States"}, {"value": "FR", "label": "France"}]
+	 * 	}
+	 * @example
+	 * 	// Date picker form
+	 * 	{
+	 * 	  "key"    : "StartDate",
+	 * 	  "tag"    : "startDate",
+	 * 	  "value"  : "01/15/2024",
+	 * 	  "type"   : "dateTime",
+	 * 	  "format" : "MM/DD/YYYY",
+	 * 	  "lang"   : "en-US"
 	 * 	}
 	 * @see office-js-api/Examples/Enumerations/FormData.js
 	 */
@@ -11930,7 +11993,7 @@
 
 		oCurSectPr.Set_Type(oSectPr.Type);
 		oCurSectPr.SetPageNumStart(-1);
-		oCurSectPr.Clear_AllHdrFtr();
+		oCurSectPr.RemoveAllHdrFtr();
 
 		this.private_GetImpl().Set_SectionPr(oSectPr);
 		return true;
@@ -12573,7 +12636,7 @@
 	 * Specifies the shading applied to the contents of the current text run.
 	 *
 	 * @memberof ApiRun
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @typeofeditors ["CDE"]
 	 *
 	 * @since 9.1.0
 	 * @param {ShdType} type - The shading type applied to the contents of the current text run.
@@ -16925,7 +16988,7 @@
 			return null;
 
 		let unifill, color;
-		if (this.Parent) {
+		if (this.Parent && this.Parent.GetClassType() === 'paragraph') {
 			const compiledShd = this.Parent.private_GetImpl().Get_CompiledPr2().ParaPr.Shd;
 			unifill = compiledShd.Unifill || compiledShd.ThemeFill;
 			color = compiledShd.Color || compiledShd.Fill;
@@ -19323,7 +19386,7 @@
 	/**
 	 * Returns a type of the ApiImage class.
 	 * @memberof ApiImage
-	 * @typeofeditors ["CDE", "CPE"]
+	 * @typeofeditors ["CDE"]
 	 * @returns {"image"}
 	 * @see office-js-api/Examples/{Editor}/ApiImage/Methods/GetClassType.js
 	 */
@@ -19538,7 +19601,7 @@
 	/**
 	 * Sets the text paddings to the current shape.
 	 * @memberof ApiShape
-	 * @typeofeditors ["CDE", "CSE"]
+	 * @typeofeditors ["CDE"]
 	 * @param {?EMU} nLeft - Left padding.
 	 * @param {?EMU} nTop - Top padding.
 	 * @param {?EMU} nRight - Right padding.
@@ -19653,6 +19716,98 @@
 			return true;
 		}
 		return false;
+	};
+
+	/**
+	 * Sets the fill properties to the current shape.
+	 * @memberof ApiShape
+	 * @typeofeditors ["CDE"]
+	 * @param {ApiFill} oFill - The fill type used to fill the shape.
+	 * @returns {boolean} - returns false if param is invalid.
+	 * @see office-js-api/Examples/{Editor}/ApiShape/Methods/SetFill.js
+	 */
+	ApiShape.prototype.SetFill = function(oFill)
+	{
+		if (!oFill || !oFill.GetClassType || oFill.GetClassType() !== "fill")
+			return false;
+
+		if (this.Shape && this.Shape.spPr)
+		{
+			this.Shape.spPr.setFill(oFill.UniFill);
+			return true;
+		}
+
+		return false;
+	};
+
+	/**
+	 * Gets the fill properties from the current shape.
+	 * @memberof ApiShape
+	 * @typeofeditors ["CDE"]
+	 * @returns {ApiFill | null}
+	 * @see office-js-api/Examples/{Editor}/ApiShape/Methods/GetFill.js
+	 */
+	ApiShape.prototype.GetFill = function()
+	{
+		if (this.Shape)
+		{
+			if (this.Shape.recalcInfo && this.Shape.recalcInfo.recalculateBrush)
+			{
+				this.Shape.recalculateBrush();
+			}
+			if (this.Shape.brush)
+			{
+				return new ApiFill(this.Shape.brush);
+			}
+		}
+
+		return null;
+	};
+
+	/**
+	 * Sets the outline properties to the current shape.
+	 * @memberof ApiShape
+	 * @typeofeditors ["CDE"]
+	 * @param {ApiStroke} oStroke - The stroke used to create the shape outline.
+	 * @returns {boolean} - returns false if param is invalid.
+	 * @see office-js-api/Examples/{Editor}/ApiShape/Methods/SetLine.js
+	 */
+	ApiShape.prototype.SetLine = function(oStroke)
+	{
+		if (!oStroke || !oStroke.GetClassType || oStroke.GetClassType() !== "stroke")
+			return false;
+
+		if (this.Shape && this.Shape.spPr)
+		{
+			this.Shape.spPr.setLn(oStroke.Ln);
+			return true;
+		}
+
+		return false;
+	};
+
+	/**
+	 * Gets the outline properties from the current shape.
+	 * @memberof ApiShape
+	 * @typeofeditors ["CDE"]
+	 * @returns {ApiStroke | null}
+	 * @see office-js-api/Examples/{Editor}/ApiShape/Methods/GetLine.js
+	 */
+	ApiShape.prototype.GetLine = function()
+	{
+		if (this.Shape)
+		{
+			if (this.Shape.recalcInfo && this.Shape.recalcInfo.recalculatePen)
+			{
+				this.Shape.recalculatePen();
+			}
+			if (this.Shape.pen)
+			{
+				return new ApiStroke(this.Shape.pen);
+			}
+		}
+
+		return null;
 	};
 
 
@@ -20101,7 +20256,12 @@
 		return this.command.swAng !== undefined ? this.command.swAng : null;
 	};
 
-
+	ApiPath.prototype.private_ConvertParentToCustomGeometry = function () {
+		const parent = this.path.parent;
+		if (parent && typeof parent.preset === 'string' && parent.preset.length > 0) {
+			parent.setPreset(null);
+		}
+	};
 
 	/**
 	 * Returns true if the current path is stroked, otherwise false.
@@ -20128,6 +20288,7 @@
 	{
 		if (bStroke !== true && bStroke !== false)
 			return;
+		this.private_ConvertParentToCustomGeometry();
 		this.path.setStroke(bStroke);
 	};
 
@@ -20160,6 +20321,7 @@
 		{
 			return;
 		}
+		this.private_ConvertParentToCustomGeometry();
 		this.path.setFill(sFill);
 	};
 
@@ -20188,6 +20350,7 @@
 	{
 		if (!AscFormat.isRealNumber(nWidth) || nWidth < 0)
 			return;
+		this.private_ConvertParentToCustomGeometry();
 		this.path.setPathW(nWidth);
 	};
 
@@ -20216,6 +20379,7 @@
 	{
 		if (!AscFormat.isRealNumber(nHeight) || nHeight < 0)
 			return;
+		this.private_ConvertParentToCustomGeometry();
 		this.path.setPathH(nHeight);
 	};
 
@@ -20739,12 +20903,12 @@
 	/**
 	 * Specifies font size for labels of the horizontal axis.
 	 * @memberof ApiChart
-	 * @typeofeditors ["CDE"]
+	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @param {pt} nFontSize - The text size value measured in points.
 	 * @returns {boolean}
-	 * @see office-js-api/Examples/{Editor}/ApiChart/Methods/SetHorAxisLablesFontSize.js
+	 * @see office-js-api/Examples/{Editor}/ApiChart/Methods/SetHorAxisLabelsFontSize.js
 	 */
-	ApiChart.prototype.SetHorAxisLablesFontSize = function(nFontSize){
+	ApiChart.prototype.SetHorAxisLabelsFontSize = function(nFontSize){
 		AscFormat.builder_SetHorAxisFontSize(this.Chart, nFontSize);
 		return true;
 	};
@@ -20752,12 +20916,12 @@
 	/**
 	 * Specifies font size for labels of the vertical axis.
 	 * @memberof ApiChart
-	 * @typeofeditors ["CDE"]
+	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @param {pt} nFontSize - The text size value measured in points.
 	 * @returns {boolean}
-	 * @see office-js-api/Examples/{Editor}/ApiChart/Methods/SetVertAxisLablesFontSize.js
+	 * @see office-js-api/Examples/{Editor}/ApiChart/Methods/SetVertAxisLabelsFontSize.js
 	 */
-	ApiChart.prototype.SetVertAxisLablesFontSize = function(nFontSize){
+	ApiChart.prototype.SetVertAxisLabelsFontSize = function(nFontSize){
 		AscFormat.builder_SetVerAxisFontSize(this.Chart, nFontSize);
 		return true;
 	};
@@ -21332,6 +21496,33 @@
 
 	//------------------------------------------------------------------------------------------------------------------
 	//
+	// ApiSmartArt
+	//
+	//------------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Class representing a smart art.
+	 * @constructor
+	 */
+	function ApiSmartArt(oGroup){
+		ApiDrawing.call(this, oGroup);
+	}
+	ApiSmartArt.prototype = Object.create(ApiDrawing.prototype);
+	ApiSmartArt.prototype.constructor = ApiSmartArt;
+
+	/**
+	 * Returns a type of the ApiSmartArt class.
+	 * @memberof ApiSmartArt
+	 * @typeofeditors ["CDE"]
+	 * @returns {"smartArt"}
+	 * @see office-js-api/Examples/{Editor}/ApiSmartArt/Methods/GetClassType.js
+	 */
+	ApiSmartArt.prototype.GetClassType = function() {
+		return "smartArt";
+	};
+
+	//------------------------------------------------------------------------------------------------------------------
+	//
 	// ApiFill
 	//
 	//------------------------------------------------------------------------------------------------------------------
@@ -21358,6 +21549,36 @@
 	{
 		var oWriter = new AscJsonConverter.WriterToJSON();
 		return JSON.stringify(oWriter.SerFill(this.UniFill));
+	};
+
+	/**
+	 * Gets the fill type.
+	 * @memberof ApiFill
+	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @returns {FillType} - returns "solid", "gradient", "pattern", "blip", "nofill" or null.
+	 * @see office-js-api/Examples/{Editor}/ApiFill/Methods/GetType.js
+	 */
+	ApiFill.prototype.GetType = function()
+	{
+		if (!this.UniFill || !this.UniFill.fill)
+			return null;
+
+		var c_oAscFill = window['Asc'].c_oAscFill;
+		switch(this.UniFill.fill.type)
+		{
+			case c_oAscFill.FILL_TYPE_SOLID:
+				return "solid";
+			case c_oAscFill.FILL_TYPE_GRAD:
+				return "gradient";
+			case c_oAscFill.FILL_TYPE_PATT:
+				return "pattern";
+			case c_oAscFill.FILL_TYPE_BLIP:
+				return "blip";
+			case c_oAscFill.FILL_TYPE_NOFILL:
+				return "nofill";
+			default:
+				return null;
+		}
 	};
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -21388,6 +21609,66 @@
 	{
 		var oWriter = new AscJsonConverter.WriterToJSON();
 		return JSON.stringify(oWriter.SerLn(this.Ln));
+	};
+
+	/**
+	 * Gets the width of the stroke in English Metric Units.
+	 * @memberof ApiStroke
+	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @returns {EMU | null}
+	 * @see office-js-api/Examples/{Editor}/ApiStroke/Methods/GetWidth.js
+	 */
+	ApiStroke.prototype.GetWidth = function()
+	{
+		if (this.Ln)
+		{
+			if (!this.Ln.isVisible())
+			{
+				return 0;
+			}
+			if (this.Ln.w !== null && this.Ln.w !== undefined)
+			{
+				return this.Ln.w;
+			}
+		}
+		return null;
+	};
+
+	/**
+	 * Gets the fill (color) of the stroke.
+	 * @memberof ApiStroke
+	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @returns {ApiFill | null}
+	 * @see office-js-api/Examples/{Editor}/ApiStroke/Methods/GetFill.js
+	 */
+	ApiStroke.prototype.GetFill = function()
+	{
+		if (this.Ln && this.Ln.Fill)
+		{
+			return new ApiFill(this.Ln.Fill);
+		}
+		return null;
+	};
+
+	/**
+	 * Gets the dash type of the stroke.
+	 * @memberof ApiStroke
+	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @returns {LineDashType | null} - returns dash type ("solid", "dash", etc.) or null.
+	 * @see office-js-api/Examples/{Editor}/ApiStroke/Methods/GetDashType.js
+	 */
+	ApiStroke.prototype.GetDashType = function()
+	{
+		if (this.Ln)
+		{
+			if (this.Ln.prstDash !== null && this.Ln.prstDash !== undefined)
+			{
+				let dashString = this.Ln.GetDashByCode ? this.Ln.GetDashByCode(this.Ln.prstDash) : null;
+				return dashString || "solid";
+			}
+			return "solid";
+		}
+		return null;
 	};
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -21747,6 +22028,46 @@
 		"b": {get : function() {return this.GetRGBA()["b"];}},
 		"a": {get : function() {return this.GetRGBA()["a"];}}
 	});
+
+	ApiColor.ThemeColorMap = {
+		'accent1': 0,
+		'accent2': 1,
+		'accent3': 2,
+		'accent4': 3,
+		'accent5': 4,
+		'accent6': 5,
+		'bg1': 6,
+		'bg2': 7,
+		'dk1': 8,
+		'dk2': 9,
+		'lt1': 12,
+		'lt2': 13,
+		'tx1': 15,
+		'tx2': 16,
+	};
+
+	/**
+	 * Gets the theme color name if the color is a theme color.
+	 *
+	 * @memberof ApiColor
+	 * @typeofeditors ["CDE"]
+	 * @since 9.3.0
+	 * @returns {SchemeColorId | null} The theme color name or null if not a theme color.
+	 * @see office-js-api/Examples/{Editor}/ApiColor/Methods/GetThemeName.js
+	 */
+	ApiColor.prototype.GetThemeName = function () {
+		if (this.type !== 'theme') {
+			return null;
+		}
+
+		for (let themeName in ApiColor.ThemeColorMap) {
+			if (ApiColor.ThemeColorMap[themeName] === this.value) {
+				return themeName;
+			}
+		}
+
+		return null;
+	};
 
 	/**
 	 * Converts the ApiColor object into the JSON object.
@@ -25238,6 +25559,40 @@
 				return ApiInlineLvlSdt.prototype.Delete.call(this, keepContent);
 			}
 		}, this);
+	};
+	
+	/**
+	 * Sets the lock state of the current form.
+	 * @memberof ApiFormBase
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @since 9.3.0
+	 * @param {boolean} isLock - Specifies whether to lock the form (true) or unlock it (false).
+	 * @returns {boolean} Returns true if the operation is successful.
+	 * @see office-js-api/Examples/{Editor}/ApiFormBase/Methods/SetLock.js
+	 */
+	ApiFormBase.prototype.SetLock = function(isLock)
+	{
+		return executeNoFormLockCheck(function(){
+			if (isLock)
+				this.Sdt.SetContentControlLock(c_oAscSdtLockType.SdtLocked);
+			else
+				this.Sdt.SetContentControlLock(c_oAscSdtLockType.Unlocked);
+			return true;
+		}, this);
+	};
+	
+	/**
+	 * Returns the lock state of the current form.
+	 * @memberof ApiFormBase
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @since 9.3.0
+	 * @returns {boolean}
+	 * @see office-js-api/Examples/{Editor}/ApiFormBase/Methods/GetLock.js
+	 */
+	ApiFormBase.prototype.GetLock = function()
+	{
+		let lock = this.Sdt.GetContentControlLock();
+		return (c_oAscSdtLockType.SdtContentLocked === lock || c_oAscSdtLockType.SdtLocked === lock);
 	};
 	
 	//------------------------------------------------------------------------------------------------------------------
@@ -29259,6 +29614,7 @@
 	ApiRun.prototype["SetSmallCaps"]                 = ApiRun.prototype.SetSmallCaps;
 	ApiRun.prototype["SetSpacing"]                   = ApiRun.prototype.SetSpacing;
 	ApiRun.prototype["SetStrikeout"]                 = ApiRun.prototype.SetStrikeout;
+	ApiRun.prototype["SetStyle"]                     = ApiRun.prototype.SetStyle;
 	ApiRun.prototype["SetUnderline"]                 = ApiRun.prototype.SetUnderline;
 	ApiRun.prototype["SetVertAlign"]                 = ApiRun.prototype.SetVertAlign;
 	ApiRun.prototype["WrapInMailMergeField"]         = ApiRun.prototype.WrapInMailMergeField;
@@ -29615,6 +29971,8 @@
 	ApiImage.prototype["GetNextImage"]               = ApiImage.prototype.GetNextImage;
 	ApiImage.prototype["GetPrevImage"]               = ApiImage.prototype.GetPrevImage;
 
+	ApiSmartArt.prototype["GetClassType"]            = ApiSmartArt.prototype.GetClassType;
+
 	ApiShape.prototype["GetClassType"]               = ApiShape.prototype.GetClassType;
 	ApiShape.prototype["GetDocContent"]              = ApiShape.prototype.GetDocContent;
 	ApiShape.prototype["SetVerticalTextAlign"]       = ApiShape.prototype.SetVerticalTextAlign;
@@ -29623,6 +29981,10 @@
 	ApiShape.prototype["GetPrevShape"]               = ApiShape.prototype.GetPrevShape;
 	ApiShape.prototype["GetGeometry"]                = ApiShape.prototype.GetGeometry;
 	ApiShape.prototype["SetGeometry"]                = ApiShape.prototype.SetGeometry;
+	ApiShape.prototype["SetFill"]                    = ApiShape.prototype.SetFill;
+	ApiShape.prototype["GetFill"]                    = ApiShape.prototype.GetFill;
+	ApiShape.prototype["SetLine"]                    = ApiShape.prototype.SetLine;
+	ApiShape.prototype["GetLine"]                    = ApiShape.prototype.GetLine;
 
 	ApiGeometry.prototype["IsCustom"]                = ApiGeometry.prototype.IsCustom;
 	ApiGeometry.prototype["GetPreset"]               = ApiGeometry.prototype.GetPreset;
@@ -29691,8 +30053,8 @@
 	ApiChart.prototype["SetMinorVerticalGridlines"]    =  ApiChart.prototype.SetMinorVerticalGridlines;
 	ApiChart.prototype["SetMajorHorizontalGridlines"]  =  ApiChart.prototype.SetMajorHorizontalGridlines;
 	ApiChart.prototype["SetMinorHorizontalGridlines"]  =  ApiChart.prototype.SetMinorHorizontalGridlines;
-	ApiChart.prototype["SetHorAxisLablesFontSize"]     = ApiChart.prototype.SetHorAxisLablesFontSize;
-	ApiChart.prototype["SetVertAxisLablesFontSize"]    = ApiChart.prototype.SetVertAxisLablesFontSize;
+	ApiChart.prototype["SetHorAxisLabelsFontSize"]     = ApiChart.prototype.SetHorAxisLabelsFontSize;
+	ApiChart.prototype["SetVertAxisLabelsFontSize"]    = ApiChart.prototype.SetVertAxisLabelsFontSize;
 	ApiChart.prototype["GetNextChart"]                 = ApiChart.prototype.GetNextChart;
 	ApiChart.prototype["GetPrevChart"]                 = ApiChart.prototype.GetPrevChart;
 	ApiChart.prototype["RemoveSeria"]                  = ApiChart.prototype.RemoveSeria;
@@ -29730,9 +30092,13 @@
 
 	ApiFill.prototype["GetClassType"]                = ApiFill.prototype.GetClassType;
 	ApiFill.prototype["ToJSON"]                      = ApiFill.prototype.ToJSON;
+	ApiFill.prototype["GetType"]                     = ApiFill.prototype.GetType;
 
 	ApiStroke.prototype["GetClassType"]              = ApiStroke.prototype.GetClassType;
 	ApiStroke.prototype["ToJSON"]                    = ApiStroke.prototype.ToJSON;
+	ApiStroke.prototype["GetWidth"]                  = ApiStroke.prototype.GetWidth;
+	ApiStroke.prototype["GetFill"]                   = ApiStroke.prototype.GetFill;
+	ApiStroke.prototype["GetDashType"]               = ApiStroke.prototype.GetDashType;
 
 	ApiGradientStop.prototype["GetClassType"]        = ApiGradientStop.prototype.GetClassType;
 	ApiGradientStop.prototype["ToJSON"]              = ApiGradientStop.prototype.ToJSON;
@@ -29756,6 +30122,7 @@
 	ApiColor.prototype["GetRGB"] = ApiColor.prototype.GetRGB;
 	ApiColor.prototype["GetRGBA"] = ApiColor.prototype.GetRGBA;
 	ApiColor.prototype["GetHex"] = ApiColor.prototype.GetHex;
+	ApiColor.prototype["GetThemeName"] = ApiColor.prototype.GetThemeName;
 	ApiColor.prototype["ToJSON"] = ApiColor.prototype.ToJSON;
 	ApiColor.prototype["FromJSON"] = ApiColor.prototype.FromJSON;
 
@@ -29925,7 +30292,10 @@
 	ApiFormBase.prototype["GetRole"]            = ApiFormBase.prototype.GetRole;
 	ApiFormBase.prototype["SetRole"]            = ApiFormBase.prototype.SetRole;
 	ApiFormBase.prototype["Delete"]             = ApiFormBase.prototype.Delete;
-	
+	ApiFormBase.prototype["SetLock"]            = ApiFormBase.prototype.SetLock;
+	ApiFormBase.prototype["GetLock"]            = ApiFormBase.prototype.GetLock;
+	ApiFormBase.prototype["Copy"]              = ApiFormBase.prototype.Copy;
+
 	ApiTextForm.prototype["GetClassType"]        = ApiTextForm.prototype.GetClassType;
 	ApiTextForm.prototype["IsAutoFit"]           = ApiTextForm.prototype.IsAutoFit;
 	ApiTextForm.prototype["SetAutoFit"]          = ApiTextForm.prototype.SetAutoFit;
@@ -30158,6 +30528,7 @@
 	window['AscBuilder'].ApiShape            = ApiShape;
 	window['AscBuilder'].ApiChart            = ApiChart;
 	window['AscBuilder'].ApiGroup            = ApiGroup;
+	window['AscBuilder'].ApiSmartArt         = ApiSmartArt;
 	window['AscBuilder'].ApiOleObject        = ApiOleObject;
 	window['AscBuilder'].ApiInlineLvlSdt     = ApiInlineLvlSdt;
 	window['AscBuilder'].ApiBlockLvlSdt      = ApiBlockLvlSdt;
@@ -30172,6 +30543,8 @@
 	window['AscBuilder'].ApiCustomProperties = ApiCustomProperties;
 	window['AscBuilder'].ApiCustomXmlParts	 = ApiCustomXmlParts;
 	window['AscBuilder'].ApiColor            = ApiColor;
+	window['AscBuilder'].ApiFill             = ApiFill;
+	window['AscBuilder'].ApiStroke           = ApiStroke;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Area for internal usage
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -30431,6 +30804,8 @@
                 return new AscBuilder.ApiImage(drawing);
             case AscDFH.historyitem_type_GroupShape:
                 return new AscBuilder.ApiGroup(drawing);
+            case AscDFH.historyitem_type_SmartArt:
+                return new AscBuilder.ApiSmartArt(drawing);
             case AscDFH.historyitem_type_OleObject:
                 return new AscBuilder.ApiOleObject(drawing);
             case AscDFH.historyitem_type_GraphicFrame:
@@ -31085,6 +31460,14 @@
 		if (!console.error)
 			logError(err);
 		throw err;
+	}
+
+	function private_EscapeHtml(text) {
+		return text.replace(/&/g, '&amp;')
+				.replace(/</g, '&lt;')
+				.replace(/>/g, '&gt;')
+				.replace(/"/g, '&quot;')
+				.replace(/'/g, '&#39;');
 	}
 
 	ApiDocument.prototype.OnChangeParaPr = function(oApiParaPr)

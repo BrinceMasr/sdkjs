@@ -295,6 +295,8 @@
     };
     
     CPdfDrawingPrototype.prototype.SetFromScan = function(bFromScan) {
+		AscCommon.History.Add(new CChangesPDFDrawingFromScan(this, this._isFromScan, bFromScan));
+
         this._isFromScan = bFromScan;
     };
     CPdfDrawingPrototype.prototype.IsFromScan = function() {
@@ -566,15 +568,6 @@
 
         return false;
     };
-	CPdfDrawingPrototype.prototype.Remove = function(direction, isWord) {
-		let oDoc = this.GetDocument();
-		if (!oDoc)
-			return;
-		
-		let oController = oDoc.GetController();
-		oController.remove(direction, true, false, false, isWord)
-		this.SetNeedRecalc(true);
-	};
 	CPdfDrawingPrototype.prototype.deleteDrawingBase = function() {
 		let oDoc = this.GetDocument();
 		if (!oDoc) {
@@ -597,7 +590,9 @@
 		
         let oPara = content.GetCurrentParagraph();
         let oRun = oPara.IsSelectionUse() ? oPara.GetElement(oPara.Selection.StartPos) : oPara.GetElement(oPara.CurPos.ContentPos);
-        let oTextPr = oRun.GetTextPr();
+        let oParaContentPos = new AscWord.CParagraphContentPos();
+        oRun.Get_ParaContentPos(undefined, undefined, oParaContentPos);
+        let oTextPr = oRun.GetTextPr(oParaContentPos, oParaContentPos.Depth);
         let sFontName = oTextPr.GetFontFamily();
 
         let oFontFile;

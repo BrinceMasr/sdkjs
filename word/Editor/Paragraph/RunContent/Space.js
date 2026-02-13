@@ -61,6 +61,8 @@
 		this.WidthVisible = 0x00000000 | 0;
 		this.WidthOrigin  = 0x00000000 | 0;
 		this.Grapheme     = AscFonts.NO_GRAPHEME;
+		
+		this.WidthEn = 0x00000000 | 0;
 
 		if (AscFonts.IsCheckSymbols)
 			AscFonts.FontPickerByCharacter.getFontBySymbol(this.Value);
@@ -150,10 +152,7 @@
 		this.Width       = ResultWidth;
 		this.WidthOrigin = ResultWidth;
 		
-		if (Math.abs(Temp) > 0.001)
-			this.WidthEn = (ResultWidth * enWidth / width) | 0;
-		else
-			this.WidthEn = ResultWidth;
+		this.WidthEn = (Math.max((enWidth * fontSize + textPr.Spacing * 2), 0) * AscWord.TEXTWIDTH_DIVIDER) | 0;
 		
 		if (0x2003 === this.Value || 0x2002 === this.Value || 0x2005 === this.Value)
 		{
@@ -238,7 +237,7 @@
 	CRunSpace.prototype.BalanceSingleByteDoubleByteWidth = function()
 	{
 		// ea-space doesn't need to be balanced (bug 58483)
-		if (this.Value === 0x3000)
+		if (this.Value === 0x3000 || this.Value === 0x2002)
 			return;
 		
 		this.Width = this.WidthEn;
@@ -279,7 +278,7 @@
 	{
 		CRunSpace.call(this, codePoint);
 		
-		this.charGid     = gid;
+		this.charGid     = gid ? gid | 0 : 0;
 		this.originWidth = width ? width : 0;
 		this.originSize  = fontSize ? fontSize : 0;
 		this.originCoeff = 1;
@@ -316,17 +315,17 @@
 		Writer.WriteLong(para_PdfSpace);
 		Writer.WriteLong(this.Value);
 		Writer.WriteLong(this.charGid);
-		Writer.WriteLong(this.originWidth);
-		Writer.WriteLong(this.fontSize);
+		Writer.WriteDouble(this.originWidth);
+		Writer.WriteDouble(this.originSize);
 
 	};
 	CPdfRunSpace.prototype.Read_FromBinary = function(Reader)
 	{
 		this.Value = Reader.GetLong();
 		
-		this.charGid = Reader.GetLong();
-		this.originWidth = Reader.GetLong();
-		this.fontSize = Reader.GetLong();
+		this.charGid     = Reader.GetLong();
+		this.originWidth = Reader.GetDouble();
+		this.originSize  = Reader.GetDouble();
 	};
 	
 	AscWord.CPdfRunSpace = CPdfRunSpace;

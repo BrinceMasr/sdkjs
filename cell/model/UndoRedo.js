@@ -677,6 +677,11 @@ function (window, undefined) {
 		this.CacheFieldElem = 184;
 		this.CalculatedItems = 185;
 
+		this.Metadata = 195;
+		this.RichValueStructures = 196;
+		this.RichValueTypesInfo = 197;
+		this.RichValueData = 198;
+
 		this.Create = function (nType) {
 			switch (nType) {
 				case this.ValueMultiTextElem:
@@ -854,6 +859,14 @@ function (window, undefined) {
 					return new AscCommonExcel.UndoRedoData_LegacyDrawingHFDrawing();
 				case this.PivotFieldItem:
 					return new AscCommonExcel.UndoRedoData_PivotFieldItem();
+				case this.Metadata:
+					return new AscCommonExcel.CMetadata();
+				case this.RichValueStructures:
+					return new AscCommonExcel.CRichValueStructures();
+				case this.RichValueTypesInfo:
+					return new AscCommonExcel.CRichValueTypesInfo();
+				case this.RichValueData:
+					return new AscCommonExcel.CRichValueData();
 			}
 			return null;
 		};
@@ -5186,7 +5199,9 @@ function (window, undefined) {
 			case AscCH.historyitem_ArrayFromula_AddFormula:
 				if (!bUndo) {
 					AscCommonExcel.executeInR1C1Mode(false, function () {
-						range.setValue(formula, null, null, bbox, null, {cmIndex: cmIndex, vmIndex: vmIndex, range: bbox});
+						if (formula) {
+							range.setValue(formula, null, null, bbox, null, {cmIndex: cmIndex, vmIndex: vmIndex, range: bbox});
+						}
 						if (cmIndex != null) {
 							ws.getRange3(bbox.r1, bbox.c1, bbox.r1, bbox.c1)._foreach(function(cell) {
 								if (cell && cell.formulaParsed) {

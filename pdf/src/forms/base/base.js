@@ -1791,6 +1791,10 @@
             valueToSet = false;
         }
 
+		if (this._bDrawFromStream == valueToSet) {
+			return;
+		}
+
         AscCommon.History.Add(new CChangesPDFFormChangedView(this, this._bDrawFromStream, valueToSet));
 
         this._bDrawFromStream = valueToSet;
@@ -2558,8 +2562,10 @@
         var oRGB = this.GetRGBColor(aColor);
         var oColor = new AscCommonWord.CDocumentColor(oRGB.r, oRGB.g, oRGB.b, false);
     
+		AscCommon.History.StartNoHistoryMode();
         applyColorToContent(this.content, oColor);
         applyColorToContent(this.contentFormat, oColor);
+		AscCommon.History.EndNoHistoryMode();
         
         this.SetWasChanged(true);
         this.SetNeedRecalc(true);
@@ -2593,12 +2599,16 @@
         
         this._textFontActual = sFontName;
 
-        if (this.content)
+		AscCommon.History.StartNoHistoryMode();
+        
+		if (this.content)
 			this.content.SetFont(sFontName);
 		
 		if (this.contentFormat)
 			this.contentFormat.SetFont(sFontName);
-        
+
+        AscCommon.History.EndNoHistoryMode();
+
         this.SetWasChanged(true);
         this.SetNeedRecalc(true);
     };
@@ -2653,12 +2663,14 @@
         this._textSize = nSize;
         
         if (nSize != 0) {
+			AscCommon.History.StartNoHistoryMode();
             if (this.content) {
                 this.content.SetFontSize(nSize);
             }
             if (this.contentFormat) {
                 this.contentFormat.SetFontSize(nSize);
             }
+			AscCommon.History.EndNoHistoryMode();
         }
         
         if (this.GetType() == AscPDF.FIELD_TYPES.button) {
@@ -2672,7 +2684,7 @@
         return this._textSize;
     };
     CBaseField.prototype.SetRect = function(aOrigRect) {
-        if (this._rect == aOrigRect) {
+        if (this._rect != null && aOrigRect != null && AscCommon.isEqualSortedArrays(this._rect, aOrigRect)) {
             return;
         }
 

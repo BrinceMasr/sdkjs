@@ -508,7 +508,7 @@
             this.CheckFormViewWindow();
 
         oGraphicsWord.AddClipRect(this.contentClipRect.X, this.contentClipRect.Y, this.contentClipRect.W, this.contentClipRect.H);
-        oContentToDraw.Draw(0, oGraphicsWord);
+        oContentToDraw.Draw(oContentToDraw.GetAbsolutePage(), oGraphicsWord);
         
         oGraphicsWord.RemoveLastClip();
         this.DrawBorders(oGraphicsPDF, oGraphicsWord);
@@ -1158,7 +1158,7 @@
         if (this.IsNeedRecalc() == false)
             return;
 
-        if (!this.contentClipRect) {
+        if (!this.contentClipRect || !this.content.Recalculated) {
             this.RecalculateContentRect();
         }
 
@@ -1249,7 +1249,7 @@
         }
 
         if (contentX != this.content.X || contentY != this.content.Y ||
-        contentXLimit != this.content.XLimit || contentYFormat != this.contentFormat.Y) {
+        contentXLimit != this.content.XLimit || contentYFormat != this.contentFormat.Y || !this.content.Recalculated || !this.contentFormat.Recalculated) {
             this.content.X      = this.contentFormat.X = contentX;
             this.content.Y      = contentY;
             this.contentFormat.Y= contentYFormat;
@@ -2053,15 +2053,15 @@
 	 * @memberof CTextField
 	 * @typeofeditors ["PDF"]
 	 */
-	CTextField.prototype.Remove = function(nDirection, isCtrlKey) {
+	CTextField.prototype.Remove = function(Count, bOnlyText, bRemoveOnlySelection, bOnTextAdd, isWord) {
 		if (this.IsCanEditText() == false)
 			return false;
 		
-        let oKeystrokeEvent = this.DoKeystrokeAction(null, nDirection, false, isCtrlKey);
+        let oKeystrokeEvent = this.DoKeystrokeAction(null, Count, false, isWord);
 		if (!oKeystrokeEvent["rc"])
 			return false;
 		
-        this.content.Remove(nDirection, true, false, false, isCtrlKey);
+        this.content.Remove(Count, bOnlyText, bRemoveOnlySelection, bOnTextAdd, isWord);
 
         // скрипт keystroke мог поменять change значение, поэтому
         let oKeystrokeTrigger = this.GetTrigger(AscPDF.PDF_TRIGGERS_TYPES.Keystroke);

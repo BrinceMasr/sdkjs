@@ -102,27 +102,6 @@
 		var ty = this.invertTransform.TransformPointY(x, y);
 		this.graphicObject.UpdateCursorType(tx, ty, 0)
 	};
-    /**
-     * Removes char in current position by direction.
-     * @memberof CTextField
-     * @typeofeditors ["PDF"]
-     */
-    CPdfGraphicFrame.prototype.Remove = function(nDirection, isCtrlKey) {
-        let oContent = this.GetDocContent();
-
-        if (oContent) {
-            oContent.Remove(nDirection, true, false, false, isCtrlKey);
-        }
-        else {
-            this.graphicObject.Remove(nDirection, true, false, false, isCtrlKey);
-        }
-        
-        this.SetNeedRecalc(true);
-
-        if (AscCommon.History.Is_LastPointEmpty()) {
-            AscCommon.History.Remove_LastPoint();
-        }
-    };
     CPdfGraphicFrame.prototype.CheckTextOnOpen = function() {
         let oTable = this.graphicObject;
         if (oTable) {

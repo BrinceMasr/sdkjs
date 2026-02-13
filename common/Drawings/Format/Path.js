@@ -179,6 +179,7 @@ function (window, undefined) {
 	AscDFH.changesFactory[AscDFH.historyitem_PathSetFill] = AscDFH.CChangesDrawingsString;
 	AscDFH.changesFactory[AscDFH.historyitem_PathSetPathH] = AscDFH.CChangesDrawingsLong;
 	AscDFH.changesFactory[AscDFH.historyitem_PathSetPathW] = AscDFH.CChangesDrawingsLong;
+	AscDFH.changesFactory[AscDFH.historyitem_PathSetParent] = AscDFH.CChangesDrawingsObject;
 	AscDFH.changesFactory[AscDFH.historyitem_PathAddPathCommand] = CChangesDrawingsAddPathCommand;
 
 	AscDFH.drawingsChangesMap[AscDFH.historyitem_PathSetStroke] = function (oClass, value) {
@@ -196,6 +197,9 @@ function (window, undefined) {
 	AscDFH.drawingsChangesMap[AscDFH.historyitem_PathSetPathW] = function (oClass, value) {
 		oClass.pathW = value;
 	};
+	AscDFH.drawingsChangesMap[AscDFH.historyitem_PathSetParent] = function (oClass, value) {
+		oClass.parent = value;
+	};
 
 
 	function Path() {
@@ -205,6 +209,7 @@ function (window, undefined) {
 		this.fill = null;
 		this.pathH = null;
 		this.pathW = null;
+		this.parent = null;
 
 		this.ArrPathCommandInfo = [];
 		this.ArrPathCommand = [];
@@ -362,6 +367,13 @@ function (window, undefined) {
 	Path.prototype.setPathW = function (pr) {
 		AscCommon.History.CanAddChanges() && AscCommon.History.Add(new AscDFH.CChangesDrawingsLong(this, AscDFH.historyitem_PathSetPathW, this.pathW, pr));
 		this.pathW = pr;
+	};
+	Path.prototype.setParent = function (parent) {
+		if (AscCommon.History.CanAddChanges()) {
+			const changes = new AscDFH.CChangesDrawingsObject(this, AscDFH.historyitem_PathSetParent, this.parent, parent);
+			AscCommon.History.Add(changes);
+		}
+		this.parent = parent;
 	};
 	Path.prototype.addPathCommand = function (cmd) {
 		AscCommon.History.CanAddChanges() && AscCommon.History.Add(new CChangesDrawingsAddPathCommand(this, cmd, this.ArrPathCommandInfo.length));
@@ -2515,7 +2527,7 @@ function (window, undefined) {
 		this.fill = null;
 		this.pathH = null;
 		this.pathW = null;
-
+		this.parent = null;
 
 		this.startPos = 0;
 
@@ -3674,15 +3686,16 @@ function (window, undefined) {
 					break;
 				}
 				case close: {
+					arrPathCommand.push({id: close});
 					i += 1;
 					break;
 				}
 			}
 		}
-
+		return arrPathCommand;
 	};
 	Path2.prototype.executeWithPathCommands = function(fMethod, params) {
-		this.ArrPathCommand = this.getArrPathCommand();
+		this.ArrPathCommand = this.getArrPathCommandObjects();
 		let result = fMethod.apply(this, params);
 		this.ArrPathCommand = undefined;
 		return result;
@@ -3695,6 +3708,9 @@ function (window, undefined) {
 	};
 	Path2.prototype.getTailArrowAngle = function (arrowLength) {
 		return this.executeWithPathCommands(Path.prototype.getTailArrowAngle, [arrowLength]);
+	};
+	Path2.prototype.isClosed = function (epsilon) {
+		return this.executeWithPathCommands(Path.prototype.isClosed, [epsilon]);
 	};
 	Path2.prototype.Write_ToBinary = function(writer) {
 		AscFormat.writeBool(writer, this.extrusionOk);

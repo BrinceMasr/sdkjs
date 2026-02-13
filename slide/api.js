@@ -6719,11 +6719,6 @@ background-repeat: no-repeat;\
 		this.SelectedObjectsStack[this.SelectedObjectsStack.length] = new asc_CSelectedObject(c_oAscTypeSelectElement.Hyperlink, new Asc.CHyperlinkProperty(hyperProp));
 	};
 
-	asc_docs_api.prototype.sync_HyperlinkClickCallback = function(Url)
-	{
-		this.sendEvent("asc_onHyperlinkClick", Url);
-	};
-
 	asc_docs_api.prototype.sync_CanAddHyperlinkCallback = function(bCanAdd)
 	{
 		//if ( true === CollaborativeEditing.Get_GlobalLock() )
@@ -7469,14 +7464,33 @@ background-repeat: no-repeat;\
 		this.WordControl.m_oLogicDocument.setShowLoop(isLoop);
 	};
 
-	asc_docs_api.prototype.sync_endDemonstration          = function()
-	{
-		this.sendEvent("asc_onEndDemonstration");
+	asc_docs_api.prototype.sync_startDemonstration = function () {
+		this.sendEvent('asc_onStartDemonstration');
+		if (window.g_asc_plugins)
+			window.g_asc_plugins.onPluginEvent('onSlideShowBegin');
 	};
-	asc_docs_api.prototype.sync_DemonstrationSlideChanged = function(slideNum)
-	{
-		this.sendEvent("asc_onDemonstrationSlideChanged", slideNum);
+	asc_docs_api.prototype.sync_endDemonstration = function () {
+		this.sendEvent('asc_onEndDemonstration');
+		if (window.g_asc_plugins)
+			window.g_asc_plugins.onPluginEvent('onSlideShowEnd');
 	};
+	asc_docs_api.prototype.sync_DemonstrationSlideChanged = function (slideIndex, previousSlideIndex) {
+		this.sendEvent('asc_onDemonstrationSlideChanged', slideIndex);
+
+		if (window.g_asc_plugins) {
+
+			window.g_asc_plugins.onPluginEvent('onSlideShowSlideChanged', {
+				slideIndex: slideIndex,
+				previousSlideIndex: previousSlideIndex
+			});
+
+			const slidesCount = this.getCountPages();
+			if (slideIndex >= 0 && slideIndex < slidesCount) {
+				window.g_asc_plugins.onPluginEvent('onSlideShowNextSlide');
+			}
+		}
+	};
+
 	asc_docs_api.prototype.getAnnotations = function ()
 	{
 		if(!this.isSlideShow()) return null;
@@ -7528,6 +7542,14 @@ background-repeat: no-repeat;\
 			this.WordControl.DemonstrationManager.EndShowMessage = this.EndShowMessage;
 			this.EndShowMessage = undefined;
 		}
+
+		let presentation = this.private_GetLogicDocument();
+		let allGIFs = presentation.GetAllGIFImageUrls();
+		for (let i = 0; i < allGIFs.length; i++) {
+			this.WordControl.DemonstrationManager.loadGIF(allGIFs[i]);
+		}
+
+
 	};
 
 	asc_docs_api.prototype.EndDemonstration = function(isNoUseFullScreen)
@@ -9913,6 +9935,7 @@ background-repeat: no-repeat;\
 	asc_docs_api.prototype['shapes_bringForward']                 = asc_docs_api.prototype.shapes_bringForward;
 	asc_docs_api.prototype['shapes_bringToBack']                  = asc_docs_api.prototype.shapes_bringToBack;
 	asc_docs_api.prototype['shapes_bringBackward']                = asc_docs_api.prototype.shapes_bringBackward;
+	asc_docs_api.prototype['sync_startDemonstration']             = asc_docs_api.prototype.sync_startDemonstration;
 	asc_docs_api.prototype['sync_endDemonstration']               = asc_docs_api.prototype.sync_endDemonstration;
 	asc_docs_api.prototype['sync_DemonstrationSlideChanged']      = asc_docs_api.prototype.sync_DemonstrationSlideChanged;
 	asc_docs_api.prototype['StartDemonstration']                  = asc_docs_api.prototype.StartDemonstration;

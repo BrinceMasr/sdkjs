@@ -9595,5 +9595,352 @@ $(function () {
 		clearData(0, 0, 100, 200);
 	});
 
+	QUnit.test("Test: \"IF with array condition and range values\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		ws.getRange2("A1").setValue("1");
+		ws.getRange2("B1").setValue("FALSE");
+		ws.getRange2("C1").setValue("3");
+		
+		ws.getRange2("A2").setValue("34");
+		ws.getRange2("B2").setValue("FALSE");
+		ws.getRange2("C2").setValue("23");
+
+		fillRange = ws.getRange2("E1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("E1").getValueForEdit2();
+		fragment[0].setFragmentText("=IF({1,0,1},A1:C2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("E1"));
+		assert.ok(resCell, "Formula cell E1 exists");
+
+		assert.strictEqual(ws.getRange2("E1").getValue(), "1", "E1 = 1");
+		assert.strictEqual(ws.getRange2("F1").getValue(), "FALSE", "F1 = FALSE");
+		assert.strictEqual(ws.getRange2("G1").getValue(), "3", "G1 = 3");
+		assert.strictEqual(ws.getRange2("E2").getValue(), "34", "E2 = 34");
+		assert.strictEqual(ws.getRange2("F2").getValue(), "FALSE", "F2 = FALSE");
+		assert.strictEqual(ws.getRange2("G2").getValue(), "23", "G2 = 23");
+
+		fillRange = ws.getRange2("H1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("H1").getValueForEdit2();
+		fragment[0].setFragmentText("=IF({1,0,1},A1:C1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("H1"));
+		assert.ok(resCell, "Formula cell H1 exists");
+
+		assert.strictEqual(ws.getRange2("H1").getValue(), "1", "H1 = 1");
+		assert.strictEqual(ws.getRange2("I1").getValue(), "FALSE", "I1 = FALSE");
+		assert.strictEqual(ws.getRange2("J1").getValue(), "3", "J1 = 3");
+
+		fillRange = ws.getRange2("K1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("K1").getValueForEdit2();
+		fragment[0].setFragmentText("=IF({1,0,1;2,0,4;1,0,1;1,0,1;1,0,1;1,0,1;1,0,1;1,0,1;1,0,1;1,0,1;1,0,1;1,0,1;1,0,1;1,0,1},A1:C10)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("K1"));
+		assert.ok(resCell, "Formula cell K1 exists");
+
+		assert.strictEqual(ws.getRange2("K1").getValue(), "1", "K1 = 1");
+		assert.strictEqual(ws.getRange2("L1").getValue(), "FALSE", "L1 = FALSE");
+		assert.strictEqual(ws.getRange2("M1").getValue(), "3", "M1 = 3");
+		assert.strictEqual(ws.getRange2("K2").getValue(), "34", "K2 = 34");
+		assert.strictEqual(ws.getRange2("L2").getValue(), "FALSE", "L2 = FALSE");
+		assert.strictEqual(ws.getRange2("M2").getValue(), "23", "M2 = 23");
+		assert.strictEqual(ws.getRange2("K3").getValue(), "0", "K3 = 0");
+		assert.strictEqual(ws.getRange2("L3").getValue(), "FALSE", "L3 = FALSE");
+		assert.strictEqual(ws.getRange2("M3").getValue(), "0", "M3 = 0");
+		assert.strictEqual(ws.getRange2("K4").getValue(), "0", "K4 = 0");
+		assert.strictEqual(ws.getRange2("L4").getValue(), "FALSE", "L4 = FALSE");
+		assert.strictEqual(ws.getRange2("M4").getValue(), "0", "M4 = 0");
+		assert.strictEqual(ws.getRange2("K5").getValue(), "0", "K5 = 0");
+		assert.strictEqual(ws.getRange2("L5").getValue(), "FALSE", "L5 = FALSE");
+		assert.strictEqual(ws.getRange2("M5").getValue(), "0", "M5 = 0");
+		assert.strictEqual(ws.getRange2("K6").getValue(), "0", "K6 = 0");
+		assert.strictEqual(ws.getRange2("L6").getValue(), "FALSE", "L6 = FALSE");
+		assert.strictEqual(ws.getRange2("M6").getValue(), "0", "M6 = 0");
+		assert.strictEqual(ws.getRange2("K7").getValue(), "0", "K7 = 0");
+		assert.strictEqual(ws.getRange2("L7").getValue(), "FALSE", "L7 = FALSE");
+		assert.strictEqual(ws.getRange2("M7").getValue(), "0", "M7 = 0");
+		assert.strictEqual(ws.getRange2("K8").getValue(), "0", "K8 = 0");
+		assert.strictEqual(ws.getRange2("L8").getValue(), "FALSE", "L8 = FALSE");
+		assert.strictEqual(ws.getRange2("M8").getValue(), "0", "M8 = 0");
+		assert.strictEqual(ws.getRange2("K9").getValue(), "0", "K9 = 0");
+		assert.strictEqual(ws.getRange2("L9").getValue(), "FALSE", "L9 = FALSE");
+		assert.strictEqual(ws.getRange2("M9").getValue(), "0", "M9 = 0");
+		assert.strictEqual(ws.getRange2("K10").getValue(), "0", "K10 = 0");
+		assert.strictEqual(ws.getRange2("L10").getValue(), "FALSE", "L10 = FALSE");
+		assert.strictEqual(ws.getRange2("M10").getValue(), "0", "M10 = 0");
+		assert.strictEqual(ws.getRange2("K11").getValue(), "#N/A", "K11 = #N/A");
+		assert.strictEqual(ws.getRange2("L11").getValue(), "FALSE", "L11 = FALSE");
+		assert.strictEqual(ws.getRange2("M11").getValue(), "#N/A", "M11 = #N/A");
+		assert.strictEqual(ws.getRange2("K12").getValue(), "#N/A", "K12 = #N/A");
+		assert.strictEqual(ws.getRange2("L12").getValue(), "FALSE", "L12 = FALSE");
+		assert.strictEqual(ws.getRange2("M12").getValue(), "#N/A", "M12 = #N/A");
+		assert.strictEqual(ws.getRange2("K13").getValue(), "#N/A", "K13 = #N/A");
+		assert.strictEqual(ws.getRange2("L13").getValue(), "FALSE", "L13 = FALSE");
+		assert.strictEqual(ws.getRange2("M13").getValue(), "#N/A", "M13 = #N/A");
+		assert.strictEqual(ws.getRange2("K14").getValue(), "#N/A", "K14 = #N/A");
+		assert.strictEqual(ws.getRange2("L14").getValue(), "FALSE", "L14 = FALSE");
+		assert.strictEqual(ws.getRange2("M14").getValue(), "#N/A", "M14 = #N/A");
+
+		//TODO IF({1,0,1;2,0,4;1,0,1;1,0,1;1,0,1;1,0,1;1,0,1;1,0,1;1,0,1;1,0,1},A1:C10)
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"FILTER dynamic array size tracking\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		// Setup initial data starting from A1
+		ws.getRange2("A1").setValue("fruit");
+		ws.getRange2("B1").setValue("apple");
+		
+		ws.getRange2("A2").setValue("fruit");
+		ws.getRange2("B2").setValue("banana");
+		
+		ws.getRange2("A3").setValue("fruit");
+		ws.getRange2("B3").setValue("orange");
+		
+		ws.getRange2("A4").setValue("vegetable");
+		ws.getRange2("B4").setValue("carrot");
+
+		// Add filter criteria
+		ws.getRange2("D4").setValue("fruit");
+
+		// Add FILTER formula in C1
+		fillRange = ws.getRange2("C1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("C1").getValueForEdit2();
+		fragment[0].setFragmentText("=FILTER(A1:B4,A1:A4=D4)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("C1"));
+		assert.ok(resCell, "Formula cell C1 exists");
+		assert.strictEqual(getNormalizedFormula(resCell), "FILTER(A1:B4,A1:A4=D4)", "FILTER formula correctly parsed");
+
+		// Check dynamic array structure and size
+		let bboxParent = ws.getRange2("C1").bbox;
+		let cellWithFormula = new window['AscCommonExcel'].CCellWithFormula(ws, bboxParent.r1, bboxParent.c1);
+		let oParser = new parserFormula('FILTER(A1:B4,A1:A4=D4)', cellWithFormula, ws);
+		assert.ok(oParser.parse(), 'FILTER(A1:B4,A1:A4=D4) parsed successfully');
+		
+		let formulaInfo = ws.dynamicArrayManager.getRefDynamicInfo(oParser);
+		assert.ok(formulaInfo, "Dynamic array info exists");
+		
+		let resultRow = formulaInfo && formulaInfo.dynamicRange.getHeight();
+		let resultCol = formulaInfo && formulaInfo.dynamicRange.getWidth();
+		let applyByArray = formulaInfo && formulaInfo.applyByArray;
+		
+		assert.strictEqual(applyByArray, true, 'FILTER creates dynamic array');
+		assert.strictEqual(resultRow, 3, 'Dynamic array has 3 rows (3 fruit entries)');
+		assert.strictEqual(resultCol, 2, 'Dynamic array has 2 columns (A:B range)');
+
+		// Check result values in the dynamic array
+		assert.strictEqual(ws.getRange2("C1").getValue(), "fruit", "C1 = fruit");
+		assert.strictEqual(ws.getRange2("D1").getValue(), "apple", "D1 = apple");
+		assert.strictEqual(ws.getRange2("C2").getValue(), "fruit", "C2 = fruit");
+		assert.strictEqual(ws.getRange2("D2").getValue(), "banana", "D2 = banana");
+		assert.strictEqual(ws.getRange2("C3").getValue(), "fruit", "C3 = fruit");
+		assert.strictEqual(ws.getRange2("D3").getValue(), "orange", "D3 = orange");
+
+		// Now change D4 to "vegetable" and check dynamic array resizing
+		ws.getRange2("D4").setValue("vegetable");
+
+		// Re-check dynamic array structure after data change
+		oParser = new parserFormula('FILTER(A1:B4,A1:A4=D4)', cellWithFormula, ws);
+		assert.ok(oParser.parse(), 'FILTER(A1:B4,A1:A4=D4) re-parsed after data change');
+		
+		formulaInfo = ws.dynamicArrayManager.getRefDynamicInfo(oParser);
+		assert.ok(formulaInfo, "Dynamic array info exists after data change");
+		
+		resultRow = formulaInfo && formulaInfo.dynamicRange.getHeight();
+		resultCol = formulaInfo && formulaInfo.dynamicRange.getWidth();
+		applyByArray = formulaInfo && formulaInfo.applyByArray;
+		
+		assert.strictEqual(applyByArray, true, 'FILTER still creates dynamic array');
+		assert.strictEqual(resultRow, 1, 'Dynamic array now has 1 row (1 vegetable entry)');
+		assert.strictEqual(resultCol, 2, 'Dynamic array still has 2 columns (A:B range)');
+
+		// Check new result values - should now show only vegetable entry
+		assert.strictEqual(ws.getRange2("C1").getValue(), "vegetable", "C1 = vegetable");
+		assert.strictEqual(ws.getRange2("D1").getValue(), "carrot", "D1 = carrot");
+
+		// Test undo/redo for dynamic array size tracking
+		let checkFruitState = function(desc) {
+			assert.strictEqual(ws.getRange2("D4").getValue(), "fruit", desc + " - D4 = fruit");
+			
+			// Check dynamic array size is 3x2
+			let parserFruit = new parserFormula('FILTER(A1:B4,A1:A4=D4)', cellWithFormula, ws);
+			assert.ok(parserFruit.parse(), desc + ' - FILTER formula parsed');
+			let infoFruit = ws.dynamicArrayManager.getRefDynamicInfo(parserFruit);
+			assert.ok(infoFruit, desc + " - Dynamic array info exists");
+			assert.strictEqual(infoFruit.dynamicRange.getHeight(), 3, desc + " - Array height = 3 rows");
+			assert.strictEqual(infoFruit.dynamicRange.getWidth(), 2, desc + " - Array width = 2 columns");
+			
+			// Verify dynamic array shows 3 fruit entries
+			assert.strictEqual(ws.getRange2("C1").getValue(), "fruit", desc + " - C1 = fruit");
+			assert.strictEqual(ws.getRange2("D1").getValue(), "apple", desc + " - D1 = apple");
+			assert.strictEqual(ws.getRange2("C2").getValue(), "fruit", desc + " - C2 = fruit");
+			assert.strictEqual(ws.getRange2("D2").getValue(), "banana", desc + " - D2 = banana");
+			assert.strictEqual(ws.getRange2("C3").getValue(), "fruit", desc + " - C3 = fruit");
+			assert.strictEqual(ws.getRange2("D3").getValue(), "orange", desc + " - D3 = orange");
+		};
+
+		let checkVegetableState = function(desc) {
+			assert.strictEqual(ws.getRange2("D4").getValue(), "vegetable", desc + " - D4 = vegetable");
+			
+			// Check dynamic array size is 1x2
+			let parserVeg = new parserFormula('FILTER(A1:B4,A1:A4=D4)', cellWithFormula, ws);
+			assert.ok(parserVeg.parse(), desc + ' - FILTER formula parsed');
+			let infoVeg = ws.dynamicArrayManager.getRefDynamicInfo(parserVeg);
+			assert.ok(infoVeg, desc + " - Dynamic array info exists");
+			assert.strictEqual(infoVeg.dynamicRange.getHeight(), 1, desc + " - Array height = 1 row");
+			assert.strictEqual(infoVeg.dynamicRange.getWidth(), 2, desc + " - Array width = 2 columns");
+			
+			// Verify dynamic array shows 1 vegetable entry
+			assert.strictEqual(ws.getRange2("C1").getValue(), "vegetable", desc + " - C1 = vegetable");
+			assert.strictEqual(ws.getRange2("D1").getValue(), "carrot", desc + " - D1 = carrot");
+		};
+
+		checkUndoRedo(checkFruitState, checkVegetableState, "Change D4 from fruit to vegetable");
+
+		clearData(0, 0, 100, 200);
+	});
+
+	QUnit.test("Test: \"FILTER dynamic array spill conflict after resize\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, resCell, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		// Setup initial data starting from A1
+		ws.getRange2("A1").setValue("fruit");
+		ws.getRange2("B1").setValue("apple");
+		
+		ws.getRange2("A2").setValue("fruit");
+		ws.getRange2("B2").setValue("banana");
+		
+		ws.getRange2("A3").setValue("fruit");
+		ws.getRange2("B3").setValue("orange");
+		
+		ws.getRange2("A4").setValue("vegetable");
+		ws.getRange2("B4").setValue("carrot");
+
+		// Add filter criteria
+		ws.getRange2("D4").setValue("fruit");
+
+		// Add FILTER formula in C1
+		fillRange = ws.getRange2("C1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("C1").getValueForEdit2();
+		fragment[0].setFragmentText("=FILTER(A1:B4,A1:A4=D4)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		resCell = getCell(ws.getRange2("C1"));
+		assert.ok(resCell, "Formula cell C1 exists");
+		assert.strictEqual(getNormalizedFormula(resCell), "FILTER(A1:B4,A1:A4=D4)", "FILTER formula correctly parsed");
+
+		// Check dynamic array structure and size
+		let bboxParent = ws.getRange2("C1").bbox;
+		let cellWithFormula = new window['AscCommonExcel'].CCellWithFormula(ws, bboxParent.r1, bboxParent.c1);
+		let oParser = new parserFormula('FILTER(A1:B4,A1:A4=D4)', cellWithFormula, ws);
+		assert.ok(oParser.parse(), 'FILTER(A1:B4,A1:A4=D4) parsed successfully');
+		
+		let formulaInfo = ws.dynamicArrayManager.getRefDynamicInfo(oParser);
+		assert.ok(formulaInfo, "Dynamic array info exists");
+		
+		let resultRow = formulaInfo && formulaInfo.dynamicRange.getHeight();
+		let resultCol = formulaInfo && formulaInfo.dynamicRange.getWidth();
+		let applyByArray = formulaInfo && formulaInfo.applyByArray;
+		
+		assert.strictEqual(applyByArray, true, 'FILTER creates dynamic array');
+		assert.strictEqual(resultRow, 3, 'Dynamic array has 3 rows (3 fruit entries)');
+		assert.strictEqual(resultCol, 2, 'Dynamic array has 2 columns (A:B range)');
+
+		// Check result values in the dynamic array
+		assert.strictEqual(ws.getRange2("C1").getValue(), "fruit", "C1 = fruit");
+		assert.strictEqual(ws.getRange2("D1").getValue(), "apple", "D1 = apple");
+		assert.strictEqual(ws.getRange2("C2").getValue(), "fruit", "C2 = fruit");
+		assert.strictEqual(ws.getRange2("D2").getValue(), "banana", "D2 = banana");
+		assert.strictEqual(ws.getRange2("C3").getValue(), "fruit", "C3 = fruit");
+		assert.strictEqual(ws.getRange2("D3").getValue(), "orange", "D3 = orange");
+
+		// Now change D4 to "vegetable" and check dynamic array resizing
+		ws.getRange2("D4").setValue("vegetable");
+
+		// Re-check dynamic array structure after data change
+		oParser = new parserFormula('FILTER(A1:B4,A1:A4=D4)', cellWithFormula, ws);
+		assert.ok(oParser.parse(), 'FILTER(A1:B4,A1:A4=D4) re-parsed after data change');
+		
+		formulaInfo = ws.dynamicArrayManager.getRefDynamicInfo(oParser);
+		assert.ok(formulaInfo, "Dynamic array info exists after data change");
+		
+		resultRow = formulaInfo && formulaInfo.dynamicRange.getHeight();
+		resultCol = formulaInfo && formulaInfo.dynamicRange.getWidth();
+		applyByArray = formulaInfo && formulaInfo.applyByArray;
+		
+		assert.strictEqual(applyByArray, true, 'FILTER still creates dynamic array');
+		assert.strictEqual(resultRow, 1, 'Dynamic array now has 1 row (1 vegetable entry)');
+		assert.strictEqual(resultCol, 2, 'Dynamic array still has 2 columns (A:B range)');
+
+		// Check new result values - should now show only vegetable entry
+		assert.strictEqual(ws.getRange2("C1").getValue(), "vegetable", "C1 = vegetable");
+		assert.strictEqual(ws.getRange2("D1").getValue(), "carrot", "D1 = carrot");
+
+		// Now place blocking data in the area where the larger array was (e.g., C2)
+		ws.getRange2("C2").setValue("BLOCKING");
+
+		// Change D4 back to "fruit" - this should cause a spill conflict
+		ws.getRange2("D4").setValue("fruit");
+
+		// Check that the formula cell now shows a spill error
+		const spillValue = ws.getRange2("C1").getValue();
+		assert.ok(spillValue === "#SPILL!" || spillValue === "#REF!", "C1 shows spill error due to blocking data");
+
+		// Remove blocking data and verify array can expand again
+		ws.getRange2("C2").setValue("");
+
+		// The array should now expand back to 3 rows
+		assert.strictEqual(ws.getRange2("C1").getValue(), "fruit", "C1 = fruit after removing block");
+		assert.strictEqual(ws.getRange2("D1").getValue(), "apple", "D1 = apple");
+		assert.strictEqual(ws.getRange2("C2").getValue(), "fruit", "C2 = fruit");
+		assert.strictEqual(ws.getRange2("D2").getValue(), "banana", "D2 = banana");
+		assert.strictEqual(ws.getRange2("C3").getValue(), "fruit", "C3 = fruit");
+		assert.strictEqual(ws.getRange2("D3").getValue(), "orange", "D3 = orange");
+
+		clearData(0, 0, 100, 200);
+	});
+
 	QUnit.module("Dynamic Arrays Tests");
 });

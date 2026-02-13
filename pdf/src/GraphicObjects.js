@@ -2057,9 +2057,14 @@
             if (target_text_object.getObjectType() === AscDFH.historyitem_type_GraphicFrame) {
                 target_text_object.graphicObject.Remove(dir, bOnlyText, bRemoveOnlySelection, bOnTextAdd, isWord);
             } else {
-                let content = this.getTargetDocContent(true);
-                if (content) {
-                    content.Remove(dir, true, bRemoveOnlySelection, bOnTextAdd, isWord)
+                if (target_text_object.Remove) {
+                    target_text_object.Remove(dir, true, bRemoveOnlySelection, bOnTextAdd, isWord);
+                }
+                else {
+                    let content = this.getTargetDocContent(true);
+                    if (content) {
+                        content.Remove(dir, true, bRemoveOnlySelection, bOnTextAdd, isWord)
+                    }
                 }
 
                 bNoCheck !== true && target_text_object.checkExtentsByDocContent && target_text_object.checkExtentsByDocContent();
