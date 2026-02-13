@@ -8431,7 +8431,7 @@ background-repeat: no-repeat;\
 
 		if (false === this.WordControl.m_oLogicDocument.Document_Is_SelectionLocked(AscCommon.changestype_Paragraph_TextProperties))
 		{
-			this.WordControl.m_oLogicDocument.StartAction(AscDFH.historydescription_Document_SetTextFontNameLong);
+			this.WordControl.m_oLogicDocument.StartAction(AscDFH.historydescription_Document_SetTextFontNameLong,  null, null, fontinfo.Name);
 			this.WordControl.m_oLogicDocument.AddToParagraph(new AscCommonWord.ParaTextPr({
 				FontFamily : {
 					Name  : fontinfo.Name,

@@ -221,7 +221,8 @@ StartAddNewShape.prototype =
 							extX: shape.spPr.xfrm.extX,
 							extY: shape.spPr.xfrm.extY,
 							fill: shape.brush,
-							border: shape.pen
+							border: shape.pen,
+							id: shape.getObjectName()
 						};
 
                     oLogicDocument.FinalizeAction(undefined, macroData);

@@ -7627,6 +7627,24 @@
 		return arrResult;
 	};
 	/**
+	 * Returns a collection of drawing objects from the document filtered by their names.
+	 * @memberof ApiDocumentContent
+	 * @typeofeditors ["CDE"]
+	 * @since 9.3.0
+	 * @param {string[]} ids - An array of drawing names to filter by.
+	 * @return {ApiDrawing[]}
+	 * @see office-js-api/Examples/{Editor}/ApiDocumentContent/Methods/GetDrawingsByName.js
+	 */
+	ApiDocument.prototype.GetDrawingsByName = function(ids)
+	{
+		let arrAllDrawing = this.Document.GetAllDrawingObjects();
+		let drawings = AscBuilder.GetApiDrawings(arrAllDrawing.map(function(drawing) {
+			return drawing.GraphicObj;
+		}));
+
+		return drawings.filter(function(drawing){return ids.includes(drawing.GetName())})
+	};
+	/**
 	 * Returns a list of all tags that are used for all content controls in the document.
 	 * @memberof ApiDocument
 	 * @typeofeditors ["CDE"]
@@ -18976,16 +18994,71 @@
 	 * Selects the current graphic object.
 	 * @memberof ApiDrawing
 	 * @typeofeditors ["CDE"]
+	 * @deprecated since 9.3.0 version.
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/Select.js
-	 */	
-	ApiDrawing.prototype.Select = function()
+	 */
+	/**
+	 * Selects the current graphic object.
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CDE"]
+	 * @since 9.3.0
+	 * @param {boolean} [isReplace=true] - Specifies whether the selection should replace the current selection (true) or be added to it (false).
+	 * @returns {boolean}
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/Select.js
+	 */
+	ApiDrawing.prototype.Select = function(isReplace)
 	{
-		let oParaDrawing = this.getParaDrawing();
-		if(!oParaDrawing) return false;
-		let oLogicDocument = private_GetLogicDocument();
-		oLogicDocument.Select_DrawingObject(oParaDrawing.Id);
+		if (isReplace === undefined)
+			isReplace = false;
 
+		let oParaDrawing = this.getParaDrawing();
+		if(!oParaDrawing)
+			return false;
+		let oLogicDocument = private_GetLogicDocument();
+		
+		if (!!isReplace)
+		{
+			oLogicDocument.Select_DrawingObject(oParaDrawing.Id);
+		}
+		else
+		{
+			let selectedObjects = oLogicDocument.DrawingObjects.selectedObjects.slice();
+			let selectedDrawings = [];
+			for(let i = 0; i <	selectedObjects.length;	i++){
+				if(selectedObjects[i].GetParaDrawing)
+					selectedDrawings.push(selectedObjects[i].GetParaDrawing());
+				else
+					selectedDrawings.push(selectedObjects[i]);
+			}
+
+			let oParaDrawing = this.getParaDrawing();
+			if(!oParaDrawing) return false;
+			selectedDrawings.push(oParaDrawing);
+			oLogicDocument.SelectDrawings(selectedDrawings, oLogicDocument);
+		}
+
+		return true;
+	};
+
+	/**
+	 * Removes the current graphic object from the selection.
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CDE"]
+	 * @since 9.3.0
+	 * @returns {boolean}
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/Unselect.js
+	 */
+	ApiDrawing.prototype.Unselect = function()
+	{
+		let oDrawing = this.Drawing;
+		if(!oDrawing)
+			return false
+		let oLogicDocument = private_GetLogicDocument();
+		let oDrawingObjects = oLogicDocument.GetDrawingObjects();
+		if (!oDrawingObjects)
+			return false;
+		oDrawingObjects.deselectObject(oDrawing);
 		return true;
 	};
 	/**
@@ -19267,6 +19340,47 @@
 	ApiDrawing.prototype.GetHeight = function()
 	{
 		return private_MM2EMU(this.getParaDrawing().getXfrmExtY());
+	};
+	/**
+	 * Returns the name of the current drawing.
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @returns {string} - Name of drawing.
+	 * @since 9.3.0
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetName.js
+	 */
+	ApiDrawing.prototype.GetName = function()
+	{
+		return this.Drawing.getObjectName();
+	};
+	/**
+	 * Sets the name of the current drawing.
+	 * If another drawing with the same name already exists, that drawing's name will be reset to a default auto-generated name.
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @param {string} name - The name which will be set to the current drawing.
+	 * @returns {boolean} - Returns true if the name was successfully set, otherwise returns false.
+	 * @since 9.3.0
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/SetName.js
+	 */
+	ApiDrawing.prototype.SetName = function(name)
+	{
+		if (name === "" || name === null || name === undefined)
+			return false
+
+		let doc = Asc.editor.GetDocument();
+		let drawings = doc.GetAllDrawingObjects();
+		for (let nCount = 0; nCount < drawings.length; nCount++)
+		{
+			let drawing = drawings[nCount];
+			if (drawing.Drawing.getOwnName() === name)
+			{
+				drawing.Drawing.setName("");
+				break;
+			}
+		}
+		this.Drawing.setName(name);
+		return true;
 	};
 	/**
      * Returns the lock value for the specified lock type of the current drawing.
@@ -29495,6 +29609,7 @@
 	ApiDocument.prototype["MoveCursorUp"]                  = ApiDocument.prototype.MoveCursorUp;
 	ApiDocument.prototype["MoveCursorDown"]                = ApiDocument.prototype.MoveCursorDown;
 	ApiDocument.prototype["GetCurrentFootEndnote"]         = ApiDocument.prototype.GetCurrentFootEndnote;
+	ApiDocument.prototype["GetDrawingsByName"]             = ApiDocument.prototype.GetDrawingsByName;
 	
 	
 	ApiParagraph.prototype["GetClassType"]           = ApiParagraph.prototype.GetClassType;
@@ -29944,6 +30059,7 @@
 	ApiDrawing.prototype["InsertInContentControl"]   = ApiDrawing.prototype.InsertInContentControl;
 	ApiDrawing.prototype["InsertParagraph"]          = ApiDrawing.prototype.InsertParagraph;
 	ApiDrawing.prototype["Select"]                   = ApiDrawing.prototype.Select;
+	ApiDrawing.prototype["Unselect"]                 = ApiDrawing.prototype.Unselect;
 	ApiDrawing.prototype["AddBreak"]                 = ApiDrawing.prototype.AddBreak;
 	ApiDrawing.prototype["SetHorFlip"]               = ApiDrawing.prototype.SetHorFlip;
 	ApiDrawing.prototype["SetVertFlip"]              = ApiDrawing.prototype.SetVertFlip;
@@ -29955,6 +30071,8 @@
 	ApiDrawing.prototype["GetPrevDrawing"]           = ApiDrawing.prototype.GetPrevDrawing;
 	ApiDrawing.prototype["GetWidth"]                 = ApiDrawing.prototype.GetWidth;
 	ApiDrawing.prototype["GetHeight"]                = ApiDrawing.prototype.GetHeight;
+	ApiDrawing.prototype["GetName"]                  = ApiDrawing.prototype.GetName;
+	ApiDrawing.prototype["SetName"]                  = ApiDrawing.prototype.SetName;
 	ApiDrawing.prototype["GetLockValue"]             = ApiDrawing.prototype.GetLockValue;
 	ApiDrawing.prototype["SetLockValue"]             = ApiDrawing.prototype.SetLockValue;
 	ApiDrawing.prototype["SetDrawingPrFromDrawing"]  = ApiDrawing.prototype.SetDrawingPrFromDrawing;

@@ -33,7 +33,6 @@
 $(function()
 {
 	AscTest.Editor.GetDocument = AscCommon.DocumentEditorApi.prototype.GetDocument.bind(AscTest.Editor);
-
 	AscTest.JsApi = {};
 	
 	AscTest.JsApi.GetDocument = AscCommon.DocumentEditorApi.prototype.GetDocument.bind(AscTest.Editor);

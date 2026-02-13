@@ -141,6 +141,7 @@ $(function()
 	AscTest.JsApi = {};
 	
 	AscTest.JsApi.GetActiveSheet = Asc.spreadsheet_api.prototype.GetActiveSheet.bind(AscTest.Editor);
+	AscTest.JsApi.GetActiveWorkbook = Asc.spreadsheet_api.prototype.GetActiveWorkbook.bind(AscTest.Editor);
 	AscTest.JsApi.GetRange = Asc.spreadsheet_api.prototype.GetRange.bind(AscTest.Editor);
 	AscTest.JsApi.CreateRGBColor = Asc.spreadsheet_api.prototype.CreateRGBColor.bind(AscTest.Editor);
 	AscTest.JsApi.CreateSolidFill = Asc.spreadsheet_api.prototype.CreateSolidFill.bind(AscTest.Editor);

@@ -8237,6 +8237,26 @@
 		return null;
 	};
 
+	/**
+	 * Returns drawings with the specified names from the workbook.
+	 * @memberof ApiWorkbook
+	 * @typeofeditors ["CSE"]
+	 * @param {string[]} ids - An array of drawing names.
+	 * @returns {Drawing[]} - Returns an array of drawing obkects filtered by the specified names.
+	 * @since 9.3.0
+	 * @see office-js-api/Examples/{Editor}/ApiWorkbook/Methods/GetDrawingsByName.js
+	 */
+	ApiWorkbook.prototype.GetDrawingsByName = function(ids)
+	{
+		let sheets = this.GetSheets();
+		let allDrawings = [];
+		for (let i = 0; i < sheets.length; i++) {
+			allDrawings = allDrawings.concat(sheets[i].GetAllDrawings());
+		}
+		return allDrawings.filter(function(drawing) {
+			return ids.includes(drawing.GetName());
+		});
+	};
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiWorksheet
@@ -12878,6 +12898,47 @@
 		return private_MM2EMU(this.Drawing.GetHeight());
 	};
 	/**
+	 * Returns the name of the current drawing.
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 * @since 9.3.0
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetName.js
+	 */
+	ApiDrawing.prototype.GetName = function () {
+		return this.Drawing.getObjectName();
+	};
+	/**
+	 * Sets the name of the current drawing.
+	 * If another drawing with the same name already exists, that drawing's name will be reset to a default auto-generated name.
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CSE"]
+	 * @param {string} name - The name which will be set to the current drawing.
+	 * @returns {boolean} - Returns true if the name was successfully set, otherwise returns false.
+	 * @since 9.3.0
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/SetName.js
+	 */
+	ApiDrawing.prototype.SetName = function(name)
+	{
+		if (name === "" || name === null || name === undefined)
+			return false
+
+		let worksheet = this.Drawing.getWorksheet();
+		let drawings = GetApiDrawings(worksheet.Drawings.map(function(drawingBase) { return drawingBase.graphicObject }));
+
+		for (let nCount = 0; nCount < drawings.length; nCount++)
+		{
+			let drawing = drawings[nCount];
+			if (drawing.Drawing.getOwnName() === name)
+			{
+				drawing.Drawing.setName("");
+				break;
+			}
+		}
+		this.Drawing.setName(name);
+		return true;
+	}
+	/**
 	 * Returns the lock value for the specified lock type of the current drawing.
 	 * @typeofeditors ["CSE"]
 	 * @param {DrawingLockType} sType - Lock type in the string format.
@@ -12986,17 +13047,50 @@
 	 * Selects the current graphic object.
 	 * @memberof ApiDrawing
 	 * @typeofeditors ["CSE"]
-	 * @since 9.1.0
+	 * @deprecated since 9.3.0 version.
 	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/Select.js
 	 */
-	ApiDrawing.prototype.Select = function() {
+	/**
+	 * Selects the current graphic object.
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CSE"]
+	 * @since 9.3.0
+	 * @param {boolean} [isReplace=false] - Specifies whether the selection should replace the current selection (true) or be added to it (false).
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/Select.js
+	 */
+	ApiDrawing.prototype.Select = function(isReplace) {
 		let oDrawing = this.Drawing;
 		if(!oDrawing) return;
 		let oController = oDrawing.getDrawingObjectsController();
 		if (!oController) return;
+
+		if (!!isReplace)
+			oController.resetSelection();
+
 		oController.selectObject(oDrawing, 0);
 		oController.updateSelectionState();
 		oController.updateOverlay();
+	};
+
+	/**
+	 * Removes the current drawing from the selection.
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CSE"]
+	 * @since 9.3.0
+	 * @returns {boolean} - Returns false if the drawing or controller is not available, otherwise returns true.
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/Unselect.js
+	 */
+	ApiDrawing.prototype.Unselect = function() {
+		let oDrawing = this.Drawing;
+		if(!oDrawing)
+			return false
+		let oController = oDrawing.getDrawingObjectsController();
+		if (!oController)
+			return false
+		oController.deselectObject(oDrawing);
+		oController.updateSelectionState();
+		oController.updateOverlay();
+		return true
 	};
 
 	/**
@@ -27526,6 +27620,7 @@
 	ApiWorkbook.prototype["GetName"] = ApiWorkbook.prototype.GetName;
 	ApiWorkbook.prototype["GetActiveSheet"] = ApiWorkbook.prototype.GetActiveSheet;
 	ApiWorkbook.prototype["GetActiveChart"] = ApiWorkbook.prototype.GetActiveChart;
+	ApiWorkbook.prototype["GetDrawingsByName"] = ApiWorkbook.prototype.GetDrawingsByName;
 
 	ApiWorksheet.prototype["GetVisible"] = ApiWorksheet.prototype.GetVisible;
 	ApiWorksheet.prototype["SetVisible"] = ApiWorksheet.prototype.SetVisible;
@@ -27694,6 +27789,8 @@
 	ApiDrawing.prototype["SetPosition"]                =  ApiDrawing.prototype.SetPosition;
 	ApiDrawing.prototype["GetWidth"]                   =  ApiDrawing.prototype.GetWidth;
 	ApiDrawing.prototype["GetHeight"]                  =  ApiDrawing.prototype.GetHeight;
+	ApiDrawing.prototype["GetName"]                    =  ApiDrawing.prototype.GetName;
+	ApiDrawing.prototype["SetName"]                    =  ApiDrawing.prototype.SetName;
 	ApiDrawing.prototype["GetLockValue"]               =  ApiDrawing.prototype.GetLockValue;
 	ApiDrawing.prototype["SetLockValue"]               =  ApiDrawing.prototype.SetLockValue;
 	ApiDrawing.prototype["GetParentSheet"]             =  ApiDrawing.prototype.GetParentSheet;
@@ -27702,6 +27799,7 @@
 	ApiDrawing.prototype["Select"]                     =  ApiDrawing.prototype.Select;
 	ApiDrawing.prototype["Fill"]                       =  ApiDrawing.prototype.Fill;
 	ApiDrawing.prototype["SetOutLine"]                 =  ApiDrawing.prototype.SetOutLine;
+	ApiDrawing.prototype["Unselect"]                   =  ApiDrawing.prototype.Unselect;
 
 	ApiImage.prototype["GetClassType"]                 =  ApiImage.prototype.GetClassType;
 

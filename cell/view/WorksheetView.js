@@ -14052,6 +14052,7 @@ function isAllowPasteLink(pastedWb) {
         this._updateSelectionNameAndInfo();
 
 		window['AscCommon'].g_specialPasteHelper.SpecialPasteButton_Update_Position();
+		Asc.editor.addMacroStepData("SelectDrawing", this.objectRender.getSelectedGraphicObjects().slice());
     };
     WorksheetView.prototype.setSelection = function (range, onlyCells) {
     	if (!Array.isArray(range)) {
