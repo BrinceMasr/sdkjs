@@ -365,7 +365,7 @@ function MoveShapeImageTrack(originalObject)
             if (oSmartArt.extY < b) {
                 this.y = this.y - (b - oSmartArt.extY);
             }
-            this.originalObject.changePositionInSmartArt(this.x, this.y);
+            this.originalObject.changePositionInSmartArt(this.x/scale_coefficients.cx, this.y/scale_coefficients.cy);
         }
         var _xfrm = this.originalObject.spPr.xfrm;
         var _x = _xfrm.offX;

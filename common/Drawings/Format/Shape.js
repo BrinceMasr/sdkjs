@@ -6040,6 +6040,7 @@
 						var defaultExtX;
 						var defaultExtY;
 						var isNormalRotate = AscFormat.checkNormalRotate(this.getDefaultRotSA());
+						const scaleCoefficient = this.getScaleCoefficient();
 						if (isNormalRotate) {
 							originalPosX = this.x;
 							originalPosY = this.y;
@@ -6051,6 +6052,10 @@
 							defaultExtX = this.extY;
 							defaultExtY = this.extX;
 						}
+						originalPosX /= scaleCoefficient;
+						originalPosY /= scaleCoefficient;
+						defaultExtX /= scaleCoefficient;
+						defaultExtY /= scaleCoefficient;
 
 
 						if (prSet) {

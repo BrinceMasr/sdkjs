@@ -3518,7 +3518,6 @@
 			var dRot = AscFormat.normalizeRotate(dAngle);
 			oXfrm.setRot(dRot);
 			if (this.isObjectInSmartArt()) {
-				//todo
 				oSmartArt = this.group.group;
 				var point = this.getSmartArtShapePoint();
 				if (point) {
@@ -3569,13 +3568,15 @@
 				if (oBounds.t < topEdgeOfSmartArt) {
 					diffY = topEdgeOfSmartArt - oBounds.t;
 				}
-
+				const scaleCoefficient = this.getScaleCoefficient();
 				if (diffX !== null) {
+					diffX /= scaleCoefficient;
 					var newOffX = this.spPr.xfrm.offX + diffX;
 					this.spPr.xfrm.setOffX(newOffX);
 					this.txXfrm && this.txXfrm.setOffX(this.txXfrm.offX + diffX);
 				}
 				if (diffY !== null) {
+					diffY /=  scaleCoefficient;
 					var newOffY = this.spPr.xfrm.offY + diffY;
 					this.spPr.xfrm.setOffY(newOffY);
 					this.txXfrm && this.txXfrm.setOffY(this.txXfrm.offY + diffY);

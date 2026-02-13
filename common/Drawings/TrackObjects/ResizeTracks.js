@@ -1409,20 +1409,6 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
                     }, this, []);
                 }
                 var xfrm = this.originalObject.spPr.xfrm;
-                if (this.originalObject.txXfrm) {
-                    var previousTxXfrmX = this.originalObject.txXfrm.offX;
-                    var previousTxXfrmY = this.originalObject.txXfrm.offY;
-                    var previousTxXfrmExtX = this.originalObject.txXfrm.extX;
-                    var previousTxXfrmExtY = this.originalObject.txXfrm.extY;
-                    var currentXfrmX = this.resizedPosX;
-                    var currentXfrmY = this.resizedPosY;
-                    var currentXfrmExtX = this.resizedExtX;
-                    var currentXfrmExtY = this.resizedExtY;
-                    this.originalObject.txXfrm.setOffX( currentXfrmX + (previousTxXfrmX - xfrm.offX));
-                    this.originalObject.txXfrm.setOffY( currentXfrmY + (previousTxXfrmY - xfrm.offY));
-                    this.originalObject.txXfrm.setExtX( previousTxXfrmExtX - (xfrm.extX - currentXfrmExtX));
-                    this.originalObject.txXfrm.setExtY( previousTxXfrmExtY - (xfrm.extY - currentXfrmExtY));
-                }
                 if(this.originalObject.getObjectType() !== AscDFH.historyitem_type_GraphicFrame)
                 {
                     if(!this.originalObject.isCrop)
@@ -2198,9 +2184,10 @@ function ResizeTrackGroup(originalObject, cardDirection, parentTrack)
                 _kw = kw;
                 _kh = kh;
             }
+						const scaleCoefficient = this.original.getScaleCoefficient();
             var xfrm = this.original.spPr.xfrm;
-            this.extX = xfrm.extX*_kw;
-            this.extY = xfrm.extY*_kh;
+            this.extX = xfrm.extX*_kw * scaleCoefficient;
+            this.extY = xfrm.extY*_kh * scaleCoefficient;
 
             this.x = this.centerDistX*kw + this.parentTrack.extX*0.5 - this.extX*0.5;
             this.y = this.centerDistY*kh + this.parentTrack.extY*0.5 - this.extY*0.5;
@@ -2438,6 +2425,7 @@ function ShapeForResizeInGroup(originalObject, parentTrack)
             }
             var xfrm = this.originalObject.spPr.xfrm;
             var txXfrm = this.originalObject.txXfrm;
+					const scaleCoefficient = this.originalObject.getScaleCoefficient();
             if (txXfrm) {
                 var previousTxXfrmX = txXfrm.offX;
                 var previousTxXfrmY = txXfrm.offY;
@@ -2452,14 +2440,14 @@ function ShapeForResizeInGroup(originalObject, parentTrack)
                 var previousXfrmOffY = this.origY || 0.0001;
                 var previousXfrmExtX = this.origExtX || 0.0001;
                 var previousXfrmExtY = this.origExtY || 0.0001;
-
-                txXfrm.setOffX( previousTxXfrmX * (currentXfrmX / previousXfrmOffX));
-                txXfrm.setOffY(previousTxXfrmY * (currentXfrmY / previousXfrmOffY));
-                txXfrm.setExtX( previousTxXfrmExtX * (currentXfrmExtX / previousXfrmExtX));
-                txXfrm.setExtY( previousTxXfrmExtY * (currentXfrmExtY / previousXfrmExtY));
+								const xScaleCoefficient = currentXfrmExtX / previousXfrmExtX;
+								const yScaleCoefficient = currentXfrmExtY / previousXfrmExtY;
+                txXfrm.setOffX(((previousTxXfrmX - previousXfrmOffX) * xScaleCoefficient + this.x) / scaleCoefficient);
+                txXfrm.setOffY(((previousTxXfrmY - previousXfrmOffY) * yScaleCoefficient + this.y) / scaleCoefficient);
+                txXfrm.setExtX( previousTxXfrmExtX * xScaleCoefficient / scaleCoefficient);
+                txXfrm.setExtY( previousTxXfrmExtY * xScaleCoefficient / scaleCoefficient);
             }
 
-					const scaleCoefficient = this.originalObject.getScaleCoefficient();
             xfrm.setOffX(this.x / scaleCoefficient);
             xfrm.setOffY(this.y / scaleCoefficient);
             xfrm.setExtX(this.extX / scaleCoefficient);

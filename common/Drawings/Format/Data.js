@@ -8850,6 +8850,7 @@ Because of this, the display is sometimes not correct.
         this.spPr.xfrm.setParent(this.spPr);
       }
       var oXfrm = this.spPr.xfrm;
+			const scaleCoefficient = this.getScaleCoefficient();
       if(AscCommonWord.ParaDrawing && (this.parent instanceof AscCommonWord.ParaDrawing)) {
         oXfrm.setOffX(0);
         oXfrm.setOffY(0);
@@ -8860,10 +8861,12 @@ Because of this, the display is sometimes not correct.
       }
       oXfrm.setChOffX(0);
       oXfrm.setChOffY(0);
-      oXfrm.setChExtX(this.extX);
-      oXfrm.setChExtY(this.extY);
-      oXfrm.setExtX(this.extX);
-      oXfrm.setExtY(this.extY);
+			const extX = this.extX / scaleCoefficient;
+			const extY = this.extY / scaleCoefficient;
+      oXfrm.setChExtX(extX);
+      oXfrm.setChExtY(extY);
+      oXfrm.setExtX(extX);
+      oXfrm.setExtY(extY);
       return {posX: oXfrm.offX, posY: oXfrm.offY};
     };
 

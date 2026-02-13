@@ -19427,13 +19427,6 @@ CDocument.prototype.controller_AddInlineImage = function(W, H, Img, GraphicObjec
 			Image.setParent(Drawing);
 			Drawing.Set_GraphicObject(Image);
 		}
-		else if (GraphicObject.isSmartArtObject && GraphicObject.isSmartArtObject())
-		{
-			Drawing   = new ParaDrawing(W, H, null, this.DrawingDocument, this, null);
-			GraphicObject.setParent(Drawing);
-			Drawing.Set_GraphicObject(GraphicObject);
-			Drawing.setExtent(GraphicObject.spPr.xfrm.extX, GraphicObject.spPr.xfrm.extY);
-		}
 		else
 		{
 			Drawing   = new ParaDrawing(W, H, null, this.DrawingDocument, this, null);
