@@ -3810,6 +3810,29 @@
         this.txPr = pr;
         this.setParentToChild(pr);
     };
+    CDLbl.prototype.replaceTextContent = function(sText) {
+        let sVal = typeof sText === "string" ? sText : "";
+        if(this.tx && this.tx.rich && this.tx.rich.content) {
+            this.tx.rich.content.ClearContent(true);
+            AddToContentFromString(this.tx.rich.content, sVal);
+        } else {
+            let oTx = this.tx || new CChartText();
+            let oBody = AscFormat.CreateTextBodyFromString(sVal, this.getDrawingDocument(), this);
+            oTx.setRich(oBody);
+            if(!this.tx) {
+                this.setTx(oTx);
+            }
+        }
+        this.recalcInfo.recalculateTxBody = true;
+        this.recalcInfo.recalculateContent = true;
+        this.recalcInfo.recalcTransform = true;
+        this.recalcInfo.recalculateTransformText = true;
+    };
+    CDLbl.prototype.replaceTextContentNoHistory = function(sText) {
+        AscFormat.ExecuteNoHistory(function() {
+            this.replaceTextContent(sText);
+        }, this, []);
+    };
     CDLbl.prototype.handleUpdateFill = function() {
         this.Refresh_RecalcData2();
     };
