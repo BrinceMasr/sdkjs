@@ -5900,14 +5900,22 @@ function(window, undefined) {
 
 		//seria.dataLabels.visibility optional
 		if (cachedData && seria && seria.dataLabels) {
+			const chartType = cachedData.type;
 			const default_lbl = new AscFormat.CDLbl();
 			const nDefaultPosition = seria.dataLabels.pos ? seria.dataLabels.pos : AscFormat.DATA_LABEL_POS_OUT_END;
 			default_lbl.initDefault(nDefaultPosition);
 			cachedData.compiledDlbs = [];
 			let aPts = seria.getValPts();
+			let sPts = seria.getCatPts();
 
 			for(let nPt = 0; nPt < aPts.length; ++nPt) {
-				let pt = aPts[nPt];
+				let pt = null;
+				// if (chartType === AscFormat.SERIES_LAYOUT_TREEMAP) {
+				// 	pt = sPts[nPt];
+				// } else {
+				// 	pt = aPts[nPt];
+				// }
+				pt = aPts[nPt];
 				const compiled_dlb = new AscFormat.CDLbl();
 				compiled_dlb.merge(default_lbl);
 				pt.compiledDlb = compiled_dlb;
