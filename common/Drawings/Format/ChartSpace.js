@@ -5925,7 +5925,7 @@ function(window, undefined) {
 				pt.compiledDlb.idx = pt.idx;
 				pt.compiledDlb.setShowChartExVal(true);
 				// LOOKUP//HERE
-				//compiledDlb.replaceTextContentNoHistory("new test");
+				// pt.compiledDlb.replaceTextContentNoHistory("new test");
 				pt.compiledDlb.recalculate();
 				if (cachedData.funnel && pt.compiledDlb.pt <= 0) {
 					pt.compiledDlb = default_lbl;

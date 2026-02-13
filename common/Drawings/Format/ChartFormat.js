@@ -2545,6 +2545,15 @@
         if(this.bDelete) {
             return;
         }
+        this.recalculateInternal();
+        if(this.chart) {
+            this.chart.addToSetPosition(this);
+        }
+    };
+    CDLbl.prototype.recalculateInternal = function() {
+        if(this.bDelete) {
+            return;
+        }
         AscFormat.ExecuteNoHistory(function() {
             if(this.recalcInfo.recalculateBrush) {
                 this.recalculateBrush();
@@ -2573,9 +2582,6 @@
             if(this.recalcInfo.recalculateTransformText) {
                 this.recalculateTransformText();
                 //this.recalcInfo.recalcTransformText = false;
-            }
-            if(this.chart) {
-                this.chart.addToSetPosition(this);
             }
         }, this, []);
     };

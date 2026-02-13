@@ -8645,7 +8645,7 @@ drawTreemapChart.prototype = {
 		// LOOKUP//HERE
 		// if (compiledDlb) {
 		// 	compiledDlb.replaceTextContentNoHistory("new test");
-		// 	compiledDlb.recalculate();
+		// 	compiledDlb.recalculateInternal();
 		// }
 
 		const paddingX = 2 / pxToMm; // 2px
