@@ -8642,6 +8642,12 @@ drawTreemapChart.prototype = {
 			return;
 		}
 
+		// LOOKUP//HERE
+		// if (compiledDlb) {
+		// 	compiledDlb.replaceTextContentNoHistory("new test");
+		// 	compiledDlb.recalculate();
+		// }
+
 		const paddingX = 2 / pxToMm; // 2px
 		const paddingY = 2 / pxToMm; // 2px
 
