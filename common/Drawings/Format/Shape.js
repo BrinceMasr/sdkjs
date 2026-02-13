@@ -4957,11 +4957,12 @@
 				this.recalcInfo.recalcTitle = oOldRecalcTitle;
 				this.recalcInfo.bRecalculatedTitle = bOldRecalcTitle;
 				AscFormat.CheckSpPrXfrm(this, true);
-				this.spPr.xfrm.setExtX(this.extX + TEXT_RECT_ERROR);
-				this.spPr.xfrm.setExtY(this.extY + TEXT_RECT_ERROR);
+				const scaleCoefficient = this.getScaleCoefficient();
+				this.spPr.xfrm.setExtX(this.extX / scaleCoefficient + TEXT_RECT_ERROR);
+				this.spPr.xfrm.setExtY(this.extY / scaleCoefficient + TEXT_RECT_ERROR);
 				if (!this.bWordShape || this.group) {
-					this.spPr.xfrm.setOffX(this.x);
-					this.spPr.xfrm.setOffY(this.y);
+					this.spPr.xfrm.setOffX(this.x / scaleCoefficient);
+					this.spPr.xfrm.setOffY(this.y / scaleCoefficient);
 					if (this.drawingBase) {
 						CheckExcelDrawingXfrm(this.spPr.xfrm);
 					}
