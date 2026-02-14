@@ -19629,7 +19629,7 @@
 		return sOperator;
 	}
 
-	// Helper to get single instance of validation
+	// Helpers to get single instance of validation
 	function getSingleValidation(apiValidation) {
 		if (!apiValidation) {
 			return;
@@ -19645,6 +19645,39 @@
 		}
 		return apiValidation.validations[0];
 	}
+
+    function setSingleValidation(apiValidation) {
+        if (!apiValidation) {
+            return;
+        }
+        if (!apiValidation.validations || !Array.isArray(apiValidation.validations) || !apiValidation.validations.length) {
+            const validation = new window['AscCommonExcel'].CDataValidations().getNewValidation();
+            apiValidation.validations = [validation];
+            return apiValidation.validations[0];
+        }
+        if (apiValidation.validations.length > 1) {
+            throwException(new Error('Multiple validations exist'));
+            return null;
+        }
+        if (!apiValidation.range || !apiValidation.range.range) {
+            throwException(new Error('Range is not provided'));
+            return
+        }
+        const targetRange = apiValidation.range.range;
+        const thisValidation = apiValidation.validations[0];
+        // if validation contains multiple ranges or if validations range is not the same as target range, create newValidation
+        if (thisValidation.ranges.length > 1 || (thisValidation.ranges.length > 0 && !targetRange.bbox.isEqual(thisValidation.ranges[0]))) {
+            const type = apiValidation.GetType();
+            const alert = apiValidation.GetAlertStyle();
+            const operator = apiValidation.GetOperator();
+            const formula1 = apiValidation.GetFormula1();
+            const formula2 = apiValidation.GetFormula2();
+            const newValidation = apiValidation.Modify(type, alert, operator, formula1, formula2);
+            return newValidation ? newValidation.validations[0] : null;
+        } else {
+            return apiValidation.validations[0];
+        }
+    }
 
 	/**
 	 * Class representing data validation.
@@ -19894,7 +19927,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetIgnoreBlank.js
 	 */
 	ApiValidation.prototype.SetIgnoreBlank = function(IgnoreBlank) {
-		const validation = getSingleValidation(this);
+		const validation = setSingleValidation(this);
 		if (!validation) {
 			return;
 		}
@@ -19924,7 +19957,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetInCellDropdown.js
 	 */
 	ApiValidation.prototype.SetInCellDropdown = function(InCellDropdown) {
-		const validation = getSingleValidation(this);
+		const validation = setSingleValidation(this);
 		if (!validation) {
 			return;
 		}
@@ -19954,7 +19987,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetShowInput.js
 	 */
 	ApiValidation.prototype.SetShowInput = function(ShowInput) {
-		const validation = getSingleValidation(this);
+		const validation = setSingleValidation(this);
 		if (!validation) {
 			return;
 		}
@@ -19984,7 +20017,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetShowError.js
 	 */
 	ApiValidation.prototype.SetShowError = function(ShowError) {
-		const validation = getSingleValidation(this);
+		const validation = setSingleValidation(this);
 		if (!validation) {
 			return;
 		}
@@ -20015,7 +20048,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetInputTitle.js
 	 */
 	ApiValidation.prototype.SetInputTitle = function(InputTitle) {
-		const validation = getSingleValidation(this);
+		const validation = setSingleValidation(this);
 		if (!validation) {
 			return;
 		}
@@ -20046,7 +20079,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetInputMessage.js
 	 */
 	ApiValidation.prototype.SetInputMessage = function(InputMessage) {
-		const validation = getSingleValidation(this);
+		const validation = setSingleValidation(this);
 		if (!validation) {
 			return;
 		}
@@ -20078,7 +20111,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetErrorTitle.js
 	 */
 	ApiValidation.prototype.SetErrorTitle = function(ErrorTitle) {
-		const validation = getSingleValidation(this);
+		const validation = setSingleValidation(this);
 		if (!validation) {
 			return;
 		}
@@ -20110,7 +20143,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiValidation/Methods/SetErrorMessage.js
 	 */
 	ApiValidation.prototype.SetErrorMessage = function(ErrorMessage) {
-		const validation = getSingleValidation(this);
+		const validation = setSingleValidation(this);
 		if (!validation) {
 			return;
 		}
