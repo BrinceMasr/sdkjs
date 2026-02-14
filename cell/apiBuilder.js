@@ -19712,35 +19712,56 @@
 		dataValidation.showInputMessage = true;
 		dataValidation.allowBlank = true;
 
-		let processFormula = function(formula) {
-			if (formula === undefined || formula === null) {
-				return null;
-			}
+        const getFormulaString = function (formula) {
+            if (formula === undefined || formula === null) {
+                return null;
+            }
 
-			if (typeof formula === "string") {
-				return new window['Asc'].CDataFormula(formula);
-			} else if (typeof formula === "number") {
-				return new window['Asc'].CDataFormula(formula.toString());
-			} else if (Array.isArray(formula)) {
+            if (typeof formula === "string") {
+                return formula
+            } else if (typeof formula === "number") {
+                return formula.toString()
+            } else if (Array.isArray(formula)) {
                 const sep = ",";
-                return new window['Asc'].CDataFormula(formula.join(sep));
+                return formula.join(sep)
             } else if (formula && formula.constructor === ApiRange) {
                 let text = formula.GetAddress();
                 if (text && typeof text === "string") {
                     text = "=" + text;
                 }
-				return new window['Asc'].CDataFormula(text);
+                return text
+            }
+
+            return null;
+        }
+
+		let processFormula = function(formula, t) {
+			if (formula === undefined || formula === null) {
+				return null;
 			}
+
+            const formulaText = getFormulaString(formula);
+            if (formulaText !== null) {
+                // check for validation if validation provided else simply pass
+                const res = t.range && t.range.range && t.range.range.worksheet && t.range.range.worksheet.workbook && t.range.range.worksheet.workbook.oApi && t.range.range.worksheet.workbook.oApi.asc_checkDataRange ?
+                    t.range.range.worksheet.workbook.oApi.asc_checkDataRange(Asc.c_oAscSelectionDialogType.DataValidation, formulaText, true, undefined, internalType) : Asc.c_oAscError.ID.No;
+                if (res !== Asc.c_oAscError.ID.No) {
+                    throwException(new Error('Provide correct formula!'));
+                    return null;
+                }
+                return new window['Asc'].CDataFormula(formulaText);
+            }
 
 			return null;
 		};
 
+        const t = this;
 		if (Formula1 !== undefined) {
-			dataValidation.formula1 = processFormula(Formula1);
+			dataValidation.formula1 = processFormula(Formula1, t);
 		}
 
 		if (Formula2 !== undefined) {
-			dataValidation.formula2 = processFormula(Formula2);
+			dataValidation.formula2 = processFormula(Formula2, t);
 		}
 
 		let ranges = [];
@@ -19773,6 +19794,7 @@
 
 		worksheet.dataValidations.add(worksheet, dataValidation, true);
 
+        // this.api.asc_checkDataRange(Asc.c_oAscSelectionDialogType.DataValidation, this.props.asc_getFormula1() ? this.props.asc_getFormula1().asc_getValue() : null, true, undefined, type);
 		this.validations = [dataValidation];
 
 		return this;
