@@ -19794,7 +19794,6 @@
 
 		worksheet.dataValidations.add(worksheet, dataValidation, true);
 
-        // this.api.asc_checkDataRange(Asc.c_oAscSelectionDialogType.DataValidation, this.props.asc_getFormula1() ? this.props.asc_getFormula1().asc_getValue() : null, true, undefined, type);
 		this.validations = [dataValidation];
 
 		return this;
