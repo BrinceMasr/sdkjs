@@ -2262,7 +2262,7 @@
 			}
 		},
 		setDrawingLine			: function(line)
-		{debugger
+		{
 			let strStrokeShape = "\t(function () {\n";
 			let type = AscFormat.CLn.prototype.GetDashByCode(line.prstDash);
 			let color = line.Fill.fill.color.color.RGBA;
