@@ -383,7 +383,7 @@ function MoveShapeImageTrack(originalObject)
         {
             _xfrm.setOffX(this.x/scale_coefficients.cx + ch_off_x);
             _xfrm.setOffY(this.y/scale_coefficients.cy + ch_off_y);
-			if (Asc.editor.getEditorId() === AscCommon.c_oEditorId.Spreadsheet)
+			if (Asc.editor.getEditorId() === AscCommon.c_oEditorId.Spreadsheet && !this.originalObject.isObjectInSmartArt())
 				Asc.editor.addMacroStepData("SetDrawingPos", {from: this.originalObject.drawingBase.from, to: this.originalObject.drawingBase.to});
 			if (Asc.editor.getEditorId() === AscCommon.c_oEditorId.Presentation)
 				Asc.editor.addMacroStepData("SetDrawingPos", {x: this.x, y: this.y});
