@@ -9942,5 +9942,185 @@ $(function () {
 		clearData(0, 0, 100, 200);
 	});
 
+	QUnit.test("Test: \"Copy worksheet with dynamic arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+
+		let fillRange, fragment;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		clearData(0, 0, 100, 200);
+
+		// Setup initial data for FILTER test
+		ws.getRange2("A1").setValue("fruit");
+		ws.getRange2("B1").setValue("apple");
+		ws.getRange2("A2").setValue("fruit");
+		ws.getRange2("B2").setValue("banana");
+		ws.getRange2("A3").setValue("vegetable");
+		ws.getRange2("B3").setValue("carrot");
+		ws.getRange2("D1").setValue("fruit");
+
+		// Add SEQUENCE formula in E1
+		fillRange = ws.getRange2("E1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("E1").getValueForEdit2();
+		fragment[0].setFragmentText("=SEQUENCE(5)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		// Add FILTER formula in F1
+		fillRange = ws.getRange2("F1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("F1").getValueForEdit2();
+		fragment[0].setFragmentText("=FILTER(A1:B3,A1:A3=D1)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		// Add blocked (collapsed) array - SEQUENCE with blocking cell
+		ws.getRange2("H2").setValue("BLOCK"); // Block the spill range
+		fillRange = ws.getRange2("H1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("H1").getValueForEdit2();
+		fragment[0].setFragmentText("=SEQUENCE(3)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		// Verify original sheet has SEQUENCE array working
+		assert.strictEqual(ws.getRange2("E1").getValue(), "1", "Original E1 = 1");
+		assert.strictEqual(ws.getRange2("E2").getValue(), "2", "Original E2 = 2");
+		assert.strictEqual(ws.getRange2("E3").getValue(), "3", "Original E3 = 3");
+		assert.strictEqual(ws.getRange2("E4").getValue(), "4", "Original E4 = 4");
+		assert.strictEqual(ws.getRange2("E5").getValue(), "5", "Original E5 = 5");
+
+		// Verify FILTER array
+		assert.strictEqual(ws.getRange2("F1").getValue(), "fruit", "Original F1 = fruit");
+		assert.strictEqual(ws.getRange2("G1").getValue(), "apple", "Original G1 = apple");
+		assert.strictEqual(ws.getRange2("F2").getValue(), "fruit", "Original F2 = fruit");
+		assert.strictEqual(ws.getRange2("G2").getValue(), "banana", "Original G2 = banana");
+
+		// Check metadata on original sheet
+		let resCellE1 = getCell(ws.getRange2("E1"));
+		assert.ok(resCellE1, "Original E1 cell exists");
+		let cmIndexE1 = resCellE1 && resCellE1.formulaParsed && resCellE1.formulaParsed.getCm();
+		assert.ok(cmIndexE1 > 0, "Original SEQUENCE formula has cm metadata: " + cmIndexE1);
+
+		let resCellF1 = getCell(ws.getRange2("F1"));
+		assert.ok(resCellF1, "Original F1 cell exists");
+		let cmIndexF1 = resCellF1 && resCellF1.formulaParsed && resCellF1.formulaParsed.getCm();
+		assert.ok(cmIndexF1 > 0, "Original FILTER formula has cm metadata: " + cmIndexF1);
+
+		// Check blocked (collapsed) array
+		let resCellH1 = getCell(ws.getRange2("H1"));
+		assert.ok(resCellH1, "Original H1 cell exists");
+		assert.strictEqual(ws.getRange2("H1").getValue(), "#SPILL!", "Original H1 shows #SPILL! error (blocked)");
+		let cmIndexH1 = resCellH1 && resCellH1.formulaParsed && resCellH1.formulaParsed.getCm();
+		let acaH1 = resCellH1 && resCellH1.formulaParsed && resCellH1.formulaParsed.getAca();
+		assert.ok(cmIndexH1 > 0, "Original blocked SEQUENCE has cm metadata: " + cmIndexH1);
+		assert.strictEqual(acaH1, true, "Original blocked SEQUENCE has aca flag = true");
+
+		// Check allFormulasCountMap on original sheet
+		let origCountMapSize = 0;
+		if (ws.dynamicArrayManager && ws.dynamicArrayManager.allFormulasCountMap) {
+			for (let key in ws.dynamicArrayManager.allFormulasCountMap) {
+				if (ws.dynamicArrayManager.allFormulasCountMap.hasOwnProperty(key)) {
+					origCountMapSize++;
+				}
+			}
+		}
+		assert.ok(origCountMapSize > 0, "Original sheet has allFormulasCountMap entries: " + origCountMapSize);
+
+		// Copy the worksheet
+		let originalSheetIndex = wb.getWorksheetIndexByName(ws.getName());
+		assert.ok(originalSheetIndex >= 0, "Found original sheet index: " + originalSheetIndex);
+
+		let copyName = ws.getName() + " (2)";
+		wb.copyWorksheet(originalSheetIndex, null, copyName);
+
+		// Get the copied worksheet
+		let wsCopy = wb.getWorksheetByName(copyName);
+		assert.ok(wsCopy, "Copied worksheet exists");
+
+		// Verify copied sheet has SEQUENCE array working
+		assert.strictEqual(wsCopy.getRange2("E1").getValue(), "1", "Copied E1 = 1");
+		assert.strictEqual(wsCopy.getRange2("E2").getValue(), "2", "Copied E2 = 2");
+		assert.strictEqual(wsCopy.getRange2("E3").getValue(), "3", "Copied E3 = 3");
+		assert.strictEqual(wsCopy.getRange2("E4").getValue(), "4", "Copied E4 = 4");
+		assert.strictEqual(wsCopy.getRange2("E5").getValue(), "5", "Copied E5 = 5");
+
+		// Verify FILTER array on copied sheet
+		assert.strictEqual(wsCopy.getRange2("F1").getValue(), "fruit", "Copied F1 = fruit");
+		assert.strictEqual(wsCopy.getRange2("G1").getValue(), "apple", "Copied G1 = apple");
+		assert.strictEqual(wsCopy.getRange2("F2").getValue(), "fruit", "Copied F2 = fruit");
+		assert.strictEqual(wsCopy.getRange2("G2").getValue(), "banana", "Copied G2 = banana");
+
+		// Verify formulas were copied
+		let resCellE1Copy = getCell(wsCopy.getRange2("E1"));
+		assert.ok(resCellE1Copy, "Copied E1 cell exists");
+		assert.strictEqual(getNormalizedFormula(resCellE1Copy), "SEQUENCE(5)", "Copied E1 has SEQUENCE formula");
+
+		let resCellF1Copy = getCell(wsCopy.getRange2("F1"));
+		assert.ok(resCellF1Copy, "Copied F1 cell exists");
+		assert.strictEqual(getNormalizedFormula(resCellF1Copy), "FILTER(A1:B3,A1:A3=D1)", "Copied F1 has FILTER formula");
+
+		// Check metadata was copied
+		let cmIndexE1Copy = resCellE1Copy && resCellE1Copy.formulaParsed && resCellE1Copy.formulaParsed.getCm();
+		assert.ok(cmIndexE1Copy > 0, "Copied SEQUENCE formula has cm metadata: " + cmIndexE1Copy);
+
+		let cmIndexF1Copy = resCellF1Copy && resCellF1Copy.formulaParsed && resCellF1Copy.formulaParsed.getCm();
+		assert.ok(cmIndexF1Copy > 0, "Copied FILTER formula has cm metadata: " + cmIndexF1Copy);
+
+		// Check blocked (collapsed) array was copied correctly
+		let resCellH1Copy = getCell(wsCopy.getRange2("H1"));
+		assert.ok(resCellH1Copy, "Copied H1 cell exists");
+		assert.strictEqual(getNormalizedFormula(resCellH1Copy), "SEQUENCE(3)", "Copied H1 has SEQUENCE formula");
+		assert.strictEqual(wsCopy.getRange2("H1").getValue(), "#SPILL!", "Copied H1 shows #SPILL! error (blocked)");
+		assert.strictEqual(wsCopy.getRange2("H2").getValue(), "BLOCK", "Copied H2 still has blocking value");
+		let cmIndexH1Copy = resCellH1Copy && resCellH1Copy.formulaParsed && resCellH1Copy.formulaParsed.getCm();
+		let acaH1Copy = resCellH1Copy && resCellH1Copy.formulaParsed && resCellH1Copy.formulaParsed.getAca();
+		assert.ok(cmIndexH1Copy > 0, "Copied blocked SEQUENCE has cm metadata: " + cmIndexH1Copy);
+		assert.strictEqual(acaH1Copy, true, "Copied blocked SEQUENCE has aca flag = true");
+
+		// Test that removing block on copied sheet allows array to expand
+		wsCopy.getRange2("H2").setValue("");
+		assert.strictEqual(wsCopy.getRange2("H1").getValue(), "1", "After unblock: Copied H1 = 1");
+		assert.strictEqual(wsCopy.getRange2("H2").getValue(), "2", "After unblock: Copied H2 = 2");
+		assert.strictEqual(wsCopy.getRange2("H3").getValue(), "3", "After unblock: Copied H3 = 3");
+
+		// Check allFormulasCountMap was copied
+		let copyCountMapSize = 0;
+		if (wsCopy.dynamicArrayManager && wsCopy.dynamicArrayManager.allFormulasCountMap) {
+			for (let key in wsCopy.dynamicArrayManager.allFormulasCountMap) {
+				if (wsCopy.dynamicArrayManager.allFormulasCountMap.hasOwnProperty(key)) {
+					copyCountMapSize++;
+				}
+			}
+		}
+		assert.strictEqual(copyCountMapSize, origCountMapSize, "Copied sheet has same allFormulasCountMap size: " + copyCountMapSize);
+
+		// Verify dynamic arrays still work on copied sheet by changing filter criteria
+		wsCopy.getRange2("D1").setValue("vegetable");
+
+		// After changing filter, FILTER should now show only vegetable
+		assert.strictEqual(wsCopy.getRange2("F1").getValue(), "vegetable", "After change: Copied F1 = vegetable");
+		assert.strictEqual(wsCopy.getRange2("G1").getValue(), "carrot", "After change: Copied G1 = carrot");
+		
+		// F2 should be empty now since only 1 vegetable entry
+		let f2Value = wsCopy.getRange2("F2").getValue();
+		assert.ok(f2Value === "" || f2Value === null || f2Value === undefined, "After change: Copied F2 is empty");
+
+		// Verify SEQUENCE array still works correctly on copied sheet
+		assert.strictEqual(wsCopy.getRange2("E1").getValue(), "1", "After change: Copied E1 still = 1");
+		assert.strictEqual(wsCopy.getRange2("E5").getValue(), "5", "After change: Copied E5 still = 5");
+
+		// Clean up - remove copied worksheet
+		let copyIndex = wb.getWorksheetIndexByName(copyName);
+		if (copyIndex >= 0) {
+			wb.removeWorksheet(copyIndex);
+		}
+
+		clearData(0, 0, 100, 200);
+	});
+
 	QUnit.module("Dynamic Arrays Tests");
 });

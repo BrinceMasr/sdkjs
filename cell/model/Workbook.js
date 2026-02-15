@@ -7153,6 +7153,13 @@
 			this.rowBreaks = wsFrom.rowBreaks.clone(this);
 		}
 
+		if (AscCommonExcel.bIsSupportDynamicArrays && wsFrom.dynamicArrayManager && wsFrom.dynamicArrayManager.allFormulasCountMap) {
+			this.dynamicArrayManager.allFormulasCountMap = {};
+			for (var cmIndex in wsFrom.dynamicArrayManager.allFormulasCountMap) {
+				this.dynamicArrayManager.allFormulasCountMap[cmIndex] = wsFrom.dynamicArrayManager.allFormulasCountMap[cmIndex];
+			}
+		}
+
 		return renameParams;
 	};
 

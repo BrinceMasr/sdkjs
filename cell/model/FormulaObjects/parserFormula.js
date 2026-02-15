@@ -6757,6 +6757,9 @@ function parserFormula( formula, parent, _ws ) {
 		oRes.isParsed = this.isParsed;
 		oRes.ref = this.ref;
 		oRes.ca = this.ca;
+		oRes.cm = this.cm;
+		oRes.vm = this.vm;
+		oRes.aca = this.aca;
 		return oRes;
 	};
 	parserFormula.prototype.getParent = function() {
