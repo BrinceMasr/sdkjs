@@ -35,6 +35,8 @@
 (function (window)
 {
 	let oMacroRecorderContext = {};
+	let shapesMacro = {};
+	let nShape = 0;
 
 	/**
 	 * @param editor
@@ -67,6 +69,8 @@
 		this.paused = false;
 		this.inProgress = true;
 		this.isFirstAction = true;
+		shapesMacro = {};
+		nShape = 0;
 
 		this.initEvents();
 		this.editor.asc_registerCallback('asc_onKeyDown', this.onKeyDown);
@@ -711,8 +715,6 @@
 		}
 	}
 
-	let shapesMacro = {};
-	let nShape = 0;
 	function getShapeCount()
 	{
 		return nShape++;
