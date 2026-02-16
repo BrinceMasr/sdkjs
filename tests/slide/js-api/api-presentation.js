@@ -70,3 +70,4 @@ $(function () {
 		assert.strictEqual(drawingsFiltered[0].GetName(), "Shape1", 'Check filtered drawing has correct name');
 	});
 });
+

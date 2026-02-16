@@ -204,3 +204,4 @@ $(function ()
         assert.ok(drawing.Drawing.getDrawingObjectsController().selectedObjects.includes(drawing.Drawing), 'Check drawing is selected in document');
     });
 });
+
