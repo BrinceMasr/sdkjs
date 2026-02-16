@@ -19100,7 +19100,7 @@
 	 * @memberof ApiDrawing
 	 * @typeofeditors ["CDE"]
 	 * @since 9.3.0
-	 * @returns {boolean} bFlip - Specifies if the figure will be flipped horizontally or not.
+	 * @returns {boolean | null} Returns true if the figure is flipped horizontally, false if not, or null if the drawing properties are not available.
 	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/AddBreak.js
 	 */
 	ApiDrawing.prototype.GetFlipH = function()
@@ -19115,7 +19115,7 @@
 	 * @memberof ApiDrawing
 	 * @typeofeditors ["CDE"]
 	 * @since 9.3.0
-	 * @returns {boolean} bFlip - Specifies if the figure will be flipped vertically or not.
+	 * @returns {boolean | null} Returns true if the figure is flipped vertically, false if not, or null if the drawing properties are not available.
 	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/AddBreak.js
 	 */
 	ApiDrawing.prototype.GetFlipV = function()
@@ -19124,6 +19124,52 @@
 			return this.Drawing.spPr.xfrm.flipV;
 
 		return null;
+	};
+
+	/**
+	 * Sets the horizontal flip of the current drawing.
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CDE"]
+	 * @since 9.3.0
+	 * @param {boolean} bFlip - Specifies if the figure will be flipped horizontally or not.
+	 * @returns {boolean} Returns true if the operation is successful, false otherwise.
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/SetFlipH.js
+	 */
+	ApiDrawing.prototype.SetFlipH = function(bFlip)
+	{
+		if (typeof(bFlip) !== "boolean")
+			return false;
+
+		if (this.Drawing && this.Drawing.spPr && this.Drawing.spPr.xfrm)
+		{
+			this.Drawing.spPr.xfrm.setFlipH(bFlip);
+			return true;
+		}
+
+		return false;
+	};
+
+	/**
+	 * Sets the vertical flip of the current drawing.
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CDE"]
+	 * @since 9.3.0
+	 * @param {boolean} bFlip - Specifies if the figure will be flipped vertically or not.
+	 * @returns {boolean} Returns true if the operation is successful, false otherwise.
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/SetFlipV.js
+	 */
+	ApiDrawing.prototype.SetFlipV = function(bFlip)
+	{
+		if (typeof(bFlip) !== "boolean")
+			return false;
+
+		if (this.Drawing && this.Drawing.spPr && this.Drawing.spPr.xfrm)
+		{
+			this.Drawing.spPr.xfrm.setFlipV(bFlip);
+			return true;
+		}
+
+		return false;
 	};
 
 	/**
@@ -30082,6 +30128,8 @@
 	ApiDrawing.prototype["SetRelativeWidth"]		 = ApiDrawing.prototype.SetRelativeWidth;
 	ApiDrawing.prototype["GetFlipH"]				 = ApiDrawing.prototype.GetFlipH;
 	ApiDrawing.prototype["GetFlipV"]				 = ApiDrawing.prototype.GetFlipV;
+	ApiDrawing.prototype["SetFlipH"]				 = ApiDrawing.prototype.SetFlipH;
+	ApiDrawing.prototype["SetFlipV"]				 = ApiDrawing.prototype.SetFlipV;
 
 	ApiDrawing.prototype["ToJSON"]                   = ApiDrawing.prototype.ToJSON;
 

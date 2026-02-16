@@ -161,5 +161,63 @@
 		assert.ok(!shape.Shape.getDrawingObjectsController().selectedObjects.includes(shape.Shape), 'Check shape is not selected after unselect');
 	});
 
+	QUnit.test("GetFlipH", function (assert) {
+		let worksheet = AscTest.JsApi.GetActiveSheet();
+		let fill = AscTest.JsApi.CreateSolidFill(AscTest.JsApi.CreateRGBColor(255, 111, 61));
+		let stroke = AscTest.JsApi.CreateStroke(0, AscTest.JsApi.CreateNoFill());
+		let shape = worksheet.AddShape("cube", 50 * 36000, 50 * 36000, fill, stroke, 0, 0, 0, 0);
+
+		assert.strictEqual(shape.GetFlipH(), false, 'Check drawing horizontal flip === false');
+		shape.SetFlipH(true);
+		assert.strictEqual(shape.GetFlipH(), true, 'Check drawing horizontal flip === true');
+	});
+
+	QUnit.test("GetFlipV", function (assert) {
+		let worksheet = AscTest.JsApi.GetActiveSheet();
+		let fill = AscTest.JsApi.CreateSolidFill(AscTest.JsApi.CreateRGBColor(255, 111, 61));
+		let stroke = AscTest.JsApi.CreateStroke(0, AscTest.JsApi.CreateNoFill());
+		let shape = worksheet.AddShape("cube", 50 * 36000, 50 * 36000, fill, stroke, 0, 0, 0, 0);
+
+		assert.strictEqual(shape.GetFlipV(), false, 'Check drawing vertical flip === false');
+		shape.SetFlipV(true);
+		assert.strictEqual(shape.GetFlipV(), true, 'Check drawing vertical flip === true');
+	});
+
+	QUnit.test("SetFlipH", function (assert) {
+		let worksheet = AscTest.JsApi.GetActiveSheet();
+		let fill = AscTest.JsApi.CreateSolidFill(AscTest.JsApi.CreateRGBColor(255, 111, 61));
+		let stroke = AscTest.JsApi.CreateStroke(0, AscTest.JsApi.CreateNoFill());
+		let shape = worksheet.AddShape("cube", 50 * 36000, 50 * 36000, fill, stroke, 0, 0, 0, 0);
+
+		let result = shape.SetFlipH(true);
+		assert.strictEqual(result, true, 'Check SetFlipH returns true');
+		assert.strictEqual(shape.GetFlipH(), true, 'Check drawing horizontal flip === true after SetFlipH');
+
+		result = shape.SetFlipH(false);
+		assert.strictEqual(result, true, 'Check SetFlipH returns true');
+		assert.strictEqual(shape.GetFlipH(), false, 'Check drawing horizontal flip === false after SetFlipH');
+
+		result = shape.SetFlipH("invalid");
+		assert.strictEqual(result, false, 'Check SetFlipH returns false for invalid parameter');
+	});
+
+	QUnit.test("SetFlipV", function (assert) {
+		let worksheet = AscTest.JsApi.GetActiveSheet();
+		let fill = AscTest.JsApi.CreateSolidFill(AscTest.JsApi.CreateRGBColor(255, 111, 61));
+		let stroke = AscTest.JsApi.CreateStroke(0, AscTest.JsApi.CreateNoFill());
+		let shape = worksheet.AddShape("cube", 50 * 36000, 50 * 36000, fill, stroke, 0, 0, 0, 0);
+
+		let result = shape.SetFlipV(true);
+		assert.strictEqual(result, true, 'Check SetFlipV returns true');
+		assert.strictEqual(shape.GetFlipV(), true, 'Check drawing vertical flip === true after SetFlipV');
+
+		result = shape.SetFlipV(false);
+		assert.strictEqual(result, true, 'Check SetFlipV returns true');
+		assert.strictEqual(shape.GetFlipV(), false, 'Check drawing vertical flip === false after SetFlipV');
+
+		result = shape.SetFlipV("invalid");
+		assert.strictEqual(result, false, 'Check SetFlipV returns false for invalid parameter');
+	});
+
 })(window);
 

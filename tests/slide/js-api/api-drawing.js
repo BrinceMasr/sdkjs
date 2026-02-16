@@ -212,5 +212,87 @@ $(function () {
 		assert.strictEqual(result, true, 'Check Unselect returns true');
 		assert.ok(!drawing.Drawing.getDrawingObjectsController().selectedObjects.includes(drawing.Drawing), 'Check drawing is not selected after unselect');
 	});
+
+	QUnit.test("Test: GetFlipH", function (assert) {
+		CreateSlide();
+
+		const presentation = AscTest.JsApi.GetPresentation();
+		const slide = presentation.GetSlideByIndex(0);
+		const fill = AscTest.JsApi.CreateSolidFill(AscTest.JsApi.CreateRGBColor(255, 111, 61));
+		const stroke = AscTest.JsApi.CreateStroke(0, AscTest.JsApi.CreateNoFill());
+		const drawing = AscTest.JsApi.CreateShape("cube", 150 * 36000, 80 * 36000, fill, stroke);
+
+		drawing.SetPosition(608400, 1267200);
+		slide.AddObject(drawing);
+
+		assert.strictEqual(drawing.GetFlipH(), false, 'Check drawing horizontal flip === false');
+		drawing.SetFlipH(true);
+		assert.strictEqual(drawing.GetFlipH(), true, 'Check drawing horizontal flip === true');
+	});
+
+	QUnit.test("Test: GetFlipV", function (assert) {
+		CreateSlide();
+
+		const presentation = AscTest.JsApi.GetPresentation();
+		const slide = presentation.GetSlideByIndex(0);
+		const fill = AscTest.JsApi.CreateSolidFill(AscTest.JsApi.CreateRGBColor(255, 111, 61));
+		const stroke = AscTest.JsApi.CreateStroke(0, AscTest.JsApi.CreateNoFill());
+		const drawing = AscTest.JsApi.CreateShape("cube", 150 * 36000, 80 * 36000, fill, stroke);
+
+		drawing.SetPosition(608400, 1267200);
+		slide.AddObject(drawing);
+
+		assert.strictEqual(drawing.GetFlipV(), false, 'Check drawing vertical flip === false');
+		drawing.SetFlipV(true);
+		assert.strictEqual(drawing.GetFlipV(), true, 'Check drawing vertical flip === true');
+	});
+
+	QUnit.test("Test: SetFlipH", function (assert) {
+		CreateSlide();
+
+		const presentation = AscTest.JsApi.GetPresentation();
+		const slide = presentation.GetSlideByIndex(0);
+		const fill = AscTest.JsApi.CreateSolidFill(AscTest.JsApi.CreateRGBColor(255, 111, 61));
+		const stroke = AscTest.JsApi.CreateStroke(0, AscTest.JsApi.CreateNoFill());
+		const drawing = AscTest.JsApi.CreateShape("cube", 150 * 36000, 80 * 36000, fill, stroke);
+
+		drawing.SetPosition(608400, 1267200);
+		slide.AddObject(drawing);
+
+		let result = drawing.SetFlipH(true);
+		assert.strictEqual(result, true, 'Check SetFlipH returns true');
+		assert.strictEqual(drawing.GetFlipH(), true, 'Check drawing horizontal flip === true after SetFlipH');
+
+		result = drawing.SetFlipH(false);
+		assert.strictEqual(result, true, 'Check SetFlipH returns true');
+		assert.strictEqual(drawing.GetFlipH(), false, 'Check drawing horizontal flip === false after SetFlipH');
+
+		result = drawing.SetFlipH("invalid");
+		assert.strictEqual(result, false, 'Check SetFlipH returns false for invalid parameter');
+	});
+
+	QUnit.test("Test: SetFlipV", function (assert) {
+		CreateSlide();
+
+		const presentation = AscTest.JsApi.GetPresentation();
+		const slide = presentation.GetSlideByIndex(0);
+		const fill = AscTest.JsApi.CreateSolidFill(AscTest.JsApi.CreateRGBColor(255, 111, 61));
+		const stroke = AscTest.JsApi.CreateStroke(0, AscTest.JsApi.CreateNoFill());
+		const drawing = AscTest.JsApi.CreateShape("cube", 150 * 36000, 80 * 36000, fill, stroke);
+
+		drawing.SetPosition(608400, 1267200);
+		slide.AddObject(drawing);
+
+		let result = drawing.SetFlipV(true);
+		assert.strictEqual(result, true, 'Check SetFlipV returns true');
+		assert.strictEqual(drawing.GetFlipV(), true, 'Check drawing vertical flip === true after SetFlipV');
+
+		result = drawing.SetFlipV(false);
+		assert.strictEqual(result, true, 'Check SetFlipV returns true');
+		assert.strictEqual(drawing.GetFlipV(), false, 'Check drawing vertical flip === false after SetFlipV');
+
+		result = drawing.SetFlipV("invalid");
+		assert.strictEqual(result, false, 'Check SetFlipV returns false for invalid parameter');
+	});
 });
 
