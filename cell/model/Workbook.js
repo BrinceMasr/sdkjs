@@ -7916,7 +7916,7 @@
 		if (bOldHidden != hidden) {
 			if (true == this.bHidden && this.getIndex() == wsActive.getIndex()) {
 				oVisibleWs = wb.findSheetNoHidden(this.getIndex());
-			} else if (false == this.bHidden && this.getIndex() !== wsActive.getIndex()) {
+			} else if (false == this.bHidden && this.getIndex() !== wsActive.getIndex() && !wb.bCollaborativeChanges) {
 				oVisibleWs = this;
 			}
 			if (null != oVisibleWs) {
