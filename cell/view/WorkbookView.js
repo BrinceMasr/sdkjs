@@ -1302,8 +1302,11 @@
       }
 	  AscCommon.applyElementDirection(this.input);
     }
-    this.handlers.trigger("asc_onSelectionChanged", this.oSelectionInfo);
-    this.handlers.trigger("asc_onSelectionEnd");
+	//TODO need review -> it may be enough to add a condition to _setEditorFocus
+	if (!(window["NATIVE_EDITOR_ENJINE"] && this.SearchEngine && this.SearchEngine.changingSelection)) {
+		this.handlers.trigger("asc_onSelectionChanged", this.oSelectionInfo);
+		this.handlers.trigger("asc_onSelectionEnd");
+	}
     //если меняется выделенный диапазон
     this.SearchEngine && this.SearchEngine.ResetCurrent(true);
 
