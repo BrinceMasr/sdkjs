@@ -7803,7 +7803,7 @@
 	 * @fires Api#onWorksheetChange
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/attachEvent.js
 	 */
-	Api["attachEvent"] = function(eventName, callback)
+	Api.attachEvent = function(eventName, callback)
 	{
 		Asc.editor.attachEvent(eventName, callback);
 	};
@@ -7817,7 +7817,7 @@
 	 * @fires Api#onWorksheetChange
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/detachEvent.js
 	 */
-	Api["detachEvent"] = function(eventName)
+	Api.detachEvent = function(eventName)
 	{
 		Asc.editor.detachEvent(eventName);
 	};
@@ -27772,6 +27772,8 @@
 	Api["GetPivotByName"] = Api.GetPivotByName;
 	Api["RefreshAllPivots"] = Api.RefreshAllPivots;
 	Api["GetAllPivotTables"] = Api.GetAllPivotTables;
+	Api["attachEvent"] = Api.attachEvent;
+	Api["detachEvent"] = Api.detachEvent;
 
 	ApiWorkbook.prototype["Save"] = ApiWorkbook.prototype.Save;
 	ApiWorkbook.prototype["GetSheets"] = ApiWorkbook.prototype.GetSheets;

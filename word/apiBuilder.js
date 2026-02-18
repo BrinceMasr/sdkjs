@@ -5955,7 +5955,7 @@
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/attachEvent.js
 	 */
-	Api["attachEvent"] = function(eventName, callback)
+	Api.attachEvent = function(eventName, callback)
 	{
 		Asc.editor.attachEvent(eventName, callback);
 	};
@@ -5969,7 +5969,7 @@
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/detachEvent.js
 	 */
-	Api["detachEvent"] = function(eventName)
+	Api.detachEvent = function(eventName)
 	{
 		Asc.editor.detachEvent(eventName);
 	};
@@ -10730,7 +10730,7 @@
 	 * Sets the text color to the current paragraph.
 	 *
 	 * @memberof ApiParagraph
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @typeofeditors ["CDE"]
 	 *
 	 * @deprecated since 9.1.0 version.
 	 * @param {byte} r - Red color component value.
@@ -12474,7 +12474,7 @@
 	 * Sets the text color for the current text run.
 	 *
 	 * @memberof ApiRun
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @typeofeditors ["CDE"]
 	 *
 	 * @deprecated since 9.1.0 version.
 	 * @param {byte} r - Red color component value.
@@ -12489,7 +12489,7 @@
 	 * Sets the text color for the current text run.
 	 *
 	 * @memberof ApiRun
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @typeofeditors ["CDE"]
 	 *
 	 * @since 9.1.0
 	 * @param {ApiColor} color
@@ -12650,7 +12650,7 @@
 	 * Specifies the shading applied to the contents of the current text run.
 	 *
 	 * @memberof ApiRun
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @typeofeditors ["CDE"]
 	 *
 	 * @deprecated since 9.1.0 version.
 	 * @param {ShdType} type - The shading type applied to the contents of the current text run.
@@ -29178,6 +29178,11 @@
 	// ApiDocumentVisitor
 	//
 	//------------------------------------------------------------------------------------------------------------------
+	
+	/**
+	 * Class representing a document visitor.
+	 * @constructor
+	 */
 	function ApiDocumentVisitor(docContent)
 	{
 		AscWord.DocumentVisitor.call(this);
@@ -29392,6 +29397,8 @@
 	Api["CreateParagraph"]                  = Api.CreateParagraph;
 	Api["CreateTable"]                      = Api.CreateTable;
 	Api["AddComment"]                       = Api.AddComment;
+	Api["attachEvent"]                      = Api.attachEvent;
+	Api["detachEvent"]                      = Api.detachEvent;
 	Api["CreateRun"]                        = Api.CreateRun;
 	Api["CreateHyperlink"]                  = Api.CreateHyperlink;
 	Api["CreateImage"]                      = Api.CreateImage;

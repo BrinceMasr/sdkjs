@@ -1271,7 +1271,7 @@
 	 * @param {function} callback - Function to be called when the event fires.
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/attachEvent.js
 	 */
-	Api["attachEvent"] = function(eventName, callback)
+	Api.attachEvent = function(eventName, callback)
 	{
 		Asc.editor.attachEvent(eventName, callback);
 	};
@@ -1284,7 +1284,7 @@
 	 * @param {string} eventName - The event name.
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/detachEvent.js
 	 */
-	Api["detachEvent"] = function(eventName)
+	Api.detachEvent = function(eventName)
 	{
 		Asc.editor.detachEvent(eventName);
 	};
@@ -5716,6 +5716,10 @@
 	 */
 	var g_nApiEffectIdCounter = 0;
 
+	/**
+	 * Class representing an animation effect.
+	 * @constructor
+	 */
 	function ApiAnimationEffect(effect, timing) {
 		this.Effect = effect;
 		this.Timing = timing;
@@ -7970,6 +7974,8 @@
     Api["CreateTable"]                          = Api.CreateTable;
     Api["CreateParagraph"]                      = Api.CreateParagraph;
     Api["CreateHyperlink"]                      = Api.CreateHyperlink;
+    Api["attachEvent"]                      	= Api.attachEvent;
+    Api["detachEvent"]                      	= Api.detachEvent;
     Api["Save"]                                 = Api.Save;
     Api["CreateMaster"]                         = Api.CreateMaster;
     Api["CreateDefaultMasterSlide"]             = Api.CreateDefaultMasterSlide;

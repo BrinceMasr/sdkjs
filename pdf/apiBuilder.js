@@ -161,7 +161,7 @@
 	 *  - rect[0] < rect[2] (x1 < x2)
 	 *  - rect[1] < rect[3] (y1 < y2)
 	 *
-	 * @typedef {[pt, pt, pt, pt]} Rect
+	 * @typedef {pt[]} Rect
 	 * @property {pt} 0 - x1 (left)
 	 * @property {pt} 1 - y1 (top)
 	 * @property {pt} 2 - x2 (right)
@@ -178,7 +178,7 @@
 	 *  - diff[2] = x2B - x2A
 	 *  - diff[3] = y2B - y2A
 	 *
-	 * @typedef {[pt, pt, pt, pt]} RectDiff
+	 * @typedef {pt[]} RectDiff
 	 * @property {pt} 0 - dx1 (left delta)
 	 * @property {pt} 1 - dy1 (top delta)
 	 * @property {pt} 2 - dx2 (right delta)
@@ -238,7 +238,7 @@
 	 *  · y1 <= y3 (left edge goes top → bottom)
 	 *  · y2 <= y4 (right edge goes top → bottom)
 	 *
-	 * @typedef {[pt, pt, pt, pt, pt, pt, pt, pt]} Quad
+	 * @typedef {pt[]} Quad
 	 * @property {pt} 0 - x1 (left top)
 	 * @property {pt} 1 - y1 (left top)
 	 * @property {pt} 2 - x2 (right top)
@@ -256,9 +256,13 @@
 	 */
 
 	/**
-	 * FreeText callout coordinates.
-	 * @typedef {[Point, Point, Point]} FreeTextCallout
+	 * FreeText callout coordinates (Array of 3 points).
+	 * @typedef {Point[]} FreeTextCallout
+	 * @property {Point} 0 - The starting point of the callout.
+	 * @property {Point} 1 - The knee/bend point of the callout.
+	 * @property {Point} 2 - The end point attached to the textbox.
 	 */
+
 	/**
 	 * Degree defines an angle in degrees.
 	 * Can be any finite number (positive or negative).
