@@ -11334,7 +11334,7 @@ function parserFormula( formula, parent, _ws ) {
 				if (isFullTableLink || !refAreaRange) {
 					this.wb.dependencyFormulas.startListeningDefName(ref.tableName, this, null, ref);
 				} else {
-					this._buildDependenciesRef(refAreaRange.worksheet.getId(), refAreaRange.getBBox0(), null, /*isStart*/true);
+					this._buildDependenciesRef(refAreaRange.worksheet.getId(), refAreaRange.getBBox0(), false, /*isStart*/true);
 				}
 			} else if (ref.type === cElementType.name) {
 				this.wb.dependencyFormulas.startListeningDefName(ref.value, this);
@@ -11417,7 +11417,7 @@ function parserFormula( formula, parent, _ws ) {
 				if (isFullTableLink || !refAreaRange) {
 					this.wb.dependencyFormulas.endListeningDefName(ref.tableName, this);
 				} else {
-					this._buildDependenciesRef(refAreaRange.worksheet.getId(), refAreaRange.getBBox0(), null, /*isStart*/false);
+					this._buildDependenciesRef(refAreaRange.worksheet.getId(), refAreaRange.getBBox0(), false, /*isStart*/false);
 				}
 			} else if (ref.type === cElementType.name) {
 				this.wb.dependencyFormulas.endListeningDefName(ref.value, this);

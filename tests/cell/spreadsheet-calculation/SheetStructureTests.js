@@ -7770,7 +7770,7 @@ $(function () {
 		let cellWithFormula, fillRange, array, wsID = ws.getId();
 			
 		// wb.dependencyFormulas.unlockRecal();
-
+		// ws.autoFilters.deleteAutoFilter(getRange(0,0,0,0));
 		ws.getRange2("A1:F10").cleanAll();
 		// set flags for CSE formula call
 		let flags = wsView._getCellFlags(0, 2);
