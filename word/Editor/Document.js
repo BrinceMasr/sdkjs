@@ -2469,7 +2469,7 @@ CDocument.prototype.private_CheckActionLock = function()
 	if (!this.Action.CheckLock || !this.Action.PointsCount || this.Action.CancelAction)
 		return;
 
-	if (!this.StartSelectionLockCheck())
+	if (!this.StartSelectionLockCheck(this.IsFillingFormMode()))
 	{
 		this.Action.CancelAction = true;
 		return;

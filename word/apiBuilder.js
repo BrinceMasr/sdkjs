@@ -30234,7 +30234,9 @@
 	ApiChart.prototype["SetMajorHorizontalGridlines"]  =  ApiChart.prototype.SetMajorHorizontalGridlines;
 	ApiChart.prototype["SetMinorHorizontalGridlines"]  =  ApiChart.prototype.SetMinorHorizontalGridlines;
 	ApiChart.prototype["SetHorAxisLabelsFontSize"]     = ApiChart.prototype.SetHorAxisLabelsFontSize;
+	ApiChart.prototype["SetHorAxisLablesFontSize"]     = ApiChart.prototype.SetHorAxisLabelsFontSize;
 	ApiChart.prototype["SetVertAxisLabelsFontSize"]    = ApiChart.prototype.SetVertAxisLabelsFontSize;
+	ApiChart.prototype["SetVertAxisLablesFontSize"]    = ApiChart.prototype.SetVertAxisLabelsFontSize;
 	ApiChart.prototype["GetNextChart"]                 = ApiChart.prototype.GetNextChart;
 	ApiChart.prototype["GetPrevChart"]                 = ApiChart.prototype.GetPrevChart;
 	ApiChart.prototype["RemoveSeria"]                  = ApiChart.prototype.RemoveSeria;

@@ -492,13 +492,30 @@ var editor;
     }
   };
 
-  spreadsheet_api.prototype.asc_TextImport = function(options, callback, bPaste) {
+  spreadsheet_api.prototype.asc_TextImport = function(options, callback, bPaste, isPasteOptions) {
     //return this.asc_TextFromUrl(null, options, callback);
     //return this.asc_TextFromFile(options, callback);
     if (this.canEdit()) {
       var text;
       if(bPaste) {
-        text = AscCommon.g_specialPasteHelper.GetPastedData(true);
+        if (isPasteOptions) {
+          AscCommon.g_clipboardBase.Get_Clipboard_Data(function (data) {
+            if (!data) {
+              callback("");
+              return;
+            }
+            //onpaste
+            if (data.clipboardData) {
+              callback("");
+            } else {
+              let _text = data[AscCommon.c_oAscClipboardDataFormat.Text];
+              callback(_text ? _text : "");
+            }
+          });
+          return;
+        } else {
+          text = AscCommon.g_specialPasteHelper.GetPastedData(true);
+        }
       } else {
         var ws = this.wb.getWorksheet();
         text = ws.getRangeText();
@@ -507,7 +524,7 @@ var editor;
         //error
         //no data was selected to parse
         this.sendEvent('asc_onError', c_oAscError.ID.NoDataToParse, c_oAscError.Level.NoCritical);
-        callback(false);
+        callback("");
         return;
       }
       callback(text);
