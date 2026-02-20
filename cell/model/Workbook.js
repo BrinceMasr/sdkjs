@@ -1865,10 +1865,10 @@
 					container.listeners[listenerId].notify(notifyData);
 				}
 			}
-			
 
-			// TODO call this notify only we use rename of table? create a flag isTablePartChanges? from DependencyGraph.renameTableColumn?
-			if (defNameObj && defNameObj.type === Asc.c_oAscDefNameType.table) {
+			let isDefnameTable = defNameObj && defNameObj.type === Asc.c_oAscDefNameType.table;
+			// TODO do notify below only when we rename the table?
+			if (isDefnameTable /*&& notifyData.type === c_oNotifyType.RenameTableColumn*/) {
 				// we are getting table info and notify all range listeners that intersects with the table ref
 				let table = wb.getTableByName(nameIndex);
 				if (table) {
@@ -1881,7 +1881,6 @@
 					for (let cell in cellMap) {
 						let cellIndex = cellMap[cell].cellIndex;
 						let rowCol = AscCommonExcel.getFromCellIndex(cellIndex, true);
-						console.log(rowCol);
 						//  the index is in the table, check the listeners
 						if (tableRef.contains2(rowCol)) {
 							for (let listenerId in cellMap[cell].listeners) {
