@@ -1661,7 +1661,7 @@
 			g_cCalcRecursion.clearCheckedCells();
 			g_cCalcRecursion.clearRecheckingFormulaData();
 			g_cCalcRecursion.clearCalculatedArguments();
-			this.changedCell = null;console.log("Called clear changed cell")
+			this.changedCell = null;
 			this.changedRange = null;
 			this.updateSharedFormulas();
 			//copy cleanCellCache to prevent recursion in trigger("cleanCellCache")
@@ -1866,6 +1866,8 @@
 				}
 			}
 			
+
+			// TODO call this notify only we use rename of table? create a flag isTablePartChanges? from DependencyGraph.renameTableColumn?
 			if (defNameObj && defNameObj.type === Asc.c_oAscDefNameType.table) {
 				// we are getting table info and notify all range listeners that intersects with the table ref
 				let table = wb.getTableByName(nameIndex);
@@ -1874,6 +1876,19 @@
 					let sheetId = defNameObj.parsedRef && defNameObj.parsedRef.outStack && 
 						defNameObj.parsedRef.outStack[0] && defNameObj.parsedRef.outStack[0].getWsId && defNameObj.parsedRef.outStack[0].getWsId();
 					let areaMap = sheetId !== undefined && this.sheetListeners[sheetId] && this.sheetListeners[sheetId].areaMap;
+					let cellMap = sheetId !== undefined && this.sheetListeners[sheetId] && this.sheetListeners[sheetId].cellMap;
+
+					for (let cell in cellMap) {
+						let cellIndex = cellMap[cell].cellIndex;
+						let rowCol = AscCommonExcel.getFromCellIndex(cellIndex, true);
+						console.log(rowCol);
+						//  the index is in the table, check the listeners
+						if (tableRef.contains2(rowCol)) {
+							for (let listenerId in cellMap[cell].listeners) {
+								cellMap[cell].listeners[listenerId].notify(notifyData);
+							}
+						}
+					}
 
 					for (let area in areaMap) {
 						let areabbox = areaMap[area].bbox;
