@@ -1878,13 +1878,15 @@
 					let areaMap = sheetId !== undefined && this.sheetListeners[sheetId] && this.sheetListeners[sheetId].areaMap;
 					let cellMap = sheetId !== undefined && this.sheetListeners[sheetId] && this.sheetListeners[sheetId].cellMap;
 
-					for (let cell in cellMap) {
-						let cellIndex = cellMap[cell].cellIndex;
-						let rowCol = AscCommonExcel.getFromCellIndex(cellIndex, true);
-						//  the index is in the table, check the listeners
-						if (tableRef.contains2(rowCol)) {
-							for (let listenerId in cellMap[cell].listeners) {
-								cellMap[cell].listeners[listenerId].notify(notifyData);
+					// Iterate through table range instead of all cells in cellMap
+					for (let row = tableRef.r1; row <= tableRef.r2; row++) {
+						for (let col = tableRef.c1; col <= tableRef.c2; col++) {
+							let cellIndex = AscCommonExcel.getCellIndex(row, col);
+							// Check if this cell exists in cellMap
+							if (cellMap[cellIndex] && cellMap[cellIndex].listeners) {
+								for (let listenerId in cellMap[cellIndex].listeners) {
+									cellMap[cellIndex].listeners[listenerId].notify(notifyData);
+								}
 							}
 						}
 					}
