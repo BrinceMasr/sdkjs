@@ -11338,6 +11338,9 @@ function parserFormula( formula, parent, _ws ) {
 				// analyze table structure - if its full link, write defnamelistener
 				const isFullTableLink = ref.reservedColumnIndex === AscCommon.FormulaTablePartInfo.all;
 				const refAreaRange = ref.area && ref.area.getRange && ref.area.getRange();
+
+				// const table = ref.oneColumnIndex ? ref.getTable() : null;
+				// const columnRange = table ? table.getColumnRange(ref.oneColumnIndex.index) : null;
 				
 				if (isFullTableLink || !refAreaRange) {
 					this.wb.dependencyFormulas.startListeningDefName(ref.tableName, this, null, ref);
@@ -11419,8 +11422,12 @@ function parserFormula( formula, parent, _ws ) {
 			ref = this.outStack[i];
 
 			if (ref.type === cElementType.table) {
+				// analyze table structure - if its full link, write defnamelistener
 				const isFullTableLink = ref.reservedColumnIndex === AscCommon.FormulaTablePartInfo.all;
 				const refAreaRange = ref.area && ref.area.getRange && ref.area.getRange();
+
+				// const table = ref.oneColumnIndex ? ref.getTable() : null;
+				// const columnRange = table ? table.getColumnRange(ref.oneColumnIndex.index) : null;
 				
 				if (isFullTableLink || !refAreaRange) {
 					this.wb.dependencyFormulas.endListeningDefName(ref.tableName, this);
