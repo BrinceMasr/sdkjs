@@ -1317,7 +1317,7 @@
 				defName.setRef(defNameRef);
 			}
 		},
-		changeTableRef: function(table) { //?
+		changeTableRef: function(table) {
 			var defName = this.getDefNameByName(table.DisplayName, null);
 			if (defName) {
 				this.buildDependency();
