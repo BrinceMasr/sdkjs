@@ -21053,6 +21053,7 @@ function isAllowPasteLink(pastedWb) {
 		var t = this;
 		var ctx = props.isOverlay ? this.overlayCtx : this.drawingCtx;
 		var isDataValidation = props.isOverlay;
+		var ctxOldDarkMode = ctx.isDarkMode; ctx.isDarkMode = false;
 
 		let isClip = null;
 		if (!isDataValidation && this._clipDrawingRect(ctx, new Asc.Range(props.col, props.row, props.col, props.row), clipType.range)) {
@@ -21064,6 +21065,7 @@ function isAllowPasteLink(pastedWb) {
 			if (isClip) {
 				this._RemoveClipRect(ctx);
 			}
+			ctx.isDarkMode = ctxOldDarkMode;
 			return;
 		}
 
@@ -21288,6 +21290,7 @@ function isAllowPasteLink(pastedWb) {
 		if (isClip) {
 			this._RemoveClipRect(ctx);
 		}
+		ctx.isDarkMode = ctxOldDarkMode;
 	};
 
 
