@@ -4910,7 +4910,7 @@
 	 * Creates an RGB color from red, green and blue components.
 	 *
 	 * @memberof Api
-	 * @typeofeditors ["CDE"]
+	 * @typeofeditors ["CDE", "PDFE"]
 	 * @param {byte} r - Red component (0-255).
 	 * @param {byte} g - Green component (0-255).
 	 * @param {byte} b - Blue component (0-255).
@@ -4943,7 +4943,7 @@
 	 * Creates a color from a HEX string.
 	 *
 	 * @memberof Api
-	 * @typeofeditors ["CDE"]
+	 * @typeofeditors ["CDE", "PDFE"]
 	 * @param {string} hexString
 	 * @returns {ApiColor}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/HexColor.js
