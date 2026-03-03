@@ -235,7 +235,8 @@ function CopyProcessor(api, onlyBinaryCopy)
 
     this.aFootnoteReference = [];
 	this.oRoot = new CopyElement("root");
-    this.listNextNumMap = [];
+    this.listNextNumMap = {};
+    this.oListContext = null;
     this.instructionHyperlinkStart = null;
 }
 CopyProcessor.prototype =
@@ -843,43 +844,79 @@ CopyProcessor.prototype =
 			//добавляем &nbsp; потому что параграфы без содержимого не копируются
             if(Para.isEmptyChild())
                 Para.addChild(new CopyElement("&nbsp;", true));
-            if(bIsNullNumPr)
-                oDomTarget.addChild( Para );
-			else{
-				var Li = new CopyElement( "li" );
-				Li.oAttributes["style"] = "list-style-type: " + sListStyle;
-				Li.addChild( Para );
-				//пробуем добавить в предыдущий список
-				var oTargetList = null;
-				if(oDomTarget.aChildren.length > 0){
-					var oPrevElem = oDomTarget.aChildren[oDomTarget.aChildren.length - 1];
-					if((bBullet && "ul" === oPrevElem.sName) || (!bBullet && "ol" === oPrevElem.sName))
-						oTargetList = oPrevElem;
-				}
+            if(bIsNullNumPr) {
+                oDomTarget.addChild(Para);
+                this.oListContext = null;
+            } else {
+                var nLvl   = PasteElementsId.g_bIsDocumentCopyPaste ? oNumPr.Lvl   : 0;
+                var nNumId = PasteElementsId.g_bIsDocumentCopyPaste ? oNumPr.NumId : oNumPr.NumId;
 
-				if (!bBullet) {
-					if (!this.listNextNumMap[oNumPr.NumId]) {
-						this.listNextNumMap[oNumPr.NumId] = 1;
-					} else {
-						this.listNextNumMap[oNumPr.NumId]++;
-					}
-				}
-				if (null == oTargetList) {
-					if (bBullet) {
-						oTargetList = new CopyElement("ul");
-					} else {
-						oTargetList = new CopyElement("ol");
-					}
-					oTargetList.oAttributes["style"] = "padding-left:40px";
-					//если список идёт с промежуточными элементами, добавляем аттрибут start
-					if (!bBullet && this.listNextNumMap[oNumPr.NumId] > 1) {
-						oTargetList.oAttributes["start"] = this.listNextNumMap[oNumPr.NumId];
-					}
-					oDomTarget.addChild(oTargetList);
-				}
-				oTargetList.addChild(Li);
-			}
+                if (!bBullet) {
+                    if (!this.listNextNumMap[nNumId])
+                        this.listNextNumMap[nNumId] = {};
+                    if (!this.listNextNumMap[nNumId][nLvl])
+                        this.listNextNumMap[nNumId][nLvl] = 1;
+                    else
+                        this.listNextNumMap[nNumId][nLvl]++;
+                }
+
+                var Li = new CopyElement("li");
+                Li.oAttributes["style"] = "list-style-type: " + sListStyle;
+                Li.addChild(Para);
+
+                var oTargetList = this._findOrCreateList(oDomTarget, nNumId, nLvl, bBullet);
+                oTargetList.addChild(Li);
+
+                var oCtxEntry = this.oListContext && this.oListContext.stack[this.oListContext.stack.length - 1];
+                if (oCtxEntry)
+                    oCtxEntry.lastLi = Li;
+            }
         }
+    },
+    _findOrCreateList : function(oDomTarget, numId, lvl, bBullet)
+    {
+        var ctx = this.oListContext;
+        var bValidCtx = ctx && ctx.oDomTarget === oDomTarget && ctx.numId === numId;
+
+        if (bValidCtx) {
+            var stack = ctx.stack;
+            var topEntry = stack[stack.length - 1];
+
+            if (topEntry.lvl === lvl) {
+                return topEntry.listElem;
+            } else if (lvl > topEntry.lvl) {
+                var nestedList = this._createListElem(bBullet, numId, lvl);
+                var parentLi = topEntry.lastLi;
+                if (parentLi)
+                    parentLi.addChild(nestedList);
+                else
+                    oDomTarget.addChild(nestedList);
+                stack.push({lvl: lvl, listElem: nestedList, lastLi: null});
+                return nestedList;
+            } else {
+                while (stack.length > 1 && stack[stack.length - 1].lvl > lvl)
+                    stack.pop();
+                if (stack[stack.length - 1].lvl === lvl)
+                    return stack[stack.length - 1].listElem;
+            }
+        }
+
+        var newList = this._createListElem(bBullet, numId, lvl);
+        oDomTarget.addChild(newList);
+        this.oListContext = {
+            oDomTarget: oDomTarget,
+            numId:      numId,
+            stack:      [{lvl: lvl, listElem: newList, lastLi: null}]
+        };
+        return newList;
+    },
+    _createListElem : function(bBullet, numId, lvl)
+    {
+        var elem = new CopyElement(bBullet ? "ul" : "ol");
+        elem.oAttributes["style"] = "padding-left:40px";
+        if (!bBullet && this.listNextNumMap[numId] && this.listNextNumMap[numId][lvl] > 1)
+            elem.oAttributes["start"] = this.listNextNumMap[numId][lvl];
+        return elem;
     },
     _BorderToStyle : function(border, name)
     {
