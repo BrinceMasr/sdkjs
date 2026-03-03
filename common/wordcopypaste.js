@@ -268,7 +268,7 @@ CopyProcessor.prototype =
             sB = "0" + sB;
         return "#" + sR + sG + sB;
     },
-    Commit_pPr : function(Item, Para, nextElem)
+    Commit_pPr : function(Item, Para, nextElem, oListNumLvl)
     {
         //pPr
         var apPr = [];
@@ -277,12 +277,20 @@ CopyProcessor.prototype =
         if(Item_pPr && Def_pPr)
         {
             //Ind
-            if(Def_pPr.Ind.Left !== Item_pPr.Ind.Left)
-                apPr.push("margin-left:" + (Item_pPr.Ind.Left * g_dKoef_mm_to_pt) + "pt");
+            if (oListNumLvl) {
+                if (oListNumLvl !== true && oListNumLvl.ParaPr) {
+                    var nExtraLeft = Item_pPr.Ind.Left - oListNumLvl.ParaPr.Ind.Left;
+                    if (Math.abs(nExtraLeft) > 0.001)
+                        apPr.push("margin-left:" + (nExtraLeft * g_dKoef_mm_to_pt) + "pt");
+                }
+            } else {
+                if(Def_pPr.Ind.Left !== Item_pPr.Ind.Left)
+                    apPr.push("margin-left:" + (Item_pPr.Ind.Left * g_dKoef_mm_to_pt) + "pt");
+                if(Def_pPr.Ind.FirstLine !== Item_pPr.Ind.FirstLine)
+                    apPr.push("text-indent:" + (Item_pPr.Ind.FirstLine * g_dKoef_mm_to_pt) + "pt");
+            }
             if(Def_pPr.Ind.Right !== Item_pPr.Ind.Right)
                 apPr.push("margin-right:" + ( Item_pPr.Ind.Right * g_dKoef_mm_to_pt) + "pt");
-            if(Def_pPr.Ind.FirstLine !== Item_pPr.Ind.FirstLine)
-                apPr.push("text-indent:" + (Item_pPr.Ind.FirstLine * g_dKoef_mm_to_pt) + "pt");
             //Jc
             if(Def_pPr.Jc !== Item_pPr.Jc){
                 switch(Item_pPr.Jc)
@@ -831,7 +839,10 @@ CopyProcessor.prototype =
             }
         }
         //pPr
-        this.Commit_pPr(Item, Para, nextElem);
+        var oListNumLvl = null;
+        if (!bIsNullNumPr)
+            oListNumLvl = (PasteElementsId.g_bIsDocumentCopyPaste && oNumberingLvl) ? oNumberingLvl : true;
+        this.Commit_pPr(Item, Para, nextElem, oListNumLvl);
 
         if(false === selectedAll)
         {
@@ -851,6 +862,21 @@ CopyProcessor.prototype =
                 var nLvl   = PasteElementsId.g_bIsDocumentCopyPaste ? oNumPr.Lvl   : 0;
                 var nNumId = PasteElementsId.g_bIsDocumentCopyPaste ? oNumPr.NumId : oNumPr.NumId;
 
+                var nIndentPt = 30;
+                if (PasteElementsId.g_bIsDocumentCopyPaste && oNum && oNumberingLvl && oNumberingLvl.ParaPr) {
+                    var nAbsPt = oNumberingLvl.ParaPr.Ind.Left * g_dKoef_mm_to_pt;
+                    if (nLvl > 0) {
+                        var oParentLvl = oNum.GetLvl(nLvl - 1);
+                        var nParentPt  = oParentLvl && oParentLvl.ParaPr ? oParentLvl.ParaPr.Ind.Left * g_dKoef_mm_to_pt : 0;
+                        nIndentPt = nAbsPt - nParentPt;
+                    } else {
+                        nIndentPt = nAbsPt;
+                    }
+                    if (nIndentPt <= 0) {
+                        nIndentPt = 30;
+                    }
+                }
+
                 if (!bBullet) {
                     if (!this.listNextNumMap[nNumId])
                         this.listNextNumMap[nNumId] = {};
@@ -864,7 +890,7 @@ CopyProcessor.prototype =
                 Li.oAttributes["style"] = "list-style-type: " + sListStyle;
                 Li.addChild(Para);
 
-                var oTargetList = this._findOrCreateList(oDomTarget, nNumId, nLvl, bBullet);
+                var oTargetList = this._findOrCreateList(oDomTarget, nNumId, nLvl, bBullet, nIndentPt);
                 oTargetList.addChild(Li);
 
                 var oCtxEntry = this.oListContext && this.oListContext.stack[this.oListContext.stack.length - 1];
@@ -873,7 +899,7 @@ CopyProcessor.prototype =
             }
         }
     },
-    _findOrCreateList : function(oDomTarget, numId, lvl, bBullet)
+    _findOrCreateList : function(oDomTarget, numId, lvl, bBullet, nIndentPt)
     {
         var ctx = this.oListContext;
         var bValidCtx = ctx && ctx.oDomTarget === oDomTarget && ctx.numId === numId;
@@ -885,7 +911,7 @@ CopyProcessor.prototype =
             if (topEntry.lvl === lvl) {
                 return topEntry.listElem;
             } else if (lvl > topEntry.lvl) {
-                var nestedList = this._createListElem(bBullet, numId, lvl);
+                var nestedList = this._createListElem(bBullet, numId, lvl, nIndentPt);
                 var parentLi = topEntry.lastLi;
                 if (parentLi)
                     parentLi.addChild(nestedList);
@@ -901,7 +927,7 @@ CopyProcessor.prototype =
             }
         }
 
-        var newList = this._createListElem(bBullet, numId, lvl);
+        var newList = this._createListElem(bBullet, numId, lvl, nIndentPt);
         oDomTarget.addChild(newList);
         this.oListContext = {
             oDomTarget: oDomTarget,
@@ -910,10 +936,10 @@ CopyProcessor.prototype =
         };
         return newList;
     },
-    _createListElem : function(bBullet, numId, lvl)
+    _createListElem : function(bBullet, numId, lvl, nIndentPt)
     {
         var elem = new CopyElement(bBullet ? "ul" : "ol");
-        elem.oAttributes["style"] = "padding-left:40px";
+        elem.oAttributes["style"] = "padding-left:" + Math.round(nIndentPt || 30) + "pt";
         if (!bBullet && this.listNextNumMap[numId] && this.listNextNumMap[numId][lvl] > 1)
             elem.oAttributes["start"] = this.listNextNumMap[numId][lvl];
         return elem;
