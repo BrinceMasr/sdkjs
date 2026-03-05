@@ -346,10 +346,17 @@ function handleFloatObjects(drawingObjectsController, drawingArr, e, x, y, group
             case AscDFH.historyitem_type_Pdf_Annot_Polygon:
             case AscDFH.historyitem_type_Pdf_Annot_Polyline:
             case AscDFH.historyitem_type_Pdf_Annot_Stamp:
+            case AscDFH.historyitem_type_Pdf_Annot_Link:
             {
                 ret = handleShapeImage(drawing, drawingObjectsController, e, x, y, group, pageIndex, bWord);
                 break;
             }
+			case AscDFH.historyitem_type_Pdf_Text_Field:
+			case AscDFH.historyitem_type_Pdf_Combobox_Field:
+			{
+				ret = handlePdfTextField(drawing, drawingObjectsController, e, x, y, group, pageIndex, bWord);
+                break;
+			}
             case AscDFH.historyitem_type_ChartSpace:
             {
                 ret = handleChart(drawing, drawingObjectsController, e, x, y, group, pageIndex, bWord);
@@ -530,14 +537,17 @@ function handleShapeImage(drawing, drawingObjectsController, e, x, y, group, pag
     if (drawing.group && drawing.group.IsFreeText && drawing.group.IsFreeText() && drawing.group.IsInTextBox() == false) {
         hit_in_text_rect = false;
     }
-    else if (drawing.IsLine && drawing.IsLine()) {
-        let oDoc = Asc.editor.getPDFDoc();
-        if (oDoc.GetActiveObject() != drawing) {
-            hit_in_text_rect = false;
-        }
-    }
     else if (drawing.IsAnnot && drawing.IsAnnot() && drawing.IsShapeBased()) {
-        hit_in_inner_area = drawing.hitInBoundingRect(x, y)
+        let oDoc = Asc.editor.getPDFDoc();
+
+        if (drawing.IsLine()) {
+            if (oDoc.GetActiveObject() != drawing) {
+                hit_in_text_rect = false;
+            }
+        }
+        else if (drawing.IsLink()) {
+            hit_in_inner_area = drawing.hitInRect(x, y);
+        }
     }
 
     if(hit_in_inner_area || hit_in_path || hit_in_text_rect)
@@ -547,6 +557,18 @@ function handleShapeImage(drawing, drawingObjectsController, e, x, y, group, pag
         {
             return oCheckResult;
         }
+
+		if (group) {
+			const isSpreadsheet = Asc.editor.getEditorId() === AscCommon.c_oEditorId.Spreadsheet;
+			const groupObjectType = group.getObjectType && group.getObjectType();
+			const isGroupOrSmartArt = groupObjectType === AscDFH.historyitem_type_GroupShape || groupObjectType === AscDFH.historyitem_type_SmartArt;
+			if (isSpreadsheet && isGroupOrSmartArt && !drawing.selected) {
+				oCheckResult = drawingObjectsController.checkDrawingHyperlinkAndMacro(group, e, false, x, y, pageIndex);
+				if (oCheckResult) {
+					return oCheckResult;
+				}
+			}
+		}
     }
 
 
@@ -634,6 +656,13 @@ function handleShapeImage(drawing, drawingObjectsController, e, x, y, group, pag
     return false;
 }
 
+function handlePdfTextField(field, drawingObjectsController, e, x, y, group, pageIndex, bWord)
+{
+	if (drawingObjectsController.document.GetActiveObject() == field) {
+		return drawingObjectsController.handleTextHit(field, e, x, y, null, pageIndex, false);
+	}
+}
+
 
 function handleShapeImageInGroup(drawingObjectsController, drawing, shape, e, x, y, pageIndex, bWord)
 {
@@ -653,6 +682,29 @@ function handleShapeImageInGroup(drawingObjectsController, drawing, shape, e, x,
         {
             return oCheckResult;
         }
+
+		const editorId = Asc.editor.getEditorId();
+		let bCheckGroupFallback;
+		switch (editorId) {
+			case AscCommon.c_oEditorId.Word:
+				bCheckGroupFallback = !drawing.selected && drawingObjectsController.selection.groupSelection !== drawing;
+				break;
+			case AscCommon.c_oEditorId.Presentation:
+				bCheckGroupFallback = !drawing.selected;
+				break;
+			case AscCommon.c_oEditorId.Spreadsheet:
+				bCheckGroupFallback = true;
+				break;
+			default:
+				bCheckGroupFallback = false;
+		}
+
+		if (bCheckGroupFallback) {
+			oCheckResult = drawingObjectsController.checkDrawingHyperlinkAndMacro(drawing, e, false, x, y, pageIndex);
+			if (oCheckResult) {
+				return oCheckResult;
+			}
+		}
     }
     if(!hit_in_text_rect && (hit_in_inner_area || hit_in_path))
     {
@@ -803,7 +855,7 @@ function handleGroup(drawing, drawingObjectsController, e, x, y, group, pageInde
                                             content.UpdateCursorType(tx, ty, 0);
                                         }
                                     }
-                                    return {objectId: drawing.Get_Id(), cursorType: "text"};
+                                    return {objectId: drawing.Get_Id(), cursorType: "text", content: title.getDocContent ? title.getDocContent() : null};
                                 }
                             }
                         }
@@ -1625,7 +1677,7 @@ function handleInternalChart(drawing, drawingObjectsController, e, x, y, group, 
                                                     content.UpdateCursorType(tx, ty, 0);
                                                 }
                                             }
-                                            return {objectId: drawing.Get_Id(), cursorType: "text", title: oDLbl};
+                                            return {objectId: drawing.Get_Id(), cursorType: "text", title: oDLbl, content: oDLbl.getDocContent()};
                                         }
                                     }
                                 }
@@ -1715,7 +1767,7 @@ function handleInternalChart(drawing, drawingObjectsController, e, x, y, group, 
                                         content.UpdateCursorType(tx, ty, 0);
                                     }
                                 }
-                                return {objectId: drawing.Get_Id(), cursorType: "text", title: oTrendlineLbl};
+                                return {objectId: drawing.Get_Id(), cursorType: "text", title: oTrendlineLbl, content: oTrendlineLbl.getDocContent()};
                             }
                         }
                     }
@@ -1831,7 +1883,7 @@ function handleInternalChart(drawing, drawingObjectsController, e, x, y, group, 
                             content.UpdateCursorType(tx, ty, 0);
                         }
                     }
-                    return {objectId: drawing.Get_Id(), cursorType: "text", title: title};
+                    return {objectId: drawing.Get_Id(), cursorType: "text", title: title, content: title.getDocContent()};
                 }
             }
         }
@@ -2041,6 +2093,14 @@ function handleInlineShapeImage(drawing, drawingObjectsController, e, x, y, page
     var _hit = drawing.hit && drawing.hit(x, y);
     var _hit_to_path = drawing.hitInPath && drawing.hitInPath(x, y);
     var b_hit_to_text = drawing.hitInTextRect && drawing.hitInTextRect(x, y);
+
+	if (_hit || _hit_to_path || b_hit_to_text) {
+		let oCheckResult = drawingObjectsController.checkDrawingHyperlinkAndMacro(drawing, e, b_hit_to_text, x, y, pageIndex);
+		if (oCheckResult) {
+			return oCheckResult;
+		}
+	}
+
     if((_hit && !b_hit_to_text) || _hit_to_path)
     {
         return handleInlineHitNoText(drawing, drawingObjectsController, e, x, y, pageIndex, false);
@@ -2289,7 +2349,7 @@ function handleFloatTable(drawing, drawingObjectsController, e, x, y, group, pag
             else
             {
                 drawing.updateCursorType(x, y, e);
-                return {objectId: drawing.Get_Id(), cursorType: "text", updated: true};
+                return {objectId: drawing.Get_Id(), cursorType: "text", updated: true, content: drawing.getDocContent && drawing.getDocContent()};
             }
         }
     }

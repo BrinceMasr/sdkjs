@@ -54,13 +54,13 @@
         this._borderEffectStyle     = undefined;
         this._contents              = undefined;
         this._creationDate          = undefined;
+        this._modDate               = undefined;
         this._delay                 = false; // пока не используется
         this._doc                   = undefined;
         this._inReplyTo             = undefined;
         this._intent                = undefined;
         this._lock                  = undefined; // pdf format lock
         this._lockContent           = undefined; // pdf format lock
-        this._modDate               = undefined;
         this._name                  = undefined;
         this._opacity               = 1;
         this._rect                  = [];
@@ -120,12 +120,12 @@
                 oCopy = new AscPDF.CAnnotationInk(AscCommon.CreateGUID(), this.GetRect().slice(), this.GetDocument());
                 break;
             }
-            case AscPDF.ANNOTATIONS_TYPES.Ink: {
-                oCopy = new AscPDF.CAnnotationInk(AscCommon.CreateGUID(), this.GetRect().slice(), this.GetDocument());
-                break;
-            }
             case AscPDF.ANNOTATIONS_TYPES.Line: {
                 oCopy = new AscPDF.CAnnotationLine(AscCommon.CreateGUID(), this.GetRect().slice(), this.GetDocument());
+                break;
+            }
+            case AscPDF.ANNOTATIONS_TYPES.Link: {
+                oCopy = new AscPDF.CAnnotationLink(AscCommon.CreateGUID(), this.GetRect().slice(), this.GetDocument());
                 break;
             }
             case AscPDF.ANNOTATIONS_TYPES.Polygon: {
@@ -160,10 +160,11 @@
 
         // base props
         let sDate           = ((new Date).getTime()).toString();
-        let aStrokeColor    = this.GetStrokeColor();
+        let aStrokeColor    = this.GetBorderColor();
         let aFillColor      = this.GetFillColor();
         let aRD             = this.GetRectangleDiff();
-        let aDash           = this.GetDash();
+        let aDash           = this.GetDashPattern();
+        let aQuads          = this.GetQuads && this.GetQuads();
 
         oCopy.SetAuthor(AscCommon.UserInfoParser.getCurrentName());
         oCopy.SetUserId(this.GetUserId());
@@ -171,18 +172,19 @@
         oCopy.SetModDate(sDate);
         oCopy.SetCreationDate(sDate);
         oCopy.SetContents(this.GetContents());
-        oCopy.SetBorder(this.GetBorder());
+        oCopy.SetBorderStyle(this.GetBorderStyle());
         oCopy.SetBorderEffectStyle(this.GetBorderEffectStyle());
         oCopy.SetBorderEffectIntensity(this.GetBorderEffectIntensity());
         oCopy.SetOpacity(this.GetOpacity());
-        oCopy.SetWidth(this.GetWidth());
+        oCopy.SetBorderWidth(this.GetBorderWidth());
         oCopy.SetMeta(JSON.parse(JSON.stringify(this.GetMeta())));
 
-        aStrokeColor && oCopy.SetStrokeColor(aStrokeColor.slice());
+        aStrokeColor && oCopy.SetBorderColor(aStrokeColor.slice());
         aFillColor && oCopy.SetFillColor(aFillColor.slice());
-        aDash && oCopy.SetDash(aDash.slice());
+        aDash && oCopy.SetDashPattern(aDash.slice());
         aRD && oCopy.SetRectangleDiff(aRD.slice());
-        
+        aQuads && oCopy.SetQuads(aQuads);
+
         // copy replies
         let oAscCommData = this.GetAscCommentData();
         if (oAscCommData) {
@@ -205,7 +207,7 @@
         oReply.SetAuthor(CommentData.m_sUserName);
         oReply.SetUserId(CommentData.m_sUserId);
         oReply.SetDisplay(window["AscPDF"].Api.Types.display["visible"]);
-        oReply.SetReplyTo(this.GetReplyTo() || this);
+        oReply.SetInReplyTo(this.GetInReplyTo() || this);
         CommentData.SetUserData(oReply.GetId());
         oReply.SetContents(CommentData.m_sText);
         oReply._wasChanged = true;
@@ -216,15 +218,22 @@
 
         this._replies.splice(nPos, 0, oReply);
     };
-    CAnnotationBase.prototype.AddReply = function(oReplyAnnot, nPos) {
-        if (!nPos) {
-            nPos = this._replies.length;
-        }
+	CAnnotationBase.prototype.AddReply = function(oReplyAnnot, nPos) {
+		if (!nPos) {
+			nPos = this._replies.length;
+		}
 
-        this._replies.splice(nPos, 0, oReplyAnnot);
+		oReplyAnnot.SetInReplyTo(this);
+		this._replies.splice(nPos, 0, oReplyAnnot);
+		
+		AscCommon.History.Add(new CChangesPDFAnnotReply(this, nPos, [oReplyAnnot], true));
 
-        AscCommon.History.Add(new CChangesPDFAnnotReply(this, nPos, [oReplyAnnot], true));
-    };
+		let oAscCommData = this.GetAscCommentData();
+        let oCommentData = new AscCommon.CCommentData();
+		oCommentData.Read_FromAscCommentData(oAscCommData);
+
+		Asc.editor.sync_ChangeCommentData(this.GetId(), oCommentData);
+	};
     CAnnotationBase.prototype.Add_ContentChanges = function(Changes) {
         this.repliesArrayChanges.Add(Changes);
     };
@@ -262,10 +271,12 @@
     CAnnotationBase.prototype.GetDocContent = function() {
         return null;
     };
-    CAnnotationBase.prototype.SetReplyTo = function(oAnnot) {
+    CAnnotationBase.prototype.SetInReplyTo = function(oAnnot) {
+		AscCommon.History.Add(new CChangesPDFAnnotInReplyTo(this, this._inReplyTo, oAnnot));
+
         this._inReplyTo = oAnnot;
     };
-    CAnnotationBase.prototype.GetReplyTo = function() {
+    CAnnotationBase.prototype.GetInReplyTo = function() {
         return this._inReplyTo;
     };
     CAnnotationBase.prototype.SetRefType = function(nType) {
@@ -275,7 +286,7 @@
         return this._refType;
     };
     CAnnotationBase.prototype.SetRectangleDiff = function(aDiff) {
-        AscCommon.History.Add(new CChangesPDFAnnotRD(this, this.GetRectangleDiff(), aDiff));
+        AscCommon.History.Add(new CChangesPDFAnnotRD(this, this._rectDiff, aDiff));
 
         this._rectDiff = aDiff;
         if (this.IsShapeBased()) {
@@ -296,11 +307,14 @@
     CAnnotationBase.prototype.SetNoZoom = function(bValue) {
         this._noZoom = bValue;
     };
-    CAnnotationBase.prototype.SetDash = function(aDash) {
+    CAnnotationBase.prototype.SetDashPattern = function(aDash) {
         AscCommon.History.Add(new CChangesPDFAnnotBorderDash(this, this._dash, aDash));
         this._dash = aDash;
+
+        this.SetWasChanged(true);
+        this.AddToRedraw();
     };
-    CAnnotationBase.prototype.GetDash = function() {
+    CAnnotationBase.prototype.GetDashPattern = function() {
         return this._dash;
     };
     CAnnotationBase.prototype.SetFillColor = function(aColor) {
@@ -309,8 +323,8 @@
         this._fillColor = aColor;
 
         if (this.IsShapeBased()) {
-            let oRGB    = this.GetRGBColor(aColor);
-            let oFill   = AscFormat.CreateSolidFillRGBA(oRGB.r, oRGB.g, oRGB.b, 255);
+            let oRGB    = aColor ? this.GetRGBColor(aColor) : null;
+            let oFill   = oRGB ? AscFormat.CreateSolidFillRGBA(oRGB.r, oRGB.g, oRGB.b, 255) : AscFormat.CreateNoFillUniFill();
             this.setFill(oFill);
             this.SetNeedRecalc(true);
             this.SetNeedUpdateOpacity(true);
@@ -322,17 +336,19 @@
     CAnnotationBase.prototype.GetFillColor = function() {
         return this._fillColor;
     };
-    CAnnotationBase.prototype.SetWidth = function(nWidthPt) {
-        AscCommon.History.Add(new CChangesPDFAnnotStrokeWidth(this, this.GetWidth(), nWidthPt));
+    CAnnotationBase.prototype.SetBorderWidth = function(nWidthPt) {
+        AscCommon.History.Add(new CChangesPDFAnnotStrokeWidth(this, this.GetBorderWidth(), nWidthPt));
 
-        this._width = nWidthPt;
+        this._borderWidth = nWidthPt;
 
         this.SetWasChanged(true);
         this.private_UpdateLn();
     };
     CAnnotationBase.prototype.private_UpdateLn = function() {
-        let nWidthPt = this.GetWidth();
+        let nWidthPt = this.GetBorderWidth();
         
+		AscCommon.History.StartNoHistoryMode();
+
         if (this.IsShapeBased()) {
             let oLine = this.spPr.ln;
             oLine.setW(nWidthPt * g_dKoef_pt_to_mm * 36000.0);
@@ -341,16 +357,19 @@
                 oLine.setFill(AscFormat.CreateNoFillUniFill());
             }
             else {
-                AscCommon.History.StartNoHistoryMode();
-                this.SetStrokeColor(this.GetStrokeColor());
-                AscCommon.History.EndNoHistoryMode();
+                let oRGB    = this.GetRGBColor(this.GetBorderColor(), true);
+				let oFill   = AscFormat.CreateSolidFillRGBA(oRGB.r, oRGB.g, oRGB.b, 255);
+				let oLine   = this.spPr.ln;
+				oLine.setFill(oFill);
             }
 
             this.handleUpdateLn();
         }
+
+		AscCommon.History.EndNoHistoryMode();
     };
-    CAnnotationBase.prototype.GetWidth = function() {
-        return this._width;
+    CAnnotationBase.prototype.GetBorderWidth = function() {
+        return this._borderWidth;
     };
     CAnnotationBase.prototype.FillCommentsDataFrom = function(oAnnot) {
         let oCurAscCommData = oAnnot.GetAscCommentData();
@@ -369,19 +388,89 @@
         this.EditCommentData(oCurData);
     };
     CAnnotationBase.prototype.SetRichContents = function(aRCInfo) {
-        AscCommon.History.Add(new CChangesPDFAnnotRC(this, this._richContents, aRCInfo));
+        AscCommon.History.Add(new CChangesPDFAnnotRC(this, this.GetRichContents(), aRCInfo));
         this._richContents = aRCInfo;
 
         this.SetWasChanged(true);
-        this.SetNeedRecalc(true);
+		this.SetNeedRecalc(true);
+        this.private_UpdateRichContent && this.private_UpdateRichContent();
     };
-    CAnnotationBase.prototype.GetRichContents = function() {
-        return this._richContents;
+    CAnnotationBase.prototype.GetRichContents = function(bCalced) {
+        if (!bCalced)
+            return this._richContents;
+
+        let oContent = this.GetDocContent();
+        if (!oContent) {
+            return null;
+        }
+        
+        let aRCInfo = [];
+
+        for (let i = 0, nCount = oContent.GetElementsCount(); i < nCount; i++) {
+            let oPara = oContent.GetElement(i);
+
+            for (let j = 0, nRunsCount = oPara.GetElementsCount(); j < nRunsCount; j++) {
+                let oRun = oPara.GetElement(j);
+                let sText = oRun.GetText();
+                let oUniColor   = oRun.Pr.Unifill;
+                let oRGBA       = oUniColor ? oUniColor.fill.color.color.RGBA : null;
+                let aPdfColor   = oRGBA ? [oRGBA.R / 255, oRGBA.G / 255, oRGBA.B / 255] : [0, 0, 0];
+
+                let sFont   = oRun.Get_RFonts().Ascii.Name;
+                let isEmbed = false;
+                let prefix  = AscFonts.getEmbeddedFontPrefix();
+
+                let nVertAlign;
+                switch (oRun.GetVertAlign()) {
+                    case AscCommon.vertalign_SuperScript:
+                        nVertAlign = 0;
+                        break;
+                    case AscCommon.vertalign_SubScript:
+                        nVertAlign = -0.01;
+                        break;
+                }
+
+                if (sFont.startsWith(prefix)) {
+                    sFont = sFont.substr(prefix.length);
+                    isEmbed = true;
+                }
+                    
+                let oRCInfo = {
+                    "alignment":        AscPDF.getPdfTypeAlignByInternal(oRun.Paragraph.GetParagraphAlign()),
+                    "bold":             oRun.Get_Bold(),
+                    "italic":           oRun.Get_Italic(),
+                    "strikethrough":    oRun.Get_Strikeout(),
+                    "underlined":       oRun.Get_Underline(),
+                    "size":             oRun.Get_FontSize(),
+                    "color":            aPdfColor,
+                    "text":             sText,
+                    "vertical":         nVertAlign
+                };
+
+                if (isEmbed) {
+                    oRCInfo["name"] = sFont;
+                }
+                else {
+                    oRCInfo["actual"] = sFont;
+                }
+
+                aRCInfo.push(oRCInfo);
+            }
+
+            if (aRCInfo[aRCInfo.length - 1])
+                aRCInfo[aRCInfo.length - 1]["text"] += '\r';
+        }
+
+        return aRCInfo;
     };
     CAnnotationBase.prototype.SetIntent = function(nType) {
         AscCommon.History.Add(new CChangesPDFAnnotIntent(this, this._intent, nType));
 
         this._intent = nType;
+
+		this.SetWasChanged(true);
+		this.recalcGeometry();
+		this.SetNeedRecalc(true);
     };
     CAnnotationBase.prototype.GetIntent = function() {
         return this._intent;
@@ -392,16 +481,16 @@
     CAnnotationBase.prototype.SetLockContent = function(bValue) {
         this._lockContent = bValue;
     };
-    CAnnotationBase.prototype.SetBorder = function(nType) {
-        if (this._border == nType) {
+    CAnnotationBase.prototype.SetBorderStyle = function(nType) {
+        if (this._borderStyle == nType) {
             return;
         }
 
-        AscCommon.History.Add(new CChangesPDFAnnotBorderType(this, this._border, nType));
-        this._border = nType;
+        AscCommon.History.Add(new CChangesPDFAnnotBorderType(this, this._borderStyle, nType));
+        this._borderStyle = nType;
     };
-    CAnnotationBase.prototype.GetBorder = function() {
-        return this._border;
+    CAnnotationBase.prototype.GetBorderStyle = function() {
+        return this._borderStyle;
     };
     CAnnotationBase.prototype.SetBorderEffectIntensity = function(nValue) {
         if (nValue == this._borderEffectIntensity) {
@@ -425,11 +514,59 @@
         this._borderEffectStyle = nStyle;
         this.SetWasChanged(true);
         this.SetNeedRecalc(true);
+        this.recalcGeometry();
+        if (nStyle == AscPDF.BORDER_EFFECT_STYLES.none) {
+            this.SetDefaultGeometry();
+        }
     };
     CAnnotationBase.prototype.GetBorderEffectStyle = function() {
         return this._borderEffectStyle;
     };
+    CAnnotationBase.prototype.SetDefaultGeometry = function() {};
+    CAnnotationBase.prototype.GetComplexBorderType = function() {
+        let nBorderStyle = this.GetBorderStyle();
+        let aDash = this.GetDashPattern();
+        let nBorderEffectStyle = this.GetBorderEffectStyle();
+        let nBorderEffectIntensity = this.GetBorderEffectIntensity();
 
+        let nComplexType = null;
+
+        if (AscPDF.BORDER_TYPES.solid == nBorderStyle || undefined == nBorderStyle) {
+            if (AscPDF.BORDER_EFFECT_STYLES.cloud == nBorderEffectStyle) {
+                if (1 == nBorderEffectIntensity) {
+                    nComplexType = AscPDF.ANNOT_COMPLEX_BORDER_TYPES.cloud1;
+                }
+                else if (2 == nBorderEffectIntensity) {
+                    nComplexType = AscPDF.ANNOT_COMPLEX_BORDER_TYPES.cloud2;
+                }
+            }
+            else {
+                nComplexType = AscPDF.ANNOT_COMPLEX_BORDER_TYPES.solid;
+            }
+        }
+        else if (AscPDF.BORDER_TYPES.dashed == nBorderStyle) {
+            if (AscCommon.isEqualSortedArrays(aDash, AscPDF.ANNOT_BORDER_DASHED_VALUES.dash1)) {
+                nComplexType = AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash1;
+            }
+            else if (AscCommon.isEqualSortedArrays(aDash, AscPDF.ANNOT_BORDER_DASHED_VALUES.dash2)) {
+                nComplexType = AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash2;
+            }
+            else if (AscCommon.isEqualSortedArrays(aDash, AscPDF.ANNOT_BORDER_DASHED_VALUES.dash3)) {
+                nComplexType = AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash3;
+            }
+            else if (AscCommon.isEqualSortedArrays(aDash, AscPDF.ANNOT_BORDER_DASHED_VALUES.dash4)) {
+                nComplexType = AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash4;
+            }
+            else if (AscCommon.isEqualSortedArrays(aDash, AscPDF.ANNOT_BORDER_DASHED_VALUES.dash5)) {
+                nComplexType = AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash5;
+            }
+            else if (AscCommon.isEqualSortedArrays(aDash, AscPDF.ANNOT_BORDER_DASHED_VALUES.dash6)) {
+                nComplexType = AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash6;
+            }
+        }
+
+        return nComplexType;
+    };
     CAnnotationBase.prototype.DrawSelected = function() {};
     CAnnotationBase.prototype.SetName = function(sName) {
         if (sName == this._name) {
@@ -459,7 +596,7 @@
         return this._needUpdateOpacity;
     };
 
-    CAnnotationBase.prototype.UpdateOpacity = function() {
+    CAnnotationBase.prototype.private_UpdateOpacity = function() {
         const t = this.GetOpacity() * 100 * 2.55;
 
         if (!this.IsShapeBased()) {
@@ -468,31 +605,21 @@
             return;
         }
 
-        if (this.IsFreeText()) {
-            for (let i = 1; i < this.spTree.length; i++) {
-                const oLine = this.spTree[i].spPr.ln;
-                oLine.Fill.transparent = t;
+        const oLine = this.spPr.ln;
+		if (oLine) {
+			oLine.Fill.transparent = t;
+		}
 
-                const oFill = this.spPr.Fill;
-                oFill.transparent = t;
+		const oFill = this.spPr.Fill;
+		if (oFill) {
+			oFill.transparent = t;
+		}
 
-                this.spTree[i].handleUpdateLn();
-                this.spTree[i].handleUpdateFill();
-            }
-        }
-        else {
-            const oLine = this.spPr.ln;
-            oLine.Fill.transparent = t;
-
-            const oFill = this.spPr.Fill;
-            oFill.transparent = t;
-
-            this.handleUpdateLn();
-            this.handleUpdateFill();
-        }
+		this.handleUpdateLn();
+		this.handleUpdateFill();
 
         this.SetNeedUpdateOpacity(false);
-    }
+    };
     CAnnotationBase.prototype.GetOpacity = function() {
         return this._opacity;
     };
@@ -793,6 +920,9 @@
     CAnnotationBase.prototype.IsStamp = function() {
         return false;
     };
+    CAnnotationBase.prototype.IsLink = function() {
+        return false;
+    };
     CAnnotationBase.prototype.SetNeedRecalc = function(bRecalc, bSkipAddToRedraw) {
         if (bRecalc == false) {
             this._needRecalc = false;
@@ -808,7 +938,7 @@
         return this._needRecalc;
     };
     CAnnotationBase.prototype.GetRect = function() {
-        return this._rect || (this.GetReplyTo() ? this.GetReplyTo().GetRect() : this._rect);
+        return this._rect || (this.GetInReplyTo() ? this.GetInReplyTo().GetRect() : this._rect);
     };
     CAnnotationBase.prototype.IsNeedDrawFromStream = function() {
         return this._bDrawFromStream;
@@ -817,10 +947,23 @@
         AscCommon.History.Add(new CChangesPDFAnnotChangedView(this, this._bDrawFromStream, bFromStream));
         this._bDrawFromStream = bFromStream;
     };
-    CAnnotationBase.prototype.SetRect = function(aOrigRect) {
-        AscCommon.History.Add(new CChangesPDFAnnotRect(this, this.GetRect(), aOrigRect));
+	CAnnotationBase.prototype.private_UpdateRect = function(rect) {
+		if (rect) {
+			this.SetRect(rect);
+		}
+	};
+    CAnnotationBase.prototype.SetRect = function(aRect) {
+		if (aRect) {
+			aRect = aRect.slice();
+		}
 
-        this._rect = aOrigRect;
+        if (this._rect != null && aRect != null && AscCommon.isEqualSortedArrays(this._rect, aRect)) {
+            return;
+        }
+
+        AscCommon.History.Add(new CChangesPDFAnnotRect(this, this._rect, aRect));
+
+        this._rect = aRect;
         this.SetWasChanged(true);
 
         if (this.IsShapeBased()) {
@@ -864,7 +1007,7 @@
         this.parentPage = oParent;
     };
     CAnnotationBase.prototype.GetParentPage = function() {
-        let oReplyTo = this.GetReplyTo();
+        let oReplyTo = this.GetInReplyTo();
         if (oReplyTo && !this.parentPage) {
             return oReplyTo.GetParentPage();
         }
@@ -924,8 +1067,8 @@
     CAnnotationBase.prototype.GetDisplay = function() {
         return this._display;
     };
-    CAnnotationBase.prototype.onMouseUp = function(e) {
-        if (e.button != 2) {
+    CAnnotationBase.prototype.onMouseUp = function(x, y, e) {
+        if (e.Button != 2) {
             this.GetDocument().ShowComment([this.GetId()]);
         }
     };
@@ -933,7 +1076,6 @@
         if (this.GetContents() == contents)
             return;
 
-        let oViewer         = Asc.editor.getDocumentRenderer();
         let oDoc            = Asc.editor.getPDFDoc();
         let sCurContents    = this.GetContents();
 
@@ -967,7 +1109,7 @@
         }
 
         if (this.IsNeedUpdateOpacity()) {
-            this.UpdateOpacity();
+            this.private_UpdateOpacity();
         }
         
         if (this.IsNeedRecalcSizes()) {
@@ -1008,7 +1150,12 @@
             return;
 
         this.Recalculate();
+        let aRect = this.GetRect();
+
+		// add clip only for changed annots
+		this.IsChanged() && oGraphicsWord.AddClipRect(aRect[0] * g_dKoef_pt_to_mm, aRect[1] * g_dKoef_pt_to_mm, (aRect[2] - aRect[0]) * g_dKoef_pt_to_mm, (aRect[3] - aRect[1]) * g_dKoef_pt_to_mm);
         this.draw(oGraphicsWord);
+        this.IsChanged() && oGraphicsWord.RemoveLastClip();
 
         // draw annot rect
         // if (oGraphicsPDF) {
@@ -1065,7 +1212,8 @@
 		oCurData && oCurData.Read_FromAscCommentData(oCurAscCommData);
 
         AscCommon.History.Add(new CChangesPDFAnnotCommentData(this, oCurData, oCommentData));
-
+        this.SetWasChanged(true, false);
+        
         if (oCommentData == null) {
             this._replies.length = 0;
             Asc.editor.sync_RemoveComment(this.GetId());
@@ -1095,6 +1243,7 @@
             oFirstCommToEdit.SetContents(oCommentData.m_sText);
         }
 
+        let aRepliesToBeChanged = [];
         let aReplyToDel = [];
         let oReply, oReplyCommentData;
         for (let i = 0; i < this._replies.length; i++) {
@@ -1108,6 +1257,7 @@
 
             if (oReplyCommentData) {
                 oReply.EditCommentData(oReplyCommentData);
+                aRepliesToBeChanged.push(oReply);
             }
             else {
                 aReplyToDel.push(oReply);
@@ -1146,6 +1296,10 @@
             }
         }
 
+        aRepliesToBeChanged.forEach(function(reply) {
+            reply.SetWasChanged(true, false);
+        });
+        
         Asc.editor.sync_ChangeCommentData(this.GetId(), oCommentData);
     };
     CAnnotationBase.prototype.GetAscCommentData = function() {
@@ -1176,13 +1330,13 @@
     CAnnotationBase.prototype.GetContents = function() {
         return this._contents;
     };
-    CAnnotationBase.prototype.SetModDate = function(sDate) {
-        if (sDate == this._modDate) {
+    CAnnotationBase.prototype.SetModDate = function(timeStamp) {
+        if (timeStamp == this._modDate) {
             return;
         }
 
-        AscCommon.History.Add(new CChangesPDFAnnotModDate(this, this._modDate, sDate));
-        this._modDate = sDate;
+        AscCommon.History.Add(new CChangesPDFAnnotModDate(this, this._modDate, timeStamp));
+        this._modDate = timeStamp;
         this.SetWasChanged(true, false);
     };
     CAnnotationBase.prototype.GetModDate = function(bPDF) {
@@ -1195,13 +1349,13 @@
 
         return this._modDate;
     };
-    CAnnotationBase.prototype.SetCreationDate = function(sDate) {
-        if (sDate == this._creationDate) {
+    CAnnotationBase.prototype.SetCreationDate = function(timeStamp) {
+        if (timeStamp == this._creationDate) {
             return;
         }
 
-        AscCommon.History.Add(new CChangesPDFAnnotCreationDate(this, this._creationDate, sDate));
-        this._creationDate = sDate;
+        AscCommon.History.Add(new CChangesPDFAnnotCreationDate(this, this._creationDate, timeStamp));
+        this._creationDate = timeStamp;
         this.SetWasChanged(true, false);
     };
     CAnnotationBase.prototype.GetCreationDate = function(bPDF) {
@@ -1258,6 +1412,9 @@
             return undefined;
         }
     };
+    CAnnotationBase.prototype.IsFromOO = function() {
+        return this._apIdx == undefined;
+    };
     CAnnotationBase.prototype.AddToRedraw = function() {
         let oViewer = editor.getDocumentRenderer();
         let nPage   = this.GetPage();
@@ -1281,12 +1438,8 @@
 	 * @typeofeditors ["PDF"]
      * @returns {object}
 	 */
-    CAnnotationBase.prototype.GetRGBColor = function(aInternalColor) {
-        let oColor = {
-            r: 255,
-            g: 255,
-            b: 255
-        };
+    CAnnotationBase.prototype.GetRGBColor = function(aInternalColor, isForStroke) {
+        let oColor = isForStroke !== true ? {r: 255, g: 255, b: 255} : {r: 0, g: 0, b: 0};
 
         if (!aInternalColor || aInternalColor.length == 0) {
             return oColor;
@@ -1342,32 +1495,26 @@
         return new AscFormat.MoveAnnotationTrack(this);
     };
 
-    CAnnotationBase.prototype.SetStrokeColor = function(aColor) {
-        AscCommon.History.Add(new CChangesPDFAnnotStroke(this, this.GetStrokeColor(), aColor));
+    CAnnotationBase.prototype.SetBorderColor = function(aColor) {
+        AscCommon.History.Add(new CChangesPDFAnnotStroke(this, this._strokeColor, aColor));
 
         this._strokeColor = aColor;
         this.SetWasChanged(true);
 
-        if (!aColor) {
-            aColor = [0, 0, 0];
-        }
-        
         if (this.IsShapeBased()) {
-            let oRGB    = this.GetRGBColor(aColor);
-            let oFill   = AscFormat.CreateSolidFillRGBA(oRGB.r, oRGB.g, oRGB.b, 255);
-            let oLine   = this.spPr.ln;
-            oLine.setFill(oFill);
-            this.SetNeedRecalc(true);
+            this.private_UpdateLn();
             this.SetNeedUpdateOpacity(true);
         }
         else {
             this.AddToRedraw();
         }
     };
-    CAnnotationBase.prototype.GetStrokeColor = function() {
+    CAnnotationBase.prototype.GetBorderColor = function() {
         return this._strokeColor;
     };
-
+	CAnnotationBase.prototype.IsNeedWriteOnSave = function() {
+		return !this.IsNeedDrawFromStream() || this.IsChanged();
+	};
     CAnnotationBase.prototype.WriteToBinaryBase = function(memory) {
         // type
         memory.WriteByte(this.GetType());
@@ -1417,9 +1564,9 @@
         let sContents       = this.GetContents();
         let BES             = this.GetBorderEffectStyle();
         let BEI             = this.GetBorderEffectIntensity();
-        let aStrokeColor    = this.GetType() == AscPDF.ANNOTATIONS_TYPES.Text ? this.GetFillColor() : this.GetStrokeColor();
-        let nBorder         = this.GetBorder();
-        let nBorderW        = this.GetWidth();
+        let aStrokeColor    = this.GetType() == AscPDF.ANNOTATIONS_TYPES.Text ? this.GetFillColor() : this.GetBorderColor();
+        let nBorder         = this.GetBorderStyle();
+        let nBorderW        = this.GetBorderWidth();
         let sModDate        = this.GetModDate(true);
 
         // rect
@@ -1481,7 +1628,7 @@
             memory.WriteDouble(nBorderW);
 
             if (nBorder == 2) {
-                let aDash = this.GetDash();
+                let aDash = this.GetDashPattern();
                 memory.WriteLong(aDash.length);
                 for (let i = 0; i < aDash.length; i++) {
                     memory.WriteDouble(aDash[i]);
@@ -1514,19 +1661,18 @@
             if (memory.isForSplit || memory.isCopyPaste) {
                 if (this.IsStamp()) {
                     if (this.GetRenderStructure()) {
-                        oMeta["isOO"] = true;
                         oMeta["InRect"] = this.GetInRect();
                     }
                 }
-                if (this.GetOriginPage() == undefined) {
-                    oMeta["isOO"] = true;
-
+                if (this.IsFromOO()) {
                     if (this.IsRedact()) {
                         let sRedactId = this.GetRedactId();
                         if (sRedactId) {
                             oMeta["redactId"] = sRedactId;
                         }
                     }
+
+                    oMeta["isOO"] = true;
                 }
             }
             
@@ -1599,15 +1745,15 @@
             for (let i = 0; i < colorLength; i++) {
                 aStrokeColor.push(memory.GetDouble());
             }
-            this.SetStrokeColor(aStrokeColor);
+            this.SetBorderColor(aStrokeColor);
         }
     
         // border
         if (Flags & (1 << 4)) {
             let nBorder = memory.GetUChar();
             let nBorderW = memory.GetDouble();
-            this.SetBorder(nBorder);
-            this.SetWidth(nBorderW);
+            this.SetBorderStyle(nBorder);
+            this.SetBorderWidth(nBorderW);
     
             if (nBorder === 2) {
                 let dashLength = memory.GetLong();
@@ -1615,7 +1761,7 @@
                 for (let i = 0; i < dashLength; i++) {
                     aDash.push(memory.GetDouble());
                 }
-                this.SetDash(aDash);
+                this.SetDashPattern(aDash);
             }
         }
     
@@ -1644,7 +1790,7 @@
             let nOpacity        = this.GetOpacity();
             let aRC             = this.GetRichContents(true);
             let CrDate          = this.GetCreationDate(true);
-            let oRefTo          = this.GetReplyTo();
+            let oRefTo          = this.GetInReplyTo();
             let nRefToReason    = this.GetRefType();
             let sSubject        = this.GetSubject();
 
@@ -1801,7 +1947,7 @@
             if (memory.annotFlags & (1 << 5)) {
                 let refApIdx = memory.GetLong();
                 oRefTo = this.FindAnnotationByApIdx(refApIdx); // Assuming a method to find annotation by ApIdx exists
-                this.SetReplyTo(oRefTo);
+                this.SetInReplyTo(oRefTo);
             }
     
             let nRefToReason = null;
@@ -1827,7 +1973,9 @@
         let nStartPos = memory.GetCurPosition();
         memory.Skip(4);
 
+        memory.docRenderer.ClearCacheProps();
         this.draw(memory.docRenderer); // для каждой страницы инициализируется свой renderer
+        memory.docRenderer.ClearCacheProps();
 
         // запись длины комманд
         let nEndPos = memory.GetCurPosition();
@@ -1892,6 +2040,16 @@
     CAnnotationBase.prototype.canResize = function () {
         return true;
     };
+	CAnnotationBase.prototype.deleteDrawingBase = function() {
+		let oDoc = this.GetDocument();
+		if (!oDoc) {
+			return;
+		}
+
+		oDoc.RemoveAnnot(this.GetId());
+	};
+	
+	CAnnotationBase.prototype.setBDeleted = AscFormat.CGraphicObjectBase.prototype.setBDeleted;
     
     function formatTimestampToPDF(timestamp) {
         const date = new Date(parseInt(timestamp));

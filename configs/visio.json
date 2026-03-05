@@ -149,6 +149,7 @@
 			"cell/view/DrawingObjectsController.js",
 
 			"word/Math/mathTypes.js",
+			"word/Editor/Styles/para-spacing.js",
 			"word/Editor/Styles.js",
 			"word/Math/math-settings.js",
 			"word/Editor/StructuredDocumentTags/sdt-settings.js",
@@ -374,7 +375,11 @@
 			"visio/model/SerializeReader.js",
 			"visio/model/SerializeWriter.js",
 			
-			"word/Editor/document-visitor.js"
+			"word/Editor/document-visitor.js",
+			
+			"word/Editor/annotations/custom-text-annotator/custom-text-annotator.js",
+			"word/Editor/annotations/custom-text-annotator/range-marks.js",
+			"word/Editor/annotations/custom-text-annotator/text-annotator-manager.js"
 		],
 		"desktop": {
 			"min": [

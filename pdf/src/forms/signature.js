@@ -37,9 +37,9 @@
 	 * @constructor
      * @extends {CBaseField}
 	 */
-    function CSignatureField(sName, aRect)
+    function CSignatureField(sName, aRect, oDoc)
     {
-        AscPDF.CBaseField.call(this, sName, AscPDF.FIELD_TYPES.signature, aRect);
+        AscPDF.CBaseField.call(this, sName, AscPDF.FIELD_TYPES.signature, aRect, oDoc);
         this._filled = false;
     };
 
@@ -84,6 +84,17 @@
         this._filled = bValue;
         this.SetDrawHighlight(!bValue);
     };
+    CSignatureField.prototype.IsFilled = function() {
+        return this._filled;
+    };
+    CSignatureField.prototype.SetDrawHighlight = function(bDraw) {
+        if (this.IsFilled()) {
+            this._needDrawHighlight = false;
+        }
+        else {
+            this._needDrawHighlight = bDraw;
+        }
+    };
     /**
      * Synchronizes this field with fields with the same name.
      * @memberof CSignatureField
@@ -102,6 +113,7 @@
     CSignatureField.prototype.Reset = function() {
     };
 	
+    CSignatureField.prototype.WriteToBinary = function(memory) {};
     function MakeColorMoreGray(rgbColor, nPower) {
         // Получаем значения компонентов цвета
         const r = rgbColor.r;

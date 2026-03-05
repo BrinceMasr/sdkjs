@@ -132,6 +132,21 @@
 	 * @property {string} Value - The element value.
 	 * @see office-js-api/Examples/Plugins/{Editor}/Enumeration/ContentControlListElement.js
 	 */
+	
+	/**
+	 * @typedef {Object} TextAnnotation
+	 * @property  {string} paragraphId  - ID of the paragraph containing the annotation.
+	 * @property  {string} rangeId - ID of the annotation range.
+	 * @property  {string} [name] -  Annotation type (e.g., `"grammar"`).
+	 */
+	
+	/**
+	 * @typedef {Object} TextAnnotationRange
+	 * @property  {string} id  - Unique identifier for the range.
+	 * @property  {number} start - Starting index of the text range.
+	 * @property  {number} length - Length of the text range.
+	 * @property  {string} [name] -  Annotation type (e.g., `"grammar"`).
+	 */
 
     var Api = window["asc_docs_api"];
 
@@ -341,16 +356,19 @@
 	 */
     Api.prototype["pluginMethod_RemoveSelectedContent"] = function()
     {
-        var oLogicDocument = this.private_GetLogicDocument();
-        if (!oLogicDocument || !oLogicDocument.IsSelectionUse())
-            return;
-
-        if (false === oLogicDocument.Document_Is_SelectionLocked(AscCommon.changestype_Remove, null, true, oLogicDocument.IsFormFieldEditing()))
-        {
-            oLogicDocument.StartAction(AscDFH.historydescription_Document_BackSpaceButton);
-            oLogicDocument.Remove(-1, true);
-            oLogicDocument.FinalizeAction();
-        }
+		let logicDocument = this.private_GetLogicDocument();
+		if (!logicDocument || !logicDocument.IsSelectionUse())
+			return;
+		
+		this.executeGroupActions(function()
+		{
+			if (!logicDocument.IsSelectionLocked(AscCommon.changestype_Remove, null, true, logicDocument.IsFormFieldEditing()))
+			{
+				logicDocument.StartAction(AscDFH.historydescription_Document_BackSpaceButton);
+				logicDocument.Remove(-1, true);
+				logicDocument.FinalizeAction();
+			}
+		});
     };
 
 	/**
@@ -368,6 +386,7 @@
 	 * @property {string} QuoteText - The quote comment text.
 	 * @property {string} Text - The comment text.
 	 * @property {string} Time - The time when the comment was posted (in milliseconds).
+	 * @property {string} UserId - The user ID of the comment author.
 	 * @property {boolean} Solved - Specifies if the comment is resolved (**true**) or not (**false**).
 	 * @property {CommentData[]} Replies - An array containing the comment replies represented as the *CommentData* object.
 	 * @see office-js-api/Examples/Plugins/{Editor}/Enumeration/CommentData.js
@@ -1067,6 +1086,35 @@
 		return result;
 	};
 	/**
+	 * Returns the current addin field from the document.
+	 * @memberof Api
+	 * @typeofeditors ["CDE"]
+	 * @alias GetCurrentAddinField
+	 * @returns {?AddinFieldData} - An AddinFieldData object containing the data about the current addin field, or null if no addin field is found.
+	 * @since 9.3.0
+	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/GetCurrentAddinField.js
+	 */
+	Api.prototype["pluginMethod_GetCurrentAddinField"] = function()
+	{
+		let logicDocument = this.private_GetLogicDocument();
+		if (!logicDocument)
+			return null;
+		
+		let fields = logicDocument.GetCurrentComplexFields();
+		let data = null;
+		for (let i = 0; i < fields.length; ++i)
+		{
+			let field = fields[i];
+			if ((field instanceof AscWord.CComplexField) && field.IsAddin())
+			{
+				data = AscWord.CAddinFieldData.FromField(field).ToJson();
+				break;
+			}
+		}
+		
+		return data;
+	};
+	/**
 	 * Updates the addin fields with the specified data.
 	 * @memberof Api
 	 * @typeofeditors ["CDE"]
@@ -1105,6 +1153,44 @@
 			return;
 		
 		logicDocument.AddAddinField(AscWord.CAddinFieldData.FromJson(data));
+	};
+	/**
+	 * Selects the specified add-in field.
+	 * @memberof Api
+	 * @typeofeditors ["CDE"]
+	 * @alias SelectAddinField
+	 * @param {string} fieldId - Field identifier.
+	 * @since 9.3.0
+	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/SelectAddinField.js
+	 */
+	Api.prototype["pluginMethod_SelectAddinField"] = function(fieldId)
+	{
+		let logicDocument = this.private_GetLogicDocument();
+		if (!logicDocument)
+			return false;
+		
+		return logicDocument.SelectAddinField(fieldId);
+	};
+	/**
+	 * Removes the specified add-in field.
+	 * @memberof Api
+	 * @typeofeditors ["CDE"]
+	 * @alias RemoveAddinField
+	 * @param {string} fieldId - Field identifier.
+	 * @since 9.3.0
+	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/pluginMethod_RemoveAddinField.js
+	 */
+	Api.prototype["pluginMethod_RemoveAddinField"] = function(fieldId)
+	{
+		let logicDocument = this.private_GetLogicDocument();
+		if (!logicDocument)
+			return false;
+		
+		if (!logicDocument.SelectAddinField(fieldId))
+			return false;
+		
+		logicDocument.RemoveBeforePaste();
+		return true;
 	};
 	/**
 	 * Removes a field wrapper, leaving only the field content.
@@ -1300,6 +1386,63 @@
 		let docPos = topDocument && topDocument.GetContentPosition ? topDocument.GetContentPosition(false) : null;
 		return bookmarks.GetBookmarkByDocPos(docPos);
 	};
+	/**
+	 * Adds annotations to the specified paragraph.
+	 * @memberof Api
+	 * @typeofeditors ["CDE"]
+	 * @alias AnnotateParagraph
+	 * @param {Object} data - Annotation data specifying what to annotate.
+	 * @param {string} data.type - The type of annotation operation (e.g., `"highlightText"`).
+	 * @param {string} [data.name] - Optional name of the annotation.
+	 * @param {string} data.paragraphId - ID of the paragraph being annotated.
+	 * @param {string} data.recalcId - Paragraph recalculation ID.
+	 * @param {Array<TextAnnotationRange>} [data.ranges] - Array of text ranges to highlight (for highlightText type)
+	 * @since 9.2.0
+	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/AnnotateParagraph.js
+	 */
+	Api.prototype["pluginMethod_AnnotateParagraph"] = function(data)
+	{
+		if (!data)
+			return;
+		
+		data["guid"] = window.g_asc_plugins.getCurrentPluginGuid();
+		this.getTextAnnotatorEventManager().onResponse(data);
+	};
+	/**
+	 * Selects text in a document using a given annotation.
+	 * @memberof Api
+	 * @typeofeditors ["CDE"]
+	 * @alias SelectAnnotationRange
+	 * @param {TextAnnotation} annotation - The annotation selection object.
+	 * @since 9.2.0
+	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/SelectAnnotationRange.js
+	 */
+	Api.prototype["pluginMethod_SelectAnnotationRange"] = function(annotation)
+	{
+		if (!annotation)
+			return;
+		
+		annotation["guid"] = window.g_asc_plugins.getCurrentPluginGuid();
+		this.getTextAnnotatorEventManager().selectRange(annotation);
+	};
+	/**
+	 * Remove a specific annotation range from the document.
+	 * @memberof Api
+	 * @typeofeditors ["CDE"]
+	 * @alias RemoveAnnotationRange
+	 * @param {TextAnnotation} annotation - The annotation removing object.
+	 * @param {boolean} [annotation.all=false] - Optional parameter, flag to remove all annotations for the current paragraph.
+	 * @since 9.2.0
+	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/RemoveAnnotationRange.js
+	 */
+	Api.prototype["pluginMethod_RemoveAnnotationRange"] = function(annotation)
+	{
+		if (!annotation)
+			return;
+		
+		annotation["guid"] = window.g_asc_plugins.getCurrentPluginGuid();
+		this.getTextAnnotatorEventManager().removeRange(annotation);
+	};
 
 	function private_ReadContentControlCommonPr(commonPr)
 	{
@@ -1381,15 +1524,97 @@
 
 		if (streamObj["undo"])
 			this["pluginMethod_EndAction"]("GroupActions", "", "cancel");
-
-		if (streamObj["stable"] !== "")
-			this["pluginMethod_PasteHtml"](streamObj["stable"]);
-
-		if (streamObj["tail"] !== "")
+		
+		let _t = this;
+		function startSilentMode()
 		{
-			this["pluginMethod_StartAction"]("GroupActions");
-			this["pluginMethod_PasteHtml"](streamObj["tail"]);
+			window.g_asc_plugins && window.g_asc_plugins.setPluginMethodReturnAsync();
+			
+			logicDocument.TurnOff_Recalculate();
+			logicDocument.TurnOff_InterfaceEvents();
 		}
+		
+		function endSilentMode()
+		{
+			logicDocument.TurnOn_Recalculate();
+			logicDocument.TurnOn_InterfaceEvents();
+			
+			logicDocument.Recalculate();
+			window.g_asc_plugins && window.g_asc_plugins.onPluginMethodReturn(true);
+		}
+		
+		function pasteTail()
+		{
+			if (streamObj["tail"] !== "")
+			{
+				_t["pluginMethod_StartAction"]("GroupActions");
+				_t._pluginMethod_PasteHtml(streamObj["tail"], endSilentMode);
+			}
+			else
+			{
+				endSilentMode();
+			}
+		}
+		
+		startSilentMode();
+		
+		if (streamObj["stable"] !== "")
+			this._pluginMethod_PasteHtml(streamObj["stable"], pasteTail);
+		else
+			pasteTail();
+	};
+
+	/**
+	 * Checks if the document is in the filling form mode.
+	 * @memberof Api
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @alias IsFillingFormMode
+	 * @returns {boolean} - Returns **true** if the document is in the filling form mode.
+	 * @since 9.3.0
+	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/IsFillingFormMode.js
+	 */
+	Api.prototype["pluginMethod_IsFillingFormMode"] = function()
+	{
+		let logicDocument = this.private_GetLogicDocument();
+		if (!logicDocument)
+			return false;
+
+		return logicDocument.IsFillingFormMode();
+	};
+	/**
+	 * Checks if the document is in the filling OForm mode.
+	 * @memberof Api
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @alias IsFillingOFormMode
+	 * @returns {boolean} - Returns **true** if the document is in the filling OForm mode.
+	 * @since 9.3.0
+	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/IsFillingOFormMode.js
+	 */
+	Api.prototype["pluginMethod_IsFillingOFormMode"] = function()
+	{
+		let logicDocument = this.private_GetLogicDocument();
+		if (!logicDocument)
+			return false;
+
+		return logicDocument.IsFillingOFormMode();
+	};
+
+	/**
+	 * Checks if the document is in the editing OForm mode.
+	 * @memberof Api
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @alias IsEditingOFormMode
+	 * @returns {boolean} - Returns **true** if the document is in the editing OForm mode.
+	 * @since 9.3.0
+	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/IsEditingOFormMode.js
+	 */
+	Api.prototype["pluginMethod_IsEditingOFormMode"] = function()
+	{
+		let logicDocument = this.private_GetLogicDocument();
+		if (!logicDocument)
+			return false;
+
+		return logicDocument.IsEditingOFormMode();
 	};
 
 	window["AscCommon"] = window["AscCommon"] || {};

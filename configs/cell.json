@@ -213,6 +213,7 @@
 			
 			"word/Editor/Paragraph/RunContent/Types.js",
 			"word/Math/mathTypes.js",
+			"word/Editor/Styles/para-spacing.js",
 			"word/Editor/Styles.js",
 			"word/Math/math-settings.js",
 			"word/Editor/StructuredDocumentTags/sdt-settings.js",
@@ -369,11 +370,11 @@
 			"word/Editor/sections/sect-pr-changes.js",
 			"word/Editor/sections/section-columns.js",
 			"word/Editor/sections/section-page.js",
+			"word/Math/mathText.js",
+			"word/Math/mathContent.js",
 			"word/Math/NamesOfLiterals.js",
 			"word/Math/LaTeXParser.js",
 			"word/Math/UnicodeParser.js",
-			"word/Math/mathText.js",
-			"word/Math/mathContent.js",
 			"word/Math/base.js",
 			"word/Math/fraction.js",
 			"word/Math/degree.js",
@@ -401,6 +402,10 @@
 			"word/Editor/api/document-section-props.js",
 			
 			"word/Editor/document-visitor.js",
+			
+			"word/Editor/annotations/custom-text-annotator/custom-text-annotator.js",
+			"word/Editor/annotations/custom-text-annotator/range-marks.js",
+			"word/Editor/annotations/custom-text-annotator/text-annotator-manager.js",
 			
 			"word/apiBuilder.js",
 			"slide/apiBuilder.js",

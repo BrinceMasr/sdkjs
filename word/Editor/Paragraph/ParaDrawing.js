@@ -190,6 +190,8 @@ function ParaDrawing(W, H, GraphicObj, DrawingDocument, DocumentContent, Parent)
 			this.graphicObjects.addGraphicObject(this);
 	}
 	this.bCellHF = false;
+	
+	this.forceNoWrap = false;
 }
 ParaDrawing.prototype = Object.create(AscWord.CRunElementBase.prototype);
 ParaDrawing.prototype.constructor = ParaDrawing;
@@ -1024,12 +1026,19 @@ ParaDrawing.prototype.Set_Props = function(Props)
 					break;
 			}
 
+			if (this.IsShape() || this.IsPicture())
+				Asc.editor.addMacroStepData("SetDrawingWrapping", {type: this.wrappingType, style: Props.WrappingStyle, behind: this.behindDoc});
+
 			this.Set_BehindDoc(false);
 		}
 	}
 
 	if (undefined != Props.Paddings)
+	{
 		this.Set_Distance(Props.Paddings.Left, Props.Paddings.Top, Props.Paddings.Right, Props.Paddings.Bottom);
+		if (this.IsShape() || this.IsPicture())
+			Asc.editor.addMacroStepData("SetDrawingDistances", {Left: Props.Paddings.Left, Top: Props.Paddings.Top, Right: Props.Paddings.Right, Bottom: Props.Paddings.Bottom});
+	}
 
 	if (undefined != Props.AllowOverlap)
 		this.Set_AllowOverlap(Props.AllowOverlap);
@@ -1037,10 +1046,14 @@ ParaDrawing.prototype.Set_Props = function(Props)
 	if (undefined != Props.PositionH)
 	{
 		this.Set_PositionH(Props.PositionH.RelativeFrom, Props.PositionH.UseAlign, ( true === Props.PositionH.UseAlign ? Props.PositionH.Align : Props.PositionH.Value ), Props.PositionH.Percent);
+		if (this.IsShape() || this.IsPicture())
+			Asc.editor.addMacroStepData("SetPositionH", {relativeFrom: Props.PositionH.RelativeFrom, useAlign: Props.PositionH.UseAlign, value: ( true === Props.PositionH.UseAlign ? Props.PositionH.Align : Props.PositionH.Value ), percent: Props.PositionH.Percent});
 	}
 	if (undefined != Props.PositionV)
 	{
 		this.Set_PositionV(Props.PositionV.RelativeFrom, Props.PositionV.UseAlign, ( true === Props.PositionV.UseAlign ? Props.PositionV.Align : Props.PositionV.Value ), Props.PositionV.Percent);
+		if (this.IsShape() || this.IsPicture())
+			Asc.editor.addMacroStepData("SetPositionV", {relativeFrom: Props.PositionV.RelativeFrom, useAlign: Props.PositionV.UseAlign, value: ( true === Props.PositionV.UseAlign ? Props.PositionV.Align : Props.PositionV.Value ), percent: Props.PositionV.Percent});
 	}
 	if (undefined != Props.SizeRelH)
 	{
@@ -1048,6 +1061,10 @@ ParaDrawing.prototype.Set_Props = function(Props)
 			RelativeFrom : AscFormat.ConvertRelPositionHToRelSize(Props.SizeRelH.RelativeFrom),
 			Percent      : Props.SizeRelH.Value / 100.0
 		});
+
+		if (this.IsShape())
+			Asc.editor.addMacroStepData("SetRelSizeH", Props.SizeRelH);
+
 	}
 
 	if (undefined != Props.SizeRelV)
@@ -1056,6 +1073,10 @@ ParaDrawing.prototype.Set_Props = function(Props)
 			RelativeFrom : AscFormat.ConvertRelPositionVToRelSize(Props.SizeRelV.RelativeFrom),
 			Percent      : Props.SizeRelV.Value / 100.0
 		});
+
+		if (this.IsShape())
+			Asc.editor.addMacroStepData("SetRelSizeV", Props.SizeRelH);
+
 	}
 
 	if (this.SizeRelH && !this.SizeRelV)
@@ -1114,24 +1135,16 @@ ParaDrawing.prototype.CheckWH = function()
 {
 	if (!this.GraphicObj)
 		return;
-	var oldExtW = this.Extent.W;
-	var oldExtH = this.Extent.H;
-	if (this.GraphicObj.spPr && this.GraphicObj.spPr.xfrm
-		&& AscFormat.isRealNumber(this.GraphicObj.spPr.xfrm.extX)
-		&& AscFormat.isRealNumber(this.GraphicObj.spPr.xfrm.extY))
+
+	let lineCorrect = 0;
+	if (this.GraphicObj.pen && this.GraphicObj.pen.Fill && this.GraphicObj.pen.Fill.fill)
 	{
-		this.Extent.W = this.GraphicObj.spPr.xfrm.extX;
-		this.Extent.H = this.GraphicObj.spPr.xfrm.extY;
+		lineCorrect = (this.GraphicObj.pen.w == null) ? 12700 : parseInt(this.GraphicObj.pen.w);
+		lineCorrect /= 72000.0;
 	}
-	if(this.GraphicObj.getObjectType() === AscDFH.historyitem_type_Shape ||
-		this.GraphicObj.getObjectType() === AscDFH.historyitem_type_SmartArt)
-	{
-		this.GraphicObj.handleUpdateExtents();
-	}
-	this.GraphicObj.recalculate();
-	this.Extent.W = oldExtW;
-	this.Extent.H = oldExtH;
-	var extX, extY, rot;
+	let extX = 5;
+	let extY = 5;
+	let rot = 0;
 	if (this.GraphicObj.spPr && this.GraphicObj.spPr.xfrm )
 	{
 		if(AscFormat.isRealNumber(this.GraphicObj.spPr.xfrm.extX) && AscFormat.isRealNumber(this.GraphicObj.spPr.xfrm.extY))
@@ -1139,85 +1152,41 @@ ParaDrawing.prototype.CheckWH = function()
             extX = this.GraphicObj.spPr.xfrm.extX;
             extY = this.GraphicObj.spPr.xfrm.extY;
 		}
-		else
-		{
-			extX = 5;
-			extY = 5;
-		}
 		if(AscFormat.isRealNumber(this.GraphicObj.spPr.xfrm.rot))
 		{
 			rot = this.GraphicObj.spPr.xfrm.rot;
 		}
-		else
-		{
-			rot = 0;
-		}
 	}
-	else
+	this.setExtent(extX, extY);
+	if(this.GraphicObj.getObjectType() === AscDFH.historyitem_type_Shape ||
+		this.GraphicObj.getObjectType() === AscDFH.historyitem_type_SmartArt)
 	{
-		extX = 5;
-		extY = 5;
-		rot = 0;
+		this.GraphicObj.handleUpdateExtents();
+	}
+	this.GraphicObj.recalculate();
+	if(!AscFormat.checkNormalRotate(rot)){
+		const temp = extX;
+		extX = extY;
+		extY = temp;
 	}
 
-	let dKoef = this.GetScaleCoefficient();
-	this.setExtent(extX / dKoef, extY / dKoef);
-
-
-	var EEL = 0.0, EET = 0.0, EER = 0.0, EEB = 0.0;
-	var addEEL = 0.0, addEET = 0.0, addEER = 0.0, addEEB = 0.0;
-
+	let addEEL = 0.0;
+	let addEET = 0.0;
+	let addEER = 0.0;
+	let addEEB = 0.0;
 	if (this.GraphicObj.getObjectType() === AscDFH.historyitem_type_SmartArt) {
 		addEER = 57150 * AscCommonWord.g_dKoef_emu_to_mm;
 		addEEL = 38100 * AscCommonWord.g_dKoef_emu_to_mm;
 	}
-	//if(this.Is_Inline())
-	{
-		var xc          = this.GraphicObj.localTransform.TransformPointX(this.GraphicObj.extX / 2.0, this.GraphicObj.extY / 2.0);
-		var yc          = this.GraphicObj.localTransform.TransformPointY(this.GraphicObj.extX / 2.0, this.GraphicObj.extY / 2.0);
-		var oBounds     = this.GraphicObj.bounds;
-		var LineCorrect = 0;
-		if (this.GraphicObj.pen && this.GraphicObj.pen.Fill && this.GraphicObj.pen.Fill.fill)
-		{
-			LineCorrect = (this.GraphicObj.pen.w == null) ? 12700 : parseInt(this.GraphicObj.pen.w);
-			LineCorrect /= 72000.0;
-		}
+	const scaleCoefficient = this.GetScaleCoefficient();
+	const bounds     = this.GraphicObj.bounds;
+	const horizontalEE = (Math.max((bounds.w / scaleCoefficient - extX) / 2, 0) + lineCorrect);
+	const verticalEE = (Math.max((bounds.h / scaleCoefficient - extY) / 2, 0) + lineCorrect);
 
-
-		var l = oBounds.x;
-		var r = l + oBounds.w;
-		var t = oBounds.y;
-		var b = t + oBounds.h;
-
-		var startX, startY;
-		if(!AscFormat.checkNormalRotate(rot)){
-			var temp = extX;
-			extX = extY;
-			extY = temp;
-		}
-
-
-		startX = xc - extX/2.0;
-		startY = yc - extY/2.0;
-
-		if(l > startX){
-			l = startX;
-		}
-		if(r < startX + extX){
-			r = startX + extX;
-		}
-		if(t > startY){
-			t = startY;
-		}
-		if(b < startY + extY){
-			b = startY + extY;
-		}
-
-		EEL = (xc - extX / 2) - l + LineCorrect + addEEL;
-		EET = (yc - extY / 2) - t + LineCorrect + addEET;
-		EER = r + LineCorrect - (xc + extX / 2) + addEER;
-		EEB = b + LineCorrect - (yc + extY / 2) + addEEB;
-	}
+	const EEL = horizontalEE + addEEL;
+	const EET = verticalEE + addEET;
+	const EER = horizontalEE + addEER;
+	const EEB = verticalEE + addEEB;
 	this.setEffectExtent(EEL, EET, EER, EEB);
 	this.Check_WrapPolygon();
 };
@@ -1720,6 +1689,8 @@ ParaDrawing.prototype.Set_XYForAdd = function(X, Y, NearPos, PageNum)
 {
 	if (null !== NearPos)
 	{
+		const OldParent = this.Parent;
+		this.Parent = NearPos.Paragraph;
 		var Layout = NearPos.Paragraph.Get_Layout(NearPos.ContentPos, this);
 		this.private_SetXYByLayout(X, Y, PageNum, Layout, true, true);
 
@@ -1740,6 +1711,7 @@ ParaDrawing.prototype.Set_XYForAdd = function(X, Y, NearPos, PageNum)
 
 		Layout = NearPos.Paragraph.Get_Layout(NearPos.ContentPos, this);
 		this.private_SetXYByLayout(X, Y, PageNum, Layout, true, true);
+		this.Parent = OldParent;
 	}
 };
 ParaDrawing.prototype.SetSkipOnRecalculate = function(isSkip)
@@ -1782,6 +1754,9 @@ ParaDrawing.prototype.Set_XY = function(X, Y, Paragraph, PageNum, bResetAlign)
 			Layout = Paragraph.Get_Layout(ContentPos, this);
 
 		this.private_SetXYByLayout(X, Y, PageNum, Layout, (bResetAlign || true !== this.PositionH.Align ? true : false), (bResetAlign || true !== this.PositionV.Align ? true : false));
+
+		if (this.IsShape() || this.IsPicture())
+			Asc.editor.addMacroStepData("SetDrawingPos", {x: this.X, y: this.Y, name: this.GraphicObj.getObjectName()});
 	}
 };
 ParaDrawing.prototype.private_SetXYByLayout = function(X, Y, PageNum, Layout, bChangeX, bChangeY)
@@ -1791,10 +1766,10 @@ ParaDrawing.prototype.private_SetXYByLayout = function(X, Y, PageNum, Layout, bC
 		return;
 	}
 	this.PageNum = PageNum;
-
+	this.Internal_Position.SetScaleFactor(this.GetScaleCoefficient());
 	this.Internal_Position.Set(this.GraphicObj.extX, this.GraphicObj.extY, this.getXfrmRot(), this.EffectExtent, this.YOffset, Layout.ParagraphLayout, Layout.PageLimitsOrigin);
-	this.Internal_Position.Calculate_X(false, c_oAscRelativeFromH.Page, false, X - Layout.PageLimitsOrigin.X, false);
-	this.Internal_Position.Calculate_Y(false, c_oAscRelativeFromV.Page, false, Y - Layout.PageLimitsOrigin.Y, false);
+	this.Internal_Position.Calculate_X(false, c_oAscRelativeFromH.Page, false, X - Layout.PageLimitsOrigin.X / this.Internal_Position.ScaleFactor, false);
+	this.Internal_Position.Calculate_Y(false, c_oAscRelativeFromV.Page, false, Y - Layout.PageLimitsOrigin.Y / this.Internal_Position.ScaleFactor, false);
 	let bCorrect = false;
 	if(this.isTableCellChild(false))
 	{
@@ -1906,6 +1881,10 @@ ParaDrawing.prototype.GetInnerForm = function()
 {
 	return this.GraphicObj ? this.GraphicObj.getInnerForm() : null;
 };
+ParaDrawing.prototype.SetForceNoWrap = function(noWrap)
+{
+	this.forceNoWrap = noWrap;
+};
 ParaDrawing.prototype.Use_TextWrap = function()
 {
 	if (this.IsInline())
@@ -1916,6 +1895,9 @@ ParaDrawing.prototype.Use_TextWrap = function()
 	if (!this.Parent
 		|| !this.Parent.GetFramePr
 		|| (this.Parent.GetFramePr() && !this.Parent.GetFramePr().IsInline()))
+		return false;
+	
+	if (this.forceNoWrap)
 		return false;
 
 	// здесь должна быть проверка, нужно ли использовать обтекание относительно данного объекта,
@@ -2076,20 +2058,15 @@ ParaDrawing.prototype.Remove_FromDocument = function(bRecalculate)
 				oGrObject.setSignature(oGrObject.signatureLine);
 			}
 		}
-		var oPictureCC         = null;
-		var arrContentControls = oRun.GetParentContentControls();
-		for (var nIndex = arrContentControls.length - 1; nIndex >= 0; --nIndex)
+		
+		let parentContentControls = oRun.GetParentContentControls();
+		for (var nIndex = parentContentControls.length - 1; nIndex >= 0; --nIndex)
 		{
-			if (arrContentControls[nIndex].IsPicture())
-			{
-				oPictureCC = arrContentControls[nIndex];
-				break;
-			}
+			let cc = parentContentControls[nIndex];
+			if (cc.IsPicture() || cc.IsBuiltInWatermark())
+				cc.RemoveContentControlWrapper();
 		}
-
-		if (oPictureCC)
-			oPictureCC.RemoveContentControlWrapper();
-
+		
 		oRun.Remove_DrawingObject(this.Id);
 		if (oRun.IsInHyperlink())
 			oResult = new CTextPr();
@@ -3179,8 +3156,9 @@ ParaDrawing.prototype.SetDrawingPrFromDrawing = function(oAnotherDrawing)
 };
 ParaDrawing.prototype.OnContentReDraw = function()
 {
-	if (this.Parent && this.Parent.Parent)
-		this.Parent.Parent.OnContentReDraw(this.PageNum, this.PageNum);
+	let docContent = this.GetParentDocumentContent();
+	if (docContent)
+		docContent.OnContentReDraw(this.PageNum, this.PageNum);
 };
 ParaDrawing.prototype.getBase64Img = function()
 {
@@ -4243,7 +4221,7 @@ CAnchorPosition.prototype.Calculate_X_Value = function(RelativeFrom)
 		case c_oAscRelativeFromH.Column:
 		{
 			Value = this.CalcX - this.ColumnStartX;
-
+			Value /= this.ScaleFactor;
 			break;
 		}
 
@@ -4259,14 +4237,14 @@ CAnchorPosition.prototype.Calculate_X_Value = function(RelativeFrom)
 		case c_oAscRelativeFromH.Margin:
 		{
 			Value = this.CalcX - this.Margin_H;
-
+			Value /= this.ScaleFactor;
 			break;
 		}
 
 		case c_oAscRelativeFromH.Page:
 		{
 			Value = this.CalcX - this.Page_X;
-
+			Value /= this.ScaleFactor;
 			break;
 		}
 
@@ -4315,14 +4293,14 @@ CAnchorPosition.prototype.Calculate_Y_Value = function(RelativeFrom, isInTable)
 		case c_oAscRelativeFromV.Margin:
 		{
 			Value = this.CalcY - this.Margin_V;
-
+			Value /= this.ScaleFactor;
 			break;
 		}
 
 		case c_oAscRelativeFromV.Page:
 		{
 			Value = this.CalcY - this.Page_Y;
-
+			Value /= this.ScaleFactor;
 			break;
 		}
 
@@ -4336,11 +4314,10 @@ CAnchorPosition.prototype.Calculate_Y_Value = function(RelativeFrom, isInTable)
 		case c_oAscRelativeFromV.TopMargin:
 		{
 			Value = this.CalcY;
-
+			Value /= this.ScaleFactor;
 			break;
 		}
 	}
-
 	return Value;
 };
 

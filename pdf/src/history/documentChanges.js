@@ -51,6 +51,7 @@ AscDFH.changesFactory[AscDFH.historyitem_PDF_Document_Locks]            = CChang
 AscDFH.changesFactory[AscDFH.historyitem_Pdf_Document_Start_Redact]     = CChangesPDFDocumentStartRedact;
 AscDFH.changesFactory[AscDFH.historyitem_Pdf_Document_Part_Redact]      = CChangesPDFDocumentPartRedact;
 AscDFH.changesFactory[AscDFH.historyitem_Pdf_Document_End_Redact]       = CChangesPDFDocumentEndRedact;
+AscDFH.changesFactory[AscDFH.historyitem_Pdf_Embed_Fonts_Map]       	= CChangesEmbedFontsMap;
 
 function CChangesPDFArrayOfDoubleProperty(Class, Old, New) {
 	AscDFH.CChangesBaseProperty.call(this, Class, Old, New);
@@ -1060,6 +1061,10 @@ CChangesPDFDocumentRecognizePage.prototype.private_SetValue = function(bRecogniz
 	
     if (-1 !== nPageIdx) {
         oFile.pages[nPageIdx].isRecognized = bRecognize;
+		if (bRecognize) {
+			oFile.nativeFile["scanPageFonts"](oPage.GetOriginIndex());
+		}
+
         if (oDoc.Viewer.drawingPages[nPageIdx]) {
             delete oDoc.Viewer.drawingPages[nPageIdx].Image;
         }
@@ -1441,11 +1446,11 @@ CChangesPDFDocumentPartRedact.prototype.ReadFromBinary = function(Reader) {
  * @constructor
  * @extends {AscDFH.CChangesBaseProperty}
  */
-function CChangesPDFDocumentEndRedact(Class, sRedactId, nPage, aQuadsFlat)
+function CChangesPDFDocumentEndRedact(Class, sRedactId, sPageId, aQuadsFlat)
 {
 	AscDFH.CChangesBaseProperty.call(this, Class, undefined, undefined);
     this.RedactId = sRedactId;
-    this.Page = nPage;
+    this.PageId = sPageId;
     this.QuadsFlat = aQuadsFlat;
 }
 CChangesPDFDocumentEndRedact.prototype = Object.create(AscDFH.CChangesBaseProperty.prototype);
@@ -1458,14 +1463,15 @@ CChangesPDFDocumentEndRedact.prototype.Undo = function() {
     // clear united binary
     delete oDoc.unitedBinary;
     
-    let oRedactData = oDoc.appliedRedactsData.pop();
+    oDoc.appliedRedactsData.pop();
     oFile.nativeFile["UndoRedact"]();
 
-    let oPageInfo = oDoc.GetPageInfo(this.Page);
+    let oPageInfo = oDoc.GetPageInfoById(this.PageId);
+    let nIndex = oPageInfo.GetIndex();
     let nOriginIndex = oPageInfo.GetOriginIndex();
 
-    oFile.pages[this.Page].text = oFile.getText(nOriginIndex);
-    oDoc.Viewer.onUpdatePages([oRedactData.page]);
+    oFile.pages[nIndex].text = oFile.getText(nOriginIndex);
+    oDoc.Viewer.onUpdatePages([nIndex]);
 };
 CChangesPDFDocumentEndRedact.prototype.Redo = function()
 {
@@ -1494,13 +1500,14 @@ CChangesPDFDocumentEndRedact.prototype.Redo = function()
 
     delete oDoc.partsOfBinaryData;
 
-    let oPageInfo = oDoc.GetPageInfo(this.Page);
+    let oPageInfo = oDoc.GetPageInfoById(this.PageId);
+    let nIndex = oPageInfo.GetIndex();
     let nOriginIndex = oPageInfo.GetOriginIndex();
 
     oFile.nativeFile["RedactPage"](nOriginIndex, this.QuadsFlat, oDoc.unitedBinary);
 
     oDoc.appliedRedactsData.push({
-        page: this.Page,
+        pageId: this.PageId,
         quads: this.QuadsFlat,
         redactId: this.RedactId,
         binary: oDoc.unitedBinary
@@ -1513,8 +1520,8 @@ CChangesPDFDocumentEndRedact.prototype.Redo = function()
         AscCommon.g_oIdCounter.m_nPdfRedactCounter = nRedactIdx;
     }
 
-    oFile.pages[this.Page].text = oFile.getText(nOriginIndex);
-    oDoc.Viewer.onUpdatePages([this.Page]);
+    oFile.pages[nIndex].text = oFile.getText(nOriginIndex);
+    oDoc.Viewer.onUpdatePages([nIndex]);
 };
 CChangesPDFDocumentEndRedact.prototype.WriteToBinary = function(Writer)
 {
@@ -1523,7 +1530,7 @@ CChangesPDFDocumentEndRedact.prototype.WriteToBinary = function(Writer)
 	if (undefined === this.RedactId)
 		nFlags |= 1;
 
-	if (undefined === this.Page)
+	if (undefined === this.PageId)
 		nFlags |= 2;
 
 	if (undefined === this.QuadsFlat)
@@ -1534,8 +1541,8 @@ CChangesPDFDocumentEndRedact.prototype.WriteToBinary = function(Writer)
 	if (undefined !== this.RedactId)
 		Writer.WriteString2(this.RedactId);
 
-	if (undefined !== this.Page)
-		Writer.WriteLong(this.Page);
+	if (undefined !== this.PageId)
+		Writer.WriteString2(this.PageId);
 	
     if (undefined !== this.QuadsFlat) {
         // write points array
@@ -1557,9 +1564,9 @@ CChangesPDFDocumentEndRedact.prototype.ReadFromBinary = function(Reader)
 		this.RedactId = Reader.GetString2();
 
 	if (nFlags & 2)
-		this.Page = undefined;
+		this.PageId = undefined;
 	else
-		this.Page = Reader.GetLong();
+		this.PageId = Reader.GetString2();
 
 	if (nFlags & 4)
 		this.QuadsFlat = undefined;
@@ -1571,5 +1578,53 @@ CChangesPDFDocumentEndRedact.prototype.ReadFromBinary = function(Reader)
     }
 };
 CChangesPDFDocumentEndRedact.prototype.CreateReverseChange = function() {
-    return new this.constructor(this.Class, this.RedactId, this.Page, this.QuadsFlat);
+    return new this.constructor(this.Class, this.RedactId, this.PageId, this.QuadsFlat);
+};
+
+/**
+ * @constructor
+ * @extends {AscDFH.CChangesBaseStringProperty}
+ */
+function CChangesEmbedFontsMap(Class, oOldFontMap, oNewFontsMap) {
+	AscDFH.CChangesBaseStringProperty.call(this, Class, oOldFontMap, oNewFontsMap);
+}
+CChangesEmbedFontsMap.prototype = Object.create(AscDFH.CChangesBaseStringProperty.prototype);
+CChangesEmbedFontsMap.prototype.constructor = CChangesEmbedFontsMap;
+CChangesEmbedFontsMap.prototype.Type = AscDFH.historyitem_Pdf_Embed_Fonts_Map;
+CChangesEmbedFontsMap.prototype.CreateReverseChange = function() {
+	return new this.constructor(this.Class, this.New, this.Old);
+};
+CChangesEmbedFontsMap.prototype.private_SetValue = function(Value) {
+	Asc.editor.embeddedFontsMap = Value ? JSON.parse(Value) : Value;
+};
+
+CChangesEmbedFontsMap.prototype.WriteToBinary = function(Writer) {
+	let nFlags = 0;
+
+	if (undefined === this.New)
+		nFlags |= 1;
+
+	if (undefined === this.Old)
+		nFlags |= 2;
+
+	Writer.WriteLong(nFlags);
+
+	if (undefined !== this.New)
+		Writer.WriteString2(this.New);
+
+	if (undefined !== this.Old)
+		Writer.WriteString2(this.Old);
+};
+CChangesEmbedFontsMap.prototype.ReadFromBinary = function(Reader) {
+	let nFlags = Reader.GetLong();
+
+	if (nFlags & 1)
+		this.New = undefined;
+	else
+		this.New = Reader.GetString2();
+
+	if (nFlags & 2)
+		this.Old = undefined;
+	else
+		this.Old = Reader.GetString2();
 };

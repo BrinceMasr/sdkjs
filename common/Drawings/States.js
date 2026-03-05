@@ -300,6 +300,7 @@ StartAddNewShape.prototype =
                     }
                     else if (oApi.wb)
                     {
+                        History.Create_NewPoint(AscDFH.historydescription_CommonStatesAddNewShape);
                         oDoc = oApi.wb;
                         oDoc.StartAction(AscDFH.historydescription_Spreadsheet_AddShape);
                     }
@@ -388,20 +389,24 @@ StartAddNewShape.prototype =
                         ? {x: shape.x, y: shape.y}
                         : {x: track.x, y: track.y};
 
-                    let data = {
-                        type: track.presetGeom,
-                        pos: pos,
-                        extX: track.extX,
-                        extY: track.extY,
-                        fill: track.overlayObject.brush,
-                        border: track.overlayObject.pen,
-                        base: shape.drawingBase ? shape.drawingBase : null
-                    };
+					// for now don't create macro for polyline
+					let macroData = (oThis instanceof PolyLineAddState2)
+                        ? undefined
+                        : {
+                            type: track.presetGeom,
+                            pos: pos,
+                            extX: track.extX,
+                            extY: track.extY,
+                            fill: track.overlayObject.brush,
+                            border: track.overlayObject.pen,
+                            base: shape.drawingBase ? shape.drawingBase : null,
+							id: shape.getObjectName()
+                        };
 
                     if (oAPI.editorId === AscCommon.c_oEditorId.Presentation)
-                        oDoc.FinalizeAction(AscDFH.historydescription_Presentation_AddShape, undefined, data);
+                        oDoc.FinalizeAction(AscDFH.historydescription_Presentation_AddShape, undefined, macroData);
                     else
-                        oDoc.FinalizeAction(AscDFH.historydescription_Spreadsheet_AddShape, data);
+                        oDoc.FinalizeAction(AscDFH.historydescription_Spreadsheet_AddShape, macroData);
                 }
 	            oThis.drawingObjects.updateOverlay();
             };
@@ -1467,7 +1472,7 @@ ResizeState.prototype =
             dX = oNearestPos.x;
             dY = oNearestPos.y;
         }
-        var resize_coef = this.majorObject.getResizeCoefficients(this.handleNum, dX, dY, start_arr, this.drawingObjects);
+        var resize_coef = this.majorObject.getResizeCoefficients(this.handleNum, dX, dY, start_arr, this.drawingObjects, e.ShiftKey);
         this.drawingObjects.trackResizeObjects(resize_coef.kd1, resize_coef.kd2, e, dX, dY);
         if(this.drawingObjects.drawingObjects.cSld)
         {
@@ -1874,8 +1879,8 @@ function MoveInGroupState(drawingObjects, majorObject, group, startX, startY)
     }
     this.rectX = Math.min.apply(Math, arr_x);
     this.rectY = Math.min.apply(Math, arr_y);
-    this.rectW = Math.max.apply(Math, arr_x);
-    this.rectH = Math.max.apply(Math, arr_y);
+    this.rectW = Math.max.apply(Math, arr_x) - this.rectX;
+    this.rectH = Math.max.apply(Math, arr_y) - this.rectY;
 }
 
 MoveInGroupState.prototype =
@@ -2096,7 +2101,7 @@ TextAddState.prototype =
                 && this.majorObject.chart.getObjectType() === AscDFH.historyitem_type_ChartSpace) {
                 sId = this.majorObject.chart.Id;
             }
-            return {objectId: sId, cursorType: "text"};
+            return {objectId: sId, cursorType: "text", content: this.majorObject.getDocContent && this.majorObject.getDocContent()};
         }
     },
     onMouseMove: function(e, x, y, pageIndex)

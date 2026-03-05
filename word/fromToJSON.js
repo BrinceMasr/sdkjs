@@ -5420,9 +5420,9 @@
 	 */
 	WriterToJSON.prototype.GetComplexFieldsToSave = function(arrContent, minStartDocPos, maxStartDocPos, bAll)
 	{
-		var oMinStartPos          = minStartDocPos ? minStartDocPos : (arrContent.length !== 0 ? arrContent[0].GetDocumentPositionFromObject() : null);
-		var oMaxStartPos          = maxStartDocPos ? maxStartDocPos : (arrContent.length !== 0 ? arrContent[arrContent.length - 1].GetDocumentPositionFromObject() : null);
-		if (oMinStartPos[0].Position === -1 || oMaxStartPos[0].Position === -1)
+		let aMinStartPos          = minStartDocPos ? minStartDocPos : (arrContent.length !== 0 ? arrContent[0].GetDocumentPositionFromObject() : null);
+		let aMaxStartPos          = maxStartDocPos ? maxStartDocPos : (arrContent.length !== 0 ? arrContent[arrContent.length - 1].GetDocumentPositionFromObject() : null);
+		if (aMaxStartPos.length == 0 || aMinStartPos[0].Position === -1 || aMaxStartPos.length == 0 || aMaxStartPos[0].Position === -1)
 			bAll = true;
 
 		var arrCompexFieldsToSave = [];
@@ -5445,7 +5445,7 @@
 						oFieldStartPos = arrTemp[nField].GetStartDocumentPosition();
 						oFieldEndPos   = arrTemp[nField].GetEndDocumentPosition();
 
-						if (private_checkRelativePos(oFieldStartPos, oMinStartPos) === 1 || private_checkRelativePos(oFieldEndPos, oMaxStartPos) === -1)
+						if (private_checkRelativePos(oFieldStartPos, aMinStartPos) === 1 || private_checkRelativePos(oFieldEndPos, aMaxStartPos) === -1)
 						{
 							arrTemp.splice(nField, 1);
 							nField--;
@@ -6964,7 +6964,7 @@
 		return arrResults;
 	};
 
-	WriterToJSON.prototype.SetSrcRect = function(srcRect) {
+	WriterToJSON.prototype.SerSrcRect = function(srcRect) {
 		if (!srcRect) return srcRect;
 		return {
 			"b": srcRect.b,
@@ -6984,7 +6984,7 @@
 		return {
 			"blip": this.SerEffects(oBlipFill.Effects),
 
-			"srcRect": this.SetSrcRect(oBlipFill.srcRect),
+			"srcRect": this.SerSrcRect(oBlipFill.srcRect),
 
 			"tile": oBlipFill.tile ? {
 				"algn": GetRectAlgnStrType(oBlipFill.tile.algn),
@@ -6996,7 +6996,7 @@
 			} : oBlipFill.tile,
 
 			"stretch":  oBlipFill.stretch ? {
-				"fillRect": this.SetSrcRect(oBlipFill.stretch.fillRect),
+				"fillRect": this.SerSrcRect(oBlipFill.stretch.fillRect),
 			} : oBlipFill.stretch,
 			"rotWithShape":  oBlipFill.rotWithShape,
 			"rasterImageId": rasterImageId,
@@ -7968,7 +7968,7 @@
 			var oTempElm   = null;
 			var arrContent = [];
 
-			if (oMathContent instanceof AscCommonWord.CDenominator || oMathContent instanceof AscCommonWord.CNumerator)
+			if (oMathContent instanceof CDenominator || oMathContent instanceof CNumerator)
 				arrContent.push(SerFracArg.call(this, oMathContent));
 			else 
 			{
@@ -8052,9 +8052,9 @@
 				return oFractionArg;
 
 			var sArgType = "";
-			if (oFractionArg instanceof AscCommonWord.CDenominator)
+			if (oFractionArg instanceof CDenominator)
 				sArgType = "den";
-			else if (oFractionArg instanceof AscCommonWord.CNumerator)
+			else if (oFractionArg instanceof CNumerator)
 				sArgType = "num";
 
 			return {
@@ -8979,7 +8979,7 @@
 		var aContent  = oParsedPara["content"];
 		var oDocument = private_GetLogicDocument();
 		var oParaPr   = oParsedPara["bFromDocument"] === true ? this.ParaPrFromJSON(oParsedPara["pPr"], oPrevNumIdInfo) : this.ParaPrDrawingFromJSON(oParsedPara["pPr"]);
-		var oPara     = new AscWord.Paragraph(oParent || oDocument, !oParsedPara["bFromDocument"]);
+		var oPara     = new AscWord.Paragraph(oParent || (oParsedPara["bFromDocument"] ? oDocument : null), !oParsedPara["bFromDocument"]);
 
 		// символ конца параграфа
 		oPara.TextPr.Set_Value(oParsedPara["bFromDocument"] === true ? this.TextPrFromJSON(oParsedPara["rPr"]) : this.TextPrDrawingFromJSON(oParsedPara["rPr"]));
@@ -10505,7 +10505,7 @@
 	};
 	ReaderFromJSON.prototype.ParaSpacingFromJSON = function(oParsedSpacing)
 	{
-		let oSpacing = new CParaSpacing();
+		let oSpacing = new AscWord.ParaSpacing();
 
 		if (oParsedSpacing["before"] != null)
 			oSpacing.Before = private_Twips2MM(oParsedSpacing["before"]);
@@ -11919,7 +11919,7 @@
 
 		if (oParsedFill["stretch"])
 		{
-			oBlipFill.stretch = AscFormat.CBlipFillStretch();
+			oBlipFill.stretch = new AscFormat.CBlipFillStretch();
 			oBlipFill.stretch.fillRect = this.SrcRectFromJSON(oParsedFill["stretch"]["fillRect"]);
 		}
 
@@ -16884,13 +16884,13 @@
 			{
 				switch (this.VertAlign)
 				{
-					case 0:
+					case AscCommon.vertalign_Baseline:
 						sVAlign = "baseline";
 						break;
-					case 1:
+					case AscCommon.vertalign_SuperScript:
 						sVAlign = "superscript";
 						break;
-					case 2:
+					case AscCommon.vertalign_SubScript:
 						sVAlign = "subscript";
 						break;
 				}
@@ -17143,13 +17143,13 @@
 				switch (oParsedJson["vertAlign"])
 				{
 					case "baseline":
-						nVAlign = 0;
+						nVAlign = AscCommon.vertalign_Baseline;
 						break;
 					case "superscript":
-						nVAlign = 1;
+						nVAlign = AscCommon.vertalign_SuperScript;
 						break;
 					case "subscript":
-						nVAlign = 2;
+						nVAlign = AscCommon.vertalign_SubScript;
 						break;
 				}
 			}

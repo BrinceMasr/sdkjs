@@ -64,7 +64,6 @@
 		this.Content[0].LogicDocument = pdfDocument;
 		
 		this.ParentPDF 			= parent;
-		this.PdfDoc    			= pdfDocument;
 		this.isFormatContent	= !!isFormatContent;
 		
 		this.transform = new AscCommon.CMatrix();
@@ -75,8 +74,19 @@
 	CTextBoxContent.prototype = Object.create(AscWord.CDocumentContent.prototype);
 	CTextBoxContent.prototype.constructor = CTextBoxContent;
 	
+	Object.defineProperties(CTextBoxContent.prototype, {
+		StartPage: {
+			get: function () {
+				return this.GetAbsolutePage();
+			},
+			set: function() {
+				return;
+			}
+		}
+	});
+
 	CTextBoxContent.prototype.GetLogicDocument = function() {
-		return this.PdfDoc;
+		return this.ParentPDF && this.ParentPDF.GetDocument();
 	};
 	CTextBoxContent.prototype.SetAlign = function(alignType) {
 		let _alignType = getInternalAlignByPdfType(alignType);
@@ -159,7 +169,7 @@
 				let isOnOpen    = Asc.editor.getDocumentRenderer().IsOpenFormsInProgress;
 				let nCharLimit	= this.ParentPDF.GetCharLimit();
 				
-				if (false == isOnOpen && bIgnoreCount !== true) {
+				if (false == isOnOpen && bIgnoreCount !== true && Asc.editor.isDocumentLoadComplete) {
 					let nCharsCount = AscWord.GraphemesCounter.GetCount(codePoints, this.GetCalculatedTextPr());
 					
 					if (nCharsCount > nCharLimit)
@@ -251,7 +261,7 @@
 		}
 
 		return AscWord.CDocumentContent.prototype.GetCalculatedTextPr.call(this, skipFontCalculator);
-	}
+	};
 	
 	function getInternalAlignByPdfType(nPdfType) {
 		let nInternalType = AscCommon.align_Left;

@@ -331,6 +331,7 @@ function NativeOpenFileData(data, version, xlsx_file_path, options)
 		default:
 			break;
 	}
+	Api = Api.getJsApi();
 }
 
 var clearTimeout = window.clearTimeout = function() {};
@@ -343,7 +344,7 @@ var console = {
 	time: function (param) {},
 	timeEnd: function (param) {},
 	warn: function() {},
-	error: function() {}
+	error: function() { window.native && window.native.ConsoleLog("[error]: " + param); }
 };
 
 var performance = window.performance = (function(){
