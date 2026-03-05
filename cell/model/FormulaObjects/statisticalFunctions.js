@@ -12582,7 +12582,7 @@ function (window, undefined) {
 			cElementType.cellsRange !== arg0.type && cElementType.cellsRange3D !== arg0.type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
-		if (arg0.type === cElementType.cellsRange3D && arg0.wsFrom.Get_Id() !== arg0.wsTo.Get_Id()) {
+		if (arg0.type === cElementType.cellsRange3D && !arg0.isSingleSheet()) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 		const t = this;
