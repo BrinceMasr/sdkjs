@@ -15257,7 +15257,11 @@
 		(true !== options.isWholeCell || options.findWhat.length === cellText.length);
 
 	};
-	Cell.prototype.isNullText=function(){
+	Cell.prototype.isNullText=function(opt_noCalc){
+		if (opt_noCalc) {
+			// Without _checkDirty: only check raw data, ignore formulaParsed
+			return null === this.number && null === this.text && null === this.multiText;
+		}
 		return this.isNullTextString() && !this.formulaParsed;
 	};
 	Cell.prototype.isEmptyTextString = function() {
@@ -15858,8 +15862,8 @@
 			}
 		}
 	};
-	Cell.prototype.getType=function(){
-		this._checkDirty();
+	Cell.prototype.getType=function(opt_noCalc){
+		if (!opt_noCalc) { this._checkDirty(); }
 		return this.type;
 	};
 	Cell.prototype.setCellStyle=function(val){
@@ -16223,8 +16227,8 @@
 		var aText = this._getValue2(AscCommon.gc_nMaxDigCountView, function(){return true;}, numFormat, cultureInfo, true);
 		return AscCommonExcel.getStringFromMultiText(aText);
 	};
-	Cell.prototype.getValueWithoutFormat = function() {
-		this._checkDirty();
+	Cell.prototype.getValueWithoutFormat = function(opt_noCalc) {
+		if (!opt_noCalc) { this._checkDirty(); }
 		var sResult = "";
 		if(null != this.number)
 		{
@@ -16259,8 +16263,8 @@
 			dDigitsCount = AscCommon.gc_nMaxDigCountView;
 		return this._getValue2(dDigitsCount, fIsFitMeasurer);
 	};
-	Cell.prototype.getNumberValue = function() {
-		this._checkDirty();
+	Cell.prototype.getNumberValue = function(opt_noCalc) {
+		if (!opt_noCalc) { this._checkDirty(); }
 		return this.number;
 	};
 	Cell.prototype.getBoolValue = function() {
