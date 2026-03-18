@@ -16813,6 +16813,23 @@
 	 * @returns {boolean}
 	 */
 	Cell.prototype.checkRecursiveFormula = function (oCellWithFormula, aPassedCell, bRecheckFormula) {
+		function updateCaFlag (oThis) {
+			if (bRecursiveFormula) {
+				if (g_cCalcRecursion.getRecursionCounter() === 0) {
+					const oWs = oThis.ws;
+					if (oWs) {
+						let oSourceCell = null;
+						oWs._getCell(oCellWithFormula.nRow, oCellWithFormula.nCol, function (oCell) {
+							oSourceCell = oCell;
+						});
+						if (oSourceCell) {
+							oSourceCell._changeCaFlagFromListener(bRecursiveFormula);
+						}
+					}
+				}
+				oFormulaParsed.ca = true;
+			}
+		}
 		if (g_cCalcRecursion.checkRecursionCounter() || oCellWithFormula == null) {
 			g_cCalcRecursion.resetRecursionCounter();
 			return false;
@@ -16833,9 +16850,17 @@
 			return false;
 		}
 		const oFormulaParsed = this.getFormulaParsed();
+		let bRecursiveFormula = false;
+
+		const sFunctionName = oFormulaParsed.getFunctionName();
+		if (oFormulaParsed._isConditionalFormula(sFunctionName) && oFormulaParsed.containsCell(oCellWithFormula)) {
+			bRecursiveFormula = oFormulaParsed.isRecursiveCondFormula(sFunctionName, null, oCellWithFormula);
+			updateCaFlag(this)
+			return bRecursiveFormula;
+		}
+
 		const aRefElements = oFormulaParsed.getRefElements();
 		const oThis = this;
-		let bRecursiveFormula = false;
 		aPassedCell = aPassedCell || [];
 		foreachRefElements(function (oRange) {
 			if (!oRange) {
@@ -16860,22 +16885,7 @@
 					return true; // break loop
 				}
 			});
-			if (bRecursiveFormula) {
-				if (g_cCalcRecursion.getRecursionCounter() === 0 && aPassedCell.length) {
-					const oWs = oThis.ws;
-					if (oWs) {
-						let oSourceCell = null;
-						oWs._getCell(oCellWithFormula.nRow, oCellWithFormula.nCol, function (oCell) {
-							oSourceCell = oCell;
-						});
-						if (oSourceCell) {
-							oSourceCell._changeCaFlagFromListener(bRecursiveFormula);
-						}
-					}
-				}
-				oFormulaParsed.ca = true;
-				return true;
-			}
+			updateCaFlag(oThis);
 			if (oFormulaParsed.ca !== bRecursiveFormula && bRecheckFormula) {
 				oFormulaParsed.ca = bRecursiveFormula;
 			}

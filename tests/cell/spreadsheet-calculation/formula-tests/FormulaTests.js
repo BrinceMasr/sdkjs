@@ -2152,6 +2152,27 @@ $(function () {
 		bCaFromSelectedCell = getCaFromSelectedCell("A1142");
 		assert.strictEqual(bCaFromSelectedCell, true, "Test: Formula LOOKUP recursive formula with disabled setting. 2 args A1142 - flag ca: true");
 		bCaFromSelectedCell = null;
+		// - Case: Formula SUMIFS isn't a recursive formula with disabled setting. Bug-74509
+		ws.getRange2("A1143").setValue("INFLOW");
+		ws.getRange2("A1144").setValue("OUTFLOW");
+		ws.getRange2("A1145").setValue("OUTFLOW");
+		ws.getRange2("B1143").setValue("100");
+		ws.getRange2("B1144").setValue("=B1146*0.1");
+		ws.getRange2("B1145").setValue("=B1146*0.1");
+		ws.getRange2("B1146").setValue("=SUMIF(A1143:A1145, \"INFLOW\", B1143:B1145)");
+		ws.getRange2("B1147").setValue("=SUMIF(A1143:A1145, \"OUTFLOW\", B1143:B1145)");
+		bCaFromSelectedCell = getCaFromSelectedCell("B1144");
+		assert.strictEqual(bCaFromSelectedCell, false, "Test: Formula SUMIFS isn't a recursive formula with disabled setting. Bug-74509. B1144 - flag ca: false");
+		bCaFromSelectedCell = null;
+		bCaFromSelectedCell = getCaFromSelectedCell("B1145");
+		assert.strictEqual(bCaFromSelectedCell, false, "Test: Formula SUMIFS isn't a recursive formula with disabled setting. Bug-74509. B1145 - flag ca: false");
+		bCaFromSelectedCell = null;
+		bCaFromSelectedCell = getCaFromSelectedCell("B1146");
+		assert.strictEqual(bCaFromSelectedCell, false, "Test: Formula SUMIFS isn't a recursive formula with disabled setting. Bug-74509. B1146 - flag ca: false");
+		bCaFromSelectedCell = null;
+		bCaFromSelectedCell = getCaFromSelectedCell("B1147");
+		assert.strictEqual(bCaFromSelectedCell, false, "Test: Formula SUMIFS isn't a recursive formula with disabled setting. Bug-74509. B1147 - flag ca: false");
+		bCaFromSelectedCell = null;
 		// -- Test changeLinkedCell method.
 		oCell = selectCell("A1000");
 		let oCellNeedEnableRecalc = selectCell("B1000");

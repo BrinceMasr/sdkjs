@@ -7016,11 +7016,12 @@ function parserFormula( formula, parent, _ws ) {
 	 * Checks cell with formula is in area.
 	 * @memberof parserFormula
 	 * @param found_operand operand of formula
+	 * @param {CCellWithFormula} [extParentCell] for checking cell from outStack, if not set, will be taken from parserFormula
 	 * @returns {boolean}
 	 * @private
 	 */
-	parserFormula.prototype._isAreaContainCell = function (found_operand) {
-		const oParentCell = this.getParent();
+	parserFormula.prototype._isAreaContainCell = function (found_operand, extParentCell) {
+		const oParentCell = extParentCell || this.getParent();
 		let nOperandType = found_operand.type;
 		let oRange = null;
 
@@ -7060,17 +7061,18 @@ function parserFormula( formula, parent, _ws ) {
 	 * Checks if the criteria cell has same formula as parserFormula.
 	 * @memberof parserFormula
 	 * @param {object} oCriteriaRange
+	 * @param {CCellWithFormula} [oExtParentCell] for checking cell from outStack, if not set, will be taken from parserFormula
 	 * @returns {boolean}
 	 * @private
 	 */
-	parserFormula.prototype._criteriaCellHasFormula = function (oCriteriaRange ) {
+	parserFormula.prototype._criteriaCellHasFormula = function (oCriteriaRange, oExtParentCell) {
 		if (oCriteriaRange.type === cElementType.name || oCriteriaRange.type === cElementType.name3D) {
 			oCriteriaRange = oCriteriaRange.toRef();
 		}
 		const oThis = this;
 		const oRange = oCriteriaRange.getRange();
 		const oBbox = oRange.bbox;
-		const oParentCell = this.getParent();
+		const oParentCell = oExtParentCell || this.getParent();
 		if (!oParentCell || (oParentCell && oParentCell.nRow == null && oParentCell.nCol == null)) {
 			return false;
 		}
@@ -7094,11 +7096,12 @@ function parserFormula( formula, parent, _ws ) {
 	 * Checks the cell with formula matches the criteria.
 	 * @memberof parserFormula
 	 * @param {{condition: object, calcRange: object, criteriaRange: object, argsFuncCondition: []}} oFormulaArgs
+	 * @param {CCellWithFormula} [oExtParentCell] for checking cell from outStack, if not set, will be taken from parserFormula
 	 * @returns {boolean}
 	 * @private
 	 */
-	parserFormula.prototype._calculateMatch = function (oFormulaArgs) {
-		const oParentCell = this.getParent();
+	parserFormula.prototype._calculateMatch = function (oFormulaArgs, oExtParentCell) {
+		const oParentCell = oExtParentCell || this.getParent();
 		if (!oParentCell || (oParentCell && oParentCell.nRow == null && oParentCell.nCol == null)) {
 			return false;
 		}
@@ -7142,10 +7145,11 @@ function parserFormula( formula, parent, _ws ) {
 	 * @memberof parserFormula
 	 * @param {[]} aRangeArgs
 	 * @param {number} nCountArgs
+	 * @param {CCellWithFormula} [oExtParentCell] for checking cell from outStack, if not set, will be taken from parserFormula
 	 * @returns {boolean}
 	 * @private
 	 */
-	parserFormula.prototype._checkRangeByCriteria = function (aRangeArgs, nCountArgs) {
+	parserFormula.prototype._checkRangeByCriteria = function (aRangeArgs, nCountArgs, oExtParentCell) {
 		const aAvailableTypes = [cElementType.name, cElementType.name3D, cElementType.cellsRange, cElementType.cellsRange3D];
 		let oCalcRange = aRangeArgs[0];
 		const aCriteriaRanges = aRangeArgs[1];
@@ -7163,7 +7167,7 @@ function parserFormula( formula, parent, _ws ) {
 			if (!aAvailableTypes.includes(aCriteriaRanges[i].type)) {
 				return bMatch;
 			}
-			if (this._criteriaCellHasFormula(aCriteriaRanges[i])) {
+			if (this._criteriaCellHasFormula(aCriteriaRanges[i], oExtParentCell)) {
 				return bMatch;
 			}
 			let oFormulaArgs = {
@@ -7174,7 +7178,7 @@ function parserFormula( formula, parent, _ws ) {
 			if (aArgs != null) {
 				oFormulaArgs.argsFuncCondition = aArgs;
 			}
-			bMatch = this._calculateMatch(oFormulaArgs);
+			bMatch = this._calculateMatch(oFormulaArgs, oExtParentCell);
 			if (!bMatch) {
 				return false;
 			}
@@ -7186,10 +7190,11 @@ function parserFormula( formula, parent, _ws ) {
 	 * Recursive function
 	 * @memberof parserFormula
 	 * @param {[]} aLogicalTest
+	 * @param {CCellWithFormula} [oExtParentCell] for checking cell from outStack, if not set, will be taken from parserFormula
 	 * @returns {cBool|null}
 	 * @private
 	 */
-	parserFormula.prototype._calculateLogicalTest = function (aLogicalTest) {
+	parserFormula.prototype._calculateLogicalTest = function (aLogicalTest, oExtParentCell) {
 		if (g_cCalcRecursion.checkRecursionCounter()) {
 			g_cCalcRecursion.resetRecursionCounter();
 			return null;
@@ -7198,7 +7203,7 @@ function parserFormula( formula, parent, _ws ) {
 		const aNameType = [cElementType.name, cElementType.name3D];
 		const oFormula = aLogicalTest[0];
 		const aArgs =  aLogicalTest[2];
-		const oParentCell = this.getParent();
+		const oParentCell = oExtParentCell || this.getParent();
 		const oBbox = oParentCell.onFormulaEvent && oParentCell.onFormulaEvent(AscCommon.c_oNotifyParentType.GetRangeCell);
 		if (!oBbox) {
 			return new cError(cErrorType.not_numeric);
@@ -7213,7 +7218,7 @@ function parserFormula( formula, parent, _ws ) {
 			}
 			if (aArgs[i] && Array.isArray(aArgs[i])) {
 				g_cCalcRecursion.incRecursionCounter();
-				aArgs[i] = this._calculateLogicalTest(aArgs[i]);
+				aArgs[i] = this._calculateLogicalTest(aArgs[i], oExtParentCell);
 				g_cCalcRecursion.resetRecursionCounter();
 				if (aArgs[i] == null) {
 					return null;
@@ -7235,16 +7240,17 @@ function parserFormula( formula, parent, _ws ) {
 	 * Recursive function
 	 * @memberof parserFormula
 	 * @param {[]} aRef
+	 * @param {CCellWithFormula} [oExtParentCell] for checking cell from outStack, if not set, will be taken from parserFormula
 	 * @returns {boolean}
 	 * @private
 	 */
-	parserFormula.prototype._findRecursionRef = function (aRef) {
+	parserFormula.prototype._findRecursionRef = function (aRef, oExtParentCell) {
 		if (g_cCalcRecursion.checkRecursionCounter()) {
 			g_cCalcRecursion.resetRecursionCounter();
 			return false;
 		}
 
-		const oThis = this;
+		const oParentCell = oExtParentCell || this.getParent();
 		const aArg = aRef[2];
 		let bRecursiveCell = false;
 
@@ -7252,7 +7258,7 @@ function parserFormula( formula, parent, _ws ) {
 			if (aArg[i] && (aArg[i].type === cElementType.name || aArg[i].type === cElementType.name3D)) {
 				aArg[i] = aArg[i].toRef();
 			}
-			if (aArg[i] && (aArg[i].type === cElementType.cell || aArg[i].type === cElementType.cell3D)) {
+			if (!bRecursiveCell && aArg[i] && (aArg[i].type === cElementType.cell || aArg[i].type === cElementType.cell3D)) {
 				let oRange = aArg[i].getRange();
 				oRange._foreachNoEmpty(function (oCell) {
 					if (!bRecursiveCell) {
@@ -7260,20 +7266,20 @@ function parserFormula( formula, parent, _ws ) {
 						if (g_cCalcRecursion.isCellChecked(sCellKey)) {
 							bRecursiveCell = g_cCalcRecursion.getCheckedCell(sCellKey);
 						} else {
-							bRecursiveCell = oCell.checkRecursiveFormula(oThis.getParent());
+							bRecursiveCell = oCell.checkRecursiveFormula(oParentCell);
 							g_cCalcRecursion.addCheckedCell(sCellKey, bRecursiveCell);
 						}
 					}
 				});
 
 			}
-			if (aArg[i] && (aArg[i].type === cElementType.cellsRange || aArg[i].type === cElementType.cellsRange3D)) {
-				bRecursiveCell = this._isAreaContainCell(aArg[i]);
+			if (!bRecursiveCell && aArg[i] && (aArg[i].type === cElementType.cellsRange || aArg[i].type === cElementType.cellsRange3D)) {
+				bRecursiveCell = this._isAreaContainCell(aArg[i], oExtParentCell);
 
 			}
-			if (aArg[i] && Array.isArray(aArg[i])) {
+			if (!bRecursiveCell && aArg[i] && Array.isArray(aArg[i])) {
 				g_cCalcRecursion.incRecursionCounter();
-				bRecursiveCell = this._findRecursionRef(aArg[i]);
+				bRecursiveCell = this._findRecursionRef(aArg[i], oExtParentCell);
 				g_cCalcRecursion.resetRecursionCounter();
 			}
 			if (bRecursiveCell) {
@@ -7287,16 +7293,17 @@ function parserFormula( formula, parent, _ws ) {
 	 * Checks operand has a recursion.
 	 * @memberof parserFormula
 	 * @param {cRef|cRef3D|cName|cName3D|cString|cNumber|cBool|cArea|cArea3D} oOperand
+	 * @param {CCellWithFormula} [oExtParentCell] for checking cell from outStack, if not set, will be taken from parserFormula
 	 * @returns {boolean}
 	 */
-	parserFormula.prototype._isOperandRecursive = function (oOperand) {
-		const oThis = this;
+	parserFormula.prototype._isOperandRecursive = function (oOperand, oExtParentCell) {
 		const aTypesWithRange = [cElementType.cell, cElementType.cell3D, cElementType.cellsRange, cElementType.cellsRange3D];
 		const aNameType = [cElementType.name, cElementType.name3D];
+		const oParentCell = oExtParentCell || this.getParent();
 		let bRecursiveCell = false;
 
 		if (oOperand && Array.isArray(oOperand)) {
-			return this._findRecursionRef(oOperand);
+			return this._findRecursionRef(oOperand, oExtParentCell);
 		}
 		if (oOperand && aNameType.includes(oOperand.type)) {
 			oOperand = oOperand.toRef();
@@ -7305,11 +7312,11 @@ function parserFormula( formula, parent, _ws ) {
 			if (oOperand.type === cElementType.cell || oOperand.type === cElementType.cell3D) {
 				let oRange = oOperand.getRange();
 				oRange._foreachNoEmpty(function (oCell) {
-					bRecursiveCell = oCell.checkRecursiveFormula(oThis.getParent());
+					bRecursiveCell = oCell.checkRecursiveFormula(oParentCell);
 				});
 				return bRecursiveCell;
 			}
-			return this._isAreaContainCell(oOperand);
+			return this._isAreaContainCell(oOperand, oExtParentCell);
 		}
 
 		return false;
@@ -7320,10 +7327,11 @@ function parserFormula( formula, parent, _ws ) {
 	 * @param {[]} aOutStack
 	 * @param {string} sFunctionName
 	 * @param {number} nCountArgs
+	 * @param {CCellWithFormula} [oExtParentCell] for checking cell from outStack, if not set, will be taken from parserFormula
 	 * @returns {boolean}
 	 * @private
 	 */
-	parserFormula.prototype._evalAndCheckRecursion = function (aOutStack, sFunctionName, nCountArgs) {
+	parserFormula.prototype._evalAndCheckRecursion = function (aOutStack, sFunctionName, nCountArgs, oExtParentCell) {
 		const aLogicalTestTypes = [cElementType.bool, cElementType.cell, cElementType.cell3D, cElementType.name, cElementType.name3D];
 		const aArgs = _getArgsCondFormula(aOutStack, sFunctionName);
 		let aLogicalTest = aArgs[0];
@@ -7338,7 +7346,7 @@ function parserFormula( formula, parent, _ws ) {
 		for (let i = 0; i < nLen; i++) {
 			let logicalTest = aLogicalTest[i];
 			if (Array.isArray(logicalTest)) {
-				logicalTest = this._calculateLogicalTest(logicalTest);
+				logicalTest = this._calculateLogicalTest(logicalTest, oExtParentCell);
 				if (logicalTest == null) {
 					return true;
 				}
@@ -7354,13 +7362,13 @@ function parserFormula( formula, parent, _ws ) {
 			}
 			let value = logicalTest.value ? aTrueValue[i] : falseValue;
 			bOperandFound = !!value;
-			bRecursiveCell = this._isOperandRecursive(value);
+			bRecursiveCell = this._isOperandRecursive(value, oExtParentCell);
 			if (bRecursiveCell) {
 				return bRecursiveCell;
 			}
 		}
 		if (!bOperandFound && defaultValue) {
-			return this._isOperandRecursive(defaultValue);
+			return this._isOperandRecursive(defaultValue, oExtParentCell);
 		}
 
 		return bRecursiveCell;
@@ -7369,9 +7377,10 @@ function parserFormula( formula, parent, _ws ) {
 	 * Checks a condition function is recursive or not.
 	 * @param {string} sFunctionName
 	 * @param {[]} [aArgs]
+	 * @param {CCellWithFormula} [oExtParentCell] - optional argument for checking recursion for another cell from the outStack of the current formula.
 	 * @returns {boolean}
 	 */
-	parserFormula.prototype.isRecursiveCondFormula = function (sFunctionName, aArgs) {
+	parserFormula.prototype.isRecursiveCondFormula = function (sFunctionName, aArgs, oExtParentCell) {
 		const aCellFormulas = ['IF', 'IFS', 'SWITCH'];
 		const aOutStack = aArgs && aArgs.length ? aArgs : _getNewOutStack(this.outStack);
 		if (!aOutStack.length) {
@@ -7384,7 +7393,7 @@ function parserFormula( formula, parent, _ws ) {
 				if (aArgs[i] && Array.isArray(aArgs[i])) {
 					let oFormula = aArgs[i][0];
 					if (oFormula.type === cElementType.operator) {
-						bHasRecursion = this.isRecursiveCondFormula(sFunctionName, [aArgs[i]]);
+						bHasRecursion = this.isRecursiveCondFormula(sFunctionName, [aArgs[i]], oExtParentCell);
 					}
 					if (oFormula.type === cElementType.func) {
 						if (!this._isConditionalFormula(oFormula.name)) {
@@ -7393,7 +7402,7 @@ function parserFormula( formula, parent, _ws ) {
 						if (sFunctionName !== oFormula.name && this._isConditionalFormula(oFormula.name)) {
 							sFunctionName = oFormula.name;
 						}
-						bHasRecursion = this.isRecursiveCondFormula(sFunctionName, aArgs[i][2]);
+						bHasRecursion = this.isRecursiveCondFormula(sFunctionName, aArgs[i][2], oExtParentCell);
 					}
 					if (bHasRecursion) {
 						return true;
@@ -7414,9 +7423,9 @@ function parserFormula( formula, parent, _ws ) {
 			if (nCountArgs === 2) {
 				const oRange = sFunctionName === 'LOOKUP' ? aOutStack[nCountArgs - 1] : aOutStack[0];
 				const oCriteria = sFunctionName === 'LOOKUP' ? aOutStack[0] : aOutStack[nCountArgs - 1];
-				bRecursiveCell = this._isAreaContainCell(oRange);
+				bRecursiveCell = this._isAreaContainCell(oRange, oExtParentCell);
 				if (!bRecursiveCell && (typeof oCriteria !== 'number' && (aAreaType.includes(oCriteria.type) || aNameType.includes(oCriteria.type)))) {
-					bRecursiveCell = this._isAreaContainCell(oCriteria);
+					bRecursiveCell = this._isAreaContainCell(oCriteria, oExtParentCell);
 				}
 				return bRecursiveCell;
 			}
@@ -7432,33 +7441,33 @@ function parserFormula( formula, parent, _ws ) {
 			}
 			if (aConditions.length) {
 				for (let i = 0, length = aConditions.length; i < length; i++) {
-					if (this._isAreaContainCell(aConditions[i])) {
+					if (this._isAreaContainCell(aConditions[i], oExtParentCell)) {
 						return true;
 					}
 				}
 			}
-			if (aCriteriaRanges.length && this._isAreaContainCell(aCriteriaRanges[0])) {
+			if (aCriteriaRanges.length && this._isAreaContainCell(aCriteriaRanges[0], oExtParentCell)) {
 				return true;
 			}
 			if (aCriteriaRanges.length) {
 				for (let i = 1, length = aCriteriaRanges.length; i < length;  i++) {
-					if (this._isAreaContainCell(aCriteriaRanges[i])) {
+					if (this._isAreaContainCell(aCriteriaRanges[i], oExtParentCell)) {
 						bHasRecursiveCriteria = true;
 						break;
 					}
 				}
 			}
-			let bRecursiveCalcRange = !!oCalcRange && this._isAreaContainCell(oCalcRange);
+			let bRecursiveCalcRange = !!oCalcRange && this._isAreaContainCell(oCalcRange, oExtParentCell);
 			// Checking criteria for the range.
 			if ((bRecursiveCalcRange || bHasRecursiveCriteria) && aCriteriaRanges.length && aConditions.length) {
-				return this._checkRangeByCriteria(aRangeArgs, nCountArgs);
+				return this._checkRangeByCriteria(aRangeArgs, nCountArgs, oExtParentCell);
 			}
 		} else {
 			const MIN_COUNT_ARGS = 2;
 			if (isNaN(nCountArgs) && nCountArgs < MIN_COUNT_ARGS) {
 				return false;
 			}
-			return this._evalAndCheckRecursion(aOutStack, sFunctionName, nCountArgs);
+			return this._evalAndCheckRecursion(aOutStack, sFunctionName, nCountArgs, oExtParentCell);
 		}
 		return false;
 	};
@@ -11961,6 +11970,25 @@ function parserFormula( formula, parent, _ws ) {
 		const sComparedFormula = oComparedFormula.Formula;
 
 		return sWsId === sComparedWsId && nParentRow === nComparedParentRow && nParentCol === nComparedParentCol && sFormula === sComparedFormula;
+	};
+	/**
+	 * Checks whether a cell is contained in the outStack of the formula.
+	 * @memberof parserFormula
+	 * @param {CCellWithFormula}oCellWithFormula
+	 * @returns {boolean}
+	 */
+	parserFormula.prototype.containsCell = function (oCellWithFormula) {
+		const aOutStack = this.outStack;
+		let bContainsInFormula = false;
+
+		AscCommonExcel.foreachRefElements(function (oRange) {
+			if (oRange.containCell2(oCellWithFormula) && oRange.worksheet.getId() === oCellWithFormula.ws.getId()) {
+				bContainsInFormula = true;
+				return true;
+			}
+		}, aOutStack);
+
+		return bContainsInFormula;
 	};
 
 	/**
