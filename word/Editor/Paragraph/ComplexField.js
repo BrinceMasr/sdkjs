@@ -1761,7 +1761,7 @@ CComplexField.prototype.GetFieldValueText = function()
 	var oEndPos = oDocument.GetContentPosition(false);
 
 	oDocument.SetSelectionByContentPositions(oStartPos, oEndPos);
-	let result = oDocument.GetSelectedText();
+	let result = logicDocument ? logicDocument.GetSelectedText() : "";
 	
 	if (state)
 		logicDocument.LoadDocumentState(state);
@@ -1969,6 +1969,44 @@ CComplexField.prototype.MoveCursorOutsideElement = function(isBefore)
 		if (oRun.IsCursorAtEnd())
 			oRun.MoveCursorOutsideElement(false);
 	}
+};
+CComplexField.prototype.MoveCursorToField = function(isValue, isBegin)
+{
+	let docContent = this.GetTopDocumentContent();
+	if (!docContent)
+		return;
+	
+	docContent.RemoveSelection();
+	
+	let fieldChar = null;
+	if (this.SeparateChar)
+	{
+		if (isValue)
+		{
+			if (isBegin)
+				fieldChar = this.SeparateChar;
+			else
+				fieldChar = this.EndChar;
+		}
+		else
+		{
+			if (isBegin)
+				fieldChar = this.BeginChar;
+			else
+				fieldChar = this.SeparateChar;
+		}
+	}
+	else
+	{
+		if (isBegin)
+			fieldChar = this.BeginChar;
+		else
+			fieldChar = this.EndChar;
+	}
+	
+	let run = fieldChar.GetRun();
+	run.Make_ThisElementCurrent(false);
+	run.SetCursorPosition(run.GetElementPosition(fieldChar) + (isBegin ? 1 : 0));
 };
 CComplexField.prototype.RemoveField = function()
 {

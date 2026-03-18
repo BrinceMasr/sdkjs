@@ -371,6 +371,14 @@ function (window, undefined) {
 		if (this.isvisible == null) this.isvisible = false;
 		if (this.isForm === null) this.isForm = false;
 	};
+	asc_CSignatureLine.prototype.isEqualId = function (sId) {
+		return typeof sId === "string" && typeof this.id === "string"
+			&& this.id.toUpperCase() === sId.toUpperCase();
+	};
+	asc_CSignatureLine.prototype.isEqualGuid = function (sGuid) {
+		return typeof sGuid === "string" && typeof this.guid === "string"
+			&& this.guid.toUpperCase() === sGuid.toUpperCase();
+	};
 	asc_CSignatureLine.prototype.asc_getId = function () {
 		return this.id;
 	};
@@ -1522,6 +1530,12 @@ function (window, undefined) {
 	asc_ChartSettings.prototype.getDataLabelsPos = function () {
 		return this.dataLabelsPos;
 	};
+	asc_ChartSettings.prototype.getErrorBarsValueType = function () {
+		return this.errorBarsValueType;
+	};
+	asc_ChartSettings.prototype.getTrendlineType = function () {
+		return this.trendlineType;
+	};
 	asc_ChartSettings.prototype.getType = function () {
 		if (this.chartSpace) {
 			return this.chartSpace.getChartType();
@@ -1793,7 +1807,8 @@ function (window, undefined) {
 	asc_ChartSettings.prototype.setDisplayDataLabels = function (bDisplay, nDataLabelPos) {
 		if (this.chartSpace) {
 			AscCommon.History.Create_NewPoint(AscDFH.historyitem_type_ChartSpace);
-			this.chartSpace.showDataLabels(bDisplay, nDataLabelPos);
+			const selectedSeriesOnly = true;
+			this.chartSpace.showDataLabels(bDisplay, nDataLabelPos, selectedSeriesOnly);
 			this.updateChart();
 			const oLogicDocument = Asc.editor.getLogicDocument();
 			if (oLogicDocument) {
@@ -1817,13 +1832,15 @@ function (window, undefined) {
 			return;
 		}
 
-		const series = this.chartSpace.getAllSeries();
-		if (!series.length) {
+		const selectedSeriesOnly = true;
+		const selectedSeries = selectedSeriesOnly && this.chartSpace.getSelectedSeries();
+		const seriesToProcess = selectedSeries ? [selectedSeries] : this.chartSpace.getAllSeries();
+		if (!seriesToProcess.length) {
 			return;
 		}
 
 		AscCommon.History.Create_NewPoint(AscDFH.historyitem_type_ChartSpace);
-		series.forEach(function (ser) {
+		seriesToProcess.forEach(function (ser) {
 			bShowErrorBars
 				? ser.createAllErrBars(nErrorValueType)
 				: ser.removeAllErrBars();
@@ -1902,7 +1919,8 @@ function (window, undefined) {
 		}
 
 		AscCommon.History.Create_NewPoint(AscDFH.historyitem_type_ChartSpace);
-		this.chartSpace.showTrendlines(bShow, nTrendlineType, nForecastForward, nForecastBackward);
+		const selectedSeriesOnly = true;
+		this.chartSpace.showTrendlines(bShow, nTrendlineType, nForecastForward, nForecastBackward, selectedSeriesOnly);
 		this.updateChart();
 		const oLogicDocument = Asc.editor.getLogicDocument();
 		if (oLogicDocument) {
@@ -2019,6 +2037,16 @@ function (window, undefined) {
 	STANDART_COLORS_MAP[0x993300] = "Brown";
 	STANDART_COLORS_MAP[0x333399] = "Indigo";
 	STANDART_COLORS_MAP[0x333333] = "Dark Gray";
+	STANDART_COLORS_MAP[0x404040] = "Dark Gray";
+	STANDART_COLORS_MAP[0x606060] = "Gray";
+	STANDART_COLORS_MAP[0xA0A0A0] = "Gray";
+	STANDART_COLORS_MAP[0xE0E0E0] = "Light Gray";
+	STANDART_COLORS_MAP[0xE6F5E6] = "Light Green";
+	STANDART_COLORS_MAP[0xDCF0DC] = "Light Green";
+	STANDART_COLORS_MAP[0xDCE6F5] = "Light Blue";
+	STANDART_COLORS_MAP[0xD7E1F0] = "Light Blue";
+	STANDART_COLORS_MAP[0xFAE6D7] = "Light Orange";
+	STANDART_COLORS_MAP[0xF5E1D2] = "Light Orange";
 
 
 	/**
@@ -2282,9 +2310,9 @@ function (window, undefined) {
 		let eps = 216.0 / 24389.0;
 		let k = 24389.0 / 27.0;
 
-		let Xr = 0.964221;  // reference white D50
+		let Xr = 0.95047;  // reference white D65
 		let Yr = 1.0;
-		let Zr = 0.825211;
+		let Zr = 1.08883;
 
 		// RGB to XYZ
 		r = R / 255; //R 0..1
@@ -2292,16 +2320,16 @@ function (window, undefined) {
 		b = B / 255; //B 0..1
 
 		// assuming sRGB (D65)
-		if (r <= 0.04045) r = r / 12; else r = Math.pow((r + 0.055) / 1.055, 2.4);
+		if (r <= 0.04045) r = r / 12.92; else r = Math.pow((r + 0.055) / 1.055, 2.4);
 
-		if (g <= 0.04045) g = g / 12; else g = Math.pow((g + 0.055) / 1.055, 2.4);
+		if (g <= 0.04045) g = g / 12.92; else g = Math.pow((g + 0.055) / 1.055, 2.4);
 
-		if (b <= 0.04045) b = b / 12; else b = Math.pow((b + 0.055) / 1.055, 2.4);
+		if (b <= 0.04045) b = b / 12.92; else b = Math.pow((b + 0.055) / 1.055, 2.4);
 
 
-		X = 0.436052025 * r + 0.385081593 * g + 0.143087414 * b;
-		Y = 0.222491598 * r + 0.71688606 * g + 0.060621486 * b;
-		Z = 0.013929122 * r + 0.097097002 * g + 0.71418547 * b;
+		X = 0.4124564 * r + 0.3575761 * g + 0.1804375 * b;
+		Y = 0.2126729 * r + 0.7151522 * g + 0.0721750 * b;
+		Z = 0.0193339 * r + 0.1191920 * g + 0.9503041 * b;
 
 		// XYZ to Lab
 		xr = X / Xr;
@@ -2455,7 +2483,9 @@ function (window, undefined) {
 		return this.Space;
 	};
 	asc_CTextBorder.prototype.asc_putSpace = function (v) {
-		this.Space = v;
+		// v in range 0..31 pt
+		const maxVal = 639 / 20 / 72 * 25.4 - 0.001;
+		this.Space = Math.min(maxVal, Math.max(0, v));
 	};
 	asc_CTextBorder.prototype.asc_getForSelectedCells = function () {
 		return this.ForSelectedCells;
@@ -3750,7 +3780,7 @@ function (window, undefined) {
 	function asc_CFreeTextAnnotProperty() {
 		this.borderWidth		= undefined;
 		this.borderStyle		= undefined;
-		this.lineEnd			= undefined;
+		this.lineEnd			= null;
 		this.canEditText		= undefined;
 	}
 
@@ -4208,7 +4238,7 @@ function (window, undefined) {
 		this.format				= null;
 		this.validate			= null;
 
-		this.options			= null;
+		this.options			= [];
 		this.commitOnSelChange	= undefined;
 		this.editable			= undefined;
 		this.placeholder		= undefined;
@@ -4263,12 +4293,12 @@ function (window, undefined) {
 
 			if (Array.isArray(a)) {
 				if (!Array.isArray(b) || a[0] !== b[0] || a[1] !== b[1]) {
-					this.options = null;
+					this.options = [];
 					break;
 				}
 			}
 			else if (a !== b) {
-				this.options = null;
+				this.options = [];
 				break;
 			}
 		}
@@ -4291,7 +4321,7 @@ function (window, undefined) {
 	///// Listbox field
 	//////////////////////////////////////////////////////////////////
 	function asc_CListboxFieldProperty() {
-		this.options		 	= null;
+		this.options		 	= [];
 		this.commitOnSelChange	= undefined;
 		this.multipleSelection	= undefined;
 	}
@@ -4320,12 +4350,12 @@ function (window, undefined) {
 
 			if (Array.isArray(a)) {
 				if (!Array.isArray(b) || a[0] !== b[0] || a[1] !== b[1]) {
-					this.options = null;
+					this.options = [];
 					break;
 				}
 			}
 			else if (a !== b) {
-				this.options = null;
+				this.options = [];
 				break;
 			}
 		}
@@ -6860,6 +6890,7 @@ function (window, undefined) {
 			let y = (h - hMM) / 2;
 
 			if (window["NATIVE_EDITOR_ENJINE"]) {
+				renderer.ResetRotation();
 				renderer.put_brushTexture(this.imageBase64, 0);
 				renderer.put_BrushTextureAlpha((255 * this.transparent) >> 0);
 				renderer._e();
@@ -7836,6 +7867,9 @@ function (window, undefined) {
 	CButtonData.prototype.get_Properties = function() {
 		return this["pr"];
 	};
+	CButtonData.prototype.asc_getSignatureProps = function(api) {
+		return new Asc.CSignatureFormProps(api, this);
+	};
 
 	function CAscChartProp(obj)
 	{
@@ -8401,6 +8435,8 @@ function (window, undefined) {
 	prot["getVertAxisLabel"] = prot.getVertAxisLabel;
 	prot["getLegendPos"] = prot.getLegendPos;
 	prot["getDataLabelsPos"] = prot.getDataLabelsPos;
+	prot["getErrorBarsValueType"] = prot.getErrorBarsValueType;
+	prot["getTrendlineType"] = prot.getTrendlineType;
 	prot["getHorGridLines"] = prot.getHorGridLines;
 	prot["putHorGridLines"] = prot.putHorGridLines;
 	prot["getVertGridLines"] = prot.getVertGridLines;
@@ -9509,6 +9545,7 @@ function (window, undefined) {
 	prot["get_Button"] = prot.get_Button;
 	prot["get_IsForm"] = prot.get_IsForm;
 	prot["get_Properties"] = prot.get_Properties;
+	prot["asc_getSignatureProps"] = prot.asc_getSignatureProps;
 
 	window["AscCommon"]["pix2mm"] = window["AscCommon"].pix2mm = function(pix)
 	{

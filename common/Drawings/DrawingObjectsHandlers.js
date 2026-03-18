@@ -351,6 +351,12 @@ function handleFloatObjects(drawingObjectsController, drawingArr, e, x, y, group
                 ret = handleShapeImage(drawing, drawingObjectsController, e, x, y, group, pageIndex, bWord);
                 break;
             }
+			case AscDFH.historyitem_type_Pdf_Text_Field:
+			case AscDFH.historyitem_type_Pdf_Combobox_Field:
+			{
+				ret = handlePdfTextField(drawing, drawingObjectsController, e, x, y, group, pageIndex, bWord);
+                break;
+			}
             case AscDFH.historyitem_type_ChartSpace:
             {
                 ret = handleChart(drawing, drawingObjectsController, e, x, y, group, pageIndex, bWord);
@@ -551,6 +557,18 @@ function handleShapeImage(drawing, drawingObjectsController, e, x, y, group, pag
         {
             return oCheckResult;
         }
+
+		if (group) {
+			const isSpreadsheet = Asc.editor.getEditorId() === AscCommon.c_oEditorId.Spreadsheet;
+			const groupObjectType = group.getObjectType && group.getObjectType();
+			const isGroupOrSmartArt = groupObjectType === AscDFH.historyitem_type_GroupShape || groupObjectType === AscDFH.historyitem_type_SmartArt;
+			if (isSpreadsheet && isGroupOrSmartArt && !drawing.selected) {
+				oCheckResult = drawingObjectsController.checkDrawingHyperlinkAndMacro(group, e, false, x, y, pageIndex);
+				if (oCheckResult) {
+					return oCheckResult;
+				}
+			}
+		}
     }
 
 
@@ -638,6 +656,13 @@ function handleShapeImage(drawing, drawingObjectsController, e, x, y, group, pag
     return false;
 }
 
+function handlePdfTextField(field, drawingObjectsController, e, x, y, group, pageIndex, bWord)
+{
+	if (drawingObjectsController.document.GetActiveObject() == field) {
+		return drawingObjectsController.handleTextHit(field, e, x, y, null, pageIndex, false);
+	}
+}
+
 
 function handleShapeImageInGroup(drawingObjectsController, drawing, shape, e, x, y, pageIndex, bWord)
 {
@@ -657,6 +682,29 @@ function handleShapeImageInGroup(drawingObjectsController, drawing, shape, e, x,
         {
             return oCheckResult;
         }
+
+		const editorId = Asc.editor.getEditorId();
+		let bCheckGroupFallback;
+		switch (editorId) {
+			case AscCommon.c_oEditorId.Word:
+				bCheckGroupFallback = !drawing.selected && drawingObjectsController.selection.groupSelection !== drawing;
+				break;
+			case AscCommon.c_oEditorId.Presentation:
+				bCheckGroupFallback = !drawing.selected;
+				break;
+			case AscCommon.c_oEditorId.Spreadsheet:
+				bCheckGroupFallback = true;
+				break;
+			default:
+				bCheckGroupFallback = false;
+		}
+
+		if (bCheckGroupFallback) {
+			oCheckResult = drawingObjectsController.checkDrawingHyperlinkAndMacro(drawing, e, false, x, y, pageIndex);
+			if (oCheckResult) {
+				return oCheckResult;
+			}
+		}
     }
     if(!hit_in_text_rect && (hit_in_inner_area || hit_in_path))
     {
@@ -2045,6 +2093,14 @@ function handleInlineShapeImage(drawing, drawingObjectsController, e, x, y, page
     var _hit = drawing.hit && drawing.hit(x, y);
     var _hit_to_path = drawing.hitInPath && drawing.hitInPath(x, y);
     var b_hit_to_text = drawing.hitInTextRect && drawing.hitInTextRect(x, y);
+
+	if (_hit || _hit_to_path || b_hit_to_text) {
+		let oCheckResult = drawingObjectsController.checkDrawingHyperlinkAndMacro(drawing, e, b_hit_to_text, x, y, pageIndex);
+		if (oCheckResult) {
+			return oCheckResult;
+		}
+	}
+
     if((_hit && !b_hit_to_text) || _hit_to_path)
     {
         return handleInlineHitNoText(drawing, drawingObjectsController, e, x, y, pageIndex, false);
