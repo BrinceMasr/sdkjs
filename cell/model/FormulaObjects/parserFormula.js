@@ -6620,6 +6620,7 @@ function parserFormula( formula, parent, _ws ) {
 			!aExcludeCondFormulas.includes(sFunctionName);
 	};
 	parserFormula.prototype.notify = function(data) {
+		const t = this;
 		var eventData = {notifyData: data, assemble: null, formula: this};
 		let sFunctionName = this.getFunctionName();
 
@@ -6635,9 +6636,17 @@ function parserFormula( formula, parent, _ws ) {
 			}
 		}
 		if (AscCommon.c_oNotifyType.Dirty === data.type) {
-				if (this.parent && this.parent.onFormulaEvent) {
-					this.parent.onFormulaEvent(AscCommon.c_oNotifyParentType.Change, eventData);
-				}
+			// TODO Change to recheck recursion cell. For now it's work only if you create new data with potential recursion.
+			//  For changing have already created cells it's may have problem actualize ca flag
+			if (this.ca && this.parent && this.parent.nRow != null && this.parent.nCol != null) {
+				// Actualize ca flag for chained cells all dependent cells must have ca flag
+				this.ws._getCell(this.parent.nRow, this.parent.nCol, function (oElem) {
+					oElem._changeCaFlagFromListener(t.ca);
+				});
+			}
+			if (this.parent && this.parent.onFormulaEvent) {
+				this.parent.onFormulaEvent(AscCommon.c_oNotifyParentType.Change, eventData);
+			}
 		} else if (this.shared && this.parent && this.parent.onFormulaEvent &&
 			this.parent.onFormulaEvent(AscCommon.c_oNotifyParentType.Shared, eventData)) {
 			;
@@ -8280,7 +8289,6 @@ function parserFormula( formula, parent, _ws ) {
 			let oRange = null;
 			let bRecursiveCell = parserFormula.ca;
 			let sFunctionName = "";
-
 
 			if (levelFuncMap.length && levelFuncMap[currentFuncLevel]) {
 				sFunctionName = levelFuncMap[currentFuncLevel].func.name;

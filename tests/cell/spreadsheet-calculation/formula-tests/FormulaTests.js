@@ -2152,7 +2152,7 @@ $(function () {
 		bCaFromSelectedCell = getCaFromSelectedCell("A1142");
 		assert.strictEqual(bCaFromSelectedCell, true, "Test: Formula LOOKUP recursive formula with disabled setting. 2 args A1142 - flag ca: true");
 		bCaFromSelectedCell = null;
-		// - Case: Formula SUMIFS isn't a recursive formula with disabled setting. Bug-74509
+		// - Case: Formula SUMIF isn't a recursive formula with disabled setting. Bug-74509
 		ws.getRange2("A1143").setValue("INFLOW");
 		ws.getRange2("A1144").setValue("OUTFLOW");
 		ws.getRange2("A1145").setValue("OUTFLOW");
@@ -2162,17 +2162,50 @@ $(function () {
 		ws.getRange2("B1146").setValue("=SUMIF(A1143:A1145, \"INFLOW\", B1143:B1145)");
 		ws.getRange2("B1147").setValue("=SUMIF(A1143:A1145, \"OUTFLOW\", B1143:B1145)");
 		bCaFromSelectedCell = getCaFromSelectedCell("B1144");
-		assert.strictEqual(bCaFromSelectedCell, false, "Test: Formula SUMIFS isn't a recursive formula with disabled setting. Bug-74509. B1144 - flag ca: false");
+		assert.strictEqual(bCaFromSelectedCell, false, "Test: Formula SUMIF isn't a recursive formula with disabled setting. Bug-74509. B1144 - flag ca: false");
 		bCaFromSelectedCell = null;
 		bCaFromSelectedCell = getCaFromSelectedCell("B1145");
-		assert.strictEqual(bCaFromSelectedCell, false, "Test: Formula SUMIFS isn't a recursive formula with disabled setting. Bug-74509. B1145 - flag ca: false");
+		assert.strictEqual(bCaFromSelectedCell, false, "Test: Formula SUMIF isn't a recursive formula with disabled setting. Bug-74509. B1145 - flag ca: false");
 		bCaFromSelectedCell = null;
 		bCaFromSelectedCell = getCaFromSelectedCell("B1146");
-		assert.strictEqual(bCaFromSelectedCell, false, "Test: Formula SUMIFS isn't a recursive formula with disabled setting. Bug-74509. B1146 - flag ca: false");
+		assert.strictEqual(bCaFromSelectedCell, false, "Test: Formula SUMIF isn't a recursive formula with disabled setting. Bug-74509. B1146 - flag ca: false");
 		bCaFromSelectedCell = null;
 		bCaFromSelectedCell = getCaFromSelectedCell("B1147");
-		assert.strictEqual(bCaFromSelectedCell, false, "Test: Formula SUMIFS isn't a recursive formula with disabled setting. Bug-74509. B1147 - flag ca: false");
+		assert.strictEqual(bCaFromSelectedCell, false, "Test: Formula SUMIF isn't a recursive formula with disabled setting. Bug-74509. B1147 - flag ca: false");
 		bCaFromSelectedCell = null;
+		// - Case: Formula SUMIF is a recursive formula with disabled setting. Bug-74509
+		ws.getRange2("A1144").setValue("INFLOW");
+		ws.getRange2("B1144").setValue("=B1146*0.1");
+		bCaFromSelectedCell = getCaFromSelectedCell("B1144");
+		assert.strictEqual(bCaFromSelectedCell, true, "Test: Formula SUMIF is a recursive formula with disabled setting. Bug-74509. B1144 - flag ca: true");
+		bCaFromSelectedCell = null;
+		bCaFromSelectedCell = getCaFromSelectedCell("B1145");
+		assert.strictEqual(bCaFromSelectedCell, true, "Test: Formula SUMIF is a recursive formula with disabled setting. Bug-74509. B1145 - flag ca: true");
+		bCaFromSelectedCell = null;
+		bCaFromSelectedCell = getCaFromSelectedCell("B1146");
+		assert.strictEqual(bCaFromSelectedCell, true, "Test: Formula SUMIF is a recursive formula with disabled setting. Bug-74509. B1146 - flag ca: true");
+		bCaFromSelectedCell = null;
+		bCaFromSelectedCell = getCaFromSelectedCell("B1147");
+		assert.strictEqual(bCaFromSelectedCell, true, "Test: Formula SUMIF is a recursive formula with disabled setting. Bug-74509. B1147 - flag ca: true");
+		bCaFromSelectedCell = null;
+		// - Case: Formula COUNTIF is a recursive formula with disabled setting. Bug-74509
+		ws.getRange2("A1148").setValue("2");
+		ws.getRange2("A1147").setValue("=A1149");
+		ws.getRange2("A1149").setValue("=COUNTIF(A1147:A1149, \">1\")");
+		bCaFromSelectedCell = getCaFromSelectedCell("A1147");
+		assert.strictEqual(bCaFromSelectedCell, true, "Test: Formula COUNTIF is a recursive formula with disabled setting. Bug-74509. A1147 - flag ca: true");
+		bCaFromSelectedCell = null;
+		bCaFromSelectedCell = getCaFromSelectedCell("A1149");
+		assert.strictEqual(bCaFromSelectedCell, true, "Test: Formula COUNTIF is a recursive formula with disabled setting. Bug-74509. A1149 - flag ca: true");
+		bCaFromSelectedCell = null;
+		oCell = selectCell("A1149");
+		bCellHasRecursion = !!getStartCellForIterCalc(oCell);
+		assert.strictEqual(bCellHasRecursion, true, "Test: Formula COUNTIF is a recursive formula with disabled setting. Bug-74509. A1149 - recursion cell");
+		bCellHasRecursion = null;
+		oCell = selectCell("A1147");
+		bCellHasRecursion = !!getStartCellForIterCalc(oCell);
+		assert.strictEqual(bCellHasRecursion, true, "Test: Formula COUNTIF is a recursive formula with disabled setting. Bug-74509. A1147 - recursion cell");
+		bCellHasRecursion = null;
 		// -- Test changeLinkedCell method.
 		oCell = selectCell("A1000");
 		let oCellNeedEnableRecalc = selectCell("B1000");

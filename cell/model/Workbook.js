@@ -16482,7 +16482,7 @@
 
 		if (oSheetListeners.cellMap.hasOwnProperty(nCellIndex) && !_isExcludeFormula(aOutStack, sFunctionName)) {
 			return oSheetListeners.cellMap[nCellIndex];
-		} else if (aOutStack && aOutStack.length && sFunctionName) {
+		} else if (aOutStack && aOutStack.length) {
 			for (let nIndex in oSheetListeners.areaMap) {
 				const oAreaMap = oSheetListeners.areaMap[nIndex];
 				let bInvalidListener = false;
@@ -16827,7 +16827,9 @@
 						}
 					}
 				}
-				oFormulaParsed.ca = true;
+				if (!oFormulaParsed.ca) {
+					oFormulaParsed.ca = true;
+				}
 			}
 		}
 		if (g_cCalcRecursion.checkRecursionCounter() || oCellWithFormula == null) {
