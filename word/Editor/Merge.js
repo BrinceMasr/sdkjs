@@ -733,7 +733,7 @@
         const oThis = this;
         const aImages = AscCommon.pptx_content_loader.End_UseFullUrl();
         const oObjectsForDownload = AscCommon.GetObjectsForImageDownload(aImages);
-        const oApi = oOriginalDocument.GetApi();
+        const oApi = Asc.editor;
         if (!oApi) {
             return;
         }
@@ -774,7 +774,7 @@
         this.originalDocument = oOriginalDocument;
         this.revisedDocument = oRevisedDocument;
         this.options = oOptions;
-        this.api = oOriginalDocument.GetApi();
+        this.api = Asc.editor;
         this.comparison = new CDocumentMergeComparison(oOriginalDocument, oRevisedDocument, oOptions ? oOptions : new AscCommonWord.ComparisonOptions());
         this.oldTrackRevisions = false;
     }
@@ -819,7 +819,8 @@
     };
 
 
-    function mergeBinary(oApi, sBinary2, oOptions) {
+    function mergeBinary(sBinary2, oOptions) {
+        const oApi = Asc.editor;
         const oDoc1 = oApi.WordControl.m_oLogicDocument;
         if (!window['NATIVE_EDITOR_ENJINE']) {
             const oCollaborativeEditing = oDoc1.CollaborativeEditing;
@@ -852,13 +853,14 @@
 
     }
     
-    function mergeDocuments(oApi, oTmpDocument) {
+    function MergeDocuments(oTmpDocument) {
+        const oApi = Asc.editor;
         oApi.insertDocumentUrlsData = {
             imageMap: oTmpDocument["GetImageMap"](), documents: [], convertCallback: function (_api, url) {
             }, endCallback: function (_api) {
             }
         };
-        mergeBinary(oApi, oTmpDocument["GetBinary"](), null, true);
+        mergeBinary(oTmpDocument["GetBinary"](), null, true);
         oApi.insertDocumentUrlsData = null;
     }
 
@@ -868,6 +870,6 @@
     window['AscCommonWord'].CMockParagraph = CMockParagraph;
     window['AscCommonWord'].CDocumentResolveConflictComparison = CDocumentResolveConflictComparison;
     window['AscCommonWord'].CDocumentMergeComparison = CDocumentMergeComparison;
-    window['AscCommonWord']["mergeDocuments"] = window['AscCommonWord'].mergeDocuments = mergeDocuments;
+    window['AscCommonWord']["MergeDocuments"] = window['AscCommonWord'].MergeDocuments = MergeDocuments;
 
 })();

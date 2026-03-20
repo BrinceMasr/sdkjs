@@ -2649,7 +2649,7 @@
         const oThis = this;
         const aImages = AscCommon.pptx_content_loader.End_UseFullUrl();
         const oObjectsForDownload = AscCommon.GetObjectsForImageDownload(aImages);
-        const oApi = oOriginalDocument.GetApi();
+        const oApi = Asc.editor;
         if(!oApi)
         {
             return;
@@ -3858,8 +3858,9 @@
 		oLogicDocument.LoadDocumentState(oSelectionState);
 	};
 
-    function CompareBinary(oApi, sBinary2, oOptions, bForceApplyChanges)
+    function CompareBinary(sBinary2, oOptions, bForceApplyChanges)
     {
+        const oApi = Asc.editor;
         const oDoc1 = oApi.WordControl.m_oLogicDocument;
         if(!window['NATIVE_EDITOR_ENJINE'])
         {
@@ -3930,14 +3931,15 @@
     }
 
 
-    function CompareDocuments(oApi, oTmpDocument)
+    function CompareDocuments(oTmpDocument)
     {
+        const oApi = Asc.editor;
         oApi.insertDocumentUrlsData = {
             imageMap: oTmpDocument["GetImageMap"](), documents: [], convertCallback: function (_api, url) {
             }, endCallback: function (_api) {
             }
         };
-        CompareBinary(oApi, oTmpDocument["GetBinary"](), null, true);
+        CompareBinary(oTmpDocument["GetBinary"](), null, true);
         oApi.insertDocumentUrlsData = null;
     }
 
