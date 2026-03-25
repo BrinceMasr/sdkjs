@@ -17726,6 +17726,21 @@ $(function () {
 		oParser = new parserFormula('XIRR({-1000,1000},{38777,38838},"abc")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: XIRR({-1000,1000},{38777,38838},"abc") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Number,Number,String. Non-numeric string guess returns #VALUE!. 3 of 3 arguments used.');
+		// 'Sheet1:Sheet2'!A1
+		let multiAreaLink = "'" + ws.getName() + ":" + ws2.getName() + "'!A1";
+		// Case #23: Area3d,Array. 3D area used. 2 of 3 arguments used.
+		oParser = new parserFormula('XIRR('+multiAreaLink+',{38777,38838})', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: XIRR('+multiAreaLink+',{38777,38838}) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area3d,Array. 3D area used. 2 of 3 arguments used.');
+		// Case #24: Array,Area3d. 3D area used. 2 of 3 arguments used.
+		oParser = new parserFormula('XIRR({-100,100},'+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: XIRR({-100,100},'+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array,Area3d. 3D area used. 2 of 3 arguments used.');
+		// Case #25: Array,Array,Area3d. 3D area used. 3 of 3 arguments used.
+		oParser = new parserFormula('XIRR({-100,100},{38777,38838},'+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: XIRR({-100,100},{38777,38838},'+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array,Area3d. 3D area used. 3 of 3 arguments used.');
+
 
 		// Bounded cases:
 		// Case #1: Number,Number,Number. Minimum valid Excel numbers for values, minimum dates, small guess. 3 of 3 arguments used.

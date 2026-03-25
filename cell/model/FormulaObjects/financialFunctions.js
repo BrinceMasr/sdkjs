@@ -5870,7 +5870,7 @@ function (window, undefined) {
 	cXIRR.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
 	cXIRR.prototype.argumentsType = [argType.any, argType.any, argType.any];
 	/**
-	 * XIRR — The Extended Internal Rate of Return is a financial metric used to calculate the annualized return on investments with irregular cash flows
+	 * XIRR - The Extended Internal Rate of Return is a financial metric used to calculate the annualized return on investments with irregular cash flows
 	 *
 	 * @param {number[]} Values - A series of cash flows that corresponds to a schedule of payments in dates. Positive and newgatie nums are required
 	 * @param {Date[]}   dates - A schedule of payment dates that corresponds to the cash flow payments.
@@ -5883,15 +5883,15 @@ function (window, undefined) {
 
 		function xirrFunction(values, dates, rate) {
 			let D_0 = dates[0], r = rate + 1, res = values[0];
-			for (var i = 1; i < values.length; i++) {
+			for (let i = 1; i < values.length; i++) {
 				res += values[i] / Math.pow(r, (dates[i] - D_0) / 365);
 			}
 			return res;
 		}
 
 		function xirrDeriv(values, dates, rate) {
-			var D_0 = dates[0], r = rate + 1, res = 0, sumDerivI;
-			for (var i = 1, count = values.length; i < count; i++) {
+			let D_0 = dates[0], r = rate + 1, res = 0, sumDerivI;
+			for (let i = 1, count = values.length; i < count; i++) {
 				sumDerivI = (dates[i] - D_0) / 365;
 				res -= sumDerivI * values[i] / Math.pow(r, sumDerivI + 1);
 			}
