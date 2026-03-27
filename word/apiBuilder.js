@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -97,7 +92,6 @@
 
 			var MinPosLength = MinPos.length;
 			var UsedLength1  = 0;
-
 
 			if (MinPosLength <= TempPos.length)
 				UsedLength1 = MinPosLength;
@@ -2457,7 +2451,6 @@
 			return null;
 		}
 
-
 		var ParaTextPr = new AscCommonWord.ParaTextPr({Underline : isUnderline});
 		Document.AddToParagraph(ParaTextPr);
 
@@ -3719,7 +3712,6 @@
 	ApiGroup.prototype = Object.create(ApiDrawing.prototype);
 	ApiGroup.prototype.constructor = ApiGroup;
 
-
 	/**
 	 * Class representing the shape geometry.
 	 * @constructor
@@ -3727,7 +3719,6 @@
 	function ApiGeometry(geometry) {
 		this.geometry = geometry;
 	}
-
 
 	/**
 	 * Class representing a path command.
@@ -3846,7 +3837,6 @@
 		this.UniFill = UniFill;
 	}
 
-
 	/**
 	 * Class representing a stroke.
 	 * @constructor
@@ -3855,7 +3845,6 @@
 	{
 		this.Ln = oLn;
 	}
-
 
 	/**
 	 * Class representing gradient stop.
@@ -3934,7 +3923,6 @@
 	function ApiCustomProperties(oCustomProperties) {
 		this.CustomProperties = oCustomProperties;
 	};
-
 
 	/**
 	 * Twentieths of a point (equivalent to 1/1440th of an inch).
@@ -4102,9 +4090,6 @@
 	 * @see office-js-api/Examples/Enumerations/GeometryFormulaType.js
 	 */
 
-
-
-
 	/**
 	 * This type specifies the available chart types which can be used to create a new chart.
 	 * @typedef {(
@@ -4129,22 +4114,17 @@
 	 * @see office-js-api/Examples/Enumerations/DrawingLockType.js
 	 */
 
-
-
-
 	/**
 	 * The path fill type.
 	 * @typedef {("none" | "norm" | "lighten" | "lightenLess" | "darken" | "darkenLess")} PathFillType
 	 * @see office-js-api/Examples/Enumerations/PathFillType.js
 	 */
 
-
 	/**
 	 * The path command types.
 	 * @typedef {("moveTo" | "lineTo" | "bezier3" | "bezier4" | "arcTo" | "close")} PathCommandType
 	 * @see office-js-api/Examples/Enumerations/PathCommandType.js
 	 */
-
 
 	/**
      * The available text vertical alignment (used to align text in a shape with a placement for text inside it).
@@ -4200,7 +4180,6 @@
 	 *     "greenYellow" | "grey" | "honeydew" | "hotPink" | "indianRed" | "indigo" | "ivory" | "khaki" | "lavender" | "lavenderBlush" | "lawnGreen" | "lemonChiffon" | "lightBlue" | "lightCoral" | "lightCyan" | "lightGoldenrodYellow" | "lightGray" | "lightGreen" | "lightGrey" | "lightPink" | "lightSalmon" | "lightSeaGreen" | "lightSkyBlue" | "lightSlateGray" | "lightSlateGrey" | "lightSteelBlue" | "lightYellow" | "lime" | "limeGreen" | "linen" | "ltBlue" | "ltCoral" | "ltCyan" | "ltGoldenrodYellow" | "ltGray" | "ltGreen" | "ltGrey" | "ltPink" | "ltSalmon" | "ltSeaGreen" | "ltSkyBlue" | "ltSlateGray" | "ltSlateGrey" | "ltSteelBlue" | "ltYellow" | "magenta" | "maroon" | "medAquamarine" | "medBlue" | "mediumAquamarine" | "mediumBlue" | "mediumOrchid" | "mediumPurple" | "mediumSeaGreen" | "mediumSlateBlue" | "mediumSpringGreen" | "mediumTurquoise" | "mediumVioletRed" | "medOrchid" | "medPurple" | "medSeaGreen" | "medSlateBlue" | "medSpringGreen" | "medTurquoise" | "medVioletRed" | "midnightBlue" | "mintCream" | "mistyRose" | "moccasin" | "navajoWhite" | "navy" | "oldLace" | "olive" | "oliveDrab" | "orange" | "orangeRed" | "orchid" | "paleGoldenrod" | "paleGreen" | "paleTurquoise" | "paleVioletRed" | "papayaWhip" | "peachPuff" | "peru" | "pink" | "plum" | "powderBlue" | "purple" | "red" | "rosyBrown" | "royalBlue" | "saddleBrown" | "salmon" | "sandyBrown" | "seaGreen" | "seaShell" | "sienna" | "silver" | "skyBlue" | "slateBlue" | "slateGray" | "slateGrey" | "snow" | "springGreen" | "steelBlue" | "tan" | "teal" | "thistle" | "tomato" | "turquoise" | "violet" | "wheat" | "white" | "whiteSmoke" | "yellow" | "yellowGreen")} PresetColor
 	 * @see office-js-api/Examples/Enumerations/PresetColor.js
 	 */
-
 
 	/**
      * Possible values for the position of chart tick labels (either horizontal or vertical).
@@ -5018,7 +4997,6 @@
 	{
 		return new ApiFill(AscFormat.builder_CreateLinearGradient(gradientStops, angle));
 	};
-
 
 	/**
 	 * Creates a radial gradient fill to apply to the object using the selected radial gradient as the object background.
@@ -8389,7 +8367,6 @@
 		return bRes;
 	};
 
-
 	/**
 	 * Returns the watermark settings in the current document.
 	 * @memberof ApiDocument
@@ -8401,7 +8378,6 @@
 	{
 		return new ApiWatermarkSettings(this.Document.GetWatermarkProps());
 	};
-
 
 	/**
 	 * Sets the watermark settings in the current document.
@@ -9241,7 +9217,6 @@
 		oTargetPr.IsIncludeLabelAndNumber = typeof(oTofPr["LabelNumber"]) == "boolean" ? oTofPr["LabelNumber"] : true;
 		oTargetPr.OutlineEnd = -1;
 		oTargetPr.OutlineStart = -1;
-
 
 		if (oTofPr["LeaderType"] == null)
 			oTofPr["LeaderType"] = "dot";
@@ -12042,7 +12017,6 @@
 		return true;
 	};
 
-
 	/**
 	 * Returns an internal ID of the current content paragraph.
 	 * @memberof ApiParagraph
@@ -12963,7 +12937,6 @@
 	 * @typedef {("nextPage" | "oddPage" | "evenPage" | "continuous" | "nextColumn")} SectionBreakType
 	* @see office-js-api/Examples/Enumerations/SectionBreakType.js
 	*/
-
 
 	/**
 	 * The coordinate value for the geometry paths.
@@ -15641,7 +15614,6 @@
 		return JSON.stringify(oJSON);
 	};
 
-
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiTextPr
@@ -16496,7 +16468,6 @@
 		return JSON.stringify(oJSON);
 	};
 
-
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiParaPr
@@ -17276,7 +17247,6 @@
 			oJSON["styles"] = oWriter.SerWordStylesForWrite();
 		return JSON.stringify(oJSON);
 	};
-
 
 	//------------------------------------------------------------------------------------------------------------------
 	//
@@ -19516,7 +19486,6 @@
 		let oXfrm = this.Drawing.getXfrm();
 		oXfrm.setRot(nRotAngle * Math.PI / 180);
 
-
 		let paraDrawing  = this.getParaDrawing();
 		if (paraDrawing)
 		{
@@ -19847,7 +19816,6 @@
 		return null;
 	};
 
-
 	/**
 	 * Returns the geometry object from the current shape.
 	 * @memberof ApiShape
@@ -19977,13 +19945,11 @@
 		return null;
 	};
 
-
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiGeometry
 	//
 	//------------------------------------------------------------------------------------------------------------------
-
 
 	ApiGeometry.prototype.privateGetParent = function()
 	{
@@ -20153,7 +20119,6 @@
 		this.geometry.setAdjValue(sName, nValue);
 	};
 
-
 	/**
 	 * Adds a guide (formula) to the current geometry.
 	 * @memberof ApiGeometry
@@ -20212,7 +20177,6 @@
 		this.geometry.AddCnx(sAngle, sX, sY);
 		return true;
 	};
-
 
 	function sanitizeCoordinate(coordinate)
 	{
@@ -20920,7 +20884,6 @@
 		return true;
 	};
 
-
 	/**
 	 * Spicifies the show options for data labels.
 	 * @memberof ApiChart
@@ -21049,7 +21012,6 @@
 		return true;
 	};
 
-
 	/**
 	 * Specifies major horizontal gridline visual properties.
 	 * @memberof ApiChart
@@ -21077,7 +21039,6 @@
 		AscFormat.builder_SetHorAxisMinorGridlines(this.Chart, oStroke ?  oStroke.Ln : null);
 		return true;
 	};
-
 
 	/**
 	 * Specifies font size for labels of the horizontal axis.
@@ -28261,7 +28222,6 @@
 		return this;
 	};
 
-
 	/**
 	 * Returns a type of the ApiWatermarkSettings class.
 	 * @memberof ApiWatermarkSettings
@@ -28415,8 +28375,6 @@
 		return this.Settings.get_Opacity();
 	};
 
-
-
 	/**
 	 * Sets the direction of the watermark in the document.
 	 * @memberof ApiWatermarkSettings
@@ -28533,7 +28491,6 @@
 	{
 		return this.Settings.get_ImageHeight();
 	};
-
 
 	/**
 	 * Sets the size (width and height) of the watermark image in the document.
@@ -29469,7 +29426,6 @@
 	Api["CreateDropDownListContentControl"] = Api.CreateDropDownListContentControl;
 	Api["CreateDatePickerContentControl"]   = Api.CreateDatePickerContentControl;
 
-
 	Api["ConvertDocument"]		         = Api.ConvertDocument;
 	Api["FromJSON"]		                 = Api.FromJSON;
 	Api["CreateRange"]		             = Api.CreateRange;
@@ -29760,7 +29716,6 @@
 	ApiParagraph.prototype["GetInternalId"]          = ApiParagraph.prototype.GetInternalId;
 	ApiParagraph.prototype["ToJSON"]                 = ApiParagraph.prototype.ToJSON;
 
-
 	ApiRun.prototype["GetClassType"]                 = ApiRun.prototype.GetClassType;
 	ApiRun.prototype["GetTextPr"]                    = ApiRun.prototype.GetTextPr;
 	ApiRun.prototype["ClearContent"]                 = ApiRun.prototype.ClearContent;
@@ -29805,7 +29760,6 @@
 	ApiRun.prototype["AddComment"]                   = ApiRun.prototype.AddComment;
 	ApiRun.prototype["GetText"]                      = ApiRun.prototype.GetText;
 	ApiRun.prototype["MoveCursorToPos"]              = ApiRun.prototype.MoveCursorToPos;
-
 
 	ApiHyperlink.prototype["GetClassType"]           = ApiHyperlink.prototype.GetClassType;
 	ApiHyperlink.prototype["SetLink"]                = ApiHyperlink.prototype.SetLink;
@@ -30835,7 +30789,6 @@
 		}
 	})(ApiRangeTextPr.prototype);
 
-
 	function ToApiForm(oForm)
 	{
 		if (!oForm)
@@ -31368,7 +31321,6 @@
 		return new ApiShape(oDrawing.GraphicObj)
 	}
 
-
 	function privateInsertWatermarkToContent(oApi, oContent, sText, bIsDiagonal){
 		if(oContent){
 			var nElementsCount = oContent.GetElementsCount();
@@ -31512,7 +31464,6 @@
 		}
 		return aWrappers;
 	}
-
 
 	function private_ChartInternalTypeToBuilder(sType) {
 		switch (sType) {

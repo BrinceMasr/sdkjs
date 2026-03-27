@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -53,9 +48,7 @@ $(function () {
 	p2.AddToContent(0, r2);
 	r2.AddText("Абракадабра");
 
-
 	QUnit.module("Check complex forms");
-
 
 	QUnit.test("Positioning, moving cursor and adding/removing text", function (assert)
 	{
@@ -176,13 +169,11 @@ $(function () {
 		AscTest.MoveCursorLeft();
 		assert.strictEqual(textForm1.IsThisElementCurrent() && textForm1.IsCursorAtBegin(), true, "Check cursor position after moving left");
 
-
 		textForm1.SetThisElementCurrent();
 		textForm1.MoveCursorToEndPos();
 		AscTest.MoveCursorRight();
 		assert.strictEqual(textForm1.IsThisElementCurrent() && textForm1.IsCursorAtBegin(), false, "Check form1 after moving cursor right");
 		assert.strictEqual(textForm2.IsThisElementCurrent() && textForm2.IsCursorAtBegin(), true, "Check form2 after moving cursor right");
-
 
 		textForm2.ClearContentControlExt();
 		assert.strictEqual(textForm2.IsPlaceHolder(), true, "Is placeholder in text form 1 after clearing form");
@@ -199,7 +190,6 @@ $(function () {
 		textForm2.MoveCursorToEndPos();
 		AscTest.MoveCursorRight();
 		assert.strictEqual(textForm2.IsThisElementCurrent() && textForm2.IsCursorAtEnd(), true, "Check cursor position after moving cursor right");
-
 
 		// Проверяем набор внутри форм
 		textForm1.ClearContentControlExt();
@@ -523,7 +513,6 @@ $(function () {
 		tempRun3.AddText("333");
 		complexForm.Add(tempRun3);
 
-
 		assert.strictEqual(formsManager.GetAllForms().length, 1, "Add complex form to document (check forms count)");
 		assert.strictEqual(formsManager.IsAllRequiredFormsFilled(), true, "Check is all required filled");
 
@@ -540,7 +529,6 @@ $(function () {
 
 		comboForm.ClearContentControlExt();
 		assert.strictEqual(complexForm.IsFormFilled(), false, "Clear combo box and and check form completion");
-
 
 		let paragraph2 = new AscWord.Paragraph();
 		logicDocument.AddToContent(logicDocument.GetElementsCount(), paragraph2);

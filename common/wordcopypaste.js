@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -509,7 +504,6 @@ CopyProcessor.prototype =
 					oBr.oAttributes["style"] = "mso-special-character:line-break;";
 				}
 
-
 				oTarget.addChild(oBr);
 				//todo закончить этот параграф и начать новый
 				//добавил неразрвной пробел для того, чтобы информация попадала в буфер обмена
@@ -558,7 +552,6 @@ CopyProcessor.prototype =
 				oSpan = new CopyElement("span");
 				oSpan.oAttributes["class"] = "MsoFootnoteReference";
 
-
 				let _oSpan2 = new CopyElement("span");
 				_oSpan2.addChild(new CopyElement(CopyPasteCorrectString("[" + index + "]"), true));
 				if (_oSpan2.oAttributes["style"]) {
@@ -605,7 +598,6 @@ CopyProcessor.prototype =
 			}
 		};
 
-
 		var realTarget;
 		var oHyperlink;
     	for (var i = 0; i < Container.Content.length; i++) {
@@ -637,7 +629,6 @@ CopyProcessor.prototype =
 						bOmitHyperlink = false;
 						realTarget = null;
 					}
-
 
 					if (!oSpan.isEmptyChild()) {
 						this.parse_para_TextPr(item.Get_CompiledTextPr(), oSpan);
@@ -1605,7 +1596,6 @@ CopyProcessor.prototype =
 			}
 		}
 
-
 		this.oPDFWriter.WriteBool(!b_style_index);
 		if (b_style_index) {
 			var tableStyle = oDoc.globalTableStyles.Style[Item.TableStyle];
@@ -1833,7 +1823,6 @@ CopyProcessor.prototype =
 				oThis.oPresentationWriter.WriteULong(selected_indexes[i]);
 			}
 		};
-
 
 		//получаем пишем количество
 		var contentCount = 0;
@@ -2069,7 +2058,6 @@ CopyProcessor.prototype =
 		return sBase64;
 	},
 
-
 	AddObjectImageToElement: function (element, drawing) {
 		if (element && drawing) {
 			let imageSrc = drawing.getBase64Img();
@@ -2107,7 +2095,6 @@ CopyProcessor.prototype =
 	CopyLayout: function (layout) {
 		this.oPresentationWriter.WriteSlideLayout(layout);
 	},
-
 
 	CopyPresentationTableCells: function (oDomTarget, graphicFrame) {
 		var aSelectedRows = [];
@@ -2257,7 +2244,6 @@ CopyProcessor.prototype =
 				this.oPresentationWriter.tableStylesGuides[key] = "{" + AscCommon.GUID() + "}"
 			}
 		}
-
 
 		this.oPresentationWriter.WriteBool(!b_style_index);
 		if (b_style_index) {
@@ -3138,7 +3124,6 @@ PasteProcessor.prototype =
 					oSelectedContent.SetInsertOptionForTable(Asc.c_oSpecialPasteProps.insertAsNestedTable);
 				}
 
-
 				if (bIsSpecialPaste && !tableSpecialPaste)
 				{
 					var parseItem = this._specialPasteItemConvert(NewElem);
@@ -3157,7 +3142,6 @@ PasteProcessor.prototype =
 						}
 					}
 				}
-
 
 				var oSelectedElement     = new AscCommonWord.CSelectedElement();
 				oSelectedElement.Element = NewElem;
@@ -3308,7 +3292,6 @@ PasteProcessor.prototype =
 			}
 		}
 
-
 		if(this.oLogicDocument && this.oLogicDocument.DrawingObjects)
 		{
 			var oTargetTextObject = AscFormat.getTargetTextObject(this.oLogicDocument.DrawingObjects);
@@ -3423,7 +3406,6 @@ PasteProcessor.prototype =
 			}
 			return;
 		}
-
 
 		var specialPasteShowOptions = !specialPasteHelper.buttonInfo.isClean() ? specialPasteHelper.buttonInfo : null;
 		if(!specialPasteHelper.specialPasteStart)
@@ -3603,7 +3585,6 @@ PasteProcessor.prototype =
 
 					this._checkNumberingText(paragraph, paragraph.Numbering.Internal.NumInfo, numbering);
 				}
-
 
 				if(pasteIntoParagraphPr)
 				{
@@ -4269,7 +4250,6 @@ PasteProcessor.prototype =
 
 				this.oDocument = this._GetTargetDocument(this.oDocument);
 
-
 				if (this.oDocument && this.oDocument.bPresentation) {
 					if (oThis.api.WordControl.m_oLogicDocument.IsTrackRevisions()) {
 						bTurnOffTrackRevisions = oThis.api.WordControl.m_oLogicDocument.GetLocalTrackRevisions();
@@ -4361,7 +4341,6 @@ PasteProcessor.prototype =
 		History.TurnOff();
 		var aContentExcel = this._readFromBinaryExcel(base64FromExcel);
 		History.TurnOn();
-
 
 		if (null === aContentExcel) {
 			return null;
@@ -4517,7 +4496,6 @@ PasteProcessor.prototype =
 				}
 			};
 
-
 			var arr_shapes = drawings;
 
 			var aImagesToDownload = [];
@@ -4667,7 +4645,6 @@ PasteProcessor.prototype =
 					oThis.pasteCallback && oThis.pasteCallback(bInsert);
 				}
 			};
-
 
 			let arr_shapes = drawings;
 
@@ -5024,7 +5001,6 @@ PasteProcessor.prototype =
 			}
 		};
 
-
 		var font_map = {};
 		var images = [];
 		//shape.getAllFonts(font_map);
@@ -5148,7 +5124,6 @@ PasteProcessor.prototype =
 					return;
 				}
 			}
-
 
 			//если несколько графических объектов, то собираем base64 у таблиц(graphicFrame)
 			if (arr_shapes.length > 1) {
@@ -5328,7 +5303,6 @@ PasteProcessor.prototype =
 				oThis.pasteCallback && oThis.pasteCallback(bInsert);
 			}
 		};
-
 
 		var font_map = {};
 		var images = [];
@@ -5555,7 +5529,6 @@ PasteProcessor.prototype =
 					return;
 				}
 			}
-
 
 			//если несколько графических объектов, то собираем base64 у таблиц(graphicFrame)
 			if (arr_shapes.length > 1) {
@@ -6159,7 +6132,6 @@ PasteProcessor.prototype =
 				return null;
 			}
 
-
 			var paste_callback = function () {
 				if (false === oThis.bNested) {
 					var oPaste = presentation.InsertContent2(aContents, nIndex);
@@ -6354,7 +6326,6 @@ PasteProcessor.prototype =
 
 				presentationSelectedContent.SlideObjects = slideCopyObjects;
 			};
-
 
 			var readLayouts = function () {
 				var loader = new AscCommon.BinaryPPTYLoader();
@@ -6752,7 +6723,6 @@ PasteProcessor.prototype =
 					oXfrm.setOffY((oPresentation.GetHeightMM() - dHeight) / 2.0);
 					aCopyObjects.push(new DrawingCopyObject(oImage, 0, 0, dWidth, dHeight));
 				}
-
 
 				//INSERT CONTENT
 				let oController = oPresentation.GetCurrentController();
@@ -7370,7 +7340,6 @@ PasteProcessor.prototype =
 			return paraRun;
 		};
 
-
 		var _addToRun = function (_nUnicode) {
 			var Item;
 			if (0x2009 === _nUnicode || 9 === _nUnicode) {
@@ -7740,7 +7709,6 @@ PasteProcessor.prototype =
 						oCurCell.Set_VAlign(vertalignjc_Top);
 						break;
 				}
-
 
 				var oCurPar = oCurCell.GetContent().GetElement(0);
 				if (!oCurPar || !oCurPar.IsParagraph())
@@ -8365,7 +8333,6 @@ PasteProcessor.prototype =
 		}
 		return arr_slides;
 	},
-
 
 	ReadSlide: function (stream) {
 		var loader = new AscCommon.BinaryPPTYLoader();
@@ -9149,7 +9116,6 @@ PasteProcessor.prototype =
 						}
 					}
 				};
-
 
 				if (pNoHtmlPr['mso-list']) {
 					var level = 0;
@@ -10722,7 +10688,6 @@ PasteProcessor.prototype =
 				table = new CTable(oDocument.DrawingDocument, oDocument, true, 0, 0, aGrid);
 			}
 
-
 			//считаем aSumGrid
 			var aSumGrid = [];
 			aSumGrid[-1] = 0;
@@ -10770,7 +10735,6 @@ PasteProcessor.prototype =
 // 		<!--EndFragment-->
 // 		</body>
 
-
 		//2. Rich text (CBlockLevelSdt)
 		//
 		// <body lang=EN-US style='tab-interval:.5in;word-wrap:break-word'>
@@ -10805,7 +10769,6 @@ PasteProcessor.prototype =
 // 		<!--EndFragment-->
 // 		</body>
 
-
 		//5. Date (CInlineLevelSdt)
 
 // 		<body lang=EN-US style='tab-interval:.5in;word-wrap:break-word'>
@@ -10815,7 +10778,6 @@ PasteProcessor.prototype =
 // 	</span>
 // 		<!--EndFragment-->
 // 		</body>
-
 
 		//6. check box (CInlineLevelSdt)
 //
@@ -10829,8 +10791,6 @@ PasteProcessor.prototype =
 // </span>
 // 		<!--EndFragment-->
 // 		</body>
-
-
 
 		//form examples:
 		//1.DropDown
@@ -10908,7 +10868,6 @@ PasteProcessor.prototype =
 		// <!--EndFragment-->
 		// </body>
 		// </html>
-
 
 		//6. Signature - fixed form (TODO see add from api)
 
@@ -12123,7 +12082,6 @@ PasteProcessor.prototype =
 				value = value.replace(/(\r|\t|\n)/g, ' ');
 			}
 
-
 			var checkPreviousNotSpaceText = function (_node) {
 				if (!_node || oThis._IsBlockElem(_node.nodeName.toLowerCase())) {
 					return false;
@@ -12245,7 +12203,6 @@ PasteProcessor.prototype =
 					} else if (oThis.needAddCommentEnd) {
 						oThis._commitCommentEnd();
 					}
-
 
 					var nUnicode = oIterator.value();
 					if (ignoreFirstSpaces) {
@@ -12807,7 +12764,6 @@ PasteProcessor.prototype =
 					if (null != href) {
 						title = child.getAttribute("title");
 
-
 						isPasteHyperlink = node.getElementsByTagName('img');
 						var text = null;
 						if (isPasteHyperlink && isPasteHyperlink.length) {
@@ -13204,7 +13160,6 @@ PasteProcessor.prototype =
 			this.aContent = oShapeContent.Content;
 		}
 
-
 		if (true === bRoot) {
 			//Если блочных элементов нет, то отменяем флаг
 			var bExist = false;
@@ -13303,7 +13258,6 @@ PasteProcessor.prototype =
 				}
 			}
 		}
-
 
 		//рекурсивно вызываем для childNodes
 		var savedNLvl = null;
@@ -13539,7 +13493,6 @@ PasteProcessor.prototype =
 	_applyStylesToTable: function (cTable, cStyle) {
 		if (!cTable || !cStyle || (cTable && !cTable.Content))
 			return;
-
 
 		var row, tableCell;
 		for (var i = 0; i < cTable.Content.length; i++) {
@@ -14231,8 +14184,6 @@ MsoStyleParser.prototype.getMsoClassByName = function (name) {
 	return null;
 };
 
-
-
 function MsoStyleClass() {
 	this.name = null;
 	this.attributes = null;
@@ -14373,7 +14324,6 @@ ParseHtmlStyle.prototype.applyStyles = function (textPr) {
 		}
 	}*/
 
-
 	var font_size = map.get('font-size');
 	//font_size = CheckDefaultFontSize(font_size, this.apiEditor);
 	if (font_size) {
@@ -14397,7 +14347,6 @@ ParseHtmlStyle.prototype.applyStyles = function (textPr) {
 		}
 	}
 
-
 	var font_weight = map.get("font-weight");
 	if (font_weight) {
 		if ("bold" === font_weight || "bolder" === font_weight || 400 < font_weight) {
@@ -14414,7 +14363,6 @@ ParseHtmlStyle.prototype.applyStyles = function (textPr) {
 	if (spacing && null != (spacing = AscCommon.valueToMm(spacing))) {
 		textPr.Spacing = spacing;
 	}
-
 
 	var text_decoration = map.get("text-decoration");
 	if (text_decoration) {
@@ -14433,7 +14381,6 @@ ParseHtmlStyle.prototype.applyStyles = function (textPr) {
 			textPr.HighLight = highLight;
 		}
 	}
-
 
 	var vertical_align = map.get("vertical-align");
 	switch (vertical_align) {
@@ -14528,13 +14475,11 @@ function addThemeImagesToMap(oImageMap, aDwnldUrls, aImages) {
   window["AscCommon"].PasteProcessor = PasteProcessor;
   window["AscCommon"].GetContentFromHtml = GetContentFromHtml;
 
-
   window["AscCommon"].addTextIntoRun = addTextIntoRun;
   window["AscCommon"].searchBinaryClass = searchBinaryClass;
 
   window["AscCommon"].PasteElementsId = PasteElementsId;
   window["AscCommon"].CheckDefaultFontFamily = CheckDefaultFontFamily;
-
 
   window["Asc"]["SpecialPasteShowOptions"] = window["Asc"].SpecialPasteShowOptions = SpecialPasteShowOptions;
   prot									 = SpecialPasteShowOptions.prototype;
@@ -14550,6 +14495,5 @@ function addThemeImagesToMap(oImageMap, aDwnldUrls, aImages) {
 
   window["AscCommon"].ParseHtmlMathContent = ParseHtmlMathContent;
   window["AscCommon"].ParseHtmlStyle = ParseHtmlStyle;
-
 
 })(window);

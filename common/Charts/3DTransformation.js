@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -334,7 +329,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 
 		let optimalWidthLine = (widthLine / this.aspectRatioX) / this.scaleX;
 
-
 		if (optimalWidthLine < widthLine) {
 			return;
 		}
@@ -546,7 +540,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 		let y11 = diffAndScalePoints.y;
 		let z11 = diffAndScalePoints.z;
 
-
 		let rotatePoints = this.rotate(x11, y11, z11);
 		let x111 = rotatePoints.x;
 		let y111 = rotatePoints.y;
@@ -555,7 +548,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 		let x1111 = x111 + diffX;
 		let y1111 = y111 + diffY;
 		let z1111 = z111 + diffZ;
-
 
 		let projectPoints = this.project(x1111, y1111, z1111);
 		let x11111 = projectPoints.x;
@@ -618,7 +610,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 		let centerYDiff = heightChart / 2 + this.top;
 		let centerZDiff = this.depthPerspective / 2;
 
-
 		point3D.offset(-centerXDiff, -centerYDiff, -centerZDiff);
 
 		//rotate
@@ -674,7 +665,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 
 		return {radius1: radius1, radius2: radius2, depth: depth};
 	};
-
 
 	//***functions for matrix transformation***
 	Processor3D.prototype._shearXY = function () {
@@ -897,7 +887,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 				valCatAx.transformYPoints[i] = {x: (point.x - widthText) / pxToMM, y: point.y / pxToMM};
 			}
 		};
-
 
 		if (xPoints) {
 			if (this.chartsDrawer.calcProp.type !== AscFormat.c_oChartTypes.HBar) {
@@ -1164,7 +1153,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 		faces.push([7, 4, 3, 0]);
 		faces.push([1, 6, 2, 5]);
 
-
 		//***Calculate cameraDiffZ***
 		if (!this.view3D.getRAngAx()) {
 			//быстрая функция поиска сдвигов камеры
@@ -1195,7 +1183,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 
 		let aspectRatio = (widthOriginalChart) / (heightOriginalChart);
 
-
 		for (let i = 0; i < newPoints.length; i++) {
 			let point3D = new Point3D(newPoints[i].x, newPoints[i].y, newPoints[i].z, this);
 
@@ -1205,7 +1192,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 			//rotate
 			let matrixRotateAllAxis = this._getMatrixRotateAllAxis();
 			point3D.multiplyPointOnMatrix1(matrixRotateAllAxis);
-
 
 			if (minZ === null || point3D.z < minZ) {
 				minZ = point3D.z;
@@ -1274,7 +1260,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 				this.cameraDiffZ = Math.abs(correctOffset.minZ);
 				this.cameraDiffX = correctOffset.diffX;
 
-
 				let minMaxOy = this._getMinMaxOyPoints(newPoints, 0);
 				//this.cameraDiffZ = - minZ;
 				this.cameraDiffY = -minMaxOy.diffY;
@@ -1317,8 +1302,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 				//correctOffset = this._correctZPosition4(minMaxOx.tempX1, minMaxOx.tempX2, minMaxOx.tempZ1, minMaxOx.tempZ2, -this.cameraDiffZ, minMaxOx.tempY1, minMaxOx.tempY2);
 				this.cameraDiffX = -minMaxOx.diffX;
 			}
-
-
 
 			//TODO пока включаю для поворотов  по OX + по OY checkOutSideArea(медленная функция), затем нужно переделать, используя закомментированный код сверху
 			this.cameraDiffZ = -minZ;
@@ -1466,7 +1449,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 				fRightDiffZ = t.cameraDiffZ;
 			}
 
-
 			while ((diffX > widthChart || diffY > heightChart) || (fRightDiffZ - fLeftDiffZ) > DELTA) {
 				t.cameraDiffZ = fLeftDiffZ + ((fRightDiffZ - fLeftDiffZ) / 2);
 
@@ -1475,7 +1457,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 				t.cameraDiffX = -minMaxOx.diffX;
 				let x111 = t.convertAndTurnPoint(minMaxOx.tempX1, minMaxOx.tempY1, minMaxOx.tempZ1);
 				let x222 = t.convertAndTurnPoint(minMaxOx.tempX2, minMaxOx.tempY2, minMaxOx.tempZ2);
-
 
 				let diffX = Math.abs(x222.x - x111.x);
 
@@ -1511,7 +1492,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 		let aspectRatioX = this.aspectRatioX;
 		let aspectRatioY = this.aspectRatioY;
 
-
 		let diffAndRotatePoint = function (point) {
 			let point3D = new Point3D(point.x, point.y, point.z, t);
 
@@ -1538,7 +1518,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 			let z1S = rotatePoints1.z - minZ;
 			//let x1SS = (fov * x1S / (z1S + fov)) + w / 2;
 
-
 			let diffAndScalePoints2 = t.diffAndScale(x2, y2, z2);
 			x2 = diffAndScalePoints2.x;
 			y2 = diffAndScalePoints2.y;
@@ -1553,7 +1532,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 
 			return (-a1 * z2S - a1 * fov - a2 * z1S - a2 * fov) / (-z2S - fov - z1S - fov);
 		};
-
 
 		let w = t.widthCanvas;
 
@@ -1603,7 +1581,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 				tempZ2 = tempArray[end].z;
 			}
 
-
 			diffX = calculateDiffX(tempX1, tempX2, tempZ1, tempZ2, minZ, tempY1, tempY2);
 
 			let projectiveMatrix = t._getPerspectiveProjectionMatrix(1 / (t.rPerspective));
@@ -1612,7 +1589,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 			rotatePoint1.offset(-diffX, 0, -minZ);
 			rotatePoint1 = rotatePoint1.project(projectiveMatrix);
 			let x1 = Math.floor(rotatePoint1.x + t.widthCanvas / 2);
-
 
 			let rotatePoint2 = diffAndRotatePoint(tempArray[end]);
 			rotatePoint2.offset(-diffX, 0, -minZ);
@@ -1631,7 +1607,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 				rotatePoint.offset(-diffX, 0, -minZ);
 				rotatePoint = rotatePoint.project(projectiveMatrix);
 				let tempX11 = Math.floor(rotatePoint.x + t.widthCanvas / 2);
-
 
 				if (x1 < x2) {
 					if (tempX11 < x1 || tempX11 > x2) {
@@ -1671,7 +1646,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 			y1 = diffAndScalePoints.y;
 			z1 = diffAndScalePoints.z;
 
-
 			let rotatePoints = t.rotate(x1, y1, z1);
 
 			let a1 = rotatePoints.y;
@@ -1679,7 +1653,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 			let z1S = rotatePoints.z + minZ;
 
 			//let x1SS = (fov * y1S / (z1S + fov)) + h / 2;
-
 
 			diffAndScalePoints = t.diffAndScale(x2, y2, z2);
 			x2 = diffAndScalePoints.x;
@@ -1697,7 +1670,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 			//let topMargin = (fov * y1S / (z1S + fov)) + h / 2;
 			//let bottomMargin = h - ((fov * y2S / (z2S + fov)) + h / 2);
 
-
 			//((a1 - diffY) / (z1S + fov)) =  - (((a2 - diffY) / (z2S + fov)))
 
 			/*(a1 - diffY) * (z2S + fov) = -(z1S + fov) * (a2 - diffY)
@@ -1709,7 +1681,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 			diffY = (a1 * z2S + a1 * fov + fov * a2 + z1S * a2) / (z2S + fov + z1S + fov);
 
 			//let diffY = (-a1 * z2S - a1 * fov - a2 * z1S -a2 * fov) / ( -z2S - fov - z1S - fov);
-
 
 			return diffY;
 
@@ -1744,12 +1715,10 @@ Processor3D.prototype.calculateCommonOptions = function () {
 				tempZ2 = tempArray[end].z;
 			}
 
-
 			diffY = calculateDiffY(tempX1, tempX2, tempY1, tempY2, tempZ1, tempZ2, minZ);
 
 			let rotatePoint1 = this.calculatePointManual(tempX1, tempY1, tempZ1, this.cameraDiffX, -diffY, minZ);
 			let y1 = rotatePoint1.y;
-
 
 			let rotatePoint2 = this.calculatePointManual(tempX2, tempY2, tempZ2, this.cameraDiffX, -diffY, minZ);
 			let y2 = rotatePoint2.y;
@@ -1825,7 +1794,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 		res[31] = points[6];
 		res[32] = points[4];
 
-
 		/*for(let i = 0; i < points.length; i++)
 		{
 			for(let j = 0; j < points.length; j++)
@@ -1865,7 +1833,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 		tempArray[17] = points[0];//leftFar
 		tempArray[18] = points[4];//leftFar
 
-
 		let tempX1, tempY1, tempZ1, tempX2, tempY2, tempZ2;
 		for (let i = 0; i < tempArray.length - 1; i++) {
 			let start = i;
@@ -1892,18 +1859,14 @@ Processor3D.prototype.calculateCommonOptions = function () {
 				tempZ2 = tempArray[end].z;
 			}
 
-
 			//let diffY = calculateDiffY(tempX1, tempX2, tempY1, tempY2, tempZ1, tempZ2, minZ);
-
 
 			let correctOffset = this._correctZPositionOY(tempX1, tempX2, tempZ1, tempZ2, minZ, tempY1, tempY2);
 			let diffZ = correctOffset.minZ;
 			let diffY = correctOffset.diffY;
 
-
 			let rotatePoint1 = this.calculatePointManual(tempX1, tempY1, tempZ1, this.cameraDiffX, diffY, diffZ);
 			let y1 = rotatePoint1.y;
-
 
 			let rotatePoint2 = this.calculatePointManual(tempX2, tempY2, tempZ2, this.cameraDiffX, diffY, diffZ);
 			let y2 = rotatePoint2.y;
@@ -1955,18 +1918,15 @@ Processor3D.prototype.calculateCommonOptions = function () {
 			let y11 = diffAndScalePoints.y;
 			let z11 = diffAndScalePoints.z;
 
-
 			let rotatePoints = t.rotate(x11, y11, z11);
 			let x111 = rotatePoints.x;
 			let z111 = rotatePoints.z;
-
 
 			/*let x1111 = x111 + diffX;
 			let y1111 = y111 + diffY;
 			let z1111 = z111 + diffZ;
 			let x11111 = (fov * x1111) / (z1111 + fov) + w / 2;
 			let y11111 = (fov * y1111) / (z1111 + fov) + h / 2;*/
-
 
 			//(fov * x1111) / (z1111 + fov) + w / 2 = t.left
 			//(fov * (x111 + diffX)) / ((z111 + diffZ) + fov) + w / 2 = t.left
@@ -1974,17 +1934,14 @@ Processor3D.prototype.calculateCommonOptions = function () {
 			//fov * (x111 + diffX) = wL * ((z111 + diffZ) + fov)
 			//fov * x111 + fov * diffX = wL * z111 + wL * diffZ + wL * fov
 
-
 			diffAndScalePoints = t.diffAndScale(x2, y2, z2);
 			let x22 = diffAndScalePoints.x;
 			let y22 = diffAndScalePoints.y;
 			let z22 = diffAndScalePoints.z;
 
-
 			rotatePoints = t.rotate(x22, y22, z22);
 			let x222 = rotatePoints.x;
 			let z222 = rotatePoints.z;
-
 
 			/*let x1111 = x111 + diffX;
 			let y1111 = y111 + diffY;
@@ -1992,16 +1949,13 @@ Processor3D.prototype.calculateCommonOptions = function () {
 			let x11111 = (fov * x1111) / (z1111 + fov) + w / 2;
 			let y11111 = (fov * y1111) / (z1111 + fov) + h / 2;*/
 
-
 			let wR = w / 2 - t.left;
 			//fov * (x222 + diffX) = wR * ((z222 + diffZ) + fov)
 			//fov * x222 + fov * diffX = wR * z222 + wR * diffZ + wR * fov
 
-
 			//итого
 			//fov * x111 + fov * diffX = wL * z111 + wL * diffZ + wL * fov
 			//fov * x222 + fov * diffX = wR * z222 + wR * diffZ + wR * fov
-
 
 			/*diffX = (wL * z111 + wL * diffZ + wL * fov - fov * x111) / fov;
 
@@ -2009,10 +1963,8 @@ Processor3D.prototype.calculateCommonOptions = function () {
 
 			fov * x222 + wL * z111 + wL * fov - fov * x111 - wR * z222 - wR * fov =  wR * diffZ - wL * diffZ*/
 
-
 			let diffZ = (fov * x222 + wL * z111 + wL * fov - fov * x111 - wR * z222 - wR * fov) / (wR - wL);
 			let diffX = (wL * z111 + wL * diffZ + wL * fov - fov * x111) / fov;
-
 
 			return {minZ: diffZ, diffX: diffX};
 		};
@@ -2035,18 +1987,15 @@ Processor3D.prototype.calculateCommonOptions = function () {
 			let y11 = diffAndScalePoints.y;
 			let z11 = diffAndScalePoints.z;
 
-
 			let rotatePoints = t.rotate(x11, y11, z11);
 			let y111 = rotatePoints.y;
 			let z111 = rotatePoints.z;
-
 
 			/*let x1111 = x111 + diffX;
 			let y1111 = y111 + diffY;
 			let z1111 = z111 + diffZ;
 			let x11111 = (fov * x1111) / (z1111 + fov) + w / 2;
 			let y11111 = (fov * y1111) / (z1111 + fov) + h / 2;*/
-
 
 			//(fov * x1111) / (z1111 + fov) + w / 2 = t.left
 			//(fov * (x111 + diffX)) / ((z111 + diffZ) + fov) + w / 2 = t.left
@@ -2054,24 +2003,20 @@ Processor3D.prototype.calculateCommonOptions = function () {
 			//fov * (x111 + diffX) = wL * ((z111 + diffZ) + fov)
 			//fov * x111 + fov * diffX = wL * z111 + wL * diffZ + wL * fov
 
-
 			diffAndScalePoints = t.diffAndScale(x2, y2, z2);
 			let x22 = diffAndScalePoints.x;
 			let y22 = diffAndScalePoints.y;
 			let z22 = diffAndScalePoints.z;
 
-
 			rotatePoints = t.rotate(x22, y22, z22);
 			let y222 = rotatePoints.y;
 			let z222 = rotatePoints.z;
-
 
 			/*let x1111 = x111 + diffX;
 			let y1111 = y111 + diffY;
 			let z1111 = z111 + diffZ;
 			let x11111 = (fov * x1111) / (z1111 + fov) + w / 2;
 			let y11111 = (fov * y1111) / (z1111 + fov) + h / 2;*/
-
 
 			//(fov * (y111 + diffY)) / ((z111 + diffZ) + fov) + h / 2 = t.top
 			//(fov * (y222 + diffY)) / ((z222 + diffZ) + fov) + h / 2 = h - t.bottom
@@ -2080,7 +2025,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 
 			/*(fov * (y111 + diffY)) / ((z111 + diffZ) + fov) = wL
 			(fov * (y222 + diffY)) / ((z222 + diffZ) + fov) = wR
-
 
 			fov * (y111 + diffY) = wL * ((z111 + diffZ) + fov)
 
@@ -2096,10 +2040,8 @@ Processor3D.prototype.calculateCommonOptions = function () {
 			let diffZ = (fov * y111 + wR * z222 + wR * fov - fov * y222 - wL * z111 - wL * fov) / (wL - wR);
 			let diffY = (wR * z222 + wR * diffZ + wR * fov - fov * y222) / fov;
 
-
 			//let diffZ = (fov * x222 + wL * z111 + wL * fov - fov * x111 - wR * z222 - wR * fov) / (wR - wL);
 			//let diffX = (wL * z111 + wL * diffZ + wL * fov - fov * x111) / fov;
-
 
 			return {minZ: diffZ, diffY: diffY};
 		};
@@ -2188,7 +2130,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 				let y1 = point1.y;
 				let y2 = point2.y;
 
-
 				if (y1 <= xTop) {
 					xTop = y1;
 					mostTopPointY = new Point3D(points[faces[i][k]].x, points[faces[i][k]].y, points[faces[i][k]].z, this.cChartDrawer);
@@ -2265,7 +2206,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 		return this.view3D && this.view3D.depthPercent ? this.view3D.depthPercent / 100 : globalBasePercent / 100;
 	};
 
-
 	function Point3D(x, y, z, chartsDrawer) {
 		this.x = x;
 		this.y = y;
@@ -2292,7 +2232,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 			let sinx = Math.sin(angleOx);
 			let cosz = Math.cos(angleOz);
 			let sinz = Math.sin(angleOz);
-
 
 			let newX = cosy * (sinz * y + cosz * x) - siny * z;
 			let newY = sinx * (cosy * z + siny * (sinz * y + cosz * x)) + cosx * (cosz * y - sinz * x);
@@ -2423,7 +2362,6 @@ Processor3D.prototype.calculateCommonOptions = function () {
 
 		return res;
 	};
-
 
 //sort parallalepiped faces
 	function CSortFaces(cChartDrawer, centralViewPoint) {

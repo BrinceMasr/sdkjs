@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -43,7 +38,6 @@
     var CChangeObject = AscDFH.CChangesDrawingsObject;
     var CChangeContent = AscDFH.CChangesDrawingsContent;
     var CChangeDouble2 = AscDFH.CChangesDrawingsDouble2;
-
 
     var drawingsChangesMap = AscDFH.drawingsChangesMap;
     var drawingContentChanges = AscDFH.drawingContentChanges;
@@ -258,7 +252,6 @@
     oSTATEDESCRMAP[TIME_NODE_STATE_FROZEN] = 'FROZEN';
     oSTATEDESCRMAP[TIME_NODE_STATE_FINISHED] = 'FINISHED';
 
-
     let NODE_TYPE_MAP = {};
     NODE_TYPE_MAP[AscFormat.NODE_TYPE_AFTEREFFECT] = "AFTEREFFECT";
     NODE_TYPE_MAP[AscFormat.NODE_TYPE_AFTERGROUP] = "AFTERGROUP";
@@ -270,14 +263,12 @@
     NODE_TYPE_MAP[AscFormat.NODE_TYPE_WITHEFFECT] = "WITHEFFECT";
     NODE_TYPE_MAP[AscFormat.NODE_TYPE_WITHGROUP] = "WITHGROUP";
 
-
     const NODE_FILL_FREEZE = 0;
     const NODE_FILL_HOLD = 1;
     const NODE_FILL_REMOVE = 2;
     const NODE_FILL_TRANSITION = 3;
 
     const ANIM_TREE_LAVELS_COUNT = 5;
-
 
     function CTimeNodeBase() {
         CBaseAnimObject.call(this);
@@ -2659,8 +2650,6 @@
             return null;
         }
 
-
-
         if (oPr.asc_getStartType() !== oCurPr.asc_getStartType()) {
             aSeqs = this.getEffectsSequences();
             for (nSeq = 0; nSeq < aSeqs.length; ++nSeq) {
@@ -2675,7 +2664,6 @@
             this.buildTree(aSeqs);
             return;
         }
-
 
         if (oPr.asc_getTriggerClickSequence() !== oCurPr.asc_getTriggerClickSequence()
             || oPr.asc_getTriggerObjectClick() !== oCurPr.asc_getTriggerObjectClick()) {
@@ -2730,7 +2718,6 @@
             this.buildTree(aSeqs);
             return;
         }
-
 
         let iN = AscFormat.isRealNumber;
         let iB = AscFormat.isRealBool;
@@ -3877,7 +3864,6 @@
         pReader.stream.SkipRecord();
     };
 
-
     changesFactory[AscDFH.historyitem_BldPTmplLst] = CChangeObject;
     changesFactory[AscDFH.historyitem_BldPAdvAuto] = CChangeLong;
     changesFactory[AscDFH.historyitem_BldPAutoUpdateAnimBg] = CChangeBool;
@@ -3902,7 +3888,6 @@
     drawingsChangesMap[AscDFH.historyitem_BldPRev] = function (oClass, value) {
         oClass.rev = value;
     };
-
 
     const ParaBuildType_allAtOnce = 0;
     const ParaBuildType_cust = 1;
@@ -4081,7 +4066,6 @@
         else if (4 === nType) this.setRev(oStream.GetBool());
     };
 
-
     changesFactory[AscDFH.historyitem_DirTransitionDir] = CChangeLong;
     drawingsChangesMap[AscDFH.historyitem_DirTransitionDir] = function (oClass, value) {
         oClass.dir = value;
@@ -4135,7 +4119,6 @@
     };
     COptionalBlackTransition.prototype.readChild = function (nType, pReader) {
     };
-
 
     changesFactory[AscDFH.historyitem_GraphicElDgmId] = CChangeString;
     changesFactory[AscDFH.historyitem_GraphicElDgmBuildStep] = CChangeLong;
@@ -4404,11 +4387,9 @@
         oClass.valueType = value;
     };
 
-
     const VALUE_TYPE_NUM = 0;
     const VALUE_TYPE_CLR = 1;
     const VALUE_TYPE_STR = 2;
-
 
     const CALCMODE_DISCRETE = 0;
     const CALCMODE_LIN = 1;
@@ -5058,7 +5039,6 @@
 	CCBhvr.prototype.isOverrideNormal = function () {
 		return this.override !== TLOverrideChildStyle;
 	};
-
 
     const RESTART_TYPE_ALWAYS = 0;
     const RESTART_TYPE_NEVER = 1;
@@ -5917,7 +5897,6 @@
 		return !!this.nodePh;
 	};
 
-
     changesFactory[AscDFH.historyitem_CondRtn] = CChangeObject;
     changesFactory[AscDFH.historyitem_CondTgtEl] = CChangeObject;
     changesFactory[AscDFH.historyitem_CondTn] = CChangeLong;
@@ -5939,7 +5918,6 @@
     drawingsChangesMap[AscDFH.historyitem_CondEvt] = function (oClass, value) {
         oClass.evt = value;
     };
-
 
     const COND_EVNT_BEGIN = 0;
     const COND_EVNT_END = 1;
@@ -6178,7 +6156,6 @@
         }
     };
 
-
     changesFactory[AscDFH.historyitem_RtnVal] = CChangeLong;
     drawingsChangesMap[AscDFH.historyitem_RtnVal] = function (oClass, value) {
         oClass.val = value;
@@ -6332,7 +6309,6 @@
         }
         return true;
     };
-
 
     changesFactory[AscDFH.historyitem_SndTgtEmbed] = CChangeLong;
     changesFactory[AscDFH.historyitem_SndTgtName] = CChangeString;
@@ -6774,7 +6750,6 @@
         return 0;
     };
 
-
     changesFactory[AscDFH.historyitem_AnimVariantBoolVal] = CChangeBool;
     changesFactory[AscDFH.historyitem_AnimVariantClrVal] = CChangeObjectNoId;
     changesFactory[AscDFH.historyitem_AnimVariantFltVal] = CChangeDouble2;
@@ -7007,7 +6982,6 @@
 
     const TLColorSpaceRGB = 0;
     const TLColorSpaceHSL = 1;
-
 
     function CAnimClr() {
         CTimeNodeBase.call(this);
@@ -7526,7 +7500,6 @@
     drawingsChangesMap[AscDFH.historyitem_AnimMotionRAng] = function (oClass, value) {
         oClass.rAng = value;
     };
-
 
     const ORIGIN_PARENT = 0;
     const ORIGIN_LAYOUT = 1;
@@ -8073,7 +8046,6 @@
                 }
             }
 
-
             oPath = new AscFormat.Path();
             oPath.setPathW(GEOMETRY_RECT_SIZE);
             oPath.setPathH(GEOMETRY_RECT_SIZE);
@@ -8234,7 +8206,6 @@
     CAnimRot.prototype.isAllowedAttribute = function (sAttrName) {
         return sAttrName === "ppt_r" || sAttrName === "r" || sAttrName === "style.rotation";
     };
-
 
     changesFactory[AscDFH.historyitem_AnimScaleCBhvr] = CChangeObject;
     changesFactory[AscDFH.historyitem_AnimScaleBy] = CChangeObject;
@@ -8462,7 +8433,6 @@
         return [this.cMediaNode];
     };
 
-
     changesFactory[AscDFH.historyitem_CMediaNodeCTn] = CChangeObject;
     changesFactory[AscDFH.historyitem_CMediaNodeTgtEl] = CChangeObject;
     changesFactory[AscDFH.historyitem_CMediaNodeMute] = CChangeBool;
@@ -8578,7 +8548,6 @@
         return [this.cTn, this.tgtEl];
     };
 
-
     changesFactory[AscDFH.historyitem_CmdCBhvr] = CChangeObject;
     changesFactory[AscDFH.historyitem_CmdCmd] = CChangeString;
     changesFactory[AscDFH.historyitem_CmdType] = CChangeLong;
@@ -8592,7 +8561,6 @@
     drawingsChangesMap[AscDFH.historyitem_CmdType] = function (oClass, value) {
         oClass.type = value;
     };
-
 
     const TLCommandTypeCall = 0;
     const TLCommandTypeEvt = 1;
@@ -8674,7 +8642,6 @@
             return null;
         }
 
-
         let oData = oSp.getMediaData();
         if(!oData) {
             return null;
@@ -8726,7 +8693,6 @@
         }
     };
 
-
     function CAdditionalMediaData() {
         this.fullScreen = null;
         this.mute = null;
@@ -8750,7 +8716,6 @@
     drawingsChangesMap[AscDFH.historyitem_TimeNodeContainerCTn] = function (oClass, value) {
         oClass.cTn = value;
     };
-
 
     const ANIM_LABEL_WIDTH_PIX = 22;
     const ANIM_LABEL_HEIGHT_PIX = 17;
@@ -9292,7 +9257,6 @@
         }
     };
 
-
     CTimeNodeContainer.prototype["asc_getDuration"] = CTimeNodeContainer.prototype.asc_getDuration;
     CTimeNodeContainer.prototype.asc_getIsAutoDuration = function () {
         return (new CAnimationTime(this.asc_getDuration())).isIndefinite();
@@ -9547,7 +9511,6 @@
         });
         return bValid;
     };
-
 
     function CPar() {
         CTimeNodeContainer.call(this);
@@ -9943,7 +9906,6 @@
         return this;
     };
 
-
     changesFactory[AscDFH.historyitem_VideoCMediaNode] = CChangeObject;
     changesFactory[AscDFH.historyitem_VideoFullScrn] = CChangeBool;
     drawingsChangesMap[AscDFH.historyitem_VideoCMediaNode] = function (oClass, value) {
@@ -10000,7 +9962,6 @@
     CVideo.prototype.getChildren = function () {
         return [this.cMediaNode];
     };
-
 
     changesFactory[AscDFH.historyitem_OleChartElLvl] = CChangeLong;
     changesFactory[AscDFH.historyitem_OleChartElType] = CChangeLong;
@@ -10131,7 +10092,6 @@
     CSndAc.prototype.readChild = function (nType, pReader) {
     };
 
-
     changesFactory[AscDFH.historyitem_StSndSnd] = CChangeObject;
     changesFactory[AscDFH.historyitem_StSndLoop] = CChangeBool;
     drawingsChangesMap[AscDFH.historyitem_StSndSnd] = function (oClass, value) {
@@ -10172,7 +10132,6 @@
     };
     CStSnd.prototype.readChild = function (nType, pReader) {
     };
-
 
     changesFactory[AscDFH.historyitem_TxElCharRg] = CChangeObject;
     changesFactory[AscDFH.historyitem_TxElPRg] = CChangeObject;
@@ -10274,7 +10233,6 @@
     CTxEl.prototype.readChild = function (nType, pReader) {
     };
 
-
     changesFactory[AscDFH.historyitem_WheelSpokes] = CChangeLong;
     drawingsChangesMap[AscDFH.historyitem_WheelSpokes] = function (oClass, value) {
         oClass.spokes = value;
@@ -10303,7 +10261,6 @@
     };
     CWheel.prototype.readChild = function (nType, pReader) {
     };
-
 
     changesFactory[AscDFH.historyitem_AttrNameText] = CChangeString;
     drawingsChangesMap[AscDFH.historyitem_AttrNameText] = function (oClass, value) {
@@ -10474,7 +10431,6 @@
             this.elapsed += nDiff;
             this.lastTime = nCurTime;
 
-
             //for test
             //if(this.lastFire === null || this.elapsed - this.lastFire >= 5000) {
             //    this.lastFire = this.elapsed;
@@ -10548,7 +10504,6 @@
     CAnimComplexTrigger.prototype.isDefault = function () {
         return this.triggers.length === 1 && this.triggers[0] === DEFAULT_SIMPLE_TRIGGER;
     };
-
 
     function CAnimEvent(fCallback, oTrigger, oCaller) {
         this.trigger = oTrigger;
@@ -11789,7 +11744,6 @@
         return this.createFade(fTime, TRANSITION_TYPE_IN);
     };
 
-
     function CTexturesCache() {
         this.map = {};
     }
@@ -12513,7 +12467,6 @@
         return  this.animationDrawer.isDrawingAnimated(sDrawingId);
     };
 
-
     function CDemoAnimPlayer(oSlide) {
         CAnimationPlayer.call(this, oSlide, null);
     }
@@ -12584,7 +12537,6 @@
     const DEFAULT_NEVER_TRIGGER = function () {
         return false;
     };
-
 
     /* Attributes names
     style.opacity
@@ -12914,7 +12866,6 @@
 		const oAttributes = {};
 		this.checkRemoveOldAnim(sDrawingId);
 
-
 		arrAnimations.sort(function(oAnim1, oAnim2) {
 			if (oAnim1.startTick && oAnim2.startTick) {
 				return oAnim1.startTick[sDrawingId] - oAnim2.startTick[sDrawingId];
@@ -12969,7 +12920,6 @@
 
         let oStrokeColor = oAttributesMap["stroke.color"];
         let bStrokeOn = oAttributesMap["stroke.on"];
-
 
         let oCurBrush;
         if(oDrawing.blipFill) {
@@ -13158,7 +13108,6 @@
     //--------------------------------------------
     //Formula parser
 
-
     function CParseQueue(oParser) {
         this.queue = [];
         this.pos = -1;
@@ -13203,7 +13152,6 @@
             this.queue[nToken].replaceVar(oVarMap);
         }
     };
-
 
     function CTokenBase(oQueue) {
         this.queue = oQueue;
@@ -13510,7 +13458,6 @@
     CArgSeparatorToken.prototype._calculate = function (aArgs, oVarMap) {
     };
 
-
     const OPERATORS_MAP = {
         "+": true,
         "-": true,
@@ -13528,7 +13475,6 @@
 
     const NUMBER_REGEXPSTR = "[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?";
     const NUMBER_REGEXP = new RegExp(NUMBER_REGEXPSTR, "g");
-
 
     const PARSER_FLAGS_CONSTVAR = 1;
     const PARSER_FLAGS_FUNCTION = 2;
@@ -13817,8 +13763,6 @@
     };
     //--------------------------------------------------------------------------
 
-
-
 	window['AscFormat'] = window['AscFormat'] || {};
     window['AscFormat'].CTiming = CTiming;
     window['AscFormat'].CEmptyObject = CEmptyObject;
@@ -13882,7 +13826,6 @@
     window['AscFormat'].CDemoAnimPlayer = CDemoAnimPlayer;
     window['AscFormat'].ICON_TRIGGER = ICON_TRIGGER;
     window['AscFormat'].MoveAnimationDrawObject = MoveAnimationDrawObject;
-
 
     function generate_preset_data() {
         var aPresets = "emph,emphasis_blink,35,0;emph,emphasis_bold_flash,10,0;emph,emphasis_bold_reveal,15,0;emph,emphasis_brush_color,16,0;emph,emphasis_color_pulse,27,0;emph,emphasis_complementary_color,21,0;emph,emphasis_complementary_color_2,22,0;emph,emphasis_contrasting_color,23,0;emph,emphasis_contrasting_darken,24,0;emph,emphasis_desaturate,25,0;emph,emphasis_fill_color,1,2;emph,emphasis_font_color,3,2;emph,emphasis_grow_shrink,6,0;emph,emphasis_grow_with_color,28,0;emph,emphasis_lighten,30,0;emph,emphasis_line_color,7,2;emph,emphasis_object_color,19,0;emph,emphasis_pulse,26,0;emph,emphasis_shimmer,36,0;emph,emphasis_spin,8,0;emph,emphasis_teeter,32,0;emph,emphasis_transparency,9,0;emph,emphasis_underline,18,0;emph,emphasis_wave,34,0;entr,entrance_appear,1,0;entr,entrance_basic_swivel_horizontal,19,10;entr,entrance_basic_swivel_vertical,19,5;entr,entrance_basic_zoom_in,23,16;entr,entrance_basic_zoom_in_from_screen_center,23,528;entr,entrance_basic_zoom_in_slightly,23,272;entr,entrance_basic_zoom_out,23,32;entr,entrance_basic_zoom_out_from_screen_bottom,23,36;entr,entrance_basic_zoom_out_slightly,23,288;entr,entrance_blinds_horizontal,3,10;entr,entrance_blinds_vertical,3,5;entr,entrance_boomerang,25,0;entr,entrance_bounce,26,0;entr,entrance_box_in,4,16;entr,entrance_box_out,4,32;entr,entrance_center_compress,50,0;entr,entrance_center_revolve,43,0;entr,entrance_checkerboard_across,5,10;entr,entrance_checkerboard_down,5,5;entr,entrance_circle_in,6,16;entr,entrance_circle_out,6,32;entr,entrance_credits,28,0;entr,entrance_curve_up,52,0;entr,entrance_diamond_in,8,16;entr,entrance_diamond_out,8,32;entr,entrance_dissolve_in,9,0;entr,entrance_drop,38,0;entr,entrance_expand,55,0;entr,entrance_fade,10,0;entr,entrance_flip,56,0;entr,entrance_float,30,0;entr,entrance_float_down,47,0;entr,entrance_float_up,42,0;entr,entrance_fly_in_from_bottom,2,4;entr,entrance_fly_in_from_bottom_left,2,12;entr,entrance_fly_in_from_bottom_right,2,6;entr,entrance_fly_in_from_left,2,8;entr,entrance_fly_in_from_right,2,2;entr,entrance_fly_in_from_top,2,1;entr,entrance_fly_in_from_top_left,2,9;entr,entrance_fly_in_from_top_right,2,3;entr,entrance_grow_and_turn,31,0;entr,entrance_peek_in_from_bottom,12,4;entr,entrance_peek_in_from_left,12,8;entr,entrance_peek_in_from_right,12,2;entr,entrance_peek_in_from_top,12,1;entr,entrance_pinwheel,35,0;entr,entrance_plus_in,13,16;entr,entrance_plus_out,13,32;entr,entrance_random_bars_horizontal,14,10;entr,entrance_random_bars_vertical,14,5;entr,entrance_rise_up,37,0;entr,entrance_spinner,49,0;entr,entrance_spiral_in,15,0;entr,entrance_split_horizontal_in,16,26;entr,entrance_split_horizontal_out,16,42;entr,entrance_split_vertical_in,16,21;entr,entrance_split_vertical_out,16,37;entr,entrance_stretch_across,17,10;entr,entrance_stretch_from_bottom,17,4;entr,entrance_stretch_from_left,17,8;entr,entrance_stretch_from_right,17,2;entr,entrance_stretch_from_top,17,1;entr,entrance_strips_left_down,18,12;entr,entrance_strips_left_up,18,9;entr,entrance_strips_right_down,18,6;entr,entrance_strips_right_up,18,3;entr,entrance_swivel,45,0;entr,entrance_wedge,20,0;entr,entrance_wheel_1_spoke,21,1;entr,entrance_wheel_2_spokes,21,2;entr,entrance_wheel_3_spokes,21,3;entr,entrance_wheel_4_spokes,21,4;entr,entrance_wheel_8_spokes,21,8;entr,entrance_whip,41,0;entr,entrance_whipe_from_bottom,22,4;entr,entrance_whipe_from_left,22,8;entr,entrance_whipe_from_right,22,2;entr,entrance_whipe_from_top,22,1;entr,entrance_zoom_object_center,53,16;entr,entrance_zoom_slide_center,53,528;exit,exit_basic_swivel_horizontal,19,10;exit,exit_basic_swivel_vertical,19,5;exit,exit_basic_zoom_in,23,16;exit,exit_basic_zoom_in_slightly,23,272;exit,exit_basic_zoom_in_to_screen_bottom,23,20;exit,exit_basic_zoom_out,23,32;exit,exit_basic_zoom_out_slightly,23,288;exit,exit_basic_zoom_out_to_screen_center,23,544;exit,exit_blinds_horizontal,3,10;exit,exit_blinds_vertical,3,5;exit,exit_boomerang,25,0;exit,exit_bounce,26,0;exit,exit_box_in,4,16;exit,exit_box_out,4,32;exit,exit_center_revolve,43,0;exit,exit_checkerboard_across,5,10;exit,exit_checkerboard_up,5,5;exit,exit_circle_in,6,16;exit,exit_circle_out,6,32;exit,exit_collapse_across,17,10;exit,exit_collapse_to_bottom,17,4;exit,exit_collapse_to_left,17,8;exit,exit_collapse_to_right,17,2;exit,exit_collapse_to_top,17,1;exit,exit_contract,55,0;exit,exit_credits,28,0;exit,exit_curve_down,52,0;exit,exit_diamond_in,8,16;exit,exit_diamond_out,8,32;exit,exit_disappear,1,0;exit,exit_dissolve_out,9,0;exit,exit_drop,38,0;exit,exit_fade,10,0;exit,exit_flip,56,0;exit,exit_float,30,0;exit,exit_float_down,42,0;exit,exit_float_up,47,0;exit,exit_fly_out_to_bottom,2,4;exit,exit_fly_out_to_bottom_left,2,12;exit,exit_fly_out_to_bottom_right,2,6;exit,exit_fly_out_to_left,2,8;exit,exit_fly_out_to_right,2,2;exit,exit_fly_out_to_top,2,1;exit,exit_fly_out_to_top_left,2,9;exit,exit_fly_out_to_top_right,2,3;exit,exit_peek_out_to_bottom,12,4;exit,exit_peek_out_to_left,12,8;exit,exit_peek_out_to_right,12,2;exit,exit_peek_out_to_top,12,1;exit,exit_pinwheel,35,0;exit,exit_plus_in,13,16;exit,exit_plus_out,13,32;exit,exit_random_bars_horizontal,14,10;exit,exit_random_bars_vertical,14,5;exit,exit_shrink_and_turn,31,0;exit,exit_shrink_down,37,0;exit,exit_spinner,49,0;exit,exit_spiral_out,15,0;exit,exit_split_horizontal_in,16,26;exit,exit_split_horizontal_out,16,42;exit,exit_split_vertical_in,16,21;exit,exit_split_vertical_out,16,37;exit,exit_stretchy,50,0;exit,exit_strips_left_down,18,12;exit,exit_strips_left_up,18,9;exit,exit_strips_right_down,18,6;exit,exit_strips_right_up,18,3;exit,exit_swivel,45,0;exit,exit_wedge,20,0;exit,exit_wheel_1_spoke,21,1;exit,exit_wheel_2_spokes,21,2;exit,exit_wheel_3_spokes,21,3;exit,exit_wheel_4_spokes,21,4;exit,exit_wheel_8_spokes,21,8;exit,exit_whip,41,0;exit,exit_whipe_from_bottom,22,4;exit,exit_whipe_from_left,22,8;exit,exit_whipe_from_right,22,2;exit,exit_whipe_from_top,22,1;exit,exit_zoom_object_center,53,32;exit,exit_zoom_slide_center,53,544;path,motion_arc_down,37,0;path,motion_arc_left,51,0;path,motion_arc_right,58,0;path,motion_arc_up,44,0;path,motion_bean,31,0;path,motion_bounce_left,41,0;path,motion_bounce_right,54,0;path,motion_circle,1,0;path,motion_crescent_moon,6,0;path,motion_curved_square,20,0;path,motion_curved_x,21,0;path,motion_curvy_left,48,0;path,motion_curvy_right,61,0;path,motion_curvy_star,23,0;path,motion_custom_path,0,0;path,motion_decaying_wave,60,0;path,motion_diagonal_down_right,49,0;path,motion_diagonal_up_right,56,0;path,motion_diamond,3,0;path,motion_down,42,0;path,motion_equal_triangle,13,0;path,motion_figure_8_four,28,0;path,motion_football,12,0;path,motion_funnel,52,0;path,motion_heart,9,0;path,motion_heartbeat,45,0;path,motion_hexagon,4,0;path,motion_horizontal_figure_8_four,26,0;path,motion_inverted_square,34,0;path,motion_inverted_triangle,33,0;path,motion_left,35,0;path,motion_loop_de_loop,24,0;path,motion_neutron,29,0;path,motion_octagon,10,0;path,motion_parallelogram,14,0;path,motion_path_4_point_star,16,0;path,motion_path_5_point_star,5,0;path,motion_path_6_point_star,11,0;path,motion_path_8_point_star,17,0;path,motion_peanut,27,0;path,motion_pentagon,15,0;path,motion_plus,32,0;path,motion_pointy_star,19,0;path,motion_right,63,0;path,motion_right_triangle,2,0;path,motion_sine_spiral_left,55,0;path,motion_sine_spiral_right,46,0;path,motion_sine_wave,40,0;path,motion_spring,53,0;path,motion_square,7,0;path,motion_stairs_down,62,0;path,motion_swoosh,30,0;path,motion_s_curve_1,59,0;path,motion_s_curve_2,39,0;path,motion_teardrop,18,0;path,motion_trapezoid,8,0;path,motion_turn_down,50,0;path,motion_turn_down_right,36,0;path,motion_turn_up,43,0;path,motion_turn_up_right,57,0;path,motion_up,64,0;path,motion_vertical_figure_8,22,0;path,motion_wave,47,0;path,motion_zigzag,38,0".split(";");
@@ -14378,7 +14321,6 @@
     // MoveAnimationDrawObject.prototype.recalculateBounds = function() {
     //     this.bounds.reset(this.x, this.y, this.x + this.extX, this.y + this.extY);
     // };
-
 
     let ANIMATION_PRESET_CLASSES = [];
     let PRESET_TYPES;
@@ -14978,11 +14920,9 @@
     PRESET_SUBTYPES = PRESET_TYPES[64] = [];
     PRESET_SUBTYPES[0] = "PPTY;v10;267;BwEAAPr7AAABAAD6AFDDAAADAQUCBgQMUMMAAA4AAAAADwUAAAAQQAAAABEAAAAA+wAZAAAA+vsAEgAAAAEAAAAACQAAAPoDAQAAADAA+wS3AAAA+vsAsAAAAAEAAAAJpwAAAPoAAQEBAhEAAABNACAAMAAgADAAIABMACAAMAAgAC0AMAAuADIANQAgAEUAAwAAAAD7AHAAAAD6+wAWAAAA+gMBDwYAAAATBAAAADIAMAAwADAA+wESAAAA+vsACwAAAPoAAQAAADQAAgD7AjcAAAD6+wAwAAAAAgAAAAARAAAA+gAFAAAAcABwAHQAXwB4APsAEQAAAPoABQAAAHAAcAB0AF8AeQD7";
 
-
     window['AscCommon'] = window['AscCommon'] || {};
     window['AscCommon'].CColorPercentage = CColorPercentage;
     window['AscCommon'].CTexturesCache = CTexturesCache;
-
 
     window['AscFormat'].NODE_FILL_FREEZE = NODE_FILL_FREEZE;
     window['AscFormat'].NODE_FILL_HOLD = NODE_FILL_HOLD;

@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -890,7 +885,6 @@ $(function () {
 			assert.ok(isEqual(results[0], letiables[0]), "PolynomialResults are not equal to the expected results: expected first constant:" + letiables[0] + ', got:' + results[0]);
 			assert.ok(isEqual(results[1], letiables[1]), "PolynomialResults are not equal to the expected results: expected second constant:" + letiables[1] + ', got:' + results[1]);
 			assert.ok(isEqual(results[2], letiables[2]), "PolynomialResults are not equal to the expected results: expected third constant:" + letiables[2] + ', got:' + results[2]);
-
 
 			size = 7;
 			catVals = [1, 2, 3, 4, 5, 6, 7];
@@ -4125,7 +4119,6 @@ $(function () {
 		})
 	}
 
-
 	function testHistogramHandleBinning () {
 
 		// this function compares each object inside the arrays
@@ -4174,7 +4167,6 @@ $(function () {
 			let isProblematic = checkArraysOfObjects(result, cachedData.data);
 			let message = isProblematic ? "Histogram; binning ranges calculated incorrectly at index: " + isProblematic[0] + ", Expected value were: " + JSON.stringify(isProblematic[1]) + ', got:' + JSON.stringify(isProblematic[2]) : 'test passed';
 			assert.ok(!isProblematic, message);
-
 
 			axisProperties = {
 				cat : {max: 119, min:7, scale : []},
@@ -4409,7 +4401,6 @@ $(function () {
 			binning.binCount = 1;
 			binning.binSize = null;
 			binning.testingNumArr = numArr;
-
 
 			cachedData.calculateBinning(numArr, axisProperties);
 			result = [{min : 7, max : 177, val: 13}];
@@ -4831,7 +4822,6 @@ $(function () {
 			binning.binSize = null;
 			binning.testingNumArr = numArr;
 
-
 			cachedData.calculateBinning(numArr, axisProperties);
 			result = [{min : 7, max : 12, val: 1}];
 			isProblematic = checkArraysOfObjects(result, cachedData.data);
@@ -4931,7 +4921,6 @@ $(function () {
 			binning.binCount = null;
 			binning.binSize = null;
 			binning.testingNumArr = numArr;
-
 
 			cachedData.calculateBinning(numArr, axisProperties);
 			result = [{min : null, max : 78, val: 6}, {min : 78, max : 78, val: 0}, {min : 78, max : null, val: 3}];
@@ -5523,7 +5512,6 @@ $(function () {
 			}
 			return false;
 		}
-
 
 		QUnit.test("Test: Histogram binning min and max and scale", function (assert) {
 

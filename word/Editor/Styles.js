@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -35,7 +30,6 @@
 // Import
 
 window['AscWord'] = window['AscWord'] || {};
-
 
 var align_Left = AscCommon.align_Left;
 var align_Right = AscCommon.align_Right;
@@ -2726,7 +2720,6 @@ CStyle.prototype =
             }
         };
 
-
         var TableStyle =
         {
             TextPr: TableTextPr1
@@ -3085,7 +3078,6 @@ CStyle.prototype =
                 Shd: CellShd3
             }
         };
-
 
         var TableFirstCol =
         {
@@ -6812,7 +6804,6 @@ CStyle.prototype.CreateTOC = function(nLvl, nType)
 				}
 			};
 
-
 			TextPr.Bold     = true;
 			TextPr.FontSize = 14;
 		}
@@ -7351,7 +7342,6 @@ function CStyles(bCreateDefault)
          Style_Table.Create_Table_ColorfulListAccent6();
          this.Add( Style_Table );
          */
-
 
         var Style_Table_Grid_1_Accent = new CStyle("Grid Table 1 Light", this.Default.Table, null, styletype_Table );
 		Style_Table_Grid_1_Accent.Create_Table_Grid_1(fUF(EThemeColor.themecolorText1, 0x95, null),  fUF(EThemeColor.themecolorText1, 0x67, null));
@@ -9298,7 +9288,6 @@ CStyles.prototype.SetTOCStylesType = function(nType)
 	}
 };
 
-
 /**
  * Recreate table of figures style according to current style type
  * @param nType {Asc.c_oAscTOCStylesType}
@@ -9870,7 +9859,6 @@ CDocumentShd.prototype.Set_FromObject = function(oShd)
 			this.Unifill = oShd.ThemeColor.createDuplicate();
 		else if (oShd.Unifill)
 			this.Unifill = oShd.Unifill.createDuplicate();
-
 
 		if (oShd.FillRef)
 			this.FillRef = oShd.FillRef.createDuplicate();
@@ -12120,7 +12108,6 @@ CTableCellPr.prototype.Set_FromObject = function(CellPr)
 	else
 		this.TableCellW = undefined;
 
-
 	this.VAlign        = CellPr.VAlign;
 	this.VMerge        = CellPr.VMerge;
 	this.TextDirection = CellPr.TextDirection;
@@ -13756,7 +13743,6 @@ CTextPr.prototype.Compare = function(TextPr)
 		this.TextFill = undefined;
 	}
 
-
 	if (undefined !== this.TextFill && !this.TextFill.IsIdentical(TextPr.TextFill))
 	{
 		this.Unifill  = undefined;
@@ -13776,7 +13762,6 @@ CTextPr.prototype.Compare = function(TextPr)
 			this.HighlightColor = undefined;
 		}
 	}
-
 
 	if (undefined !== this.TextOutline && !this.TextOutline.IsIdentical(TextPr.TextOutline))
 	{
@@ -16764,7 +16749,6 @@ CParaPr.prototype.Compare = function(ParaPr)
 	if (undefined != this.Lvl && undefined != ParaPr.Lvl && ParaPr.Lvl === this.Lvl)
 		Result_ParaPr.Lvl = this.Lvl;
 
-
 	if (undefined != this.DefaultTab && undefined != ParaPr.DefaultTab && ParaPr.DefaultTab === this.DefaultTab)
 		Result_ParaPr.DefaultTab = this.DefaultTab;
 
@@ -17807,8 +17791,6 @@ window["AscWord"].CShd     = CDocumentShd;
 window["AscWord"].Shd      = CDocumentShd;
 window["AscWord"].CStyles  = CStyles;
 window["AscWord"].CParaInd = CParaInd;
-
-
 
 // Создаем глобальные дефолтовые стили, чтобы быстро можно было отдать дефолтовые настройки
 var g_oDocumentDefaultTextPr = new CTextPr();

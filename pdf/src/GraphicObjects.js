@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -281,7 +276,6 @@
             this.moveSelectedObjectsByDir([1, null], Word);
         }
     };
-
 
     CGraphicObjects.prototype.cursorMoveUp = function(AddToSelect, Word) {
         let oViewer = Asc.editor.getDocumentRenderer();
@@ -1030,7 +1024,6 @@
         return bRet;
     };
 
-
     CGraphicObjects.prototype.editChart = function(oBinary) {
         var chart_space = this.getChartSpace2(oBinary, null), select_start_page;
 
@@ -1294,7 +1287,6 @@
         if (undefined !== drawingDocument.BeginDrawTracking)
             drawingDocument.BeginDrawTracking();
 
-
         const oTrackDrawer  = drawingDocument.AutoShapesTrack;
         oTrackDrawer.SetCurrentPage(pageIndex, true);
 
@@ -1531,16 +1523,13 @@
             drawingDocument.DrawTrackSelectShapes(this.selectionRect.x, this.selectionRect.y, this.selectionRect.w, this.selectionRect.h);
         }
 
-
         if (this.connector) {
             this.connector.drawConnectors(oTrackDrawer);
             this.connector = null;
         }
 
-
         if (undefined !== drawingDocument.EndDrawTracking)
             drawingDocument.EndDrawTracking();
-
 
     };
     CGraphicObjects.prototype.deselectObject = function (object) {
@@ -1967,7 +1956,6 @@
                     g.m_oCoordTransform.tx = -_bounds_cheker.Bounds.min_x;
                     g.m_oCoordTransform.ty = -_bounds_cheker.Bounds.min_y;
                     g.transform(1, 0, 0, 1, 0, 0);
-
 
                     AscCommon.IsShapeToImageConverter = true;
                     for (let i = 0; i < aSelectedObjects.length; ++i) {

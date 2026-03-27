@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -1716,7 +1711,6 @@
 	window['AscDFH'].historyitem_type_ImageBlipStart         = 1202 << 16;
 	window['AscDFH'].historyitem_type_ImageBlipEnd           = 1203 << 16;
 
-
 	window['AscDFH'].historyitem_type_Address                          = 1201 << 16;
 	window['AscDFH'].historyitem_type_AxisUnits                        = 1202 << 16;
 	window['AscDFH'].historyitem_type_AxisUnitsLabel                   = 1200 << 16;
@@ -1776,7 +1770,6 @@
 	window['AscDFH'].historyitem_type_ValueColorMiddlePosition         = 1255 << 16;
 	window['AscDFH'].historyitem_type_ValueColorPositions              = 1256 << 16;
 	window['AscDFH'].historyitem_type_ValueColors                      = 1257 << 16;
-
 
 	window['AscDFH'].historyitem_type_DocumentMacros         = 2000 << 16;
 	window['AscDFH'].historyitem_type_PrSet                  = 2001 << 16;
@@ -1901,7 +1894,6 @@
 	window['AscDFH'].historyitem_type_Control      = 2303 << 16;
 	window['AscDFH'].historyitem_type_ControlPr    = 2304 << 16;
 	window['AscDFH'].historyitem_type_FormControlPr= 2305 << 16;
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2827,7 +2819,6 @@
 	window['AscDFH'].historyitem_StrPoint_SetIdx = window['AscDFH'].historyitem_type_StrPoint | 1;
 	window['AscDFH'].historyitem_StrPoint_SetVal = window['AscDFH'].historyitem_type_StrPoint | 2;
 
-
 	window['AscDFH'].historyitem_MultiLvlStrRef_SetF                = window['AscDFH'].historyitem_type_MultiLvlStrRef | 1;
 	window['AscDFH'].historyitem_MultiLvlStrRef_SetMultiLvlStrCache = window['AscDFH'].historyitem_type_MultiLvlStrRef | 2;
 
@@ -3296,7 +3287,6 @@
 	window['AscDFH'].historyitem_GraphicFrameSetSetParent     = window['AscDFH'].historyitem_type_GraphicFrame | 4;
 	window['AscDFH'].historyitem_GraphicFrameSetSetGroup      = window['AscDFH'].historyitem_type_GraphicFrame | 5;
 
-
     window['AscDFH'].historyitem_Sparkline_Type = window['AscDFH'].historyitem_type_Sparkline | 1;
     window['AscDFH'].historyitem_Sparkline_LineWeight = window['AscDFH'].historyitem_type_Sparkline | 2;
     window['AscDFH'].historyitem_Sparkline_DisplayEmptyCellsAs = window['AscDFH'].historyitem_type_Sparkline | 3;
@@ -3328,7 +3318,6 @@
     window['AscDFH'].historyitem_Sparkline_RemoveSparkline = window['AscDFH'].historyitem_type_Sparkline | 29;
     window['AscDFH'].historyitem_Sparkline_Worksheet = window['AscDFH'].historyitem_type_Sparkline | 30;
 
-
     window['AscDFH'].historyitem_NotesMasterSetHF          = window['AscDFH'].historyitem_type_NotesMaster | 1;
     window['AscDFH'].historyitem_NotesMasterSetNotesStyle  = window['AscDFH'].historyitem_type_NotesMaster | 2;
     window['AscDFH'].historyitem_NotesMasterSetNotesTheme  = window['AscDFH'].historyitem_type_NotesMaster | 3;
@@ -3338,7 +3327,6 @@
     window['AscDFH'].historyitem_NotesMasterAddToNotesLst  = window['AscDFH'].historyitem_type_NotesMaster | 7;
     window['AscDFH'].historyitem_NotesMasterSetName        = window['AscDFH'].historyitem_type_NotesMaster | 8;
     window['AscDFH'].historyitem_NotesMasterSetClrMap      = window['AscDFH'].historyitem_type_NotesMaster | 9;
-
 
     window['AscDFH'].historyitem_NotesSetClrMap           = window['AscDFH'].historyitem_type_Notes | 1;
     window['AscDFH'].historyitem_NotesSetShowMasterPhAnim = window['AscDFH'].historyitem_type_Notes | 2;
@@ -3417,7 +3405,6 @@
 	AscDFH.historyitem_DirTransitionDir = AscDFH.historyitem_type_DirTransition | 1;
 
 	AscDFH.historyitem_OptBlackTransitionThruBlk = AscDFH.historyitem_type_OptBlackTransition | 1;
-
 
 	AscDFH.historyitem_GraphicElDgmId          = AscDFH.historyitem_type_GraphicEl | 1;
 	AscDFH.historyitem_GraphicElDgmBuildStep   = AscDFH.historyitem_type_GraphicEl | 2;
@@ -3571,10 +3558,8 @@
 	AscDFH.historyitem_CmdCmd   = AscDFH.historyitem_type_Cmd | 2;
 	AscDFH.historyitem_CmdType  = AscDFH.historyitem_type_Cmd | 3;
 
-
 	AscDFH.historyitem_OleChartElLvl  = AscDFH.historyitem_type_OleChartEl | 1;
 	AscDFH.historyitem_OleChartElType = AscDFH.historyitem_type_OleChartEl | 2;
-
 
 	AscDFH.historyitem_TimeNodeContainerCTn = AscDFH.historyitem_type_TimeNodeContainer | 1;
 
@@ -3656,7 +3641,6 @@
 
 	AscDFH.historyitem_BgFormatFill  = AscDFH.historyitem_type_BgFormat | 1;
 	AscDFH.historyitem_BgFormatEffect = AscDFH.historyitem_type_BgFormat | 2;
-
 
 	AscDFH.historyitem_WholeEffect    = AscDFH.historyitem_type_Whole | 1;
 	AscDFH.historyitem_WholeLn        = AscDFH.historyitem_type_Whole | 2;
@@ -3814,7 +3798,6 @@
 	AscDFH.historyitem_ViewPrGuideOrient         = AscDFH.historyitem_type_ViewPrGuide | 1;
 	AscDFH.historyitem_ViewPrGuidePos            = AscDFH.historyitem_type_ViewPrGuide | 2;
 
-
 	AscDFH.historyitem_Address_SetAddress1       = AscDFH.historyitem_type_Address | 1;
 	AscDFH.historyitem_Address_SetCountryRegion  = AscDFH.historyitem_type_Address | 2;
 	AscDFH.historyitem_Address_SetAdminDistrict1 = AscDFH.historyitem_type_Address | 3;
@@ -3878,7 +3861,6 @@
 	AscDFH.historyitem_DataLabels_AddDataLabelHidden    = AscDFH.historyitem_type_DataLabels | 9;
 	AscDFH.historyitem_DataLabels_RemoveDataLabelHidden = AscDFH.historyitem_type_DataLabels | 10;
 	AscDFH.historyitem_DataLabels_SetPos                = AscDFH.historyitem_type_DataLabels | 11;
-
 
 	AscDFH.historyitem_DataLabelVisibilities_SetSeriesName   = AscDFH.historyitem_type_DataLabelVisibilities | 1;
 	AscDFH.historyitem_DataLabelVisibilities_SetCategoryName = AscDFH.historyitem_type_DataLabelVisibilities | 2;
@@ -4110,7 +4092,6 @@
 	AscDFH.historyitem_Control_ControlPr     = AscDFH.historyitem_type_Control | 1;
 	AscDFH.historyitem_Control_FormControlPr = AscDFH.historyitem_type_Control | 2;
 
-
 	//------------------------------------------------------------------------------------------------------------------
 	// Типы изменений в PDF Forms 
 	//------------------------------------------------------------------------------------------------------------------
@@ -4145,8 +4126,6 @@
 	AscDFH.historyitem_Pdf_Form_Ap_Idx			= AscDFH.historyitem_type_Pdf_Form | 28;
 	AscDFH.historyitem_Pdf_Form_Changed_View	= AscDFH.historyitem_type_Pdf_Form | 29;
 	AscDFH.historyitem_Pdf_Form_Orig_Page		= AscDFH.historyitem_type_Pdf_Form | 30;
-
-
 
 	// text
 	AscDFH.historyitem_Pdf_Text_Form_Multiline			= AscDFH.historyitem_type_Pdf_Text_Field | 1;
@@ -4187,7 +4166,6 @@
 
 	// radio
 	AscDFH.historyitem_Pdf_Radiobutton_Is_Unison		= AscDFH.historyitem_type_Pdf_Radiobutton_Field | 1;
-
 
 	//------------------------------------------------------------------------------------------------------------------
 	// Типы изменений в PDF Annots 
@@ -4292,7 +4270,6 @@
 	window['AscDFH'].historyitem_Pdf_Document_Part_Redact		= window['AscDFH'].historyitem_type_PDF_Document | 16;
 	window['AscDFH'].historyitem_Pdf_Document_End_Redact		= window['AscDFH'].historyitem_type_PDF_Document | 17;
 	window['AscDFH'].historyitem_Pdf_Embed_Fonts_Map			= window['AscDFH'].historyitem_type_PDF_Document | 18;
-
 
 	AscDFH.historyitem_CustomPropertiesAddProperty = AscDFH.historyitem_type_CustomProperties | 0;
 	AscDFH.historyitem_CustomPropertiesRemoveProperty = AscDFH.historyitem_type_CustomProperties | 1;
@@ -5426,7 +5403,6 @@
 		// double : New
 		// double : Old
 
-
 		var nFlags = Reader.GetLong();
 
 		if (nFlags & 1)
@@ -5598,7 +5574,6 @@
 		// long : New
 		// long : Old
 
-
 		var nFlags = Reader.GetLong();
 
 		if (nFlags & 1)
@@ -5666,7 +5641,6 @@
 		// string : New
 		// string : Old
 
-
 		var nFlags = Reader.GetLong();
 
 		if (nFlags & 1)
@@ -5733,7 +5707,6 @@
 		// 3-bit : IsUndefined Old
 		// byte  : New
 		// byte  : Old
-
 
 		var nFlags = Reader.GetLong();
 

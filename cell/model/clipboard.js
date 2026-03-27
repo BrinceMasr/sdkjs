@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -354,13 +349,11 @@
 					selectionRange = ws.model.selectionRange.getLast();
 				}
 
-
 				//TODO игнорировать нужно и формулы и скрытые строчки в случае, если селект их задевает + стандартные условия в bIsExcludeHiddenRows
 				if (ws.model.autoFilters.bIsExcludeHiddenRows(selectionRange, activeCell, true)) {
 					ws.model.excludeHiddenRows(true);
 					ws.model.ignoreWriteFormulas(true);
 				}
-
 
 				// IMAGE
 				if (_formats & AscCommon.c_oAscClipboardDataFormat.Image) {
@@ -644,7 +637,6 @@
 			return base64;
 		};
 
-
 		function CCopyPasteExcelOptions()
 		{
 			this.isExcel = true;
@@ -683,7 +675,6 @@
 				 this.wb.Core.category = this.oldWorkbookCoreParameters.oldCategory;
 				 this.wb.Core.contentStatus = this.oldWorkbookCoreParameters.oldContentStatus;
 
-
 					var oBinaryFileWriter = new AscCommonExcel.BinaryFileWriter(this.wb);
 					this.cachedWbBinaryData = oBinaryFileWriter.Write(true, false, true);
 
@@ -707,7 +698,6 @@
 			}
 			return sRange;
 		};
-
 
 		function CopyProcessorExcel() {
 
@@ -833,7 +823,6 @@
 						let locale = wb.oApi ? wb.oApi.asc_getLocale() : null;
 						wb.Core.language = (undefined !== locale && null !== locale) ? locale.toString() : null;
 
-
 						//WRITE
 						const oCopyPaste = !ignoreCopyPaste ? selectionRange : false;
 						const oBinaryFileWriter = new AscCommonExcel.BinaryFileWriter(wb, !ignoreCopyPaste ? selectionRange : false);
@@ -910,7 +899,6 @@
 				AscFormat.ExecuteNoHistory(function () {
 					isIntoShape.GetSelectedContent(selectedContent);
 				}, this, []);
-
 
 				if (!selectedContent || !selectedContent.Elements || !selectedContent.Elements.length) {
 					return null;
@@ -2025,7 +2013,6 @@
 							}
 						});
 
-
 						let diff = 0;
 						for (let i = 1; i < _ranges.length; i++) {
 							if (byCol) {
@@ -2939,7 +2926,6 @@
 							curRow = xfrm.offY - startRow + ws.objectRender.convertMetric(ws._getRowTop(activeRow) - ws._getRowTop(0), 0, 3);
 						}
 
-
 						drawingObject = ws.objectRender.cloneDrawingObject(drawingObject);
 						drawingObject.graphicObject.setDrawingBase(drawingObject);
 
@@ -3000,7 +2986,6 @@
 					ws.objectRender.controller.updateOverlay();
 					ws.setSelectionShape(true);
 					History.EndTransaction();
-
 
 					if (!needShowSpecialProps) {
 						window['AscCommon'].g_specialPasteHelper.CleanButtonInfo();
@@ -3068,7 +3053,6 @@
 						graphicObject = graphicObject.convertToPPTX(ws.getDrawingDocument(), ws.model, true);
 					}
 
-
 					//create new drawingBase
 					drawingObject = ws.objectRender.createDrawingObject();
 					drawingObject.graphicObject = graphicObject;
@@ -3116,7 +3100,6 @@
 							}
 						}
 					}
-
 
 					AscFormat.CheckSpPrXfrm2(graphicObject);
 					xfrm = graphicObject.spPr.xfrm;
@@ -3171,7 +3154,6 @@
 				ws.objectRender.controller.updateOverlay();
 				History.EndTransaction();
 			},
-
 
 			_loadImagesOnServer: function (aPastedImages, callback) {
 				var api = Asc["editor"];
@@ -3701,7 +3683,6 @@
 
 				newFonts = this._convertFonts(oPasteProcessor.oFonts);
 
-
 				History.StartTransaction();
 				oPasteProcessor._Execute(node, {}, true, true, false);
 				if (!oPasteProcessor.aContent || !oPasteProcessor.aContent.length) {
@@ -3760,7 +3741,6 @@
 					if ("" === value) {
 						return result;
 					}
-
 
 					if (isHyperLink) {
 						var oCurHyperlink = new ParaHyperlink();
@@ -3900,7 +3880,6 @@
 
 				var props = specialPasteProps ? specialPasteProps.property : null;
 				textImport = props === c_oSpecialPasteProps.useTextImport;
-
 
 				//TODO сделать вставку текста всегда через эту функцию
 				this.activeRange = worksheet.model.selectionRange.getLast().clone(true);
@@ -4354,7 +4333,6 @@
 			}
 		};
 
-
 		/** @constructor */
 		function pasteFromBinaryWord(clipboard, ws, bFromPresentation) {
 			this.aResult = new excelPasteContent();
@@ -4444,7 +4422,6 @@
 				this.aResult.props._images = pasteData.images && pasteData.images.length ? pasteData.images : this.aResult.props._images;
 				this.aResult.props._aPastedImages = pasteData.aPastedImages && pasteData.aPastedImages.length ? pasteData.aPastedImages : this.aResult.props._aPastedImages;
 
-
 				//TODO alreadyLoadImagesOnServer - пересмотреть
 				//alreadyLoadImagesOnServer - флаг используется для загрузки изображений из html
 				//грузим картинки для вствки из документов(если это необходимо)
@@ -4493,7 +4470,6 @@
 									rowSpan = childrens[i].height;
 									colSpan = childrens[i].width;
 								}
-
 
 								var newCell = this.aResult.getCell(row /*+ this.rowDiff*/, col);
 								newCell.rowSpan = rowSpan;
@@ -4644,7 +4620,6 @@
 					}
 					text = "";
 				}
-
 
 				//проходимся по контенту paragraph
 				var paraRunObj;
@@ -4930,7 +4905,6 @@
 				aResult.props._images.push(sImageUrl);
 			},
 
-
 			_checkDrawingList: function (drawing) {
 				var t = this;
 				var checkParagraph = function (paragraph) {
@@ -4948,7 +4922,6 @@
 					 }
 
 					 numberingText = t._parseNumbering(paragraph);
-
 
 					 var text = t._getAllNumberingText(Lvl, numberingText);
 					 formatText = this._getPrParaRun(paraPr, LvlPr.GetTextPr());
@@ -5425,7 +5398,6 @@
 				}
 			}
 		};
-
 
 		//---------------------------------------------------------export---------------------------------------------------
 		var g_clipboardExcel = new Clipboard();

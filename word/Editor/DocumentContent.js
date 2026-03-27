@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -39,7 +34,6 @@ var c_oAscHAnchor = Asc.c_oAscHAnchor;
 var c_oAscXAlign = Asc.c_oAscXAlign;
 var c_oAscYAlign = Asc.c_oAscYAlign;
 var c_oAscVAnchor = Asc.c_oAscVAnchor;
-
 
 /**
  * Класс CDocumentContent. Данный класс используется для работы с контентом ячеек таблицы, колонтитулов, сносок,
@@ -2083,7 +2077,6 @@ CDocumentContent.prototype.Is_Empty = function()
 	return this.Content[0].IsEmpty({SkipPlcHldr : false});
 };
 
-
 CDocumentContent.prototype.IsEmpty = function()
 {
 	return this.Is_Empty();
@@ -3502,7 +3495,6 @@ CDocumentContent.prototype.AddToParagraph = function(ParaItem, bRecalculate)
 						}
 					}
 
-
 					// Если у нас что-то заселекчено и мы вводим текст или пробел
 					// и т.д., тогда сначала удаляем весь селект.
 					this.Remove(1, true, false, true);
@@ -4033,7 +4025,6 @@ CDocumentContent.prototype.MoveCursorRight = function(AddToSelect, Word, FromPas
 				var End = this.Selection.EndPos;
 				if (End < this.Selection.StartPos)
 					End = this.Selection.StartPos;
-
 
 				this.CurPos.ContentPos = End;
 
@@ -8035,7 +8026,6 @@ CDocumentContent.prototype.Write_ToBinary2 = function(Writer)
 	Writer.WriteBool(this.Split);
 	AscFormat.writeBool(Writer, this.bPresentation);
 
-
 	var ContentToWrite;
 	if (this.StartState)
 	{
@@ -8797,7 +8787,6 @@ CDocumentContent.prototype.CanUpdateTarget = function(CurPage)
 		return true;
 
 	var nPos = (this.Selection.Use ? this.Selection.EndPos : this.CurPos.ContentPos);
-
 
 	if (this.Pages[CurPage].EndPos > nPos)
 		return true;

@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -582,7 +577,6 @@ function CDrawingPage()
 	this.cachedImage = null;
 }
 
-
 function CDrawingCollaborativeTarget(DrawingDocument)
 {
 	AscCommon.CDrawingCollaborativeTargetBase.call(this);
@@ -670,16 +664,13 @@ function CDrawingDocument()
 	this.m_oWordControl   = null;
 	this.m_oLogicDocument = null;
 
-
 	this.IsEmptyPresentation = false;
 
 	this.SlideCurrent     = -1;
 	this.SlideCurrectRect = new CDrawingPage();
 
-
 	this.MasterCurrent = -1;
 	this.LayoutCurrent = -1;
-
 
 	this.isTabButtonShow = true;
 
@@ -789,7 +780,6 @@ function CDrawingDocument()
 	// methods ---
 
 	// target
-
 
 	this.GetSlidesCount = function()
 	{
@@ -1584,7 +1574,6 @@ function CDrawingDocument()
 			this.m_oWordControl.m_oApi.checkLastWork();
 	};
 
-
 	this.OnRecalculateSlide = function(index)
 	{
 
@@ -1593,7 +1582,6 @@ function CDrawingDocument()
 		{
 			thpages[index].IsRecalc = true;
 		}
-
 
 		if (this.m_oWordControl && this.m_oWordControl.MobileTouchManager)
 		{
@@ -1611,7 +1599,6 @@ function CDrawingDocument()
 			this.m_oWordControl.OnUpdateOverlay();
 			this.SendChangeDocumentToApi(true);
 		}
-
 
 		if (index === this.SlideCurrent)
 		{
@@ -1812,7 +1799,6 @@ function CDrawingDocument()
 
 		if (!bIsChange)
 			return;
-
 
 		AscFormat.ExecuteNoHistory(function(){
 
@@ -3375,7 +3361,6 @@ function CDrawingDocument()
 		return this.m_oWordControl.Thumbnails.GetCurSld();
 	};
 
-
 	this.OnStartImagesLoading = function(aImages)
 	{
 		this.LoadingImages = [].concat(aImages);
@@ -3661,9 +3646,6 @@ CMouseDownTrack.prototype.IsSamePos = function()
 	return this.Position === this.Page || this.Position === (this.Page + 1);
 };
 
-
-
-
 function CThPosBase(oThumbnails)
 {
 	this.thumbnails = oThumbnails;
@@ -3752,7 +3734,6 @@ CSlideThPos.prototype.GetSld = function()
 {
 	return this.GetPresentation().Slides[this.Idx];
 };
-
 
 function CMasterThPos(oThumbnails)
 {
@@ -4046,7 +4027,6 @@ CSlidesThumbnails.prototype.PosToIndex = function(oPos)
 	if(!oPos) return -1;
 	return oPos.Idx;
 };
-
 
 function CMastersThumbnails()
 {
@@ -4622,7 +4602,6 @@ function CThumbnailsManager(editorPage)
 					oThis.MouseDownTrack.SetPosition(oThis.ConvertCoords2(global_mouseEvent.X, global_mouseEvent.Y));
 				}
 			}
-
 
 			oThis.OnUpdateOverlay();
 
@@ -5553,7 +5532,6 @@ function CThumbnailsManager(editorPage)
 
 		const arrSlides = oLogicDocument.GetAllSlides();
 
-
 		for (let i = 0; i < arrSlides.length; i++) {
 			const page = this.m_arrPages[i];
 			const oSlide = arrSlides[i];
@@ -5806,7 +5784,6 @@ function CThumbnailsManager(editorPage)
 		{
 			this.m_arrPages[i].IsSelected = false;
 		}
-
 
 		this.m_oWordControl.m_oLogicDocument.Document_UpdateInterfaceState();
 		this.OnUpdateOverlay();
@@ -7129,7 +7106,6 @@ function CNotesDrawer(page)
 		if (e)
 			AscCommon.check_MouseMoveEvent(e);
 
-
 		var pos = oThis.GetPosition();
 		var _x = pos.X;
 		var _y = pos.Y;
@@ -7174,7 +7150,6 @@ function CNotesDrawer(page)
 		}
 
 		oThis.HtmlPage.StartUpdateOverlay();
-
 
 		var is_drawing = oThis.HtmlPage.m_oDrawingDocument.checkMouseUp_Drawing(pos);
 		if (is_drawing === true)
@@ -7362,7 +7337,6 @@ function CPaneDrawerBase(page, htmlElement, parentDrawer, pageControl)
 	this.DrawTask = new CAnimPaneDrawTask();
 
 	this.Control = null;
-
 
 	this.Scroll = 0;
 	this.ScrollMax = 0;
@@ -7579,11 +7553,9 @@ function CPaneDrawerBase(page, htmlElement, parentDrawer, pageControl)
 
 		AscCommon.check_MouseUpEvent(e);
 
-
 		var pos = oThis.GetPosition(e);
 		var _x = pos.X;
 		var _y = pos.Y;
-
 
 		if (oThis.GetDrawingDocument().InlineTextTrackEnabled)
 		{
@@ -7594,7 +7566,6 @@ function CPaneDrawerBase(page, htmlElement, parentDrawer, pageControl)
 		var is_drawing = oThis.GetDrawingDocument().checkMouseUp_Drawing(pos);
 		if (is_drawing === true)
 			return;
-
 
 		oControl.onMouseUp(global_mouseEvent, _x, _y);
 		//oThis.GetPresentation().AnimPane_OnMouseUp(global_mouseEvent, _x, _y);

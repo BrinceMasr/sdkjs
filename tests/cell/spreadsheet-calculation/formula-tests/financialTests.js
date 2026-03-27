@@ -12,24 +12,18 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
-
 
 $(function () {
 	// Mocks for API Testing
@@ -115,7 +109,6 @@ $(function () {
 			this.isLoadFullApi = true;
 		};
 
-
 		let api = new Asc.spreadsheet_api({
 			'id-view': 'editor_sdk'
 		});
@@ -127,7 +120,6 @@ $(function () {
 		let docInfo = new Asc.asc_CDocInfo();
 		docInfo.asc_putTitle("TeSt.xlsx");
 		api.DocInfo = docInfo;
-
 
 		window["Asc"]["editor"] = api;
 		AscCommon.g_oTableId.init(api);
@@ -185,7 +177,6 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-
 		oParser = new parserFormula(func + "(A100:C101)", "A1", ws);
 		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
 		assert.ok(oParser.parse(), 'Formula is parsed.');
@@ -229,7 +220,6 @@ $(function () {
 			assert.ok(oParser.parse(), 'Test: Formula ' + func + argStr + ' is parsed.');
 			return oParser.calculate().getValue();
 		};
-
 
 		//***array-formula***
 		ws.getRange2("A100").setValue("1");
@@ -411,7 +401,6 @@ $(function () {
 		var dsc = coupD - dbc;
 		var diff = dsc / coupD - 1;
 		yld = yld / frequency + 1;
-
 
 		coupon *= 100 / frequency;
 
@@ -6505,7 +6494,6 @@ $(function () {
 
         // Need to fix: results diff from MS
 
-
 		testArrayFormula2(assert, "DB", 4, 5);
 
 	});
@@ -6551,7 +6539,6 @@ $(function () {
 		ws2.getRange2("A13").setValue("6") // TestName3D2
 		ws2.getRange2("A14").setValue("1") // TestName3D3
 		ws2.getRange2("A15").setValue("2") // TestName3D4
-
 
 		// Positive cases:
 
@@ -8539,7 +8526,6 @@ $(function () {
 		// Case #17: Number, Empty. Empty npery.
 		// Case #18: Empty, Empty. Both arguments empty.
 
-
 		testArrayFormula2(assert, "EFFECT", 2, 2, true)
 	});
 
@@ -8616,7 +8602,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Monthly payments at 1% monthly rate, 12 periods, no PV, end of period. Returns future value.
@@ -8772,7 +8757,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: FV(TestNameArea3D2,TestNameArea3D2,TestNameArea3D2,TestNameArea3D2,TestNameArea3D2) is parsed.');
 		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getElementRowCol(0,0).getValue(), res, 'Test: Negative case: Name3D. 3D named range with multi-cell area for rate returns num array.');
 
-
 		// Case #16: Date. Large date serial number as rate returns num.
 		oParser = new parserFormula('FV(DATE(2025,1,1),12,-100,0,0)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FV(DATE(2025,1,1),12,-100,0,0) is parsed.');
@@ -8795,7 +8779,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 409500, 'Test: Negative case: Array. Array with booleans for rate returns array of valid nums.');
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,1).getValue(), 1200, 'Test: Negative case: Array. Array with booleans for rate returns array of valid nums.');
 
-
 		// Bounded cases:
 		// Case #1: Number. Maximum Excel number for rate.
 		oParser = new parserFormula('FV(1.79769313486232E+307,1,-1,0,0)', 'A2', ws);
@@ -8817,7 +8800,6 @@ $(function () {
 		oParser = new parserFormula('FV(0.01,1,-1,-1.79769313486232E+307,0)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FV(0.01,1,-1,-1.79769313486232E+307,0) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1.8156700662109432e+307, 'Test: Bounded case: Number. Minimum Excel number for pv. Returns large future value.');
-
 
 		testArrayFormula2(assert, "FV", 3, 5);
 	});
@@ -8874,7 +8856,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Valid principal and numeric schedule array. Returns 1000*(1+0.01)*(1+0.02)*(1+0.03).
@@ -9074,7 +9055,6 @@ $(function () {
 		// Case #3: Number. Maximum Excel number in schedule. Returns large future value or #NUM! if overflow.
 		// Case #4: Number. Minimum Excel number in schedule. Returns future value or #NUM! if overflow.
 
-
 		//testArrayFormula2(assert, "FVSCHEDULE", 2, 2, true, true);
 	});
 
@@ -9132,7 +9112,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Formula(2), Number(3). Dates via DATE formula, valid basis 0. 5 of 5 arguments used.
@@ -9609,7 +9588,6 @@ $(function () {
 				x = xN;
 			}
 
-
 			if (!(wasNegative && wasPositive)) {
 				return "#NUM!";
 			}
@@ -9621,7 +9599,6 @@ $(function () {
 			}
 
 		}
-
 
 		//TODO в хроме при расчёте разница, временно убираю
 		oParser = new parserFormula("IRR({-70000,12000,15000,18000,21000})", "A2", ws);
@@ -9684,7 +9661,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Basic valid input: array with one negative and two positive values. 1 argument used.
@@ -9883,7 +9859,6 @@ $(function () {
 		// Case #1: Number. Minimum positive/negative values supported by Excel. 1 argument used.
 		// Case #2: Number. Maximum Excel values. 1 argument used.
 
-
 	});
 
 	QUnit.test("Test: \"ISPMT\"", function (assert) {
@@ -9940,7 +9915,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number(4). Monthly rate (12%/12), per=0, 4-year loan, negative pv. 4 of 4 arguments used.
@@ -10131,7 +10105,6 @@ $(function () {
 		// Need to fix:
 		// Case #7: Area(4). Multi-cell range for rate returns #VALUE!. 4 of 4 arguments used.
 
-
 		testArrayFormula2(assert, "ISPMT", 4, 4);
 	});
 
@@ -10179,7 +10152,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number(6). Settlement and maturity as serial numbers, coupon and yld positive, frequency 2, basis 0. 6 of 6 arguments used.
@@ -10876,7 +10848,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: NOMINAL(0.05,2147483647) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue().toFixed(9), '0.048789978', 'Test: Bounded case: Number, Number. Max integer for npery. 2 of 2 arguments used.');
 
-
 		// Need to fix: error types difference, precision problems, ms res diffs
 		// Case #11: Area3D, Number. 3D single-cell range for rate. 2 of 2 arguments used.
 		// Case #7: Boolean, Number. Boolean FALSE (0) returns #VALUE!. 2 of 2 arguments used.
@@ -10928,7 +10899,6 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), nper(0.12 / 12, -100, -1000));
 
-
 		// bug 70050
 		oParser = new parserFormula("NPER(0,-393977.5252,14351946.04,,1)", "A2", ws);
 		assert.ok(oParser.parse());
@@ -10969,7 +10939,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #0: Number. All arguments are numbers, valid input. 5 of 5 arguments used.
@@ -11464,7 +11433,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #0: Number, Number, Number, Number, Number, Number, Number, Number. All arguments are numbers, valid dates (maturity > first_coupon > settlement > issue). 8 of 9 arguments used.
 		oParser = new parserFormula('ODDFPRICE(DATE(2025,1,1), DATE(2027,7,1), DATE(2024,7,1), DATE(2025,7,1), 0.030, 98.0, 100, 2, 0)', 'A2', ws);
@@ -11733,7 +11701,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Date, Date, Date, Date, Number, Number, Number, Number, Number. All numeric arguments valid.
 		oParser = new parserFormula('ODDFYIELD(DATE(2025,1,1), DATE(2027,7,1), DATE(2024,7,1), DATE(2025,7,1), 0.030, 98.0, 100, 2, 0)', 'A2', ws);
@@ -11906,7 +11873,6 @@ $(function () {
 
 		// Need to fix: different results in positive cases and one boundary case
 
-
 		testArrayFormula2(assert, "ODDFYIELD", 8, 9, true);
 	});
 
@@ -11929,7 +11895,6 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(),
 			oddlprice(new cDate(Date.UTC(2008, 10, 11)), new cDate(Date.UTC(2021, 2, 1)), new cDate(Date.UTC(2008, 9, 15)), 0.0785, 0.0625, 100, 2, 1));
-
 
 		// Data for reference link. Use A100-A111
 		ws.getRange2("A1:C214").cleanAll();
@@ -11965,7 +11930,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number(8). Valid numbers, all arguments provided. 8 of 8 arguments used.
@@ -12162,7 +12126,6 @@ $(function () {
 		// Case #12: Boolean,Number(7). Boolean settlement, returns #NUM!. 8 of 8 arguments used.
 		// Case #2: Formula(3),Number(5). Maximum valid dates, redemption, frequency = 4, basis = 4. 8 of 8 arguments used.
 
-
 		testArrayFormula2(assert, "ODDLPRICE", 7, 8, true);
 	});
 
@@ -12220,7 +12183,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number(8). Valid numbers, all arguments provided. 8 of 8 arguments used.
@@ -12715,7 +12677,6 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.ok(Math.abs(oParser.calculate().getValue() - pmt(0.08 / 12, 10, 10000, 0, 1)) < dif);
 
-
 		// Data for reference link. Use A100-A111
 		ws.getRange2("A1:C214").cleanAll();
 		ws.getRange2("A100").setValue("0.5");
@@ -12936,13 +12897,11 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: PMT(0.05,12,-1000,1E+307,0) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), -6.2825410020815325e+305, 'Test: Bounded case: Number. Largest valid fv. 5 arguments used.');
 
-
 		// Need to fix:
 		// Case #5: Area. Multi-cell range for rate returns #VALUE!. 3 arguments used.
 		// Case #8: Name. Named range with text returns #VALUE!. 3 arguments used.
 		// Case #19: Number. Invalid type value returns #NUM!. 5 arguments used.
 		// Case #1: Number. Largest valid nper. 3 arguments used.
-
 
 		testArrayFormula2(assert, "PMT", 3, 5);
 	});
@@ -13186,7 +13145,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: PPMT(0.1,1,12,1E+307) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), -4.676331510028725e+305, 'Test: Bounded case: Number. Maximum valid pv. 4 of 6 arguments used.');
 
-
 		// Need to fix: different results from MS, error types diff
 		// Case #12: Table. Table structured references. 4 of 6 arguments used.
 		// Case #8: Area. Multi-cell range for rate returns #NUM!. 4 of 6 arguments used.
@@ -13236,7 +13194,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Date, Date, Number, Number, Number, Number, Number. All arguments valid, semiannual payments, US basis.
@@ -13469,7 +13426,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number(5). Valid numeric inputs, basis 0. 5 of 5 arguments used.
 		oParser = new parserFormula('PRICEDISC(38777,38838,0.05,100,0)', 'A2', ws);
@@ -13672,7 +13628,6 @@ $(function () {
 		// Case #17: Name(5). Named range with non-numeric settlement returns #VALUE!. 5 of 5 arguments used.
 		// Case #3: Number(5). Settlement at minimum Excel date (Jan 1, 1900), maturity at Jan 1, 1901. 5 of 5 arguments used.
 
-
 		testArrayFormula2(assert, "PMT", 4, 5, true);
 	});
 
@@ -13728,7 +13683,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number(6). Valid numeric inputs, basis 0. 6 of 6 arguments used.
@@ -13934,7 +13888,6 @@ $(function () {
 		// Case #15: Formula(6). Issue date beyond Excel limit returns #NUM!. 6 of 6 arguments used.
 		// Case #1: Number(6). Minimum valid Excel date (Jan 1, 1900) and smallest positive rate/yield. 6 of 6 arguments used.
 		// Case #3: Number(6). Settlement and issue at minimum Excel date (Jan 1, 1900), maturity at Jan 1, 1901. 6 of 6 arguments used.
-
 
 		testArrayFormula2(assert, "PRICEMAT", 5, 6, true);
 	});
@@ -14323,7 +14276,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number(3). Basic valid input: 3 required arguments. Returns interest rate per period.
 		oParser = new parserFormula('RATE(12,-100,1000)', 'A2', ws);
@@ -14574,7 +14526,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number(5). Settlement and maturity as serial numbers, investment and discount positive, basis 0. 5 of 5 arguments used.
 		oParser = new parserFormula('RECEIVED(38777,38838,1000,0.1,0)', 'A2', ws);
@@ -14778,7 +14729,6 @@ $(function () {
 		// Case #21: Name,Number(4). Settlement as named range with area, returns #VALUE!. 5 of 5 arguments used.
 		// Case #1: Number(5). Minimum valid values for investment and discount. 5 of 5 arguments used.
 		// Case #2: Formula(2),Number(3). Maximum valid dates and investment, basis = 4. 5 of 5 arguments used.
-
 
 		testArrayFormula2(assert, "RECEIVED", 4, 5, true);
 	});
@@ -15003,7 +14953,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: RRI(TestNameArea3D,TestName3D1,TestName3D2) is parsed.');
 		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, 'Test: Negative case: Name3D(3). nper as 3D named range with area, returns #NUM!. 3 of 3 arguments used.');
 
-
 		// Case #19: Area3D(3). 3D multi-cell range for nper, returns #NUM!. 3 of 3 arguments used.
 		oParser = new parserFormula('RRI(Sheet2!A4:A5,Sheet2!A2:A2,Sheet2!A3:A3)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RRI(Sheet2!A4:A5,Sheet2!A2:A2,Sheet2!A3:A3) is parsed.');
@@ -15028,7 +14977,6 @@ $(function () {
 		// Case #16: Number(3). Smallest valid fv slightly above pv. 3 of 3 arguments used.
 		// Case #12: Area(3). Multi-cell ranges, returns #NUM!. 3 of 3 arguments used.
 		// Case #17: Name(3). nper as named range with area, returns #NUM!. 3 of 3 arguments used.
-
 
 		testArrayFormula2(assert, "RRI", 3, 3);
 	});
@@ -15570,8 +15518,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
-
 		// Positive cases:
 		// Case #1: Date, Date, Number. Settlement and maturity are valid dates, discount positive.
 		oParser = new parserFormula('TBILLEQ(DATE(2025,1,1), DATE(2025,6,30), 0.05)', 'A2', ws);
@@ -15767,7 +15713,6 @@ $(function () {
 		// Case #2: Date, Date, Number. Maximum valid period (exactly 1 year).
 		// Case #4: Number, Number, Number. Discount close to 1.
 
-
 		testArrayFormula2(assert, "TBILLEQ", 3, 3, true);
 	});
 
@@ -15827,7 +15772,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Date, Date, Number. Settlement and maturity are valid dates, discount positive.
@@ -16026,7 +15970,6 @@ $(function () {
 		// Case #4: Date, Date, String. Numeric string converted to number.
 		// Case #5: Date, Date, Reference link. Discount value taken from reference link.
 
-
 		testArrayFormula2(assert, "TBILLPRICE", 3, 3, true);
 	});
 
@@ -16202,7 +16145,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Date, Date, Number. Settlement and maturity are valid dates, discount positive.
@@ -16402,7 +16344,6 @@ $(function () {
 		// Case #2: Date, Date, Number. Maximum valid period (exactly 1 year).
 		// Case #3: Number, Number, Number. Minimal positive discount.
 		// Case #4: Number, Number, Number. Discount close to 1.
-
 
 	});
 
@@ -16959,7 +16900,6 @@ $(function () {
 		assert.ok(oParser.parse(), "VDB(F2:F4,11000,8,0,1)");
 		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, "Result of VDB(F2:F4,11000,8,0,1)");
 
-
 		// cellsRange (arg0)
 		oParser = new parserFormula("VDB(F2:F4,11000,8,0,1)", "A2", ws);
 		oParser.setArrayFormulaRef(ws.getRange2("F2:F4").bbox);
@@ -17077,7 +17017,6 @@ $(function () {
 		assert.strictEqual(array.getElementRowCol(3, 0).getValue(), "", "Result in [3,0] VDB(F2:F4,F5:F7,F8:F15,F9:F15,F9:F15,F9:F15,F9:F15)");
 		assert.strictEqual(array.getElementRowCol(5, 5).getValue(), "#N/A", "Result in [5,5] VDB(F2:F4,F5:F7,F8:F15,F9:F15,F9:F15,F9:F15,F9:F15)");
 
-
 		// Data for reference link. Use A100-A111
 		ws.getRange2("A1:C214").cleanAll();
 		ws.getRange2("A100").setValue("1000");
@@ -17111,7 +17050,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Basic valid input: all numbers, all arguments specified. 7 of 7 arguments used.
@@ -17501,7 +17439,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number,Number,Number. Basic valid input: cash flows and dates as arrays, guess provided. 3 of 3 arguments used.
 		oParser = new parserFormula('XIRR({-1000,1000},{38777,38838},0.1)', 'A2', ws);
@@ -17886,7 +17823,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: XNPV(5%,Sheet2!B12:E12,B112:E112) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 439.12172180379343, 'Test: Positive case: Number, Area3D, Area. Normal rate and references to 3D area and current sheet area together.');
 
-
 		// Negative cases:
 		// Case #1: Number,Array. Rate = -1 returns #NUM!. 3 of 3 arguments used.
 		oParser = new parserFormula('XNPV(-1,{100,-200},{38777,38838})', 'A2', ws);
@@ -17995,7 +17931,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: XNPV(0.1,{100,-200},{2958465,2958466}) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Bounded case: Number,Array. Maximum valid Excel dates (12/31/9999). 3 of 3 arguments used.');
 
-
 	});
 
 	QUnit.test("Test: \"YIELD\"", function (assert) {
@@ -18037,7 +17972,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number(7). All arguments are numbers. 7 of 7 arguments used.
@@ -18229,7 +18163,6 @@ $(function () {
 		// Case #18: Boolean, Number(6). Boolean settlement, returns #VALUE!. 7 of 7 arguments used.
 		// Case #1: Number(7). Minimum valid values for rate, price, redemption. 7 of 7 arguments used.
 
-
 		testArrayFormula2(assert, "YIELD", 6, 7, true);
 	});
 
@@ -18279,7 +18212,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number(5). All arguments are numbers. 5 of 5 arguments used.
@@ -18471,7 +18403,6 @@ $(function () {
 		// Case #14: Boolean, Number(4). Boolean settlement, returns #VALUE!. 5 of 5 arguments used.
 		// Case #19: Number(2), Array, Number(2). Price as array with boolean, returns #NUM!. 5 of 5 arguments used.
 		// Case #20: Number(3), Array, Number. Redemption as array with boolean, returns #NUM!. 5 of 5 arguments used.
-
 
 		testArrayFormula2(assert, "YIELDDISC", 4, 5, true);
 	});
@@ -18721,7 +18652,6 @@ $(function () {
 		// Case #1: Number(6). Minimum valid Excel date (Jan 1, 1900) and smallest positive rate/price. 6 of 6 arguments used.
 		// Case #2: Formula(3), Number(3). Maximum valid Excel date (Dec 31, 9999) and largest valid rate/price. 6 of 6 arguments used.
 		// Case #3: Number(6). Settlement and issue at minimum Excel date (Jan 1, 1900), maturity at Jan 1, 1901. 6 of 6 arguments used.
-
 
 		testArrayFormula2(assert, "YIELDMAT", 5, 6, true);
 	});

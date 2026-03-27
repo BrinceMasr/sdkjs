@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -251,7 +246,6 @@ CTable.prototype.private_DrawRowBackground = function(oGraphics, oTableShd, nCel
 		oGraphics.SetShd(oTableShd);
 
 	oGraphics.b_color1(RGBA.r, RGBA.g, RGBA.b, 255);
-
 
 	var nCurGridCol = oRow.GetBefore().Grid;
 	var nEndGrid    = this.TableGrid.length - oRow.GetAfter().Grid;
@@ -515,7 +509,6 @@ CTable.prototype.private_DrawCellsBackground = function(pGraphics, PNum, Row_sta
             }
         }
     }
-
 
     // Рисуем заливку всех ячеек на странице
     for ( var CurRow = Row_start; CurRow <= Row_last; CurRow++ )
@@ -1207,7 +1200,6 @@ CTable.prototype.private_DrawCellsBorders = function(pGraphics, PNum, Row_start,
                     }
                 }
 
-
                 // Правая граница
                 var BorderInfo_Right = CellBordersInfo.Right;
                 for ( var Index = Row_side_border_start; Index <= Row_side_border_end; Index++ )
@@ -1250,7 +1242,6 @@ CTable.prototype.private_DrawCellsBorders = function(pGraphics, PNum, Row_start,
                         pGraphics.DrawEmptyTableLine( X_cell_end, Y0, X_cell_end, Y1 );
                     }
                 }
-
 
                 // Верхняя граница
                 var BorderInfo_Top   = oHeaderLastRow ? CellBordersInfo.TopHeader : CellBordersInfo.Top;

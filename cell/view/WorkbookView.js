@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -37,7 +32,6 @@
  * @param {undefined} undefined
  */
   function(window, undefined) {
-
 
   /*
    * Import
@@ -183,7 +177,6 @@
 		return this;
 	}
 
-
   /**
    * Widget for displaying and editing Workbook object
    * -----------------------------------------------------------------------------
@@ -284,7 +277,6 @@
     this.trackOverlay = null;
     this.mainOverlay = null;
     this.autoShapeTrack = null;
-
 
     this.selectionDialogMode = false;
     this.dialogAbsName = false;
@@ -527,7 +519,6 @@
 				  self._onShowFormulas.apply(self, arguments);
 			  },
 
-
 			  // Shapes
 			  "graphicObjectMouseDown": function () {
 				  self._onGraphicObjectMouseDown.apply(self, arguments);
@@ -653,7 +644,6 @@
 					}
 				}.bind(this), false);
 				this.eventListeners.push(eventInfo);
-
 
 	      eventInfo = new AscCommon.CEventListenerInfo(this.input, "keydown", function (event) {
 		      if (this.isCellEditMode) {
@@ -821,7 +811,6 @@
       this.Api.isEnabledDropTarget = function () {
       	return !self.isCellEditMode;
 	  };
-
 
       AscCommon.InitBrowserInputContext(this.Api, "id_target_cursor");
       AscCommonExcel.executeInR1C1Mode(false, function () {
@@ -1746,7 +1735,6 @@
 			}));
 		}
 
-
       // Проверяем комментарии ячейки
       if (ct.commentIndexes) {
         arrMouseMoveObjects.push(new asc_CMM({
@@ -1915,7 +1903,6 @@
 		var ws = this.getWorksheet();
 		return ws.canFillHandle(range, checkColRowLimits);
 	};
-
 
   // Обработка перемещения диапазона
   WorkbookView.prototype._onMoveRangeHandle = function(x, y, callback, colRowMoveProps) {
@@ -2519,7 +2506,6 @@
     return ws;
   };
 
-
 	WorkbookView.prototype.drawWorksheet = function () {
 		if (-1 === this.wsActive) {
 			return this.showWorksheet();
@@ -2696,7 +2682,6 @@
 
     this.canvasOverlay.parentNode.style.right = (this.Api.isMobileVersion || !showVerticalScroll) ? 0 : this.defaults.scroll.widthPx + 'px';
     this.canvasOverlay.parentNode.style.bottom = (this.Api.isMobileVersion || !showHorizontalScroll) ? 0 : this.defaults.scroll.heightPx + 'px';
-
 
     this.isInit = true;
 
@@ -3126,7 +3111,6 @@
 		return {fPos: fPos, _lastFNameLength: _lastFNameLength};
 	};
 
-
 	// Вставка формулы в редактор
     WorkbookView.prototype.insertInCellEditor = function (name, type, autoComplete) {
         var t = this, ws = this.getWorksheet(), cursorPos, tmp;
@@ -3528,7 +3512,6 @@
 			  this.Api.sendEvent("asc_onUndoRedo");
 		  }
 	  }
-
 
   };
 
@@ -4499,7 +4482,6 @@
 		AscBrowser.retinaPixelRatio = retinaPixelRatio;
 	};
 
-
 	WorkbookView.prototype.getPivotMergeStyle = function (sheetMergedStyles, range, style, pivot) {
 		var styleInfo = pivot.asc_getStyleInfo();
 		var i, r, dxf, stripe1, stripe2, emptyStripe = new Asc.CTableStyleElement();
@@ -5389,7 +5371,6 @@
 			return;
 		}
 
-
 		//AscCommon.getUserColorById(this.ShortId, null, true)
 
 		//var CursorPos = [{Class : Run, Position : InRunPos}];
@@ -5570,7 +5551,6 @@
 		return this.SearchEngine.GetNextElement();
 	};
 
-
 	/*this.closeCellEditor();
 	 // Для поиска эта переменная не нужна (но она может остаться от replace)
 	 options.selectionRange = null;
@@ -5725,9 +5705,6 @@
 		return this.model.recalculateCellWatches(true);
 	};
 
-
-
-
 	WorkbookView.prototype.getDrawRestriction = function (val) {
 		return this.drawRestrictions && this.drawRestrictions[val];
 	};
@@ -5847,7 +5824,6 @@
 			// 	error: string, // для отображения ошибки
 			// })
 
-
 			let isLocalDesktop = window["AscDesktopEditor"] && window["AscDesktopEditor"]["IsLocalFile"]();
 			const doUpdateData = function (_arrAfterPromise) {
 				if (!_arrAfterPromise.length) {
@@ -5927,7 +5903,6 @@
 							}
 						}
 					}
-
 
 					if (stream && eR) {
 						updatedReferences.push(eR);
@@ -6682,7 +6657,6 @@
 		this.model.setDefaultDirection(val);
 	};
 
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Collaborative editing
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -6875,7 +6849,6 @@
 	{
 		return this.isPartialReading;
 	};
-
 
 	//временно добавляю сюда. в идеале - использовать общий класс из документов(или сделать базовый, от него наследоваться) - CDocumentSearch
 	function CDocumentSearchExcel(wb) {
@@ -7546,7 +7519,6 @@
 		return this.Count > 1000;
 	};
 
-
 	/**
 	 * Controller for handling external selection and formula editing between worksheets/workbooks
 	 * @constructor
@@ -7907,7 +7879,6 @@
 			editor.lastRangeLength === data.lastRangeLength &&
 			editor.cursorPos === data.cursorPos;
 	};
-
 
 	//------------------------------------------------------------export---------------------------------------------------
   window['AscCommonExcel'] = window['AscCommonExcel'] || {};

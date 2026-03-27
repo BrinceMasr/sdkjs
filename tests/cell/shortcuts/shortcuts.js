@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -339,7 +334,6 @@ QUnit.config.autostart = false;
 
 		ExecuteCellEditorHotkey(cellEditorHotkeyTypes.moveToRightWord);
 		CheckCursorPosition(24, 'Check move to right word');
-
 
 		ExecuteCellEditorHotkey(cellEditorHotkeyTypes.moveToStartLine);
 		CheckCursorPosition(18, 'Check move to start line');
@@ -726,7 +720,6 @@ QUnit.config.autostart = false;
 		ExecuteTestWithCatchEvent('asc_onPrint', () => true, true, Asc.c_oAscSpreadsheetShortcutType.PrintPreviewAndPrint);
 		ExecuteTestWithCatchEvent('asc_onContextMenu', () => true, true, tableEvents[tableHotkeyTypes.contextMenu][0]);
 
-
 		ClearShapeAndAddParagraph('');
 		const hyperlink = new AscCommonExcel.Hyperlink();
 		hyperlink.Hyperlink = "https://www.onlyoffice.com/";
@@ -799,7 +792,6 @@ QUnit.config.autostart = false;
 			ExecuteGraphicHotkey(graphicHotkeyTypes.removeChart, eventIndex);
 			CheckRemoveDrawingObject(chart);
 
-
 			const shape1 = AddShape(0, 0, 100, 100);
 			const shape2 = AddShape(0, 0, 100, 100);
 			const shape3 = AddShape(0, 0, 100, 100);
@@ -830,7 +822,6 @@ QUnit.config.autostart = false;
 		}
 
 		SelectDrawings([drawing1]);
-
 
 		ExecuteGraphicHotkey(graphicHotkeyTypes.bigMoveGraphicObjectLeft);
 		CheckShapePosition(100 - 5 * AscCommon.g_dKoef_pix_to_mm, 100);
@@ -910,7 +901,6 @@ QUnit.config.autostart = false;
 		assert.true(GetDrawingObjects().selectedObjects[0] === drawing2, 'Check reset text selection');
 		assert.true(!GetDrawingObjects().selection.textSelection, 'Check reset text selection');
 
-
 		let group = CreateGroup([drawing1, drawing2]);
 		group.selectObject(drawing1, 0);
 		GetDrawingObjects().selection.groupSelection = group;
@@ -980,7 +970,6 @@ QUnit.config.autostart = false;
 
 		ExecuteGraphicHotkey(graphicHotkeyTypes.moveCursorRightWord);
 		CheckCursorPosition(24, 'Check move to right word');
-
 
 		ExecuteGraphicHotkey(graphicHotkeyTypes.moveCursorToStartLine);
 		CheckCursorPosition(18, 'Check move to start line');
@@ -1262,7 +1251,6 @@ QUnit.config.autostart = false;
 		ExecuteHotkeyWithEvent(1);
 	});
 
-
 	QUnit.module('Test table hotkeys', {
 		before   : function f()
 		{
@@ -1322,7 +1310,6 @@ QUnit.config.autostart = false;
 			assert.deepEqual([lastRange.r1, lastRange.c1, lastRange.r2, lastRange.c2], [r1, c1, r2, c2], description);
 		}
 
-
 		Select(0, 15, 0, 15, 0, 15);
 		FillActiveCell('Hello');
 		Select(25, 0, 25, 0, 25, 0);
@@ -1342,7 +1329,6 @@ QUnit.config.autostart = false;
 		CheckActiveCell(25, 0, 'Check move to top cell');
 		ExecuteTableHotkey(tableHotkeyTypes.moveToTopCell);
 		CheckActiveCell(0, 0, 'Check move to top cell');
-
 
 		Select(0, 39, 0, 39, 0, 39);
 		ExecuteTableHotkey(tableHotkeyTypes.moveToLeftEdgeCell);
@@ -1541,7 +1527,6 @@ QUnit.config.autostart = false;
 		ExecuteTableHotkey(tableHotkeyTypes.reset);
 		assert.strictEqual(wsView.getCutRange(), null, 'Check resetting copy range');
 	});
-
 
 	QUnit.test('Check actions with removing', (assert) =>
 	{

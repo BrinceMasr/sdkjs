@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -44,7 +39,6 @@
 		var AscBrowser = AscCommon.AscBrowser;
 
 		var c_oAscSelectionType = Asc.c_oAscSelectionType;
-
 
 		/** @const */
 		var kLeftLim1 = .999999999999999;
@@ -375,7 +369,6 @@
 				}
 				return false;
 			};
-
 
 			for (var i = 0; i < str.length; i++) {
 				if (str[i] === "%") {
@@ -1197,7 +1190,6 @@
 
 			return newRange;
 		};
-
 
 		/**
 		 *
@@ -2190,7 +2182,6 @@
 
 		};
 
-
 		function outputDebugStr(channel) {
 			var c = window.console;
 			if (Asc.g_debug_mode && c && c[channel] && c[channel].apply) {
@@ -2879,7 +2870,6 @@
 
 			var shapeDrawer = new AscCommon.CShapeDrawer();
 			shapeDrawer.Graphics = graphics;
-
 
 			AscFormat.ExecuteNoHistory(
 				function () {
@@ -3596,7 +3586,6 @@
 			result.scanOnOnlySheet = this.scanOnOnlySheet;
 			result.lookIn = this.lookIn;
 
-
 			result.replaceWith = this.replaceWith;
 			result.isReplaceAll = this.isReplaceAll;
 
@@ -4130,7 +4119,6 @@
 			return AscCommonExcel.getCFIconsForLoad().concat(AscCommonExcel.getSlicerIconsForLoad()).concat(AscCommonExcel.getPivotButtonsForLoad());
 		}
 
-
 		/*
 		 * Export
 		 * -----------------------------------------------------------------------------
@@ -4319,7 +4307,6 @@
 		prot["asc_setNotSearchEmptyCells"] = prot.asc_setNotSearchEmptyCells;
 		prot["asc_setActiveCell"] = prot.asc_setActiveCell;
 		prot["asc_setIsForMacros"] = prot.asc_setIsForMacros;
-
 
 		window["AscCommonExcel"].findResults = findResults;
 

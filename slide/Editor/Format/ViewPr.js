@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -33,7 +28,6 @@
 "use strict";
 
 (function (window, undefined) {
-
 
     let CBaseObject = AscFormat.CBaseObject;
     let oHistory = AscCommon.History;
@@ -48,8 +42,6 @@
 
     let IC = AscFormat.InitClass;
     let CBFO = AscFormat.CBaseFormatObject;
-
-
 
     AscDFH.changesFactory[AscDFH.historyitem_ViewPrGridSpacing] = CChangeObject;
     AscDFH.changesFactory[AscDFH.historyitem_ViewPrSlideViewerPr] = CChangeObject;
@@ -67,7 +59,6 @@
     AscDFH.changesFactory[AscDFH.historyitem_CViewPrScale] = CChangeObject;
     AscDFH.changesFactory[AscDFH.historyitem_ViewPrScaleSx] = CChangeObject;
     AscDFH.changesFactory[AscDFH.historyitem_ViewPrScaleSy] = CChangeObject;
-
 
     let drawingsChangesMap = window['AscDFH'].drawingsChangesMap;
 
@@ -88,8 +79,6 @@
     drawingsChangesMap[AscDFH.historyitem_ViewPrScaleSy] = function(oClass, value){oClass.sy = value;};
 
     AscDFH.drawingContentChanges[AscDFH.historyitem_CSldViewPrGuideLst] = function(oClass){return oClass.guideLst;};
-
-
 
     function fReadSlideSize(oStream) {
         let oSlideSize = new AscCommonSlide.CSlideSize();
@@ -221,7 +210,6 @@
         }
     };
 
-
     CViewPr.prototype.privateWriteAttributes = function(pWriter) {
     };
     CViewPr.prototype.writeChildren = function(pWriter) {
@@ -332,7 +320,6 @@
         }
     };
 
-
     function CCommonViewPr() {
         CBFO.call(this);
         this.cSldViewPr = null;
@@ -433,7 +420,6 @@
             this.parent.Refresh_RecalcData2(Data);
         }
     };
-
 
     const GUIDE_POS_TO_EMU = 1587.5;
 
@@ -693,8 +679,6 @@
         }
     };
 
-
-
     const orient_horz = 0;
     const orient_vert = 1;
 
@@ -903,7 +887,6 @@
             this.parent.Refresh_RecalcData2(Data);
         }
     };
-
 
     window['AscFormat'] = window['AscFormat'] || {};
     window['AscFormat'].CViewPr = CViewPr;

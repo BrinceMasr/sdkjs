@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -1293,7 +1288,6 @@
 	CTextProp.prototype['put_SmallCaps'] = CTextProp.prototype.put_SmallCaps = function(v){this.SmallCaps = v;};
 	CTextProp.prototype['put_Lang'] = CTextProp.prototype.put_Lang = function(v){this.Lang = v;};
 
-
 	window['Asc']['CTextProp'] = window['Asc'].CTextProp = CTextProp;
 
 	/**
@@ -1610,7 +1604,6 @@
 	CTableOfContentsPr.prototype['put_IncludeLabelAndNumber'] = CTableOfContentsPr.prototype.put_IncludeLabelAndNumber;
 	CTableOfContentsPr.prototype['get_IncludeLabelAndNumber'] = CTableOfContentsPr.prototype.get_IncludeLabelAndNumber;
 
-
 	/**
 	 * Класс для работы с настройками стиля
 	 * @constructor
@@ -1758,7 +1751,6 @@
 	CAscNumberingLvlText.prototype['put_Type']  = CAscNumberingLvlText.prototype.put_Type;
 	CAscNumberingLvlText.prototype['get_Value'] = CAscNumberingLvlText.prototype.get_Value;
 	CAscNumberingLvlText.prototype['put_Value'] = CAscNumberingLvlText.prototype.put_Value;
-
 
 	/**
 	 * Класс для работы с настройками конкретного уровня нумерации
@@ -2462,7 +2454,6 @@
 	CAscDateTime.prototype['get_FormatsExamples'] = CAscDateTime.prototype.get_FormatsExamples;
 	CAscDateTime.prototype["get_String"]          = CAscDateTime.prototype.get_String;
 
-
 	window['Asc']['CAscCaptionProperties'] = window['Asc'].CAscCaptionProperties = CAscCaptionProperties;
 	var prot = CAscCaptionProperties.prototype;
 	prot.get_Name = prot["get_Name"] = function(){return this.Name;};
@@ -2694,7 +2685,6 @@
 		this.TypeItalic = false;
 	}
 
-
 	CSignatureFormProps.prototype.put_PreviewImgId = function(divId)
 	{
 		this.PreviewImgId = divId;
@@ -2730,7 +2720,6 @@
 			this._renderTypePreview();
 		}
 	};
-
 
 	CSignatureFormProps.prototype.showFileDialog = function()
 	{
@@ -2990,7 +2979,6 @@
 		ctx.restore();
 	};
 
-
 	CSignatureFormProps.prototype._initDrawCanvas = function()
 	{
 		if (this.DrawCanvas || !this.PreviewDrawId)
@@ -3225,7 +3213,6 @@
 		Asc.editor.sendEvent("asc_CanUndoSignature", this.asc_canUndo());
 		Asc.editor.sendEvent("asc_CanRedoSignature", this.asc_canRedo());
 	};
-
 
 	CSignatureFormProps.prototype.put_TypeFont = function(name)
 	{

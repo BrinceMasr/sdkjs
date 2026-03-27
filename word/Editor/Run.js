@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -218,10 +213,6 @@ ParaRun.prototype.Copy = function(Selected, oPr)
 	if (isMathRun)
 		NewRun.Set_MathPr(this.MathPrp.Copy());
 
-
-
-
-
     var StartPos = 0;
     var EndPos   = this.Content.length;
 
@@ -380,7 +371,6 @@ ParaRun.prototype.GetSelectedContent = function(oSelectedContent)
 
 			if (oSelectedContent.IsMoveTrack())
 				oSelectedContent.AddRunForMoveTrack(oRun);
-
 
 			for (var nPos = 0, nCount = oRun.Content.length; nPos < nCount; ++nPos)
 			{
@@ -774,7 +764,6 @@ ParaRun.prototype.MathAutoCorrection_DeleteLastSpace = function()
 
 	return false;
 }
-
 
 // Проверяем пустой ли ран
 ParaRun.prototype.Is_Empty = function(oProps)
@@ -4293,7 +4282,6 @@ ParaRun.prototype.Recalculate_Range = function(PRS, ParaPr, Depth)
                                 if(FirstItemOnLine === false)
                                     bInsideOper = true;
 
-
                                 if(Word == false && FirstItemOnLine == true )
                                 {
                                     SpaceLen += BrkLen;
@@ -4658,7 +4646,6 @@ ParaRun.prototype.Recalculate_Range = function(PRS, ParaPr, Depth)
                         }
                     }
 
-
                     StartWord = true;
                     Word = true;
 
@@ -4930,7 +4917,6 @@ ParaRun.prototype.Recalculate_Range = function(PRS, ParaPr, Depth)
         }
     }
 
-
     PRS.MoveToLBP       = MoveToLBP;
     PRS.NewRange        = NewRange;
     PRS.ForceNewPage    = ForceNewPage;
@@ -4957,7 +4943,6 @@ ParaRun.prototype.Recalculate_Range = function(PRS, ParaPr, Depth)
     PRS.bEndRunToContent    = bEndRunToContent;
     PRS.bNoOneBreakOperator = bNoOneBreakOperator;
     PRS.bForcedBreak        = bForcedBreak;
-
 
 	if (this.Type == para_Math_Run)
 	{
@@ -5024,7 +5009,6 @@ ParaRun.prototype.Recalculate_SetRangeBounds = function(_CurLine, _CurRange, oSt
 
 	var CurLine  = _CurLine - this.StartLine;
 	var CurRange = 0 === CurLine ? _CurRange - this.StartRange : _CurRange;
-
 
 	if (isStartPos)
 	{
@@ -5820,7 +5804,6 @@ ParaRun.prototype.Recalculate_Range_Spaces = function(PRSA, _CurLine, _CurRange,
 						Item.Reset_SavedPosition();
 					}
                 }
-
 
                 break;
             }
@@ -6625,7 +6608,6 @@ ParaRun.prototype.SkipDraw = function(PDS)
 	var StartPos = this.protected_GetRangeStartPos(CurLine, CurRange);
 	var EndPos   = this.protected_GetRangeEndPos(CurLine, CurRange);
 
-
 	var X = PDS.X;
 
 	for (var Pos = StartPos; Pos < EndPos; Pos++)
@@ -7215,7 +7197,6 @@ ParaRun.prototype.Get_WordEndPos = function(SearchPos, ContentPos, Depth, UseCon
 		SearchPos.UpdatePos = true;
 		return;
 	}
-
 
     // На втором этапе мы смотрим на каком элементе мы встали: если это не пробел, тогда
     // останавливаемся здесь. В противном случае сдвигаемся вперед, пока не попали на первый
@@ -7858,11 +7839,9 @@ ParaRun.prototype.Internal_Compile_Pr = function ()
 			}
 			var StyleDefaultTextPr = Styles.Default.TextPr.Copy();
 
-
 			// Ascii - по умолчанию шрифт Cambria Math
 			// hAnsi, eastAsia, cs - по умолчанию шрифты не Cambria Math, а те, которые компилируются в документе
 			Styles.Default.TextPr.RFonts.Merge({Ascii : MathFont});
-
 
 			var Pr = Styles.Get_Pr(StyleId, styletype_Paragraph, null, null);
 
@@ -7875,7 +7854,6 @@ ParaRun.prototype.Internal_Compile_Pr = function ()
 				oShapeStyle.TextPr = oShapeTextPr;
 			}
 		}
-
 
 		if (this.IsPlaceholder())
 		{
@@ -8238,7 +8216,6 @@ ParaRun.prototype.Apply_TextPr = function(TextPr, IncFontSize, ApplyToAll)
 			else
 				CRun.IncreaseDecreaseFontSize(IncFontSize);
 
-
             if ( null !== RRun )
                 RRun.RemoveSelection();
         }
@@ -8314,7 +8291,6 @@ ParaRun.prototype.Split_Run = function(Pos)
 
     if(bMathRun)
         NewRun.Set_MathPr(this.MathPrp.Copy());
-
 
     var OldCrPos = this.State.ContentPos;
     var OldSSPos = this.State.Selection.StartPos;
@@ -8466,7 +8442,6 @@ ParaRun.prototype.Apply_Pr = function(TextPr)
 		this.SetFontSizeCS(null === TextPr.FontSize ? undefined : TextPr.FontSize);
 	}
 
-
 	var oCompiledPr;
 	if (undefined !== TextPr.AscUnifill && null !== TextPr.AscUnifill)
 	{
@@ -8593,7 +8568,6 @@ ParaRun.prototype.Apply_Pr = function(TextPr)
 				this.Set_RFonts2(TextPr.RFonts);
 		}
 	}
-
 
 	if (undefined !== TextPr.Lang && undefined !== TextPr.Lang.Val)
 	{
@@ -8963,7 +8937,6 @@ ParaRun.prototype.Get_HighLight = function()
 {
     return this.Get_CompiledPr(false).HighLight;
 };
-
 
 ParaRun.prototype.Set_RStyle = function(styleId)
 {
@@ -9871,7 +9844,6 @@ CParaRunLine.prototype =
         return true;
     }
 
-
 };
 
 // Метка о конце или начале изменений пришедших от других соавторов документа
@@ -9947,7 +9919,6 @@ function FontSize_IncreaseDecreaseValue(bIncrease, Value)
 
     return NewValue;
 }
-
 
 function CRunCollaborativeMarks()
 {
@@ -10222,7 +10193,6 @@ ParaRun.prototype.Recalculate_Range_OneLine = function(PRS, ParaPr, Depth)
 
     var CurLine  = PRS.Line - this.StartLine;
     var CurRange = ( 0 === CurLine ? PRS.Range - this.StartRange : PRS.Range );
-
 
     // обновляем позиции start и end для Range
     var RangeStartPos = this.protected_AddRange(CurLine, CurRange);
@@ -10666,7 +10636,6 @@ ParaRun.prototype.Get_AlignBrk = function(_CurLine, bBrkBefore)
     // null      - break отсутствует
     // 0         - break присутствует, alnAt = undefined
     // Number    = break присутствует, alnAt = Number
-
 
     // если оператор находится в конце строки и по этому оператору осушествляется принудительный перенос (Forced)
     // тогда StartPos = 0, EndPos = 1 (для предыдущей строки), т.к. оператор с принудительным переносом всегда должен находится в начале Run

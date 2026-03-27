@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -146,7 +141,6 @@ CMathMenuSettings.prototype["get_WrapRight"]       = CMathMenuSettings.prototype
 CMathMenuSettings.prototype["put_WrapRight"]       = CMathMenuSettings.prototype.put_WrapRight;
 CMathMenuSettings.prototype["get_SmallFraction"]   = CMathMenuSettings.prototype.get_SmallFraction;
 CMathMenuSettings.prototype["put_SmallFraction"]   = CMathMenuSettings.prototype.put_SmallFraction;
-
 
 function Get_WordDocumentDefaultMathSettings()
 {
@@ -301,7 +295,6 @@ CParaMathLineParameters.prototype.Add_Line = function(Line, bStartLine, bStartPa
             this.LineParameters[NumLine].SpaceAlign = bStartPage == true ? MathSettings.Get_WrapIndent(this.WrapState) : 0;
         }
 
-
         bInsideBounds = false;
     }
 
@@ -345,7 +338,6 @@ CParaMathLineParameters.prototype.Get_SpaceAlign = function(Line)
 
     return SpaceAlign;
 };
-
 
 function CMathPageInfo()
 {
@@ -519,8 +511,6 @@ CMathPageInfo.prototype.Get_SpaceAlign = function(_Line, _Page)
 
     return this.WPages[Page].Get_SpaceAlign(Line);
 };
-
-
 
 /**
  *
@@ -915,7 +905,6 @@ ParaMath.prototype.Get_AlignToLine = function(_CurLine, _CurRange, _Page, _X, _X
         }
     }
 
-
     return X;
 };
 
@@ -1165,7 +1154,6 @@ ParaMath.prototype.Apply_TextPr = function(TextPr, IncFontSize, ApplyToAll)
 
         var NewTextPr = new CTextPr();
         var bSetInRoot = false;
-
 
         if(IncFontSize == undefined)
         {
@@ -1459,7 +1447,6 @@ ParaMath.prototype.Recalculate_Range = function(PRS, ParaPr, Depth)
 		PRS.SetMathRecalcInfoObject(this);
 	}
 
-
 	// такая сиуация возможна, если разместили формулу под картинкой и нужно заново пересчитать формулу
 	// для этого меняем PRS.Y и ждем пока не произойдет private_RecalculateLineCheckRangeY
 	// т.к. в противном случае мы можем изменить Ranges на те, что находятся PRS.Y, который был до того как его изменили в данном блоке (возникает из-за того, что ф-ия private_RecalculateLineCheckRanges нах-ся выше ф-ии private_RecalculateLineCheckRangeY)
@@ -1518,7 +1505,6 @@ ParaMath.prototype.Recalculate_Range = function(PRS, ParaPr, Depth)
 
 			//здесь обновляем WrapState, исходя из этого параметра будем считать WrapIndent
 			this.PageInfo.Update_CurrentWrap(DispDef, bInline);
-
 
 			// формулы не инлайновая, есть Ranges пересчитываем формулу в макс Range => private_RecalculateRangeInsideInterval
 			if (this.ParaMathRPI.IntervalState !== MATH_INTERVAL_EMPTY && this.ParaMathRPI.bInternalRanges == true/*this.ParaMathRPI.bStartRanges == true*/) // картинки в другом параграфе и формула пересчитывается с учетом Ranges
@@ -1590,7 +1576,6 @@ ParaMath.prototype.private_UpdateWrapSettings = function(PRS)
     var LngR       = PRS.Ranges.length,
         Ranges     = PRS.Ranges;
 
-
     if(LngR > 0)
     {
         this.ParaMathRPI.IntervalState = MATH_INTERVAL_ON_SIDE;
@@ -1643,7 +1628,6 @@ ParaMath.prototype.private_UpdateWrapSettings = function(PRS)
 
             XStart += this.ParaMathRPI.IndLeft;
 
-
             // в конце сравним с текущим отрезком, т.к. может произойти например след ситуация :
             // 2 плавающих объекта находятся в различных строках +> PRS.Ranges.length <=1
             // при этом формула должна расположится в макс по ширине из отрезков, образованными обоими плавающими мат объектами
@@ -1673,7 +1657,6 @@ ParaMath.prototype.private_UpdateWrapSettings = function(PRS)
             {
                 this.ParaMathRPI.RangeY = RangeY;
             }
-
 
             var DiffXStart = Math.abs(this.ParaMathRPI.XStart - XStart),
                 DiffXEnd   = Math.abs(this.ParaMathRPI.XEnd - XEnd);
@@ -1720,7 +1703,6 @@ ParaMath.prototype.private_RecalculateRangeInsideInterval = function(PRS, ParaPr
         this.private_UpdateXLimits(PRS);
 
         this.private_RecalculateRoot(PRS, ParaPr, Depth);
-
 
         if(PRS.bMathWordLarge == true)
         {
@@ -1879,7 +1861,6 @@ ParaMath.prototype.private_UpdateXLimits = function(PRS)
     PRS.X    += MathSettings.Get_LeftMargin(WrapState);
     PRS.XEnd -= MathSettings.Get_RightMargin(WrapState);
 
-
     PRS.WrapIndent = MathSettings.Get_WrapIndent(WrapState);
 
     PRS.bFirstLine = this.Root.IsStartLine(PRS.Line);
@@ -1954,7 +1935,6 @@ ParaMath.prototype.Recalculate_LineMetrics = function(PRS, ParaPr, _CurLine, _Cu
 
     var RootAscent  = this.Root.GetAscent(_CurLine, _CurRange),
         RootDescent = this.Root.GetDescent(_CurLine, _CurRange);
-
 
     if(PRS.LineAscent < RootAscent)
         PRS.LineAscent = RootAscent;
@@ -2568,7 +2548,6 @@ ParaMath.prototype.Draw_Lines = function(PDSL)
         var UnderlineY = Y + UndOff;
         var LineW      = (FirstRPrp.FontSize / 18) * g_dKoef_pt_to_mm;
 
-
         var BgColor = PDSL.BgColor;
         if ( undefined !== FirstRPrp.Shd && Asc.c_oAscShdNil !== FirstRPrp.Shd.Value )
             BgColor = FirstRPrp.Shd.Get_Color( Para );
@@ -2601,7 +2580,6 @@ ParaMath.prototype.Draw_Lines = function(PDSL)
 					aUnderline.set(UnderlineY, LineW);
 	        aUnderline.Add(X, X + Width, CurColor);
         }
-
 
         this.Root.Draw_Lines(PDSL);
 

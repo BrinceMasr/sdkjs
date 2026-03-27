@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -81,7 +76,6 @@ else
 {
 	getBinaryPromise = function() { return getBinaryPromise2(); }
 }
-
 
 	(function(){
 
@@ -204,7 +198,6 @@ else
 
 })();
 
-
 	var Module=typeof Module!="undefined"?Module:{};
 var Promise=function(){function noop(){}function bind(fn,thisArg){return function(){fn.apply(thisArg,arguments)}}function Promise(fn){if(!(this instanceof Promise))throw new TypeError("Promises must be constructed via new");if(typeof fn!="function")throw new TypeError("not a function");this._state=0;this._handled=false;this._value=undefined;this._deferreds=[];doResolve(fn,this)}function handle(self,deferred){while(self._state===3)self=self._value;if(self._state===0){self._deferreds.push(deferred);
 return}self._handled=true;Promise._immediateFn(function(){var cb=self._state===1?deferred.onFulfilled:deferred.onRejected;if(cb===null){(self._state===1?resolve:reject)(deferred.promise,self._value);return}var ret;try{ret=cb(self._value)}catch(e){reject(deferred.promise,e);return}resolve(deferred.promise,ret)})}function resolve(self,newValue){try{if(newValue===self)throw new TypeError("A promise cannot be resolved with itself.");if(newValue&&(typeof newValue=="object"||typeof newValue=="function")){var then=
@@ -242,9 +235,6 @@ function jz(){return Ga|0}function iz(a){a=a|0;Ga=a}function ao(a){a=a|0;X()}fun
 // EMSCRIPTEN_END_FUNCS
 e=I;p(Ra);var Ia=c([null,ZG,ZE,lA,Pz,YD,KC,xz,Ly,Gl,zy,ry,ky,by,Wx,Ww,Lw,nl,_u,Fu,bm,Fs,vs,kg,ds,ur,jr,Jq,ce,Pc,Vb,bI,SH,Va,SD,HD,Bb,Se,Mz,pb,Fy,Jz,Gz,Ez,Dz,Bz,zz,Cz,yy,xy,Yd,dA,Vz,Fl,ty,gc,Cb,jd,kB,Zd,We,qi,Rf,pn,sy,wy,Xe,ci,Vb,Id,ke,uc,ci,qw,Kd,mw,lw,nw,kw,dB,jw,iw,pw,$n,wD,Du,tu,zu,ru,Vy,wu,Uy,Cu,Tl,Sl,Rd,hz,_k,Lc,qu,pu,Ui,yz,ad,Bu,lc,Au,hu,fu,bu,Ty,Sy,gA,eu,jA,Xi,Jh,Ih,zk,pi,gz,_b,ri,le,ju,sd,gu,iu,Qy,Py,Oy,Zb,Ny,li,ib,ZF,EF,tF,iF,YE,NE,IE,HE,GE,CE,yE,qE,fE,_D,XD,ce,ce,ce,ce,ce,ce,Qm,Oz,Ve,fz,ez,dz,cz,bz,az,$y,Uz,_y,Zy,Yy,Xy,Wy,li,Ol,Ry,Te,My,ib,ib,Ky,Jy,Iy,Hy,Gy,Ey,Dy,Cy,By,Ay,vy,uy,py,Dl,oy,ny,my,ly,jy,iy,hy,bi,gy,fy,ey,dy,cy,Bl,Al,ay,zf,$x,pb,_x,Zx,Yx,Xx,Vx,Ux,Tx,Sx,Rx,Qx,pb,Px,Ox,Nx,Mx,Lx,Kx,Jx,pb,Ix,Hx,Gx,Fx,Ex,Dx,Cx,Bx,Ax,zx,yx,xx,wx,vx,ux,tx,sx,Sw,Tw,Uw,Vw,Xw,Yw,Zw,Qw,Pw,Ow,Nw,Mw,Kw,Jw,Iw,Hw,Gw,Fw,Ew,Dw,Cw,Bw,Aw,zw,yw,xw,ww,vw,uw,tw,Rw,rx,qx,px,ox,nx,mx,lx,kx,jx,ix,hx,gx,fx,ex,dx,cx,bx,ax,Zb,$w,gw,fw,ew,pb,dw,cw,bw,aw,$v,_v,Zv,Yv,Xv,Wv,Vv,Uv,Tv,Sv,pb,Rv,Qv,Pv,Ov,Nv,Mv,Lv,Kv,Jv,Iv,ev,fv,gv,hv,iv,jv,kv,cv,bv,av,$u,Zu,Yu,Xu,Wu,Vu,Uu,Tu,Su,Ru,Qu,Pu,Ou,Nu,Mu,Lu,Ku,Ju,Iu,Hu,lv,Gu,Eu,dv,Hv,Gv,tl,Fv,Ev,Dv,Cv,Bv,Av,zv,yv,xv,wv,vv,uv,tv,sv,rv,qv,pv,ov,ol,nv,mv,_w,sw,rw,ll,xu,ia,yu,uu,Mb,vu,fl,vl,ab,fb,he,su,ou,nu,mu,lu,ku,cu,du,au,$t,ib,et,it,ht,ft,Zt,Yt,Xt,Wt,Vt,Ut,Tt,St,Qt,Pt,Ot,Nt,Mt,Lt,Kt,Jt,It,Gt,Ft,Et,Dt,Ct,Bt,At,zt,yt,wt,vt,ut,tt,st,rt,qt,pt,ot,nt,ib,li,dt,Ys,Zs,$s,Ws,Yc,jt,lt,pb,Xs,at,bt,ct,Ts,ib,Rs,Qs,Os,Ns,Ms,Ls,Ks,Js,Is,Hs,Gs,Es,Ds,Cs,Bs,As,zs,ys,xs,ws,us,ts,ss,rs,qs,ps,os,ns,ms,ks,js,is,fs,es,cs,hs,bs,as,$r,_r,Zr,Yr,Xr,Wr,Or,Ur,Tr,Sr,Qr,Mr,Lr,Kr,Jr,Ir,Hr,Gr,Fr,Er,Dr,Cr,Br,Ar,zr,pb,yr,xr,wr,pb,qy,tr,sr,rr,qr,pr,or,nr,mr,lr,kr,ir,hr,gr,br,pb,fr,er,dr,cr,Wq,ar,$q,_q,Zq,Yq,Xq,Af,$h,ow,hw,ci,Vq,Uq,Sq,Qq,Oq,Nq,Fj,Mq,Lq,Iq,Hq,Gq,Fq,Eq,Dq,Cq,Bq,Aq,yq,xq,wq,vq,uq,tq,sq,rq,qq,pq,oq,nq,mq,lq,kq,jq,iq,hq,gq,fq,eq,dq,cq,bq,aq,$p,_p,Zp,Yp,ls,Kq,Pq,Rq,Tq,vr,Nr,Rr,Pr,gs,Vr,Us,zq,Ss,Bj,Xp,Qp,Pp,Op,Np,Mp,Vj,Lp,pf,Wp,Vp,Up,Sp,Rp,Tp,Kp,Jp,zj,Ip,Hp,Gp,Fp,Ep,Dp,Cp,Bp,Ap,zp,yp,xp,wp,vp,up,zj,tp,sp,Pc,Vb,QC,AB,rj,rp,pb,pb,nH,qj,ib,pb,mf,mf,lf,lf,pb,eb,pb,pb,pj,ib,eb,pb,ud,ud,Zb,eb,pb,qp,pp,op,np,mp,lp,kp,jp,ip,hp,gp,fp,ep,dp,cp,bp,ap,$o,_o,Zo,Yo,Xo,Wo,PI,OI,NI,MI,LI,KI,JI,II,HI,GI,FI,EI,DI,CI,BI,zI,AI,yI,xI,wI,vI,uI,tI,sI,rI,qI,pI,oI,nI,mI,lI,kI,jI,iI,hI,gI,fI,eI,dI,cI,aI,$H,_H,ZH,YH,XH,WH,VH,UH,TH,RH,QH,PH,OH,NH,MH,LH,KH,JH,IH,GH,FH,EH,DH,CH,BH,AH,zH,yH,xH,vH,uH,tH,sH,rH,qH,ud,pH,oH,Qo,lH,hH,gH,fH,eH,dH,cH,bH,aH,$G,_G,XG,WG,VG,UG,TG,SG,RG,QG,PG,OG,sh,kH,jH,MG,LG,KG,JG,IG,HG,GG,FG,EG,DG,BG,AG,zG,yG,xG,wG,vG,uG,tG,sG,rG,qG,pG,oG,nG,mG,lG,kG,jG,iG,hG,gG,fG,eG,dG,cG,bG,aG,$F,_F,YF,XF,WF,VF,UF,TF,SF,RF,QF,PF,OF,NF,MF,LF,KF,JF,IF,HF,GF,FF,DF,CF,BF,AF,zF,yF,xF,wF,vF,uF,sF,rF,qF,pF,oF,nF,mF,lF,kF,jF,hF,gF,fF,eF,dF,cF,bF,aF,$E,_E,XE,WE,VE,UE,TE,SE,RE,QE,PE,OE,ME,LE,Pc,Vb,Po,Oo,No,Mo,Lo,Ko,Jo,Io,Ho,Go,Fo,Eo,Do,Co,Bo,Ao,zo,yo,xo,wo,Hd,KE,JE,eb,ib,ib,ib,ib,ib,pb,pb,eb,ib,eb,ib,eb,eb,ib,eb,eb,eb,eb,xc,xc,eb,pb,pb,pb,pb,pb,pb,eb,eb,eb,eb,eb,eb,eb,eb,eb,eb,xc,xc,eb,eb,eb,xc,pb,eb,ib,eb,pb,eb,eb,eb,Xb,xc,xc,xc,eb,eb,eb,eb,xc,ib,ib,ib,ib,Xb,Xb,ib,ib,ib,ib,ib,ib,ib,ib,ib,ib,eb,ib,ib,eb,eb,eb,eb,Xb,Xb,eb,qh,qh,ib,ib,ib,kf,kf,kf,ph,ph,ib,ib,ud,jf,jf,vo,FE,hE,gE,eE,qj,ib,pb,mf,mf,lf,lf,pb,eb,pb,pb,pj,ib,eb,pb,ud,ud,hf,eb,pb,EE,ib,ib,ib,ib,ib,pb,pb,eb,ib,eb,ib,eb,eb,ib,eb,eb,eb,eb,xc,xc,eb,pb,pb,pb,pb,pb,pb,eb,eb,eb,eb,eb,eb,eb,eb,eb,eb,xc,xc,eb,eb,eb,xc,pb,eb,ib,eb,pb,eb,eb,eb,DE,uo,uo,xc,BE,to,to,AE,xc,zE,so,xE,so,wE,vE,uE,tE,sE,rE,pE,oE,nE,mE,lE,kE,jE,iE,ib,eb,eb,eb,eb,Xb,Xb,eb,qh,qh,ib,ib,ib,kf,kf,kf,ph,ph,ib,ib,ud,jf,jf,Zf,cE,aE,$D,qo,oo,Zb,pb,hj,BD,zD,xD,uD,sD,qD,oD,mD,kD,iD,gD,eD,cD,aD,_C,YC,WC,Zb,UC,SC,ZD,dE,bE,pb,CD,AD,yD,vD,tD,rD,pD,nD,lD,jD,hD,fD,dD,bD,$C,ZC,XC,VC,Zb,TC,RC,ao,lh,pe,ao,lh,WD,lh,pb,VD,UD,Hd,TD,jo,Vj,RD,QD,PD,Kd,OD,Rf,ND,MD,LD,KD,Rf,JD,ID,GD,pf,FD,Kd,ED,DD,hf,jh,OC,MC,Gl,LC,oo,Yc,JC,PC,NC,IC,HC,Zb,sh,Pc,Vb,Zb,Pc,Vb,Yc,Yc,Tn,GC,Kd,FC,Rf,Sn,EC,Rn,DC,cj,bj,CC,Tn,pf,pn,Kd,BC,Sn,Rn,AC,zC,yC,Wf,Hd,xC,ig,wC,Wc,vC,uC,tC,sC,rC,qC,Ce,pC,Wc,oC,nC,mC,lC,kC,Zb,Pc,Vb,Yc,jC,iC,Hd,hC,gC,Qn,fC,Pn,eC,dC,Zb,Zb,Zb,cC,bC,aC,$B,_B,On,ZB,YB,Zb,Zb,Zb,XB,WB,Wf,VB,UB,hf,TB,SB,Vb,RB,OB,NB,Hd,aj,QB,PB,Pc,Vb,Yc,Vb,Yc,eh,LB,Yc,Ln,Zb,ig,Zb,Kd,Rf,Wc,Qn,Xb,MB,KB,JB,Zb,Ce,Zb,pf,Kd,Wc,BB,Xb,HB,GB,Wf,IB,ig,FB,Wc,$d,$d,dh,EB,DB,Ln,Ce,CB,Wc,$d,$d,dh,Pc,Vb,Yc,Vb,Hd,Vb,Wf,Vb,hf,Vb,sh,En,zB,oB,nB,mB,qj,ib,pb,mf,mf,lf,lf,pb,eb,pb,pb,pj,ib,eb,pb,ud,ud,hf,ib,ib,ib,ib,ib,ib,ib,pb,yB,Tf,xB,wB,ib,Xb,eb,vB,eb,jf,Tf,uB,tB,sB,rB,qB,xc,pB,eb,eb,eb,ib,eb,eb,eb,Xb,eb,eb,eb,Xb,Xb,ib,ib,ib,ib,pb,pb,Xb,Xb,eb,eb,eb,eb,eb,eb,eb,eb,eb,eb,ib,ib,ib,ib,ib,ib,eb,Vb,Po,Oo,No,Mo,Lo,Ko,Jo,Io,Ho,Go,Fo,Eo,Do,Co,Bo,Ao,zo,yo,xo,wo,Hd,ib,ib,ib,ib,ib,ib,ib,pb,Tf,Tf,Xb,lB,ib,Xb,eb,ib,eb,jf,Tf,eb,eb,eb,Xb,ud,xc,Xb,eb,eb,eb,ib,eb,eb,eb,Xb,eb,eb,eb,Xb,Xb,ib,ib,ib,ib,pb,pb,Xb,Xb,eb,eb,eb,eb,eb,eb,eb,eb,eb,eb,ib,ib,ib,ib,ib,ib,eb,Vi,jB,pb,vn,QA,PA,OA,NA,MA,LA,KA,JA,IA,HA,GA,FA,EA,DA,Zb,CA,BA,AA,zA,yA,iB,hB,gB,fB,Zb,Pc,Vb,Hd,eB,yn,cB,bB,aB,$A,xn,Pn,_A,cj,bj,ZA,YA,xn,XA,WA,VA,UA,On,TA,SA,RA,hf,Pc,Vb,sh,wn,lh,Ti,xA,wA,Pc,Vb,Yc,Vb,Hd,Sf,uA,Yc,sn,Zb,rn,Zb,rA,Wc,Wc,pA,Xb,vA,tA,sA,Zb,qn,Zb,qA,Wc,Wc,oA,Xb,Pc,Vb,Wf,nA,rn,mA,Wc,$d,$d,dh,cj,bj,sn,qn,kA,Wc,$d,$d,dh,iA,Xd,hA,ef,fA,eA,cA,bA,aA,$z,_z,Zz,Yz,Xz,Wz,Tz,Sz,Rz,Qz,Zb,Nz,Lz,Kz,Iz,Hz,Bi,Az,Pc,Vb,pb,pb,wz,Vb,vz,lz,oz,uz,Vb,mz,pz,tz,Vb,nz,qz,sz,Vb,rz,Pc,Vb,kz,am,Ce,am]);function Ja(){return E.byteLength/65536|0}function Oa(Pa){Pa=Pa|0;var Ka=Ja()|0;var La=Ka+Pa|0;if(Ka<La&&La<65536){var Ma=new ArrayBuffer(N(La,65536));var Na=new Int8Array(Ma);Na.set(F);F=new Int8Array(Ma);G=new Int16Array(Ma);H=new Int32Array(Ma);I=new Uint8Array(Ma);J=new Uint16Array(Ma);K=new Uint32Array(Ma);L=new Float32Array(Ma);M=new Float64Array(Ma);E=Ma;D.buffer=E;e=I}return Ka}return{"J":Vo,"K":cb,"L":Ta,"M":Ia,"N":_t,"O":Rt,"P":Ht,"Q":xt,"R":mt,"S":kt,"T":gt,"U":_s,"V":Vs,"W":Ps,"X":HH,"Y":Kd,"Z":Ce,"_":ig,"$":pf,"aa":wH,"ba":mH,"ca":iH,"da":Ce,"ea":YG,"fa":NG,"ga":CG,"ha":Fz,"ia":jz,"ja":iz}}return Qa(Sa)}
 // EMSCRIPTEN_END_ASM
-
-
-
 
 )(asmLibraryArg)},instantiate:function(binary,info){return{then:function(ok){var module=new WebAssembly.Module(binary);ok({"instance":new WebAssembly.Instance(module)})}}},RuntimeError:Error};wasmBinary=[];if(typeof WebAssembly!="object")abort("no native wasm support detected");var wasmMemory;var ABORT=false;
 var EXITSTATUS;function assert(condition,text){if(!condition)abort(text)}var UTF8Decoder=typeof TextDecoder!="undefined"?new TextDecoder("utf8"):undefined;
@@ -299,7 +289,6 @@ function invoke_viiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9){var sp=stackSave();
 dependenciesFulfilled=function runCaller(){if(!calledRun)run();if(!calledRun)dependenciesFulfilled=runCaller};
 function run(args){args=args||arguments_;if(runDependencies>0)return;preRun();if(runDependencies>0)return;function doRun(){if(calledRun)return;calledRun=true;Module["calledRun"]=true;if(ABORT)return;initRuntime();if(Module["onRuntimeInitialized"])Module["onRuntimeInitialized"]();postRun()}if(Module["setStatus"]){Module["setStatus"]("Running...");setTimeout(function(){setTimeout(function(){Module["setStatus"]("")},1);doRun()},1)}else doRun()}Module["run"]=run;
 function exit(status,implicit){EXITSTATUS=status;procExit(status)}function procExit(code){EXITSTATUS=code;if(!keepRuntimeAlive()){if(Module["onExit"])Module["onExit"](code);ABORT=true}quit_(code,new ExitStatus(code))}if(Module["preInit"]){if(typeof Module["preInit"]=="function")Module["preInit"]=[Module["preInit"]];while(Module["preInit"].length>0)Module["preInit"].pop()()}run();
-
 
 	/**
 	 * Class representing a zip archive creator/reader.

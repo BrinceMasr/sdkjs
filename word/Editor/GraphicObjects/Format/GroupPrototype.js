@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -37,7 +32,6 @@ var CShape = AscFormat.CShape;
 var CGroupShape = AscFormat.CGroupShape;
 
 CGroupShape.prototype.addToRecalculate = CShape.prototype.addToRecalculate;
-
 
 CGroupShape.prototype.Get_Theme = CShape.prototype.Get_Theme;
 CGroupShape.prototype.setStartPage = CShape.prototype.setStartPage;
@@ -73,7 +67,6 @@ CGroupShape.prototype.handleUpdateLn = function()
 CGroupShape.prototype.getRecalcObject = CShape.prototype.getRecalcObject;
 CGroupShape.prototype.setRecalcObject = CShape.prototype.setRecalcObject;
 CGroupShape.prototype.Get_ColorMap = CShape.prototype.Get_ColorMap;
-
 
 CGroupShape.prototype.getTargetDocContent = AscFormat.DrawingObjectsController.prototype.getTargetDocContent;
 CGroupShape.prototype.documentUpdateInterfaceState = function()
@@ -275,10 +268,8 @@ CGroupShape.prototype.getArrayWrapPolygons = function()
     return arr_wrap_polygons;
 };
 
-
 CGroupShape.prototype.recalculateTransform = CShape.prototype.recalculateTransform;
 CGroupShape.prototype.updatePosition = CShape.prototype.updatePosition;
-
 
 CGroupShape.prototype.checkShapeChild = function()
 {
@@ -292,7 +283,6 @@ CGroupShape.prototype.checkShapeChildTransform = function()
         this.spTree[i].updatePosition(this.posX, this.posY);
     }
 };
-
 
 CGroupShape.prototype.getArrayWrapIntervals = CShape.prototype.getArrayWrapIntervals;
 
@@ -368,7 +358,6 @@ CGroupShape.prototype.recalculateBounds = function()
         y_arr_min.push(t);
     }
 
-
     if(!this.bForceGroupBounds)
     {
         var tr = this.localTransform;
@@ -399,7 +388,6 @@ CGroupShape.prototype.recalculateBounds = function()
     this.bounds.h = this.bounds.b - this.bounds.t;
 };
 
-
 CGroupShape.prototype.getBoundsPos = function()
 {
     var sp_tree = this.spTree;
@@ -418,7 +406,6 @@ CGroupShape.prototype.getBoundsPos = function()
     }
     return {x: Math.min.apply(Math, x_arr_min), y: Math.min.apply(Math, y_arr_min)};
 };
-
 
 CGroupShape.prototype.getAbsolutePos = function()
 {

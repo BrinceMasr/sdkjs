@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -35,7 +30,6 @@
  * @param {undefined} undefined
  */
 (function (window, undefined) {
-
 
 	var CBaseObject = AscFormat.CBaseObject;
 	AscDFH.changesFactory[AscDFH.historyitem_AutoShapes_SetLocks] = AscDFH.CChangesDrawingsLong;
@@ -50,13 +44,11 @@
 
 	AscDFH.changesFactory[AscDFH.historyitem_ShapeSetFLocksText] = AscDFH.CChangesDrawingsBool;
 
-
 	AscDFH.changesFactory[AscDFH.historyitem_AutoShapes_SetDrawingBasePos] = AscDFH.CChangesDrawingsObjectNoId;
 	AscDFH.changesFactory[AscDFH.historyitem_AutoShapes_SetDrawingBaseExt] = AscDFH.CChangesDrawingsObjectNoId;
 	AscDFH.changesFactory[AscDFH.historyitem_AutoShapes_SetDrawingBaseCoors] = AscDFH.CChangesDrawingsObjectNoId;
 	AscDFH.changesFactory[AscDFH.historyitem_ShapeSetClientData] = AscDFH.CChangesDrawingsObjectNoId;
 	AscDFH.changesFactory[AscDFH.historyitem_ShapeSetUseBgFill] = AscDFH.CChangesDrawingsBool;
-
 
 	var drawingsChangesMap = window['AscDFH'].drawingsChangesMap;
 
@@ -91,7 +83,6 @@
 			oClass.worksheet = null;
 		}
 	};
-
 
 	drawingsChangesMap[AscDFH.historyitem_AutoShapes_SetDrawingBasePos] = function (oClass, value) {
 		if (value) {
@@ -137,7 +128,6 @@
 	drawingsChangesMap[AscDFH.historyitem_ShapeSetUseBgFill] = function (oClass, value) {
 		oClass.useBgFill = value;
 	};
-
 
 	drawingsChangesMap[AscDFH.historyitem_ShapeSetMacro] = function (oClass, value) {
 		oClass.macro = value;
@@ -195,7 +185,6 @@
 		}
 		return new_rot;
 	}
-
 
 	function CDrawingBaseCoordsWritable(a, b) {
 		this.a = a;
@@ -361,7 +350,6 @@
 		this.transform(oTransform);
 	};
 
-
 	CGraphicBounds.prototype.checkByOther = function (oBounds) {
 		if (oBounds) {
 			if (oBounds.l < this.l) {
@@ -409,7 +397,6 @@
 		this.b = b;
 		this.checkWH();
 	};
-
 
 	CGraphicBounds.prototype.isIntersect = function (l, t, r, b) {
 
@@ -508,7 +495,6 @@
 		}, this, []);
 	};
 
-
 	CGraphicBounds.prototype.toObject = function () {
 		return {
 			"X": this.x,
@@ -525,7 +511,6 @@
 		this.contentCopyPr = null;
 		this.cacheImage = true;
 	}
-
 
 	/**
 	 * Base class for all graphic objects
@@ -709,7 +694,6 @@
 		}
 		return false;
 	};
-
 
 	CGraphicObjectBase.prototype.getRectBounds = function () {
 		let aSnapX = [];
@@ -1690,7 +1674,6 @@
 				oldCx = this.drawingBase.ext.cx,
 				oldCy = this.drawingBase.ext.cy;
 
-
 			this.drawingBase.setGraphicObjectCoords();
 			this.x = oldX;
 			this.y = oldY;
@@ -1760,7 +1743,6 @@
 					cx: extX,
 					cy: extY
 				})));
-
 
 			this.drawingBase.from.col = fromCol;
 			this.drawingBase.from.colOff = fromColOff;
@@ -2238,7 +2220,6 @@
 				bOwnV = true;
 			}
 		}
-
 
 		if (!bSnapH) {
 			if (Array.isArray(aDrawings)) {
@@ -2779,7 +2760,6 @@
 			oImage.spPr.xfrm.setFlipH(this.flipH);
 			oImage.spPr.xfrm.setFlipV(this.flipV);
 
-
 			oImage.setParent(this.parent);
 			oImage.recalculate();
 			oImage.setParent(null);
@@ -3185,7 +3165,6 @@
 		if (i === selected_objects.length)
 			selected_objects.push(this);
 
-
 		if (drawingObjectsController) {
 			drawingObjectsController.onChangeDrawingsSelection();
 		}
@@ -3219,7 +3198,6 @@
 		}
 		return null;
 	};
-
 
 	//TODO: refactor this methods: don't call functions from AscFormat.CShape.prototype
 	CGraphicObjectBase.prototype.getCanvasContext = function () {
@@ -3263,7 +3241,6 @@
 		return null;
 	};
 	//------------------------------------------------------------------------------------
-
 
 	CGraphicObjectBase.prototype.SetControllerTextSelection = function (drawing_objects, nPageIndex) {
 		if (drawing_objects) {
@@ -4057,7 +4034,6 @@
 	var ANIM_LABEL_WIDTH_PIX = 22;
 	var ANIM_LABEL_HEIGHT_PIX = 17;
 
-
 	function CRelSizeAnchor() {
 		CBaseObject.call(this);
 		this.fromX = null;
@@ -4145,7 +4121,6 @@
 	AscDFH.changesFactory[AscDFH.historyitem_RelSizeAnchorToY] = window['AscDFH'].CChangesDrawingsDouble;
 	AscDFH.changesFactory[AscDFH.historyitem_RelSizeAnchorObject] = window['AscDFH'].CChangesDrawingsObject;
 	AscDFH.changesFactory[AscDFH.historyitem_RelSizeAnchorParent] = window['AscDFH'].CChangesDrawingsObject;
-
 
 	function CAbsSizeAnchor() {
 		CBaseObject.call(this);

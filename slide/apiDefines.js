@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -603,7 +598,6 @@ var c_oAscPresentationShortcutType = {
 	SpeechWorker                  : 129
 };
 
-
 const c_oAscPresentationViewMode = {
 	normal: 0,
 	masterSlide: 1,
@@ -825,7 +819,6 @@ prot['normal']      = c_oAscPresentationViewMode.normal;
 prot['masterSlide'] = c_oAscPresentationViewMode.masterSlide;
 prot['sorter']      = c_oAscPresentationViewMode.sorter;
 
-
 window['AscCommon']                = window['AscCommon'] || {};
 window['AscCommon'].c_oSerFormat   = c_oSerFormat;
 window['AscCommon'].CurFileVersion = c_oSerFormat.Version;
@@ -1015,7 +1008,6 @@ window['AscFormat'].EMPHASIS_WAVE = window['AscFormat']["EMPHASIS_WAVE"] = 34;
 window['AscFormat'].EMPHASIS_BLINK = window['AscFormat']["EMPHASIS_BLINK"] = 35;
 window['AscFormat'].EMPHASIS_SHIMMER = window['AscFormat']["EMPHASIS_SHIMMER"] = 36;
 
-
 //preset subtypes
 window['AscFormat'].EXIT_ZOOM_OBJECT_CENTER = window['AscFormat']["EXIT_ZOOM_OBJECT_CENTER"] = 32;
 window['AscFormat'].EXIT_ZOOM_SLIDE_CENTER = window['AscFormat']["EXIT_ZOOM_SLIDE_CENTER"] = 544;
@@ -1166,7 +1158,6 @@ window['AscFormat'].ENTRANCE_BASIC_ZOOM_IN_FROM_SCREEN_CENTER = window['AscForma
 
 window['AscFormat'].ENTRANCE_BASIC_SWIVEL_VERTICAL = window['AscFormat']["ENTRANCE_BASIC_SWIVEL_VERTICAL"] = 5;
 window['AscFormat'].ENTRANCE_BASIC_SWIVEL_HORIZONTAL = window['AscFormat']["ENTRANCE_BASIC_SWIVEL_HORIZONTAL"] = 10;
-
 
 window['AscFormat'].MOTION_CUSTOM_PATH_CURVE = window['AscFormat']["MOTION_CUSTOM_PATH_CURVE"] = 1;
 window['AscFormat'].MOTION_CUSTOM_PATH_LINE = window['AscFormat']["MOTION_CUSTOM_PATH_LINE"] = 2;

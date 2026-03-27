@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -55,7 +50,6 @@
 	var oSeriesType = Asc.c_oAscSeriesType;
 	var oSeriesDateUnitType = Asc.c_oAscDateUnitType;
 	var oFillType = Asc.c_oAscFillType;
-
 
 	var UndoRedoItemSerializable = AscCommonExcel.UndoRedoItemSerializable;
 	var UndoRedoData_CellSimpleData = AscCommonExcel.UndoRedoData_CellSimpleData;
@@ -151,8 +145,6 @@
 		NeedTransform: 2,
 		PreProcessed: 3
 	};
-
-
 
 	var emptyStyleComponents = {table: [], conditional: []};
 	function getRangeType(oBBox){
@@ -2189,7 +2181,6 @@
 
 				this.wb.addExternalReferences(newExternalReferences);
 
-
 				this.wb.dependencyFormulas.lockRecal();
 				let t = this;
 				this.wb.oApi.asc_updateExternalReferences(needUpdateExternalReference, function () {
@@ -2201,7 +2192,6 @@
 					}
 					t.wb.sortDependency();
 					AscCommonExcel.importRangeLinksState.startBuildImportRangeLinks = null;
-
 
 					t.wb.drawWorksheet();
 				});
@@ -3570,7 +3560,6 @@
 		if (!valueMetadataBlock) {
 			return;
 		}
-
 
 		const typeIndex = valueMetadataBlock.t - 1;
 		const valueIndex = valueMetadataBlock.v;
@@ -5807,7 +5796,6 @@
 		}
 	};
 
-
 //-------------------------------------------------------------------------------------------------
 	Workbook.prototype.getRangeAndSheetFromStr = function (sRange) {
 		var ws;
@@ -6109,7 +6097,6 @@
 								}
 							});
 
-
 							var prepared = this.dependencyFormulas.prepareChangeSheet(removedSheetId, {remove: removedSheetId});
 							this.dependencyFormulas.removeSheet(prepared);
 						}
@@ -6385,7 +6372,6 @@
 						prevCol: -1,
 						formulaArray: []
 					};
-
 
 					var sheetData = new AscCommonExcel.CT_SheetData();
 					xmlParserContext.InitOpenManager.tmp = tmp;
@@ -9803,7 +9789,6 @@
 		this.moveProtectedRange(oBBoxFrom, oBBoxTo, copyRange, offset, wsTo);
 		this._moveUserProtectedRange(oBBoxFrom, oBBoxTo, copyRange, offset, wsTo);
 
-
 		if(true == this.workbook.bUndoChanges || true == this.workbook.bRedoChanges) {
 			wsTo.autoFilters.unmergeTablesAfterMove(oBBoxTo);
 		}
@@ -9963,7 +9948,6 @@
 		//notifyChanged after move cells to get new locations(for intersect ranges)
 		this.workbook.dependencyFormulas.notifyChanged(renameRes.changed);
 		AscCommon.History.Add(AscCommonExcel.g_oUndoRedoWorksheet, AscCH.historyitem_Worksheet_ShiftCellsRight, this.getId(), oActualRange, new UndoRedoData_BBox(oBBox));
-
 
 		this.autoFilters.redrawStylesTables(redrawTablesArr);
 		if (this.workbook.handlers) {
@@ -12600,7 +12584,6 @@
 		return {str: resultStr, obj: res};
 	};
 
-
 	Worksheet.prototype.insertSlicer = function (name, obj_name, type, pivotTable, slicerCacheDefinition) {
 		AscCommon.History.Create_NewPoint();
 		AscCommon.History.StartTransaction();
@@ -12934,7 +12917,6 @@
 		}
 	};
 
-
 	Worksheet.prototype.getActiveNamedSheetViewId = function () {
 		return this.activeNamedSheetViewId;
 	};
@@ -13226,7 +13208,6 @@
 		return null;
 	};
 
-
 	Worksheet.prototype.setCFRule = function (val) {
 		if (!val) {
 			return;
@@ -13296,7 +13277,6 @@
 				val.ranges.push(this.selectionRange.ranges[i].clone());
 			}
 		}
-
 
 		val.recalcInterfaceFormula(this);
 		this.addConditionalFormattingRule(val);
@@ -13621,7 +13601,6 @@
 				sortCondition.dxf = AscCommonExcel.g_StyleCache.addXf(newDxf);
 			}
 
-
 			if(!sortState.SortConditions) {
 				sortState.SortConditions = [];
 			}
@@ -13708,7 +13687,6 @@
 		});
 		return res;
 	};
-
 
 	Worksheet.prototype.setProtectedSheet = function (props, addToHistory) {
 		if (!this.sheetProtection) {
@@ -14012,7 +13990,6 @@
 		});
 		return res;
 	};
-
 
 	Worksheet.prototype.getProtectedRanges = function (needClone) {
 		var protectedRanges = this.aProtectedRanges;
@@ -14772,7 +14749,6 @@
 		}
 	};
 
-
 	Worksheet.prototype.setSheetViewType = function(val, addToHistory) {
 		var sheetView = this.sheetViews[0];
 
@@ -14974,7 +14950,6 @@
 	Worksheet.prototype.getCurrentRowsCount = function () {
 		return this.rowsData && this.rowsData.getMaxIndex();
 	};
-
 
 //-------------------------------------------------------------------------------------------------
 	var g_nCellStructSize = 4 + 4 + 8;
@@ -15491,7 +15466,6 @@
 				AscCommonExcel.importRangeLinksState.importRangeLinks = null;
 			}
 		}
-
 
 		//2. проверяем, каких ссылок не осталось в новых данных
 		if (externalLinks && fNew && fNew.outStack) {
@@ -17474,8 +17448,6 @@
 			return false;
 		}
 
-
-
 		if("" == val) {
 			if (this.ws.workbook.handlers) {
 				this.ws.workbook.handlers.trigger("changeDocument", AscCommonExcel.docChangedType.cellValue, this, null, this.ws.getId());
@@ -18099,7 +18071,6 @@
 		stream.XlsbStartRecord(type, len);
 		stream.WriteULong(this.nCol & 0x3FFF);
 
-
 		stream.WriteULong(nFlags2);
 
 		//todo RkNumber
@@ -18160,7 +18131,6 @@
 		if (formulaToWrite) {
 			flags = this.toXLSBFormula(stream, formulaToWrite, isBlankFormula);
 		}
-
 
 		stream.WriteUShort(flags);
 
@@ -18931,7 +18901,6 @@
 			}
 		}
 
-
 		if(false == this.worksheet.workbook.bUndoChanges && false == this.worksheet.workbook.bRedoChanges) {
 			this._foreach(function(cell){
 				t.worksheet.dynamicArrayManager.changeCell(cell);
@@ -18988,7 +18957,6 @@
 				t.worksheet.dynamicArrayManager.changeCell(cell);
 			});
 		}
-
 
 		this._foreach(function(cell){
 			if (pushOnlyFirstMergedCell) {
@@ -21045,7 +21013,6 @@
 		AscCommon.History.StartTransaction();
 		let t = this;
 
-
 		this._setPropertyNoEmpty(null, null,
 			function (cell, nRow0, nCol0, nRowStart, nColStart) {
 				if(false == t.worksheet.workbook.bUndoChanges && false == t.worksheet.workbook.bRedoChanges) {
@@ -21155,7 +21122,6 @@
 		var nLastRow0 = elemObj.nLastRow0;
 		var nLastCol0 = elemObj.nLastCol0;
 
-
 		//проверяем что это не пустая операция
 		var aSortData = [];
 		var nHiddenCount = 0;
@@ -21215,7 +21181,6 @@
 				aSortData.push(oNewElem);
 			}
 		}
-
 
 		if (aSortData.length > 0) {
 			//добавляем индексы перехода пустых ячеек(нужно для сортировки комментариев)
@@ -21650,7 +21615,6 @@
 			}
 		})]);
 
-
 		var tempSheetMemory, nIndexFrom, nIndexTo, j;
 		if (opt_by_row) {
 			tempSheetMemory = [];
@@ -21723,7 +21687,6 @@
 			}
 		}
 	};
-
 
 	function _isSameSizeMerged(bbox, aMerged, checkProportion) {
 		var oRes = null;
@@ -22562,7 +22525,6 @@
 						}
 					}
 				}
-
 
 				var aDataValidations;
 				if (wsFrom.dataValidations && wsTo.dataValidations) {
@@ -23812,7 +23774,6 @@
 		}
 		return hiddenSum;
 	};
-
 
 	function tryTranslateToPrintArea(val) {
 		const printAreaStr = "Print_Area";
@@ -25556,7 +25517,6 @@
 			});
 		}
 
-
 		return res;
 	};
 
@@ -25826,7 +25786,6 @@
 				formula.setAca(true);
 				formula.setCa(true);
 
-
 				for (let r = oldRef.r1; r <= oldRef.r2; r++) {
 					for (let c = oldRef.c1; c <= oldRef.c2; c++) {
 						if (!(c === oldRef.c1 && r === oldRef.r1)) {
@@ -25839,7 +25798,6 @@
 						}
 					}
 				}
-
 
 				const cmIndex = newProps.cmIndex != null ? newProps.cmIndex : formula.getCm();
 
@@ -26638,9 +26596,6 @@
 			this.ws.workbook.dependencyFormulas.addToChangedRange(this.ws.getId(), unionRange);
 		}
 	};
-
-
-
 
 	// Export
 	window['AscCommonExcel'] = window['AscCommonExcel'] || {};

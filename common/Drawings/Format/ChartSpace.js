@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -30,15 +25,12 @@
  *
  */
 
-
 "use strict";
 (/**
  * @param {Window} window
  * @param {undefined} undefined
  */
 function(window, undefined) {
-
-
 
 	const MAX_LABELS_COUNT = 300;
 	const MAX_SERIES_COUNT = 255;
@@ -82,7 +74,6 @@ function(window, undefined) {
 	const DISP_BLANKS_AS_SPAN = 1;
 	const DISP_BLANKS_AS_ZERO = 2;
 
-
 	const DEFAULT_LBLS_DISTANCE = 10.0 * (25.4 / 72);///TODO
 	function checkExternalChart(chart) {
 		const oApi = Asc.editor;
@@ -122,7 +113,6 @@ function(window, undefined) {
 		}
 		return oResultTextPr;
 	}
-
 
 	function checkBlackUnifill(unifill, bLines) {
 		if (unifill && unifill.fill && unifill.fill.color) {
@@ -364,7 +354,6 @@ function(window, undefined) {
 	var G_O_NO_ACTIVE_COMMENT_BRUSH = AscFormat.CreateUniFillByUniColor(AscFormat.CreateUniColorRGB(248, 231, 195));
 	var G_O_ACTIVE_COMMENT_BRUSH = AscFormat.CreateUniFillByUniColor(AscFormat.CreateUniColorRGB(240, 200, 120));
 
-
 	var CChangesDrawingsBool = AscDFH.CChangesDrawingsBool;
 	var CChangesDrawingsLong = AscDFH.CChangesDrawingsLong;
 	var CChangesDrawingsDouble = AscDFH.CChangesDrawingsDouble;
@@ -373,9 +362,7 @@ function(window, undefined) {
 	var CChangesDrawingsObjectNoId = AscDFH.CChangesDrawingsObjectNoId;
 	var CChangesDrawingsContent = AscDFH.CChangesDrawingsContent;
 
-
 	var drawingsChangesMap = window['AscDFH'].drawingsChangesMap;
-
 
 	function CChangesStartChartSpaceBinary(Class, Old, New, Color) {
 		AscDFH.CChangesStartBinaryData.call(this, Class, Old, New, AscDFH.historyitem_ChartSpace_SetStartBinaryData, Color);
@@ -429,7 +416,6 @@ function(window, undefined) {
 	AscDFH.changesFactory[AscDFH.historyitem_ChartSpace_RemoveUserShape] = CChangesDrawingsContent;
 	AscDFH.changesFactory[AscDFH.historyitem_ChartSpace_ChartStyle] = CChangesDrawingsObject;
 	AscDFH.changesFactory[AscDFH.historyitem_ChartSpace_ChartColors] = CChangesDrawingsObjectNoId;
-
 
 	AscDFH.drawingContentChanges[AscDFH.historyitem_ChartSpace_RemoveUserShape] =
 		AscDFH.drawingContentChanges[AscDFH.historyitem_ChartSpace_AddUserShape] = function (oClass) {
@@ -1010,7 +996,6 @@ function(window, undefined) {
 		const sanitizedLabels = sanitizeLabels(aLabels, oLabelParams && oLabelParams.valid && oLabelParams.isUserDefinedTickSkip);
 		const fNewInterval = (aLabels.length * fInterval) / (sanitizedLabels.length > 0 ? sanitizedLabels.length : 1);
 
-
 		this.bRotated = true;
 		this.align = (fDistance >= 0);
 		var fMaxHeight = 0.0;
@@ -1113,8 +1098,6 @@ function(window, undefined) {
 						// add to Paragraph
 						let index = paragraph.Content.length - 1;
 						paragraph.Content.splice(index, 0, oParaRun);
-
-
 
 						let size = 0;
 
@@ -1233,7 +1216,6 @@ function(window, undefined) {
 
 					//add three dots to the label
 					addThreeDots(isSlice, oLabel);
-
 
 					//recalculate new labels based on settings
 					oContent.Recalculate_Page(0, true);
@@ -2693,7 +2675,6 @@ function(window, undefined) {
 			}
 		}
 
-
 		var nLegend = oProps.getLegendPos(), oLegend;
 		bOverlay = (c_oAscChartLegendShowSettings.leftOverlay === nLegend || nLegend === c_oAscChartLegendShowSettings.rightOverlay);
 		if (bOverlay) {
@@ -3517,7 +3498,6 @@ function(window, undefined) {
 			style.ParaPr = para_pr;
 
 			var minor_font = theme.themeElements.fontScheme.minorFont;
-
 
 			if (minor_font) {
 				if (typeof minor_font.latin === "string" && minor_font.latin.length > 0) {
@@ -4645,7 +4625,6 @@ function(window, undefined) {
 								stroke.Fill.convertToPPTXMods();
 							}
 							oSeries.marker.spPr.setLn(stroke);
-
 
 							if (Array.isArray(oSeries.dPt)) {
 								for (var i = 0; i < oSeries.dPt.length; ++i) {
@@ -6062,7 +6041,6 @@ function(window, undefined) {
 					}
 				}
 
-
 			}
 		}
 
@@ -6483,7 +6461,6 @@ function(window, undefined) {
 			}
 		}
 
-
 	};
 	CChartSpace.prototype.getView3d = function () {
 		return this.chart.getView3d();
@@ -6722,7 +6699,6 @@ function(window, undefined) {
 							oCurAxis.posY -= oRect.fVertPadding;
 						}
 					}
-
 
 					let nTickLblSkip = AscFormat.isRealNumber(oCurAxis.tickLblSkip) ? oCurAxis.tickLblSkip : 1;
 					let bTickSkip = nTickLblSkip > 1;
@@ -7458,7 +7434,6 @@ function(window, undefined) {
 					((oValAx.isHorizontal()) && oValAx.xPoints)) {
 					oAxisLabels = oValAx.labels;
 
-
 					if (oAxisLabels) {
 						var dZPositionValAxis = oProcessor3D.calculateZPositionValAxis();
 						var dPosY, dPosY2
@@ -7504,7 +7479,6 @@ function(window, undefined) {
 						oAxisLabels.extX = Math.max.apply(Math, aXPoints) - oAxisLabels.x;
 						oAxisLabels.extY = Math.max.apply(Math, aYPoints) - oAxisLabels.y;
 					}
-
 
 					oAxisLabels = oCatAx.labels;
 
@@ -8066,7 +8040,6 @@ function(window, undefined) {
 							arr_heights2.push(calc_entry.txBody.getSummaryHeight3());
 						}
 
-
 						var chart_object;
 						if (this.chart && this.chart.plotArea && this.chart.plotArea.charts[0]) {
 							chart_object = this.chart.plotArea.charts[0];
@@ -8100,7 +8073,6 @@ function(window, undefined) {
 							}
 						}
 
-
 						if (AscFormat.isRealNumber(cut_index)) {
 							if (cut_index > 0) {
 								legend_height = height_summ2 - arr_heights[cut_index];
@@ -8117,7 +8089,6 @@ function(window, undefined) {
 						legend.extY = legend_height;
 						var summ_h = 0;
 
-
 						var b_reverse_order = false;
 						var chart_object, cat_ax, start_index, end_index;
 						if (this.chart && this.chart.plotArea && this.chart.plotArea.charts[0]) {
@@ -8131,7 +8102,6 @@ function(window, undefined) {
 							(!cat_ax || !cat_ax.isReversed())) {
 							b_reverse_order = true;
 						}
-
 
 						if (!b_reverse_order) {
 							calc_entryes.splice(cut_index, calc_entryes.length - cut_index);
@@ -8729,7 +8699,6 @@ function(window, undefined) {
 		var oTheme = this.Get_Theme();
 		var oColorMap = this.Get_ColorMap();
 
-
 		fSaveChartObjectSourceFormatting(this, oCopy, oTheme, oColorMap);
 
 		if (!oCopy.txPr || !oCopy.txPr.content || !oCopy.txPr.content.Content[0] || !oCopy.txPr.content.Content[0].Pr) {
@@ -9325,12 +9294,10 @@ function(window, undefined) {
 					var ser = series[i];
 					var pts = ser.getNumPts();
 
-
 					var series_dlb = new AscFormat.CDLbl();
 					series_dlb.merge(default_lbl);
 					series_dlb.merge(aCharts[t].dLbls);
 					series_dlb.merge(ser.dLbls);
-
 
 					var bCheckAll = true, j;
 					if (series_dlb.checkNoLbl()) {
@@ -9433,7 +9400,6 @@ function(window, undefined) {
 				if (style.line1 === EFFECT_SUBTLE && oChartSpace.style === 34)
 					base_line_fills = getArrayFillsFromBase(style.line2, nColorsCount);
 
-
 				for (let nSer = 0; nSer < aSeries.length; ++nSer) {
 					let oSeries = aSeries[nSer];
 					var compiled_brush = new AscFormat.CUniFill();
@@ -9474,7 +9440,6 @@ function(window, undefined) {
 					if (oChartSpace.style === 34 && pts)
 						base_line_fills = getArrayFillsFromBase(style.line2, getMaxIdx(pts));
 
-
 					var compiled_line = new AscFormat.CLn();
 					compiled_line.merge(default_line);
 					compiled_line.Fill = new AscFormat.CUniFill();
@@ -9501,7 +9466,6 @@ function(window, undefined) {
 					}
 					oSeries.compiledSeriesPen = compiled_line.createDuplicate();
 					oSeries.compiledSeriesPen.calculate(parents.theme, parents.slide, parents.layout, parents.master, RGBA, oChartSpace.clrMapOvr);
-
 
 					if(pts) {
 						oChartSpace.ptsCount += pts.length;
@@ -9577,7 +9541,6 @@ function(window, undefined) {
 								ser.compiledSeriesBrush.merge(ser.spPr.Fill);
 							}
 
-
 							ser.compiledSeriesPen = new AscFormat.CLn();
 							if (style.line1 === EFFECT_NONE) {
 								ser.compiledSeriesPen.w = 0;
@@ -9600,7 +9563,6 @@ function(window, undefined) {
 							}
 							if (ser.spPr && ser.spPr.ln)
 								ser.compiledSeriesPen.merge(ser.spPr.ln);
-
 
 							if (!(oChart.getObjectType() === AscDFH.historyitem_type_LineChart || oChart.getObjectType() === AscDFH.historyitem_type_ScatterChart)) {
 								var base_fills = getArrayFillsFromBase(style.fill2, getMaxIdx(pts));
@@ -9777,7 +9739,6 @@ function(window, undefined) {
 										}
 									}
 
-
 									//
 									{
 										default_line = new AscFormat.CLn();
@@ -9793,7 +9754,6 @@ function(window, undefined) {
 										var base_line_fills;
 										if (this.style === 34)
 											base_line_fills = getArrayFillsFromBase(style.line2, getMaxIdx(pts));
-
 
 										var compiled_line = new AscFormat.CLn();
 										compiled_line.merge(default_line);
@@ -9912,7 +9872,6 @@ function(window, undefined) {
 									oCompiledBandFmt = new AscFormat.CBandFmt();
 									oCompiledBandFmt.setIdx(i);
 									oCompiledBandFmt.setSpPr(oSpPr);
-
 
 									if (num_format) {
 										oCompiledBandFmt.startValue = num_format.formatToChart(aValAxArray[i] * multiplier);
@@ -10128,12 +10087,10 @@ function(window, undefined) {
 						var brushes = getArrayFillsFromBase(fill, getMaxIdx(aAllsSeries));
 						var pens_fills = getArrayFillsFromBase(line, getMaxIdx(aAllsSeries));
 
-
 						for (var i = 0; i < series.length; ++i) {
 							var ser = series[i];
 							if (ser.marker && ser.marker.symbol === AscFormat.SYMBOL_NONE && (!Array.isArray(ser.dPt) || ser.dPt.length === 0))
 								continue;
-
 
 							var compiled_marker = new AscFormat.CMarker();
 							var symbol;
@@ -10567,7 +10524,6 @@ function(window, undefined) {
 		if (this.chartObj == null)
 			this.chartObj = new AscFormat.CChartsDrawer();
 		this.chartObj.recalculate(this);
-
 
 		var oChartSize = this.getChartSizes(true);
 		this.chart.plotArea.x = oChartSize.startX;
@@ -11670,7 +11626,6 @@ function(window, undefined) {
 				return true;
 		}
 
-
 		if (isOk)
 			return true;
 
@@ -12291,7 +12246,6 @@ function(window, undefined) {
 		return ret;
 	}
 
-
 	function CreateUniFillSolidFillWidthTintOrShade(unifill, effectVal) {
 		var ret = unifill.createDuplicate();
 		var unicolor = ret.fill.color;
@@ -12337,7 +12291,6 @@ function(window, undefined) {
 		return oUniFill;
 	}
 
-
 	function CreateView3d(nRotX, nRotY, bRAngAx, nDepthPercent) {
 		var oView3d = new AscFormat.CView3d();
 		AscFormat.isRealNumber(nRotX) && oView3d.setRotX(nRotX);
@@ -12360,7 +12313,6 @@ function(window, undefined) {
 		return "General";
 	}
 
-
 	function FillCatAxNumFormat(oCatAxis, aAscSeries) {
 		if (!oCatAxis) {
 			return;
@@ -12381,7 +12333,6 @@ function(window, undefined) {
 			oCatAxis.numFmt.setSourceLinked(true);
 		}
 	}
-
 
 	function CreateTypedLineChart(type) {
 		var oLineChart = new AscFormat.CLineChart();
@@ -12493,7 +12444,6 @@ function(window, undefined) {
 		}
 		num_fmt.setFormatCode(format_code);
 		num_fmt.setSourceLinked(true);
-
 
 		if (asc_series.length > 1) {
 			chart.setLegend(new AscFormat.CLegend());
@@ -13188,7 +13138,6 @@ function(window, undefined) {
 		return oChartSpace;
 	}
 
-
 	function CreateRadarChart(chartSeries, bUseCache, oOptions, bMarker, bFilled) {
 		var asc_series = chartSeries;
 		var chart_space = Asc.editor.isPdfEditor() ? new AscPDF.CPdfChartSpace() : new AscFormat.CChartSpace();
@@ -13293,7 +13242,6 @@ function(window, undefined) {
 		cat_ax.setCrossAx(val_ax);
 		val_ax.setCrossAx(cat_ax);
 
-
 		cat_ax.setScaling(new AscFormat.CScaling());
 		cat_ax.setDelete(false);
 		cat_ax.setAxPos(AscFormat.AX_POS_B);
@@ -13392,7 +13340,6 @@ function(window, undefined) {
 		}
 		return aSeries;
 	}
-
 
 	function checkSpPrRasterImages(spPr) {
 		if (spPr && spPr.Fill && spPr.Fill && spPr.Fill.fill && spPr.Fill.fill.type === Asc.c_oAscFill.FILL_TYPE_BLIP) {
@@ -13745,7 +13692,6 @@ function(window, undefined) {
 		// adjust labelWidth and fAxisLength by alpha
 		const labelWidth = Math.max(oLabelsBox.maxMinWidth, this.minLabelWidth);
 
-
 		// find nLabelCount
 		const nLabelCount = fAxisLength > 0 && fAxisLength >= labelWidth ? Math.floor( fAxisLength/ labelWidth) : 1;
 
@@ -13945,7 +13891,6 @@ function(window, undefined) {
 
 		return true;
 	};
-
 
 	function CChartStyleCache() {
 		this.cachedStyles = {};

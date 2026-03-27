@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -97,8 +92,6 @@ var c_oAscChangeLevel = {
 	BringBackward : 0x03
 };
 
-
-
 /** @enum {number} */
 var c_oAscVertAlignJc = {
 	Top    : 0x00, // var vertalignjc_Top    = 0x00;
@@ -124,9 +117,6 @@ var c_oAscAlignShapeType = {
 
 var TABLE_STYLE_WIDTH_PIX  = 72;
 var TABLE_STYLE_HEIGHT_PIX = 52;
-
-
-
 
 /** @enum {number} */
 var c_oAscRevisionsObjectType = {
@@ -158,7 +148,6 @@ var c_oAscFootnoteRestart = {
 	EachSect   : 0x01, //section_footnote_RestartEachSect,
 	EachPage   : 0x02  //section_footnote_RestartEachPage
 };
-
 
 var c_oAscSdtLevelType = {
 	Block  : 0x01,
@@ -197,7 +186,6 @@ var c_oAscHyperlinkAnchor = {
 	Heading       : 1,
 	Bookmark      : 2
 };
-
 
 var c_oAscSdtCheckBoxDefaults = {
 	CheckedSymbol   : 0x2612,
@@ -391,7 +379,6 @@ var c_oAscTextToTableAutoFitType = {
 	Window  : 3
 };
 
-
 var c_oAscEDocProtect = {
 	Comments: 0,
 	Forms: 1,
@@ -423,7 +410,6 @@ prot['None']        = c_oAscCollaborativeMarksShowType.None;
 prot['All']         = c_oAscCollaborativeMarksShowType.All;
 prot['LastChanges'] = c_oAscCollaborativeMarksShowType.LastChanges;
 
-
 prot = window['Asc']['c_oAscChangeLevel'] = c_oAscChangeLevel;
 prot['BringToFront']  = c_oAscChangeLevel.BringToFront;
 prot['BringForward']  = c_oAscChangeLevel.BringForward;
@@ -447,8 +433,6 @@ prot['ALIGN_BOTTOM'] = c_oAscAlignShapeType.ALIGN_BOTTOM;
 prot['ALIGN_CENTER'] = c_oAscAlignShapeType.ALIGN_CENTER;
 prot['ALIGN_MIDDLE'] = c_oAscAlignShapeType.ALIGN_MIDDLE;
 
-
-
 prot = window['Asc']['c_oAscFootnotePos'] = window['Asc'].c_oAscFootnotePos = c_oAscFootnotePos;
 prot['BeneathText'] = c_oAscFootnotePos.BeneathText;
 prot['DocEnd']      = c_oAscFootnotePos.DocEnd;
@@ -463,7 +447,6 @@ prot = window['Asc']['c_oAscFootnoteRestart'] = window['Asc'].c_oAscFootnoteRest
 prot['Continuous'] = c_oAscFootnoteRestart.Continuous;
 prot['EachSect']   = c_oAscFootnoteRestart.EachSect;
 prot['EachPage']   = c_oAscFootnoteRestart.EachPage;
-
 
 prot = window['Asc']['c_oAscSdtLevelType'] = window['Asc'].c_oAscSdtLevelType = c_oAscSdtLevelType;
 prot['Block']  = c_oAscSdtLevelType.Block;
@@ -685,7 +668,6 @@ prot = window['Asc']['c_oAscTextToTableAutoFitType'] = window['Asc'].c_oAscTextT
 prot['Fixed']   = prot.Fixed;
 prot['Content'] = prot.Content;
 prot['Window']  = prot.Window;
-
 
 prot = window['Asc']['c_oAscEDocProtect'] = window['Asc'].c_oAscEDocProtect = c_oAscEDocProtect;
 prot['Comments']   = prot.Comments;

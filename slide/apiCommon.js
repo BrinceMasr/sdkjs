@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -243,7 +238,6 @@ CAscSlideTransition.prototype.Write_ToBinary = function(w)
     if(AscFormat.isRealNumber(this.TransitionDuration))
         w.WriteLong(this.TransitionDuration);
 
-
     w.WriteBool(AscFormat.isRealBool(this.SlideAdvanceOnMouseClick));
     if(AscFormat.isRealBool(this.SlideAdvanceOnMouseClick))
         w.WriteBool(this.SlideAdvanceOnMouseClick);
@@ -267,14 +261,11 @@ CAscSlideTransition.prototype.Read_FromBinary = function(r)
     if(r.GetBool())
         this.TransitionOption = r.GetLong();
 
-
     if(r.GetBool())
         this.TransitionDuration = r.GetLong();
 
-
     if(r.GetBool())
         this.SlideAdvanceOnMouseClick = r.GetBool();
-
 
     if(r.GetBool())
         this.SlideAdvanceAfter = r.GetBool();
@@ -846,7 +837,6 @@ CAscSlideTransition.prototype.fillXmlParams = function (aAttrNames, aAttrValues)
 
 AscDFH.drawingsConstructorsMap[AscDFH.historyitem_SlideSetTransition] = CAscSlideTransition;
 
-
 // информация о темах --------------------------------------------
 
 function CAscThemeInfo(themeInfo)
@@ -876,7 +866,6 @@ CLayoutThumbnail.prototype.get_Image = function() { return this.Image; };
 CLayoutThumbnail.prototype.get_Name = function() { return this.Name; };
 CLayoutThumbnail.prototype.get_Width = function() { return this.Width; };
 CLayoutThumbnail.prototype.get_Height = function() { return this.Height; };
-
 
 function CompareTransitions(transition1, transition2){
     if(!transition1 || !transition2){
@@ -966,7 +955,6 @@ function CAscHFProps() {
     this.ShowHeader = null;
 
     this.ShowOnTitleSlide = null;
-
 
     this.api = null;
     this.DivId = null;
@@ -1069,7 +1057,6 @@ CAscHFProps.prototype['updateView'] = CAscHFProps.prototype.updateView = functio
 };
 CAscHFProps.prototype['put_Api'] = CAscHFProps.prototype.put_Api = function(v){this.api = v;};
 
-
 function CAscHF() {
     this.Slide = null;
     this.Notes = null;
@@ -1083,8 +1070,6 @@ CAscHF.prototype['get_Notes'] = CAscHF.prototype.get_Notes = function(){return t
 //------------------------------------------------------------export----------------------------------------------------
 window['Asc'] = window['Asc'] || {};
 window['AscCommonSlide'] = window['AscCommonSlide'] || {};
-
-
 
 window['AscCommonSlide']['CAscDateTime'] = window['AscCommonSlide'].CAscDateTime = CAscDateTime;
 window['AscCommonSlide']['CAscHFProps'] = window['AscCommonSlide'].CAscHFProps = CAscHFProps;

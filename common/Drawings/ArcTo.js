@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -306,7 +301,6 @@
         var _cx = start_x - _l * _cos;
         var _cy = start_y - _l * _sin;
 
-
         ArcTo2OnCanvas(context, _cx - width_r, _cy - height_r, 2 * width_r, 2 * height_r, start_ang, sweep_ang);
     }
 
@@ -346,7 +340,6 @@
         ctx.bezierCurveTo(fX - fXRad * c_fKappa, fY - fYRad, fX - fXRad, fY - fYRad * c_fKappa, fX - fXRad, fY);
     }
 
-
     function EllipseArcOnCanvas(ctx, fX, fY, fXRad, fYRad, fAngle1, fAngle2, bClockDirection)
     {
         while ( fAngle1 < 0 )
@@ -382,7 +375,6 @@
             }
         }
     }
-
 
     function EllipseArc2OnCanvas(ctx, fX, fY, fXRad, fYRad, dAngle1, dAngle2, bClockDirection)
     {
@@ -478,7 +470,6 @@
         var _cx = start_x - _l * _cos;
         var _cy = start_y - _l * _sin;
 
-
         return HitToArc2(px, py, context, _cx - width_r, _cy - height_r, 2 * width_r, 2 * height_r, start_ang, sweep_ang);
     }
 
@@ -517,7 +508,6 @@
             HitInBezier4(ctx, px, py, fX, fY - fYRad, fX - fXRad * c_fKappa, fY - fYRad, fX - fXRad, fY - fYRad * c_fKappa, fX - fXRad, fY);
     }
 
-
     function HitToEllipseArcOnCanvas(px, py, ctx, fX, fY, fXRad, fYRad, fAngle1, fAngle2, bClockDirection)
     {
         while ( fAngle1 < 0 )
@@ -552,7 +542,6 @@
         }
     }
 
-
     function HitToEllipseArc2OnCanvas(px, py, ctx, fX, fY, fXRad, fYRad, dAngle1, dAngle2, bClockDirection)
     {
         var nFirstPointQuard  = ((2 * dAngle1 / Math.PI) >> 0) + 1;
@@ -577,7 +566,6 @@
                     dEndAngle = nIndex * Math.PI / 2;
                 if ( !( nIndex == nFirstPointQuard ) )
                     dStartAngle = (nIndex - 1 ) * Math.PI / 2;
-
 
                 EndPoint = HitToEllipseArc3OnCanvas(px, py, EndPoint, ctx, fX, fY, fXRad, fYRad, AngToEllPrm( dStartAngle, fXRad, fYRad ), AngToEllPrm( dEndAngle, fXRad, fYRad ), false);
                 if(EndPoint.hit)

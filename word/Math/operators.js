@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -456,7 +451,6 @@ COperatorBracket.prototype.calcCoord = function(stretch)
             hh1[7] = 1;
             hh2[7] = 1;
 
-
             RX1 = 0.22*delta + 0.78;
             RX2 = 0.17*delta + 0.83;
 
@@ -477,7 +471,6 @@ COperatorBracket.prototype.calcCoord = function(stretch)
         for(var i = 0; i < 8; i++ )
             RX[26-i] = 1 + i*((RX2+RX1)/2 - 1)/7;
 
-
         for(var i = 0; i < 4; i++)
         {
             c1[i] = X[30 + 2*i] - X[28 + 2*i];
@@ -487,10 +480,8 @@ COperatorBracket.prototype.calcCoord = function(stretch)
         c1[5] = X[48] - X[44];
         c2[5] = X[5] - X[9];
 
-
         c1[6] = X[52] - X[48];
         c2[6] = X[1] - X[5];
-
 
         c1[7] = (X[0] - X[1])/2 + X[1] - X[52];
         c2[7] = (X[0] - X[1])/2;
@@ -612,13 +603,11 @@ COperatorBracket.prototype.calcCoord = function(stretch)
         c1[10] = X[52] - X[48];
         c2[10] = X[1] - X[5];
 
-
         c1[11] = (X[0] - X[1])/2 + X[1] - X[52];
         c2[11] = (X[0] - X[1])/2;
 
         c1[8] = X[44] - X[36];
         c2[8] = X[9] - X[17];
-
 
         for(var i = 0; i < 12; i++)
         {
@@ -713,7 +702,6 @@ COperatorBracket.prototype.calcCoord = function(stretch)
 
     }
 
-
     for(var i = 0; i < 54; i++)
     {
         //YY[i] =  (H - Y[i]*RX[i])*alpha;
@@ -724,7 +712,6 @@ COperatorBracket.prototype.calcCoord = function(stretch)
 
         XX[i] =  XX[i]*alpha;
     }
-
 
     for(var i = 0; i < 50; i++)
         YY[54 + i] = YY[51 - i];
@@ -817,7 +804,6 @@ COperatorParenthesis.prototype.calcSize = function(stretch)
     var heightBr, widthBr;
     var minBoxH =   5.27099609375 *betta; //width of 0x28
 
-
     if(this.Parent.type == OPER_GROUP_CHAR)
     {
         // перевернутая скобка
@@ -829,14 +815,12 @@ COperatorParenthesis.prototype.calcSize = function(stretch)
         var maxBoxH =   9.63041992187 *betta; //9.63 width of 0x239D
         widthBr = 11.99444444444 *betta;
 
-
         var ry = stretch / widthBr,
             delta = maxBoxH - minBoxH;
 
         heightBr = delta/4.3 * (ry - 1) + minBoxH;
         heightBr = heightBr >  maxBoxH ? maxBoxH : heightBr;
     }
-
 
     return {height: heightBr, width : widthBr};
 };
@@ -1018,7 +1002,6 @@ COperatorAngleBracket.prototype.calcCoord = function(stretch)
     Y[1] = Y[6] = Y[0] + ww3*c1;
     Y[2] = Y[5] = Y[3] + ww4*c2;
 
-
     var k1 = 0.01*augm;
 
     var hh1 = (X[0] - X[3])*k1,
@@ -1104,7 +1087,6 @@ CSquareBracket.prototype.calcCoord = function(stretch)
 
     for(var i = 0; i < 4; i++)
         X[4+i] += lng;
-
 
     var XX = [],
         YY = [];
@@ -1270,7 +1252,6 @@ COperatorLine.prototype.calcCoord = function(stretch)
 
     XX[2] += lng;
     XX[3] += lng;
-
 
     var W = XX[2],
         H = YY[2] + shY;
@@ -1616,7 +1597,6 @@ CLeftRightArrow.prototype.calcCoord = function(stretch)
     if(lng > 0)
         for(var i = 0; i < 8; i++)
             XX[7+i] += lng;
-
 
     var W = XX[10],
         H = YY[1];
@@ -2097,7 +2077,6 @@ CCombining_LR_Arrow.prototype.calcCoord = function(stretch)
     return {XX: XX, YY: YY, W: W, H: H};
 
 };
-
 
 function COperator(type)
 {
@@ -2846,7 +2825,6 @@ COperator.prototype.getProps = function(props, defaultProps)
         bNotType    = props.type === undefined ||  props.type === null,
         bUnicodeChr = props.chr !== null && props.chr+0 === props.chr;
 
-
     if(bDelimiter && props.chr == -1) // empty operator
     {
         type = OPERATOR_EMPTY;
@@ -2858,7 +2836,6 @@ COperator.prototype.getProps = function(props, defaultProps)
 
     var bLoc        = props.loc !== null && props.loc !== undefined;
     var bDefaultLoc = defaultProps.loc !== null && defaultProps.loc !==  undefined;
-
 
     if(!bLoc && bDefaultLoc)
         location = defaultProps.loc;
@@ -3035,8 +3012,6 @@ COperator.prototype.fixSize = function(oMeasure, stretch)
             else
                 ascent = height/2 + shCenter;
         }
-
-
 
         this.size.width  = width;
         this.size.height = height;
@@ -3635,7 +3610,6 @@ CDelimiter.prototype.recalculateSize = function(oMeasure)
     // Общая ширина
     var width = widthG + this.begOper.size.width + this.endOper.size.width + (this.Pr.column - 1)*this.sepOper.size.width;
     width += this.GapLeft + this.GapRight;
-
 
     this.size.ascent = this.GeneralMetrics.ascent;
     this.size.height = this.GeneralMetrics.height;
@@ -4332,7 +4306,6 @@ CCharacter.prototype.Draw_Elements = function(PDSE)
         Italic:     false,
         Bold:       false
     };
-
 
     PDSE.Graphics.SetFont(Font);
 

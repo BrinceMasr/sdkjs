@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -1506,7 +1501,6 @@
 			structured_tables_reservedColumn = new XRegExp('\\#(?:' + loc_all + '|' + loc_headers + '|' + loc_totals + '|' + loc_data + /*'|' + loc_this_row + */')'),
 			structured_tables_thisRow        = new XRegExp('(?:\\#(?:' + loc_this_row +')|(?:\\@))');
 
-
 		//Table4[[#Data];[#Totals]]
 		//Table1[[#Headers],[#Data],[Column1]]
 		//Table4[[#Headers];[Column1]:[Column2]]
@@ -2938,7 +2932,6 @@
 		rx_table              = build_rx_table(null),
 		rx_table_local        = build_rx_table(null);
 
-
 	function parseExternalLink(url) {
 		//var regExpExceptExternalLink = /('?[a-zA-Z0-9\s\[\]\.]{1,99})?'?!?\$?[a-zA-Z]{1,3}\$?[0-9]{1,7}(:\$?[a-zA-Z]{1,3}\$?[0-9]{1,7})?/;
 
@@ -2956,7 +2949,6 @@
 					break;
 				}
 			}
-
 
 			if (url && url[0] === "'"/*url.match(/('[^\[]*\[[^\]]+\]([^'])+'!)/g)*/) {
 				for (i = exclamationMarkIndex ? exclamationMarkIndex : url.length - 1; i >= 0; i--) {
@@ -3272,7 +3264,6 @@
 
 			colStr = getColStr();
 			rowStr = getRowStr();
-
 
 			if(isAbsCol) {
 				colStr = "$" + colStr;
@@ -4539,7 +4530,6 @@
 		init(obj);
 	}
 
-
 	function CIdCounter()
 	{
 		this.m_sUserId = null;
@@ -4724,7 +4714,6 @@
 		return false;
 	};
 
-
 	function CContentChanges()
 	{
 		this.m_aChanges = [];
@@ -4893,7 +4882,6 @@
 
 		return Positions;
 	};
-
 
 	/**
 	 * Корректируем заданное значение в миллиметрах к ближайшему целому значению в твипсах
@@ -8643,7 +8631,6 @@
 			sResult = arrChinese[nRemainder] + sResult;
 		}
 
-
 		var nRemValue = nQuotient;
 		while (nQuotient > 0)
 		{
@@ -10516,7 +10503,6 @@
 			case Asc.c_oAscNumberingFormat.RussianUpper:
 			{
 
-
 				sResult = IntToRussian(nValue, nFormat);
 				break;
 			}
@@ -10631,7 +10617,6 @@
 				sResult = IntToIdeographZodiacTraditional(nValue);
 				break;
 			}
-
 
 			case Asc.c_oAscNumberingFormat.Iroha:
 			case Asc.c_oAscNumberingFormat.IrohaFullWidth:
@@ -11488,7 +11473,6 @@
 
 		writer.WriteXmlNodeStart(ns + name);
 
-
 		if (color.rgb && !color.theme) {
 			var nIndex = GetDefaultIndexByRGBA(color.getR(), color.getG(), color.getB(), 255);
 			if (-1 === nIndex) {
@@ -11668,7 +11652,6 @@
 		}
 		return null;
 	}
-
 
 	function getColorSchemeByIdx(idx) {
 		var tmp = AscCommon.g_oUserColorScheme[idx];
@@ -11989,7 +11972,6 @@
 	{
 		return (0x2F800 <= nCharCode && nCharCode <= 0x2FA1F);
 	}
-
 
 	function IsComplexScript(nCharCode)
 	{
@@ -12913,7 +12895,6 @@
 		return this.mapTranslate.hasOwnProperty(key) ? this.mapTranslate[key] : key;
 	};
 
-
 	function CPolygonPoint2(X, Y)
 	{
 		this.X = X;
@@ -13191,7 +13172,6 @@
 				VectorsY = this.Vectors[PageIndex].VY,
 				Page = this.Vectors[PageIndex].Page;
 
-
 			for (var LineIndex in VectorsX)
 			{
 				for (var Index in VectorsX[LineIndex])
@@ -13268,7 +13248,6 @@
 						}
 						Polygon.PushPoint(X, Y);
 						Polygon.CorrectExtremePoints();
-
 
 						Polygon.Direction = Direction;
 						Paths.push(Polygon);
@@ -14768,7 +14747,6 @@
 			is_correction);
 	};
 
-
 	function CRC32()
 	{
 		this.m_aTable = [];
@@ -15113,7 +15091,6 @@
 		return pages;
 	}
 
-
 	function CPluginCtxMenuInfo(sType, sOlePluginGuid) {
 		if(!sType) {
 			this["type"] = Asc.c_oPluginContextMenuTypes.None;
@@ -15142,7 +15119,6 @@
 		}
 	};
 	
-
 
 	function deg2rad(deg)
 	{
@@ -15181,7 +15157,6 @@
 			console.log(arguments[i]);
 		}
 	}
-
 
 	const LRI = '\u2066'; // LEFT-TO-RIGHT ISOLATE
 	const RLI = '\u2067'; // RIGHT-TO-LEFT ISOLATE
@@ -15270,7 +15245,6 @@
 		}
 		element.dir = dir;
 	}
-
 
 	function getFirstStrongDirection(text) {
 		if(!text) return null;

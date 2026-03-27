@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -79,7 +74,6 @@
     function ApiTheme(oThemeInfo){
         this.ThemeInfo = oThemeInfo;
     }
-
 
     /**
      * Class representing a theme color scheme.
@@ -155,7 +149,6 @@
 	ApiImage.prototype = Object.create(ApiDrawing.prototype);
 	ApiImage.prototype.constructor = ApiImage;
 
-
     /**
      * Class representing a group of drawings.
      * @constructor
@@ -201,9 +194,6 @@
     ApiTable.prototype = Object.create(ApiDrawing.prototype);
     ApiTable.prototype.constructor = ApiTable;
 
-
-
-
     /**
      * Class representing a table row.
      * @param oTableRow
@@ -213,7 +203,6 @@
     function ApiTableRow(oTableRow){
         this.Row = oTableRow;
     }
-
 
     /**
      * Class representing a table cell.
@@ -286,7 +275,6 @@
      * @see office-js-api/Examples/Enumerations/pt.js
 	 */
 
-
     /**
      * English measure unit. 1 mm = 36000 EMUs, 1 inch = 914400 EMUs.
      * @typedef {number} EMU
@@ -304,7 +292,6 @@
     * @typedef {("None" | "ArabicPeriod"  | "ArabicParenR"  | "RomanUcPeriod" | "RomanLcPeriod" | "AlphaLcParenR" | "AlphaLcPeriod" | "AlphaUcParenR" | "AlphaUcPeriod")} BulletType
     * @see office-js-api/Examples/Enumerations/BulletType.js
 	 */
-
 
     /**
      * The available text vertical alignment (used to align text in a shape with a placement for text inside it).
@@ -329,7 +316,6 @@
      * @see office-js-api/Examples/Enumerations/PresetColor.js
 	 */
 
-
     /**
      * Possible values for the position of chart tick labels (either horizontal or vertical).
      * <b>"none"</b> - not display the selected tick labels.
@@ -353,8 +339,6 @@
      * @typedef {"cross" | "dashDnDiag" | "dashHorz" | "dashUpDiag" | "dashVert" | "diagBrick" | "diagCross" | "divot" | "dkDnDiag" | "dkHorz" | "dkUpDiag" | "dkVert" | "dnDiag" | "dotDmnd" | "dotGrid" | "horz" | "horzBrick" | "lgCheck" | "lgConfetti" | "lgGrid" | "ltDnDiag" | "ltHorz" | "ltUpDiag" | "ltVert" | "narHorz" | "narVert" | "openDmnd" | "pct10" | "pct20" | "pct25" | "pct30" | "pct40" | "pct5" | "pct50" | "pct60" | "pct70" | "pct75" | "pct80" | "pct90" | "plaid" | "shingle" | "smCheck" | "smConfetti" | "smGrid" | "solidDmnd" | "sphere" | "trellis" | "upDiag" | "vert" | "wave" | "wdDnDiag" | "wdUpDiag" | "weave" | "zigZag"} PatternType
      * @see office-js-api/Examples/Enumerations/PatternType.js
 	 */
-
-
 
     /**
      * The available types of tick mark appearance.
@@ -587,7 +571,6 @@
 
         return oMaster;
     };
-
 
 	Api.CreateDefaultMasterSlide = function () {
         let master = AscCommonSlide.CreateDefaultMaster();
@@ -910,7 +893,6 @@
         return new ApiChart(oChartSpace);
     };
 
-
     /**
      * Creates a group of drawings.
      * @memberof Api
@@ -1123,7 +1105,6 @@
                     oPresentation.insertSlide(oPresentation.Slides.length, oSlide);
                 }
 
-
                 let oCPres = new AscCommon.CPres();
                 oCPres.defaultTextStyle = oReader.LstStyleFromJSON(oParsedObj["defaultTextStyle"]);
                 oCPres.attrAutoCompressPictures = oParsedObj["autoCompressPictures"];
@@ -1225,7 +1206,6 @@
         oReader.AssignConnectedObjects();
         return oResult;
 	};
-
 
     /**
 	 * Returns the selection from the current presentation.
@@ -1406,7 +1386,6 @@
     {
         this.Presentation.Create_NewHistoryPoint(AscDFH.historydescription_Document_ApiBuilder);
     };
-
 
     /**
      * Replaces the current image with an image specified.
@@ -3199,7 +3178,6 @@
     //
     //------------------------------------------------------------------------------------------------------------------
 
-
 	ApiThemeColorScheme.prototype.checkThemeElement = function(fCallback)
 	{
 		let bUpdateTheme = false;
@@ -3405,7 +3383,6 @@
         if (!arrLine)
             arrLine = [];
 
-
 		this.checkThemeElement(function (formatScheme) {
 			formatScheme.lnStyleLst = [];
 			for (let nLine = 0; nLine < 3; nLine++)
@@ -3514,7 +3491,6 @@
     {
         if (typeof(sName) !== "string")
             sName = "";
-
 
 		return this.checkThemeElement(function (fontScheme) {
 			if (fontScheme)
@@ -3738,7 +3714,6 @@
         }
         return false;
     };
-
 
     /**
      * Returns the visibility of the current presentation slide.
@@ -6243,7 +6218,6 @@
         var drawingParent       = this.GetParent();
         var allDrawingsInParent = null;
 
-
 		this.Drawing.checkDrawingUniNvPr();
 
         switch (this.Drawing.getObjectType())
@@ -6504,7 +6478,6 @@
 		oController.updateOverlay();
 		return true;
 	};
-
 
     /**
      * Sets the rotation angle to the current drawing object.
@@ -6847,8 +6820,6 @@
 		return true;
 	};
 
-
-
     //------------------------------------------------------------------------------------------------------------------
     //
     // ApiGroup
@@ -6960,7 +6931,6 @@
         return "shape";
     };
 
-
     /**
      * Deprecated in 6.2.
      * Returns the shape inner contents where a paragraph or text runs can be inserted.
@@ -7024,7 +6994,6 @@
             }
         }
     };
-
 
 	/**
 	 * Returns the geometry object from the current shape.
@@ -7155,7 +7124,6 @@
 		return null;
 	};
 
-
     /**
 	 * Sets the text paddings to the current shape.
 	 * @memberof ApiShape
@@ -7185,14 +7153,11 @@
 		return false;
 	};
 
-
 	//------------------------------------------------------------------------------------------------------------------
     //
     // ApiChart
     //
     //------------------------------------------------------------------------------------------------------------------
-
-
 
     //------------------------------------------------------------------------------------------------------------------
 	//
@@ -7291,7 +7256,6 @@
         return "table";
     };
 
-
     /**
      * Returns a row by its index.
      * @typeofeditors ["CPE"]
@@ -7358,7 +7322,6 @@
         var isMerged = this.Table.MergeTableCells(true);
         var oMergedCell = this.Table.CurCell;
         oTable.RemoveSelection();
-
 
         if (true === isMerged)
             return new ApiTableCell(oMergedCell);
@@ -7626,7 +7589,6 @@
         return new ApiTableCell(this.Row.Content[nPos]);
     };
 
-
     /**
      * Sets the height to the current table row.
      * @typeofeditors ["CPE"]
@@ -7657,8 +7619,6 @@
         this.Row.Set_Height(Math.max(1, nValue/36000 - fMaxTopMargin - fMaxBottomMargin - fMaxTopBorder/2 - fMaxBottomBorder/2), Asc.linerule_AtLeast);
     };
 
-
-
     //------------------------------------------------------------------------------------------------------------------
     //
     // ApiTableCell
@@ -7685,7 +7645,6 @@
     ApiTableCell.prototype.GetContent = function(){
         return Api.private_CreateApiDocContent(this.Cell.Content);
     };
-
 
     /**
      * Specifies the shading which shall be applied to the extents of the current table cell.
@@ -7736,7 +7695,6 @@
 
         this.Cell.Set_Pr(oPr);
     };
-
 
     /**
      * Specifies an amount of space which shall be left between the bottom extent of the cell contents and the border
@@ -7991,7 +7949,6 @@
 	Api["GetSelection"]                         = Api.GetSelection;
 	Api["GetByInternalId"]                      = Api.GetByInternalId;
 
-
     ApiPresentation.prototype["GetClassType"]             = ApiPresentation.prototype.GetClassType;
     ApiPresentation.prototype["GetCurSlideIndex"]         = ApiPresentation.prototype.GetCurSlideIndex;
     ApiPresentation.prototype["GetSlideByIndex"]          = ApiPresentation.prototype.GetSlideByIndex;
@@ -8243,7 +8200,6 @@
     ApiDrawing.prototype["Fill"]                          = ApiDrawing.prototype.Fill;
     ApiDrawing.prototype["SetOutLine"]                    = ApiDrawing.prototype.SetOutLine;
 
-
 	ApiChart.prototype["GetClassType"] = ApiChart.prototype.GetClassType = AscBuilder.ApiChart.prototype.GetClassType;
 	ApiChart.prototype["GetChartType"] = ApiChart.prototype.GetChartType = AscBuilder.ApiChart.prototype.GetChartType;
 	ApiChart.prototype["SetTitle"] = ApiChart.prototype.SetTitle = AscBuilder.ApiChart.prototype.SetTitle;
@@ -8369,7 +8325,6 @@
 	ApiSelection.prototype.getPresentation = function () {
 		return Asc.editor.getLogicDocument();
 	};
-
 
 	/**
 	 * Returns the type of the current selection.
@@ -8776,6 +8731,4 @@
 	};
 	
 })(window, null);
-
-
 

@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -162,7 +157,6 @@
 		this._validation = null;
 		this._formatConditions = null;
 	}
-
 
 	/**
 	 * Class representing a graphical object.
@@ -563,7 +557,6 @@
 		this.index = index;
 	}
 
-
 	/**
 	 * Class representing characters in an object that contains text.
 	 * @constructor
@@ -627,7 +620,6 @@
 			.getValue();
 	};
 
-
 	/**
 	 * Creates a new custom function.
 	 * The description of the function parameters and result is specified using JSDoc. The *@customfunction* tag is required in JSDoc.
@@ -670,9 +662,7 @@
 			delete this.parsedJSDoc;
 		}
 
-
 		// now we have to decide what we're going to use (make the priority order) - parsedJSDoc or options
-
 
 		//1. jsdoc params:
 		//
@@ -1480,7 +1470,6 @@
 		"Z.TEST": "Z.Test",
 		"ZTEST": "ZTest",//not js
 
-
 		//not in vba, only js:
 		//"INIT": "init", //not support by OO
 		//"AREAS": "areas", //not support by OO
@@ -1623,7 +1612,6 @@
 	// 	}
 	// 	console.log(test)
 	// };
-
 
 	ApiWorksheetFunction.prototype.private_calculateFunction = function (sFunc, arg) {
 		//check
@@ -2496,7 +2484,6 @@
 	// ApiWorksheetFunction.prototype.CHITEST = function (arg1, arg2) {
 	// 	return this.private_calculateFunction("CHITEST", arguments);
 	// };
-
 
 	/**
 	 * Returns the test for independence: the value from the chi-squared distribution for the statistic and the appropriate degrees of freedom.
@@ -7554,7 +7541,6 @@
 			arrMailMergeMap.push(valuesInRow);
 		}
 
-
 		return arrMailMergeMap;
 	};
 
@@ -7887,7 +7873,6 @@
 		}
 	});
 
-
 	/**
 	 * Returns all comments from the current workbook including comments from all worksheets.
 	 * @memberof Api
@@ -8037,7 +8022,6 @@
 			this.SetReferenceStyle(ReferenceStyle);
 		}
 	});
-
 
 	/**
 	 * Returns the document information:
@@ -8868,7 +8852,6 @@
 		}
 	});
 
-
 	/**
 	 * Returns the page PrintHeadings property which specifies whether the current sheet row/column headings must be printed or not.
 	 * @memberof ApiWorksheet
@@ -9130,7 +9113,6 @@
 			return new ApiChart(oChart);
 		};
 
-
 	/**
 	 * Adds a shape to the current sheet with the parameters specified.
 	 * <note>Please note that the horizontal and vertical offsets are
@@ -9155,7 +9137,6 @@
 		private_SetCoords(oShape, this.worksheet, nWidth, nHeight, nFromCol, nColOffset, nFromRow, nRowOffset);
 		return new ApiShape(oShape);
 	};
-
 
 	/**
 	 * Adds an image to the current sheet with the parameters specified.
@@ -9534,7 +9515,6 @@
 		return result;
 	};
 
-
 	/**
 	 * Returns a protected range object by its title.
 	 * @memberof ApiWorksheet
@@ -9634,7 +9614,6 @@
 		let workbook = this.worksheet.workbook;
 		return new AscBuilder.ApiCustomXmlParts(workbook);
 	};
-
 
 	/**
 	 * Specifies the cell border position.
@@ -11439,7 +11418,6 @@
 			return;
 		}
 
-
 		let nPasteType = null;
 		if (sPasteType) {
 			switch (sPasteType) {
@@ -11970,7 +11948,6 @@
 			let operator1 = opt_operator1 || (oCriteria1 && getOperator(oCriteria1.op));
 			let operator2 = opt_operator2 || (oCriteria2 && getOperator(oCriteria2.op));
 
-
 			let customFiltersArr = [];
 			if (oCriteria1) {
 				customFiltersArr[0] = new Asc.CustomFilter();
@@ -12307,7 +12284,6 @@
 		let ws = this.range.worksheet;
 		let selectionRange = ws.selectionRange.getLast();
 		let api = ws.workbook.oApi;
-
 
 		let _range;
 		if (ws.AutoFilter) {
@@ -13013,7 +12989,6 @@
 			return true;
 		}
 
-
 		return false;
 	};
 
@@ -13032,7 +13007,6 @@
 
 		return null;
 	};
-
 
 	ApiDrawing.prototype.resetDrawingBaseCoords = function() {
 		if(!this.Drawing) return;
@@ -14256,7 +14230,6 @@
 		this.WB.Api.asc_changeComment(this.Comment.asc_getId(), this.Comment);
 	};
 
-
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiCommentReply
@@ -14784,7 +14757,6 @@
 	// ApiFont
 	//
 	//------------------------------------------------------------------------------------------------------------------
-
 
 	/**
 	 * Returns the parent ApiCharacters object of the specified font.
@@ -15769,7 +15741,6 @@
 		}
 	});
 
-
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiFreezePanes
@@ -15954,7 +15925,6 @@
 	 * @typedef {("CanEdit" | "CanView" | "NotView")} ProtectedRangeUserType
 	 * @see office-js-api/Examples/Enumerations/ProtectedRangeUserType.js
 	 */
-
 
 	/**
 	 * Sets a user to the current protected range.
@@ -16165,7 +16135,6 @@
 		}
 		return protectedRangeUserType;
 	};
-
 
 	/**
 	 * Returns the ID property of the current user's information.
@@ -19583,7 +19552,6 @@
 		}
 	});
 
-
 	/**
 	 * The validation type.
 	 * @typedef {("xlValidateInputOnly" | "xlValidateWholeNumber" | "xlValidateDecimal" |
@@ -21998,8 +21966,6 @@
 		}
 	});
 
-
-
 	/**
 	 * Returns the format condition type.
 	 * @memberof ApiFormatCondition
@@ -23691,7 +23657,6 @@
 		}
 	});
 
-
 	/**
 	 * Returns the value of the color scale criterion.
 	 * @memberof ApiColorScaleCriterion
@@ -24596,7 +24561,6 @@
 	// 	}
 	// });
 
-
 	/**
 	 * Returns the bar border color of the data bar.
 	 * @memberof ApiDatabar
@@ -24641,7 +24605,6 @@
 			}
 		}, true);
 	};
-
 
 	/**
 	 * Returns the percent maximum value of the data bar.
@@ -27026,7 +26989,6 @@
 	 */
 	ApiTop10.prototype.SetFillColor = ApiFormatCondition.prototype.SetFillColor;
 
-
 	// Block inherited methods that should not be available for ApiTop10
 	ApiTop10.prototype.Modify = null;
 	ApiTop10.prototype.GetOperator = null;
@@ -27951,8 +27913,6 @@
 	ApiRange.prototype["GetCurrentRegion"] = ApiRange.prototype.GetCurrentRegion;
 	ApiRange.prototype["GetFormatConditions"] = ApiRange.prototype.GetFormatConditions;
 
-
-
 	ApiDrawing.prototype["GetClassType"]               =  ApiDrawing.prototype.GetClassType;
 	ApiDrawing.prototype["SetSize"]                    =  ApiDrawing.prototype.SetSize;
 	ApiDrawing.prototype["SetPosition"]                =  ApiDrawing.prototype.SetPosition;
@@ -28051,14 +28011,12 @@
 	ApiColor.prototype["GetClassType"]                =  ApiColor.prototype.GetClassType;
 	ApiColor.prototype["GetRGB"]                      =  ApiColor.prototype.GetRGB;
 
-
 	ApiName.prototype["GetName"]                 =  ApiName.prototype.GetName;
 	ApiName.prototype["SetName"]                 =  ApiName.prototype.SetName;
 	ApiName.prototype["Delete"]                  =  ApiName.prototype.Delete;
 	ApiName.prototype["GetRefersTo"]             =  ApiName.prototype.GetRefersTo;
 	ApiName.prototype["SetRefersTo"]             =  ApiName.prototype.SetRefersTo;
 	ApiName.prototype["GetRefersToRange"]        =  ApiName.prototype.GetRefersToRange;
-
 
 	ApiComment.prototype["GetClassType"]         =  ApiComment.prototype.GetClassType;
 	ApiComment.prototype["GetText"]              =  ApiComment.prototype.GetText;
@@ -28081,7 +28039,6 @@
 	ApiComment.prototype["RemoveReplies"]        =  ApiComment.prototype.RemoveReplies;
 	ApiComment.prototype["Delete"]               =  ApiComment.prototype.Delete;
 
-
 	ApiCommentReply.prototype["GetClassType"]         =  ApiCommentReply.prototype.GetClassType;
 	ApiCommentReply.prototype["GetText"]              =  ApiCommentReply.prototype.GetText;
 	ApiCommentReply.prototype["SetText"]              =  ApiCommentReply.prototype.SetText;
@@ -28095,11 +28052,9 @@
 	ApiCommentReply.prototype["GetTime"]              =  ApiCommentReply.prototype.GetTime;
 	ApiCommentReply.prototype["SetTime"]              =  ApiCommentReply.prototype.SetTime;
 
-
 	ApiAreas.prototype["GetCount"]               = ApiAreas.prototype.GetCount;
 	ApiAreas.prototype["GetItem"]                = ApiAreas.prototype.GetItem;
 	ApiAreas.prototype["GetParent"]              = ApiAreas.prototype.GetParent;
-
 
 	ApiCharacters.prototype["GetCount"]          = ApiCharacters.prototype.GetCount;
 	ApiCharacters.prototype["GetParent"]         = ApiCharacters.prototype.GetParent;
@@ -28569,7 +28524,6 @@
 	ApiWorksheetFunction.prototype["T_DIST_RT"]      =  ApiWorksheetFunction.prototype.T_DIST_RT;
 	ApiWorksheetFunction.prototype["T_INV_2T"]       =  ApiWorksheetFunction.prototype.T_INV_2T;
 
-
 	ApiPivotTable.prototype["AddDataField"]                       = ApiPivotTable.prototype.AddDataField;
 	ApiPivotTable.prototype["AddFields"]                          = ApiPivotTable.prototype.AddFields;
 	ApiPivotTable.prototype["ClearAllFilters"]                    = ApiPivotTable.prototype.ClearAllFilters;
@@ -28791,8 +28745,6 @@
 	ApiFormatCondition.prototype["SetTextOperator"] = ApiFormatCondition.prototype.SetTextOperator;
 	ApiFormatCondition.prototype["GetParent"] = ApiFormatCondition.prototype.GetParent;
 
-
-
 	ApiAboveAverage.prototype["GetAboveBelow"] = ApiAboveAverage.prototype.GetAboveBelow;
 	ApiAboveAverage.prototype["SetAboveBelow"] = ApiAboveAverage.prototype.SetAboveBelow;
 	ApiAboveAverage.prototype["GetNumStdDev"] = ApiAboveAverage.prototype.GetNumStdDev;
@@ -28974,7 +28926,6 @@
 	ApiIconCriterion.prototype["GetIndex"] = ApiIconCriterion.prototype.GetIndex;
 	ApiIconCriterion.prototype["GetIcon"] = ApiIconCriterion.prototype.GetIcon;
 	ApiIconCriterion.prototype["SetIcon"] = ApiIconCriterion.prototype.SetIcon;
-
 
     function createAutoFilterArray(parent, filters) {
         if (!Array.isArray(filters)) return [];

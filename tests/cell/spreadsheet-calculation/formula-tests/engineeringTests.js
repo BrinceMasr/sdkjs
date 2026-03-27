@@ -12,24 +12,18 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
-
 
 $(function () {
 	// Mocks for API Testing
@@ -116,7 +110,6 @@ $(function () {
 			this.isLoadFullApi = true;
 		};
 
-
 		let api = new Asc.spreadsheet_api({
 			'id-view': 'editor_sdk'
 		});
@@ -128,7 +121,6 @@ $(function () {
 		let docInfo = new Asc.asc_CDocInfo();
 		docInfo.asc_putTitle("TeSt.xlsx");
 		api.DocInfo = docInfo;
-
 
 		window["Asc"]["editor"] = api;
 		AscCommon.g_oTableId.init(api);
@@ -186,7 +178,6 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-
 		oParser = new parserFormula(func + "(A100:C101)", "A1", ws);
 		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
 		assert.ok(oParser.parse(), 'Formula is parsed.');
@@ -230,7 +221,6 @@ $(function () {
 			assert.ok(oParser.parse(), 'Test: Formula ' + func + argStr + ' is parsed.');
 			return oParser.calculate().getValue();
 		};
-
 
 		//***array-formula***
 		ws.getRange2("A100").setValue("1");
@@ -346,7 +336,6 @@ $(function () {
 			}
 		}
 	}
-
 
 	/**
 	 * Function creates table or edit existed table.
@@ -684,7 +673,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula BESSELI(10, 244) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 2.7847769865682407e-308, 'Test: Bounded case: Number, Number. A combination of large X and large N that does not cause an overflow error.');
 
-
 		testArrayFormula2(assert, "BESSELI", 2, 2, true, null);
 	});
 
@@ -960,7 +948,6 @@ $(function () {
 
 		testArrayFormula2(assert, "BESSELJ", 2, 2, true, null);
 	});
-
 
 	QUnit.test("Test: \"BESSELK\"", function (assert) {
 		// Data for reference link. Use A100-A111
@@ -1423,11 +1410,9 @@ $(function () {
         assert.ok(oParser.parse(), 'Test: Formula BESSELY(MAX_USED_VALUE, MAX_USED_VALUE) is parsed.');
         assert.strictEqual(oParser.calculate().getValue(), "#NUM!", 'Test: Bounded case: Number, Formula. Using a very large integer for the both arguments.');
 
-
 		testArrayFormula2(assert, "BESSELY", 2, 2, true, null);
 
 	});
-
 
 	QUnit.test("Test: \"BIN2DEC\"", function (assert) {
 		// Data for reference link. Use A100-A111
@@ -2605,7 +2590,6 @@ $(function () {
         // Case #23: Area. Multi-cell range. 1 of 2 arguments used.
         // Case #25: Name. Named range with multiple cells. 1 of 2 arguments used.
         // Case #26: Area3D. 3D range with multiple cells. 1 of 2 arguments used.
-
 
 		testArrayFormula2(assert, "BIN2OCT", 1, 2, true);
 	});
@@ -3812,7 +3796,6 @@ $(function () {
         // Case #4: Number(2). Large values near half of max. Returns 1.
         // Case #5: Number(2). Minimum non-zero with maximum allowed. Flips all bits.
 
-
 		testArrayFormula2(assert, "BITXOR", 2, 2);
 	});
 
@@ -4092,7 +4075,6 @@ $(function () {
         // Case #17: Boolean(2). Booleans -> (1;0). 2 of 3 args used.
         // Case #19: Empty,Number. Real_num is  empty return #N/A error. 2 of 3 args were used.
         // Case #20: Number, Empty. I_num is empty return #N/A error. 2 of 3 args were used.
-
 
 		testArrayFormula2(assert, "COMPLEX", 2, 3, true);
 	});
@@ -4602,10 +4584,8 @@ $(function () {
         // Case #8: Number, String(2). Convert very large number 9999999999 from Feet to Meter. Return 3048000000
         // Case #10: Number, String(2). Convert 1 from Light-year to Meter (very large conversion). Return 9.46073E+15
 
-
 		testArrayFormula2(assert, "CONVERT", 3, 3, true);
 	});
-
 
 	QUnit.test("Test: \"DEC2BIN\"", function (assert) {
 		// Data for reference link. Use A100-A111
@@ -6014,7 +5994,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number. Basic valid input: zero as lower_limit. 1 argument used.
 		oParser = new parserFormula('ERF(1)', 'A2', ws);
@@ -6211,7 +6190,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: ERF(,) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), "#N/A", 'Test: Negative case: Empty, Empty. Empty check in both valued.');
 
-
 		// Bounded cases:
 		// Case #1: Number. Minimum valid numeric lower_limit. 1 argument used.
 		oParser = new parserFormula('ERF(1E-307)', 'A2', ws);
@@ -6229,7 +6207,6 @@ $(function () {
 		oParser = new parserFormula('ERF(9.99999999999999E+307,9.99999999999999E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: ERF(9.99999999999999E+307,9.99999999999999E+307) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Number, Number. Maximum valid numeric values for both limits. 2 arguments used.');
-
 
 		testArrayFormula2(assert, "ERF", 1, 2, true);
 	});
@@ -6285,7 +6262,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Basic valid input: zero as x. 1 argument used.
@@ -6465,7 +6441,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: ERF.PRECISE(9.99999999999999E+307) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number. Maximum valid numeric x. 1 argument used.');
 
-
 		testArrayFormula2(assert, "ERF.PRECISE", 1, 1, true);
 	});
 
@@ -6520,7 +6495,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Basic valid input: zero as x. 1 argument used.
@@ -6700,7 +6674,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: ERFC(9.99999999999999E+307) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Number. Maximum valid numeric x. 1 argument used.');
 
-
 		testArrayFormula2(assert, "ERFC", 1, 1, true);
 	});
 
@@ -6755,7 +6728,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Basic valid input: zero as x. 1 argument used.
@@ -6934,7 +6906,6 @@ $(function () {
 		oParser = new parserFormula('ERFC.PRECISE(9.99999999999999E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: ERFC.PRECISE(9.99999999999999E+307) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Number. Maximum valid numeric x. 1 argument used.');
-
 
 	});
 
@@ -7536,7 +7507,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: HEX2BIN(1,A112) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Number, Ref. Non-numeric number returns #VALUE!. 2 arguments used.');
 
-
 		// Bounded cases:
 		// Case #1: Number. Minimum positive hex number (0). 1 argument used.
 		oParser = new parserFormula('HEX2BIN(0)', 'A2', ws);
@@ -7558,7 +7528,6 @@ $(function () {
 		oParser = new parserFormula('HEX2BIN("1FF",1E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: HEX2BIN("1FF",1E+307) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Bounded case: Number, Number. Maximum places for 1FF (9 bits needed, 10 allowed). 2 arguments used.');
-
 
 		testArrayFormula2(assert, "HEX2BIN", 1, 2, true);
 	});
@@ -7645,7 +7614,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #0: Number. Valid positive hex number (511 decimal). 1 argument used.
@@ -7844,7 +7812,6 @@ $(function () {
 		oParser = new parserFormula('HEX2DEC(8000000000)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: HEX2DEC(8000000000) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), -549755813888, 'Test: Bounded case: Number. Minimum negative hex number (-549,755,813,888 decimal). 1 argument used.');
-
 
 		testArrayFormula2(assert, "HEX2DEC", 1, 1, true);
 	});
@@ -8146,7 +8113,6 @@ $(function () {
 		oParser = new parserFormula('HEX2OCT(1,A112)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: HEX2OCT(1,A112) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Number, Ref. Non-numeric number returns #VALUE!. 2 arguments used.');
-
 
 		// Bounded cases:
 		// Case #1: Number. Minimum positive hex number (0). 1 argument used.
@@ -8537,7 +8503,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: String. Complex number as string. Returns modulus sqrt(3^2 + 4^2) = 5.
 		oParser = new parserFormula('IMAGINARY("3+4i")', 'A2', ws);
@@ -8847,7 +8812,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String. Complex number as string. Returns modulus sqrt(3^2 + 4^2) = 5.
@@ -9161,7 +9125,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: String. Complex number as string. Returns modulus sqrt(3^2 + 4^2) = 5.
 		oParser = new parserFormula('IMCONJUGATE("3+4i")', 'A2', ws);
@@ -9474,7 +9437,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: String. Complex number as string. Returns modulus sqrt(3^2 + 4^2) = 5.
 		oParser = new parserFormula('IMCOS("3+4i")', 'A2', ws);
@@ -9733,7 +9695,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: IMCOS("0+1E-307i") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '1', 'Test: Bounded case: Number. Minimum positive imaginary component. Returns modulus 1E-307.');
 
-
 		testArrayFormula(assert, "IMCOS", true);
 	});
 
@@ -9780,7 +9741,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String. Complex number as string. Returns modulus sqrt(3^2 + 4^2) = 5.
@@ -10040,7 +10000,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: IMCOSH("0+1E-307i") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '1', 'Test: Bounded case: Number. Minimum positive imaginary component. Returns modulus 1E-307.');
 
-
 		testArrayFormula(assert, "IMCOSH", true);
 	});
 
@@ -10087,7 +10046,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String. Complex number as string. Returns modulus sqrt(3^2 + 4^2) = 5.
@@ -10347,7 +10305,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: IMCOT("0+1E-307i") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Bounded case: Number. Minimum positive imaginary component. Returns modulus 1E-307.');
 
-
 		testArrayFormula(assert, "IMCOT", true);
 	});
 
@@ -10394,7 +10351,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String. Complex number as string. Returns modulus sqrt(3^2 + 4^2) = 5.
@@ -10710,7 +10666,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: String. Complex number as string. Returns modulus sqrt(3^2 + 4^2) = 5.
 		oParser = new parserFormula('IMCSCH("3+4i")', 'A2', ws);
@@ -10977,7 +10932,6 @@ $(function () {
 		// Case #2: Number. Minimum positive complex number. Returns modulus sqrt(1E-307^2 + 1E-307^2). - NaN
 		// Case #3: Number. Minimum positive imaginary component. Returns modulus 1E-307. - NaN
 
-
 		testArrayFormula(assert, "IMCSCH", true);
 	});
 
@@ -11024,7 +10978,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String, String. Divides two complex numbers as strings. Returns 3.5+0.5i.
@@ -11292,7 +11245,6 @@ $(function () {
 		// Case #3: Number, Number. Minimum positive complex number in denominator. Returns large complex number.
 		// Case #4: Number, Number. Minimum positive imaginary components. Returns 1.
 
-
 		testArrayFormula2(assert, "IMDIV", 2, 2, true, null);
 	});
 
@@ -11340,7 +11292,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String. Complex number as string. Returns modulus sqrt(3^2 + 4^2) = 5.
@@ -11655,7 +11606,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: String. Complex number as string. Returns modulus sqrt(3^2 + 4^2) = 5.
 		oParser = new parserFormula('IMLN("3+4i")', 'A2', ws);
@@ -11914,7 +11864,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: IMLN("0+1E-307i") is parsed.');
 		//? assert.strictEqual(oParser.calculate().getValue(), '-706.893623549172+1.5707963267949i', 'Test: Bounded case: Number. Minimum positive imaginary component. Returns modulus 1E-307.');
 
-
 		testArrayFormula(assert, "IMLN", true);
 	});
 
@@ -11961,7 +11910,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String. Complex number as string. Returns modulus sqrt(3^2 + 4^2) = 5.
@@ -12216,7 +12164,6 @@ $(function () {
 		oParser = new parserFormula('IMLOG2("0+1E-307i")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IMLOG2("0+1E-307i") is parsed.');
 		//? assert.strictEqual(oParser.calculate().getValue(), '-1019.83192513042+2.2661800709136i', 'Test: Bounded case: Number. Minimum positive imaginary component. Returns modulus 1E-307.');
-
 
 		testArrayFormula(assert, "IMLOG2", true);
 	});
@@ -12522,7 +12469,6 @@ $(function () {
 		oParser = new parserFormula('IMLOG10("0+1E-307i")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IMLOG10("0+1E-307i") is parsed.');
 		//? assert.strictEqual(oParser.calculate().getValue(), '-307+0.682188176920921i', 'Test: Bounded case: Number. Minimum positive imaginary component. Returns modulus 1E-307.');
-
 
 		testArrayFormula(assert, "IMLOG10", true);
 	});
@@ -12868,7 +12814,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: String. Single complex number as string. Returns 3+4i.
 		oParser = new parserFormula('IMPRODUCT("3+4i")', 'A2', ws);
@@ -13146,7 +13091,6 @@ $(function () {
 		// Case #16: String. Invalid complex number suffix (j instead of i) returns #VALUE!. - j
 		// Case #19: Array, String. Array with mixed valid and invalid elements, processes first valid element. Returns -1+7i.
 
-
 	});
 
 	QUnit.test("Test: \"IMREAL\"", function (assert) {
@@ -13192,7 +13136,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String. Complex number as string. Returns modulus sqrt(3^2 + 4^2) = 5.
@@ -13452,7 +13395,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: IMREAL("0+1E-307i") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Number. Minimum positive imaginary component. Returns modulus 1E-307.');
 
-
 		testArrayFormula(assert, "IMREAL", true);
 	});
 
@@ -13499,7 +13441,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String. Complex number as string. Returns modulus sqrt(3^2 + 4^2) = 5.
@@ -13759,7 +13700,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: IMSEC("0+1E-307i") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '1', 'Test: Bounded case: Number. Minimum positive imaginary component. Returns modulus 1E-307.');
 
-
 		testArrayFormula(assert, "IMSEC", true);
 	});
 
@@ -13806,7 +13746,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String. Complex number as string. Returns modulus sqrt(3^2 + 4^2) = 5.
@@ -14066,7 +14005,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: IMSECH("0+1E-307i") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '1', 'Test: Bounded case: Number. Minimum positive imaginary component. Returns modulus 1E-307.');
 
-
 		testArrayFormula(assert, "IMSECH", true);
 	});
 
@@ -14113,7 +14051,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String. Complex number as string. Returns modulus sqrt(3^2 + 4^2) = 5.
@@ -14373,7 +14310,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: IMSIN("0+1E-307i") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '0', 'Test: Bounded case: Number. Minimum positive imaginary component. Returns modulus 1E-307.');
 
-
 		testArrayFormula(assert, "IMSIN", true);
 	});
 
@@ -14420,7 +14356,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String. Complex number as string. Returns modulus sqrt(3^2 + 4^2) = 5.
@@ -14680,7 +14615,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: IMSINH("0+1E-307i") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '1e-307i', 'Test: Bounded case: Number. Minimum positive imaginary component. Returns modulus 1E-307.');
 
-
 		testArrayFormula(assert, "IMSINH", true);
 	});
 
@@ -14727,7 +14661,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String. Complex number as string. Returns modulus sqrt(3^2 + 4^2) = 5.
@@ -15055,7 +14988,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: String, String. Subtracts two complex numbers as strings. Returns 2+3i.
 		oParser = new parserFormula('IMSUB("3+4i","1+1i")', 'A2', ws);
@@ -15316,7 +15248,6 @@ $(function () {
 		// Case #14: Array, String. Array with boolean in first argument returns #VALUE!.
 		// Case #17: String, String. Invalid complex number suffix (j instead of i) in first argument returns #VALUE!.
 
-
 		testArrayFormula2(assert, "IMSUB", 2, 2, true, null);
 	});
 
@@ -15362,7 +15293,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String. Single complex number as string. Returns 3+4i.
@@ -15634,7 +15564,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: IMSUM("0+1E-307i") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '1e-307i', 'Test: Bounded case: Number. Minimum positive imaginary component. Returns 0+1E-307i.');
 
-
 		testArrayFormula2(assert, "IMSUB", 2, 2, true, null);
 	});
 
@@ -15681,7 +15610,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String. Complex number as string. Returns modulus sqrt(3^2 + 4^2) = 5.
@@ -16246,7 +16174,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: OCT2BIN(3777777777,10) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Bounded case: Number, Number. Maximum valid octal with maximum places. 2 arguments used.');
 
-
 		// Need to fix: error handle, error types diff from MS, Boolean handle
 		// Case #20: Area3D, Number. 3D single-cell range with fixed places. 2 arguments used.
 		// Case #6: Error. Propagates #N/A error. 1 argument used.
@@ -16330,7 +16257,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Basic valid integer input (octal 77 = decimal 63). 1 argument used.
@@ -16505,7 +16431,6 @@ $(function () {
 		oParser = new parserFormula('OCT2DEC("2000000000")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: OCT2DEC("2000000000") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 268435456, 'Test: Bounded case: String. Minimum negative octal (2000000000 = decimal -536870912). 1 argument used.');
-
 
 		// Need to fix: Boolean handle
 		// Case #5: Boolean. Boolean TRUE returns #VALUE!. 1 argument used.
@@ -16810,7 +16735,6 @@ $(function () {
 		oParser = new parserFormula('OCT2HEX(3777777777,10)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: OCT2HEX(3777777777,10) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '001FFFFFFF', 'Test: Bounded case: Number, Number. Maximum valid octal with maximum places. 2 arguments used.');
-
 
 		testArrayFormula2(assert, "OCT2HEX", 1, 2, true)
 

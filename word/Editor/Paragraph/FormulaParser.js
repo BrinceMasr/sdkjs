@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -74,7 +69,6 @@
     var oOperatorRegExp = new RegExp(sOperator, 'g');
     var oFunctionsRegExp = new RegExp(sFunctions, 'g');
 
-
     var oLettersMap = {};
     oLettersMap['A'] = 1;
     oLettersMap['B'] = 2;
@@ -103,7 +97,6 @@
     oLettersMap['Y'] = 25;
     oLettersMap['Z'] = 26;
 
-
   var oDigitMap = {};
     oDigitMap['0'] = 0;
     oDigitMap['1'] = 1;
@@ -115,7 +108,6 @@
     oDigitMap['7'] = 7;
     oDigitMap['8'] = 8;
     oDigitMap['9'] = 9;
-
 
     function CFormulaNode(parseQueue) {
         this.document = null;
@@ -141,7 +133,6 @@
     CFormulaNode.prototype.isCell = function(){
         return false;
     };
-
 
     CFormulaNode.prototype.checkSizeFormated = function(_result){
         if(_result.length > 63){
@@ -535,8 +526,6 @@
         this.result = (aArgs[1].result >= aArgs[0].result) ? 1.0 : 0.0;
     };
 
-
-
     function CLeftParenOperatorNode(parseQueue){
         CFormulaNode.call(this, parseQueue);
     }
@@ -580,7 +569,6 @@
     oOperatorsMap[">="] = CGreaterThanOrEqualOperatorNode;
     oOperatorsMap["("] = CLeftParenOperatorNode;
     oOperatorsMap[")"] = CRightParenOperatorNode;
-
 
     var LEFT = 0;
     var RIGHT = 1;
@@ -766,7 +754,6 @@
             this.result = oRes.result;
         }
     };
-
 
     CCellRangeNode.prototype._parseCellVal = function (oCurCell, oRes) {
         if(oCurCell){
@@ -1071,7 +1058,6 @@
         }
         this.result = count;
     };
-
 
     function CDEFINEDFunctionNode(parseQueue){
         CFunctionNode.call(this, parseQueue);
@@ -1446,7 +1432,6 @@
         this.Data = Data;
     }
 
-
     var oFuncMap = {};
     oFuncMap['ABS'] = CABSFunctionNode;
     oFuncMap['AND'] = CANDFunctionNode;
@@ -1524,7 +1509,6 @@
         return null;
     };
 
-
     CFormulaParser.prototype.parseNumber = function(nStartPos, nEndPos){
         var sNum = this.formula.slice(nStartPos, nEndPos);
         sNum = sNum.replace(sComma, '');
@@ -1536,7 +1520,6 @@
         }
         return null;
     };
-
 
     CFormulaParser.prototype.parseCoord = function(nStartPos, nEndPos, oMap, nBase){
         var nRet = 0;
@@ -1703,7 +1686,6 @@
         return oResult;
     };
 
-
     CFormulaParser.prototype.parseOperator = function(nStartPos, nEndPos){
         var sOperator = this.formula.slice(nStartPos, nEndPos);
         if(sOperator === '-'){
@@ -1840,7 +1822,6 @@
         this.formula = sFormula.toUpperCase();
         this.parseQueue = null;
         this.error = null;
-
 
         this.parseQueue = new CParseQueue();
         this.parseQueue.formula = this.formula;
@@ -2205,7 +2186,6 @@
     };
     window['AscCommonWord'] = window['AscCommonWord'] || {};
     window['AscCommonWord'].CFormulaParser = CFormulaParser;
-
 
     function CTextParser(sListSeparator, sDigitSeparator){
         CFormulaParser.call(this, sListSeparator, sDigitSeparator);//TODO: take list separator and digits separator from settings

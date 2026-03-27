@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -600,7 +595,6 @@ CNary.prototype.Recalculate_Range = function(PRS, ParaPr, Depth)
         var RangeStartPos = this.protected_AddRange(CurLine, CurRange),
             RangeEndPos = 2;
 
-
         if(CurLine == 0 && CurRange == 0)
         {
             PRS.WordLen += this.BrGapLeft;
@@ -634,7 +628,6 @@ CNary.prototype.Recalculate_Range = function(PRS, ParaPr, Depth)
         PRS.Update_CurPos(2, Depth); // this.Arg = this.Content[2]
         PRS.bMath_OneLine  = false;
         this.Arg.Recalculate_Range(PRS, ParaPr, Depth+1);
-
 
         if(PRS.NewRange == false)
         {
@@ -1178,12 +1171,10 @@ CNaryUndOvr.prototype.setPosition = function(pos, PosInfo)
     PosUpIter.x = pos.x + this.GapLeft + this.align(0,0).x;
     PosUpIter.y = pos.y + UpIter.size.ascent;
 
-
     var PosSign = new CMathPosition();
 
     PosSign.x = pos.x + this.GapLeft + this.align(1,0).x;
     PosSign.y = pos.y + UpIter.size.height + this.gapTop;
-
 
     var PosLowIter = new CMathPosition();
 
@@ -1516,7 +1507,6 @@ CSigma.prototype.getCoord = function()
     X[34] = 44102; Y[34] = 5200;
     X[35] = 16252; Y[35] = 5200;
 
-
     //var textScale =  this.getTxtPrp().FontSize/850; // 1000 pt
     var textScale =  this.Get_TxtPrControlLetter().FontSize/850; // 1000 pt
     var alpha = textScale*25.4/96 /64;
@@ -1533,7 +1523,6 @@ CSigma.prototype.getCoord = function()
     var h_middle1 = Y[3] - Y[0] - h3,
         coeff1 = (Y[1] - Y[0])/h_middle1,
         coeff2 = (Y[3] - Y[2])/h_middle1;
-
 
     var y3 = Y[3],
         y2 = Y[2];
@@ -1727,7 +1716,6 @@ CProduct.prototype.getCoord = function()
     X[61] = 0; Y[61] = 0;
     X[62] = 67894; Y[62] = 0;
 
-
     //var textScale = this.getTxtPrp().FontSize/850, // 1000 pt
     var textScale = this.Get_TxtPrControlLetter().FontSize/850, // 1000 pt
         alpha = textScale*25.4/96 /64;
@@ -1752,7 +1740,6 @@ CProduct.prototype.getCoord = function()
         X[i] += ww;
 
     X[62] += ww;
-
 
     return {X: X, Y: Y};
 
@@ -1997,7 +1984,6 @@ CIntegral.prototype.getCoord = function()
     X[41] = 20407; Y[41] = 4883;
     X[42] = 20407; Y[42] = 0;
 
-
     var shX = X[9]*0.025;
     for(var i = 0; i < 21; i++)
     {
@@ -2009,7 +1995,6 @@ CIntegral.prototype.getCoord = function()
     {
         Y[22+i] += shY + Y[20];
     }
-
 
     X[21] = (X[20] + X[22])/2; Y[21] = (Y[20] + Y[22])/2;
     X[44] = X[0]; Y[44] = Y[0];
@@ -2175,7 +2160,6 @@ CTripleIntegral.prototype.calculateSizeGlyph = function()
     return {width : width, height : height};
 };
 
-
 function CCircle()
 {
 
@@ -2248,7 +2232,6 @@ CCircle.prototype.drawPath = function(pGraphics, XX, YY)
     pGraphics._c(XX[31], YY[31], XX[32], YY[32], XX[33], YY[33]);
 };
 
-
 function CSurface()
 {
 
@@ -2304,8 +2287,6 @@ CSurface.prototype.getCoord = function()
 
     var W = X[11],
         H = Y[21];
-
-
 
     return {X: X, Y: Y, W: W, H: H};
 };
@@ -2400,7 +2381,6 @@ CVolume.prototype.getCoord = function()
     var W = X[15],
         H = Y[28];
 
-
     return {X: X, Y: Y, W : W, H : H};
 };
 CVolume.prototype.drawPath = function(pGraphics, XX, YY)
@@ -2454,7 +2434,6 @@ CClosedPathIntegral.prototype.drawGlyph = function(parameters)
         PDSE        = parameters.PDSE;
 
     var pGraphics   = parameters.PDSE.Graphics;
-
 
     var oCompiledPr = this.Parent.Get_CompiledCtrPrp();
 
@@ -2590,11 +2569,9 @@ CClosedPathIntegral.prototype.drawGlyph = function(parameters)
             else if(PrevX < IntegralX[j])
                 IntegralY[j] += WidthLine;
 
-
             PrevX = CurrentX;
             PrevY = CurrentY;
         }
-
 
         IntegralX[0] = IntegralX[IntegralLng - 1];
         IntegralY[0] = IntegralY[IntegralLng - 1];
@@ -2643,7 +2620,6 @@ CClosedPathIntegral.prototype.drawGlyph = function(parameters)
 
     pGraphics.SetIntegerGrid(intGrid);
 };
-
 
 /**
  *

@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -124,7 +119,6 @@
 	AscFormat.InitClass(ForeignData_Type, AscFormat.CBaseFormatNoIdObject, AscDFH.historyitem_type_Unknown);
 	ForeignData_Type.prototype.kind = c_oVsdxSheetStorageKind.ForeignData_Type;
 
-
 	/**
 	 *    // https://learn.microsoft.com/ru-ru/office/client-developer/visio/trigger_type-complextypevisio-xml
 	 * @constructor
@@ -144,7 +138,6 @@
 	 */
 	function SheetStorage() {
 		AscFormat.CBaseFormatNoIdObject.call(this);
-
 
 		// setSheetClassMembers
 
@@ -254,7 +247,6 @@
 		}
 	}
 
-
 	/**
 	 * Abstract class for ShapeSheet_Type (Sheet_Type) descendents only.
 	 * @constructor
@@ -325,7 +317,6 @@
 		}
 		return this.textStyle;
 	}
-
 
 	// inheritance from ShapeSheetType for
 	// StyleSheet_Type, DocumentSheet_Type, PageSheet_Type and Shape_Type
@@ -775,7 +766,6 @@
 		return element;
 	}
 
-
 	/**
 	 *    // Docs old:
 	 *    // Section_Type complexType: https://learn.microsoft.com/ru-ru/office/client-developer/visio/section_type-complextypevisio-xml
@@ -800,7 +790,6 @@
 	Section_Type.prototype = Object.create(SheetStorage.prototype);
 	Section_Type.prototype.constructor = Section_Type;
 	Section_Type.prototype.kind = c_oVsdxSheetStorageKind.Section_Type;
-
 
 	/**
 	 *    // Docs old:
@@ -828,7 +817,6 @@
 	Row_Type.prototype = Object.create(SheetStorage.prototype);
 	Row_Type.prototype.constructor = Row_Type;
 	Row_Type.prototype.kind = c_oVsdxSheetStorageKind.Row_Type;
-
 
 	/**
 	 * Docs old:
@@ -1146,7 +1134,6 @@
 		return returnValue;
 	}
 
-
 	// /**
 	//  * @memberOf Cell_Type
 	//  * @return {number}
@@ -1195,7 +1182,6 @@
 	// 	let res = this.getValueInMM() / g_dKoef_in_to_mm;
 	// 	return res;
 	// }
-
 
 	/**
 	 *    // Docs old:
@@ -1254,7 +1240,6 @@
 	// https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Object/create#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80_%D0%BA%D0%BB%D0%B0%D1%81%D1%81%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%BE%D0%B5_%D0%BD%D0%B0%D1%81%D0%BB%D0%B5%D0%B4%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5_%D1%81_object.create
 	Shape_Type.prototype = Object.create(SheetStorageAndStyles.prototype);
 	Shape_Type.prototype.constructor = Shape_Type;
-
 
 	/**
 	 * @memberOf Shape_Type
@@ -1440,7 +1425,6 @@
 		});
 	}
 
-
 	/**
 	 * Realizes Master-To-Shape inheritance.
 	 * Comes through the shape recursively through all subshapes
@@ -1543,7 +1527,6 @@
 		//           		<Cell N='PinX' V='1.113900526692464' F='Inh'/>
 		//           		<Cell N='PinY' V='1.16976435446399' F='Inh'/>
 		// 		  				...
-
 
 		let masterShapesToInheritFrom = [];
 
@@ -1916,7 +1899,6 @@
 		return copy;
 	}
 
-
 	/**
 	 * // Docs old:
 	 * // Элемент PageSheet (Page_Type complexType): https://learn.microsoft.com/ru-ru/office/client-developer/visio/pagesheet-element-page_type-complextypevisio-xml
@@ -2071,7 +2053,6 @@
 	}
 	AscFormat.InitClass(Icon_Type, AscFormat.CBaseFormatNoIdObject, AscDFH.historyitem_type_Unknown);
 
-
 	//todo move to commons
 	function PropLocker(objectId)
 	{
@@ -2128,7 +2109,6 @@
 	window['AscVisio']  = window['AscVisio'] || {};
 	window['AscFormat']  = window['AscFormat'] || {};
 	window['AscWord'] = window['AscWord'] || {};
-
 
 	window['AscVisio'].c_oVsdxSheetStorageKind = c_oVsdxSheetStorageKind;
 	window['AscVisio'].SheetStorageAndStyles = SheetStorageAndStyles;

@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -49,7 +44,6 @@ var UndoRedoData_IndexSimpleProp = AscCommonExcel.UndoRedoData_IndexSimpleProp;
 var UndoRedoData_FromTo = AscCommonExcel.UndoRedoData_FromTo;
 
 var UndoRedoData_Layout = AscCommonExcel.UndoRedoData_Layout;
-
 
 var c_oAscCustomAutoFilter = Asc.c_oAscCustomAutoFilter;
 var c_oAscAutoFilterTypes = Asc.c_oAscAutoFilterTypes;
@@ -592,7 +586,6 @@ g_oColorManager = new ColorManager();
 		}
 		return textPos;
 	};
-
 
 var g_oFontProperties = {
 		fn: 0,
@@ -3837,8 +3830,6 @@ var g_oFontProperties = {
 		return res;
 	}
 
-
-
 	var g_oBorderPropProperties = {
 		s: 0, c: 1
 	};
@@ -5080,7 +5071,6 @@ var g_oFontProperties = {
 	CellXfs.prototype.asc_setNumFormatInfo = function (val) {
 		this.num = new AscCommonExcel.Num({f:val});
 	};
-
 
 	/** @enum */
 	var c_oSerAligmentTypes =
@@ -6709,7 +6699,6 @@ StyleManager.prototype =
 	Col.prototype.getCollapsed = function () {
 		return this.collapsed;
 	};
-
 
 	var g_nRowStructSize = 4 + 4 + 8;
 
@@ -9154,7 +9143,6 @@ function RangeDataManagerElem(bbox, data)
 				return null;
 			}
 
-
 			//1. only data - Table1
 			//2. only data Table4[[Column1]:[Column2]] / Table4[Column1]
 			if (dataContains && !totalContains && !headerContains) {
@@ -9181,14 +9169,12 @@ function RangeDataManagerElem(bbox, data)
 				}
 			}
 
-
 			//hybrid totals/headers/data
 
 			//Table4[[#Data];[#Totals];[Column1]]
 			//Table4[[#Headers];[#Data];[Column1]]
 			//Table4[[#Totals];[Column1]]
 			//Table4[[#Headers];[#Data];[Column1]:[Column2]]
-
 
 			//all hybrid
 			//Table4[[#Data];[#Totals]]
@@ -9280,7 +9266,6 @@ function RangeDataManagerElem(bbox, data)
 		}
 		return false;
 	};
-
 
 	/** @constructor */
 	function AutoFilter() {
@@ -9959,7 +9944,6 @@ function RangeDataManagerElem(bbox, data)
 		}
 	};
 
-
 	/** @constructor */
 	function TableColumn() {
 		this.Name = null;
@@ -10220,7 +10204,6 @@ function RangeDataManagerElem(bbox, data)
 		this._lowerCaseName = this.Name && this.Name.toLowerCase();
 	};
 
-
 	/** @constructor */
 	function TableStyleInfo() {
 		this.Name = null;
@@ -10327,7 +10310,6 @@ function RangeDataManagerElem(bbox, data)
 		this.ShowButton = reader.GetBool();
 	};
 
-
 	FilterColumn.prototype.clone = function () {
 		var res = new FilterColumn();
 		res.ColId = this.ColId;
@@ -10375,7 +10357,6 @@ function RangeDataManagerElem(bbox, data)
 	};
 	FilterColumn.prototype.createFilter = function (obj) {
 
-
 		//распознаем формат
 		/*var res = AscCommon.g_oFormatParser.parse(val);
 		if(null != res)
@@ -10402,9 +10383,6 @@ function RangeDataManagerElem(bbox, data)
 			}
 			this.setValueTextInternal(val);
 		}*/
-
-
-
 
 		var allFilterOpenElements = false;
 		var newFilter;
@@ -10458,7 +10436,6 @@ function RangeDataManagerElem(bbox, data)
 
 		let visibleDropDown = obj.asc_getVisibleDropDown();
 		this.ShowButton = visibleDropDown === false ? false : null;
-
 
 		return allFilterOpenElements;
 	};
@@ -11307,7 +11284,6 @@ function RangeDataManagerElem(bbox, data)
 			var trimVal = "string" === typeof(val) ? window["Asc"].trim(val) : val;
 			var trimFilterVal = "string" === typeof(filterVal) ? window["Asc"].trim(filterVal) : filterVal;
 
-
 			var matchingValues = function (_val1, _val2, op) {
 				_val1 = _val1 + "";
 				_val2 = _val2 + "";
@@ -11676,7 +11652,6 @@ function RangeDataManagerElem(bbox, data)
 		referenceValues[Asc.c_oAscDynamicAutoFilter.yearToDate] = [44927, 45050];
 		referenceValues[Asc.c_oAscDynamicAutoFilter.yesterday] = [45048, 45049];
 
-
 		let _calcDateInterval = function (_diff) {
 			let today = new cDate().getCurrentDate();
 			let start, end;
@@ -11837,7 +11812,6 @@ function RangeDataManagerElem(bbox, data)
 		/*if (val != undefined && referenceValues[this.Type] && (val !== referenceValues[this.Type][0] || maxVal !== referenceValues[this.Type][1])) {
 			console.log(this.Type);
 		}*/
-
 
 		this.Val = val;
 		this.MaxVal = maxVal;
@@ -12051,7 +12025,6 @@ function RangeDataManagerElem(bbox, data)
 			this.MaxVal = reader.GetLong();
 		}
 	};
-
 
 	var g_oColorFilter = {
 		CellColor : 0,
@@ -12278,7 +12251,6 @@ function RangeDataManagerElem(bbox, data)
 			this.dxf = oDxf;
 		}
 	};
-
 
 	var g_oTop10 = {
 		FilterVal : 0,
@@ -12511,7 +12483,6 @@ function RangeDataManagerElem(bbox, data)
 			this.Val = reader.GetLong();
 		}
 	};
-
 
 	/** @constructor */
 	function SortCondition() {
@@ -12883,8 +12854,6 @@ function RangeDataManagerElem(bbox, data)
 		}
 	};
 
-
-
 	/** @constructor */
 	function QueryTableRefresh() {
 		this.queryTableDeletedFields = null;
@@ -12980,7 +12949,6 @@ function RangeDataManagerElem(bbox, data)
 		}
 
 	};
-
 
 	/** @constructor */
 	function QueryTableField() {
@@ -13195,7 +13163,6 @@ function RangeDataManagerElem(bbox, data)
 	CWorkbookFormulas.prototype.getCount = function() {
 		return this.all.length;
 	};
-
 
 	/** @constructor */
 	function asc_CPageMargins (ws) {
@@ -13584,7 +13551,6 @@ function RangeDataManagerElem(bbox, data)
 		res["pageMargins"]["right"] = this.pageMargins.right;
 		res["pageMargins"]["top"] = this.pageMargins.top;
 
-
 		res["pageSetup"] = {};
 		res["pageSetup"]["blackAndWhite"] = this.pageSetup.blackAndWhite;
 		res["pageSetup"]["cellComments"] = this.pageSetup.cellComments;
@@ -13827,7 +13793,6 @@ function RangeDataManagerElem(bbox, data)
 	asc_CPageOptions.prototype.asc_getPrintTitlesHeight = function () {
 		return this.printTitlesHeight;
 	};
-
 
 	function CHeaderFooter(ws) {
 		this.ws = ws;
@@ -14198,7 +14163,6 @@ function RangeDataManagerElem(bbox, data)
 		return false;
 	};
 
-
 	function CHeaderFooterData(str) {
 		this.str = str;
 		this.parser = null;
@@ -14461,7 +14425,6 @@ function RangeDataManagerElem(bbox, data)
 		this.color = val;
 	};
 
-
 	function CSortLevelInfo() {
 		this.colorsFill = null;
 		this.colorsFont = null;
@@ -14643,7 +14606,6 @@ function RangeDataManagerElem(bbox, data)
 	CFunctionInfo.prototype.asc_getActiveArgsCount = function () {
 		return this.activeArgsCount;
 	};
-
 
 	function CPrintPreviewState(wb) {
 		this.ctx = null;
@@ -14828,7 +14790,6 @@ function RangeDataManagerElem(bbox, data)
 		}
 		this.ctx.canvas.style.marginTop = topMargin + "px";
 
-
 		kF = trueZoom;
 		if (!page || page.scale !== this.printZoom) {
 			this.printZoom = page ? page.scale : 1;
@@ -14909,7 +14870,6 @@ function RangeDataManagerElem(bbox, data)
 			return advancedOptions.pageOptionsMap[activeSheet] && advancedOptions.pageOptionsMap[activeSheet].pageSetup;
 		}
 	};
-
 
 	function CT_Connection() {
 		this.dbPr = null;//CT_DbPr
@@ -15014,7 +14974,6 @@ function RangeDataManagerElem(bbox, data)
 	OleSizeSelectionRange.prototype.updateUndoRedoChanged = function () {
 		this.api.wb.cellEditor.handlers.trigger( "updateUndoRedoChanged", this.currentHistoryIndex > 0, this.currentHistoryIndex < this.localHistory.length - 1);
 	};
-
 
 	OleSizeSelectionRange.prototype.undo = function () {
 		const ws = this.api.wb.getWorksheet();
@@ -15135,7 +15094,6 @@ function RangeDataManagerElem(bbox, data)
 		// вот так, если б это было просто путь к файлу как в MS:
 		// 	onRequestReferenceData({data:{path: "new.docx"}})
 
-
 		var res = new asc_CExternalReference();
 
 		if (this.referenceData) {
@@ -15153,7 +15111,6 @@ function RangeDataManagerElem(bbox, data)
 
 		return res;
 	};
-
 
 	ExternalReferenceBase.prototype.setReferenceData = function (fileId, portalName) {
 		if (!fileId || !portalName) {
@@ -15745,7 +15702,6 @@ function RangeDataManagerElem(bbox, data)
 		this.initWorksheetFromSheetDataSet(sheetName);
 	};
 
-
 	ExternalReference.prototype.initWorksheetsFromSheetDataSet = function () {
 		if (this.SheetNames) {
 			for (var i = 0; i < this.SheetNames.length; i++) {
@@ -16108,7 +16064,6 @@ function RangeDataManagerElem(bbox, data)
 		return this.externalReference && this.externalReference.Id;
 	};
 
-
 	function ExternalSheetDataSet() {
 		this.SheetId = null;
 		this.RefreshError = null;
@@ -16294,8 +16249,6 @@ function RangeDataManagerElem(bbox, data)
 		return row;
 	};
 
-
-
 	function ExternalRow() {
 		this.R = null;
 		this.Cell = [];
@@ -16367,7 +16320,6 @@ function RangeDataManagerElem(bbox, data)
 
 		return cell;
 	};
-
 
 	function ExternalCell() {
 		this.Ref = null;//храним в строке, в будущем перевести в row/col
@@ -16443,7 +16395,6 @@ function RangeDataManagerElem(bbox, data)
 				isChanged = true;
 				this.CellValue = newVal;
 			}
-
 
 			var cellValueType = null;
 			switch (cellType) {
@@ -16837,7 +16788,6 @@ function RangeDataManagerElem(bbox, data)
 		});
 	};
 
-
 	function CBreak(/*ws*/) {
 		this.id = null;
 		this.min = null;
@@ -16929,7 +16879,6 @@ function RangeDataManagerElem(bbox, data)
 		}
 		return isChanged ? this : null;
 	};
-
 
 	/**
 	 * Class representing a Series settings for fills data of context menu and dialog window - "Series"
@@ -17637,7 +17586,6 @@ function RangeDataManagerElem(bbox, data)
 		this.toolbarMenuAllowedProps = val;
 	};
 
-
 	function CTimeline() {
 		this.name = null;
 		this.cache = null;
@@ -17722,7 +17670,6 @@ function RangeDataManagerElem(bbox, data)
 		return false;
 	};
 
-
 	function CTimelineCachePivotTable() {
 		this.name = null;
 		this.tabId = null;
@@ -17748,7 +17695,6 @@ function RangeDataManagerElem(bbox, data)
 	CTimelineCachePivotTable.prototype.isCachePivotTable = function (sheetId, pivotName) {
 		return this.tabId === sheetId && this.name === pivotName;
 	};
-
 
 	function CTimelineState() {
 		this.name = null;
@@ -18143,7 +18089,6 @@ function RangeDataManagerElem(bbox, data)
 	CWorkbookPr.prototype.setCodeName = function (val) {
 		this.CodeName = val;
 	};
-
 
 	/**
 	 * Class representing calculation settings for UI interface
@@ -18666,9 +18611,6 @@ function RangeDataManagerElem(bbox, data)
 		this.valueMetadata.push(valueMetadataBlock);
 		return valueMetadataBlock;
 	};
-
-
-
 
 	function CFutureMetadata() {
 		this.name = null;
@@ -19621,7 +19563,6 @@ function RangeDataManagerElem(bbox, data)
 	CMetadataBlockExt.prototype.clone = function () {
 		let res = new CMetadataBlockExt();
 
-
 		res.richValueBlock = this.richValueBlock && this.richValueBlock.clone();
 		res.dynamicArrayProperties = this.dynamicArrayProperties && this.dynamicArrayProperties.clone();
 
@@ -19687,7 +19628,6 @@ function RangeDataManagerElem(bbox, data)
 		}
 	};
 
-
 	function CCustomFunctionEngine(wb) {
 		this.wb = wb;
 		this.funcsMapInfo = {};
@@ -19736,7 +19676,6 @@ function RangeDataManagerElem(bbox, data)
 			return;
 		}
 
-
 		//prefix add for separate main function from custom function
 		//!!!_xldudf
 		funcName = this.prefixName + funcName;
@@ -19756,7 +19695,6 @@ function RangeDataManagerElem(bbox, data)
 		let argumentsType = [];
 		let argumentsMin = 0;
 		let argumentsMax = argsInfo ? argsInfo.length : 0;
-
 
 		let argsFuncLength = func.length;
 		if (argsFuncLength > argumentsMax) {
@@ -19856,7 +19794,6 @@ function RangeDataManagerElem(bbox, data)
 						oContext["args"][i] = {"address": _address};
 					}
 
-
 					if (!arg[i] && !defaultValue) {
 						continue;
 					}
@@ -19876,7 +19813,6 @@ function RangeDataManagerElem(bbox, data)
 						args.push(elem);
 					}
 				}
-
 
 				let res = func.apply(oContext, args);
 
@@ -20071,7 +20007,6 @@ function RangeDataManagerElem(bbox, data)
 			if (!this.localiztionMap[i].localNameToFullName) {
 				this.localiztionMap[i].localNameToFullName = {};
 			}
-
 
 			this.localiztionMap[i].fullNameToLocalName[funcName] = (translations[i] + "").toUpperCase();
 			this.localiztionMap[i].localNameToFullName[translations[i]] = funcName;
@@ -20316,7 +20251,6 @@ function RangeDataManagerElem(bbox, data)
 				break;
 			default:
 				res = new AscCommonExcel.cError(AscCommonExcel.cErrorType.wrong_value_type);
-
 
 		}
 		return res;
@@ -21459,7 +21393,6 @@ function RangeDataManagerElem(bbox, data)
 		reader.Seek(end);
 	};
 
-
 	// RichValue Types
 	function CRichValueTypeReservedKeyFlag() {
 		this.value = null;
@@ -22009,7 +21942,6 @@ function RangeDataManagerElem(bbox, data)
 		}
 	};
 
-
 	//----------------------------------------------------------export----------------------------------------------------
 	var prot;
 	window['Asc'] = window['Asc'] || {};
@@ -22133,7 +22065,6 @@ function RangeDataManagerElem(bbox, data)
 	prot["asc_setBorder"] = prot.asc_setBorder;
 	prot["asc_setNumFormatInfo"] = prot.asc_setNumFormatInfo;
 
-
 	window['AscCommonExcel'].Align = Align;
 	window['AscCommonExcel'].CCellStyles = CCellStyles;
 	window['AscCommonExcel'].CCellStyle = CCellStyle;
@@ -22221,7 +22152,6 @@ function RangeDataManagerElem(bbox, data)
 	window['AscCommonExcel'].c_oAscPatternType = c_oAscPatternType;
 
 	window['AscCommonExcel'].OleSizeSelectionRange = OleSizeSelectionRange;
-
 
 	window["Asc"]["CustomFilters"]			= window["Asc"].CustomFilters = CustomFilters;
 	prot									= CustomFilters.prototype;
@@ -22317,7 +22247,6 @@ function RangeDataManagerElem(bbox, data)
 	prot["asc_setHorizontalCentered"] = prot.asc_setHorizontalCentered;
 	prot["asc_setVerticalCentered"] = prot.asc_setVerticalCentered;
 
-
 	window["Asc"]["CHeaderFooter"] = window["Asc"].CHeaderFooter = CHeaderFooter;
 	window["Asc"]["CHeaderFooterData"] = window["Asc"].CHeaderFooterData = CHeaderFooterData;
 
@@ -22385,7 +22314,6 @@ function RangeDataManagerElem(bbox, data)
 	prot["asc_getActiveArgPos"] = prot.asc_getActiveArgPos;
 	prot["asc_getActiveArgsCount"] = prot.asc_getActiveArgsCount
 
-
 	window["Asc"]["asc_CExternalReference"] = window["Asc"].asc_CExternalReference = asc_CExternalReference;
 	prot = asc_CExternalReference.prototype;
 	prot["asc_getType"] = prot.asc_getType;
@@ -22396,8 +22324,6 @@ function RangeDataManagerElem(bbox, data)
 	prot["asc_getPath"] = prot.asc_getPath;
 	prot["asc_getLink"] = prot.asc_getLink;
 
-
-
 	window["AscCommonExcel"].CPrintPreviewState = CPrintPreviewState;
 
 	window["AscCommonExcel"].FromXml_ST_PatternType         = FromXml_ST_PatternType;
@@ -22405,7 +22331,6 @@ function RangeDataManagerElem(bbox, data)
 	window["AscCommonExcel"].ToXml_ST_PatternType           = ToXml_ST_PatternType;
 	window["AscCommonExcel"].FromXml_ST_BorderStyle         = FromXml_ST_BorderStyle;
 	window["AscCommonExcel"].ToXml_ST_BorderStyle           = ToXml_ST_BorderStyle;
-
 
 	window["AscCommonExcel"].CT_Connection = CT_Connection;
 	window["AscCommonExcel"].CT_Filter = CT_Filter;
@@ -22522,7 +22447,6 @@ function RangeDataManagerElem(bbox, data)
 	prot["asc_setContextMenuChosenProperty"] = prot.asc_setContextMenuChosenProperty;
 	prot["asc_setToolbarMenuAllowedProps"] = prot.asc_setToolbarMenuAllowedProps;
 
-
 	window["AscCommonExcel"].CTimeline = CTimeline;
 	window["AscCommonExcel"].CTimelineCacheDefinition = CTimelineCacheDefinition;
 	window["AscCommonExcel"].CTimelineCachePivotTable = CTimelineCachePivotTable;
@@ -22575,7 +22499,6 @@ function RangeDataManagerElem(bbox, data)
 	prot = CCustomFunctionArgInfo.prototype;
 	prot["asc_getName"] = prot.asc_getName;
 	prot["asc_getIsOptional"] = prot.asc_getIsOptional;
-
 
 	window["AscCommonExcel"].CWorkbookInfo = CWorkbookInfo;
 	prot = CWorkbookInfo.prototype;

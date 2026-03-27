@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -1361,7 +1356,6 @@
         TimelineStyleElementType : 5,
         TimelineStyleElementDxfId : 6
     };
-
 
 	var c_oSer_Metadata =
 	{
@@ -4437,7 +4431,6 @@
 			}
 		};
 
-
 		//****write metadata****
 		this.WriteMetadata = function (pMetadata) {
 			if (!pMetadata) {
@@ -5344,7 +5337,6 @@
             this.bs.WriteItem(c_oSerWorksheetsTypes.Hyperlinks, function(){oThis.WriteHyperlinks(ws);});
 
             this.bs.WriteItem(c_oSerWorksheetsTypes.MergeCells, function(){oThis.WriteMergeCells(ws);});
-
 
             if (ws.Drawings && ws.Drawings.length) {
 							const arrControls = [];
@@ -9724,10 +9716,6 @@
             else if (c_oSerWorkbookTypes.XmlMap === type) {
                 //this.stream.Skip(1); //skip type
 
-
-
-
-
                 /*LONG end = pReader->GetPos() + pReader->GetRecordSize() + 4;
 
                 while (pReader->GetPos() < end)
@@ -11027,7 +11015,6 @@
 					sharedStringIndexMap: sharedStringIndexMap
 				};
 
-
                 res = this.bcr.Read1(sheetDataElem.len, function(t, l) {
                     return oThis.ReadSheetData(t, l, tmp);
                 });
@@ -11087,7 +11074,6 @@
 				if(typeof editor != "undefined" && editor && editor.WordControl && editor.WordControl.m_oLogicDocument && editor.WordControl.m_oLogicDocument.DrawingDocument) {
                    this.wb.DrawingDocument = editor.WordControl.m_oLogicDocument.DrawingDocument;
                 }
-
 
                 this.curWorksheet = oNewWorksheet;
                 res = this.bcr.Read1(length, function(t,l){
@@ -13878,12 +13864,8 @@
                     aSeekTable.push( {type: mtiType, offset: mtiOffBits} );
             }
 
-
-
-
             var aCellXfs = [];
             var oMediaArray = {};
-
 
             //****TODO Не нахожу в файле****
             wb.aWorksheets = [];
@@ -13896,9 +13878,6 @@
 
             this.InitOpenManager.initSchemeAndTheme(wb);
             //****TODO Не нахожу в файле****
-
-
-
 
             if(null != nSharedStringTableOffset)
             {
@@ -13924,7 +13903,6 @@
                 }
             }
 
-
             var personList = {};
             if(null != nPersonListTableOffset)
             {
@@ -13933,12 +13911,6 @@
                     res = new BinaryPersonReader(this.stream, personList).Read();
             }
 
-
-
-
-
-
-
 			var bwtr = new Binary_WorksheetTableReader(this.stream, this.InitOpenManager, wb, aCellXfs, oMediaArray, personList);
 			if(null != nWorkbookTableOffset)
 			{
@@ -13946,9 +13918,6 @@
 				if(c_oSerConstants.ReadOk == res)
 					res = (new Binary_WorkbookTableReader(this.stream, this.InitOpenManager, wb, bwtr)).Read();
 			}
-
-
-
 
             if(c_oSerConstants.ReadOk == res)
             {
@@ -15579,7 +15548,6 @@
             }
         }, oThis.isCopyPaste);
 
-
         //prepare defnames
         var defNameList = this.wb.dependencyFormulas.saveDefName(this.isCopyPaste === false);
         var filterDefName = "_xlnm._FilterDatabase";
@@ -16291,7 +16259,6 @@
     prot['notView'] = prot.notView;
     prot['view'] = prot.view;
     prot['edit'] = prot.edit;
-
 
     window['Asc']['EUpdateLinksType'] = window['Asc'].EUpdateLinksType = EUpdateLinksType;
     prot = EUpdateLinksType;

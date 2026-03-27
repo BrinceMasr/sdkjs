@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -100,7 +95,6 @@ CShape.prototype.getDrawingDocument = function()
     return editor.WordControl.m_oDrawingDocument;
 };
 
-
 CShape.prototype.getTextArtPreviewManager = function()
 {
     return editor.textArtPreviewManager;
@@ -110,7 +104,6 @@ CShape.prototype.recalcBrush = function()
 {
     this.recalcInfo.recalculateBrush = true;
 };
-
 
 CShape.prototype.recalcPen = function()
 {
@@ -299,7 +292,6 @@ CShape.prototype.getParentObjects = function ()
     return {slide: null, layout: null, master: null, theme: oTheme};
 };
 
-
 CShape.prototype.recalculateTxBoxContent = function()
 {
     if(this.textBoxContent === null || this.textBoxContent.Parent !== this)
@@ -339,8 +331,6 @@ CShape.prototype.recalculateTxBoxContent = function()
     }
     return oRecalcObj;
 };
-
-
 
 CShape.prototype.recalculatePresentation = function ()
 {
@@ -635,7 +625,6 @@ CShape.prototype.recalculateContent = function()
             this.recalcInfo.bRecalculatedTitle = true;
             this.recalcInfo.recalcTitle = null;
 
-
             var oTextWarpContent = this.checkTextWarp(content, body_pr, oRecalcObject.textRectW + oRecalcObject.correctW, oRecalcObject.textRectH + oRecalcObject.correctH, true, false);
             this.txWarpStructParamarks = oTextWarpContent.oTxWarpStructParamarksNoTransform;
             this.txWarpStruct = oTextWarpContent.oTxWarpStructNoTransform;
@@ -670,8 +659,6 @@ CShape.prototype.recalculateTransform =  function()
 {
     this.recalculateLocalTransform(this.localTransform);
 };
-
-
 
 CShape.prototype.updatePosition = function(x, y)
 {
@@ -712,8 +699,6 @@ CShape.prototype.getArrayWrapIntervals = function(x0,y0, x1, y1, Y0Sp, Y1Sp, Lef
 {
     return this.parent.getArrayWrapIntervals(x0,y0, x1, y1, Y0Sp, Y1Sp, LeftField, RightField, arr_intervals, bMathWrap);
 };
-
-
 
 CShape.prototype.applyParentTransform = function(transform)
 {
@@ -1030,7 +1015,6 @@ CShape.prototype.OnContentReDraw = function()
 
 };
 
-
 CShape.prototype.documentStatistics = function(stats)
 {
     var content = this.getDocContent();
@@ -1093,7 +1077,6 @@ CShape.prototype.getNearestPos = function(x, y, pageIndex, drawing)
     return null;
 };
 
-
 CShape.prototype.cursorGetPos = function()
 {
     var content = this.getDocContent();
@@ -1108,7 +1091,6 @@ CShape.prototype.cursorGetPos = function()
     return {X: 0, Y: 0};
 };
 
-
 CShape.prototype.cursorMoveAt = function( X, Y, AddToSelect )
 {
     var content = this.getDocContent();
@@ -1119,7 +1101,6 @@ CShape.prototype.cursorMoveAt = function( X, Y, AddToSelect )
         content.MoveCursorToXY(t_x, t_y, AddToSelect, undefined, AscFormat.isRealNumber(this.selectStartPage) ? this.selectStartPage : 0);
     }
 };
-
 
 CShape.prototype.Get_Styles = function(level)
 {
@@ -1249,7 +1230,6 @@ CShape.prototype.setRecalcObject =  function(object)
     }
 };
 
-
 CShape.prototype.setStartPage = function(pageIndex, bNoResetSelectPage, bCheckContent)
 {
     if(!(bNoResetSelectPage === true))
@@ -1306,7 +1286,6 @@ CShape.prototype.getStyles = function(level)
     return this.Get_Styles(level);
 };
 
-
 CShape.prototype.getDrawingObjectsController = function()
 {
     var oLogicDoc = this.getLogicDocument();
@@ -1316,7 +1295,6 @@ CShape.prototype.getDrawingObjectsController = function()
     }
     return null;
 };
-
 
 AscFormat.CTextBody.prototype.checkCurrentPlaceholder = function()
 {

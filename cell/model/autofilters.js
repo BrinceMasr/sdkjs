@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -90,7 +85,6 @@
 			this.dateTimeGrouping = null;
 
 			this.repeats = 1;
-
 
 			this.hiddenByOtherColumns = undefined;
 		}
@@ -441,7 +435,6 @@
 			asc_setVisibleDropDown: function (val) {
 				this.visibleDropDown = val;
 			},
-
 
 			asc_getCellId: function () {
 				return this.cellId;
@@ -906,7 +899,6 @@
 							}
 						}
 
-
 						//add to model
 						var newFilter = t._addNewFilter(filterRange, styleName, bWithoutFilter, displayName,
 							tablePart, offset);
@@ -1005,7 +997,6 @@
 					filterRange = isTablePartsContainsRange.Ref.clone();
 				}
 
-
 				var addFilterCallBack = function () {
 					History.Create_NewPoint();
 					History.StartTransaction();
@@ -1079,7 +1070,6 @@
 					}
 				}
 
-
 				worksheet.workbook.dependencyFormulas.lockRecal();
 
 				//if apply a/f from context menu
@@ -1130,7 +1120,6 @@
 					};
 				}
 
-
 				//change model
 				if (!autoFilter) {
 					autoFilter = filterObj.filter.addAutoFilter();
@@ -1173,7 +1162,6 @@
 						newFilterColumn.ColId = filterObj.ColId;
 					}
 				}
-
 
 				filterRange = worksheet.getRange3(autoFilter.Ref.r1 + 1, filterObj.ColId + autoFilter.Ref.c1, autoFilter.Ref.r2, filterObj.ColId + autoFilter.Ref.c1);
 				autoFiltersObject = tryConvertFilter ? this._tryConvertCustomFilter(autoFiltersObject, filterRange) : autoFiltersObject;
@@ -1422,7 +1410,6 @@
 				History.Create_NewPoint();
 				History.StartTransaction();
 
-
 				//open/close rows
 				if ((!bUndoChanges && !bRedoChanges) || ignoreUndoRedo) {
 					var activeNamedSheetView = worksheet.getActiveNamedSheetViewId();
@@ -1617,7 +1604,6 @@
 
 				return res;
 			},
-
 
 			// Redo
 			Redo: function (type, data) {
@@ -2025,7 +2011,6 @@
 				}
 			},
 
-
 			//if active range contains in tablePart but not equal this active range
 			isTablePartContainActiveRange: function (activeRange) {
 				var worksheet = this.worksheet;
@@ -2225,7 +2210,6 @@
 					}
 				};
 
-
 				//change autoFilter
 				if (worksheet.AutoFilter) {
 					changeFilter(worksheet.AutoFilter);
@@ -2276,7 +2260,6 @@
 					//change TableParts
 					changeFilter(tablePart);
 				}
-
 
 				return redrawTablesArr;
 			},
@@ -2463,7 +2446,6 @@
 					History.EndTransaction();
 				};
 
-
 				var onSortColorAutoFilterCallback = function (type) {
 					History.Create_NewPoint();
 					History.StartTransaction();
@@ -2540,7 +2522,6 @@
 					displayName = undefined;
 					isCellIdString = true;
 				}
-
 
 				curFilter = this._getFilterByDisplayName(displayName);
 				if (null !== curFilter) {
@@ -2851,7 +2832,6 @@
 						moveFilter.FilterColumns = cloneFilterColumns(data[i].FilterColumns);
 					}
 
-
 					if (oCurFilter[i].TableStyleInfo && oCurFilter[i] && moveFilter) {
 						t._cleanStyleTable(oCurFilter[i].Ref);
 						t._setColorStyleTable(moveFilter.Ref, moveFilter);
@@ -3140,7 +3120,6 @@
 						}
 					}
 
-
 					//если данный фильтр находится внизу, то ошибка
 					if ((InsertCellsAndShiftDown || DeleteCellsAndShiftTop) && tableRange.r1 > activeCells.r1 && (((tableRange.c1 <= activeCells.c1 && tableRange.c2 >= activeCells.c1) || (tableRange.c1 <= activeCells.c2 && tableRange.c2 >= activeCells.c2)) && !(tableRange.c1 >= activeCells.c1 && tableRange.c2 <= activeCells.c2))) {
 						worksheet.workbook.handlers.trigger("asc_onError", c_oAscError.ID.AutoFilterChangeFormatTableError, c_oAscError.Level.NoCritical);
@@ -3397,7 +3376,6 @@
 				tablePart.changeDisplayName(newName);
 				worksheet.changeTableName(oldFilter.DisplayName, newName);
 
-
 				this._addHistoryObj({
 					oldFilter: oldFilter,
 					newFilterRef: tablePart.Ref.clone(),
@@ -3562,7 +3540,6 @@
 					}
 				}
 
-
 				return {filter: filter, index: index, activeRange: activeRange, ColId: ColId, startColId: startColId};
 			},
 
@@ -3691,7 +3668,6 @@
 
 						var ref = filter.Ref;
 						var tableRange = new Asc.Range(ref.c1, ref.r1, ref.c2, ref.r1);
-
 
 						//в этом случае нашли ячейки(ячейку), которая входит в состав заголовка фильтра
 						var intersection = range.intersection(tableRange);
@@ -3824,7 +3800,6 @@
 						}
 						var _formula = tableColumn.getTotalRowFormula(tablePart, true);
 						newFormulas.push(_formula ? "=" + _formula : "");
-
 
 						this._addHistoryObj({
 							nCol: cell.bbox.c1,
@@ -3994,7 +3969,6 @@
 					};
 				}
 
-
 				//проверяем есть ли пустые строчки и столбцы в диапазоне
 				if (ar.r1 === cloneActiveRange.r1) {
 					for (var n = cloneActiveRange.c1; n <= cloneActiveRange.c2; n++) {
@@ -4106,7 +4080,6 @@
 
 					cloneActiveRange = newRange;
 				}
-
 
 				if (cloneActiveRange) {
 					return cloneActiveRange;
@@ -4717,7 +4690,6 @@
 					doExpand();
 				}
 
-
 				if (checkLastEmpty) {
 					let _cropRange = this.checkEmptyAreas(range, rangeAfterTableCrop);
 					if (_cropRange.r2 !== range.r2 || _cropRange.c2 !== range.c2) {
@@ -4903,7 +4875,6 @@
 
 						this.worksheet.workbook.editDefinesNames(oldDefName, newDefName);*/
 
-
 						newFilter.Ref = ref;
 						worksheet.AutoFilter = newFilter;
 					}
@@ -4928,7 +4899,6 @@
 
 					newFilter = worksheet.createTablePart();
 					newFilter.Ref = ref;
-
 
 					newFilter.TableStyleInfo = new AscCommonExcel.TableStyleInfo();
 					newFilter.TableStyleInfo.Name = style;
@@ -5115,7 +5085,6 @@
 						continue;
 					}
 
-
 					//not apply filter by current button
 					if (fullValues && null === currentFilterColumn && worksheet.getRowHidden(i) === true) {
 						if (textIndexMapHideValues.hasOwnProperty(textLowerCase)) {
@@ -5213,7 +5182,6 @@
 						_values = _values.concat(this._sortArrayMinMax(_hideValues, isAscending));
 					}
 				}
-
 
 				return {
 					values: _values,
@@ -6627,7 +6595,6 @@
 										rangeMe = AscCommonExcel.g_oRangeCache.getAscRange(cellIdMe).clone();
 									});
 
-
 									var colMe = _setOffset(rangeMe.c1, this.applyCollaborativeChangedColumnsArr, true);
 									var colOther = rangeOther.c1;
 									var rowMe = _setOffset(rangeMe.r1, this.applyCollaborativeChangedRowsArr);
@@ -6836,7 +6803,6 @@
 		prot["asc_getSheetColumnName"] = prot.asc_getSheetColumnName;
 		prot["asc_getTimeFormat"] = prot.asc_getTimeFormat;
 
-
 		window["Asc"]["AutoFilterObj"] = window["Asc"].AutoFilterObj = AutoFilterObj;
 		prot = AutoFilterObj.prototype;
 		prot["asc_getType"] = prot.asc_getType;
@@ -6887,7 +6853,6 @@
 		prot["asc_setMinute"] = prot.asc_setMinute;
 		prot["asc_setSecond"] = prot.asc_setSecond;
 		prot["asc_setDateTimeGrouping"] = prot.asc_setDateTimeGrouping;
-
 
 		window["AscCommonExcel"].AddFormatTableOptions = AddFormatTableOptions;
 		prot = AddFormatTableOptions.prototype;

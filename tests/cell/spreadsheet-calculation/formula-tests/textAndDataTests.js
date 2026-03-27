@@ -12,24 +12,18 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
-
 
 $(function () {
 	// Mocks for API Testing
@@ -116,7 +110,6 @@ $(function () {
 			this.isLoadFullApi = true;
 		};
 
-
 		let api = new Asc.spreadsheet_api({
 			'id-view': 'editor_sdk'
 		});
@@ -128,7 +121,6 @@ $(function () {
 		let docInfo = new Asc.asc_CDocInfo();
 		docInfo.asc_putTitle("TeSt.xlsx");
 		api.DocInfo = docInfo;
-
 
 		window["Asc"]["editor"] = api;
 		AscCommon.g_oTableId.init(api);
@@ -186,7 +178,6 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-
 		oParser = new parserFormula(func + "(A100:C101)", "A1", ws);
 		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
 		assert.ok(oParser.parse(), 'Formula is parsed.');
@@ -230,7 +221,6 @@ $(function () {
 			assert.ok(oParser.parse(), 'Test: Formula ' + func + argStr + ' is parsed.');
 			return oParser.calculate().getValue();
 		};
-
 
 		//***array-formula***
 		ws.getRange2("A100").setValue("1");
@@ -346,7 +336,6 @@ $(function () {
 			}
 		}
 	}
-
 
 	/**
 	 * Function creates table or edit existed table.
@@ -1621,7 +1610,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula CLEAN("") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '', 'Test: Bounded case: String. Empty string input. Returns an empty string.');
 
-
 		testArrayFormula(assert, "CLEAN");
 	});
 
@@ -2119,7 +2107,6 @@ $(function () {
 		// DefNames 3D. Use A11-A18, B18
 		ws2.getRange2("A11").setValue("Hello") // TestName3D
 		ws2.getRange2("A12").setValue("world") // TestName3D1
-
 
 		// Positive cases:
 
@@ -3229,7 +3216,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: FIND("A"&REPT("Z",32766),"A"&REPT("Z",32766),1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: String. Maximum find_text and within_text length (32,767 characters). Returns 1.');
 
-
 		testArrayFormula2(assert, "FIND", 2, 3);
 	});
 
@@ -3290,7 +3276,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String. Case-sensitive match, start_num skips first 7 characters. Returns 9.
@@ -3494,7 +3479,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: FINDB("A"&REPT("Z",32766),"A"&REPT("Z",32766),1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: String. Maximum find_text and within_text length (32,767 characters). Returns 1.');
 
-
 	});
 
 	QUnit.test("Test: \"FIXED\"", function (assert) {
@@ -3548,7 +3532,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Basic valid input: number with 2 decimals, commas included. 2 of 3 arguments used.
@@ -3756,7 +3739,6 @@ $(function () {
 		// Case #3: Number. Maximum 15 significant digits. 2 of 3 arguments used. - diff res
 		// Case #4: Number. Maximum decimals (127). 2 of 3 arguments used.
 
-
 		testArrayFormula2(assert, "FIXED", 2, 3);
 	});
 
@@ -3764,7 +3746,6 @@ $(function () {
 
 		ws.getRange2("A2").setValue("Sale Price");
 		ws.getRange2("A3").setValue("Sweden");
-
 
 		oParser = new parserFormula("LEFT(A2,4)", "A2", ws);
 		assert.ok(oParser.parse());
@@ -3906,7 +3887,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: LEFT(REPT("X",32767),32767) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), longStr, 'Test: Bounded case: Large String, Number.');
 
-
 		testArrayFormula2(assert, "LEFT", 1, 2);
 	});
 
@@ -3945,7 +3925,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String, Number. Basic string with valid byte count. 2 arguments used.
@@ -4298,7 +4277,6 @@ $(function () {
 		// Case #3: Area. Multi-cell range returns error
 		// Case #3: Number. Max Excel number converted to string - different result
 
-
 		testArrayFormula2(assert, "LEN", 1, 1);
 	});
 
@@ -4338,7 +4316,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String. Basic valid input: ASCII string, returns byte count (3 bytes in SBCS, 3 bytes in DBCS). 1 argument used.
@@ -4540,7 +4517,6 @@ $(function () {
 		// Case #8: Name3D. 3D named range with multi-cell area, returns #VALUE! error. 1 argument used.
 		// Case #16: Time. Invalid time value, propagates #NUM! error. 1 argument used.
 		// Case #4: Number. Maximum Excel number converted to string, returns byte count (e.g., 22 bytes in SBCS). 1 argument used.
-
 
 		testArrayFormula2(assert, "LEN", 1, 1);
 	});
@@ -4859,7 +4835,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: MID(TRUE,1,2) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 'TR', 'Test: Negative case: Boolean, Number, Number. Boolean as text. 3 arguments used.');
 
-
 		// Need to fix: empty, array and error check
 		// Case #8: Array, Number, Number. Text as array
 		// Case #14: String, Empty, Number. Empty start position
@@ -4921,7 +4896,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String, Number, Number. Basic valid input. All 3 arguments used.
@@ -5089,7 +5063,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #0: String. Basic text string with dot decimal separator. 1 of 3 arguments used.
@@ -5281,7 +5254,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: NUMBERVALUE(A103) is parsed.');
 		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Reference link. Reference to maximum valid number string. 1 of 3 arguments used.');
 
-
 		// Need to fix: area/area3D handle, String handle, error types diff, empty should be zero
 		// Case #1: String, String. Text with comma decimal separator specified. 2 of 3 arguments used.
 		// Case #17: String. Scientific notation string. 1 of 3 arguments used.
@@ -5347,7 +5319,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String. Basic string input with mixed case. 1 argument used.
@@ -5522,7 +5493,6 @@ $(function () {
 		// Case #4: Area. Multi-cell range returns #VALUE!. 1 argument used.
 		// Case #12: Area3D. 3D multi-cell range returns #VALUE!. 1 argument used.
 		// Case #13: Name. Named range with area returns #VALUE!. 1 argument used.
-
 
 		testArrayFormula2(assert, "PROPER", 1, 1);
 	});
@@ -5789,7 +5759,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String, Number(2), String. Basic valid input: string, positive integers, and replacement string. 4 of 4 arguments used.
@@ -6209,7 +6178,6 @@ $(function () {
 		// Case #12: Table, Number. Table column with non-text value, returns #VALUE!. 2 of 2 arguments used.
 		// Case #18: String, Number. Excessively large number_times, returns #VALUE!. 2 of 2 arguments used.
 
-
 		testArrayFormula2(assert, "REPT", 2, 2);
 	});
 
@@ -6261,7 +6229,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String, Number. Basic valid input: string and integer num_chars. 2 of 2 arguments used.
@@ -6667,7 +6634,6 @@ $(function () {
 		// Need to fix:
 		// Case #5: Area, Number. Multi-cell range returns #VALUE!. 2 arguments used.
 
-
 		testArrayFormula2(assert, "LEN", 1, 1);
 	});
 
@@ -6908,7 +6874,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: REGEXTEST("abc","[a-z]{2,}") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Negative case: String, String, Number. Quantifier when m is empty cause result');
 
-
 		// Bounded cases:
 		// Case #1: String, String. Very long string and exact pattern (near Excel limit)
 		oParser = new parserFormula('REGEXTEST(REPT("a",10000),"^a{10000}$")', 'A2', ws);
@@ -6926,8 +6891,6 @@ $(function () {
 		oParser = new parserFormula('REGEXTEST("© Excel 2025","\\\\u00A9")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: REGEXTEST("© Excel 2025","\\\\u00A9") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Bounded case: String, String. Unicode escape sequence (PCRE2 supports \u00A9)');
-
-
 
 		// testArrayFormula2(assert, "REGEXTEST", 1, 1);
 	});
@@ -7253,7 +7216,6 @@ $(function () {
 		// Need to fix: pcre2 quantificators errror
 		// Case #27: String, String, Number. Possessive quantifier
 
-
 		// testArrayFormula2(assert, "REGEXEXTRACT", 1, 1);
 	});
 
@@ -7578,7 +7540,6 @@ $(function () {
 		// Case #29: String, String, String. Invalid backreference ? treats as literal or error - excel special symbols
 		// Case #10: String, String, String. Near max captures/backrefs
 
-
 		// testArrayFormula2(assert, "REGEXREPLACE", 1, 1);
 	});
 
@@ -7748,7 +7709,6 @@ $(function () {
 		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 1, 'Result of SEARCH({"*vmwtst*","hcd*tst","*vmctst*"}, A1:A2)[0,1]');
 		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 1, 'Result of SEARCH({"*vmwtst*","hcd*tst","*vmctst*"}, A1:A2)[0,2]');
 
-
 		bbox = ws.getRange2("D1:F2").bbox;
 		cellWithFormula = new window['AscCommonExcel'].CCellWithFormula(ws, bbox.r1, bbox.c1);
 		oParser = new parserFormula('SEARCH({"*vmwtst*","hcd*tst","*vmctst*"}, A1:B2)', cellWithFormula, ws);
@@ -7826,7 +7786,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String(2). Basic string input, finds "a" in "abc". Returns 1. 2 of 3 arguments used.
@@ -8064,7 +8023,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: String(2). Basic string input, finds "a" in "abc". Returns 1. 2 of 3 arguments used.
 		oParser = new parserFormula('SEARCHB("a","abc")', 'A2', ws);
@@ -8260,7 +8218,6 @@ $(function () {
 		// Need to fix: area handle, result diff in boundary case
 		// Case #6: Area(2). Single-cell range for both arguments. Returns 1. 2 of 3 arguments used.
 		// Case #4: String(2). Max string length for both arguments. Returns 1. 2 of 3 arguments used.
-
 
 	});
 
@@ -9504,7 +9461,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number, String. Basic valid input: number and format string. 2 of 2 arguments used.
 		oParser = new parserFormula('TEXT(123.45,"0.00")', 'A2', ws);
@@ -9739,7 +9695,6 @@ $(function () {
 		ws.getRange2("C9").setValue(",");
 		ws.getRange2("D9").setValue(";");
 
-
 		oParser = new parserFormula("TEXTJOIN(A9:D9, TRUE, A2:D7)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "Tulsa,OK,74133,US;Seattle,WA,98109,US;Iselin,NJ,8830,US;Fort Lauderdale,FL,33309,US;Tempe,AZ,85285,US;end");
@@ -9761,7 +9716,6 @@ $(function () {
 		testArrayFormulaEqualsValues(assert,
 			"113.1233.123-4-4224455113.1233.123-4-4224455113.1233.123-4-4224455113.1233.123-4-422445,113.1233.123-4-4224455113.1233.123-4-4224455113.1233.123-4-4224455113.1233.123-4-422445,113.1233.123-4-4224455113.1233.123-4-4224455113.1233.123-4-4224455113.1233.123-4-422445,113.1233.123-4-4224455113.1233.123-4-4224455113.1233.123-4-4224455113.1233.123-4-422445;113.1233.123-4-4224455113.1233.123-4-4224455113.1233.123-4-4224455113.1233.123-4-422445,113.1233.123-4-4224455113.1233.123-4-4224455113.1233.123-4-4224455113.1233.123-4-422445,113.1233.123-4-4224455113.1233.123-4-4224455113.1233.123-4-4224455113.1233.123-4-422445,113.1233.123-4-4224455113.1233.123-4-4224455113.1233.123-4-4224455113.1233.123-4-422445;#N/A,#N/A,#N/A,#N/A",
 			"TEXTJOIN(A1:C2,A1:A2,A1:C2,A1:C2,A1:C2,A1:C2)");
-
 
 		ws.getRange2("A1:C214").cleanAll();
 		// Data for reference link. Use A100-A111
@@ -9802,7 +9756,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String, Boolean, String. Basic string concatenation with comma delimiter, ignore_empty TRUE. 3 arguments used.
@@ -9990,7 +9943,6 @@ $(function () {
 		// Case #6: String, String, String. Non-boolean string for ignore_empty returns #VALUE!. 3 arguments used. - critical
 		// Case #9: Name, Boolean, String. Named range with area returns #VALUE!. 3 arguments used.
 
-
 	});
 
 	QUnit.test("Test: \"TEXTBEFORE\"", function (assert) {
@@ -10022,7 +9974,6 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#N/A");
 
-
 		oParser = new parserFormula("TEXTBEFORE(B2;B3;1;TRUE)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "");
@@ -10050,7 +10001,6 @@ $(function () {
 		oParser = new parserFormula("TEXTBEFORE(B2;B3;0, TRUE)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-
 
 		oParser = new parserFormula("TEXTBEFORE(B2;B3;-1)", "A1", ws);
 		assert.ok(oParser.parse());
@@ -10088,7 +10038,6 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "");
 
-
 		ws.getRange2("B2").setValue("12test434TESTtest233");
 		ws.getRange2("B3").setValue("TEST");
 
@@ -10116,7 +10065,6 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "error");
 
-
 		oParser = new parserFormula("TEXTBEFORE(B2;B3;-1;TRUE;TRUE;\"error\")", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "12test434TEST");
@@ -10136,7 +10084,6 @@ $(function () {
 		oParser = new parserFormula("TEXTBEFORE(B2;B3;-5;TRUE;TRUE;\"error\")", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "error");
-
 
 		oParser = new parserFormula("TEXTBEFORE(\"12tessdadsadtestt434TESTtest233sd\";\"TEST\";2;TRUE;TRUE;\"error\")", "A1", ws);
 		assert.ok(oParser.parse());
@@ -10187,7 +10134,6 @@ $(function () {
 		oParser = new parserFormula("TEXTBEFORE(A1,{\"i\",\"J\",\"o\",\"O\",\"m\"})", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "TRUE1Br");
-
 
 		ws.getRange2("A1").setValue("test125test2test3test4FALSEtest5");
 		ws.getRange2("B4").setValue("w");
@@ -10254,7 +10200,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String,String. Basic split: returns \'apple\'
@@ -10502,7 +10447,6 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "error");
 
-
 		oParser = new parserFormula("TEXTAFTER(C3;C6;-1;TRUE;FALSE;\"error\")", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "xt");
@@ -10677,7 +10621,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String,String. Basic string split, default instance_num=1 ? returns \'banana,pear\'
@@ -10901,7 +10844,6 @@ $(function () {
 		// Case #16: String,String. Bounded variation edge test
 		// Case #17: String,String. Bounded variation edge test
 
-
 	});
 
 	QUnit.test("Test: \"TEXTSPLIT\"", function (assert) {
@@ -10947,7 +10889,6 @@ $(function () {
 		assert.strictEqual(array.getElementRowCol(0, 9).getValue(), "");
 		assert.strictEqual(array.getElementRowCol(0, 10).getValue(), "");
 		assert.strictEqual(array.getElementRowCol(0, 11).getValue(), " test123testdel3testwDEL3test2DeL4jjjdel4rrrDEL123rrrdEl4");
-
 
 		oParser = new parserFormula("TEXTSPLIT(C3,{\"del1\",\"del2\"},\"del3\")", "A1", ws);
 		assert.ok(oParser.parse());
@@ -11007,7 +10948,6 @@ $(function () {
 		assert.strictEqual(array.getElementRowCol(4, 0).getValue(), 'test2del4jjjdel4rrr');
 		assert.strictEqual(array.getElementRowCol(4, 1).getValue(), '23rrrdel4');
 		assert.strictEqual(array.getElementRowCol(4, 2).getValue(), '#N/A');
-
 
 		oParser = new parserFormula("TEXTSPLIT(C3,{\"del2\"},{\"del3\",\"del1\"},FALSE,TRUE,\"error\")", "A1", ws);
 		assert.ok(oParser.parse());
@@ -11079,7 +11019,6 @@ $(function () {
 		assert.strictEqual(array.getElementRowCol(12, 2).getValue(), 'error');
 		assert.strictEqual(array.getElementRowCol(12, 3).getValue(), 'error');
 
-
 		oParser = new parserFormula("TEXTSPLIT(C3,{\"del2\"},{\"del3\",\"del1\"},TRUE,TRUE,\"error\")", "A1", ws);
 		assert.ok(oParser.parse());
 		array = oParser.calculate();
@@ -11145,7 +11084,6 @@ $(function () {
 		assert.strictEqual(array.getElementRowCol(6, 0).getValue(), 'testwDEL3test2DeL4jjjdel4rrrDEL123rrrdEl4');
 		assert.strictEqual(array.getElementRowCol(6, 1).getValue(), 'error');
 
-
 		oParser = new parserFormula("TEXTSPLIT(C3,,\"del\",,,)", "A1", ws);
 		assert.ok(oParser.parse());
 		array = oParser.calculate();
@@ -11186,7 +11124,6 @@ $(function () {
 		oParser = new parserFormula("TEXTSPLIT(C3:D4,\"del1\")", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "test1");
-
 
 		oParser = new parserFormula("TEXTSPLIT(C3,C5:D5,C6:D6,TRUE,,C11)", "A1", ws);
 		assert.ok(oParser.parse());
@@ -11313,7 +11250,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String, String, String, Boolean. Basic string splitting with comma column delimiter, semicolon row delimiter, ignore_empty TRUE. 4 arguments used.
@@ -11510,7 +11446,6 @@ $(function () {
 		oParser = new parserFormula("TRIM(\" First Quarter Earnings \")", "A2", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "First Quarter Earnings");
-
 
 		ws.getRange2("A1:C214").cleanAll();
 		// Data for reference link. Use A100-A111
@@ -11773,7 +11708,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number. Basic valid input: integer code point for \'A\'. 1 argument used.
 		oParser = new parserFormula('UNICHAR(65)', 'A2', ws);
@@ -11967,7 +11901,6 @@ $(function () {
 		// Case #16: Number. Excessively large number returns #VALUE!. 1 argument used.
 		// Case #20: Formula. Date resolving to 0 returns #VALUE!. 1 argument used.
 		// Case #2: Number. Maximum valid code point (U+10FFFF). 1 argument used.
-
 
 	});
 
@@ -12402,7 +12335,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: UPPER(0) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), "0", 'Test: Bounded case: Number. Zero converted to string. 1 argument used.');
 
-
 		// Need to fix:
 		// Should return array when encounter the area
 		// Case #4: Area. Multi-cell range returns arr.
@@ -12472,7 +12404,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: String. Text string representing a number converted to number. 1 argument used.
@@ -12676,7 +12607,6 @@ $(function () {
 		// Case #11: Area3D. 3D multi-cell range returns #VALUE!. 1 argument used.
 		// Case #1: Number. Maximum valid Excel number. 1 argument used.
 		// Case #2: Number. Minimum valid Excel number. 1 argument used.
-
 
 		testArrayFormula2(assert, "value", 1, 1);
 	});

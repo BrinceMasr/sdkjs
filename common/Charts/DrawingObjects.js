@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -718,7 +713,6 @@ CSparklineView.prototype.initFromSparkline = function(oSparkline, oSparklineGrou
         settings.putTitle(c_oAscChartTitleShowSettings.none);
         settings.putLegendPos(Asc.c_oAscChartLegendShowSettings.none);
 
-
         chart_space.recalculateReferences();
         chart_space.recalcInfo.recalculateReferences = false;
         var oSerie = chart_space.chart.plotArea.charts[0].series[0];
@@ -977,7 +971,6 @@ CSparklineView.prototype.initFromSparkline = function(oSparkline, oSparklineGrou
                     }
                 }
 
-
                 if(nSparklineType !== Asc.c_oAscSparklineType.Line){
                     for(i = 0; i < aSeriesPoints.length; ++i)
                     {
@@ -1214,7 +1207,6 @@ CSparklineView.prototype.draw = function(graphics, offX, offY)
 	this.chartSpace.chartObj.calcProp.trueHeight = _true_height;
 };
 
-
 CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGroup)
 {
     var oAxis = this.chartSpace.chart.plotArea.getAxisByTypes();
@@ -1243,7 +1235,6 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
                 oValAx.scaling.setMax(maxVal);
             }
         }
-
 
         if(oSparklineGroup.displayXAxis)
         {
@@ -1293,8 +1284,6 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
 // Manager
 //-----------------------------------------------------------------------------------
 
-
-
     var rAF = (function() {
         return window.requestAnimationFrame ||
             window.webkitRequestAnimationFrame ||
@@ -1314,7 +1303,6 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
             window.msCancelRequestAnimationFrame ||
             clearTimeout;
     })();
-
 
     function DrawingBase(ws) {
         this.worksheet = ws;
@@ -1337,7 +1325,6 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
     }
 
     //{ prototype
-
 
     DrawingBase.prototype.isUseInDocument = function() {
         if(this.worksheet && this.worksheet.model){
@@ -1473,7 +1460,6 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
     };
 
     // Считаем From/To исходя из graphicObject
-
 
     DrawingBase.prototype._getGraphicObjectCoords = function()
     {
@@ -1627,9 +1613,7 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
             return;
         if ( _t.isGraphicObject() && _t.graphicObject.bounds) {
 
-
             var bounds = _t.graphicObject.bounds;
-
 
             var fromX =  this.mmToPx(bounds.x > 0 ? bounds.x : 0), fromY =  this.mmToPx(bounds.y > 0 ? bounds.y : 0),
                 toX = this.mmToPx(bounds.x + bounds.w), toY = this.mmToPx(bounds.y + bounds.h);
@@ -1911,7 +1895,6 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
     var aObjects = [];
     var aImagesSync = [];
 
-
     var oStateBeforeLoadChanges = null;
 
     _this.zoom = { last: 1, current: 1 };
@@ -1952,7 +1935,6 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
     //-----------------------------------------------------------------------------------
     // Create drawing
     //-----------------------------------------------------------------------------------
-
 
     //}
 
@@ -2056,7 +2038,6 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
         copyObject.to.row = object.to.row;
         copyObject.to.rowOff = object.to.rowOff;
 
-
         copyObject.boundsFromTo.from.col =  object.boundsFromTo.from.col;
         copyObject.boundsFromTo.from.colOff = object.boundsFromTo.from.colOff;
         copyObject.boundsFromTo.from.row =  object.boundsFromTo.from.row;
@@ -2150,8 +2131,6 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
             }
         }
 
-
-
         aImagesSync = _this.checkImageBullets(currentSheet, aImagesSync);
 
         for(let i = 0; i < aImagesSync.length; ++i)
@@ -2226,7 +2205,6 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
 
         return arrImagesWithoutImageBullets;
     }
-
 
     _this.getSelectedDrawingsRange = function()
     {
@@ -2535,7 +2513,6 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
     // For object type
     //-----------------------------------------------------------------------------------
 
-
     _this.calculateObjectMetrics = function (object, width, height, opt_checkRtl) {
         // Обработка картинок большого разрешения
         var bCorrect = false;
@@ -2573,8 +2550,6 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
         object.to.rowOff = pxToMm(toCell.rowOff);
         return bCorrect;
     };
-
-
 
     _this.addImageObjectCallback = function (_image, options, imageIndex) {
         var isOption = options && options.cell;
@@ -2635,8 +2610,6 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
             worksheet.workbook.FinalizeAction()
         }
     };
-
-
 
     _this.addImageDrawingObject = function(imageUrls, options) {
         if (imageUrls && _this.canEdit()) {
@@ -2817,7 +2790,6 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
                 }, [], false, AscDFH.historydescription_Spreadsheet_CreateGroup);
                 return;
             }
-
 
             _this.controller.resetSelection();
 
@@ -3197,9 +3169,7 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
 					sparkline.oCacheView.initFromSparkline(sparkline, oSparklineGroup, worksheet);
                 }
 
-
 				sparkline.oCacheView.draw(graphics, offsetX, offsetY);
-
 
             }
             if(oDrawingContext instanceof AscCommonExcel.CPdfPrinter)
@@ -3751,7 +3721,6 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
         return ret;
     };
 
-
     _this.addOleObject = function(fWidth, fHeight, nWidthPix, nHeightPix, sLocalUrl, sData, sApplicationId, bSelect, arrImagesForAddToHistory){
         var drawingObject = _this.createDrawingObject();
         drawingObject.worksheet = worksheet;
@@ -3853,7 +3822,6 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
          */
 
         var response = { result: true, x: 0, y: 0 };
-
 
         // выход за границу слева или сверху
         if ( y < 0 ) {
@@ -4127,7 +4095,6 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
     //-----------------------------------------------------------------------------------
     // Graphic object mouse & keyboard events
     //-----------------------------------------------------------------------------------
-
 
     _this.onStartUserAction = function() {
         if(!AscCommon.SpeechWorker.isEnabled) {
@@ -4494,7 +4461,6 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
         return info;
     };
 
-
     _this.checkCurrentTextObjectExtends = function()
     {
         var oController = this.controller;
@@ -4548,7 +4514,6 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
         _this.controller.recalculateCurPos(true, true);
         Asc.editor.sendEvent("asc_onUserActionEnd");
     };
-
 
     _this.addCompositeText = function(nCharCode){
 
@@ -4675,7 +4640,6 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
 
         return _this.CompositeInput.Length;
     };
-
 
     //-----------------------------------------------------------------------------------
     // Private Misc Methods

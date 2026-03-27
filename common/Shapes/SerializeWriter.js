@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -700,7 +695,6 @@ function CBinaryFileWriter()
         var _slides = presentation.Slides;
         var _slide_count = _slides.length;
 
-
         for (let nIdx = 0; nIdx < presentation.slideMasters.length; ++nIdx) {
             let _m = presentation.slideMasters[nIdx];
             let _len_dst = _dst_masters.length;
@@ -735,7 +729,6 @@ function CBinaryFileWriter()
                 }
             }
         }
-
 
         for(var i = 0; i < _dst_notes.length; ++i)
         {
@@ -834,7 +827,6 @@ function CBinaryFileWriter()
             }
         }
 
-
         this.StartMainRecord(c_oMainTables.TableStyles);
         this.StartRecord(c_oMainTables.SlideRels);
         this.WriteUChar(g_nodeAttributeStart);
@@ -900,7 +892,6 @@ function CBinaryFileWriter()
         this.WriteUChar(g_nodeAttributeEnd);
         this.EndRecord();
 
-
         this.StartMainRecord(c_oMainTables.NotesMastersRels);
         this.StartRecord(c_oMainTables.NotesMastersRels);
         this.WriteUChar(g_nodeAttributeStart);
@@ -941,9 +932,6 @@ function CBinaryFileWriter()
         this.WriteUChar(g_nodeAttributeEnd);
         this.EndRecord();
 
-
-
-
         this.StartMainRecord(c_oMainTables.ThemeRels);
         this.StartRecord(c_oMainTables.ThemeRels);
         var _master_count = _dst_masters.length;
@@ -977,7 +965,6 @@ function CBinaryFileWriter()
             this.EndRecord();
         }
         this.EndRecord();
-
 
         var _count_arr = 0;
 
@@ -1919,7 +1906,6 @@ function CBinaryFileWriter()
                     break;
             }
 
-
             var defTab = pPr.DefaultTab;
             if (defTab !== undefined && defTab != null)
             {
@@ -2224,7 +2210,6 @@ function CBinaryFileWriter()
                 oThis.WriteRecord2(5, rPr.RFonts.CS, oThis.WriteTextFontTypeface);
         }
 
-
         if (hlinkObj != null && hlinkObj !== undefined)
         {
             oThis.WriteRecord1(7, hlinkObj, oThis.WriteHyperlink);
@@ -2376,7 +2361,6 @@ function CBinaryFileWriter()
             oThis.WriteRecord1(1, bodyPr.textFit, oThis.WriteTextFit);
         }
     };
-
 
     this.WriteTextFit = function(oTextFit)
     {
@@ -2954,7 +2938,6 @@ function CBinaryFileWriter()
         oThis.StartRecord(0);
         oThis.WriteUChar(g_nodeAttributeStart);
         oThis.WriteUChar(g_nodeAttributeEnd);
-
 
         var effects_count = fill.Effects.length;
 
@@ -3700,8 +3683,6 @@ function CBinaryFileWriter()
             oThis.WriteUChar(g_nodeAttributeEnd);
         }
 
-
-
         shape.spPr.WriteXfrm = shape.spPr.xfrm;
 
         var tmpFill = shape.spPr.Fill;
@@ -3788,7 +3769,6 @@ function CBinaryFileWriter()
 
         }
 
-
         var nvPicPr;
         if(image.nvPicPr)
         {
@@ -3804,8 +3784,6 @@ function CBinaryFileWriter()
         oThis.WriteRecord1(0, nvPicPr, this.WriteUniNvPr);
 
         image.spPr.WriteXfrm = image.spPr.xfrm;
-
-
 
         var unifill = new AscFormat.CUniFill();
         unifill.fill = image.blipFill;
@@ -4125,7 +4103,6 @@ function CBinaryFileWriter()
             oThis._WriteInt1(3, (tableMar.Bottom.W * 36000) >> 0);
         }
 
-
         if(AscFormat.isRealNumber(cell.Pr.TextDirection))
         {
             switch (cell.Pr.TextDirection)
@@ -4176,7 +4153,6 @@ function CBinaryFileWriter()
                 }
             }
         }
-
 
         oThis.WriteUChar(g_nodeAttributeEnd);
 
@@ -4621,7 +4597,6 @@ function CBinaryFileWriter()
     this.Write_Hyperlink2 = function(hyper)
     {
         oThis.WriteUChar(g_nodeAttributeStart);
-
 
         var id = hyper.id;
         var action = hyper.action;
@@ -5150,7 +5125,6 @@ function CBinaryFileWriter()
 
         oThis.WriteRecord3(4, _part.TableCellPr.TableCellBorders.InsideH, oThis.WriteTableCellBorderLineStyle);
         oThis.WriteRecord3(5, _part.TableCellPr.TableCellBorders.InsideV, oThis.WriteTableCellBorderLineStyle);
-
 
         oThis.EndRecord();
 
@@ -5782,7 +5756,6 @@ function CBinaryFileWriter()
 
             image.spPr.WriteXfrm = image.spPr.xfrm;
 
-
             var _unifill = null;
             if (image.blipFill instanceof AscFormat.CUniFill)
             {
@@ -5941,7 +5914,6 @@ function CBinaryFileWriter()
 
         return TableGrid;
     }
-
 
     function GetTableRowHeight(row)
     {

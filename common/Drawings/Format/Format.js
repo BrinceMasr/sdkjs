@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -38,7 +33,6 @@
 	 * @param {undefined} undefined
 	 */
 	function (window, undefined) {
-
 
 		const recalcSlideInterval = 30;
 		let prot;
@@ -60,7 +54,6 @@
 		var g_nodeAttributeStart = AscCommon.g_nodeAttributeStart;
 		var g_nodeAttributeEnd = AscCommon.g_nodeAttributeEnd;
 
-
 		var CChangesDrawingsBool = AscDFH.CChangesDrawingsBool;
 		var CChangesDrawingsLong = AscDFH.CChangesDrawingsLong;
 		var CChangesDrawingsDouble = AscDFH.CChangesDrawingsDouble;
@@ -72,8 +65,6 @@
 		var CChangesDrawingsContentLongMap = AscDFH.CChangesDrawingsContentLongMap;
 		var CChangesDrawingsContent = AscDFH.CChangesDrawingsContent;
 		var CChangesDrawingsDouble2 = AscDFH.CChangesDrawingsDouble2;
-
-
 
 		function CBaseNoIdObject() {
 		}
@@ -156,7 +147,6 @@
 			this.writeAttrXmlImpl(writer);
 			writer.WriteXmlAttributesEnd();
 		};
-
 
 		function CBaseObject() {
 			CBaseNoIdObject.call(this);
@@ -338,7 +328,6 @@
 				this.parent.onRemoveChild(this);
 			}
 		};
-
 
 		// Visio Extensions
 		function CClrSchemeExtLst() {
@@ -827,7 +816,6 @@
 		};				
 		// Theme visio extensions end
 
-
 		function CT_Hyperlink() {
 			CBaseNoIdObject.call(this);
 			this.snd = null;
@@ -932,11 +920,9 @@
 			return ret;
 		};
 
-
 		var drawingsChangesMap = window['AscDFH'].drawingsChangesMap;
 		var drawingConstructorsMap = window['AscDFH'].drawingsConstructorsMap;
 		var drawingContentChanges = window['AscDFH'].drawingContentChanges;
-
 
 		drawingsChangesMap[AscDFH.historyitem_DefaultShapeDefinition_SetSpPr] = function (oClass, value) {
 			oClass.spPr = value;
@@ -1174,7 +1160,6 @@
 			return oClass.properties;
 		};
 
-
 		drawingConstructorsMap[AscDFH.historyitem_ClrMap_SetClr] = CUniColor;
 		drawingConstructorsMap[AscDFH.historyitem_DefaultShapeDefinition_SetBodyPr] = CBodyPr;
 		drawingConstructorsMap[AscDFH.historyitem_DefaultShapeDefinition_SetLstStyle] = TextListStyle;
@@ -1261,9 +1246,6 @@
 		AscDFH.changesFactory[AscDFH.historyitem_HF_SetSldNum] = CChangesDrawingsBool;
 		AscDFH.changesFactory[AscDFH.historyitem_CustomPropertiesAddProperty] = CChangesDrawingsContentNoId;
 
-
-
-
 // COLOR -----------------------
 		/*
  var map_color_scheme = {};
@@ -1332,7 +1314,6 @@
 			var imageLocal = AscCommon.g_oDocumentUrls.getImageLocal(rasterImageId);
 			return imageLocal ? imageLocal : rasterImageId;
 		}
-
 
 		var g_oThemeFontsName = {};
 		g_oThemeFontsName["+mj-cs"] = true;
@@ -1506,7 +1487,6 @@
 			return null;
 		}
 
-
 		function checkThemeFonts(oFontMap, font_scheme) {
 			if (oFontMap["+mj-lt"]) {
 				if (font_scheme.majorFont && typeof font_scheme.majorFont.latin === "string" && font_scheme.majorFont.latin.length > 0)
@@ -1557,7 +1537,6 @@
 			}
 			return ret;
 		}
-
 
 		function checkObjectUnifill(obj, theme, colorMap) {
 			if (obj && obj.Unifill) {
@@ -1613,8 +1592,6 @@
 			NOTES: 3,
 			NOTES_MASTER: 4
 		};
-
-
 
 		var map_hightlight = {};
 		map_hightlight["black"] = 0x000000;
@@ -2383,7 +2360,6 @@
 			return 0;
 		};
 
-
 		function getPercentageValue(sVal) {
 			var _len = sVal.length;
 			if (_len === 0)
@@ -2493,7 +2469,6 @@
 			return "";
 		};
 
-
 		const COLOR_3DDKSHADOW               = 21;
 		const COLOR_3DFACE                   = 15;
 		const COLOR_3DHIGHLIGHT              = 20;
@@ -2530,7 +2505,6 @@
 		const COLOR_WINDOW                   = 5;
 		const COLOR_WINDOWFRAME              = 6;
 		const COLOR_WINDOWTEXT               = 8;
-
 
 		function GetSysColor(nIndex)
 		{
@@ -2774,7 +2748,6 @@
 						break;
 				}
 			}
-
 
 			this.RGBA.R = (RGB >> 16) & 0xFF;
 			this.RGBA.G = (RGB >> 8) & 0xFF;
@@ -3486,13 +3459,11 @@
 
 // -----------------------------
 
-
 		function CBaseFill() {
 			CBaseNoIdObject.call(this);
 		}
 		InitClass(CBaseFill, CBaseNoIdObject, 0);
 		CBaseFill.prototype.type = c_oAscFill.FILL_TYPE_NONE;
-
 
 		function CBlipFill() {
 			CBaseFill.call(this);
@@ -4044,7 +4015,6 @@
 			let o = other.fillRect;
 			return o && f.l === o.l && f.t === o.t && f.r === o.r && f.b === o.b;
 		};
-
 
 		function CBlip(oBlipFill) {
 			CBaseNoIdObject.call(this);
@@ -4748,7 +4718,6 @@
 			return true;
 		};
 
-
 		function CEffectElement() {
 			CBaseNoIdObject.call(this);
 			this.ref = null;
@@ -5289,7 +5258,6 @@
 			}
 		};
 
-
 		asc_CShadowProperty.prototype["getTransparency"] = asc_CShadowProperty.prototype.getTransparency;
 		asc_CShadowProperty.prototype["putTransparency"] = asc_CShadowProperty.prototype.putTransparency;
 		asc_CShadowProperty.prototype["getSize"] = asc_CShadowProperty.prototype.getSize;
@@ -5302,7 +5270,6 @@
 		asc_CShadowProperty.prototype["putColor"] = asc_CShadowProperty.prototype.putColor;
 		asc_CShadowProperty.prototype["putPreset"] = asc_CShadowProperty.prototype.putPreset;
 		asc_CShadowProperty.prototype["getPreset"] = asc_CShadowProperty.prototype.getPreset;
-
 
 		window['Asc'] = window['Asc'] || {};
 		window['Asc']['asc_CShadowProperty'] = window['Asc'].asc_CShadowProperty = asc_CShadowProperty;
@@ -5647,7 +5614,6 @@
 		};
 
 //-----------------
-
 
 		/**
 		 * @constructor
@@ -6286,7 +6252,6 @@
 			return null;
 		};
 
-
 		function getGrayscaleValue(color) {
 			return color.R * 0.2126 + color.G * 0.7152 + color.B * 0.0722;
 		}
@@ -6900,7 +6865,6 @@
 					if (typeof u1.fill.RasterImageId === "string" && typeof u2.fill.RasterImageId === "string"
 						&& AscCommon.getFullImageSrc2(u1.fill.RasterImageId) !== AscCommon.getFullImageSrc2(u2.fill.RasterImageId))
 						return false;
-
 
 					if (u1.fill.srcRect && !u2.fill.srcRect || !u1.fill.srcRect && u2.fill.srcRect)
 						return false;
@@ -7519,7 +7483,6 @@
 			return LineEndType.Arrow;
 		};
 
-
 		EndArrow.prototype.GetTypeByCode = function (nCode) {
 			switch (nCode) {
 				case LineEndType.Arrow : {
@@ -7548,7 +7511,6 @@
 		EndArrow.prototype.isPresent = function () {
 			return AscFormat.isRealNumber(this.type) && this.type !== LineEndType.None && this.type !== LineEndType.vsdxNone;
 		};
-
 
 		function ConvertJoinAggType(_type) {
 			switch (_type) {
@@ -8127,7 +8089,6 @@
 			return ret;
 		};
 
-
 		function CNvPr() {
 			CBaseFormatObject.call(this);
 			this.id = 0;
@@ -8210,19 +8171,15 @@
 			return this.id === oPr.id && this.name === oPr.name;
 		};
 
-
 		const AUDIO_CD = 0;
 		const WAV_AUDIO_FILE = 1;
 		const AUDIO_FILE = 2;
 		const VIDEO_FILE = 3;
 		const QUICK_TIME_FILE = 4;
 
-
 		const DRAW_TYPE_PEN = 0;
 		const DRAW_TYPE_PENCIL = 1;
 		const DRAW_TYPE_HIGHLITER = 2;
-
-
 
 		function UniMedia() {
 			CBaseNoIdObject.call(this);
@@ -8309,7 +8266,6 @@
 
 		var orientPh_horz = 0,
 			orientPh_vert = 1;
-
 
 		function Ph() {
 			CBaseFormatObject.call(this);
@@ -8525,7 +8481,6 @@
 			}
 			return 0;
 		};
-
 
 		function StyleRef() {
 			CBaseNoIdObject.call(this);
@@ -8754,7 +8709,6 @@
 
 			style.setLnRef(lnRef);
 
-
 			var fillRef = new StyleRef();
 			unicolor = new CUniColor();
 			unicolor.setColor(new CSchemeColor());
@@ -8762,7 +8716,6 @@
 			fillRef.setIdx(b_line ? 0 : 1);
 			fillRef.setColor(unicolor);
 			style.setFillRef(fillRef);
-
 
 			var effectRef = new StyleRef();
 			unicolor = new CUniColor();
@@ -8781,7 +8734,6 @@
 			style.setFontRef(fontRef);
 			return style;
 		}
-
 
 		function CXfrm() {
 			CBaseFormatObject.call(this);
@@ -8814,7 +8766,6 @@
 				&& isRealNumber(this.extX) && isRealNumber(this.extY)
 				&& isRealNumber(this.chExtX) && isRealNumber(this.chExtY);
 		};
-
 
 		CXfrm.prototype.isZero = function () {
 			return (
@@ -8852,14 +8803,12 @@
 				this.setOffY(xfrm.offY);
 			}
 
-
 			if (xfrm.extX != null) {
 				this.setExtX(xfrm.extX);
 			}
 			if (xfrm.extY != null) {
 				this.setExtY(xfrm.extY);
 			}
-
 
 			if (xfrm.chOffX != null) {
 				this.setChOffX(xfrm.chOffX);
@@ -8868,14 +8817,12 @@
 				this.setChOffY(xfrm.chOffY);
 			}
 
-
 			if (xfrm.chExtX != null) {
 				this.setChExtX(xfrm.chExtX);
 			}
 			if (xfrm.chExtY != null) {
 				this.setChExtY(xfrm.chExtY);
 			}
-
 
 			if (xfrm.flipH != null) {
 				this.setFlipH(xfrm.flipH);
@@ -9585,7 +9532,6 @@
 		var tx1 = 15;
 		var tx2 = 16;
 
-
 		let CLR_IDX_MAP = {};
 		CLR_IDX_MAP["dk1"] = 8;
 		CLR_IDX_MAP["lt1"] = 12;
@@ -9599,7 +9545,6 @@
 		CLR_IDX_MAP["accent6"] = 5;
 		CLR_IDX_MAP["hlink"] = 11;
 		CLR_IDX_MAP["folHlink"] = 10;
-
 
 		let CLR_NAME_MAP = {};
 		CLR_NAME_MAP[8] = "dk1";
@@ -9727,7 +9672,6 @@
 			AscCommon.History.Add(new CChangesDrawingsContentLongMap(this, AscDFH.historyitem_ClrMap_SetClr, index, [clr], true));
 			this.color_map[index] = clr;
 		};
-
 
 		ClrMap.prototype.SchemeClr_GetBYTECode = function (sValue) {
 			if ("accent1" === sValue)
@@ -11020,8 +10964,6 @@
 				images.push(fill_image_id);
 		};
 
-
-
 		function CBg() {
 			CBaseNoIdObject.call(this);
 			this.bwMode = null;
@@ -11173,7 +11115,6 @@
 			oContent.RecalcAllFields();
 		}
 
-
 		function CSpTree(oSlideObject) {
 			CBaseNoIdObject.call(this);
 			this.spTree = [];
@@ -11186,7 +11127,6 @@
 // ----------------------------------
 
 // MASTERSLIDE ----------------------
-
 
 		function CTextStyles() {
 			CBaseNoIdObject.call(this);
@@ -11237,7 +11177,6 @@
 				this.titleStyle.Write_ToBinary(w);
 			}
 
-
 			w.WriteBool(isRealObject(this.bodyStyle));
 			if (isRealObject(this.bodyStyle)) {
 				this.bodyStyle.Write_ToBinary(w);
@@ -11255,7 +11194,6 @@
 			} else {
 				this.titleStyle = null;
 			}
-
 
 			if (r.GetBool()) {
 				this.bodyStyle = new TextListStyle();
@@ -11419,7 +11357,6 @@
 
 		_arr_lt_types_weight.sort(AscCommon.fSortAscending);
 
-
 		var _global_layout_summs_array = {};
 		_global_layout_summs_array["_" + _ph_summ_blank] = nSldLtTBlank;
 		_global_layout_summs_array["_" + _ph_summ_chart] = nSldLtTChart;
@@ -11440,7 +11377,6 @@
 		_global_layout_summs_array["_" + _ph_summ__two_obj_and_two_tx] = nSldLtTTwoTxTwoObj;
 		_global_layout_summs_array["_" + _ph_summ__tx] = nSldLtTTx;
 		_global_layout_summs_array["_" + _ph_summ__tx_and_clip_art] = nSldLtTTxAndClipArt;
-
 
 // SLIDE ----------------------------
 		function redrawSlide(slide, presentation, arrInd, pos, direction, arr_slides) {
@@ -11484,7 +11420,6 @@
 				}
 			}
 		}
-
 
 		function CTextFit(nType) {
 			CBaseNoIdObject.call(this);
@@ -11737,7 +11672,6 @@
 				w.WriteDouble(this.rIns);
 			}
 
-
 			flag = this.rot != null;
 			w.WriteBool(flag);
 			if (flag) {
@@ -11780,7 +11714,6 @@
 				w.WriteLong(this.vert);
 			}
 
-
 			flag = this.vertOverflow != null;
 			w.WriteBool(flag);
 			if (flag) {
@@ -11811,66 +11744,55 @@
 				this.anchor = r.GetLong();
 			}
 
-
 			flag = r.GetBool();
 			if (flag) {
 				this.anchorCtr = r.GetBool();
 			}
-
 
 			flag = r.GetBool();
 			if (flag) {
 				this.bIns = r.GetDouble();
 			}
 
-
 			flag = r.GetBool();
 			if (flag) {
 				this.compatLnSpc = r.GetBool();
 			}
-
 
 			flag = r.GetBool();
 			if (flag) {
 				this.forceAA = r.GetBool();
 			}
 
-
 			flag = r.GetBool();
 			if (flag) {
 				this.fromWordArt = r.GetBool();
 			}
-
 
 			flag = r.GetBool();
 			if (flag) {
 				this.horzOverflow = r.GetLong();
 			}
 
-
 			flag = r.GetBool();
 			if (flag) {
 				this.lIns = r.GetDouble();
 			}
-
 
 			flag = r.GetBool();
 			if (flag) {
 				this.numCol = r.GetLong();
 			}
 
-
 			flag = r.GetBool();
 			if (flag) {
 				this.rIns = r.GetDouble();
 			}
 
-
 			flag = r.GetBool();
 			if (flag) {
 				this.rot = r.GetLong();
 			}
-
 
 			flag = r.GetBool();
 			if (flag) {
@@ -11887,30 +11809,25 @@
 				this.spcFirstLastPara = r.GetBool();
 			}
 
-
 			flag = r.GetBool();
 			if (flag) {
 				this.tIns = r.GetDouble();
 			}
-
 
 			flag = r.GetBool();
 			if (flag) {
 				this.upright = r.GetBool();
 			}
 
-
 			flag = r.GetBool();
 			if (flag) {
 				this.vert = r.GetLong();
 			}
 
-
 			flag = r.GetBool();
 			if (flag) {
 				this.vertOverflow = r.GetLong();
 			}
-
 
 			flag = r.GetBool();
 			if (flag) {
@@ -12168,7 +12085,6 @@
 				w.WriteDouble(this.rIns);
 			}
 
-
 			flag = this.rot != null;
 			w.WriteBool(flag);
 			if (flag) {
@@ -12211,7 +12127,6 @@
 				w.WriteLong(this.vert);
 			}
 
-
 			flag = this.vertOverflow != null;
 			w.WriteBool(flag);
 			if (flag) {
@@ -12240,66 +12155,55 @@
 				this.anchor = r.GetLong();
 			}
 
-
 			flag = r.GetBool();
 			if (flag) {
 				this.anchorCtr = r.GetBool();
 			}
-
 
 			flag = r.GetBool();
 			if (flag) {
 				this.bIns = r.GetDouble();
 			}
 
-
 			flag = r.GetBool();
 			if (flag) {
 				this.compatLnSpc = r.GetBool();
 			}
-
 
 			flag = r.GetBool();
 			if (flag) {
 				this.forceAA = r.GetBool();
 			}
 
-
 			flag = r.GetBool();
 			if (flag) {
 				this.fromWordArt = r.GetBool();
 			}
-
 
 			flag = r.GetBool();
 			if (flag) {
 				this.horzOverflow = r.GetLong();
 			}
 
-
 			flag = r.GetBool();
 			if (flag) {
 				this.lIns = r.GetDouble();
 			}
-
 
 			flag = r.GetBool();
 			if (flag) {
 				this.numCol = r.GetLong();
 			}
 
-
 			flag = r.GetBool();
 			if (flag) {
 				this.rIns = r.GetDouble();
 			}
 
-
 			flag = r.GetBool();
 			if (flag) {
 				this.rot = r.GetLong();
 			}
-
 
 			flag = r.GetBool();
 			if (flag) {
@@ -12316,30 +12220,25 @@
 				this.spcFirstLastPara = r.GetBool();
 			}
 
-
 			flag = r.GetBool();
 			if (flag) {
 				this.tIns = r.GetDouble();
 			}
-
 
 			flag = r.GetBool();
 			if (flag) {
 				this.upright = r.GetBool();
 			}
 
-
 			flag = r.GetBool();
 			if (flag) {
 				this.vert = r.GetLong();
 			}
 
-
 			flag = r.GetBool();
 			if (flag) {
 				this.vertOverflow = r.GetLong();
 			}
-
 
 			flag = r.GetBool();
 			if (flag) {
@@ -12352,7 +12251,6 @@
 				this.textFit.Read_FromBinary(r)
 			}
 		};
-
 
 		function CTextParagraphPr() {
 			this.bullet = new CBullet();
@@ -12542,12 +12440,10 @@
 				this.bulletSize.Write_ToBinary(w);
 			}
 
-
 			w.WriteBool(isRealObject(this.bulletTypeface));
 			if (isRealObject(this.bulletTypeface)) {
 				this.bulletTypeface.Write_ToBinary(w);
 			}
-
 
 			w.WriteBool(isRealObject(this.bulletType));
 			if (isRealObject(this.bulletType)) {
@@ -12929,7 +12825,6 @@
 		prot["get_Type"] = prot["asc_getType"] = prot.asc_getType;
 		window["Asc"]["asc_CBullet"] = window["Asc"].asc_CBullet = CBullet;
 
-
 		function CBulletColor(nType) {
 			CBaseNoIdObject.call(this);
 			this.type = AscFormat.isRealNumber(nType) ? nType : AscFormat.BULLET_TYPE_COLOR_CLRTX;
@@ -13096,7 +12991,6 @@
 				(this.typeface) = r.GetString2();
 			}
 		};
-
 
 		var numbering_presentationnumfrmt_AlphaLcParenBoth = 0;
 		var numbering_presentationnumfrmt_AlphaLcParenR = 1;
@@ -13509,8 +13403,6 @@
 		}
 
 		InitClass(CBaseAttrObject, CBaseNoIdObject, 0);
-
-
 
 		function CChangesCorePr(Class, Old, New, Color) {
 			AscDFH.CChangesBase.call(this, Class, Old, New, Color);
@@ -14391,7 +14283,6 @@
 			}
 		};
 
-
 		window['AscCommon'].CCore = CCore;
 		prot = CCore.prototype;
 		prot["asc_getTitle"] = prot.asc_getTitle;
@@ -14963,7 +14854,6 @@
 		window['AscCommon'].CCustomProperties = CCustomProperties;
 		prot = CCustomProperties.prototype;
 		prot["add"] = prot.add;
-
 
 		function CCustomProperty() {
 			CBaseNoIdObject.call(this);
@@ -15781,7 +15671,6 @@
 		prot["setDate"] = prot.setDate;
 		prot["setBool"] = prot.setBool;
 
-
 		var c_oVariantTypes = {
 			vtEmpty: 0,
 			vtNull: 1,
@@ -16112,7 +16001,6 @@
 			s.Seek2(_end_pos);
 		};
 
-
 		window['AscCommon'].CPres = CPres;
 
 		function CClrMapOvr() {
@@ -16121,7 +16009,6 @@
 		}
 		InitClass(CClrMapOvr, CBaseNoIdObject, 0);
 
-
 		function IdEntry(name) {
 			AscFormat.CBaseNoIdObject.call(this);
 			this.name = name;
@@ -16129,7 +16016,6 @@
 			this.rId = null;
 		}
 		InitClass(IdEntry, CBaseNoIdObject, undefined);
-
 
 		function CExtP() {
 			this.st = null;
@@ -16190,7 +16076,6 @@
 				theme.themeElements.fontScheme.setMinorFont(new FontCollection(theme.themeElements.fontScheme));
 				theme.themeElements.fontScheme.majorFont.setLatin(opt_fontName);
 				theme.themeElements.fontScheme.minorFont.setLatin(opt_fontName);
-
 
 				var scheme = theme.themeElements.clrScheme;
 
@@ -16323,7 +16208,6 @@
 				theme.themeElements.fmtScheme.lnStyleLst.push(pen);
 				theme.extraClrSchemeLst = [];
 
-
 				let oEffectStyle;
 				oEffectStyle = new AscFormat.CEffectStyle();
 				oEffectStyle.checkEffectPr();
@@ -16367,7 +16251,6 @@
 			// TODO change other colors
 			scheme.colors[11] = AscFormat.CreateUniColorRGB(0x05, 0x63, 0xC1); // link
 			scheme.colors[10] = AscFormat.CreateUniColorRGB(0x80, 0x00, 0x80); // followed link
-
 
 			theme.themeElements.themeExt = new AscFormat.CThemeExt();
 			theme.themeElements.themeExt.themeSchemeSchemeEnum = "0";
@@ -16427,7 +16310,6 @@
 			lnRef.setColor(unicolor);
 			style.setLnRef(lnRef);
 
-
 			var fillRef = new StyleRef();
 			fillRef.setIdx(0);
 			unicolor = new CUniColor();
@@ -16435,7 +16317,6 @@
 			unicolor.color.setId(g_clr_accent1);
 			fillRef.setColor(unicolor);
 			style.setFillRef(fillRef);
-
 
 			var effectRef = new StyleRef();
 			effectRef.setIdx(0);
@@ -16618,7 +16499,6 @@
 							_url = AscCommon.g_oUserTexturePresets[_tx_id];
 						}
 
-
 						if (ret.fill == null) {
 							ret.fill = new CBlipFill();
 						}
@@ -16768,7 +16648,6 @@
 			if (null != _alpha) {
 				ret.transparent = _alpha;
 
-
 			}
 
 			if (ret.transparent != null) {
@@ -16822,7 +16701,6 @@
 				}
 
 			}
-
 
 			ret.width = (ln.w == null) ? 12700 : (ln.w >> 0);
 			ret.width /= 36000.0;
@@ -17054,7 +16932,6 @@
 			shape.spPr.ln = CorrectUniFill(asc_shape_prop.asc_getStroke(), shape.spPr.ln);
 		}
 
-
 		function CreateAscTextArtProps(oTextArtProps) {
 			if (!oTextArtProps) {
 				return undefined;
@@ -17176,8 +17053,6 @@
 			}
 			return position;
 		}
-
-
 
 		/**
 		 * Common Functions For Builder
@@ -17574,7 +17449,6 @@
 			return null;
 		}
 
-
 		function builder_CreateTitle(sTitle, nFontSize, bIsBold, oChartSpace) {
 			if (typeof sTitle === "string" && sTitle.length > 0) {
 				var oTitle = new AscFormat.CTitle();
@@ -17746,7 +17620,6 @@
 		function builder_SetVerAxisFontSize(oChartSpace, nFontSize) {
 			builder_SetObjectFontSize(oChartSpace.chart.plotArea.getVerticalAxis(), nFontSize, oChartSpace.getDrawingDocument());
 		}
-
 
 		function builder_SetShowPointDataLabel(oChartSpace, nSeriesIndex, nPointIndex, bShowSerName, bShowCatName, bShowVal, bShowPerecent) {
 			if (oChartSpace && oChartSpace.chart && oChartSpace.chart.plotArea && oChartSpace.chart.plotArea.charts[0]) {
@@ -20593,7 +20466,6 @@
 		window['AscFormat'].UniMedia = UniMedia;
 		window['AscFormat'].CT_Hyperlink = CT_Hyperlink;
 
-
 		window['AscFormat'].builder_CreateShape = builder_CreateShape;
 		window['AscFormat'].builder_CreateChart = builder_CreateChart;
 		window['AscFormat'].builder_CreateGroup = builder_CreateGroup;
@@ -20629,7 +20501,6 @@
 		window['AscFormat'].builder_SetHorAxisFontSize = builder_SetHorAxisFontSize;
 		window['AscFormat'].builder_SetVerAxisFontSize = builder_SetVerAxisFontSize;
 		window['AscFormat'].builder_SetShowPointDataLabel = builder_SetShowPointDataLabel;
-
 
 		window['AscFormat'].Ax_Counter = Ax_Counter;
 		window['AscFormat'].TYPE_TRACK = TYPE_TRACK;
@@ -20728,15 +20599,11 @@
 		window['AscFormat']._arr_lt_types_weight = _arr_lt_types_weight;
 		window['AscFormat']._global_layout_summs_array = _global_layout_summs_array;
 
-
 		window['AscFormat'].AUDIO_CD = AUDIO_CD;
 		window['AscFormat'].WAV_AUDIO_FILE = WAV_AUDIO_FILE;
 		window['AscFormat'].AUDIO_FILE = AUDIO_FILE;
 		window['AscFormat'].VIDEO_FILE = VIDEO_FILE;
 		window['AscFormat'].QUICK_TIME_FILE = QUICK_TIME_FILE;
-
-
-
 
 		window['AscFormat'].DRAW_TYPE_PEN = DRAW_TYPE_PEN;
 		window['AscFormat'].DRAW_TYPE_PENCIL = DRAW_TYPE_PENCIL;
@@ -20773,7 +20640,6 @@
 		window['AscFormat'].EFFECT_TYPE_ALPHAINV = EFFECT_TYPE_ALPHAINV;
 		window['AscFormat'].EFFECT_TYPE_ALPHAMOD = EFFECT_TYPE_ALPHAMOD;
 		window['AscFormat'].EFFECT_TYPE_BLEND = EFFECT_TYPE_BLEND;
-
 
 		window['AscFormat'].fCreateEffectByType = fCreateEffectByType;
 		window['AscFormat'].COuterShdw = COuterShdw;

@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -39,7 +34,6 @@
 
 // TODO: Несовсем правильно(всмысле не как в Word) обрабатывается верхнее поле ячеек:
 //       особенно это проявляется в таблицах с ненулевым расстоянием между ячейками.
-
 
 // TODO: Оказалось, что параметр "не отрывать от следующего" влияет и на таблицы, если
 //       после параграфа с таким параметром идет таблица. (см. MSFT_FY11Q3_10Q.docx стр. 3)
@@ -65,7 +59,6 @@ var c_oAscVAnchor = Asc.c_oAscVAnchor;
 var c_oAscCellTextDirection = Asc.c_oAscCellTextDirection;
 var c_oAscRevisionsChangeType = Asc.c_oAscRevisionsChangeType;
 
-
 var table_Selection_Cell = 0x00; // Селектим целыми ячейками
 var table_Selection_Text = 0x01; // Селектим текст внутри текущей ячейки
 
@@ -77,7 +70,6 @@ var table_Selection_Columns           = 0x04; // Селектим по коло�
 var table_Selection_Cells             = 0x05; // Селектим только по ячейкам
 
 var type_Table = 0x0002;
-
 
 /**
  * Класс CTable
@@ -495,7 +487,6 @@ CTable.prototype.Get_Props = function()
 			{
 				CellMarginFlag = true;
 			}
-
 
 			var nCurRowHeight;
 			var oRowH = Row.GetHeight();
@@ -1882,7 +1873,6 @@ CTable.prototype.Set_Props = function(Props)
 			else
 				Cell_end = Pos.Cell;
 
-
 			if (Cells_array.length - 1 === Index)
 			{
 				var Row_temp = this.Content[PrevRow];
@@ -2434,7 +2424,6 @@ CTable.prototype.GetAllSeqFieldsByType = function(sType, aFields)
 		}
 	}
 };
-
 
 CTable.prototype.FindParagraph = function (fCondition, bBackward, nStartIdx)
 {
@@ -4179,7 +4168,6 @@ CTable.prototype.SelectRows = function(nStartRow, nEndRow)
 		}
 	}
 
-
 	this.Selection.Use   = true;
 	this.Selection.Start = false;
 	this.Selection.Type  = table_Selection_Cell;
@@ -4865,7 +4853,6 @@ CTable.prototype.GetSelectionBounds = function(isForceCellSelection)
 
 		var BeginRect = {X : TableX + X0, Y : Y, W : X1 - X0, H : H, Page : CurPage + this.GetAbsoluteStartPage()};
 
-
 		Row  = this.Content[EndPos.Row];
 		Cell = Row.Get_Cell(EndPos.Cell);
 
@@ -5004,7 +4991,6 @@ CTable.prototype.Selection_SetStart = function(X, Y, CurPage, MouseEvent)
 			Type       : MouseEvent.Type,
 			CtrlKey    : MouseEvent.CtrlKey
 		};
-
 
 		this.Selection.Type = table_Selection_Cell;
 		this.private_UpdateSelectedCellsArray();
@@ -6065,7 +6051,6 @@ CTable.prototype.SetSelectionToBeginEnd = function(isSelectionStart, isElementSt
 		this.Selection.StartPos.Pos = Pos;
 	else
 		this.Selection.EndPos.Pos = Pos;
-
 
 	this.private_UpdateSelectedCellsArray();
 };
@@ -7386,7 +7371,6 @@ CTable.prototype.MoveCursorToCell = function(bNext)
 			oCheckAutoCorrectPara = null;
 		}
 
-
 		// Т.к. мы собираемся выставить селект заново, то предварительно очистим текущий селект
 		oLogicDocument.RemoveSelection();
 
@@ -7599,7 +7583,6 @@ CTable.prototype.GetSelectedContent = function(SelectedContent)
 			SelectedContent.Add(new AscCommonWord.CSelectedElement(this.Copy(this.Parent), true));
 			return;
 		}
-
 
 		var TableGrid = this.Internal_Copy_Grid(this.TableGridCalc);
 
@@ -9698,7 +9681,6 @@ CTable.prototype.SplitTableCells = function(Cols, Rows, isFailureEvents)
 		}
 	}
 
-
 	var Cells     = [];
 	var Cells_pos = [];
 	var Rows_     = [];
@@ -10738,7 +10720,6 @@ CTable.prototype.AddTableColumn = function(bBefore, nCount)
 
 				NewCell.Content.AddToParagraph(new ParaTextPr(TextPr));
 				NewCell.Content.SetApplyToAll(false);
-
 
 				if (false === bBefore2)
 					Rows_info[CurRow].splice(Add_info[CurRow] + 1, 0, {W : Width, Type : 0, GridSpan : 1});
@@ -14204,7 +14185,6 @@ CTable.prototype.Update_TableMarkupFromRuler = function(NewMarkup, bCol, Index)
 
 						var Before_Info = Row.Get_Before();
 
-
 						if (Before_Info.GridBefore > 0)
 						{
 							if (Before_Info.GridBefore >= Col)
@@ -16541,7 +16521,6 @@ CTable.prototype.GetRowsCount = function()
 	return this.Content.length;
 };
 
-
 CTable.prototype.GetColsCount = function()
 {
 	return this.TableGrid.length;
@@ -16589,7 +16568,6 @@ CTable.prototype.StartSelectionFromCurPos = function()
 	// В функции private_UpdateSelectedCellsArray выставляется тип по ячеейкам, но нам нужен внутри ячейки изначальный селект
 	this.Selection.Type   = table_Selection_Text;
 	this.Selection.CurRow = this.CurCell.Row.Index;
-
 
 	this.CurCell.Content.StartSelectionFromCurPos();
 };
@@ -18090,7 +18068,6 @@ CTable.prototype.InsertTableContent = function(_nCellIndex, _nRowIndex, oTable)
 	if (true === isNeedRebuildGrid)
 		this.private_CreateNewGrid(arrRowsInfo);
 
-
 	this.RemoveSelection();
 	if (oFirstCell)
 	{
@@ -18263,8 +18240,6 @@ CTable.prototype.Resize = function(nWidth, nHeight)
 				var oRow  = this.GetRow(nCurRow);
 				var oRowH = oRow.GetHeight();
 				var nNewH = arrNewH[nCurRow];
-
-
 
 				if(!this.bPresentation)
 				{
@@ -18580,7 +18555,6 @@ CTable.prototype.GetMinHeight = function()
 			var oCellTBorder  = oCell.GetBorder(0);
 			var oCellBBorder  = oCell.GetBorder(2);
 
-
 			if (border_None !== oCellTBorder.Value && nMaxTopBorder < oCellTBorder.Size)
 				nMaxTopBorder = oCellTBorder.Size;
 
@@ -18756,7 +18730,6 @@ CTable.prototype.DistributeColumns = function()
 				arrCheckMergedCells.push([nCurRow]);
 			}
 
-
 			for (var nMergeIndex = 1, nMergedCount = arrMergedCells.length; nMergeIndex < nMergedCount; ++nMergeIndex)
 			{
 				var nCurCell2 = arrMergedCells[nMergeIndex].Index;
@@ -18806,7 +18779,6 @@ CTable.prototype.DistributeColumns = function()
 				else
 					break;
 			}
-
 
 			if (null === nFirstStartGridCol)
 			{
@@ -19358,7 +19330,6 @@ CTable.prototype.RejectPrChange = function()
 
 		oRow.RejectPrChange();
 	}
-
 
 	if (undefined !== this.TableGridChange)
 	{

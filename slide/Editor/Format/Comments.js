@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -45,10 +40,8 @@ function (window, undefined) {
 	AscDFH.changesFactory[AscDFH.historyitem_Comment_Change] = AscDFH.CChangesDrawingsObjectNoId;
 	AscDFH.changesFactory[AscDFH.historyitem_Comment_TypeInfo] = AscDFH.CChangesDrawingsLong;
 
-
 	AscDFH.drawingsConstructorsMap[AscDFH.historyitem_Comment_Position] = AscFormat.CDrawingBaseCoordsWritable;
 	AscDFH.drawingsConstructorsMap[AscDFH.historyitem_Comment_Change] = CCommentData;
-
 
 	AscDFH.drawingsChangesMap[AscDFH.historyitem_Comment_Position] = function (oClass, value) {
 		oClass.x = value.a;
@@ -394,7 +387,6 @@ function (window, undefined) {
 		return true;
 	};
 
-
 	ParaComment.prototype.Refresh_RecalcData = function () {
 	};
 
@@ -550,7 +542,6 @@ function (window, undefined) {
 		}
 	};
 
-
 	function CCommentData() {
 		this.m_sText = "";
 		this.m_sTime = "";
@@ -605,11 +596,9 @@ function (window, undefined) {
 		return this.m_sQuoteText;
 	};
 
-
 	CCommentData.prototype.Set_QuoteText = function (Quote) {
 		this.SetQuoteText(Quote);
 	};
-
 
 	CCommentData.prototype.SetQuoteText = function (Quote) {
 		this.m_sQuoteText = Quote;
@@ -671,7 +660,6 @@ function (window, undefined) {
 	CCommentData.prototype.Get_Reply = function (Index) {
 		return this.GetReply(Index);
 	};
-
 
 	CCommentData.prototype.GetReply = function (Index) {
 		if (Index < 0 || Index >= this.m_aReplies.length) return null;
@@ -862,7 +850,6 @@ function (window, undefined) {
 		}
 	};
 
-
 	var comment_type_Common = 1; // Комментарий к обычному тексу
 	var comment_type_HdrFtr = 2; // Комментарий к колонтитулу
 
@@ -896,7 +883,6 @@ function (window, undefined) {
 		// Добавляем данный класс в таблицу Id (обязательно в конце конструктора)
 		g_oTableId.Add(this, this.Id);
 	}
-
 
 	CComment.prototype.getObjectType = function () {
 		return AscDFH.historyitem_type_Comment;
@@ -1100,7 +1086,6 @@ function (window, undefined) {
 	CComment.prototype.Get_TypeInfo = function () {
 		return this.m_oTypeInfo;
 	};
-
 
 	CComment.prototype.Refresh_RecalcData = function (Data) {
 		if (this.slideComments) {

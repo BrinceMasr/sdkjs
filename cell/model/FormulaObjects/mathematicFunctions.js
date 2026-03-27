@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -179,7 +174,6 @@ function (window, undefined) {
 
 		return sumX(arg0, arg1, false);
 	};
-
 
 	/**
 	 * @constructor
@@ -560,7 +554,6 @@ function (window, undefined) {
 
 		return res;
 	};
-
 
 	/**
 	 * @constructor
@@ -2127,7 +2120,6 @@ function (window, undefined) {
 			return res;
 		}
 
-
 		for (let i = 0; i < arg.length; i++) {
 			let argI = arg[i];
 
@@ -2931,7 +2923,6 @@ function (window, undefined) {
 				}
 			}
 
-
 			let C = new Array(A.length);
 			for (i = 0; i < A.length; i++) {
 				C[i] = new Array(B[0].length);
@@ -3309,7 +3300,6 @@ function (window, undefined) {
 
 			return res;
 		}
-
 
 		arg0 = arg0.tocNumber();
 		if (arg0.type === cElementType.error) {
@@ -3712,7 +3702,6 @@ function (window, undefined) {
 		if (!(arg0 instanceof cNumber) || (arg1 && !(arg0 instanceof cNumber))) {
 			return new cError(cErrorType.wrong_value_type);
 		}
-
 
 		return quotient(arg0, arg1);
 	};
@@ -4778,7 +4767,6 @@ function (window, undefined) {
 			return arg0;
 		}
 
-
 		if (arg1.type === cElementType.empty) {
 			return new cError(cErrorType.not_available);
 		}
@@ -4795,7 +4783,6 @@ function (window, undefined) {
 			return arg1;
 		}
 
-
 		if (arg2.type === cElementType.empty) {
 			return new cError(cErrorType.not_available);
 		}
@@ -4811,7 +4798,6 @@ function (window, undefined) {
 		if (arg2.type === cElementType.error) {
 			return arg2;
 		}
-
 
 		if (arg3.type === cElementType.empty) {
 			return new cError(cErrorType.not_available);
@@ -5529,7 +5515,6 @@ function (window, undefined) {
 			arg1 = arg[k];
 			arg2 = arg[k + 1];
 
-
 			arg1Range = getRange(arg1);
 			if (!arg1Range) {
 				return new cError(cErrorType.wrong_value_type);
@@ -5965,7 +5950,6 @@ function (window, undefined) {
 			arg1 = arg1.tocNumber();
 		}
 
-
 		if (cElementType.error === arg0.type) {
 			return arg0;
 		}
@@ -6014,7 +5998,6 @@ function (window, undefined) {
 
 		return truncHelper(arg0.getValue(), arg1.getValue());
 	};
-
 
 	/**
 	 * @constructor
@@ -6148,7 +6131,6 @@ function (window, undefined) {
 
 		return res ? res : sequenceRangeArrayGeneral([arg0, arg1, arg2, arg3], false);
 	};
-
 
 	var g_oSUMIFSCache = new SUMIFSCache();
 

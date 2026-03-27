@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -1628,7 +1623,6 @@
 			}
 			this.m_oMainContent.Bounds.B = GlobalSkin.SupportNotes ? this.splitters[1].position + GlobalSkin.SplitterWidthMM : 1000;
 			this.m_oMainContent.Bounds.isAbsB = GlobalSkin.SupportNotes;
-
 
 			this.UpdateBottomControlsParams();
 
@@ -4143,7 +4137,6 @@
 			ctx.globalAlpha = dGlobalAplpha;
 		}
 
-
 		if (isDrawNotes && drDoc.m_bIsSelection)
 		{
 			var ctxOverlay = overlayNotes.m_oContext;
@@ -4429,8 +4422,6 @@
 		}
 		if (this.m_oLogicDocument.IsEmpty())
 			return;
-
-
 
 		let aAllLayouts = this.m_oLogicDocument.GetAllLayouts();
 		let oLtDrawer = this.m_oLayoutDrawer;
@@ -4801,7 +4792,6 @@
 		let oDrawing = mediaData.getDrawing();
 		if (!oDrawing) return null;
 
-
 		let oNotRotatedBounds = new AscFormat.CGraphicBounds(
 			oDrawing.x,
 			oDrawing.y,
@@ -4847,7 +4837,6 @@
 
 				let zoom = _w / _w_mm;
 
-
 				let getCoords = function (x, y) {
 					return {
 						X: _x + zoom * x + 0.5 >> 0,
@@ -4879,8 +4868,6 @@
 
 		let nWidth, nHeight, nX, nY;
 
-
-
 		nWidth = oMediaFrameRect.w - 2 * MIN_MEDIA_CONTROL_CONTROL_INSET;
 		nWidth = Math.max(nWidth, MIN_MEDIA_CONTROL_WIDTH);
 		nHeight = MEDIA_CONTROL_HEIGHT;
@@ -4889,7 +4876,6 @@
 			let dKoef = AscCommon.g_dKoef_mm_to_pix;
 			nX = (oMediaFrameRect.l + oMediaFrameRect.r) / 2.0 - nWidth / 2 + 0.5 >> 0;
 			nY = oMediaFrameRect.b + MEDIA_CONTROL_TOP_MARGIN + 0.5 >> 0;
-
 
 			let nControlX = this.X;
 			let nControlY = this.Y;
@@ -4909,7 +4895,6 @@
 			let nViewRectT = nControlY + dViewT * dKoef + 0.5 >> 0;
 			let nViewRectR = nViewRectL + (oMainViewRect.R - oMainViewRect.L) * dKoef + 0.5 >> 0;
 			let nViewRectB = nViewRectT + (oMainViewRect.B - oMainViewRect.T) * dKoef + 0.5 >> 0;
-
 
 			if (nX < nViewRectL)
 				nX = nViewRectL;

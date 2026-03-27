@@ -12,24 +12,18 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
-
 
 $(function () {
 
@@ -375,7 +369,6 @@ $(function () {
 		var diff = dsc / coupD - 1;
 		yld = yld / frequency + 1;
 
-
 		coupon *= 100 / frequency;
 
 		for (var index = 1; index <= numCoup; index++) {
@@ -415,7 +408,6 @@ $(function () {
 		ws.getRange2("A101").setValue("2");
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
-
 
 		oParser = new parserFormula(func + "(A100:C101)", "A1", ws);
 		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
@@ -461,7 +453,6 @@ $(function () {
 			assert.ok(oParser.parse());
 			return oParser.calculate().getValue();
 		};
-
 
 		//***array-formula***
 		ws.getRange2("A100").setValue("1");
@@ -683,7 +674,6 @@ $(function () {
 		real = AscCommonExcel.buildRelativePath(path1, path2);
 		assert.strictEqual(need, real);
 
-
 		path1 = "D:/root/inside/inside2/inseide3/inside4/test.xlsx";
 		path2 = "C:/root/test.xlsx";
 		need = "file:///D:\\root\\inside\\inside2\\inseide3\\inside4\\test.xlsx";
@@ -776,7 +766,6 @@ $(function () {
 		assert.strictEqual(ws.getRange2("B2").getValueForEdit(), '=IMPORTRANGE("http://localhost/editor?fileName=new%20(51).xlsx","A3")', 'Import range function in B2 before source change');
 		assert.strictEqual(ws.getRange2("C2").getValueForEdit(), '=IMPORTRANGE("http://localhost/editor?fileName=new%20(51).xlsx","A4")', 'Import range function in C2 before source change');
 		assert.ok(Object.keys(wb.dependencyFormulas.sheetListeners[fromERWorksheet.Id].areaMap).length > 0, 'Listeners count in dep. formula before change source');
-
 
 		wb.changeExternalReference(index, toER);
 		assert.ok(Object.keys(wb.dependencyFormulas.sheetListeners[fromERWorksheet.Id].areaMap).length === 0, 'Listeners count in dep. formula after change source');
@@ -875,7 +864,6 @@ $(function () {
 		let oDefName = new Asc.asc_CDefName("test", "Sheet1!" + "$A$1:$A$2");
 		externalWb.editDefinesNames(null, oDefName);
 		AscCommonExcel.g_DefNameWorksheet = RealDefNameWorksheet;
-
 
 		oParser.isParsed = false;
 		oParser.outStack = [];
@@ -988,7 +976,6 @@ $(function () {
 		secondExternalWs.getRange2("A1").setValue("2222");
 		wb.externalReferences[1].updateData([secondExternalWs]);
 		assert.strictEqual(oParser.calculate().getValue().getValue(), 2222, 'EXTERNAL_AFTER_UPDATE');
-
 
 		ws.getRange2("A100").setValue("='[new.xlsx]Sheet1'!A1");
 		assert.strictEqual(wb.externalReferences.length, 2, 'Amount of references before changing a cell');
@@ -1384,7 +1371,6 @@ $(function () {
 		assert.strictEqual(wb.externalReferences.length, 0);
 	});
 
-
 	QUnit.test("Test: \"Read and init external reference data\"", function (assert) {
 		// create external link
 		let cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 1, 0);
@@ -1428,7 +1414,6 @@ $(function () {
 		assert.strictEqual(Object.keys(externalWb.dependencyFormulas.defNames.wb).length, 0, 'Defnames before init');
 		eR.initPostOpen();
 		assert.strictEqual(Object.keys(externalWb.dependencyFormulas.defNames.wb).length, 1, 'Defnames after init');
-
 
 		/* add second sheet with '!' in name */
 		externalWs = createExternalWorksheet(" 'Sheet!'!1");

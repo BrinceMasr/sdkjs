@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -343,7 +338,6 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
             }
         }
 
-
         this.isLine = originalObject.spPr && originalObject.spPr.geometry && originalObject.spPr.geometry.preset === "line";
 		this.isLine = this.isLine || this.bConnector;
         this.bChangeCoef = this.translatetNumberHandle % 2 === 0 && this.originalFlipH !== this.originalFlipV;
@@ -357,7 +351,6 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
             this.pen = AscFormat.CreatePenBrushForChartTrack().pen;
         }
         this.overlayObject = new AscFormat.OverlayObject(this.geometry, this.resizedExtX, this.resizedExtY, this.brush, this.pen, this.transform);
-
 
         this.resizeConnector = function(kd1, kd2, e, x, y){
 
@@ -735,7 +728,6 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
                         }
                     }
 
-
                     _new_resize_half_width = this.resizedExtX*0.5;
                     _new_resize_half_height = this.resizedExtY*0.5;
                     if(this.resizedflipH !== this.originalFlipH)
@@ -796,7 +788,6 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
                             this.resizedflipH = !this.originalFlipH;
                         }
                     }
-
 
                     _new_resize_half_width = this.resizedExtX*0.5;
                     _new_resize_half_height = this.resizedExtY*0.5;
@@ -956,7 +947,6 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
                 }
             }
 
-
             if(isCrop){
                 this.resizedflipH = this.originalFlipH;
                 this.resizedflipV = this.originalFlipV;
@@ -1062,7 +1052,6 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
                 this.resizedExtY = _abs_height >= MIN_SHAPE_SIZE  || this.isLine ? _abs_height : MIN_SHAPE_SIZE;
                 this.resizedflipV  = _real_height < 0 ? !this.originalFlipV : this.originalFlipV;
 
-
             }
             else
             {
@@ -1084,7 +1073,6 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
                 this.resizedflipH  = _real_width < 0 ? !this.originalFlipH : this.originalFlipH;
 
             }
-
 
             if(isCrop){
                 this.resizedflipH = this.originalFlipH;
@@ -1122,7 +1110,6 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
             }
 
             global_MatrixTransformer.RotateRadAppend(_transform, -this.resizedRot);
-
 
             global_MatrixTransformer.TranslateAppend(_transform, this.resizedPosX, this.resizedPosY);
             global_MatrixTransformer.TranslateAppend(_transform, _horizontal_center, _vertical_center);
@@ -1187,7 +1174,6 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
                 var oldSrcRect, oldPen;
                 var parentCrop = this.originalObject.parentCrop;
 
-
                 var oShapeDrawer = new AscCommon.CShapeDrawer();
                 oShapeDrawer.bIsCheckBounds = true;
                 oShapeDrawer.Graphics = new AscFormat.CSlideBoundsChecker();
@@ -1235,7 +1221,6 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
                 return;
             }
 
-
             if(this.oNewShape){
                 this.oNewShape.drawConnectors(overlay);
             }
@@ -1280,14 +1265,12 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
             boundsChecker.Bounds.min_y = Math.min.apply(Math, arr_p_y);
             boundsChecker.Bounds.max_y = Math.max.apply(Math, arr_p_y);
 
-
             boundsChecker.Bounds.posX = this.resizedPosX / scaleCoefficient;
             boundsChecker.Bounds.posY = this.resizedPosY / scaleCoefficient;
             boundsChecker.Bounds.extX = this.resizedExtX / scaleCoefficient;
             boundsChecker.Bounds.extY = this.resizedExtY / scaleCoefficient;
             return boundsChecker.Bounds;
         };
-
 
         this.trackEnd = function(bWord)
         {
@@ -1528,7 +1511,6 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
                 _xfrm.setRot(_xfrm2.rot);
                 this.originalObject.spPr.setGeometry(this.oSpPr.geometry.createDuplicate());
 
-
                 var nvUniSpPr = this.originalObject.nvSpPr.nvUniSpPr.copy();
                 if(this.numberHandle === 0){
                     nvUniSpPr.stCnxIdx = this.beginShapeIdx;
@@ -1703,7 +1685,6 @@ function ResizeTrackGroup(originalObject, cardDirection, parentTrack)
 
             this.bChangeCoef = this.translatetNumberHandle % 2 === 0 && this.originalFlipH !== this.originalFlipV;
 
-
         }
 
         if(this.parentTrack)
@@ -1790,7 +1771,6 @@ function ResizeTrackGroup(originalObject, cardDirection, parentTrack)
                     else
                         this.resizedflipV = this.originalFlipV;
 
-
                     _new_resize_half_width = this.resizedExtX*0.5;
                     _new_resize_half_height = this.resizedExtY*0.5;
                     if(this.resizedflipH !== this.originalFlipH)
@@ -1839,7 +1819,6 @@ function ResizeTrackGroup(originalObject, cardDirection, parentTrack)
                         this.resizedflipH = !this.originalFlipH;
                     else
                         this.resizedflipH = this.originalFlipH;
-
 
                     _new_resize_half_width = this.resizedExtX*0.5;
                     _new_resize_half_height = this.resizedExtY*0.5;
@@ -1975,7 +1954,6 @@ function ResizeTrackGroup(originalObject, cardDirection, parentTrack)
                 }
             }
 
-
             this.x = this.resizedPosX;
             this.y = this.resizedPosY;
             this.extX = this.resizedExtX;
@@ -2000,7 +1978,6 @@ function ResizeTrackGroup(originalObject, cardDirection, parentTrack)
 
             global_MatrixTransformer.RotateRadAppend(_transform, -this.resizedRot);
 
-
             global_MatrixTransformer.TranslateAppend(_transform, this.resizedPosX, this.resizedPosY);
             global_MatrixTransformer.TranslateAppend(_transform, _horizontal_center, _vertical_center);
 
@@ -2012,8 +1989,6 @@ function ResizeTrackGroup(originalObject, cardDirection, parentTrack)
 			        global_MatrixTransformer.MultiplyAppend(_transform, parent_transform);
 		        }
 	        }
-
-
 
             var originalExtX, originalExtY;
             if(AscFormat.isRealNumber(this.original.extX) && AscFormat.isRealNumber(this.original.extY)){
@@ -2104,7 +2079,6 @@ function ResizeTrackGroup(originalObject, cardDirection, parentTrack)
                 this.resizedExtY = _abs_height >= MIN_SHAPE_SIZE || this.lineFlag ? _abs_height : MIN_SHAPE_SIZE;
                 this.resizedflipV  = _real_height < 0 ? !this.originalFlipV : this.originalFlipV;
 
-
             }
             else
             {
@@ -2129,7 +2103,6 @@ function ResizeTrackGroup(originalObject, cardDirection, parentTrack)
 
             this.resizedPosX = this.centerPointX - this.resizedExtX*0.5;
             this.resizedPosY = this.centerPointY - this.resizedExtY*0.5;
-
 
             this.x = this.resizedPosX;
             this.y = this.resizedPosY;
@@ -2156,10 +2129,8 @@ function ResizeTrackGroup(originalObject, cardDirection, parentTrack)
 
             global_MatrixTransformer.RotateRadAppend(_transform, -this.resizedRot);
 
-
             global_MatrixTransformer.TranslateAppend(_transform, this.resizedPosX, this.resizedPosY);
             global_MatrixTransformer.TranslateAppend(_transform, _horizontal_center, _vertical_center);
-
 
             var xfrm = this.original.spPr.xfrm;
             var kw = this.resizedExtX/xfrm.extX;
@@ -2260,8 +2231,6 @@ function ResizeTrackGroup(originalObject, cardDirection, parentTrack)
             return boundsChecker.Bounds;
         };
 
-
-
         this.trackEnd = function(bWord)
         {
             if (this.flipH !== this.original.flipH || this.flipV !== this.original.flipV) return;
@@ -2306,7 +2275,6 @@ function ResizeTrackGroup(originalObject, cardDirection, parentTrack)
 
             this.original.ResetParametersWithResize();
 
-
         };
 	    this.checkDrawingPartWithHistory = function () {
 				if (this.originalObject.getObjectType && this.originalObject.getObjectType() === AscDFH.historyitem_type_SmartArt) {
@@ -2318,7 +2286,6 @@ function ResizeTrackGroup(originalObject, cardDirection, parentTrack)
 		    }
 	    };
     }, this, []);
-
 
 }
 
@@ -2335,7 +2302,6 @@ function ShapeForResizeInGroup(originalObject, parentTrack)
         this.rot = originalObject.rot;
         this.flipH = originalObject.flipH;
         this.flipV = originalObject.flipV;
-
 
         this.origX = this.x;
         this.origY = this.y;

@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -66,7 +61,6 @@ $(function () {
 	AscCommon.baseEditorsApi.prototype._onEndLoadSdk = function () {
 	};
 	Asc.ReadDefTableStyles = function(){};
-
 
 	var api = new Asc.spreadsheet_api({
 		'id-view': 'editor_sdk'
@@ -161,7 +155,6 @@ $(function () {
 		assert.strictEqual(ws.getRange2("B7").getValueForEdit(), val);
 		assert.strictEqual(ws.getRange2("B8").getValueForEdit(), val);
 		assert.strictEqual(ws.getRange2("B9").getValueForEdit(), val);
-
 
 		var val1 = "=SIN(A2)";
 		var val2 = "=SIN(A3)";
@@ -271,7 +264,6 @@ $(function () {
 
 		assert.strictEqual(originalFormula, receivedFormula, "Copy without formula changing");
 
-
 		originalFormula = '++++"STR"';
 		ws.getRange2("A1").setValue(originalFormula);
 		ws.selectionRange.ranges = [getRange(0, 0, 0, 0)];
@@ -282,7 +274,6 @@ $(function () {
 		receivedFormula = ws.getRange2("A2").getValueForEdit();
 
 		assert.strictEqual(originalFormula, receivedFormula, "Copy without formula changing");
-
 
 		originalFormula = '++++FALSE';
 		ws.getRange2("A1").setValue(originalFormula);
@@ -295,7 +286,6 @@ $(function () {
 		
 		assert.strictEqual(originalFormula, receivedFormula, "Copy without formula changing");
 
-
 		originalFormula = "+SUM(+++1)+++1";
 		ws.getRange2("A1").setValue(originalFormula);
 		ws.selectionRange.ranges = [getRange(0, 0, 0, 0)];
@@ -306,7 +296,6 @@ $(function () {
 		receivedFormula = ws.getRange2("A2").getValueForEdit();
 
 		assert.strictEqual(originalFormula, receivedFormula, "Copy without formula changing");
-
 
 		originalFormula = "+++-SIN(+-+1-+-+1)+-+1+-+1";
 		ws.getRange2("A1").setValue(originalFormula);

@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -334,7 +329,6 @@ function (window, undefined) {
 		}
 	};
 
-
 	/**
 	 * @constructor
 	 * @extends {AscCommonExcel.cBaseFunction}
@@ -602,7 +596,6 @@ function (window, undefined) {
 	cCONCAT.prototype.Calculate = function (arg) {
 		let arg0 = new cString(""), argI;
 
-
 		let _checkMaxStringLength = function () {
 			let maxStringLength = 32767;
 			let _str = arg0 && arg0.toString && arg0.toString();
@@ -858,7 +851,6 @@ function (window, undefined) {
 			for (let i = 0; i < num_digits; i++, cNull += "0") {
 			}
 		}
-
 
 		let format;
 		let api = window["Asc"]["editor"];
@@ -1259,7 +1251,6 @@ function (window, undefined) {
 		if (cElementType.cellsRange === arg0.type || cElementType.cellsRange3D === arg0.type || cElementType.cellsRange === arg1.type || cElementType.cellsRange3D === arg1.type) {
 			return new cError(cErrorType.not_available);
 		}
-
 
 		if (cElementType.cell === arg0.type || cElementType.cell3D === arg0.type) {
 			arg0 = arg0.getValue();
@@ -1781,7 +1772,6 @@ function (window, undefined) {
 		return this._findArrayInNumberArguments(oArguments, calcText, true);
 	};
 
-
 	/**
 	 * @constructor
 	 * @extends {AscCommonExcel.cBaseFunction}
@@ -2271,7 +2261,6 @@ function (window, undefined) {
 
 		return regexTest(text.getValue(), pattern.getValue(), caseSensitivityVal);
 	};
-
 
 	/**
 	 * @constructor
@@ -3419,7 +3408,6 @@ function (window, undefined) {
 			if ("" === res) {
 				return new cError(cErrorType.wrong_value_type);
 			}
-
 
 			return new cString(res);
 		}

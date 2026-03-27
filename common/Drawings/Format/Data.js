@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -107,7 +102,6 @@ Because of this, the display is sometimes not correct.
     const Alg_type_snake = 9;
     const Alg_type_sp = 7;
     const Alg_type_tx = 8;
-
 
     const Param_type_horzAlign = 0;
     const Param_type_vertAlign = 1;
@@ -485,7 +479,6 @@ Because of this, the display is sometimes not correct.
     const LayoutShapeType_shapeType_wedgeEllipseCallout = 186;
     const LayoutShapeType_shapeType_wedgeRectCallout = 187;
     const LayoutShapeType_shapeType_wedgeRoundRectCallout = 188;
-
 
     const AnimLvl_val_ctr = 1;
     const AnimLvl_val_lvl = 2;
@@ -967,7 +960,6 @@ Because of this, the display is sometimes not correct.
 			}
 	  }
 
-
     changesFactory[AscDFH.historyitem_CCommonDataListAdd] = CChangeContent;
     changesFactory[AscDFH.historyitem_CCommonDataListRemove] = CChangeContent;
     drawingContentChanges[AscDFH.historyitem_CCommonDataListAdd] = function (oClass) {
@@ -1071,7 +1063,6 @@ Because of this, the display is sometimes not correct.
     };
     CCommonDataListNoId.prototype.readAttribute = null;
 
-
     function PtLst() {
       CCommonDataList.call(this);
     }
@@ -1119,7 +1110,6 @@ Because of this, the display is sometimes not correct.
         }
       }
     };
-
 
     function CxnLst() {
       CCommonDataList.call(this);
@@ -1389,7 +1379,6 @@ Because of this, the display is sometimes not correct.
 
     };
 
-
     changesFactory[AscDFH.historyitem_BgFormatFill] = CChangeObjectNoId;
     changesFactory[AscDFH.historyitem_BgFormatEffect] = CChangeObjectNoId;
     drawingsChangesMap[AscDFH.historyitem_BgFormatFill] = function (oClass, value, bFromLoad) {
@@ -1522,8 +1511,6 @@ Because of this, the display is sometimes not correct.
     BgFormat.prototype.Refresh_RecalcData2 = function(data)
     {
     };
-
-
 
     changesFactory[AscDFH.historyitem_WholeEffect] = CChangeObjectNoId;
     changesFactory[AscDFH.historyitem_WholeLn] = CChangeObjectNoId;
@@ -1967,8 +1954,6 @@ Because of this, the display is sometimes not correct.
         return prSet.getCustAng();
       }
     };
-
-
 
     changesFactory[AscDFH.historyitem_PrSetCoherent3DOff] = CChangeBool;
     changesFactory[AscDFH.historyitem_PrSetCsCatId] = CChangeString;
@@ -2801,7 +2786,6 @@ Because of this, the display is sometimes not correct.
     LayoutDef.prototype.getChildren = function() {
       return [this.title, this.desc, this.catLst, this.sampData, this.styleData, this.clrData, this.layoutNode];
     };
-
 
     function CatLst() {
       CCommonDataListNoId.call(this);
@@ -4625,7 +4609,6 @@ Because of this, the display is sometimes not correct.
     Rule.prototype.readChild = function(nType, pReader) {
     };
 
-
 		function SShape() {
       CBaseFormatNoIdObject.call(this);
       this.blip = null;
@@ -5900,7 +5883,6 @@ Because of this, the display is sometimes not correct.
       return this.catLst;
     }
 
-
     StyleDef.prototype.getScene3d = function () {
       return this.scene3d;
     }
@@ -7094,7 +7076,6 @@ Because of this, the display is sometimes not correct.
 						res.push(shape);
 						checkShapes[shape.GetId()] = true;
 					}
-
 
 					const primFontConstraint = smartArtInfo.textConstraints[AscFormat.Constr_type_primFontSz];
 					if (primFontConstraint) {
@@ -9184,7 +9165,6 @@ Because of this, the display is sometimes not correct.
       // });
     };
 
-
     window['AscFormat'] = window['AscFormat'] || {};
     window['AscFormat'].kForInsFitFontSize     = kForInsFitFontSize;
     window['AscFormat'].PrSet                  = PrSet;
@@ -9265,7 +9245,6 @@ Because of this, the display is sometimes not correct.
     window['AscFormat'].Alg_type_snake = Alg_type_snake;
     window['AscFormat'].Alg_type_sp = Alg_type_sp;
     window['AscFormat'].Alg_type_tx = Alg_type_tx;
-
 
     window['AscFormat'].Param_type_horzAlign = Param_type_horzAlign;
     window['AscFormat'].Param_type_vertAlign = Param_type_vertAlign;
@@ -9640,7 +9619,6 @@ Because of this, the display is sometimes not correct.
     window['AscFormat'].LayoutShapeType_shapeType_wedgeEllipseCallout = LayoutShapeType_shapeType_wedgeEllipseCallout;
     window['AscFormat'].LayoutShapeType_shapeType_wedgeRectCallout = LayoutShapeType_shapeType_wedgeRectCallout;
     window['AscFormat'].LayoutShapeType_shapeType_wedgeRoundRectCallout = LayoutShapeType_shapeType_wedgeRoundRectCallout;
-
 
     window['AscFormat'].AnimLvl_val_ctr = AnimLvl_val_ctr;
     window['AscFormat'].AnimLvl_val_lvl = AnimLvl_val_lvl;

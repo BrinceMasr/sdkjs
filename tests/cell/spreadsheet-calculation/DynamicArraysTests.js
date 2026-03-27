@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -837,7 +832,6 @@ $(function () {
 		assembledVal = ws.getRange2("A18").getValueForEdit();
 		assert.strictEqual(assembledVal, formula, "result for edit: " + formula);
 
-
 		fillRange = ws.getRange2("A18");
 		wsView.setSelection(fillRange.bbox);
 		fragment = ws.getRange2("A18").getValueForEdit2();
@@ -1220,7 +1214,6 @@ $(function () {
 		assembledVal = ws.getRange2("A51").getValueForEdit();
 		assert.strictEqual(assembledVal, formula, "result for edit: " + formula);
 
-
 		// Test @ with SUMPRODUCT and multiple array operations
 		formula = "=@SUMPRODUCT((@B1:B10>@C1)*(@C1:C10<@D1)*(@D1:D10=@E1)*@B1:B10/@F1)";
 		fillRange = ws.getRange2("A52");
@@ -1492,7 +1485,6 @@ $(function () {
 
 		ws.getRange2("A1:Z100").cleanAll();
 	});
-
 
 	QUnit.test('Test @ -> not single() -> exceptions', function (assert) {
 		if (!AscCommonExcel.bIsSupportDynamicArrays) {
@@ -2748,7 +2740,6 @@ $(function () {
 		assembledVal = ws.getRange2("A109").getValueForEdit();
 		assert.strictEqual(assembledVal, formula, "result for edit: " + formula);
 
-
 		formula = "=ERROR.TYPE(@I6:I15)";
 		fillRange = ws.getRange2("A118");
 		wsView.setSelection(fillRange.bbox);
@@ -2759,7 +2750,6 @@ $(function () {
 		assert.strictEqual(resCell.getFormulaParsed().getFormula(), "ERROR.TYPE(I6:I15)", "ERROR.TYPE(@I6:I15) -> ERROR.TYPE(I6:I15)");
 		assembledVal = ws.getRange2("A118").getValueForEdit();
 		assert.strictEqual(assembledVal, formula, "result for edit: " + formula);
-
 
 		formula = "=COMBINA(@K6:K15,@L6:L15)";
 		fillRange = ws.getRange2("A120");
@@ -2811,7 +2801,6 @@ $(function () {
 		assert.strictEqual(applyByArray, false, 'Is =A1:A3 array formula');
 		assert.strictEqual(resultRow, false, 'Rows in =A1:A3');
 		assert.strictEqual(resultCol, false, 'Cols in =A1:A3');
-
 
 		oParser = new parserFormula('{1;2;3}', cellWithFormula, ws);
 		assert.ok(oParser.parse(), '{1;2;3}');
@@ -2943,7 +2932,6 @@ $(function () {
 		assert.strictEqual(resultRow, false, 'Rows in =A1:XFD1 from D1');
 		assert.strictEqual(resultCol, false /*AscCommon.gc_nMaxCol - 3*/, 'Cols in =A1:XFD1 from D1');
 
-
 		oParser = new parserFormula('SIN(A1)', cellWithFormula, ws);
 		assert.ok(oParser.parse(), 'SIN(A1)');
 		formulaInfo = ws.dynamicArrayManager.getRefDynamicInfo(oParser);
@@ -2954,7 +2942,6 @@ $(function () {
 		assert.strictEqual(resultRow, false, 'Rows in =SIN(A1)');
 		assert.strictEqual(resultCol, false, 'Cols in =SIN(A1)');
 
-
 		oParser = new parserFormula('SUM(A1:A3)', cellWithFormula, ws);
 		assert.ok(oParser.parse(), 'SUM(A1:A3)');
 		formulaInfo = ws.dynamicArrayManager.getRefDynamicInfo(oParser);
@@ -2964,7 +2951,6 @@ $(function () {
 		assert.strictEqual(applyByArray, false, 'Is =SUM(A1:A3) array formula');
 		assert.strictEqual(resultRow, false, 'Rows in =SUM(A1:A3)');
 		assert.strictEqual(resultCol, false, 'Cols in =SUM(A1:A3)');
-
 
 		oParser = new parserFormula('SUM(A1:A3+A1:A3)', cellWithFormula, ws);
 		assert.ok(oParser.parse(), 'SUM(A1:A3+A1:A3)');
@@ -2986,7 +2972,6 @@ $(function () {
 		assert.strictEqual(resultRow, 3, 'Rows in =SUM(A1:A3+A1:A3)+A1:A3');
 		assert.strictEqual(resultCol, 1, 'Cols in =SUM(A1:A3+A1:A3)+A1:A3');
 
-
 		oParser = new parserFormula('SUM(SIN(A1:A3)+A1:A3)', cellWithFormula, ws);
 		assert.ok(oParser.parse(), 'SUM(SIN(A1:A3)+A1:A3)');
 		formulaInfo = ws.dynamicArrayManager.getRefDynamicInfo(oParser);
@@ -2996,7 +2981,6 @@ $(function () {
 		assert.strictEqual(applyByArray, false, 'Is =SUM(SIN(A1:A3)+A1:A3) array formula');
 		assert.strictEqual(resultRow, false, 'Rows in =SUM(SIN(A1:A3)+A1:A3)');
 		assert.strictEqual(resultCol, false, 'Cols in =SUM(SIN(A1:A3)+A1:A3)');
-
 
 		oParser = new parserFormula('SUM(SIN(SUM(A1:A3)))', cellWithFormula, ws);
 		assert.ok(oParser.parse(), 'SUM(SIN(SUM(A1:A3)))');
@@ -3008,7 +2992,6 @@ $(function () {
 		assert.strictEqual(resultRow, false, 'Rows in =SUM(SIN(SUM(A1:A3)))');
 		assert.strictEqual(resultCol, false, 'Cols in =SUM(SIN(SUM(A1:A3)))');
 
-
 		oParser = new parserFormula('SIN(SUM(SIN(A1:A3)))', cellWithFormula, ws);
 		assert.ok(oParser.parse(), 'SIN(SUM(SIN(A1:A3)))');
 		formulaInfo = ws.dynamicArrayManager.getRefDynamicInfo(oParser);
@@ -3018,7 +3001,6 @@ $(function () {
 		assert.strictEqual(applyByArray, false, 'Is =SIN(SUM(SIN(A1:A3))) array formula');
 		assert.strictEqual(resultRow, false, 'Rows in =SIN(SUM(SIN(A1:A3)))');
 		assert.strictEqual(resultCol, false, 'Cols in =SIN(SUM(SIN(A1:A3)))');
-
 
 		oParser = new parserFormula('COS(SIN(A1)*SUM(A1:A3)+A1:A3)', cellWithFormula, ws);
 		assert.ok(oParser.parse(), 'COS(SIN(A1)*SUM(A1:A3)+A1:A3)');
@@ -3030,7 +3012,6 @@ $(function () {
 		assert.strictEqual(resultRow, 3, 'Rows in =COS(SIN(A1)*SUM(A1:A3)+A1:A3)');
 		assert.strictEqual(resultCol, 1, 'Cols in =COS(SIN(A1)*SUM(A1:A3)+A1:A3)');
 
-
 		oParser = new parserFormula('SIN(A1+A1:A3)', cellWithFormula, ws);
 		assert.ok(oParser.parse(), 'SIN(A1+A1:A3)');
 		formulaInfo = ws.dynamicArrayManager.getRefDynamicInfo(oParser);
@@ -3040,7 +3021,6 @@ $(function () {
 		assert.strictEqual(applyByArray, true, 'Is =SIN(A1+A1:A3) array formula');
 		assert.strictEqual(resultRow, 3, 'Rows in =SIN(A1+A1:A3)');
 		assert.strictEqual(resultCol, 1, 'Cols in =SIN(A1+A1:A3)');
-
 
 		oParser = new parserFormula('{1,2}*{3;4}', cellWithFormula, ws);
 		assert.ok(oParser.parse(), '{1,2}*{3;4}');
@@ -3084,7 +3064,6 @@ $(function () {
 		assert.strictEqual(oParser.simplifyRefType(array, ws, bboxParent.r1 + 2, bboxParent.c1 + 2).getValue(), "#N/A", "Result of =A100:B101 [2,2]");
 		assert.strictEqual(oParser.simplifyRefType(array, ws, bboxParent.r1 + 2, bboxParent.c1 + 3).getValue(), "#N/A", "Result of =A100:B101 [2,3]");
 
-
 		ws.getRange2("A100").setValue("1");
 
 		bboxParent = ws.getRange2("I100").bbox;
@@ -3105,7 +3084,6 @@ $(function () {
 		assert.strictEqual(oParser.simplifyRefType(array, ws, bboxParent.r1 + 2, bboxParent.c1 + 1).getValue(), "#N/A", "Result of =A100:B101 [2,1]");
 		assert.strictEqual(oParser.simplifyRefType(array, ws, bboxParent.r1 + 2, bboxParent.c1 + 2).getValue(), "#N/A", "Result of =A100:B101 [2,2]");
 		assert.strictEqual(oParser.simplifyRefType(array, ws, bboxParent.r1 + 2, bboxParent.c1 + 3).getValue(), "#N/A", "Result of =A100:B101 [2,3]");
-
 
 		ws.getRange2("B101").setValue("#N/A");
 
@@ -5623,7 +5601,6 @@ $(function () {
 		clearData(0, 0, 100, 200);
 	});
 
-
 	QUnit.test("Test: \"Copy-paste dynamic array - expand vs blocked\"", function (assert) {
 		if (!AscCommonExcel.bIsSupportDynamicArrays) {
 			assert.ok(true, "Dynamic arrays support is disabled");
@@ -5799,7 +5776,6 @@ $(function () {
 
 		// Test undo/redo
 		checkUndoRedo(checkEmptyState, checkArrayState, "Dynamic array add/delete with emptySelection Format option");
-
 
 		clearData(0, 0, 10, 20);
 	});
@@ -6119,7 +6095,6 @@ $(function () {
 		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
 
 		checkSecondBlockedState("Second blocked insert");
-
 
 		checkUndoRedo(checkSecondBlockedEmptyState, checkSecondBlockedState, "Second blocked insert undo/redo");
 

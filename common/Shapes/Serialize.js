@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -174,7 +169,6 @@ function BinaryPPTYLoader()
 	this.map_shapes_by_id = {};
 	this.fields = [];
 	this.smartarts = [];
-
 
 	this.ClearConnectedObjects = function(){
         this.oConnectedObjects = {};
@@ -1074,7 +1068,6 @@ function BinaryPPTYLoader()
         var _type = s.GetUChar(); // 0!!!
         s.Skip2(4); // len
 
-
         while (s.cur < _end_rec)
         {
             s.Skip2(1);
@@ -1966,7 +1959,6 @@ function BinaryPPTYLoader()
         return _path;
     };
 
-
     this.ReadBlur = function()
     {
         var nRecStart, nRecLen, nRecEnd;
@@ -2114,7 +2106,6 @@ function BinaryPPTYLoader()
                     break;
             }
         }
-
 
         s.Seek2(nRecEnd);
         return oEffect;
@@ -2501,7 +2492,6 @@ function BinaryPPTYLoader()
                     }
                 }
 
-
                 s.Seek2(nRecEnd);
                 break;//var  EFFECT_TYPE_LUM			=
             }
@@ -2740,7 +2730,6 @@ function BinaryPPTYLoader()
                     }
                 }
 
-
                 s.Seek2(nRecEnd);
                 break;//var  EFFECT_TYPE_DAG			=
             }
@@ -2852,7 +2841,6 @@ function BinaryPPTYLoader()
                             break;
                     }
                 }
-
 
                 s.Seek2(nRecEnd);
                 break;//var EFFECT_TYPE_CLRCHANGE		=
@@ -3184,7 +3172,6 @@ function BinaryPPTYLoader()
         s.Seek2(_e2);
     }
 
-
     this.ReadUniFill = function(oSpPr, oImageShape, oLn, oParagraph, oBullet)
     {
         var s = this.stream;
@@ -3244,7 +3231,6 @@ function BinaryPPTYLoader()
                             case 2:
                             {
                                 var oBlipTile = new AscFormat.CBlipFillTile();
-
 
                                 var s = this.stream;
 
@@ -3449,7 +3435,6 @@ function BinaryPPTYLoader()
                                 s.Skip2(_len);
                             }
                         }
-
 
                     }
                     if (null != uni_fill.fill.lin && null != uni_fill.fill.path)
@@ -3800,7 +3785,6 @@ function BinaryPPTYLoader()
 
         var _rec_start = s.cur;
         var _end_rec = _rec_start + s.GetLong() + 4;
-
 
         s.Skip2(1); // start attributes
 
@@ -4949,7 +4933,6 @@ function BinaryPPTYLoader()
         var _rec_start = s.cur;
         var _end_rec = _rec_start + s.GetULong() + 4;
 
-
         s.Skip2(1); // start attributes
 
         while (true)
@@ -6091,7 +6074,6 @@ function BinaryPPTYLoader()
             }
         }
 
-
         if (dxaOrig > 0 && dyaOrig > 0) {
 			var ratio = 4 / 3 / 20;//twips to px
 			ole.setPixSizes(ratio * dxaOrig, ratio * dyaOrig);
@@ -7096,7 +7078,6 @@ function BinaryPPTYLoader()
         s.Seek2(_end_rec);
         return shapes;
     };
-
 
     this.ReadPic = function(type)
     {
@@ -8604,7 +8585,6 @@ function BinaryPPTYLoader()
             }
         }
 
-
         while (s.cur < _end_rec)
         {
             var _at = s.GetUChar();
@@ -9702,7 +9682,6 @@ function BinaryPPTYLoader()
                         }
                     }
 
-
                     // lnSpc
                     // TODO:
                     break;
@@ -10145,7 +10124,6 @@ function BinaryPPTYLoader()
                         }
                         para_pr.DefaultRunPr.Set_FromObject(r_pr);
 
-
                         if (this.IsUseFullUrl && par)
                         {
 
@@ -10513,7 +10491,6 @@ function BinaryPPTYLoader()
 
                                 s.Seek2(_end);
 
-
                                 var new_run = new ParaRun(par, false), hyperlink = null;
                                 if (null != _run)
                                 {
@@ -10808,13 +10785,6 @@ function BinaryPPTYLoader()
     // ------------------------------------------
 }
 
-
-
-
-
-
-
-
     function CPPTXContentLoader()
     {
         this.Reader = new AscCommon.BinaryPPTYLoader();
@@ -10868,7 +10838,6 @@ function BinaryPPTYLoader()
             var oStream = this.stream;
             var oResult = fReadFunction();
             this.CheckStreamEnd(stream);
-
 
             this.BaseReader = oOldReader;
             this.LogicDocument = oOldLogicDocument;
@@ -11569,9 +11538,6 @@ function BinaryPPTYLoader()
                 }
             }
 
-
-
-
             var oleType = null;
             while (s.cur < _end_rec)
             {
@@ -11645,9 +11611,6 @@ function BinaryPPTYLoader()
                     }
                 }
             }
-
-
-
 
 			if (dxaOrig > 0 && dyaOrig > 0) {
 				var ratio = 4 / 3 / 20;//twips to px
@@ -11901,7 +11864,6 @@ function BinaryPPTYLoader()
             _xfrm.rot = _rot;
         };
 
-
         this.CheckImagesNeeds = function(logicDoc)
         {
             var index = 0;
@@ -11931,8 +11893,5 @@ function BinaryPPTYLoader()
     window['AscCommon'].BinaryPPTYLoader = BinaryPPTYLoader;
     window['AscCommon'].IsHiddenObj = IsHiddenObj;
     window['AscCommon'].pptx_content_loader = new CPPTXContentLoader();
-
-
-
 
 })(window);

@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -77,7 +72,6 @@ var c_oChartBar3dFaces =
 	back: 5
 };
 
-
 var globalGapDepth = 150;
 var isTurnOn3DCharts = true;
 var standartMarginForCharts = 13;
@@ -116,7 +110,6 @@ function CChartsDrawer()
 	this.errBars = new CErrBarsDraw(this);
 	this.trendline = new CTrendline(this);
 	this.upDownBars = new CUpDownBars(this);
-
 
 	this.changeAxisMap = null;
 
@@ -979,7 +972,6 @@ CChartsDrawer.prototype =
 		//высчитываем выходящие за пределы подписи осей
 		var labelsMargin = this._calculateMarginLabels(chartSpace);
 		var left = labelsMargin.left, right = labelsMargin.right, top = labelsMargin.top, bottom = labelsMargin.bottom;
-
 
 		var leftTextLabels = 0;
 		var rightTextLabels = 0;
@@ -2424,7 +2416,6 @@ CChartsDrawer.prototype =
 			}
 		}
 
-
 		return res;
 	},
 
@@ -2733,7 +2724,6 @@ CChartsDrawer.prototype =
 
 		return {min: axisMin, max: axisMax};
 	},
-
 
 	//****functions for UP Functions****
 	preCalculateData: function (chartSpace, notCalcExtremum, predefinedRect) {
@@ -3336,7 +3326,6 @@ CChartsDrawer.prototype =
 				}
 			}*/
 
-
 			var getResult = function(index, isChartEx) {
 				resPos = Math.abs(yPoints[index + 1].pos - yPoints[index].pos);
 				resVal = yPoints[index + 1].val - yPoints[index].val;
@@ -3483,7 +3472,6 @@ CChartsDrawer.prototype =
 		var top = this.calcProp.chartGutter._top;
 
 		standartMarginForCharts = 17;
-
 
 		this.processor3D =
 			new AscFormat.Processor3D(widthCanvas, heightCanvas, left, right, bottom, top, chartSpace, this);
@@ -3702,7 +3690,6 @@ CChartsDrawer.prototype =
 		//start point
 		bz[0] = pts[1];
 
-
 		//control points
 		if ((d02 / 6 < d12 / 2) && (d13 / 6 < d12 / 2)) {
 			var f;
@@ -3869,7 +3856,6 @@ CChartsDrawer.prototype =
 		var x0 = point1.x, y0 = point1.y, z0 = point1.z;
 		var x1 = point2.x, y1 = point2.y, z1 = point2.z;
 
-
 		/*x - x0 	 =  	y - y0 	 =  	z - z0
 		 x1 - x0 			y1 - y0 		z1 - z0
 
@@ -3964,7 +3950,6 @@ CChartsDrawer.prototype =
 		var y1 = lineEquation.y1;
 		var z1 = lineEquation.z1;
 
-
 		//x - x1		y - y1		z - z1
 		//			=			=			t
 		//  l			  m		 	  n
@@ -3972,7 +3957,6 @@ CChartsDrawer.prototype =
 		/*x = t * l + x1
 		 y = t * m + y1
 		 z = t * n + z1*/
-
 
 		/*A * x + B * y + C * z + D = 0
 
@@ -4343,7 +4327,6 @@ CChartsDrawer.prototype =
 		return {a: a, b: b, c: c, d: d};
 	},
 
-
 	//******calculate graphic objects for 3d*******
 	calculateRect3D: function (points, val, isNotDrawDownVerge, isNotOnlyFrontFaces, points2) {
 		var res;
@@ -4405,7 +4388,6 @@ CChartsDrawer.prototype =
 			face = this._calculatePathFace(point1, point2, point3, point4, true);
 			addPathToArr(this._isVisibleVerge3D(point42, point12, point22, val), face, 1);
 		}
-
 
 		//left
 		if (val === 0 && this.calcProp.type === c_oChartTypes.HBar) {
@@ -5544,7 +5526,6 @@ CChartsDrawer.prototype =
 			pointPlainUp3 = this._convertAndTurnPoint(upPlainPointX3, upPlainPointY3, upPlainPointZ3);
 			pointPlainUp4 = this._convertAndTurnPoint(upPlainPointX4, upPlainPointY4, upPlainPointZ4);
 
-
 			point1 = this._convertAndTurnPoint(x1, y1, z1);
 			point2 = this._convertAndTurnPoint(x2, y2, z2);
 			point3 = this._convertAndTurnPoint(x3, y3, z3);
@@ -6430,7 +6411,6 @@ CChartsDrawer.prototype =
 	}
 };
 
-
 /** @constructor */
 function drawBarChart(chart, chartsDrawer) {
 	this.chartProp = chartsDrawer.calcProp;
@@ -6500,7 +6480,6 @@ drawBarChart.prototype = {
 
 		var xPoints = this.catAx.xPoints;
 		var yPoints = this.valAx.yPoints;
-
 
 		var scaleAxis = this.valAx.scale;
 		var axisMin = scaleAxis[0] < scaleAxis[scaleAxis.length - 1] ? scaleAxis[0] :scaleAxis[scaleAxis.length - 1];
@@ -6618,7 +6597,6 @@ drawBarChart.prototype = {
 							(seriesCounter * individualBarWidth - seriesCounter * widthOverLap);
 					}
 				}
-
 
 				if (this.catAx.isReversed()) {
 					startX = startX - individualBarWidth;
@@ -7120,7 +7098,6 @@ drawBarChart.prototype = {
 		return {x: centerX, y: centerY};
 	},
 
-
 	//TODO delete after test
 	_DrawBars3D2: function () {
 		var t = this;
@@ -7478,7 +7455,6 @@ drawBarChart.prototype = {
 		point7 = this.cChartDrawer._convertAndTurnPoint(x72, y72, z72);
 		point8 = this.cChartDrawer._convertAndTurnPoint(x82, y82, z82);
 
-
 		var needAddOnlyFrontFace = this.subType === "standard";
 		var nullPositionOX = this.catAx.posY * this.chartProp.pxToMM;
 
@@ -7513,7 +7489,6 @@ drawBarChart.prototype = {
 				dRadius2 = perspectiveDepth / 2;
 			}
 		};
-
 
 		var facePoints;
 		switch (type) {
@@ -7674,8 +7649,6 @@ drawBarChart.prototype = {
 	}
 };
 
-
-
 /** @constructor */
 function drawClusteredColumn(seria, chartsDrawer) {
 	this.chartProp = chartsDrawer.calcProp;
@@ -7744,7 +7717,6 @@ drawClusteredColumn.prototype = {
 			paths[i] = cChartDrawer._calculateRect(start, valStart, bW, height);
 			start += (bW + gap);
 		}
-
 
 		cachedData.data.forEach(recalculateBar);
 	},
@@ -8206,7 +8178,6 @@ drawWaterfallChart.prototype = {
 		this.cChartDrawer.cShapeDrawer.Graphics.SaveGrState();
 		this.cChartDrawer.cShapeDrawer.Graphics.AddClipRect(leftRect, topRect, rightRect, bottomRect);
 
-
 		//TODO !!!
 		//series color
 		/*<cx:plotArea>
@@ -8403,7 +8374,6 @@ drawFunnelChart.prototype = {
 
 		this.cChartDrawer.cShapeDrawer.Graphics.SaveGrState();
 		this.cChartDrawer.cShapeDrawer.Graphics.AddClipRect(leftRect, topRect, rightRect, bottomRect);
-
 
 		//TODO !!!
 		//series color
@@ -8916,7 +8886,6 @@ drawBoxWhiskerChart.prototype = {
 		path.moveTo((x + (size / 2)) * pathW / pxToMm, y * pathH);
 		path.lnTo((x - (size / 2)) * pathW / pxToMm, y * pathH);
 
-
 		return pathId;
 	},
 
@@ -8950,7 +8919,6 @@ drawBoxWhiskerChart.prototype = {
 
 		this.cChartDrawer.cShapeDrawer.Graphics.SaveGrState();
 		this.cChartDrawer.cShapeDrawer.Graphics.AddClipRect(leftRect, topRect, rightRect, bottomRect);
-
 
         let i = 0;
 
@@ -9158,7 +9126,6 @@ drawLineChart.prototype = {
 						point3 = this.cChartDrawer._convertAndTurnPoint(x1, y1 - widthLine, diffGapDepth + depthSer + serDiff * i);
 						point4 = this.cChartDrawer._convertAndTurnPoint(x, y - widthLine, diffGapDepth + depthSer + serDiff * i);
 
-
 						point5 = this.cChartDrawer._convertAndTurnPoint(x, y + widthLine, diffGapDepth + serDiff * i);
 						point6 = this.cChartDrawer._convertAndTurnPoint(x1, y1 + widthLine, diffGapDepth + serDiff * i);
 						point7 = this.cChartDrawer._convertAndTurnPoint(x1, y1 + widthLine, diffGapDepth + depthSer + serDiff * i);
@@ -9352,10 +9319,8 @@ drawLineChart.prototype = {
 		var pathH = this.chartProp.pathH;
 		var pathW = this.chartProp.pathW;
 
-
 		path.moveTo(x * pathW, y * pathH);
 		path.lnTo(x1 * pathW, y1 * pathH);
-
 
 		return pathId;
 	},
@@ -9367,7 +9332,6 @@ drawLineChart.prototype = {
 
 		var pathH = this.chartProp.pathH;
 		var pathW = this.chartProp.pathW;
-
 
 		var splineCoords = this.cChartDrawer.calculate_Bezier(x, y, x1, y1, x2, y2, x3, y3);
 
@@ -9414,7 +9378,6 @@ drawLineChart.prototype = {
 			}
 		};
 
-
 		//рисуем по сериям
 		var onSeries = function (onlyLessNull) {
 			var drawNeedVerge = function () {
@@ -9427,7 +9390,6 @@ drawLineChart.prototype = {
 
 			drawNeedVerge();
 		};
-
 
 		var reverseSeriesOnSeries = function (onlyLessNull) {
 			var drawNeedVerge = function () {
@@ -9444,7 +9406,6 @@ drawLineChart.prototype = {
 
 			drawNeedVerge();
 		};
-
 
 		if (!this.cChartDrawer.processor3D.view3D.getRAngAx()) {
 			var angle = Math.abs(this.cChartDrawer.processor3D.angleOy);
@@ -9495,7 +9456,6 @@ drawLineChart.prototype = {
 		}
 	}
 };
-
 
 /** @constructor */
 function drawAreaChart(chart, chartsDrawer) {
@@ -9653,7 +9613,6 @@ drawAreaChart.prototype = {
 			}
 		}
 
-
 		if (this.cChartDrawer.nDimensionCount === 3) {
 			this._calculatePaths3D();
 
@@ -9754,7 +9713,6 @@ drawAreaChart.prototype = {
 
 		let pathH = this.chartProp.pathH;
 		let pathW = this.chartProp.pathW;
-
 
 		let point;
 		let pxToMm = this.chartProp.pxToMM;
@@ -9881,7 +9839,6 @@ drawAreaChart.prototype = {
 			var prevX1 = prevPoints ? prevPoints[i + 1].x * pxToMm : x1;
 			var prevY1 = prevPoints ? prevPoints[i + 1].y * pxToMm : nullPositionOX;
 
-
 			if (prevY < y && prevY1 < y1) {
 				var temp = y;
 				y = prevY;
@@ -9907,7 +9864,6 @@ drawAreaChart.prototype = {
 			if (!this.prevPoints[i]) {
 				this.prevPoints[i] = [];
 			}
-
 
 			//начальные точки, без проекции и без поворота
 			var p1 = {x: x, y: y, z: this.gapDepth};
@@ -9988,7 +9944,6 @@ drawAreaChart.prototype = {
 			this.darkFaces[seria] = {};
 			darkFaces = this.darkFaces[seria];
 		}
-
 
 		//front
 		darkFaces["front"] = null;
@@ -10139,13 +10094,11 @@ drawAreaChart.prototype = {
 		var point7 = pointsIn3D[upFar][pointsIn3D[upFar].length - 1];
 		var point8 = pointsIn3D[upNear][pointsIn3D[upNear].length - 1];
 
-
 		//front
 		paths[0] = null;
 		if (this.darkFaces[seriaNum]["front"]) {
 			pathId = this.cChartSpace.AllocPath();
 			path = this.cChartSpace.GetPath(pathId);
-
 
 			calculateFace(upNear, false, true);
 			calculateFace(downNear, true);
@@ -10303,7 +10256,6 @@ drawAreaChart.prototype = {
 				notRotateNear = {x: point.x, y: point.y, z: this.gapDepth};
 				notRotateFar = {x: point.x, y: point.y, z: this.gapDepth + this.perspectiveDepth};
 
-
 				face = generateFace(prevNearProject, prevFarProject, farProject, nearProject, prevNear, prevFar, far, near, prevNotRotateNear, prevNotRotateFar, notRotateNear, notRotateFar, 1);
 				this.upFaces.push(face);
 			}
@@ -10344,7 +10296,6 @@ drawAreaChart.prototype = {
 
 				notRotateNear = {x: point.x, y: point.y, z: this.gapDepth};
 				notRotateFar = {x: point.x, y: point.y, z: this.gapDepth + this.perspectiveDepth};
-
 
 				face = generateFace(prevNearProject, prevFarProject, farProject, nearProject, prevNear, prevFar, far, near, prevNotRotateNear, prevNotRotateFar, notRotateNear, notRotateFar, 1);
 				this.downFaces.push(face);
@@ -10392,7 +10343,6 @@ drawAreaChart.prototype = {
 				if (!this.prevPoints[i]) {
 					this.prevPoints[i] = [];
 				}
-
 
 				var curRect = {
 					point1: {x: x, y: y, z: this.gapDepth},
@@ -10466,7 +10416,6 @@ drawAreaChart.prototype = {
 			curUp[0] = {start: curPoint1, end: curIntersection, eq: curLine1};
 			curUp[1] = {start: curIntersection, end: curPoint2, eq: curLine2};
 		}
-
 
 		//первая/последняя точка текущей грани, пересечение текущей грани
 		if (!this.prevPoints[pointIndex].length ||
@@ -10571,7 +10520,6 @@ drawAreaChart.prototype = {
 		var pathH = this.chartProp.pathH;
 		var pathW = this.chartProp.pathW;
 
-
 		var point1 = arrPointsProject[0];
 		var point2 = arrPointsProject[1];
 		var point3 = arrPointsProject[2];
@@ -10611,7 +10559,6 @@ drawAreaChart.prototype = {
 			path.lnTo(p3.x / pxToMm * pathW, p3.y / pxToMm * pathH);
 			path.lnTo(p4.x / pxToMm * pathW, p4.y / pxToMm * pathH);
 			path.lnTo(p1.x / pxToMm * pathW, p1.y / pxToMm * pathH);
-
 
 			var arrPoints = [p1, p2, p3, p4];
 			var arrPoints2 = [p11, p22, p33, p44];
@@ -10739,7 +10686,6 @@ drawAreaChart.prototype = {
 			x = turnPoint.x / pxToMm;
 			y = turnPoint.y / pxToMm;
 		}
-
 
 		var constMargin = 5 / pxToMm;
 
@@ -11013,7 +10959,6 @@ drawAreaChart.prototype = {
 				}
 			}
 
-
 		} else {
 			var drawVerges = function (i, j, paths, onlyLessNull, k) {
 				var brush, pen, options;
@@ -11112,7 +11057,6 @@ drawAreaChart.prototype = {
 	}
 };
 
-
 /** @constructor */
 function drawHBarChart(chart, chartsDrawer) {
 	this.chartProp = chartsDrawer.calcProp;
@@ -11208,7 +11152,6 @@ drawHBarChart.prototype = {
 			seria = numCache.pts;
 			seriesHeight[i] = [];
 
-
 			var isValMoreZero = false;
 			var isValLessZero = 0;
 			var shapeType = null !== this.chart.series[i].shape ? this.chart.series[i].shape : this.chart.shape;
@@ -11230,7 +11173,6 @@ drawHBarChart.prototype = {
 				const trendline = this.chart.series[i].getLastTrendline();
 				idx = seria[j].idx != null ? seria[j].idx + Math.floor(trendline && trendline.backward ? trendline.backward : 0) : j;
 
-
 				startXColumnPosition = this._getStartYColumnPosition(seriesHeight, idx, i, val, xPoints, shapeType);
 				startX = startXColumnPosition.startY / this.chartProp.pxToMM;
 				width = startXColumnPosition.width / this.chartProp.pxToMM;
@@ -11238,7 +11180,6 @@ drawHBarChart.prototype = {
 				var minH = startXColumnPosition.minH;
 
 				seriesHeight[i][idx] = startXColumnPosition.width;
-
 
 				//стартовая позиция колонки Y
 				if (!this.catAx.isReversed()) {
@@ -11258,7 +11199,6 @@ drawHBarChart.prototype = {
 						startYPosition = yPoints[0].pos - Math.abs(yPoints[0].pos - this.valAx.posY);
 					}
 				}
-
 
 				if (!this.catAx.isReversed()) {
 					if (seriesCounter === 0) {
@@ -11556,7 +11496,6 @@ drawHBarChart.prototype = {
 		var oCommand1 = oPath.getCommandByIndex(1);
 		var oCommand2 = oPath.getCommandByIndex(2);
 
-
 		var x = oCommand0.X;
 		var y = oCommand0.Y;
 
@@ -11733,7 +11672,6 @@ drawHBarChart.prototype = {
 			var point77 = this.cChartDrawer._convertAndTurnPoint(x7, y7, z7, null, null, true);
 			var point88 = this.cChartDrawer._convertAndTurnPoint(x8, y8, z8, null, null, true);
 
-
 			var arrPoints = [[point1, point4, point8, point5], [point1, point2, point3, point4],
 				[point1, point2, point6, point5], [point4, point8, point7, point3],
 				[point5, point6, point7, point8], [point6, point2, point3, point7]];
@@ -11741,7 +11679,6 @@ drawHBarChart.prototype = {
 			var arrPoints2 = [[point11, point44, point88, point55], [point11, point22, point33, point44],
 				[point11, point22, point66, point55], [point44, point88, point77, point33],
 				[point55, point66, point77, point88], [point66, point22, point33, point77]];
-
 
 			if (!this.temp) {
 				this.temp = [];
@@ -11849,7 +11786,6 @@ drawHBarChart.prototype = {
 			}
 		}
 	},
-
 
 	_DrawBars3D3: function () {
 		var t = this;
@@ -12451,7 +12387,6 @@ drawPieChart.prototype = {
 		var pathH = this.chartProp.pathH;
 		var pathW = this.chartProp.pathW;
 
-
 		var pxToMm = this.chartProp.pxToMM;
 
 		var x0 = xCenter + radius * Math.cos(stAng);
@@ -12496,7 +12431,6 @@ drawPieChart.prototype = {
 			cY = yCenter;
 		}
 
-
 		var x01 = xCenter + radius * Math.cos(stAng + swAng);
 		var y01 = yCenter - radius * Math.sin(stAng + swAng);
 
@@ -12508,7 +12442,6 @@ drawPieChart.prototype = {
 		} else {
 			aX = xCenter;
 		}
-
 
 		var aY;
 		if (y01 < yCenter) {
@@ -12823,7 +12756,6 @@ drawPieChart.prototype = {
 		//var point7 = this.cChartDrawer._convertAndTurnPoint(x7, y7, z7);
 		//var point8 = this.cChartDrawer._convertAndTurnPoint(x8, y8, z8);
 
-
 		var radius3D1 = (z6 - z2) / 2;
 		var radius3D2 = (z5 - z1) / 2;
 
@@ -12910,7 +12842,6 @@ drawPieChart.prototype = {
 		var oView3D = this.cChartSpace.chart.getView3d();
 		var firstAngle = oView3D && oView3D.rotY ? (-oView3D.rotY / 360) * (Math.PI * 2) : 0;
 
-
 		var getAngleByCoordsSidesTriangle = function (aC, bC, cC) {
 			var res;
 
@@ -12953,7 +12884,6 @@ drawPieChart.prototype = {
 				swapAngle = Math.abs((parseFloat(partOfSum)) * (Math.PI * 2));
 			}
 
-
 			var tempSwapAngle = 0, newSwapAngle = 0, tempStartAngle = startAngle;
 			while (true) {
 				if (i === numCache.length && swapAngle < 0) {
@@ -12970,12 +12900,10 @@ drawPieChart.prototype = {
 					}
 				}
 
-
 				var p1 = getPointsByAngle(tempStartAngle);
 				var p2 = getPointsByAngle(tempStartAngle + tempSwapAngle);
 				newSwapAngle += getAngleByCoordsSidesTriangle({x: p2.x - p1.x, y: p2.y - p1.y},
 					{x: xCenter - p1.x, y: yCenter - p1.y}, {x: xCenter - p2.x, y: yCenter - p2.y});
-
 
 				if (i === numCache.ptCount && swapAngle < 0) {
 					if (tempStartAngle - Math.PI / 2 > startAngle + swapAngle) {
@@ -13027,17 +12955,14 @@ drawPieChart.prototype = {
 		radius1 = !radius1 ? properties.radius1 : radius1;
 		radius2 = !radius2 ? properties.radius2 : radius2;
 
-
 		var pxToMm = this.chartProp.pxToMM;
 		var pathH = this.chartProp.pathH;
 		var pathW = this.chartProp.pathW;
-
 
 		swAng = this._changeAngle(radius, stAng, swAng, xCenter, yCenter, depth, radius1, radius2);
 		stAng = this.angleFor3D;
 		//корректируем центр
 		yCenter = yCenter - depth / 2;
-
 
 		var getSegmentPoints = function (startAng, endAng) {
 			var radiusSpec = (radius1 * radius2) / Math.sqrt(
@@ -13109,7 +13034,6 @@ drawPieChart.prototype = {
 			path.lnTo(p.x3 / pxToMm * pathW, p.y3 / pxToMm * pathH);
 			path.lnTo(xCenter / pxToMm * pathW, (yCenter + depth) / pxToMm * pathH);
 
-
 			return pathId;
 		};
 
@@ -13164,7 +13088,6 @@ drawPieChart.prototype = {
 			path.arcTo(radius1 / pxToMm * pathW, radius2 / pxToMm * pathH, -1 * stAng * cToDeg,
 				-1 * swapAng * cToDeg);
 			path.lnTo(xCenter / pxToMm * pathW, (yCenter + depth) / pxToMm * pathH);
-
 
 			return pathId;
 		};
@@ -13221,7 +13144,6 @@ drawPieChart.prototype = {
 		var pathW = this.chartProp.pathW;
 
 		var oThis = this;
-
 
 		var getSegmentPoints = function (startAng, endAng, startAng2, endAng2) {
 			var radiusSpec = (radiusUp1 * radiusUp2) / Math.sqrt(Math.pow(radiusUp2, 2) * Math.pow((Math.cos(startAng)), 2) + Math.pow(radiusUp1, 2) * Math.pow(Math.sin(startAng), 2));
@@ -13318,7 +13240,6 @@ drawPieChart.prototype = {
 			path.arcTo(radiusDown1 / pxToMm * pathW, radiusDown2 / pxToMm * pathH, -1 * startAng2 * cToDeg - 1 * swapAng2 * cToDeg, 1 * swapAng2 * cToDeg);
 			path.lnTo(p.x0 / pxToMm * pathW, p.y0 / pxToMm * pathH);
 
-
 			return pathId;
 		};
 
@@ -13347,7 +13268,6 @@ drawPieChart.prototype = {
 				path.lnTo(pointCenter1.x / pxToMm * pathW, pointCenter1.y / pxToMm * pathH);
 			}
 
-
 			return pathId;
 		};
 
@@ -13370,7 +13290,6 @@ drawPieChart.prototype = {
 			path.lnTo(x / pxToMm * pathW, y / pxToMm * pathH);
 			path.arcTo(radiusDown1 / pxToMm * pathW, radiusDown2 / pxToMm * pathH, -1 * startAng * cToDeg, -1 * swapAng * cToDeg);
 			path.lnTo(pointCenter2.x / pxToMm * pathW, (pointCenter2.y) / pxToMm * pathH);
-
 
 			return pathId;
 		};
@@ -13412,7 +13331,6 @@ drawPieChart.prototype = {
 
 		return {frontPath: frontPath, upPath: upPath, insidePath: insidePath, downPath: downPath};
 	},
-
 
 	_drawPie3D: function () {
 		var numCache = this._getFirstRealNumCache(true);
@@ -13645,7 +13563,6 @@ drawPieChart.prototype = {
         var fBisectAngle = AscFormat.normalizeRotate((fStartAngle + fEndAngle)/2.0);
         var fBisectAngle2 = AscFormat.normalizeRotate(fBisectAngle + Math.PI/4) - Math.PI/4;
         var nIndexArea = ((fBisectAngle2 + Math.PI/4)/(Math.PI/2)) >> 0;
-
 
         var fLengthCoeff =  ((fBisectAngle2 + Math.PI/4) - (Math.PI/2)*nIndexArea)/(Math.PI/2);
 
@@ -13881,7 +13798,6 @@ drawPieChart.prototype = {
 		path.moveTo(point4.x / pxToMm * pathW, point4.y / pxToMm * pathH);
 		path.lnTo(point8.x / pxToMm * pathW, point8.y / pxToMm * pathH);
 
-
 		this.paths.test = pathId;
 	},
 
@@ -13977,13 +13893,11 @@ drawPieChart.prototype = {
 			}
 		};
 
-
 		var pathId = this.cChartSpace.AllocPath();
 		var path = this.cChartSpace.GetPath(pathId);
 
 		var pathH = this.chartProp.pathH;
 		var pathW = this.chartProp.pathW;
-
 
 		calculateProps();
 
@@ -13991,7 +13905,6 @@ drawPieChart.prototype = {
 		path.lnTo(x0 / pxToMm * pathW, y0 / pxToMm * pathH);
 		path.arcTo(radius1 / pxToMm * pathW, radius2 / pxToMm * pathH, -1 * stAng * cToDeg, -1 * swAng * cToDeg);
 		path.lnTo(xCenter / pxToMm * pathW, yCenter / pxToMm * pathH);
-
 
 		this.angleFor3D += swAng;
 		if (!this.usually3dPropsCalc[seriaNum]) {
@@ -14038,7 +13951,6 @@ drawPieChart.prototype = {
 
 	}
 };
-
 
 	/** @constructor */
 function drawDoughnutChart(chart, chartsDrawer) {
@@ -14287,7 +14199,6 @@ drawDoughnutChart.prototype = {
 		var pathH = this.chartProp.pathH;
 		var pathW = this.chartProp.pathW;
 
-
 		var pxToMm = this.chartProp.pxToMM;
 
 		var x2 = xCenter + radius1 * Math.cos(stAng);
@@ -14308,7 +14219,6 @@ drawDoughnutChart.prototype = {
 		path.lnTo(x4 / pxToMm * pathW, y4 / pxToMm * pathH);
 		path.arcTo(radius2 / pxToMm * pathW, radius2 / pxToMm * pathH, -1 * stAng * cToDeg - swAng * cToDeg, swAng * cToDeg);
 		path.moveTo(xCenter / pxToMm * pathW, yCenter / pxToMm * pathH);
-
 
 		return pathId;
 	},
@@ -14332,7 +14242,6 @@ drawDoughnutChart.prototype = {
 		var radius2 = oCommand4.hR;
 		var xCenter = oCommand5.X;
 		var yCenter = oCommand5.Y;
-
 
 		var newRadius = radius2 + (radius1 - radius2) / 2;
 		var centerX = xCenter + newRadius * Math.cos(-1 * stAng - swAng / 2);
@@ -14372,7 +14281,6 @@ drawDoughnutChart.prototype = {
 		return {x: centerX, y: centerY};
 	}
 };
-
 
 /** @constructor */
 function drawRadarChart(chart, chartsDrawer) {
@@ -14808,7 +14716,6 @@ drawRadarChart.prototype = {
 	}
 };
 
-
 /** @constructor */
 function drawScatterChart(chart, chartsDrawer) {
 	this.chartProp = chartsDrawer.calcProp;
@@ -14962,7 +14869,6 @@ drawScatterChart.prototype = {
 				compiledMarkerSize = yPoint && yPoint.compiledMarker ? yPoint.compiledMarker.size : null;
 				compiledMarkerSymbol = yPoint && yPoint.compiledMarker ? yPoint.compiledMarker.symbol : null;
 
-
 				if (!this.paths.points) {
 					this.paths.points = [];
 				}
@@ -15028,11 +14934,9 @@ drawScatterChart.prototype = {
 					xVal = n + 1;
 				}
 
-
 				yPoint = this.cChartDrawer.getIdxPoint(seria, idx);
 				compiledMarkerSize = yPoint && yPoint.compiledMarker ? yPoint.compiledMarker.size : null;
 				compiledMarkerSymbol = yPoint && yPoint.compiledMarker ? yPoint.compiledMarker.symbol : null;
-
 
 				if (!this.paths.points) {
 					this.paths.points = [];
@@ -15270,11 +15174,9 @@ drawScatterChart.prototype = {
 		path.moveTo(x * pathW, y * pathH);
 		path.cubicBezTo(x1 * pathW, y1 * pathH, x2 * pathW, y2 * pathH, x3 * pathW, y3 * pathH);
 
-
 		return pathId;
 	}
 };
-
 
 /** @constructor */
 function drawStockChart(chart, chartsDrawer) {
@@ -15411,7 +15313,6 @@ drawStockChart.prototype = {
 		var pathH = this.chartProp.pathH;
 		var pathW = this.chartProp.pathW;
 
-
 		// path.moveTo(x * pathW, y * pathH);
 		// path.lnTo(x1 * pathW, y1 * pathH);
 		for (let i = 0; i < numCache.pts.length; i++) {
@@ -15453,7 +15354,6 @@ drawStockChart.prototype = {
 
 		var pathH = this.chartProp.pathH;
 		var pathW = this.chartProp.pathW;
-
 
 		path.moveTo(x * pathW, y * pathH);
 		path.lnTo(x1 * pathW, y1 * pathH);
@@ -15601,7 +15501,6 @@ drawBubbleChart.prototype = {
 				y = this.cChartDrawer.getYPosition(points[k].y, this.valAx);
 				x = this.cChartDrawer.getYPosition(points[k].x, this.catAx);
 
-
 				if (!this.paths.points) {
 					this.paths.points = [];
 				}
@@ -15726,7 +15625,6 @@ drawBubbleChart.prototype = {
 		if (bubbleSize) {
 			var maxSize, curSize, yPoints, maxDiamBubble, diffSize, maxArea;
 
-
 			maxSize = this.cChartDrawer._getMaxMinValueArray(bubbleSize).max;
 			curSize = bubbleSize[k].val;
 
@@ -15745,7 +15643,6 @@ drawBubbleChart.prototype = {
 			}
 		}
 
-
 		var pathId = this.cChartSpace.AllocPath();
 		var path = this.cChartSpace.GetPath(pathId);
 
@@ -15758,7 +15655,6 @@ drawBubbleChart.prototype = {
 		return pathId;
 	}
 };
-
 
 /** @constructor */
 function drawSurfaceChart(chart, chartsDrawer) {
@@ -15867,7 +15763,6 @@ drawSurfaceChart.prototype = {
 		this._calculateAllFaces(points, points3d);
 	},
 
-
 	_calculateAllFaces: function (points, points3d) {
 		if (!this.paths.test) {
 			this.paths.test = [];
@@ -15910,7 +15805,6 @@ drawSurfaceChart.prototype = {
 		lines[1] = {p1: p13d, p2: p213d, p111: p1, p222: p21};
 		lines[2] = {p1: p3d, p2: p13d, p111: p, p222: p1};
 		lines[3] = {p1: p23d, p2: p213d, p111: p2, p222: p21};
-
 
 		var pointsValue = [p1, p2, p21, p];
 		if (this.cChartDrawer.isPointsLieIntoOnePlane(p3d, p13d, p213d, p23d))//не делим диагональю данный сегмент
@@ -15974,7 +15868,6 @@ drawSurfaceChart.prototype = {
 						newPath = pointsFace2[l];
 					}
 
-
 					if (newPath) {
 						if (!t.paths.test2[l]) {
 							t.paths.test2[l] = [];
@@ -16025,7 +15918,6 @@ drawSurfaceChart.prototype = {
 			 }
 			 }
 
-
 			 if(!t.paths.test2[l])
 			 {
 			 t.paths.test2[l] = [];
@@ -16043,7 +15935,6 @@ drawSurfaceChart.prototype = {
 			 }*/
 		}
 	},
-
 
 	_getIntersectionPlanesAndLines: function (lines, pointsValue, bIsAddIntoPaths) {
 		var t = this;
@@ -16134,7 +16025,6 @@ drawSurfaceChart.prototype = {
 					}
 				}
 			}
-
 
 			var isCalculatePrevPoints = false;
 			if (null === prevPoints) {
@@ -16328,7 +16218,6 @@ drawSurfaceChart.prototype = {
 
 		return path
 	},
-
 
 	_getYVal: function (n, i) {
 		var idxPoint = this.cChartDrawer.getIdxPoint(this.chart.series[i], n);
@@ -16547,7 +16436,6 @@ axisChart.prototype = {
 		x1 = convertResult.x / this.chartProp.pxToMM;
 		y1 = convertResult.y / this.chartProp.pxToMM;
 
-
 		this.paths.axisLine = this._calculateLine(x, y, x1, y1);
 	},
 
@@ -16695,7 +16583,6 @@ axisChart.prototype = {
 					var posYtemp = yPoints[yPoints.length - 1].pos - firstDiff / 2;
 					this._calculateLine(posX - crossMajorStep / this.chartProp.pxToMM, posYtemp, posX + widthLine / this.chartProp.pxToMM, posYtemp, path);
 				}
-
 
 				//промежуточные линии
 				if (widthMinorLine !== 0) {
@@ -17343,7 +17230,6 @@ backWall3DChart.prototype =
 		this.cChartDrawer.drawPath(path, pen, brush);
 	}
 };
-
 
 	/** @constructor */
 function areaChart()
@@ -18619,7 +18505,6 @@ CErrBarsDraw.prototype = {
 					path.moveTo(positions.xPos[0] * pathW, positions.yPos[0] * pathH);
 				}
 
-
 				if (positions.xPos.length === 4) {
 					path.cubicBezTo(positions.xPos[1] * pathW, positions.yPos[1] * pathH, positions.xPos[2] * pathW, positions.yPos[2] * pathH, positions.xPos[3] * pathW,
 						positions.yPos[3] * pathH);
@@ -19851,7 +19736,6 @@ CErrBarsDraw.prototype = {
 			}
 		}
 
-
 		const catLimits = this.binning.recalculate(axisProperties);
 		addRangesAndFillCatScale(this.data, this.binning, catLimits, axisProperties);
 		countOccurrencesAndValExtremum(this.data, this.binning, numArr, axisProperties, this);
@@ -20108,7 +19992,6 @@ CErrBarsDraw.prototype = {
 				return resArr;
 			}
 
-
 			if (lastLayer != null) {
 				return [];
 			} else {
@@ -20235,7 +20118,6 @@ CErrBarsDraw.prototype = {
 			return sum / arr.length;
 		}
 
-
 		//the logic of the functions is repeated in the AscCommonExcel.getMedian/AscCommonExcel.getPercentile/AscCommonExcel.getPercentileExclusive
 		// but they cannot be used in that form. for the future, move the common part out and use it
 		function getMedian(rArray) {
@@ -20250,7 +20132,6 @@ CErrBarsDraw.prototype = {
 				return rArray[(nSize - 1) / 2];
 			}
 		}
-
 
 		function getPercentile(values, alpha, isSorted) {
 			values = isSorted ? values : values.sort(AscCommon.fSortAscending);
@@ -20766,7 +20647,6 @@ CErrBarsDraw.prototype = {
 		// 1 layer plus maximum number of children
 		this.layersCount = 1 + additionalLayers;
 	}
-
 
 	function CUpDownBars(chartsDrawer) {
 		this.cChartDrawer = chartsDrawer;

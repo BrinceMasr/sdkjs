@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -35,9 +30,6 @@
 // Import
 var g_oTableId = AscCommon.g_oTableId;
 var History = AscCommon.History;
-
-
-
 
 function CChangesDrawingsContentComments(Class, Type, Pos, Items, isAdd){
 	AscDFH.CChangesDrawingsContent.call(this, Class, Type, Pos, Items, isAdd);
@@ -87,7 +79,6 @@ CChangesDrawingsContentComments.prototype.Load = function(){
 
 AscDFH.CChangesDrawingsContentComments = CChangesDrawingsContentComments;
 
-
 AscDFH.changesFactory[AscDFH.historyitem_SlideSetLocks             ] = AscDFH.CChangesDrawingSlideLocks;
 AscDFH.changesFactory[AscDFH.historyitem_SlideSetComments          ] = AscDFH.CChangesDrawingsObject    ;
 AscDFH.changesFactory[AscDFH.historyitem_SlideSetShow              ] = AscDFH.CChangesDrawingsBool      ;
@@ -107,7 +98,6 @@ AscDFH.changesFactory[AscDFH.historyitem_SlideCommentsAddComment   ] = AscDFH.CC
 AscDFH.changesFactory[AscDFH.historyitem_SlideCommentsRemoveComment] = AscDFH.CChangesDrawingsContentComments   ;
 AscDFH.changesFactory[AscDFH.historyitem_SlideSetNotes             ] = AscDFH.CChangesDrawingsObject   ;
 AscDFH.changesFactory[AscDFH.historyitem_SlideSetTiming      ] = AscDFH.CChangesDrawingsObject   ;
-
 
 AscDFH.drawingsChangesMap[AscDFH.historyitem_SlideSetComments          ] = function(oClass, value){oClass.slideComments = value;};
 AscDFH.drawingsChangesMap[AscDFH.historyitem_SlideSetShow              ] = function(oClass, value){oClass.show = value;};
@@ -139,8 +129,6 @@ AscDFH.drawingsChangesMap[AscDFH.historyitem_SlideSetCSldName          ] = funct
 AscDFH.drawingsChangesMap[AscDFH.historyitem_SlideSetClrMapOverride    ] = function(oClass, value){oClass.clrMap = value;};
 AscDFH.drawingsChangesMap[AscDFH.historyitem_PropLockerSetId           ] = function(oClass, value){oClass.objectId = value;};
 AscDFH.drawingsChangesMap[AscDFH.historyitem_SlideSetNotes             ] = function(oClass, value){oClass.notes = value;};
-
-
 
 AscDFH.drawingContentChanges[AscDFH.historyitem_SlideAddToSpTree          ] =
 AscDFH.drawingContentChanges[AscDFH.historyitem_SlideRemoveFromSpTree     ] = function(oClass){return oClass.cSld.spTree;};
@@ -186,14 +174,12 @@ function Slide(presentation, slideLayout, slideNum)
     this.searchingArray = [];  // массив объектов для селекта
     this.selectionArray = [];  // массив объектов для поиска
 
-
     this.writecomments = [];
 
     this.m_oContentChanges = new AscCommon.CContentChanges(); // список изменений(добавление/удаление элементов)
 
     this.commentX = 0;
     this.commentY = 0;
-
 
     this.deleteLock     = null;
     this.backgroundLock = null;
@@ -203,7 +189,6 @@ function Slide(presentation, slideLayout, slideNum)
     this.showLock       = null;
 
     this.Lock = new AscCommon.CLock();
-
 
     this.notesShape = null;
 
@@ -479,7 +464,6 @@ AscFormat.InitClass(Slide, AscFormat.CBaseFormatObject, AscDFH.historyitem_type_
             }
         }
 
-
         if(_input_reduced_type == AscFormat.phType_sldNum || _input_reduced_type == AscFormat.phType_dt || _input_reduced_type == AscFormat.phType_ftr || _input_reduced_type == AscFormat.phType_hdr)
         {
             for(_shape_index = 0; _shape_index < _sp_tree.length; ++_shape_index)
@@ -553,7 +537,6 @@ AscFormat.InitClass(Slide, AscFormat.CBaseFormatObject, AscDFH.historyitem_type_
                 }
             }
         }
-
 
         if(body_count === 1 && bSingleBody)
         {
@@ -896,7 +879,6 @@ AscFormat.InitClass(Slide, AscFormat.CBaseFormatObject, AscDFH.historyitem_type_
         }
     };
 
-
     Slide.prototype.CheckLayout = function(){
         var bRet = true;
         if(!this.Layout || !this.Layout.CheckCorrect()){
@@ -919,7 +901,6 @@ AscFormat.InitClass(Slide, AscFormat.CBaseFormatObject, AscDFH.historyitem_type_
 
     Slide.prototype.correctContent = function(){
 
-
         for(var i = this.cSld.spTree.length - 1;  i > -1 ; --i){
             if(this.cSld.spTree[i].CheckCorrect && !this.cSld.spTree[i].CheckCorrect() || this.cSld.spTree[i].bDeleted){
                 if(this.cSld.spTree[i].setBDeleted){
@@ -937,7 +918,6 @@ AscFormat.InitClass(Slide, AscFormat.CBaseFormatObject, AscDFH.historyitem_type_
             }
         }
     };
-
 
     Slide.prototype.removeFromSpTreeByPos = function(pos){
         if(pos > -1 && pos < this.cSld.spTree.length){
@@ -1123,7 +1103,6 @@ AscFormat.InitClass(Slide, AscFormat.CBaseFormatObject, AscDFH.historyitem_type_
 		}
 		return aImages;
 	};
-
 
     Slide.prototype.getAllRasterImagesForDraw = function(images) {
         let aImages = images;
@@ -1827,7 +1806,6 @@ AscFormat.InitClass(Slide, AscFormat.CBaseFormatObject, AscDFH.historyitem_type_
         this.graphicObjects.onMouseUp(e, x, y);
     };
 
-
     Slide.prototype.getColorMap = function()
     {
         if(this.clrMap)
@@ -1858,7 +1836,6 @@ AscFormat.InitClass(Slide, AscFormat.CBaseFormatObject, AscDFH.historyitem_type_
         return AscFormat.GetDefaultColorMap();
     };
 
-
     Slide.prototype.showDrawingObjects = function()
     {
         editor.WordControl.m_oDrawingDocument.OnRecalculateSlide(this.num);
@@ -1870,12 +1847,10 @@ AscFormat.InitClass(Slide, AscFormat.CBaseFormatObject, AscDFH.historyitem_type_
         editor.sync_ShowComment(Id, x, y );
     };
 
-
     Slide.prototype.getSlideIndex = function()
     {
         return this.num;
     };
-
 
     Slide.prototype.getWorksheet = function()
     {
@@ -1905,7 +1880,6 @@ Slide.prototype.openOleEditor = function()
     {
         this.m_oContentChanges.Refresh();
     };
-
 
     Slide.prototype.isLockedObject = function()
     {
@@ -2052,12 +2026,10 @@ Slide.prototype.openOleEditor = function()
         return {snapX: snapX, snapY: snapY};
     };
 
-
     Slide.prototype.Load_Comments  = function(authors)
     {
         AscCommonSlide.fLoadComments(this, authors);
     };
-
 
 	Slide.prototype.RestartSpellCheck = function()
     {
@@ -2338,8 +2310,6 @@ AscFormat.CTextBody.prototype.checkCurrentPlaceholder = function()
     return false;
 };
 
-
-
 function SlideComments(slide)
 {
     this.comments = [];
@@ -2382,7 +2352,6 @@ SlideComments.prototype =
         this.comments.splice(this.comments.length, 0, comment);
         comment.slideComments = this;
     },
-
 
     getSlideIndex: function()
     {

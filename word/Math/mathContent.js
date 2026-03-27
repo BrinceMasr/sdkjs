@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -559,7 +554,6 @@ AmperWidths.prototype.AddNewAlignRange = function()
         this.Widths[len-1].odd = 0;
     }
 
-
     this.bEven = !this.bEven;
 
 };
@@ -568,7 +562,6 @@ AmperWidths.prototype.SetDefault = function()
     this.bEven         = true;
     this.Widths.length = 0;
 };
-
 
 function CGeneralObjectGaps(Left, Right)
 {
@@ -658,7 +651,6 @@ CCoeffGaps.prototype =
         var TRIANGLE_SYMB = code >= 0x29CE && code <= 0x29D7;
         var OTH_SYMB      = code == 0x29DF || (code >= 0x29E1 && code <= 0x29E7) || (code >= 0x29F4 && code <= 0x29F8) || (code >= 0x2A22 && code <= 0x2AF0) || (code >= 0x2AF2 && code <= 0x2AFB) || code == 0x2AFD || code == 0x2AFE;
 
-
         return COMPARE || ARROWS || INTERSECTION || EQUALS || ARR_FISHES || TRIANGLE_SYMB || OTH_SYMB;
     },
     checkZeroSign: function(code, direct) // "*", "/", "\"
@@ -670,7 +662,6 @@ CCoeffGaps.prototype =
         var bOper = code == MULT || code == DIVISION || code == B_SLASH;
         var bLeftBracket = direct == -1 && (code == 0x28 || code == 0x5B || code == 0x7B);
         var bRightBracket = direct == 1 && (code == 0x29 || code == 0x5D || code == 0x7D);
-
 
         return bOper || bLeftBracket || bRightBracket;
     }
@@ -823,7 +814,6 @@ CMathGapsInfo.prototype =
 
             var leftCode;
 
-
             if(this.Current.IsMathText())
             {
                 var currCode = this.Current.getCodeChr();
@@ -927,7 +917,6 @@ CMathGapsInfo.prototype =
             coeffRight = 0.3;
         }
 
-
         return direct == -1 ? coeffLeft : coeffRight;
     },
     checkGapKind: function(Comp)
@@ -936,7 +925,6 @@ CMathGapsInfo.prototype =
 
         var bEmptyGaps = kind == MATH_MATRIX /*|| (kind == MATH_DELIMITER && Comp.Is_EmptyGaps())*/,
             bChildGaps = kind == MATH_DEGREE || kind == MATH_DEGREESubSup || kind == MATH_ACCENT || kind == MATH_RADICAL || kind == MATH_LIMIT || kind == MATH_BORDER_BOX;
-
 
         return  {bEmptyGaps: bEmptyGaps, bChildGaps: bChildGaps};
     }
@@ -1015,7 +1003,6 @@ CMPrp.prototype =
             textPrp.Italic = this.sty == STY_BI || this.sty == STY_ITALIC;
             textPrp.Bold   = this.sty == STY_BI || this.sty == STY_BOLD;
         }
-
 
         return textPrp;
     },
@@ -1328,7 +1315,6 @@ CMathContent.prototype.Math_UpdateGaps = function(_CurLine, _CurRange)
             var EndPosPrev   = this.protected_GetRangeEndPos(CurLine - 1, CurRange);
             this.Content[EndPosPrev].UpdLastElementForGaps(_CurLine - 1, _CurRange, GapsInfo);
         }
-
 
         for(var Pos = StartPos; Pos <= EndPos; Pos++)
         {
@@ -2009,7 +1995,6 @@ CMathContent.prototype.Get_CompiledTextPr = function(Copy, bAll)
             }
         }
 
-
         // пропускаем пустые рана только для случая, когда есть селект
 
         while ( null === TextPr && StartPos <= EndPos )
@@ -2027,7 +2012,6 @@ CMathContent.prototype.Get_CompiledTextPr = function(Copy, bAll)
         {
             EndPos--;
         }
-
 
         for ( var CurPos = StartPos; CurPos < EndPos + 1; CurPos++ )
         {
@@ -2130,10 +2114,8 @@ CMathContent.prototype.Apply_TextPr = function(TextPr, IncFontSize, ApplyToAll, 
                 EndPos = temp;
             }
 
-
             for(var i = StartPos + 1; i < EndPos; i++)
                 this.Content[i].Apply_TextPr(TextPr, IncFontSize, true );
-
 
             if(this.Content[EndPos].Type == para_Math_Run)
             {
@@ -2152,7 +2134,6 @@ CMathContent.prototype.Apply_TextPr = function(TextPr, IncFontSize, ApplyToAll, 
             else
                 this.Content[EndPos].Apply_TextPr(TextPr, IncFontSize, true);
 
-
             if(this.Content[StartPos].Type == para_Math_Run)
             {
                 NewRuns = this.Content[StartPos].Apply_TextPr(TextPr, IncFontSize, false);
@@ -2160,7 +2141,6 @@ CMathContent.prototype.Apply_TextPr = function(TextPr, IncFontSize, ApplyToAll, 
                 LRun = NewRuns[0];
                 CRun = NewRuns[1];
                 // RRun - null
-
 
                 if(LRun !== null)
                 {
@@ -2170,7 +2150,6 @@ CMathContent.prototype.Apply_TextPr = function(TextPr, IncFontSize, ApplyToAll, 
             }
             else
                 this.Content[StartPos].Apply_TextPr(TextPr, IncFontSize, true);
-
 
             var bStartComposition = this.Content[StartPos].Type == para_Math_Composition || (this.Content[StartPos].Is_Empty() && this.Content[StartPos + 1].Type == para_Math_Composition);
             var bEndCompostion    = this.Content[EndPos].Type == para_Math_Composition || (this.Content[EndPos].Is_Empty()   && this.Content[EndPos - 1].Type == para_Math_Composition);
@@ -2182,7 +2161,6 @@ CMathContent.prototype.Apply_TextPr = function(TextPr, IncFontSize, ApplyToAll, 
                 else if (this.Selection.EndPos < this.Selection.StartPos && true === this.Content[this.Selection.EndPos].IsSelectionEmpty(true) )
                     this.Selection.EndPos++;
             }
-
 
             if(!bEndCompostion)
             {
@@ -4825,7 +4803,6 @@ CMathContent.prototype.Selection_CheckParaContentPos = function(ContentPos, Dept
     if(CurPos < bEndPos)
         bEnd = false;
 
-
     if(bStart === false && bEnd === false)
         return true;
     else if((bStartPos <= CurPos || bStart === false) && (CurPos <= bEndPos || bEnd === false))
@@ -5030,7 +5007,6 @@ CMathContent.prototype.Recalculate_Range = function(PRS, ParaPr, Depth)
                             PRS.bMathWordLarge = true;
                         }
                     }
-
 
                     // обновляем BreakPos на конец Run, т.к. внутри мат объекта BreakPos  может измениться на  if(true !== Word)
                     // обновляем только в том случае, если Word = false, иначе можем здесь перебить корректный LineBreakPos
@@ -5683,7 +5659,6 @@ CMathContent.prototype.private_GetPosRunForForcedBreak = function()
             EndPos   = this.Selection.StartPos;
         }
 
-
         var bHaveSelectedItem = false;
         for(var CurPos = StartPos; CurPos <= EndPos; CurPos++)
         {
@@ -5892,7 +5867,6 @@ CMathContent.prototype.Delete_ItemToContentThroughInterface = function(Props, Po
         RemoveDelimiter = Props.Action & c_oMathMenuAction.RemoveDelimiter && Item.kind == MATH_DELIMITER,
         RemoveGroupChar = Props.Type == Asc.c_oAscMathInterfaceType.GroupChar && Props.Pos == Asc.c_oAscMathInterfaceGroupCharPos.None && Item.kind == MATH_GROUP_CHARACTER,
         RemoveRadical   = Props.Action & c_oMathMenuAction.RemoveRadical && Item.kind == MATH_RADICAL;
-
 
     if(RemoveChar || RemoveBar || RemoveScript || RemoveLimit || RemoveMatrix || RemoveEqArray || RemoveDelimiter || RemoveGroupChar || RemoveRadical)
     {
@@ -6361,7 +6335,6 @@ CMathContent.prototype.GetTextContent = function(bSelectedText, isLaTeX)
 	let strContent = oMathText.GetText();
 	return {str: strContent, content: oMathText};
 };
-
 
 var g_DefaultAutoCorrectMathFuncs =
 [

@@ -12,24 +12,18 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
-
 
 $(function () {
 	// Mocks for API Testing
@@ -118,7 +112,6 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-
 		oParser = new parserFormula(func + "(A100:C101)", "A1", ws);
 		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
 		assert.ok(oParser.parse(), 'Formula is parsed.');
@@ -163,7 +156,6 @@ $(function () {
 			assert.ok(oParser.parse(), 'Test: Formula ' + func + argStr + ' is parsed.');
 			return oParser.calculate().getValue();
 		};
-
 
 		//***array-formula***
 		ws.getRange2("A100").setValue("1");
@@ -340,7 +332,6 @@ $(function () {
 		let docInfo = new Asc.asc_CDocInfo();
 		docInfo.asc_putTitle("TeSt.xlsx");
 		api.DocInfo = docInfo;
-
 
 		window["Asc"]["editor"] = api;
 		AscCommon.g_oTableId.init(api);
@@ -3588,7 +3579,6 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 100);
 
-
 		oParser = new parserFormula("1+A1470", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
@@ -4417,7 +4407,6 @@ $(function () {
 
 			doCustomFunctionTasks(assert, aTasks, typeToArgMap, fCustomFunc.name.toUpperCase(), "! _@NUMBER_number-> any !");
 
-
 			//********** 5. @number / @number <- @number[][] **********
 			initParamsCustomFunction([{type: "number"}, {type: "number"}], "number[][]");
 
@@ -4434,7 +4423,6 @@ $(function () {
 
 			doCustomFunctionTasks(assert, aTasks, typeToArgMap, fCustomFunc.name.toUpperCase(), "! _@NUMBER_@NUMBER->number[][] !");
 
-
 			//********** 6. @number[][] / @number <- @number **********
 			initParamsCustomFunction([{type: "number[][]"}, {type: "number"}], "number");
 
@@ -4450,7 +4438,6 @@ $(function () {
 			];
 
 			doCustomFunctionTasks(assert, aTasks, typeToArgMap, fCustomFunc.name.toUpperCase(), "! _@NUMBER[][]_@NUMBER->number !");
-
 
 			//**********7. @number / @number <- @string[][] **********
 			initParamsCustomFunction([{type: "number"}, {type: "number"}], "string[][]");
@@ -4619,7 +4606,6 @@ $(function () {
 
 			doCustomFunctionTasks(assert, aTasks, typeToArgMap, fCustomFunc.name.toUpperCase(), "_@NUMBER@STRING->STRING");
 
-
 			//********** 3. @string<- @boolean **********
 			initParamsCustomFunction([{type: "string"}], "boolean");
 
@@ -4787,7 +4773,6 @@ $(function () {
 
 			doCustomFunctionTasks(assert, aTasks, typeToArgMap, fCustomFunc.name.toUpperCase(), "! _@NUMBER_@BOOLEAN->boolean[][] !");
 
-
 			//********** 4. @boolean<- @any **********
 			initParamsCustomFunction([{type: "boolean"}], "any");
 
@@ -4831,7 +4816,6 @@ $(function () {
 			];
 
 			doCustomFunctionTasks(assert, aTasks, typeToArgMap, fCustomFunc.name.toUpperCase(), "! _@NUMBER_@BOOLEAN[][]->boolean[][] !");
-
 
 			//********** 2. @boolean[][]<- @boolean **********
 			initParamsCustomFunction([{type: "boolean[][]"}], "boolean");
@@ -4896,7 +4880,6 @@ $(function () {
 			];
 
 			doCustomFunctionTasks(assert, aTasks, typeToArgMap, fCustomFunc.name.toUpperCase(), "! _@NUMBER_@boolean[][]->string[][] !");
-
 
 			//********** 10. @boolean[][]<- @any[][] **********
 			initParamsCustomFunction([{type: "boolean[][]"}], "any[][]");
@@ -6553,7 +6536,6 @@ $(function () {
 		assert.ok(oParser.parse(true), "SUM('" + wsName + "'!$A:$A,0). isLocal = true. Link to 3d range $A:$A inside function with quotes");
 		assert.ok(oParser.outStack.length > 2, "OutStack length after parse");
 		assert.strictEqual(oParser.calculate().getValue(), 0, "SUM('" + wsName + "'!$A:$A,0)");
-
 
 		wsName = "Sheet!25";
 		newWs.setName(wsName);

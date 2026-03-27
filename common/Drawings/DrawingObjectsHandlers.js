@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -47,7 +42,6 @@ function CheckCoordsNeedPage(x, y, pageIndex, needPageIndex, drawingDocument)
             return {x: t.X, y: t.Y};
     }
 }
-
 
 function handleSelectedObjects(drawingObjectsController, e, x, y, group, pageIndex, bWord)
 {
@@ -94,7 +88,6 @@ function handleSelectedObjects(drawingObjectsController, e, x, y, group, pageInd
                     ret = drawingObjectsController.handleMoveHit(oCropSelection, e, tx, ty, group, true, oCropSelection.selectStartPage, true);
                 }
             }
-
 
             var oldSelectedObjects;
             if(group)
@@ -311,7 +304,6 @@ function handleSelectedObjects(drawingObjectsController, e, x, y, group, pageInd
     }
     return ret;
 }
-
 
 function handleFloatObjects(drawingObjectsController, drawingArr, e, x, y, group, pageIndex, bWord)
 {
@@ -559,7 +551,6 @@ function handleShapeImage(drawing, drawingObjectsController, e, x, y, group, pag
         }
     }
 
-
     if(window["IS_NATIVE_EDITOR"])
     {
         if(drawing.getObjectType() === AscDFH.historyitem_type_Shape && drawing.getDocContent && drawing.getDocContent())
@@ -650,7 +641,6 @@ function handlePdfTextField(field, drawingObjectsController, e, x, y, group, pag
 		return drawingObjectsController.handleTextHit(field, e, x, y, null, pageIndex, false);
 	}
 }
-
 
 function handleShapeImageInGroup(drawingObjectsController, drawing, shape, e, x, y, pageIndex, bWord)
 {
@@ -1518,14 +1508,11 @@ function handleInternalChart(drawing, drawingObjectsController, e, x, y, group, 
             }
         }
 
-
         if(/*bClickFlag*/true){
-
 
             var oPlotArea = drawing.chart.plotArea;
             if(drawing.selection.plotArea)
             {
-
 
                 //check hit in resize handles
                 hit_to_handles = oPlotArea.hitToHandles(x, y);
@@ -1863,7 +1850,6 @@ function handleInternalChart(drawing, drawingObjectsController, e, x, y, group, 
 
         //todo gridlines
 
-
         //plotArea
         if(bClickFlag){
 
@@ -1889,7 +1875,6 @@ function handleInternalChart(drawing, drawingObjectsController, e, x, y, group, 
                     return {objectId: drawing.Get_Id(), cursorType: "move", title: null};
                 }
             }
-
 
             var oChartSizes = drawing.getChartSizes(true);
             var oInvertTransform = drawing.invertTransform;
@@ -1932,7 +1917,6 @@ function handleInternalChart(drawing, drawingObjectsController, e, x, y, group, 
                             selector.selectObject(drawing, pageIndex);
                             selector.selection.chartSelection = drawing;
                             drawing.selection.plotArea = drawing.chart.plotArea;
-
 
                             drawingObjectsController.arrPreTrackObjects.length = 0;
                             drawingObjectsController.arrPreTrackObjects.push(new AscFormat.MoveChartObjectTrack(drawing.chart.plotArea, drawing));
@@ -1979,7 +1963,6 @@ function handleInternalChart(drawing, drawingObjectsController, e, x, y, group, 
                                 }
                             }
 
-
                             drawing.selection.plotArea = drawing.chart.plotArea;
                             drawing.selection.rotatePlotArea = true;
 
@@ -2003,8 +1986,6 @@ function handleInternalChart(drawing, drawingObjectsController, e, x, y, group, 
                             return true;
                         }
                     }
-
-
 
                     drawingObjectsController.updateSelectionState();
                     drawingObjectsController.updateOverlay();
@@ -2059,7 +2040,6 @@ function handleChart(drawing, drawingObjectsController, e, x, y, group, pageInde
         return ret;
     return false;
 }
-
 
 function handleInlineShapeImage(drawing, drawingObjectsController, e, x, y, pageIndex)
 {

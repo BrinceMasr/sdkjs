@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -380,7 +375,6 @@ $(function(){
         form = new CellFormat("ss.000");
         strictEqual(fGetFormatedText(form.format(7540.313102)), "52.013", "format: ss.000, number: 7540.313102, date: 22.08.1920 7:30:52");
         strictEqual(fGetFormatedText(form.format(1/(24*60*60*1000))), "00.001", "format: ss.000, number: 1.1574074074074074E-8, date: 30.12.1899 0:00:00");
-
 
     });
 

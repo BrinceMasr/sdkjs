@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -34,7 +29,6 @@
 
 // Import
 var History = AscCommon.History;
-
 
  AscDFH.changesFactory[AscDFH.historyitem_SlideMasterSetThemeIndex]     = AscDFH.CChangesDrawingsLong            ;
  AscDFH.changesFactory[AscDFH.historyitem_SlideMasterSetSize]           = AscDFH.CChangesDrawingsObjectNoId      ;
@@ -80,18 +74,15 @@ var History = AscCommon.History;
  AscDFH.drawingsChangesMap[AscDFH.historyitem_SlideMasterSetTiming]         = function(oClass, value){oClass.timing = value;};
  AscDFH.drawingsChangesMap[AscDFH.historyitem_SlideMasterSetPreserve]       = function(oClass, value){oClass.preserve = value;};
 
-
 AscDFH.drawingsConstructorsMap[AscDFH.historyitem_SlideMasterSetSize]      = AscFormat.CDrawingBaseCoordsWritable;
 AscDFH.drawingsConstructorsMap[AscDFH.historyitem_SlideMasterSetBg]        = AscFormat.CBg;
 AscDFH.drawingsConstructorsMap[AscDFH.historyitem_SlideMasterSetTxStyles]  = AscFormat.CTextStyles;
 AscDFH.drawingsConstructorsMap[AscDFH.historyitem_SlideMasterSetTransition]  = Asc.CAscSlideTransition;
 
-
 AscDFH.drawingContentChanges[AscDFH.historyitem_SlideMasterAddToSpTree]       = function(oClass){return oClass.cSld.spTree;};
 AscDFH.drawingContentChanges[AscDFH.historyitem_SlideMasterAddLayout]         = function(oClass){return oClass.sldLayoutLst;};
 AscDFH.drawingContentChanges[AscDFH.historyitem_SlideMasterRemoveLayout]      = function(oClass){return oClass.sldLayoutLst;};
 AscDFH.drawingContentChanges[AscDFH.historyitem_SlideMasterRemoveFromSpTree]  = function(oClass){return oClass.cSld.spTree;};
-
 
 function MasterSlide(presentation, theme)
 {
@@ -112,7 +103,6 @@ function MasterSlide(presentation, theme)
     this.ImageBase64 = "";
     this.Width64 = 0;
     this.Height64 = 0;
-
 
     // pointers
     this.Theme = null;
@@ -139,7 +129,6 @@ function MasterSlide(presentation, theme)
         recalculateBounds: true,
         recalculateSlideLayouts: true
     };
-
 
     this.lastRecalcSlideIndex = 0;
 
@@ -222,7 +211,6 @@ MasterSlide.prototype.Read_FromBinary2 = function (r) {
     this.Id = r.GetString2();
     this.theme = AscFormat.readObject(r);
 };
-
 
 MasterSlide.prototype.recalculateBackground = function() {
     var _back_fill = null;
@@ -342,7 +330,6 @@ MasterSlide.prototype.getMatchingLayout = function (type, matchingName, cSldName
             }
         }
     }
-
 
     if (matchingName != "" && matchingName != null) {
         _layoutName = matchingName;
@@ -1168,7 +1155,6 @@ function CMasterThumbnailDrawer()
             18 // font_size
         ];
         _params[9] *= ((this.HeightMM / this.HeightPx) * (96 / 25.4));
-
 
         for (var i = 0; i < _params.length; i++)
         {

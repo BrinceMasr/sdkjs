@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -309,7 +304,6 @@ $(function() {
 				api.asc_RemoveTraceArrows(Asc.c_oAscRemoveArrowsType.all);
 			}
 
-
 			ws.getRange2("A1").setValue("=Sheet2!A10:A11+I5:J6+C1+A10:A11+Sheet2!C3");
 			ws.getRange2("C1").setValue("=Sheet2!A10:A11+Sheet2!C3");
 			
@@ -571,7 +565,6 @@ $(function() {
 			assert.strictEqual(traceManager._getDependents(C1Index, I5Index), 1, "C1->I5");
 			assert.strictEqual(traceManager._getDependents(C1Index, I6Index), 1, "C1->I6");
 
-
 			// clear traces
 			api.asc_RemoveTraceArrows(Asc.c_oAscRemoveArrowsType.all);
 
@@ -609,7 +602,6 @@ $(function() {
 			assert.strictEqual(traceManager._getDependents(C1Index, K4Index), 1, "C1->K4");
 			assert.strictEqual(traceManager._getDependents(C1Index, K5Index), 1, "C1->K5");
 			assert.strictEqual(traceManager._getDependents(C1Index, K6Index), 1, "C1->K6");
-
 
 			// clear traces
 			api.asc_RemoveTraceArrows(Asc.c_oAscRemoveArrowsType.all);
@@ -2230,7 +2222,6 @@ $(function() {
 			// clear traces
 			api.asc_RemoveTraceArrows(Asc.c_oAscRemoveArrowsType.all);
 
-
 			ws.getRange2("B4").setValue("=SIN(A:A)");
 			let A4Index = AscCommonExcel.getCellIndex(ws.getRange2("A4").bbox.r1, ws.getRange2("A4").bbox.c1),
 				B4Index = AscCommonExcel.getCellIndex(ws.getRange2("B4").bbox.r1, ws.getRange2("B4").bbox.c1);
@@ -2263,7 +2254,6 @@ $(function() {
 
 			// clear traces
 			api.asc_RemoveTraceArrows(Asc.c_oAscRemoveArrowsType.all);
-
 
 			ws.getRange2("B6").setValue("=NPV(A:A;1)");
 			let A6Index = AscCommonExcel.getCellIndex(ws.getRange2("A6").bbox.r1, ws.getRange2("A6").bbox.c1),

@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -502,7 +497,6 @@
 			}
 			return false;
 		};
-
 
 		if (!compareElements(this.aRuleElements, val.aRuleElements)) {
 			if (addToHistory) {
@@ -1439,7 +1433,6 @@
 		this.aRuleElements = [];
 		val = correctFromInterface(val);
 
-
 		this.aRuleElements[0] = new CFormulaCF();
 		this.aRuleElements[0].Text = val;
 	};
@@ -2231,7 +2224,6 @@
 		return res ? res : this.Text;
 	};
 
-
 	function CIconSet() {
 		this.IconSet = EIconSetType.Traffic3Lights1;
 		this.Percent = true;
@@ -2399,7 +2391,6 @@
 		if (reader.GetBool()) {
 			this.ShowValue = reader.GetBool();
 		}
-
 
 		var i, length, elem;
 		if (reader.GetBool()) {
@@ -2750,7 +2741,6 @@
 			return _formulaParsed;
 		};
 
-
 		var _checkValue = function (_val, _type, _isNumeric) {
 			var fParser, _error;
 			switch (_type) {
@@ -3020,7 +3010,6 @@
 		"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3QgeD0iMSIgeT0iMiIgd2lkdGg9IjYiIGhlaWdodD0iNiIgZmlsbD0iIzIzNjFCRSIvPgo8cmVjdCB4PSIxLjUiIHk9IjIuNSIgd2lkdGg9IjUiIGhlaWdodD0iNSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLW9wYWNpdHk9IjAuMiIvPgo8cmVjdCB4PSI4IiB5PSIyIiB3aWR0aD0iNiIgaGVpZ2h0PSI2IiBmaWxsPSIjQ0NDQ0NDIi8+CjxyZWN0IHg9IjguNSIgeT0iMi41IiB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBzdHJva2U9ImJsYWNrIiBzdHJva2Utb3BhY2l0eT0iMC4yIi8+CjxyZWN0IHg9IjgiIHk9IjkiIHdpZHRoPSI2IiBoZWlnaHQ9IjYiIGZpbGw9IiMyMzYxQkUiLz4KPHJlY3QgeD0iOC41IiB5PSI5LjUiIHdpZHRoPSI1IiBoZWlnaHQ9IjUiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS1vcGFjaXR5PSIwLjIiLz4KPHJlY3QgeD0iMSIgeT0iOSIgd2lkdGg9IjYiIGhlaWdodD0iNiIgZmlsbD0iIzIzNjFCRSIvPgo8cmVjdCB4PSIxLjUiIHk9IjkuNSIgd2lkdGg9IjUiIGhlaWdodD0iNSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLW9wYWNpdHk9IjAuMiIvPgo8L3N2Zz4K",
 		"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEgMkg3VjhIMVYyWiIgZmlsbD0iIzIzNjFCRSIvPgo8cGF0aCBkPSJNMS41IDIuNUg2LjVWNy41SDEuNVYyLjVaIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utb3BhY2l0eT0iMC4yIi8+CjxyZWN0IHg9IjgiIHk9IjIiIHdpZHRoPSI2IiBoZWlnaHQ9IjYiIGZpbGw9IiMyMzYxQkUiLz4KPHJlY3QgeD0iOC41IiB5PSIyLjUiIHdpZHRoPSI1IiBoZWlnaHQ9IjUiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS1vcGFjaXR5PSIwLjIiLz4KPHJlY3QgeD0iOCIgeT0iOSIgd2lkdGg9IjYiIGhlaWdodD0iNiIgZmlsbD0iIzIzNjFCRSIvPgo8cmVjdCB4PSI4LjUiIHk9IjkuNSIgd2lkdGg9IjUiIGhlaWdodD0iNSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLW9wYWNpdHk9IjAuMiIvPgo8cmVjdCB4PSIxIiB5PSI5IiB3aWR0aD0iNiIgaGVpZ2h0PSI2IiBmaWxsPSIjMjM2MUJFIi8+CjxyZWN0IHg9IjEuNSIgeT0iOS41IiB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBzdHJva2U9ImJsYWNrIiBzdHJva2Utb3BhY2l0eT0iMC4yIi8+Cjwvc3ZnPgo="];
 
-
 	var iDown = 1, iSide = 2, iUp = 3;
 	var iDownGray = 4, iSideGray = 5, iUpGray = 6;
 	var iFlagRed = 7, iFlagYellow = 8, iFlagGreen = 9;
@@ -3213,7 +3202,6 @@
 	prot['asc_setValue2'] = prot.asc_setValue2;
 	prot['asc_checkScope'] = prot.asc_checkScope;
 	prot['asc_setColorScaleOrDataBarOrIconSetRule'] = prot.asc_setColorScaleOrDataBarOrIconSetRule;
-
 
 	prot = CColorScale.prototype;
 	prot['asc_getCFVOs'] = prot.asc_getCFVOs;

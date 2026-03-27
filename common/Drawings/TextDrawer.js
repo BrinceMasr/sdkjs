@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -45,7 +40,6 @@
 
 	var PATH_DIV_EPSILON = 0.1;
 	var UNDERLINE_DIV_EPSILON = 3;
-
 
 	function ParaDrawingStruct(nPageIndex, pDrawing) {
 		this.oDrawing = pDrawing;
@@ -317,7 +311,6 @@
 		return combinedGeometry;
 	};
 
-
 	function CheckIntervalIntersection(X1, Y1, X2, Y2, X3, Y3, X4, Y4) {
 		return (((X3 - X1) * (Y2 - Y1) - (Y3 - Y1) * (X2 - X1)) * ((X4 - X1) * (Y2 - Y1) - (Y4 - Y1) * (X2 - X1)) >= 0) && (((X1 - X3) * (Y4 - Y3) - (Y1 - Y3) * (X4 - X3)) * ((X2 - X3) * (Y4 - Y3) - (Y2 - Y3) * (X4 - X3)) >= 0);
 	}
@@ -352,7 +345,6 @@
 		this.arrBounds[3].X1 = oTransform.TransformPointX(oBounds.min_x, oBounds.min_y);
 		this.arrBounds[3].Y1 = oTransform.TransformPointY(oBounds.min_x, oBounds.min_y);
 	};
-
 
 	BoundsRect.prototype.checkIntersection = function (oBoundsRect) {
 		var i, j, oCurBound1, oCurBound2;
@@ -396,7 +388,6 @@
 			return 0;
 		}
 	};
-
 
 	BoundsRect.prototype.checkBoundsRectProjection = function (oBoundsRect) {
 		var dX = 0, dY = 0, dLTemp;
@@ -559,7 +550,6 @@
 	CDocContentStructure.prototype.getParagraphStructures = function () {
 		return this.m_aContent;
 	};
-
 
 	CDocContentStructure.prototype.Write_ToBinary = function (writer) {
 		writer.WriteLong(this.m_aContent.length);
@@ -1366,7 +1356,6 @@
 	};
     CLineStructure.prototype.Write_ToBinary = function (writer) {
 
-
         writer.WriteLong(this.m_aContent.length);
         for(let idx = 0; idx < this.m_aContent.length; ++idx) {
             this.m_aContent[idx].Write_ToBinary(writer);
@@ -1518,7 +1507,6 @@
 		oLine.setW(dSize * 36000 >> 0);
 		oLine.setFill(oUnifill);
 
-
 		//TODO
 		// this.Color      = { R : 255, G : 255, B : 255, A : 255 };
 		// this.Style      = 0;
@@ -1569,7 +1557,6 @@
 
 		this.m_oLine = null;
 		this.m_oFill = null;
-
 
 		// чтобы выставилось в первый раз
 		this.m_oPen.Color.R = -1;
@@ -2741,7 +2728,6 @@
 		};
 	};
 
-
 	function ObjectsToDrawBetweenTwoPolygons(aObjectsToDraw, oBoundsController, oPolygonWrapper1, oPolygonWrapper2) {
 		var i;
 		for (i = 0; i < aObjectsToDraw.length; ++i) {
@@ -2758,7 +2744,6 @@
 		if (oPen1 && !oPen2 || !oPen1 && oPen2 || (oPen1 && oPen2 && !oPen1.IsIdentical(oPen2))) return false;
 		return true;
 	}
-
 
 	function GetRectContentWidth(oContent, dMaxWidth) {
 		var _maxWidth = AscFormat.isRealNumber(dMaxWidth) ? dMaxWidth : 100000;

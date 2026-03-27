@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -31,7 +26,6 @@
  */
 
 "use strict";
-
 
 (function(window, undefined) {
     function gcd(n, m) {
@@ -192,7 +186,6 @@
                           oPath2, nRelH2, oBrush2, oPen2, oTransform2) {
         CMorphObjectBase.call(this, oTexturesCache, nRelH1, nRelH2);
 
-
         if(oPath1.fill !== oPath2.fill || oPath1.stroke !== oPath2.stroke) {
             return;
         }
@@ -218,7 +211,6 @@
             this.path2.convertToBezierCurves(this.path2T, this.transform2);
         }, this, []);
 
-
         this.path = null;
         this.pen = null;
         this.brush = null;
@@ -230,7 +222,6 @@
         let aContours2 = [];
         const aCommands1 = this.path1T.ArrPathCommand;
         const aCommands2 = this.path2T.ArrPathCommand;
-
 
         for(let nCmd = 0; nCmd < aCommands1.length; ++nCmd) {
             let oCmd = aCommands1[nCmd];
@@ -358,7 +349,6 @@
                 fillContour(aContourT2, oFirstCmd2, oLastCmd2, aBezier2, this.transform2);
             }
         }
-
 
         const oPath = AscFormat.ExecuteNoHistory(function() {
 
@@ -497,7 +487,6 @@
         this.morphedObjects.push(oMorphObject);
     };
 
-
     function CShapeComplexMorph(oTexturesCache, nRelH1, nRelH2, oShape1, oShape2, bNoText) {
         CComplexMorphObject.call(this, oTexturesCache, nRelH1, nRelH2);
         this.shape1 = oShape1;
@@ -594,7 +583,6 @@
 		}
 	};
     CShapeComplexMorph.prototype.getDrawingData = function(oDrawing, oAnimPlayer) {
-
 
         let sFormatId = oDrawing.GetId();
         let oAnimParams = oAnimPlayer.getDrawingParams(sFormatId, true);
@@ -807,7 +795,6 @@
                 AscCommon. global_MatrixTransformer.ScaleAppend(oT, 1, -1);
             AscCommon.global_MatrixTransformer.RotateRadAppend(oT, -oXfrm.rot);
             AscCommon.global_MatrixTransformer.TranslateAppend(oT, oXfrm.offX + hc, oXfrm.offY + vc);
-
 
             this.drawObject.geometry.Recalculate(oXfrm.extX, oXfrm.extY, false);
             this.drawObject.extX = oXfrm.extX;
@@ -1121,7 +1108,6 @@
                     if(nPar === aParStructs1.length && nStructuresCount < nMaxCount) {
                         bTexture = false;
 
-
                         for(nPar = 0; nPar < aParStructs1.length; ++nPar) {
                             let oParStruct1 = aParStructs1[nPar];
                             let oParStruct2 = aParStructs2[nPar];
@@ -1130,7 +1116,6 @@
                             if(aTextStructs1.length !== aTextStructs2.length) {
                                 break;
                             }
-
 
                             let aContent1 = oParStruct1.m_aContent;
                             for(let nIdx = 0; nIdx < aContent1.length; ++nIdx) {
@@ -1389,7 +1374,6 @@
         }
         oGraphics.m_oContext.drawImage(oDrawCanvas, nX, nY, nW, nH);
     };
-
 
     function CGroupComplexMorph(oTexturesCache, nRelH1, nRelH2, oGroup1, oGroup2) {
         CComplexMorphObject.call(this, oTexturesCache, nRelH1, nRelH2);

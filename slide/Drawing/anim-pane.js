@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -35,7 +30,6 @@
 (function (window, undefined) {
 	var InitClass = AscFormat.InitClass;
 	var CAnimTexture = AscFormat.CAnimTexture;
-
 
 	const STATE_FLAG_SELECTED = 1;
 	const STATE_FLAG_HOVERED = 2;
@@ -58,7 +52,6 @@
 	const CONTROL_TYPE_ANIM_GROUP = 13;
 	const CONTROL_TYPE_ANIM_ITEM = 14;
 	const CONTROL_TYPE_EFFECT_BAR = 15;
-
 
 	function CControl(oParentControl) {
 		AscFormat.ExecuteNoHistory(function () {
@@ -501,7 +494,6 @@
 
 	};
 
-
 	function CControlContainer(oParentControl) {
 		CControl.call(this, oParentControl);
 		this.children = [];
@@ -693,7 +685,6 @@
 		return null;
 	};
 
-
 	function CTopControl(oDrawer) {
 		CControlContainer.call(this, null);
 		this.drawer = oDrawer;
@@ -718,7 +709,6 @@
 		CControlContainer.prototype.onResize.call(this);
 		this.onUpdate();
 	};
-
 
 	function CLabel(oParentControl, sString, nFontSize, bBold, nParaAlign) {
 		CControl.call(this, oParentControl);
@@ -823,7 +813,6 @@
 		}
 	};
 
-
 	function CImageControl(oParentControl, sBase64Image, width, height) {
 		CControl.call(this, oParentControl)
 		this.src = sBase64Image;
@@ -855,7 +844,6 @@
 	CImageControl.prototype.getOutlineColor = function () {
 		return null;
 	};
-
 
 	function CButton(oParentControl, fOnMouseDown, fOnMouseMove, fOnMouseUp) {
 		CControlContainer.call(this, oParentControl);
@@ -928,7 +916,6 @@
 	CButton.prototype.isDisabled = function () {
 		return this.getStateFlag(STATE_FLAG_DISABLED);
 	};
-
 
 	function CAnimPaneHeader(oDrawer) {
 		CTopControl.call(this, oDrawer);
@@ -1073,7 +1060,6 @@
 			PLAY_BUTTON_HEIGHT
 		);
 
-
 		this.moveUpButton.icon.setLayout(0, 0, MOVE_BUTTON_SIZE, MOVE_BUTTON_SIZE);
 
 		gap = (HEADER_HEIGHT - MOVE_BUTTON_SIZE) / 2;
@@ -1116,7 +1102,6 @@
 		}
 		return CControl.prototype.onMouseMove.call(this, e, x, y);
 	};
-
 
 	function CTimelineContainer(oDrawer) {
 		CTopControl.call(this, oDrawer);
@@ -1216,7 +1201,6 @@
 		}
 		return CTopControl.prototype.onMouseDown.call(this, e, x, y);
 	};
-
 
 	function CTimeline(oParentControl, oContainer, oChild) {
 		CControlContainer.call(this, oParentControl);
@@ -1616,7 +1600,6 @@
 
 		let nPenW = this.getPenWidth(graphics);
 
-
 		let sColor = oSkin.AnimPaneTimelineScrollerOutline;
 		let oColor = AscCommon.RgbaHexToRGBA(sColor);
 		graphics.p_color(oColor.R, oColor.G, oColor.B, 0xFF);
@@ -1852,7 +1835,6 @@
 		return CControlContainer.prototype.onMouseUp.call(this, e, x, y);
 	};
 
-
 	function CSeqListContainer(oDrawer) {
 		CTopControl.call(this, oDrawer);
 		this.seqList = this.addControl(new CSeqList(this));
@@ -1903,7 +1885,6 @@
 		}
 		return CTopControl.prototype.onMouseDown.call(this, e, x, y);
 	};
-
 
 	function CSeqList(oParentControl) {
 		CControlContainer.call(this, oParentControl);
@@ -2161,7 +2142,6 @@
 		})
 	};
 
-
 	// mainSeq or interactiveSeq
 	function CAnimSequence(oParentControl, oSeq) {
 		CControlContainer.call(this, oParentControl);
@@ -2206,7 +2186,6 @@
 		}
 		this.setLayout(this.getLeft(), this.getTop(), this.getWidth(), dCurY);
 	};
-
 
 	function CAnimGroup(oParentControl, aAllGroupEffects) {
 		CControlContainer.call(this, oParentControl);
@@ -2292,7 +2271,6 @@
 			return nMilliseconds * TIME_INTERVALS[index] / TIME_SCALES[index] / 1000;
 		}
 	}
-
 
 	function CAnimItem(oParentControl, oEffect) {
 		CControlContainer.call(this, oParentControl);
@@ -3040,7 +3018,6 @@
 		return null;
 	};
 
-
 	// HEADER
 	const HEADER_HEIGHT = 40 * AscCommon.g_dKoef_pix_to_mm;
 	const HEADER_LABEL_FONTSIZE = 10;
@@ -3060,7 +3037,6 @@
 	const MOVE_DOWN_BUTTON_LEFT_MARGIN = 4 * AscCommon.g_dKoef_pix_to_mm;
 
 	const CLOSE_BUTTON_SIZE = 24 * AscCommon.g_dKoef_pix_to_mm;
-
 
 	// TIMELINE
 	const TIMELINE_HEIGHT = 40 * AscCommon.g_dKoef_pix_to_mm;
@@ -3108,7 +3084,6 @@
 		SMALL_TIME_INTERVAL//600
 	]; // in mms
 
-
 	// SEQUENCE LIST
 	const SEQ_LABEL_MARGIN = 3;
 	const SEQ_LABEL_HEIGHT = 15 * AscCommon.g_dKoef_pix_to_mm;
@@ -3126,12 +3101,10 @@
 	const MIN_ALLOWED_DURATION = 10; // milliseconds
 	const MIN_ALLOWED_REPEAT_COUNT = 10; // equals 0.01 of full effect duration
 
-
 	// COMMON
 	const COMMON_LEFT_MARGIN = 14 * AscCommon.g_dKoef_pix_to_mm;
 	const COMMON_RIGHT_MARGIN = 20 * AscCommon.g_dKoef_pix_to_mm;
 	// const ALIGNMENT_LINE = MATH.max(CLOSE_BUTTON_SIZE, MENU_BUTTON_SIZE, TIMELINE_SCROLL_BUTTON_SIZE) / 2;
-
 
 	// ICONS
 	const playIcon_dark = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIHZpZXdCb3g9IjAgMCAxMCAxMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0yIDEwTDEwIDVMMiAtNC43NjgzN2UtMDdWMTBaIiBmaWxsPSJibGFjayIvPgo8L3N2Zz4K';
@@ -3187,7 +3160,6 @@
 			zoomOutIcon_dark, zoomOutIcon_light,
 		];
 	}
-
 
 	// EXPORTS
 	window['AscCommon'] = window['AscCommon'] || {};

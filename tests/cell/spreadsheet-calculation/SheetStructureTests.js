@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -547,7 +542,6 @@ $(function () {
 			compareData(assert, rangeCompare, [["row2col1", "", "", "row2col2", "row2col3", "row2col6"]], desc);
 		}, " move_col_2 ");
 
-
 		//***move with ctrl***
 		//***move without shift***
 		//move from 1 to 3 cols
@@ -576,7 +570,6 @@ $(function () {
 			compareData(assert, rangeCompare, [["row2col1", "row2col2", "row2col3", "row2col2", "row2col3", "row2col6"]], desc);
 		}, " move_col_2_ctrl ");
 
-
 		//***move without ctrl***
 		//***move with shift***
 		wsView.activeMoveRange = getRange(3, 0, 3, AscCommon.gc_nMaxRow);
@@ -604,7 +597,6 @@ $(function () {
 		}, function (desc){
 			compareData(assert, rangeCompare, [["row2col1", "row2col2", "row2col3", "row2col4", "row2col2", "row2col5"]], desc);
 		}, " move_col_1_shift_ctrl ");
-
 
 		//***ROWS***
 		//***move without ctrl***
@@ -653,7 +645,6 @@ $(function () {
 		}, function (desc){
 			compareData(assert, rangeCompare, [["row1col2"], ["row3col2"], ["row4col2"], ["row2col2"], ["row5col2"], ["row6col2"], ["row7col2"], ["row8col2"], ["row9col2"]], desc);
 		}, " move_row_3_shift ");
-
 
 		//***move with ctrl***
 		//***move with shift***
@@ -745,7 +736,6 @@ $(function () {
 		assert.strictEqual(resCell.getFormula(), "SUM(A101:A105)", "Formula in cell A105 after 1 row shifted");
 		ws.getRange2("A99:B110").cleanAll();
 
-
 		ws.getRange2("A100").setValue("1");
 		ws.getRange2("A101").setValue("2");
 		ws.getRange2("A102").setValue("3");
@@ -813,7 +803,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=SUM(A100:A105)", "Value for edit in A105 after 1 row shifted");
 		assert.strictEqual(resCell.getFormula(), "SUM(A100:A105)", "Formula in cell A105 after 1 row shifted");
 		ws.getRange2("A99:B110").cleanAll();
-
 
 		ws.getRange2("A100").setValue("1");
 		ws.getRange2("A101").setValue("2");
@@ -883,7 +872,6 @@ $(function () {
 		assert.strictEqual(resCell.getFormula(), "SUM(A100:A105)", "Formula in cell A105 after" + count + " row shifted");
 		ws.getRange2("A99:B110").cleanAll();
 
-
 		ws.getRange2("A100").setValue("1");
 		ws.getRange2("A101").setValue("2");
 		ws.getRange2("A102").setValue("3");
@@ -951,7 +939,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=SUM(A100:A104)", "Value for edit in A105 after" + count + " row shifted");
 		assert.strictEqual(resCell.getFormula(), "SUM(A100:A104)", "Formula in cell A105 after" + count + " row shifted");
 		ws.getRange2("A99:B110").cleanAll();
-
 
 		ws.getRange2("A100").setValue("1");
 		ws.getRange2("A101").setValue("2");
@@ -1028,7 +1015,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=SUM(A103:A107)", "Value for edit in A108 after" + count + " row shifted");
 		assert.strictEqual(resCell.getFormula(), "SUM(A103:A107)", "Formula in cell A108 after" + count + " row shifted");
 		ws.getRange2("A99:B110").cleanAll();
-
 
 		ws.getRange2("A100").setValue("1");
 		ws.getRange2("A101").setValue("2");
@@ -1199,7 +1185,6 @@ $(function () {
 		tables.length = 0;
 		clearData(0, 0, 200, 200);
 
-
 		/* create table with header/title and with the same data as the previous test*/
 		ws.getRange2("A100").setValue("1");
 		ws.getRange2("A101").setValue("2");
@@ -1267,7 +1252,6 @@ $(function () {
 		tables.length = 0;
 		clearData(0, 0, 200, 200);
 
-
 		ws.getRange2("A100").setValue("1");
 		ws.getRange2("A101").setValue("2");
 		ws.getRange2("A102").setValue("3");
@@ -1332,7 +1316,6 @@ $(function () {
 
 		tables.length = 0;
 		clearData(0, 0, 200, 200);
-
 
 		ws.getRange2("A100").setValue("1");
 		ws.getRange2("A101").setValue("2");
@@ -1399,7 +1382,6 @@ $(function () {
 		tables.length = 0;
 		clearData(0, 0, 200, 200);
 
-
 		ws.getRange2("A100").setValue("1");
 		ws.getRange2("A101").setValue("2");
 		ws.getRange2("A102").setValue("3");
@@ -1465,7 +1447,6 @@ $(function () {
 		tables.length = 0;
 		clearData(0, 0, 200, 200);
 		ws.getRange2("A99:B110").cleanAll();
-
 
 		ws.getRange2("A100").setValue("1");
 		ws.getRange2("A101").setValue("2");
@@ -2101,7 +2082,6 @@ $(function () {
 		getHorizontalAutofillCases(0, 8, 0, 11, assert, [expectedDataCapitalized, expectedDataUpper,
 			expectedDataLower, expectedDataShortCapitalized, expectedDataShortUpper, expectedDataShortLower], 3);
 
-
 		clearData(0, 0, 11, 13);
 
 		// Reverse case
@@ -2706,7 +2686,6 @@ $(function () {
 			['deC','feB','apR','juN','auG','ocT','deC', 'feB','apR','juN'],
 			['dEc','fEb','aPr','jUn','aUg','oCt','dEc', 'fEb','aPr','jUn']
 		];
-
 
 		// Asc case
 		// Add expected Data after Autofill
@@ -3359,7 +3338,6 @@ $(function () {
 			compareData(assert, fillRange, [["Test1"], ["Test1"], ["Test1"], ["Test1"]], _desc);
 		}, "Autofill: down fill text + number");
 
-
 		fillRange = new Asc.Range(3, 0, 3, 3);
 		wsView.setSelection(fillRange);
 		api.asc_FillCells(Asc.c_oAscFillType.fillDown);
@@ -3370,7 +3348,6 @@ $(function () {
 			compareData(assert, fillRange, [["36526"], ["36526"], ["36526"], ["36526"]], _desc);
 		}, "Autofill: down fill date");
 
-
 		fillRange = new Asc.Range(2, 0, 4, 0);
 		wsView.setSelection(fillRange);
 		api.asc_FillCells(Asc.c_oAscFillType.fillRight);
@@ -3380,7 +3357,6 @@ $(function () {
 		}, function (_desc) {
 			compareData(assert, fillRange, [["Test1", "Test1", "Test1", "Test1"]], _desc);
 		}, "Autofill: right fill text + number");
-
 
 		clearData(0, 0, 6, 11);
 
@@ -3408,7 +3384,6 @@ $(function () {
 		sTableData = table.getSelectionString(activeCell, handleSelectionRange);
 
 		assert.strictEqual(sTableData, null, "check selection not table_2");
-
 
 		activeCell = new AscCommon.CellBase(10, 10);
 		handleSelectionRange = new Asc.Range(0, 100, 0, 103);
@@ -3439,7 +3414,6 @@ $(function () {
 		sTableData = table.getSelectionString(activeCell, handleSelectionRange);
 
 		assert.strictEqual(sTableData, tableName + "[[#All],[Column1]:[Column2]]", "check selection table data from column1 to column2 + header");
-
 
 		activeCell = new AscCommon.CellBase(10, 10);
 		handleSelectionRange = new Asc.Range(0, 99, 2, 103);
@@ -3476,7 +3450,6 @@ $(function () {
 		sTableData = table.getSelectionString(activeCell, handleSelectionRange);
 
 		assert.strictEqual(sTableData, tableName + "[[#All],[Column1]]", "check all column1 selection table");
-
 
 		//Table5[[#All];[Column1]:[Column2]]
 		activeCell = new AscCommon.CellBase(10, 10);
@@ -3528,7 +3501,6 @@ $(function () {
 
 		assert.strictEqual(sTableData, tableName + "[[#Headers],[#Data]]", "check selection Headers Data");
 
-
 		clearData(0, 99, 0, 105);
 	});
 
@@ -3564,7 +3536,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@]", "Value for edit in cell after Table[@] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[#This Row]", "Formula in cell after Table[@] is typed");
 
-
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 10);
 		oParser = new AscCommonExcel.parserFormula(tableName + "[#This Row]", cellWithFormula, ws);
@@ -3598,7 +3569,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@]", "Value for edit in cell after Table[@] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[#This Row]", "Formula in cell after Table[@] is typed");
 
-
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 20);
 		oParser = new AscCommonExcel.parserFormula(tableName + "[@Column1]", cellWithFormula, ws);
@@ -3612,7 +3582,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@Column1]", "Value for edit in cell after Table[@Column1] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[Column1]]", "Formula in cell after Table[@Column1] is typed");
 
-
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 25);
 		oParser = new AscCommonExcel.parserFormula(tableName + "[[#This Row],[Column1]]", cellWithFormula, ws);
@@ -3625,7 +3594,6 @@ $(function () {
 		
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@Column1]", "Value for edit in cell after Table[[#This Row],[Column1]] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[Column1]]", "Formula in cell after Table[[#This Row],[Column1]] is typed");
-
 
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 30);
@@ -3642,7 +3610,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[[Column1]:[Column2]]", "Value for edit in cell after Table[[Column1]:[Column2]] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[Column1]:[Column2]]", "Formula in cell after Table[[Column1]:[Column2]] is typed");
 
-
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 30);
 		oParser = new AscCommonExcel.parserFormula(tableName + "[[Column1]:[Column2]]", cellWithFormula, ws);
@@ -3658,7 +3625,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[[Column1]:[Column3]]", "Value for edit in cell after Table[[Column1]:[Column3]] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[Column1]:[Column3]]", "Formula in cell after Table[[Column1]:[Column3]] is typed");
 
-
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 30);
 		oParser = new AscCommonExcel.parserFormula(tableName + "[[Column1]:[Column345]]", cellWithFormula, ws);
@@ -3666,7 +3632,6 @@ $(function () {
 		array = oParser.calculate();
 		assert.strictEqual(array.type, AscCommonExcel.cElementType.error, 'Result of Table[[Column1]:[Column345]]');
 		assert.strictEqual(array.value, "#NAME?", 'Result of Table[[Column1]:[Column345]]');
-
 
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 30);
@@ -3683,7 +3648,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@[Column1]:[Column2]]", "Value for edit in cell after Table[@[Column1]:[Column2]] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[Column1]:[Column2]]", "Formula in cell after Table[@[Column1]:[Column2]] is typed");
 
-
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 35);
 		oParser = new AscCommonExcel.parserFormula(tableName + "[[#This Row],[Column1]:[Column2]]", cellWithFormula, ws);
@@ -3698,7 +3662,6 @@ $(function () {
 		
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@[Column1]:[Column2]]", "Value for edit in cell after Table[[#This Row],[Column1]:[Column2]] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[Column1]:[Column2]]", "Formula in cell after Table[[#This Row],[Column1]:[Column2]] is typed");
-
 
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 40);
@@ -3715,7 +3678,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@[Column1]:[Column2]]", "Value for edit in cell after Table[[#This Row],[Column1]:[Column2]] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[Column1]:[Column2]]", "Formula in cell after Table[[#This Row],[Column1]:[Column2]] is typed");
 
-
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 45);
 		oParser = new AscCommonExcel.parserFormula(tableName + "[@[Column1]]", cellWithFormula, ws);
@@ -3728,7 +3690,6 @@ $(function () {
 		
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@Column1]", "Value for edit in cell after Table[@[Column1]] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[Column1]]", "Formula in cell after Table[@[Column1]] is typed");
-
 
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 50);
@@ -3746,7 +3707,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[#Headers]", "Value for edit in cell after Table[#Headers] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[#Headers]", "Formula in cell after Table[#Headers] is typed");
 
-
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 55);
 		oParser = new AscCommonExcel.parserFormula(tableName + "[[#Headers]]", cellWithFormula, ws);
@@ -3763,7 +3723,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[#Headers]", "Value for edit in cell after Table[[#Headers]] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[#Headers]", "Formula in cell after Table[[#Headers]] is typed");
 
-
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 60);
 		oParser = new AscCommonExcel.parserFormula(tableName + "[[#Headers],[Column2]]", cellWithFormula, ws);
@@ -3776,7 +3735,6 @@ $(function () {
 		
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[[#Headers],[Column2]]", "Value for edit in cell after Table[[#Headers],[Column2]] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#Headers],[Column2]]", "Formula in cell after Table[[#Headers],[Column2]] is typed");
-
 
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 65);
@@ -3792,7 +3750,6 @@ $(function () {
 		
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[[#Headers],[Column2]:[Column3]]", "Value for edit in cell after Table[[#Headers],[Column2]:[Column3]] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#Headers],[Column2]:[Column3]]", "Formula in cell after Table[[#Headers],[Column2]:[Column3]] is typed");
-
 
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 70);
@@ -3813,7 +3770,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[#All]", "Value for edit in cell after Table[#All] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[#All]", "Formula in cell after Table[#All] is typed");
 
-
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 75);
 		oParser = new AscCommonExcel.parserFormula(tableName + "[[#All]]", cellWithFormula, ws);
@@ -3833,7 +3789,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[#All]", "Value for edit in cell after Table[[#All]] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[#All]", "Formula in cell after Table[[#All]] is typed");
 
-
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 80);
 		oParser = new AscCommonExcel.parserFormula(tableName + "[#Data]", cellWithFormula, ws);
@@ -3852,7 +3807,6 @@ $(function () {
 		
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName +"[#Data]", "Value for edit in cell after Table[#Data] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName +"[#Data]", "Formula in cell after Table[#Data] is typed");
-
 
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 85);
@@ -3888,7 +3842,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[#Totals]", "Value for edit in cell after Table[#Totals]] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[#Totals]", "Formula in cell after Table[[#Totals]] is typed");
 
-
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 95);
 		oParser = new AscCommonExcel.parserFormula(tableName + "[[#Data],[#Totals]]", cellWithFormula, ws);
@@ -3909,7 +3862,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[[#Data],[#Totals]]", "Value for edit in cell after Table[[#Data],[#Totals]] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#Data],[#Totals]]", "Formula in cell after Table[[#Data],[#Totals]] is typed");
 
-
 		// =Table3[[#This Row],[#Data]]
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 100);
@@ -3925,7 +3877,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "", "Value for edit in cell after Table[[#This Row],[#Data]] is typed");
 		assert.strictEqual(resCell.getFormula(), "", "Formula in cell after Table[[#This Row],[#Data]] is typed");
 
-
 		// =Table3[[#This Row],[#All]]
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 105);
@@ -3940,7 +3891,6 @@ $(function () {
 		
 		assert.strictEqual(resCell.getValueForEdit(), "", "Value for edit in cell after Table[[#This Row],[#All]] is typed");
 		assert.strictEqual(resCell.getFormula(), "", "Formula in cell after Table[[#This Row],[#All]] is typed");
-
 
 		// =Table3[[#Headers],[#Data]]
 		// calc res check
@@ -4102,7 +4052,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[#All]", "Value for edit in cell after Table[#All] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[#All]", "Formula in cell after Table[#All] is typed");
 
-
 		/* column header check */
 		// this pattern is looking for special characters in the string that need to be escaped
 		let specialSymbolsPattern = /(['#@\[\]])/g;
@@ -4116,7 +4065,6 @@ $(function () {
 
 		assert.strictEqual(valueInCellEditMode, expectedValue, "Header value in first column. Simulation value for edit in cellEditMode");
 
-
 		// set selection to the second column header
 		selectedRange = ws.getRange2("B100");
 		wsView.setSelection(selectedRange.bbox);
@@ -4126,7 +4074,6 @@ $(function () {
 		expectedValue = tableName + "[[#Headers],[" + ws.getRange2("B100").getValueForEdit().replace(specialSymbolsPattern, "'$1") + "]]";
 
 		assert.strictEqual(valueInCellEditMode, expectedValue, "Header value in second column. Simulation value for edit in cellEditMode");
-
 
 		// set selection to the third column header
 		selectedRange = ws.getRange2("C100");
@@ -4196,7 +4143,6 @@ $(function () {
 
 		assert.strictEqual(valueInCellEditMode, expectedValue, "Second and third column without header select. Simulation value for edit in cellEditMode");
 
-
 		clearData(0, 99, 0, 105);
 	});
 
@@ -4239,7 +4185,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@Column1]", "Value for edit in cell after Table[@Column1] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[Column1]]", "Formula in cell after Table[@Column1] is typed");
 
-
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 25);
 		oParser = new AscCommonExcel.parserFormula(tableName + "[[#This Row],[Column1]]", cellWithFormula, ws);
@@ -4267,7 +4212,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[[Column1]:[Column2]]", "Value for edit in cell after Table[[Column1]:[Column2]] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[Column1]:[Column2]]", "Formula in cell after Table[[Column1]:[Column2]] is typed");
 
-
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 30);
 		oParser = new AscCommonExcel.parserFormula(tableName + "[[Column1]:[Column2]]", cellWithFormula, ws);
@@ -4282,7 +4226,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[[Column1]:[Column3]]", "Value for edit in cell after Table[[Column1]:[Column3]] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[Column1]:[Column3]]", "Formula in cell after Table[[Column1]:[Column3]] is typed");
 
-
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 30);
 		oParser = new AscCommonExcel.parserFormula(tableName + "[[Column1]:[Column345]]", cellWithFormula, ws);
@@ -4290,7 +4233,6 @@ $(function () {
 		array = oParser.calculate();
 		assert.strictEqual(array.type, AscCommonExcel.cElementType.error, 'Result of Table[[Column1]:[Column345]]');
 		assert.strictEqual(array.value, "#NAME?", 'Result of Table[[Column1]:[Column345]]');
-
 
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 30);
@@ -4307,7 +4249,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@[Column1]:[Column2]]", "Value for edit in cell after Table[@[Column1]:[Column2]] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[Column1]:[Column2]]", "Formula in cell after Table[@[Column1]:[Column2]] is typed");
 
-
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 35);
 		oParser = new AscCommonExcel.parserFormula(tableName + "[[#This Row],[Column1]:[Column2]]", cellWithFormula, ws);
@@ -4323,7 +4264,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@[Column1]:[Column2]]", "Value for edit in cell after Table[[#This Row],[Column1]:[Column2]] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[Column1]:[Column2]]", "Formula in cell after Table[[#This Row],[Column1]:[Column2]] is typed");
 
-
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 40);
 		oParser = new AscCommonExcel.parserFormula(tableName + "[[#This Row],[Column1]:[Column2]]", cellWithFormula, ws);
@@ -4338,7 +4278,6 @@ $(function () {
 		
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@[Column1]:[Column2]]", "Value for edit in cell after Table[[#This Row],[Column1]:[Column2]] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[Column1]:[Column2]]", "Formula in cell after Table[[#This Row],[Column1]:[Column2]] is typed");
-
 
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 45);
@@ -4366,7 +4305,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[[#Headers],[Column1]]", "Value for edit in cell after Table[[#Headers],[Column1]] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#Headers],[Column1]]", "Formula in cell after Table[[#Headers],[Column1]] is typed");
 
-
 		// calc res check
 		cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 101, 65);
 		oParser = new AscCommonExcel.parserFormula(tableName + "[[#Headers],[Column1]:[Column2]]", cellWithFormula, ws);
@@ -4393,54 +4331,45 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@" + newColumnName + "]", "Value for edit in cell after column name changed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[" + newColumnName + "]]", "Formula in cell after column name changed");
 
-
 		// value for edit and formula in cell check
 		resCell = ws.getRange4(101, 25);
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@" + newColumnName + "]", "Value for edit in cell after column name changed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[" + newColumnName + "]]", "Formula in cell after column name changed");
 
+		// value for edit and formula in cell check
+		resCell = ws.getRange4(101, 30);
+		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@[" + newColumnName + "]:[Column2]]", "Value for edit in cell after column name changed");
+		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[" + newColumnName + "]:[Column2]]", "Formula in cell after column name changed");
 
 		// value for edit and formula in cell check
 		resCell = ws.getRange4(101, 30);
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@[" + newColumnName + "]:[Column2]]", "Value for edit in cell after column name changed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[" + newColumnName + "]:[Column2]]", "Formula in cell after column name changed");
 
-
 		// value for edit and formula in cell check
 		resCell = ws.getRange4(101, 30);
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@[" + newColumnName + "]:[Column2]]", "Value for edit in cell after column name changed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[" + newColumnName + "]:[Column2]]", "Formula in cell after column name changed");
-
-
-		// value for edit and formula in cell check
-		resCell = ws.getRange4(101, 30);
-		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@[" + newColumnName + "]:[Column2]]", "Value for edit in cell after column name changed");
-		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[" + newColumnName + "]:[Column2]]", "Formula in cell after column name changed");
-
 
 		// value for edit and formula in cell check
 		resCell = ws.getRange4(101, 35);
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@[" + newColumnName + "]:[Column2]]", "Value for edit in cell after column name changed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[" + newColumnName + "]:[Column2]]", "Formula in cell after column name changed");
 
-
 		// value for edit and formula in cell check
 		resCell = ws.getRange4(101, 40);
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@[" + newColumnName + "]:[Column2]]", "Value for edit in cell after column name changed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[" + newColumnName + "]:[Column2]]", "Formula in cell after column name changed");
-
 
 		// value for edit and formula in cell check
 		resCell = ws.getRange4(101, 45);
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@" + newColumnName + "]", "Value for edit in cell after column name changed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[" + newColumnName + "]]", "Formula in cell after column name changed");
 
-
 		// value for edit and formula in cell check
 		resCell = ws.getRange4(101, 60);
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[[#Headers],[" + newColumnName + "]]", "Value for edit in cell after column name changed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#Headers],[" + newColumnName + "]]", "Formula in cell after column name changed");
-
 
 		// value for edit and formula in cell check
 		resCell = ws.getRange4(101, 65);
@@ -4482,7 +4411,6 @@ $(function () {
 		assert.strictEqual(resArray[0], "D1", 'First argument in "SUM(D1"');
 		assert.strictEqual(_parseResult.error, c_oAscError.ID.FrmlParenthesesCorrectCount, 'Error in parseResult for "SUM(D1" formula');
 
-
 		formula = "SUM(D1,"
 		parser = new AscCommonExcel.parserFormula(formula, null, ws);
 		_parseResult = new AscCommonExcel.ParseResult([], []);
@@ -4492,7 +4420,6 @@ $(function () {
 		resArray = _parseResult.getArgumentsValue(formula);
 		assert.strictEqual(resArray[0], "D1", 'First argument in "SUM(D1,"');
 		assert.strictEqual(_parseResult.error, c_oAscError.ID.FrmlOperandExpected, 'Error in parseResult for "SUM(D1," formula');
-
 
 		formula = "SUM(D1,D2"
 		parser = new AscCommonExcel.parserFormula(formula, null, ws);
@@ -4504,7 +4431,6 @@ $(function () {
 		assert.strictEqual(resArray[0], "D1", 'First argument in "SUM(D1,D2"');
 		assert.strictEqual(resArray[1], "D2", 'Second argument in "SUM(D1,D2"');
 		assert.strictEqual(_parseResult.error, c_oAscError.ID.FrmlParenthesesCorrectCount, 'Error in parseResult for "SUM(D1,D2" formula');
-
 
 		formula = "SUM(D1,D2)"
 		parser = new AscCommonExcel.parserFormula(formula, null, ws);
@@ -4528,7 +4454,6 @@ $(function () {
 		assert.strictEqual(resArray[0], "D1:D2", 'First argument in "SUM(D1:D2)"');
 		assert.strictEqual(_parseResult.error, undefined, 'Error in parseResult for "SUM(D1:D2)" formula');
 
-
 		formula = "SUM(D1:D2,)"
 		parser = new AscCommonExcel.parserFormula(formula, null, ws);
 		_parseResult = new AscCommonExcel.ParseResult([], []);
@@ -4539,7 +4464,6 @@ $(function () {
 		assert.strictEqual(resArray[0], "D1:D2", 'First argument in "SUM(D1:D2,)"');
 		assert.strictEqual(_parseResult.error, undefined, 'Error in parseResult for "SUM(D1:D2,)" formula');
 
-
 		formula = "SUM("
 		parser = new AscCommonExcel.parserFormula(formula, null, ws);
 		_parseResult = new AscCommonExcel.ParseResult([], []);
@@ -4549,7 +4473,6 @@ $(function () {
 		resArray = _parseResult.getArgumentsValue(formula);
 		assert.strictEqual(resArray[0], "", 'First argument in "SUM("');
 		assert.strictEqual(_parseResult.error, c_oAscError.ID.FrmlOperandExpected, 'Error in parseResult for "SUM(" formula');
-
 
 		formula = "SUM(1"
 		parser = new AscCommonExcel.parserFormula(formula, null, ws);
@@ -4571,7 +4494,6 @@ $(function () {
 		assert.strictEqual(resArray[0], "1", 'First argument in "SUM(1,D1"');
 		assert.strictEqual(resArray[1], "D1", 'Second argument in "SUM(1,D1"');
 		assert.strictEqual(_parseResult.error, c_oAscError.ID.FrmlParenthesesCorrectCount, 'Error in parseResult for "SUM(1,D1" formula');
-
 
 		formula = 'SUM(1,D1,"str",TRUE,def'
 		parser = new AscCommonExcel.parserFormula(formula, null, ws);
@@ -4654,7 +4576,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "", "Formula after B1:B2 autosum");
 		assert.strictEqual(wsView.model.selectionRange.getLast().getName(), "B1:B2", "Selection after B1:B2 autosum");
 
-
 		ws.getRange2("C1").setValue("ds");
 		ws.getRange2("C2").setValue("1");
 		ws.getRange2("C3").setValue("1");
@@ -4671,7 +4592,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=SUM(C2:C3)", "Formula after C1:C3 autosum");
 		assert.strictEqual(wsView.model.selectionRange.getLast().getName(), "C2:C4", "Selection after C1:C3 autosum");
 
-
 		ws.getRange2("D2").setValue("ds");
 		ws.getRange2("D4").setValue("1");
 
@@ -4687,7 +4607,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=SUM(D1:D4)", "Formula after D1:D4 autosum");
 		assert.strictEqual(wsView.model.selectionRange.getLast().getName(), "D1:D5", "Selection after D1:D4 autosum");
 
-
 		ws.getRange2("E1").setValue("ds");
 		ws.getRange2("E3").setValue("1");
 		ws.getRange2("E4").setValue("");
@@ -4699,12 +4618,10 @@ $(function () {
 		wsView._initColsCount();
 		wsView.autoCompleteFormula("SUM");
 
-
 		resCell = ws.getRange2("E4");
 		assert.strictEqual(resCell.getValueWithFormat(), "1", "Value after E1:E4 autosum");
 		assert.strictEqual(resCell.getValueForEdit(), "=SUM(E3)", "Formula after E1:E4 autosum");
 		assert.strictEqual(wsView.model.selectionRange.getLast().getName(), "E3:E4", "Selection after E1:E4 autosum");
-
 
 		ws.getRange2("F1").setValue("ds");
 		ws.getRange2("F3").setValue("1");
@@ -4721,7 +4638,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueWithFormat(), "2", "Value after F1:F4 autosum");
 		assert.strictEqual(resCell.getValueForEdit(), "=SUM(F3:F4)", "Formula after F1:F4 autosum");
 		assert.strictEqual(wsView.model.selectionRange.getLast().getName(), "F3:F5", "Selection after F1:F4 autosum");
-
 
 		ws.getRange2("G2").setValue("ds");
 		ws.getRange2("G4").setValue("1");
@@ -4755,7 +4671,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueWithFormat(), "2", "Value after A10:C10 autosum");
 		assert.strictEqual(resCell.getValueForEdit(), "=SUM(B10:C10)", "Formula after A10:C10 autosum");
 		assert.strictEqual(wsView.model.selectionRange.getLast().getName(), "B10:D10", "Selection after A10:C10 autosum");
-
 
 		ws.getRange2("A11").setValue("ds");
 		ws.getRange2("B11").setValue("1");
@@ -4813,7 +4728,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=SUM(B21:B23)", "Formula after A20:B23 autosum");
 		assert.strictEqual(wsView.model.selectionRange.getLast().getName(), "A21:B24", "Selection after A20:B23 autosum");
 
-
 		ws.getRange2("K1").setValue("ds");
 		ws.getRange2("L1").setValue("ds");
 		ws.getRange2("K3").setValue("1");
@@ -4829,7 +4743,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueWithFormat(), "1", "Value after K1:L3 autosum");
 		assert.strictEqual(resCell.getValueForEdit(), "=SUM(K3)", "Formula after K1:L3 autosum");
 		assert.strictEqual(wsView.model.selectionRange.getLast().getName(), "K3:L3", "Selection after K1:L3 autosum");
-
 
 		ws.getRange2("K5:L10").cleanAll();
 		ws.getRange2("K6").setValue("ds");
@@ -4854,7 +4767,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueWithFormat(), "1", "Value after K5:L9 autosum");
 		assert.strictEqual(resCell.getValueForEdit(), "=SUM(K9)", "Formula after K5:L9 autosum");
 		assert.strictEqual(wsView.model.selectionRange.getLast().getName(), "K8:L9", "Selection after K5:L9 autosum");
-
 
 		ws.getRange2("A12:M14").cleanAll();
 		ws.getRange2("K13").setValue("1");
@@ -5013,7 +4925,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "", "Formula after A20:A22(only dates in range) autosum");
 		assert.strictEqual(wsView.model.selectionRange.getLast().getName(), "A20:A22", "Selection after A20:A22(only dates in range) autosum");
 
-
 		// number 
 		ws.getRange2("A20:A23").cleanAll();
 		fillRange = ws.getRange2("A20:A22");
@@ -5030,7 +4941,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=SUM(A20:A22)", "Formula after A20:A22(only number in range) autosum");
 		assert.strictEqual(wsView.model.selectionRange.getLast().getName(), "A20:A23", "Selection after A20:A22(only number in range) autosum");
 
-
 		// fraction
 		fillRange = ws.getRange2("A20:A22");
 		fillRange.setNumFormat("# ?/?"); 	// change to the fraction format
@@ -5044,7 +4954,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueWithFormat(), "3", "Value after A20:A22(only fraction in range) autosum");
 		assert.strictEqual(resCell.getValueForEdit(), "=SUM(A20:A22)", "Formula after A20:A22(only fraction in range) autosum");
 		assert.strictEqual(wsView.model.selectionRange.getLast().getName(), "A20:A23", "Selection after A20:A22(only fraction in range) autosum");
-
 
 		// scientific
 		fillRange = ws.getRange2("A20:A22");
@@ -5060,7 +4969,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=SUM(A20:A22)", "Formula after A20:A22(only scientific in range) autosum");
 		assert.strictEqual(wsView.model.selectionRange.getLast().getName(), "A20:A23", "Selection after A20:A22(only scientific in range) autosum");
 
-
 		// accounting
 		fillRange = ws.getRange2("A20:A22");
 		fillRange.setNumFormat("_([$$-409]* #,##0.00_);_([$$-409]* \\(#,##0.00\\);_([$$-409]* \"-\"??_);_(@_)"); 	// change to the accounting format
@@ -5074,7 +4982,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueWithFormat(), "3", "Value after A20:A22(only accounting in range) autosum");
 		assert.strictEqual(resCell.getValueForEdit(), "=SUM(A20:A22)", "Formula after A20:A22(only accounting in range) autosum");
 		assert.strictEqual(wsView.model.selectionRange.getLast().getName(), "A20:A23", "Selection after A20:A22(only accounting in range) autosum");
-
 
 		// percentage
 		fillRange = ws.getRange2("A20:A22");
@@ -5090,7 +4997,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=SUM(A20:A22)", "Formula after A20:A22(only percents in range) autosum");
 		assert.strictEqual(wsView.model.selectionRange.getLast().getName(), "A20:A23", "Selection after A20:A22(only percents in range) autosum");
 
-
 		// l.date
 		fillRange = ws.getRange2("A20:A22");
 		fillRange.setNumFormat("[$-F800]dddd\,\ mmmm\ d\,\ yyyy"); 	// change to the long date format
@@ -5104,7 +5010,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueWithFormat(), "", "Value after A20:A22(only dates in range) autosum");
 		assert.strictEqual(resCell.getValueForEdit(), "", "Formula after A20:A22(only dates in range) autosum");
 		assert.strictEqual(wsView.model.selectionRange.getLast().getName(), "A20:A22", "Selection after A20:A22(only dates in range) autosum");
-
 
 		// text
 		fillRange = ws.getRange2("A20:A22");
@@ -5138,7 +5043,6 @@ $(function () {
 		supposedActiveCell = ws.getCell2("B22");
 		assert.strictEqual(activeCell.col === supposedActiveCell.bbox.c1 && activeCell.row === supposedActiveCell.bbox.r1, true, "Active cell test. B20:B22(only text in range) autosum");
 
-
 		ws.getRange2("B10").cleanAll();
 		ws.getRange2("A20:A21").setValue("111");
 		fillRange = ws.getRange2("B20:B22");
@@ -5150,7 +5054,6 @@ $(function () {
 		activeCell = ws.selectionRange.activeCell;
 		supposedActiveCell = ws.getCell2("B22");
 		assert.strictEqual(activeCell.col === supposedActiveCell.bbox.c1 && activeCell.row === supposedActiveCell.bbox.r1, true, "Active cell test. B20:B22(only text in range) autosum");
-
 
 		ws.getRange2("A22").setValue("111");
 		fillRange = ws.getRange2("B20:B22");
@@ -5190,7 +5093,6 @@ $(function () {
 
 		assert.strictEqual(wsView.model.selectionRange.getLast().getName(), "A30:D31", "Selection after A30:D31 autosum");
 
-
 		ws.getRange2("A40:B41").setValue("111");
 		ws.getRange2("C40:C41").merge(Asc.c_oAscMergeOptions.MergeCenter);
 		assert.ok(ws.getRange2("C40:C41").hasMerged(), 'Range C40:C41 is merged');
@@ -5219,7 +5121,6 @@ $(function () {
 
 		assert.strictEqual(wsView.model.selectionRange.getLast().getName(), "A40:D41", "Selection after A40:D41 autosum");
 
-
 		ws.getRange2("A50:A51").setValue("111");
 		ws.getRange2("A52:A53").merge(Asc.c_oAscMergeOptions.MergeCenter);
 		assert.ok(ws.getRange2("A52:A53").hasMerged(), 'Range A52:A53 is merged');
@@ -5238,7 +5139,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "", "Formula in merged cell after A50:A53 autosum");
 
 		assert.strictEqual(wsView.model.selectionRange.getLast().getName(), "A50:A53", "Selection after A50:A53 autosum");
-
 
 		ws.getRange2("A60:B61").setValue("111");
 		ws.getRange2("C60:D60").merge(Asc.c_oAscMergeOptions.MergeCenter);
@@ -5291,7 +5191,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueWithFormat(), "", "Value in merged cell after C70:D70 autosum");
 		assert.strictEqual(resCell.getValueForEdit(), "", "Formula in merged cell after C70:D70 autosum");
 
-
 		ws.getRange2("A80:B82").setValue("111");
 		ws.getRange2("C80:H88").merge(Asc.c_oAscMergeOptions.MergeCenter);
 		assert.ok(ws.getRange2("C80:H88").hasMerged(), 'Range C80:H88" is merged');
@@ -5307,7 +5206,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueWithFormat(), "", "Value in merged cell after C80:H88 autosum");
 		assert.strictEqual(resCell.getValueForEdit(), "", "Formula in merged cell after C80:H88 autosum");
 
-
 		ws.getRange2("A90:B91").setValue("111");
 		ws.getRange2("A92:D94").merge(Asc.c_oAscMergeOptions.MergeCenter);
 		assert.ok(ws.getRange2("A92:D94").hasMerged(), 'Range A92:D94 is merged');
@@ -5322,7 +5220,6 @@ $(function () {
 		resCell = ws.getRange2("A92");
 		assert.strictEqual(resCell.getValueWithFormat(), "", "Value in merged cell after A92:D94 autosum");
 		assert.strictEqual(resCell.getValueForEdit(), "", "Formula in merged cell after A92:D94 autosum");
-
 
 		ws.getRange2("A110:C111").setValue("111");
 		ws.getRange2("C112").setValue("111");
@@ -5359,7 +5256,6 @@ $(function () {
 		resCell = ws.getRange2("B1");
 		assert.strictEqual(resCell.getValueWithFormat(), "", "Value in cell B1 after autosum");
 		assert.strictEqual(resCell.getValueForEdit(), "", "Formula in cell B1 after autosum");
-
 
 		fillRange = ws.getRange2("D1");
 		wsView.setSelection(fillRange.bbox);
@@ -5450,7 +5346,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=SUM(C1)", "Formula in cell D1 after B1:D1 autosum");
 		ws.getRange2("B1:D1").cleanAll();
 
-
 		fillRange = ws.getRange2("D1:F1");
 		wsView.setSelection(fillRange.bbox);
 		wsView._initRowsCount();
@@ -5494,7 +5389,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueWithFormat(), "", "Value in cell C3 after B2:C3 autosum");
 		assert.strictEqual(resCell.getValueForEdit(), "", "Formula in cell C3 after B2:C3 autosum");
 
-
 		// single cell selection, top cell data
 		ws.getRange2("A1:D1").setValue("1");
 		fillRange = ws.getRange2("D2");
@@ -5513,7 +5407,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueWithFormat(), "", "Value in cell D2 after autosum");
 		assert.strictEqual(resCell.getValueForEdit(), "", "Formula in cell D2 after autosum");
 
-
 		fillRange = ws.getRange2("D6");
 		wsView.setSelection(fillRange.bbox);
 		wsView._initRowsCount();
@@ -5529,7 +5422,6 @@ $(function () {
 		resCell = ws.getRange2("D6");
 		assert.strictEqual(resCell.getValueWithFormat(), "", "Value in cell D6 after autosum");
 		assert.strictEqual(resCell.getValueForEdit(), "", "Formula in cell D6 after autosum");
-
 
 		// multi cells selection, top cell data
 		// vertical
@@ -5552,7 +5444,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueWithFormat(), "1", "Value in cell D3 after autosum");
 		assert.strictEqual(resCell.getValueForEdit(), "=SUM(D2)", "Formula in cell D3 after D2:D3 autosum");
 		ws.getRange2("D2:D3").cleanAll();
-
 
 		fillRange = ws.getRange2("D6:D8");
 		wsView.setSelection(fillRange.bbox);
@@ -5600,7 +5491,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueWithFormat(), "0", "Value in cell F2 after autosum");
 		assert.strictEqual(resCell.getValueForEdit(), "=SUM(F1)", "Formula in cell F2 after D2:F2 autosum");
 		ws.getRange2("D2:F2").cleanAll();
-
 
 		fillRange = ws.getRange2("D5:F5");
 		wsView.setSelection(fillRange.bbox);
@@ -5707,7 +5597,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=SIN({1,2})", "Formula in B12 after =SIN({1,2}) calculate");
 		assert.strictEqual(resCell.getNumFormatStr(), "@", "B12 cellFormat after =SIN({1,2}) calculate");
 
-
 		fragment[0].setFragmentText('=HSTACK({"Red";"Blue";"Green"},A2:A4)');
 
 		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);		// calculate
@@ -5741,7 +5630,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueWithFormat(), "Shirt", 'Value in B12 after =HSTACK({"Red";"Blue";"Green"},A2:A4) calculate');
 		assert.strictEqual(resCell.getValueForEdit(), '=HSTACK({\"Red\";\"Blue\";\"Green\"},A2:A4)', 'Formula in B12 after =HSTACK({"Red";"Blue";"Green"},A2:A4) calculate');
 		assert.strictEqual(resCell.getNumFormatStr(), "@", 'B12 cellFormat after =HSTACK({"Red";"Blue";"Green"},A2:A4) calculate');
-
 
 		ws.getRange2("A1:Z100").cleanAll();
 	});
@@ -6067,7 +5955,6 @@ $(function () {
 		range.sort(Asc.c_oAscSortOptions.Descending, 0);
 		compareData(assert, range.bbox, expectedRes.reverse(), "Desc check_sort_15");
 
-
 		// turkish
 		testData = [
 			['C'],['Ç'],['ç'],['Ğ'],['ğ'],
@@ -6091,7 +5978,6 @@ $(function () {
 		range.sort(Asc.c_oAscSortOptions.Descending, 0);
 		compareData(assert, range.bbox, expectedRes, "Desc check_sort_16");
 
-
 		testData = [
 			['ALİ'],
 			['MURAT'],
@@ -6107,7 +5993,6 @@ $(function () {
 
 		range.sort(Asc.c_oAscSortOptions.Descending, 0);
 		compareData(assert, range.bbox, expectedRes.reverse(), "Desc check_sort_17");
-
 
 		// hungarian, portugese, deutsch, turkish
 		testData = [
@@ -7217,7 +7102,6 @@ $(function () {
 		ws.getRange2("A10:C10").merge(Asc.c_oAscMergeOptions.MergeAcross);
 		ws.getRange2("A10:C10").cleanAll();
 
-
 		ws.getRange2("A10").setValue("");
 		ws.getRange2("B10").setValue("2");
 		ws.getRange2("C10").setValue("3");
@@ -7238,7 +7122,6 @@ $(function () {
 		// A10:C10 unmerge
 		ws.getRange2("A10:C10").merge(Asc.c_oAscMergeOptions.MergeAcross);
 		ws.getRange2("A10:C10").cleanAll();
-
 
 		bbox = ws.getRange2("A10").bbox;
 		ws.getRange2("A10").setValue("={4,6}", undefined, undefined, bbox);
@@ -7262,7 +7145,6 @@ $(function () {
 		ws.getRange2("A10:C10").merge(Asc.c_oAscMergeOptions.MergeAcross);
 		ws.getRange2("A10:C10").cleanAll();
 
-
 		bbox = ws.getRange2("B10").bbox;
 		ws.getRange2("A10").setValue("2");
 		ws.getRange2("B10").setValue("={4,6}", undefined, undefined, bbox);
@@ -7284,7 +7166,6 @@ $(function () {
 		// A10:C10 unmerge
 		ws.getRange2("A10:C10").merge(Asc.c_oAscMergeOptions.MergeAcross);
 		ws.getRange2("A10:C10").cleanAll();
-
 
 		bbox = ws.getRange2("A10:B10").bbox;
 		ws.getRange2("A10:B10").setValue("={4,6}", undefined, undefined, bbox);
@@ -7308,7 +7189,6 @@ $(function () {
 		ws.getRange2("A10:C10").merge(Asc.c_oAscMergeOptions.MergeAcross);
 		ws.getRange2("A10:C10").cleanAll();
 
-
 		bbox = ws.getRange2("B10:C10").bbox;
 		ws.getRange2("A10").setValue("3");
 		ws.getRange2("B10:C10").setValue("={4,6}", undefined, undefined, bbox);
@@ -7330,7 +7210,6 @@ $(function () {
 		// A10:C10 unmerge
 		ws.getRange2("A10:C10").merge(Asc.c_oAscMergeOptions.MergeAcross);
 		ws.getRange2("A10:C10").cleanAll();
-
 
 		bbox = ws.getRange2("B10:C10").bbox;
 		ws.getRange2("A10").setValue("");
@@ -7818,7 +7697,6 @@ $(function () {
 		wsView._initRowsCount();
 		wsView._initColsCount();
 
-
 		ws.getRange2("A1").setValue("1");
 		ws.getRange2("A2").setValue("2");
 		ws.getRange2("A3").setValue("3");
@@ -7870,14 +7748,12 @@ $(function () {
 		api.wb._onSelectAllByRange();
 		assert.strictEqual(ws.selectionRange.getLast().getType(), Asc.c_oAscSelectionType.RangeMax);
 
-
 		let tableOptions = new AscCommonExcel.AddFormatTableOptions();
 		fillRange = new Asc.Range(0, 0, 2, 1);
 		tableOptions.range = fillRange.getName();
 		ws.autoFilters.addAutoFilter("style", fillRange, tableOptions);
 		assert.strictEqual(ws.TableParts.length, 1);
 		assert.strictEqual(ws.TableParts[0].Ref.getName(), "A1:C3");
-
 
 		fillRange = new Asc.Range(1, 1, 1, 1);
 		wsView.setSelection(fillRange);
@@ -8004,7 +7880,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueWithFormat(), "#VALUE!", "Value in C1 after =MDETERM({1,2,3,4}) calculate");
 		assert.strictEqual(resCell.getValueForEdit(), "=MDETERM({1,2,3,4})", "Formula in C1 after =MDETERM({1,2,3,4}) calculate");
 
-
 		assert.strictEqual(resCell.getValueWithFormat(), "#VALUE!", "Value in C1 before =MDETERM({1,2;10,11}) calculate");
 		assert.strictEqual(resCell.getValueForEdit(), "=MDETERM({1,2,3,4})", "Formula in C1 before =MDETERM({1,2;10,11}) calculate");
 		fragment[0].setFragmentText("=MDETERM({1,2;10,11})");
@@ -8082,7 +7957,6 @@ $(function () {
 		assert.strictEqual(sheetListeners.areaMap && sheetListeners.areaMap["A2:D4"], undefined, "A2:D4(Table) listeners after delete value =SUM(tableName)");
 		assert.strictEqual(sheetListeners && sheetListeners.areaMap && Object.keys(defNameListeners).length, 0, "DefNameListeners after delete value =SUM(tableName)");
 
-
 		// Table[#All]
 		// Table link with headers
 		fragment[0].setFragmentText("=SUM("+tableName+"[#All])");
@@ -8105,7 +7979,6 @@ $(function () {
 		assert.strictEqual(sheetListeners.areaMap && Object.keys(sheetListeners.areaMap).length, 1, "AreaMap listeners after delete value =SUM(tableName#All)");
 		assert.strictEqual(sheetListeners.areaMap && sheetListeners.areaMap["A2:D4"], undefined, "A2:D4(Table) listeners after delete value =SUM(tableName#All)");
 		assert.strictEqual(sheetListeners && sheetListeners.areaMap && Object.keys(defNameListeners).length, 0, "DefNameListeners after delete value =SUM(tableName#All)");
-
 
 		// Table[Column1]
 		// Table columns link without headers
@@ -8132,7 +8005,6 @@ $(function () {
 		assert.strictEqual(sheetListeners.areaMap && sheetListeners.areaMap["A2:D4"], undefined, "A2:D4(Table) listeners after delete value =SUM(Column1)");
 		assert.strictEqual(sheetListeners.areaMap && sheetListeners.areaMap["A2:A4"], undefined, "A2:A4(Column) listeners after delete value =SUM(Column1)");	
 		assert.strictEqual(sheetListeners && sheetListeners.areaMap && Object.keys(defNameListeners).length, 0, "DefNameListeners after delete value =SUM(Column1)");
-
 
 		// Table[[Column1]:[Column2]]
 		// Table columns link without headers
@@ -8162,7 +8034,6 @@ $(function () {
 		assert.strictEqual(sheetListeners.areaMap && sheetListeners.areaMap["A2:B4"], undefined, "A2:B4(Columns) listeners after delete value SUM(Table[Col1]:[Col2]");
 		assert.strictEqual(sheetListeners && sheetListeners.areaMap && Object.keys(defNameListeners).length, 0, "DefNameListeners after delete value SUM(Table[Col1]:[Col2]");
 
-
 		// Table[[#All],[Column1]]
 		// Table columns link with headers
 		fragment[0].setFragmentText("=SUM("+tableName+"[[#All],[Column1]])");
@@ -8190,7 +8061,6 @@ $(function () {
 		assert.strictEqual(sheetListeners.areaMap && sheetListeners.areaMap["A2:A4"], undefined, "A2:A4(Column) listeners after delete value SUM(tableName#All,Col1)");
 		assert.strictEqual(sheetListeners.areaMap && sheetListeners.areaMap["A1:A4"], undefined, "A1:A4(Column) listeners after delete value SUM(tableName#All,Col1)");
 		assert.strictEqual(sheetListeners && sheetListeners.areaMap && Object.keys(defNameListeners).length, 0, "DefNameListeners after delete value SUM(tableName#All,Col1)");
-
 
 		// Table[[#All],[Column1]:[Column2]]
 		// Table columns link with headers
@@ -8222,7 +8092,6 @@ $(function () {
 		assert.strictEqual(sheetListeners.areaMap && sheetListeners.areaMap["A1:B4"], undefined, "A1:B4(Columns) listeners after delete value SUM(tableName#All,Col1)");
 		assert.strictEqual(sheetListeners && sheetListeners.areaMap && Object.keys(defNameListeners).length, 0, "DefNameListeners after delete value SUM(tableName#All,Col1)");
 
-
 		fragment[0].setFragmentText("=SUM("+tableName + "[[#All],[Column1]:[Column4]])");
 		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
 		assert.strictEqual(resCell.getValueWithFormat(), "12", "Value in C10 after =SUM("+tableName + "[[#All],[Column1]:[Column4]]) calculate");
@@ -8239,7 +8108,6 @@ $(function () {
 		assert.strictEqual(resCell.getValueForEdit(), "=22", "Formula in C10 after tableName[[#All],[Column1]:[Column4]] delete");
 		sheetListeners = dependencyFormulas.sheetListeners[wsID];
 		assert.strictEqual(sheetListeners.areaMap && sheetListeners.areaMap["A1:D4"], undefined, "A1:D4(Columns) listeners after delete value tableName#All,Col1")
-
 
 		flags.ctrlKey = true;
 		flags.shiftKey = true;
@@ -8379,7 +8247,6 @@ $(function () {
 		flags.ctrlKey = false;
 		flags.shiftKey = false;
 
-
 		// remove tables
 		tables.length = 0;
 		
@@ -8387,5 +8254,4 @@ $(function () {
 
 		QUnit.module("Sheet structure");
 });
-
 

@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -57,7 +52,6 @@ function ChartPreviewManager() {
 	this.CHART_PREVIEW_HEIGHT_PIX = 50;
 
 	this._canvas_charts = null;
-
 
 	this.FirstActionOnTimer = true;
 	this.Index = -1;
@@ -397,7 +391,6 @@ ChartPreviewManager.prototype.getChartByType = function(type)
 		chart_space.spPr.xfrm.setExtY(fChartSize);
 		settings.putTitle(Asc.c_oAscChartTitleShowSettings.noOverlay);
 
-
 		var val_ax_props = new AscCommon.asc_ValAxisSettings();
 		val_ax_props.putMinValRule(Asc.c_oAscValAxisRule.auto);
 		val_ax_props.putMaxValRule(Asc.c_oAscValAxisRule.auto);
@@ -407,7 +400,6 @@ ChartPreviewManager.prototype.getChartByType = function(type)
 		val_ax_props.putMajorTickMark(c_oAscTickMark.TICK_MARK_NONE);
 		val_ax_props.putMinorTickMark(c_oAscTickMark.TICK_MARK_NONE);
 		val_ax_props.putCrossesRule(Asc.c_oAscCrossesRule.auto);
-
 
 		var cat_ax_props = new AscCommon.asc_CatAxisSettings();
 		cat_ax_props.putIntervalBetweenLabelsRule(Asc.c_oAscBetweenLabelsRule.auto);
@@ -591,7 +583,6 @@ ChartPreviewManager.prototype.getChartPreviews = function(chartType, arrId, bEmp
 	}
 	if (AscFormat.isRealNumber(chartType)) {
 
-
 		if (!this._isCachedChartStyles(chartType)) {
 			aStyles = AscCommon.g_oChartStyles[chartType];
 			if (Array.isArray(aStyles)) {
@@ -673,7 +664,6 @@ ChartPreviewManager.prototype.getChartPreviews = function(chartType, arrId, bEmp
 		this.m_nSmartArtId = nSmartArtId;
 	};
 	CSmartArtPreviewInfo.prototype["asc_setSmartArtId"] = CSmartArtPreviewInfo.prototype.asc_setSmartArtId;
-
 
 	function SmartArtPreviewDrawer() {
 		AscCommon.CActionOnTimerBase.call(this);
@@ -1190,7 +1180,6 @@ TextArtPreviewManager.prototype.getShape =  function()
 		bWord = false;
 	}
 
-
 	var oParentObjects = oShape.getParentObjects();
 	var oTrack = new AscFormat.NewShapeTrack("textRect", 0, 0, oParentObjects.theme, oParentObjects.master, oParentObjects.layout, oParentObjects.slide, 0);
 	oTrack.track({}, oShape.convertPixToMM(this.canvasWidth), oShape.convertPixToMM(this.canvasHeight));
@@ -1374,7 +1363,6 @@ TextArtPreviewManager.prototype.generateTextArtStyles = function()
         }
     }, this, []);
 };
-
 
 	//----------------------------------------------------------export----------------------------------------------------
 	window['AscCommon'] = window['AscCommon'] || {};

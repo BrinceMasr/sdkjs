@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -90,7 +85,6 @@ function (window, undefined) {
 		}
 	};
 
-
 	CChangesDrawingsAddPathCommand.prototype.WriteToBinary = function (Writer) {
 		Writer.WriteLong(this.Index);
 		Writer.WriteLong(this.Command.id);
@@ -130,7 +124,6 @@ function (window, undefined) {
 			}
 		}
 	};
-
 
 	CChangesDrawingsAddPathCommand.prototype.ReadFromBinary = function (Reader) {
 		this.Index = Reader.GetLong();
@@ -173,7 +166,6 @@ function (window, undefined) {
 		}
 	};
 
-
 	AscDFH.changesFactory[AscDFH.historyitem_PathSetStroke] = AscDFH.CChangesDrawingsBool;
 	AscDFH.changesFactory[AscDFH.historyitem_PathSetExtrusionOk] = AscDFH.CChangesDrawingsBool;
 	AscDFH.changesFactory[AscDFH.historyitem_PathSetFill] = AscDFH.CChangesDrawingsString;
@@ -200,7 +192,6 @@ function (window, undefined) {
 	AscDFH.drawingsChangesMap[AscDFH.historyitem_PathSetParent] = function (oClass, value) {
 		oClass.parent = value;
 	};
-
 
 	function Path() {
 		AscFormat.CBaseFormatObject.call(this);
@@ -284,7 +275,6 @@ function (window, undefined) {
 			}
 		}
 		return p;
-
 
 		/**
 		 * Deep clones a NURBS/spline-like object with the structure shown in the screenshot
@@ -770,7 +760,6 @@ function (window, undefined) {
 						swAng = parseInt(cmd.swAng, 10);
 					}
 
-
 					let a1 = stAng;
 					let a2 = stAng + swAng;
 					let a3 = swAng;
@@ -965,7 +954,6 @@ function (window, undefined) {
 						onBadParams(this, x, y, a, b);
 						break;
 					}
-
 
 					this.ArrPathCommand.push({
 						id: ellipticalArcTo,
@@ -1181,7 +1169,6 @@ function (window, undefined) {
 						return bezierArray;
 					}
 
-
 					// Init arguments
 					let controlPoints = cmd.controlPoints;
 					let weights = cmd.weights;
@@ -1289,7 +1276,6 @@ function (window, undefined) {
 				}
 				case arcTo: {
 
-
 					let a1 = cmd.stAng;
 					let a2 = cmd.stAng + cmd.swAng;
 					let a3 = cmd.swAng;
@@ -1329,7 +1315,6 @@ function (window, undefined) {
 
 					lastX = xc + l1 * cos1;
 					lastY = yc + l1 * sin1;
-
 
 					break;
 				}
@@ -1954,7 +1939,6 @@ function (window, undefined) {
 					break;
 				}
 
-
 				case ellipticalArcTo: {
 					let oPathAccumulator = new AscFormat.PathAccumulator();
 					ArcToCurvers(oPathAccumulator, oCmd.stX, oCmd.stY, oCmd.wR, oCmd.hR, oCmd.stAng, oCmd.swAng, oCmd.ellipseRotation);
@@ -2005,7 +1989,6 @@ function (window, undefined) {
 								let cp2y = bezier.controlPoints[1].y;
 								let endx = bezier.endPoint.x;
 								let endy = bezier.endPoint.y;
-
 
 								dX0 = oTransform.TransformPointX(cp1x, cp1y) * 36000 >> 0;
 								dY0 = oTransform.TransformPointY(cp1x, cp1y) * 36000 >> 0;
@@ -2493,7 +2476,6 @@ function (window, undefined) {
 		return oFirstCmd.id === moveTo;
 	};
 
-
 	Path.prototype.clear = function () {};
 	function CPathCmd() {
 		AscFormat.CBaseNoIdObject.call(this);
@@ -2603,7 +2585,6 @@ function (window, undefined) {
 		let a1 = stAng;
 		let a2 = stAng + swAng;
 		let a3 = swAng;
-
 
 		stAng = Math.atan2(10e-10 * Math.sin(a1 * cToRad), 10e-10 * Math.cos(a1 * cToRad)) / cToRad;
 		swAng = Math.atan2(10e-10 * Math.sin(a2 * cToRad), 10e-10 * Math.cos(a2 * cToRad)) / cToRad - stAng;
@@ -3768,7 +3749,6 @@ function (window, undefined) {
 
 		if (Math.max(r01, r12, r23) < epsilon) return [{x: x0, y: y0}, {x: x1, y: y1}, {x: x2, y: y2}, {x: x3, y: y3}];
 
-
 		let x01 = (x0 + x1) * 0.5;
 		let y01 = (y0 + y1) * 0.5;
 
@@ -3861,7 +3841,6 @@ function (window, undefined) {
 		return splitBezier4(x0, y0, x1, y1, x2, y2, x3, y3, aParameters);
 	}
 
-
 	function getEllipsePoint(dXCE, dYCE, dA, dB, dAlpha) {
 		return {
 			x: dXCE + dA * Math.cos(dAlpha), y: dYCE + dB * Math.sin(dAlpha)
@@ -3904,7 +3883,6 @@ function (window, undefined) {
 		return {p: p1, alpha: dAlphaMiddle};
 	}
 
-
 	function circlesIntersection(x1, y1, r1, x2, y2, r2) {
 		let dDx = x1 - x2;
 		let dDy = y1 - y2;
@@ -3931,7 +3909,6 @@ function (window, undefined) {
 
 		return [{x: ix1, y: iy1}, {x: ix2, y: iy2}];
 	}
-
 
 	//--------------------------------------------------------export----------------------------------------------------
 	window['AscFormat'] = window['AscFormat'] || {};

@@ -12,24 +12,18 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
-
 
 $(function () {
 	// Mocks for API Testing
@@ -116,7 +110,6 @@ $(function () {
 			this.isLoadFullApi = true;
 		};
 
-
 		let api = new Asc.spreadsheet_api({
 			'id-view': 'editor_sdk'
 		});
@@ -128,7 +121,6 @@ $(function () {
 		let docInfo = new Asc.asc_CDocInfo();
 		docInfo.asc_putTitle("TeSt.xlsx");
 		api.DocInfo = docInfo;
-
 
 		window["Asc"]["editor"] = api;
 		AscCommon.g_oTableId.init(api);
@@ -186,7 +178,6 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-
 		oParser = new parserFormula(func + "(A100:C101)", "A1", ws);
 		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
 		assert.ok(oParser.parse(), 'Formula is parsed.');
@@ -230,7 +221,6 @@ $(function () {
 			assert.ok(oParser.parse(), 'Test: Formula ' + func + argStr + ' is parsed.');
 			return oParser.calculate().getValue();
 		};
-
 
 		//***array-formula***
 		ws.getRange2("A100").setValue("1");
@@ -314,7 +304,6 @@ $(function () {
 		res = res.toString();
 		return res;
 	}
-
 
 	/**
 	 * Function creates table or edit existed table.
@@ -1969,7 +1958,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(17,6,A101:A111,4) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 96, 'Test: Bounded case: Number(2), Area, Number. Function_num is QUARTILE.INC (17), options is 6 (ignore errors), ref is area, k is maximum valid value (4)');
 
-
 	});
 
 	QUnit.test("Test: \"ARABIC\"", function (assert) {
@@ -2459,7 +2447,6 @@ $(function () {
 		oParser = new parserFormula('ASIN(0.9999999999999)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ASIN(0.9999999999999) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue().toFixed(8) - 0, 1.57079588, 'Test: Bounded case: Number. Value very close to maximum valid value.');
-
 
 		testArrayFormula(assert, "ASIN");
 	});
@@ -3094,7 +3081,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula DEGREES(ATAN(-9.99999999999999E+307)) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), -90, 'Test: Bounded case: Formula. Converting ATAN of min value to degrees - approaches -90°.');
 
-
 		testArrayFormula(assert, "ATAN");
 	});
 
@@ -3356,7 +3342,6 @@ $(function () {
 		oParser = new parserFormula('ATAN2(2.2251E-154,1.79769E+154)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ATAN2(2.2251E-154,1.79769E+154) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue().toFixed(9) - 0, 1.570796327, 'Test: Bounded case: Number. Minimum possible number for first argument and maximum possible for second. Large difference between arguments. Should correctly calculate the result, close to 0');
-
 
 		testArrayFormula2(assert, "ATAN2", 2, 2);
 	});
@@ -4174,7 +4159,6 @@ $(function () {
 		oParser = new parserFormula('CEILING(-1E-307, -1E-307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula CEILING(-1E-307, -1E-307) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), -1e-307, 'Test: Bounded case: Number(2). Very small negative number with equal significance.');
-
 
 		testArrayFormula2(assert, "CEILING", 2, 2);
 	});
@@ -8631,7 +8615,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("1.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-1.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number. Basic valid input: positive integer. 1 argument used.
 		oParser = new parserFormula('FACTDOUBLE(5)', 'A2', ws);
@@ -8825,7 +8808,6 @@ $(function () {
 		// Case #1: Number. Minimum valid number (returns 1). 1 argument used.
 		// Case #2: Number. Maximum valid number before overflow. 1 argument used.
 		// Case #3: Number. Small decimal truncated to 0 (returns 1). 1 argument used. - critical
-
 
 		testArrayFormula(assert, "FACTDOUBLE", true);
 	});
@@ -9081,7 +9063,6 @@ $(function () {
 		// Case #3: Number. Maximum 15 significant digits for number. 2 of 2 arguments used.
 		// Case #4: Number. Maximum 15 significant digits for negative number. 2 of 2 arguments used.
 
-
 		testArrayFormula2(assert, "FLOOR", 2, 2);
 	});
 
@@ -9147,7 +9128,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Basic valid input: positive number, positive significance. 2 of 2 arguments used.
@@ -9341,7 +9321,6 @@ $(function () {
 		// Case #3: Number. Maximum 15 significant digits for number. 2 of 2 arguments used.
 		// Case #4: Number. Maximum 15 significant digits for negative number. 2 of 2 arguments used.
 
-
 		testArrayFormula2(assert, "FLOOR.PRECISE", 1, 2);
 	});
 
@@ -9399,7 +9378,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Positive number, default significance (1), rounds down to 123. 1 of 3 arguments used.
@@ -9594,7 +9572,6 @@ $(function () {
 		// Case #3: Number. Maximum 15 significant digits for number. 2 of 3 arguments used.
 		// Case #4: Number. Maximum 15 significant digits for negative number, mode -1. 3 of 3 arguments used.
 
-
 		testArrayFormula2(assert, "FLOOR.MATH", 1, 3);
 	});
 
@@ -9648,7 +9625,6 @@ $(function () {
 		ws.getRange2("B208").setValue("0.8s"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #0: Number. Basic valid input: two positive integers. 2 of 255 arguments used.
@@ -9849,7 +9825,6 @@ $(function () {
 		oParser = new parserFormula('GCD(2,2^53+1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GCD(2,2^53+1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), "#NUM!", 'Test: Bounded case: Number. More than maximum integer > 2^53 with another number. 2 of 255 arguments used.');
-
 
 		testArrayFormula2(assert, "GCD", 1, 8, null, true);
 	});
@@ -10369,7 +10344,6 @@ $(function () {
 		// Case #13: Area. Multi-cell significance range returns #VALUE!. 2 arguments used.
 		// Case #2: Number. Maximum number with minimum significance. 2 arguments used.
 
-
 		testArrayFormula2(assert, "ISO.CEILING", 1, 2);
 	});
 
@@ -10619,7 +10593,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: LCM(2^53+2) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), "#NUM!", 'Test: Bounded case 5: Number. More than large MAX integer.');
 
-
 		testArrayFormula2(assert, "LCM", 1, 8, null, true);
 
 	});
@@ -10637,7 +10610,6 @@ $(function () {
 		oParser = new parserFormula("LN(EXP(3))", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 3);
-
 
 		// Data for reference link. Use A100-A111
 		ws.getRange2("A100").setValue("0.5");
@@ -10962,7 +10934,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: LN(EXP(10)) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 10, 'Test: Bounded case: Formula. Compound function boundary test. 1 argument used.');
 
-
 		// Need to fix: cross Area check, empty check
 		// Different result with MS
 		// Case #7: Array. Array with single element
@@ -10976,7 +10947,6 @@ $(function () {
 		// Case #16: Array. Array with boolean returns #NUM!.
 		// Case #26: Array. Array with text values.
 		// Case #1: Number. Min valid positive value
-
 
 		testArrayFormula(assert, "LN");
 	});
@@ -11514,7 +11484,6 @@ $(function () {
 		ws.getRange2("D3").setValue("1");
 		ws.getRange2("D4").setValue("0");
 		ws.getRange2("D5").setValue("2");
-
 
 		oParser = new parserFormula("MDETERM(A2:D5)", "A2", ws);
 		assert.ok(oParser.parse());
@@ -12829,7 +12798,6 @@ $(function () {
 		// Case #3: Number(2). Max negative Excel number for number. 2 of 2 arguments used.
 		// Case #4: Number(2). Min valid negative divisor. 2 of 2 arguments used.
 
-
 		testArrayFormula2(assert, "MOD", 2, 2);
 	});
 
@@ -12849,7 +12817,6 @@ $(function () {
 
 			return x * multiple;
 		}
-
 
 		oParser = new parserFormula("MROUND(10,3)", "A1", ws);
 		assert.ok(oParser.parse());
@@ -13521,7 +13488,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: SUM(MUNIT(1000)) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1000, 'Test: Positive case: Formula. Nested formula evaluating to integer > 0. Returns the SUM of the matrix 1000x1000.');
 
-
 		// Negative cases:
 		// Case #1: Number. Zero returns #NUM! error (n must be positive). 1 argument used.
 		oParser = new parserFormula('MUNIT(0)', 'A2', ws);
@@ -13641,7 +13607,6 @@ $(function () {
 		oParser = new parserFormula("ODD(-2)", "A2", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), -3);
-
 
 		// Data for reference link. Use A100-A111
 		ws.getRange2("A100").setValue("0.5");
@@ -14018,7 +13983,6 @@ $(function () {
 
 		// ------------------------- same tests as in Pow operator tests ------------------------- //
 
-
 		oParser = new parserFormula("POWER(0,0)", "A1", ws);
 		assert.ok(oParser.parse(), "POWER(0,0)");
 		assert.strictEqual(oParser.calculate().getValue(), 1, "Result of POWER(0,0)");	// ms - #NUM!, js - 1, LO - 1, gs - 1
@@ -14335,7 +14299,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: POWER(2,-1E+307) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Number. Largest negative power. 2 of 2 arguments used.');
 
-
 		// Need to fix: diff results from MS
 		// Case #10: Name3D. 3D named ranges with valid numbers. 2 of 2 arguments used.
 		// Case #11: Ref3D. 3D references to valid numbers. 2 of 2 arguments used.
@@ -14371,7 +14334,6 @@ $(function () {
 		oParser = new parserFormula("PRODUCT(A2:A4, 2)", "A2", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 4500);
-
 
 		ws.getRange2("A1:C214").cleanAll();
 		// Data for reference link. Use A100-A111
@@ -14508,7 +14470,6 @@ $(function () {
 		oParser = new parserFormula('PRODUCT(A106:A107,0.1,"123",,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: PRODUCT(A106:A107,0.1,"123",,TRUE) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 12.3, 'Test: Positive case: Area(empty), Number, String(as num), Empty, Boolean. 5 arguments used.');
-
 
 		// Negative cases:
 		// Case #1: String. Non-numeric string returns #VALUE!. 1 of 3 arguments used.
@@ -15520,7 +15481,6 @@ $(function () {
 		// TODO many problems with this formula
 		// Need to fix: 3D sheets/cells handle, area handle, differences in results from MS, critical err in some cases with 3D, too long calc when big num encounter in row/col
 
-
 	});
 
 	QUnit.test("Test: \"RANDBETWEEN\"", function (assert) {
@@ -15617,7 +15577,6 @@ $(function () {
 		assert.strictEqual(res, "", "Result RANDBETWEEN(1,{5.5,3.5})[1,0] ");
 		res = array.getElementRowCol(2, 0).getValue();
 		assert.strictEqual(res, "#N/A", "Result RANDBETWEEN(1,{5.5,3.5})[2,0] ");
-
 
 		oParser = new parserFormula("RANDBETWEEN(null, undefined)", "A2", ws);
 		assert.ok(oParser.parse(), "RANDBETWEEN(null, undefined)");
@@ -16291,7 +16250,6 @@ $(function () {
 		// Case #18: Table. Table structured reference with valid number (1). Returns "I".
 		// Case #11: Name. Named range with text returns #VALUE!.
 
-
 		testArrayFormula2(assert, "ROMAN", 2, 2);
 	});
 
@@ -16386,7 +16344,6 @@ $(function () {
 		ws.getRange2("B110").setValue("6");
 		ws.getRange2("B111").setValue("5");
 
-
 		oParser = new parserFormula("ROUND(A100, B100)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 3.14, "Round ROUND(A100, B100)");
@@ -16435,7 +16392,6 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 1.12312, "Round ROUND(A111, B111)");
 
-
 		oParser = new parserFormula("ROUND(1.123,2)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 1.12, "ROUND(1.123,2)");
@@ -16451,7 +16407,6 @@ $(function () {
 		oParser = new parserFormula("ROUND(1.995,2)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 2.00, "ROUND(1.995,2)");
-
 
 		oParser = new parserFormula("ROUND(3.14159,0)", "A1", ws);
 		assert.ok(oParser.parse());
@@ -16472,7 +16427,6 @@ $(function () {
 		oParser = new parserFormula("ROUND(3.14159,4)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 3.1416, "ROUND(3.14159,4)");
-
 
 		oParser = new parserFormula("ROUND(-1.123,2)", "A1", ws);
 		assert.ok(oParser.parse());
@@ -16727,7 +16681,6 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), -0.05, "ROUND(-0.05,2)");
 
-
 		oParser = new parserFormula("ROUND(19.99,2)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 19.99, "ROUND(19.99,2)");
@@ -16747,7 +16700,6 @@ $(function () {
 		oParser = new parserFormula("ROUND(19.001,2)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 19.00, "ROUND(19.001,2)");
-
 
 		ws.getRange2("A1:C214").cleanAll();
 		// Data for reference link. Use A100-A111
@@ -16983,7 +16935,6 @@ $(function () {
 		// Case #16: Number, Name. Named range with text for num_digits returns #VALUE!. 2 of 2 arguments used.
 		// Case #17: Name3D, Number. 3D named range with text returns #VALUE!. 2 of 2 arguments used.
 		// Case #18: Number, Name3D. 3D named range with text for num_digits returns #VALUE!. 2 of 2 arguments used.
-
 
 		testArrayFormula2(assert, "ROUND", 2, 2);
 	});
@@ -17838,7 +17789,6 @@ $(function () {
 		// Case #18: Number, Name3D. 3D named range with text for num_digits returns #VALUE!. 2 of 2 arguments used.
 		// Case #2: Number(2). Largest valid Excel number, ROUNDUPs to itself. 2 of 2 arguments used.
 
-
 	});
 
 	QUnit.test("Test: \"ROUNDUP(31415.92654,-2)\"", function (assert) {
@@ -18125,7 +18075,6 @@ $(function () {
 		// Case #3: Number. Value slightly above ?/2 (valid). 1 argument used.
 		// Case #4: Number. Value slightly below -?/2 (valid). 1 argument used.
 
-
 		testArrayFormula(assert, "SEC");
 	});
 
@@ -18376,12 +18325,10 @@ $(function () {
 		// Case #13: Table. Table structured reference with valid number (0). 1 argument used.
 		// Case #5: Area. Multi-cell range returns #VALUE!. 1 argument used.
 
-
 		testArrayFormula(assert, "SECH");
 	});
 
 	QUnit.test("Test: \"SERIESSUM\"", function (assert) {
-
 
 		ws.getRange2("A2").setValue("1");
 		ws.getRange2("A3").setValue(numDivFact(-1, 2));
@@ -18403,7 +18350,6 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.ok(Math.abs(oParser.calculate().getValue() -
 			(Math.PI / 4 - 1 / Math.fact(3) * Math.pow(Math.PI / 4, 3) + 1 / Math.fact(5) * Math.pow(Math.PI / 4, 5) - 1 / Math.fact(7) * Math.pow(Math.PI / 4, 7))) < dif);
-
 
 		// Data for reference link. Use A100-A111
 		ws.getRange2("A1:C214").cleanAll();
@@ -18444,7 +18390,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #0: Number(3), Array. Basic valid input: numbers for x, n, m, and array for coefficients. 4 of 4 arguments used.
@@ -18551,7 +18496,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: SERIESSUM(Sheet2!A4,1,1,{1.5,2.5,3.5}) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Test: Positive case: Number(3), Array. Float coefficients in array. 4 of 4 arguments used.');
 
-
 		// Negative cases:
 		// Case #1: Number(3), Array. Negative x may cause #NUM! depending on coefficients. 4 of 4 arguments used.
 		oParser = new parserFormula('SERIESSUM(-1,1,1,{1,2,3})', 'A2', ws);
@@ -18647,7 +18591,6 @@ $(function () {
 		oParser = new parserFormula('SERIESSUM(1,2^31-1,2^31-1,{1,2,3})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SERIESSUM(1,2^31-1,2^31-1,{1,2,3}) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 6, 'Test: Bounded case: Number(3), Array. Maximum integer values for n and m (Excelâ??s 32-bit integer limit). 4 of 4 arguments used.');
-
 
 		//TODO нужна другая функция для тестирования
 		//testArrayFormula2(assert, "SERIESSUM", 4, 4);
@@ -19127,7 +19070,6 @@ $(function () {
 		// Case #2: Number. Smallest negative number Excel can handle, returns ~-1E-308. 1 argument used.
 		// Case #3: Number. Largest number Excel can handle, returns valid sine value. 1 argument used.
 
-
 	});
 
 	QUnit.test("Test: \"SIN have wrong arguments count\"", function (assert) {
@@ -19187,7 +19129,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Basic valid input: zero radians. 1 argument used.
@@ -19428,7 +19369,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Square root of 4
@@ -19958,7 +19898,6 @@ $(function () {
 		assert.ok(oParser.parse(), "SUBTOTAL(9,A102,A102:A105,A106,A102:A105,A106)");
 		assert.strictEqual(oParser.calculate().getValue(), 728, "SUBTOTAL(9,A102,A102:A106,A102:A105,A106)");
 
-
 		// for bug 68820
 		ws.getRange2("B100").setValue("-2");
 		ws.getRange2("B101").setValue("1");
@@ -20037,8 +19976,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
-
 
 		// Positive cases:
 		// Case #1: Number. Simple number as input.
@@ -20337,7 +20274,6 @@ $(function () {
 		// Case #11: Ref3D. Invalid 3D reference.
 		// Case #12: Area3D. Invalid 3D area reference.
 
-
 	});
 
 	QUnit.test("Test: \"SUBTOTAL with multiple ranges\"", function (assert) {
@@ -20418,7 +20354,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'SUM(SIN(A101:A103))');
 		assert.strictEqual(oParser.calculate().getValue().toFixed(2), "1.89", 'Result of SUM(SIN(A101:A103))');
 
-
 		ws.getRange2("A1:C214").cleanAll();
 		// Data for reference link. Use A100-A111
 		ws.getRange2("A100").setValue("0.5");
@@ -20453,7 +20388,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Basic valid input: single integer. 1 argument used.
@@ -20712,7 +20646,6 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 300000);
 
-
 		ws.getRange2("A12").setValue("Vegetables");
 		ws.getRange2("A13").setValue("Vegetables");
 		ws.getRange2("A14").setValue("Fruits");
@@ -20825,7 +20758,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'SUMIFS(A2:A9,A2:A9,A2,A2:A9*2,A2) - wrong argument type check');
 		assert.strictEqual(oParser.calculate(null, null, null, null, calculateResult).getValue(), "#NULL!", 'Result of SUMIFS(A2:A9,A2:A9,A2,A2:A9*2,A2) - wrong argument type check');
 
-
 	});
 
 	QUnit.test("Test: \"SUMIFS with multiple criteria ranges\"", function (assert) {
@@ -20881,7 +20813,6 @@ $(function () {
 		assert.ok(oParser.parse(), "Multiple SUMIFS with 4 criteria pairs");
 		assert.strictEqual(oParser.calculate().getValue(), 40 + 50, "Multiple SUMIFS with 4 criteria pairs");
 
-
 		// Test with cell references for criteria
 		ws.getRange2("J2").setValue("Red");
 		ws.getRange2("J3").setValue("Large");
@@ -20895,7 +20826,6 @@ $(function () {
 		oParser = new parserFormula("SUMIFS(E2:E7, F2:F7, \"Red\", G2:G7, \"*\", H2:H7, \">\" & 2023, I2:I7, \"A\", I2:I7, \"<>Z\")", "A1", ws);
 		assert.ok(oParser.parse(), "SUMIFS with complex criteria expressions");
 		assert.strictEqual(oParser.calculate().getValue(), 40, "SUMIFS with complex criteria expressions");
-
 
 		// Test with criteria that select a single row
 		oParser = new parserFormula("SUMIFS(E2:E7, F2:F7, \"Red\", G2:G7, \"Large\", H2:H7, 2024, I2:I7, \"A\", E2:E7, 40)", "A1", ws);
@@ -21185,7 +21115,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number. Basic valid input: arrays with 2 numbers each. 2 arguments used.
 		oParser = new parserFormula('SUMPRODUCT({1,2},{3,4})', 'A2', ws);
@@ -21390,7 +21319,6 @@ $(function () {
 		// Case #18: Area3D. Mismatched 3D range sizes returns #VALUE!.
 		// Case #12: Table. Table references with numbers (1,2; 3,4). 2 arguments used.
 		// Case #4: Number. Minimum positive Excel number. 2 arguments used.
-
 
 		testArrayFormula2(assert, "SUMPRODUCT", 1, 8, null, true);
 	});
@@ -21720,7 +21648,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Array. Basic valid input: arrays with integer elements. 2 of 2 arguments used.
 		oParser = new parserFormula('SUMX2MY2({1,2},{3,4})', 'A2', ws);
@@ -21930,7 +21857,6 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 74);
 
-
 		oParser = new parserFormula("SUMX2PY2(A101,B101)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 26);
@@ -21981,7 +21907,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Array. Basic valid input: arrays with integer elements. 2 of 2 arguments used.
@@ -22243,7 +22168,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Array. Basic valid input: arrays with integer elements. 2 of 2 arguments used.
 		oParser = new parserFormula('SUMXMY2({1,2},{3,4})', 'A2', ws);
@@ -22472,7 +22396,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number. Basic valid input: zero radians. 1 argument used.
 		oParser = new parserFormula('TAN(0)', 'A2', ws);
@@ -22664,7 +22587,6 @@ $(function () {
 		// Case #10: Area3D. 3D multi-cell range returns #VALUE!. 1 argument used.
 		// Case #14: Number. Number exceeding Excels limit returns #NUM!. 1 argument used.
 		// Case #19: Area. Area with text in one cell returns #VALUE!. 1 argument used.
-
 
 		testArrayFormula(assert, "TAN");
 	});
@@ -22907,7 +22829,6 @@ $(function () {
 		// Case #1: Number. Smallest positive number Excel can handle, returns ~1E-308. 1 argument used.
 		// Case #2: Number. Smallest negative number Excel can handle, returns ~-1E-308. 1 argument used.
 
-
 		testArrayFormula(assert, "TANH");
 	});
 
@@ -22941,7 +22862,6 @@ $(function () {
 		oParser = new parserFormula("TRUNC(0.45)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 0);
-
 
 		oParser = new parserFormula("TRUNC(43214)", "A1", ws);
 		assert.ok(oParser.parse());
@@ -23138,7 +23058,6 @@ $(function () {
 		assert.ok(oParser.parse(), "TRUNC(2,)");
 		assert.strictEqual(oParser.calculate().getValue(), 2, "Result of TRUNC(2,)");
 
-
 		oParser = new parserFormula("TRUNC(E101:E101,E102)", "A1", ws);
 		assert.ok(oParser.parse(), "TRUNC('252.252','1')");
 		assert.strictEqual(oParser.calculate().getValue(), 123.33, "Result of TRUNC('252.252','1')");
@@ -23323,7 +23242,6 @@ $(function () {
 		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), "#N/A", "Result of SEQUENCE(H19:K19, H19:I19, J19)[0,2]");
 		assert.strictEqual(array.getElementRowCol(0, 3).getValue(), "#N/A", "Result of SEQUENCE(H19:K19, H19:I19, J19)[0,3]");
 		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), "", "Result of SEQUENCE(H19:K19, H19:I19, J19)[1,0]");
-
 
 		oParser = new parserFormula('SEQUENCE(G10)', "A2", ws);
 		assert.ok(oParser.parse(), 'SEQUENCE(G10)');
@@ -23817,7 +23735,6 @@ $(function () {
 		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 4, "Result of SEQUENCE(1,2,2,{2,2;2,2})[0,1]");
 		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 4, "Result of SEQUENCE(1,2,2,{2,2;2,2})[1,0]");
 		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), 4, "Result of SEQUENCE(1,2,2,{2,2;2,2})[1,1]");
-
 
 		oParser = new parserFormula('SEQUENCE({1,2,3},{1,2},1,1)', "A2", ws);
 		assert.ok(oParser.parse(), 'SEQUENCE({1,2,3},{1,2},1,1)');

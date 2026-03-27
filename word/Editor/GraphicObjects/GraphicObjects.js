@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -66,7 +61,6 @@ function CGraphicObjects(document, drawingDocument, api)
     this.arrPreTrackObjects = [];
     this.arrTrackObjects = [];
 
-
     this.curState = new AscFormat.NullState(this);
 
     this.selectionInfo =
@@ -80,7 +74,6 @@ function CGraphicObjects(document, drawingDocument, api)
     this.polyline = null;
 
     this.drawingObjects = [];
-
 
     this.urlMap = [];
     this.recalcMap = {};
@@ -181,7 +174,6 @@ CGraphicObjects.prototype =
     {
         this.bNoCheckChartTextSelection = false;
     },
-
 
     getDrawingDocument: function()
     {
@@ -436,7 +428,6 @@ CGraphicObjects.prototype =
 
     createWatermarkImage: DrawingObjectsController.prototype.createWatermarkImage,
 
-
     getAllInksShapes: function ()
     {
         let aDrawings = this.document.GetAllDrawingObjects();
@@ -506,7 +497,6 @@ CGraphicObjects.prototype =
 			this.document.FinalizeAction();
 		}
 	},
-
 
     createWatermark: function(oProps)
     {
@@ -780,7 +770,6 @@ CGraphicObjects.prototype =
 		}
 	},
 
-
     selectObject: DrawingObjectsController.prototype.selectObject,
 
     checkSelectedObjectsForMove: DrawingObjectsController.prototype.checkSelectedObjectsForMove,
@@ -792,7 +781,6 @@ CGraphicObjects.prototype =
 		editChartDrawingObjects: DrawingObjectsController.prototype.editChartDrawingObjects,
 		editChartCallback: DrawingObjectsController.prototype.editChartCallback,
 	getSelectedSingleChart: DrawingObjectsController.prototype.getSelectedSingleChart,
-
 
     getPageSizesByDrawingObjects: function()
     {
@@ -825,7 +813,6 @@ CGraphicObjects.prototype =
             oDocContent.AcceptRevisionChanges(Type, bAll);
         }
     },
-
 
 	RejectRevisionChanges: function(Type, bAll)
     {
@@ -1432,7 +1419,6 @@ CGraphicObjects.prototype =
 		}
 	},
 
-
 	getCompatibilityMode: function(){
         var ret = 0xFF;
         if(this.document && this.document.GetCompatibilityMode){
@@ -1440,7 +1426,6 @@ CGraphicObjects.prototype =
         }
         return ret;
     },
-
 
     mergeDrawings: function(pageIndex, HeaderDrawings, HeaderTables, FooterDrawings, FooterTables)
     {
@@ -1577,7 +1562,6 @@ CGraphicObjects.prototype =
         return false;
     },
 
-
     getTableByXY: function(x, y, pageIndex, documentContent)
     {
         if(!this.graphicPages[pageIndex])
@@ -1643,7 +1627,6 @@ CGraphicObjects.prototype =
         this.applyDrawingProps(props);
     },
 
-
     addShapeOnPage: function(sPreset, nPageIndex)
     {
         if ( docpostype_HdrFtr !== this.document.GetDocPosType() || null !== this.document.HdrFtr.CurHdrFtr )
@@ -1691,7 +1674,6 @@ CGraphicObjects.prototype =
         }
     },
 
-
     drawOnOverlay: function(overlay)
     {
         var _track_objects = this.arrTrackObjects;
@@ -1709,7 +1691,6 @@ CGraphicObjects.prototype =
         //TODO Anchor Position
         return;
     },
-
 
 	getAllDrawingsOnPage: function(pageIndex, bHdrFtr)
 	{
@@ -1828,7 +1809,6 @@ CGraphicObjects.prototype =
     handleSignatureDblClick: function(sGuid, width, height){
         editor.sendEvent("asc_onSignatureDblClick", sGuid, width, height);
     },
-
 
     handleOleObjectDoubleClick: function(drawing, oleObject, e, x, y, pageIndex)
     {
@@ -2019,7 +1999,6 @@ CGraphicObjects.prototype =
 			}
         }
     },
-
 
     canAddComment: function()
     {
@@ -2257,8 +2236,6 @@ CGraphicObjects.prototype =
         this.graphicPages[pageIndex].hdrFtrPage.mergePages(page1, page2);
     },
 
-
-
     onEndRecalculateDocument: function(pagesCount)
     {
         for(var i = 0; i < pagesCount; ++i)
@@ -2272,7 +2249,6 @@ CGraphicObjects.prototype =
                 delete  this.graphicPages[i];
         }
     },
-
 
     documentStatistics: function( CurPage, Statistics )
     {
@@ -2329,7 +2305,6 @@ CGraphicObjects.prototype =
 			this.drawingDocument.SelectShow();
         }
     },
-
 
     getMajorParaDrawing: function()
     {
@@ -2391,7 +2366,6 @@ CGraphicObjects.prototype =
        //    }
        //}
     },
-
 
     updateTextPr: function()
     {
@@ -2557,7 +2531,6 @@ CGraphicObjects.prototype =
         return content && content.RemoveTableColumn();
     },
 
-
     tableAddCol: function(bBefore, nCount)
     {
         var content = this.getTargetDocContent();
@@ -2587,7 +2560,6 @@ CGraphicObjects.prototype =
 		var content = this.getTargetDocContent();
 		return content && content.DistributeTableCells(isHorizontally);
 	},
-
 
     documentSearch: function( CurPage, String, search_Common )
     {
@@ -2632,7 +2604,6 @@ CGraphicObjects.prototype =
     },
 
     selectNextObject: DrawingObjectsController.prototype.selectNextObject,
-
 
     getCurrentParagraph: function(bIgnoreSelection, arrSelectedParagraphs, oPr)
     {
@@ -2692,7 +2663,6 @@ CGraphicObjects.prototype =
             return false;
         }
     },
-
 
     isSelectionUse: function()
     {
@@ -2818,7 +2788,6 @@ CGraphicObjects.prototype =
         return this.document.Get_ColorMap();
     },
 
-
 	GetStyleFromFormatting: function()
     {
         var oContent = this.getTargetDocContent();
@@ -2914,7 +2883,6 @@ CGraphicObjects.prototype =
         page && page.drawBeforeObjectsByContent(graphics, content)
     },
 
-
     endTrackShape: function()
     {
 
@@ -2946,7 +2914,6 @@ CGraphicObjects.prototype =
         }
         graphics.shapePageIndex = null;
     },
-
 
     drawBeforeObjectsHdrFtr: function(pageIndex, graphics)
     {
@@ -3032,14 +2999,10 @@ CGraphicObjects.prototype =
     canUnGroup: DrawingObjectsController.prototype.canUnGroup,
     getBoundsForGroup: DrawingObjectsController.prototype.getBoundsForGroup,
 
-
-
-
     getArrayForGrouping: function()
     {
         return this.canGroup(true);
     },
-
 
     startSelectionFromCurPos: function()
     {
@@ -3049,7 +3012,6 @@ CGraphicObjects.prototype =
             content.StartSelectionFromCurPos();
         }
     },
-
 
     Check_TrackObjects: function()
     {
@@ -3345,7 +3307,6 @@ CGraphicObjects.prototype =
         }
     },
 
-
     selectionIsEmpty: function(bCheckHidden)
     {
         var content = this.getTargetDocContent();
@@ -3363,14 +3324,12 @@ CGraphicObjects.prototype =
 
     cursorMoveRight: DrawingObjectsController.prototype.cursorMoveRight,
 
-
     cursorMoveUp: DrawingObjectsController.prototype.cursorMoveUp,
 
     cursorMoveDown: DrawingObjectsController.prototype.cursorMoveDown,
 
     cursorMoveEndOfLine: DrawingObjectsController.prototype.cursorMoveEndOfLine,
     getMoveDist: DrawingObjectsController.prototype.getMoveDist,
-
 
     cursorMoveStartOfLine: DrawingObjectsController.prototype.cursorMoveStartOfLine,
 
@@ -3462,7 +3421,6 @@ CGraphicObjects.prototype =
             }
         }
     },
-
 
     recalculateCurPos: function(bUpdateX, bUpdateY)
     {
@@ -3790,7 +3748,6 @@ CGraphicObjects.prototype =
         this.changeCurrentState(oOldState);
         return bRet;
     },
-
 
     pointInObjInDocContent: function( docContent, X, Y, pageIndex )
     {
@@ -4250,7 +4207,6 @@ CGraphicObjects.prototype =
         }
     },
 
-
     distributeHor : function(alignType)
     {
         var selected_objects = this.selection.groupSelection ? this.selection.groupSelection.selectedObjects : this.selectedObjects, i, boundsObject, arrBounds, pos1, pos2, gap, sortObjects, lastPos;
@@ -4392,7 +4348,6 @@ CGraphicObjects.prototype =
         }
     },
 
-
     Save_DocumentStateBeforeLoadChanges: function(oState)
     {
         var oTargetDocContent = this.getTargetDocContent(undefined, true);
@@ -4454,7 +4409,6 @@ CGraphicObjects.prototype =
         }
     },
 
-
     removeById: function(nPageIdx, sId)
     {
         const oDrawing = AscCommon.g_oTableId.Get_ById(sId);
@@ -4472,7 +4426,6 @@ CGraphicObjects.prototype =
         }
     },
 
-
     Remove_ById: function(id)
     {
         for(var i = 0; i < this.graphicPages.length; ++i)
@@ -4480,7 +4433,6 @@ CGraphicObjects.prototype =
             this.removeById(i, id)
         }
     },
-
 
     selectById: function(id, pageIndex)
     {
@@ -4547,7 +4499,6 @@ CGraphicObjects.prototype =
         return !!this.getSmartArtSelection() && this.isTextSelectionUse();
     },
 
-
     drawSelectionPage: function(pageIndex)
     {
         var oMatrix = null;
@@ -4608,9 +4559,7 @@ CGraphicObjects.prototype =
     checkChartTextSelection: DrawingObjectsController.prototype.checkChartTextSelection,
     checkNeedResetChartSelection: DrawingObjectsController.prototype.checkNeedResetChartSelection,
 
-
     addNewParagraph: DrawingObjectsController.prototype.addNewParagraph,
-
 
     paragraphClearFormatting: function(isClearParaPr, isClearTextPr)
     {
@@ -4628,9 +4577,7 @@ CGraphicObjects.prototype =
 
     setParagraphShd: DrawingObjectsController.prototype.setParagraphShd,
 
-
     setParagraphStyle:  DrawingObjectsController.prototype.setParagraphStyle,
-
 
     setParagraphContextualSpacing: DrawingObjectsController.prototype.setParagraphContextualSpacing,
 
@@ -4638,7 +4585,6 @@ CGraphicObjects.prototype =
     setParagraphKeepLines: DrawingObjectsController.prototype.setParagraphKeepLines,
 
     setParagraphKeepNext: DrawingObjectsController.prototype.setParagraphKeepNext,
-
 
     setParagraphWidowControl: DrawingObjectsController.prototype.setParagraphWidowControl,
 
@@ -4735,8 +4681,6 @@ CGraphicObjects.prototype =
         }
         return {X: 0, Y: 0, PageIndex: pageIndex};
     },
-
-
 
     CheckRange: function(X0, Y0, X1, Y1, Y0Sp, Y1Sp, LeftField, RightField, PageNum, HdrFtrRanges, docContent, bMathWrap)
     {

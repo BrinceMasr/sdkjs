@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -134,7 +129,6 @@ function (window, undefined) {
 	window['AscCH'].historyitem_Worksheet_ChangeLegacyDrawingHFDrawing = 64;
 
 	window['AscCH'].historyitem_Worksheet_TimelineDelete = 65;
-
 
 	window['AscCH'].historyitem_RowCol_Fontname = 1;
 	window['AscCH'].historyitem_RowCol_Fontsize = 2;
@@ -850,7 +844,6 @@ CHistory.prototype.UndoRedoEnd = function (Point, oRedoObjectParam, bUndo) {
 		}
 	}
 
-
     if(!window["NATIVE_EDITOR_ENJINE"])
     {
         var wsView = window["Asc"]["editor"].wb.getWorksheet();
@@ -1022,12 +1015,10 @@ CHistory.prototype.Reset_RecalcIndex = function()
 CHistory.prototype.Add_RecalcNumPr = function()
 {};
 
-
 CHistory.prototype.Set_Additional_ExtendDocumentToPos = function()
 {
 
 };
-
 
 CHistory.prototype.CheckUnionLastPoints = function()
 {
@@ -1160,7 +1151,6 @@ CHistory.prototype.Create_NewPoint = function(nDescription)
 			Time  : null,   // Текущее время
 			SelectionState : null
 		};
-
 
 		this.Points.length  = this.Index + 1;
 		this.CollectChanges = true;

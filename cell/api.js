@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -59,7 +54,6 @@ var editor;
   var c_oAscAsyncActionType = asc.c_oAscAsyncActionType;
 
   var History = null;
-
 
   /**
    *
@@ -287,7 +281,6 @@ var editor;
     }
     return AscCommonExcel.getCurrencyFormat(cultureInfo, 2, true, true, null);
   };
-
 
   spreadsheet_api.prototype.asc_getCurrentListType = function(){
       var ws = this.wb.getWorksheet();
@@ -695,7 +688,6 @@ var editor;
 	spreadsheet_api.prototype.asc_ImportXmlEnd = function (stream, dataRef, newSheetName) {
 		let t = this;
 
-
 		let doInsertXml = function (_dataRef, _ws) {
 			let binaryData = stream;
 			if (!window["AscDesktopEditor"]) {
@@ -801,7 +793,6 @@ var editor;
 			}
 		}
 	};
-
 
 	spreadsheet_api.prototype._convertFromXml = function (document, callback) {
 		let stream = null;
@@ -2206,7 +2197,6 @@ var editor;
 					reader = new StaxParser(contentStyles, stylesPart, xmlParserContext);
 					styleSheet.fromXml(reader);
 
-
 					var oStyleObject = {
 						aBorders: styleSheet.borders,
 						aFills: styleSheet.fills,
@@ -2665,7 +2655,6 @@ var editor;
 
 			initOpenManager.readDefStyles(wb, wb.CellStyles.DefaultStyles);
 
-
 			AscCommon.pptx_content_loader.Reader.ImageMapChecker = AscCommon.pptx_content_loader.ImageMapChecker;
 			xmlParserContext.loadDataLinks();
 			xmlParserContext.ClearSmartArts();
@@ -2882,7 +2871,6 @@ var editor;
           t._onUpdateCFLock(lockElem);
           t._onUpdateProtectedRangesLock(lockElem);
           t._onUpdateUserProtectedRange(lockElem);
-
 
           var ws = t.wb.getWorksheet();
           var lockSheetId = lockElem.Element["sheetId"];
@@ -4087,7 +4075,6 @@ var editor;
       return false;
     }
 
-
     if (!arrSheets) {
       arrSheets = [this.wbModel.getActive()];
     }
@@ -4283,7 +4270,6 @@ var editor;
 	  if (!arrSheets) {
 		  return false;
 	  }
-
 
 	  var t = this;
 	  var addWorksheet = function(res) {
@@ -4885,7 +4871,6 @@ var editor;
     this.AddImageUrl(urls, imgProp, token, null);
   };
 
-
   spreadsheet_api.prototype.asc_AddMath = function(Type)
   {
     var t = this, fonts = {};
@@ -5101,7 +5086,6 @@ var editor;
 		}
 		return bRes;
   };
-
 
   spreadsheet_api.prototype.asc_addTextArt = function(nStyle) {
     var ws = this.wb.getWorksheet();
@@ -5337,7 +5321,6 @@ var editor;
     }
   };
 
-
     spreadsheet_api.prototype.asc_startEditCurrentOleObject = function(){
         var ws = this.wb.getWorksheet();
         if(ws && ws.objectRender){
@@ -5556,7 +5539,6 @@ var editor;
 	  }
       return ws.objectRender.controller.putImageToSelection(sImageSrc, nWidth, nHeight, replaceMode);
   };
-
 
 	spreadsheet_api.prototype.getPluginContextMenuInfo = function () {
 		const oWorksheet = this.wb.getWorksheet();
@@ -6300,7 +6282,6 @@ var editor;
     }
   };
 
-
 	spreadsheet_api.prototype.asc_setCellReadingOrder = function(readingOrder) {
 		if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
 			return;
@@ -6565,7 +6546,6 @@ var editor;
 	this.changeFormatPainterState(formatPainterState, undefined);
   };
 
-
 	spreadsheet_api.prototype.changeFormatPainterState = function(formatPainterState, bLockDraw) {
         if (this.isStartAddShape) {
             this.asc_endAddShape();
@@ -6753,7 +6733,6 @@ var editor;
         sheetId);
     this.collaborativeEditing.lock([lockInfo], onChangeColorScheme);
   };
-
 
   spreadsheet_api.prototype.asc_AfterChangeColorScheme = function() {
     this.asc_CheckGuiControlColors();
@@ -7098,7 +7077,6 @@ var editor;
 			   _adjustPrint.asc_setPrintType(_options["adjustOptions"]["printType"]);
 	   }
 
-
        var ws, newPrintOptions;
 	   var _orientation = spreadsheetLayout ? spreadsheetLayout["orientation"] : null;
 	   if(_orientation === "portrait") {
@@ -7314,7 +7292,6 @@ var editor;
 		this.executeGroupActionsEnd();
 		return true;
 	};
-
 
   spreadsheet_api.prototype.pre_Paste = function(_fonts, _images, callback)
   {
@@ -8514,7 +8491,6 @@ var editor;
 			}
 		};
 
-
 		var checkPassword = function (hash, doNotCheckPassword) {
 			if (doNotCheckPassword) {
 				//TODO проверить, может быть нужен глобальный лок?
@@ -8665,8 +8641,6 @@ var editor;
           oWorkbook.convertEquationToMath(oEquation, isAll);
       }
   };
-
-
 
 	/*отправляем инфомарцию, инфомарция в виде строки(id + ";" + isEdit + ";" + rangeStr;)
 		_autoSaveInner -> wb.sendCursor -> CDocsCoApi.prototype.sendCursor
@@ -9006,7 +8980,6 @@ var editor;
 			ws.handlers.trigger("selectionMathInfoChanged", info);
 		});
 	};
-
 
 	spreadsheet_api.prototype.asc_EditSelectAll = function() {
 		if (this.wb) {
@@ -9668,7 +9641,6 @@ var editor;
 		return wb.customFunctionEngine && wb.customFunctionEngine.getFunc(sName, !bIgnoreLocal);
 	};
 
-
 	spreadsheet_api.prototype.asc_getOpeningDocumentsList = function(callback) {
 		if (!this.broadcastChannel) {
 			return;
@@ -9801,7 +9773,6 @@ var editor;
 			return null;
 		return oWBModel.CustomProperties;
 	};
-
 
 	spreadsheet_api.prototype.addCustomProperty = function (name, type, value) {
 		let oCustomProperties = this.getCustomProperties();
@@ -10051,7 +10022,6 @@ var editor;
   prot["asc_drawPrintPreview"] = prot.asc_drawPrintPreview;
   prot["asc_closePrintPreview"] = prot.asc_closePrintPreview;
 
-
   prot["asc_getDocumentName"] = prot.asc_getDocumentName;
   prot["asc_getAppProps"] = prot.asc_getAppProps;
   prot["asc_getCoreProps"] = prot.asc_getCoreProps;
@@ -10081,11 +10051,9 @@ var editor;
   prot["asc_SetPrintHeadings"] = prot.asc_SetPrintHeadings;
   prot["asc_SetPrintGridlines"] = prot.asc_SetPrintGridlines;
 
-
   prot["asc_ChangePrintArea"] = prot.asc_ChangePrintArea;
   prot["asc_CanAddPrintArea"] = prot.asc_CanAddPrintArea;
   prot["asc_SetPrintScale"] = prot.asc_SetPrintScale;
-
 
   prot["asc_decodeBuffer"] = prot.asc_decodeBuffer;
 
@@ -10144,7 +10112,6 @@ var editor;
   prot["asc_setShowZeroCellValues"] = prot.asc_setShowZeroCellValues;
   prot["asc_SetAutoCorrectHyperlinks"] = prot.asc_SetAutoCorrectHyperlinks;
 
-
   // Spreadsheet interface
 
   prot["asc_getColumnWidth"] = prot.asc_getColumnWidth;
@@ -10172,9 +10139,6 @@ var editor;
   prot["asc_getShowFormulas"] = prot.asc_getShowFormulas;
   prot["asc_setRightToLeft"] = prot.asc_setRightToLeft;
   prot["asc_setDefaultDirection"] = prot.asc_setDefaultDirection;
-
-
-
 
   // Defined Names
   prot["asc_getDefinedNames"] = prot.asc_getDefinedNames;
@@ -10215,7 +10179,6 @@ var editor;
   prot["asc_getSlicerPictures"] = prot.asc_getSlicerPictures;
   prot["asc_getDefaultTableStyle"] = prot.asc_getDefaultTableStyle;
 
-
   prot["asc_applyAutoCorrectOptions"] = prot.asc_applyAutoCorrectOptions;
 
   //Group data
@@ -10230,7 +10193,6 @@ var editor;
   prot["asc_setGroupSummary"] = prot.asc_setGroupSummary;
   prot["asc_getGroupSummaryRight"] = prot.asc_getGroupSummaryRight;
   prot["asc_getGroupSummaryBelow"] = prot.asc_getGroupSummaryBelow;
-
 
   // Drawing objects interface
 
@@ -10376,14 +10338,11 @@ var editor;
   prot["asc_checkActiveCellPassword"] = prot.asc_checkActiveCellPassword;
   prot["asc_checkLockedCells"] = prot.asc_checkLockedCells;
 
-
   prot["asc_formatPainter"] = prot.asc_formatPainter;
   prot["asc_showAutoComplete"] = prot.asc_showAutoComplete;
   prot["asc_getHeaderFooterMode"] = prot.asc_getHeaderFooterMode;
   prot["asc_getActiveRangeStr"] = prot.asc_getActiveRangeStr;
   prot["asc_getActiveRange"] = prot.asc_getActiveRange;
-
-
 
   prot["asc_onMouseUp"] = prot.asc_onMouseUp;
 
@@ -10391,7 +10350,6 @@ var editor;
   prot["asc_insertHyperlink"] = prot.asc_insertHyperlink;
   prot["asc_removeHyperlink"] = prot.asc_removeHyperlink;
   prot["asc_getFullHyperlinkLength"] = prot.asc_getFullHyperlinkLength;
-
 
   prot["asc_cleanSelectRange"] = prot.asc_cleanSelectRange;
   prot["asc_insertInCell"] = prot.asc_insertInCell;
@@ -10524,7 +10482,6 @@ var editor;
 
   prot["asc_getEscapeSheetName"] = prot.asc_getEscapeSheetName;
 
-
   prot["asc_ConvertEquationToMath"] = prot.asc_ConvertEquationToMath;
 
   prot["asc_getProtectedRanges"]           = prot.asc_getProtectedRanges;
@@ -10633,6 +10590,5 @@ var editor;
   prot["SetCustomFunctions"] = prot.SetCustomFunctions;
   
   AscCommon['SpreadsheetEditorApi'] = AscCommon.SpreadsheetEditorApi = spreadsheet_api;
-
 
 })(window);

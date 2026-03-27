@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -739,7 +734,6 @@ function CSelectedElementsInfo(oPr)
 	this.m_bCheckAllSelection = !!(oPr && oPr.CheckAllSelection); // Проверять все выделение, или только 1 элемент
     this.m_bAddAllComplexFields = !!(oPr && oPr.AddAllComplexFields);
 
-
 	this.m_bTable             = false; // Находится курсор или выделение целиком в какой-нибудь таблице
 	this.m_bMixedSelection    = false; // Попадает ли в выделение одновременно несколько элементов
 	this.m_nDrawing           = selected_None;
@@ -1374,7 +1368,6 @@ function CDocument(DrawingDocument, isMainLogicDocument)
 	this.NumberingApplicator = new AscWord.CNumberingApplicator(this); // Класс для применения нумерации к текущему выделение
 	this.NumberingCollection = new AscWord.CNumberingCollection(this); // Класс, хранящий нумерации, используемые в документе
 
-
     this.CreateStyles();
 
     this.DrawingDocument = DrawingDocument;
@@ -1811,7 +1804,6 @@ CDocument.prototype.Add_TestDocument               = function()
                 Run.AddText(TextElement);
                 Para.AddToContent(0, Run);
             }
-
 
         }
         //Para.Add_ToContent(0, Run);
@@ -3142,7 +3134,6 @@ CDocument.prototype.private_Recalculate = function(_RecalcData, isForceStrictRec
 	this.FullRecalc.ScrollToTarget    = true;
 	
 
-
 	// Если у нас произошли какие-либо изменения с основной частью документа, тогда начинаем его пересчитывать сразу,
     // а если изменения касались только секций, тогда пересчитываем основную часть документа только с того места, где
     // остановился предыдущий пересчет, либо с того места, где изменения секций приводят к пересчету документа.
@@ -3161,7 +3152,6 @@ CDocument.prototype.private_Recalculate = function(_RecalcData, isForceStrictRec
 	}
 
     this.DrawingDocument.OnStartRecalculate(StartPage);
-
 
     // TODO: По большому счету всегда можно запускать пересчет с нулевым таймаутом, но сейчас при переносе картинок и
 	//       некоторых других действиях нам важно, чтобы пересчет первый раз сработал сразу. Поэтому запускаем пересчет
@@ -3325,7 +3315,6 @@ CDocument.prototype.private_RecalculateFastParagraph = function(arrChanges, nSta
 {
 	var _nStartIndex = undefined !== nStartIndex ? nStartIndex : 0;
 	var _nEndIndex   = undefined !== nEndIndex ? nEndIndex : arrChanges.length - 1;
-
 
 	// Смотрим, чтобы изменения происходили только внутри параграфов. Если есть изменение,
 	// которое не возвращает параграф, значит возвращаем null.
@@ -4907,7 +4896,6 @@ CDocument.prototype.private_RecalculateFlowParagraph         = function(RecalcIn
                 TempElement.Reset(TempElement.X, TempElement.Y, TempElement.XLimit, TempElement.YLimit, TempElement.PageNum, ColumnIndex, ColumnsCount, SectionIndexAbs, SectPr);
             }
 
-
             Index += this.RecalcInfo.FlowObjectElementsCount - 1;
             this.RecalcInfo.Reset();
             RecalcResult = recalcresult_NextElement;
@@ -5785,7 +5773,6 @@ CDocument.prototype.AddInlineImage = function(W, H, Img, GraphicObject, bFlow)
 	if (undefined === bFlow)
 		bFlow = false;
 
-
     this.TurnOff_InterfaceEvents();
     this.Controller.AddInlineImage(W, H, Img, GraphicObject, bFlow);
     this.TurnOn_InterfaceEvents(true);
@@ -6150,7 +6137,6 @@ CDocument.prototype.RemoveDropCap = function(bDropCap)
 					FramePara.Clear_TextFormatting();
 					FramePara.Apply_TextPr(TextPr, undefined);
 				}
-
 
 				Next.CopyPr(Last);
 				Last.Concat(Next);
@@ -8099,7 +8085,6 @@ CDocument.prototype.OnEndTextDrag = function(NearPos, bCopy)
 		{
 			this.TrackMoveId = null;
 		}
-
 
 		// Получим копию выделенной части документа, которую надо перенести в новое место, одновременно с этим
 		// удаляем эту выделенную часть (если надо).
@@ -10120,7 +10105,6 @@ CDocument.prototype.CorrectEnterText = function(oldValue, newValue)
 		return false;
 	}
 
-
 	this.StartAction(AscDFH.historydescription_Document_CorrectEnterText);
 
 	this.DrawingDocument.TargetStart();
@@ -10184,7 +10168,6 @@ CDocument.prototype.OnMouseDown = function(e, X, Y, PageIndex)
 		this.DrawTableMode.StartX = X;
 		this.DrawTableMode.StartY = Y;
 		this.DrawTableMode.Page   = PageIndex;
-
 
 		var arrTables = this.GetAllTablesOnPage(PageIndex);
 
@@ -10413,7 +10396,6 @@ CDocument.prototype.OnMouseUp = function(e, X, Y, PageIndex)
 		Y = oCorrectedPos.Y;
 	}
 
-
 	if (this.DrawTableMode.Draw || this.DrawTableMode.Erase)
 	{
 		if (!this.DrawTableMode.Start)
@@ -10585,7 +10567,6 @@ CDocument.prototype.OnMouseMove = function(e, X, Y, PageIndex)
 		this.DrawTableMode.CheckSelectedTable();
 		this.DrawTableMode.UpdateTablePages();
 	}
-
 
 	if (true === this.Selection.Start)
 		this.private_UpdateTargetForCollaboration();
@@ -11020,7 +11001,6 @@ CDocument.prototype.IsStylesUseInDocument = function(styleIds)
 			mapStyleId[runStyleId]++;
 	});
 
-
 	let result = [];
 	for (let index = 0, count = styleIds.length; index < count; ++index)
 	{
@@ -11332,7 +11312,6 @@ CDocument.prototype.Document_SetHdrFtrFirstPage = function(Value)
 		this.HdrFtr.Set_CurHdrFtr(sectPr.Get_Header_Default());
 	}
 
-
 	this.Recalculate();
 
 	if (null !== this.HdrFtr.CurHdrFtr)
@@ -11386,7 +11365,6 @@ CDocument.prototype.Document_SetHdrFtrEvenAndOddHeaders = function(Value)
 
 		this.HdrFtr.Set_CurHdrFtr(oHeader);
 	}
-
 
 	this.Recalculate();
 
@@ -11515,7 +11493,6 @@ CDocument.prototype.Document_SetHdrFtrLink = function(bLinkToPrevious)
 			else
 				CurHdrFtr = HdrFtr.Footer;
 		}
-
 
 		this.HdrFtr.Set_CurHdrFtr(CurHdrFtr);
 		this.HdrFtr.CurHdrFtr.MoveCursorToStartPos(false);
@@ -14502,7 +14479,6 @@ CDocument.prototype.Get_SectionPageNumInfo = function(Page_abs)
 		}
 	}
 
-
 	var bFirst = ( FP === CP && true === bCheckFP ? true : false );
 	var bEven  = ( 0 === CP % 2 ? true : false ); // Четность/нечетность проверяется по текущему номеру страницы в секции, с учетом нумерации в секциях
 
@@ -15027,8 +15003,6 @@ CDocument.prototype.private_MoveCursorDown = function(StartX, StartY, AddToSelec
 				CurY = StartY;
 			}
 		}
-
-
 
 		this.MoveCursorToXY(StartX, CurY, AddToSelect);
 		this.private_UpdateCursorXY(false, true, false);
@@ -17978,7 +17952,6 @@ CDocument.prototype.private_GetRevisionsChangeElement = function(nDirection, oCu
 				this.private_GetRevisionsChangeElementInDocument(oSearchEngine, this.Content.length - 1);
 		}
 
-
 		if (true !== oSearchEngine.IsFound())
 			this.private_GetRevisionsChangeElementInHdrFtr(oSearchEngine, null);
 	}
@@ -18561,7 +18534,6 @@ CDocument.prototype.AcceptRevisionChanges = function(nType, bAll)
 		this.Endnotes.AcceptRevisionChanges(nType, bAll);
 	}
 
-
 	if (true !== bAll)
 	{
 		this.Recalculate();
@@ -19120,7 +19092,6 @@ CDocument.prototype.ConvertFootnoteType = function(isCurrent, isFootnotes, isEnd
 		arrRuns       = oEngine.GetRuns();
 		arrRefs       = oEngine.GetRefs();
 	}
-
 
 	if (arrRuns.length !== arrRefs.length || arrFootnotes.length !== arrRuns.length)
 		return;
@@ -25298,7 +25269,6 @@ CDocument.prototype.AddBlankPage = function()
 				this.Content[this.CurPos.ContentPos].MoveCursorToStartPos(false);
 			}
 
-
 			this.Recalculate();
 			this.UpdateInterface();
 			this.UpdateSelection();
@@ -25462,7 +25432,6 @@ CDocument.prototype.ParseTableFormulaInstrLine = function(sInstrLine)
     }
     return ["", ""];
 };
-
 
 CDocument.prototype.AddCaption = function(oPr)
 {
@@ -25638,7 +25607,6 @@ CDocument.prototype.AddCaption = function(oPr)
             NewParagraph.Internal_Content_Add(nCurPos++, NewRun, false);
         }
 
-
         //Update added field
         aFieldsToUpdate.push(oComplexField);
         for(nField = aFieldsToUpdate.length - 1; nField > -1; --nField)
@@ -25796,7 +25764,6 @@ CDocument.prototype.RemoveTrackMoveMarks = function(sMoveId)
 
 	if (!this.Action.Additional.TrackMove)
 		this.Action.Additional.TrackMove = {};
-
 
 	if (this.Action.Additional.TrackMove[sMoveId])
 		return;
@@ -26646,7 +26613,6 @@ CDocument.prototype.ClearAllSpecialForms = function(contentControls)
 			oControl.ClearContentControlExt();
 			oControl.RemoveSelection();
 		}
-
 
 		if (currentControl)
 			currentControl.SelectContentControl();
@@ -28363,7 +28329,6 @@ function CDocumentCompareDrawingsLogicPositions(Drawing1, Drawing2)
     this.Result   = 0;
 }
 
-
 /**
  * Класс для обработки (принятия/отклонения) изменения связанного с переносом
  * @param sMoveId
@@ -28417,7 +28382,6 @@ CTrackRevisionsMoveProcessEngine.prototype.GetUserId = function()
 {
 	return this.UserId;
 };
-
 
 function CRevisionsChangeParagraphSearchEngine(nDirection, oCurrentElement, oTrackManager)
 {

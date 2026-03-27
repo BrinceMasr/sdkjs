@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -70,7 +65,6 @@
 	 */
 	Shape_Type.prototype.convertShape = function (visioDocument,
 												  pageInfo, drawingPageScale, currentGroupHandling) {
-
 
 		// Method start
 
@@ -126,7 +120,6 @@
 		if (isShapeDeleted) {
 			return createEmptyShape();
 		}
-
 
 		// also check for {}, undefined, NaN, null
 		if (isNaN(pinX_inch) || pinX_inch === null || isNaN(pinY_inch) || pinY_inch === null ||
@@ -200,7 +193,6 @@
 
 			/** @type CUniFill */
 			let	uniFillBkgnd = null;
-
 
 			/**
 			 * Let's memorize what color properties used themeVal because quickStyleVariation can change only those
@@ -284,7 +276,6 @@
 
 			uniFillForegndWithPattern = getUnifillForegroundWithPattern(this, pageInfo,visioDocument,
 					themeValWasUsedFor, uniFillBkgnd, uniFillForegnd, fillGradientEnabled);
-
 
 			// Block end
 			// Used functions:
@@ -810,7 +801,6 @@
 				newLineColorNoMods.RGBA.A = lineColorRGBA.A;
 				newLineUniFill.transparent = lineUniFill.transparent;
 
-
 				let newFillUniFill = new AscFormat.CUniFill();
 				newFillUniFill.fill = new AscFormat.CSolidFill();
 				newFillUniFill.fill.color = new AscFormat.CUniColor();
@@ -820,7 +810,6 @@
 				newFillColorNoMods.setColor(fillColorRGBA.R, fillColorRGBA.G, fillColorRGBA.B);
 				newFillColorNoMods.RGBA.A = fillColorRGBA.A;
 				newFillUniFill.transparent = fillUniFill.transparent;
-
 
 				if (lineColorRGBA !== undefined && fillColorRGBA !== undefined) {
 					AscFormat.CColorModifiers.prototype.RGB2HSL(255, 255, 255, backgroundColorHSL);
@@ -936,7 +925,6 @@
 			oStroke.setHeadEnd(beginArrow);
 		}
 
-
 		// apply flip props consider flip point: locPinX_inch or locPinY_inch
 		let flipHorizontally = this.getCellNumberValue("FlipX") === 1;
 		if (flipHorizontally) {
@@ -954,7 +942,6 @@
 		let shapeWidth_mm = shapeWidth_inch * g_dKoef_in_to_mm;
 		let shapeHeight_mm = shapeHeight_inch * g_dKoef_in_to_mm;
 
-
 		let cShape = this.convertToCShapeUsingParamsObj({
 			x_mm: x_mm, y_mm: y_mm,
 			w_mm: shapeWidth_mm, h_mm: shapeHeight_mm,
@@ -968,7 +955,6 @@
 			isShapeDeleted: isShapeDeleted,
 			id: this.id
 		});
-
 
 		// set shadow
 		// check shadow pattern
@@ -1010,7 +996,6 @@
 
 				let shadowColor = getShadowColor(shape, pageInfo, visioDocument);
 				shadow.color = shadowColor;
-
 
 				let shadowTypeCell = shape.getCell("ShapeShdwType");
 				// TODO check themed type. shadowTypeCell.calculateValue return undefined on THEMEVAL
@@ -1139,7 +1124,6 @@
 			}
 		}
 
-
 		// not scaling fontSize
 		let textCShape = getTextCShape(visioDocument.themes[0], this, cShape,
 			lineUniFillNoGradient, uniFillForegndNoGradient, drawingPageScale, maxHeightScaledIn,
@@ -1210,7 +1194,6 @@
 							rect.setLTRB(rect.l, rect.t + offsetY * 100, rect.r, rect.b + offsetY * 100);
 						}
 
-
 						cImageShape.rot = cShape.rot;
 						// cImageShape.brush = cShape.brush;
 						cImageShape.bounds = cShape.bounds;
@@ -1247,7 +1230,6 @@
 			cShape.spPr.xfrm.flipV = false;
 			cShape.spPr.xfrm.flipH = false;
 
-
 			groupShape.brush = cShape.brush;
 			groupShape.bounds = cShape.bounds;
 			groupShape.localTransform = cShape.localTransform;
@@ -1258,7 +1240,6 @@
 			groupShape.spTree[groupShape.spTree.length - 1].setGroup(groupShape);
 			cShape.spPr.xfrm.setOffX(0);
 			cShape.spPr.xfrm.setOffY(0);
-
 
 			groupShape.addToSpTree(groupShape.spTree.length, textCShape);
 			groupShape.spTree[groupShape.spTree.length - 1].setGroup(groupShape);
@@ -1385,7 +1366,6 @@
 					fillColorHSL.L = fillColorHSL.L / 255 * 100;
 					textColorHSL.L = textColorHSL.L / 255 * 100;
 
-
 					let quickStyleVariationCell = shape.getCell("QuickStyleVariation");
 					if (quickStyleVariationCell) {
 						let quickStyleVariationCellValue = Number(quickStyleVariationCell.v);
@@ -1440,7 +1420,6 @@
 					backgroundColorHSL.L = backgroundColorHSL.L / 255 * 100;
 					compareColorHSL.L = compareColorHSL.L / 255 * 100;
 					textColorHSL.L = textColorHSL.L / 255 * 100;
-
 
 					let quickStyleVariationCell = shape.getCell("QuickStyleVariation");
 					if (quickStyleVariationCell) {
@@ -1611,7 +1590,6 @@
 					indentationFirstLine = indentationFirstLineCell.getNumberValue() * AscCommonWord.g_dKoef_in_to_mm;
 				}
 
-
 				// create new paragraph to hold new properties
 				let oContent = textCShape.getDocContent();
 				let paragraph = new Paragraph(textCShape.getDrawingDocument(), true);
@@ -1631,7 +1609,6 @@
 				// 	lineSpacing = lineSpacingVsdx;
 				// }
 				// paragraph.Pr.Spacing.Line = lineSpacing;
-
 
 				// Set defaultParagraph justify/align text - center
 				paragraph.Pr.SetJc(horizontalAlign);
@@ -1661,7 +1638,6 @@
 				// paragraph.Pr.Spacing.After = 0;
 			}
 
-
 			/**
 			 * Parses run props and set them
 			 * @param characterRowNum
@@ -1686,7 +1662,6 @@
 				let themeValWasUsedFor = {
 					fontColor: false
 				}
-
 
 				// handle Color
 				let textColor;
@@ -1726,7 +1701,6 @@
 				oNewLang.Val = languageId;
 				oRun.Set_Lang(oNewLang);
 
-
 				let fontSizeCell = characterPropsFinal && characterPropsFinal.getCell("Size");
 				let fontSizePt;
 				if (fontSizeCell && fontSizeCell.kind === AscVisio.c_oVsdxSheetStorageKind.Cell_Type) {
@@ -1742,7 +1716,6 @@
 					AscCommon.consoleLog("font size was not found so default is set (9 pt)");
 				}
 				oRun.SetFontSize(fontSizePt);
-
 
 				// handle font
 
@@ -1803,7 +1776,6 @@
 					AscCommon.consoleLog("fontCell was not found so default is set (Calibri). Check mb AsianFont or ScriptFont");
 				}
 				oRun.Set_RFonts(cRFonts);
-
 
 				// handle style (bold italic underline small caps)
 				const styleVsdx = characterPropsFinal && characterPropsFinal.getCellStringValue("Style");
@@ -2010,7 +1982,6 @@
 
 				return formatedString;
 
-
 				// if (valueFunction === "PAGENUMBER()") {
 				// 	return String(currentPageIndex);
 				// } else if (valueFunction === "PAGECOUNT()") {
@@ -2019,7 +1990,6 @@
 
 				// return valueV ? valueV : fldTagText;
 			}
-
 
 			let textElement = shape.getTextElement();
 			if (!textElement) {
@@ -2056,7 +2026,6 @@
 			}
 			textCShape.setVerticalAlign(1); // sets text vert align center. equal to anchor set to txBody bodyPr
 			textCShape.bSelectedText = false;
-
 
 			// instead of AscFormat.AddToContentFromString(oContent, sText);
 			// use https://api.onlyoffice.com/docbuilder/presentationapi/apishape api implementation code
@@ -2121,7 +2090,6 @@
 						}
 					}
 				}
-
 
 				if (typeof textElementPart === "string" || textElementPart.kind === AscVisio.c_oVsdxTextKind.FLD) {
 					if (typeof textElementPart === "string") {
@@ -2212,7 +2180,6 @@
 				parseParagraphAndAddToShapeContent(0, paragraphPropsCommon, textCShape);
 			}
 
-
 			// handle horizontal align i. e. defaultParagraph align
 
 			// handle vertical align
@@ -2237,7 +2204,6 @@
 			} else {
 				AscCommon.consoleLog("vertical align cell was not found for shape. align set to center. Shape:", shape);
 			}
-
 
 			// setup text properties
 			let oTextPr;
@@ -2286,7 +2252,6 @@
 			let rightMarginInch = shape.getCellNumberValueWithScale("RightMargin", 1);
 			let bottomMarginInch = shape.getCellNumberValueWithScale("BottomMargin", 1);
 
-
 			// CHECKS SIGN but positive tIns gives bottom inset.
 			// Check https://disk.yandex.ru/d/IU1vdjzcF9p3IQ , https://disk.yandex.ru/d/0l7elFyX5INcXg
 			// it is may global graphics transform issue so set bottom inset as top and opposite
@@ -2302,7 +2267,6 @@
 				textCShape.txBody.setBodyPr(oBodyPr);
 			}
 
-
 			// handle cords
 
 			let shapeAngle = shape.getCellNumberValue("Angle");
@@ -2313,13 +2277,11 @@
 				textAngle = -textAngle;
 			}
 
-
 			// to rotate around point we 1) add one more offset 2) rotate around center
 			// https://www.figma.com/design/SJSKMY5dGoAvRg75YnHpdX/newRotateScheme?node-id=0-1&node-type=canvas&t=UTtoZyLRItzaQvS9-0
 
 			let txtPinX_inch = shape.getCellNumberValueWithScale("TxtPinX", drawingPageScale);
 			let txtPinY_inch = shape.getCellNumberValueWithScale("TxtPinY", drawingPageScale);
-
 
 			// consider https://disk.yandex.ru/d/2XzRaPTKzKHFjA
 			// where TxtHeight and TxtWidth get all shape height and width and txtPinX_inch and txtPinY_inch are not defined
@@ -2420,7 +2382,6 @@
 			oXfrm.setParent(oSpPr);
 			oSpPr.setFill(AscFormat.CreateNoFillUniFill());
 			oSpPr.setLn(AscFormat.CreateNoFillLine());
-
 
 			textCShape.setSpPr(oSpPr);
 			oSpPr.setParent(textCShape);
@@ -2812,7 +2773,6 @@
 				groupShape.Id = cShapeOrCGroupShape.Id + "_Group";
 				groupShape.setParent2(visioDocument);
 
-
 				// if DisplayMode is 1 add group geometry to bottom layer
 				if (this.getCellNumberValue("DisplayMode") === 1) {
 					// if it is group so there is geometry and text in it. We take geometry
@@ -2949,7 +2909,6 @@
 
 		return shape;
 	};
-
 
 	//-------------------------------------------------------------export-------------------------------------------------
 	window['Asc']            = window['Asc'] || {};

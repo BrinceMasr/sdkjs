@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -36,7 +31,6 @@
  * @param {undefined} undefined
  */
     function (window, undefined) {
-
 
     /*
      * Import
@@ -95,7 +89,6 @@
     var c_oAscChangeSelectionFormatTable = asc.c_oAscChangeSelectionFormatTable;
     var asc_CSelectionMathInfo = AscCommonExcel.asc_CSelectionMathInfo;
 
-
 	var c_maxColFillDataCount = 10000;
 
     /*
@@ -146,7 +139,6 @@
 
 	//limit rows for prepare metrics. if more then limit -> metrics will prepare dynamic
 	var nMaxPrintRows = 150000;
-
 
 function isAllowPasteLink(pastedWb) {
 	var api = window["Asc"]["editor"];
@@ -411,7 +403,6 @@ function isAllowPasteLink(pastedWb) {
         return this.borders.getB();
     };
 
-
     /**
      * Widget for displaying and editing Worksheet object
      * -----------------------------------------------------------------------------
@@ -662,7 +653,6 @@ function isAllowPasteLink(pastedWb) {
 		this.model.handleDrawings(appendChart);
 		return charts;
 	};
-
 
 	WorksheetView.prototype.getCurrentChart = function() {
 		if(this.isSelectOnShape) {
@@ -1030,7 +1020,6 @@ function isAllowPasteLink(pastedWb) {
 		}, this, []);
 	};
 
-
 	WorksheetView.prototype._initWorksheetDefaultWidthForPrint = function () {
 		var defaultPpi = 96;
 		var truePPIX = this.drawingCtx.ppiX;
@@ -1203,7 +1192,6 @@ function isAllowPasteLink(pastedWb) {
 		//new scroll - calculate height before vr
 		let beforeVisibleRangeHeight = this._getRowTop(this.visibleRange.r1) - this.cellsTop;
 
-
 		beforeVisibleRangeHeight += this.getScrollCorrect();
 		let defaultScrollPxStep = Asc.round(this.getVScrollStep());
 		return defaultScrollPxStep === 0 ? 0 : ((beforeVisibleRangeHeight - frozenVisibleRangeHeight)/defaultScrollPxStep);
@@ -1250,7 +1238,6 @@ function isAllowPasteLink(pastedWb) {
 
 		//new scroll - calculate height before vr
 		let beforeVisibleRangeWidth = this._getColLeft(this.visibleRange.c1) - this.cellsLeft;
-
 
 		beforeVisibleRangeWidth += this.getHorizontalScrollCorrect();
 		let defaultScrollPxStep = Asc.round(this.getHScrollStep());
@@ -1519,7 +1506,6 @@ function isAllowPasteLink(pastedWb) {
 		return height * this.getZoom();
 	};
 
-
     WorksheetView.prototype.getColumnWidth = function (index, units) {
 		var u = units >= 0 && units <= 3 ? units : 0;
 		return this._getColumnWidth(index) * asc_getcvt(0/*px*/, u, this._getPPIX());
@@ -1718,7 +1704,6 @@ function isAllowPasteLink(pastedWb) {
         }
         return {offsetX: offsetX, offsetY: offsetY};
     };
-
 
 	// mouseX - это разница стартовых координат от мыши при нажатии и границы
 	WorksheetView.prototype.changeColumnWidth = function (col, x2, mouseX) {
@@ -2010,7 +1995,6 @@ function isAllowPasteLink(pastedWb) {
 			this._isLockedAll(onChangeHeightCallback);
 		}
 	};
-
 
     // Checks if there are non-empty values ​​in a range
     WorksheetView.prototype._getValuesPositionsInRange = function (onlyNumbers) {
@@ -3509,7 +3493,6 @@ function isAllowPasteLink(pastedWb) {
 					realPageWidth = currentWidth;
 				}
 
-
 				let endCell = t.model.getCell3(rowIndex, colIndex - 1);
 				let fullBordersEndCell = endCell.getBorderFull();
 				if (fullBordersEndCell && fullBordersEndCell.r) {
@@ -3670,7 +3653,6 @@ function isAllowPasteLink(pastedWb) {
 		}
 
 		checkMaxRowCol(range);
-
 
 		return new AscCommon.CellBase(maxRow, maxCol);
 	};
@@ -3992,7 +3974,6 @@ function isAllowPasteLink(pastedWb) {
 		};
 		indexPrintPage = recalcIndexPrintPage(indexPrintPage);
 
-
 		let vector_koef = AscCommonExcel.vector_koef / t.getZoom();
 		if (AscCommon.AscBrowser.isCustomScaling()) {
 			vector_koef /= t.getRetinaPixelRatio();
@@ -4106,7 +4087,6 @@ function isAllowPasteLink(pastedWb) {
 					drawingCtx.updateTransforms && drawingCtx.updateTransforms();*/
 				}
 
-
 				let offsetCols = printPagesData.startOffsetPx;
 				//range = printPagesData.pageRange;
 				let offsetX = t._getColLeft(range.c1) - printPagesData.leftFieldInPx + offsetCols - titleWidth;
@@ -4172,7 +4152,6 @@ function isAllowPasteLink(pastedWb) {
 				oBaseTransform.sx = printScale;
 				oBaseTransform.sy = printScale;
 
-
 				oBaseTransform.tx = asc_getcvt(0/*mm*/, 3/*px*/, t._getPPIX()) * ( -offsetCols * printScale  +  printPagesData.pageClipRectLeft + (printPagesData.leftFieldInPx - printPagesData.pageClipRectLeft + titleWidth) * printScale) - (t.getRightToLeft() ? -1 : 1) * (t.getCellLeft(range.c1, 3) - t.getCellLeft(0, 3)) * printScale;
 
 				const pxToMm = asc_getcvt(0/*mm*/, 3/*px*/, t._getPPIX());
@@ -4187,7 +4166,6 @@ function isAllowPasteLink(pastedWb) {
 				oBaseTransform.tx = _txPx * pxToMm;
 
 				oBaseTransform.ty = pxToMm * (printPagesData.pageClipRectTop + (printPagesData.topFieldInPx - printPagesData.pageClipRectTop + titleHeight) * printScale) - (t.getCellTop(range.r1, 3) - t.getCellTop(0, 3)) * printScale;
-
 
 				let bGraphics = !!(oDocRenderer instanceof AscCommon.CGraphics);
 				let clipL, clipT, clipR, clipB;
@@ -4263,7 +4241,6 @@ function isAllowPasteLink(pastedWb) {
 				}
 				t.visibleRange = tmpVisibleRange;
 			};
-
 
 			let cellsLeft = printPagesData.pageHeadings ? this.cellsLeft : 0;
 			let cellsTop = printPagesData.pageHeadings ? this.cellsTop : 0;
@@ -4643,7 +4620,6 @@ function isAllowPasteLink(pastedWb) {
 			pageBottomField = c_oAscPrintDefaultSettings.PageBottomField;
 		}
 
-
 		if (Asc.c_oAscPageOrientation.PageLandscape === pageOrientation) {
 			var tmp = pageWidth;
 			pageWidth = pageHeight;
@@ -4762,7 +4738,6 @@ function isAllowPasteLink(pastedWb) {
 				hScale = doCalcScaleHeight(0, maxRow);
 			}
 		}
-
 
 		//scale only int
 		/*wScale = wScale >> 0;
@@ -5231,7 +5206,6 @@ function isAllowPasteLink(pastedWb) {
 			}
 		};
 
-
 		let needSelectTopBorder = false;
 		let needSelectRightBorder = style  !== kHeaderDefault && !isColHeader;
 		let needSelectBottomBorder = style  !== kHeaderDefault && isColHeader;
@@ -5261,7 +5235,6 @@ function isAllowPasteLink(pastedWb) {
 		drawBorders(true);
 
 		ctx.stroke();
-
 
         // Для невидимых кроме border-а ничего не рисуем
         if (isZeroHeader || -1 === index) {
@@ -5359,7 +5332,6 @@ function isAllowPasteLink(pastedWb) {
 			this.setRightToLeft(trueRtl);
 		}
 	};
-
 
 	/** Рисует текст ячейки */
 	WorksheetView.prototype._drawHeaderFooter = function (drawingCtx, printPagesData, headerFooterData, indexPrintPage, countPrintPages, bFooter, opt_headerFooter) {
@@ -5519,7 +5491,6 @@ function isAllowPasteLink(pastedWb) {
                 return oShape;
 
             }, this, []);
-
 
             let oGraphics;
             if(drawingCtx instanceof AscCommonExcel.CPdfPrinter) {
@@ -5903,7 +5874,6 @@ function isAllowPasteLink(pastedWb) {
 					clipWidth = width - widthOffset;
 					clipHeight = height - heightOffset;
 				};
-
 
 				if (!frozenOffsetX && !frozenOffsetY) {
 					//not frozen panes
@@ -6641,7 +6611,6 @@ function isAllowPasteLink(pastedWb) {
 					resMatrix.ty);
 			}
 
-
 			this.stringRender.restoreInternalState(ct.state);
 
 			if (isWrapped) {
@@ -6723,7 +6692,6 @@ function isAllowPasteLink(pastedWb) {
 			this._drawText(this.stringRender.restoreInternalState(ct.state), ctx, textX, textY, textW, color);
 			this._RemoveClipRect(ctx);
 		}
-
 
 		//внутреннии ссылки не добавляю, мс аналогично работает
 		if (drawingCtx && drawingCtx.DocumentRenderer && drawingCtx.DocumentRenderer.AddHyperlink /*&& drawingCtx.DocumentRenderer.AddLink*/) {
@@ -7058,7 +7026,6 @@ function isAllowPasteLink(pastedWb) {
 			drawDot(x1, y1, externalLineColor);
 			drawMiniTable(x1, y1, miniTableCol, miniTableRow, isTableLeft, isTableTop);
 
-
 			traceManager.addExternalLineCoordinates(fromCellIndex, x1, y1, newX2, newY2);
 		};
 
@@ -7297,8 +7264,6 @@ function isAllowPasteLink(pastedWb) {
 				t.stringRender.setString([str]);
 				textMetrics = t.stringRender._measureChars();
 
-
-
 				if (textMetrics.width === needWidth && textMetrics.height === needHeight) {
 					break;
 				} else if (textMetrics.width > needWidth || textMetrics.height > needHeight) {
@@ -7321,7 +7286,6 @@ function isAllowPasteLink(pastedWb) {
 			y1 = this._getRowTop(range.r1) - offsetY;
 			x2 = this._getColLeft(range.c2 + 1) - offsetX;
 			y2 = this._getRowTop(range.r2 + 1) - offsetY;
-
 
 			var pageRange;
 			var tX1, tX2, tY1, tY2, pageIntersection, index;
@@ -7515,7 +7479,6 @@ function isAllowPasteLink(pastedWb) {
 				borderRightObject && borderRightObject.getTopBorder())); // top border width
 			var bbw = zoomPrintPreviewCorrect(t._calcMaxBorderWidth(borderLeftObject && borderLeftObject.getBottomBorder(),
 				borderRightObject && borderRightObject.getBottomBorder())); // bottom border width
-
 
 			var dy1 = tbw > bw ? tbw - 1 : (tbw > 1 ? -1 : 0);
 			var dy2 = bbw > bw ? -2 : (bbw > 2 ? 1 : 0);
@@ -8201,7 +8164,6 @@ function isAllowPasteLink(pastedWb) {
 		return null;
 	};
 
-
 	/** */
 
     WorksheetView.prototype._drawSelectionElement = function (visibleRange, offsetX, offsetY, args) {
@@ -8267,7 +8229,6 @@ function isAllowPasteLink(pastedWb) {
             ctx.setFillStyle(fillColor);
 			this._fillRect(ctx, x1, y1, x2 - x1, y2 - y1);
         }
-
 
         let isPagePreview = AscCommonExcel.selectionLineType.ResizeRange & selectionLineType;
 		//меняю толщину линии для селекта(только в случае сплошной линии) и масштаба 200%
@@ -8347,8 +8308,6 @@ function isAllowPasteLink(pastedWb) {
             }
             ctx.closePath().stroke();
         }
-
-
 
         // Отрисовка квадратов для move/resize
         let isResize = AscCommonExcel.selectionLineType.Resize & selectionLineType;
@@ -8793,7 +8752,6 @@ function isAllowPasteLink(pastedWb) {
 		fHorLine = ctx.lineHorPrevPx;
 		fVerLine = ctx.lineVerPrevPx;
 
-
 		if (AscBrowser.retinaPixelRatio >= 2) {
 			widthLine = ((widthLine * 2) + 0.5) >> 0
 		}
@@ -8821,7 +8779,6 @@ function isAllowPasteLink(pastedWb) {
 			fHorLine.apply(ctx, [x1, y, x2]);
 			ctx.closePath().stroke();
 		}
-
 
 		return true;
 	};
@@ -9317,7 +9274,6 @@ function isAllowPasteLink(pastedWb) {
 		}
 	};
 
-
     // ----- Cell text cache -----
 
     /** Очищает кэш метрик текста ячеек */
@@ -9482,7 +9438,6 @@ function isAllowPasteLink(pastedWb) {
         if (null === c || !this.model.isUserProtectedRangesCanView({nCol: col, nRow: row})) {
             return col;
         }
-
 
         let showFormulas = false;
         let viewSettings = this.model.getSheetView();
@@ -9775,7 +9730,6 @@ function isAllowPasteLink(pastedWb) {
 			fr = [new AscCommonExcel.Fragment()];
 			fr[0].format = cell.getFont();
 		}
-
 
 		var th;
 		var cellType = cell.getType();
@@ -10079,7 +10033,6 @@ function isAllowPasteLink(pastedWb) {
         return -1;
     };
 
-
     // ----- Merged cells cache -----
 
     WorksheetView.prototype._isMergedCells = function (range) {
@@ -10106,7 +10059,6 @@ function isAllowPasteLink(pastedWb) {
         // ToDo пересмотреть
         return Math.max(b1 && b1.w, b2 && b2.w);
     };
-
 
     // ----- Cells utilities -----
 
@@ -10759,7 +10711,6 @@ function isAllowPasteLink(pastedWb) {
                     	deltaRows--;
                     }
 
-
                 } else {
                     //stay in vr.r1
                     deltaCorrect = currentScrollCorrect - defaultScrollPxStep;
@@ -10805,7 +10756,6 @@ function isAllowPasteLink(pastedWb) {
         var oldStart = vr.r1;
         var oldEnd = vr.r2;
 		var x = this.cellsLeft;
-
 
         var topOldStart = this._getRowTop(oldStart);
         var dy = (this._getRowTop(start) + deltaCorrect - (topOldStart + currentScrollCorrect));
@@ -11086,7 +11036,6 @@ function isAllowPasteLink(pastedWb) {
 			editor.move();
 		}
 
-
         //ToDo this.drawDepCells();
         this.cellCommentator.updateActiveComment();
         this.cellCommentator.drawCommentCells();
@@ -11096,7 +11045,6 @@ function isAllowPasteLink(pastedWb) {
         //this.model.updateTopLeftCell(this.visibleRange);
         return this;
     };
-
 
 	//smooth scroll
 	WorksheetView.prototype.setScrollCorrect = function (val, needDraw) {
@@ -11122,8 +11070,6 @@ function isAllowPasteLink(pastedWb) {
 		var u = units >= 0 && units <= 3 ? units : 0;
 		return this.horizontalScrollCorrect ? (this.horizontalScrollCorrect * asc_getcvt(0/*px*/, u, this._getPPIX())) : 0;
 	};
-
-
 
 	WorksheetView.prototype.isScrollCorrect = function () {
 		return !!this.scrollCorrect;
@@ -11213,7 +11159,6 @@ function isAllowPasteLink(pastedWb) {
 						deltaCols--;
 					}
 
-
 				} else {
 					//stay in vr.r1
 					deltaCorrect = currentScrollCorrect - defaultScrollPxStep;
@@ -11268,7 +11213,6 @@ function isAllowPasteLink(pastedWb) {
         var oldVCE_isPartial = this._isColDrawnPartially(vr.c2, vr.c1, diffWidth);
         var oldVR = vr.clone();
 
-
 		this.workbook.getSmoothScrolling() && this.setHorizontalScrollCorrect(deltaCorrect);
 
         // ToDo стоит тут переделать весь scroll
@@ -11308,8 +11252,6 @@ function isAllowPasteLink(pastedWb) {
 
         var lastColWidth = (scrollRight && oldVCE_isPartial) ?
         ctxW - (this._getColLeft(oldEnd) - leftOldStart + this.cellsLeft + diffWidth) : 0;
-
-
 
         // Перемещаем область
         var moveWidth = oldW - lastColWidth;
@@ -12537,7 +12479,6 @@ function isAllowPasteLink(pastedWb) {
 						}
 					}
 				}
-
 
 				this.model.getCell3(r.row, c.col)._foreachNoEmpty(function (cell) {
 					if (cell.isFormula()) {
@@ -13840,7 +13781,6 @@ function isAllowPasteLink(pastedWb) {
 			let oMath         = oSelectedInfo.GetMath();
 		}
 
-
         var textPr = oController.getParagraphTextPr();
         var theme = oController.getTheme();
         if (textPr && theme && theme.themeElements && theme.themeElements.fontScheme) {
@@ -14383,7 +14323,6 @@ function isAllowPasteLink(pastedWb) {
 		}
 	};
 
-
     // ----- Changing cells -----
 
     WorksheetView.prototype.applyFormatPainter = function () {
@@ -14517,7 +14456,6 @@ function isAllowPasteLink(pastedWb) {
 
 			t.applyFillHandle(null, null, null, true);
 		};
-
 
 		//only end range - selected range
 		//1. search base
@@ -14893,7 +14831,6 @@ function isAllowPasteLink(pastedWb) {
              (1)
              ____________________________
 
-
              (2)
 
              ____________________________
@@ -15178,7 +15115,6 @@ function isAllowPasteLink(pastedWb) {
 				return;
 			}
 
-
 			if (this.intersectionFormulaArray(changedRange, null, null, true)) {
 				// Сбрасываем параметры автозаполнения
 				this.activeFillHandle = null;
@@ -15250,7 +15186,6 @@ function isAllowPasteLink(pastedWb) {
 					range = new Asc.Range(activeRange.c1,  activeRange.r1,  activeRange.c2,  firstEmptyCell.nRow - 1);
 				}
 			}
-
 
 			if (range) {
 				this.fillHandleDirection = 1;
@@ -15646,7 +15581,6 @@ function isAllowPasteLink(pastedWb) {
 			var type = this.startCellMoveResizeRange.getType();
 
 			var ar = range.clone();
-
 
 			this.overlayCtx.clear();
 			if (targetInfo.cursor === kCurNEResize || targetInfo.cursor === kCurSEResize) {
@@ -16105,7 +16039,6 @@ function isAllowPasteLink(pastedWb) {
 
 		this.startCellMoveResizeRange = null;
 	};
-
 
 	WorksheetView.prototype.moveRangeHandle = function (arnFrom, arnTo, copyRange, opt_wsTo, callback) {
 		//opt_wsTo - for test reasons only
@@ -16663,7 +16596,6 @@ function isAllowPasteLink(pastedWb) {
 								break;
                         }
 
-
 						t.model.excludeHiddenRows(false);
 
 						// Если нужно удалить автофильтры - удаляем
@@ -17088,7 +17020,6 @@ function isAllowPasteLink(pastedWb) {
 			return tempRanges;
 		};
 
-
 		var isChange;
 		var newRanges = [];
 		if (breakRange) {
@@ -17224,7 +17155,6 @@ function isAllowPasteLink(pastedWb) {
             } else {
                 isIntersectionR2 = false;
             }
-
 
             if (ar.c1 > ar.c2 || ar.r1 > ar.r2) {
                 isIntersection = true;
@@ -17442,7 +17372,6 @@ function isAllowPasteLink(pastedWb) {
 				}
 				t.model.onUpdateRanges(arrChangedRanges);
 
-
 				var aRanges = [];
 				var oBBox;
 				for (var nRange = 0; nRange < arrChangedRanges.length; ++nRange) {
@@ -17608,7 +17537,6 @@ function isAllowPasteLink(pastedWb) {
 
 			History.EndTransaction();
 		};
-
 
 		//check user protect
 		let checkUserRanges = t.model.selectionRange && t.model.selectionRange.ranges;
@@ -18522,7 +18450,6 @@ function isAllowPasteLink(pastedWb) {
 		}
     };
 
-
 	// ----- Search -----
 	WorksheetView.prototype._isCellEqual = function (c, r, options) {
 		var cell, cellText;
@@ -19190,8 +19117,6 @@ function isAllowPasteLink(pastedWb) {
 					}
 				}
 			}
-
-
 
 			if (!applyByArray && AscCommonExcel.bIsSupportDynamicArrays) {
 				/* if we write not through cse, then check the formula for the presence of ref */
@@ -20013,7 +19938,6 @@ function isAllowPasteLink(pastedWb) {
 					History.StartTransaction();
 					t.workbook.StartAction(AscDFH.historydescription_Spreadsheet_AddAutoFilter, {style: styleName, range: ar, info: filterInfo});
 
-
 					var type = ar.getType();
 					var isSlowOperation = false;
 					if (c_oAscSelectionType.RangeMax === type || c_oAscSelectionType.RangeRow === type ||  c_oAscSelectionType.RangeCol === type) {
@@ -20464,7 +20388,6 @@ function isAllowPasteLink(pastedWb) {
 			isApplyAutoFilter = true;
 		}
 
-
 		var onChangeAutoFilterCallback = function (isSuccess) {
 			if (false === isSuccess) {
 				t.model.workbook.handlers.trigger("asc_onError", c_oAscError.ID.LockedAllError, c_oAscError.Level.NoCritical);
@@ -20645,7 +20568,6 @@ function isAllowPasteLink(pastedWb) {
                 History.StartTransaction();
 
                 var rgbColor = color ? new AscCommonExcel.RgbColor((color.asc_getR() << 16) + (color.asc_getG() << 8) + color.asc_getB()) : null;
-
 
                 var sort = t.model._doSort(sortProps.sortRange, type, sortProps.startCol, rgbColor);
                 t.cellCommentator.sortComments(sort);
@@ -21270,7 +21192,6 @@ function isAllowPasteLink(pastedWb) {
 			height = rowHeight -  widthBorder * 2;
 		}
 
-
 		if (window['IS_NATIVE_EDITOR']) {
 			isMobileRetina = true;
 		}
@@ -21283,7 +21204,6 @@ function isAllowPasteLink(pastedWb) {
 			this._RemoveClipRect(ctx);
 		}
 	};
-
 
 	WorksheetView.prototype._drawPivotCollapseButton = function (offsetX, offsetY, props) {
 		var ctx = props.isOverlay ? this.overlayCtx : this.drawingCtx;
@@ -21425,7 +21345,6 @@ function isAllowPasteLink(pastedWb) {
 		ctx.beginPath();
 		t._lineVer(ctx, x1 - diff, y1 + 1, y1 - lnSize + 1);
 		t._lineHor(ctx, x1 + 1, y1 - diff, x1 - lnSize + 1);
-
 
 		ctx.setStrokeStyle(m_oColor);
 		ctx.stroke();
@@ -21778,7 +21697,6 @@ function isAllowPasteLink(pastedWb) {
             return false;
         }
 
-
         //2)если затрагиваем перемещаемым диапазоном часть а/ф со скрытыми строчками
         if (!opt_wsTo && !checkMoveRangeIntoApplyAutoFilter(arnTo)) {
             ws.workbook.handlers.trigger("asc_onError", c_oAscError.ID.AutoFilterMoveToHiddenRangeError,
@@ -21837,7 +21755,6 @@ function isAllowPasteLink(pastedWb) {
 						startRow = rangeWithoutHeaderFooter.r1;
 					}
 				}
-
 
 				break;
 			}
@@ -23686,7 +23603,6 @@ function isAllowPasteLink(pastedWb) {
 			}
 		};
 
-
 		var _allProps = bCol ? this.model.oAllCol : null/*this.model.oSheetFormatPr.oAllRow*/;
 		var allOutLineLevel = _allProps ? _allProps.getOutlineLevel() : 0;
 		if(!allOutLineLevel) {
@@ -23731,7 +23647,6 @@ function isAllowPasteLink(pastedWb) {
 
 		//TODO возможно стоит вначале пройтись по старому groupArr и проставить всем столбцам/строкам false - могут быть проблемы при удалении всех групп и тд
 		//val.setCollapsed(false);
-
 
 		//вычисляем опцию collapsed уже после основных вычислений
 		//связано с тем, что она проставляется в строке/столбце, следующей за последней в группе
@@ -23819,7 +23734,6 @@ function isAllowPasteLink(pastedWb) {
 			x1 = this._getColLeft(range.c1) - offsetX;
 			x2 = this._getColLeft(range.c2 + 1) - offsetX;
 			y2 = this.groupHeight;
-
 
 			//фон для группировки
 			ctx.setFillStyle(this.settings.header.style[kHeaderDefault].background);
@@ -24818,7 +24732,6 @@ function isAllowPasteLink(pastedWb) {
 			}
 		};
 
-
 		functionModelAction = function () {
 			var _summaryBelow = t.model.sheetPr ? t.model.sheetPr.SummaryBelow : true;
 			var _summaryRight = t.model.sheetPr ? t.model.sheetPr.SummaryRight : true;
@@ -25023,7 +24936,6 @@ function isAllowPasteLink(pastedWb) {
 		//TODO если кнопка группа с наименьшим уровнем попала в выделение и внутри этой группы на предыдущей строке есть кнопка группы с меньшим уровнем,
 		//TODO то скрываем именно внутреннюю группу - это необходимо сделать! касается только группы с самым наименьшим уровенем, далее внутренни группы не нужно проверять
 
-
 		var getNeedGroups = function(groupArr, /*levelMap,*/ bCol) {
 
 			var maxGroupIndexMap = {}, deleteIndexes = {};
@@ -25074,11 +24986,9 @@ function isAllowPasteLink(pastedWb) {
 			selectPartRowGroup = null;
 		}
 
-
 		needGroups = getNeedGroups(t.arrColGroups.groupArr, /*t.arrColGroups.levelMap,*/ true);
 		var allGroupSelectedCol = needGroups.container;
 		var selectPartColGroup = needGroups.selectPartGroup;
-
 
 		if(allGroupSelectedCol.length) {
 			selectPartColGroup = null;
@@ -25155,7 +25065,6 @@ function isAllowPasteLink(pastedWb) {
 		var ar = this.model.selectionRange.getLast().clone();
 		var t = this;
 
-
 		var getNeedGroups = function(groupArr, bCol) {
 			var res;
 			if(groupArr) {
@@ -25177,7 +25086,6 @@ function isAllowPasteLink(pastedWb) {
 
 		var needGroups = getNeedGroups(t.arrRowGroups.groupArr);
 		var allGroupSelectedRow = needGroups;
-
 
 		needGroups = getNeedGroups(t.arrColGroups.groupArr, true);
 		var allGroupSelectedCol = needGroups;
@@ -25206,7 +25114,6 @@ function isAllowPasteLink(pastedWb) {
 				//если блок попал полностью под выделение
 				t.model.setRowHidden(!bExpand, allGroupSelectedRow.start, allGroupSelectedRow.end);
 			}
-
 
 			//столбцы
 			if(allGroupSelectedCol) {
@@ -25348,7 +25255,6 @@ function isAllowPasteLink(pastedWb) {
 				}
 			}
 
-
 			for(var j in doChangeRowArr) {
 				t.model.setRowHidden(false, doChangeRowArr[j].r1, doChangeRowArr[j].r2);
 				t.model.setOutlineRow(0, doChangeRowArr[j].r1, doChangeRowArr[j].r2);
@@ -25463,7 +25369,6 @@ function isAllowPasteLink(pastedWb) {
 				}
 			}
 		}
-
 
 		var callback = function(success) {
 			if(!success) {
@@ -25589,7 +25494,6 @@ function isAllowPasteLink(pastedWb) {
 				}
 			}
 
-
 			//для columnSort - добавлять с1++
 			if (dataHasHeaders) {
 				selection.r1++;
@@ -25680,7 +25584,6 @@ function isAllowPasteLink(pastedWb) {
 			}
 			return level;
 		};
-
 
 		//столбцы/строки с настройками
 		if(modelSort) {
@@ -25816,7 +25719,6 @@ function isAllowPasteLink(pastedWb) {
 		if (!window['AscCommonExcel'].g_IncludeNewRowColInTable) {
 			return;
 		}
-
 
 		var t = this;
 		var api = window["Asc"]["editor"];
@@ -26044,7 +25946,6 @@ function isAllowPasteLink(pastedWb) {
 				}
 			}
 
-
 			aSortElems.sort(function(a, b) {
 				if ((deleteIndexesMap[a.index] && deleteIndexesMap[b.index]) || (!deleteIndexesMap[a.index] && !deleteIndexesMap[b.index])) {
 					return 0;
@@ -26179,7 +26080,6 @@ function isAllowPasteLink(pastedWb) {
 
 	//данные для отображения
 	генерируем данные для отображения в шейпа по имени - getFilterValuesBySlicerName
-
 
 	//обновление view
 	после применения автофильтра изменяем отображения на основне данных модели по имени ф/т - updateSlicerViewAfterTableChange
@@ -26677,7 +26577,6 @@ function isAllowPasteLink(pastedWb) {
 		}
 	};
 
-
 	WorksheetView.prototype.setCF = function (arr, deleteIdArr, presetId) {
 		var t = this;
 
@@ -27136,7 +27035,6 @@ function isAllowPasteLink(pastedWb) {
 		return {row: maxRow, col: maxCol};
 	};
 
-
 	WorksheetView.prototype.updateExternalReferenceByCell = function (c, initStructure, callback, forceUpdate) {
 		var t = this;
 		var externalReferences = this.getExternalReferencesByCell(c, initStructure);
@@ -27421,7 +27319,6 @@ function isAllowPasteLink(pastedWb) {
 		}
 	};
 
-
 	WorksheetView.prototype.traceDependents = function () {
 		if (this.traceDependentsManager) {
 			this.traceDependentsManager.calculateDependents();
@@ -27436,7 +27333,6 @@ function isAllowPasteLink(pastedWb) {
 			this.updateSelection();
 		}
 	};
-
 
 	WorksheetView.prototype.changeLegacyDrawingHFPictures = function (picturesMap) {
 		//lock?
@@ -27545,7 +27441,6 @@ function isAllowPasteLink(pastedWb) {
 			}
 		};
 
-
 		switch (type) {
 			case c_oAscFillType.copyCells:
 				if (!this.activeFillHandle) {
@@ -27582,7 +27477,6 @@ function isAllowPasteLink(pastedWb) {
 				if (!cSerial) {
 					return;
 				}
-
 
 				this._isLockedCells(oRangeModel, /*subType*/null, function (success) {
 					if (!success) {
@@ -27811,7 +27705,6 @@ function isAllowPasteLink(pastedWb) {
 		return ctx;
 	};
 
-
 	WorksheetView.prototype._AddClipRect = function (ctx, x, y, w, h, skipRtl) {
 		let _x = this.getRightToLeft() && !skipRtl ? (this.getCtxWidth(ctx) - x - w) : x;
 		ctx.AddClipRect && ctx.AddClipRect(_x, y, w, h);
@@ -27948,8 +27841,6 @@ function isAllowPasteLink(pastedWb) {
 
 	
 
-
-
 	function CRenderingSettings() {
 		this.splitRowBG = null; //number - how much row need skip, every 2,3 and..
 		this.ctxWidth = null;
@@ -28039,8 +27930,6 @@ function isAllowPasteLink(pastedWb) {
 		}
 		this.timer = null;
 	};
-
-
 
 	function CCellPasteHelper(ws) {
 		this.ws = ws;
@@ -28355,7 +28244,6 @@ function isAllowPasteLink(pastedWb) {
 			}
 		}
 
-
 		//добавляем форматированные таблицы
 		var i;
 		var arnToRange = pasteToRange ? pasteToRange : ws.model.selectionRange.getLast();
@@ -28492,7 +28380,6 @@ function isAllowPasteLink(pastedWb) {
 				ws.model.moveProtectedRange(refInsertBinary, arnToRange, true, offsetAll, ws.model, val);
 			}
 		}
-
 
 		//делаем unmerge ф/т
 		intersectionRangeWithTableParts = ws.model.autoFilters._intersectionRangeWithTableParts(arnToRange);
@@ -28994,7 +28881,6 @@ function isAllowPasteLink(pastedWb) {
 		var isMergedFirstCell = firstCell.hasMerged();
 		var isOneMerge = false;
 
-
 		var startCell = val.getCell3(activeCellsPasteFragment.r1, activeCellsPasteFragment.c1);
 		var isMergedStartCell = startCell.hasMerged();
 
@@ -29145,7 +29031,6 @@ function isAllowPasteLink(pastedWb) {
 		//необходимо проверить, пересекаемся ли мы с фоматированной таблицей
 		//если да, то подхватывать dxf при вставке не нужно
 		var intersectionAllRangeWithTables = ws.model.autoFilters._intersectionRangeWithTableParts(trueActiveRange);
-
 
 		var addComments = function (pasteRow, pasteCol, comments) {
 			var comment;
@@ -29425,7 +29310,6 @@ function isAllowPasteLink(pastedWb) {
 				pastedRangeProps.tableDxf = tableDxf.dxf;
 			}
 
-
 			if (undefined === colsWidth[toCol]) {
 				colsWidth[toCol] = val._getCol(fromCol);
 			}
@@ -29443,7 +29327,6 @@ function isAllowPasteLink(pastedWb) {
 					pastedFormulaArray.push({ref: _formulaArrayRef, newVal: newVal});
 				}
 			});
-
 
 			//apply props by cell
 			var formulaProps = {
@@ -30410,7 +30293,6 @@ function isAllowPasteLink(pastedWb) {
 			cellCoord = [new AscCommon.asc_CRect(positionShapeContent.x, positionShapeContent.y, 0, 0)];
 		}
 
-
 		specialPasteShowOptions.asc_setOptions(props);
 		specialPasteShowOptions.asc_setCellCoord(cellCoord);
 		specialPasteShowOptions.asc_setShowPasteSpecial(showPasteSpecial);
@@ -30513,7 +30395,6 @@ function isAllowPasteLink(pastedWb) {
 
 		return cellCoord;
 	};
-
 
 	/**
 	 * Class for asynchronous cell text replacement using timer

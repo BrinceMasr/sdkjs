@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -38,7 +33,6 @@ var HANDLE_EVENT_MODE_HANDLE = AscFormat.HANDLE_EVENT_MODE_HANDLE;
 var MOVE_DELTA = AscFormat.MOVE_DELTA;
 
 var History = AscCommon.History;
-
 
 DrawingObjectsController.prototype.handleChartDoubleClick = function()
 {
@@ -105,12 +99,10 @@ DrawingObjectsController.prototype.fitImagesToSlide = function()
     }, [], false, AscDFH.historydescription_Presentation_FitImagesToSlide)
 };
 
-
 DrawingObjectsController.prototype.getDrawingArray = function()
 {
     return this.drawingObjects.getDrawingsForController();
 };
-
 
 DrawingObjectsController.prototype.isViewMode = function()
 {
@@ -136,8 +128,6 @@ DrawingObjectsController.prototype.getColorMap = function()
     }
     return AscFormat.GetDefaultColorMap();
 };
-
-
 
 DrawingObjectsController.prototype.handleOleObjectDoubleClick = function(drawing, oleObject, e, x, y, pageIndex)
 {
@@ -198,7 +188,6 @@ DrawingObjectsController.prototype.getDrawingObjects = function()
     return this.drawingObjects.cSld.spTree;
 };
 
-
 DrawingObjectsController.prototype.paragraphFormatPaste2 = function()
 {
 	let oData = this.getEditorApi().getFormatPainterData();
@@ -231,19 +220,16 @@ DrawingObjectsController.prototype.onMouseMove = function(e, x, y)
 };
 DrawingObjectsController.prototype.OnMouseMove = DrawingObjectsController.prototype.onMouseMove;
 
-
 DrawingObjectsController.prototype.onMouseUp = function(e, x, y)
 {
     this.curState.onMouseUp(e, x, y, 0);
 };
 DrawingObjectsController.prototype.OnMouseUp = DrawingObjectsController.prototype.onMouseUp;
 
-
 DrawingObjectsController.prototype.convertPixToMM = function(pix)
 {
     return editor.WordControl.m_oDrawingDocument.GetMMPerDot(pix);
 };
-
 
 DrawingObjectsController.prototype.resetSelect = function()
 {
@@ -253,9 +239,6 @@ DrawingObjectsController.prototype.resetSelect = function()
     this.clearTrackObjects();
     this.changeCurrentState(new AscFormat.NullState(this));
 };
-
-
-
 
 DrawingObjectsController.prototype.checkSelectedObjectsAndFireCallback = function(callback, args)
 {
@@ -401,7 +384,6 @@ DrawingObjectsController.prototype.updateChart = function (binary)
 	}
 };
 
-
 DrawingObjectsController.prototype.addImage = function(sImageUrl, nPixW, nPixH, videoUrl, audioUrl)
 {
     let oPresentation = this.getPresentation();
@@ -500,7 +482,6 @@ DrawingObjectsController.prototype.getSnapNearestPos = function(dX, dY)
     }
     return this.getPresentation().getStrideData().getNearestPoint(dX, dY);
 };
-
 
 DrawingObjectsController.prototype.getHorGuidesPos = function() {
     return this.getPresentation().getHorGuidesPos();

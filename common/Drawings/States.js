@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -43,8 +38,6 @@ var isRealObject = AscCommon.isRealObject;
 
 var MOVE_DELTA = 1/100000;
 var SNAP_DISTANCE = 1.27;
-
-
 
 function StartAddNewShape(drawingObjects, preset, nPlaceholderType, bVertical)
 {
@@ -443,7 +436,6 @@ StartAddNewShape.prototype =
     }
 };
 
-
 function checkEmptyPlaceholderContent(content)
 {
     if(!content){
@@ -479,7 +471,6 @@ function checkEmptyPlaceholderContent(content)
     }
     return null;
 }
-
 
 function NullState(drawingObjects)
 {
@@ -723,8 +714,6 @@ NullState.prototype =
     }
 };
 
-
-
     function SlicerState(drawingObjects, oSlicer) {
         this.drawingObjects = drawingObjects;
         this.slicer = oSlicer;
@@ -857,9 +846,6 @@ TrackSelectionRect.prototype =
     }
 
 };
-
-
-
 
     function TrackGuideState(drawingObjects, oGuide, dStartX, dStartY) {
         this.drawingObjects = drawingObjects;
@@ -1032,7 +1018,6 @@ ChangeAdjState.prototype =
         this.drawingObjects.changeCurrentState(new NullState(this.drawingObjects));
     }
 };
-
 
 function PreRotateState(drawingObjects, majorObject)
 {
@@ -1399,7 +1384,6 @@ RotateState.prototype =
     }
 };
 
-
 function PreResizeState(drawingObjects, majorObject, cardDirection)
 {
     this.drawingObjects = drawingObjects;
@@ -1490,7 +1474,6 @@ ResizeState.prototype =
 
     onMouseUp: RotateState.prototype.onMouseUp
 };
-
 
 function PreMoveState(drawingObjects,  startX, startY, shift, ctrl, majorObject, majorObjectIsSelected, bInside, bGroupSelection)
 {
@@ -1898,7 +1881,6 @@ MoveInGroupState.prototype =
     onMouseUp: MoveState.prototype.onMouseUp
 };
 
-
 function PreRotateInGroupState(drawingObjects, group, majorObject)
 {
     this.drawingObjects = drawingObjects;
@@ -2211,7 +2193,6 @@ TextAddState.prototype =
     }
 };
 
-
 function SplineBezierState(drawingObjects, bAnimCustomPath, bReplace, bPreview)
 {
     this.drawingObjects = drawingObjects;
@@ -2255,7 +2236,6 @@ SplineBezierState.prototype =
         this.drawingObjects.changeCurrentState(new NullState(this.drawingObjects));
     }
 };
-
 
 function SplineBezierState33(drawingObjects, startX, startY, pageIndex, bAnimCustomPath, bReplace, bPreview)
 {
@@ -2451,10 +2431,8 @@ SplineBezierState3.prototype =
         x5 = (x4 + x6)*0.5;
         y5 = (y4 + y6)*0.5;
 
-
         spline.path.length = 1;
         spline.path.push(new AscFormat.SplineCommandBezier(x1, y1, x2, y2, x3, y3));
-
 
         spline.path.push(new AscFormat.SplineCommandBezier(x4, y4, x5, y5, x6, y6));
         this.drawingObjects.updateOverlay();
@@ -2480,7 +2458,6 @@ SplineBezierState3.prototype =
     }
 };
 
-
 function SplineBezierState4(drawingObjects, pageIndex, bAnimCustomPath, bReplace, bPreview)
 {
     this.drawingObjects = drawingObjects;
@@ -2490,7 +2467,6 @@ function SplineBezierState4(drawingObjects, pageIndex, bAnimCustomPath, bReplace
     this.bReplace = bReplace;
     this.bPreview = bPreview;
 }
-
 
 SplineBezierState4.prototype =
 {
@@ -2655,7 +2631,6 @@ SplineBezierState5.prototype =
         x3 = lastCommand.x3;
         y3 = lastCommand.y3;
 
-
         var tr_x, tr_y;
         if(pageIndex === this.drawingObjects.startTrackPos.pageIndex)
         {
@@ -2673,7 +2648,6 @@ SplineBezierState5.prototype =
 
         var vx = (x6 - x0)/6;
         var vy = (y6 - y0)/6;
-
 
         x2 = x3 - vx;
         y2 = y3 - vy;
@@ -2694,7 +2668,6 @@ SplineBezierState5.prototype =
         }
         lastCommand.x2 = x2;
         lastCommand.y2 = y2;
-
 
         spline.path.push(new AscFormat.SplineCommandBezier(x4, y4, x5, y5, x6, y6));
         this.drawingObjects.updateOverlay();
@@ -2757,7 +2730,6 @@ PolyLineAddState.prototype =
         this.drawingObjects.changeCurrentState(new NullState(this.drawingObjects));
     }
 };
-
 
 function PolyLineAddState2(drawingObjects, minDistance, bAnimCustomPath, bReplace, bPreview)
 {
@@ -2827,8 +2799,6 @@ PolyLineAddState2.prototype =
     }
 };
 
-
-
 function AddPolyLine2State(drawingObjects, bAnimCustomPath, bReplace, bPreview)
 {
     this.drawingObjects = drawingObjects;
@@ -2872,7 +2842,6 @@ function AddPolyLine2State2(drawingObjects, x, y, bAnimCustomPath, bReplace, bPr
     this.bAnimCustomPath = bAnimCustomPath;
     this.bReplace = bReplace;
     this.bPreview = bPreview;
-
 
 }
 AddPolyLine2State2.prototype =
@@ -2931,7 +2900,6 @@ function AddPolyLine2State3(drawingObjects, bAnimCustomPath, bReplace, bPreview)
     this.lastX = -1000;
     this.lastY = -1000;
 
-
     this.polylineFlag = true;
     this.bAnimCustomPath = bAnimCustomPath;
     this.bReplace = bReplace;
@@ -2943,7 +2911,6 @@ AddPolyLine2State3.prototype =
     {
         if(this.drawingObjects.handleEventMode === HANDLE_EVENT_MODE_CURSOR)
             return {objectId: "1", bMarker: true, cursorType: "crosshair"};
-
 
         this.lastX = x;
         this.lastY = y;

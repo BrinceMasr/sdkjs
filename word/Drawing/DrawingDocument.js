@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -2208,7 +2203,6 @@ function CDrawingDocument()
 			this.TargetHtmlElement.oldColor = { R : newColor.R, G : newColor.G, B : newColor.B };
 		}
 
-
 		let TextMatrix = this.AutoShapesTrack.transformPageMatrix(this.TextMatrix);
 		if (null == TextMatrix || global_MatrixTransformer.IsIdentity2(TextMatrix))
 		{
@@ -3286,7 +3280,6 @@ function CDrawingDocument()
 		var oHeader          = new CHeaderFooter(oLogicDocument.HdrFtr, oLogicDocument, this, AscCommon.hdrftr_Header);
 		var oDocumentContent = oHeader.GetContent();
 
-
 		var nStylesType   = props.get_StylesType();
 		var isShowPageNum = props.get_ShowPageNumbers();
 		var isRightTab    = props.get_RightAlignTab();
@@ -3294,7 +3287,6 @@ function CDrawingDocument()
 
 		if (undefined === nTabLeader || null === nTabLeader)
 			nTabLeader = Asc.c_oAscTabLeader.Dot;
-
 
 		var sStyleId = null;
 		var sStyleToDelete = null;
@@ -3314,7 +3306,6 @@ function CDrawingDocument()
 
 		var oParaIndex = 0;
 		var nPageIndex = 1;
-
 
 		var nCount = 5;
 		var sCaption = props.get_Caption();
@@ -6628,7 +6619,6 @@ function CDrawingDocument()
 	{
 		return Asc.editor.isEyedropperStarted() || Asc.editor.isDrawInkMode();
 	};
-
 
 	// mouse events
 	this.checkMouseDown_Drawing = function (pos)

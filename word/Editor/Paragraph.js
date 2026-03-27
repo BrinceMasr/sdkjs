@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -413,7 +408,6 @@ Paragraph.prototype.Copy2 = function(Parent)
 		Para.Internal_Content_Add(Para.Content.length, Item.Copy2(), false);
 	}
 
-
 	Para.RemoveSelection();
 	Para.MoveCursorToStartPos(false);
 
@@ -723,7 +717,6 @@ Paragraph.prototype.GetContentBounds = function(CurPage)
 					Right = oRange.XVisible + oRange.W + oRange.WEnd + oRange.WBreak;
 			}
 		}
-
 
 		if (!oBounds)
 		{
@@ -3064,7 +3057,6 @@ Paragraph.prototype.drawRunHighlight = function(CurPage, pGraphics, Pr, drawStat
 					TempBottom -= Pr.ParaPr.Spacing.After;
 			}
 
-
 			if (Pr.ParaPr.Brd.Right.Value === border_Single)
 			{
 				let RGBA = Pr.ParaPr.Brd.Right.Get_Color(this);
@@ -4101,7 +4093,6 @@ Paragraph.prototype.Remove = function(nCount, isRemoveWholeElement, bRemoveOnlyS
 			}
 
 			var isFootEndnoteRefRun = (para_Run === this.Content[StartPos].Type && this.Content[StartPos].IsFootEndnoteReferenceRun());
-
 
 			if (this.Content[StartPos].IsSolid())
 			{
@@ -8106,7 +8097,6 @@ Paragraph.prototype.ModifyHyperlink = function(HyperProps)
 				HyperRun.SetUnderline(true);
 			}
 
-
 			// Заполняем ран гиперссылки текстом
 			HyperRun.AddText(HyperProps.Text);
 
@@ -9856,7 +9846,6 @@ Paragraph.prototype.GetCalculatedTextPr = function()
 				while (true !== this.Content[StartPos].IsCursorPlaceable() && StartPos > OldStartPos)
 					StartPos--;
 
-
 				if (bCheckParaEnd && StartPos === EndPos && this.Content[StartPos].IsSelectionEmpty())
 					TextPr = null;
 				else
@@ -11398,7 +11387,6 @@ Paragraph.prototype.PasteFormatting = function(oData)
 			this.Set_Tabs(oParaPr.Tabs);
 		else
 			this.Set_Tabs(new CParaTabs());
-
 
 		if (this.bFromDocument)
 		{
@@ -14972,7 +14960,6 @@ Paragraph.prototype.GetCurrentComments = function(oComments)
 			}
 		}
 
-
 	}
 
 	return oComments;
@@ -16059,7 +16046,6 @@ Paragraph.prototype.UpdateDocumentOutline = function()
 {
 	if (!this.bFromDocument || !this.LogicDocument || !this.Parent)
 		return;
-
 
 	var isCheck = true;
 	var oParent = this.Parent;
@@ -18849,7 +18835,6 @@ Paragraph.prototype.CheckTrackMoveMarkInSelection = function(isStart, isCheckTo)
 			}
 		}
 
-
 		if (this.Content[nStartPos].IsSelectedFromStart())
 		{
 			nPos = nStartPos - 1;
@@ -19248,7 +19233,6 @@ Paragraph.prototype.UpdateLineNumbersInfo = function()
 				nStartLineNum = 0;
 		}
 
-
 		this.LineNumbersInfo = new CParagraphLineNumbersInfo(nStartLineNum);
 	}
 	else
@@ -19533,11 +19517,8 @@ Paragraph.prototype.asc_canAddRefToCaptionText = Paragraph.prototype.CanAddRefAf
 Paragraph.prototype["asc_getText"]                = Paragraph.prototype.asc_getText;
 Paragraph.prototype["asc_canAddRefToCaptionText"] = Paragraph.prototype.asc_canAddRefToCaptionText;
 
-
-
 var pararecalc_0_All  = 0;
 var pararecalc_0_None = 1;
-
 
 function CParaRecalcInfo()
 {
@@ -19714,7 +19695,6 @@ CParaPos.prototype.IsValid = function(oParagraph)
 
 	return (oParagraph.Lines[this.Line] && oParagraph.Lines[this.Line].Ranges[this.Range]);
 };
-
 
 // используется в Internal_Draw_3 и Internal_Draw_5
 function CParaDrawingRangeLinesElement(y0, y1, x0, x1, w, r, g, b, a, Additional, Additional2)
@@ -19951,7 +19931,6 @@ CParaDrawingRangeHorizontalLines.prototype.Add = function(x0, x1, color, additio
 {
 	return CParaDrawingRangeLines.prototype.Add.call(this, this.y, this.y, x0, x1, this.w, color.r, color.g, color.b, additional, additional2);
 };
-
 
 function CParagraphCurPos()
 {
@@ -20462,7 +20441,6 @@ CRunRecalculateObject.prototype =
         if ( this.StartLine !== OLI.StartLine || this.StartRange !== OLI.StartRange || CurLine < 0 || CurLine >= this.private_Get_LinesCount() || CurLine >= OLI.protected_GetLinesCount() || CurRange < 0 || CurRange >= this.private_Get_RangesCount(CurLine) || CurRange >= OLI.protected_GetRangesCount(CurLine) )
             return false;
 
-
         var ThisSP = this.private_Get_RangeStartPos(CurLine, CurRange);
         var ThisEP = this.private_Get_RangeEndPos(CurLine, CurRange);
 
@@ -20818,7 +20796,6 @@ CParagraphMathParaChecker.prototype.GetResult = function()
 {
 	return this.Result;
 };
-
 
 function CParagraphStartState(Paragraph)
 {

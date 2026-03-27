@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -230,7 +225,6 @@ $(function () {
 		let ref = cfLocation && cfLocation[1];
 		assert.strictEqual(ref, "=$A$5", "compare location conditional formatting in cell");
 
-
 		cf = new AscCommonExcel.CConditionalFormattingRule();
 		cf.asc_setType(Asc.c_oAscCFType.cellIs);
 		cf.asc_setLocation("=Table1[Column1]");
@@ -248,10 +242,8 @@ $(function () {
 		ref = cfLocation && cfLocation[1];
 		assert.strictEqual(ref, "=$A$2:$A$4", "compare location conditional formatting in table");
 
-
 		clearData(0, 6, 0, 6);
 	});
-
 
 	QUnit.test("Test: \"simple tests\"", function (assert) {
 		let testData = [
@@ -260,7 +252,6 @@ $(function () {
 
 		let range = ws.getRange4(0, 0);
 		range.fillData(testData);
-
 
 		let newRule = new AscCommonExcel.CConditionalFormattingRule();
 		newRule.asc_setType(Asc.c_oAscCFType.cellIs);
@@ -289,11 +280,9 @@ $(function () {
 		let ref = cfLocation && cfLocation[1];
 		assert.strictEqual(ref, "=$A$1", "compare location conditional formatting");
 
-
 		let compiledStyle = ws.getCompiledStyle(0, 0);
 		let rgbColor = compiledStyle.fill.bg();
 		assert.strictEqual(compareAscColorAndRgbColor(fillColor, rgbColor), true, "compare fill color _1");
-
 
 		//Clearing data of sheet
 		clearData(0, 0, 1, 8);
@@ -539,7 +528,6 @@ $(function () {
 		assert.strictEqual(compareAscColorAndRgbColor(fillColor, rgbColor3), false, "Cell A3 doesn't contain 'Intel' text");
 		assert.strictEqual(compareAscColorAndRgbColor(fillColor, rgbColor4), true, "Cell A4 contains 'Intel' text");
 		assert.strictEqual(compareAscColorAndRgbColor(fillColor, rgbColor5), false, "Cell A5 doesn't contain 'Intel' text");
-
 
 		// Test 2: Using cell reference formula
 		let formulaRule = new AscCommonExcel.CConditionalFormattingRule();

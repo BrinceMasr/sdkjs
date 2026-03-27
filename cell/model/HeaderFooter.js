@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -138,7 +133,6 @@ function (window, undefined) {
 		return this.field;
 	};
 
-
 	function HeaderFooterParser() {
 		this.tokens = [];
 		this.curTokenPosition = null;
@@ -250,7 +244,6 @@ function (window, undefined) {
 
 				case c_nToken: {
 					nState = c_nText;
-
 
 					switch (cChar) {
 						case '&':
@@ -698,7 +691,6 @@ function (window, undefined) {
 					}
 				}
 
-
 				if (!compareColors(prevFont.c, newFont.c)) {
 					let newColor = this.convertFontColorFromObj(newFont.c);
 					if (null !== newColor) {
@@ -773,7 +765,6 @@ function (window, undefined) {
 
 		return res;
 	};
-
 
 	function CHeaderFooterEditorSection(type, portion, canvasObj) {
 		this.type = type;
@@ -966,7 +957,6 @@ function (window, undefined) {
 		return sType;
 	};
 
-
 	function convertFieldToMenuText(val, _text) {
 		let textField = null;
 		let tM = AscCommon.translateManager;
@@ -1040,7 +1030,6 @@ function (window, undefined) {
 		this.wbCellEditor = null;
 		this.editorElemId = "ce-canvas-outer-menu";
 
-
 		this.api = window["Asc"]["editor"];
 		this.wb = this.api.wb;
 
@@ -1100,7 +1089,6 @@ function (window, undefined) {
 		this.canvas[c_nPortionLeftFooter] = createAndPushCanvasObj(idArr[3]);
 		this.canvas[c_nPortionCenterFooter] = createAndPushCanvasObj(idArr[4]);
 		this.canvas[c_nPortionRightFooter] = createAndPushCanvasObj(idArr[5]);
-
 
 		//add common options
 		let optHeaderFooterProps = opt_objForSave && opt_objForSave.headerFooter;
@@ -1181,7 +1169,6 @@ function (window, undefined) {
 			}
 
 			t.curParentFocusId = id;
-
 
 			let cSection = t._getSectionById(id);
 			if (cSection) {
@@ -2309,11 +2296,9 @@ function (window, undefined) {
 		this.menuPresets = arrPresetsMenu;
 	};
 
-
 	CHeaderFooterEditor.prototype.getPageType = function () {
 		return this.pageType;
 	};
-
 
 	function CLegacyDrawingHF(ws) {
 		this.drawings = [];
@@ -2428,7 +2413,6 @@ function (window, undefined) {
 		return res;
 	};
 
-
 	function CLegacyDrawingHFDrawing() {
 		this.id = null;//"LH", "CH", "RH", "LF", "CF", "RF", "LHEVEN",..., "LHFIRST"
 		this.graphicObject = null;
@@ -2437,7 +2421,6 @@ function (window, undefined) {
 	CLegacyDrawingHFDrawing.prototype.init = function () {
 
 	};
-
 
 	//------------------------------------------------------------export---------------------------------------------------
 	window['AscCommonExcel'] = window['AscCommonExcel'] || {};

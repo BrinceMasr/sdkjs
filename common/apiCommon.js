@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -186,7 +181,6 @@ function (window, undefined) {
 		}
 		return false;
 	}
-
 
 	function asc_menu_ReadPaddings(_params, _cursor){
 		const _paddings = new Asc.asc_CPaddings();
@@ -614,7 +608,6 @@ function (window, undefined) {
 
 		this.dispUnitsRule = null;
 		this.units = null;
-
 
 		this.showUnitsOnChart = null;
 		this.majorTickMark = null;
@@ -1986,7 +1979,6 @@ function (window, undefined) {
 		return this._height;
 	};
 
-
 	const STANDART_COLORS_MAP = {};
 	STANDART_COLORS_MAP[0x000000] = "Black";
 	STANDART_COLORS_MAP[0xFFFFFF] = "White";
@@ -2044,7 +2036,6 @@ function (window, undefined) {
 	STANDART_COLORS_MAP[0xD7E1F0] = "Light Blue";
 	STANDART_COLORS_MAP[0xFAE6D7] = "Light Orange";
 	STANDART_COLORS_MAP[0xF5E1D2] = "Light Orange";
-
 
 	/**
 	 * Класс CColor для работы с цветами
@@ -2322,7 +2313,6 @@ function (window, undefined) {
 		if (g <= 0.04045) g = g / 12.92; else g = Math.pow((g + 0.055) / 1.055, 2.4);
 
 		if (b <= 0.04045) b = b / 12.92; else b = Math.pow((b + 0.055) / 1.055, 2.4);
-
 
 		X = 0.4124564 * r + 0.3575761 * g + 0.1804375 * b;
 		Y = 0.2126729 * r + 0.7151522 * g + 0.0721750 * b;
@@ -5207,7 +5197,6 @@ function (window, undefined) {
 			this.Locked = (undefined != obj.Locked) ? obj.Locked : false;
 			this.lockAspect = (undefined != obj.lockAspect) ? obj.lockAspect : false;
 
-
 			this.ChartProperties = (undefined != obj.ChartProperties) ? obj.ChartProperties : null;
 			this.ShapeProperties = (undefined != obj.ShapeProperties) ? obj.ShapeProperties : null;
 			this.SlicerProperties = (undefined != obj.SlicerProperties) ? obj.SlicerProperties : null;
@@ -5295,7 +5284,6 @@ function (window, undefined) {
 			this.columnSpace = undefined;
 			this.textFitType = undefined;
 			this.vertOverflowType = undefined;
-
 
 			this.rot = undefined;
 			this.rotAdd = undefined;
@@ -5735,8 +5723,6 @@ function (window, undefined) {
 		return this.Value;
 	};
 
-
-
 	/** @constructor */
 	function asc_CShapeFill() {
 		this.type = null;
@@ -5779,7 +5765,6 @@ function (window, undefined) {
 			this.fill.asc_putType(textureType);
 		}
 	};
-
 
 	// There was asc_CFillBlip
 
@@ -5869,7 +5854,6 @@ function (window, undefined) {
 	asc_CFillSolid.prototype.asc_putColor = function (v) {
 		this.color = v;
 	};
-
 
 	/** @constructor */
 	function asc_CStroke() {
@@ -6033,7 +6017,6 @@ function (window, undefined) {
 		return false;
 	};
 
-
 	//-----------------------------------------------------------------
 	// События движения мыши
 	//-----------------------------------------------------------------
@@ -6120,7 +6103,6 @@ function (window, undefined) {
 	CMouseMoveData.prototype.get_EffectDescription = function () {
 		return this.EffectDescription;
 	};
-
 
 	/**
 	 * Класс для работы с интерфейсом для гиперссылок
@@ -7835,7 +7817,6 @@ function (window, undefined) {
 		return AscCommon.CShortcuts.GetShortcutIndex(this.asc_GetKeyCode(), this.asc_IsCtrl(), this.asc_IsShift(), this.asc_IsAlt(), this.asc_IsCommand());
 	};
 
-
 	function CButtonData(oData) {
 		this["obj"] = oData["obj"];
 		this["type"] = oData["type"];
@@ -8504,7 +8485,6 @@ function (window, undefined) {
 
 	prot["getExternalReference"] = prot.getExternalReference;
 
-
 	window["AscCommon"].asc_CRect = asc_CRect;
 	prot = asc_CRect.prototype;
 	prot["asc_getX"] = prot.asc_getX;
@@ -8548,7 +8528,6 @@ function (window, undefined) {
 	prot["get_effectValue"] = prot["asc_getEffectValue"] = prot.get_effectValue = prot.asc_getEffectValue;
 	prot["put_effectValue"] = prot["asc_putEffectValue"] = prot.put_effectValue = prot.asc_putEffectValue;
 	prot["get_nameInColorScheme"] = prot["asc_getNameInColorScheme"] = prot.get_nameInColorScheme = prot.asc_getNameInColorScheme;
-
 
 	window["Asc"]["asc_CTextBorder"] = window["Asc"].asc_CTextBorder = asc_CTextBorder;
 	prot = asc_CTextBorder.prototype;
@@ -9070,7 +9049,6 @@ function (window, undefined) {
 	prot["asc_getCurrencyPrepend"]	= prot.asc_getCurrencyPrepend;
 	prot["asc_putCurrencyPrepend"]	= prot.asc_putCurrencyPrepend;
 
-
 	window["Asc"]["asc_CFieldPercentageFormatProperty"] = window["Asc"].asc_CFieldPercentageFormatProperty = asc_CFieldPercentageFormatProperty;
 	prot = asc_CFieldPercentageFormatProperty.prototype;
 	prot["asc_getType"]				= prot.asc_getType;
@@ -9529,7 +9507,6 @@ function (window, undefined) {
 	CAscShortcut.prototype["asc_ToJson"] = CAscShortcut.prototype.asc_ToJson;
 	CAscShortcut.prototype["asc_FromJson"] = CAscShortcut.prototype.asc_FromJson;
 	CAscShortcut.prototype["asc_GetShortcutIndex"] = CAscShortcut.prototype.asc_GetShortcutIndex;
-
 
 	window["Asc"]["CButtonData"] = window["Asc"].CButtonData = CButtonData;
 	prot = CButtonData.prototype;

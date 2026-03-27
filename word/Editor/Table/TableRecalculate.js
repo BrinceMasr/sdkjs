@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -658,7 +653,6 @@ CTable.prototype.private_RecalculateGrid = function(pageFields)
 						}
 					}
 
-
 					// Если данное условие выполняется, значит у нас все ячейки с предпочитаемыми значениями, тогда
 					// мы растягиваем все ячейки равномерно. Если не выполняется, значит есть ячейки, в которых
 					// предпочитаемое значение не задано, и тогда растягиваем только такие ячейки.
@@ -727,7 +721,6 @@ CTable.prototype.private_RecalculateGrid = function(pageFields)
 					nSumPrefOverMinContent += arrPrefOverMinContent[nCurCol];
 					nSumMinContent += arrMinNoPref[nCurCol];
 				}
-
 
 				if (nSumMinContent > nMaxTableW)
 				{
@@ -2310,7 +2303,6 @@ CTable.prototype.private_RecalculatePage = function(CurPage)
                 break;
             }
 
-
             // Здесь мы выставляем только начальную координату строки (для каждой страницы)
             // высоту строки(для каждой страницы) мы должны обсчитать после общего цикла, т.к.
             // в одной из следйющих строк может оказаться ячейка с вертикальным объединением,
@@ -2395,7 +2387,6 @@ CTable.prototype.private_RecalculatePage = function(CurPage)
                 Cell.Temp.X_cell_end   = Page.X + CellMetrics.X_cell_end;
                 Cell.Temp.Y_cell_start = Y_content_start - CellMar.Top.W;
                 Cell.Temp.Y_cell_end   = Y_content_end + BottomMargin;
-
 
                 // Какие-то ячейки в строке могут быть не разбиты на строки, а какие то разбиты.
                 // Здесь контролируем этот момент, чтобы у тех, которые не разбиты не вызывать
@@ -3183,7 +3174,6 @@ CTable.prototype.private_RecalculatePage = function(CurPage)
             if (bFootnoteBreak)
 				continue;
 
-
             // Еще раз обновляем параметр, есть ли текст на первой странице
             bContentOnFirstPage = false;
             for ( var CurCell = 0; CurCell < CellsCount; CurCell++ )
@@ -3492,7 +3482,6 @@ CTable.prototype.private_RecalculatePage = function(CurPage)
             Cell.Temp.Y_VAlign_offset[CellPageIndex] = Dy;
         }
     }
-
 
     // Просчитаем нижнюю границу таблицы на данной странице
     var CurRow = LastRow;

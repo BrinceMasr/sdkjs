@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -267,7 +262,6 @@
 
 		ExecuteThumbnailHotkey(thumbnailsTypes.moveToFirstSlide);
 		CheckSelectedSlides([0]);
-
 
 		ExecuteThumbnailHotkey(thumbnailsTypes.selectNextSlide, 0);
 		CheckSelectedSlides([0, 1]);
@@ -570,7 +564,6 @@
 		ExecuteMainHotkey(mainShortcutTypes.checkMoveCursorWordRight);
 		CheckCursorPosition(24, 'Check move to right word');
 
-
 		ExecuteMainHotkey(mainShortcutTypes.checkMoveToStartLineContent);
 		CheckCursorPosition(18, 'Check move to start line');
 
@@ -642,7 +635,6 @@
 
 		ExecuteMainHotkey(mainShortcutTypes.checkSelectCursorTop);
 		CheckSelectedText('Hello World Hello ', 'Select up');
-
 
 		logicDocument.MoveCursorToEndPos();
 		ExecuteMainHotkey(mainShortcutTypes.checkSelectCursorLeft);
@@ -749,7 +741,6 @@
 		ExecuteMainShortcut(Asc.c_oAscPresentationShortcutType.RightPara);
 		assert.strictEqual(GetDirectParaPr().GetJc(), AscCommon.align_Right, "Check turn on right para");
 
-
 		paragraph.Set_PresentationLevel(0);
 		paragraph.Pr.SetInd(0, 0, 0);
 		ExecuteMainHotkey(mainShortcutTypes.checkIncreaseIndent);
@@ -808,7 +799,6 @@
 		ExecuteMainHotkey(mainShortcutTypes.checkLittleMoveShapeTop);
 		CheckShapePosition(0, 0);
 		AscTest.TurnOffRecalculate();
-
 
 		function CheckSelectedObjects(arrOfDrawings)
 		{
@@ -985,7 +975,6 @@
 			ExecuteMainHotkey(mainShortcutTypes.checkRemoveChart, eventIndex);
 			CheckRemoveObject(logicDocument.GetCurrentSlide().cSld.spTree, chart);
 
-
 			const shape1 = AddShape(0, 0, 100, 100);
 			const shape2 = AddShape(0, 0, 100, 100);
 			const shape3 = AddShape(0, 0, 100, 100);
@@ -1125,7 +1114,6 @@
 		assert.true(textPr.GetBold(), 'Check copy paragraph property');
 		assert.true(textPr.GetItalic(), 'Check copy paragraph property');
 		assert.true(textPr.GetStrikeout(), 'Check copy paragraph property');
-
 
 		ClearShapeAndAddParagraph('Hello');
 		logicDocument.SelectAll();

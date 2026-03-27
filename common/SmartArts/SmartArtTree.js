@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -288,7 +283,6 @@
 		}
 		this.else.executeAlgorithm(smartartAlgorithm);
 	};
-
 
 	If.prototype.executeAlgorithm = function (smartartAlgorithm) {
 		if (this.checkCondition(smartartAlgorithm)) {
@@ -1065,7 +1059,6 @@
 		});
 	};
 
-
 	SmartArtAlgorithm.prototype.cleanDrawingShapeInfo = function () {
 		const smartart = this.smartart;
 		const drawing = smartart.drawing;
@@ -1124,7 +1117,6 @@
 		});
 		this.presRoot.initRootConstraints(this.smartart, this);
 	};
-
 
 	SmartArtAlgorithm.prototype.calcScaleCoefficients = function () {
 		const oThis = this;
@@ -1194,7 +1186,6 @@
 		}
 	};
 
-
 	SmartArtAlgorithm.prototype.forEachPresFromTop = function (callback) {
 		const elements = [this.presRoot];
 		callback(this.presRoot, 0);
@@ -1207,7 +1198,6 @@
 			}
 		}
 	};
-
 
 	SmartArtAlgorithm.prototype.getCurrentNode = function () {
 		return this.nodesStack[this.nodesStack.length - 1];
@@ -1637,7 +1627,6 @@
 		}
 	}
 
-
 	SmartArtDataNode.prototype.getPrSet = function () {
 		const presNode = this.getPresNode();
 		return presNode && presNode.getPrSet();
@@ -1701,7 +1690,6 @@
 			const y2 = matrix.TransformPointY(pos.x + pos.width, pos.y);
 			const y3 = matrix.TransformPointY(pos.x, pos.y + pos.height);
 			const y4 = matrix.TransformPointY(pos.x + pos.width, pos.y + pos.height);
-
 
 			minX = Math.min(x1, x2, x3, x4);
 			maxX = Math.max(x1, x2, x3, x4);
@@ -1997,7 +1985,6 @@
 			editorShape.spPr.ln.setTailEnd(this.tailLnArrow);
 		}
 
-
 		const style = editorShape.style;
 		if (contentPoint && contentPoint.point.prSet && contentPoint.point.prSet.style) {
 			style.merge(contentPoint.point.prSet.style);
@@ -2035,7 +2022,6 @@
 			return AscCommon.To_XML_ST_LayoutShapeType(this.type);
 		}
 	};
-
 
 	function BaseAlgorithm() {
 		this.params = {};
@@ -2320,7 +2306,6 @@
 		return this.params[AscFormat.Param_type_ar] || 0;
 	}
 
-
 	BaseAlgorithm.prototype.setParentNode = function (node) {
 		this.parentNode = node;
 	};
@@ -2382,7 +2367,6 @@
 
 	};
 
-
 	function SnakeAlgorithm() {
 		PositionAlgorithm.call(this);
 		this.calcValues = {
@@ -2432,7 +2416,6 @@
 		}
 		return oRes;
 	};
-
 
 	SnakeAlgorithm.prototype.calculateFixedRowScaleCoefficient = function () {
 		const parentNode = this.parentNode;
@@ -2566,7 +2549,6 @@
 
 					const updatePreviousRowHeight = previousRowHeight + height + previousRowSpace;
 
-
 					let widthCoefficient = 1;
 					let heightCoefficient = 1;
 					widthCoefficient = parentWidth / sumWidth;
@@ -2575,7 +2557,6 @@
 					const nodeWidthCoefficient = parentWidth / width;
 					const nodeHeightCoefficient = parentHeight / updatePreviousRowHeight;
 					let addToWidth = false;
-
 
 					if ((heightCoefficient < 1) && (heightCoefficient > widthCoefficient) && (nodeWidthCoefficient < tempCoefficient)) {
 						coefficient = Math.min(coefficient, /*nodeWidthCoefficient,*/ nodeWidthCoefficient);
@@ -2996,7 +2977,6 @@
 		return this.bounds;
 	};
 
-
 	function ShapeRows() {
 		ContainerBase.call(this);
 		this.bounds = null;
@@ -3296,7 +3276,6 @@ function HierarchyAlgorithm() {
 		}
 		this.createShadowShape(isCalculateScaleCoefficients);
 	};
-
 
 	function HierarchyChildAlgorithm() {
 		HierarchyAlgorithm.call(this);
@@ -3907,7 +3886,6 @@ function HierarchyAlgorithm() {
 			offY += nonAsstShape.y + nonAsstShape.height + space;
 		}
 
-
 		const asstNode = this.getAsstNode();
 		if (asstNode && asstNode.algorithm.getMainChilds().length) {
 			const asstShape = asstNode.getShape(isCalculateScaleCoefficients);
@@ -4149,7 +4127,6 @@ function HierarchyAlgorithm() {
 		this.applySecondaryAlign(isCalculateScaleCoefficients);
 	};
 
-
 	function PyramidAlgorithm() {
 		PositionAlgorithm.call(this);
 		this.calcValues = {
@@ -4280,7 +4257,6 @@ function HierarchyAlgorithm() {
 		const defaultBlockHeight = this.calcValues.defaultBlockHeight;
 		let previousBlockWidth = this.getStartDefaultBlockWidth();
 		const defaultAdjValue = (previousBlockWidth / 2) / parentHeight;
-
 
 		const firstPyramidComponents = this.getFirstPyramidComponents();
 		const firstChild = firstPyramidComponents.pyramid;
@@ -5473,7 +5449,6 @@ function HierarchyAlgorithm() {
 			}
 		}
 
-
 		return new CCoordPoint(Math.cos(angle) * radius + centerPoint.x, Math.sin(angle) * radius + centerPoint.y);
 	};
 	ConnectorAlgorithm.prototype.isPointOnInterval = function (point, startSegment, endSegment) {
@@ -5867,7 +5842,6 @@ function HierarchyAlgorithm() {
 		} else {
 			return;
 		}
-
 
 		const customAdjLst = new AscFormat.AdjLst();
 		const adj1 = new AscFormat.Adj();
@@ -6281,7 +6255,6 @@ function HierarchyAlgorithm() {
 
 			shape.connectorShape = connectorShape;
 
-
 			connectorShape.customGeom.push([0]);
 			connectorShape.customGeom.push([1, (startPoint.x - connectorShape.x) * 36000, (startPoint.y - connectorShape.y) * 36000]);
 			const startAngle = startVector.getAngle();
@@ -6401,7 +6374,6 @@ function HierarchyAlgorithm() {
 		if (!contentNodes.length) {
 			return;
 		}
-
 
 		const stBulletLvl = this.params[AscFormat.Param_type_stBulletLvl];
 		editorShape.createTextBody();
@@ -7619,7 +7591,6 @@ PresNode.prototype.addChild = function (ch, pos) {
 			}
 		}
 
-
 		switch (constr.type) {
 			case AscFormat.Constr_type_begPad:
 			case AscFormat.Constr_type_endPad: {
@@ -7999,12 +7970,10 @@ PresNode.prototype.addChild = function (ch, pos) {
 			return;
 		}
 
-
 			shape.x = shapeBounds.l;
 			shape.y = shapeBounds.t;
 			shape.cleanParams.x = cleanShapeBounds.l;
 			shape.cleanParams.y = cleanShapeBounds.t;
-
 
 		shape.width = shapeBounds.r - shapeBounds.l;
 		shape.height = shapeBounds.b - shapeBounds.t;
@@ -8101,7 +8070,6 @@ PresNode.prototype.addChild = function (ch, pos) {
 		shape.x = x;
 		shape.y = y;
 
-
 		shape.width = scaleWidth;
 		shape.height = scaleHeight;
 		const offX = (width - shape.width) / 2;
@@ -8126,7 +8094,6 @@ PresNode.prototype.addChild = function (ch, pos) {
 				moveShape.width = scaleMoveWidth;
 				moveShape.height = scaleMoveHeight;
 				moveNode.moveTo(moveOffX, moveOffY, isCalculateCoefficients);
-
 
 			} else {
 				moveNode.setMoveScaleCoefficients(widthCoef, heightCoef);

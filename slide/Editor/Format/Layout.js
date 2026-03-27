@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -34,7 +29,6 @@
 
 // Import
 var History = AscCommon.History;
-
 
 AscDFH.changesFactory[AscDFH.historyitem_SlideLayoutSetMaster]         = AscDFH.CChangesDrawingsObject;
 AscDFH.changesFactory[AscDFH.historyitem_SlideLayoutSetHF]             = AscDFH.CChangesDrawingsObject;
@@ -97,7 +91,6 @@ AscDFH.drawingContentChanges[AscDFH.historyitem_SlideLayoutRemoveFromSpTree] = f
     return oClass.cSld.spTree;
 };
 
-
 function SlideLayout()
 {
     AscFormat.CBaseFormatObject.call(this);
@@ -136,9 +129,7 @@ function SlideLayout()
         recalculateBounds: true
     };
 
-
     this.lastRecalcSlideIndex = -1;
-
 
     this.presentation = editor && editor.WordControl && editor.WordControl.m_oLogicDocument;
     this.graphicObjects = new AscFormat.DrawingObjectsController(this);
@@ -150,8 +141,6 @@ function SlideLayout()
     this.showLock = new PropLocker(this.Id);
 }
 AscFormat.InitClass(SlideLayout, AscFormat.CBaseFormatObject, AscDFH.historyitem_type_SlideLayout);
-
-
 
 SlideLayout.prototype.getDrawingDocument = function() {
     return editor.WordControl.m_oLogicDocument.DrawingDocument;
@@ -582,7 +571,6 @@ SlideLayout.prototype.getMaster = function(){
         }
         this.recalculate();
         DrawBackground(graphics, this.backgroundFill, this.Width, this.Height);
-
 
         if(this.showMasterSp) {
             this.Master.drawNoPlaceholdersShapesOnly(graphics, this);
@@ -1062,7 +1050,6 @@ SlideLayout.prototype.setPreserve = function(bPr) {
     LAYOUT_TYPE_MAP["vertTitleAndTxOverChart"] = AscFormat.nSldLtTVertTitleAndTxOverChart;
     LAYOUT_TYPE_MAP["vertTx"] = AscFormat.nSldLtTVertTx;
 
-
     let LAYOUT_TYPE_TO_STRING = {};
     LAYOUT_TYPE_TO_STRING[AscFormat.nSldLtTBlank] = "blank" ;
     LAYOUT_TYPE_TO_STRING[AscFormat.nSldLtTChart] = "chart";
@@ -1219,7 +1206,6 @@ function DrawNativeDashRect(g, transform, extX, extY) {
     g._e();
   }
 
-
 function CLayoutThumbnailDrawer()
 {
     this.CanvasImage    = null;
@@ -1319,7 +1305,6 @@ function CLayoutThumbnailDrawer()
                 }
                 if (!_usePH)
                     continue;
-
 
                 _sp_elem.draw(g);
                 if(!_sp_elem.pen || !_sp_elem.pen.Fill || _sp_elem.pen.isNoFillLine())

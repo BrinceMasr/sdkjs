@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -106,7 +101,6 @@
 		const oRevisedParent = oFirstNode.partner.par.element;
 		const oMainParent = oFirstNode.par.element;
 
-
 		const oNeedReviewWithUser = {};
 		const arrChanges = getChanges(arrMainElements, arrRevisedElements, comparison, oMainParent, oRevisedParent);
 
@@ -185,7 +179,6 @@
 			changeFirstTextElement(oTextIterator, oRun);
 		}
 
-
 		oTextIterator.setCollectReviewRuns(null);
 		const arrRuns = oPartner.collectRuns;
 
@@ -195,7 +188,6 @@
 		const oReviewInfo = oPartner.reviewInfo;
 		const sReviewUserName = oReviewInfo.GetUserName();
 		const sReviewDate = oReviewInfo.GetDateTime();
-
 
 		if (!oNeedReviewWithUser[sReviewDate]) {
 			oNeedReviewWithUser[sReviewDate] = {};
@@ -1188,7 +1180,6 @@
         return aContentToInsert;
     };
 
-
     CNode.prototype.applyInsertsToParagraph = function (comparison, aContentToInsert, oChange) {
         if (oChange.remove.length > 0 && !comparison.isSkipWhitespaces(oChange.remove)) {
             this.applyInsertsToParagraphsWithRemove(comparison, aContentToInsert, oChange);
@@ -1563,7 +1554,6 @@
         return !this.isLeaf();
     };
 
-
     CNode.prototype.forEachDescendant = function(callback, T) {
         this.children.forEach(function(node) {
             node.forEach(callback, T);
@@ -1617,7 +1607,6 @@
         }
         return false;
     };
-
 
 	function CCommentElement(oComment, oParaComment)
 	{
@@ -2126,7 +2115,6 @@
     // ComparisonOptions.prototype["getFields"] = ComparisonOptions.prototype.getFields = function(){return this.fields;};
     ComparisonOptions.prototype["getWords"] = ComparisonOptions.prototype.getWords = function(){return this.words;};
 
-
     ComparisonOptions.prototype["putInsertionsAndDeletions"] = ComparisonOptions.prototype.putInsertionsAndDeletions = function(v){this.insertionsAndDeletions = v;};
     // ComparisonOptions.prototype["putMoves"] = ComparisonOptions.prototype.putMoves = function(v){this.moves = v;};
     ComparisonOptions.prototype["putComments"] = ComparisonOptions.prototype.putComments = function(v){this.comments = v;};
@@ -2139,7 +2127,6 @@
     ComparisonOptions.prototype["putTextBoxes"] = ComparisonOptions.prototype.putTextBoxes = function(v){this.textBoxes = v;};
     // ComparisonOptions.prototype["putFields"] = ComparisonOptions.prototype.putFields = function(v){this.fields = v;};
     ComparisonOptions.prototype["putWords"] = ComparisonOptions.prototype.putWords = function(v){this.words = v;};
-
 
     function CDocumentComparison(oOriginalDocument, oRevisedDocument, oOptions, bIsWordsByOneSymbol)
     {
@@ -2917,7 +2904,6 @@
 							oOrigSectPr.Set_Header_First(oReviseSectPr.HeaderFirst.Copy(this.originalDocument, this.copyPr));
 						}
 
-
 						oOrigContent = oOrigSectPr.HeaderEven && oOrigSectPr.HeaderEven.Content;
 						oReviseContent = oReviseSectPr && oReviseSectPr.HeaderEven && oReviseSectPr.HeaderEven.Content;
 						if(oOrigContent && !oReviseContent)
@@ -2932,7 +2918,6 @@
 						{
 							oOrigSectPr.Set_Header_Even(oReviseSectPr.HeaderEven.Copy(this.originalDocument, this.copyPr));
 						}
-
 
 						oOrigContent = oOrigSectPr.HeaderDefault && oOrigSectPr.HeaderDefault.Content;
 						oReviseContent = oReviseSectPr && oReviseSectPr.HeaderDefault && oReviseSectPr.HeaderDefault.Content;
@@ -2949,7 +2934,6 @@
 							oOrigSectPr.Set_Header_Default(oReviseSectPr.HeaderDefault.Copy(this.originalDocument, this.copyPr));
 						}
 
-
 						oOrigContent = oOrigSectPr.FooterFirst && oOrigSectPr.FooterFirst.Content;
 						oReviseContent = oReviseSectPr && oReviseSectPr.FooterFirst && oReviseSectPr.FooterFirst.Content;
 						if(oOrigContent && !oReviseContent)
@@ -2965,7 +2949,6 @@
 							oOrigSectPr.Set_Footer_First(oReviseSectPr.FooterFirst.Copy(this.originalDocument, this.copyPr));
 						}
 
-
 						oOrigContent = oOrigSectPr.FooterEven && oOrigSectPr.FooterEven.Content;
 						oReviseContent = oReviseSectPr && oReviseSectPr.FooterEven && oReviseSectPr.FooterEven.Content;
 						if(oOrigContent && !oReviseContent)
@@ -2980,7 +2963,6 @@
 						{
 							oOrigSectPr.Set_Footer_Even(oReviseSectPr.FooterEven.Copy(this.originalDocument, this.copyPr));
 						}
-
 
 						oOrigContent = oOrigSectPr.FooterDefault && oOrigSectPr.FooterDefault.Content;
 						oReviseContent = oReviseSectPr && oReviseSectPr.FooterDefault && oReviseSectPr.FooterDefault.Content;
@@ -3650,7 +3632,6 @@
 											oLastText.updateHash(oWordCounter, this);
 										}
 
-
 										if (oLastText.elements.length > 0) {
 											oLastText = new TextElementConstructor();
 											oLastText.setFirstRun(oRun);
@@ -3928,7 +3909,6 @@
             AscCommon.pptx_content_loader.End_UseFullUrl();
         }
     }
-
 
     function CompareDocuments(oApi, oTmpDocument)
     {

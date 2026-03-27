@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -1024,7 +1019,6 @@ function (window, undefined) {
 		return res;
 	}
 
-
 	function getBetaDistPDF(fX, fA, fB) {
 		// special cases
 		if (fA === 1) {
@@ -1075,7 +1069,6 @@ function (window, undefined) {
 				return 0;
 			}
 		}
-
 
 		var fLogDblMax = Math.log(2.22507e+308);
 		var fLogDblMin = Math.log(2.22507e-308);
@@ -1625,7 +1618,6 @@ function (window, undefined) {
 		return a - b;
 	}
 
-
 	function lcl_CalculateColumnMeans(pX, pResMat, nC, nR) {
 		for (var i = 0; i < nC; i++) {
 			var fSum = 0.0;
@@ -1678,7 +1670,6 @@ function (window, undefined) {
 
 	// same with transposed matrix A, N is count of columns, K count of rows
 	function lcl_TCalculateQRdecomposition(pMatA, pVecR, nK, nN) {
-
 
 		var fSum;
 		// ScMatrix matrices are zero based, index access (column,row)
@@ -2240,7 +2231,6 @@ function (window, undefined) {
 			return;
 		}
 
-
 		//********
 		// Fill unused cells in pResMat; order (column,row)
 		if (bStats) {
@@ -2250,7 +2240,6 @@ function (window, undefined) {
 				pResMat[i][4] = null;//->PutError( FormulaError::NotAvailable, i, 4);
 			}
 		}
-
 
 		// Uses sum(x-MeanX)^2 and not [sum x^2]-N * MeanX^2 in case bConstant.
 		// Clone constant matrices, so that Mat = Mat - Mean is possible.
@@ -2275,7 +2264,6 @@ function (window, undefined) {
 				}
 			}
 		}
-
 
 		let fIntercept, fSSreg, fDegreesFreedom, fSSresid, fFstatistic, fRMSE, fSigmaSlope, fSigmaIntercept, fR2;
 		let aVecR, pMeans, pMatZ, pSlopes, bIsSingular, row, col, fPart;
@@ -2417,16 +2405,13 @@ function (window, undefined) {
 					pResMat[K - 1 - i][0] = _bRKP ? Math.exp(getDouble(pSlopes, i)) : getDouble(pSlopes, i);
 				}
 
-
 				if (bStats) {
 					fSSreg = 0.0;
 					fSSresid = 0.0;
 					// re-use memory of Z;
 
-
 					//*********
 					fillDouble(pMatZ, 0.0, 0, 0, 0, N - 1);
-
 
 					// Z = R * Slopes
 					lcl_ApplyUpperRightTriangle(pMatX, aVecR, pSlopes, pMatZ, K, false);
@@ -2436,13 +2421,11 @@ function (window, undefined) {
 					}
 					fSSreg = lcl_GetSumProduct(pMatZ, pMatZ, N);
 
-
 					//********
 					// re-use Y for residuals, Y = Y-Z
 					for (row = 0; row < N; row++) {
 						putDouble(pMatY, row, getDouble(pMatY, row) - getDouble(pMatZ, row));
 					}
-
 
 					fSSresid = lcl_GetSumProduct(pMatY, pMatY, N);
 					pResMat[0][4] = fSSreg;
@@ -2456,12 +2439,10 @@ function (window, undefined) {
 						pResMat[0][3] = null; //->PutError( FormulaError::NotAvailable, 0, 3); // F
 						pResMat[1][2] = 0;//->PutDouble(0.0, 1, 2); // RMSE
 
-
 						//********
 						for (i = 0; i < K; i++) {
 							pResMat[K - 1 - i][1] = 0;//->PutDouble(0.0, K-1-i, 1);
 						}
-
 
 						// SigmaIntercept = RMSE * sqrt(...) = 0
 						if (bConstant) {
@@ -2488,7 +2469,6 @@ function (window, undefined) {
 						// a whole matrix, but iterate over unit vectors.
 						fSigmaIntercept = 0.0;
 
-
 						//********
 						for (col = 0; col < K; col++) {
 							//re-use memory of MatZ
@@ -2508,7 +2488,6 @@ function (window, undefined) {
 								fSigmaIntercept += fPart * getDouble(pMeans, col);
 							}
 						}
-
 
 						if (bConstant) {
 							fSigmaIntercept = fRMSE * Math.sqrt(fSigmaIntercept + 1.0 / N);
@@ -2563,14 +2542,12 @@ function (window, undefined) {
 					lcl_TApplyHouseholderTransformation(pMatX, row, pMatZ, N);
 				}
 
-
 				//*******
 				// B = R^(-1) * Q' * Y <=> B = R^(-1) * Z <=> R * B = Z
 				// result Z should have zeros for index>=K; if not, ignore values
 				for (col = 0; col < K; col++) {
 					pSlopes[col][0] = pMatZ[col][0];
 				}
-
 
 				lcl_SolveWithUpperRightTriangle(pMatX, aVecR, pSlopes, K, true);
 				fIntercept = 0.0;
@@ -2588,10 +2565,8 @@ function (window, undefined) {
 					fSSresid = 0.0;
 					// re-use memory of Z;
 
-
 					//*********
 					//pMatZ->FillDouble(0.0, 0, 0, N-1, 0);
-
 
 					// Z = R * Slopes
 					lcl_ApplyUpperRightTriangle(pMatX, aVecR, pSlopes, pMatZ, K, true);
@@ -2601,13 +2576,11 @@ function (window, undefined) {
 					}
 					fSSreg = lcl_GetSumProduct(pMatZ, pMatZ, N);
 
-
 					//********
 					// re-use Y for residuals, Y = Y-Z
 					for (col = 0; col < N; col++) {
 						pMatY[0][col] = pMatY[0][col] - pMatZ[0][col];
 					}
-
 
 					fSSresid = lcl_GetSumProduct(pMatY, pMatY, N);
 					pResMat[0][4] = fSSreg;
@@ -2624,11 +2597,9 @@ function (window, undefined) {
 						pResMat[1][2] = 0; // RMSE
 						// SigmaSlope[i] = RMSE * sqrt(matrix[i,i]) = 0 * sqrt(...) = 0
 
-
 						for (i = 0; i < K; i++) {
 							pResMat[K - 1 - i][1] = 0;
 						}
-
 
 						// SigmaIntercept = RMSE * sqrt(...) = 0
 						if (bConstant) {
@@ -2656,7 +2627,6 @@ function (window, undefined) {
 						// a whole matrix, but iterate over unit vectors.
 						// (R' R) ^(-1) is symmetric
 
-
 						//********
 						fSigmaIntercept = 0.0;
 
@@ -2676,7 +2646,6 @@ function (window, undefined) {
 								fSigmaIntercept += fPart * pMeans[0][row];
 							}
 						}
-
 
 						if (bConstant) {
 							fSigmaIntercept = fRMSE * Math.sqrt(fSigmaIntercept + 1.0 / N);
@@ -2810,7 +2779,6 @@ function (window, undefined) {
 		return res;
 	};
 
-
 	function ScETSForecastCalculation(nSize) {
 		//SvNumberFormatter* mpFormatter;
 		this.maRange = [];   // data (X, Y)
@@ -2882,7 +2850,6 @@ function (window, undefined) {
 
 	ScETSForecastCalculation.prototype = Object.create(ScETSForecastCalculation.prototype);
 	ScETSForecastCalculation.prototype.constructor = ScETSForecastCalculation;
-
 
 	ScETSForecastCalculation.prototype.PreprocessDataRange =
 		function (rMatX, rMatY, rSmplInPrd, bDataCompletion, nAggregation, rTMat, eETSType) {
@@ -3102,7 +3069,6 @@ function (window, undefined) {
 			return true;
 		};
 
-
 	ScETSForecastCalculation.prototype.initData = function () {
 		// give various vectors size and initial value
 		this.mpBase = [];
@@ -3218,7 +3184,6 @@ function (window, undefined) {
 		return true;
 	};
 
-
 	ScETSForecastCalculation.prototype.calcAccuracyIndicators = function () {
 		var fSumAbsErr = 0.0;
 		var fSumDivisor = 0.0;
@@ -3244,7 +3209,6 @@ function (window, undefined) {
 		this.mfSMAPE = fSumAbsPercErr * 2.0 / nCalcCount;
 	};
 
-
 	ScETSForecastCalculation.prototype.CalcPeriodLen = function () {
 		var nBestVal = this.mnCount;
 		var fBestME = Number.MAX_VALUE;
@@ -3267,7 +3231,6 @@ function (window, undefined) {
 		}
 		return nBestVal;
 	};
-
 
 	ScETSForecastCalculation.prototype.CalcAlphaBetaGamma = function () {
 		var f0 = 0.0;
@@ -3352,7 +3315,6 @@ function (window, undefined) {
 		}
 		this.calcAccuracyIndicators();
 	};
-
 
 	ScETSForecastCalculation.prototype.CalcBetaGamma = function () {
 		var f0 = 0.0;
@@ -3453,7 +3415,6 @@ function (window, undefined) {
 		}
 	};
 
-
 	ScETSForecastCalculation.prototype.refill = function () {
 		// refill mpBase, mpTrend, mpPerIdx and mpForecast with values
 		// using the calculated mfAlpha, (mfBeta), mfGamma
@@ -3493,7 +3454,6 @@ function (window, undefined) {
 		this.calcAccuracyIndicators();
 	};
 
-
 	ScETSForecastCalculation.prototype.convertXtoMonths = function (x) {
 		//Date aNullDate = *( mpFormatter->GetNullDate() );
 		var aDate = cDate.prototype.getDateFromExcel(x);
@@ -3518,7 +3478,6 @@ function (window, undefined) {
 		}
 		return (12.0 * nYear + nMonth + (aDate.getDate() - this.mnMonthDay) / fMonthLength);
 	};
-
 
 	ScETSForecastCalculation.prototype.GetForecast = function (fTarget, rForecast) {
 		if (!this.initCalc()) {
@@ -3594,7 +3553,6 @@ function (window, undefined) {
 		}
 		return rFcMat;
 	};
-
 
 	ScETSForecastCalculation.prototype.GetStatisticValue = function (rTypeMat) {
 		if (!this.initCalc()) {
@@ -3787,7 +3745,6 @@ function (window, undefined) {
 		return rPIMat;
 	};
 
-
 	ScETSForecastCalculation.prototype.GetEDSPredictionIntervals = function (rTMat, fPILevel) {
 		if (!this.initCalc()) {
 			return false;
@@ -3826,7 +3783,6 @@ function (window, undefined) {
 				((1 + 4 * o + 5 * o * o) + 2 * (i) * fPILevel * (1 + 3 * o) + 2 * (i * i) * fPILevel *
 					fPILevel));
 		}
-
 
 		for (var i = 0; i < nR; i++) {
 			for (var j = 0; j < nC; j++) {
@@ -4282,7 +4238,6 @@ function (window, undefined) {
 			}
 		}
 
-
 		if (0 === _count) {
 			return new cError(cErrorType.division_by_zero);
 		} else {
@@ -4608,7 +4563,6 @@ function (window, undefined) {
 
 		return this._findArrayInNumberArguments(oArguments, calcBinom);
 	};
-
 
 	/**
 	 * @constructor
@@ -6399,7 +6353,6 @@ function (window, undefined) {
 			return isError;
 		}
 
-
 		// todo bug 36721:
 		// The prediction result differs from ms - due to different smoothing coefficients (alpha, beta, gamma)
 		// Error values ​​are interpreted differently in MS, and because of this, the values ​​of the smoothing coefficients do not match, which at the end affects the result
@@ -6534,7 +6487,6 @@ function (window, undefined) {
 
 		argClone[2] = argClone[2] ? argClone[2].tocNumber() : new cNumber(1);
 		argClone[3] = argClone[3] ? argClone[3].tocNumber() : new cNumber(1);
-
 
 		let argError;
 		if (argError = this._checkErrorArg(argClone)) {
@@ -6742,7 +6694,6 @@ function (window, undefined) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 
-
 		if (arg0.type === cElementType.cellsRange || arg0.type === cElementType.array) {
 			arg0 = arg0.getMatrix();
 		} else if (arg0.type === cElementType.cellsRange3D) {
@@ -6810,7 +6761,6 @@ function (window, undefined) {
 
 		return this._findArrayInNumberArguments(oArguments, calcFTest);
 	};
-
 
 	/**
 	 * @constructor
@@ -7013,7 +6963,6 @@ function (window, undefined) {
 	cGAMMALN.prototype.argumentsMax = 1;
 	cGAMMALN.prototype.argumentsType = [argType.number];
 	cGAMMALN.prototype.Calculate = function (arg) {
-
 
 		/*
 		 from OpenOffice Source.
@@ -7381,7 +7330,6 @@ function (window, undefined) {
 			return arg3;
 		}
 
-
 		arg0 = Math.floor(arg0);
 		arg1 = Math.floor(arg1);
 		arg2 = Math.floor(arg2);
@@ -7457,7 +7405,6 @@ function (window, undefined) {
 			return isNaN(res) ? new cError(cErrorType.not_numeric) : new cNumber(res);
 		}
 
-
 		return this._findArrayInNumberArguments(oArguments, hypgeomdist);
 	};
 
@@ -7527,7 +7474,6 @@ function (window, undefined) {
 
 		}
 
-
 		const max_num = 1 * Math.pow(10,155); // 1E+155 - max number in this function (ms reference)
 		let arg0 = arg[0], arg1 = arg[1], arr0 = [], arr1 = [];
 
@@ -7560,7 +7506,6 @@ function (window, undefined) {
 		} else {
 			arr0.push(arg0);
 		}
-
 
 		if (arg1.type === cElementType.cellsRange || arg1.type === cElementType.cellsRange3D) {
 			arr1 = arg1.getValue();
@@ -7740,7 +7685,6 @@ function (window, undefined) {
 			return new cError(cErrorType.not_numeric);
 		}
 
-
 		if (cElementType.cellsRange === arg1.type || cElementType.cellsRange3D === arg1.type) {
 			arg1 = arg1.cross(arguments[1]);
 		} else if (cElementType.array === arg1.type) {
@@ -7850,7 +7794,6 @@ function (window, undefined) {
 			bStats = getBoolValue(argClone[3], false),
 			res = new cArray(),
 			tMatrix = [];
-
 
 		//return matrix [col][row]
 		let mat = CalculateRGPRKP(pMatY, pMatX, bConstant, bStats, true);
@@ -9083,10 +9026,8 @@ function (window, undefined) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 
-
 		return normdist(arg0.getValue(), arg1.getValue(), arg2.getValue(), arg3.toBool());
 	};
-
 
 	/**
 	 * @constructor
@@ -9744,7 +9685,6 @@ function (window, undefined) {
 		return this._findArrayInNumberArguments(oArguments, calcPhi);
 	};
 
-
 	/**
 	 * @constructor
 	 * @extends {AscCommonExcel.cBaseFunction}
@@ -9893,7 +9833,6 @@ function (window, undefined) {
 		} else {
 			return new cError(cErrorType.not_available);
 		}
-
 
 		if (arg2 instanceof cArea || arg2 instanceof cArea3D) {
 			arg2 = arg2.cross(arguments[1]);
@@ -10242,7 +10181,6 @@ function (window, undefined) {
 			}
 		}
 
-
 		var arg0 = arg[0], arg1 = arg[1], arr0 = [], arr1 = [];
 
 		if (arg0 instanceof cArea) {
@@ -10440,7 +10378,6 @@ function (window, undefined) {
 				return new cNumber(sumXDeltaYDelta / sqrXDelta);
 			}
 		}
-
 
 		var arg0 = arg[0], arg1 = arg[1], arr0 = [], arr1 = [];
 
@@ -11003,7 +10940,6 @@ function (window, undefined) {
 
 			}
 
-
 			if (sqrXDelta == 0 || sqrYDelta == 0 || xLength < 3) {
 				return new cError(cErrorType.division_by_zero);
 			} else {
@@ -11011,7 +10947,6 @@ function (window, undefined) {
 					Math.sqrt((1 / (xLength - 2)) * (sqrYDelta - sumXDeltaYDelta * sumXDeltaYDelta / sqrXDelta)));
 			}
 		}
-
 
 		var arg0 = arg[0], arg1 = arg[1], arr0 = [], arr1 = [];
 
@@ -12231,7 +12166,6 @@ function (window, undefined) {
 	FormulaRangesCache.prototype.remove = function () {
 	};
 
-
 	function CountIfTypedCache() {
 		this.data = {};
 	}
@@ -12722,10 +12656,8 @@ function (window, undefined) {
 		this.typedCache.clean();
 	};
 
-
 	let g_oFormulaRangesCache = new FormulaRangesCache();
 	let g_oCountIfCache = new CountIfCache();
-
 
 	//----------------------------------------------------------export----------------------------------------------------
 	window['AscCommonExcel'] = window['AscCommonExcel'] || {};

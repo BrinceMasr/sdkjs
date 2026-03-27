@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -6740,7 +6735,6 @@ function BinaryDocumentTableWriter(memory, doc, oMapCommentId, oNumIdMap, copyPa
 			this.bs.WriteItem(c_oSerSdt.Content, function(){oThis.WriteParagraphContent(oSdt, false, false);});
 		}
 
-
 	};
 	this.WriteSdtPr = function (val, oSdt)
 	{
@@ -8628,7 +8622,6 @@ function BinaryFileReader(doc, openParams)
 					//если не используется - нужно его заменить
 					//на данный момент функции для замены нет, добавляю новый стиль с новым именем
 
-
 					//пока работаем как и раньше, только расширяем количество стилей за счёт putBasedOn
 					//TODO нужна функци для поиска check(_basedOnElems) && check(_elem)
 					var isUseStyleInDoc = true; // = check(_basedOnElems) && check(_elem)
@@ -8687,7 +8680,6 @@ function BinaryFileReader(doc, openParams)
 					//3. в функции tryAddStyle определяем, используются уже эти стили + основной стиль в документе
 					//TODO пункт 3. такой функции пока нет
 
-
 					var styleId = tryAddStyle(stylePaste, elem, basedOnElems);
 					if (styleId) {
 						mapStylesIds[stylePaste.param.id] = styleId;
@@ -8739,7 +8731,6 @@ function BinaryFileReader(doc, openParams)
 			aContent[Index].Document_Get_AllFontNames(AllFonts);
 
         var aPrepeareFonts = [];
-
 
 		var fontScheme;
 		var m_oLogicDocument = editor.WordControl.m_oLogicDocument;

@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -167,7 +162,6 @@
 			return len + ";" + writer.GetBase64Memory2(pos, len);
 	};
 
-
 	/**
 	 * Базовый класс для совместного редактирования в разных редакторах
 	 * @constructor
@@ -185,7 +179,6 @@
         this.m_aNeedLock    = []; // Массив со списком залоченных объектов(которые были залочены, но еще не были добавлены на данном клиенте)
 
         this.m_aEndActions  = []; // Массив действий, которые надо выполнить после принятия чужих изменений
-
 
         this.m_bGlobalLock          = 0; // Запрещаем производить любые "редактирующие" действия (т.е. то, что в историю запишется)
         this.m_bGlobalLockSelection = 0; // Запрещаем изменять селект и курсор
@@ -217,7 +210,6 @@
         this.m_aForeignCursorsXY     = {};
         this.m_aForeignCursorsToShow = {};
 		this.m_nSplitRun             = 0; //
-
 
         this.m_nAllChangesSavedIndex = 0;
 
@@ -524,7 +516,6 @@
 				break;
 		}
 
-
 		this.private_SaveRecalcChangeIndex(false);
 		this.private_ClearChanges();
 
@@ -549,7 +540,6 @@
     CCollaborativeEditingBase.prototype.Release_Locks = function()
     {
     };
-
 
     CCollaborativeEditingBase.prototype.CheckWaitingImages = function (aImages) {
 
@@ -597,7 +587,6 @@
         oApi.pre_Save(aImages);
     };
 
-
     CCollaborativeEditingBase.prototype.CollectImagesFromChanges = function () {
         var oApi = editor || Asc['editor'];
         var aImages = [], sImagePath, i, sImageFromChanges, oThemeUrls = {};
@@ -631,7 +620,6 @@
         AscCommon.g_oDocumentUrls.addUrls(oThemeUrls);
         return aImages;
     };
-
 
     CCollaborativeEditingBase.prototype.OnStart_Load_Objects = function(fEndCallBack)
     {
@@ -824,7 +812,6 @@
         this.Clear_DCChanges();
     };
 
-
     //-----------------------------------------------------------------------------------
     // Функции для работы с массивами PosExtChangesX, PosExtChangesY
     //-----------------------------------------------------------------------------------
@@ -854,7 +841,6 @@
 
         // Очищаем массив
         this.m_aChangedClasses = {};
-
 
         if (true === bRepaint)
         {

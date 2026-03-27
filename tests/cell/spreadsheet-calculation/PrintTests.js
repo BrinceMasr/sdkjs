@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -31,7 +26,6 @@
  */
 QUnit.config.autostart = false;
 $(function() {
-
 
 	Asc.spreadsheet_api.prototype._init = function() {
 		this._loadModules();
@@ -347,7 +341,6 @@ $(function() {
 
 			comparePrintPageSettings(assert, page, referenceObj, "Compare pages settings changes without scale page3: ");
 
-
 			page = printPagesData.arrPages[3];
 
 			referenceObj = {
@@ -464,7 +457,6 @@ $(function() {
 			wsView._changeFitToPage(0, 0);
 			updateView();
 
-
 			printPagesData = api.wb.calcPagesPrint(new Asc.asc_CAdjustPrint());
 			assert.strictEqual(printPagesData.arrPages.length, 4, "Compare pages length 2");
 
@@ -533,7 +525,6 @@ $(function() {
 			};
 
 			comparePrintPageSettings(assert, page, referenceObj, "Compare pages settings changes with scale page2: ");
-
 
 			page = printPagesData.arrPages[2];
 
@@ -1112,7 +1103,6 @@ $(function() {
 				assert.strictEqual(ws.rowBreaks.containsBreak(insertRowBreakId), true, desc + " check row contains");
 			}, "insert page break_col1row3");
 
-
 			insertColBreakId = 5;
 			insertRowBreakId = 5;
 			wsView.setSelection(new Asc.Range(insertColBreakId, insertRowBreakId, insertColBreakId, insertRowBreakId));
@@ -1125,8 +1115,6 @@ $(function() {
 				assert.strictEqual(ws.colBreaks.containsBreak(insertColBreakId), true, desc + " check col contains");
 				assert.strictEqual(ws.rowBreaks.containsBreak(insertRowBreakId), true, desc + " check row contains");
 			}, "insert page break_col5row5");
-
-
 
 			insertColBreakId = 1;
 			insertRowBreakId = 1;
@@ -1199,7 +1187,6 @@ $(function() {
 
 			assert.strictEqual(ws.colBreaks.containsBreak(3), true, " check col contains + remove1");
 			assert.strictEqual(ws.rowBreaks.containsBreak(3), true, " check row contains + remove1");
-
 
 			insertColBreakId = 3;
 			insertRowBreakId = 3;
@@ -1337,7 +1324,6 @@ $(function() {
 
 			}, "change page row break_from3to12");
 
-
 			wsView.changeRowColBreaks(8, 2, new Asc.Range(0, 0, 16, 57), true, true);
 
 			checkUndoRedo(function (desc) {
@@ -1397,8 +1383,6 @@ $(function() {
 		testPageBreaksAndTitles();
 		testPageBreaksManipulation();
 	}
-
-
 
 	//test file
 	//sdkjs-tests-printtests.xlsx

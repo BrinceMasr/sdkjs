@@ -12,24 +12,18 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
-
 
 $(function () {
 	// Mocks for API Testing
@@ -109,7 +103,6 @@ $(function () {
 			this.isLoadFullApi = true;
 		};
 
-
 		let api = new Asc.spreadsheet_api({
 			'id-view': 'editor_sdk'
 		});
@@ -121,7 +114,6 @@ $(function () {
 		let docInfo = new Asc.asc_CDocInfo();
 		docInfo.asc_putTitle("TeSt.xlsx");
 		api.DocInfo = docInfo;
-
 
 		window["Asc"]["editor"] = api;
 		AscCommon.g_oTableId.init(api);
@@ -179,7 +171,6 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-
 		oParser = new parserFormula(func + "(A100:C101)", "A1", ws);
 		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
 		assert.ok(oParser.parse(), 'Formula is parsed.');
@@ -223,7 +214,6 @@ $(function () {
 			assert.ok(oParser.parse(), 'Test: Formula ' + func + argStr + ' is parsed.');
 			return oParser.calculate().getValue();
 		};
-
 
 		//***array-formula***
 		ws.getRange2("A100").setValue("1");
@@ -838,7 +828,6 @@ $(function () {
 		ws.getRange2("B3").setValue("0");
 		ws.getRange2("B4").setValue("23");
 
-
 		oParser = new parserFormula('IFERROR(A2/B2,"Error in calculation")', "A22", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 6);
@@ -884,7 +873,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number,String. Basic valid input: number with string fallback. 2 of 2 arguments used.
@@ -1082,7 +1070,6 @@ $(function () {
 		// Case #1: Number,String. Maximum valid Excel number with string fallback. 2 of 2 arguments used.
 		// Case #2: Number,String. Minimum positive Excel number with string fallback. 2 of 2 arguments used.
 
-
 		//testArrayFormula2(assert, "IFERROR", 2, 2);
 	});
 
@@ -1125,7 +1112,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number,String. Basic valid number with string fallback. 2 of 2 arguments used.
@@ -1326,7 +1312,6 @@ $(function () {
 		// Case #20: Name3D,String. 3D named range with text returns #VALUE!, not caught by IFNA. Returns #VALUE!. 2 of 2 arguments used.
 		// Case #1: Number,String. Maximum valid Excel number with string fallback. 2 of 2 arguments used.
 		// Case #2: Number,String. Minimum positive Excel number with string fallback. 2 of 2 arguments used.
-
 
 	});
 
@@ -1622,7 +1607,6 @@ $(function () {
 		oParser = new parserFormula('AND(A3<1,A3>100)', "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "FALSE");
-
 
 		// Data for reference link. Use A100-A111
 		ws.getRange2("A100").setValue("0.5");
@@ -2146,7 +2130,6 @@ $(function () {
 		// Case #21: String. Non-matching text string expression, no default, returns #N/A. 2 value-result pairs, no default.
 		// Case #22: Number,String. Result as error, no match, returns 300 (default). 2 value-result pairs with default.
 
-
 	});
 
 	QUnit.test("Test: \"XOR\"", function (assert) {
@@ -2248,7 +2231,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #0: Number. Single numeric argument, coerces to TRUE. 1 argument used.

@@ -12,24 +12,18 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
-
 
 "use strict";
 
@@ -428,7 +422,6 @@ function (window, undefined) {
 
 		return new cNumber(fRet);
 	}
-
 
 	function _Bessely1(fNum) {
 		var z, xx, y, fRet, ans1, ans2;
@@ -955,16 +948,13 @@ function (window, undefined) {
 				return c >= '0' && c <= '9';
 			}
 
-
 			function iscomma(c) {
 				return c == '.' || c == ',';
 			}
 
-
 			function isexpstart(c) {
 				return c == 'e' || c == 'E';
 			}
-
 
 			function isimagunit(c) {
 				return c == 'i' || c == 'j';
@@ -1169,7 +1159,6 @@ function (window, undefined) {
 				unitConverterArr["g"]["LTON"] = 0.000000984206527611061;
 				unitConverterArr["g"]["brton"] = 0.0000009842065;
 
-
 				unitConverterArr["sg"] = {};//Слэг
 
 				unitConverterArr["sg"]["lbm"] = 32.1739194101648;
@@ -1187,7 +1176,6 @@ function (window, undefined) {
 				unitConverterArr["sg"]["LTON"] = 0.0143633549716368;
 				unitConverterArr["sg"]["brton"] = 0.0143633545686854;
 
-
 				unitConverterArr["lbm"] = {};//Фунт массы (эвердьюпойс)
 
 				unitConverterArr["lbm"]["u"] = 2.73159503145377E+026;
@@ -1204,7 +1192,6 @@ function (window, undefined) {
 				unitConverterArr["lbm"]["LTON"] = 0.000446428512128958;
 				unitConverterArr["lbm"]["brton"] = 0.000446428499604793;
 
-
 				unitConverterArr["u"] = {};//атомная единица массы
 
 				unitConverterArr["u"]["ozm"] = 5.85738448002141E-026;
@@ -1220,7 +1207,6 @@ function (window, undefined) {
 				unitConverterArr["u"]["LTON"] = 1.63431440967062E-030;
 				unitConverterArr["u"]["brton"] = 1.63431436382135E-030;
 
-
 				unitConverterArr["ozm"] = {};//Унция
 
 				unitConverterArr["ozm"]["grain"] = 437.499924514917;
@@ -1235,7 +1221,6 @@ function (window, undefined) {
 				unitConverterArr["ozm"]["LTON"] = 0.0000279017779222963;
 				unitConverterArr["ozm"]["brton"] = 0.0000279017771395361;
 
-
 				unitConverterArr["grain"] = {};//Гран
 
 				unitConverterArr["grain"]["cwt"] = 0.00000142857127610345;
@@ -1249,7 +1234,6 @@ function (window, undefined) {
 				unitConverterArr["grain"]["LTON"] = 0.0000000637755033974752;
 				unitConverterArr["grain"]["brton"] = 0.0000000637755016083088;
 
-
 				unitConverterArr["cwt"] = {};//Американский (короткий) центнер
 
 				unitConverterArr["cwt"]["shweight"] = 1.00000017152651;
@@ -1262,7 +1246,6 @@ function (window, undefined) {
 				unitConverterArr["cwt"]["LTON"] = 0.0446428571428571;
 				unitConverterArr["cwt"]["brton"] = 0.0446428558904405;
 
-
 				unitConverterArr["shweight"] = {};//Американский (короткий) центнер
 
 				unitConverterArr["shweight"]["uk_cwt"] = 0.892856989708499;
@@ -1274,7 +1257,6 @@ function (window, undefined) {
 				unitConverterArr["shweight"]["LTON"] = 0.044642849485425;
 				unitConverterArr["shweight"]["brton"] = 0.0446428482330085;
 
-
 				unitConverterArr["uk_cwt"] = {};//Английский (длинный) центнер
 
 				unitConverterArr["uk_cwt"]["lcwt"] = 1;
@@ -1285,7 +1267,6 @@ function (window, undefined) {
 				unitConverterArr["uk_cwt"]["LTON"] = 0.05;
 				unitConverterArr["uk_cwt"]["brton"] = 0.0499999985972934;
 
-
 				unitConverterArr["lcwt"] = {};//Английский (длинный) центнер
 
 				unitConverterArr["lcwt"]["hweight"] = 0.999999971945867;
@@ -1295,7 +1276,6 @@ function (window, undefined) {
 				unitConverterArr["lcwt"]["LTON"] = 0.05;
 				unitConverterArr["lcwt"]["brton"] = 0.0499999985972934;
 
-
 				unitConverterArr["lcwt"] = {};//Английский (длинный) центнер
 
 				unitConverterArr["lcwt"]["hweight"] = 0.999999971945867;
@@ -1304,7 +1284,6 @@ function (window, undefined) {
 				unitConverterArr["lcwt"]["uk_ton"] = 0.05;
 				unitConverterArr["lcwt"]["LTON"] = 0.05;
 				unitConverterArr["lcwt"]["brton"] = 0.0499999985972934;
-
 
 				unitConverterArr["hweight"] = {};//Английский (длинный) центнер
 
@@ -1314,7 +1293,6 @@ function (window, undefined) {
 				unitConverterArr["hweight"]["LTON"] = 0.0500000014027067;
 				unitConverterArr["hweight"]["brton"] = 0.05;
 
-
 				unitConverterArr["stone"] = {};//Стоун
 
 				unitConverterArr["stone"]["ton"] = 0.007;
@@ -1322,19 +1300,16 @@ function (window, undefined) {
 				unitConverterArr["stone"]["LTON"] = 0.00625000176291212;
 				unitConverterArr["stone"]["brton"] = 0.00625000158757374;
 
-
 				unitConverterArr["ton"] = {};//Тонна
 
 				unitConverterArr["ton"]["uk_ton"] = 0.892857394701732;
 				unitConverterArr["ton"]["LTON"] = 0.892857394701732;
 				unitConverterArr["ton"]["brton"] = 0.892857369653392;
 
-
 				unitConverterArr["uk_ton"] = {};//Стандартная тонна
 
 				unitConverterArr["uk_ton"]["LTON"] = 1;
 				unitConverterArr["uk_ton"]["brton"] = 0.999999971945867;
-
 
 				unitConverterArr["LTON"] = {};//Стандартная тонна
 
@@ -1361,7 +1336,6 @@ function (window, undefined) {
 				unitConverterArr["m"]["pica"] = 236.220472441;
 				unitConverterArr["m"]["survey_mi"] = 0.000621369949494949;
 
-
 				unitConverterArr["mi"] = {};
 
 				unitConverterArr["mi"]["Nmi"] = 0.868976241900648;
@@ -1376,7 +1350,6 @@ function (window, undefined) {
 				unitConverterArr["mi"]["Pica"] = 4561920;
 				unitConverterArr["mi"]["pica"] = 380160.000000089;
 				unitConverterArr["mi"]["survey_mi"] = 0.999998;
-
 
 				unitConverterArr["Nmi"] = {};
 
@@ -1405,7 +1378,6 @@ function (window, undefined) {
 				unitConverterArr["in"]["pica"] = 6.0000000000014;
 				unitConverterArr["in"]["survey_mi"] = 0.0000157827967171717;
 
-
 				unitConverterArr["ft"] = {};
 
 				unitConverterArr["ft"]["yd"] = 0.333333333333333;
@@ -1418,7 +1390,6 @@ function (window, undefined) {
 				unitConverterArr["ft"]["pica"] = 72.0000000000168;
 				unitConverterArr["ft"]["survey_mi"] = 0.000189393560606061;
 
-
 				unitConverterArr["yd"] = {};
 
 				unitConverterArr["yd"]["ang"] = 9144000000;
@@ -1430,7 +1401,6 @@ function (window, undefined) {
 				unitConverterArr["yd"]["pica"] = 216.00000000005;
 				unitConverterArr["yd"]["survey_mi"] = 0.000568180681818182;
 
-
 				unitConverterArr["ang"] = {};
 
 				unitConverterArr["ang"]["ell"] = 0.00000000008748906;
@@ -1441,7 +1411,6 @@ function (window, undefined) {
 				unitConverterArr["ang"]["pica"] = 0.0000000236220472441;
 				unitConverterArr["ang"]["survey_mi"] = 0.000000000000062136994949495;
 
-
 				unitConverterArr["ell"] = {};
 
 				unitConverterArr["ell"]["ly"] = 1.20817786335034E-016;
@@ -1451,7 +1420,6 @@ function (window, undefined) {
 				unitConverterArr["ell"]["pica"] = 270.000011934064;
 				unitConverterArr["ell"]["survey_mi"] = 0.000710225883664711;
 
-
 				unitConverterArr["ly"] = {};
 
 				unitConverterArr["ly"]["parsec"] = 0.30659480471312;
@@ -1460,7 +1428,6 @@ function (window, undefined) {
 				unitConverterArr["ly"]["pica"] = 2.23477039370131E+018;
 				unitConverterArr["ly"]["survey_mi"] = 5878487805555.55;
 
-
 				unitConverterArr["parsec"] = {};
 
 				unitConverterArr["parsec"]["pc"] = 1;
@@ -1468,17 +1435,14 @@ function (window, undefined) {
 				unitConverterArr["parsec"]["pica"] = 7.28900281200909E+018;
 				unitConverterArr["parsec"]["survey_mi"] = 19173474942134.3;
 
-
 				unitConverterArr["pc"] = {};
 				unitConverterArr["pc"]["Pica"] = 8.74680337440886E+019;
 				unitConverterArr["pc"]["pica"] = 7.28900281200909E+018;
 				unitConverterArr["pc"]["survey_mi"] = 19173474942134.3;
 
-
 				unitConverterArr["Pica"] = {};
 				unitConverterArr["Pica"]["pica"] = 0.0833333333333528;
 				unitConverterArr["Pica"]["survey_mi"] = 0.000000219205509960718;
-
 
 				unitConverterArr["pica"] = {};
 				unitConverterArr["pica"]["survey_mi"] = 0.00000263046611952801;
@@ -1497,7 +1461,6 @@ function (window, undefined) {
 				unitConverterArr["yr"]["sec"] = 31557600;
 				unitConverterArr["yr"]["s"] = 31557600;
 
-
 				unitConverterArr["day"] = {};//День
 
 				unitConverterArr["day"]["d"] = 1;
@@ -1507,7 +1470,6 @@ function (window, undefined) {
 				unitConverterArr["day"]["sec"] = 86400;
 				unitConverterArr["day"]["s"] = 86400;
 
-
 				unitConverterArr["d"] = {};//День
 
 				unitConverterArr["d"]["hr"] = 24;
@@ -1516,7 +1478,6 @@ function (window, undefined) {
 				unitConverterArr["d"]["sec"] = 86400;
 				unitConverterArr["d"]["s"] = 86400;
 
-
 				unitConverterArr["hr"] = {};//Час
 
 				unitConverterArr["hr"]["mn"] = 60;
@@ -1524,19 +1485,16 @@ function (window, undefined) {
 				unitConverterArr["hr"]["sec"] = 3600;
 				unitConverterArr["hr"]["s"] = 3600;
 
-
 				unitConverterArr["mn"] = {};//Минуты
 
 				unitConverterArr["mn"]["min"] = 1;
 				unitConverterArr["mn"]["sec"] = 60;
 				unitConverterArr["mn"]["s"] = 60;
 
-
 				unitConverterArr["min"] = {};//Минуты
 
 				unitConverterArr["min"]["sec"] = 60;
 				unitConverterArr["min"]["s"] = 60;
-
 
 				unitConverterArr["sec"] = {};//Секунды
 
@@ -1562,19 +1520,16 @@ function (window, undefined) {
 				unitConverterArr["atm"]["psi"] = 14.6959444569062;
 				unitConverterArr["atm"]["Torr"] = 760.00211972032;
 
-
 				unitConverterArr["at"] = {};//Атмосфера
 
 				unitConverterArr["at"]["mmHg"] = 760;
 				unitConverterArr["at"]["psi"] = 14.6959444569062;
 				unitConverterArr["at"]["Torr"] = 760.00211972032;
 
-
 				unitConverterArr["mmHg"] = {};//Миллиметр ртутного столба
 
 				unitConverterArr["mmHg"]["psi"] = 0.019336769022245;
 				unitConverterArr["mmHg"]["Torr"] = 1.00000278910568;
-
 
 				unitConverterArr["psi"] = {};//Фунт на квадратный дюйм
 
@@ -1591,24 +1546,20 @@ function (window, undefined) {
 				unitConverterArr["N"]["lbf"] = 0.224808923655339;
 				unitConverterArr["N"]["pond"] = 101.9716;
 
-
 				unitConverterArr["dyn"] = {};//Dyne
 
 				unitConverterArr["dyn"]["dy"] = 1;
 				unitConverterArr["dyn"]["lbf"] = 0.00000224808923655339;
 				unitConverterArr["dyn"]["pond"] = 0.001019716;
 
-
 				unitConverterArr["dy"] = {};//Dyne
 
 				unitConverterArr["dy"]["lbf"] = 0.00000224808923655339;
 				unitConverterArr["dy"]["pond"] = 0.001019716;
 
-
 				unitConverterArr["lbf"] = {};//Pound force
 
 				unitConverterArr["lbf"]["pond"] = 453.5923144952;
-
 
 				//Energy
 				unitConverterArr["J"] = {};//Joule
@@ -1626,7 +1577,6 @@ function (window, undefined) {
 				unitConverterArr["J"]["BTU"] = 0.000947815067349015;
 				unitConverterArr["J"]["btu"] = 0.000947815067349015;
 
-
 				unitConverterArr["e"] = {};//Erg
 
 				unitConverterArr["e"]["c"] = 0.0000000239006249473467;
@@ -1641,7 +1591,6 @@ function (window, undefined) {
 				unitConverterArr["e"]["BTU"] = 0.0000000000947815067349015;
 				unitConverterArr["e"]["btu"] = 0.0000000000947815067349015;
 
-
 				unitConverterArr["c"] = {};//Thermodynamic calorie
 
 				unitConverterArr["c"]["cal"] = 0.99933031528756;
@@ -1655,7 +1604,6 @@ function (window, undefined) {
 				unitConverterArr["c"]["BTU"] = 0.00396564972437775;
 				unitConverterArr["c"]["btu"] = 0.00396564972437775;
 
-
 				unitConverterArr["cal"] = {};//IT calorie
 
 				unitConverterArr["cal"]["eV"] = 2.61317E+019;
@@ -1668,7 +1616,6 @@ function (window, undefined) {
 				unitConverterArr["cal"]["BTU"] = 0.00396830723907002;
 				unitConverterArr["cal"]["btu"] = 0.00396830723907002;
 
-
 				unitConverterArr["eV"] = {};//Electron volt
 
 				unitConverterArr["eV"]["ev"] = 1;
@@ -1680,7 +1627,6 @@ function (window, undefined) {
 				unitConverterArr["eV"]["BTU"] = 1.51857982414846E-022;
 				unitConverterArr["eV"]["btu"] = 1.51857982414846E-022;
 
-
 				unitConverterArr["ev"] = {};//Electron volt
 
 				unitConverterArr["ev"]["HPh"] = 5.968255667084E-026;
@@ -1691,7 +1637,6 @@ function (window, undefined) {
 				unitConverterArr["ev"]["BTU"] = 1.51857982414846E-022;
 				unitConverterArr["ev"]["btu"] = 1.51857982414846E-022;
 
-
 				unitConverterArr["HPh"] = {};//Horsepower-hour
 
 				unitConverterArr["HPh"]["hh"] = 1;
@@ -1701,7 +1646,6 @@ function (window, undefined) {
 				unitConverterArr["HPh"]["BTU"] = 2544.42823641704;
 				unitConverterArr["HPh"]["btu"] = 2544.42823641704;
 
-
 				unitConverterArr["hh"] = {};//Horsepower-hour
 
 				unitConverterArr["hh"]["Wh"] = 745.699921403228;
@@ -1710,7 +1654,6 @@ function (window, undefined) {
 				unitConverterArr["hh"]["BTU"] = 2544.42823641704;
 				unitConverterArr["hh"]["btu"] = 2544.42823641704;
 
-
 				unitConverterArr["Wh"] = {};//Watt-hour
 
 				unitConverterArr["Wh"]["wh"] = 1;
@@ -1718,26 +1661,22 @@ function (window, undefined) {
 				unitConverterArr["Wh"]["BTU"] = 3.41213424245645;
 				unitConverterArr["Wh"]["btu"] = 3.41213424245645;
 
-
 				unitConverterArr["wh"] = {};//Watt-hour
 
 				unitConverterArr["wh"]["flb"] = 85429.5199893544;
 				unitConverterArr["wh"]["BTU"] = 3.41213424245645;
 				unitConverterArr["wh"]["btu"] = 3.41213424245645;
 
-
 				unitConverterArr["flb"] = {};//Foot-pound
 
 				unitConverterArr["flb"]["BTU"] = 0.0000399409272448405;
 				unitConverterArr["flb"]["btu"] = 0.0000399409272448405;
-
 
 				unitConverterArr["BTU"] = {};//BTU
 
 				unitConverterArr["BTU"]["btu"] = 1;
 
 			};
-
 
 			var generatePowerMagnetismTemperature = function () {
 
@@ -1749,13 +1688,11 @@ function (window, undefined) {
 				unitConverterArr["HP"]["W"] = 745.699921403228;
 				unitConverterArr["HP"]["w"] = 745.699921403228;
 
-
 				unitConverterArr["h"] = {};//Horsepower
 
 				unitConverterArr["h"]["PS"] = 1.0138700185381;
 				unitConverterArr["h"]["W"] = 745.699921403228;
 				unitConverterArr["h"]["w"] = 745.699921403228;
-
 
 				unitConverterArr["PS"] = {};//Pferdestärke
 
@@ -1765,7 +1702,6 @@ function (window, undefined) {
 				unitConverterArr["W"] = {};//Watt ;
 
 				unitConverterArr["W"]["w"] = 1;
-
 
 				//Magnetism
 				unitConverterArr["T"] = {};//Tesla
@@ -1785,7 +1721,6 @@ function (window, undefined) {
 				unitConverterArr["C"]["Rank"] = [{type: 1, val: 273.15}, {type: 0, val: 1.8}];
 				unitConverterArr["C"]["Reau"] = 0.8;
 
-
 				unitConverterArr["cel"] = {};//Degree Celsius
 
 				unitConverterArr["cel"]["F"] = [{type: 0, val: 1.8}, {type: 1, val: 32}];
@@ -1795,7 +1730,6 @@ function (window, undefined) {
 				unitConverterArr["cel"]["Rank"] = [{type: 1, val: 273.15}, {type: 0, val: 1.8}];
 				unitConverterArr["cel"]["Reau"] = 0.8;
 
-
 				unitConverterArr["F"] = {};//Degree Fahrenheit
 
 				unitConverterArr["F"]["fah"] = 1;
@@ -1804,7 +1738,6 @@ function (window, undefined) {
 				unitConverterArr["F"]["Rank"] = [{type: 1, val: 459.67}];
 				unitConverterArr["F"]["Reau"] = [{type: 1, val: -32}, {type: 0, val: 0.444444}];
 
-
 				unitConverterArr["fah"] = {};//Degree Fahrenheit
 
 				unitConverterArr["fah"]["K"] = [{type: 1, val: -32}, {type: 0, val: 5 / 9}, {type: 1, val: 273.15}];
@@ -1812,13 +1745,11 @@ function (window, undefined) {
 				unitConverterArr["fah"]["Rank"] = [{type: 1, val: 459.67}];
 				unitConverterArr["fah"]["Reau"] = [{type: 1, val: -32}, {type: 0, val: 0.444444}];
 
-
 				unitConverterArr["K"] = {};//Kelvin
 
 				unitConverterArr["K"]["kel"] = 1;
 				unitConverterArr["K"]["Rank"] = 1.8;
 				unitConverterArr["K"]["Reau"] = [{type: 1, val: -273.15}, {type: 0, val: 0.8}];
-
 
 				unitConverterArr["kel"] = {};//Kelvin
 
@@ -1830,7 +1761,6 @@ function (window, undefined) {
 				unitConverterArr["Rank"]["Reau"] = [{type: 0, val: 0.4444444}, {type: 1, val: -218.52}];
 
 			};
-
 
 			var generateVolume = function () {
 
@@ -1880,7 +1810,6 @@ function (window, undefined) {
 				unitConverterArr["tsp"]["regton"] = 0.00000174063239539155;
 				unitConverterArr["tsp"]["MTON"] = 0.00696252893518519;
 
-
 				unitConverterArr["tspm"] = {};//Modern teaspoon
 
 				unitConverterArr["tspm"]["tbs"] = 0.33814022701843;
@@ -1925,7 +1854,6 @@ function (window, undefined) {
 				unitConverterArr["tspm"]["regton"] = 0.0000017657335;
 				unitConverterArr["tspm"]["MTON"] = 0.00706293334429772;
 
-
 				unitConverterArr["tbs"] = {};
 
 				unitConverterArr["tbs"]["oz"] = 0.5;
@@ -1969,7 +1897,6 @@ function (window, undefined) {
 				unitConverterArr["tbs"]["regton"] = 0.00000522189718617466;
 				unitConverterArr["tbs"]["MTON"] = 0.0208875868055556;
 
-
 				unitConverterArr["oz"] = {};
 
 				unitConverterArr["oz"]["cup"] = 0.125;
@@ -2012,7 +1939,6 @@ function (window, undefined) {
 				unitConverterArr["oz"]["regton"] = 0.0000104437943723493;
 				unitConverterArr["oz"]["MTON"] = 0.0417751736111111;
 
-
 				unitConverterArr["cup"] = {};
 
 				unitConverterArr["cup"]["pt"] = 0.5;
@@ -2054,7 +1980,6 @@ function (window, undefined) {
 				unitConverterArr["cup"]["regton"] = 0.0000835503549787945;
 				unitConverterArr["cup"]["MTON"] = 0.334201388888889;
 
-
 				unitConverterArr["pt"] = {};
 
 				unitConverterArr["pt"]["us_pt"] = 1;
@@ -2095,7 +2020,6 @@ function (window, undefined) {
 				unitConverterArr["pt"]["regton"] = 0.000167100709957589;
 				unitConverterArr["pt"]["MTON"] = 0.668402777777778;
 
-
 				unitConverterArr["us_pt"] = {};
 
 				unitConverterArr["us_pt"]["uk_pt"] = 0.832674184628989;
@@ -2135,7 +2059,6 @@ function (window, undefined) {
 				unitConverterArr["us_pt"]["regton"] = 0.000167100709957589;
 				unitConverterArr["us_pt"]["MTON"] = 0.668402777777778;
 
-
 				unitConverterArr["uk_pt"] = {};
 
 				unitConverterArr["uk_pt"]["qt"] = 0.600474962752427;
@@ -2174,7 +2097,6 @@ function (window, undefined) {
 				unitConverterArr["uk_pt"]["regton"] = 0.000200679585175375;
 				unitConverterArr["uk_pt"]["MTON"] = 0.80271826617946;
 
-
 				unitConverterArr["qt"] = {};
 
 				unitConverterArr["qt"]["uk_qt"] = 0.832674184628989;
@@ -2212,7 +2134,6 @@ function (window, undefined) {
 				unitConverterArr["qt"]["regton"] = 0.000334201419915178;
 				unitConverterArr["qt"]["MTON"] = 1.33680555555556;
 
-
 				unitConverterArr["uk_qt"] = {};
 
 				unitConverterArr["uk_qt"]["gal"] = 0.300237481376214;
@@ -2249,7 +2170,6 @@ function (window, undefined) {
 				unitConverterArr["uk_qt"]["regton"] = 0.00040135917035075;
 				unitConverterArr["uk_qt"]["MTON"] = 1.60543653235892;
 
-
 				unitConverterArr["gal"] = {};
 
 				unitConverterArr["gal"]["uk_gal"] = 0.832674184628989;
@@ -2285,7 +2205,6 @@ function (window, undefined) {
 				unitConverterArr["gal"]["regton"] = 0.00133680567966071;
 				unitConverterArr["gal"]["MTON"] = 5.34722222222222;
 
-
 				unitConverterArr["uk_gal"] = {};
 
 				unitConverterArr["uk_gal"]["l"] = 4.54609;
@@ -2320,7 +2239,6 @@ function (window, undefined) {
 				unitConverterArr["uk_gal"]["regton"] = 0.001605436681403;
 				unitConverterArr["uk_gal"]["MTON"] = 6.42174612943568;
 
-
 				unitConverterArr["l"] = {};
 
 				unitConverterArr["l"]["L"] = 1;
@@ -2354,7 +2272,6 @@ function (window, undefined) {
 				unitConverterArr["l"]["regton"] = 0.0003531467;
 				unitConverterArr["l"]["MTON"] = 1.41258666885954;
 
-
 				unitConverterArr["L"] = {};
 
 				unitConverterArr["L"]["lt"] = 1;
@@ -2387,7 +2304,6 @@ function (window, undefined) {
 				unitConverterArr["L"]["regton"] = 0.0003531467;
 				unitConverterArr["L"]["MTON"] = 1.41258666885954;
 
-
 				unitConverterArr["lt"] = {};
 
 				unitConverterArr["lt"]["ang3"] = 1E+027;
@@ -2419,7 +2335,6 @@ function (window, undefined) {
 				unitConverterArr["lt"]["regton"] = 0.0003531467;
 				unitConverterArr["lt"]["MTON"] = 1.41258666885954;
 
-
 				unitConverterArr["ang3"] = {};
 
 				unitConverterArr["ang3"]["ang^3"] = 1;
@@ -2450,7 +2365,6 @@ function (window, undefined) {
 				unitConverterArr["ang3"]["regton"] = 3.531467E-031;
 				unitConverterArr["ang3"]["MTON"] = 1.41258666885954E-027;
 
-
 				unitConverterArr["ang^3"] = {};
 
 				unitConverterArr["ang^3"]["barrel"] = 6.28981077043211E-030;
@@ -2480,7 +2394,6 @@ function (window, undefined) {
 				unitConverterArr["ang^3"]["regton"] = 3.531467E-031;
 				unitConverterArr["ang^3"]["MTON"] = 1.41258666885954E-027;
 
-
 				unitConverterArr["ang^3"] = {};
 
 				unitConverterArr["ang^3"]["barrel"] = 6.28981077043211E-030;
@@ -2509,7 +2422,6 @@ function (window, undefined) {
 				unitConverterArr["ang^3"]["GRT"] = 3.531467E-031;
 				unitConverterArr["ang^3"]["regton"] = 3.531467E-031;
 				unitConverterArr["ang^3"]["MTON"] = 1.41258666885954E-027;
-
 
 				unitConverterArr["barrel"] = {};
 
@@ -2539,7 +2451,6 @@ function (window, undefined) {
 				unitConverterArr["barrel"]["regton"] = 0.0561458385457499;
 				unitConverterArr["barrel"]["MTON"] = 224.583333333333;
 
-
 				unitConverterArr["bushel"] = {};
 
 				unitConverterArr["bushel"]["ft3"] = 1.24445616141077;
@@ -2567,7 +2478,6 @@ function (window, undefined) {
 				unitConverterArr["bushel"]["regton"] = 0.0124445627694247;
 				unitConverterArr["bushel"]["MTON"] = 49.7782464564307;
 
-
 				unitConverterArr["ft3"] = {};
 
 				unitConverterArr["ft3"]["ft^3"] = 1;
@@ -2594,7 +2504,6 @@ function (window, undefined) {
 				unitConverterArr["ft3"]["regton"] = 0.010000000928371;
 				unitConverterArr["ft3"]["MTON"] = 40;
 
-
 				unitConverterArr["ft^3"] = {};
 
 				unitConverterArr["ft^3"]["in3"] = 1728;
@@ -2619,7 +2528,6 @@ function (window, undefined) {
 				unitConverterArr["ft^3"]["regton"] = 0.010000000928371;
 				unitConverterArr["ft^3"]["MTON"] = 40;
 
-
 				unitConverterArr["in3"] = {};
 
 				unitConverterArr["in3"]["in^3"] = 1;
@@ -2643,7 +2551,6 @@ function (window, undefined) {
 				unitConverterArr["in3"]["regton"] = 0.0000057870375742888;
 				unitConverterArr["in3"]["MTON"] = 0.0231481481481481;
 
-
 				unitConverterArr["in^3"] = {};
 
 				unitConverterArr["in^3"]["ly3"] = 1.93532997701517E-053;
@@ -2664,7 +2571,6 @@ function (window, undefined) {
 				unitConverterArr["in^3"]["GRT"] = 0.0000057870375742888;
 				unitConverterArr["in^3"]["regton"] = 0.0000057870375742888;
 				unitConverterArr["in^3"]["MTON"] = 0.0231481481481481;
-
 
 				unitConverterArr["ly3"] = {};
 
@@ -2687,7 +2593,6 @@ function (window, undefined) {
 				unitConverterArr["ly3"]["regton"] = 2.99020717036278E+047;
 				unitConverterArr["ly3"]["MTON"] = 1.19608275710425E+051;
 
-
 				unitConverterArr["ly^3"] = {};
 
 				unitConverterArr["ly^3"]["m3"] = 8.46732298606437E+047;
@@ -2707,7 +2612,6 @@ function (window, undefined) {
 				unitConverterArr["ly^3"]["regton"] = 2.99020717036278E+047;
 				unitConverterArr["ly^3"]["MTON"] = 1.19608275710425E+051;
 
-
 				unitConverterArr["m3"] = {};
 
 				unitConverterArr["m3"]["m^3"] = 1;
@@ -2726,7 +2630,6 @@ function (window, undefined) {
 				unitConverterArr["m3"]["regton"] = 0.3531467;
 				unitConverterArr["m3"]["MTON"] = 1412.58666885954;
 
-
 				unitConverterArr["m^3"] = {};
 
 				unitConverterArr["m^3"]["mi3"] = 0.000000000239912758578928;
@@ -2744,7 +2647,6 @@ function (window, undefined) {
 				unitConverterArr["m^3"]["regton"] = 0.3531467;
 				unitConverterArr["m^3"]["MTON"] = 1412.58666885954;
 
-
 				unitConverterArr["mi3"] = {};
 
 				unitConverterArr["mi3"]["mi^3"] = 1;
@@ -2761,7 +2663,6 @@ function (window, undefined) {
 				unitConverterArr["mi3"]["regton"] = 1471979656.65432;
 				unitConverterArr["mi3"]["MTON"] = 5887918080000;
 
-
 				unitConverterArr["mi^3"] = {};
 
 				unitConverterArr["mi3"]["yd3"] = 5451776000;
@@ -2776,7 +2677,6 @@ function (window, undefined) {
 				unitConverterArr["mi3"]["regton"] = 1471979656.65432;
 				unitConverterArr["mi3"]["MTON"] = 5887918080000;
 
-
 				unitConverterArr["yd3"] = {};
 
 				unitConverterArr["yd3"]["yd^3"] = 1;
@@ -2790,7 +2690,6 @@ function (window, undefined) {
 				unitConverterArr["yd3"]["regton"] = 0.270000025066018;
 				unitConverterArr["yd3"]["MTON"] = 1080;
 
-
 				unitConverterArr["yd^3"] = {};
 
 				unitConverterArr["yd^3"]["Nmi3"] = 0.000000000120360977212069;
@@ -2803,7 +2702,6 @@ function (window, undefined) {
 				unitConverterArr["yd^3"]["regton"] = 0.270000025066018;
 				unitConverterArr["yd^3"]["MTON"] = 1080;
 
-
 				unitConverterArr["Nmi3"] = {};
 
 				unitConverterArr["Nmi3"]["Nmi^3"] = 1;
@@ -2815,7 +2713,6 @@ function (window, undefined) {
 				unitConverterArr["Nmi3"]["regton"] = 2243252184.55391;
 				unitConverterArr["Nmi3"]["MTON"] = 8973007905187.58;
 
-
 				unitConverterArr["Nmi^3"] = {};
 
 				//unitConverterArr["Nmi^3"]["Picapt3"] = ;
@@ -2826,7 +2723,6 @@ function (window, undefined) {
 				unitConverterArr["Nmi^3"]["regton"] = 2243252184.55391;
 				unitConverterArr["Nmi^3"]["MTON"] = 8973007905187.58;
 
-
 				/*unitConverterArr["Picapt3"] = {};
 
 				 unitConverterArr["Picapt3"]["Picapt^3"] = ;
@@ -2836,7 +2732,6 @@ function (window, undefined) {
 				 unitConverterArr["Picapt3"]["regton"] = ;
 				 unitConverterArr["Picapt3"]["MTON"] = ;
 
-
 				 unitConverterArr["Picapt^3"] = {}; ;
 
 				 unitConverterArr["Picapt^3"]["Pica3"] = ;
@@ -2845,7 +2740,6 @@ function (window, undefined) {
 				 unitConverterArr["Picapt^3"]["regton"] = ;
 				 unitConverterArr["Picapt^3"]["MTON"] = ;*/
 
-
 				unitConverterArr["Pica3"] = {};
 
 				unitConverterArr["Pica3"]["Pica^3"] = 1;
@@ -2853,19 +2747,16 @@ function (window, undefined) {
 				unitConverterArr["Pica3"]["regton"] = 0.0000000000155045373968214;
 				unitConverterArr["Pica3"]["MTON"] = 0.0000000620181438297008;
 
-
 				unitConverterArr["Pica^3"] = {};
 
 				unitConverterArr["Pica^3"]["GRT"] = 0.0000000000155045373968214;
 				unitConverterArr["Pica^3"]["regton"] = 0.0000000000155045373968214;
 				unitConverterArr["Pica^3"]["MTON"] = 0.0000000620181438297008;
 
-
 				unitConverterArr["GRT"] = {};
 
 				unitConverterArr["GRT"]["regton"] = 1;
 				unitConverterArr["GRT"]["MTON"] = 3999.99962865162;
-
 
 				unitConverterArr["regton"] = {};
 
@@ -2903,7 +2794,6 @@ function (window, undefined) {
 				unitConverterArr["uk_acre"]["yd2"] = 4840;
 				unitConverterArr["uk_acre"]["yd^2"] = 4840;
 
-
 				unitConverterArr["us_acre"] = {};
 
 				unitConverterArr["us_acre"]["ang2"] = 4.04687260987425E+023;
@@ -2930,7 +2820,6 @@ function (window, undefined) {
 				unitConverterArr["us_acre"]["yd2"] = 4840.01936005808;
 				unitConverterArr["us_acre"]["yd^2"] = 4840.01936005808;
 
-
 				unitConverterArr["ang2"] = {};
 
 				unitConverterArr["ang2"]["ang^2"] = 1;
@@ -2956,7 +2845,6 @@ function (window, undefined) {
 				unitConverterArr["ang2"]["yd2"] = 1.19599004630108E-020;
 				unitConverterArr["ang2"]["yd^2"] = 1.19599004630108E-020;
 
-
 				unitConverterArr["ang^2"] = {};
 
 				unitConverterArr["ang^2"]["ar"] = 1E-022;
@@ -2981,7 +2869,6 @@ function (window, undefined) {
 				unitConverterArr["ang^2"]["yd2"] = 1.19599004630108E-020;
 				unitConverterArr["ang^2"]["yd^2"] = 1.19599004630108E-020;
 
-
 				unitConverterArr["ar"] = {};
 
 				unitConverterArr["ar"]["ft2"] = 1076.39104167097;
@@ -3005,7 +2892,6 @@ function (window, undefined) {
 				unitConverterArr["ar"]["yd2"] = 119.599004630108;
 				unitConverterArr["ar"]["yd^2"] = 119.599004630108;
 
-
 				unitConverterArr["ft2"] = {};
 
 				unitConverterArr["ft2"]["ft^2"] = 1;
@@ -3028,7 +2914,6 @@ function (window, undefined) {
 				unitConverterArr["ft2"]["yd2"] = 0.111111111111111;
 				unitConverterArr["ft2"]["yd^2"] = 0.111111111111111;
 
-
 				unitConverterArr["ft^2"] = {};
 
 				unitConverterArr["ft^2"]["ha"] = 0.000009290304;
@@ -3050,7 +2935,6 @@ function (window, undefined) {
 				unitConverterArr["ft^2"]["yd2"] = 0.111111111111111;
 				unitConverterArr["ft^2"]["yd^2"] = 0.111111111111111;
 
-
 				unitConverterArr["ha"] = {};
 
 				unitConverterArr["ha"]["in2"] = 15500031.000062;
@@ -3071,7 +2955,6 @@ function (window, undefined) {
 				unitConverterArr["ha"]["yd2"] = 11959.9004630108;
 				unitConverterArr["ha"]["yd^2"] = 11959.9004630108;
 
-
 				unitConverterArr["in2"] = {};
 
 				unitConverterArr["in2"]["in^2"] = 1;
@@ -3091,7 +2974,6 @@ function (window, undefined) {
 				unitConverterArr["in2"]["yd2"] = 0.000771604938271605;
 				unitConverterArr["in2"]["yd^2"] = 0.000771604938271605;
 
-
 				unitConverterArr["in^2"] = {};
 
 				unitConverterArr["in^2"]["ly2"] = 7.20836355779189E-036;
@@ -3110,7 +2992,6 @@ function (window, undefined) {
 				unitConverterArr["in^2"]["yd2"] = 0.000771604938271605;
 				unitConverterArr["in^2"]["yd^2"] = 0.000771604938271605;
 
-
 				unitConverterArr["ly2"] = {};
 
 				unitConverterArr["ly2"]["ly^2"] = 1;
@@ -3128,7 +3009,6 @@ function (window, undefined) {
 				unitConverterArr["ly2"]["yd2"] = 1.07043010814506E+032;
 				unitConverterArr["ly2"]["yd^2"] = 1.07043010814506E+032;
 
-
 				unitConverterArr["ly^2"] = {};
 
 				unitConverterArr["ly^2"]["m2"] = 8.9501590038784E+031;
@@ -3145,7 +3025,6 @@ function (window, undefined) {
 				unitConverterArr["ly^2"]["yd2"] = 1.07043010814506E+032;
 				unitConverterArr["ly^2"]["yd^2"] = 1.07043010814506E+032;
 
-
 				unitConverterArr["m2"] = {};
 
 				unitConverterArr["m2"]["m^2"] = 1;
@@ -3161,7 +3040,6 @@ function (window, undefined) {
 				unitConverterArr["m2"]["yd2"] = 1.19599004630108;
 				unitConverterArr["m2"]["yd^2"] = 1.19599004630108;
 
-
 				unitConverterArr["m^2"] = {};
 
 				unitConverterArr["m^2"]["Morgen"] = 0.0004;
@@ -3176,7 +3054,6 @@ function (window, undefined) {
 				unitConverterArr["m^2"]["yd2"] = 1.19599004630108;
 				unitConverterArr["m^2"]["yd^2"] = 1.19599004630108;
 
-
 				unitConverterArr["Morgen"] = {};
 
 				unitConverterArr["Morgen"]["mi2"] = 0.000965255396356115;
@@ -3190,7 +3067,6 @@ function (window, undefined) {
 				unitConverterArr["Morgen"]["yd2"] = 2989.9751157527;
 				unitConverterArr["Morgen"]["yd^2"] = 2989.9751157527;
 
-
 				unitConverterArr["mi2"] = {};
 
 				unitConverterArr["mi2"]["mi^2"] = 1;
@@ -3203,7 +3079,6 @@ function (window, undefined) {
 				unitConverterArr["mi2"]["yd2"] = 3097600;
 				unitConverterArr["mi2"]["yd^2"] = 3097600;
 
-
 				unitConverterArr["mi^2"] = {};
 
 				unitConverterArr["mi^2"]["Nmi2"] = 0.755119708987773;
@@ -3215,7 +3090,6 @@ function (window, undefined) {
 				unitConverterArr["mi^2"]["yd2"] = 3097600;
 				unitConverterArr["mi^2"]["yd^2"] = 3097600;
 
-
 				unitConverterArr["Nmi2"] = {};
 
 				unitConverterArr["Nmi2"]["Nmi^2"] = 1;
@@ -3226,7 +3100,6 @@ function (window, undefined) {
 				unitConverterArr["Nmi2"]["yd2"] = 4102131.04376826;
 				unitConverterArr["Nmi2"]["yd^2"] = 4102131.04376826;
 
-
 				unitConverterArr["Nmi^2"] = {};
 
 				//unitConverterArr["Nmi^2"]["Picapt2"] = ;
@@ -3236,7 +3109,6 @@ function (window, undefined) {
 				unitConverterArr["Nmi^2"]["yd2"] = 4102131.04376826;
 				unitConverterArr["Nmi^2"]["yd^2"] = 4102131.04376826;
 
-
 				/*unitConverterArr["Picapt2"] = {};
 
 				 unitConverterArr["Picapt2"]["Pica2"] = ;
@@ -3245,7 +3117,6 @@ function (window, undefined) {
 				 unitConverterArr["Picapt2"]["yd2"] = ;
 				 unitConverterArr["Picapt2"]["yd^2"] = ;*/
 
-
 				unitConverterArr["Pica2"] = {};
 
 				unitConverterArr["Pica2"]["Pica^2"] = 1;
@@ -3253,19 +3124,16 @@ function (window, undefined) {
 				unitConverterArr["Pica2"]["yd2"] = 0.000000148843545191282;
 				unitConverterArr["Pica2"]["yd^2"] = 0.000000148843545191282;
 
-
 				unitConverterArr["Pica^2"] = {};
 
 				//unitConverterArr["Pica^2"]["Picapt^2"] = ;
 				unitConverterArr["Pica^2"]["yd2"] = 0.000000148843545191282;
 				unitConverterArr["Pica^2"]["yd^2"] = 0.000000148843545191282;
 
-
 				/*unitConverterArr["Picapt^2"] = {};
 
 				 unitConverterArr["Picapt^2"]["yd2"] = ;
 				 unitConverterArr["Picapt^2"]["yd^2"] = ;*/
-
 
 				unitConverterArr["yd2"] = {};
 
@@ -3279,7 +3147,6 @@ function (window, undefined) {
 
 				unitConverterArr["bit"]["byte"] = 0.125;
 
-
 				//Speed
 				unitConverterArr["admkn"] = {};
 
@@ -3290,7 +3157,6 @@ function (window, undefined) {
 				unitConverterArr["admkn"]["m/sec"] = 0.5144444;
 				unitConverterArr["admkn"]["mph"] = 1.15077934860415;
 
-
 				unitConverterArr["kn"] = {};
 
 				unitConverterArr["kn"]["m/h"] = 1852;
@@ -3299,7 +3165,6 @@ function (window, undefined) {
 				unitConverterArr["kn"]["m/sec"] = 0.514444444444444;
 				unitConverterArr["kn"]["mph"] = 1.15077944802354;
 
-
 				unitConverterArr["m/h"] = {};
 
 				unitConverterArr["m/h"]["m/hr"] = 1;
@@ -3307,19 +3172,16 @@ function (window, undefined) {
 				unitConverterArr["m/h"]["m/sec"] = 0.000277777777777778;
 				unitConverterArr["m/h"]["mph"] = 0.000621371192237334;
 
-
 				unitConverterArr["m/hr"] = {};
 
 				unitConverterArr["m/hr"]["m/s"] = 0.000277777777777778;
 				unitConverterArr["m/hr"]["m/sec"] = 0.000277777777777778;
 				unitConverterArr["m/hr"]["mph"] = 0.000621371192237334;
 
-
 				unitConverterArr["m/s"] = {};
 
 				unitConverterArr["m/s"]["m/sec"] = 1;
 				unitConverterArr["m/s"]["mph"] = 2.2369362920544;
-
 
 				unitConverterArr["m/sec"] = {};
 
@@ -4382,7 +4244,6 @@ function (window, undefined) {
 			availablePrefixMap["Mi"]["byte"] = 1;
 			availablePrefixMap["ki"]["byte"] = 1;
 
-
 			prefixValueMap = {};
 			prefixValueMap["Y"] = 1.00E+24;
 			prefixValueMap["Z"] = 1.00E+21;
@@ -4481,7 +4342,6 @@ function (window, undefined) {
 		cIMPOWER, cIMPRODUCT, cIMREAL, cIMSEC, cIMSECH, cIMSIN, cIMSINH, cIMSQRT, cIMSUB, cIMSUM, cIMTAN, cOCT2BIN,
 		cOCT2DEC, cOCT2HEX);
 
-
 	/**
 	 * @constructor
 	 * @extends {AscCommonExcel.cBaseFunction}
@@ -4558,7 +4418,6 @@ function (window, undefined) {
 		return besselFunctionsCalc(arg0, arg1, calcFunc);
 	};
 
-
 	/**
 	 * @constructor
 	 * @extends {AscCommonExcel.cBaseFunction}
@@ -4596,7 +4455,6 @@ function (window, undefined) {
 		return besselFunctionsCalc(arg0, arg1, calcFunc);
 	};
 
-
 	/**
 	 * @constructor
 	 * @extends {AscCommonExcel.cBaseFunction}
@@ -4633,7 +4491,6 @@ function (window, undefined) {
 
 		return besselFunctionsCalc(arg0, arg1, calcFunc);
 	};
-
 
 	/**
 	 * @constructor
@@ -5551,7 +5408,6 @@ function (window, undefined) {
 			return arg0;
 		}
 
-
 		if (arg1.type === cElementType.bool) {
 			return new cError(cErrorType.wrong_value_type);
 		} else if (arg1.type === cElementType.empty) {
@@ -5752,7 +5608,6 @@ function (window, undefined) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 
-
 		if (arg1.type === cElementType.cellsRange || arg1.type === cElementType.cellsRange3D) {
 			arg1 = arg1.cross(arguments[1]);
 		} else if (arg1.type === cElementType.array) {
@@ -5901,7 +5756,6 @@ function (window, undefined) {
 		if (arg0.type === cElementType.bool) {
 			return new cError(cErrorType.wrong_value_type);
 		}
-
 
 		if (arg1.type === cElementType.cellsRange || arg1.type === cElementType.cellsRange3D) {
 			arg1 = arg1.cross(arguments[1]);
@@ -6154,7 +6008,6 @@ function (window, undefined) {
 			arg0 = arg0.getElementRowCol(0, 0);
 		}
 
-
 		let res = IMFUNC(arg0, "Cos");
 		return res;
 
@@ -6304,7 +6157,6 @@ function (window, undefined) {
 		} else if (arg0 instanceof cArray) {
 			arg0 = arg0.getElementRowCol(0, 0);
 		}
-
 
 		if (arg1 instanceof cArea || arg1 instanceof cArea3D) {
 			arg1 = arg1.cross(arguments[1]);
@@ -6750,7 +6602,6 @@ function (window, undefined) {
 
 	};
 
-
 	/**
 	 * @constructor
 	 * @extends {AscCommonExcel.cBaseFunction}
@@ -6863,7 +6714,6 @@ function (window, undefined) {
 		} else if (arg0 instanceof cArray) {
 			arg0 = arg0.getElementRowCol(0, 0);
 		}
-
 
 		if (arg1 instanceof cArea || arg1 instanceof cArea3D) {
 			arg1 = arg1.cross(arguments[1]);

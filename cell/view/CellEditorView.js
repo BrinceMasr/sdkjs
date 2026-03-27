@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -36,7 +31,6 @@
  * @param {undefined} undefined
  */
 function (window, undefined) {
-
 
 	/*
 	 * Import
@@ -58,7 +52,6 @@ function (window, undefined) {
 
 	var asc_HL = AscCommonExcel.HandlersList;
 	var asc_incDecFonSize = asc.incDecFonSize;
-
 
 	/** @const */
 	var kBeginOfLine = -1;
@@ -90,7 +83,6 @@ function (window, undefined) {
 	var codeEqually = 0x3D;
 	var codeUnarPlus = 0x2B;
 	var codeUnarMinus = 0x2D;
-
 
 	/**
 	 * CellEditor widget
@@ -1853,7 +1845,6 @@ function (window, undefined) {
 			this.handlers.trigger("updatedEditableFunction", fCurrent, fPos !== undefined ? this.calculateOffset(fPos) : null, functionInfo);
 		}
 
-
 		if (this.getMenuEditorMode()) {
 			this.handlers.trigger("updateMenuEditorCursorPosition", curTop, curHeight);
 		}
@@ -3520,8 +3511,6 @@ function (window, undefined) {
 		}
 		api.sendEvent('onCloseCellEditor');
 	};
-
-
 
 	//------------------------------------------------------------export---------------------------------------------------
 	window['AscCommonExcel'] = window['AscCommonExcel'] || {};

@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -41,7 +36,6 @@
     window['AscDFH'].drawingsChangesMap = drawingsChangesMap;
     window['AscDFH'].drawingsConstructorsMap = drawingConstructorsMap;
     window['AscDFH'].drawingContentChanges = drawingContentChanges;
-
 
     var oPosExtMap = {};
     oPosExtMap[AscDFH.historyitem_Xfrm_SetOffX]  = true;
@@ -92,7 +86,6 @@
 		AscDFH.CChangesBaseBoolProperty.prototype.ReadFromBinary.call(this, reader);
     };
     window['AscDFH'].CChangesDrawingsBool = CChangesDrawingsBool;
-
 
     function CChangesDrawingsLong(Class, Type, OldPr, NewPr) {
         this.Type = Type;
@@ -156,8 +149,6 @@
     };
     window['AscDFH'].CChangesDrawingsDouble = CChangesDrawingsDouble;
 
-
-
     function CChangesDrawingsDouble2(Class, Type, OldPr, NewPr) {
         this.Type = Type;
         var _OldPr = typeof OldPr === "number" ? OldPr : undefined;
@@ -210,8 +201,6 @@
     CChangesDrawingsDouble2.prototype.ReadFromBinary = function(Reader)
     {
 
-
-
         Reader.Seek2(Reader.GetCurPos() - 4);
         this.Type = Reader.GetLong();
         // Long  : Flag
@@ -220,7 +209,6 @@
         // 3-bit : IsUndefined Old
         // double : New
         // double : Old
-
 
         var nFlags = Reader.GetLong();
 
@@ -246,7 +234,6 @@
         return !!oPosExtHor[this.Type];
     };
     window['AscDFH'].CChangesDrawingsDouble2 = CChangesDrawingsDouble2;
-
 
     function CChangesDrawingsString(Class, Type, OldPr, NewPr) {
         this.Type = Type;
@@ -275,7 +262,6 @@
 		AscDFH.CChangesBaseStringProperty.prototype.ReadFromBinary.call(this, reader);
     };
     window['AscDFH'].CChangesDrawingsString = CChangesDrawingsString;
-
 
     function CChangesDrawingsObjectNoId(Class, Type, OldPr, NewPr) {
         this.Type = Type;
@@ -316,7 +302,6 @@
         }
         return null;
     };
-
 
     /**
      * @constructor
@@ -376,7 +361,6 @@
         let chunks = this.Class._chunkedRaster;
         if(!Array.isArray(chunks) || chunks.length === 0) return;
 
-
         const fullVal = chunks.join("");
         value.RasterImageId = fullVal;
         delete this.Class._chunkedRaster;
@@ -400,7 +384,6 @@
     };
     AscDFH.changesFactory[AscDFH.historyitem_type_ImageBlipEnd] = CChangesImageIdEnd;
     window['AscDFH'].CChangesImageIdEnd = CChangesImageIdEnd;
-
 
     function CChangesDrawingsImageRasterImageIdPart(Class, NewChunk, OldChunk) {
 		this.NewChunk = NewChunk;
@@ -454,7 +437,6 @@
 	CChangesDrawingsImageRasterImageIdPart.prototype.CheckCorrect = function () {
 		return true;
 	};
-
 
     function CChangesDrawingsObject(Class, Type, OldPr, NewPr) {
         this.Type = Type;
@@ -537,7 +519,6 @@
         var Id = Reader.GetString2();
         return AscCommon.g_oTableId.Get_ById(Id);
     };
-
 
     CChangesDrawingsContent.prototype.private_GetChangedArray = function () {
         if (drawingContentChanges[this.Type]) {
@@ -677,7 +658,6 @@
         return oRet;
     };
 
-
     function CChangesDrawingsContentPresentation(Class, Type, Pos, Items, isAdd, Color){
 		CChangesDrawingsContent.call(this, Class, Type, Pos, Items, isAdd);
         this.Color = Color === true ? true : false;
@@ -791,8 +771,6 @@
     };
     window['AscDFH'].CChangesDrawingsContentLong = CChangesDrawingsContentLong;
 
-
-
     function CChangesDrawingsContentBool(Class, Type, Pos, Items, isAdd) {
         this.Type = Type;
         AscDFH.CChangesDrawingsContent.call(this, Class, Type, Pos, Items, isAdd);
@@ -822,15 +800,12 @@
 	};
 	window['AscDFH'].CChangesDrawingsContentString = CChangesDrawingsContentString;
 
-
-
     function CChangesDrawingsContentLongMap(Class, Type, Pos, Items, isAdd){
 		AscDFH.CChangesDrawingsContentLong.call(this, Class, Type, Pos, Items, isAdd);
     }
 
 	CChangesDrawingsContentLongMap.prototype = Object.create(AscDFH.CChangesDrawingsContentLong.prototype);
 	CChangesDrawingsContentLongMap.prototype.constructor = CChangesDrawingsContentLongMap;
-
 
     CChangesDrawingsContentLongMap.prototype.private_InsertInArrayLoad = function () {
         if (this.Items.length <= 0)
@@ -872,7 +847,6 @@
     };
 
     window['AscDFH'].CChangesDrawingsContentLongMap = CChangesDrawingsContentLongMap;
-
 
     function CChangesDrawingChangeTheme(Class, Type, aIndexes){
         this.Type = Type;
@@ -926,7 +900,6 @@
     };
 
     window['AscDFH'].CChangesDrawingChangeTheme = CChangesDrawingChangeTheme;
-
 
     function CChangesDrawingSlideLocks(Class, deleteLock, backgroundLock, timingLock, transitionLock, layoutLock, showLock){
         this.Type = AscDFH.historyitem_SlideSetLocks;
@@ -989,7 +962,6 @@
     };
 
     window['AscDFH'].CChangesDrawingSlideLocks = CChangesDrawingSlideLocks;
-
 
     function CChangesSparklinesChangeData(Class, OldPr, NewPr){
         this.Type = AscDFH.historyitem_Sparkline_ChangeData;
@@ -1141,8 +1113,6 @@
     };
     window['AscDFH'].CChangesSparklinesChangeData = CChangesSparklinesChangeData;
 
-
-
     function CChangesSparklinesRemoveData(Class, oSparkline, bReverse){
         this.Type = AscDFH.historyitem_Sparkline_RemoveData;
         this.sparkline = oSparkline;
@@ -1197,7 +1167,6 @@
     CChangesSparklinesRemoveData.prototype.CreateReverseChange = function(){
         return new CChangesSparklinesRemoveData(this.Class, this.sparkline, !this.bReverse);
     };
-
 
     window['AscDFH'].CChangesSparklinesRemoveData = CChangesSparklinesRemoveData;
 
@@ -1292,7 +1261,6 @@
         }
         oClass.cleanCache();
     };
-
 
     CChangesDrawingsExcelColor.prototype.CreateReverseChange = function(){
         return new CChangesDrawingsExcelColor(this.Class, this.Type, this.NewPr, this.OldPr);
@@ -1419,14 +1387,12 @@
 	};
 	window['AscDFH'].CChangesPartBinaryData = CChangesPartBinaryData;
 
-
 	function CChangesEndBinaryData(Class, Old, New, Type, Color) {
 		this.Type = Type;
 		AscDFH.CChangesBaseProperty.call(this, Class, Old, New, Color);
 	}
 	CChangesEndBinaryData.prototype = Object.create(AscDFH.CChangesBaseProperty.prototype);
 	CChangesEndBinaryData.prototype.constructor = CChangesEndBinaryData;
-
 
 	CChangesEndBinaryData.prototype.Undo = function () {
 		if (this.Class.partsOfBinaryData) {
@@ -1476,7 +1442,6 @@
 	}
 	window['AscDFH'].addBinaryDataToHistory = addBinaryDataToHistory;
 
-
 	function CChangesDrawingsImageId(Class, NewPr) {
 		CChangesDrawingsString.call(this, Class, AscDFH.historyitem_ImageShapeLoadImagesfromContent, '', NewPr);
 		this.FromLoad = false;
@@ -1510,7 +1475,6 @@
 	}
 	window['AscDFH'].addImagesFromFrame = addImagesFromFrame;
 
-
 AscDFH.changesFactory[AscDFH.historyitem_Sparkline_Type               ] = AscDFH.CChangesDrawingsLong;
 AscDFH.changesFactory[AscDFH.historyitem_Sparkline_LineWeight         ] = AscDFH.CChangesDrawingsDouble;
 AscDFH.changesFactory[AscDFH.historyitem_Sparkline_DisplayEmptyCellsAs] = AscDFH.CChangesDrawingsLong;
@@ -1529,7 +1493,6 @@ AscDFH.changesFactory[AscDFH.historyitem_Sparkline_ManualMax          ] = AscDFH
 AscDFH.changesFactory[AscDFH.historyitem_Sparkline_ManualMin          ] = AscDFH.CChangesDrawingsDouble;
 AscDFH.changesFactory[AscDFH.historyitem_Sparkline_DateAxis           ] = AscDFH.CChangesDrawingsBool;
 AscDFH.changesFactory[AscDFH.historyitem_Sparkline_F                  ] = AscDFH.CChangesDrawingsString;
-
 
 AscDFH.changesFactory[AscDFH.historyitem_Sparkline_ColorSeries        ] = AscDFH.CChangesDrawingsExcelColor;
 AscDFH.changesFactory[AscDFH.historyitem_Sparkline_ColorNegative      ] = AscDFH.CChangesDrawingsExcelColor;

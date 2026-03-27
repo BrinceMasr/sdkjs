@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -103,7 +98,6 @@
             var dOldAlpha = null;
             var oGraphics = overlay.Graphics ? overlay.Graphics : overlay;
 
-
             if(AscFormat.isRealNumber(this.originalShape.selectStartPage) && overlay.SetCurrentPage)
             {
                 overlay.SetCurrentPage(this.originalShape.selectStartPage);
@@ -133,7 +127,6 @@
         //this.overlayObject.draw(overlay);
     };
 
-
     EditShapeGeometryTrack.prototype.drawSelect = function(oDrawingDocument, nGmEditPointIdx) {
         if(!this.isCorrect()) {
             return;
@@ -153,7 +146,6 @@
         }
         oDrawingDocument.AutoShapesTrack.DrawGeometryEdit(matrix, pathLst, gmEditList, gmEditPoint, oBounds);
     };
-
 
     EditShapeGeometryTrack.prototype.getGmSelection = function() {
         return this.drawingObjects.selection.geometrySelection;
@@ -264,7 +256,6 @@
                 gmEditPoint.g2Y = _relative_y;
 
                 if(cur_command_type_1 === PathType.ARC && cur_command_type_2 === PathType.ARC) {
-
 
                     var isEllipseArc = Math.abs((gmEditPoint.X - gmEditPoint.g1X) * (g2Y - gmEditPoint.g1Y) - (g2X - gmEditPoint.g1X) * (gmEditPoint.Y - gmEditPoint.g1Y));
 
@@ -409,7 +400,6 @@
         arr_p_x.push(oRectBounds.XRB);
         arr_p_y.push(oRectBounds.YLT);
         arr_p_y.push(oRectBounds.YRB);
-
 
         bounds_checker.Bounds.min_x = Math.min.apply(Math, arr_p_x);
         bounds_checker.Bounds.max_x = Math.max.apply(Math, arr_p_x);
@@ -789,7 +779,6 @@
                             var g2X = nextCommand ? nextCommand.X0 : undefined;
                             var g2Y = nextCommand ? nextCommand.Y0 : undefined;
 
-
                             var curPoint = {
                                 g1X: g1X,
                                 g1Y: g1Y,
@@ -969,7 +958,6 @@
             }, this, []
         );
     };
-
 
     EditShapeGeometryTrack.prototype.findBezier4Param = function(XT, YT, X0, Y0, X1, Y1, X2, Y2, X3, Y3) {
        var nSteps = 1000;
@@ -1328,7 +1316,6 @@
         var distance =  this.originalObject.convertPixToMM(AscCommon.global_mouseEvent.KoefPixToMM * AscCommon.TRACK_CIRCLE_RADIUS);
         var geometry = this.geometry;
 
-
         var gmEditPoint = this.getGmEditPt();
         var tx = this.invertTransform.TransformPointX(x, y);
         var ty = this.invertTransform.TransformPointY(x, y);
@@ -1375,7 +1362,6 @@
         return true;
     };
 
-
     function CGeomHitData(gmEditPointIdx, isHitInFirstCPoint, isHitInSecondCPoint, addingNewPoint) {
         this.gmEditPointIdx = gmEditPointIdx;
         this.isHitInFirstCPoint = isHitInFirstCPoint;
@@ -1388,8 +1374,6 @@
 
     window['AscFormat'] = window['AscFormat'] || {};
     window['AscFormat'].EditShapeGeometryTrack = EditShapeGeometryTrack;
-
-
 
     function splitCurveAt(t, x1, y1, x2, y2, x3, y3, x4, y4) {
         var x1_, y1_, x2_, y2_, x3_, y3_, x4_, y4_;

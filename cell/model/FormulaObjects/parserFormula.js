@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -486,7 +481,6 @@ function (window, undefined) {
 		return typedArr;
 	}
 
-
 /** @enum */
 var cElementType = {
 		number      : 0,
@@ -598,14 +592,9 @@ let cElementTypeWeight =  new Map();
 	cElementTypeWeight.set(cElementType.bool, 2);
 	cElementTypeWeight.set(cElementType.error, 3);
 
-
-
-
 Math.fmod = function ( a, b ) {
 	return Number( (a - (this.floor( a / b ) * b)).toPrecision( cExcelSignificantDigits ) );
 };
-
-
 
 parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSeparator);
 
@@ -1479,7 +1468,6 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 		}
 		return row;
 	};
-
 
 	/**
 	 * @constructor
@@ -3402,8 +3390,6 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 		return array;
 	};
 
-
-
 	/**
 	 * @constructor
 	 * @extends {cBaseType}
@@ -4113,7 +4099,6 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 				tempArgs.push(tempArg);
 			}
 
-
 			//для функций row/column с нулевым количеством аргументов необходимо рассчитывать
 			//значение для каждой ячейки массива, изменяя при этом opt_bbox
 			//TODO добавляю ещё одну проверку. в будущем стоит рассмотреть использование всегда parserFormula.ref
@@ -4202,7 +4187,6 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 						}
 					}
 				}
-
 
 				res = array;
 
@@ -4340,7 +4324,6 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 	}
 	cUnknownFunction.prototype = Object.create(cBaseFunction.prototype);
 	cUnknownFunction.prototype.constructor = cUnknownFunction;
-
 
 	/** @constructor */
 	function parentLeft() {
@@ -4482,7 +4465,6 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 
 		return res;
 	};
-
 
 	/**
 	 * @constructor
@@ -5068,7 +5050,6 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 	cSpecialOperandEnd.prototype.constructor = cSpecialOperandEnd;
 	cSpecialOperandEnd.prototype.type = cElementType.specialFunctionEnd;
 
-
 	/* cFormulaOperators is container for holding all ECMA-376 operators, see chapter $18.17.2.2 in "ECMA-376, Second Edition, Part 1 - Fundamentals And Markup Language Reference" */
 	var cFormulaOperators = {
 		'(': parentLeft,
@@ -5262,7 +5243,6 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 		}
 	}
 
-
 	function getRangeByName(sName, ws) {
 		// Early validation
 		if (!sName || !ws) {
@@ -5305,7 +5285,6 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 
 /*--------------------------------------------------------------------------*/
 
-
 var _func = [];//для велосипеда а-ля перегрузка функций.
 _func[cElementType.number] = [];
 _func[cElementType.string] = [];
@@ -5315,7 +5294,6 @@ _func[cElementType.cellsRange] = [];
 _func[cElementType.empty] = [];
 _func[cElementType.array] = [];
 _func[cElementType.cell] = [];
-
 
 _func[cElementType.number][cElementType.number] = function ( arg0, arg1, what ) {
 	var compareNumbers = function(){
@@ -5454,7 +5432,6 @@ _func[cElementType.number][cElementType.empty] = function ( arg0, arg1, what ) {
 	}
 	return new cError(cErrorType.wrong_value_type);
 };
-
 
 _func[cElementType.string][cElementType.number] = function ( arg0, arg1, what ) {
 	let opt_return_bool = arguments[5];
@@ -5637,7 +5614,6 @@ _func[cElementType.string][cElementType.empty] = function ( arg0, arg1, what ) {
 	return new cError(cErrorType.wrong_value_type);
 };
 
-
 _func[cElementType.bool][cElementType.number] = function ( arg0, arg1, what ) {
 	let opt_return_bool = arguments[5];
 	let res = null;
@@ -5815,13 +5791,11 @@ _func[cElementType.bool][cElementType.empty] = function ( arg0, arg1, what ) {
 	return new cError(cErrorType.wrong_value_type);
 };
 
-
 _func[cElementType.error][cElementType.number] = _func[cElementType.error][cElementType.string] =
   _func[cElementType.error][cElementType.bool] =
     _func[cElementType.error][cElementType.error] = _func[cElementType.error][cElementType.empty] = function(arg0) {
             return arg0;
         };
-
 
 _func[cElementType.empty][cElementType.number] = function ( arg0, arg1, what ) {
     if ( what === ">" ) {
@@ -5917,7 +5891,6 @@ _func[cElementType.empty][cElementType.empty] = function ( arg0, arg1, what ) {
     return new cError( cErrorType.wrong_value_type );
 };
 
-
 _func[cElementType.cellsRange][cElementType.number] = _func[cElementType.cellsRange][cElementType.string] =
     _func[cElementType.cellsRange][cElementType.bool] = _func[cElementType.cellsRange][cElementType.error] =
     _func[cElementType.cellsRange][cElementType.array] =
@@ -5926,7 +5899,6 @@ _func[cElementType.cellsRange][cElementType.number] = _func[cElementType.cellsRa
             return _func[cross.type][arg1.type]( cross, arg1, what );
         };
 
-
 _func[cElementType.number][cElementType.cellsRange] = _func[cElementType.string][cElementType.cellsRange] =
     _func[cElementType.bool][cElementType.cellsRange] = _func[cElementType.error][cElementType.cellsRange] =
     _func[cElementType.array][cElementType.cellsRange] =
@@ -5934,7 +5906,6 @@ _func[cElementType.number][cElementType.cellsRange] = _func[cElementType.string]
             var cross = arg1.cross( bbox );
             return _func[arg0.type][cross.type]( arg0, cross, what );
         };
-
 
 _func[cElementType.cellsRange][cElementType.cellsRange] = function ( arg0, arg1, what, bbox ) {
   var cross1 = arg0.cross(bbox), cross2 = arg1.cross(bbox);
@@ -8162,7 +8133,6 @@ function parserFormula( formula, parent, _ws ) {
 					startArrayArg = null;
 				}
 
-
 				argPosArrMap[currentFuncLevel][argPosArrMap[currentFuncLevel].length - 1].end = ph.pCurrPos;
 				argPosArrMap[currentFuncLevel][argPosArrMap[currentFuncLevel].length] = {start: ph.pCurrPos + 1};
 
@@ -8271,7 +8241,6 @@ function parserFormula( formula, parent, _ws ) {
 			let oRange = null;
 			let bRecursiveCell = parserFormula.ca;
 			let sFunctionName = "";
-
 
 			if (levelFuncMap.length && levelFuncMap[currentFuncLevel]) {
 				sFunctionName = levelFuncMap[currentFuncLevel].func.name;
@@ -8923,7 +8892,6 @@ function parserFormula( formula, parent, _ws ) {
 					parseResult.allFunctionsPos.push({func: levelFuncMap[currentFuncLevel].func, start: levelFuncMap[currentFuncLevel].startPos, end: ph.pCurrPos, args: _argPos});
 				}*/
 
-
 				if (!parseResult.allFunctionsPos) {
 					parseResult.allFunctionsPos = [];
 				}
@@ -9124,7 +9092,6 @@ function parserFormula( formula, parent, _ws ) {
 			return this.isParsed = false;
 		}
 	};
-
 
 	let enabledToSingle =
 	{
@@ -13732,7 +13699,6 @@ function parserFormula( formula, parent, _ws ) {
 	window['AscCommonExcel'].aExcludeRecursiveFormulas = aExcludeRecursiveFormulas;
 
 	window['AscCommonExcel'].cReplaceFormulaType = cReplaceFormulaType;
-
 
 	window['AscCommonExcel'].cNumber = cNumber;
 	window['AscCommonExcel'].cString = cString;

@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -1498,7 +1493,6 @@
         oClass.size = value;
     };
 
-
     AscDFH.changesFactory[AscDFH.historyitem_DLbl_SetDelete] = window['AscDFH'].CChangesDrawingsBool;
     AscDFH.changesFactory[AscDFH.historyitem_DLbl_SetShowBubbleSize] = window['AscDFH'].CChangesDrawingsBool;
     AscDFH.changesFactory[AscDFH.historyitem_DLbl_SetShowCatName] = window['AscDFH'].CChangesDrawingsBool;
@@ -2105,7 +2099,6 @@
     drawingContentChanges[AscDFH.historyitem_Chart_AddPivotFmt] = function(oClass) {
         return oClass.pivotFmts;
     };
-
 
 // Import
     var CMatrix = AscCommon.CMatrix;
@@ -2801,7 +2794,6 @@
         var _text_rect_width = _r - _l;
         var nVert = _body_pr.vert;
 
-
         if(!_body_pr.upright) {
             if(!(nVert === AscFormat.nVertTTvert || nVert === AscFormat.nVertTTvert270)) {
                 switch(_body_pr.anchor) {
@@ -2904,7 +2896,6 @@
             var _vc = this.extY * 0.5;
             var _transformed_shape_xc = this.transform.TransformPointX(_hc, _vc);
             var _transformed_shape_yc = this.transform.TransformPointY(_hc, _vc);
-
 
             var _content_width, content_height2;
             if(!(nVert === AscFormat.nVertTTvert || nVert === AscFormat.nVertTTvert270)) {
@@ -3045,7 +3036,6 @@
                     else
                         style.TextPr.FontSize = 18;
                 }
-
 
                 if(bChartEx) {
                     if (oChartSpace.chartStyle && oChartSpace.chartColors) {
@@ -3390,7 +3380,6 @@
 
             var content = this.txBody.content;
 
-
             var sParPasteId = null;
             if(window['AscCommon'].g_specialPasteHelper && window['AscCommon'].g_specialPasteHelper.showButtonIdParagraph) {
                 sParPasteId = window['AscCommon'].g_specialPasteHelper.showButtonIdParagraph;
@@ -3603,7 +3592,6 @@
         if(dLbl.showSerName != null)
             this.setShowSerName(dLbl.showSerName);
 
-
         if(dLbl.showVal != null)
             this.setShowVal(dLbl.showVal);
         if(dLbl.showDlblsRange != null)
@@ -3671,7 +3659,6 @@
         this.x = x;
         this.y = y;
 
-
         this.calcX = this.x;
         this.calcY = this.y;
 
@@ -3684,7 +3671,6 @@
 
         this.transform = this.localTransform.CreateDublicate();
         this.invertTransform = global_MatrixTransformer.Invert(this.transform);
-
 
         this.localTransformText = this.ownTransformText.CreateDublicate();
         global_MatrixTransformer.TranslateAppend(this.localTransformText, this.calcX, this.calcY);
@@ -3703,13 +3689,11 @@
         this.calcX = this.x;
         this.calcY = this.y;
 
-
         this.localTransform.tx = x;
         this.localTransform.ty = y;
 
         this.transform = this.localTransform.CreateDublicate();
         this.invertTransform = global_MatrixTransformer.Invert(this.transform);
-
 
         this.localTransformText.tx = x;
         this.localTransformText.ty = y;
@@ -3736,7 +3720,6 @@
 
         this.transformText = this.localTransformText.CreateDublicate();
         global_MatrixTransformer.TranslateAppend(this.transformText, x, y);
-
 
         this.invertTransform = global_MatrixTransformer.Invert(this.transform);
         this.invertTransformText = global_MatrixTransformer.Invert(this.transformText);
@@ -3889,7 +3872,6 @@
             }
         }
     };
-
 
     function CSeriesBase() {
         CBaseChartObject.call(this);
@@ -6831,7 +6813,6 @@
             }
         }
 
-
         //check: does category axis exist
         for(var _i = this.charts.length - 1; _i > -1; --_i){
             var oChart = this.charts[_i];
@@ -6972,7 +6953,6 @@
         return false;
     }
 
-
     function getIsSmoothByType(nType) {
         if(nType === Asc.c_oAscChartTypeSettings.scatterSmoothMarker ||
             nType === Asc.c_oAscChartTypeSettings.scatterSmooth) {
@@ -7012,7 +6992,6 @@
         }
         return false;
     }
-
 
     function COrderedAxes(oPlotArea) {
         this.verticalAxes = [];
@@ -8174,7 +8153,6 @@
         this.crosses = null;
         this.crossesAt = null;
 
-
         this.bDelete = false;
         this.majorTickMark = c_oAscTickMark.TICK_MARK_OUT;
         this.minorTickMark = c_oAscTickMark.TICK_MARK_NONE;
@@ -8756,7 +8734,6 @@
         else
             ret.putIntervalBetweenTick(1);
 
-
         if(!AscFormat.isRealNumber(this.tickLblSkip))
             ret.putIntervalBetweenLabelsRule(c_oAscBetweenLabelsRule.auto);
         else {
@@ -8848,7 +8825,6 @@
         var crossesRule = props.getCrossesRule();
         var crosses = props.getCrosses();
         var labelsPosition = props.getLabelsPosition();
-
 
         var bChanged = false;
         if(AscFormat.isRealNumber(intervalBetweenTick) && this.tickMarkSkip !== intervalBetweenTick && this.setTickMarkSkip) {
@@ -9397,7 +9373,6 @@
             }
         }
 
-
         if(AscFormat.isRealBool(props.logScale)) {
             if(props.logScale && AscFormat.isRealNumber(props.logBase) && props.logBase >= 2 && props.logBase <= 1000) {
                 if(scaling.logBase !== props.logBase) {
@@ -9487,7 +9462,6 @@
 					}
 				}
 			}
-
 
         if(AscFormat.isRealNumber(props.crossesRule) && isRealObject(this.crossAx)) {
             if(props.crossesRule === c_oAscCrossesRule.auto) {
@@ -11074,11 +11048,9 @@
             entry.transformText = entry.localTransformText.CreateDublicate();
             global_MatrixTransformer.TranslateAppend(entry.transformText, this.posX, this.posY);
 
-
             global_MatrixTransformer.MultiplyAppend(entry.transformText, t);
 
             entry.invertTransformText = global_MatrixTransformer.Invert(entry.transformText);
-
 
             if(entry.calcMarkerUnion.marker) {
                 entry.calcMarkerUnion.marker.transform = entry.calcMarkerUnion.marker.localTransform.CreateDublicate();
@@ -16301,7 +16273,6 @@
     };
     CView3d.prototype["asc_setHeight"] = CView3d.prototype.asc_setHeight;
 
-
     function CExternalData() {
         CBaseChartObject.call(this);
         this.autoUpdate = null;
@@ -16392,7 +16363,6 @@
         if(this.userInterface !== null)
             oCopy.setUserInterface(this.userInterface);
     };
-
 
     function CPrintSettings() {
         CBaseChartObject.call(this);
@@ -19995,8 +19965,6 @@
     AscDFH.drawingsConstructorsMap[AscDFH.historyitem_ChartStyleEntryEffectRef] = AscFormat.StyleRef;
     AscDFH.drawingsConstructorsMap[AscDFH.historyitem_ChartStyleEntryFontRef] = AscFormat.FontRef;
     AscDFH.drawingsConstructorsMap[AscDFH.historyitem_ChartStyleEntryBodyPr] = AscFormat.CBodyPr;
-
-
 
     //--------------------------------------------------------export----------------------------------------------------
     window['AscFormat'] = window['AscFormat'] || {};

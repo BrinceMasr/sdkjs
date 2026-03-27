@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -38,7 +33,6 @@
 	 * @param {undefined} undefined
 	 */
 	function (window, undefined) {
-
 
 		/*
 		 * Import
@@ -70,7 +64,6 @@
 				this.d = lm.d;
 			}
 		};
-
 
 		LineInfo.prototype.initStartX = function (lineWidth, x, maxWidth, align) {
 			var x_ = x;
@@ -218,7 +211,6 @@
 
 			let w = Math.trunc(_width / codePointCount);
 			let r = Math.max(0, _width - w * codePointCount);
-
 
 			if (1 === codePointCount)
 			{
@@ -472,7 +464,6 @@
 				isVertBottom = (Asc.c_oAscVAlign.Bottom === alignVertical),
 				isVertCenter = (Asc.c_oAscVAlign.Center === alignVertical || Asc.c_oAscVAlign.Dist === alignVertical || Asc.c_oAscVAlign.Just === alignVertical),
 				isVertTop = (Asc.c_oAscVAlign.Top === alignVertical);
-
 
 			var _height = tm.height * ctx.getZoom();
 			if (isVertBottom) {
@@ -1194,7 +1185,6 @@
 			self.textColor = textColor;
 			drawState.justifyDx = dx;
 
-
 			function computeWordDeltaX() {
 				if (align !== AscCommon.align_Justify || n === self.lines.length - 1) {
 					return 0;
@@ -1245,7 +1235,6 @@
 				drawState.y = y;
 				drawState.beginFragment(begin, end, p_);
 			}
-
 
 			drawState.beginLine(l, x1, y);
 			for (i = 0, strBeg = 0; i < this.chars.length; ++i) {
@@ -1348,7 +1337,6 @@
 			return isRtl ? AscCommon.align_Right : AscCommon.align_Left;
 		};
 
-
 		StringRender.prototype.addClipRect = function(x, y, w, h) {
 			this.clipRect.x = x;
 			this.clipRect.y = y;
@@ -1363,7 +1351,6 @@
 		//------------------------------------------------------------export---------------------------------------------------
 		window['AscCommonExcel'] = window['AscCommonExcel'] || {};
 		window["AscCommonExcel"].StringRender = StringRender;
-
 
 		function TableCellDrawState(stringRender) {
 			this.stringRender = stringRender;
@@ -1388,7 +1375,6 @@
 			this.seenNonSpaceInLine = false;
 			this.trailingSpaceStart = Infinity;
 		}
-
 
 		TableCellDrawState.prototype.endLine = function() {
 			this.bidiFlow.end();
@@ -1589,8 +1575,6 @@
 			this.bidiFlow.begin(this.getMainDirection() === AscBidi.DIRECTION_FLAG.RTL);
 		};
 
-
-
 		TableCellDrawState.prototype.reset = function(drawingCtx, textColor, flags, angle) {
 			this.drawingCtx = drawingCtx || this.stringRender.drawingCtx;
 			this.x = 0;
@@ -1630,6 +1614,5 @@
 		};
 
 	}
-
 
 )(window);

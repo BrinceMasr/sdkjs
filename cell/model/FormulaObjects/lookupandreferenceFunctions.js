@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -1273,7 +1268,6 @@ function (window, undefined) {
 		// // If none of the cells in the range touch the table, then return #REF
 		// ...arg2 - [field1,item1] - [field name, element] - the name and element pair point to an element in the field
 
-
 		const getPivotData = function (looking_field, pivot_table_ref, items_array) {
 			if (cElementType.cell !== pivot_table_ref.type && cElementType.cell3D !== pivot_table_ref.type && cElementType.cellsRange !== pivot_table_ref.type && cElementType.cellsRange3D !== pivot_table_ref.type) {
 				return refError;
@@ -1445,7 +1439,6 @@ function (window, undefined) {
 		}
 		arg0 = arg0.tocString();
 
-
 		if(arg1) {
 			if (arg1 instanceof cArea || arg1 instanceof cArea3D) {
 				arg1 = arg1.cross(arguments[1]);
@@ -1477,7 +1470,6 @@ function (window, undefined) {
 
 		return res;
 	};
-
 
 	/**
 	 * @constructor
@@ -1517,7 +1509,6 @@ function (window, undefined) {
 		arg1 = arg1.tocNumber();
 		arg2 = arg2.tocNumber();
 		arg3 = arg3.tocNumber();
-
 
 		if (cElementType.error === arg1.type || cElementType.error === arg2.type || cElementType.error === arg3.type) {
 			return new cError(cErrorType.wrong_value_type);
@@ -1808,7 +1799,6 @@ function (window, undefined) {
 			}
 			return retArr;
 		}
-
 
 		return g_oLOOKUPCache.calculate(arg, arguments[1]);
 	};
@@ -2643,7 +2633,6 @@ function (window, undefined) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 
-
 		if (cElementType.empty === arg2.type) {
 			arg2 = null;
 		} else {
@@ -2667,7 +2656,6 @@ function (window, undefined) {
 		} else if (cElementType.array === arg3.type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
-
 
 		if (cElementType.empty === arg3.type) {
 			arg3 = null;
@@ -2763,7 +2751,6 @@ function (window, undefined) {
 	cDROP.prototype.Calculate = function (arg) {
 		return takeDrop(arg, arguments[1], true);
 	};
-
 
 	/**
 	 * @constructor
@@ -3280,7 +3267,6 @@ function (window, undefined) {
 			}
 		}
 
-
 		if (cElementType.error === arg0Val.type) {
 			return arg0Val;
 		}
@@ -3372,7 +3358,6 @@ function (window, undefined) {
 		r = this.bHor ? bb.r1 : bb.r2;
 		c = this.bHor ? bb.c2 : bb.c1;
 		let oSearchRange = ws.getRange3(bb.r1, bb.c1, r, c);
-
 
 		res = this._get(oSearchRange, arg0Val, arg3, opt_arg4, opt_arg5);
 		if (opt_xlookup) {
@@ -4625,7 +4610,6 @@ function (window, undefined) {
 				arg2RowsLength = arg2.range.bbox.r2 - arg2.range.bbox.r1 + 1;
 			}
 
-
 			let bVertical = bbox.r2 - bbox.r1 >= bbox.c2 - bbox.c1;
 			let index;
 			if(index === undefined) {
@@ -4641,7 +4625,6 @@ function (window, undefined) {
 					return new cError(cErrorType.not_available);
 				}
 			}
-
 
 			let ws = cElementType.cellsRange3D === arg1.type && arg1.isSingleSheet() ? arg1.getWS() : arg1.ws;
 			if (cElementType.cellsRange3D === arg1.type) {
@@ -5097,7 +5080,6 @@ function (window, undefined) {
 
 		let arg1_array = new cArray();
 		arg1_array.fillFromArray(arg1);
-
 
 		var res = new cArray();
 		arg1_array.foreach2(function (elem, r, c) {

@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -78,7 +73,6 @@ var MAP_FMLA_TO_TYPE = {};
     MAP_FMLA_TO_TYPE["sqrt"] = FORMULA_TYPE_SQRT;
     MAP_FMLA_TO_TYPE["tan"] = FORMULA_TYPE_TAN;
     MAP_FMLA_TO_TYPE["val"] = FORMULA_TYPE_VALUE;
-
 
     var MAP_TYPE_TO_FMLA = {};
     MAP_TYPE_TO_FMLA[FORMULA_TYPE_MULT_DIV] =   "*/";
@@ -149,9 +143,6 @@ function SAt2(x, y, z)
 {
     return  x*(Math.sin(Math.atan2(z, y)));
 }
-
-
-
 
 function CalculateGuideValue(name, formula, x, y, z, gdLst)
 {
@@ -295,11 +286,9 @@ function CalculateCnxLst(cnxLstInfo, cnxLst, gdLst)
         if(isNaN(ang_))
             ang_=gdLst[cnxLstInfo[i].ang];
 
-
         x_=gdLst[cnxLstInfo[i].x];
         if(x_===undefined)
             x_=parseInt(cnxLstInfo[i].x);
-
 
         y_=gdLst[cnxLstInfo[i].y];
         if(y_===undefined)
@@ -338,7 +327,6 @@ function CalculateAhXYList(ahXYListInfo, ahXYLst, gdLst)
         if(isNaN(maxX))
             maxX=gdLst[ahXYListInfo[i].maxX];
 
-
         minY=parseInt(ahXYListInfo[i].minY);
         if(isNaN(minY))
             minY=gdLst[ahXYListInfo[i].minY];
@@ -346,7 +334,6 @@ function CalculateAhXYList(ahXYListInfo, ahXYLst, gdLst)
         maxY=parseInt(ahXYListInfo[i].maxY);
         if(isNaN(maxY))
             maxY=gdLst[ahXYListInfo[i].maxY];
-
 
         posX=parseInt(ahXYListInfo[i].posX);
         if(isNaN(posX))
@@ -360,10 +347,8 @@ function CalculateAhXYList(ahXYListInfo, ahXYLst, gdLst)
             posY=gdLst[ahXYListInfo[i].posY];
         }
 
-
         if(ahXYLst[i]==undefined)
             ahXYLst[i]={};
-
 
 	    if(isNaN(minX)) {
 		    minX = 0;
@@ -413,7 +398,6 @@ function CalculateAhPolarList(ahPolarListInfo, ahPolarLst, gdLst)
         if(isNaN(maxR))
             maxR=gdLst[ahPolarListInfo[i].maxR];
 
-
         minAng=parseInt(ahPolarListInfo[i].minAng);
         if(isNaN(minAng))
             minAng=gdLst[ahPolarListInfo[i].minAng];
@@ -421,7 +405,6 @@ function CalculateAhPolarList(ahPolarListInfo, ahPolarLst, gdLst)
         maxAng=parseInt(ahPolarListInfo[i].maxAng);
         if(isNaN(maxAng))
             maxAng=gdLst[ahPolarListInfo[i].maxAng];
-
 
         posX=parseInt(ahPolarListInfo[i].posX);
         if(isNaN(posX))
@@ -434,7 +417,6 @@ function CalculateAhPolarList(ahPolarListInfo, ahPolarLst, gdLst)
         {
             posY=gdLst[ahPolarListInfo[i].posY];
         }
-
 
         if(ahPolarLst[i]==undefined)
         {
@@ -547,7 +529,6 @@ function CChangesGeometryAddAdj(Class, Name, OldValue, NewValue, OldAvValue, bRe
     };
     AscDFH.changesFactory[AscDFH.historyitem_GeometryAddAdj] = CChangesGeometryAddAdj;
 
-
     function CChangesGeometryAddGuide(Class, Name, formula, x, y, z, bReverse){
         this.Type = AscDFH.historyitem_GeometryAddGuide;
         this.Name = Name;
@@ -610,7 +591,6 @@ function CChangesGeometryAddAdj(Class, Name, OldValue, NewValue, OldAvValue, bRe
         this.bReverse = Reader.GetBool();
     };
 
-
     CChangesGeometryAddGuide.prototype.CreateReverseChange = function(){
         return new CChangesGeometryAddGuide(this.Class, this.Name, this.formula, this.x, this.y, this.z, !this.bReverse);
     };
@@ -628,7 +608,6 @@ function CChangesGeometryAddAdj(Class, Name, OldValue, NewValue, OldAvValue, bRe
 
 	CChangesGeometryAddCnx.prototype = Object.create(AscDFH.CChangesBase.prototype);
 	CChangesGeometryAddCnx.prototype.constructor = CChangesGeometryAddCnx;
-
 
     CChangesGeometryAddCnx.prototype.RemoveCnx = function(){
         var aCnxLstInfo = this.Class.cnxLstInfo;
@@ -676,7 +655,6 @@ function CChangesGeometryAddAdj(Class, Name, OldValue, NewValue, OldAvValue, bRe
         return new CChangesGeometryAddCnx(this.Class, this.ang, this.x, this.y, !this.bReverse);
     };
     AscDFH.changesFactory[AscDFH.historyitem_GeometryAddCnx] = CChangesGeometryAddCnx;
-
 
     function CChangesGeometryAddHandleXY(Class, gdRefX, minX, maxX, gdRefY, minY, maxY, posX, posY, bReverse){
         this.Type = AscDFH.historyitem_GeometryAddHandleXY;
@@ -1805,9 +1783,6 @@ function CChangesGeometryAddAdj(Class, Name, OldValue, NewValue, OldAvValue, bRe
     }
     AscFormat.InitClass(CGuide, AscFormat.CBaseNoIdObject, 0);
 
-
-
-
 function PathAccumulator()
 {
     this.pathCommand = [];
@@ -1881,7 +1856,6 @@ function GraphEdge(point1, point2)
     }
 }
 
-
 function GetArrayPolygonsByPaths(dEpsilon, aPathLst)
 {
     var geom = new Geometry();
@@ -1899,7 +1873,6 @@ function GetArrayPolygonsByPaths(dEpsilon, aPathLst)
     }
     return aByPaths;
 }
-
 
     //--------------------------------------------------------export----------------------------------------------------
     window['AscFormat'] = window['AscFormat'] || {};

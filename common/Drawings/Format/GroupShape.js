@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -45,7 +40,6 @@
 		var global_MatrixTransformer = AscCommon.global_MatrixTransformer;
 
 		var CShape = AscFormat.CShape;
-
 
 		AscDFH.changesFactory[AscDFH.historyitem_GroupShapeSetNvGrpSpPr] = AscDFH.CChangesDrawingsObject;
 		AscDFH.changesFactory[AscDFH.historyitem_GroupShapeSetSpPr] = AscDFH.CChangesDrawingsObject;
@@ -81,13 +75,11 @@
 			this.nvGrpSpPr = null;
 			this.spTree = [];
 
-
 			this.invertTransform = null;
 			this.scaleCoefficients = {cx: 1, cy: 1};
 
 			this.arrGraphicObjects = [];
 			this.selectedObjects = [];
-
 
 			this.selection =
 				{
@@ -418,7 +410,6 @@
 			}
 		};
 
-
 		CGroupShape.prototype.isPlaceholder = function () {
 			return !!(this.nvGrpSpPr != null && this.nvGrpSpPr.nvPr && this.nvGrpSpPr.nvPr.ph);
 		};
@@ -475,7 +466,6 @@
 			}
 			for (var i = 0; i < this.spTree.length; ++i)
 				this.spTree[i].draw(graphics);
-
 
 			this.drawLocks(this.transform, graphics);
 			if (oClipRect) {
@@ -543,7 +533,6 @@
 			}
 		};
 
-
 		CGroupShape.prototype.getLocalTransform = function () {
 			if (this.recalcInfo.recalculateTransform) {
 				this.recalculateTransform();
@@ -568,7 +557,6 @@
 				if (this.spPr && this.spPr.xfrm && this.spPr.xfrm.isNotNullForGroup()) {
 
 					var dExtX = this.spPr.xfrm.extX, dExtY = this.spPr.xfrm.extY;
-
 
 					if (this.drawingBase && !this.group) {
 						var metrics = this.drawingBase.getGraphicObjectMetrics();
@@ -1368,7 +1356,6 @@
 			return {posX: pos_x, posY: pos_y};
 		};
 
-
 		CGroupShape.prototype.getParentObjects = function () {
 			var parents = {slide: null, layout: null, master: null, theme: null};
 			return parents;
@@ -1417,7 +1404,6 @@
 		CGroupShape.prototype.loadDocumentStateAfterLoadChanges = AscFormat.DrawingObjectsController.prototype.loadDocumentStateAfterLoadChanges;
 		CGroupShape.prototype.getAllConnectors = AscFormat.DrawingObjectsController.prototype.getAllConnectors;
 		CGroupShape.prototype.getAllShapes = AscFormat.DrawingObjectsController.prototype.getAllShapes;
-
 
 		CGroupShape.prototype.calculateSnapArrays = function (snapArrayX, snapArrayY) {
 			var sp;
@@ -1668,7 +1654,6 @@
 				this.spTree[nSp].GetAllOleObjects(sPluginId, arrObjects);
 			}
 		};
-
 
 		CGroupShape.prototype.checkXfrm = function () {
 			if (!this.spPr) {

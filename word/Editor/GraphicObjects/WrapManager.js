@@ -12,24 +12,18 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
-
 
 // Import
 var History = AscCommon.History;
@@ -49,7 +43,6 @@ function CWrapPolygon(wordGraphicObject)
     this.edited = false;
 
     this.wrapSide = WRAP_TEXT_SIDE_BOTH_SIDES;
-
 
     this.posX = null;
     this.posY = null;
@@ -335,7 +328,6 @@ CWrapPolygon.prototype =
                             min_x = intersection_bottom.min;
                     }
                 }
-
 
                 var arr_points = this.calculatedPoints;
                 var point_count = arr_points.length;
@@ -785,13 +777,11 @@ CWrapPolygon.prototype =
 };
 CWrapPolygon.prototype.constructor = CWrapPolygon;
 
-
 function CPolygonPoint()
 {
     this.x = +0;
     this.y = +0;
 }
-
 
 function CWrapManager(graphicPage)
 {
@@ -952,7 +942,6 @@ CWrapManager.prototype =
             }
         }
 
-
         for(index = 0; index < hdrFtrRa.length; ++index)
         {
             arr_intervals.push(hdrFtrRa[index]);
@@ -1027,7 +1016,6 @@ function TrackNewPointWrapPolygon(originalObject, point1)
     this.point2 = originalObject.parent.wrappingPolygon.calculatedPoints[point1 + 1] ? originalObject.parent.wrappingPolygon.calculatedPoints[point1 + 1] : originalObject.parent.wrappingPolygon.calculatedPoints[0];
 }
 
-
 TrackNewPointWrapPolygon.prototype =
 {
     track: function(x, y)
@@ -1072,7 +1060,6 @@ TrackPointWrapPointWrapPolygon.prototype =
         overlay.ds();
     }
 };
-
 
 function CChangesWrapPolygonEdited(Class, OldPr, NewPr){
 	AscDFH.CChangesBaseBoolProperty.call(this, Class, OldPr, NewPr);
@@ -1168,12 +1155,10 @@ ArrayWrapPoint.prototype.Read_FromBinary = function(Reader){
     this.length = nLength;
 };
 
-
 AscDFH.changesFactory = AscDFH.changesFactory || {};
 AscDFH.changesFactory[AscDFH.historyitem_WrapPolygonSetEdited] = CChangesWrapPolygonEdited;
 AscDFH.changesFactory[AscDFH.historyitem_WrapPolygonSetWrapSide] = CChangesWrapPolygonWrapSide;
 AscDFH.changesFactory[AscDFH.historyitem_WrapPolygonSetRelPoints] = CChangesWrapPolygonRelPoints;
-
 
 //--------------------------------------------------------export----------------------------------------------------
 window['AscCommonWord'] = window['AscCommonWord'] || {};

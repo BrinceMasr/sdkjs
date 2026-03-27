@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -393,7 +388,6 @@
 		this.extX = reader.GetDouble();
 		this.extY = reader.GetDouble();
 
-
 		this.geometry = AscFormat.ExecuteNoHistory(function(){ return new AscFormat.Geometry();}, this, []);
 		this.geometry.Read_FromBinary(reader);
 
@@ -434,7 +428,6 @@
 	ObjectToDraw.prototype.getGeometry = function () {
 		return this.geometry;
 	};
-
 
 	function RotateTrackShapeImage(originalObject)
 	{
@@ -607,7 +600,6 @@
 
 		this.overlayObjects = [];
 
-
 		this.arrTransforms = [];
 		this.arrTransforms2 = [];
 		var arr_graphic_objects = originalObject.getArrGraphicObjects();
@@ -624,9 +616,7 @@
 			}
 		}
 
-
 		this.angle = originalObject.rot;
-
 
 	}
 
@@ -756,8 +746,6 @@
 		this.bIsTracked = false;
 		this.chartSpace = oChartSpace;
 
-
-
 		this.originalObject = oChartSpace;
 		this.originalShape = oChartSpace;
 
@@ -783,12 +771,10 @@
 				}
 			}
 
-
 			if(nPointsCount < 30){
 				this.bChartTrack = true;
 			}
 		}
-
 
 		AscFormat.ExecuteNoHistory(function(){
 			this.view3D = oChartSpace.chart.getView3d();
@@ -807,7 +793,6 @@
 			oPen2.Fill = AscFormat.CreateSolidFillRGBA(0x61, 0x9e, 0xde, 255);
 			oPen2.prstDash = 0;
 			this.objectToDraw2 = new OverlayObject(this.geometry, oChartSpace.extX, oChartSpace.extY, null, oPen2, oChartSpace.transform );
-
 
 			var pxToMM = this.chartSpace.chartObj.calcProp.pxToMM;
 			var oChSz = this.chartSizes;
@@ -855,7 +840,6 @@
 
 		};
 
-
 		this.calculateGeometry = function()
 		{
 			AscFormat.ExecuteNoHistory(function(){
@@ -869,8 +853,6 @@
 				this.geometry.pathLst.push(path);
 				var oChSz = this.chartSizes;
 				var processor3D = this.chartSpace.chartObj.processor3D;
-
-
 
 				var centerPoint2 = this.processor3D.convertAndTurnPoint((oChSz.startX + oChSz.w/2)*pxToMM, (oChSz.startY + oChSz.h/2)*pxToMM, this.depthPerspective/2);
 
@@ -988,7 +970,6 @@
 			if(this.view3D.rotX > 90){
 				this.view3D.rotX = 90;
 			}
-
 
 			var OldView = oChartSpace.chart.view3D;
 			if(this.bChartTrack){

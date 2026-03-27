@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -738,7 +733,6 @@ window.AscCommon.g_cIsBeta = "false";
 	var align_Distributed = 4;
 	var align_CenterContinuous = 5;
 
-
 	var linerule_AtLeast = 0x00;
 	var linerule_Auto    = 0x01;
 	var linerule_Exact   = 0x02;
@@ -803,7 +797,6 @@ window.AscCommon.g_cIsBeta = "false";
 		Drop   : 0x01,
 		Margin : 0x02
 	};
-
 
 	var c_oAscChartTitleShowSettings = {
 		none      : 0,
@@ -1445,7 +1438,6 @@ window.AscCommon.g_cIsBeta = "false";
 		wedgeRoundRectCallout: 188
 	}
 
-
 	var ST_ParameterId = {
 		alignTx: 0,
 		ar: 1,
@@ -2000,7 +1992,6 @@ window.AscCommon.g_cIsBeta = "false";
 
 	};
 
-
     /** @enum {number} */
     var c_oAscMathInterfaceType = {
         Common        : 0x00,
@@ -2020,7 +2011,6 @@ window.AscCommon.g_cIsBeta = "false";
         EqArray       : 0x0e,
         Phantom       : 0x0f
     };
-
 
 	/** @enum {number} */
 	var c_oAscMathInterfaceBarPos = {
@@ -2500,7 +2490,6 @@ window.AscCommon.g_cIsBeta = "false";
 	g_aPunctuation[0xFFED] = PUNCTUATION_FLAG_BASE | PUNCTUATION_FLAG_EAST_ASIAN;                                     // ￭
 	g_aPunctuation[0xFFEE] = PUNCTUATION_FLAG_BASE | PUNCTUATION_FLAG_EAST_ASIAN;                                     // ￮
 
-
 	var offlineMode = '_offline_';
 	var chartMode = '_chart_';
 	var oleMode = '_ole_';
@@ -2561,7 +2550,6 @@ window.AscCommon.g_cIsBeta = "false";
 		MultiLevel: 1,
 		SingleLevel: 2
 	};
-
 
 	var c_oAscSmartArtTypes = {
 		AccentedPicture: 0, // Акцентируемый рисунок
@@ -2985,7 +2973,6 @@ window.AscCommon.g_cIsBeta = "false";
 	c_oAscSmartArtSections[c_oAscSmartArtSectionNames.Picture]      = c_oAscSmartArtPictureTypes;
 	c_oAscSmartArtSections[c_oAscSmartArtSectionNames.OfficeCom]    = c_oAscSmartArtOfficeComTypes;
 
-
 	var c_oAscJSONNumberingType = {
 		Remove : "remove",
 		Bullet : "bullet",
@@ -3109,7 +3096,6 @@ window.AscCommon.g_cIsBeta = "false";
 		Hidden : 2
 	};
 
-
 	var c_oAscObjectsAlignType = {
 		Selected: 0,
 		Slide: 1,
@@ -3159,7 +3145,6 @@ window.AscCommon.g_cIsBeta = "false";
 		MoveMarkRemove : 0xFF  // внутреннний тип, для удаления отметок переноса внутри параграфов и таблиц
 	};
 
-
 	/** @enum {number} */
 	var c_oAscSectionBreakType = {
 		NextPage   : 0x00,
@@ -3169,14 +3154,12 @@ window.AscCommon.g_cIsBeta = "false";
 		Column     : 0x04
 	};
 
-
 	var c_oAscSdtLockType = {
 		ContentLocked    : 0x00,
 		SdtContentLocked : 0x01,
 		SdtLocked        : 0x02,
 		Unlocked         : 0x03
 	};
-
 
 	/**
 	 * Типы горизонтального прилегания для автофигур.
@@ -3203,8 +3186,6 @@ window.AscCommon.g_cIsBeta = "false";
 		Outside : 0x03,
 		Top     : 0x04
 	};
-
-
 
 	var c_oAscWatermarkType = {
 		None       : 0,
@@ -3853,7 +3834,6 @@ window.AscCommon.g_cIsBeta = "false";
 		ConfirmAddCellWatches: 5,
 		ConfirmReplaceHeaderFooterPicture: 6
 	};
-
 
 	const c_oPluginContextMenuTypes = {
 		None: "None",
@@ -4743,8 +4723,6 @@ window.AscCommon.g_cIsBeta = "false";
 		c_oAscKeyCodeAnalogues[normalKeyCode].push(parseInt(anotherKeyCode, 10));
 	}
 
-
-
 	const c_oAscExternalReferenceType = {
 		referenceData: 0,
 		link: 1,
@@ -5006,7 +4984,6 @@ window.AscCommon.g_cIsBeta = "false";
 	prot['BlockLine'] = prot.BlockLine;
 	prot['PlainLine'] = prot.PlainLine;
 	prot['PlainParagraph'] = prot.PlainParagraph;
-
 
 	window['Asc']['c_oAscAsyncAction']       = window['Asc'].c_oAscAsyncAction = c_oAscAsyncAction;
 	prot                                     = c_oAscAsyncAction;
@@ -5508,7 +5485,6 @@ window.AscCommon.g_cIsBeta = "false";
 	prot['sysDashDotDot'] = prot.sysDashDotDot;
 	prot['sysDot']        = prot.sysDot;
 
-
     window['Asc']['c_oAscMathInterfaceType'] = window['Asc'].c_oAscMathInterfaceType = c_oAscMathInterfaceType;
     prot                  = c_oAscMathInterfaceType;
     prot['Common'] = prot.Common;
@@ -5527,8 +5503,6 @@ window.AscCommon.g_cIsBeta = "false";
     prot['Matrix'] = prot.Matrix;
     prot['EqArray'] = prot.EqArray;
     prot['Phantom'] = prot.Phantom;
-
-
 
 	prot = window['Asc']['c_oAscMathInterfaceBarPos'] = window['Asc'].c_oAscMathInterfaceBarPos = c_oAscMathInterfaceBarPos;
 	prot['Top']    = c_oAscMathInterfaceBarPos.Top;
@@ -5593,7 +5567,6 @@ window.AscCommon.g_cIsBeta = "false";
 	prot["Right"]   = c_oAscTabType.Right;
 	prot["Left"]    = c_oAscTabType.Left;
 
-
 	prot = window['Asc']['c_oAscRestrictionType'] = window['Asc'].c_oAscRestrictionType = c_oAscRestrictionType;
 	prot['None']           = c_oAscRestrictionType.None;
 	prot['OnlyForms']      = c_oAscRestrictionType.OnlyForms;
@@ -5606,7 +5579,6 @@ window.AscCommon.g_cIsBeta = "false";
 	prot['ReadOnly'] = c_oAscLocalRestrictionType.ReadOnly;
 	prot['Locked']   = c_oAscLocalRestrictionType.Locked;
 	prot['Nosafe']   = c_oAscLocalRestrictionType.Nosafe;
-
 
 	prot =  window["AscCommon"]["c_oAscCellAnchorType"] = window["AscCommon"].c_oAscCellAnchorType = c_oAscCellAnchorType;
 	prot["cellanchorAbsolute"] = prot.cellanchorAbsolute;
@@ -5675,7 +5647,6 @@ window.AscCommon.g_cIsBeta = "false";
 	prot["Http"] = prot.Http;
 	prot["Email"] = prot.Email;
 	prot["Unsafe"] = prot.Unsafe;
-
 
 	window["AscCommon"].changestype_None                      = changestype_None;
 	window["AscCommon"].changestype_Paragraph_Content         = changestype_Paragraph_Content;
@@ -5746,7 +5717,6 @@ window.AscCommon.g_cIsBeta = "false";
 	window['AscCommon']['align_Justify'] = window['AscCommon'].align_Justify = align_Justify;
 	window['AscCommon']['align_Distributed'] = window['AscCommon'].align_Distributed = align_Distributed;
 	window['AscCommon']['align_CenterContinuous'] = window['AscCommon'].align_CenterContinuous = align_CenterContinuous;
-
 
 	window["AscCommon"]["c_oAscFormatPainterState"]    = c_oAscFormatPainterState;
 	c_oAscFormatPainterState["kOff"] = c_oAscFormatPainterState.kOff;
@@ -6082,7 +6052,6 @@ window.AscCommon.g_cIsBeta = "false";
 	prot['Frame']  = c_oAscSdtAppearance.Frame;
 	prot['Hidden'] = c_oAscSdtAppearance.Hidden;
 
-
 	prot = window['Asc']['c_oAscObjectsAlignType'] = window['Asc'].c_oAscObjectsAlignType = c_oAscObjectsAlignType;
 	prot['Selected'] = c_oAscObjectsAlignType.Selected;
 	prot['Slide'] = c_oAscObjectsAlignType.Slide;
@@ -6111,7 +6080,6 @@ window.AscCommon.g_cIsBeta = "false";
 	prot['MoveTo']   = c_oAscRevisionsMove.MoveTo;
 	prot['MoveFrom'] = c_oAscRevisionsMove.MoveFrom;
 
-
 	prot = window['Asc']['c_oAscRevisionsChangeType'] = window['Asc'].c_oAscRevisionsChangeType = c_oAscRevisionsChangeType;
 	prot['Unknown']    = c_oAscRevisionsChangeType.Unknown;
 	prot['TextAdd']    = c_oAscRevisionsChangeType.TextAdd;
@@ -6133,13 +6101,11 @@ window.AscCommon.g_cIsBeta = "false";
 	prot['Continuous'] = c_oAscSectionBreakType.Continuous;
 	prot['Column']     = c_oAscSectionBreakType.Column;
 
-
 	prot = window['Asc']['c_oAscSdtLockType'] = window['Asc'].c_oAscSdtLockType = c_oAscSdtLockType;
 	prot['ContentLocked']    = c_oAscSdtLockType.ContentLocked;
 	prot['SdtContentLocked'] = c_oAscSdtLockType.SdtContentLocked;
 	prot['SdtLocked']        = c_oAscSdtLockType.SdtLocked;
 	prot['Unlocked']         = c_oAscSdtLockType.Unlocked;
-
 
 	prot = window['Asc']['c_oAscAlignH'] = window['Asc'].c_oAscAlignH = c_oAscAlignH;
 	prot['Center']  = c_oAscAlignH.Center;
@@ -6147,7 +6113,6 @@ window.AscCommon.g_cIsBeta = "false";
 	prot['Left']    = c_oAscAlignH.Left;
 	prot['Outside'] = c_oAscAlignH.Outside;
 	prot['Right']   = c_oAscAlignH.Right;
-
 
 	prot = window['Asc']['c_oAscAlignV'] = window['Asc'].c_oAscAlignV = c_oAscAlignV;
 	prot['Bottom']  = c_oAscAlignV.Bottom;
@@ -6370,8 +6335,6 @@ window.AscCommon.g_cIsBeta = "false";
 	prot['ConfirmReplaceFormulaInTable'] = prot.ConfirmReplaceFormulaInTable;
 
 	window['Asc']['c_oAscSmartArtSections'] = window['Asc'].c_oAscSmartArtSections = c_oAscSmartArtSections;
-
-
 
 	prot = window['Asc']['c_oPluginContextMenuTypes'] = window['Asc'].c_oPluginContextMenuTypes = c_oPluginContextMenuTypes;
 	prot['None'] = prot.None;

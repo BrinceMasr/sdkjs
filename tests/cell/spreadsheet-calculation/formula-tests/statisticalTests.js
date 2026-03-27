@@ -12,24 +12,18 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
-
 
 $(function () {
 	// Mocks for API Testing
@@ -116,7 +110,6 @@ $(function () {
 			this.isLoadFullApi = true;
 		};
 
-
 		let api = new Asc.spreadsheet_api({
 			'id-view': 'editor_sdk'
 		});
@@ -128,7 +121,6 @@ $(function () {
 		let docInfo = new Asc.asc_CDocInfo();
 		docInfo.asc_putTitle("TeSt.xlsx");
 		api.DocInfo = docInfo;
-
 
 		window["Asc"]["editor"] = api;
 		AscCommon.g_oTableId.init(api);
@@ -186,7 +178,6 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-
 		oParser = new parserFormula(func + "(A100:C101)", "A1", ws);
 		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
 		assert.ok(oParser.parse(), 'Formula is parsed.');
@@ -230,7 +221,6 @@ $(function () {
 			assert.ok(oParser.parse(), 'Test: Formula ' + func + argStr + ' is parsed.');
 			return oParser.calculate().getValue();
 		};
-
 
 		//***array-formula***
 		ws.getRange2("A100").setValue("1");
@@ -360,7 +350,6 @@ $(function () {
 	function difBetween(a, b) {
 		return Math.abs(a - b) < dif
 	}
-
 
 	/**
 	 * Function creates table or edit existed table.
@@ -728,7 +717,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula AVEDEV(0,0,0) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Number(3). Test with zeros. Result should be 0. 3 arguments used.');
 
-
 		testArrayFormula2(assert, "AVEDEV", 1, 8, null, true);
 	});
 
@@ -1077,7 +1065,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula AVERAGE(1E+100,1E-100) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 5e+99, 'Test: Bounded case: Number(2). Numbers with vastly different scales. 2 arguments used.');
 
-
 		testArrayFormula2(assert, "AVERAGE", 1, 8, null, true);
 	});
 
@@ -1403,7 +1390,6 @@ $(function () {
 		oParser = new parserFormula('AVERAGEA(-1E-307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AVERAGEA(-1E-307) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), -1e-307, 'Test: Bounded case: Number. Very small negative number close to zero. 1 of 5 arguments used.');
-
 
 		testArrayFormula2(assert, "AVERAGEA", 1, 8, null, true);
 	});
@@ -2330,7 +2316,6 @@ $(function () {
         assert.ok(oParser.parse(), "AVERAGEIFS with 5 criteria pairs - no match");
         assert.strictEqual(oParser.calculate().getValue(), "#DIV/0!", "AVERAGEIFS with 5 criteria pairs - no match should return #DIV/0!");
 
-
         // Test with cell references for criteria
         ws.getRange2("J2").setValue("Red");
         ws.getRange2("J3").setValue("Large");
@@ -2344,7 +2329,6 @@ $(function () {
         oParser = new parserFormula("AVERAGEIFS(E2:E7, H2:H7, \">2023\", E2:E7, \">=30\")", "A1", ws);
         assert.ok(oParser.parse(), "AVERAGEIFS with numeric criteria");
         assert.strictEqual(oParser.calculate().getValue(), 45, "AVERAGEIFS with numeric criteria"); // Average of 30, 40, 50, 60
-
 
         // Test with blank criteria
         ws.getRange2("F4").setValue("");
@@ -2702,7 +2686,6 @@ $(function () {
 		ws2.getRange2("A15").setValue("2") // TestName3D4
 		ws2.getRange2("A16").setValue("3"); // TestNameArea3D
 		ws2.getRange2("A17").setValue("4"); // TestNameArea3D
-
 
 		// Positive cases:
 
@@ -3095,7 +3078,6 @@ $(function () {
 		// Case #25: Area, Number(2), Boolean. Parameter x is multi-cell area with incorrect data. Cumulative=TRUE. 4 of 6 arguments used.
 		// Case #27: Number(2), Area, Boolean. Parameter beta is multi-cell area with incorrect data. Cumulative=TRUE. 4 of 6 arguments used.
 
-
 		testArrayFormula2(assert, "BETA.DIST", 4, 6);
 	});
 
@@ -3389,7 +3371,6 @@ $(function () {
 		ws2.getRange2("A13").setValue("3") // TestName3D2
 		ws2.getRange2("A14").setValue("0") // TestName3D3
 		ws2.getRange2("A15").setValue("3") // TestName3D4
-
 
 		// Positive cases:
 
@@ -4001,7 +3982,6 @@ $(function () {
 		// Case #8: Number(3), Boolean. Edge case: very small probability with large number of trials.
 		// Case #9: Number(3), Boolean. Edge case: probability very close to 1 with large number of trials.
 		// Case #10: Number(3), Boolean. Testing with extremely large numbers.
-
 
 		testArrayFormula2(assert, "BINOMDIST", 4, 4);
 	});
@@ -4658,7 +4638,6 @@ $(function () {
 		// Case #23: Formula, Number(3). trials is a date.
 		// Case #5: Number(4). number_s is at maximum (equal to trials).
 
-
 		testArrayFormula2(assert, "BINOM.DIST.RANGE", 3, 4);
 	});
 
@@ -4934,7 +4913,6 @@ $(function () {
 		oParser = new parserFormula('CHIDIST(10^10,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula CHIDIST(10^10,1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Number(2). Large \'x\' and minimum \'deg_freedom\'.');
-
 
 		testArrayFormula2(assert, "CHIDIST", 2, 2);
 	});
@@ -5633,7 +5611,6 @@ $(function () {
 		oParser = new parserFormula('CHISQ.DIST(9.99999999999999E+307,10^10,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula CHISQ.DIST(9.99999999999999E+307,10^10,TRUE) is parsed.');
 		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number, Number, Boolean. Maximum valid x value with maximum valid deg_freedom.');
-
 
 		testArrayFormula2(assert, "CHISQ.DIST", 3, 3);
 	});
@@ -6563,7 +6540,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("35"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("25"); // TestNameArea3D2
 
-
 		// Positive cases:
 
 		// Case #1: Area(2). The χ2 statistic for the data above is 16.16957 with 2 degrees of freedom.
@@ -7379,7 +7355,6 @@ $(function () {
 		ws2.getRange2("A11").setValue("0.05") // TestName3D
 		ws2.getRange2("A12").setValue("2.5") // TestName3D1
 		ws2.getRange2("A13").setValue("50") // TestName3D2
-
 
 		// Positive cases:
 
@@ -8982,11 +8957,9 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 2);
 
-
 		testArrayFormulaEqualsValues(assert, "1,1,1,#N/A;1,1,1,#N/A;#N/A,#N/A,#N/A,#N/A", "COUNTIFS(A1:C2,A1:C2,A1:C2,A1:C2, A1:C2,A1:C2)");
 		testArrayFormulaEqualsValues(assert, "1,0,0,#N/A;1,0,0,#N/A;#N/A,#N/A,#N/A,#N/A", "COUNTIFS(A1:C2,A1:A2,A1:C2,A1:C2,A1:C2,A1:C2)");
 		testArrayFormulaEqualsValues(assert, "#VALUE!,#VALUE!,#VALUE!,#N/A;#VALUE!,#VALUE!,#VALUE!,#N/A;#N/A,#N/A,#N/A,#N/A", "COUNTIFS(A1:C2,A1:C2,A1:A2,A1:C2,A1:A2,A1:C2)");
-
 
 		ws.getRange2("DS2").setValue("12");
 		ws.getRange2("DS3").setValue("2");
@@ -9150,7 +9123,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getElementRowCol(9,0).getValue(), 0, 'Result of COUNTIFS(A98,A88:A99)[9,0]');
 		assert.strictEqual(oParser.calculate().getElementRowCol(10,0).getValue(), 0, 'Result of COUNTIFS(A98,A88:A99)[10,0]');
 		assert.strictEqual(oParser.calculate().getElementRowCol(11,0).getValue(), 0, 'Result of COUNTIFS(A98,A88:A99)[11,0]');
-
 
 		// bug 58497
 		ws.getRange2("A100:Z300").cleanAll();
@@ -9904,7 +9876,6 @@ $(function () {
 		assert.strictEqual(result.getElementRowCol(3, 0).getValue(), 0, 'Row 4: COUNTIF with criteria "Red" returns 0');
 		assert.strictEqual(result.getElementRowCol(4, 0).getValue(), 3, 'Row 5: COUNTIF with criteria ">5" returns 3');
 		assert.strictEqual(result.getElementRowCol(5, 0).getValue(), 3, 'Row 6: COUNTIF with criteria "5" returns 3');
-
 
 		// Case #57: Area3D, Number. Count numeric values equal to 5 in 3D range
 		oParser = new parserFormula('COUNTIF(Sheet2!A1:A6, 5)', "C2", ws);
@@ -11005,7 +10976,6 @@ $(function () {
 		// Case #5: Area, Area. Entire column references
 		// Case #6: Area, Area. Entire row references
 
-
 		testArrayFormula2(assert, "COVARIANCE.P", 2, 2, null, true);
 	});
 
@@ -11972,7 +11942,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number. Basic valid input: positive numbers, cumulative TRUE. Returns cumulative distribution.
 		oParser = new parserFormula('EXPONDIST(1,2,TRUE)', 'A2', ws);
@@ -12171,7 +12140,6 @@ $(function () {
 		// Case #16: Area3D. 3D multi-cell ranges return #VALUE! error.
 		// Case #2: Number. Minimum valid lambda (>0), cumulative TRUE.
 
-
 		testArrayFormula2(assert, "EXPONDIST", 3, 3);
 	});
 
@@ -12222,7 +12190,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Basic valid input: positive numbers, cumulative TRUE. Returns cumulative distribution.
@@ -12470,7 +12437,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number. Basic valid input: probability between 0 and 1, positive integer degrees of freedom. 3 of 3 arguments used.
 		oParser = new parserFormula('FDIST(0.5,10,20)', 'A2', ws);
@@ -12712,7 +12678,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number. Basic valid input: positive number for x, integers for degrees of freedom, cumulative TRUE. 4 of 4 arguments used.
 		oParser = new parserFormula('F.DIST(1,2,3,TRUE)', 'A2', ws);
@@ -12903,7 +12868,6 @@ $(function () {
 		// Case #15: Ref3D. x as 3D reference to text returns #VALUE!. 4 of 4 arguments used.
 		// Case #18: Number. deg_freedom1 ? 10^10 returns #NUM!. 4 of 4 arguments used.
 		// Case #19: Number. deg_freedom2 ? 10^10 returns #NUM!. 4 of 4 arguments used.
-
 
 		testArrayFormula2(assert, "F.DIST", 4, 4);
 	});
@@ -13185,7 +13149,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number. Basic valid input: probability between 0 and 1, positive integer degrees of freedom. 3 of 3 arguments used.
 		oParser = new parserFormula('FINV(0.5,10,20)', 'A2', ws);
@@ -13369,7 +13332,6 @@ $(function () {
 		// Case #20: Area3D. 3D multi-cell range returns #VALUE!. 3 of 3 arguments used.
 		// Case #1: Number. Minimum valid probability and degrees of freedom. 3 of 3 arguments used.
 
-
 		testArrayFormula2(assert, "FINV", 3, 3);
 	});
 
@@ -13417,7 +13379,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Basic valid input: probability between 0 and 1, positive integer degrees of freedom. 3 of 3 arguments used.
@@ -13611,7 +13572,6 @@ $(function () {
 		// Case #11: Boolean. Boolean TRUE returns #NUM!. 3 of 3 arguments used.
 		// Case #1: Number. Minimum valid probability and degrees of freedom. 3 of 3 arguments used.
 
-
 		testArrayFormula2(assert, "F.INV", 3, 3);
 	});
 
@@ -13659,7 +13619,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Basic valid input: probability between 0 and 1, positive integer degrees of freedom. 3 of 3 arguments used.
@@ -13911,7 +13870,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Basic valid input: number between -1 and 1. 1 argument used.
@@ -14166,7 +14124,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number. Basic valid input: number between -1 and 1. 1 argument used.
 		oParser = new parserFormula('FISHERINV(0.5)', 'A2', ws);
@@ -14362,7 +14319,6 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"FORECAST\"", function (assert) {
-
 
 		function forecast(fx, y, x) {
 
@@ -14711,7 +14667,6 @@ $(function () {
 		// Case #15: Name. Named range with text returns #VALUE!. - result diff
 		// Case #1: Number. Minimum valid positive values for x and arrays, non-zero variance in known_x\'s. 3 of 3 arguments used. - result diff
 
-
 	});
 
 	function putDataForForecastEts() {
@@ -14830,7 +14785,6 @@ $(function () {
 		ws.getRange2('B58').setValue('4176486');
 		ws.getRange2('B59').setValue('4347059');
 		ws.getRange2('B60').setValue('3781168');
-
 
 		ws.getRange2('A61').setValue('41548');
 		ws.getRange2('A62').setValue('41579');
@@ -15333,8 +15287,6 @@ $(function () {
 		// Case #18: Number. Larger arrays with 5 elements for values and timeline. 3 of 6 arguments used. - result diff
 		// Case #19: Number. Mismatched array sizes (4 vs 3) for values and timeline returns #N/A. 3 of 6 arguments used. - array sizes diff #N/A
 
-
-
 	});
 
 	QUnit.test("Test: \"FORECAST.ETS.CONFINT\"", function (assert) {
@@ -15473,7 +15425,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Date,Number. Basic valid input: date for target_date, arrays with 3 elements for values and timeline. 3 of 6 arguments used.
@@ -16177,7 +16128,6 @@ $(function () {
 		// Case #11: Area3D. 3D range with 3 cells for target_date. 3 of 6 arguments used.
 		// Case #16: Formula. target_date as formula with float. 3 of 6 arguments used.
 
-
 	});
 
 	QUnit.test("Test: \"FORECAST.ETS.STAT\"", function (assert) {
@@ -16250,7 +16200,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Date,Number. Basic valid input: date for target_date, arrays with 3 elements for values and timeline. 3 of 6 arguments used.
@@ -16445,7 +16394,6 @@ $(function () {
 		oParser = new parserFormula('FORECAST.ETS.STAT({1E-307,2E-307,3E-307},{45655,45656,45657},2,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FORECAST.ETS.STAT({1E-307,2E-307,3E-307},{45655,45656,45657},2,1) is parsed.');
 		//? assert.strictEqual(oParser.calculate().getValue(), 0.001, 'Test: Bounded case: Number. Minimum valid array sizes (3 elements) with smallest valid values, all optional arguments used. 6 of 6 arguments used.');
-
 
 		// TODO: ScETSForecastCalculation.prototype.prefillTrendData - добавить округление числа в this.mnSmplInPrd
 		// TODO множество расхождений в результатах в этой функции. Нужно пересмотреть алгоритм расчета для того набора данных что используется в тестах
@@ -16770,7 +16718,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number. Basic valid input: numeric array for data_array and bins_array. Returns {2,2,1}.
 		oParser = new parserFormula('FREQUENCY({1,2,3,4,5},{2,4})', 'A2', ws);
@@ -16900,7 +16847,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: FREQUENCY({TRUE},0) is parsed.');
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0, 'Test: Positive case: Array, number. Bool in first array.');
 		assert.strictEqual(oParser.calculate().getElementRowCol(1,0).getValue(), 0, 'Test: Positive case: Array, number. Bool in first array.');
-
 
 		// Negative cases:
 		// Case #1: Number. Negative numbers in data_array are counted. Returns {3,0,0}.
@@ -17080,7 +17026,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2\
-
 
 		// Positive cases:
 		// Case #1: Array(2). Valid numeric arrays, returns probability. 2 of 2 arguments used.
@@ -17316,7 +17261,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2\
-
 
 		// Positive cases:
 		// Case #1: Array(2). Valid numeric arrays, returns probability. 2 of 2 arguments used.
@@ -17564,7 +17508,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #0: Number. Basic valid input: integer > 0. 1 argument used.
 		oParser = new parserFormula('GAMMA(10)', 'A2', ws);
@@ -17764,7 +17707,6 @@ $(function () {
 		// Case #2: Number. Maximum positive number accepted by Excel. 1 argument used.
 		// Case #3: Number. Negative number close to -1 but non-integer. 1 argument used.
 
-
 		testArrayFormula2(assert, "GAMMA", 1, 1);
 	});
 
@@ -17818,7 +17760,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #0: Number. Basic valid input: x ? 0, alpha = 1 (exponential distribution), beta > 0, cumulative = TRUE. 4 of 4 arguments used.
@@ -18032,7 +17973,6 @@ $(function () {
 		// Case #2: Number. Maximum positive x accepted by Excel. 4 of 4 arguments used.
 		// Case #3: Number. Maximum positive alpha accepted by Excel. 4 of 4 arguments used.
 
-
 	});
 
 	QUnit.test("Test: \"GAMMA.DIST\"", function (assert) {
@@ -18085,7 +18025,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #0: Number. Basic valid input: x ? 0, alpha = 1 (exponential distribution), beta > 0, cumulative = TRUE. 4 of 4 arguments used.
@@ -18299,7 +18238,6 @@ $(function () {
 		// Case #2: Number. Maximum positive x accepted by Excel. 4 of 4 arguments used.
 		// Case #3: Number. Maximum positive alpha accepted by Excel. 4 of 4 arguments used.
 
-
 		testArrayFormula2(assert, "GAMMA.DIST", 4, 4);
 	});
 
@@ -18349,7 +18287,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #0: Number. Basic valid input: probability = 0.5, alpha > 0, beta > 0. 3 of 3 arguments used.
@@ -18605,7 +18542,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #0: Number. Basic valid input: probability = 0.5, alpha > 0, beta > 0. 3 of 3 arguments used.
 		oParser = new parserFormula('GAMMA.INV(0.5,1,1)', 'A2', ws);
@@ -18826,7 +18762,6 @@ $(function () {
 
 		testArrayFormula(assert, "GAMMALN");
 
-
 		// 	Data for reference link. Use A100-A111
 		ws.getRange2("A1:C214").cleanAll();
 		ws.getRange2("A100").setValue("0.1");
@@ -18864,7 +18799,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #0: Number. Basic valid input: integer > 0. 1 argument used.
@@ -19068,7 +19002,6 @@ $(function () {
 		// Case #6: Area. Multi-cell range returns #NUM!. 1 argument used.
 		// Case #1: Number. Minimum positive number accepted by Excel. 1 argument used.
 
-
 	});
 
 	QUnit.test("Test: \"GAMMALN.PRECISE\"", function (assert) {
@@ -19117,7 +19050,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #0: Number. Basic valid input: integer > 0. 1 argument used.
@@ -19367,7 +19299,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #0: Number. Basic valid input: integer > 0. 1 argument used.
 		oParser = new parserFormula('GAUSS(10)', 'A2', ws);
@@ -19566,7 +19497,6 @@ $(function () {
 		// Need to fix: area handle
 		// Case #6: Area. Multi-cell range returns #NUM!. 1 argument used.
 
-
 		testArrayFormula2(assert, "GAUSS", 1, 1);
 	});
 
@@ -19631,7 +19561,6 @@ $(function () {
 		ws.getRange2("B208").setValue("0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #0: Number. Basic valid input: two positive integers. 2 of 255 arguments used.
@@ -19969,7 +19898,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #0: Array. Basic valid array input for known_y\'s. 1 argument used.
 		oParser = new parserFormula('GROWTH({2;4})', 'A2', ws);
@@ -20199,7 +20127,6 @@ $(function () {
 		// Case #18: Array. Negative known_y\'s returns #NUM!. 1 argument used.
 		// Case #19: Array, Empty. Empty reference for known_x\'s returns #VALUE!. 2 arguments used.
 
-
 		ws.getRange2("A200").setValue("1");
 		ws.getRange2("A201").setValue("2");
 		ws.getRange2("A202").setValue("3");
@@ -20272,7 +20199,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getElementRowCol(2, 0).getValue().toFixed(8) - 0, 4.30886938, "Result of GROWTH({2,8;2,2;10,10},{1,1;1,1;1,1}) [2,0]");
 		assert.strictEqual(oParser.calculate().getElementRowCol(2, 1).getValue().toFixed(8) - 0, 4.30886938, "Result of GROWTH({2,8;2,2;10,10},{1,1;1,1;1,1}) [2,1]");
 
-
 	});
 
 	QUnit.test("Test: \"HARMEAN\"", function (assert) {
@@ -20336,7 +20262,6 @@ $(function () {
 		ws.getRange2("B208").setValue("0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #0: Number. Basic valid input: two positive integers. 2 of 255 arguments used.
@@ -20590,7 +20515,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number(4). All arguments are integers. 4 of 4 arguments used.
 		oParser = new parserFormula('HYPGEOMDIST(2,10,5,20)', 'A2', ws);
@@ -20769,7 +20693,6 @@ $(function () {
 		oParser = new parserFormula('HYPGEOMDIST(1E-307,2,1,3)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: HYPGEOMDIST(1E-307,2,1,3) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue().toFixed(2) - 0, 0.33, 'Test: Bounded case: Number(4). Smallest positive number for sample_s (truncates to 0). 4 of 4 arguments used.');
-
 
 		testArrayFormula2(assert, "HYPGEOMDIST", 4, 4);
 	});
@@ -21011,8 +20934,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: HYPGEOM.DIST(1E-307,2,1,3,TRUE) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0.33333333333333337, 'Test: Bounded case: Number(5). Smallest positive number for sample_s (truncates to 0). 5 of 5 arguments used.');
 
-
-
 		testArrayFormula2(assert, "HYPGEOM.DIST", 5, 5);
 	});
 
@@ -21088,7 +21009,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Basic valid input: arrays with numbers. 2 arguments used.
@@ -21281,7 +21201,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: INTERCEPT({1E+155,1E+155},{1E+155,2E+155}) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Bounded case: Array, Array. Maximum number boundary check. 2 arguments used.');
 
-
 		testArrayFormula2(assert, "INTERCEPT", 2, 2, null, true);
 	});
 
@@ -21323,7 +21242,6 @@ $(function () {
 		oParser = new parserFormula("KURT(10.5,12.4,19.4)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#NUM!");
-
 
 		// Data for reference link. Use A100-A111
 		ws.getRange2("A100").setValue("0.5");
@@ -21439,8 +21357,6 @@ $(function () {
 		// Case #4: Empty. #NUM!
 		// Case #5: Number(3). #DIV/0!
 		// All bounded cases
-
-
 
 		testArrayFormula2(assert, "KURT", 1, 8, null, true);
 	});
@@ -21614,7 +21530,6 @@ $(function () {
 		ws.getRange2("B203").setValue("3");
 		ws.getRange2("B204").setValue("4");
 
-
 		oParser = new parserFormula("LINEST(A202:B204)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(8) - 0, 0.54285714);
@@ -21671,7 +21586,6 @@ $(function () {
 			assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 2);
 			assert.strictEqual(array.getElementRowCol(0, 1).getValue(), 1);
 		}
-
 
 		ws.getRange2("A102").setValue("2310");
 		ws.getRange2("A103").setValue("2333");
@@ -22127,7 +22041,6 @@ $(function () {
 		ws.getRange2("A111").setValue("11");
 		ws.getRange2("A112").setValue("12");
 
-
 		ws.getRange2("B101").setValue("133890");
 		ws.getRange2("B102").setValue("135000");
 		ws.getRange2("B103").setValue("135790");
@@ -22529,7 +22442,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(8) - 0, 4.30886938, "Result of LOGEST({2,8;2,2;10,10},{1,1;1,1;1,1},FALSE) [0,0]");
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 1).getValue().toFixed(8) - 0, 1, "Result of LOGEST({2,8;2,2;10,10},{1,1;1,1;1,1},FALSE) [0,1]");
 
-
 	});
 
 	QUnit.test("Test: \"LOGINV\"", function (assert) {
@@ -22557,7 +22469,6 @@ $(function () {
 		oParser = new parserFormula("LOGINV(0,3.5,1.2)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), loginv(-10, 3.5, 1.2));
-
 
 		// Data for reference link. Use A100-A111
 		ws.getRange2("A100").setValue("0.5");
@@ -23071,7 +22982,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number. Basic valid input: all arguments are numbers. 3 of 3 arguments used.
 		oParser = new parserFormula('LOGNORM.INV(0.5, 0, 1)', 'A2', ws);
@@ -23267,7 +23177,6 @@ $(function () {
 		// Case #11: Number,Area,Number. Multi-cell range returns #NUM!. 3 of 3 arguments used.
 		// Case #12: Number,Number,Area. Multi-cell range returns #NUM!. 3 of 3 arguments used.
 
-
 		testArrayFormula2(assert, "LOGNORM.INV", 3, 3);
 	});
 
@@ -23314,7 +23223,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Basic valid input: positive numbers for x, any real number for mean, positive standard_dev. 3 of 3 arguments used.
@@ -23497,7 +23405,6 @@ $(function () {
 		// Need to fix: ms res diff
 		// Case #6: Area. Multi-cell range returns #VALUE!. 3 of 3 arguments used.
 		// Case #1: Number. Minimum valid values for x and standard_dev. 3 of 3 arguments used.
-
 
 		testArrayFormula2(assert, "LOGNORMDIST", 3, 3);
 	});
@@ -23832,12 +23739,10 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: MAX(TIME(0,0,0), 0) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Time. Min time value. 2 arguments used.');
 
-
 		// Need to fix: errors when only text in args
 		// Case #2: String. Non-numeric strings return 0
 		// Case #6: Boolean, String. Boolean + non-numeric string
 		// Case #9: Ref3D. 3D ref to text.
-
 
 		testArrayFormula2(assert, "MAX", 1, 8, null, true);
 	});
@@ -24061,7 +23966,6 @@ $(function () {
 		oParser = new parserFormula('MAXA(TIME(0,0,0), 0)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MAXA(TIME(0,0,0), 0) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Time. Min time value. 2 arguments used.');
-
 
 		// Need to fix: errors when only text in args. In arrays MS ignores text and logical values?
 		// Case #2: String. Non-numeric strings return 0
@@ -24434,7 +24338,6 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 1);
 
-
 		// Data for reference link. Use A100-A111
 		ws.getRange2("A1:C214").cleanAll();
 		ws.getRange2("A100").setValue("0.5");
@@ -24621,7 +24524,6 @@ $(function () {
 		// Case #2: String. Non-numeric strings return 0
 		// Case #6: Boolean, String. Boolean + non-numeric string
 		// Case #9: Ref3D. 3D ref to text.
-
 
 		testArrayFormula2(assert, "min", 1, 8, null, true);
 	});
@@ -26319,7 +26221,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: NEGBINOMDIST(1000000,5,0.999999999999999) is parsed.');
 		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Number. Large Number_f, max Probability_s. 3 of 3 arguments used.');
 
-
 		// TODO need to fix different results
 		// Need to fix: errors types, ms diff results, area/array handle
 		// Case #2: Number. Floats truncated to integers. 3 of 3 arguments used.
@@ -26861,7 +26762,6 @@ $(function () {
 		oParser = new parserFormula('NORMDIST(1,0,1,"0")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NORMDIST(1,0,1,"0") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Bounded case: String. String convertible to FALSE for cumulative. 4 of 4 arguments used.');
-
 
 		testArrayFormula2(assert, "NORMDIST", 4, 4);
 	});
@@ -28344,8 +28244,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: NORMSINV(Sheet2!A4:A5) is parsed.');
 		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, 'Test: Negative case: Area3D. 3D multi-cell range returns #NUM!.');
 
-
-
 		// Need to fix: area handle, error types difference, empty cell/value handle
 		// Case #10: Area. Single-cell range with valid probabilit.
 		// Case #12: Name. Named range with valid probability (0.5).
@@ -28363,7 +28261,6 @@ $(function () {
 		// Case #12: Boolean. Boolean FALSE (0) returns #NUM!.
 		// Case #13: Area. Multi-cell range returns #NUM!.
 		// Case #15: Name. Named range with text returns #VALUE!.
-
 
 		testArrayFormula(assert, "NORMSINV");
 	});
@@ -28591,7 +28488,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: NORM.S.INV(1-1E-15) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 7.941444487415977, 'Test: Bounded case: Number. Largest valid probability below 1, returns large positive z-score.');
 
-
 		// Need to fix: area handle, error types difference, empty cell/value handle
 		// Case #10: Area. Single-cell range with valid probabilit.
 		// Case #12: Name. Named range with valid probability (0.5).
@@ -28609,7 +28505,6 @@ $(function () {
 		// Case #12: Boolean. Boolean FALSE (0) returns #NUM!.
 		// Case #13: Area. Multi-cell range returns #NUM!.
 		// Case #15: Name. Named range with text returns #VALUE!.
-
 
 	});
 
@@ -28682,7 +28577,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Arrays with numeric values. 2 of 2 arguments used.
@@ -28940,7 +28834,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number, Number. Array of integers, k as decimal. Returns median (2).
 		oParser = new parserFormula('PERCENTILE({1,2,3}, 0.5)', 'A2', ws);
@@ -29183,7 +29076,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number, Number. Array of integers, k as decimal. Returns median (2).
@@ -29442,7 +29334,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number, Number. Array of integers, k as decimal. Returns median (2).
@@ -29731,7 +29622,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #0: Number. Basic valid input: array of numbers, x in array. 2 of 3 arguments used.
@@ -30162,7 +30052,6 @@ $(function () {
 		// Case #6: Area. Multi-cell range for x returns #VALUE!. 2 of 3 arguments used.
 		// Case #7: Boolean. Boolean array returns #N/A. 2 of 3 arguments used.
 
-
 		//TODO нужен другой тест
 		//testArrayFormula2(assert, "PERCENTRANK.EXC", 2, 3, null, true);
 	});
@@ -30226,7 +30115,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #0: Number. Basic valid input: array of numbers, x in array. 2 of 3 arguments used.
@@ -30672,7 +30560,6 @@ $(function () {
 		// Case #18: Number, Area3D. 3D multi-cell range for number_chosen returns #VALUE!. 2 of 2 arguments used.
 		// Case #0: Number, Number. Minimum valid value (0,0) returns 1. 2 of 2 arguments used.
 
-
 		testArrayFormula2(assert, "PERMUT", 2, 2);
 	});
 
@@ -30935,7 +30822,6 @@ $(function () {
 		// Case #17: Area3D, Number. 3D multi-cell range returns #VALUE!. 2 of 2 arguments used.
 		// Case #18: Number, Area3D. 3D multi-cell range for number_chosen returns #VALUE!. 2 of 2 arguments used.
 
-
 		testArrayFormula2(assert, "PERMUTATIONA", 2, 2);
 	});
 
@@ -31175,7 +31061,6 @@ $(function () {
 		// Case #12: Area3D. 3D multi-cell range, returns first cell’s value (2). 1 argument used.
 		// Case #2: Number. Largest valid Excel number. 1 argument used.
 
-
 		testArrayFormula2(assert, "PHI", 1, 1);
 	});
 
@@ -31252,7 +31137,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #0: Number. Valid integer x, positive mean, cumulative TRUE. 3 of 3 arguments used.
@@ -31492,7 +31376,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #0: Number. Valid integer x, positive mean, cumulative TRUE. 3 of 3 arguments used.
@@ -31739,7 +31622,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number,Array. 0.8
@@ -32060,7 +31942,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #0: Array, Number. Array with valid numbers, quart = 2 (median). 2 arguments used.
 		oParser = new parserFormula('QUARTILE({1,2,3,4},2)', 'A2', ws);
@@ -32326,7 +32207,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #0: Array, Number. Array with valid numbers, quart = 2 (median). 2 arguments used.
@@ -32595,7 +32475,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #0: Array, Number. Array with valid numbers, quart = 2 (median). 2 arguments used.
@@ -33067,7 +32946,6 @@ $(function () {
 		// Case #19: Area,Area,Number. Multi-cell range as number returns #VALUE!. 3 of 3 arguments used.
 		// Case #3: Date,Area,Number. Minimum valid date serial (1/1/1900). 3 of 3 arguments used.
 		// Case #2: Number,Empty,Number. Empty ref returns #N/A. 3 of 3 arguments used. - should be Warning window
-
 
 	});
 
@@ -33662,7 +33540,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #0: Array. Basic valid input: arrays with 3 numeric values. 2 arguments used.
 		oParser = new parserFormula('RSQ({1,2,3},{4,5,6})', 'A2', ws);
@@ -33855,7 +33732,6 @@ $(function () {
 		// Case #17: Formula. Nested IF returning valid array. 2 arguments used.
 		// Case #20: Area,Table. Mixed types: area and table reference. 2 arguments used.
 
-
 		testArrayFormula2(assert, "RSQ", 2, 2, null, true)
 	});
 
@@ -33942,7 +33818,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Array with valid numbers. Returns skewness.
@@ -34194,7 +34069,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number. Array with valid numbers. Returns skewness.
 		oParser = new parserFormula('SKEW.P({1,2,3,4,50})', 'A2', ws);
@@ -34386,7 +34260,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: SKEW.P({1E+100,1E+100,1E-100}) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), -0.7071067811865474, 'Test: Bounded case: Number. Highly skewed dataset with extreme values. Returns skewness.');
 
-
 	});
 
 	QUnit.test("Test: \"SLOPE\"", function (assert) {
@@ -34469,7 +34342,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Basic valid input: arrays with three numbers, slope is 0.5.
@@ -34668,7 +34540,6 @@ $(function () {
 		// Case #16: Reference link. Single cell references, returns #DIV/0! error.
 		// Case #19: Formula. Single-element IF result, returns #DIV/0! error.
 
-
 		testArrayFormula2(assert, "SLOPE", 2, 2, null, true);
 	});
 
@@ -34756,7 +34627,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #0: Number. Basic valid input: array of numbers, k as number. 2 arguments used.
@@ -35197,7 +35067,6 @@ $(function () {
 		// Case #14: Area. Multi-cell range for mean, returns #VALUE!. 3 of 3 arguments used.
 		// Case #15: Area. Multi-cell range for stdev, returns #VALUE!. 3 of 3 arguments used.
 
-
 		testArrayFormula2(assert, "STANDARDIZE", 3, 3);
 	});
 
@@ -35495,7 +35364,6 @@ $(function () {
 		// Case #15: Area3D. 3D range with text returns #VALUE!. 1 argument used.
 		// Case #17: Reference link. Reference to cells with text returns #VALUE!. 2 arguments used.
 
-
 	});
 
 	QUnit.test("Test: \"STDEV.P\"", function (assert) {
@@ -35784,7 +35652,6 @@ $(function () {
 		ws.getRange2("E403").setValue("173");
 		ws.getRange2("E404").setValue("112");
 		ws.getRange2("E405").setValue("109");
-
 
 		function stdeva() {
 			var average = 0, res = 0;
@@ -36335,7 +36202,6 @@ $(function () {
 		oParser = new parserFormula('STDEVP(A103:A112)', "AA2", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue().toFixed(5) - 0, 26.05456);
-
 
 		ws.getRange2("A1:C214").cleanAll();
 		// Data for reference link. Use A100-A111
@@ -36914,7 +36780,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number. Basic valid input: arrays with numeric values, equal length, >=3 points.
 		oParser = new parserFormula('STEYX({1,2,3},{4,5,6})', 'A2', ws);
@@ -37110,7 +36975,6 @@ $(function () {
 		// Case #17: Number. All zeros in known_y\'s, valid but may cause issues in regression.
 		// Case #20: Array. Error in known_x\'s array, propagates #N/A.
 
-
 		testArrayFormula2(assert, "STEYX", 2, 2, null, true);
 	});
 
@@ -37169,7 +37033,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number(2), Boolean. Valid numeric inputs, cumulative TRUE. 3 of 3 arguments used.
@@ -37438,7 +37301,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number(2), Boolean. Valid numeric inputs, cumulative TRUE. 3 of 3 arguments used.
 		oParser = new parserFormula('T.DIST(2,10,TRUE)', 'A2', ws);
@@ -37661,7 +37523,6 @@ $(function () {
 		// Case #3: Number(2), Boolean. Largest valid x, large deg_freedom. 3 of 3 arguments used.
 		// Case #4: Number(2), Boolean. Largest negative x, large deg_freedom. 3 of 3 arguments used.
 
-
 		testArrayFormula2(assert, "T.DIST", 3, 3);
 	});
 
@@ -37708,7 +37569,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number(2), Boolean. Valid numeric inputs, cumulative TRUE. 3 of 3 arguments used.
@@ -37929,8 +37789,6 @@ $(function () {
 		// Case #17: Number, Area3D, Boolean. 3D multi-cell range for deg_freedom returns #VALUE!. 3 of 3 arguments used.
 		// Case #3: Number(2), Boolean. Largest valid x, large deg_freedom. 3 of 3 arguments used.
 
-
-
 		testArrayFormula2(assert, "T.DIST.2T", 2, 2);
 	});
 
@@ -37977,8 +37835,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
-
 
 		// Positive cases:
 		// Case #1: Number(2), Boolean. Valid numeric inputs, cumulative TRUE. 3 of 3 arguments used.
@@ -38190,7 +38046,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: T.DIST.RT(-1E+307,1E6) is parsed.');
 		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Bounded case: Number(2), Boolean. Largest negative x, large deg_freedom. 3 of 3 arguments used.');
 
-
 		// Need to fix: error types diff, diff results from MS in some cases
 		// Case #7: Number, Reference link, Boolean. Reference link for deg_freedom. 3 of 3 arguments used.
 		// Case #8: Area, Number, Boolean. Multi-cell range for x returns #VALUE!. 3 of 3 arguments used.
@@ -38200,7 +38055,6 @@ $(function () {
 		// Case #17: Number, Area3D, Boolean. 3D multi-cell range for deg_freedom returns #VALUE!. 3 of 3 arguments used.
 		// Case #3: Number(2), Boolean. Largest valid x, large deg_freedom. 3 of 3 arguments used.
 		// Case #4: Number(2), Boolean. Largest negative x, large deg_freedom. 3 of 3 arguments used.
-
 
 		testArrayFormula2(assert, "T.DIST.RT", 2, 2);
 	});
@@ -38437,7 +38291,6 @@ $(function () {
 		// Case #1: Number. Minimum valid probability (>0) and minimum degrees of freedom (1). 2 arguments used.
 		// Case #2: Number. Maximum valid probability (<1) and maximum degrees of freedom. 2 arguments used.
 
-
 		testArrayFormula2(assert, "TINV", 2, 2, null, true);
 	});
 
@@ -38480,7 +38333,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Basic valid input: probability between 0 and 1, integer degrees of freedom. 2 arguments used.
@@ -38916,7 +38768,6 @@ $(function () {
 		// Case #19: String. String convertible to probability > 1 returns #NUM!. 2 arguments used.
 		// Case #1: Number. Minimum valid probability (>0) and minimum degrees of freedom (1). 2 arguments used.
 		// Case #2: Number. Maximum valid probability (<1) and maximum degrees of freedom. 2 arguments used.
-
 
 		testArrayFormula2(assert, "T.INV.2T", 2, 2);
 	});
@@ -39488,7 +39339,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 1).getValue().toFixed(2) - 0, 102576.47, "Result of TREND(A3:C3,A4:C5,A6:C7,1)[0,1]");
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 2).getValue().toFixed(2) - 0, 102191.92, "Result of TREND(A3:C3,A4:C5,A6:C7,1)[0,2]");
 
-
 		oParser = new parserFormula("TREND(A3:C3,A4:C5,A6:C7,0)", "A2", ws);
 		assert.ok(oParser.parse(), "TREND(A3:C3,A4:C5,A6:C7,0)");
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(2) - 0, 9.41, "Result of TREND(A3:C3,A4:C5,A6:C7,0)[0,0]");
@@ -39858,7 +39708,6 @@ $(function () {
 		// Case #16: Number, Boolean, Number, Number. Second array as boolean, returns #VALUE!. 4 of 4 arguments used.
 		// Case #19: Ref3D, Ref3D, Number, Number. 3D references with invalid data, returns #VALUE!. 4 of 4 arguments used.
 
-
 		//TODO нужна другая функция для тестирования
 		//testArrayFormula2(assert, "TTEST", 4, 4, null, true);
 	});
@@ -40128,7 +39977,6 @@ $(function () {
 		// Case #16: Number, Boolean, Number, Number. Second array as boolean, returns #VALUE!. 4 of 4 arguments used.
 		// Case #19: Ref3D, Ref3D, Number, Number. 3D references with invalid data, returns #VALUE!. 4 of 4 arguments used.
 
-
 	});
 
 	QUnit.test("Test: \"VAR\"", function (assert) {
@@ -40221,7 +40069,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Two valid number inputs. 2 arguments used.
@@ -40469,7 +40316,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Two valid number inputs. 2 arguments used.
@@ -40719,7 +40565,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number. Two valid number inputs. 2 arguments used.
 		oParser = new parserFormula('VAR.S(10,20)', 'A2', ws);
@@ -40910,7 +40755,6 @@ $(function () {
 		// Case #9: Table. Two table columns with text return #VALUE!.
 		// Case #14: String. Strings convertible to numbers (negative and positive). 2 arguments used.
 		// Case #4: Formula. Formulas yielding near-maximum valid numbers. 2 arguments used.
-
 
 		testArrayFormula2(assert, "VAR.S", 1, 8, null, true);
 
@@ -41184,7 +41028,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number. Two valid number inputs. 2 arguments used.
 		oParser = new parserFormula('VARP(10,20)', 'A2', ws);
@@ -41367,7 +41210,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: VARP(1E+307/SQRT(10),1E+307/SQRT(10)+1) is parsed.');
 		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Bounded case: Formula. Formulas yielding near-maximum valid numbers. 2 arguments used.');
 
-
 		// Need to fix: empty handle, string handle, error handle, error types diff, ms result diff
 		// Case #4: String. Strings convertible to numbers. 2 arguments used.
 		// Case #18: String. Short date strings convertible to numbers. 2 arguments used.
@@ -41376,7 +41218,6 @@ $(function () {
 		// Case #9: Table. Two table columns with text return #VALUE!.
 		// Case #14: String. Strings convertible to numbers (negative and positive). 2 arguments used.
 		// Case #4: Formula. Formulas yielding near-maximum valid numbers. 2 arguments used.
-
 
 	});
 
@@ -41433,7 +41274,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Two valid number inputs. 2 arguments used.
@@ -41628,7 +41468,6 @@ $(function () {
 		// Case #19: Array. Arrays with mixed numeric and non-numeric values return #VALUE!.
 		// Case #4: Formula. Formulas yielding near-maximum valid numbers. 2 arguments used.
 
-
 		testArrayFormula2(assert, "VARPA", 1, 8, null, true);
 	});
 
@@ -41680,7 +41519,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number(4). Basic valid input: all numbers, cumulative TRUE. 4 of 4 arguments used.
@@ -41941,7 +41779,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number(4). Basic valid input: all numbers, cumulative TRUE. 4 of 4 arguments used.
 		oParser = new parserFormula('WEIBULL.DIST(2,1.5,2,TRUE)', 'A2', ws);
@@ -42149,7 +41986,6 @@ $(function () {
 		// Case #12: Number(3),Area. Multi-cell range for cumulative returns #NUM!. 4 of 4 arguments used.\
 		// Case #2: Number(4). Maximum valid Excel numbers for x, alpha, beta. 4 of 4 arguments used.
 
-
 		testArrayFormula2(assert, "WEIBULL.DIST", 4, 4);
 	});
 
@@ -42215,7 +42051,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #0: Number. Basic valid input: array of numbers, x as number, sigma provided. 3 of 3 arguments used.
@@ -42416,7 +42251,6 @@ $(function () {
 		// Case #12: Table. Table column with text, returns #VALUE!. 3 of 3 arguments used.
 		// Case #15: Array. Array with boolean, returns #VALUE!. 3 of 3 arguments used.
 		// Case #18: String. Date string converting to negative number, returns #VALUE!. 3 of 3 arguments used.
-
 
 		//TODO нужна другая функция для тестирования
 		//testArrayFormula2(assert, "Z.TEST", 2, 3, null, true);
@@ -42688,8 +42522,6 @@ $(function () {
 		//TODO нужна другая функция для тестирования
 		//testArrayFormula2(assert, "Z.TEST", 2, 3, null, true);
 	});
-
-
 
 	wb.dependencyFormulas.unlockRecal();
 });

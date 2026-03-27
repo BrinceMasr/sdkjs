@@ -12,24 +12,18 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
-
 
 $(function () {
 	// Mocks for API Testing
@@ -109,7 +103,6 @@ $(function () {
 			this.isLoadFullApi = true;
 		};
 
-
 		let api = new Asc.spreadsheet_api({
 			'id-view': 'editor_sdk'
 		});
@@ -121,7 +114,6 @@ $(function () {
 		let docInfo = new Asc.asc_CDocInfo();
 		docInfo.asc_putTitle("TeSt.xlsx");
 		api.DocInfo = docInfo;
-
 
 		window["Asc"]["editor"] = api;
 		AscCommon.g_oTableId.init(api);
@@ -179,7 +171,6 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-
 		oParser = new parserFormula(func + "(A100:C101)", "A1", ws);
 		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
 		assert.ok(oParser.parse(), 'Formula is parsed.');
@@ -223,7 +214,6 @@ $(function () {
 			assert.ok(oParser.parse(), 'Test: Formula ' + func + argStr + ' is parsed.');
 			return oParser.calculate().getValue();
 		};
-
 
 		//***array-formula***
 		ws.getRange2("A100").setValue("1");
@@ -1236,7 +1226,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 8, 'Test: Positive case: Area, Reference link. Area as info_type');
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,1).getValue(), "TRUE", 'Test: Positive case: Area, Reference link. Area as info_type');
 
-
 		// Negative cases:
 		// Case #1: Number, Reference link. info_type parameter as number instead of string - should return #VALUE!
 		oParser = new parserFormula('CELL(1,A100)', 'A2', ws);
@@ -1311,7 +1300,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula CELL("col",INDIRECT(ADDRESS(1,16384))) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 16384, 'Test: Bounded case: String, Formula. Using INDIRECT and ADDRESS to create reference to maximum column - tests boundary values.');
 
-
 	});
 
     QUnit.test("Test: \"ISBLANK\"", function (assert) {
@@ -1361,7 +1349,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Empty. Empty argument treated as empty cell, returns TRUE
@@ -1451,7 +1438,6 @@ $(function () {
 		oParser = new parserFormula('ISBLANK(Sheet2!A4:A5)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: ISBLANK(Sheet2!A4:A5) is parsed.');
 		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), _res, 'Test: Positive case: Area3D. 3D multi-cell range, returns TRUE');
-
 
 		// Case #21: Table. Table column with empty cell, returns TRUE
 		oParser = new parserFormula('ISBLANK(Table1[Column1])', 'A2', ws);
@@ -1590,7 +1576,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: ISBLANK(9.99999999999999E+307) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Bounded case: Formula. Largest Excel number, returns FALSE');
 
-
 		testArrayFormula2(assert, "ISBLANK", 1, 1);
 	});
 
@@ -1646,7 +1631,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Error. #DIV/0! error, returns TRUE
@@ -1906,7 +1890,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Error. #DIV/0! error, returns TRUE
@@ -2175,7 +2158,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Integer input (even), returns TRUE
@@ -2453,7 +2435,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Reference link. Reference to cell with formula returns TRUE. 1 of 1 argument used.
 		oParser = new parserFormula('ISFORMULA(A100)', 'A2', ws);
@@ -2702,7 +2683,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Boolean. Boolean TRUE, returns TRUE
@@ -2954,7 +2934,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Error. #DIV/0! error, returns TRUE
 		oParser = new parserFormula('ISNA(#DIV/0!)', 'A2', ws);
@@ -3157,7 +3136,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: ISNA(9.99999999999999E+307*10) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Bounded case: Formula. Largest Excel number causing overflow (#NUM!), returns TRUE');
 
-
 		testArrayFormula2(assert, "ISNA", 1, 1);
 	});
 
@@ -3200,7 +3178,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Number input, returns TRUE
@@ -3460,7 +3437,6 @@ $(function () {
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
-
 		// Positive cases:
 		// Case #1: Number. Integer input, returns TRUE
 		oParser = new parserFormula('ISNUMBER(123)', 'A2', ws);
@@ -3667,7 +3643,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: ISNUMBER(-9.99999999999999E+307) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Bounded case: Formula. Largest negative Excel number, returns TRUE');
 
-
 		testArrayFormula2(assert, "ISNUMBER", 1, 1);
 	});
 
@@ -3718,7 +3693,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Integer input (even), returns TRUE
@@ -3930,7 +3904,6 @@ $(function () {
 		// Case #7: Boolean. Boolean input, returns #VALUE!
 		// Case #8: Boolean. Boolean input, returns #VALUE!
 
-
 		testArrayFormula2(assert, "ISODD", 1, 1, true, null);
 	});
 
@@ -3973,7 +3946,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Number input, returns TRUE
@@ -4181,7 +4153,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: ISREF(1/0) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Bounded case: Formula. Formula resulting in #DIV/0!, returns TRUE');
 
-
 		testArrayFormula2(assert, "ISREF", 1, 1, null, true);
 	});
 
@@ -4226,7 +4197,6 @@ $(function () {
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
-
 
 		// Positive cases:
 		// Case #1: Number. Number input, returns TRUE
@@ -4466,7 +4436,6 @@ $(function () {
 		oParser = new parserFormula('N("7")', "A7", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 0);
-
 
 		// Data for reference link. Use A100-A111
 		ws.getRange2("A100").setValue("1");
@@ -4923,7 +4892,6 @@ $(function () {
 		// Case #13: String. Date string not a valid sheet name. Returns #N/A. 1 argument used.
 		// Case #14: Formula. Formula resolving to invalid date (#NUM!). Returns #VALUE!. 1 argument used.
 
-
 		testArrayFormula2(assert, "SHEET", 1, 1, null, true);
 	});
 
@@ -4973,7 +4941,6 @@ $(function () {
 		wb.createWorksheet(0, "Sheet3");
 		wb.createWorksheet(0, "Sheet4");
 		wb.createWorksheet(0, "Sheet5");
-
 
 		// Positive cases:
 		// Case #1: Empty. No argument provided, returns number of sheets in the workbook. 0 arguments used.
@@ -5419,7 +5386,6 @@ $(function () {
 		// Case #3: Empty. Reference to empty cell. Returns #VALUE!.
 		// Case #5: Name. Named range with multiple cells. Returns #VALUE!.
 		// Case #6: Name3D. 3D named range with multiple cells. Returns #VALUE!.
-
 
 		//TODO нужна другая функция для тестирования
 		//testArrayFormula2(assert, "TYPE", 1, 1);

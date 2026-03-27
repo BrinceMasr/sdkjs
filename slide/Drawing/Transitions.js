@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -96,7 +91,6 @@ function CTransitionAnimation(htmlpage)
     this.CalculateRect = function()
     {
         // эта функция определяет, где находится рект для перехода
-
 
         var _rect   = editor.WordControl.m_oDrawingDocument.SlideCurrectRect;
 
@@ -427,7 +421,6 @@ function CTransitionAnimation(htmlpage)
                 _ctx1.fillRect(0, 0, oThis.DemonstrationObject.Canvas.width, oThis.DemonstrationObject.Canvas.height);
             }
 
-
             if (null != oThis.CacheImage1.Image)
             {
                 _ctx1.drawImage(oThis.CacheImage1.Image, oThis.Rect.x, oThis.Rect.y, oThis.Rect.w, oThis.Rect.h);
@@ -638,7 +631,6 @@ function CTransitionAnimation(htmlpage)
         var _xSrcO = 0;
         var _ySrcO = 0;
 
-
         let _part = oThis._getPart();
 
         var _offX = (_wDst * (1 - _part)) >> 0;
@@ -779,7 +771,6 @@ function CTransitionAnimation(htmlpage)
         var _yDst = oThis.Rect.y;
         var _wDst = oThis.Rect.w;
         var _hDst = oThis.Rect.h;
-
 
         let _part = oThis._getPart();
 
@@ -1303,7 +1294,6 @@ function CTransitionAnimation(htmlpage)
         var _wDst = oThis.Rect.w;
         var _hDst = oThis.Rect.h;
 
-
         let _part = oThis._getPart();
 
         var _ctx2 = null;
@@ -1690,7 +1680,6 @@ function CTransitionAnimation(htmlpage)
         var _xSrc = 0;
         var _ySrc = 0;
 
-
         let _part = oThis._getPart();
 
         var _offX = (_wDst * _part) >> 0;
@@ -1841,7 +1830,6 @@ function CTransitionAnimation(htmlpage)
         var _xSrc = 0;
         var _ySrc = 0;
 
-
         let _part = oThis._getPart();
 
         var _offX = (_wDst * (1 - _part)) >> 0;
@@ -1988,7 +1976,6 @@ function CTransitionAnimation(htmlpage)
         var _yDst = oThis.Rect.y;
         var _wDst = oThis.Rect.w;
         var _hDst = oThis.Rect.h;
-
 
         let _part = oThis._getPart();
 
@@ -2421,7 +2408,6 @@ function CTransitionAnimation(htmlpage)
         var _wDst = oThis.Rect.w;
         var _hDst = oThis.Rect.h;
 
-
         let _part = oThis._getPart();
 
         switch (oThis.Param)
@@ -2442,7 +2428,6 @@ function CTransitionAnimation(htmlpage)
                     _ctx1.fillStyle = oThis.DemonstrationObject.Canvas.style.backgroundColor;
                     _ctx1.fillRect(0, 0, oThis.DemonstrationObject.Canvas.width, oThis.DemonstrationObject.Canvas.height);
                 }
-
 
                 var _w = ((0.5 * _wDst) * (1 + _part)) >> 0;
                 var _h = ((0.5 * _hDst) * (1 + _part)) >> 0;
@@ -2650,7 +2635,6 @@ function CTransitionAnimation(htmlpage)
         }
         oThis.CurrentTime = new Date().getTime();
 
-
         oThis.SetBaseTransform();
 
         if (oThis.CurrentTime >= oThis.EndTime)
@@ -2659,13 +2643,7 @@ function CTransitionAnimation(htmlpage)
             return;
         }
 
-
-
-
-
-
         let _part = oThis._getPart();
-
 
 		if(!oThis.Morph)
 		{
@@ -2685,12 +2663,8 @@ function CTransitionAnimation(htmlpage)
             oCanvas = oThis.HtmlPage.m_oOverlayApi.m_oControl.HtmlElement;
         }
 
-
-
         oThis.HtmlPage.m_oOverlayApi.Clear();
         oThis.HtmlPage.m_oOverlayApi.CheckRect(oThis.Rect.x, oThis.Rect.y, oThis.Rect.w, oThis.Rect.h);
-
-
 
         oThis.Morph.morph(_part);
 	    oThis.Morph.draw(oCanvas, oThis.Rect, _part)
@@ -3131,7 +3105,6 @@ function CDemonstrationManager(htmlpage)
         this.Canvas.setAttribute("style", "touch-action:none;position:absolute;margin:0;padding:0;left:0px;top:0px;width:100%;height:100%;zIndex:2;background-color:#000000;");
         this.CheckBackgroundColor();
 
-
         this.Canvas.width = AscCommon.AscBrowser.convertToRetinaValue(_width, true);
         this.Canvas.height = AscCommon.AscBrowser.convertToRetinaValue(_height, true);
 
@@ -3358,7 +3331,6 @@ function CDemonstrationManager(htmlpage)
         if (!_is_transition)
             oThis.SlideNum = this.GetPrevVisibleSlide();
 
-
         oThis.StartAnimation(oThis.SlideNum);
         oThis.OnPaintSlide(false);
     };
@@ -3385,8 +3357,6 @@ function CDemonstrationManager(htmlpage)
             oThis.Overlay.setAttribute("style", "touch-action:none;position:absolute;margin:0;padding:0;left:0px;top:0px;width:100%;height:100%;zIndex:3;");
             oThis.Overlay.width = oThis.Canvas.width;
             oThis.Overlay.height = oThis.Canvas.height;
-
-
 
             AscCommon.addMouseEvent(oThis.Overlay, "down", oThis.onMouseDown);
             AscCommon.addMouseEvent(oThis.Overlay, "move", oThis.onMouseMove);
@@ -3511,8 +3481,6 @@ function CDemonstrationManager(htmlpage)
             oThis.CheckWatermark(oThis.Transition);
         }
 
-
-
         // теперь запустим функцию
         var _slides = oThis.HtmlPage.m_oLogicDocument.Slides;
         var nSlideNum = oThis.SlideNum;
@@ -3590,7 +3558,6 @@ function CDemonstrationManager(htmlpage)
 			this.HtmlPage.m_oApi.sync_endDemonstration();
         }
 		this.HtmlPage.m_oApi.DemonstrationReporterEnd();
-
 
         this.SlideAnnotations.clear();
         if (this.HtmlPage.m_oApi.isOnlyDemonstration)
@@ -4230,7 +4197,6 @@ function CDemonstrationManager(htmlpage)
             var _x = x * _w / _w_mm;
             var _y = y * _h / _h_mm;
 
-
             if (oThis.HtmlPage.m_oApi.isReporterMode)
             {
                 _x += ((oThis.HtmlPage.m_oMainParent.AbsolutePosition.L * g_dKoef_mm_to_pix) >> 0);
@@ -4392,7 +4358,6 @@ function CDemonstrationManager(htmlpage)
 		_y /= _rect.h;
 
 		oThis.PointerMove(_x, _y);
-
 
         AscCommon.stopEvent(e);
         return false;

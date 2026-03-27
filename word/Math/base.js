@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -54,8 +49,6 @@ var c_oAscMathInterfaceMatrixColumnRule = {
     Multiple   : 0x04
 };
 
-
-
 /** @enum {number} */
 var c_oAscMathInterfaceEqArrayLineRule = {
     Single     : 0x00,
@@ -79,8 +72,6 @@ var c_oAscMathInterfaceSettingsAlign = {
     Right   : 2,
     Justify : 3
 };
-
-
 
 /** @enum {number} */
 var c_oAscMathMainType = {
@@ -547,7 +538,6 @@ CMathBase.prototype.IsLastRange = function(_CurLine, _CurRange)
     var LinesCount = this.protected_GetLinesCount(),
         RangesCount = this.protected_GetRangesCount(CurLine);
 
-
     return CurLine == LinesCount - 1 && CurRange == RangesCount - 1;
 };
 CMathBase.prototype.UpdatePosBound = function(pos, PosInfo)
@@ -784,7 +774,6 @@ CMathBase.prototype.Resize = function(oMeasure, RPI)
             this.elements[i][j].Resize(oMeasure, RPI);
         }
 
-
     this.recalculateSize(oMeasure, RPI);
 };
 CMathBase.prototype.Resize_2 = function(oMeasure, Parent, ParaMath, RPI, ArgSize)
@@ -854,7 +843,6 @@ CMathBase.prototype.Set_CompiledCtrPrp = function(Parent, ParaMath, RPI)
             Name:       defaultTxtPrp.FontFamily.Name,
             Index:      defaultTxtPrp.FontFamily.Index
         }; // Cambria Math
-
 
         this.RecalcInfo.bCtrPrp = false;
     }
@@ -926,7 +914,6 @@ CMathBase.prototype.IsOneLineText = function() // for degree
     else
         bOneLineText = false;
 
-
     return bOneLineText;
 };
 ////    For Edit   /////
@@ -951,7 +938,6 @@ CMathBase.prototype.SetGaps = function(GapsInfo)
 
     GapsInfo.Left       = GapsInfo.Current;
     GapsInfo.leftRunPrp = GapsInfo.currRunPrp;
-
 
     GapsInfo.Current    = this;
     GapsInfo.currRunPrp = this.Get_CompiledCtrPrp();
@@ -1649,7 +1635,6 @@ CMathBase.prototype.Read_FromBinary2 = function( Reader )
     // Long             : ReviewType
     // Bool             : undefined == ReviewInfo
     // if false         : ReviewInfo
-
 
     this.Id = Reader.GetString2();
 
@@ -2361,7 +2346,6 @@ CMathBase.prototype.UpdatePRS = function(PRS, Metric)
 
     if(PRS.LineDescent < MetricDesc)
         PRS.LineDescent = MetricDesc;
-
 
 };
 CMathBase.prototype.UpdateMetrics = function(PRS, Size)
@@ -3318,7 +3302,6 @@ CMathMenuBase.prototype.Set_DeleteForcedBreak = function()
     this.CanInsertForcedBreak = false;
     this.CanDeleteForcedBreak = true;
 };
-
 
 /**
  * ctrlPr - Control Properties

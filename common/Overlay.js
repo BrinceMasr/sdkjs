@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -65,10 +60,8 @@
         };
         window.g_track_rotate_marker2.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAMAAAC7IEhfAAAAeFBMVEUAAAD///////////////////////////////////////////////////////////////////////////+Tk5Obm5v8/PzAwMD5+fmWlpbt7e3k5OSfn5/z8/PLy8vn5+fExMSsrKyqqqrf39+vr6+9vb2urq7c3NxSmuRpAAAAE3RSTlMA+u2XA+PTrId4WBwTN7EKtLY4iqQP6AAAAWhJREFUOMudVe2SgjAMLN+goN51CxTLp3r3/m943BAqIJTR/RU6O02yTRY2g5tEgW9blu0HUeKyLRxDj0/ghcdVWuxYfAHLiV95B5uvwD4saK7DN+DMSj1f+CYu58l9J27A6XnnJG9R3ZWU6l4Vk+y6D310baHRXvUxdRSP/aYZILJbmebFLRNAlo69x7PEeQdZ5Xz8qiS6fJr8aOnEquATFApdSsr/v1HINUo+Q6nwoDDspfH4JmoJ6shzWcINaNBSlLCI6uvLfyXmAlR2xIKBB/A1ZKiGIGA+8QCtphBawRt+hsBnNvE0M0OPZmwcijRnFvE0U6CuIcbrIUlJRnJL9L0YifTQCgU3p/aH4I7fnWaCIajwMMszCl5A7Aj+TWctGuMT6qG4QtbGodBj9oAyjpke3LSDYXCXq9A8V6GZrsLGcqXlcrneW9elAQgpxdwA3rcUdv4ymdQHtrdvpPvW/LHZ7/8+/gBTWGFPbAkGiAAAAABJRU5ErkJggg==";
 
-
         TRACK_DISTANCE_ROTATE2 = 18;
     }
-
 
     function COverlay()
     {
@@ -707,7 +700,6 @@
 
         this.Graphics.SetIntegerGrid(false);
 
-
         this.Graphics.globalAlpha = 0.5;
         this.m_oContext.globalAlpha = 0.5;
     };
@@ -961,7 +953,6 @@
             this.Graphics.m_oCoordTransform.sx = _scale * (drawPage.right - drawPage.left) / oPage.width_mm;
             this.Graphics.m_oCoordTransform.sy = _scale * (drawPage.bottom - drawPage.top) / oPage.height_mm;
         }
-
 
         this.Graphics.globalAlpha = 0.5;
         this.m_oContext.globalAlpha = 0.5;
@@ -1316,8 +1307,6 @@
 
                             ctx.beginPath();
                         }
-
-
 
                         ctx.fillStyle = (type != AscFormat.TYPE_TRACK.CHART_TEXT) ? _style_white : _style_blue;
                         var TRACK_RECT_SIZE_CUR = (type != AscFormat.TYPE_TRACK.CHART_TEXT) ? SCALE_TRACK_RECT_SIZE : SCALE_TRACK_RECT_SIZE_CT;
@@ -2859,7 +2848,6 @@
 
         overlay.CheckRect(cx - dist, cy - dist, Math.round(TRACK_ADJUSTMENT_SIZE * rPR), Math.round(TRACK_ADJUSTMENT_SIZE * rPR));
 
-
         if(bTextWarp === true)
         {
             ctx.fillStyle = _style_text_adj;
@@ -2897,7 +2885,6 @@
         var dKoefX = wDst / this.CurrentPageInfo.width_mm;
         var dKoefY = hDst / this.CurrentPageInfo.height_mm;
         //
-
 
         var firstGuide, secondGuide;
         if (gmEditPoint.g1X !== undefined && gmEditPoint.g1Y !== undefined) {

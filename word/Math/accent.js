@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -87,7 +82,6 @@ CAccentCircumflex.prototype.calcCoord = function(stretch)
 
     // g_dKoef_px_to_mm = 25.4/96
 
-
     var textScale = fontSize/1000, // 1000 pt
         alpha = textScale*25.4/96 /64;
 
@@ -104,7 +98,6 @@ CAccentCircumflex.prototype.calcCoord = function(stretch)
     X[7] = 2833; Y[7] = 0;
     X[8] = 0; Y[8] = 2373;
 
-
     var XX = [],
         YY = [];
 
@@ -113,14 +106,12 @@ CAccentCircumflex.prototype.calcCoord = function(stretch)
     var a1 = X[3] - X[0], b1 = W,            c1 = X[2] - X[1],
         a2 = X[4] - X[7], b2 = W - 2*X[7],   c2 = X[5] - X[6] ; //X[8] = 0
 
-
     var RX = [];
     for(var i = 0; i < X.length; i++)
         RX[i] = 1;
 
     RX[0] = RX[2] = (b1 - c1)/(a1-c1);
     RX[4] = RX[6] =  (b2 - c2)/(a2-c2);
-
 
     XX[0] = XX[8] = X[0];
     YY[0] = YY[8] = Y[0];
@@ -300,7 +291,6 @@ CAccentTilde.prototype.calcCoord = function(stretch)
     X[25] = 3249; Y[25] = 1243;
     X[26] = 0; Y[26] = 3066;
 
-
     var XX = [],
         YY = [];
 
@@ -311,7 +301,6 @@ CAccentTilde.prototype.calcCoord = function(stretch)
     var Width = stretch/alpha;
     var augm = Width/X[13] * 0.5;
 
-
     for(var i = 0; i < X.length; i++)
     {
         XX[i] = X[i]*alpha*augm;
@@ -320,7 +309,6 @@ CAccentTilde.prototype.calcCoord = function(stretch)
 
     var H = YY[5];
     var W = XX[13];
-
 
     return {XX: XX, YY: YY, W: W, H: H};
 };
@@ -391,7 +379,6 @@ CAccentBreve.prototype.calcCoord = function(stretch)
     X[20] = 20953; Y[20] = 9665;
     X[21] = 21953; Y[21] = 12371;
     X[22] = 25161; Y[22] = 11372;
-
 
     var XX = [],
         YY = [];
@@ -761,7 +748,6 @@ CAccent.prototype.GetTextOfElement = function(oMathText)
 	}
 	return oMathText;
 };
-
 
 /**
  *

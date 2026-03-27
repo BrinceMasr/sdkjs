@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -42,7 +37,6 @@
     AscDFH.changesFactory[AscDFH.historyitem_NotesSetName]        = AscDFH.CChangesDrawingsString;
     AscDFH.changesFactory[AscDFH.historyitem_NotesSetSlide]        = AscDFH.CChangesDrawingsObject;
     AscDFH.changesFactory[AscDFH.historyitem_NotesSetNotesMaster]        = AscDFH.CChangesDrawingsObject;
-
 
     AscDFH.drawingsChangesMap[AscDFH.historyitem_NotesSetClrMap]  = function(oClass, value){oClass.clrMap = value;};
     AscDFH.drawingsChangesMap[AscDFH.historyitem_NotesSetShowMasterPhAnim]  = function(oClass, value){oClass.showMasterPhAnim = value;};
@@ -87,7 +81,6 @@
         this.slide            = null;
 
         this.Master      = null;
-
 
         this.m_oContentChanges = new AscCommon.CContentChanges(); // список изменений(добавление/удаление элементов)
         this.kind = AscFormat.TYPE_KIND.NOTES;
@@ -151,7 +144,6 @@
         History.Add(new AscDFH.CChangesDrawingsObjectNoId(this, AscDFH.historyitem_NotesSetBg, this.cSld.Bg , bg));
         this.cSld.Bg = bg;
     };
-
 
     CNotes.prototype.setCSldName = function(pr){
         History.Add(new AscDFH.CChangesDrawingsString(this, AscDFH.historyitem_NotesSetName, this.cSld.name , pr));
@@ -235,7 +227,6 @@
         }
     };
 
-
     CNotes.prototype.getAllFonts = function(fonts)
     {
         var i;
@@ -254,7 +245,6 @@
     CNotes.prototype.getTheme = function(){
         return this.Master.Theme;
     };
-
 
     CNotes.prototype.getParentObjects = function()
     {
@@ -307,7 +297,6 @@
         return copy;
     };
 
-
     CNotes.prototype.isEmptyBody = function(){
         var oBodyShape = this.getBodyShape();
         if(!oBodyShape){
@@ -350,7 +339,6 @@
     {
         return editor.WordControl.m_oDrawingDocument.GetMMPerDot(pix);
     };
-
 
     CNotes.prototype.Clear_ContentChanges = function()
     {

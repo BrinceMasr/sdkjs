@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -286,7 +281,6 @@
 		this.ShowGuides           = false;
 		this.ShowGridlines        = false;
 
-
 		this.isAddSpaceBetweenPrg = false;
 		this.isPageBreakBefore    = false;
 		this.isKeepLinesTogether  = false;
@@ -330,7 +324,6 @@
 
 		this.mouseMode = "select";
 
-
 		this.presentationViewMode = Asc.c_oAscPresentationViewMode.normal;
 
 		this.frameLoader = null;
@@ -361,7 +354,6 @@
 		else if(config["thumbnails-position"] === "right") {
 			this.thumbnailsPosition = AscCommon.thumbnailsPositionMap.right;
 		}
-
 
 		if (this.isReporterMode)
 		{
@@ -765,7 +757,6 @@
 	asc_docs_api.prototype.asc_AddMasterSlide = function() {
 		if(!this.isMasterMode()) return;
 
-
 		let oLogicDocument = this.private_GetLogicDocument();
 		if(!oLogicDocument) return;
 		oLogicDocument.AddNewMasterSlide();
@@ -893,7 +884,6 @@
 	{
 		this.sendEvent("asc_onCollaborativeChanges");
 	};
-
 
 	asc_docs_api.prototype.SetCollaborativeMarksShowType = function(Type)
 	{
@@ -1063,7 +1053,6 @@
 
 		let aStack = [];
 
-
 		for(let nSelObj = 0; nSelObj < this.SelectedObjectsStack.length; ++nSelObj)
 		{
 			if(this.SelectedObjectsStack[nSelObj].Type === c_oAscTypeSelectElement.Slide)
@@ -1075,7 +1064,6 @@
 		let oDrawingPr = oDrawingsController.getDrawingPropsFromArray(aDrawings);
 		let oParaPr = oDrawingsController.getParagraphParaPr();
 		let oTextPr = oDrawingsController.getParagraphTextPr();
-
 
 		if (oTextPr && oParaPr)
 		{
@@ -1467,7 +1455,6 @@ background-repeat: no-repeat;\
 			setInterval(AscCommon.SafariIntervalFocus, 10);
 	};
 
-
 	asc_docs_api.prototype.OpenDocumentFromZipNoInit = function(data)
 	{
 
@@ -1505,7 +1492,6 @@ background-repeat: no-repeat;\
 				this.WordControl.m_oLogicDocument.readCommentAuthors(oCommentAuthorsReader);
 			}
 		}
-
 
 		var documentPart = doc.getPartByRelationshipType(openXml.Types.presentation.relationType);
 		var contentDocument = documentPart.getDocumentContent();
@@ -1566,7 +1552,6 @@ background-repeat: no-repeat;\
 
 		this.WordControl.m_oDrawingDocument.CheckFontNeeds();
 		this.FontLoader.LoadDocumentFonts(this.WordControl.m_oLogicDocument.Fonts, false);
-
 
 		if (this.isMobileVersion)
 		{
@@ -2374,7 +2359,6 @@ background-repeat: no-repeat;\
 		this.sendEvent("asc_onCanRedo", canRedo);
 	};
 
-
 	/*callbacks*/
 	/*asc_docs_api.prototype.sync_CursorLockCallBack = function(isLock){
 	 this.sendEvent("asc_onCursorLock",isLock);
@@ -2499,7 +2483,6 @@ background-repeat: no-repeat;\
 	{
 		this.WordControl.m_oLogicDocument.goToNextSearchResult();
 	};
-
 
 	asc_docs_api.prototype.gotoSearchResultText = function(navigator)
 	{//переход к результату.
@@ -3728,7 +3711,6 @@ background-repeat: no-repeat;\
 
 	/*----------------------------------------------------------------*/
 
-
 	asc_docs_api.prototype.Update_ParaInd                = function(Ind)
 	{
 		var FirstLine = 0;
@@ -3896,7 +3878,6 @@ background-repeat: no-repeat;\
 		if (!oLogicDocument)
 			return;
 
-
 		var doc = this.WordControl.m_oLogicDocument;
 		var oController = doc.GetCurrentController();
 		if(!oController){
@@ -4033,7 +4014,6 @@ background-repeat: no-repeat;\
 
 		}
 	};
-
 
 	/*
 	 {
@@ -4607,7 +4587,6 @@ background-repeat: no-repeat;\
 		}
 	};
 
-
 	asc_docs_api.prototype.asc_addOleObjectAction = function(sLocalUrl, Data, sApplicationId, fWidth, fHeight, nWidthPix, nHeightPix, bSelect, arrImagesForAddToHistory)
 	{
 		var _image = this.ImageLoader.LoadImage(AscCommon.getFullImageSrc2(sLocalUrl), 1);
@@ -4646,13 +4625,10 @@ background-repeat: no-repeat;\
         return this.WordControl.m_oLogicDocument.GetAllSignatures();
     };
 
-
     asc_docs_api.prototype.asc_CallSignatureDblClickEvent = function(sGuid){
         return this.WordControl.m_oLogicDocument.CallSignatureDblClickEvent(sGuid);
     };
     //-------------------------------------------------------
-
-
 
 	asc_docs_api.prototype.asc_canEditCrop = function()
 	{
@@ -4696,7 +4672,6 @@ background-repeat: no-repeat;\
 		return bRes;
 	};
 
-
 	asc_docs_api.prototype.AddTextArt = function(nStyle)
 	{
 		if (editor.WordControl.m_oLogicDocument.Document_Is_SelectionLocked(changestype_Drawing_Props) === false)
@@ -4704,7 +4679,6 @@ background-repeat: no-repeat;\
 			this.WordControl.m_oLogicDocument.AddTextArt(nStyle);
 		}
 	};
-
 
 	asc_docs_api.prototype.canGroup = function()
 	{
@@ -5081,7 +5055,6 @@ background-repeat: no-repeat;\
 			this.WordControl.OnScroll();
 	};
 
-
 	asc_docs_api.prototype.AddShapeOnCurrentPage = function(sPreset){
 		if(!this.WordControl.m_oLogicDocument){
 			return;
@@ -5195,7 +5168,6 @@ background-repeat: no-repeat;\
 		return oPresentation && oPresentation.GetCurrentController();
 	};
 
-
 	asc_docs_api.prototype.ChangeColorScheme = function(sSchemeName)
 	{
 		var scheme = AscCommon.getColorSchemeByName(sSchemeName);
@@ -5247,7 +5219,6 @@ background-repeat: no-repeat;\
 			this.asc_hideMediaControl();
 		}
 	};
-
 
 	//-----------------------------------------------------------------
 	// Функции для работы с комментариями
@@ -5471,7 +5442,6 @@ background-repeat: no-repeat;\
 		}
 	};
 
-
 	//Remove All comments
 	asc_docs_api.prototype.asc_RemoveAllComments = function(isMine, isCurrent)
 	{
@@ -5603,7 +5573,6 @@ background-repeat: no-repeat;\
 		this.sendEvent("asc_onUnLockComment", Id);
 	};
 
-
 	asc_docs_api.prototype._goToComment = function(data)
 	{
 		if (this.WordControl && this.WordControl.m_oLogicDocument && data)
@@ -5615,7 +5584,6 @@ background-repeat: no-repeat;\
 			}
 		}
 	};
-
 
 	// работа с шрифтами
 	asc_docs_api.prototype.asyncFontsDocumentStartLoaded = function(blockType)
@@ -5874,7 +5842,6 @@ background-repeat: no-repeat;\
 			}
 		}
 
-
 		this.WordControl.m_oLogicDocument.Document_UpdateInterfaceState();
 		this.WordControl.m_oLogicDocument.Document_UpdateRulersState();
 		this.WordControl.m_oLogicDocument.Document_UpdateSelectionState();
@@ -6008,8 +5975,6 @@ background-repeat: no-repeat;\
 		this.addMediaCallback(sImageUrlLocal, obj, sAudioUrl, "localAudio");
 	};
 
-
-
 	asc_docs_api.prototype.asc_AddVideoUrlCallback = function(sImageUrlLocal, sVideoUrl, obj)
 	{
 		this.addMediaCallback(sImageUrlLocal, obj, sVideoUrl, "linkVideo");
@@ -6048,7 +6013,6 @@ background-repeat: no-repeat;\
 			oApi.WordControl.m_oLogicDocument.addImages([oImageObject], oPlaceholder);
 		});
 	};
-
 
 	asc_docs_api.prototype.asc_AddVideoUrl = function(sImageUrlLocal, sVideoUrl, obj)
 	{
@@ -6650,7 +6614,6 @@ background-repeat: no-repeat;\
 		this.sendEvent("asc_onNotesShow", this.getIsNotesShow());
 	};
 
-
 	//-----------------------------------------------------------------
 	// Функции для работы с гиперссылками
 	//-----------------------------------------------------------------
@@ -6901,7 +6864,6 @@ background-repeat: no-repeat;\
 			this.WordControl.m_oDrawingDocument.DrawImageTextureFillTextArt(null);
 		}
 
-
 		var _len = this.SelectedObjectsStack.length;
 		if (_len > 0)
 		{
@@ -6969,7 +6931,6 @@ background-repeat: no-repeat;\
 				break;
 			}
 		}
-
 
 		var bgFill = aSlides[0].backgroundFill ? aSlides[0].backgroundFill.createDuplicate() : aSlides[0].backgroundFill;
 		for(i = 1; i < aSlides.length; ++i)
@@ -7552,7 +7513,6 @@ background-repeat: no-repeat;\
 			}
 		}
 
-
 	};
 
 	asc_docs_api.prototype.EndDemonstration = function(isNoUseFullScreen)
@@ -8094,7 +8054,6 @@ background-repeat: no-repeat;\
 		}
 		if(!oTrToApply)
 			return;
-
 
 		if (!oPresentation.IsSelectionLocked(AscCommon.changestype_SlideTransition, {All : true}))
 		{
@@ -9366,7 +9325,6 @@ background-repeat: no-repeat;\
 		return oLogicDocument.GetSpeechDescription(prevState, action);
 	};
 
-
 	asc_docs_api.prototype.asc_changePresentationViewMode = function(mode) {
 		if(this.presentationViewMode === mode) return;
 		this.presentationViewMode = mode;
@@ -9434,7 +9392,6 @@ background-repeat: no-repeat;\
 		if (this.WordControl)
 			this.WordControl.setMouseMode(mode);
 	};
-
 
 	asc_docs_api.prototype.asc_setDemoBackgroundColor = function(sColor)
 	{
@@ -9771,7 +9728,6 @@ background-repeat: no-repeat;\
 	asc_docs_api.prototype['asc_moveAnimationLater']              = asc_docs_api.prototype.asc_moveAnimationLater;
 	asc_docs_api.prototype['asc_onShowAnimTab']                   = asc_docs_api.prototype.asc_onShowAnimTab;
 
-
 	asc_docs_api.prototype['StartAddShape']                       = asc_docs_api.prototype.StartAddShape;
 	asc_docs_api.prototype['asc_canEditGeometry']                 = asc_docs_api.prototype.asc_canEditGeometry;
 	asc_docs_api.prototype['asc_editPointsGeometry']              = asc_docs_api.prototype.asc_editPointsGeometry;
@@ -10084,7 +10040,6 @@ background-repeat: no-repeat;\
 	asc_docs_api.prototype["asc_removeExternalReferences"] = asc_docs_api.prototype.asc_removeExternalReferences;
 	asc_docs_api.prototype["asc_changeExternalReference"]  = asc_docs_api.prototype.asc_changeExternalReference;
 
-
 	asc_docs_api.prototype["asc_changePresentationViewMode"] = asc_docs_api.prototype.asc_changePresentationViewMode;
 	asc_docs_api.prototype["asc_AddMasterSlide"] = asc_docs_api.prototype.asc_AddMasterSlide;
 	asc_docs_api.prototype["asc_AddSlideLayout"] = asc_docs_api.prototype.asc_AddSlideLayout;
@@ -10108,7 +10063,6 @@ background-repeat: no-repeat;\
 
 	asc_docs_api.prototype["asc_SetThumbnailsPosition"] = asc_docs_api.prototype.asc_SetThumbnailsPosition;
 	asc_docs_api.prototype["getJsApi"] = asc_docs_api.prototype.getJsApi;
-
 
 	window['Asc']['asc_CCommentDataSlide'] = window['Asc'].asc_CCommentDataSlide = asc_CCommentDataSlide;
 	window['Asc']['asc_CCommentData'] = window['Asc'].asc_CCommentData = asc_CCommentDataSlide;

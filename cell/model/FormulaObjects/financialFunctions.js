@@ -12,17 +12,12 @@
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
  * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
- *
+ *  *
  * The  interactive user interfaces in modified source and object code versions
  * of the Program must display Appropriate Legal Notices, as required under
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
+ *  *
  * All the Product's GUI elements, including illustrations and icon sets, as
  * well as technical writing content are licensed under the terms of the
  * Creative Commons Attribution-ShareAlike 4.0 International. See the License
@@ -351,7 +346,6 @@ function (window, undefined) {
 		var dsc = coupD - dbc;
 		var diff = dsc / coupD - 1;
 		yld = yld / frequency + 1;
-
 
 		coupon *= 100 / frequency;
 
@@ -1275,7 +1269,6 @@ function (window, undefined) {
 		maturity = Math.floor(maturity.getValue());
 		basis = Math.floor(basis.getValue());
 		frequency = Math.floor(frequency.getValue());
-
 
 		if (settlement < startRangeCurrentDateSystem || maturity < startRangeCurrentDateSystem ||
 			settlement >= maturity || basis < 0 || basis > 4 ||
@@ -2587,7 +2580,6 @@ function (window, undefined) {
 			return resArr;
 		}
 
-
 		let rate = arg[0], nper = arg[1], pmt = arg[2], pv = arg[3] ? arg[3] : new cNumber(0),
 			type = arg[4] ? arg[4] : new cNumber(0);
 
@@ -3582,7 +3574,6 @@ function (window, undefined) {
 		if (rate == -1) {
 			return new cError(cErrorType.division_by_zero);
 		}
-
 
 		for (var i = 1; i < arg.length; i++) {
 			var argI = arg[i];
@@ -6051,7 +6042,6 @@ function (window, undefined) {
 		if (arg0.getValue() <= 0) {
 			return new cError(cErrorType.not_numeric);
 		}
-
 
 		let dateArray = [], valueArray = [];
 
