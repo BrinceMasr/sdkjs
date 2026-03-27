@@ -8381,7 +8381,7 @@
 			this.idx = null;
 			this.orient = null;
 			this.sz = null;
-			this.type = null;
+			this.type = AscFormat.phType_obj;
 		}
 
 		InitClass(Ph, CBaseFormatObject, AscDFH.historyitem_type_Ph);
