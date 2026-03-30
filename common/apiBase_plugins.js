@@ -1916,6 +1916,24 @@
 		}
 	};
 
+	/**
+	 * Enables or disables the modal plugin footer button by index.
+	 *
+	 * @memberof Api
+	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 *
+	 * @param {number} index - The button index (0-based) in the buttons array from config.json.
+	 * @param {boolean} isDisabled - Specifies whether to disable (true) or enable (false) the button.
+	 *
+	 * @alias SetButtonDisabled
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/SetButtonDisabled.js
+	 */
+	Api.prototype['pluginMethod_SetButtonDisabled'] = function (index, isDisabled) {
+		const eventName = isDisabled ? 'asc_onPluginSetButtonDisabled' : 'asc_onPluginSetButtonEnabled';
+		this.sendEvent(eventName, index);
+	};
+
 	Api.prototype["pluginMethod_GetKeychainStorageInfo"] = function(keys)
 	{
 		if (!this.keychainStorage)

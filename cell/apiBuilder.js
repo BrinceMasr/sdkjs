@@ -7685,13 +7685,13 @@
 	 */
 	Api.InsertPivotExistingWorksheet = function (dataRef, pivotRef, confirmation) {
 		if (dataRef) {
-			dataRef = dataRef.GetWorksheet().GetName() + "!" + dataRef.GetAddress(true, true);
+			dataRef = AscCommon.parserHelp.get3DRef(dataRef.GetWorksheet().GetName(), dataRef.GetAddress(true, true));
 		} else {
 			var options = Asc.editor.asc_getAddPivotTableOptions();
 			dataRef = options.range;
 		}
 		if (pivotRef) {
-			pivotRef = pivotRef.GetWorksheet().GetName() + "!" + pivotRef.GetAddress(true, true);
+			pivotRef = AscCommon.parserHelp.get3DRef(pivotRef.GetWorksheet().GetName(), pivotRef.GetAddress(true, true));
 		} else {
 			private_MakeError('"pivotRef" is undefined.');
 		}
@@ -7715,7 +7715,7 @@
 	Api.InsertPivotNewWorksheet = function (dataRef, newSheetName) {
 		let editor = Asc.editor;
 		if (dataRef) {
-			dataRef = dataRef.GetWorksheet().GetName() + "!" + dataRef.GetAddress(true, true);
+			dataRef = AscCommon.parserHelp.get3DRef(dataRef.GetWorksheet().GetName(), dataRef.GetAddress(true, true));
 		} else {
 			var options = editor.asc_getAddPivotTableOptions();
 			dataRef = options.range;
@@ -17365,7 +17365,7 @@
 	 */
 	ApiPivotTable.prototype.SetSource = function (source) {
 		if (source instanceof ApiRange) {
-			var ref = source.GetWorksheet().GetName() + "!" + source.GetAddress(true, true);
+			var ref = AscCommon.parserHelp.get3DRef(source.GetWorksheet().GetName(), source.GetAddress(true, true));
 			var props = new Asc.CT_pivotTableDefinition();
 			props.asc_setDataRef(ref);
 			this.pivot.asc_set(this.api, props);
@@ -24429,7 +24429,7 @@
 		this.private_changeStyle(function(newRule) {
 			if (newRule.aRuleElements && newRule.aRuleElements[0] &&
 				newRule.aRuleElements[0].aCFVOs && newRule.aRuleElements[0].aCFVOs[0]) {
-				newRule.aRuleElements[0].aCFVOs[0].asc_setVal(value);
+				newRule.aRuleElements[0].aCFVOs[0].asc_setVal(value != null ? value + "" : value);
 			}
 		}, true);
 	};
@@ -24517,7 +24517,7 @@
 		this.private_changeStyle(function(newRule) {
 			if (newRule.aRuleElements && newRule.aRuleElements[0] &&
 				newRule.aRuleElements[0].aCFVOs && newRule.aRuleElements[0].aCFVOs[1]) {
-				newRule.aRuleElements[0].aCFVOs[1].asc_setVal(value);
+				newRule.aRuleElements[0].aCFVOs[1].asc_setVal(value != null ? value + "" : value);
 			}
 		}, true);
 	};
@@ -25337,7 +25337,7 @@
 
 						if (lastCFVO.asc_getType() === window['AscCommonExcel'].ECfvoType.Percent ||
 							lastCFVO.asc_getType() === window['AscCommonExcel'].ECfvoType.Percentile) {
-							let baseValue = parseFloat(lastCFVO.asc_getVal()) || 0;
+							let baseValue = parseFloat(lastCFVO.Val) || 0;
 							let step = (100 - baseValue) / (newIconCount - currentCFVOs.length + 1);
 							let newValue = Math.round(baseValue + step * (i - currentCFVOs.length + 1));
 							newCFVO.asc_setVal(newValue.toString());
@@ -25396,13 +25396,13 @@
 
 		if (cfvo.asc_getType() === window['AscCommonExcel'].ECfvoType.Percent) {
 			let expectedPercent = Math.round((index * 100) / totalCount);
-			let actualValue = parseFloat(cfvo.asc_getVal());
+			let actualValue = parseFloat(cfvo.Val);
 			return Math.abs(actualValue - expectedPercent) <= 1;
 		}
 
 		if (cfvo.asc_getType() === window['AscCommonExcel'].ECfvoType.Percentile) {
 			let expectedPercentile = Math.round((index * 100) / totalCount);
-			let actualValue = parseFloat(cfvo.asc_getVal());
+			let actualValue = parseFloat(cfvo.Val);
 			return Math.abs(actualValue - expectedPercentile) <= 1;
 		}
 
@@ -25475,7 +25475,7 @@
 					if (percentileValues) {
 						cfvo.asc_setType(AscCommonExcel.ECfvoType.Percentile);
 						// Set default percentile values if not already set
-						if (!cfvo.asc_getVal()) {
+						if (!cfvo.Val) {
 							// For 3-icon set: 33%, 67%; for 4-icon set: 25%, 50%, 75%; for 5-icon set: 20%, 40%, 60%, 80%
 							let totalCfvos = iconSetElement.aCFVOs.length;
 							let percentileValue = Math.round((i / (totalCfvos - 1)) * 100);
@@ -25484,7 +25484,7 @@
 					} else {
 						cfvo.asc_setType(AscCommonExcel.ECfvoType.Number);
 						// Reset to default numeric values if needed
-						if (!cfvo.asc_getVal()) {
+						if (!cfvo.Val) {
 							cfvo.asc_setVal("0");
 						}
 					}
@@ -26029,7 +26029,7 @@
 		let t = this;
 		this.parent.private_changeStyle(function (newRule) {
 			let index = t.GetIndex() - 1;
-			newRule.aRuleElements[0].aCFVOs[index].asc_setVal(value);
+			newRule.aRuleElements[0].aCFVOs[index].asc_setVal(value != null ? value + "" : value);
 		}, true);
 	};
 
@@ -29177,7 +29177,7 @@
 	}
 
 	function private_MM2EMU(mm) {
-		return mm * 36000.0;
+		return Math.round(mm * 36000.0);
 	}
 
 	function private_GetDrawingLockType(sType) {

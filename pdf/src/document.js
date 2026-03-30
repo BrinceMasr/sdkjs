@@ -5013,10 +5013,6 @@ var CPresentation = CPresentation || function(){};
         this.UpdateTextProps();
         this.UpdateCanAddHyperlinkState();
         
-        let oGroup = oTargetTextObject && oTargetTextObject.getMainGroup && oTargetTextObject.getMainGroup();
-        if (oTargetTextObject && (!oGroup || !oGroup.IsAnnot())) {
-            oTargetDocContent && oTargetDocContent.Document_UpdateInterfaceState();
-        }
         this.Api.sync_pagePropCallback(oCurPage);
         this.Api.sync_EndCatchSelectedElements();
         this.Api.sendEvent('asc_onCanEditPage', oCurPage.IsEditPageLock() || oCurPage.IsRecognized());
@@ -5271,7 +5267,7 @@ var CPresentation = CPresentation || function(){};
             Asc.editor.sync_PrPropCallback(oParaPr);
         }
         else if (oAcitveObj) {
-            if (oAcitveObj.IsForm()) {
+            if (oAcitveObj.IsForm() && this.IsEditFieldsMode()) {
                 let oController = this.GetController();
                 let nAlignType = oAcitveObj.GetAlign();
                 let isRTL = oAcitveObj.IsRTL();
@@ -5849,6 +5845,8 @@ var CPresentation = CPresentation || function(){};
             let nPage   = aSelQuads[nInfo].page;
             let aQuads  = aSelQuads[nInfo].quads;
 
+			let RD_VALUE = 2.8346;
+
             aQuads.forEach(function(quads) {
                 let aMinRect = getMinRect(quads);
                 let MinX = aMinRect[0];
@@ -5856,7 +5854,7 @@ var CPresentation = CPresentation || function(){};
                 let MaxX = aMinRect[2];
                 let MaxY = aMinRect[3];
 
-                let aRect = isTextSelection ? [MinX - 1, MinY - 1, MaxX + 1, MaxY + 1] : [MinX, MinY, MaxX, MaxY];
+                let aRect = isTextSelection ? [MinX - 1, MinY - 1, MaxX + 1, MaxY + 1] : [MinX - RD_VALUE, MinY - RD_VALUE, MaxX + RD_VALUE, MaxY + RD_VALUE];
 
                 let oProps = {
                     rect:           aRect,
@@ -5874,6 +5872,7 @@ var CPresentation = CPresentation || function(){};
                 oAnnot.SetOpacity(1);
                 oAnnot.SetBorderWidth(1);
                 oAnnot.SetHighlight(AscPDF.BUTTON_HIGHLIGHT_TYPES.none);
+				oAnnot.SetRectangleDiff([RD_VALUE, RD_VALUE, RD_VALUE, RD_VALUE]); // default value
 
                 if (isTextSelection) {
                     let dx = quads[2] - quads[0];
@@ -7910,6 +7909,8 @@ var CPresentation = CPresentation || function(){};
 
 			this.GetController().Load_DocumentStateAfterLoadChanges(oState);
 		}
+
+		this.GetFile().Selection = oState.fileSelection;
 	};
     CPDFDoc.prototype.Check_MergeData = function() {};
     CPDFDoc.prototype.Set_SelectionState2 = function() {};
@@ -8384,6 +8385,7 @@ var CPresentation = CPresentation || function(){};
         oSelectionState.activeObject        = this.GetActiveObject();
         oSelectionState.drawingSelection    = oController.getSelectionState();
         oSelectionState.HistoryIndex        = this.History.Index;
+		oSelectionState.fileSelection		= this.GetFile().getSelection();
 
         return oSelectionState;
     };
@@ -8402,6 +8404,8 @@ var CPresentation = CPresentation || function(){};
 		
 		if (oState.CurPage != -1 && oState.CurPage != this.Viewer.currentPage)
 			this.Viewer.navigateToPage(oState.CurPage);
+
+		this.GetFile().Selection = oState.fileSelection;
 	};
     CPDFDoc.prototype.IsSelectionLocked = function (nCheckType, oAdditionalData, isDontLockInFastMode, isIgnoreCanEditFlag) {
         return this.Document_Is_SelectionLocked(nCheckType, oAdditionalData, isIgnoreCanEditFlag, undefined, isDontLockInFastMode);
@@ -9886,13 +9890,15 @@ var CPresentation = CPresentation || function(){};
 		}
 
         // stroke
-        let oStrokeColor    = annot.GetBorderColor();
-        let oStrokeRGB      = annot.GetRGBColor(oStrokeColor);
-		oStrokeRGB["r"] = oStrokeRGB.r;
-        oStrokeRGB["g"] = oStrokeRGB.g;
-        oStrokeRGB["b"] = oStrokeRGB.b;
-        oProps.asc_putStroke(oStrokeRGB);
-
+		if (nType !== AscPDF.ANNOTATIONS_TYPES.Stamp) {
+			let oStrokeColor    = annot.GetBorderColor();
+			let oStrokeRGB      = annot.GetRGBColor(oStrokeColor);
+			oStrokeRGB["r"] = oStrokeRGB.r;
+			oStrokeRGB["g"] = oStrokeRGB.g;
+			oStrokeRGB["b"] = oStrokeRGB.b;
+			oProps.asc_putStroke(oStrokeRGB);
+		}
+        
         // opacity
         oProps.asc_putOpacity(annot.GetOpacity());
         
@@ -9925,13 +9931,25 @@ var CPresentation = CPresentation || function(){};
             }
             case AscPDF.ANNOTATIONS_TYPES.Polygon:
             case AscPDF.ANNOTATIONS_TYPES.Square:
-            case AscPDF.ANNOTATIONS_TYPES.Link:
             case AscPDF.ANNOTATIONS_TYPES.Circle: {
                 oAnnotProps = new Asc.asc_CClosedAnnotProperty();
                 oAnnotProps.asc_putBorderStyle(annot.GetComplexBorderType());
                 oAnnotProps.asc_putBorderWidth(annot.GetBorderWidth());
                 break;
             }
+			case AscPDF.ANNOTATIONS_TYPES.Link: {
+				oAnnotProps = new Asc.asc_CClosedAnnotProperty();
+				let nLineW = annot.GetBorderWidth();
+				oAnnotProps.asc_putBorderStyle(nLineW == 0 ? undefined : annot.GetBorderStyle());
+				oAnnotProps.asc_putBorderWidth(nLineW);
+				break;
+			}
+			case AscPDF.ANNOTATIONS_TYPES.Ink: {
+				oAnnotProps = new Asc.asc_CClosedAnnotProperty();
+				oAnnotProps.asc_putBorderStyle(null);
+				oAnnotProps.asc_putBorderWidth(annot.GetBorderWidth());
+				break;
+			}
         }
         
         oProps.asc_putAnnotProps(oAnnotProps);
