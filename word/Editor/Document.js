@@ -5790,48 +5790,99 @@ CDocument.prototype.AddInlineImage = function(W, H, Img, GraphicObject, bFlow)
     this.Controller.AddInlineImage(W, H, Img, GraphicObject, bFlow);
     this.TurnOn_InterfaceEvents(true);
 };
-
 CDocument.prototype.AddHorizontalRule = function()
 {
-	let curParagraph = this.GetCurrentParagraph();
-
-	let existingHRDrawing = null;
-	if (curParagraph)
+	if (this.IsTextSelectionUse())
+		this.RemoveBeforePaste();
+	else if (this.IsSelectionUse())
+		this.RemoveSelection();
+	
+	if (docpostype_DrawingObjects === this.GetDocPosType())
 	{
-		let drawings = curParagraph.GetAllDrawingObjects();
-		for (let i = 0; i < drawings.length; i++)
+		let paraDrawing = this.DrawingObjects.getMajorParaDrawing();
+		if (paraDrawing && (paraDrawing.IsSmartArt() || paraDrawing.IsChart()))
+			paraDrawing.GoToText(true);
+	}
+	
+	let curParagraph = this.GetCurrentParagraph();
+	if (!curParagraph)
+		return false;
+	
+	let docContent = curParagraph.GetParent();
+	let posInParent = curParagraph.GetIndex();
+	if (!docContent || -1 === posInParent)
+		return false;
+	
+	let cursorToNext = false;
+	
+	if (!curParagraph.IsEmpty()
+		|| (curParagraph.IsCursorAtBegin() && !curParagraph.GetPrevParagraph()))
+	{
+		if (curParagraph.IsCursorAtBegin())
 		{
-			if (drawings[i].isHorizontalRule && drawings[i].isHorizontalRule())
-			{
-				existingHRDrawing = drawings[i];
-				break;
-			}
+			let newParagraph = new AscWord.Paragraph();
+			curParagraph.SplitContent(newParagraph, false);
+			curParagraph.Continue(newParagraph);
+			newParagraph.Correct_Content();
+			docContent.AddToContent(posInParent, newParagraph);
+			curParagraph = newParagraph;
+			cursorToNext = true;
+		}
+		else if (curParagraph.IsCursorAtEnd() && curParagraph.GetNextParagraph())
+		{
+			let newParagraph = new AscWord.Paragraph();
+			curParagraph.SplitContent(newParagraph, true);
+			curParagraph.Continue(newParagraph);
+			newParagraph.Correct_Content();
+			docContent.AddToContent(posInParent + 1, newParagraph);
+			curParagraph = newParagraph;
+			cursorToNext = false;
+		}
+		else
+		{
+			let lastParagraph = curParagraph.Split();
+			docContent.AddToContent(posInParent + 1, lastParagraph);
+			lastParagraph.MoveCursorToStartPos();
+			
+			let newParagraph = lastParagraph.Split();
+			newParagraph.Correct_Content();
+			docContent.AddToContent(posInParent + 2, newParagraph);
+			curParagraph = lastParagraph;
+			cursorToNext = true;
 		}
 	}
-
-	if (existingHRDrawing)
+	
+	curParagraph.SetThisElementCurrent();
+	let hrParagraph = curParagraph;
+	
+	let run = new AscWord.Run();
+	run.SetFontSize(12);
+	curParagraph.AddToContent(0, run);
+	run.SetThisElementCurrentInParagraph();
+	
+	let numPr = curParagraph.GetNumPr();
+	if (numPr)
+		curParagraph.RemoveNumPr();
+	
+	let prevHRDrawing = null;
+	while (curParagraph && !prevHRDrawing)
 	{
-		curParagraph.MoveCursorToEndPos();
-		this.AddNewParagraph(false);
-		curParagraph = this.GetCurrentParagraph();
-	}
-
-	let prevHRDrawing = existingHRDrawing;
-	if (!prevHRDrawing && curParagraph)
-	{
-		let prevParagraph = curParagraph.Get_DocumentPrev();
-		if (prevParagraph && prevParagraph.GetAllDrawingObjects)
-		{
-			let drawings = prevParagraph.GetAllDrawingObjects();
-			for (let i = 0; i < drawings.length; i++)
+		curParagraph.CheckRunContent(function(run){
+			
+			for (let i = 0; i < run.GetElementsCount(); ++i)
 			{
-				if (drawings[i].isHorizontalRule && drawings[i].isHorizontalRule())
+				let item = run.GetElement(i);
+				if (item.IsDrawing() && item.getHorizontalRule())
 				{
-					prevHRDrawing = drawings[i];
-					break;
+					prevHRDrawing = item;
+					return true;
 				}
 			}
-		}
+			
+			return false;
+		}, null, null, false, false);
+		
+		curParagraph = curParagraph.GetPrevParagraph();
 	}
 
 	let sectPr = this.GetCurrentSectPr();
@@ -5843,14 +5894,14 @@ CDocument.prototype.AddHorizontalRule = function()
 
 	let fill = null;
 	let ln = AscFormat.CreateNoFillLine();
-
+	
 	if (prevHRDrawing && prevHRDrawing.GraphicObj)
 	{
 		let srcShape = prevHRDrawing.GraphicObj;
 		let srcHR = srcShape.getHorizontalRule && srcShape.getHorizontalRule();
 		if (srcHR)
 			hr = srcHR.createDuplicate();
-
+		
 		if (srcShape.spPr)
 		{
 			if (srcShape.spPr.xfrm && AscFormat.isRealNumber(srcShape.spPr.xfrm.extY))
@@ -5861,7 +5912,7 @@ CDocument.prototype.AddHorizontalRule = function()
 				ln = srcShape.spPr.ln.createDuplicate();
 		}
 	}
-
+	
 	let shape = new AscFormat.CShape();
 	shape.setWordShape(true);
 	shape.setBDeleted(false);
@@ -5888,6 +5939,20 @@ CDocument.prototype.AddHorizontalRule = function()
 	spPr.setParent(shape);
 
 	this.AddInlineImage(width, height, null, shape);
+	
+	this.RemoveSelection();
+	
+	let nextParagraph = hrParagraph.GetNextParagraph();
+	if (cursorToNext && nextParagraph)
+	{
+		nextParagraph.SetThisElementCurrent();
+		nextParagraph.MoveCursorToStartPos();
+	}
+	else
+	{
+		hrParagraph.SetThisElementCurrent();
+		hrParagraph.MoveCursorToEndPos();
+	}
 
 	this.Recalculate();
 	this.UpdateInterface();
@@ -6839,7 +6904,7 @@ CDocument.prototype.SetParagraphBidi = function(isRtl)
 	this.UpdateInterface();
 	this.UpdateSelection();
 };
-CDocument.prototype.SetParagraphAlign = function(Align)
+CDocument.prototype.SetParagraphAlign = function(Align, pr)
 {
 	var SelectedInfo = this.GetSelectedElementsInfo();
 	var Math         = SelectedInfo.GetMath();
@@ -6849,7 +6914,7 @@ CDocument.prototype.SetParagraphAlign = function(Align)
 	}
 	else
 	{
-		this.Controller.SetParagraphAlign(Align);
+		this.Controller.SetParagraphAlign(Align, pr);
 	}
 
 	this.Recalculate();

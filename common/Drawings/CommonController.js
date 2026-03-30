@@ -7641,9 +7641,10 @@
 					for (var i = 0; i < drawings.length; ++i) {
 						drawing = drawings[i];
 
-						if (drawing.IsAnnot && drawing.IsAnnot() && drawing.IsComment() || drawing.IsEditFieldShape && drawing.IsEditFieldShape()) {
+						if (drawing.IsDrawing && !drawing.IsDrawing()) {
 							continue;
 						}
+
 						if (drawing.isHorizontalRule()) {
 							continue;
 						}
@@ -8250,7 +8251,7 @@
 											chart_props.h = null;
 
 
-										if (chart_props.title !== group_drawing_props.title)
+										if (chart_props.title !== group_drawing_props.chartProps.title)
 											chart_props.title = undefined;
 										if (chart_props.description !== group_drawing_props.chartProps.description)
 											chart_props.description = undefined;

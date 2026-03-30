@@ -2483,7 +2483,9 @@ function (window, undefined) {
 		return this.Space;
 	};
 	asc_CTextBorder.prototype.asc_putSpace = function (v) {
-		this.Space = v;
+		// v in range 0..31 pt
+		const maxVal = 639 / 20 / 72 * 25.4 - 0.001;
+		this.Space = Math.min(maxVal, Math.max(0, v));
 	};
 	asc_CTextBorder.prototype.asc_getForSelectedCells = function () {
 		return this.ForSelectedCells;
@@ -4943,7 +4945,7 @@ function (window, undefined) {
 	asc_CFieldRegularFormatProperty.prototype.asc_putRegExp = function (v) {
 		this.regExp = v;
 	};
-	asc_CFieldSpecialFormatProperty.prototype.compare = function (pr) {
+	asc_CFieldRegularFormatProperty.prototype.compare = function (pr) {
 		if (this.regExp !== pr.regExp) {
 			this.regExp = null;
 		}
@@ -4988,7 +4990,7 @@ function (window, undefined) {
 	asc_CFieldValidateProperty.prototype.asc_putLessThen = function (v) {
 		this.lessThen = v;
 	};
-	asc_CFieldSpecialFormatProperty.prototype.compare = function (pr) {
+	asc_CFieldValidateProperty.prototype.compare = function (pr) {
 		if (this.greaterThen !== pr.greaterThen) {
 			this.greaterThen = null;
 		}
