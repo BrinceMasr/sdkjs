@@ -3469,7 +3469,7 @@
 						if (this.document && content.Parent && content.Parent instanceof AscFormat.CTextBody)
 							return false;
 
-						if(!Asc.editor.presentationViewManager.isCanAddHyperlinkInContent()) {
+						if(Asc.editor.presentationViewManager && !Asc.editor.presentationViewManager.isCanAddHyperlinkInContent()) {
 							return false;
 						}
 						return content.CanAddHyperlink(bCheckInHyperlink);
