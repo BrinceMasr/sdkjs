@@ -8963,42 +8963,24 @@
 	};
 
 	/**
-     * Returns all the selected drawings in the current document.
-     * @memberof ApiDocument
+	 * Returns all the selected drawings in the current document.
+	 *
+	 * @memberof ApiDocument
 	 * @typeofeditors ["CDE"]
-     * @returns {ApiShape[] | ApiImage[] | ApiChart[] | ApiDrawing[]}
-     * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/GetSelectedDrawings.js
+	 *
+	 * @returns {Drawing[]}
+	 *
+	 * @since 7.2.0
+	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/GetSelectedDrawings.js
 	 */
-	ApiDocument.prototype.GetSelectedDrawings = function()
-	{
-		var aSelected = this.Document.DrawingObjects.selectedObjects;
-		var aResult = [];
-		for (var nDrawing = 0; nDrawing < aSelected.length; nDrawing++)
-		{
-			if (aSelected[nDrawing].isImage())
-				aResult.push(new ApiImage(aSelected[nDrawing]));
-			else if (aSelected[nDrawing].isChart())
-				aResult.push(new ApiChart(aSelected[nDrawing]));
-			else if (aSelected[nDrawing].isShape())
-				aResult.push(new ApiShape(aSelected[nDrawing]));
-			else
-				aResult.push(new ApiDrawing(aSelected[nDrawing]));
-		}
+	ApiDocument.prototype.GetSelectedDrawings = function () {
+		const selected = this.Document.DrawingObjects.selectedObjects;
+		const selectedInText = this.Document.GetSelectedDrawingObjectsInText()
+			.map(function (drawing) { return drawing.GraphicObj; });
 
-		var aSelectedInText = this.Document.GetSelectedDrawingObjectsInText();
-		for (nDrawing = 0; nDrawing < aSelectedInText.length; nDrawing++)
-		{
-			if (aSelectedInText[nDrawing].GraphicObj.isImage())
-				aResult.push(new ApiImage(aSelectedInText[nDrawing].GraphicObj));
-			else if (aSelectedInText[nDrawing].GraphicObj.isChart())
-				aResult.push(new ApiChart(aSelectedInText[nDrawing].GraphicObj));
-			else if (aSelectedInText[nDrawing].GraphicObj.isShape())
-				aResult.push(new ApiShape(aSelectedInText[nDrawing].GraphicObj));
-			else
-				aResult.push(new ApiDrawing(aSelected[nDrawing].GraphicObj));
-		}
-
-		return aResult;
+		const drawingObjects = selected.concat(selectedInText);
+		const apiDrawings = GetApiDrawings(drawingObjects);
+		return apiDrawings;
 	};
 
 	/**
