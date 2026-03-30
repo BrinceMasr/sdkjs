@@ -77,6 +77,7 @@ function (window, undefined) {
 
 	var importRangeLinksState = {importRangeLinks: null, startBuildImportRangeLinks: null};
 	const aExcludeRecursiveFormulas = ['ISFORMULA','SHEET','SHEETS', 'AREAS', 'COLUMN', 'COLUMNS', 'ROW', 'ROWS', 'CELL', 'OFFSET'];
+	const aFormulasWithCa = ['INDIRECT', 'TODAY', 'NOW', 'OFFSET', 'CELL', 'SHEET', 'RAND', 'RANDARRAY', 'RANDBETWEEN']
 
 	const cReplaceFormulaType = {
 		val: 1,
@@ -6636,14 +6637,6 @@ function parserFormula( formula, parent, _ws ) {
 			}
 		}
 		if (AscCommon.c_oNotifyType.Dirty === data.type) {
-			// TODO Change to recheck recursion cell. For now it's work only if you create new data with potential recursion.
-			//  For changing have already created cells it's may have problem actualize ca flag
-			if (this.ca && this.parent && this.parent.nRow != null && this.parent.nCol != null) {
-				// Actualize ca flag for chained cells all dependent cells must have ca flag
-				this.ws._getCell(this.parent.nRow, this.parent.nCol, function (oElem) {
-					oElem._changeCaFlagFromListener(t.ca);
-				});
-			}
 			if (this.parent && this.parent.onFormulaEvent) {
 				this.parent.onFormulaEvent(AscCommon.c_oNotifyParentType.Change, eventData);
 			}
