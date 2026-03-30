@@ -13284,21 +13284,72 @@
 
 	/**
 	 * Sets the fill formatting properties to the current graphic object.
+	 *
 	 * @memberof ApiDrawing
 	 * @typeofeditors ["CSE"]
-	 * @param {ApiFill} oFill - The fill type used to fill the graphic object.
-	 * @returns {boolean} - returns false if param is invalid.
-	 * @since 9.3.0
-	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/Fill.js
+	 *
+	 * @param {ApiFill} fill - The fill type used to fill the graphic object.
+	 * @returns {boolean} - returns false if param is invalid or not supported for the current graphic object.
+	 *
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/SetFill.js
 	 */
-	ApiDrawing.prototype.Fill = function(oFill)
-	{
-		if (!oFill || !oFill.GetClassType || oFill.GetClassType() !== "fill")
+	ApiDrawing.prototype.SetFill = function (fill) {
+		const classType = this.GetClassType();
+		if (classType !== 'shape' && classType !== 'image' && classType !== 'chart') {
 			return false;
+		}
 
-		this.Drawing.spPr.setFill(oFill.UniFill);
-		return true;
+		if (!fill || !fill.GetClassType || fill.GetClassType() !== 'fill') {
+			return false;
+		}
+
+		if (this.Drawing && this.Drawing.spPr) {
+			this.Drawing.spPr.setFill(fill.UniFill);
+			return true;
+		}
+
+		return false;
 	};
+
+	/**
+	 * Gets the fill formatting properties from the current graphic object.
+	 *
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CSE"]
+	 *
+	 * @returns {ApiFill | null}
+	 *
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetFill.js
+	 */
+	ApiDrawing.prototype.GetFill = function () {
+		const classType = this.GetClassType();
+		if (classType !== 'shape' && classType !== 'image' && classType !== 'chart') {
+			return null;
+		}
+
+		if (this.Drawing) {
+			if (this.Drawing.recalcInfo && this.Drawing.recalcInfo.recalculateBrush) {
+				if (classType === 'chart') {
+					this.Drawing.recalculateChartBrush();
+				} else {
+					this.Drawing.recalculateBrush();
+				}
+			}
+
+			if (this.Drawing.brush) {
+				return new AscBuilder.ApiFill(this.Drawing.brush);
+			}
+		}
+
+		return null;
+	};
+
+	Object.defineProperty(ApiDrawing.prototype, 'Fill', {
+		set: function (fill) { this.SetFill(fill); },
+		get: function () { return this.GetFill(); }
+	});
 
 	/**
 	 * Sets the outline properties to the specified graphic object.
@@ -13559,52 +13610,6 @@
 			return true;
 		}
 		return false;
-	};
-
-	/**
-	 * Sets the fill properties to the current shape.
-	 * @memberof ApiShape
-	 * @typeofeditors ["CSE"]
-	 * @param {ApiFill} oFill - The fill type used to fill the shape.
-	 * @returns {boolean} - returns false if param is invalid.
-	 * @see office-js-api/Examples/{Editor}/ApiShape/Methods/SetFill.js
-	 */
-	ApiShape.prototype.SetFill = function(oFill)
-	{
-		if (!oFill || !oFill.GetClassType || oFill.GetClassType() !== "fill")
-			return false;
-
-		if (this.Shape && this.Shape.spPr)
-		{
-			this.Shape.spPr.setFill(oFill.UniFill);
-			return true;
-		}
-
-		return false;
-	};
-
-	/**
-	 * Gets the fill properties from the current shape.
-	 * @memberof ApiShape
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiFill | null}
-	 * @see office-js-api/Examples/{Editor}/ApiShape/Methods/GetFill.js
-	 */
-	ApiShape.prototype.GetFill = function()
-	{
-		if (this.Shape)
-		{
-			if (this.Shape.recalcInfo && this.Shape.recalcInfo.recalculateBrush)
-			{
-				this.Shape.recalculateBrush();
-			}
-			if (this.Shape.brush)
-			{
-				return new AscBuilder.ApiFill(this.Shape.brush);
-			}
-		}
-
-		return null;
 	};
 
 	/**
@@ -28067,7 +28072,8 @@
 	ApiDrawing.prototype["SetFlipH"]                   =  ApiDrawing.prototype.SetFlipH;
 	ApiDrawing.prototype["SetFlipV"]                   =  ApiDrawing.prototype.SetFlipV;
 	ApiDrawing.prototype["Select"]                     =  ApiDrawing.prototype.Select;
-	ApiDrawing.prototype["Fill"]                       =  ApiDrawing.prototype.Fill;
+	ApiDrawing.prototype["SetFill"]                    =  ApiDrawing.prototype.SetFill;
+	ApiDrawing.prototype["GetFill"]                    =  ApiDrawing.prototype.GetFill;
 	ApiDrawing.prototype["SetOutLine"]                 =  ApiDrawing.prototype.SetOutLine;
 	ApiDrawing.prototype["Unselect"]                   =  ApiDrawing.prototype.Unselect;
 	ApiDrawing.prototype["Delete"]                     =  ApiDrawing.prototype.Delete;
@@ -28085,8 +28091,6 @@
 	ApiShape.prototype["SetPaddings"]                  =  ApiShape.prototype.SetPaddings;
 	ApiShape.prototype["GetGeometry"]                  =  ApiShape.prototype.GetGeometry;
 	ApiShape.prototype["SetGeometry"]                  =  ApiShape.prototype.SetGeometry;
-	ApiShape.prototype["SetFill"]                      =  ApiShape.prototype.SetFill;
-	ApiShape.prototype["GetFill"]                      =  ApiShape.prototype.GetFill;
 	ApiShape.prototype["SetLine"]                      =  ApiShape.prototype.SetLine;
 	ApiShape.prototype["GetLine"]                      =  ApiShape.prototype.GetLine;
 
