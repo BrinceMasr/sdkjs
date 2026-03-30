@@ -5859,6 +5859,12 @@
 			window.g_asc_plugins.onUpdateOptions();
 	};
 
+	baseEditorsApi.prototype.setPluginsDisabled = function(guids)
+	{
+		if (window.g_asc_plugins)
+			window.g_asc_plugins.setPluginsDisabled(guids);
+	};
+
 	baseEditorsApi.prototype.getCustomProperties = function() {
 		return null;
 	};
@@ -6326,6 +6332,7 @@
 	prot['asc_applyAscShortcuts'] = prot.asc_applyAscShortcuts;
 
 	prot['setPluginsOptions'] = prot.setPluginsOptions;
+	prot['setPluginsDisabled'] = prot.setPluginsDisabled;
 	prot['asc_pluginButtonDockChanged'] = prot.asc_pluginButtonDockChanged;
 
 	// passwords

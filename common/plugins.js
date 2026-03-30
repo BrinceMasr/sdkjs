@@ -167,6 +167,8 @@
 		this.dockCallbacks = {};
 
 		this.pluginsWindows = {};
+
+		this.disabledPlugins = {};
 	}
 
 	CPluginsManager.prototype =
@@ -754,6 +756,12 @@
 			}
 		},
 
+		setPluginsDisabled : function(guids)
+		{
+			for (let i = 0, len = guids.length; i < len; i++)
+				this.disabledPlugins[guids[i]] = true;
+		},
+
 		buttonClick : function(id, guid, windowId)
 		{
 			if (guid === undefined)
@@ -983,6 +991,9 @@
 				if (!plugin.isConnector)
 					return;
 			}
+
+			if (this.disabledPlugins[guid])
+				return;
 
 			if (!this.checkEditorSupport(plugin, variation))
 				return;
