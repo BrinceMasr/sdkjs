@@ -888,43 +888,66 @@ function CDrawingDocument()
 		if (null == this.m_oWordControl)
 			return;
 
-		this.CheckTargetDraw(this.m_dTargetX, this.m_dTargetY, !this.m_oLogicDocument.IsFocusOnNotes());
+		let focusType;
+		if (this.m_oLogicDocument.IsFocusOnNotes()) {
+			focusType = FOCUS_OBJECT_NOTES;
+		} else if (this.m_oLogicDocument.IsFocusOnOutline()) {
+			focusType = FOCUS_OBJECT_THUMBNAILS;
+		} else {
+			focusType = FOCUS_OBJECT_MAIN;
+		}
+		this.CheckTargetDraw(this.m_dTargetX, this.m_dTargetY, focusType);
 	};
 
-	this.CheckTargetDraw = function(x, y, isFocusOnSlide)
+	this.CheckTargetDraw = function(x, y, focusType)
 	{
 		function roundPxForScale(value) {
 			return ((value * AscCommon.AscBrowser.retinaPixelRatio) >> 0) / AscCommon.AscBrowser.retinaPixelRatio;
 		}
 
 		var isReporter = this.m_oWordControl.m_oApi.isReporterMode;
-		if (this.TargetHtmlElementOnSlide != isFocusOnSlide)
+		if (this.TargetHtmlElementOnSlide != focusType)
 		{
-			if (this.TargetHtmlElementOnSlide)
-			{
-				this.m_oWordControl.m_oMainView.HtmlElement.removeChild(this.TargetHtmlElement);
-				this.m_oWordControl.m_oNotesContainer.HtmlElement.appendChild(this.TargetHtmlElement);
-				this.TargetHtmlElement.style.zIndex = isReporter ? 0 : 9;
-
-				AscCommon.g_inputContext.TargetOffsetY = (this.m_oWordControl.m_oNotesContainer.AbsolutePosition.T * AscCommon.g_dKoef_mm_to_pix) >> 0;
+			switch (this.TargetHtmlElementOnSlide) {
+				case FOCUS_OBJECT_MAIN: {
+					this.m_oWordControl.m_oMainView.HtmlElement.removeChild(this.TargetHtmlElement);
+					break;
+				}
+				case FOCUS_OBJECT_NOTES: {
+					this.m_oWordControl.m_oNotesContainer.HtmlElement.removeChild(this.TargetHtmlElement);
+					break;
+				}
+				case FOCUS_OBJECT_THUMBNAILS: {
+					this.m_oWordControl.m_oThumbnailsContainer.HtmlElement.removeChild(this.TargetHtmlElement);
+					break;
+				}
 			}
-			else
-			{
-				this.m_oWordControl.m_oNotesContainer.HtmlElement.removeChild(this.TargetHtmlElement);
-				this.m_oWordControl.m_oMainView.HtmlElement.appendChild(this.TargetHtmlElement);
-				this.TargetHtmlElement.style.zIndex = isReporter ? 0 : 9;
-
-				AscCommon.g_inputContext.TargetOffsetY = 0;
+			switch (focusType) {
+				case FOCUS_OBJECT_MAIN: {
+					this.m_oWordControl.m_oMainView.HtmlElement.appendChild(this.TargetHtmlElement);
+					this.TargetHtmlElement.style.zIndex = isReporter ? 0 : 9;
+					AscCommon.g_inputContext.TargetOffsetY = 0;
+					break;
+				}
+				case FOCUS_OBJECT_NOTES: {
+					this.m_oWordControl.m_oNotesContainer.HtmlElement.appendChild(this.TargetHtmlElement);
+					this.TargetHtmlElement.style.zIndex = isReporter ? 0 : 9;
+					AscCommon.g_inputContext.TargetOffsetY = (this.m_oWordControl.m_oNotesContainer.AbsolutePosition.T * AscCommon.g_dKoef_mm_to_pix) >> 0;
+					break;
+				}
+				case FOCUS_OBJECT_THUMBNAILS: {
+					this.m_oWordControl.m_oThumbnailsContainer.HtmlElement.appendChild(this.TargetHtmlElement);
+					break;
+				}
 			}
-
-			this.TargetHtmlElementOnSlide = isFocusOnSlide;
+			this.TargetHtmlElementOnSlide = focusType;
 		}
-		else if (!this.TargetHtmlElementOnSlide)
+		else if (focusType === FOCUS_OBJECT_NOTES)
 		{
 			AscCommon.g_inputContext.TargetOffsetY = (this.m_oWordControl.m_oNotesContainer.AbsolutePosition.T * AscCommon.g_dKoef_mm_to_pix) >> 0;
 		}
 
-		var targetZoom = isFocusOnSlide ? this.m_oWordControl.m_nZoomValue : 100;
+		var targetZoom = (focusType === FOCUS_OBJECT_THUMBNAILS || focusType === FOCUS_OBJECT_NOTES) ? 100 : this.m_oWordControl.m_nZoomValue;
 
 		var oldW = this.TargetHtmlElement.width;
 		var oldH = this.TargetHtmlElement.height;
@@ -944,7 +967,7 @@ function CDrawingDocument()
 		}
 
 		var oldColor = this.TargetHtmlElement.oldColor;
-		var newColor = this.GetTargetColor(isFocusOnSlide);
+		var newColor = this.GetTargetColor(FOCUS_OBJECT_MAIN === focusType);
 		if (!oldColor ||
 			oldColor.R !== newColor.R ||
 			oldColor.G !== newColor.G ||
@@ -964,8 +987,10 @@ function CDrawingDocument()
 
 			var pos = this.ConvertCoordsToCursor(x, y);
 
-			if (!isFocusOnSlide)
-			{
+			if (focusType === FOCUS_OBJECT_THUMBNAILS) {
+				pos.X = x * g_dKoef_mm_to_pix;
+				pos.Y = y * g_dKoef_mm_to_pix - this.m_oWordControl.Thumbnails.m_dScrollY;
+			} else if (focusType === FOCUS_OBJECT_NOTES) {
 				pos.X = x * g_dKoef_mm_to_pix + AscCommon.AscBrowser.convertToRetinaValue(this.m_oWordControl.m_oNotesApi.OffsetX);
 				pos.Y = y * g_dKoef_mm_to_pix - this.m_oWordControl.m_oNotesApi.Scroll;
 			}
@@ -1033,9 +1058,19 @@ function CDrawingDocument()
 			this.UpdateTargetCheck = true;
 			return;
 		}
-
 		var isTargetOnNotes = this.m_oLogicDocument.IsFocusOnNotes();
-		var targetZoom = isTargetOnNotes ? 100 : this.m_oWordControl.m_nZoomValue;
+		var isTargetOnOutline = this.m_oLogicDocument.IsFocusOnOutline();
+		let focusType;
+		if (isTargetOnNotes) {
+			focusType = FOCUS_OBJECT_NOTES;
+		} else if (isTargetOnOutline) {
+			focusType = FOCUS_OBJECT_THUMBNAILS;
+		} else {
+			focusType = FOCUS_OBJECT_MAIN;
+		}
+
+
+		var targetZoom = (focusType === FOCUS_OBJECT_THUMBNAILS || focusType === FOCUS_OBJECT_NOTES) ? 100 : this.m_oWordControl.m_nZoomValue;
 
 		/// detect need scrolling
 		var targetSize 	= Number(this.m_dTargetSize * targetZoom * g_dKoef_mm_to_pix / 100);
@@ -1051,7 +1086,7 @@ function CDrawingDocument()
 		this.m_dTargetX = x;
 		this.m_dTargetY = y;
 
-		if (!isTargetOnNotes)
+		if (focusType === FOCUS_OBJECT_MAIN)
 		{
 			// focus ton slide
 			pos = this.ConvertCoordsToCursor(_x, _y);
@@ -1123,7 +1158,7 @@ function CDrawingDocument()
 				return;
 			}
 		}
-		else if (this.m_oWordControl.m_oNotesApi)
+		else if (focusType === FOCUS_OBJECT_NOTES && this.m_oWordControl.m_oNotesApi)
 		{
 			var yPos = _y * g_dKoef_mm_to_pix - this.m_oWordControl.m_oNotesApi.Scroll;
 			var _hh = this.m_oWordControl.m_oNotes.HtmlElement.height;
@@ -1156,9 +1191,42 @@ function CDrawingDocument()
 				this.m_oWordControl.OnScroll();
 				return;
 			}
+		} else if (focusType === FOCUS_OBJECT_THUMBNAILS && this.m_oWordControl.Thumbnails) {
+			const scrollValue = this.m_oWordControl.Thumbnails.m_dScrollY;
+			var yPos = _y * g_dKoef_mm_to_pix - scrollValue;
+			var _hh = this.m_oWordControl.m_oThumbnails.HtmlElement.height;
+			_hh /= AscCommon.AscBrowser.retinaPixelRatio;
+
+			var boxY = 0;
+			var targetSizeAscent = (this.m_dTargetAscent * g_dKoef_mm_to_pix) >> 0;
+
+			var boxB = _hh - (targetSize - targetSizeAscent);
+			if (boxB < 0)
+				boxB = _hh;
+
+			yPos += targetSizeAscent;
+
+			var nValueScrollVer = 0;
+			if (yPos < boxY)
+			{
+				nValueScrollVer = (scrollValue + yPos - boxY) >> 0;
+			}
+			if (yPos > boxB)
+			{
+				nValueScrollVer = (scrollValue + yPos - boxB) >> 0;
+			}
+
+			/// check scroll
+			if (0 != nValueScrollVer)
+			{
+				this.m_oWordControl.m_bIsUpdateTargetNoAttack = true;
+				this.m_oWordControl.m_oScrollThumbApi.scrollToY(nValueScrollVer);
+				this.m_oWordControl.OnScroll();
+				return;
+			}
 		}
 
-		this.CheckTargetDraw(x, y, !isTargetOnNotes);
+		this.CheckTargetDraw(x, y, focusType);
 	};
 
 	this.SetTargetSize   = function(size, ascent)

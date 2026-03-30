@@ -83,6 +83,10 @@
 			? width >= 0 && height >= 1
 			: width >= 1 && height >= 0;
 	};
+	CThumbnailsManagerBase.prototype.isOutline = function()
+	{
+		return false;
+	};
 
 
 	function CThumbnailsManager(editorPage) {
@@ -2445,6 +2449,10 @@
 
 		this.ScrollerHeight = 0;
 		this.ScrollerWidth = 0;
+
+		this.outlineLeftMarginMM = 20;
+		this.outlineView = new AscCommonSlide.OutlineView();
+
 	}
 	AscFormat.InitClassWithoutType(COutlineThumbnailsManager, CThumbnailsManagerBase);
 
@@ -2640,6 +2648,50 @@
 			global_mouseEvent.Button = 0;
 
 		this.SetFocusElement(FOCUS_OBJECT_THUMBNAILS);
+		if (global_mouseEvent.Button == 0 && this.outlineView) {
+			const pR = AscCommon.AscBrowser.retinaPixelRatio;
+			const outlineCoords = this.ConvertCoords(global_mouseEvent.X, global_mouseEvent.Y);
+			const outlineXMm = outlineCoords.X * g_dKoef_pix_to_mm;
+			const outlineYMm = outlineCoords.Y * g_dKoef_pix_to_mm;
+			if (outlineXMm > this.outlineLeftMarginMM) {
+
+				const hit = this.outlineView.getOutlineParagraphAtPosition(outlineYMm / pR);
+
+
+				if (hit) {
+					this.SelectPageEnabled = false;
+					this.m_oWordControl.GoToPage(hit.slideIndex);
+					this.SelectPageEnabled = true;
+					this.outlineView.selectionSetStart(global_mouseEvent, outlineXMm / pR, outlineYMm / pR, hit.slideIndex)
+					const caretInfo = this.outlineView.getOutlineCursorPos();
+
+
+					const presentation = this.m_oWordControl.m_oLogicDocument;
+					const controller = presentation.GetCurrentController();
+					if (controller && hit.sourceShape) {
+						controller.resetSelection(true);
+						controller.selectObject(hit.sourceShape, hit.slideIndex);
+						controller.selection.textSelection = hit.sourceShape;
+						const srcContent = hit.sourceShape.txBody && hit.sourceShape.txBody.content;
+						if (srcContent && caretInfo) {
+							srcContent.CurPos.ContentPos = hit.sourceParagraphIdx;
+							srcContent.Selection.Use = false;
+							const srcPara = srcContent.Content[hit.sourceParagraphIdx];
+							if (srcPara) {
+								const outlinePara = this.outlineView.outlineShape.txBody.content.Content[hit.paragraphIdx];
+								srcPara.Set_ParaContentPos(caretInfo, true, -1, -1, false);
+								outlinePara.Document_SetThisElementCurrent();
+							}
+						}
+					}
+
+
+					this.OnUpdateOverlay();
+					checkSelectionEnd();
+					return false;
+				}
+			}
+		}
 
 		var pos = this.ConvertCoords(global_mouseEvent.X, global_mouseEvent.Y);
 		if (pos.Page == -1) {
@@ -3372,22 +3424,24 @@
 		if (!canvas)
 			return;
 
-		this.m_oWordControl.m_oApi.clearEyedropperImgData();
-
 		const context = AscCommon.AscBrowser.getContext2D(canvas);
 		context.clearRect(0, 0, canvas.width, canvas.height);
 		const graphics = new AscCommon.CGraphics();
-		const widthMM = canvas.width * g_dKoef_pix_to_mm;
-		const heightMM = canvas.height * g_dKoef_pix_to_mm;
+		const widthMM = canvas.width / AscCommon.AscBrowser.retinaPixelRatio * g_dKoef_pix_to_mm;
+		const heightMM = canvas.height / AscCommon.AscBrowser.retinaPixelRatio * g_dKoef_pix_to_mm;
 		graphics.init(context, canvas.width, canvas.height, widthMM, heightMM);
 		graphics.m_oFontManager = this.m_oFontManager;
-		graphics.transform(1, 0, 0, 1, 0, 0);
+		const currentSlideIndex = this.m_oWordControl.m_oDrawingDocument.SlideCurrent;
+		const scrollYMm = this.m_dScrollY * g_dKoef_pix_to_mm;
 
-		const presentation = this.m_oWordControl.m_oLogicDocument;
-		const outlineView = new AscCommonSlide.OutlineView(presentation);
-		outlineView.updateAll(widthMM, heightMM);
-		outlineView.draw(graphics);
-		// this.OnUpdateOverlay();
+		if (!this.outlineView.outlineShape) {
+			const outlineWidth = widthMM - this.outlineLeftMarginMM;
+			this.outlineView.updateAll(outlineWidth, heightMM, currentSlideIndex);
+		}
+		this.outlineView.updateOutlineShapeTransform(this.outlineLeftMarginMM, -scrollYMm);
+		this.m_oWordControl.m_oApi.clearEyedropperImgData();
+		this.outlineView.draw(graphics);
+		this.outlineView.drawDecorations(graphics, currentSlideIndex, scrollYMm, this.outlineLeftMarginMM);
 	};
 
 	COutlineThumbnailsManager.prototype.onCheckUpdate = function()
@@ -3395,13 +3449,12 @@
 		if (!this.isThumbnailsShown() || 0 == this.DigitWidths.length)
 			return;
 
-		// if (!this.isThumbnailsShown() || 0 == this.DigitWidths.length)
-		// 	return;
-		//
-		//
-		// if (this.m_oWordControl.m_oApi.isSaveFonts_Images)
-		// 	return;
-		//
+		if (this.m_oWordControl.m_oApi.isSaveFonts_Images)
+			return;
+
+		if (!this.m_bIsUpdate)
+			return;
+
 		// if (this.m_lDrawingFirst == -1 || this.m_lDrawingEnd == -1)
 		// {
 		// 	if (this.m_oWordControl.m_oDrawingDocument.IsEmptyPresentation)
@@ -4472,6 +4525,10 @@
 	COutlineThumbnailsManager.prototype.GetCurSld = function()
 	{
 		return this.thumbnails.GetCurSld();
+	};
+	COutlineThumbnailsManager.prototype.isOutline = function()
+	{
+		return true;
 	};
 
 

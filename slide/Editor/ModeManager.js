@@ -187,6 +187,9 @@
 	SlideModeManagerBase.prototype.isDrawingSlide = function () {
 		return false;
 	};
+	SlideModeManagerBase.prototype.isFocusOnOutline = function () {
+		return false;
+	};
 
 	function SlideModeManager(api) {
 		SlideModeManagerBase.call(this, api);
@@ -1474,16 +1477,23 @@
 	};
 
 	function OutlineModeManager(api) {
-		SlideModeManagerBase.call(this, api);
+		SlideModeManager.call(this, api);
 		this.type = Asc.c_oAscPresentationViewMode.sorter;
 	}
 
-	AscFormat.InitClassWithoutType(OutlineModeManager, SlideModeManagerBase);
+	AscFormat.InitClassWithoutType(OutlineModeManager, SlideModeManager);
 	OutlineModeManager.prototype.isOutlineMode = function() {
 		return true;
 	};
 	OutlineModeManager.prototype.isSlideMode = function() {
-		return false;
+		return true;
+	};
+	OutlineModeManager.prototype.isFocusOnOutline = function () {
+		const api = this.getApi();
+		return api.WordControl.Thumbnails.isOutline();
+	};
+	OutlineModeManager.prototype.isThumbnailsSupported = function() {
+		return true;
 	};
 
 	function getViewModeByType(type, api) {
@@ -1505,6 +1515,9 @@
 			}
 			case Asc.c_oAscPresentationViewMode.sorter: {
 				return new SorterModeManager(api);
+			}
+			case Asc.c_oAscPresentationViewMode.outline: {
+				return new OutlineModeManager(api);
 			}
 		}
 	}
