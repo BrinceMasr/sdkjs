@@ -10161,7 +10161,7 @@
 	 * Returns a value of the specified range.
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
-	 * @returns {string | string[][]}
+	 * @returns {string | number | boolean | Array<Array<string | number | boolean>>}
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/GetValue.js
 	 */
 	ApiRange.prototype.GetValue = function () {
@@ -10170,14 +10170,14 @@
 		var nRow = bbox.r2 - bbox.r1 + 1;
 		var res;
 		if (this.range.isOneCell()) {
-			res = this.range.getValue();
+			res = this.range.getTypedValue();
 		} else {
 			res = [];
 			for (var i = 0; i < nRow; i++) {
 				var arr = [];
 				for (var k = 0; k < nCol; k++) {
 					var cell = this.range.worksheet.getRange3((bbox.r1 + i), (bbox.c1 + k), (bbox.r1 + i), (bbox.c1 + k));
-					arr.push(cell.getValue());
+					arr.push(cell.getTypedValue());
 				}
 				res.push(arr);
 			}

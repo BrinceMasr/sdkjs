@@ -19905,6 +19905,24 @@
 	Range.prototype.getValue=function(){
 		return this.getValueWithoutFormat();
 	};
+	Range.prototype.getTypedValue=function(){
+		var result = "";
+		this.worksheet._getCellNoEmpty(this.bbox.r1, this.bbox.c1, function(cell) {
+			if (null != cell) {
+				cell._checkDirty();
+				if (null != cell.number) {
+					if (CellValueType.Bool === cell.type)
+						result = cell.number === 1;
+					else
+						result = cell.number;
+				} else if (null != cell.text)
+					result = cell.text;
+				else if (null != cell.multiText)
+					result = AscCommonExcel.getStringFromMultiText(cell.multiText);
+			}
+		});
+		return result;
+	};
 	Range.prototype.getValueWithFormat=function(){
 		var value;
 		this.worksheet._getCellNoEmpty(this.bbox.r1, this.bbox.c1, function(cell) {
