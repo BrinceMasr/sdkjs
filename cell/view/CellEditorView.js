@@ -150,6 +150,7 @@ function (window, undefined) {
 		this.skipTLUpdate = true;
 		this.loadFonts = false;
 		this.isOpened = false;
+		this._programmaticInput = false;
 		this.callTopLineMouseup = false;
 		this.m_nEditorState = c_oAscCellEditorState.editEnd; // Editor's status
 
@@ -442,11 +443,16 @@ function (window, undefined) {
 	CellEditor.prototype._setInputFragments = function (fragments) {
 		if (!this.input) return;
 		if (this._isContentEditable()) {
+			this._programmaticInput = true;
 			if (this.isTopLineActive && this.isFormula()) {
 				this.input.innerHTML = this._buildInputHTML(fragments);
 			} else {
 				this.input.textContent = AscCommonExcel.getFragmentsText(fragments);
 			}
+			if (this.input.textContent.endsWith('\n')) {
+				this.input.appendChild(document.createElement('br'));
+			}
+			this._programmaticInput = false;
 		} else {
 			this.input.value = AscCommonExcel.getFragmentsText(fragments);
 		}
@@ -462,7 +468,11 @@ function (window, undefined) {
 	 */
 	CellEditor.prototype.open = function (options) {
 		this._setEditorState(c_oAscCellEditorState.editStart);
-		
+
+		if (this._isContentEditable()) {
+			this.input.style.whiteSpace = 'pre-wrap';
+		}
+
 		var b = this._getInputSelectionStart();
 
 		this.isOpened = true;
@@ -2328,6 +2338,9 @@ function (window, undefined) {
 	};
 
 	CellEditor.prototype._addNewLine = function () {
+		if (this.isTopLineActive) {
+			this._updateCursorByTopLine();
+		}
 		this._wrapText();
 		let sNewLine = "\n";
 		this._addChars( /*codeNewLine*/sNewLine);
@@ -3379,6 +3392,9 @@ function (window, undefined) {
 	/** @param event {jQuery.Event} */
 	CellEditor.prototype._onInputTextArea = function (event) {
 		//TODO save the text!
+		if (this._programmaticInput) {
+			return true;
+		}
 		var t = this;
 		if (!this.handlers.trigger("canEdit") || this.loadFonts) {
 			return true;
