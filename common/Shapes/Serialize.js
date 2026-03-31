@@ -516,7 +516,7 @@ function BinaryPPTYLoader()
                 var _nm_count = s.GetULong();
                 for (var i = 0; i < _nm_count; i++){
                     this.presentation.notesMasters[i] = this.ReadNoteMaster();
-                    this.presentation.notesMasters[i].setTheme(this.aThemes[0]);//TODO: remove after tracks are implemented
+                    this.presentation.notesMasters[i].setTheme(this.aThemes[0]);//TODO: remove after rels are implemented
                 }
             }
 
@@ -598,7 +598,7 @@ function BinaryPPTYLoader()
             }
         }
 
-        // everything is loaded, now we need to establish relationships and load images from themes and templates
+        // everything is loaded, now we need to establish relationships and load images from themes and layouts
         if (undefined != _main_tables["41"])
         {
             s.Seek2(_main_tables["41"]);
