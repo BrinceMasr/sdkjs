@@ -3583,6 +3583,7 @@
 			this.specificRange = null;
 			this.isForMacros = null;
 			this.activeCell = null;
+			this.wsIndex = -1;  // forced worksheet index for ApiRange.Find (-1 = use active)
 
 			//если запускаем новый поиск из-за измененного документа, то присылаем последний элемент, на который
 			//кликнул пользователь и далее пытаемся найти следующий/предыдущий
@@ -3623,6 +3624,7 @@
 			result.lastSearchElem = this.lastSearchElem;
 			result.isNotSearchEmptyCells = this.isNotSearchEmptyCells;
 			result.activeCell = this.activeCell;
+			result.wsIndex = this.wsIndex;
 
 			return result;
 		};
@@ -3633,8 +3635,8 @@
 		};
 		asc_CFindOptions.prototype.isEqual2 = function (obj) {
 			return obj && this.findWhat === obj.findWhat && this.scanByRows === obj.scanByRows && this.isMatchCase === obj.isMatchCase && this.isWholeCell === obj.isWholeCell &&
-				this.lookIn === obj.lookIn && this.specificRange == obj.specificRange && this.isNotSearchEmptyCells == obj.isNotSearchEmptyCells && this.activeCell ==
-				obj.activeCell;
+				this.lookIn === obj.lookIn && this.specificRange == obj.specificRange && this.isNotSearchEmptyCells == obj.isNotSearchEmptyCells &&
+				this.wsIndex === obj.wsIndex;
 		};
 		asc_CFindOptions.prototype.clearFindAll = function () {
 			this.countFindAll = 0;
@@ -3729,6 +3731,9 @@
 		};
 		asc_CFindOptions.prototype.asc_setIsForMacros = function (val) {
 			this.isForMacros = val;
+		};
+		asc_CFindOptions.prototype.asc_setWsIndex = function (val) {
+			this.wsIndex = (val !== undefined && val !== null) ? val : -1;
 		};
 
 		/** @constructor */

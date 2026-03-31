@@ -1193,4 +1193,213 @@ $(function () {
         assert.strictEqual(third.GetAddress(true, true, "xlA1", false), "$A$2", "Third is A2");
         assert.strictEqual(fourth.GetAddress(true, true, "xlA1", false), "$A$1", "Fourth wraps to A1");
     });
+
+    QUnit.test("Find: on non-active sheet returns result from that sheet", function (assert) {
+        initializeTest();
+        const sheet2 = AscTest.JsApi.AddSheet("FindSheet2_" + Date.now());
+        sheet2.GetRange("B2").SetValue("hello");
+        ws.SetActive();
+
+        const found = sheet2.GetRange("A1:D4").Find("hello", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", false);
+
+        assert.ok(found, "Find returned a range");
+        assert.strictEqual(found.GetAddress(true, true, "xlA1", false), "$B$2", "Found in B2 on sheet2");
+
+        sheet2.Delete();
+    });
+
+    QUnit.test("Find: returns null on non-active sheet when value absent", function (assert) {
+        initializeTest();
+        const sheet2 = AscTest.JsApi.AddSheet("FindSheet2Null_" + Date.now());
+        sheet2.GetRange("A1").SetValue("other");
+        ws.SetActive();
+
+        const found = sheet2.GetRange("A1:D4").Find("missing", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", false);
+
+        assert.strictEqual(found, null, "Returns null when value not found on non-active sheet");
+
+        sheet2.Delete();
+    });
+
+    QUnit.test("FindNext: on non-active sheet iterates correctly", function (assert) {
+        initializeTest();
+        const sheet2 = AscTest.JsApi.AddSheet("FindNextSheet2_" + Date.now());
+        sheet2.GetRange("A1").SetValue("x");
+        sheet2.GetRange("B1").SetValue("x");
+        sheet2.GetRange("C1").SetValue("x");
+        ws.SetActive();
+
+        const range = sheet2.GetRange("A1:C1");
+        const first = range.Find("x", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", false);
+        const second = range.FindNext(first);
+        const third = range.FindNext(second);
+        const fourth = range.FindNext(third);
+
+        assert.strictEqual(first.GetAddress(true, true, "xlA1", false), "$B$1", "First is B1");
+        assert.strictEqual(second.GetAddress(true, true, "xlA1", false), "$C$1", "Second is C1");
+        assert.strictEqual(third.GetAddress(true, true, "xlA1", false), "$A$1", "Third wraps to A1");
+        assert.strictEqual(fourth.GetAddress(true, true, "xlA1", false), "$B$1", "Fourth wraps to B1");
+
+        sheet2.Delete();
+    });
+
+    QUnit.test("FindPrevious: on non-active sheet iterates correctly", function (assert) {
+        initializeTest();
+        const sheet2 = AscTest.JsApi.AddSheet("FindPrevSheet2_" + Date.now());
+        sheet2.GetRange("A1").SetValue("y");
+        sheet2.GetRange("B1").SetValue("y");
+        sheet2.GetRange("C1").SetValue("y");
+        ws.SetActive();
+
+        const range = sheet2.GetRange("A1:C1");
+        const first = range.Find("y", "A1", "xlValues", "xlWhole", "xlByRows", "xlPrevious", false);
+        const second = range.FindPrevious(first);
+        const third = range.FindPrevious(second);
+
+        assert.strictEqual(first.GetAddress(true, true, "xlA1", false), "$C$1", "First is C1 (xlPrevious wraps back from A1)");
+        assert.strictEqual(second.GetAddress(true, true, "xlA1", false), "$B$1", "Second is B1");
+        assert.strictEqual(third.GetAddress(true, true, "xlA1", false), "$A$1", "Third is A1");
+
+        sheet2.Delete();
+    });
+
+    QUnit.test("Find: active sheet result unaffected when non-active sheet has same value", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("dup");
+        const sheet2 = AscTest.JsApi.AddSheet("FindDupSheet2_" + Date.now());
+        sheet2.GetRange("C3").SetValue("dup");
+        ws.SetActive();
+
+        const foundOnWs = ws.GetRange("A1:D4").Find("dup", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", false);
+        const foundOnSheet2 = sheet2.GetRange("A1:D4").Find("dup", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", false);
+
+        assert.strictEqual(foundOnWs.GetAddress(true, true, "xlA1", false), "$A$1", "Found A1 on active sheet");
+        assert.strictEqual(foundOnSheet2.GetAddress(true, true, "xlA1", false), "$C$3", "Found C3 on non-active sheet");
+
+        sheet2.Delete();
+    });
+
+    QUnit.test("FindNext: without After argument starts from first match", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("z");
+        ws.GetRange("B1").SetValue("z");
+        ws.GetRange("C1").SetValue("z");
+
+        const range = ws.GetRange("A1:C1");
+        const first = range.Find("z", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", false);
+        const second = range.FindNext(first);
+        const third = range.FindNext(second);
+
+        assert.strictEqual(first.GetAddress(true, true, "xlA1", false), "$B$1", "First match is B1");
+        assert.strictEqual(second.GetAddress(true, true, "xlA1", false), "$C$1", "FindNext gives C1");
+        assert.strictEqual(third.GetAddress(true, true, "xlA1", false), "$A$1", "FindNext wraps to A1");
+    });
+
+    QUnit.test("Find: case-sensitive on non-active sheet finds only matching case", function (assert) {
+        initializeTest();
+        const sheet2 = AscTest.JsApi.AddSheet("FindCaseSheet2_" + Date.now());
+        sheet2.GetRange("A1").SetValue("Hello");
+        sheet2.GetRange("B1").SetValue("hello");
+        sheet2.GetRange("C1").SetValue("HELLO");
+        ws.SetActive();
+
+        const range = sheet2.GetRange("A1:C1");
+        const found = range.Find("hello", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", true);
+
+        assert.ok(found, "Find returned a range");
+        assert.strictEqual(found.GetAddress(true, true, "xlA1", false), "$B$1", "Only lowercase hello matched");
+
+        sheet2.Delete();
+    });
+
+    QUnit.test("Find: case-insensitive on non-active sheet finds all variants", function (assert) {
+        initializeTest();
+        const sheet2 = AscTest.JsApi.AddSheet("FindCaseInsSheet2_" + Date.now());
+        sheet2.GetRange("A1").SetValue("Hello");
+        sheet2.GetRange("B1").SetValue("hello");
+        sheet2.GetRange("C1").SetValue("HELLO");
+        ws.SetActive();
+
+        const range = sheet2.GetRange("A1:C1");
+        const first = range.Find("hello", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", false);
+        const second = range.FindNext(first);
+        const third = range.FindNext(second);
+
+        assert.strictEqual(first.GetAddress(true, true, "xlA1", false), "$B$1", "First: hello at B1");
+        assert.strictEqual(second.GetAddress(true, true, "xlA1", false), "$C$1", "Second: HELLO at C1");
+        assert.strictEqual(third.GetAddress(true, true, "xlA1", false), "$A$1", "Third: Hello at A1");
+
+        sheet2.Delete();
+    });
+
+    QUnit.test("Find: case-sensitive returns null when case does not match on non-active sheet", function (assert) {
+        initializeTest();
+        const sheet2 = AscTest.JsApi.AddSheet("FindCaseNullSheet2_" + Date.now());
+        sheet2.GetRange("A1").SetValue("Hello");
+        sheet2.GetRange("B1").SetValue("HELLO");
+        ws.SetActive();
+
+        const found = sheet2.GetRange("A1:B1").Find("hello", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", true);
+
+        assert.strictEqual(found, null, "Case-sensitive find returns null when no exact match");
+
+        sheet2.Delete();
+    });
+
+    QUnit.test("Find: case-sensitive active sheet vs non-active sheet with same mixed-case values", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("Word");
+        ws.GetRange("B1").SetValue("word");
+        const sheet2 = AscTest.JsApi.AddSheet("FindCase2Sheets_" + Date.now());
+        sheet2.GetRange("A1").SetValue("word");
+        sheet2.GetRange("B1").SetValue("Word");
+        ws.SetActive();
+
+        const foundOnWs = ws.GetRange("A1:B1").Find("word", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", true);
+        const foundOnSheet2 = sheet2.GetRange("A1:B1").Find("word", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", true);
+
+        assert.strictEqual(foundOnWs.GetAddress(true, true, "xlA1", false), "$B$1", "Active sheet: lowercase word at B1");
+        assert.strictEqual(foundOnSheet2.GetAddress(true, true, "xlA1", false), "$A$1", "Non-active sheet: lowercase word at A1");
+
+        sheet2.Delete();
+    });
+
+    QUnit.test("Find: xlPart match case-sensitive on non-active sheet", function (assert) {
+        initializeTest();
+        const sheet2 = AscTest.JsApi.AddSheet("FindPartCaseSheet2_" + Date.now());
+        sheet2.GetRange("A1").SetValue("FooBar");
+        sheet2.GetRange("B1").SetValue("foobar");
+        sheet2.GetRange("C1").SetValue("FOOBAR");
+        ws.SetActive();
+
+        const range = sheet2.GetRange("A1:C1");
+        const found = range.Find("foo", "A1", "xlValues", "xlPart", "xlByRows", "xlNext", true);
+        const second = range.FindNext(found);
+
+        assert.ok(found, "Find returned a range");
+        assert.strictEqual(found.GetAddress(true, true, "xlA1", false), "$B$1", "xlPart case-sensitive: only foobar matched");
+        assert.strictEqual(second.GetAddress(true, true, "xlA1", false), "$B$1", "FindNext wraps to same cell — only one match");
+
+        sheet2.Delete();
+    });
+
+    QUnit.test("FindNext: case-sensitive on non-active sheet skips non-matching case", function (assert) {
+        initializeTest();
+        const sheet2 = AscTest.JsApi.AddSheet("FindNextCaseSheet2_" + Date.now());
+        sheet2.GetRange("A1").SetValue("test");
+        sheet2.GetRange("B1").SetValue("Test");
+        sheet2.GetRange("C1").SetValue("test");
+        ws.SetActive();
+
+        const range = sheet2.GetRange("A1:C1");
+        const first = range.Find("test", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", true);
+        const second = range.FindNext(first);
+        const third = range.FindNext(second);
+
+        assert.strictEqual(first.GetAddress(true, true, "xlA1", false), "$C$1", "First: test at C1 (after A1)");
+        assert.strictEqual(second.GetAddress(true, true, "xlA1", false), "$A$1", "Second: test at A1 (wraps, skips Test at B1)");
+        assert.strictEqual(third.GetAddress(true, true, "xlA1", false), "$C$1", "Third: back to C1");
+
+        sheet2.Delete();
+    });
 });

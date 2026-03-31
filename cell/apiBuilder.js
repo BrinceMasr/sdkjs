@@ -11808,6 +11808,7 @@
 			start.row += (!options.scanByRows ? (options.scanForward ? 1 : -1) : 0);
 			start.col += (options.scanByRows ? (options.scanForward ? 1 : -1) : 0);
 			options.asc_setActiveCell(start);
+			options.asc_setWsIndex(this.range.worksheet.index);
 			let engine = this.range.worksheet.workbook.oApi.wb.Search(options);
 			let id = this.range.worksheet.workbook.oApi.wb.GetSearchElementId(options.scanForward);
 			if (id != null) {
@@ -11896,6 +11897,7 @@
 			engine = this.range.worksheet.workbook.oApi.wb.Search(this._searchOptions);
 			let id = this.range.worksheet.workbook.oApi.wb.GetSearchElementId(false);
 			if (id != null) {
+				engine.SetCurrent(id);
 				let elem = engine.Elements[id];
 				res = new ApiRange(this.range.worksheet.getRange3(elem.row, elem.col, elem.row, elem.col));
 			}

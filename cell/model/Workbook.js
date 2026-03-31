@@ -5069,7 +5069,7 @@
 		this.lastFindCells = {};
 	};
 	Workbook.prototype.findCellText = function (options, searchEngine) {
-		var ws = this.getActiveWs();
+		var ws = (options.wsIndex !== -1 && options.wsIndex != null && Asc.c_oAscSearchBy.Workbook !== options.scanOnOnlySheet) ? (this.getWorksheet(options.wsIndex) || this.getActiveWs()) : this.getActiveWs();
 		var result = ws.findCellText(options, searchEngine), result2 = null;
 		if (Asc.c_oAscSearchBy.Workbook === options.scanOnOnlySheet) {
 			// Search on workbook
