@@ -1244,7 +1244,7 @@
 
 			const nCurrentAlign = oCurrentLvl.Jc;
 			oCurrentLvl.Jc = AscCommon.align_Left;
-			// calculate position separately so that horizontal numbering starts from the same place
+			// calculate X position separately to ensure a consistent starting point
 			if (nCurrentAlign === AscCommon.align_Right)
 			{
 				nTextYx -= nMaxTextWidth;
