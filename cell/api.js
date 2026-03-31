@@ -177,7 +177,6 @@ var editor;
       arr_colors[i].setColorSchemeId(array_colors_types[i])
     }
 
-    // now let's check
     var bIsSend = false;
     if (this.GuiControlColorsMap != null) {
       for (var i = 0; i < _count; ++i) {
@@ -1502,7 +1501,7 @@ var editor;
 		AscCommonExcel.checkStylesNames(t.wbModel.CellStyles);
 		t.FontLoader.LoadDocumentFonts(t.wbModel.generateFontMap2());
 
-		// Some unclear workaround to prevent crashes on iPad
+		// Some unclear stub to prevent crashes on iPad
 		if (t.isMobileVersion) {
 			AscCommon.AscBrowser.isSafariMacOs = false;
 			AscCommon.PasteElementsId.PASTE_ELEMENT_ID = "wrd_pastebin";
@@ -2858,7 +2857,7 @@ var editor;
         }
 
         if (t.wb) {
-          // Send update for toolbar, because when selection is in locked cell we need to block toolbar
+          // Send update for toolbar, because when selection is in locked cell we need to block the toolbar
           t.wb._onWSSelectionChanged(true);
 
           // Send update for sheets
@@ -2938,7 +2937,7 @@ var editor;
         if (c_oAscLockTypes.kLockTypeNone !== newType) {
           lockElem.setType(newType, true);
         } else {
-          // Remove from locks, the one who was editing left without saving
+          // Remove from locks, the one who was editing and left without saving
           t.collaborativeEditing.removeUnlock(lockElem);
           if (!t._onCheckCommentRemoveLock(lockElem.Element)) {
             if (lockElem.Element["type"] === c_oAscLockTypeElem.Object) {
@@ -2975,7 +2974,7 @@ var editor;
     };
     this.CoAuthoringApi.onLocksReleasedEnd = function() {
       if (!t.isDocumentLoadComplete) {
-        // While document is not yet loaded, do nothing
+        // While the document is not yet loaded, do nothing
         return;
       }
 
@@ -3019,7 +3018,7 @@ var editor;
       }
 
       var tmpAdditionalInfo = JSON.parse(excelAdditionalInfo);
-      // This is where we received recalcIndexColumns and recalcIndexRows
+      // Here we received recalcIndexColumns and recalcIndexRows
       var oRecalcIndexColumns = t.collaborativeEditing.addRecalcIndex('0', tmpAdditionalInfo['indexCols']);
       var oRecalcIndexRows = t.collaborativeEditing.addRecalcIndex('1', tmpAdditionalInfo['indexRows']);
 
@@ -3473,7 +3472,7 @@ var editor;
 		// Change state type (to none)
 		this.advancedOptionsAction = c_oAscAdvancedOptionsAction.None;
 
-		// There were errors on opening, send warning
+		// There were errors on opening, send a warning
 		if (0 < this.wbModel.openErrors.length) {
 			this.sendEvent('asc_onError', c_oAscError.ID.OpenWarning, c_oAscError.Level.NoCritical);
 		}
@@ -3783,7 +3782,7 @@ var editor;
     return this.wb._onCheckDefNameLock();
   };
 
-  // Is sheet work locked
+  // Is sheet editing locked
   spreadsheet_api.prototype.asc_isWorksheetLockedOrDeleted = function(index) {
     var ws = this.wbModel.getWorksheet(index);
     var sheetId = null;
@@ -3798,14 +3797,14 @@ var editor;
     return (false !== this.collaborativeEditing.getLockIntersection(lockInfo, c_oAscLockTypes.kLockTypeOther, /*bCheckOnlyLockAll*/false));
   };
 
-  // Is workbook work locked
+  // Is workbook editing locked
   spreadsheet_api.prototype.asc_isWorkbookLocked = function() {
     var lockInfo = this.collaborativeEditing.getLockInfo(c_oAscLockTypeElem.Sheet, /*subType*/null, null, null);
     // Check if someone is editing the sheet
     return (false !== this.collaborativeEditing.getLockIntersection(lockInfo, c_oAscLockTypes.kLockTypeOther, /*bCheckOnlyLockAll*/false));
   };
 
-  // Is sheet work locked
+  // Is sheet editing locked
   spreadsheet_api.prototype.asc_isLayoutLocked = function(index) {
       var ws = this.wbModel.getWorksheet(index);
       var sheetId = null;
@@ -3820,7 +3819,7 @@ var editor;
       return (false !== this.collaborativeEditing.getLockIntersection(lockInfo, c_oAscLockTypes.kLockTypeOther, /*bCheckOnlyLockAll*/false));
   };
 
-	// Is sheet work locked
+	// Is sheet editing locked
   spreadsheet_api.prototype.asc_isHeaderFooterLocked = function(index) {
       var ws = this.wbModel.getWorksheet(index);
       var sheetId = null;
@@ -6718,7 +6717,7 @@ var editor;
 			}
 		};
 		// ToDo fix the workaround, create new lock element type
-		var sheetId = -1; // Create non-existent sheet and non-existent object
+		var sheetId = -1; // non-existent sheet and non-existent object
 		var lockInfo = this.collaborativeEditing.getLockInfo(c_oAscLockTypeElem.Object, /*subType*/null, sheetId,
 			sheetId);
 		this.collaborativeEditing.lock([lockInfo], onChangeColorScheme);
@@ -6747,8 +6746,8 @@ var editor;
         }
       }
     };
-    // ToDo fix the workaround, create new lock element type
-    var sheetId = -1; // Create non-existent sheet and non-existent object
+    // ToDo fix the stub, create new lock element type
+    var sheetId = -1; // non-existent sheet and non-existent object
     var lockInfo = this.collaborativeEditing.getLockInfo(c_oAscLockTypeElem.Object, /*subType*/null, sheetId,
         sheetId);
     this.collaborativeEditing.lock([lockInfo], onChangeColorScheme);
@@ -7276,7 +7275,7 @@ var editor;
 	  var ws = this.wbModel.getActiveWs();
 	  this.wbModel.handlers.trigger('showWorksheet', ws.getId());
 
-      //in _onUpdateAfterApplyChanges there's no cache cleanup, adding -
+      //in _onUpdateAfterApplyChanges there's no cache cleanup, because add clean cache -
 	  var lastPointIndex = History.Points && History.Points.length - 1;
 	  var lastPoint = History.Points[lastPointIndex];
 	  if (lastPoint && lastPoint.UpdateRigions) {
@@ -8668,7 +8667,7 @@ var editor;
 
 
 
-	/*send cursor information, information as string (id + ";" + isEdit + ";" + rangeStr;)
+	/*send cursor information as string (id + ";" + isEdit + ";" + rangeStr;)
 		_autoSaveInner -> wb.sendCursor -> CDocsCoApi.prototype.sendCursor
 		NeedUpdateTargetForCollaboration - flag set to true when selection changes, then the previous function sends info to server
 
