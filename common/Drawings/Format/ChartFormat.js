@@ -3334,7 +3334,7 @@
         }
         ret.merge(oBaseBodyPr);
         var nVert = ret.vert;
-        //We don't support bodyPr.rot yet. Workaround for effect_stormtrooper.docx.
+        // We don't support bodyPr.rot yet. Workaround for cases where bodyPr.rot is set.
         if(AscFormat.isRealNumber(ret.rot) && 0 !== ret.rot) {
             if(Math.abs(ret.rot - 5400000) < 1000) {
                 if(ret.vert === AscFormat.nVertTTvert270) {
