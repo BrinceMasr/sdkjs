@@ -12391,8 +12391,8 @@ function parseStringToCElement (val, cultureInfo) {
 				const indexesArray = column.indexes[oldType];
 				const dataArray = column.data[oldType];
 				if (dataArray && indexesArray) {
-					const removeIndex = indexesArray.indexOf(changedIndex);
-					if (removeIndex !== -1) {
+					const removeIndex = this.findLowerIndexInTyped(changedIndex, indexesArray);
+					if (removeIndex < indexesArray.length && indexesArray[removeIndex] === changedIndex) {
 						dataArray.splice(removeIndex, 1);
 						indexesArray.splice(removeIndex, 1);
 					}
@@ -12652,29 +12652,6 @@ function parseStringToCElement (val, cultureInfo) {
 	SumIfSumRangeCache.prototype = Object.create(CountIfTypedCache.prototype);
 	SumIfSumRangeCache.prototype.constructor = SumIfSumRangeCache;
 
-	SumIfSumRangeCache.prototype.updateColumnData = function (ws, columnIndex, startIndex, endIndex) {
-		const wsId = ws.getId();
-		if (!this.data[wsId]) {
-			this.data[wsId] = {};
-		}
-		if (!this.data[wsId][columnIndex]) {
-			this.data[wsId][columnIndex] = {start: startIndex, end: startIndex - 1, data: {}, indexes: {}};
-		}
-		const column = this.data[wsId][columnIndex];
-		if (startIndex < column.start) {
-			const r1 = startIndex;
-			const r2 = column.start - 1;
-			const fullRange = ws.getRange3(r1, columnIndex, r2, columnIndex);
-			this.updateDataBefore(fullRange, column, startIndex);
-		}
-		if (endIndex > column.end) {
-			const r1 = column.end + 1;
-			const r2 = endIndex;
-			const fullRange = ws.getRange3(r1, columnIndex, r2, columnIndex);
-			this.updateDataAfter(fullRange, column, endIndex);
-		}
-	};
-
 	SumIfSumRangeCache.prototype.updateDataBefore = function(range, column, startIndex) {
 		column.start = startIndex;
 		const unshiftDataArrays = {};
@@ -12780,10 +12757,12 @@ function parseStringToCElement (val, cultureInfo) {
 	SumIfTypedCache.prototype.constructor = SumIfTypedCache;
 
 	/**
-	 * Sums all number values in the sum range. O(N_sum) per column.
+	 * Sums and counts all number values in the sum range. O(N_sum) per column.
+	 * @returns {{sum: number, count: number}}
 	 */
 	SumIfTypedCache.prototype.sumColumnTotalInRange = function(searchRange, sumRange, sumCache) {
 		let sum = 0;
+		let count = 0;
 		const searchRangeWs = searchRange.getWS();
 		const searchRangeBbox = searchRange.getBBox0();
 		const sumRangeWs = sumRange.getWorksheet();
@@ -12805,18 +12784,20 @@ function parseStringToCElement (val, cultureInfo) {
 				for (let j = first; j < last; j += 1) {
 					sum += sumData[j];
 				}
+				count += last - first;
 			}
 		}
-		return sum;
+		return {sum: sum, count: count};
 	};
 
 	/**
 	 * Sums values from sum range for rows where the search column has ANY data.
 	 * Uses advancing pointers for O(N_sum + K_total) per column.
-	 * @returns {{result: number|null, error: cError|null}}
+	 * @returns {{sum: number|null, count: number|null, error: cError|null}}
 	 */
 	SumIfTypedCache.prototype.sumForNonEmpty = function(searchRange, sumRange, sumCache, ignoreErrors) {
 		let sum = 0;
+		let count = 0;
 		const searchRangeWs = searchRange.getWS();
 		const searchRangeWsId = searchRangeWs.getId();
 		const searchRangeBbox = searchRange.getBBox0();
@@ -12857,7 +12838,7 @@ function parseStringToCElement (val, cultureInfo) {
 				for (let j = firstErr; j < lastErr; j += 1) {
 					const searchRow = sumErrorIndexes[j] - rowSumOffset;
 					if (this.hasDataAtRow(searchColumn, searchRow)) {
-						return {result: null, error: new cError(sumErrorData[j])};
+						return {sum: null, count: null, error: new cError(sumErrorData[j])};
 					}
 				}
 			}
@@ -12889,11 +12870,12 @@ function parseStringToCElement (val, cultureInfo) {
 					}
 					if (found) {
 						sum += sumData[j];
+						count += 1;
 					}
 				}
 			}
 		}
-		return {result: sum, error: null};
+		return {sum: sum, count: count, error: null};
 	};
 
 	/**
@@ -12990,6 +12972,7 @@ function parseStringToCElement (val, cultureInfo) {
 
 	SumIfTypedCache.prototype.calculate = function(searchRange, sumRange, sumCache, type, matchingFunction, searchValue, convertToNumber, skipErrors) {
 		let sum = 0;
+		let count = 0;
 
 		const searchRangeWs = searchRange.getWS();
 		const searchRangeWsId = searchRangeWs.getId();
@@ -13041,10 +13024,11 @@ function parseStringToCElement (val, cultureInfo) {
 						currentErrorIndex = gallopAdvance(errorIndexes, currentErrorIndex, errLen, targetRow);
 						// Check after gallop: pointer may land on targetRow whether or not it needed to advance
 						if (errorIndexes && currentErrorIndex < errLen && errorIndexes[currentErrorIndex] === targetRow) {
-							return {result: null, error: new cError(errorData[currentErrorIndex])};
+							return {sum: null, count: null, error: new cError(errorData[currentErrorIndex])};
 						}
 						if (sumIndexes && currentSumIndex < sumLen && sumIndexes[currentSumIndex] === targetRow) {
 							sum += sumData[currentSumIndex];
+							count += 1;
 							currentSumIndex += 1;
 						}
 					}
@@ -13058,17 +13042,18 @@ function parseStringToCElement (val, cultureInfo) {
 						currentErrorIndex = gallopAdvance(errorIndexes, currentErrorIndex, errLen, targetRow);
 						// Check after gallop: pointer may land on targetRow whether or not it needed to advance
 						if (errorIndexes && currentErrorIndex < errLen && errorIndexes[currentErrorIndex] === targetRow) {
-							return {result: null, error: new cError(errorData[currentErrorIndex])};
+							return {sum: null, count: null, error: new cError(errorData[currentErrorIndex])};
 						}
 						if (sumIndexes && currentSumIndex < sumLen && sumIndexes[currentSumIndex] === targetRow) {
 							sum += sumData[currentSumIndex];
+							count += 1;
 							currentSumIndex += 1;
 						}
 					}
 				}
 			}
 		}
-		return {result: sum, error: null};
+		return {sum: sum, count: count, error: null};
 	};
 
 	// -------------------------------------------------------SumIfCache---------------------------------------------------
@@ -13084,13 +13069,14 @@ function parseStringToCElement (val, cultureInfo) {
 	}
 	SumIfCache.prototype = Object.create(CountIfCache.prototype);
 	SumIfCache.prototype.constructor = SumIfCache;
+	SumIfCache.prototype.criteria3DError = new cNumber(0);
 
 	SumIfCache.prototype.calculate = function (arg, _arg1) {
 		const arg0 = arg[0];
 		let arg1 = arg[1];
 		const arg2 = arg[2] ? arg[2] : arg[0];
 
-		const validationError = validateSumIfArgs(arg0, arg1, arg2, new cNumber(0));
+		const validationError = validateSumIfArgs(arg0, arg1, arg2, this.criteria3DError);
 		if (validationError) {
 			return validationError;
 		}
@@ -13115,6 +13101,7 @@ function parseStringToCElement (val, cultureInfo) {
 
 	SumIfCache.prototype._calculate = function (range, arg1, sumRange) {
 		let _sum = 0;
+		let _count = 0;
 		const matchingInfo = AscCommonExcel.matchingValue(arg1, parseStringToCElement);
 		const type = matchingInfo.val.type;
 		let searchValue = matchingInfo.val;
@@ -13134,7 +13121,7 @@ function parseStringToCElement (val, cultureInfo) {
 					return errorResult;
 				}
 
-				const totalSum = this.typedCache.sumColumnTotalInRange(range, sumRange, this.sumRangeCache);
+				const total = this.typedCache.sumColumnTotalInRange(range, sumRange, this.sumRangeCache);
 				const nonEmptyResult = this.typedCache.sumForNonEmpty(range, sumRange, this.sumRangeCache, true);
 				if (nonEmptyResult.error !== null) {
 					return nonEmptyResult.error;
@@ -13146,14 +13133,16 @@ function parseStringToCElement (val, cultureInfo) {
 					return emptyStringResult.error;
 				}
 
-				_sum = totalSum - nonEmptyResult.result + emptyStringResult.result;
+				_sum = total.sum - nonEmptyResult.sum + emptyStringResult.sum;
+				_count = total.count - nonEmptyResult.count + emptyStringResult.count;
 			} else if (matchingInfo.op === "<>") {
 				// complement: sum(<>"") = rows with any value; sumForNonEmpty is exactly that
 				const calculatingResult = this.typedCache.sumForNonEmpty(range, sumRange, this.sumRangeCache);
 				if (calculatingResult.error !== null) {
 					return calculatingResult.error;
 				}
-				_sum = calculatingResult.result;
+				_sum = calculatingResult.sum;
+				_count = calculatingResult.count;
 			}
 		} else {
 			const isWildcard = type === cElementType.string && (searchValue.indexOf('*') !== -1 || searchValue.indexOf('?') !== -1);
@@ -13163,14 +13152,16 @@ function parseStringToCElement (val, cultureInfo) {
 				if (calculatingResult.error !== null) {
 					return calculatingResult.error;
 				}
-				_sum = calculatingResult.result;
+				_sum = calculatingResult.sum;
+				_count = calculatingResult.count;
 				if (type === cElementType.number) {
 					// also sum string cells that parse to the same number (e.g. cell "5" with criteria 5)
 					calculatingResult = this.typedCache.calculate(range, sumRange, this.sumRangeCache, cElementType.string, matchingFunction, searchValue, true);
 					if (calculatingResult.error !== null) {
 						return calculatingResult.error;
 					}
-					_sum += calculatingResult.result;
+					_sum += calculatingResult.sum;
+					_count += calculatingResult.count;
 				}
 			} else if (matchingInfo.op === '<>') {
 				// Complement: sum(<>) = totalSum - sum(=)
@@ -13180,19 +13171,30 @@ function parseStringToCElement (val, cultureInfo) {
 					return errorResult;
 				}
 
-				const totalSum = this.typedCache.sumColumnTotalInRange(range, sumRange, this.sumRangeCache);
+				const total = this.typedCache.sumColumnTotalInRange(range, sumRange, this.sumRangeCache);
 				const matchResult = this.typedCache.calculate(range, sumRange, this.sumRangeCache, type, equalFn, searchValue, false, true);
-				_sum = totalSum - matchResult.result;
+				_sum = total.sum - matchResult.sum;
+				_count = total.count - matchResult.count;
 			} else {
 				const matchingFunction = getMatchingFunction(type, matchingInfo.op, isWildcard);
 				const calculatingResult = this.typedCache.calculate(range, sumRange, this.sumRangeCache, type, matchingFunction, searchValue);
 				if (calculatingResult.error !== null) {
 					return calculatingResult.error;
 				}
-				_sum = calculatingResult.result;
+				_sum = calculatingResult.sum;
+				_count = calculatingResult.count;
 			}
 		}
-		return new cNumber(_sum);
+		return this._finalizeResult(_sum, _count);
+	};
+
+	/**
+	 * @param {number} sum
+	 * @param {number} count
+	 * @returns {cNumber}
+	 */
+	SumIfCache.prototype._finalizeResult = function (sum, count) {
+		return new cNumber(sum);
 	};
 
 	SumIfCache.prototype.remove = function (cell, dataOld, dataNew) {
@@ -13218,223 +13220,6 @@ function parseStringToCElement (val, cultureInfo) {
 	AverageIfTypedCache.prototype = Object.create(SumIfTypedCache.prototype);
 	AverageIfTypedCache.prototype.constructor = AverageIfTypedCache;
 
-	/**
-	 * Counts all number values in the average range. O(N_sum) per column.
-	 * @param {Object} searchRange
-	 * @param {Object} sumRange
-	 * @param {Object} sumCache
-	 * @returns {number}
-	 */
-	AverageIfTypedCache.prototype.countColumnTotalInRange = function(searchRange, sumRange, sumCache) {
-		let count = 0;
-		const searchRangeWs = searchRange.getWS();
-		const searchRangeBbox = searchRange.getBBox0();
-		const sumRangeWs = sumRange.getWorksheet();
-		const sumRangeWsId = sumRangeWs.getId();
-		const sumRangeBbox = sumRange.getBBox0();
-		const columnsOffset = searchRangeBbox.c1 - sumRangeBbox.c1;
-
-		for (let i = sumRangeBbox.c1; i <= sumRangeBbox.c2; i += 1) {
-			const searchColumnIndex = columnsOffset + i;
-			this.updateColumnData(searchRangeWs, searchColumnIndex, searchRangeBbox.r1, searchRangeBbox.r2);
-			sumCache.updateColumnData(sumRangeWs, i, sumRangeBbox.r1, sumRangeBbox.r2);
-
-			const sumColumn = sumCache.data[sumRangeWsId][i];
-			const sumIndexes = sumColumn.indexes[cElementType.number];
-			if (sumIndexes) {
-				const first = sumCache.findLowerIndexInTyped(sumRangeBbox.r1, sumIndexes);
-				const last = sumCache.findHigherIndexInTyped(sumRangeBbox.r2, sumIndexes);
-				count += last - first;
-			}
-		}
-		return count;
-	};
-
-	/**
-	 * Sums values and counts them from average range for rows where search column has ANY data.
-	 * @param {Object} searchRange
-	 * @param {Object} sumRange
-	 * @param {Object} sumCache
-	 * @param {boolean} ignoreErrors
-	 * @returns {{result: {sum: number, count: number}|null, error: cError|null}}
-	 */
-	AverageIfTypedCache.prototype.sumForNonEmpty = function(searchRange, sumRange, sumCache, ignoreErrors) {
-		let sum = 0;
-		let count = 0;
-		const searchRangeWs = searchRange.getWS();
-		const searchRangeWsId = searchRangeWs.getId();
-		const searchRangeBbox = searchRange.getBBox0();
-		const sumRangeWs = sumRange.getWorksheet();
-		const sumRangeWsId = sumRangeWs.getId();
-		const sumRangeBbox = sumRange.getBBox0();
-		const columnsOffset = searchRangeBbox.c1 - sumRangeBbox.c1;
-
-		for (let i = sumRangeBbox.c1; i <= sumRangeBbox.c2; i += 1) {
-			const searchColumnIndex = columnsOffset + i;
-			this.updateColumnData(searchRangeWs, searchColumnIndex, searchRangeBbox.r1, searchRangeBbox.r2);
-			sumCache.updateColumnData(sumRangeWs, i, sumRangeBbox.r1, sumRangeBbox.r2);
-
-			const searchColumn = this.data[searchRangeWsId][searchColumnIndex];
-			const sumColumn = sumCache.data[sumRangeWsId][i];
-			const rowSumOffset = sumRangeBbox.r1 - searchRangeBbox.r1;
-
-			// 4 advancing pointers, one per type — amortized O(1) per sum entry to check if search row has ANY data
-			const sNumIdx = searchColumn.indexes[cElementType.number];
-			const sStrIdx = searchColumn.indexes[cElementType.string];
-			const sBoolIdx = searchColumn.indexes[cElementType.bool];
-			const sErrIdx = searchColumn.indexes[cElementType.error];
-
-			let sNumPtr = sNumIdx ? this.findLowerIndexInTyped(searchRangeBbox.r1, sNumIdx) : 0;
-			let sStrPtr = sStrIdx ? this.findLowerIndexInTyped(searchRangeBbox.r1, sStrIdx) : 0;
-			let sBoolPtr = sBoolIdx ? this.findLowerIndexInTyped(searchRangeBbox.r1, sBoolIdx) : 0;
-			let sErrPtr = sErrIdx ? this.findLowerIndexInTyped(searchRangeBbox.r1, sErrIdx) : 0;
-			const sNumEnd = sNumIdx ? this.findHigherIndexInTyped(searchRangeBbox.r2, sNumIdx) : 0;
-			const sStrEnd = sStrIdx ? this.findHigherIndexInTyped(searchRangeBbox.r2, sStrIdx) : 0;
-			const sBoolEnd = sBoolIdx ? this.findHigherIndexInTyped(searchRangeBbox.r2, sBoolIdx) : 0;
-			const sErrEnd = sErrIdx ? this.findHigherIndexInTyped(searchRangeBbox.r2, sErrIdx) : 0;
-
-			const sumErrorIndexes = sumColumn.indexes[cElementType.error];
-			const sumErrorData = sumColumn.data[cElementType.error];
-			if (sumErrorIndexes && !ignoreErrors) {
-				const firstErr = sumCache.findLowerIndexInTyped(sumRangeBbox.r1, sumErrorIndexes);
-				const lastErr = sumCache.findHigherIndexInTyped(sumRangeBbox.r2, sumErrorIndexes);
-				for (let j = firstErr; j < lastErr; j += 1) {
-					const searchRow = sumErrorIndexes[j] - rowSumOffset;
-					if (this.hasDataAtRow(searchColumn, searchRow)) {
-						return {result: null, error: new cError(sumErrorData[j])};
-					}
-				}
-			}
-
-			const sumData = sumColumn.data[cElementType.number];
-			const sumIndexes = sumColumn.indexes[cElementType.number];
-			if (sumData) {
-				const first = sumCache.findLowerIndexInTyped(sumRangeBbox.r1, sumIndexes);
-				const last = sumCache.findHigherIndexInTyped(sumRangeBbox.r2, sumIndexes);
-				for (let j = first; j < last; j += 1) {
-					const searchRow = sumIndexes[j] - rowSumOffset;
-					let found = false;
-					if (sNumIdx) {
-						while (sNumPtr < sNumEnd && sNumIdx[sNumPtr] < searchRow) sNumPtr += 1;
-						if (sNumPtr < sNumEnd && sNumIdx[sNumPtr] === searchRow) found = true;
-					}
-					if (!found && sStrIdx) {
-						while (sStrPtr < sStrEnd && sStrIdx[sStrPtr] < searchRow) sStrPtr += 1;
-						if (sStrPtr < sStrEnd && sStrIdx[sStrPtr] === searchRow) found = true;
-					}
-					if (!found && sBoolIdx) {
-						while (sBoolPtr < sBoolEnd && sBoolIdx[sBoolPtr] < searchRow) sBoolPtr += 1;
-						if (sBoolPtr < sBoolEnd && sBoolIdx[sBoolPtr] === searchRow) found = true;
-					}
-					if (!found && sErrIdx) {
-						while (sErrPtr < sErrEnd && sErrIdx[sErrPtr] < searchRow) sErrPtr += 1;
-						if (sErrPtr < sErrEnd && sErrIdx[sErrPtr] === searchRow) found = true;
-					}
-					if (found) {
-						sum += sumData[j];
-						count += 1;
-					}
-				}
-			}
-		}
-		return {result: {sum, count}, error: null};
-	};
-
-	/**
-	 * Finds matching rows in search range and accumulates sum+count from average range.
-	 * Uses galloping search. Returns {result: {sum, count}, error}.
-	 * @param {Object} searchRange
-	 * @param {Object} sumRange
-	 * @param {Object} sumCache
-	 * @param {number} type
-	 * @param {Function} matchingFunction
-	 * @param {*} searchValue
-	 * @param {boolean} convertToNumber
-	 * @param {boolean} skipErrors
-	 * @returns {{result: {sum: number, count: number}|null, error: cError|null}}
-	 */
-	AverageIfTypedCache.prototype.calculate = function(searchRange, sumRange, sumCache, type, matchingFunction, searchValue, convertToNumber, skipErrors) {
-		let sum = 0;
-		let count = 0;
-
-		const searchRangeWs = searchRange.getWS();
-		const searchRangeWsId = searchRangeWs.getId();
-		const searchRangeBbox = searchRange.getBBox0();
-		const sumRangeWs = sumRange.getWorksheet();
-		const sumRangeWsId = sumRangeWs.getId();
-		const sumRangeBbox = sumRange.getBBox0();
-
-		const columnsOffset = sumRangeBbox.c1 - searchRangeBbox.c1;
-
-		for (let i = searchRangeBbox.c1; i <= searchRangeBbox.c2; i += 1) {
-			const sumColumnIndex = columnsOffset + i;
-
-			this.updateColumnData(searchRangeWs, i, searchRangeBbox.r1, searchRangeBbox.r2);
-			sumCache.updateColumnData(sumRangeWs, sumColumnIndex, sumRangeBbox.r1, sumRangeBbox.r2);
-
-			const searchColumn = this.data[searchRangeWsId][i];
-			const sumColumn = sumCache.data[sumRangeWsId][sumColumnIndex];
-
-			const searchTypedData = searchColumn.data[type];
-			const searchTypedIndexes = searchColumn.indexes[type];
-
-			const sumData = sumColumn.data[cElementType.number];
-			const sumIndexes = sumColumn.indexes[cElementType.number];
-
-			const errorIndexes = skipErrors ? null : sumColumn.indexes[cElementType.error];
-			const errorData = skipErrors ? null : sumColumn.data[cElementType.error];
-
-			if (searchTypedData) {
-				const rowSumOffset = sumRangeBbox.r1 - searchRangeBbox.r1;
-
-				const firstIndex = this.findLowerIndexInTyped(searchRangeBbox.r1, searchTypedIndexes);
-				const lastIndex = this.findHigherIndexInTyped(searchRangeBbox.r2, searchTypedIndexes);
-
-				let currentSumIndex = sumIndexes && sumCache.findLowerIndexInTyped(searchTypedIndexes[firstIndex] + rowSumOffset, sumIndexes);
-				let currentErrorIndex = errorIndexes && sumCache.findLowerIndexInTyped(searchTypedIndexes[firstIndex] + rowSumOffset, errorIndexes);
-
-				const sumLen = sumIndexes ? sumIndexes.length : 0;
-				const errLen = errorIndexes ? errorIndexes.length : 0;
-
-				if (convertToNumber) {
-					for (let j = firstIndex; j < lastIndex; j += 1) {
-						const value = AscCommon.g_oFormatParser.parseLocaleNumber(searchTypedData[j]);
-						if (isNaN(value) || !matchingFunction(value, searchValue)) continue;
-						if ((!sumIndexes || currentSumIndex >= sumLen) && (!errorIndexes || currentErrorIndex >= errLen)) break;
-						const targetRow = searchTypedIndexes[j] + rowSumOffset;
-						currentSumIndex = gallopAdvance(sumIndexes, currentSumIndex, sumLen, targetRow);
-						currentErrorIndex = gallopAdvance(errorIndexes, currentErrorIndex, errLen, targetRow);
-						if (errorIndexes && currentErrorIndex < errLen && errorIndexes[currentErrorIndex] === targetRow) {
-							return {result: null, error: new cError(errorData[currentErrorIndex])};
-						}
-						if (sumIndexes && currentSumIndex < sumLen && sumIndexes[currentSumIndex] === targetRow) {
-							sum += sumData[currentSumIndex];
-							count += 1;
-							currentSumIndex += 1;
-						}
-					}
-				} else {
-					for (let j = firstIndex; j < lastIndex; j += 1) {
-						if (!matchingFunction(searchTypedData[j], searchValue)) continue;
-						if ((!sumIndexes || currentSumIndex >= sumLen) && (!errorIndexes || currentErrorIndex >= errLen)) break;
-						const targetRow = searchTypedIndexes[j] + rowSumOffset;
-						currentSumIndex = gallopAdvance(sumIndexes, currentSumIndex, sumLen, targetRow);
-						currentErrorIndex = gallopAdvance(errorIndexes, currentErrorIndex, errLen, targetRow);
-						if (errorIndexes && currentErrorIndex < errLen && errorIndexes[currentErrorIndex] === targetRow) {
-							return {result: null, error: new cError(errorData[currentErrorIndex])};
-						}
-						if (sumIndexes && currentSumIndex < sumLen && sumIndexes[currentSumIndex] === targetRow) {
-							sum += sumData[currentSumIndex];
-							count += 1;
-							currentSumIndex += 1;
-						}
-					}
-				}
-			}
-		}
-		return {result: {sum, count}, error: null};
-	};
-
 	// -------------------------------------------------------AverageIfCache----------------------------------------------
 
 	/**
@@ -13448,127 +13233,18 @@ function parseStringToCElement (val, cultureInfo) {
 	}
 	AverageIfCache.prototype = Object.create(SumIfCache.prototype);
 	AverageIfCache.prototype.constructor = AverageIfCache;
+	AverageIfCache.prototype.criteria3DError = new cError(cErrorType.division_by_zero);
 
-	AverageIfCache.prototype.calculate = function (arg, _arg1) {
-		const arg0 = arg[0];
-		let arg1 = arg[1];
-		const arg2 = arg[2] ? arg[2] : arg[0];
-
-		const validationError = validateSumIfArgs(arg0, arg1, arg2, new cError(cErrorType.division_by_zero));
-		if (validationError) {
-			return validationError;
-		}
-
-		const t = this;
-		function calculateOne(rangeOrCell, condition, sumRangeOrCell) {
-			const bbox = rangeOrCell.getBBox0();
-			const sumBbox = sumRangeOrCell.getBBox0();
-			const realSumBbox = new AscCommonExcel.Range(sumRangeOrCell.getWS(), sumBbox.r1, sumBbox.c1, sumBbox.r1 + (bbox.r2 - bbox.r1), sumBbox.c1 + (bbox.c2 - bbox.c1));
-			return t._get(rangeOrCell, condition, realSumBbox);
-		}
-
-		const arrayResult = iterateCriteriaArg(arg0, arg1, arg2, calculateOne);
-		if (arrayResult) {
-			return arrayResult;
-		}
-		if (cElementType.cell === arg1.type || cElementType.cell3D === arg1.type) {
-			arg1 = arg1.getValue();
-		}
-		return calculateOne(arg0, arg1, arg2);
-	};
-
-	AverageIfCache.prototype._calculate = function (range, arg1, sumRange) {
-		let _sum = 0;
-		let _count = 0;
-		const matchingInfo = AscCommonExcel.matchingValue(arg1, parseStringToCElement);
-		const type = matchingInfo.val.type;
-		let searchValue = matchingInfo.val;
-		if (type === cElementType.string) {
-			searchValue = searchValue.toString().toLowerCase();
-		} else if (type === cElementType.error) {
-			searchValue = searchValue.errorType;
-		} else {
-			searchValue = searchValue.value;
-		}
-
-		if (searchValue === "") {
-			if (matchingInfo.op === "=" || matchingInfo.op === null) {
-				// Complement: average(empty) uses totalSum - sumForNonEmpty + sum(string="")
-				const errorResult = this.typedCache.checkErrorsForEmpty(range, sumRange, this.sumRangeCache);
-				if (errorResult) {
-					return errorResult;
-				}
-
-				const totalSum = this.typedCache.sumColumnTotalInRange(range, sumRange, this.sumRangeCache);
-				const totalCount = this.typedCache.countColumnTotalInRange(range, sumRange, this.sumRangeCache);
-				const nonEmptyResult = this.typedCache.sumForNonEmpty(range, sumRange, this.sumRangeCache, true);
-				if (nonEmptyResult.error !== null) {
-					return nonEmptyResult.error;
-				}
-
-				const matchingFunction = getMatchingFunction(cElementType.string, '=', false);
-				const emptyStringResult = this.typedCache.calculate(range, sumRange, this.sumRangeCache, cElementType.string, matchingFunction, searchValue);
-				if (emptyStringResult.error !== null) {
-					return emptyStringResult.error;
-				}
-
-				_sum = totalSum - nonEmptyResult.result.sum + emptyStringResult.result.sum;
-				_count = totalCount - nonEmptyResult.result.count + emptyStringResult.result.count;
-			} else if (matchingInfo.op === "<>") {
-				const calculatingResult = this.typedCache.sumForNonEmpty(range, sumRange, this.sumRangeCache);
-				if (calculatingResult.error !== null) {
-					return calculatingResult.error;
-				}
-				_sum = calculatingResult.result.sum;
-				_count = calculatingResult.result.count;
-			}
-		} else {
-			const isWildcard = type === cElementType.string && (searchValue.indexOf('*') !== -1 || searchValue.indexOf('?') !== -1);
-			if ((matchingInfo.op === '=' || matchingInfo.op === null) && !isWildcard) {
-				const matchingFunction = getMatchingFunction(type, matchingInfo.op, isWildcard);
-				let calculatingResult = this.typedCache.calculate(range, sumRange, this.sumRangeCache, type, matchingFunction, searchValue);
-				if (calculatingResult.error !== null) {
-					return calculatingResult.error;
-				}
-				_sum = calculatingResult.result.sum;
-				_count = calculatingResult.result.count;
-				if (type === cElementType.number) {
-					// also include string cells that parse to the same number
-					calculatingResult = this.typedCache.calculate(range, sumRange, this.sumRangeCache, cElementType.string, matchingFunction, searchValue, true);
-					if (calculatingResult.error !== null) {
-						return calculatingResult.error;
-					}
-					_sum += calculatingResult.result.sum;
-					_count += calculatingResult.result.count;
-				}
-			} else if (matchingInfo.op === '<>') {
-				// Complement: average(<>X) = (totalSum - sum(=X)) / (totalCount - count(=X))
-				const equalFn = getMatchingFunction(type, '=', isWildcard);
-				const errorResult = this.typedCache.checkErrorsForNotEqual(range, sumRange, this.sumRangeCache, type, equalFn, searchValue);
-				if (errorResult) {
-					return errorResult;
-				}
-
-				const totalSum = this.typedCache.sumColumnTotalInRange(range, sumRange, this.sumRangeCache);
-				const totalCount = this.typedCache.countColumnTotalInRange(range, sumRange, this.sumRangeCache);
-				const matchResult = this.typedCache.calculate(range, sumRange, this.sumRangeCache, type, equalFn, searchValue, false, true);
-				_sum = totalSum - matchResult.result.sum;
-				_count = totalCount - matchResult.result.count;
-			} else {
-				const matchingFunction = getMatchingFunction(type, matchingInfo.op, isWildcard);
-				const calculatingResult = this.typedCache.calculate(range, sumRange, this.sumRangeCache, type, matchingFunction, searchValue);
-				if (calculatingResult.error !== null) {
-					return calculatingResult.error;
-				}
-				_sum = calculatingResult.result.sum;
-				_count = calculatingResult.result.count;
-			}
-		}
-
-		if (_count === 0) {
+	/**
+	 * @param {number} sum
+	 * @param {number} count
+	 * @returns {cNumber|cError}
+	 */
+	AverageIfCache.prototype._finalizeResult = function (sum, count) {
+		if (count === 0) {
 			return new cError(cErrorType.division_by_zero);
 		}
-		return new cNumber(_sum / _count);
+		return new cNumber(sum / count);
 	};
 
 
