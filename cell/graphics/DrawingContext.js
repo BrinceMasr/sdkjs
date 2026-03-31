@@ -1371,7 +1371,7 @@
 	 * @param {Number} w         Text width
 	 * @param {Number} wBB       Text Bound Box width
 	 * @param {AscFonts.CFontManager} fm  AscFonts.CFontManager object for getting font metrics
-	 * @param {Number} r         Conversion coefficient pt -> to current units of measurement (this.units)
+	 * @param {Number} r         Conversion coefficient pt -> current units of measurement (this.units)
 	 * @return {TextMetrics}
 	 */
 	DrawingContext.prototype._calcTextMetrics = function (w, wBB, fm, r) {
