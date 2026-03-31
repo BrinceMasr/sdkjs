@@ -13184,10 +13184,6 @@ function parseStringToCElement (val, cultureInfo) {
 				const totalSum = this.typedCache.sumColumnTotalInRange(range, sumRange, this.sumRangeCache);
 				const matchResult = this.typedCache.calculate(range, sumRange, this.sumRangeCache, type, equalFn, searchValue, false, true);
 				_sum = totalSum - matchResult.result;
-				if (type === cElementType.number) {
-					const strMatchResult = this.typedCache.calculate(range, sumRange, this.sumRangeCache, cElementType.string, equalFn, searchValue, true, true);
-					_sum -= strMatchResult.result;
-				}
 			} else {
 				const matchingFunction = getMatchingFunction(type, matchingInfo.op, isWildcard);
 				const calculatingResult = this.typedCache.calculate(range, sumRange, this.sumRangeCache, type, matchingFunction, searchValue);
@@ -13559,11 +13555,6 @@ function parseStringToCElement (val, cultureInfo) {
 				const matchResult = this.typedCache.calculate(range, sumRange, this.sumRangeCache, type, equalFn, searchValue, false, true);
 				_sum = totalSum - matchResult.result.sum;
 				_count = totalCount - matchResult.result.count;
-				if (type === cElementType.number) {
-					const strMatchResult = this.typedCache.calculate(range, sumRange, this.sumRangeCache, cElementType.string, equalFn, searchValue, true, true);
-					_sum -= strMatchResult.result.sum;
-					_count -= strMatchResult.result.count;
-				}
 			} else {
 				const matchingFunction = getMatchingFunction(type, matchingInfo.op, isWildcard);
 				const calculatingResult = this.typedCache.calculate(range, sumRange, this.sumRangeCache, type, matchingFunction, searchValue);
