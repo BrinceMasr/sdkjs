@@ -5573,6 +5573,7 @@
 			return;
 		}
 		if (this.SearchEngine.Compare(oProps) && !oProps.isNeedRecalc && !(oProps.lastSearchElem && this.SearchEngine.modifiedDocument)) {
+			this.SearchEngine.props.activeCell = oProps.activeCell;
 			return this.SearchEngine;
 		}
 		oProps.isNeedRecalc = null;
@@ -7172,9 +7173,14 @@
 			return this.Direction ? this.CurId + 1 : this.CurId - 1;
 		} else {
 			// it's necessary because into the docbuilder "this.wb.wsActive" is "-1" and search doesn't work
-			let ws = this.wb.model.getActiveWs();
-			if (!ws) {
-				ws = this.wb && this.wb.model && this.wb.model.getActiveWs && this.wb.model.getActiveWs();
+			let ws;
+			if (this.props && this.props.wsIndex !== undefined && this.props.wsIndex !== null && this.props.wsIndex !== -1) {
+				ws = this.wb.model.getWorksheet(this.props.wsIndex) || this.wb.model.getActiveWs();
+			} else {
+				ws = this.wb.model.getActiveWs();
+				if (!ws) {
+					ws = this.wb && this.wb.model && this.wb.model.getActiveWs && this.wb.model.getActiveWs();
+				}
 			}
 			let selectionRange = (this.props && this.props.selectionRange) || (ws && ws.selectionRange) || (ws && ws.copySelection);
 
