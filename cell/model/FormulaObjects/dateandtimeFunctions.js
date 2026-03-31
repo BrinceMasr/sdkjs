@@ -512,7 +512,7 @@ function (window, undefined) {
 		if (type) {
 			switch (wk) {
 				case 0:
-					// Return week number from December 31 of the previous year
+					// Return the week number from December 31 of the previous year
 					startOfYear.setUTCDate(0);
 					return weekNumber(startOfYear, iso, type);
 				case 53:
@@ -1651,7 +1651,7 @@ function (window, undefined) {
 	cNETWORKDAYS_INTL.prototype.numFormat = AscCommonExcel.cNumFormatNone;
 	cNETWORKDAYS_INTL.prototype.arrayIndexes = {2: 1, 3: 1};
 	cNETWORKDAYS_INTL.prototype.argumentsType = [argType.any, argType.any, argType.number, argType.any];
-	//TODO in this case there are differences with MS. With 3 and 4 arguments - replacing the result with an error does not occur.
+	//TODO in this case there are differences with MS. With 3 and 4 arguments, the result is not replaced with an error.
 	cNETWORKDAYS_INTL.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
 	cNETWORKDAYS_INTL.prototype.Calculate = function (arg) {
 		var tempArgs = arg[2] ? [arg[0], arg[1], arg[2]] : [arg[0], arg[1]];
@@ -2172,7 +2172,7 @@ function (window, undefined) {
 			while (daysCounter !== workdaysCount) {
 				currentDate = new cDate(currentDate.getTime() + diff * c_msPerDay);
 
-				//TODO verify when crossing through argVal0 = 60
+				//TODO check when crossing argVal0 = 60
 				var dayOfWeek;
 				var argVal0 = argClone && argClone[0] ? argClone[0].getValue() : null;
 				if (argVal0 !== null && argVal0 < 60) {
@@ -2219,7 +2219,7 @@ function (window, undefined) {
 	cWORKDAY_INTL.prototype.numFormat = AscCommonExcel.cNumFormatNone;
 	cWORKDAY_INTL.prototype.arrayIndexes = {0: AscCommonExcel.arrayIndexesType.range, 1: AscCommonExcel.arrayIndexesType.range, 3: 1};
 	cWORKDAY_INTL.prototype.argumentsType = [argType.any, argType.any, argType.number, argType.any];
-	//TODO in this case there are differences with MS. With 3 and 4 arguments - replacing the result with an error does not occur.
+	//TODO in this case there are differences with MS. With 3 and 4 arguments, the result is not replaced with an error.
 	// cWORKDAY_INTL.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
 	cWORKDAY_INTL.prototype.Calculate = function (arg) {
 		//TODO issue with formulas of the following type - WORKDAY.INTL(8,60,"0000000")

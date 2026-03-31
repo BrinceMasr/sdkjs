@@ -241,7 +241,7 @@ function (window, undefined) {
 			res = true;
 		} else {
 			var conditionObj = AscCommonExcel.matchingValue(condition);
-			//if string without operators, add * to search for matches starting with this string
+			//if a string has no operators, add * to search for matches starting with that string
 			//this is how MS does it. LO searches for exact matches
 			if (null === conditionObj.op && cElementType.string === conditionObj.val.type) {
 				conditionObj.val.value += "*";
@@ -262,7 +262,7 @@ function (window, undefined) {
 				if (bIsCondition) {
 					if (0 === i) {
 						arr[j] = header;
-						if (map.hasOwnProperty(header)) {//if we find the same header, skip it
+						if (map.hasOwnProperty(header)) {//if a duplicate header is found, skip it
 							continue;
 						} else {
 							map[header] = [];
@@ -272,7 +272,7 @@ function (window, undefined) {
 					}
 				} else {
 					if (0 === i) {
-						if (map.hasOwnProperty(header)) {//if we find the same header, skip it
+						if (map.hasOwnProperty(header)) {//if a duplicate header is found, skip it
 							continue;
 						} else {
 							map[header] = [];
@@ -292,11 +292,11 @@ function (window, undefined) {
 
 	function getNeedValuesFromDataBase(dataBase, field, conditionData, bIsGetObjArray, doNotCheckEmptyField) {
 
-		//fill map: column name -> its content (from the database)
+		//fill the map: column name -> its content (from the database)
 		var databaseObj = convertDatabase(dataBase);
 		var headersArr = databaseObj.arr, headersDataMap = databaseObj.map;
 
-		//fill map: column name -> its content (from conditions)
+		//fill the map: column name -> its content (from conditions)
 		databaseObj = convertDatabase(conditionData, true);
 		var headersConditionArr = databaseObj.arr, headersConditionMap = databaseObj.map;
 

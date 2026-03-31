@@ -1035,7 +1035,7 @@ function (window, undefined) {
 		} else if(cElementType.array === rows.type) {
 			rows = rows.getElementRowCol(0, 0);
 		} else if(cElementType.cellsRange === rows.type || cElementType.cellsRange3D === rows.type) {
-			// TODO couldn't determine exactly how the function behaves when cellsRange is passed as second or third argument, so returning error for now 
+			// TODO couldn't determine exactly how the function behaves when cellsRange is passed as second or third argument, so returning an error for now
 			rows = new cError(cErrorType.wrong_value_type);
 		};
 		rows = rows.tocNumber();
@@ -1052,7 +1052,7 @@ function (window, undefined) {
 		} else if(cElementType.array === columns.type) {
 			columns = columns.getElementRowCol(0, 0);
 		} else if(cElementType.cellsRange === columns.type || cElementType.cellsRange3D === columns.type) {
-			// TODO couldn't determine exactly how the function behaves when cellsRange is passed as second or third argument, so returning error for now
+			// TODO couldn't determine exactly how the function behaves when cellsRange is passed as second or third argument, so returning an error for now
 			columns = new cError(cErrorType.wrong_value_type);
 		}
 		columns = columns.tocNumber();
@@ -4951,7 +4951,7 @@ function (window, undefined) {
 				matrix = [[arg[i]]];
 			}
 
-			//adding by rows
+			//append by rows
 			for (let j = 0; j < matrix.length; j++) {
 				if (matrix[j]) {
 					if (!unionArray) {
@@ -5047,7 +5047,7 @@ function (window, undefined) {
 
 		//from documentation:
 		//Excel returns a #VALUE! when an array constant contains one or more numbers that are not a whole number.
-		//couldn't reproduce in MS
+		//could not reproduce in MS
 
 		let arg1 = arg[0];
 		if (arg1.type === arg1.empty) {

@@ -3713,7 +3713,7 @@ function (window, undefined) {
 			return res;
 		};
 
-		//processing the first argument - range above, if it comes here as a range, take the first element
+		//processing the first argument - if it arrives as a range, take the first element
 		var res;
 		if (cElementType.cellsRange3D === text.type || cElementType.cellsRange === text.type) {
 			text = text.getValue2(0, 0);

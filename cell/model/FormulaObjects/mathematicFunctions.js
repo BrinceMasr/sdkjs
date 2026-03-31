@@ -1664,7 +1664,7 @@ function (window, undefined) {
 	 * @constructor
 	 * @extends {cCEILING}
 	 */
-	//TODO there is no description for this function anywhere! works the same as cCEILING in all examples.
+	//TODO there is no description for this function anywhere! It works the same as cCEILING in all examples.
 	function cECMA_CEILING() {
 	}
 
@@ -5541,7 +5541,7 @@ function (window, undefined) {
 				return new cError(cErrorType.wrong_value_type);
 			}
 
-			//we put the actual value for search in cache, not the entire range
+			//put the search value in the cache, not the entire range
 			if (cElementType.cellsRange === arg2.type || cElementType.cellsRange3D === arg2.type) {
 				arg2 = arg2.cross(arguments[1]);
 			} else if (cElementType.array === arg2.type) {

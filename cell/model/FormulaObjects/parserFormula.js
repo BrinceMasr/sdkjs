@@ -525,13 +525,13 @@ var cErrorType = {
 		cannot_be_spilled	: 10,
 		busy                : 11
   };
-//adding cReturnFormulaType constant for correct array formula processing
-// value - function can only return a value (not an array)
+//cReturnFormulaType constant added for correct array formula processing
+// value - a function can only return a value (not an array)
 // in this case the function is called multiple times for each element of internal arrays
 // area and area3d are preliminarily converted to array
 // value_convert_area - same as value, but area and area3d are not converted to array
 // array - can return array
-// used in returnValueType for each formula
+// used in returnValueType of each formula
 // also this parameter in formulas can be an array - array of argument indexes that are input array/area
 // area_to_ref - replace area with array of cell references (REF)
 // replace_only_array - in case of Area - keep it in arguments and calculate only 1 value (similar to array)
@@ -2032,7 +2032,7 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 	cRef3D.prototype.constructor = cRef3D;
 	cRef3D.prototype.type = cElementType.cell3D;
 	cRef3D.prototype.clone = function (opt_ws) {
-		//TODO adding additional check for inserting sheet into another workbook.
+		//TODO added an additional check for inserting a sheet into another workbook.
 		//need to re-verify and always use only opt_ws if it is provided.
 		var isAddingSheet = Asc["editor"] && Asc["editor"].wb && Asc["editor"].wb.model && Asc["editor"].wb.model.addingWorksheet;
 		var ws = opt_ws ? opt_ws : this.ws;
@@ -3607,7 +3607,7 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 	};
 	cBaseFunction.prototype.toLocaleString = function (/*locale*/) {
 		var name = this.toString();
-		//for cUnknownFunction we do a check
+		//check is performed for cUnknownFunction
 		if(AscCommonExcel.cFormulaFunctionToLocale && undefined !== AscCommonExcel.cFormulaFunctionToLocale[name]) {
 			return AscCommonExcel.cFormulaFunctionToLocale[name];
 		} else {
@@ -4116,7 +4116,7 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 
 			//for row/column functions with zero arguments, need to calculate
 			//the value for each cell of the array, changing opt_bbox
-			//TODO adding another check. in the future consider always using parserFormula.ref
+			//TODO added another check. Consider always using parserFormula.ref in the future.
 			//TODO review isOneCell/checkOneRowCol check - may need to look at data count and expand range if parserFormula.ref exceeds argument range
 			if ((replaceAreaByRefs && 0 === argumentsCount && parserFormula.ref) || (/*!bIsSpecialFunction &&*/ firstArray && parserFormula.ref && !parserFormula.ref.isOneCell() && checkOneRowCol())) {
 				firstArray = new cArray();
@@ -5306,7 +5306,7 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 /*--------------------------------------------------------------------------*/
 
 
-var _func = [];//for workaround like function overloading.
+var _func = [];
 _func[cElementType.number] = [];
 _func[cElementType.string] = [];
 _func[cElementType.bool] = [];
@@ -7846,8 +7846,8 @@ function parserFormula( formula, parent, _ws ) {
 
 		var t = this;
 		var _checkReferenceCount = function (weight) {
-			//introducing a limit on the maximum number of operands in formula
-			//for this adding weight of each operand
+			//introducing a limit on the maximum number of operands in a formula
+			//this is done by adding a weight to each operand
 			//func - 0.75, array - 2, bool - 0.5, number - _number >= 65536 || Number.isInteger(_number)) ? 1.25 : 0.5
 			//string - 0.5+length*0/25
 			//error - 1
@@ -10600,7 +10600,7 @@ function parserFormula( formula, parent, _ws ) {
 		}
 	};
 
-	/* For reverse assembly of function sometimes it is necessary to change cell references */
+	/* For reverse assembly of the function, it is sometimes necessary to change cell references */
 	parserFormula.prototype.changeOffset = function (offset, canResize, nChangeTable, notOffset3d) {//offset = AscCommon.CellBase
 		var t = this;
 		//temporarily commenting due to problem: when assembling formula after processing by this function in R1c1 mode
@@ -11103,7 +11103,7 @@ function parserFormula( formula, parent, _ws ) {
 		}
 		return bRes;
 	};
-	/* Assembly of function into infix form */
+	/* Assembly of the function into infix form */
 	parserFormula.prototype.assemble = function (rFormula) {
 		if (!rFormula && this.outStack.length === 1 && this.outStack[this.outStack.length - 1] instanceof cError) {
 			return this.Formula;
@@ -11112,7 +11112,7 @@ function parserFormula( formula, parent, _ws ) {
 		return this._assembleExec();
 	};
 
-	/* Assembly of function into infix form */
+	/* Assembly of the function into infix form */
 	parserFormula.prototype.assembleLocale = function (locale, digitDelim, rFormula) {
 		if (!rFormula && this.outStack.length === 1 && this.outStack[this.outStack.length - 1] instanceof cError) {
 			return this.Formula;

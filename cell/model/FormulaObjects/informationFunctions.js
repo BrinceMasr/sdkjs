@@ -179,9 +179,9 @@ function (window, undefined) {
 	 * @return {text} Returns information about the formatting, location, or contents of a cell.
 	 */
 	cCell.prototype.Calculate = function (arg, opt_bbox, opt_defName, ws) {
-		//intentionally introducing restriction - minimum 2 arguments
-		//in case of one argument, it's necessary to always track the last changed cell
-		//also during assembly, it's necessary to write data about the last changed cell
+		//intentionally enforcing a restriction - minimum 2 arguments
+		//with one argument, the last changed cell must always be tracked
+		//also, during assembly, data about the last changed cell must be recorded
 		//is this needed?
 		let arg0 = arg[0];
 		let arg1 = arg[1];
@@ -1037,7 +1037,7 @@ function (window, undefined) {
 		var arg0 = arg[0];
 		if (arg0 instanceof cArea || arg0 instanceof cArea3D) {
 			//todo review!
-			//workaround for array formula
+			//stub for array formula
 			//MS treats this argument as an array
 			if (this.bArrayFormula) {
 				arg0 = arg[0].getValue()
