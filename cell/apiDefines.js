@@ -348,7 +348,7 @@ var c_oAscPopUpSelectorType = {
 	RedoTableAutoExpansion: 1
   };
 
-  // Changing Print_Area
+  // Change Print_Area
   var c_oAscChangePrintAreaType = {
       set: 0,
       clear: 1,

@@ -20962,7 +20962,7 @@
 				props.asc_setStdDev(0);
 				// Operator can override settings
 				if (Operator !== undefined) {
-					// Here you can add logic for various above/below average types
+					// Logic for various above/below average types can be added here
 				}
 				break;
 

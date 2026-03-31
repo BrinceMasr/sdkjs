@@ -1335,7 +1335,7 @@
 			"showDataAs": oDataField.showDataAs != null ? ToXml_ST_ShowDataAs(oDataField.showDataAs) : undefined,
 			"baseField":  oDataField.baseField != null ? oDataField.baseField : undefined,
 			"baseItem":   oDataField.baseItem != null ? oDataField.baseItem : undefined,
-			"numFmtId":   oDataField.num != null ? this.stylesForWrite.getNumIdByFormat(oDataField.num) : undefined, // here, from here
+			"numFmtId":   oDataField.num != null ? this.stylesForWrite.getNumIdByFormat(oDataField.num) : undefined,
 			"extLst":     oDataField.extLst != null ? this.SerExtensionList(oDataField.extLst) : undefined
 		}
 	};
@@ -6420,7 +6420,6 @@
 		for (var nElm = 0; nElm < aParsed.length; nElm++)
 			oSlicers.slicer.push(this.SlicerFromJSON(aParsed[nElm], oWorksheet));
 
-		// here from here
 		//return oSlicers;
 	};
 	ReaderFromJSON.prototype.SlicerFromJSON = function(oParsed, oWorksheet)
