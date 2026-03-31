@@ -6311,9 +6311,6 @@ CT_pivotTableDefinition.prototype.asc_removeDataField = function(api, pivotIndex
 		pivot.removeDataFieldAndReIndex(pivotIndex, dataIndex, true);
 	});
 };
-// In all asc_moveTo methods, added another parameter to set the index in the new type. Because from the interface it comes as dataIndex.
-// And because of this, there is a bug that the field is always added to the end of the list, and another bug (for example: when moving the last field from the values field to another type to the first position,
-// the wrong field is deleted and 2 identical fields appear). This fix resolves these issues, only interface changes are needed.
 CT_pivotTableDefinition.prototype.asc_moveToPageField = function(api, pivotIndex, dataIndex, indexTo) {
 	if (st_VALUES === pivotIndex) {
 		return;
