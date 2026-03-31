@@ -4587,7 +4587,7 @@
 			}
 		}
 
-		// now send all templates of the first theme
+		// now send all layouts of the first theme
 		this.CheckLayouts();
 
 		this.SlideDrawer.CheckSlide(drDoc.SlideCurrent);
