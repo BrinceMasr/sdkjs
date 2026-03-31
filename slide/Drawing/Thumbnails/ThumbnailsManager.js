@@ -135,7 +135,7 @@
 
 		this.SelectPageEnabled = true;
 
-		this.MouseDownTrack = new AscCommon.CMouseDownTrack(this);
+		this.MouseDownTrack = new AscCommon.COutlineMouseDownTrack(this);
 
 		this.MouseTrackCommonImage = null;
 
@@ -2450,8 +2450,14 @@
 		this.ScrollerHeight = 0;
 		this.ScrollerWidth = 0;
 
-		this.outlineLeftMarginMM = 20;
+		this.outlineTopMarginMM = 3;
+		this.outlineLeftMarginMM = 10;
 		this.outlineView = new AscCommonSlide.OutlineView();
+
+		this.m_oOverlayApi = new AscCommon.COverlay();
+		this.m_oOverlayApi.m_oControl = this.m_oWordControl.m_oThumbnails;
+		this.m_oOverlayApi.m_oHtmlPage = this.m_oWordControl;
+		this.m_oOverlayApi.Clear();
 
 	}
 	AscFormat.InitClassWithoutType(COutlineThumbnailsManager, CThumbnailsManagerBase);
@@ -2624,7 +2630,6 @@
 
 		var control = this.m_oWordControl.m_oThumbnails.HtmlElement;
 		if (global_mouseEvent.IsLocked == true && global_mouseEvent.Sender != control) {
-			// кто-то зажал мышку. кто-то другой
 			return false;
 		}
 
@@ -2640,7 +2645,6 @@
 
 		this.m_oWordControl.m_oApi.sync_EndAddShape();
 		if (global_mouseEvent.Sender != control) {
-			// такого быть не должно
 			return false;
 		}
 
@@ -2648,16 +2652,16 @@
 			global_mouseEvent.Button = 0;
 
 		this.SetFocusElement(FOCUS_OBJECT_THUMBNAILS);
+		const pos = this.ConvertCoords(global_mouseEvent.X, global_mouseEvent.Y);
+		this.MouseDownTrack.Start(pos.Page, global_mouseEvent.X, global_mouseEvent.Y);
 		if (global_mouseEvent.Button == 0 && this.outlineView) {
 			const pR = AscCommon.AscBrowser.retinaPixelRatio;
-			const outlineCoords = this.ConvertCoords(global_mouseEvent.X, global_mouseEvent.Y);
-			const outlineXMm = outlineCoords.X * g_dKoef_pix_to_mm;
-			const outlineYMm = outlineCoords.Y * g_dKoef_pix_to_mm;
+
+			const outlineXMm = pos.X * g_dKoef_pix_to_mm;
+			const outlineYMm = pos.Y * g_dKoef_pix_to_mm;
 			if (outlineXMm > this.outlineLeftMarginMM) {
 
 				const hit = this.outlineView.getOutlineParagraphAtPosition(outlineYMm / pR);
-
-
 				if (hit) {
 					this.SelectPageEnabled = false;
 					this.m_oWordControl.GoToPage(hit.slideIndex);
@@ -2693,135 +2697,12 @@
 			}
 		}
 
-		var pos = this.ConvertCoords(global_mouseEvent.X, global_mouseEvent.Y);
 		if (pos.Page == -1) {
 			if (global_mouseEvent.Button == 2) {
 				this.showContextMenu(false);
 			}
 			checkSelectionEnd();
 			return false;
-		}
-
-		if (global_keyboardEvent.CtrlKey && !this.m_oWordControl.m_oApi.isReporterMode) {
-			if (this.m_arrPages[pos.Page].IsSelected === true) {
-				this.m_arrPages[pos.Page].IsSelected = false;
-				var arr = this.GetSelectedArray();
-				if (0 == arr.length) {
-					this.m_arrPages[pos.Page].IsSelected = true;
-					this.ShowPage(pos.Page);
-				} else {
-					this.OnUpdateOverlay();
-
-					this.SelectPageEnabled = false;
-					this.m_oWordControl.GoToPage(arr[0]);
-					this.SelectPageEnabled = true;
-
-					this.ShowPage(arr[0]);
-				}
-			} else {
-				if (this.GetFirstSelectedType() === this.GetSlideType(pos.Page)) {
-					this.m_arrPages[pos.Page].IsSelected = true;
-					this.OnUpdateOverlay();
-
-					this.SelectPageEnabled = false;
-					this.m_oWordControl.GoToPage(pos.Page);
-					this.SelectPageEnabled = true;
-					this.ShowPage(pos.Page);
-				}
-			}
-		} else if (global_keyboardEvent.ShiftKey && !this.m_oWordControl.m_oApi.isReporterMode) {
-
-			var pages_count = this.m_arrPages.length;
-			for (var i = 0; i < pages_count; i++) {
-				this.m_arrPages[i].IsSelected = false;
-			}
-
-			var _max = pos.Page;
-			var _min = this.m_oWordControl.m_oDrawingDocument.SlideCurrent;
-			if (_min > _max) {
-				var _temp = _max;
-				_max = _min;
-				_min = _temp;
-			}
-
-			let nSlideType = this.GetSlideType(_min);
-			for (var i = _min; i <= _max; i++) {
-				if (nSlideType === this.GetSlideType(i)) {
-					this.m_arrPages[i].IsSelected = true;
-				}
-			}
-
-			this.OnUpdateOverlay();
-			this.ShowPage(pos.Page);
-			oPresentation.Document_UpdateInterfaceState();
-		} else if (0 == global_mouseEvent.Button || 2 == global_mouseEvent.Button) {
-
-			let isMouseDownOnAnimPreview = false;
-			if (0 == global_mouseEvent.Button) {
-				if (this.m_arrPages[pos.Page].animateLabelRect) // click on the current star, preview animation button, slide transition
-				{
-					let animateLabelRect = this.m_arrPages[pos.Page].animateLabelRect;
-					if (pos.X >= animateLabelRect.minX && pos.X <= animateLabelRect.maxX && pos.Y >= animateLabelRect.minY && pos.Y <= animateLabelRect.maxY)
-						isMouseDownOnAnimPreview = true
-				}
-
-				if (!isMouseDownOnAnimPreview) // приготавливаемся к треку
-				{
-					this.MouseDownTrack.Start(pos.Page, global_mouseEvent.X, global_mouseEvent.Y);
-				}
-			}
-
-			if (this.m_arrPages[pos.Page].IsSelected) {
-				let isStartedAnimPreview = (this.m_oWordControl.m_oLogicDocument.IsStartedPreview() || (this.m_oWordControl.m_oDrawingDocument.TransitionSlide && this.m_oWordControl.m_oDrawingDocument.TransitionSlide.IsPlaying()));
-
-				this.SelectPageEnabled = false;
-				this.m_oWordControl.GoToPage(pos.Page);
-				this.SelectPageEnabled = true;
-
-				if (!isStartedAnimPreview) {
-					if (isMouseDownOnAnimPreview) {
-						this.m_oWordControl.m_oApi.SlideTransitionPlay(function () { this.m_oWordControl.m_oApi.asc_StartAnimationPreview() });
-					}
-				}
-
-				if (this.m_oWordControl.m_oNotesApi.IsEmptyDraw) {
-					this.m_oWordControl.m_oNotesApi.IsEmptyDraw = false;
-					this.m_oWordControl.m_oNotesApi.IsRepaint = true;
-				}
-
-				if (global_mouseEvent.Button == 2 && !global_keyboardEvent.CtrlKey) {
-					this.showContextMenu(false);
-				}
-				checkSelectionEnd();
-				return false;
-			}
-
-			var pages_count = this.m_arrPages.length;
-			for (var i = 0; i < pages_count; i++) {
-				this.m_arrPages[i].IsSelected = false;
-			}
-
-			this.m_arrPages[pos.Page].IsSelected = true;
-
-			this.OnUpdateOverlay();
-
-			if (global_mouseEvent.Button == 0 && this.m_arrPages[pos.Page].animateLabelRect) // click on the current star, preview animation button, slide transition
-			{
-				let animateLabelRect = this.m_arrPages[pos.Page].animateLabelRect;
-				let isMouseDownOnAnimPreview = false;
-				if (pos.X >= animateLabelRect.minX && pos.X <= animateLabelRect.maxX && pos.Y >= animateLabelRect.minY && pos.Y <= animateLabelRect.maxY);
-				isMouseDownOnAnimPreview = true;
-			}
-
-			this.SelectPageEnabled = false;
-			this.m_oWordControl.GoToPage(pos.Page);
-			this.SelectPageEnabled = true;
-
-			if (isMouseDownOnAnimPreview) {
-				this.m_oWordControl.m_oApi.SlideTransitionPlay(function () { this.m_oWordControl.m_oApi.asc_StartAnimationPreview() });
-			}
-
-			this.ShowPage(pos.Page);
 		}
 
 		if (global_mouseEvent.Button == 2 && !global_keyboardEvent.CtrlKey) {
@@ -2862,7 +2743,6 @@
 
 		if (this.MouseDownTrack.IsStarted())
 		{
-			// это трек для перекидывания слайдов
 			if (this.MouseDownTrack.IsSimple() && !this.m_oWordControl.m_oApi.isViewMode)
 			{
 				if (Math.abs(this.MouseDownTrack.GetX() - global_mouseEvent.X) > 10 || Math.abs(this.MouseDownTrack.GetY() - global_mouseEvent.Y) > 10)
@@ -2872,7 +2752,6 @@
 			{
 				if (!this.MouseDownTrack.IsSimple())
 				{
-					// нужно определить активная позиция между слайдами
 					this.MouseDownTrack.SetPosition(this.ConvertCoords2(global_mouseEvent.X, global_mouseEvent.Y));
 				}
 			}
@@ -3414,23 +3293,31 @@
 
 		ctx.beginPath();
 	};
-
-	COutlineThumbnailsManager.prototype.OnPaint = function () {
-		if (!this.isThumbnailsShown()) {
-			return;
-		}
-
-		const canvas = this.m_oWordControl.m_oThumbnails.HtmlElement;
-		if (!canvas)
-			return;
-
-		const context = AscCommon.AscBrowser.getContext2D(canvas);
-		context.clearRect(0, 0, canvas.width, canvas.height);
+	COutlineThumbnailsManager.prototype.getOutlineGraphics = function (context) {
+		const canvas = context.canvas;
 		const graphics = new AscCommon.CGraphics();
 		const widthMM = canvas.width / AscCommon.AscBrowser.retinaPixelRatio * g_dKoef_pix_to_mm;
 		const heightMM = canvas.height / AscCommon.AscBrowser.retinaPixelRatio * g_dKoef_pix_to_mm;
 		graphics.init(context, canvas.width, canvas.height, widthMM, heightMM);
 		graphics.m_oFontManager = this.m_oFontManager;
+		return graphics;
+	}
+	COutlineThumbnailsManager.prototype.OnPaint = function () {
+		if (!this.isThumbnailsShown()) {
+			return;
+		}
+
+		const canvas = this.m_oWordControl.m_oThumbnailsBack.HtmlElement;
+		if (!canvas)
+			return;
+
+		const context = AscCommon.AscBrowser.getContext2D(canvas);
+		context.clearRect(0, 0, canvas.width, canvas.height);
+		const graphics = this.getOutlineGraphics(context);
+
+		const widthMM = canvas.width / AscCommon.AscBrowser.retinaPixelRatio * g_dKoef_pix_to_mm;
+		const heightMM = canvas.height / AscCommon.AscBrowser.retinaPixelRatio * g_dKoef_pix_to_mm;
+
 		const currentSlideIndex = this.m_oWordControl.m_oDrawingDocument.SlideCurrent;
 		const scrollYMm = this.m_dScrollY * g_dKoef_pix_to_mm;
 
@@ -3438,7 +3325,7 @@
 			const outlineWidth = widthMM - this.outlineLeftMarginMM;
 			this.outlineView.updateAll(outlineWidth, heightMM, currentSlideIndex);
 		}
-		this.outlineView.updateOutlineShapeTransform(this.outlineLeftMarginMM, -scrollYMm);
+		this.outlineView.updateOutlineShapeTransform(this.outlineLeftMarginMM, -scrollYMm + this.outlineTopMarginMM);
 		this.m_oWordControl.m_oApi.clearEyedropperImgData();
 		this.outlineView.draw(graphics);
 		this.outlineView.drawDecorations(graphics, currentSlideIndex, scrollYMm, this.outlineLeftMarginMM);
@@ -3560,15 +3447,21 @@
 		if (this.m_oWordControl)
 			this.m_oWordControl.m_oApi.checkLastWork();
 
-		const context = canvas.getContext("2d");
-		const canvasWidth = canvas.width;
-		const canvasHeight = canvas.height;
+		// const context = canvas.getContext("2d");
+		// this.getOutlineGraphics(canvas);
 
-		this.drawThumbnailsBorders(context, canvasWidth, canvasHeight);
-
-		if (this.MouseDownTrack.IsDragged()) {
-			this.drawThumbnailsInsertionLine(context, canvasWidth, canvasHeight);
+		if ((this.MouseDownTrack.IsDragged())) {
+			const shape = this.outlineView.outlineShape;
+			if (shape) {
+				const pos = this.ConvertCoords(global_mouseEvent.X, global_mouseEvent.Y);
+				shape.selectionSetEnd(global_mouseEvent, pos.X * g_dKoef_pix_to_mm / AscCommon.AscBrowser.retinaPixelRatio, pos.Y * g_dKoef_pix_to_mm / AscCommon.AscBrowser.retinaPixelRatio, 0);
+				shape.updateSelectionState(this.m_oWordControl.m_oDrawingDocument);
+				this.m_oWordControl.OnUpdateOverlay();
+			}
 		}
+		// if (this.MouseDownTrack.IsDragged()) {
+		// 	this.drawThumbnailsInsertionLine(context, canvasWidth, canvasHeight);
+		// }
 	};
 	COutlineThumbnailsManager.prototype.drawThumbnailsBorders = function (context, canvasWidth, canvasHeight) {
 		// context.fillStyle = GlobalSkin.BackgroundColorThumbnails;

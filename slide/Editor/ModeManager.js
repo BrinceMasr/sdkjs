@@ -512,7 +512,9 @@
 		if (oContent.SlideObjects.length === 0) {
 			return;
 		}
+		const bChangeSize = kw !== 1 || kh !== 1;
 		const presentation = this.getPresentation();
+		const oCurrentMaster = presentation.GetCurrentMaster();
 		if (bEndFormatting) {
 			const oSourceContent = aContents[1];
 			for (let i = 0; i < oContent.SlideObjects.length; ++i) {

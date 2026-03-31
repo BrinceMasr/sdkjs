@@ -245,8 +245,6 @@
 		this.MainScrollsEnabledFlag = 0;
 		this.m_bIsIE = AscCommon.AscBrowser.isIE;
 
-		// thumbnails
-		this.Thumbnails = new AscCommon.COutlineThumbnailsManager(this);
 
 		// сплиттеры (для табнейлов и для заметок)
 		this.splitters;
@@ -318,6 +316,8 @@
 
 		this.initThumbnails();
 		this.recalculateThumbnailsBounds();
+
+		this.Thumbnails = new AscCommon.COutlineThumbnailsManager(this);
 
 		this.initMainContent();
 		this.recalculateMainContentBounds();
@@ -4066,6 +4066,9 @@
 			}
 
 			var ret = oWordControl.Thumbnails.onKeyDown(e);
+			if (oWordControl.m_oLogicDocument.IsFocusOnOutline()) {
+				return;
+			}
 			if (false === ret)
 				return false;
 			if (undefined === ret)
@@ -4257,6 +4260,7 @@
 
 		var overlay = this.m_oOverlayApi;
 		var overlayNotes = null;
+		var overlayOutline = null;
 
 		var isDrawNotes = false;
 		if (this.IsNotesSupported() && this.m_oNotesApi)
@@ -4267,6 +4271,16 @@
 
 			if (this.m_oLogicDocument.IsFocusOnNotes())
 				isDrawNotes = true;
+		}
+		var isDrawOutline = false;
+		if (this.IsThumbnailsSupported() && this.Thumbnails)
+		{
+			overlayOutline = this.Thumbnails.m_oOverlayApi;
+			overlayOutline.SetBaseTransform();
+			overlayOutline.Clear();
+
+			if (this.m_oLogicDocument.IsFocusOnOutline())
+				isDrawOutline = true;
 		}
 
 		overlay.SetBaseTransform();
@@ -4354,6 +4368,31 @@
 
 			if (drDoc.SlideCurrent != -1)
 				this.m_oLogicDocument.Slides[drDoc.SlideCurrent].drawNotesSelect();
+
+			ctxOverlay.globalAlpha = 0.2;
+			ctxOverlay.fill();
+			ctxOverlay.globalAlpha = 1.0;
+			ctxOverlay.stroke();
+			ctxOverlay.beginPath();
+		}
+
+		if (isDrawOutline && drDoc.m_bIsSelection)
+		{
+			var ctxOverlay = overlayOutline.m_oContext;
+			ctxOverlay.fillStyle   = "rgba(51,102,204,255)";
+			ctxOverlay.strokeStyle = "#9ADBFE";
+			ctxOverlay.lineWidth = Math.round(AscCommon.AscBrowser.retinaPixelRatio);
+
+			ctxOverlay.beginPath();
+
+			if (drDoc.SlideCurrent != -1) {
+				const shape = this.Thumbnails.outlineView.outlineShape;
+				const content = shape && shape.getDocContent();
+				if (content) {
+					this.m_oDrawingDocument.UpdateTargetTransform(shape.transformText);
+					content.DrawSelectionOnPage(0);
+				}
+			}
 
 			ctxOverlay.globalAlpha = 0.2;
 			ctxOverlay.fill();

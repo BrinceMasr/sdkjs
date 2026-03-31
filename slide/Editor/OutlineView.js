@@ -112,24 +112,36 @@
 			}
 		}
 	};
+	OutlineView.prototype.getTextPr = function (isTitle) {
+		const textPr = new CTextPr();
+		textPr.SetFontSize(10);
+		if (isTitle) {
+			textPr.SetBold(true);
+		}
+		return textPr;
+	};
+	OutlineView.prototype.getParaPr = function (compiledParaPr) {
+		const copyParaPr = new CParaPr();
+		if (compiledParaPr.ParaPr.Bullet) {
+			copyParaPr.Bullet = compiledParaPr.ParaPr.Bullet.createDuplicate();
+			copyParaPr.Lvl = compiledParaPr.ParaPr.Lvl;
+		}
+		copyParaPr.Ind = compiledParaPr.ParaPr.Ind.Copy();
+		copyParaPr.Ind.FirstLine *= 0.5;
+		copyParaPr.Ind.Left *= 0.5;
+		copyParaPr.Ind.Right *= 0.5;
+		copyParaPr.Spacing.Before = 1;
+		copyParaPr.Spacing.After = 1;
+		copyParaPr.Spacing.Line = 1;
+		return copyParaPr;
+	};
 	OutlineView.prototype.applyParagraphProps = function (outlineParagraph, slideParagraph, isTitle) {
 		const compiledPr = slideParagraph.getCompiledPr();
-		const copyParaPr = new CParaPr();
-		if (compiledPr.ParaPr.Bullet) {
-			copyParaPr.Bullet = compiledPr.ParaPr.Bullet.createDuplicate();
-			copyParaPr.Lvl = compiledPr.ParaPr.Lvl;
-			copyParaPr.Ind = compiledPr.ParaPr.Ind.Copy();
-			// copyParaPr.Ind.FirstLine *= 0.5;
-			// copyParaPr.Ind.Left *= 0.5;
-			// copyParaPr.Ind.Right *= 0.5;
-		}
+		const copyParaPr = this.getParaPr(compiledPr);
+		const oThis = this;
 		outlineParagraph.SetPr(copyParaPr);
 		outlineParagraph.CheckRunContent(function (run) {
-			const textPr = new CTextPr();
-			textPr.SetFontSize(10);
-			if (isTitle) {
-				textPr.SetBold(true);
-			}
+			const textPr = oThis.getTextPr(isTitle);
 			run.SetPr(textPr);
 		});
 	};
@@ -171,7 +183,8 @@
 		const paragraph = content.Content[paragraphIdx];
 		if (paragraph && paragraph.Pages && paragraph.Pages[0] !== undefined
 				&& paragraph.Lines && paragraph.Lines[0]) {
-			return paragraph.Pages[0].Y + paragraph.Lines[0].Top;
+			const transformText = this.outlineShape.transformText;
+			return transformText.TransformPointY(0, paragraph.Pages[0].Y + paragraph.Lines[0].Top);
 		}
 		return null;
 	};
@@ -262,28 +275,24 @@
 		const prepareColor = parseInt(color.slice(1), 16);
 		return {R: (prepareColor >> 16) & 0xff, G: (prepareColor >> 8) & 0xff, B: prepareColor & 0xff};
 	};
-	OutlineView.prototype.drawDecorations = function (graphics, currentSlideIndex, scrollYMm, leftMarginMM) {
+	OutlineView.prototype.drawDecorations = function (graphics, currentSlideIndex, scrollYMm) {
 		if (!this.outlineShape || !this.paragraphMap.length) return;
 
-		const rectX = leftMarginMM * 0.1;
-		const rectW = leftMarginMM * 0.3;
+		const rectX = 2;
+		const rectW = 6;
 		const content = this.outlineShape.txBody.content;
 		const backgroundRGB = this.getRGBFromHex(AscCommon.GlobalSkin.BackgroundColorThumbnails);
+
+		g_oTextMeasurer.SetTextPr(this.getTextPr(), null);
+		g_oTextMeasurer.SetFontSlot(AscWord.fontslot_ASCII);
+		const height = g_oTextMeasurer.GetHeight();
+
 		for (let i = 0; i < this.slideFirstParagraphs.length; i += 1) {
 			const firstIdx = this.slideFirstParagraphs[i];
 			const topY = this.getParagraphY(firstIdx);
 			if (topY === null) continue;
-
-			const firstPara = content.Content[firstIdx];
-			let firstLineH = rectW;
-			if (firstPara && firstPara.Lines && firstPara.Lines[0]) {
-				const fl = firstPara.Lines[0];
-				firstLineH = (fl.Bottom || 0) - (fl.Top || 0);
-			}
-			const barH = rectW * (4 / 5);
-
 			const penRGB = this.getRGBFromHex(i === currentSlideIndex ? AscCommon.GlobalSkin.ThumbnailsPageOutlineActive : AscCommon.GlobalSkin.ThumbnailsPageOutline);
-			const barShape = this.createDecorShape(backgroundRGB, penRGB, rectW, barH, "roundRect", 12700);
+			const barShape = this.createDecorShape(backgroundRGB, penRGB, rectW, height, "roundRect", 20000);
 			this.drawDecorShape(graphics, barShape, rectX, topY - scrollYMm);
 		}
 
@@ -308,24 +317,15 @@
 
 
 		const numberPenRGB = this.getRGBFromHex(AscCommon.GlobalSkin.ThumbnailsPageOutline);
-		const numberWShape = rectW * (4 / 5);
+		const numberWShape = rectW * (3 / 5);
 		for (let i = 0; i < this.paragraphMap.length; i += 1) {
 			const entry = this.paragraphMap[i];
 			if (!entry.isFirstOfShape || entry.isTitle) continue;
 
 			const paraY = this.getParagraphY(i);
 			if (paraY === null) continue;
-
-			const para = content.Content[i];
-			let firstLineH = rectW;
-			if (para && para.Lines && para.Lines[0]) {
-				const fl = para.Lines[0];
-				firstLineH = (fl.Bottom || 0) - (fl.Top || 0);
-			}
-			const badgeH = Math.min(rectW, Math.max(0.1, firstLineH));
-
-			const badgeShape = this.createDecorShape(backgroundRGB, numberPenRGB, numberWShape, badgeH, "rect", 0, String(badgeNumbers[i]));
-			this.drawDecorShape(graphics, badgeShape, rectX, paraY - scrollYMm);
+			const badgeShape = this.createDecorShape(backgroundRGB, numberPenRGB, numberWShape, height, "rect", 0, String(badgeNumbers[i]));
+			this.drawDecorShape(graphics, badgeShape, rectX + rectW - numberWShape, paraY - scrollYMm);
 		}
 	};
 	OutlineView.prototype.getTargetDocContent = function () {
