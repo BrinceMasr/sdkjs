@@ -4080,7 +4080,7 @@
 		oWordControl.bIsUseKeyPress = ((_ret_mouseDown & keydownresult_PreventKeyPress) != 0) ? false : true;
 
 		if ((_ret_mouseDown & keydownresult_PreventDefault) != 0) {
-			// remove prevent with alt. Italians are too unhappy about it.
+			// remove prevent with alt. Workaround for Italian keyboard layout.
 			e.preventDefault();
 		}
 
@@ -4119,7 +4119,7 @@
 		oWordControl.EndUpdateOverlay();
 
 		if ((_ret_mouseDown & keydownresult_PreventDefault) != 0) {
-			// remove prevent with alt. Italians are too unhappy about it.
+			// remove prevent with alt. Workaround for Italian keyboard layout.
 			e.preventDefault();
 			return false;
 		}
