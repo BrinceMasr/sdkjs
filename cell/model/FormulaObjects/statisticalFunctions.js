@@ -12481,8 +12481,8 @@ function parseStringToCElement (val, cultureInfo) {
 		if (arg1.type === cElementType.cellsRange || arg1.type === cElementType.cellsRange3D) {
 			let matrix = arg1.getMatrix();
 			if (arg1.type === cElementType.cellsRange3D) {
-			matrix = matrix[0];
-		}
+				matrix = matrix[0];
+			}
 			const result = new cArray();
 			for (let row = 0; row < matrix.length; row += 1) {
 				result.addRow();
@@ -12732,9 +12732,9 @@ function parseStringToCElement (val, cultureInfo) {
 				newType = dataNew.type;
 				newValue = dataNew.value;
 				if (newType !== cElementType.error && newType !== cElementType.number) {
-					return;
-				}
-				if (newValue && newType === cElementType.error) {
+					newValue = null;
+					newType = null;
+				} else if (newValue && newType === cElementType.error) {
 					newValue = new cError(newValue).errorType;
 				}
 			}
@@ -13082,7 +13082,6 @@ function parseStringToCElement (val, cultureInfo) {
 		this.typedCache = new SumIfTypedCache();
 		this.sumRangeCache = new SumIfSumRangeCache();
 	}
-	SumIfCache.prototype.constructor = SumIfCache;
 	SumIfCache.prototype = Object.create(CountIfCache.prototype);
 	SumIfCache.prototype.constructor = SumIfCache;
 
