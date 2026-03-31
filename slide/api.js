@@ -767,8 +767,26 @@
 	asc_docs_api.prototype.IsHandoutMasterMode = function() {
 		return this.presentationViewManager.isMasterHandoutMode();
 	};
+	asc_docs_api.prototype.IsOutlineMode = function() {
+		return this.presentationViewManager.isOutlineMode();
+	};
 	asc_docs_api.prototype.asc_IsMasterSlideMode = function() {
 		return this.IsMasterSlideMode();
+	};
+	asc_docs_api.prototype.asc_IsSlidePageMode = function() {
+		return this.IsSlidePageMode();
+	};
+	asc_docs_api.prototype.asc_IsNotesPageMode = function() {
+		return this.IsNotesPageMode();
+	};
+	asc_docs_api.prototype.asc_IsNotesMasterMode = function() {
+		return this.IsNotesMasterMode();
+	};
+	asc_docs_api.prototype.asc_IsHandoutMasterMode = function() {
+		return this.IsHandoutMasterMode();
+	};
+	asc_docs_api.prototype.asc_IsOutlineMode = function() {
+		return this.IsOutlineMode();
 	};
 	asc_docs_api.prototype.asc_AddMasterSlide = function() {
 		return this.presentationViewManager.addMasterSlide();
@@ -10055,6 +10073,11 @@ background-repeat: no-repeat;\
 	asc_docs_api.prototype["asc_CanDeleteMaster"] = asc_docs_api.prototype.asc_CanDeleteMaster;
 	asc_docs_api.prototype["asc_CanDeleteLayout"] = asc_docs_api.prototype.asc_CanDeleteLayout;
 	asc_docs_api.prototype["asc_IsMasterSlideMode"] = asc_docs_api.prototype.asc_IsMasterSlideMode;
+	asc_docs_api.prototype["asc_IsSlidePageMode"] = asc_docs_api.prototype.asc_IsSlidePageMode;
+	asc_docs_api.prototype["asc_IsNotesPageMode"] = asc_docs_api.prototype.asc_IsNotesPageMode;
+	asc_docs_api.prototype["asc_IsNotesMasterMode"] = asc_docs_api.prototype.asc_IsNotesMasterMode;
+	asc_docs_api.prototype["asc_IsHandoutMasterMode"] = asc_docs_api.prototype.asc_IsHandoutMasterMode;
+	asc_docs_api.prototype["asc_IsOutlineMode"] = asc_docs_api.prototype.asc_IsOutlineMode;
 
 	asc_docs_api.prototype["asc_setViewerTargetType"] = asc_docs_api.prototype.asc_setViewerTargetType;
 
