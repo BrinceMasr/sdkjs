@@ -1169,7 +1169,7 @@
 	function AFMakeNumber(value) {
 		let result = parseInt(value);
 		if (isNaN(result) || ("" + result) !== ("" + value))
-			return defaultValue;
+			return 0;
 		
 		return result;
 	}
