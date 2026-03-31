@@ -55,22 +55,22 @@
 
 		var pHText = [];
 
-		pHText[AscFormat.phType_body] = "Slide text";             //"Текст слайда" ;                              ;
-		pHText[AscFormat.phType_chart] = "Chart";         // "Диаграмма" ;                                     ;
-		pHText[AscFormat.phType_clipArt] = "Clip Art";// "Текст слайда" ; //(Clip Art)                   ;
-		pHText[AscFormat.phType_ctrTitle] = "Slide title";// "Заголовок слайда" ; //(Centered Title)     ;
-		pHText[AscFormat.phType_dgm] = "Diagram";// "Диаграмма";// (Diagram)                        ;
-		pHText[AscFormat.phType_dt] = "Date and time";// "Дата и время";// (Date and Time)         ;
-		pHText[AscFormat.phType_ftr] = "Footer";// "Нижний колонтитул";// (Footer)                  ;
-		pHText[AscFormat.phType_hdr] = "Header";// "Верхний колонтитул"; //(Header)                 ;
-		pHText[AscFormat.phType_media] = "Media";// "Текст слайда"; //(Media)                         ;
-		pHText[AscFormat.phType_obj] = "Slide text";// "Текст слайда"; //(Object)                   ;
-		pHText[AscFormat.phType_pic] = "Picture";// "Вставка рисунка"; //(Picture)                  ;
-		pHText[AscFormat.phType_sldImg] = "Image";// "Вставка рисунка"; //(Slide Image)                ;
-		pHText[AscFormat.phType_sldNum] = "Slide number";// "Номер слайда"; //(Slide Number)           ;
-		pHText[AscFormat.phType_subTitle] = "Slide subtitle";// "Подзаголовок слайда"; //(Subtitle)      ;
-		pHText[AscFormat.phType_tbl] = "Table";// "Таблица"; //(Table)                              ;
-		pHText[AscFormat.phType_title] = "Slide title";// "Заголовок слайда" ;  //(Title)             ;
+		pHText[AscFormat.phType_body] = "Slide text";             //(Body)                              ;
+		pHText[AscFormat.phType_chart] = "Chart";         // (Chart)                                     ;
+		pHText[AscFormat.phType_clipArt] = "Clip Art";// (Clip Art)                   ;
+		pHText[AscFormat.phType_ctrTitle] = "Slide title";// (Centered Title)     ;
+		pHText[AscFormat.phType_dgm] = "Diagram";// (Diagram)                        ;
+		pHText[AscFormat.phType_dt] = "Date and time";// (Date and Time)         ;
+		pHText[AscFormat.phType_ftr] = "Footer";// (Footer)                  ;
+		pHText[AscFormat.phType_hdr] = "Header";// (Header)                 ;
+		pHText[AscFormat.phType_media] = "Media";// (Media)                         ;
+		pHText[AscFormat.phType_obj] = "Slide text";// (Object)                   ;
+		pHText[AscFormat.phType_pic] = "Picture";// (Picture)                  ;
+		pHText[AscFormat.phType_sldImg] = "Image";// (Slide Image)                ;
+		pHText[AscFormat.phType_sldNum] = "Slide number";// (Slide Number)           ;
+		pHText[AscFormat.phType_subTitle] = "Slide subtitle";// (Subtitle)      ;
+		pHText[AscFormat.phType_tbl] = "Table";// (Table)                              ;
+		pHText[AscFormat.phType_title] = "Slide title";// (Title)             ;
 
 		var c_oAscFill = Asc.c_oAscFill;
 
@@ -226,12 +226,12 @@
 				radius = global_mouseEvent.AscHitToHandlesEpsilon;
 			}
 
-			// чтобы не считать корни
+			// to avoid calculating square roots
 			radius *= radius;
 
-			// считаем ближайший маркер, так как окрестность может быть большой, и пересекаться.
+			// find the nearest marker, since the neighborhood can be large and overlap.
 
-			var _min_dist = 2 * radius; // главное что больше
+			var _min_dist = 2 * radius; // the main thing is that it's larger
 			var _ret_value = -1;
 
 			var check_line = CheckObjectLine(object);
@@ -315,7 +315,7 @@
 				}
 			}
 
-			// теперь смотрим расстояние до центра фигуры, чтобы можно было двигать маленькую
+			// now check the distance to the shape center, so that small shapes can be moved
 			dist_x = t_x - hc;
 			dist_y = t_y - vc;
 			_tmp_dist = dist_x * dist_x + dist_y * dist_y;
@@ -984,8 +984,8 @@
 			this.txBody = null;
 			this.bodyPr = null;
 			this.textBoxContent = null;
-			this.drawingBase = null;//DrawingBase в Excell'е
-			this.bWordShape = null;//если этот флаг стоит в true то автофигура имеет формат как в редакторе документов
+			this.drawingBase = null;//DrawingBase in Excel
+			this.bWordShape = null;//if this flag is true then the autoshape has the format as in the document editor
 			this.bCheckAutoFitFlag = false;
 			this.signatureLine = null;
 			this.txXfrm = null;
@@ -2398,19 +2398,19 @@
 									break;
 								}
 								case 1:    //ctr
-								case 2:    //dist TODO: пока выравнивание  по центру. Переделать!
-								case 3:    //just TODO: пока выравнивание  по центру. Переделать!
+								case 2:    //dist TODO: currently center alignment. Needs to be reworked!
+								case 3:    //just TODO: currently center alignment. Needs to be reworked!
 									// (Text Anchor Enum ( Center ))
 									_vertical_shift = (_text_rect_height - _content_height) * 0.5;
 									break;
 
 								// case 2: //dist
-								// {// (Text Anchor Enum ( Distributed )) TODO: пока выравнивание  по центру. Переделать!
+								// {// (Text Anchor Enum ( Distributed )) TODO: currently center alignment. Needs to be reworked!
 								//     _vertical_shift = (_text_rect_height - _content_height) * 0.5;
 								//     break;
 								// }
 								// case 3: //just
-								// {// (Text Anchor Enum ( Justified )) TODO: пока выравнивание  по центру. Переделать!
+								// {// (Text Anchor Enum ( Justified )) TODO: currently center alignment. Needs to be reworked!
 								//     _vertical_shift = (_text_rect_height - _content_height) * 0.5;
 								//     break;
 								// }
@@ -3758,8 +3758,8 @@
 						}
 					}
 
-					if (!this.bWordShape || this.group)//в презентациях и в таблицах изменям позицию: по горизонтали - в зависимости от выравнивания первого параграфа в контенте,
-						// по вертикали - в зависимости от вертикального выравнивания контента.
+					if (!this.bWordShape || this.group)//in presentations and tables we change position: horizontally - depending on the alignment of the first paragraph in the content,
+						// vertically - depending on the vertical alignment of the content.
 					{
 						var dSin = Math.sin(this.rot), dCos = Math.cos(this.rot);
 						var oContent = this.getDocContent();
@@ -4761,7 +4761,7 @@
 			return widthOfContent > sizesOfTextRectContent.width;
 		};
 		CShape.prototype.checkFitContentForSmartArt = function () {
-			// почему-то у майков не подбирается шрифт для ширины, если вставлено только уравнение
+			// for some reason Microsoft doesn't select a font for width if only an equation is inserted
 			const oContent = this.getCurrentDocContentInSmartArt();
 			if (oContent) {
 				for (let i = 0; i < oContent.Content.length; i += 1) {
@@ -5380,16 +5380,16 @@
 					}
 					drawing_document.UpdateTargetTransform(oMatrix);
 					if (true === content.IsSelectionUse()) {
-						// Выделение нумерации
+						// Numbering selection
 						if (selectionflag_Numbering == content.Selection.Flag) {
 							drawing_document.TargetEnd();
 							drawing_document.SelectEnabled(true);
 							drawing_document.SelectClear();
 							drawing_document.SelectShow();
 						}
-						// Обрабатываем движение границы у таблиц
+						// Handle table border movement
 						else if (null != content.Selection.Data && true === content.Selection.Data.TableBorder && type_Table == content.Content[content.Selection.Data.Pos].GetType()) {
-							// Убираем курсор, если он был
+							// Remove cursor if it was present
 							drawing_document.TargetEnd();
 						} else {
 							if (false === content.IsSelectionEmpty()) {
@@ -6711,7 +6711,7 @@
 			}
 		};
 
-		CShape.prototype.Refresh_RecalcData2 = function (pageIndex/*для текста*/) {
+		CShape.prototype.Refresh_RecalcData2 = function (pageIndex/*for text*/) {
 			this.recalcContent();
 			this.recalcContent2 && this.recalcContent2();
 			this.recalcTransformText();

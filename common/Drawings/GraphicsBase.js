@@ -152,7 +152,7 @@
 			return function(r, g, b, a) {
 				var isCorrect = _this.isDarkMode;
 				if (isCorrect && 0 !== this.shapeDrawCounter)
-					if (!(1 === this.shapeDrawCounter && this.isFormDraw)) //форму первого уровня не корректируем
+					if (!(1 === this.shapeDrawCounter && this.isFormDraw)) //don't correct the first level form
 						isCorrect = false;
 				if (isCorrect && _darkModeCheckColor2(r, g, b))
 					_func.call(_this, 255 - r, 255 - g, 255 - b, a);
@@ -173,7 +173,7 @@
 			return function(r, g, b, a) {
 				var isCorrect = _this.isDarkMode;
 				if (isCorrect && 0 !== this.shapeDrawCounter)
-					if (!(1 === this.shapeDrawCounter && this.isFormDraw)) //форму первого уровня не корректируем
+					if (!(1 === this.shapeDrawCounter && this.isFormDraw)) //don't correct the first level form
 						isCorrect = false;
 				if (isCorrect)
 				{
@@ -625,7 +625,7 @@
 
 		let Points = oPath.Points;
 		let nCount = Points.length;
-		// берем предпоследнюю точку, т.к. последняя совпадает с первой
+		// take the second-to-last point, since the last one coincides with the first
 		let PrevX = Points[nCount - 2].X, PrevY = Points[nCount - 2].Y;
 		let _x    = Points[nCount - 2].X,    _y = Points[nCount - 2].Y;
 		let StartX, StartY;

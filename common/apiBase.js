@@ -65,7 +65,7 @@
 
 		this.isViewMode = false;
 		this.restrictions = Asc.c_oAscRestrictionType.None;
-		this.isCanSendChanges = true; // Флаг, говорит о возможности отсылать свои изменения (задается извне)
+		this.isCanSendChanges = true; // Flag indicating ability to send changes (set externally)
 
 		this.FontLoader  = null;
 		this.ImageLoader = null;
@@ -78,7 +78,7 @@
 		this.documentUrl         = "null";
 		this.documentUrlChanges  = null;
 		this.documentTokenChanges  = null;
-		this.documentCallbackUrl = undefined;		// Ссылка для отправления информации о документе
+		this.documentCallbackUrl = undefined;		// URL for sending document information
 		this.documentFormat      = "null";
 		this.documentTitle       = "null";
 		this.documentFormatSave  = Asc.c_oAscFileType.UNKNOWN;
@@ -87,16 +87,16 @@
 		this.documentIsWopi = false;
 		this.documentUserSessionId = undefined;
 
-		this.documentOpenOptions = undefined;		// Опции при открытии (пока только опции для CSV)
+		this.documentOpenOptions = undefined;		// Options when opening (currently only CSV options)
 
-		// Тип состояния на данный момент (сохранение, открытие или никакое)
+		// Current state type (saving, opening, or none)
 		this.advancedOptionsAction = AscCommon.c_oAscAdvancedOptionsAction.None;
 		this.OpenDocumentProgress  = new AscCommon.COpenProgress();
 		var sProtocol              = window.location.protocol;
 		this.documentOrigin        = ((sProtocol && '' !== sProtocol) ? sProtocol + '//' : '') + window.location.host; // for presentation theme url
 		this.documentPathname      = window.location.pathname; // for presentation theme url
 
-		// Переменная отвечает, получили ли мы ответ с сервера совместного редактирования
+		// Variable indicates whether we received a response from the collaborative editing server
 		this.ServerIdWaitComplete = false;
 		this.ServerIdWaitAction = null;
 
@@ -110,18 +110,18 @@
 		this.groupActionsCounter = 0;
 
 		// AutoSave
-		this.autoSaveGap = 0;					// Интервал автосохранения (0 - означает, что автосохранения нет) в милесекундах
-		this.lastSaveTime = null;				// Время последнего сохранения
-		this.autoSaveGapFast = 2000;			// Интервал быстрого автосохранения (когда человек один) - 2 сек.
-		this.autoSaveGapSlow = 10 * 60 * 1000;	// Интервал медленного автосохранения (когда совместно) - 10 минут
+		this.autoSaveGap = 0;					// Autosave interval (0 means no autosave) in milliseconds
+		this.lastSaveTime = null;				// Last save time
+		this.autoSaveGapFast = 2000;			// Fast autosave interval (when alone) - 2 sec
+		this.autoSaveGapSlow = 10 * 60 * 1000;	// Slow autosave interval (when collaborating) - 10 minutes
 		this.intervalWaitAutoSave = 1000;
 
 		// Unlock document
 		this.canUnlockDocument = false;
-		this.canUnlockDocument2 = false;		// Дублирующий флаг, только для saveChanges или unLockDocument
+		this.canUnlockDocument2 = false;		// Duplicate flag, only for saveChanges or unLockDocument
 		this.canStartCoAuthoring = false;
 
-		this.isDocumentCanSave = false;			// Флаг, говорит о возможности сохранять документ (активна кнопка save или нет)
+		this.isDocumentCanSave = false;			// Flag indicating ability to save document (whether save button is active)
 
 		// translate manager
 		this.translateManager = AscCommon.translateManager.init(config['translate']);
@@ -133,7 +133,7 @@
 		this.chartPreviewManager   = null;
 		this.textArtPreviewManager = null;
 		this.shapeElementId        = null;
-		// Режим вставки диаграмм в редакторе документов
+		// Chart insertion mode in document editor
 		this.isOpenedFrameEditor    = false;
 		this.openedFrameEditorType  = null;
 
@@ -145,41 +145,41 @@
 		this.User                   = undefined;
 		this.CoAuthoringApi         = new AscCommon.CDocsCoApi();
 		this.isCoAuthoringEnable    = true;
-		// Массив lock-ов, которые были на открытии документа
+		// Array of locks that existed when the document was opened
 		this.arrPreOpenLocksObjects = [];
 
 		// Spell Checking
-		this.SpellCheckUrl = '';    // Ссылка сервиса для проверки орфографии
+		this.SpellCheckUrl = '';    // Spell check service URL
 
-		// Результат получения лицензии
+		// License retrieval result
 		this.licenseResult       = null;
-		// Получили ли лицензию
+		// Whether license was received
 		this.isOnLoadLicense     = false;
-		// Переменная, которая отвечает, послали ли мы окончание открытия документа
+		// Variable indicating whether we sent document open completion
 		this.isDocumentLoadComplete = false;
-		// Переменная, которая отвечает, послали ли мы окончание открытия документа
+		// Variable that indicates whether we've sent the document open completion notification
 		this.isPreOpenLocks = true;
 		this.isApplyChangesOnOpenEnabled = true;
 		this.isProtectionSupport = true;
 		this.isAnonymousSupport = true;
 
-		this.canSave    = true;        // Флаг нужен чтобы не происходило сохранение пока не завершится предыдущее сохранение
-		this.IsUserSave = false;    // Флаг, контролирующий сохранение было сделано пользователем или нет (по умолчанию - нет)
+		this.canSave    = true;        // Flag to prevent saving until the previous save completes
+		this.IsUserSave = false;    // Flag controlling whether save was initiated by user or not (default - no)
 		this.isForceSaveOnUserSave = false;
         this.forceSaveButtonTimeout = null;
         this.forceSaveButtonContinue = false;
         this.forceSaveTimeoutTimeout = null;
 		this.forceSaveForm = null;
-		this.forceSaveUndoRequest = false; // Флаг нужен, чтобы мы знали, что данное сохранение пришло по запросу Undo в совместке
+		this.forceSaveUndoRequest = false; // Flag to know that this save came from an Undo request in collaborative mode
 		this.forceSaveSendFormRequest = false;
 		this.forceSaveDisconnectRequest = false;
 		this.forceSaveOformRequest = false;
 		this.saveRelativePrev = {};
 
 		// Version History
-		this.VersionHistory = null;				// Объект, который отвечает за точку в списке версий
+		this.VersionHistory = null;				// Object responsible for a point in the version list
 
-		//Флаги для применения свойств через слайдеры
+		// Flags for applying properties via sliders
 		this.noCreatePoint     = false;
 		this.exucuteHistory    = false;
 		this.exucuteHistoryEnd = false;
@@ -266,11 +266,11 @@
 			window["AscDesktopEditor"]["CreateEditorApi"](this);
 
 		var t            = this;
-		//Asc.editor = Asc['editor'] = AscCommon['editor'] = AscCommon.editor = this; // ToDo сделать это!
+		//Asc.editor = Asc['editor'] = AscCommon['editor'] = AscCommon.editor = this; // ToDo do this!
 		this.HtmlElement = document.getElementById(this.HtmlElementName);
 		if (this.HtmlElement)
 		{
-			// запрещаем действия браузера по умолчанию
+			// disable default browser actions
 			this.HtmlElement.style.touchAction = "none";
 		}
 
@@ -498,7 +498,7 @@
 			case c_oEditorId.Word:
 				if (this.isPdfEditor())
 				{
-					//todo выставить формат
+					//todo set format
 					res = undefined;
 				}
 				else
@@ -627,7 +627,7 @@
 			this.User.setFirstName(this.DocInfo.get_FirstName());
 			this.User.setLastName(this.DocInfo.get_LastName());
 
-			//чтобы в versionHistory был один documentId для auth и open
+			// so that versionHistory has one documentId for auth and open
 			this.CoAuthoringApi.setDocId(this.documentId);
 
 			if (this.DocInfo.get_Wopi())
@@ -794,7 +794,7 @@
 	baseEditorsApi.prototype.sync_InitEditorFonts            = function(gui_fonts)
 	{
 		if (!this.isViewMode) {
-			// корректируем имена для текущего языка интерфейса
+			// correct names for the current interface language
 			var currentLang = this.asc_getLocale();
 			if (typeof currentLang !== "string")
 				currentLang = (AscCommon.g_oDefaultCultureInfo && (typeof AscCommon.g_oDefaultCultureInfo.Name === "string")) ? AscCommon.g_oDefaultCultureInfo.Name : "en";
@@ -820,12 +820,12 @@
 		}
 		if (undefined !== actionRestriction)
 		{
-			//для некоторых действий не хочется показывать модальный loader, который закрывает всю страницу
-			//если для них делать incrementCounterLongAction, то будут проблемы, что не заблокированы линейки, resize окна не работает
-			//И скорее всего другие проблемы, поэтому делается через asc_setRestriction
-			//Пока это используется только при disconnect/reconnect, при disconnect мы хотим, чтобы было отключено любое редактирование.
-			//Поэтому, включаем глобальный лок в совместке. Если поведение будет меняться, то параметр actionRestriction надо делать настройкой,
-			//в которой будет указан новый рестрикшен и нужно ли включать лок на редактирование (и, возможно, лок на селект/курсор)
+			// for some actions we don't want to show a modal loader that covers the entire page
+			// if we use incrementCounterLongAction for them, there will be problems: rulers won't be blocked, window resize won't work
+			// and likely other issues, so this is done via asc_setRestriction
+			// currently this is only used for disconnect/reconnect; on disconnect we want all editing to be disabled
+			// therefore, we enable global lock in collaborative mode. If behavior changes, actionRestriction parameter should become a setting
+			// specifying the new restriction and whether to enable editing lock (and possibly selection/cursor lock)
 			AscCommon.CollaborativeEditing.Set_GlobalLock(true);
 			this.incrementCounterActionRestriction(actionRestriction);
 		}
@@ -860,7 +860,7 @@
 	 */
 	baseEditorsApi.prototype.asc_setRestriction              = function(val, additionalSettings)
 	{
-		// Если выставлен флаг OnlySignatures, то его нельзя перебить никак, кроме как явно снять через
+		// If the OnlySignatures flag is set, it cannot be overridden except by explicitly removing it via
 		// editor.removeRestriction(Asc.c_oAscRestrictionType.OnlySignatures)
 		if (this.restrictions & Asc.c_oAscRestrictionType.OnlySignatures)
 			return;
@@ -993,8 +993,8 @@
 				AscCommon.sendImgUrls(this, oInformation["images"], function () {}, true, oInformation["token"]);
 				break;
 			}
-			case c_oAscFrameDataType.OpenFrame: // TODO: это нужно перенести в web-apps,
-				// при открытии и закрытии фрейма метод должен вызываться там, в 7.2 это сделать не успели
+			case c_oAscFrameDataType.OpenFrame: // TODO: this should be moved to web-apps,
+				// the method should be called there when opening and closing a frame, we didn't have time to do this in 7.2
 			{
 				this.asc_onOpenFrameEditor(oInformation["editorType"]);
 				break;
@@ -1310,7 +1310,7 @@
 		return (this.canEdit() || this.isRestrictionComments() || this.isRestrictionForms());
 	};
 	/**
-	 * Функция для загрузчика шрифтов (нужно ли грузить default шрифты). Для Excel всегда возвращаем false
+	 * Function for font loader (whether to load default fonts). For Excel always returns false
 	 * @returns {boolean}
 	 */
 	baseEditorsApi.prototype.IsNeedDefaultFonts = function()
@@ -1325,7 +1325,7 @@
 				res = true;
 				break;
 			case c_oEditorId.Visio:
-				//todo сделать как в презентациях когда будет редактор
+				//todo do like in presentations when the editor is ready
 				res = false;
 				break;
 		}
@@ -1394,7 +1394,7 @@
 	// Open
 	baseEditorsApi.prototype.asc_LoadDocument                    = function(isRepeat)
 	{
-		// Меняем тип состояния (на открытие)
+		// Change state type (to opening)
 		this.advancedOptionsAction = AscCommon.c_oAscAdvancedOptionsAction.Open;
 
 		//todo auth on connection
@@ -1471,7 +1471,7 @@
 	baseEditorsApi.prototype.asyncServerIdEndLoaded              = function(openedAt)
 	{
 		this.setOpenedAt(openedAt);
-		// С сервером соединились, возможно стоит подождать загрузку шрифтов
+		// Connected to server, possibly need to wait for fonts to load
 		this.ServerIdWaitComplete = true;
 		if (this.ServerIdWaitAction) {
 			this.sync_EndAction.apply(this, this.ServerIdWaitAction);
@@ -1481,17 +1481,17 @@
 	};
 	baseEditorsApi.prototype.asyncFontStartLoaded                = function()
 	{
-		// здесь прокинуть евент о заморозке меню
+		// here emit event about menu freeze
 		this.sync_StartAction(c_oAscAsyncActionType.Information, c_oAscAsyncAction.LoadFont);
 	};
 	baseEditorsApi.prototype.asyncImageStartLoaded               = function()
 	{
-		// здесь прокинуть евент о заморозке меню
+		// here emit event about menu freeze
 	};
 	baseEditorsApi.prototype.asyncImagesDocumentStartLoaded      = function(aImages)
 	{
-		// евент о заморозке не нужен... оно и так заморожено
-		// просто нужно вывести информацию в статус бар (что началась загрузка картинок)
+		// freeze event is not needed... it's already frozen
+		// just need to show information in status bar (that image loading started)
 	};
 	baseEditorsApi.prototype.onDocumentContentReady              = function()
 	{
@@ -1518,7 +1518,7 @@
 		if (window["AscDesktopEditor"] && window["AscDesktopEditor"]["onDocumentContentReady"])
             window["AscDesktopEditor"]["onDocumentContentReady"]();
 
-		// теперь на старте нельзя удалить бинарник для подбора - он может пригодиться в nativeViewer
+		// now at startup cannot delete selection binary - it may be useful in nativeViewer
 		if (!this.disableRemoveFonts)
 			delete window["g_fonts_selection_bin"];
 	};
@@ -1601,7 +1601,7 @@
 	 * @param {string} data.url
 	 */
 	/**
-	 * Сохранение документа с указанием относительного пути
+	 * Saving document with a relative path specified
 	 * @param docId external document id
 	 * @param token from intergation
 	 * @param timeout in ms
@@ -1632,7 +1632,7 @@
 	baseEditorsApi.prototype._saveCheck = function () {
 		return false;
 	};
-	// Переопределяется во всех редакторах
+	// Overridden in all editors
 	baseEditorsApi.prototype._haveOtherChanges = function () {
 		return false;
 	};
@@ -1644,8 +1644,8 @@
 		var nState;
 		if (false == e["saveLock"]) {
 			if (this.isLongAction()) {
-				// Мы не можем в этот момент сохранять, т.к. попали в ситуацию, когда мы залочили сохранение и успели нажать вставку до ответа
-				// Нужно снять lock с сохранения
+				// We can't save at this moment because we got into a situation where we locked saving and managed to click insert before the response
+				// Need to remove save lock
 				this.CoAuthoringApi.onUnSaveLock = function () {
 					if (t.isForceSaveOnUserSave && t.IsUserSave) {
 						t.forceSaveButtonContinue = t.forceSave();
@@ -1679,11 +1679,11 @@
 		} else {
 			nState = this.CoAuthoringApi.get_state();
 			if (AscCommon.ConnectionState.ClosedCoAuth === nState || AscCommon.ConnectionState.ClosedAll === nState) {
-				// Отключаемся от сохранения, соединение потеряно
+				// Disconnecting from save, connection lost
 				this.IsUserSave = false;
 				this.canSave = true;
 			} else {
-				// Если автосохранение, то не будем ждать ответа, а просто перезапустим таймер на немного
+				// If autosave, don't wait for response, just restart timer for a bit
 				if (!this.IsUserSave) {
 					this.canSave = true;
 					if (this.canUnlockDocument) {
@@ -1700,7 +1700,7 @@
 			}
 		}
 	};
-	// Функция сохранения. Переопределяется во всех редакторах
+	// Save function. Overridden in all editors
 	baseEditorsApi.prototype._onSaveCallbackInner = function () {
 	};
 	baseEditorsApi.prototype._autoSave = function () {
@@ -1715,7 +1715,7 @@
 			}
 		}
 	};
-	// Функция автосохранения. Переопределяется во всех редакторах
+	// Autosave function. Overridden in all editors
 	baseEditorsApi.prototype._autoSaveInner = function () {
 	};
 	baseEditorsApi.prototype._prepareSave = function (isIdle) {
@@ -1745,17 +1745,17 @@
 				// ToDo !!!!
 			}
 		} else {
-			// Когда документ еще не загружен, нужно отпустить lock (при быстром открытии 2-мя пользователями)
+			// When document is not yet loaded, need to release lock (when quickly opened by 2 users)
 			this.startCollaborationEditing();
 			this.CoAuthoringApi.unLockDocument(false, true);
 		}
 	};
-	// Выставление интервала автосохранения (0 - означает, что автосохранения нет)
+	// Setting autosave interval (0 - means no autosave)
 	baseEditorsApi.prototype.asc_setAutoSaveGap                  = function(autoSaveGap)
 	{
 		if (typeof autoSaveGap === "number")
 		{
-			this.autoSaveGap = autoSaveGap * 1000; // Нам выставляют в секундах
+			this.autoSaveGap = autoSaveGap * 1000; // They set it in seconds
 		}
 	};
 	baseEditorsApi.prototype.checkChangesSize = function() {
@@ -1788,7 +1788,7 @@
 	{
 		this.CoAuthoringApi.getMessages();
 	};
-	// get users, возвращается массив users
+	// get users, returns users array
 	baseEditorsApi.prototype.asc_coAuthoringGetUsers             = function()
 	{
 		this.CoAuthoringApi.getUsers();
@@ -1905,15 +1905,15 @@
 		this.initCollaborativeEditing();
 		
 		var t = this;
-		//Если User не задан, отключаем коавторинг.
+		//If User is not set, disable co-authoring.
 		if (null == this.User || null == this.User.asc_getId())
 		{
 			this.User = new AscCommon.asc_CUser();
 			this.User.setId("Unknown");
 			this.User.setUserName("Unknown");
 		}
-		//в обычном серверном режиме портим ссылку, потому что CoAuthoring теперь имеет встроенный адрес
-		//todo надо использовать проверку get_OfflineApp
+		//in normal server mode we invalidate the URL because CoAuthoring now has a built-in address
+		//todo need to use get_OfflineApp check
 		if (!(window['NATIVE_EDITOR_ENJINE'] || (this.DocInfo && this.DocInfo.get_OfflineApp())) || window['IS_NATIVE_EDITOR'])
 		{
 			this.CoAuthoringApi.set_url(null);
@@ -1958,7 +1958,7 @@
 				if (t.CoAuthoringApi.get_isAuth()) {
 					t.CoAuthoringApi.auth(t.getViewMode(), undefined, t.isIdle());
 				} else {
-					//первый запрос или ответ не дошел надо повторить открытие
+					//first request or response didn't arrive, need to repeat opening
 					t.asc_LoadDocument(true);
 				}
 			}
@@ -2136,8 +2136,8 @@
 			t.sendEvent("asc_onDocumentModifiedChanged");
 		};
 		/**
-		 * Event об отсоединении от сервера
-		 * @param {jQuery} e  event об отсоединении с причиной
+		 * Event about disconnect from server
+		 * @param {jQuery} e  event about disconnect with reason
 		 * @param {opt_closeCode: AscCommon.c_oCloseCode.drop} opt_closeCode
 		 */
 		this.CoAuthoringApi.onDisconnect = function(e, opt_closeCode)
@@ -2257,7 +2257,7 @@
 			if (t.isViewMode) {
 				return;
 			}
-			// На старте не нужно ничего делать
+			// No need to do anything at startup
 			if (isStartEvent) {
 				t.startCollaborationEditing();
 			} else {
@@ -2293,7 +2293,7 @@
 			var context = this.CoAuthoringApi;
 			var args = Array.prototype.slice.call(arguments, 1);
 
-			// Пока документ еще не загружен, будем сохранять функцию и аргументы
+			// While document is not yet loaded, we will save function and arguments
 			this.arrPreOpenLocksObjects.push(function()
 			{
 				f.apply(context, args);
@@ -2305,7 +2305,7 @@
 	baseEditorsApi.prototype._applyPreOpenLocks                  = function()
 	{
 		this.isPreOpenLocks = false;
-		// Применяем все lock-и (ToDo возможно стоит пересмотреть вообще Lock-и)
+		// Apply all locks (ToDo possibly worth reconsidering locks in general)
 		for (var i = 0; i < this.arrPreOpenLocksObjects.length; ++i)
 		{
 			this.arrPreOpenLocksObjects[i]();
@@ -2318,7 +2318,7 @@
 		this.CoAuthoringApi.disconnect();
 		this.isCoAuthoringEnable = false;
 
-		// Выставляем view-режим
+		// Set view mode
 		this.asc_setViewMode(true);
 	};
 	baseEditorsApi.prototype.asc_stopSaving                      = function()
@@ -2358,7 +2358,7 @@
             window["asc_nativeOnSpellCheck"] = function(response) {
                 var _editor = window["Asc"]["editor"] ? window["Asc"]["editor"] : window.editor;
                 if (_editor.SpellCheckApi) {
-                	// поверяем на сообщение о полной очистке очереди задач для текущего
+                	// check for message about complete clearing of task queue for current
                 	if ("clear" === response) {
 						_editor.SpellCheckApi.isRestart = false;
 						return;
@@ -2751,7 +2751,7 @@
 			return;
 		}
 		var t = this;
-        if (this.WordControl) // после показа диалога может не прийти mouseUp
+        if (this.WordControl) // after showing dialog mouseUp may not come
         	this.WordControl.m_bIsMouseLock = false;
 		AscCommon.ShowImageFileDialog(this.documentId, this.documentUserId, this.CoAuthoringApi.get_jwt(), this.documentShardKey, this.documentWopiSrc, this.documentUserSessionId, function(error, files)
 		{
@@ -2802,7 +2802,7 @@
 		}
 	};
 
-	//метод, который подменяет callback загрузки в каждом редакторе, TODO: переделать, сделать одинаково в о всех редакторах
+	//method that replaces load callback in each editor, TODO: refactor, make it the same in all editors
 	baseEditorsApi.prototype.asc_replaceLoadImageCallback = function(fCallback)
 	{
 	};
@@ -2982,7 +2982,7 @@
 			this.asc_coAuthoringDisconnect();
 		}
 
-		if (this.SpellCheckApi && this.SpellCheckApi.restart /* старый спеллчек (серверный - не поддеживает этот метод */)
+		if (this.SpellCheckApi && this.SpellCheckApi.restart /* old spellcheck (server-based - does not support this method */)
 			this.SpellCheckApi.restart();
 
 		var bUpdate = true;
@@ -2991,7 +2991,7 @@
 		} else {
 			bUpdate = this.VersionHistory.update(newObj);
 		}
-		// ToDo должно быть все общее
+		// ToDo should be all common
 		if (bUpdate) {
 			this.asc_CloseFile();
 
@@ -3012,7 +3012,7 @@
 			var oApi = Asc.editor || editor;
 			this.isApplyChangesOnVersionHistory = true;
 			this.sync_StartAction(c_oAscAsyncActionType.BlockInteraction, c_oAscAsyncAction.Open);
-			// Нужно только добавить некоторые изменения
+			// Only need to add some changes
 			AscCommon.CollaborativeEditing.Clear_CollaborativeMarks();
 			oApi.VersionHistory.applyChanges(oApi);
 			AscCommon.CollaborativeEditing.Apply_Changes();
@@ -3130,7 +3130,7 @@
 				|| this.forceSaveDisconnectRequest
 				|| this.forceSaveOformRequest) {
 				if (this._prepareSave(isIdle)) {
-					// Не даем пользователю сохранять, пока не закончится сохранение (если оно началось)
+					// Don't allow user to save until save completes (if it started)
 					this.canSave = false;
 					this.CoAuthoringApi.askSaveChanges(function (e) {
 						t._onSaveCallback(e);
@@ -3178,7 +3178,7 @@
 		}
 	}
 	/**
-	 * Эта функция возвращает true, если есть изменения или есть lock-и в документе
+	 * This function returns true if there are changes or locks in the document
 	 */
 	baseEditorsApi.prototype.asc_isDocumentCanSave = function()
 	{
@@ -3856,7 +3856,7 @@
 	// Native
 	baseEditorsApi.prototype['asc_nativeCheckPdfRenderer'] = function (_memory1, _memory2) {
 		if (true) {
-			// pos не должен минимизироваться!!!
+			// pos should not be minimized!!!
 
 			_memory1.Copy = _memory1["Copy"];
 			_memory1.ClearNoAttack = _memory1["ClearNoAttack"];
@@ -4276,7 +4276,7 @@
 	{
 	};
 	/**
-	 * Получаем текст (в виде массива юникодных значений), который будет добавлен на ивенте KeyDown
+	 * Get text (as array of unicode values) that will be added on KeyDown event
 	 * @param e
 	 * @returns {Number[]}
 	 */
@@ -4315,11 +4315,11 @@
 
 	baseEditorsApi.prototype.isIdle = function()
 	{
-		// пока не стартовали - считаем работаем
+		// while not started - consider working
 		if (0 == this.lastWorkTime)
 			return 0;
 
-		// если плагин работает - то и мы тоже
+		// if plugin is working - we are too
 		if (this.pluginsManager && this.pluginsManager.isWorked())
 			return 0;
 
@@ -4381,9 +4381,9 @@
 	{
 		this.macroRecorder.cancel();
 
-		// Посылаем наверх эвент об отключении от сервера
+		// Send event about server disconnection
 		this.sendEvent('asc_onCoAuthoringDisconnect', enableDownload);
-		// И переходим в режим просмотра т.к. мы не можем сохранить файл
+		// And switch to view mode since we cannot save the file
 		this.asc_setViewMode(true);
 	};
 
@@ -4438,7 +4438,7 @@
 			let sDivId;
 			let oNumberingInfo;
 
-			// Это верный тип передачи информации
+			// This is the correct type for passing information
 			if (arrDrawingInfo[i]["numberingInfo"])
 			{
 				arrAdaptedDrawingInfo.push(arrDrawingInfo[i]);
@@ -4963,7 +4963,7 @@
 
 	baseEditorsApi.prototype.initShortcuts = function(arrShortcuts, isRemoveBeforeAdd)
 	{
-		// Массив
+		// Array
 		// [[ActionType, KeyCode, Ctrl, Shift, Alt]]
 		for (var nIndex = 0, nCount = arrShortcuts.length; nIndex < nCount; ++nIndex)
 		{
@@ -5293,7 +5293,7 @@
         return false;
 	};
 
-    // это для отложенных действий на клике (диалоги в мобильной версии)
+    // this is for deferred actions on click (dialogs in mobile version)
 	baseEditorsApi.prototype.setHandlerOnClick = function(handler)
 	{
 		this._handlerOnClick = handler;
@@ -5393,7 +5393,7 @@
 		if (this.contextMenuPlugins.processItems[guid])
 		{
 			this.contextMenuPlugins.processItems[guid]--;
-			// не копим.
+			// don't accumulate.
 			this.contextMenuPlugins.processItems[guid] = 0;
 			if (this.contextMenuPlugins.processItems[guid] === 0)
 			{
@@ -5472,13 +5472,13 @@
 	baseEditorsApi.prototype.signOform = function()
 	{
 		// TODO:
-		// 1) делаем архив oform
-		// 2) прогоняем архив через модуль для подписи. считаем хэши и делаем архив - и отдаем хмл для подписи
-		// 3) вызываем плагин для подписи
-		// 4) получаем подпись и информацию о подписи.
-		// 5) добавляем эти данные в архив
+		// 1) create oform archive
+		// 2) pass archive through signing module. calculate hashes and create archive - and return xml for signing
+		// 3) call signing plugin
+		// 4) get signature and signature info.
+		// 5) add this data to archive
 
-		// TODO: проверить, есть ли плагин для подписи
+		// TODO: check if signing plugin exists
 
 		let plugin = window.g_asc_plugins ? window.g_asc_plugins.getSign() : null;
 		if (!plugin)

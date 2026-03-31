@@ -535,11 +535,11 @@ function (window, undefined) {
 			f.excludeNestedStAg = ignoreNestedStAg;
 
 			let newArgs = [];
-			//14 - 19 особенные функции, требующие второго аргумента
+			//14 - 19 are special functions requiring second argument
 			let doNotCheckRef = nFunc >= 14 && nFunc <= 19;
 			for (let i = 2; i < arg.length; i++) {
-				//аргумент может быть только ссылка на ячейку или диапазон ячеек
-				//в противном случае - ошибка
+				//argument can only be cell reference or cell range
+				//otherwise - error
 				if (doNotCheckRef || this.checkRef(arg[i])) {
 					newArgs.push(arg[i]);
 				} else {
@@ -632,7 +632,7 @@ function (window, undefined) {
 			return arg0;
 		}
 
-		//TODO проверить возвращение ошибок!
+		//TODO check error returns!
 		var res = to_arabic(arg0.getValue());
 		return isNaN(res) ? new cError(cErrorType.wrong_value_type) : new cNumber(res);
 	};
@@ -1405,8 +1405,8 @@ function (window, undefined) {
 	cCOTH.prototype.Calculate = function (arg) {
 		var arg0 = arg[0];
 
-		//TODO в документации к COTH написано максимальное значение - Math.pow(2, 27), но MS EXCEL в данном случае не выдает ошибку
-		//проверку на максиимальное значение убрал
+		//TODO COTH documentation says maximum value is Math.pow(2, 27), but MS EXCEL does not throw an error in this case
+		//removed the maximum value check
 		if (cElementType.cellsRange === arg0.type || cElementType.cellsRange3D === arg0.type) {
 			arg0 = arg0.cross(arguments[1]);
 		}
@@ -1509,8 +1509,8 @@ function (window, undefined) {
 	cCSCH.prototype.Calculate = function (arg) {
 		var arg0 = arg[0];
 
-		//TODO в документации к COTH написано максимальное значение - Math.pow(2, 27), но MS EXCEL в данном случае не выдает ошибку
-		//проверку на максиимальное значение убрал
+		//TODO COTH documentation says maximum value is Math.pow(2, 27), but MS EXCEL does not throw an error in this case
+		//removed the maximum value check
 		if (cElementType.cellsRange === arg0.type || cElementType.cellsRange3D === arg0.type) {
 			arg0 = arg0.cross(arguments[1]);
 		}
@@ -1664,7 +1664,7 @@ function (window, undefined) {
 	 * @constructor
 	 * @extends {cCEILING}
 	 */
-	//TODO нигде нет отписания к этой функции! работает так же как и cCEILING на всех примерах.
+	//TODO there is no description for this function anywhere! works the same as cCEILING in all examples.
 	function cECMA_CEILING() {
 	}
 
@@ -2234,7 +2234,7 @@ function (window, undefined) {
 	 * @constructor
 	 * @extends {AscCommonExcel.cBaseFunction}
 	 */
-	//TODO точная копия функции CEILING.PRECISE. зачем excel две одинаковые функции?
+	//TODO exact copy of CEILING.PRECISE function. why does excel have two identical functions?
 	function cISO_CEILING() {
 	}
 
@@ -2788,7 +2788,7 @@ function (window, undefined) {
 			}
 		}
 
-		function MatrixCofactor(i, j, __A) {        //Алгебраическое дополнение матрицы
+		function MatrixCofactor(i, j, __A) {        //Algebraic cofactor of matrix
 			let N = __A.length, sign = ((i + j) % 2 == 0) ? 1 : -1;
 
 			for (let m = 0; m < N; m++) {
@@ -2805,7 +2805,7 @@ function (window, undefined) {
 			return sign * Determinant(__A);
 		}
 
-		function AdjugateMatrix(_A) {             //Союзная (присоединённая) матрица к A. (матрица adj(A), составленная из алгебраических дополнений A).
+		function AdjugateMatrix(_A) {             //Adjugate (adjoint) matrix of A. (matrix adj(A), composed of algebraic cofactors of A).
 			let N = _A.length, B = [], adjA = [];
 
 			for (let i = 0; i < N; i++) {
@@ -2869,7 +2869,7 @@ function (window, undefined) {
 				return new cNumber(1 / arg0.getFirstElement());
 			}
 			arg0 = arg0.getMatrix();
-			//TODO при мерже релиза, перейти на функцию getArrayCopy/ добавить параметр getMatrix для генерации копии
+			//TODO when merging release, switch to getArrayCopy function / add getMatrix parameter for copy generation
 			arg0 = _getArrayCopy(arg0);
 		} else if (cElementType.number === arg0.type) {
 			return new cNumber(1 / arg0);
@@ -3795,9 +3795,9 @@ function (window, undefined) {
 		//var oArguments = this._prepareArguments(arg, arguments[1]);
 		var argClone = arg;
 
-		//если какой-то из аргументов массив - обрабатываю здесь
-		//если обрабатывать выше и проходиться по массиву, то данная функция всегда будет возвращать массив
-		//а нам нужно только значение с индексом 0,0 у возвращаемого массива
+		//if any of the arguments is an array - handle it here
+		//if handled above and iterating over the array, this function will always return an array
+		//but we only need the value at index 0,0 of the returned array
 
 		var i, j;
 		var matrixRowCount;
@@ -4652,8 +4652,8 @@ function (window, undefined) {
 	cSECH.prototype.Calculate = function (arg) {
 		var arg0 = arg[0];
 
-		//TODO в документации к COTH написано максимальное значение - Math.pow(2, 27), но MS EXCEL в данном случае не выдает ошибку
-		//проверку на максиимальное значение убрал
+		//TODO COTH documentation says maximum value is Math.pow(2, 27), but MS EXCEL does not throw an error in this case
+		//removed the maximum value check
 		if (cElementType.cellsRange === arg0.type || cElementType.cellsRange3D === arg0.type) {
 			arg0 = arg0.cross(arguments[1]);
 		}
@@ -5424,7 +5424,7 @@ function (window, undefined) {
 	function cSUMIFS() {
 	}
 
-	//TODO есть расхождение с MS - смотри в файле + arrayIndexes - нужно формировать при условии что все нечетные аргумента - массивы(начиная с 3 аргумента)
+	//TODO there is a discrepancy with MS - see file + arrayIndexes - need to form when all odd arguments are arrays (starting from 3rd argument)
 	//***array-formula***
 	cSUMIFS.prototype = Object.create(cBaseFunction.prototype);
 	cSUMIFS.prototype.constructor = cSUMIFS;
@@ -5541,7 +5541,7 @@ function (window, undefined) {
 				return new cError(cErrorType.wrong_value_type);
 			}
 
-			//в кэш кладём истинное значение для поиска, а не весь диапазон
+			//we put the actual value for search in cache, not the entire range
 			if (cElementType.cellsRange === arg2.type || cElementType.cellsRange3D === arg2.type) {
 				arg2 = arg2.cross(arguments[1]);
 			} else if (cElementType.array === arg2.type) {
@@ -5920,7 +5920,7 @@ function (window, undefined) {
 		// https://0.30000000000000004.com/
 
 		function truncHelper(a, b) {
-			//TODO возможно стоит добавить ограничения для коэффициента b(ms не ограничивает; LO - максимальные значения 20/-20)
+			//TODO maybe should add limits for coefficient b (MS doesn't limit; LO - maximum values 20/-20)
 			if (b > 20) {
 				b = 20;
 			} else if (!Number.isInteger(b)) {

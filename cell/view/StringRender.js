@@ -396,9 +396,9 @@
 		};
 
 		/**
-		 * Применяем только трансформации поворота в области
+		 * Apply only rotation transformations in the area
 		 * @param {drawingCtx} drawingCtx
-		 * @param {type} angle Угол поворота в градусах
+		 * @param {type} angle Rotation angle in degrees
 		 * @param {Number} x
 		 * @param {Number} y
 		 * @param {Number} dx
@@ -449,11 +449,11 @@
 		StringRender.prototype.getTransformBound = function (angle, w, h, textW, alignHorizontal, alignVertical, maxWidth) {
 			var ctx = this.drawingCtx;
 
-			// TODO: добавить padding по сторонам
+			// TODO: add padding on sides
 
 			this.angle = 0;  //  angle;
 
-			var dx = 0, dy = 0, offsetX = 0,    // смещение BB
+			var dx = 0, dy = 0, offsetX = 0,    // BB offset
 
 				tm = this._doMeasure(maxWidth),
 
@@ -886,7 +886,7 @@
 
 			function insertRepeatChars() {
 				if (0 === charProp.total)
-					return;	// Символ уже изначально лежит в строке и в списке
+					return;	// Character is already initially in the string and list
 				var repeatEnd = pos + charProp.total;
 				self.chars = [].concat(
 					self.chars.slice(0, repeatEnd),
@@ -1059,8 +1059,8 @@
 				fmt = fr.format.clone();
 				var va = fmt.getVerticalAlign();
 
-				//TODO пока не убрал эту регулярку, сначала перевожу в текст, потом обратно в сиволы
-				//TODO избавиться от регулярки!
+				//TODO haven't removed this regex yet, first convert to text, then back to symbols
+				//TODO get rid of regex!
 				if (fr.isInitCharCodes()) {
 					fr.initText();
 				}
@@ -1117,7 +1117,7 @@
 				}
 				measureFragment(chars, fmt);
 
-				// для italic текста прибавляем к концу строки разницу между charWidth и BBox
+				// for italic text add difference between charWidth and BBox to end of line
 				for (j = startCh; font.getItalic() && j < this.charWidths.length; ++j) {
 					if (this.charProps[j] && this.charProps[j].delta && j > 0) {
 						if (this.charWidths[j - 1] > 0) {
@@ -1132,7 +1132,7 @@
 			if (0 !== this.chars.length && this.charProps[this.chars.length] !== undefined) {
 				delete this.charProps[this.chars.length];
 			} else if (font.getItalic()) {
-				// для italic текста прибавляем к концу текста разницу между charWidth и BBox
+				// for italic text add difference between charWidth and BBox to end of text
 				this.charWidths[this.charWidths.length - 1] += delta;
 			}
 

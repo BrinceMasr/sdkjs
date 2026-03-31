@@ -577,7 +577,7 @@ function CBinaryFileWriter()
 
             if ((_start_pos + 5) == this.pos)
             {
-                // удаляем запись из бинарника
+                // remove record from binary
                 this.pos -= 5;
 
                 return false;
@@ -1017,7 +1017,7 @@ function CBinaryFileWriter()
         for (var i = 0; i < _count_arr; i++)
             this.WriteNoteMaster(_dst_notesMasters[i]);
 
-        // во время записи - нужно заодно генерить FontMap и ImagesMap
+        // during writing - we also need to generate FontMap and ImagesMap
         this.StartMainRecord(c_oMainTables.FontMap);
         this.StartRecord(c_oMainTables.FontMap);
         this.WriteUChar(g_nodeAttributeStart);
@@ -1046,7 +1046,7 @@ function CBinaryFileWriter()
         this.WriteUChar(g_nodeAttributeEnd);
         this.EndRecord();
 
-        // теперь запишем информацию о главных таблицах
+        // now write information about main tables
         this.WriteMainPart(startPos);
     };
 
@@ -1054,7 +1054,7 @@ function CBinaryFileWriter()
     {
         this.WriteDocument2(presentation);
 
-        // и скинем все в base64
+        // and convert everything to base64
         var ret = "PPTY;v1;" + this.pos + ";";
         return ret + this.GetBase64Memory();
     };
@@ -2515,7 +2515,7 @@ function CBinaryFileWriter()
         {
             return;
         }
-        // делаем прозрачность
+        // apply transparency
         if(!color.Mods)
         {
             color.setMods(new AscFormat.CColorModifiers());
@@ -2559,7 +2559,7 @@ function CBinaryFileWriter()
 
         for (var i = 0; i < len__; ++i)
         {
-            oThis.WriteRecord1(1, oEffect.effectList[i], oThis.WriteEffect); // id неважен
+            oThis.WriteRecord1(1, oEffect.effectList[i], oThis.WriteEffect); // id doesn't matter
         }
         oThis.EndRecord();
 
@@ -3026,7 +3026,7 @@ function CBinaryFileWriter()
                     oThis._WriteInt1(0, fill.colors[i].pos);
                     oThis.WriteUChar(g_nodeAttributeEnd);
 
-                    // делаем прозрачность
+                    // apply transparency
                     oThis.CorrectUniColorAlpha(fill.colors[i].color, trans);
 
                     oThis.WriteRecord1(0, fill.colors[i].color, oThis.WriteUniColor);
@@ -3763,7 +3763,7 @@ function CBinaryFileWriter()
         var isOle = AscDFH.historyitem_type_OleObject == image.getObjectType();
         if(isOle){
             oThis.StartRecord(6);
-            //важно писать в начале
+            //important to write at the beginning
             oThis.WriteRecord1(4, image, oThis.WriteOleInfo);
         } else {
             var _type;
@@ -5301,7 +5301,7 @@ function CBinaryFileWriter()
             }
             oThis.WriteUChar(g_nodeAttributeEnd);
 
-            // TODO: потом переделать по-нормальному
+            // TODO: refactor properly later
             //if (!_border.Unifill && _border.Color instanceof CDocumentColor)
             //{
             //    var _unifill = new AscFormat.CUniFill();
@@ -5384,7 +5384,7 @@ function CBinaryFileWriter()
             }
             oThis.WriteUChar(g_nodeAttributeEnd);
 
-            // TODO: потом переделать по-нормальному
+            // TODO: refactor properly later
             //if (!_border.Unifill && _border.Color instanceof CDocumentColor)
             //{
             //    var _unifill = new AscFormat.CUniFill();
@@ -5751,7 +5751,7 @@ function CBinaryFileWriter()
             var _type, _fileMask;
             if(isOle){
                 _writer.StartRecord(6);
-                //важно писать в начале
+                //important to write at the beginning
                 _writer.WriteRecord1(4, image, _writer.WriteOleInfo);
             } else {
                 var _type;

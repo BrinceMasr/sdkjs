@@ -96,7 +96,7 @@ var editor;
 
     this.documentFormatSave = c_oAscFileType.XLSX;
 
-    // объекты, нужные для отправки в тулбар (шрифты, стили)
+    // objects needed for sending to toolbar (fonts, styles)
     this._gui_control_colors = null;
     this.GuiControlColorsMap = null;
     this.IsSendStandartColors = false;
@@ -104,15 +104,15 @@ var editor;
     this.asyncMethodCallback = undefined;
 
 	this.IsInitControl = false;//single canvas creation
-    // Переменная отвечает, загрузились ли фонты
+    // Variable indicates whether fonts are loaded
     this.FontLoadWaitComplete = false;
-    //текущий обьект куда записываются информация для update, когда принимаются изменения в native редакторе
+    //current object where update information is written when changes are received in native editor
     this.oRedoObjectParamNative = null;
 
     this.collaborativeEditing = null;
 
     // AutoSave
-    this.autoSaveGapRealTime = 30;	  // Интервал быстрого автосохранения (когда выставлен флаг realtime) - 30 мс.
+    this.autoSaveGapRealTime = 30;	  // Fast autosave interval (when realtime flag is set) - 30 ms.
 
     // Shapes
     this.isStartAddShape = false;
@@ -126,7 +126,7 @@ var editor;
       this.styleThumbnailWidth = 100;
 	  this.styleThumbnailHeight = 20;
 
-    this.formulasList = null;	// Список всех формул
+    this.formulasList = null;	// List of all formulas
 
 	this.tmpR1C1mode = null;
 
@@ -151,7 +151,7 @@ var editor;
   spreadsheet_api.prototype._init = function() {
     AscCommon.baseEditorsApi.prototype._init.call(this);
     this.topLineEditorElement = document.getElementById(this.topLineEditorName);
-    // ToDo нужно ли это
+    // ToDo is this needed
     asc['editor'] = ( asc['editor'] || this );
   };
 
@@ -166,7 +166,7 @@ var editor;
   };
 
   spreadsheet_api.prototype.asc_CheckGuiControlColors = function() {
-    // потом реализовать проверку на то, что нужно ли посылать
+    // later implement check whether sending is needed
 
     var arr_colors = new Array(10);
 	var array_colors_types = [6, 15, 7, 16, 0, 1, 2, 3, 4, 5];
@@ -177,7 +177,7 @@ var editor;
       arr_colors[i].setColorSchemeId(array_colors_types[i])
     }
 
-    // теперь проверим
+    // now let's check
     var bIsSend = false;
     if (this.GuiControlColorsMap != null) {
       for (var i = 0; i < _count; ++i) {
@@ -408,8 +408,8 @@ var editor;
 			this.wbModel.handlers.handlers['asc_onError'] = null;
 		}
 
-      /* Нужно закрыть редактор (до выставления флага canSave, т.к. мы должны успеть отправить
-       asc_onDocumentModifiedChanged для подписки на сборку) Баг http://bugzilla.onlyoffice.com/show_bug.cgi?id=28331 */
+      /* Need to close the editor (before setting the canSave flag, because we must send
+       asc_onDocumentModifiedChanged for assembly subscription in time) Bug http://bugzilla.onlyoffice.com/show_bug.cgi?id=28331 */
 		if (!this.asc_closeCellEditor()) {
 			if (isIdle) {
 				this.asc_closeCellEditor(true);
@@ -716,9 +716,9 @@ var editor;
 				return;
 			}
 
-			//заполняем через банарник
+			//fill via binary
 			let oBinaryFileReader = new AscCommonExcel.BinaryFileReader(true);
-			//чтобы лишнего не читать, проставляю флаг копипаст
+			//to avoid reading unnecessary data, setting the copy-paste flag
 			oBinaryFileReader.InitOpenManager.copyPasteObj = {
 				isCopyPaste: true, activeRange: null, selectAllSheet: true
 			};
@@ -865,7 +865,7 @@ var editor;
 			var activeSheet = null;
 			if (opt_activeRange) {
 				var is3dRef = parserHelp.parse3DRef(opt_activeRange);
-				//TODO вставка на другой лист
+				//TODO paste to another sheet
 				var range, sheetModel;
 				if (is3dRef) {
 					sheetModel = this.wb.model.getWorksheetByName(is3dRef.sheet);
@@ -1048,8 +1048,8 @@ var editor;
 	spreadsheet_api.prototype.CheckChangedDocument = function() {
 		if (true === History.Have_Changes())
 		{
-			// дублирование евента. когда будет undo-redo - тогда
-			// эти евенты начнут отличаться
+			// event duplication. when undo-redo is implemented - then
+			// these events will start to differ
 			this.SetDocumentModified(true);
 		}
 		else
@@ -1269,12 +1269,12 @@ var editor;
 	  };
 
   /*
-   idOption идентификатор дополнительного параметра, пока c_oAscAdvancedOptionsID.CSV.
-   option - какие свойства применить, пока массив. для CSV объект asc_CTextOptions(codepage, delimiter)
+   idOption identifier of additional parameter, currently c_oAscAdvancedOptionsID.CSV.
+   option - which properties to apply, currently an array. for CSV an object asc_CTextOptions(codepage, delimiter)
    exp:	asc_setAdvancedOptions(c_oAscAdvancedOptionsID.CSV, new Asc.asc_CTextOptions(1200, c_oAscCsvDelimiter.Comma) );
    */
   spreadsheet_api.prototype.asc_setAdvancedOptions = function(idOption, option) {
-    // Проверяем тип состояния в данный момент
+    // Check the state type at the moment
     if (this.advancedOptionsAction !== c_oAscAdvancedOptionsAction.Open) {
       return;
     }
@@ -1315,7 +1315,7 @@ var editor;
         break;
     }
   };
-  // Опции страницы (для печати)
+  // Page options (for printing)
   spreadsheet_api.prototype.asc_setPageOptions = function(options, index) {
     var sheetIndex = (undefined !== index && null !== index) ? index : this.wbModel.getActive();
     this.wb.getWorksheet(sheetIndex).setPageOptions(options);
@@ -1340,7 +1340,7 @@ var editor;
     var sheetIndex = (undefined !== index && null !== index) ? index : this.wbModel.getActive();
     var ws = this.wbModel.getWorksheet(sheetIndex);
     var printOptions = ws.PagePrintOptions;
-	//TODO похожая инициализация в getPrintOptionsJson - сделать общую
+	//TODO similar initialization in getPrintOptionsJson - make it common
 	if(initPrintTitles && printOptions) {
 		printOptions.initPrintTitles();
     }
@@ -1438,7 +1438,7 @@ var editor;
 
   spreadsheet_api.prototype._onNeedParams = function(data, opt_isPassword) {
     var t = this;
-    // Проверяем, возможно нам пришли опции для CSV
+    // Check if we received options for CSV
     if (this.documentOpenOptions && !opt_isPassword) {
       var codePageCsv = AscCommon.c_oAscEncodingsMap[this.documentOpenOptions["codePage"]] || AscCommon.c_oAscCodePageUtf8, delimiterCsv = this.documentOpenOptions["delimiter"],
 		  delimiterCharCsv = this.documentOpenOptions["delimiterChar"];
@@ -1456,7 +1456,7 @@ var editor;
 		}
 	} else {
 		if (t.handlers.hasTrigger("asc_onAdvancedOptions")) {
-			// ToDo разделитель пока только "," http://bugzilla.onlyoffice.com/show_bug.cgi?id=31009
+			// ToDo delimiter is only "," for now http://bugzilla.onlyoffice.com/show_bug.cgi?id=31009
 			var cp = {
 				'codepage': AscCommon.c_oAscCodePageNone, "delimiter": AscCommon.c_oAscCsvDelimiter.Comma,
 				'encodings': AscCommon.getEncodingParams()
@@ -1502,7 +1502,7 @@ var editor;
 		AscCommonExcel.checkStylesNames(t.wbModel.CellStyles);
 		t.FontLoader.LoadDocumentFonts(t.wbModel.generateFontMap2());
 
-		// Какая-то непонятная заглушка, чтобы не падало в ipad
+		// Some unclear workaround to prevent crashes on iPad
 		if (t.isMobileVersion) {
 			AscCommon.AscBrowser.isSafariMacOs = false;
 			AscCommon.PasteElementsId.PASTE_ELEMENT_ID = "wrd_pastebin";
@@ -1592,7 +1592,7 @@ var editor;
           oAdditionalData["delimiterChar"] = options.advancedOptions.asc_getDelimiterChar();
         }
       }
-      //перед записью подменяю topLeftCell на тот, который видим
+      //before writing, substitute topLeftCell with the one that is visible
         this.wb.executeWithCurrentTopLeftCell(function () {
           dataContainer.data = oBinaryFileWriter.Write(oAdditionalData["nobase64"]);
         });
@@ -1667,7 +1667,7 @@ var editor;
 		this.wb.printPreviewState.setPage(index, true);
 		this.wb.printSheetPrintPreview(index);
 		var curPage = this.wb.printPreviewState.getPage(index);
-		//возвращаю инфомарцию об активном листе, который печатаем
+		//returning information about the active sheet being printed
 		var indexActiveWs = curPage && curPage.indexWorksheet;
 		if (indexActiveWs === undefined) {
 			indexActiveWs = null !== this.wb.printPreviewState.realActiveSheet ? this.wb.printPreviewState.realActiveSheet : this.wbModel.getActive();
@@ -1695,7 +1695,7 @@ var editor;
 
   spreadsheet_api.prototype.asc_isDocumentModified = function() {
     if (!this.canSave || this.asc_getCellEditMode() || this.isOpenedFrameEditor) {
-      // Пока идет сохранение или редактирование ячейки, мы не закрываем документ
+      // While saving or editing a cell is in progress, we don't close the document
       return true;
     } else if (History && History.Have_Changes) {
       return History.Have_Changes();
@@ -1718,43 +1718,43 @@ var editor;
    * asc_onInitEditorFonts		(gui_fonts)
    * asc_onInitEditorStyles		(gui_styles)
    * asc_onOpenDocumentProgress	(AscCommon.COpenProgress)
-   * asc_onAdvancedOptions		(c_oAscAdvancedOptionsID, asc_CAdvancedOptions)			- эвент на получение дополнительных опций (открытие/сохранение CSV)
-   * asc_onError				(c_oAscError.ID, c_oAscError.Level)						- эвент об ошибке
-   * asc_onEditCell				(Asc.c_oAscCellEditorState)								- эвент на редактирование ячейки с состоянием (переходами из формулы и обратно)
-   * asc_onEditorSelectionChanged	(CellXfs)											- эвент на смену информации о выделении в редакторе ячейки
-   * asc_onSelectionChanged		(asc_CCellInfo)										- эвент на смену информации о выделении
-   * asc_onSelectionNameChanged	(sName)												- эвент на смену имени выделения (Id-ячейки, число выделенных столбцов/строк, имя диаграммы и др.)
+   * asc_onAdvancedOptions		(c_oAscAdvancedOptionsID, asc_CAdvancedOptions)			- event for receiving additional options (open/save CSV)
+   * asc_onError				(c_oAscError.ID, c_oAscError.Level)						- error event
+   * asc_onEditCell				(Asc.c_oAscCellEditorState)								- event for cell editing with state (transitions from formula and back)
+   * asc_onEditorSelectionChanged	(CellXfs)											- event for selection info change in cell editor
+   * asc_onSelectionChanged		(asc_CCellInfo)										- event for selection info change
+   * asc_onSelectionNameChanged	(sName)												- event for selection name change (cell-Id, number of selected columns/rows, chart name, etc.)
    * asc_onSelection
    *
-   * Changed	(asc_CSelectionMathInfo)							- эвент на смену математической информации о выделении
+   * Changed	(asc_CSelectionMathInfo)							- event for math info change about selection
    * asc_onZoomChanged			(zoom)
-   * asc_onSheetsChanged			()													- эвент на обновление списка листов
-   * asc_onActiveSheetChanged		(indexActiveSheet)									- эвент на обновление активного листа
-   * asc_onCanUndoChanged			(bCanUndo)											- эвент на обновление возможности undo
-   * asc_onCanRedoChanged			(bCanRedo)											- эвент на обновление возможности redo
-   * asc_onSaveUrl				(sUrl, callback(hasError))							- эвент на сохранение файла на сервер по url
-   * asc_onDocumentModifiedChanged(bIsModified)										- эвент на обновление статуса "изменен ли файл"
-   * asc_onMouseMove				(asc_CMouseMoveData)								- эвент на наведение мышкой на гиперлинк или комментарий
-   * asc_onHyperlinkClick			(sUrl)												- эвент на нажатие гиперлинка
-   * asc_onCoAuthoringDisconnect	()													- эвент об отключении от сервера без попытки reconnect
-   * asc_onSelectionRangeChanged	(selectRange)										- эвент о выборе диапазона для диаграммы (после нажатия кнопки выбора)
-   * asc_onRenameCellTextEnd		(countCellsFind, countCellsReplace)					- эвент об окончании замены текста в ячейках (мы не можем сразу прислать ответ)
-   * asc_onWorkbookLocked			(result)											- эвент залочена ли работа с листами или нет
-   * asc_onWorksheetLocked		(index, result)										- эвент залочен ли лист или нет
-   * asc_onGetEditorPermissions	(permission)										- эвент о правах редактора
-   * asc_onStopFormatPainter		()													- эвент об окончании форматирования по образцу
-   * asc_onUpdateSheetViewSettings	()													- эвент об обновлении свойств листа (закрепленная область, показывать сетку/заголовки)
-   * asc_onUpdateTabColor			(index)												- эвент об обновлении цвета иконки листа
-   * asc_onDocumentCanSaveChanged	(bIsCanSave)										- эвент об обновлении статуса "можно ли сохранять файл"
-   * asc_onDocumentUpdateVersion	(callback)											- эвент о том, что файл собрался и не может больше редактироваться
-   * asc_onContextMenu			(event)												- эвент на контекстное меню
-   * asc_onDocumentContentReady ()                        - эвент об окончании загрузки документа
+   * asc_onSheetsChanged			()													- event for sheets list update
+   * asc_onActiveSheetChanged		(indexActiveSheet)									- event for active sheet update
+   * asc_onCanUndoChanged			(bCanUndo)											- event for undo availability update
+   * asc_onCanRedoChanged			(bCanRedo)											- event for redo availability update
+   * asc_onSaveUrl				(sUrl, callback(hasError))							- event for saving file to server by url
+   * asc_onDocumentModifiedChanged(bIsModified)										- event for "is file modified" status update
+   * asc_onMouseMove				(asc_CMouseMoveData)								- event for mouse hover over hyperlink or comment
+   * asc_onHyperlinkClick			(sUrl)												- event for hyperlink click
+   * asc_onCoAuthoringDisconnect	()													- event for server disconnect without reconnect attempt
+   * asc_onSelectionRangeChanged	(selectRange)										- event for range selection for chart (after clicking select button)
+   * asc_onRenameCellTextEnd		(countCellsFind, countCellsReplace)					- event for cell text replacement completion (we cannot send response immediately)
+   * asc_onWorkbookLocked			(result)											- event for whether workbook operations are locked or not
+   * asc_onWorksheetLocked		(index, result)										- event for whether sheet is locked or not
+   * asc_onGetEditorPermissions	(permission)										- event for editor permissions
+   * asc_onStopFormatPainter		()													- event for format painter completion
+   * asc_onUpdateSheetViewSettings	()													- event for sheet properties update (frozen area, show grid/headers)
+   * asc_onUpdateTabColor			(index)												- event for sheet tab color update
+   * asc_onDocumentCanSaveChanged	(bIsCanSave)										- event for "can save file" status update
+   * asc_onDocumentUpdateVersion	(callback)											- event for when file was compiled and can no longer be edited
+   * asc_onContextMenu			(event)												- event for context menu
+   * asc_onDocumentContentReady ()                        - event for document loading completion
    * asc_onFilterInfo	        (countFilter, countRecords)								- send count filtered and all records
-   * asc_onLockDocumentProps/asc_onUnLockDocumentProps    - эвент о том, что залочены опции layout
-   * asc_onUpdateDocumentProps                            - эвент о том, что необходимо обновить данные во вкладке layout
-   * asc_onLockPrintArea/asc_onUnLockPrintArea            - эвент о локе в меню опции print area во вкладке layout
-   * asc_onPrintPreviewSheetChanged                 - эвент о смене печатаемого листа при предварительной печати
-   * asc_onPrintPreviewPageChanged                  - эвент о смене печатаемой страницы при предварительной печати
+   * asc_onLockDocumentProps/asc_onUnLockDocumentProps    - event for layout options being locked
+   * asc_onUpdateDocumentProps                            - event for when layout tab data needs to be updated
+   * asc_onLockPrintArea/asc_onUnLockPrintArea            - event for print area option lock in layout tab menu
+   * asc_onPrintPreviewSheetChanged                 - event for printed sheet change during print preview
+   * asc_onPrintPreviewPageChanged                  - event for printed page change during print preview
    * asc_onAddCustomFunction			()		    - add new custom function event
    */
 
@@ -1790,7 +1790,7 @@ var editor;
 		this.styleThumbnailHeight = height;
 	};
 
-  // Посылает эвент о том, что обновились листы
+  // Sends event that sheets have been updated
   spreadsheet_api.prototype.sheetsChanged = function() {
     this.handlers.trigger("asc_onSheetsChanged");
   };
@@ -1809,7 +1809,7 @@ var editor;
       this.asyncMethodCallback();
       this.asyncMethodCallback = undefined;
     } else {
-      // Шрифты загрузились, возможно стоит подождать совместное редактирование
+      // Fonts loaded, possibly need to wait for collaborative editing
       this.FontLoadWaitComplete = true;
         this._openDocumentEndCallback();
         if (this.fAfterLoad) {
@@ -1868,10 +1868,10 @@ var editor;
 		this.FontLoadWaitComplete = false;
         this.turnOffSpecialModes();
 
-		//удаляю весь handlersList, добавленный при инициализации wbView
-		//потому что старый при открытии использовать нельзя(в случае с истрией версий при повторном открытии файла там остаются старые функции от предыдущего workbookview)
-		//по идее нужно делать его полное зануление, а при открытии создавать заново. но есть функции, которые
-		//добавляются в интерфейсе и в случае с историей версий заново не добавляются
+		//removing all handlersList added during wbView initialization
+		//because the old one cannot be used when opening (in version history case, when reopening a file, old functions from previous workbookview remain there)
+		//ideally should nullify it completely and recreate when opening. but there are functions that
+		//are added in the interface and in version history case are not added again
 		this.wb.removeHandlersList();
 		if (this.frameManager.isFrameEditor()) {
 			this.wb.removeEventListeners();
@@ -2189,7 +2189,7 @@ var editor;
 			}
 
 			//connection
-			//пока читаю в строку connections. в serialize сейчас аналогично не парсим структуру, а храним в виде массива байтов
+			//currently reading connections as string. in serialize we similarly don't parse the structure, but store as byte array
 			var connectionsPart = wbPart.getPartByRelationshipType(openXml.Types.connections.relationType);
 			if (connectionsPart) {
 				wb.connections = connectionsPart.getDocumentContent();
@@ -2265,7 +2265,7 @@ var editor;
 			}
 
 			//wb comments
-			//лежит в виде бинарника, читаем через serialize
+			//stored as binary, reading via serialize
 			var workbookComment = wbPart.getPartByRelationshipType(openXml.Types.workbookComment.relationType);
 			if (workbookComment) {
 				var contentWorkbookComment = workbookComment.getDocumentContent(true);
@@ -2303,21 +2303,21 @@ var editor;
 				});
 			}
 
-			//TODO CalcChain - из бинарника не читается, и не пишется в бинарник. реализовать позже
+			//TODO CalcChain - not read from binary, and not written to binary. implement later
 
 			//Custom xml
-			//папка customXml, в неё лежат item[n].xml, itemProps[n].xml + rels
+			//customXml folder, contains item[n].xml, itemProps[n].xml + rels
 
-			//в Content_Types пишется только ссылка на itemProps в слудующем виде:
+			//in Content_Types only reference to itemProps is written in the following format:
 			//<Override PartName="/customXml/itemProps1.xml" ContentType="application/vnd.openxmlformats-officedocument.customXmlProperties+xml"/>
 
-			//rels(которые внутри customXml) лежит ссылка на itemProps  в следующем виде:
+			//rels (which are inside customXml) contains reference to itemProps in the following format:
 			//<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship  Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/customXmlProps" Target="itemProps1.xml"/></Relationships>
 
-			//workbook.xml.rels лежит ссылка на item  в следующем виде:
+			//workbook.xml.rels contains reference to item in the following format:
 			//<Relationship  Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/customXml" Target="../customXml/item1.xml"/>
 
-			//TODO проверить когда несколько ссылок на customXml
+			//TODO check when there are multiple references to customXml
 			var customXmlParts = wbPart.getPartsByRelationshipType(openXml.Types.customXml.relationType);
 			if (customXmlParts) {
 				for (i = 0; i < customXmlParts.length; i++) {
@@ -2326,7 +2326,7 @@ var editor;
 					var customXmlPropsPart = customXmlPart.getPartByRelationshipType(openXml.Types.customXmlProps.relationType);
 					var customXmlProps = customXmlPropsPart && customXmlPropsPart.getDocumentContent("string");
 
-					//в бинарник не будем писать, для совместимости оставляю поля, добавляю ещё новые
+					//won't write to binary, keeping fields for compatibility, adding new ones
 					var custom = {Uri: [], ItemId: null, Content: null, item: customXml, itemProps: customXmlProps};
 					if (!wb.customXmls) {
 						wb.customXmls = [];
@@ -2338,8 +2338,8 @@ var editor;
 			//sheets
 			var wsParts = [];
 			if (wbXml && wbXml.sheets) {
-				//вначале беру все листы, потом запрашиваю контент каждого из них.
-				//связано с проблемой внтури парсера, на примере файла Read_Only_part_of_lists.xlsx
+				//first get all sheets, then request content for each of them.
+				//related to parser internal issue, as shown in Read_Only_part_of_lists.xlsx file
 				wbXml.sheets.forEach(function (wbSheetXml) {
 					if (null !== wbSheetXml.id && wbSheetXml.name) {
 						var wsPart = wbPart.getPartById(wbSheetXml.id);
@@ -2424,7 +2424,7 @@ var editor;
 									var namedSheetView = new Asc.CT_NamedSheetViews();
 									reader = new StaxParser(contentSheetView, namedSheetView, xmlParserContext);
 									namedSheetView.fromXml(reader);
-									//связь с таблицыми по id осуществляется через tableIdOpen, который потом в методе initPostOpen преобразуется в tableId
+									//table relationship by id is done via tableIdOpen, which is then converted to tableId in initPostOpen method
 									ws.aNamedSheetViews = namedSheetView.namedSheetView;
 								}
 
@@ -2439,7 +2439,7 @@ var editor;
 								}
 
 								//COMMENTS
-								//буду читать по формату, далее преобразовывать
+								//will read by format, then convert
 								var comments, pThreadedComments;
 								var commentsFile = wsPart.getPartsByRelationshipType(openXml.Types.worksheetComments.relationType);
 								for (i = 0; i < commentsFile.length; ++i) {
@@ -2508,7 +2508,7 @@ var editor;
 				var sheetData = new AscCommonExcel.CT_SheetData();
 				
 				xmlParserContext.InitOpenManager.tmp = tmp;
-				//TODO пересмотреть фунцию fromXml
+				//TODO review the fromXml function
 				sheetData.fromXmlPart(sheetDataElem);
 				
 				return tmp;
@@ -2523,9 +2523,9 @@ var editor;
 					return;
 				}
 				
-				//TODO возможно стоит делать это в worksheet после полного чтения
+				//TODO possibly should do this in worksheet after full reading
 				//***array-formula***
-				//добавление ко всем ячейкам массива головной формулы
+				//adding the main formula to all array cells
 				for (var j = 0; j < tmp.formulaArray.length; j++) {
 					var curFormula = tmp.formulaArray[j];
 					var ref = curFormula.ref;
@@ -2679,26 +2679,26 @@ var editor;
 		return backgroundOpenReader;
 	};
 
-  // Эвент о пришедщих изменениях
+  // Event about received changes
   spreadsheet_api.prototype.syncCollaborativeChanges = function() {
-    // Для быстрого сохранения уведомлять не нужно.
+    // No need to notify for fast save.
     if (!this.collaborativeEditing.getFast()) {
       this.handlers.trigger("asc_onCollaborativeChanges");
     }
   };
 
-  // Применение изменений документа, пришедших при открытии
-  // Их нужно применять после того, как мы создали WorkbookView
-  // т.к. автофильтры, диаграммы, изображения и комментарии завязаны на WorksheetView (ToDo переделать)
+  // Applying document changes received at opening
+  // They need to be applied after we created WorkbookView
+  // because autofilters, charts, images and comments are tied to WorksheetView (ToDo refactor)
   spreadsheet_api.prototype._applyFirstLoadChanges = function() {
     if (this.isDocumentLoadComplete) {
       return;
     }
     if (this.collaborativeEditing.applyChanges()) {
-      // Изменений не было
+      // No changes
       this.onDocumentContentReady();
     }
-    // Пересылаем свои изменения (просто стираем чужие lock-и, т.к. своих изменений нет)
+    // Forward our changes (just clear others' locks, since we have no changes)
     this.collaborativeEditing.sendChanges();
   };
 
@@ -2837,7 +2837,7 @@ var editor;
           lockElem.setType(c_oAscLockTypes.kLockTypeOther, true);
         }
 
-        // Выставляем ID пользователя, залочившего данный элемент
+        // Set the ID of the user who locked this element
         lockElem.setUserId(e["user"]);
 
         if (lockType === c_oAscLockTypeElem.Object) {
@@ -2858,23 +2858,23 @@ var editor;
         }
 
         if (t.wb) {
-          // Шлем update для toolbar-а, т.к. когда select в lock ячейке нужно заблокировать toolbar
+          // Send update for toolbar, because when selection is in locked cell we need to block toolbar
           t.wb._onWSSelectionChanged(true);
 
-          // Шлем update для листов
+          // Send update for sheets
           t._onUpdateSheetsLock(lockElem);
 
           t._onUpdateDefinedNames(lockElem);
 
-          //эвент о локе в меню вкладки layout(кроме print area)
+          //event about lock in layout tab menu (except print area)
           t._onUpdateLayoutLock(lockElem);
-          //эвент о локе в меню опции print area во вкладке layout
+          //event about lock in print area option in layout tab
           t._onUpdatePrintAreaLock(lockElem);
-          //эвент о локе в меню опции headers/footers во вкладке layout
+          //event about lock in headers/footers option in layout tab
           t._onUpdateHeaderFooterLock(lockElem);
-          //эвент о локе в меню опции scale во вкладке layout
+          //event about lock in scale option in layout tab
           t._onUpdatePrintScaleLock(lockElem);
-          //эвент о локе представлений
+          //event about views lock
           if (t._onUpdateNamedSheetViewLock) {
             t._onUpdateNamedSheetViewLock(lockElem);
           }
@@ -2888,7 +2888,7 @@ var editor;
           var lockSheetId = lockElem.Element["sheetId"];
           if (lockSheetId === ws.model.getId()) {
             if (lockType === c_oAscLockTypeElem.Object) {
-              // Нужно ли обновлять закрепление областей
+              // Do we need to update frozen panes
               if (t._onUpdateFrozenPane(lockElem)) {
                 ws.draw();
               } else if (drawing && ws.model === drawing.worksheet) {
@@ -2900,7 +2900,7 @@ var editor;
               ws.updateSelection();
             }
           } else if (-1 !== lockSheetId && 0 === lockSheetId.indexOf(AscCommonExcel.CCellCommentator.sStartCommentId)) {
-            // Коммментарий
+            // Comment
             t.handlers.trigger("asc_onLockComment", lockElem.Element["rangeOrObjectId"], e["user"]);
           }
         }
@@ -2924,7 +2924,7 @@ var editor;
             newType = c_oAscLockTypes.kLockTypeOther2;
           }
         } else if (curType === c_oAscLockTypes.kLockTypeMine) {
-          // Такого быть не должно
+          // This should not happen
           newType = c_oAscLockTypes.kLockTypeMine;
         } else if (curType === c_oAscLockTypes.kLockTypeOther2 || curType === c_oAscLockTypes.kLockTypeOther3) {
           newType = c_oAscLockTypes.kLockTypeOther2;
@@ -2938,7 +2938,7 @@ var editor;
         if (c_oAscLockTypes.kLockTypeNone !== newType) {
           lockElem.setType(newType, true);
         } else {
-          // Удаляем из lock-ов, тот, кто правил ушел и не сохранил
+          // Remove from locks, the one who was editing left without saving
           t.collaborativeEditing.removeUnlock(lockElem);
           if (!t._onCheckCommentRemoveLock(lockElem.Element)) {
             if (lockElem.Element["type"] === c_oAscLockTypeElem.Object) {
@@ -2956,31 +2956,31 @@ var editor;
           }
         }
         if (t.wb) {
-          // Шлем update для листов
+          // Send update for sheets
           t._onUpdateSheetsLock(lockElem);
-          /*снимаем лок для DefName*/
+          /*release lock for DefName*/
           t.handlers.trigger("asc_onLockDefNameManager",Asc.c_oAscDefinedNameReason.OK);
-          //эвент о локе в меню вкладки layout
+          //event about lock in layout tab menu
           t._onUpdateLayoutLock(lockElem);
-          //эвент о локе в меню опции print area во вкладке layout
+          //event about lock in print area option in layout tab
           t._onUpdatePrintAreaLock(lockElem);
-          //эвент о локе в меню опции headers/footers во вкладке layout
+          //event about lock in headers/footers option in layout tab
           t._onUpdateHeaderFooterLock(lockElem);
-          //эвент о локе в меню опции scale во вкладке layout
+          //event about lock in scale option in layout tab
           t._onUpdatePrintScaleLock(lockElem);
-          /*снимаем лок c защищенных юзером диапазонов*/
+          /*release lock from user-protected ranges*/
           t.handlers.trigger("asc_onLockUserProtectedManager");
         }
       }
     };
     this.CoAuthoringApi.onLocksReleasedEnd = function() {
       if (!t.isDocumentLoadComplete) {
-        // Пока документ еще не загружен ничего не делаем
+        // While document is not yet loaded, do nothing
         return;
       }
 
       if (t.wb) {
-        // Шлем update для toolbar-а, т.к. когда select в lock ячейке нужно сбросить блокировку toolbar
+        // Send update for toolbar, because when selection is in locked cell we need to reset toolbar lock
         t.wb._onWSSelectionChanged(true);
 
         var worksheet = t.wb.getWorksheet();
@@ -3019,11 +3019,11 @@ var editor;
       }
 
       var tmpAdditionalInfo = JSON.parse(excelAdditionalInfo);
-      // Это мы получили recalcIndexColumns и recalcIndexRows
+      // This is where we received recalcIndexColumns and recalcIndexRows
       var oRecalcIndexColumns = t.collaborativeEditing.addRecalcIndex('0', tmpAdditionalInfo['indexCols']);
       var oRecalcIndexRows = t.collaborativeEditing.addRecalcIndex('1', tmpAdditionalInfo['indexRows']);
 
-      // Теперь нужно пересчитать индексы для lock-элементов
+      // Now we need to recalculate indices for lock-elements
       if (null !== oRecalcIndexColumns || null !== oRecalcIndexRows) {
         t.collaborativeEditing._recalcLockArray(c_oAscLockTypes.kLockTypeMine, oRecalcIndexColumns, oRecalcIndexRows);
         t.collaborativeEditing._recalcLockArray(c_oAscLockTypes.kLockTypeOther, oRecalcIndexColumns, oRecalcIndexRows);
@@ -3054,7 +3054,7 @@ var editor;
       var excelAdditionalInfo = null;
       var bCollaborative = this.collaborativeEditing.getCollaborativeEditing();
       if (bCollaborative) {
-        // Пересчетные индексы добавляем только если мы не одни
+        // Add recalculation indices only if we're not alone
         if (recalcIndexColumns || recalcIndexRows) {
           excelAdditionalInfo = {"indexCols": recalcIndexColumns, "indexRows": recalcIndexRows};
         }
@@ -3105,12 +3105,12 @@ var editor;
 
   spreadsheet_api.prototype._onUpdateAfterApplyChanges = function() {
     if (!this.isDocumentLoadComplete) {
-      // При открытии после принятия изменений мы должны сбросить пересчетные индексы
+      // On opening after applying changes we should reset recalculation indices
       this.collaborativeEditing.clearRecalcIndex();
       this.onDocumentContentReady();
     } else if (this.wb && !window["NATIVE_EDITOR_ENJINE"]) {
-      // Нужно послать 'обновить свойства' (иначе для удаления данных не обновится строка формул).
-      // ToDo Возможно стоит обновлять только строку формул
+      // Need to send 'update properties' (otherwise formula bar won't update for data deletion).
+      // ToDo Possibly should only update formula bar
       AscCommon.CollaborativeEditing.Load_Images();
       if(AscCommon.CollaborativeEditing.Is_Fast()) {
           AscCommon.CollaborativeEditing.Refresh_ForeignCursors();
@@ -3160,7 +3160,7 @@ var editor;
 
 	spreadsheet_api.prototype._onUpdateAllSheetsLock = function () {
 		if (this.wbModel) {
-			// Шлем update для листов
+			// Send update for sheets
 			this.handlers.trigger("asc_onWorkbookLocked", this.asc_isWorkbookLocked());
 			var i, length, wsModel, wsIndex;
 			for (i = 0, length = this.wbModel.getWorksheetCount(); i < length; ++i) {
@@ -3252,11 +3252,11 @@ var editor;
   };
 
 	spreadsheet_api.prototype._onUpdateSheetsLock = function (lockElem) {
-		// Шлем update для листов, т.к. нужно залочить лист
+		// Send update for sheets, because we need to lock the sheet
 		if (c_oAscLockTypeElem.Sheet === lockElem.Element["type"]) {
 			this._onUpdateAllSheetsLock();
 		} else {
-			// Шлем update для листа
+			// Send update for sheet
 			var wsModel = this.wbModel.getWorksheetById(lockElem.Element["sheetId"]);
 			if (wsModel) {
 				var wsIndex = wsModel.getIndex();
@@ -3332,15 +3332,15 @@ var editor;
   };
 
   spreadsheet_api.prototype._sendWorkbookStyles = function () {
-    // Для нативной версии (сборка и приложение) не генерируем стили
+    // For native version (build and app) we don't generate styles
     if (this.wbModel && !window["NATIVE_EDITOR_ENJINE"]) {
-      // Отправка стилей ячеек
+      // Send cell styles
       this.handlers.trigger("asc_onInitEditorStyles", this.wb.getCellStyles(this.styleThumbnailWidth, this.styleThumbnailHeight));
     }
   };
 
   spreadsheet_api.prototype.startCollaborationEditing = function() {
-    // Начинаем совместное редактирование
+    // Start collaborative editing
     this.collaborativeEditing.startCollaborationEditing();
 
 	  if (this.isDocumentLoadComplete) {
@@ -3355,13 +3355,13 @@ var editor;
   };
 
   spreadsheet_api.prototype.endCollaborationEditing = function() {
-    // Временно заканчиваем совместное редактирование
+    // Temporarily end collaborative editing
     this.collaborativeEditing.endCollaborationEditing();
   };
 
 	// End Load document
 	spreadsheet_api.prototype._openDocumentEndCallback = function () {
-		// Не инициализируем дважды
+		// Don't initialize twice
 		if (this.isDocumentLoadComplete || !this.ServerIdWaitComplete || !this.FontLoadWaitComplete) {
 			return;
 		}
@@ -3378,7 +3378,7 @@ var editor;
 			return;
         }
 
-		//история версий - возможно стоит грамотно чистить wbview, но не пересоздавать
+		//version history - possibly should properly clean wbview, but not recreate
 		var previousVersionZoom;
 		if ((this.VersionHistory || this.frameManager.isFrameEditor()) && this.controller) {
 			var elem = document.getElementById("ws-v-scrollbar");
@@ -3464,16 +3464,16 @@ var editor;
 		this.sendStandartTextures();
 		this.sendMathToMenu();
 
-		// Применяем пришедшие при открытии изменения
+		// Apply changes received at opening
 		this._applyFirstLoadChanges();
 		this._applyPreOpenLocks();
 		// Go to if sent options
 		this.goTo();
 
-		// Меняем тип состояния (на никакое)
+		// Change state type (to none)
 		this.advancedOptionsAction = c_oAscAdvancedOptionsAction.None;
 
-		// Были ошибки при открытии, посылаем предупреждение
+		// There were errors on opening, send warning
 		if (0 < this.wbModel.openErrors.length) {
 			this.sendEvent('asc_onError', c_oAscError.ID.OpenWarning, c_oAscError.Level.NoCritical);
 		}
@@ -3490,8 +3490,8 @@ var editor;
 		
 		this.onNeedUpdateExternalReferenceOnOpen();
 		this.onUpdateDocumentModified(this.isDocumentModified());//line moved from onDocumentContentReady
-		//раньше вызов был закомментирован, потому при при открытии вызывается в Viewport.js(asc_Resize) и Main.js(asc_showComments)
-		//но рассчитывать на внешние вызовы ненадежно и вызовов нет при VersionHistory и refreshFile
+		//previously the call was commented out, because on opening it's called in Viewport.js(asc_Resize) and Main.js(asc_showComments)
+		//but relying on external calls is unreliable and there are no calls for VersionHistory and refreshFile
 		this.asc_Resize();
 		this.initBroadcastChannelListeners();
 
@@ -3500,9 +3500,9 @@ var editor;
 		Asc.editor.asc_registerCallback('asc_onSelectionChanged', this.toggleChartElementsCallback);
 	};
 
-	// Переход на диапазон в листе
+	// Navigate to range in sheet
 	spreadsheet_api.prototype._asc_setWorksheetRange = function (val) {
-		// Получаем sheet по имени
+		// Get sheet by name
 		var ranges = null, ws;
         var sheet = val.asc_getSheet();
         if (!sheet) {
@@ -3511,7 +3511,7 @@ var editor;
 				ws = ranges.worksheet;
             }
         } else {
-        	//при переходе к диапазону внутри документа, игнорируется регистр у имени листа -> Sheet1===SHEEt1
+        	//when navigating to a range inside the document, sheet name case is ignored -> Sheet1===SHEEt1
 			ws = this.wbModel.getWorksheetByName(sheet, true);
         }
 		if (!ws) {
@@ -3520,11 +3520,11 @@ var editor;
 		} else if (ws.getHidden()) {
 			return;
 		}
-		// Индекс листа
+		// Sheet index
 		var sheetIndex = ws.getIndex();
-		// Если не совпали индекс листа и индекс текущего, то нужно сменить
+		// If sheet index doesn't match current index, we need to change
 		if (this.asc_getActiveWorksheetIndex() !== sheetIndex) {
-			// Меняем активный лист
+			// Change active sheet
 			this.asc_showWorksheet(sheetIndex);
 		}
 		var range;
@@ -3547,7 +3547,7 @@ var editor;
 		var t = this;
 
 		AscCommon.CollaborativeEditing.Clear_CollaborativeMarks();
-		// Принимаем чужие изменения
+		// Accept others' changes
 		this.collaborativeEditing.applyChanges();
 
 		this.CoAuthoringApi.onUnSaveLock = function () {
@@ -3560,7 +3560,7 @@ var editor;
 			}
 
 			if (t.collaborativeEditing.getCollaborativeEditing()) {
-				// Шлем update для toolbar-а, т.к. когда select в lock ячейке нужно заблокировать toolbar
+				// Send update for toolbar, because when selection is in locked cell we need to block toolbar
 				t.wb._onWSSelectionChanged(true);
 			}
 
@@ -3571,7 +3571,7 @@ var editor;
 			if (!t.forceSaveButtonContinue) {
 				t.sync_EndAction(c_oAscAsyncActionType.Information, c_oAscAsyncAction.Save);
 			}
-			// Обновляем состояние возможности сохранения документа
+			// Update document save availability state
 			t.onUpdateDocumentModified(History.Have_Changes());
 
 			if (undefined !== window["AscDesktopEditor"]) {
@@ -3582,7 +3582,7 @@ var editor;
 				t._unlockDocument();
 			}
 		};
-		// Пересылаем свои изменения
+		// Forward our changes
 		if (this.forceSaveUndoRequest)
 		{
 			this.collaborativeEditing.Set_GlobalLock(false);
@@ -3602,7 +3602,7 @@ var editor;
   };
 
 	spreadsheet_api.prototype._isLockedAddWorksheets = function(callback) {
-		// Проверка глобального лока
+		// Check global lock
 		if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
 			return false;
 		}
@@ -3650,7 +3650,7 @@ var editor;
 		}
 		this.wbModel.dependencyFormulas && this.wbModel.dependencyFormulas.unlockRecal();
 		AscCommonExcel.g_cCalcRecursion && AscCommonExcel.g_cCalcRecursion.setIsSheetCreating(false);
-		// Посылаем callback об изменении списка листов
+		// Send callback about sheets list change
 		this.sheetsChanged();
 		this.inkDrawer.endSilentMode();
 		return res;
@@ -3670,7 +3670,7 @@ var editor;
     return this.wbModel.getWorksheet(index).getTabColor();
   };
   spreadsheet_api.prototype.asc_setWorksheetTabColor = function(color, arrSheets) {
-    // Проверка глобального лока
+    // Check global lock
     if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
       return false;
     }
@@ -3727,7 +3727,7 @@ var editor;
 
   spreadsheet_api.prototype.asc_setDefinedNames = function(defName) {
 //            return this.wb.setDefinedNames(defName);
-    // Проверка глобального лока
+    // Check global lock
     if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
       return;
     }
@@ -3735,7 +3735,7 @@ var editor;
   };
 
   spreadsheet_api.prototype.asc_editDefinedNames = function(oldName, newName) {
-    // Проверка глобального лока
+    // Check global lock
     if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
       return;
     }
@@ -3744,7 +3744,7 @@ var editor;
   };
 
   spreadsheet_api.prototype.asc_delDefinedNames = function(oldName) {
-    // Проверка глобального лока
+    // Check global lock
     if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
       return;
     }
@@ -3783,7 +3783,7 @@ var editor;
     return this.wb._onCheckDefNameLock();
   };
 
-  // Залочена ли работа с листом
+  // Is sheet work locked
   spreadsheet_api.prototype.asc_isWorksheetLockedOrDeleted = function(index) {
     var ws = this.wbModel.getWorksheet(index);
     var sheetId = null;
@@ -3794,18 +3794,18 @@ var editor;
     }
 
     var lockInfo = this.collaborativeEditing.getLockInfo(c_oAscLockTypeElem.Sheet, /*subType*/null, sheetId, sheetId);
-    // Проверим, редактирует ли кто-то лист
+    // Check if someone is editing the sheet
     return (false !== this.collaborativeEditing.getLockIntersection(lockInfo, c_oAscLockTypes.kLockTypeOther, /*bCheckOnlyLockAll*/false));
   };
 
-  // Залочена ли работа с листами
+  // Is workbook work locked
   spreadsheet_api.prototype.asc_isWorkbookLocked = function() {
     var lockInfo = this.collaborativeEditing.getLockInfo(c_oAscLockTypeElem.Sheet, /*subType*/null, null, null);
-    // Проверим, редактирует ли кто-то лист
+    // Check if someone is editing the sheet
     return (false !== this.collaborativeEditing.getLockIntersection(lockInfo, c_oAscLockTypes.kLockTypeOther, /*bCheckOnlyLockAll*/false));
   };
 
-  // Залочена ли работа с листом
+  // Is sheet work locked
   spreadsheet_api.prototype.asc_isLayoutLocked = function(index) {
       var ws = this.wbModel.getWorksheet(index);
       var sheetId = null;
@@ -3816,11 +3816,11 @@ var editor;
       }
 
       var lockInfo = this.collaborativeEditing.getLockInfo(c_oAscLockTypeElem.Object, /*subType*/null, sheetId, "layoutOptions");
-      // Проверим, редактирует ли кто-то лист
+      // Check if someone is editing the sheet
       return (false !== this.collaborativeEditing.getLockIntersection(lockInfo, c_oAscLockTypes.kLockTypeOther, /*bCheckOnlyLockAll*/false));
   };
 
-	// Залочена ли работа с листом
+	// Is sheet work locked
   spreadsheet_api.prototype.asc_isHeaderFooterLocked = function(index) {
       var ws = this.wbModel.getWorksheet(index);
       var sheetId = null;
@@ -3831,7 +3831,7 @@ var editor;
       }
 
       var lockInfo = this.collaborativeEditing.getLockInfo(c_oAscLockTypeElem.Object, /*subType*/null, sheetId, "headerFooter");
-      // Проверим, редактирует ли кто-то лист
+      // Check if someone is editing the sheet
       return (false !== this.collaborativeEditing.getLockIntersection(lockInfo, c_oAscLockTypes.kLockTypeOther, /*bCheckOnlyLockAll*/false));
   };
 
@@ -3849,13 +3849,13 @@ var editor;
   };
 
 	spreadsheet_api.prototype.asc_isPrintAreaLocked = function(index) {
-		//проверка лока для именованного диапазона -  области печати
-		//локи для именованных диапазонов устроены следующем образом: если изменяется хоть один именованный диапазон
-		//добавлять новые/редактировать старые/удалять измененные нельзя, но зато разрешается удалять не измененные
-		//в данном случае для области печати логика следующая - если был добавлен именованный диапазон(в тч и область печати)
-		//не даём возможность добавлять/редактировть область печати на всех листах, но разрешаем удалять не измененные области печати
-		//если вторым пользователем добавлена область печати, первым удалять разершается по общей схеме
-		//но поскольку изменения не приняты, этой области печати ещё нет у первого пользователя - удаления не произойдёт
+		//lock check for named range - print area
+		//locks for named ranges work as follows: if any named range is modified
+		//adding new/editing old/deleting modified ones is not allowed, but deleting unchanged ones is allowed
+		//in this case for print area the logic is: if a named range was added (including print area)
+		//we don't allow adding/editing print area on all sheets, but allow deleting unchanged print areas
+		//if print area is added by second user, first user can delete according to general scheme
+		//but since changes are not accepted, this print area doesn't exist yet for the first user - deletion won't happen
 
 		var res = false;
 		if(index !== undefined) {
@@ -3909,7 +3909,7 @@ var editor;
   };
 
   spreadsheet_api.prototype.asc_hideWorksheet = function (arrSheets) {
-    // Проверка глобального лока
+    // Check global lock
     if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
       return false;
     }
@@ -3922,7 +3922,7 @@ var editor;
       arrSheets = [this.wbModel.getActive()];
     }
 
-    // Вдруг остался один лист
+    // In case only one sheet remains
     if (this.asc_getWorksheetsCount() <= this.asc_getHiddenWorksheets().length + arrSheets.length) {
       return false;
     }
@@ -3950,7 +3950,7 @@ var editor;
   };
 
   spreadsheet_api.prototype.asc_renameWorksheet = function(name, opt_id) {
-    // Проверка глобального лока
+    // Check global lock
     if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
       return false;
     }
@@ -4019,9 +4019,9 @@ var editor;
     });
   };
 
-  // Удаление листа
+  // Delete sheet
   spreadsheet_api.prototype.asc_deleteWorksheet = function (arrSheets) {
-    // Проверка глобального лока
+    // Check global lock
     if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
       return false;
     }
@@ -4057,7 +4057,7 @@ var editor;
         t.wb.updateWorksheetByModel();
 		History.EndTransaction();
         t.wb.showWorksheet();
-        // Посылаем callback об изменении списка листов
+        // Send callback about sheets list change
         t.sheetsChanged();
       }
     };
@@ -4078,7 +4078,7 @@ var editor;
       return;
 	}
 
-  	// Проверка глобального лока
+  	// Check global lock
     if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
       return false;
     }
@@ -4121,12 +4121,12 @@ var editor;
             t.wbModel.replaceWorksheet(index, _where);
           }
         }
-        // Обновим текущий номер
+        // Update current number
         t.wbModel.setActive(active.getIndex());
         t.wb.updateWorksheetByModel();
         t.wb.showWorksheet();
         History.EndTransaction();
-        // Посылаем callback об изменении списка листов
+        // Send callback about sheets list change
         t.sheetsChanged();
       }
     };
@@ -4147,7 +4147,7 @@ var editor;
 		return;
 	}
 
-	  // Проверка глобального лока
+	  // Check global lock
     if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
       return false;
     }
@@ -4169,7 +4169,7 @@ var editor;
 
     var scale = this.asc_getZoom();
 
-    // ToDo уйти от lock для листа при копировании
+    // ToDo get rid of lock for sheet when copying
     var sheet, arrLocks = [];
     for (var i = 0; i < arrSheets.length; ++i) {
       sheet = arrSheets[i] = this.wbModel.getWorksheet(arrSheets[i]);
@@ -4179,7 +4179,7 @@ var editor;
     var t = this;
     var copyWorksheet = function(res) {
       if (res) {
-        // ToDo перейти от wsViews на wsViewsId
+        // ToDo switch from wsViews to wsViewsId
         History.Create_NewPoint();
         History.StartTransaction();
         var index;
@@ -4187,12 +4187,12 @@ var editor;
           index = arrSheets[i].getIndex();
           t.wbModel.copyWorksheet(index, where, arrNames[i]);
         }
-        // Делаем активным скопированный
+        // Make the copied one active
         t.wbModel.setActive(where);
         t.wb.updateWorksheetByModel();
         t.wb.showWorksheet();
         History.EndTransaction();
-        // Посылаем callback об изменении списка листов
+        // Send callback about sheets list change
         t.sheetsChanged();
       }
     };
@@ -4250,8 +4250,8 @@ var editor;
   };
 
   spreadsheet_api.prototype.asc_StartMoveSheet = function (arrSheets) {
-	  // Проверка глобального лока
-	  // Лок каждого листа необходимо проверять в интерфейсе. если что-то залочено - не переносим
+	  // Check global lock
+	  // Each sheet's lock must be checked in the interface. if something is locked - don't move
       if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
 		  return false;
 	  }
@@ -4264,7 +4264,7 @@ var editor;
   };
 
   spreadsheet_api.prototype.asc_EndMoveSheet = function(where, arrNames, arrSheets) {
-	  // Проверка глобального лока
+	  // Check global lock
 	  if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
 		  return false;
 	  }
@@ -4292,13 +4292,13 @@ var editor;
 		  }
 	  };
 
-	  //TODO нужно лочить все листы
+	  //TODO need to lock all sheets
 	  addWorksheet(true);
 	  //this.collaborativeEditing.lock([], addWorksheet);
   };
 
 	spreadsheet_api.prototype.getBinaryContentSheets = function (arrSheets) {
-		//если выделены все - не перенесим(проверка в интерфейсе)
+		//if all are selected - won't move (check in interface)
 		var sheet, sBinarySheet, res = [];
 		var activeIndex = this.wbModel.nActive;
 		for (var i = 0; i < arrSheets.length; ++i) {
@@ -4405,12 +4405,12 @@ var editor;
         return;
     }
 
-    options.lookIn = Asc.c_oAscFindLookIn.Formulas; // При замене поиск только в формулах
+    options.lookIn = Asc.c_oAscFindLookIn.Formulas; // When replacing, search only in formulas
 	  wb.replaceCellText(options);
   };
 
   spreadsheet_api.prototype.asc_endFindText = function() {
-    // Нужно очистить поиск
+    // Need to clear search
     this.wb._cleanFindResults();
   };
 
@@ -4444,8 +4444,8 @@ var editor;
 	};
 
   /**
-   * Делает активной указанную ячейку
-   * @param {String} reference  Ссылка на ячейку вида A1 или R1C1
+   * Makes the specified cell active
+   * @param {String} reference  Cell reference in A1 or R1C1 format
    */
   spreadsheet_api.prototype.asc_findCell = function (reference) {
     if (this.asc_getCellEditMode()) {
@@ -4457,16 +4457,16 @@ var editor;
       return;
     }
 
-    // Получаем sheet по имени
+    // Get sheet by name
     ws = d[0].getWorksheet();
     if (!ws || ws.getHidden()) {
       return;
     }
-    // Индекс листа
+    // Sheet index
     var sheetIndex = ws.getIndex();
-    // Если не совпали индекс листа и индекс текущего, то нужно сменить
+    // If sheet index doesn't match current index, we need to change
     if (this.asc_getActiveWorksheetIndex() !== sheetIndex) {
-      // Меняем активный лист
+      // Change active sheet
       this.asc_showWorksheet(sheetIndex);
     }
 
@@ -4635,7 +4635,7 @@ var editor;
   };
 
   spreadsheet_api.prototype.asc_emptyCells = function(options, isMineComments) {
-    //TODO isMineComments - временный флаг, как только в сдк появится класс для групп, добавить этот флаг туда
+    //TODO isMineComments - temporary flag, once sdk has a class for groups, add this flag there
   	this.wb.emptyCells(options, isMineComments);
   };
 
@@ -4647,12 +4647,12 @@ var editor;
      this.wb.getWorksheet().cleanDepCells();*/
   };
 
-  // Потеряем ли мы что-то при merge ячеек
+  // Will we lose something when merging cells
   spreadsheet_api.prototype.asc_mergeCellsDataLost = function(options) {
     return this.wb.getWorksheet().getSelectionMergeInfo(options);
   };
 
-  //нужно ли спрашивать пользователя о расширении диапазона
+  //should we ask the user about range expansion
   spreadsheet_api.prototype.asc_sortCellsRangeExpand = function() {
     return this.wb.getWorksheet().getSelectionSortInfo();
   };
@@ -4911,7 +4911,7 @@ var editor;
   };
 
   spreadsheet_api.prototype.asc_showImageFileDialog = function() {
-    // ToDo заменить на общую функцию для всех
+    // ToDo replace with common function for all
     this.asc_addImage();
   };
   spreadsheet_api.prototype._addImageUrl = function(arrUrls, oOptionObject) {
@@ -5116,7 +5116,7 @@ var editor;
     return parserHelp.checkDataRange(this.wbModel, this.wb, dialogType, dataRange, fullCheck, isRows, chartType);
   };
 
-  // Для вставки диаграмм в Word
+  // For inserting charts in Word
   spreadsheet_api.prototype.asc_getBinaryFileWriter = function() {
     return new AscCommonExcel.BinaryFileWriter(this.wbModel);
   };
@@ -5138,17 +5138,17 @@ var editor;
 	}
 
   spreadsheet_api.prototype.asc_cleanWorksheet = function() {
-    var ws = this.wb.getWorksheet();	// Для удаления данных листа и диаграмм
+    var ws = this.wb.getWorksheet();	// For deleting sheet data and charts
     if (ws.objectRender) {
       ws.objectRender.cleanWorksheet();
     }
   };
 
-  // Выставление данных (пока используется только для MailMerge)
+  // Setting data (currently used only for MailMerge)
   spreadsheet_api.prototype.asc_setData = function(oData) {
     this.wb.getWorksheet().setData(oData);
   };
-  // Получение данных
+  // Getting data
   spreadsheet_api.prototype.asc_getData = function() {
     this.asc_closeCellEditor();
     return this.wb.getWorksheet().getData();
@@ -6122,7 +6122,7 @@ var editor;
     return this.wb && this.wb.getSelectionInfo();
   };
 
-  // Получить координаты активной ячейки
+  // Get active cell coordinates
   spreadsheet_api.prototype.asc_getActiveCellCoord = function(useUpRightMerge) {
     var oWorksheet = this.wb.getWorksheet();
     if(oWorksheet){
@@ -6135,7 +6135,7 @@ var editor;
     }
   };
 
-	// Получить координаты активной ячейки
+	// Get active cell coordinates
 	spreadsheet_api.prototype.asc_getActiveCell = function() {
 		var oWorksheet = this.wb.getWorksheet();
 		if(oWorksheet){
@@ -6149,12 +6149,12 @@ var editor;
 
 	};
 
-  // Получить координаты для каких-либо действий (для общей схемы)
+  // Get coordinates for any actions (for general scheme)
   spreadsheet_api.prototype.asc_getAnchorPosition = function() {
     return this.asc_getActiveCellCoord();
   };
 
-  // Получаем свойство: редактируем мы сейчас или нет
+  // Get property: are we editing right now or not
   spreadsheet_api.prototype.asc_getCellEditMode = function() {
     return this.wb ? this.wb.getCellEditMode() : false;
   };
@@ -6471,7 +6471,7 @@ var editor;
     this.wb.restoreFocus();
   };
 
-  // Увеличение размера шрифта
+  // Increase font size
   spreadsheet_api.prototype.asc_increaseFontSize = function() {
     var ws = this.wb.getWorksheet();
     if (ws.objectRender.selectedGraphicObjectsExists() && ws.objectRender.controller.increaseFontSize) {
@@ -6482,7 +6482,7 @@ var editor;
     }
   };
 
-  // Уменьшение размера шрифта
+  // Decrease font size
   spreadsheet_api.prototype.asc_decreaseFontSize = function() {
     var ws = this.wb.getWorksheet();
     if (ws.objectRender.selectedGraphicObjectsExists() && ws.objectRender.controller.decreaseFontSize) {
@@ -6521,7 +6521,7 @@ var editor;
 
 		var protectedRanges = ws.getProtectedRangesByActiveRange();
 
-		//входит ли в зону защищенных диапазонов ячейка - null(не входит)/true(входит и защищена паролем)/false(входит и не защищена паролем или была защищена и уже не защищена)
+		//is the cell in the protected ranges zone - null(not in)/true(in and password protected)/false(in and not password protected or was protected and no longer is)
 		var res = null;
 		if (protectedRanges) {
 			for (var i = 0; i < protectedRanges.length; i++) {
@@ -6560,7 +6560,7 @@ var editor;
 		}
 	};
 
-  // Формат по образцу
+  // Format painter
   spreadsheet_api.prototype.asc_formatPainter = function(formatPainterState) {
 	this.changeFormatPainterState(formatPainterState, undefined);
   };
@@ -6669,7 +6669,7 @@ var editor;
   };
 
   /**
-   * Режим выбора диапазона
+   * Range selection mode
    * @param {Asc.c_oAscSelectionDialogType} selectionDialogType
    * @param selectRange
    */
@@ -6717,8 +6717,8 @@ var editor;
 				}
 			}
 		};
-		// ToDo поправить заглушку, сделать новый тип lock element-а
-		var sheetId = -1; // Делаем не существующий лист и не существующий объект
+		// ToDo fix the workaround, create new lock element type
+		var sheetId = -1; // Create non-existent sheet and non-existent object
 		var lockInfo = this.collaborativeEditing.getLockInfo(c_oAscLockTypeElem.Object, /*subType*/null, sheetId,
 			sheetId);
 		this.collaborativeEditing.lock([lockInfo], onChangeColorScheme);
@@ -6747,8 +6747,8 @@ var editor;
         }
       }
     };
-    // ToDo поправить заглушку, сделать новый тип lock element-а
-    var sheetId = -1; // Делаем не существующий лист и не существующий объект
+    // ToDo fix the workaround, create new lock element type
+    var sheetId = -1; // Create non-existent sheet and non-existent object
     var lockInfo = this.collaborativeEditing.getLockInfo(c_oAscLockTypeElem.Object, /*subType*/null, sheetId,
         sheetId);
     this.collaborativeEditing.lock([lockInfo], onChangeColorScheme);
@@ -6767,9 +6767,9 @@ var editor;
       this.textArtPreviewManager.clear();
     }
 
-    // На view-режиме не нужно отправлять стили
+    // In view mode we don't need to send styles
     if (!this.getViewMode()) {
-      // Отправка стилей
+      // Send styles
       this._sendWorkbookStyles();
     }
 
@@ -6800,11 +6800,11 @@ var editor;
 			if (this.collaborativeEditing.getFast() && this.collaborativeEditing.haveOtherChanges()) {
 				AscCommon.CollaborativeEditing.Clear_CollaborativeMarks();
 
-				// Принимаем чужие изменения
+				// Accept others' changes
 				this.collaborativeEditing.applyChanges();
-				// Пересылаем свои изменения (просто стираем чужие lock-и, т.к. своих изменений нет)
+				// Forward our changes (just clear others' locks, since we have no changes)
 				this.collaborativeEditing.sendChanges();
-				// Шлем update для toolbar-а, т.к. когда select в lock ячейке нужно заблокировать toolbar
+				// Send update for toolbar, because when selection is in locked cell we need to block toolbar
 				this.wb._onWSSelectionChanged();
 			}
             if (AscCommon.CollaborativeEditing.Is_Fast() /*&& !AscCommon.CollaborativeEditing.Is_SingleUser()*/) {
@@ -6838,7 +6838,7 @@ var editor;
 	};
 
 	spreadsheet_api.prototype._onUpdateDocumentCanSave = function () {
-		// Можно модифицировать это условие на более быстрое (менять самим состояние в аргументах, а не запрашивать каждый раз)
+		// Can optimize this condition to be faster (change the state ourselves in arguments instead of requesting each time)
 		var tmp = History.Have_Changes() || (this.collaborativeEditing.getCollaborativeEditing() &&
 			0 !== this.collaborativeEditing.getOwnLocksLength()) || this.asc_getCellEditMode();
 		if (tmp !== this.isDocumentCanSave) {
@@ -6854,7 +6854,7 @@ var editor;
     var res = false;
     var sheetId = lockElem["sheetId"];
     if (-1 !== sheetId && 0 === sheetId.indexOf(AscCommonExcel.CCellCommentator.sStartCommentId)) {
-      // Коммментарий
+      // Comment
       res = true;
       this.handlers.trigger("asc_onUnLockComment", lockElem["rangeOrObjectId"]);
     }
@@ -6862,7 +6862,7 @@ var editor;
   };
 
   spreadsheet_api.prototype.SetDocumentModified = spreadsheet_api.prototype.onUpdateDocumentModified = function(bIsModified) {
-    // Обновляем только после окончания сохранения
+    // Update only after saving is complete
     if (this.canSave) {
       this.handlers.trigger("asc_onDocumentModifiedChanged", bIsModified);
       this._onUpdateDocumentCanSave();
@@ -6873,7 +6873,7 @@ var editor;
     }
   };
 
-	// Выставление локали
+	// Setting locale
 	spreadsheet_api.prototype.asc_setLocalization = function (oLocalizedData, sLang) {
 		if (!this.isLoadFullApi) {
 			this.tmpLocalization = oLocalizedData;
@@ -7051,7 +7051,7 @@ var editor;
 
 	spreadsheet_api.prototype.getPrintOptionsJson = function() {
 		var res = {};
-		//отдельного флага для дополнительных настроек не делаю, общие опции тоже читаются, но пока не сделан мерж опций - верхние настройки перекроют внутренниие(если они заданы)
+		//not creating separate flag for additional settings, common options are also read, but until options merge is done - top settings will override internal ones (if they are set)
 		res["spreadsheetLayout"] = {};
 		res["spreadsheetLayout"]["ignorePrintArea"] = false;
 		res["spreadsheetLayout"]["sheetsProps"] = this.wbModel && this.wbModel.getPrintOptionsJson();
@@ -7072,7 +7072,7 @@ var editor;
     var t = this;
 
     if(_options) {
-      //печатаем только 1 страницу первой книги
+      //print only 1 page of the first workbook
       var isOnlyFirstPage = _options["printOptions"] && _options["printOptions"]["onlyFirstPage"];
        if(isOnlyFirstPage) {
 		   _adjustPrint.isOnlyFirstPage = true;
@@ -7184,7 +7184,7 @@ var editor;
     var _printPagesData = this.wb.calcPagesPrint(_adjustPrint);
 
     if (undefined === _printer && _page === undefined) {
-      // ПУСТОЙ вызов, так как он должен быть ДО команд печати (картинки). А реальзый вызов - после (pagescount)
+      // EMPTY call, because it must be BEFORE print commands (images). And the real call - after (pagescount)
       window["AscDesktopEditor"] && window["AscDesktopEditor"]["Print_Start"]();
       this.wb.executeWithoutPreview(function () {
         _printer = t.wb.printSheets(_printPagesData, null, _adjustPrint).DocumentRenderer;
@@ -7276,7 +7276,7 @@ var editor;
 	  var ws = this.wbModel.getActiveWs();
 	  this.wbModel.handlers.trigger('showWorksheet', ws.getId());
 
-      //в _onUpdateAfterApplyChanges нет очистки кэша, добавляю -
+      //in _onUpdateAfterApplyChanges there's no cache cleanup, adding -
 	  var lastPointIndex = History.Points && History.Points.length - 1;
 	  var lastPoint = History.Points[lastPointIndex];
 	  if (lastPoint && lastPoint.UpdateRigions) {
@@ -7611,7 +7611,7 @@ var editor;
 		} else {
 			this.sendEvent('asc_onError', c_oAscError.ID.PivotLabledColumns, c_oAscError.Level.NoCritical);
 		}
-		// добавил возвращение таблицы, для методов билдера
+		// added table return, for builder methods
 		return pivot;
 	};
 	spreadsheet_api.prototype.asc_insertPivotExistingWorksheet = function(dataRef, pivotRef, confirmation) {
@@ -7749,7 +7749,7 @@ var editor;
 		this._changePivotWithLockExt(pivot, false, true, onAction, doNotCheckUnderlyingData, doNotAutoFitColumnsWidth);
 	};
 	spreadsheet_api.prototype._changePivotWithLockExt = function (pivot, confirmation, updateSelection, onAction, doNotCheckUnderlyingData, doNotAutoFitColumnsWidth) {
-		// Проверка глобального лока
+		// Check global lock
 		if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
 			return;
 		}
@@ -7776,7 +7776,7 @@ var editor;
 		});
 	};
 	spreadsheet_api.prototype._changePivotAndConnectedBySlicerWithLock = function (pivot, flds, onAction) {
-		// Проверка глобального лока
+		// Check global lock
 
 		var t = this;
 		this._isLockedPivotAndConnectedBySlicer(pivot, flds, function(res) {
@@ -7788,7 +7788,7 @@ var editor;
 		});
 	};
 	spreadsheet_api.prototype._changePivotAndConnectedByPivotCacheWithLock = function (pivot, confirmation, onAction, onRepeat, updateSelection) {
-		// Проверка глобального лока
+		// Check global lock
 
 		var t = this;
 		var pivotTables = pivot.getPivotTablesConnectedByPivotCache();
@@ -8037,7 +8037,7 @@ var editor;
 			for (i = 0, length = t.wbModel.getWorksheetCount(); i < length; ++i) {
 				wsModel = t.wbModel.getWorksheet(i);
 				wsIndex = wsModel.getIndex();
-				//TODO необходимо добавить инофрмацию о локе нового добавленного правила!!!
+				//TODO need to add lock information for newly added rule!!!
 
 				var isLockedRules = false;
 				if (wsModel.isConditionalFormattingRules()) {
@@ -8073,15 +8073,15 @@ var editor;
 	};
 
 	spreadsheet_api.prototype._onCheckCFRemoveLock = function (lockElem) {
-		//лок правила - с правилом делать ничего нельзя
-		//лок менеджера - незалоченное правило можно удалять и редактировать. новые правила добавлять нельзя.
-		//так же нельзя перемещать местами правила
+		//rule lock - can't do anything with the rule
+		//manager lock - unlocked rule can be deleted and edited. new rules can't be added.
+		//also can't reorder rules
 
-		//лочим правило как объект. в лок кладём id и лист с префиксом CConditionalFormattingRule.sStartLockCFId
-		//на принятии изменений удаляем локи с соответсвующих элементов
-		//разлочиваем менеджер если нет залоченных элементов(т.е. проверяем все на лок)
-		//+ проверяем нет ли нового добавленного правила другим юзером
-		//всего для передачи в интерфейс 4 события - asc_onLockCFRule/asc_onUnLockCFRule; asc_onLockCFManager/asc_onUnLockCFManager
+		//lock rule as object. put id and sheet with prefix CConditionalFormattingRule.sStartLockCFId in lock
+		//on accepting changes remove locks from corresponding elements
+		//unlock manager if there are no locked elements (i.e. check all for lock)
+		//+ check if there's a newly added rule by another user
+		//total 4 events for interface - asc_onLockCFRule/asc_onUnLockCFRule; asc_onLockCFManager/asc_onUnLockCFManager
 
 		var res = false;
 		var t = this;
@@ -8116,11 +8116,11 @@ var editor;
 	};
 
   spreadsheet_api.prototype.asc_beforeInsertSlicer = function () {
-    //пока возвращаю только данные о ф/т
+    //currently only returning data about format table
     return this.wb.beforeInsertSlicer();
   };
   spreadsheet_api.prototype.asc_insertSlicer = function (arr) {
-    //пока возвращаю только данные о ф/т
+    //currently only returning data about format table
     return this.wb.insertSlicers(arr);
   };
 
@@ -8136,9 +8136,9 @@ var editor;
   };
 
   spreadsheet_api.prototype.asc_getDataValidationProps = function(extend) {
-    //если активная область затрагивает частично ячейку с date validation, частично без - выдаем предупреждение
-    //второе предупреждение - если выделено несколько разных ячеек с разными data validation
-    //возвращаем либо id ошибки, либо объект для диалога
+    //if active area partially affects a cell with data validation, partially without - show warning
+    //second warning - if multiple different cells with different data validation are selected
+    //return either error id or object for dialog
     var ws = this.wbModel.getActiveWs();
     if (ws) {
       return ws.getDataValidationProps(extend);
@@ -8275,15 +8275,15 @@ var editor;
   };
 
   spreadsheet_api.prototype._onCheckProtectedRangeRemoveLock = function (lockElem) {
-    //лок правила - с правилом делать ничего нельзя
-    //лок менеджера - незалоченное правило можно удалять и редактировать. новые правила добавлять нельзя.
-    //так же нельзя перемещать местами правила
+    //rule lock - can't do anything with the rule
+    //manager lock - unlocked rule can be deleted and edited. new rules can't be added.
+    //also can't reorder rules
 
-    //лочим правило как объект. в лок кладём id и лист с префиксом Asc.CProtectedRange.sStartLock
-    //на принятии изменений удаляем локи с соответсвующих элементов
-    //разлочиваем менеджер если нет залоченных элементов(т.е. проверяем все на лок)
-    //+ проверяем нет ли нового добавленного правила другим юзером
-    //всего для передачи в интерфейс 4 события - asc_onLockProtectedRange/asc_onUnLockProtectedRange; asc_onLockProtectedRangeManager/asc_onUnLockProtectedRangeManager
+    //lock rule as object. put id and sheet with prefix Asc.CProtectedRange.sStartLock in lock
+    //on accepting changes remove locks from corresponding elements
+    //unlock manager if there are no locked elements (i.e. check all for lock)
+    //+ check if there's a newly added rule by another user
+    //total 4 events for interface - asc_onLockProtectedRange/asc_onUnLockProtectedRange; asc_onLockProtectedRangeManager/asc_onUnLockProtectedRangeManager
 
     var res = false;
     var t = this;
@@ -8354,7 +8354,7 @@ var editor;
   };
 
 	spreadsheet_api.prototype.asc_setProtectedSheet = function (props) {
-		// Проверка глобального лока
+		// Check global lock
 		if (this.collaborativeEditing.getGlobalLock() || !this.canEdit() || !this.wb) {
 			return false;
 		}
@@ -8421,7 +8421,7 @@ var editor;
 						props.algorithmName = null;
 						t.collaborativeEditing.lock([lockInfo], callback);
 					} else {
-						//неверный пароль
+						//incorrect password
 						t.handlers.trigger("asc_onError", c_oAscError.ID.PasswordIsNotCorrect,
 							c_oAscError.Level.NoCritical);
 						t.handlers.trigger("asc_onChangeProtectWorksheet", i);
@@ -8472,7 +8472,7 @@ var editor;
 	};
 
 	spreadsheet_api.prototype.asc_setProtectedWorkbook = function (props) {
-		// Проверка глобального лока
+		// Check global lock
 		if (this.collaborativeEditing.getGlobalLock() || !this.canEdit()) {
 			return false;
 		}
@@ -8517,7 +8517,7 @@ var editor;
 
 		var checkPassword = function (hash, doNotCheckPassword) {
 			if (doNotCheckPassword) {
-				//TODO проверить, может быть нужен глобальный лок?
+				//TODO check if global lock is needed?
 				t.collaborativeEditing.lock(arrLocks, callback);
 			} else {
 				if (props.lockStructure) {
@@ -8532,10 +8532,10 @@ var editor;
 						props.workbookSaltValue = null;
 						props.workbookSpinCount = null;
 						props.workbookAlgorithmName = null;
-						//TODO проверить, может быть нужен глобальный лок?
+						//TODO check if global lock is needed?
 						t.collaborativeEditing.lock(arrLocks, callback);
 					} else {
-						//неверный пароль
+						//incorrect password
 						t.handlers.trigger("asc_onError", c_oAscError.ID.PasswordIsNotCorrect,
 							c_oAscError.Level.NoCritical);
 						t.handlers.trigger("asc_onChangeProtectWorkbook");
@@ -8650,8 +8650,8 @@ var editor;
   };
   spreadsheet_api.prototype.asc_ConvertEquationToMath = function(oEquation, isAll)
   {
-      // TODO: Вообще здесь нужно запрашивать шрифты, которые использовались в старой формуле,
-      //      но пока это только 1 шрифт "Cambria Math".
+      // TODO: Here we should actually request the fonts that were used in the old formula,
+      //      but for now it's only 1 font "Cambria Math".
       var oWorkbook = this.wb;
       var loader   = AscCommon.g_font_loader;
       var fontinfo = AscFonts.g_fontApplication.GetFontInfo("Cambria Math");
@@ -8668,20 +8668,20 @@ var editor;
 
 
 
-	/*отправляем инфомарцию, инфомарция в виде строки(id + ";" + isEdit + ";" + rangeStr;)
+	/*send cursor information, information as string (id + ";" + isEdit + ";" + rangeStr;)
 		_autoSaveInner -> wb.sendCursor -> CDocsCoApi.prototype.sendCursor
-		NeedUpdateTargetForCollaboration  - флаг высталяем в true, когда поменялся селект, потом предыдущая функция отсылает инфу на сервер
+		NeedUpdateTargetForCollaboration - flag set to true when selection changes, then the previous function sends info to server
 
-	храним инф. о курсорах в
-		CCollaborativeEditing->m_aForeignCursorsData, добавляем/удаляем с помощью методов Add_ForeignCursor/Remove_ForeignCursor
+	store cursor info in
+		CCollaborativeEditing->m_aForeignCursorsData, add/remove using methods Add_ForeignCursor/Remove_ForeignCursor
 
-	удаляем инф. на
+	remove info on
 		t.handlers.trigger("asc_onConnectionStateChanged", e) -> Remove_ForeignCursor
 
-	принимаем инфомарцию о курсорах
+	receive cursor information
 		this.CoAuthoringApi.onCursor -> WorkbookView.prototype.Update_ForeignCursor
 
-	эвенты в интерфейс: asc_onShowForeignSelectLabel/asc_onHideForeignSelectLabel*/
+	interface events: asc_onShowForeignSelectLabel/asc_onHideForeignSelectLabel*/
 
 	
 	spreadsheet_api.prototype.showForeignSelectLabel = function (UserId, X, Y, Color, isEdit) {
@@ -8691,7 +8691,7 @@ var editor;
 		this.sendEvent("asc_onHideForeignCursorLabel", UserId);
 	};
 
-	//TODO временно положил в прототип. перенести!
+	//TODO temporarily placed in prototype. Move it!
 	spreadsheet_api.prototype.sheetViewManagerLocks = [];
 	spreadsheet_api.prototype.asc_addNamedSheetView = function (duplicateNamedSheetView, setActive) {
 		var t = this;
@@ -8710,7 +8710,7 @@ var editor;
 		if (duplicateNamedSheetView) {
 			namedSheetView = duplicateNamedSheetView.clone();
 		} else {
-			//если создаём новый вью когда находимся на другом вью, клонируем аквтиный
+			//if creating a new view while on another view, clone the active one
 			var activeNamedSheetViewId = wsModel.getActiveNamedSheetViewId();
 			if (activeNamedSheetViewId !== null) {
 				duplicateNamedSheetView = true;
@@ -8857,7 +8857,7 @@ var editor;
 		}
 		var ws = this.wbModel.getWorksheet(index);
 
-		//при переходе между вью - hidden manager не обновляется.
+		//when switching between views - hidden manager is not updated.
 		var changedHiddenRowsArr = [];
 		var historyUpdateRange = new asc.Range(0, 0, 0, 0);
 		var i;
@@ -8906,30 +8906,30 @@ var editor;
 
 			AscCommon.History.EndTransaction();
 
-			//TODO нужно переприменять в дальнейшем сортировку
+			//TODO need to reapply sorting later
 
-			//если переходим на вью, то необходимо открыть все строки и применить фильтры
-			//если переходим на дефолт, то необходимо скрыть ещё те строки, которые в модели лежат
-			//посколько при переходе во вью данные из модели удалились - их нужно получить
-			//т.е. нужно где-то хранить!
+			//if switching to a view, need to show all rows and apply filters
+			//if switching to default, need to also hide rows that are in the model
+			//since when switching to view the data from model was removed - need to get it
+			//i.e. need to store it somewhere!
 
-			//при переходе во вью - переносим с дефолта все флаги о скрытии строчек
-			//переприменяем все фильтры
-			//применяем скрытие строчек внутрии а/ф - используя новый флаг о скрытии
-			//все остальные строчки - используя старый флаг о скрытии строк
-			//получение данных о скрытой строке: в режиме вью внутри а/ф используем новый флаг
-			//вне а/ф - старый флаг
-			//при переходе из дефолта внутри а/ф(к которому не применен фильтр) наследуем флаг об скрытии/открытии ячеек
-			//для этого прохожусь по всем строкам - и наследую флаг
+			//when switching to view - transfer all row hiding flags from default
+			//reapply all filters
+			//apply row hiding inside autofilter - using new hiding flag
+			//all other rows - using old row hiding flag
+			//getting hidden row data: in view mode inside autofilter use new flag
+			//outside autofilter - old flag
+			//when switching from default inside autofilter (that has no filter applied) inherit the show/hide cell flag
+			//for this iterate through all rows - and inherit the flag
 
 			if (ws.getActiveNamedSheetViewId() !== null) {
-				//чтобы не усложнять логику решил не наследовать внутри а/ф скрытые строки от дефолта
-				//просто отрываем все строки, а далее применяем те, что скрыты во вью
+				//to avoid complicating the logic, decided not to inherit hidden rows inside autofilter from default
+				//just show all rows, then apply those that are hidden in the view
 				ws.getRange3(0, 0, AscCommon.gc_nMaxRow0, 0)._foreachRowNoEmpty(function(row) {
 					if (ws.autoFilters.containInFilter(row.index/*, true*/)) {
 						row.setHidden(false, true);
 					} /*else {
-						//наследуем с дефолта, если в этих строчках нет применнного фильтра
+						//inherit from default, if these rows don't have an applied filter
 						row.setHidden(row.getHidden(false), true);
 					}*/
 				});
@@ -9060,7 +9060,7 @@ var editor;
 
 	spreadsheet_api.prototype.setDrawGroupsRestriction = function() {
 		if (this.wb) {
-			//пока использую строку. будут другие ограничения на отрисовку - необходимо завести константы
+			//for now using string. when there are other drawing restrictions - need to create constants
 			this.wb.setDrawRestriction("groups");
 		}
 	};
@@ -9075,14 +9075,14 @@ var editor;
 		let range = null;
 		let result = null;
 		if (Array.isArray(props)) {
-			// todo сделать получение листа ещё
+			// todo also implement getting the worksheet
 			range = ws.getRange3(props[0].r1, props[0].c1, props[0].r2, props[0].c2);
 			let arr = props.length <= 1 ? null : props.map(function(r){
 				return ws.getRange3(r.r1, r.c1, r.r2, r.c2);
 			})
 			result = jsApi.private_GetRange(range, arr);
 		} else {
-			// todo сделать получение листа ещё
+			// todo also implement getting the worksheet
 			range = ws.getRange3(props.r1, props.c1, props.r2, props.c2);
 			result = jsApi.private_GetRange(range);
 		}

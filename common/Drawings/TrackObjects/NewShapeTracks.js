@@ -34,7 +34,7 @@
 
 (function(window, undefined){
 
-    var MIN_SHAPE_SIZE = 1.27;//размер меньше которого нельзя уменшить автофигуру или картинку по горизонтали или вертикали
+    var MIN_SHAPE_SIZE = 1.27;//minimum size below which the autoshape or image cannot be reduced horizontally or vertically
     var MIN_SHAPE_SIZE_DIV2 = MIN_SHAPE_SIZE/2.0;
 
     var SHAPE_ASPECTS = {};

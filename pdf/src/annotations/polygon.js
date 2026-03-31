@@ -256,7 +256,7 @@
 
         let oPt, nPt;
         let nPtCount = aPoints.length;
-        // если последняя точка совпадает с первой, значит её не учитываем
+        // if the last point matches the first one, we don't count it
         if (aPoints[0].x == aPoints[aPoints.length - 1].x && aPoints[0].y == aPoints[aPoints.length - 1].y)
             nPtCount = aPoints.length - 1;
 

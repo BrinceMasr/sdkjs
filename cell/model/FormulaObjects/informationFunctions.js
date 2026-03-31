@@ -61,8 +61,8 @@ function (window, undefined) {
 			formatInfo = numFormat ? numFormat.getTypeInfo() : null;
 			sFormat = numFormat ? numFormat.sFormat : null;
 		});
-		//такие форматы как дата не поддерживаются
-		//TODO функция нуждается в доработке
+		//formats like date are not supported
+		//TODO function needs improvement
 		if (formatInfo) {
 			let postfix = "";
 			if (numFormat && (numFormat.oNegativeFormat && numFormat.oNegativeFormat.Color !== -1)) {
@@ -179,10 +179,10 @@ function (window, undefined) {
 	 * @return {text} Returns information about the formatting, location, or contents of a cell.
 	 */
 	cCell.prototype.Calculate = function (arg, opt_bbox, opt_defName, ws) {
-		//специально ввожу ограничения - минимум 2 аргумента
-		//в случае одного аргумента необходимо следить всегда за последней измененной ячейкой
-		//так же при сборке необходимо записывать данные об последней измененной ячейке
-		//нужно дли это ?
+		//intentionally introducing restriction - minimum 2 arguments
+		//in case of one argument, it's necessary to always track the last changed cell
+		//also during assembly, it's necessary to write data about the last changed cell
+		//is this needed?
 		let arg0 = arg[0];
 		let arg1 = arg[1];
 		arg0 = arg0.tocString();
@@ -238,7 +238,7 @@ function (window, undefined) {
 				}
 				case "sheet":
 				case _cCellFunctionLocal["sheet"]: {
-					//нет в офф. документации
+					//not in official documentation
 					//ms excel returns 1?
 					res = new cNumber(1);
 					break;
@@ -261,7 +261,7 @@ function (window, undefined) {
 				}
 				case "filename":
 				case _cCellFunctionLocal["filename"]: {
-					//TODO без пути
+					//TODO without path
 					let fileName;
 					if (spreadsheetLayout && spreadsheetLayout["formulaProps"] && spreadsheetLayout["formulaProps"]["docTitle"]) {
 						fileName = spreadsheetLayout["formulaProps"]["docTitle"];
@@ -626,7 +626,7 @@ function (window, undefined) {
 	cISFORMULA.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.area_to_ref;
 	cISFORMULA.prototype.argumentsType = [argType.reference];
 	cISFORMULA.prototype.Calculate = function (arg) {
-		//есть различия в поведении этой формулы для ms и lo(для нескольких ячеек с данными)
+		//there are differences in behavior of this formula between MS and LO (for multiple cells with data)
 		var arg0 = arg[0];
 		var res = false;
 		if ((arg0 instanceof cArea || arg0 instanceof cArea3D) && arg0.range) {
@@ -1036,9 +1036,9 @@ function (window, undefined) {
 	cTYPE.prototype.Calculate = function (arg) {
 		var arg0 = arg[0];
 		if (arg0 instanceof cArea || arg0 instanceof cArea3D) {
-			//todo пересмотреть!
-			//заглушка для формулы массива
-			//ms воспринимает данный аргумент как массив
+			//todo review!
+			//workaround for array formula
+			//MS treats this argument as an array
 			if (this.bArrayFormula) {
 				arg0 = arg[0].getValue()
 			} else {

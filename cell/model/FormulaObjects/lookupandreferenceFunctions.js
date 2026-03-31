@@ -98,7 +98,7 @@ function (window, undefined) {
 		return new RegExp(vFS + "$", flags ? flags : "i");
 	}
 
-	// TODO переделать поиск: добиться такого же результата как в ms
+	// TODO rework search: achieve the same result as in MS
 	function XBinarySearch (target, array, match_mode, isReverse) {
 		let mid, item;
 		let index = -1;
@@ -1035,7 +1035,7 @@ function (window, undefined) {
 		} else if(cElementType.array === rows.type) {
 			rows = rows.getElementRowCol(0, 0);
 		} else if(cElementType.cellsRange === rows.type || cElementType.cellsRange3D === rows.type) {
-			// TODO не получилось точно выяснить поведение функции при передаче в нее cellsRange вторым или третьим аргументом, поэтому пока возвращаем ошибку 
+			// TODO couldn't determine exactly how the function behaves when cellsRange is passed as second or third argument, so returning error for now 
 			rows = new cError(cErrorType.wrong_value_type);
 		};
 		rows = rows.tocNumber();
@@ -1052,7 +1052,7 @@ function (window, undefined) {
 		} else if(cElementType.array === columns.type) {
 			columns = columns.getElementRowCol(0, 0);
 		} else if(cElementType.cellsRange === columns.type || cElementType.cellsRange3D === columns.type) {
-			// TODO не получилось точно выяснить поведение функции при передаче в нее cellsRange вторым или третьим аргументом, поэтому пока возвращаем ошибку
+			// TODO couldn't determine exactly how the function behaves when cellsRange is passed as second or third argument, so returning error for now
 			columns = new cError(cErrorType.wrong_value_type);
 		}
 		columns = columns.tocNumber();
@@ -1523,7 +1523,7 @@ function (window, undefined) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 
-		//TODO в дальнейшем необходимо продумать преобразования аргументов на основе argumentsType!!!
+		//TODO in the future, need to think through argument conversions based on argumentsType!!!
 		if (cElementType.array === arg1.type) {
 			arg1 = arg1.getElementRowCol(0,0);
 			if (cElementType.error === arg1.type) {
@@ -1680,7 +1680,7 @@ function (window, undefined) {
 	function cINDIRECT() {
 	}
 
-	//TODO есть разница с MS - в тестовом файле E6
+	//TODO there is a difference with MS - in test file E6
 	//***array-formula***
 	cINDIRECT.prototype = Object.create(cBaseFunction.prototype);
 	cINDIRECT.prototype.constructor = cINDIRECT;
@@ -1880,9 +1880,9 @@ function (window, undefined) {
 			if (box) {
 				box = box.clone(true);
 
-				//в документации написано, что в отрицательных значений в 4 и 5 аргументах быть не может
-				//но на деле ms рассчитывает такие формулы
-				//сделал аналогично
+				//documentation says that negative values in 4th and 5th arguments are not allowed
+				//but in practice MS calculates such formulas
+				//implemented the same way
 
 				box.c1 = box.c1 + arg2;
 				box.r1 = box.r1 + arg1;
@@ -2575,7 +2575,7 @@ function (window, undefined) {
 
 		var arg0 = arg[0];
 		if (cElementType.cellsRange === arg0.type) {
-			//TODO возможно стоит на вход функции Calculate в случае применения как формулы массива сразу передавать преобразованный range в array
+			//TODO perhaps when used as array formula, the converted range should be passed as array directly to Calculate function input
 			if(!this.bArrayFormula) {
 				arg0 = arg0.cross(arguments[1]);
 				return arg0;
@@ -2583,7 +2583,7 @@ function (window, undefined) {
 				arg0 = arg0.getMatrix();
 			}
 		} else if(cElementType.cellsRange3D === arg0.type) {
-			//TODO возможно стоит на вход функции в случае применения как формулы массива сразу передавать преобразованный range в array
+			//TODO perhaps when used as array formula, the converted range should be passed as array directly to function input
 			arg0 = arg0.getMatrix()[0];
 		} else if(cElementType.array === arg0.type) {
 			arg0 = arg0.getMatrix();
@@ -3949,7 +3949,7 @@ function (window, undefined) {
 		}
 
 		if (cElementType.cellsRange3D === arg0.type || cElementType.cellsRange === arg0.type) {
-			// TODO пересмотреть поведение функции при получении массива первым аргументом
+			// TODO review function behavior when array is received as first argument
 			arg0 = isXMatch ? arg0.getFullArray().getElementRowCol(0,0) : arg0.cross(_arg1);
 
 			if (cElementType.empty === arg0.type) {
@@ -4791,14 +4791,14 @@ function (window, undefined) {
 			arg3 = new cError(cErrorType.not_available);
 		}
 
-		//arg4/arg5 - только число
+		//arg4/arg5 - number only
 		//[match_mode]
 		//0 - If none found, return #N/A. This is the default.
 		//-1 - If none found, return the next smaller item.
 		//1 - If none found, return the next larger item.
 		//2 - A wildcard match where *, ?, and ~
-		//TODO если аргумент массив/area - результат становится размером с этот массив
-		//TODO либо обрабатывать выше и вызывать эту функцию для каждого элемента массива, либо здесь вычислять этот массив
+		//TODO if argument is array/area - result becomes the size of this array
+		//TODO either handle above and call this function for each array element, or calculate this array here
 		if (!arg4) {
 			arg4 = new cNumber(0);
 		}
@@ -4812,8 +4812,8 @@ function (window, undefined) {
 			}
 		}
 
-		//TODO если аргумент массив/area - результат становится размером с этот массив
-		//TODO либо обрабатывать выше и вызывать эту функцию для каждого элемента массива, либо здесь вычислять этот массив
+		//TODO if argument is array/area - result becomes the size of this array
+		//TODO either handle above and call this function for each array element, or calculate this array here
 		//[search_mode]
 		//1 - Perform a search starting at the first item. This is the default.
 		//-1 - Perform a reverse search starting at the last item.
@@ -4832,7 +4832,7 @@ function (window, undefined) {
 			}
 		}
 
-		//массив arg1 должен содержать 1 строку или 1 столбец
+		//array arg1 must contain 1 row or 1 column
 		let dimensions1 = arg1.getDimensions();
 		let dimensions2 = arg2.getDimensions();
 		let bVertical = null;
@@ -4867,7 +4867,7 @@ function (window, undefined) {
 						res += arrayOffset;
 					}
 				}
-				//возвращаем из arg2 строку или столбец
+				//return row or column from arg2
 				let _startRange = 0;
 				if (dimensions2.bbox) {
 					_startRange = bVertical ? dimensions2.bbox.r1 : dimensions2.bbox.c1;
@@ -4951,7 +4951,7 @@ function (window, undefined) {
 				matrix = [[arg[i]]];
 			}
 
-			//добавляем по строкам
+			//adding by rows
 			for (let j = 0; j < matrix.length; j++) {
 				if (matrix[j]) {
 					if (!unionArray) {
@@ -5045,9 +5045,9 @@ function (window, undefined) {
 			return argError;
 		}
 
-		//из документации:
+		//from documentation:
 		//Excel returns a #VALUE! when an array constant contains one or more numbers that are not a whole number.
-		//не повторил в мс
+		//couldn't reproduce in MS
 
 		let arg1 = arg[0];
 		if (arg1.type === arg1.empty) {

@@ -127,7 +127,7 @@
     };
 
     /**
-     * Получаем рассчитанные настройки текста (полностью заполненные)
+     * Get calculated text settings (fully filled)
      * @returns {CTextPr}
      */
     CPdfChartSpace.prototype.GetCalculatedTextPr = function() {

@@ -905,8 +905,8 @@
 		let linePattern = getPresetDash(this, pageInfo, visioDocument, lineCap);
 		if (linePattern === 11 && oStroke.Fill) {
 			// 11 type is vsdx transparent
-			//todo реализовать прозрачный тип через отдельную настройку или разделить fill для линий и наконечников
-			//в vsdx может быть прозрачная линия с видимыми наконечниками
+			//todo implement transparent type via separate setting or separate fill for lines and arrowheads
+			//in vsdx there can be a transparent line with visible arrowheads
 			oStroke.Fill.fill = new AscFormat.CNoFill();
 		} else {
 			oStroke.setPrstDash(linePattern);

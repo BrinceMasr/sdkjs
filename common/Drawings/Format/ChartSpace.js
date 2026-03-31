@@ -1461,7 +1461,7 @@ function(window, undefined) {
 					if (!oCompiledPr) {
 						oCompiledPr = oContent.Content[0].CompiledPr;
 					}
-					oContent.Reset(0, 0, fContentWidth, 20000);//выставляем большую ширину чтобы текст расчитался в одну строку.
+					oContent.Reset(0, 0, fContentWidth, 20000);//set large width so text calculates in one line.
 					oContent.Recalculate_Page(0, true);
 					var fContentHeight = oContent.GetSummaryHeight();
 					oTransform = oLabel.localTransformText;
@@ -3723,7 +3723,7 @@ function(window, undefined) {
 				if (plot_area) {
 					for (i = 0; i < plot_area.charts.length; ++i) {
 						plot_area.charts[i] && plot_area.charts[i].applyLabelsFunction(fCallback, value, oDD);
-						/*TODO надо бы этот метод переименовать чтоб название не вводило в заблуждение*/
+						/*TODO this method should be renamed so the name is not misleading*/
 					}
 					var cur_axis;
 					for (i = 0; i < plot_area.axId.length; ++i) {
@@ -5215,7 +5215,7 @@ function(window, undefined) {
 			if (plot_area) {
 				for (i = 0; i < plot_area.charts.length; ++i) {
 					plot_area.charts[i] && plot_area.charts[i].documentCreateFontMap(allFonts);
-					/*TODO надо бы этот метод переименовать чтоб название не вводило в заблуждение*/
+					/*TODO this method should be renamed so the name is not misleading*/
 				}
 				var cur_axis;
 				for (i = 0; i < plot_area.axId.length; ++i) {
@@ -5971,7 +5971,7 @@ function(window, undefined) {
 			let oLbl = aDLbls[i];
 			if (oLbl && oLbl.series && oLbl.pt) {
 
-				let ser_idx = oLbl.series.idx; //сделаем проверку лежит ли серия с индексом this.recalcInfo.dataLbls[i].series.idx в сериях первой диаграммы
+				let ser_idx = oLbl.series.idx; //check if the series with index this.recalcInfo.dataLbls[i].series.idx exists in the first chart's series
 				for (var j = 0; j < series.length; ++j) {
 					if (series[j].idx === ser_idx) {
 						let pos = this.chartObj.recalculatePositionText(oLbl);
@@ -6204,7 +6204,7 @@ function(window, undefined) {
 		switch (nAxisType) {
 			case AscDFH.historyitem_type_DateAx:
 			case AscDFH.historyitem_type_CatAx: {
-				//расчитаем подписи для горизонтальной оси
+				//calculate labels for horizontal axis
 				let nPtsLen = 0;
 				let aScale = [];
 				if (Array.isArray(oAxis.scale)) {
@@ -7768,7 +7768,7 @@ function(window, undefined) {
 							}
 							if(ser.compiledSeriesPen && !b_scatter_no_line) {
 								union_marker.lineMarker = AscFormat.CreateMarkerGeometryByType(AscFormat.SYMBOL_DASH);
-								union_marker.lineMarker.pen = ser.compiledSeriesPen.createDuplicate(); //Копируем, так как потом возможно придется изменять толщину линии;
+								union_marker.lineMarker.pen = ser.compiledSeriesPen.createDuplicate(); //Copy, as we may need to change line thickness later;
 							}
 							if(!b_scatter_no_line && !AscFormat.CChartsDrawer.prototype._isSwitchCurrent3DChart(this)) {
 								b_line_series = true;
@@ -7898,12 +7898,12 @@ function(window, undefined) {
 			var line_marker_width;
 			if (b_line_series) {
 				marker_size = 2.5;
-				line_marker_width = 7.7;//Пока так
+				line_marker_width = 7.7;//For now
 				for (i = 0; i < calc_entryes.length; ++i) {
 					calc_entry = calc_entryes[i];
 					if (calc_entry.calcMarkerUnion.lineMarker) {
 						calc_entry.calcMarkerUnion.lineMarker.spPr.geometry.Recalculate(line_marker_width, 1);
-						/*Excel не дает сделать толщину линии для маркера легенды больше определенной. Считаем, что это толщина равна 133000emu*/
+						/*Excel doesn't allow legend marker line thickness to exceed a certain value. We assume this thickness equals 133000emu*/
 						if (calc_entry.calcMarkerUnion.lineMarker.pen
 							&& AscFormat.isRealNumber(calc_entry.calcMarkerUnion.lineMarker.pen.w) && calc_entry.calcMarkerUnion.lineMarker.pen.w > 133000) {
 							calc_entry.calcMarkerUnion.lineMarker.pen.w = 133000;
@@ -7986,7 +7986,7 @@ function(window, undefined) {
 					legend_pos === c_oAscChartLegendShowSettings.leftOverlay ||
 					legend_pos === c_oAscChartLegendShowSettings.right ||
 					legend_pos === c_oAscChartLegendShowSettings.rightOverlay || legend_pos === c_oAscChartLegendShowSettings.topRight) && !bFixedSize) {
-					max_legend_width = this.extX / 3;//Считаем, что ширина легенды не больше трети ширины всей диаграммы;
+					max_legend_width = this.extX / 3;//We assume legend width is no more than one third of the total chart width;
 					var sizes = this.getChartSizes();
 					max_legend_height = sizes.h;
 					if (b_line_series) {
@@ -8152,9 +8152,9 @@ function(window, undefined) {
 						legend.setPosition(0, 0);
 					}
 				} else {
-					/*пока сделаем так: максимальная ширимна 0.9 от ширины дмаграммы
-                     без заголовка  максимальная высота легенды 0.6 от высоты диаграммы,
-                     с заголовком 0.6 от высоты за вычетом высоты заголовка*/
+					/*for now we'll do it this way: max width is 0.9 of chart width,
+                     without title max legend height is 0.6 of chart height,
+                     with title 0.6 of height minus title height*/
 					var fMaxLegendHeight, fMaxLegendWidth;
 					if (bFixedSize) {
 						fMaxLegendWidth = fFixedWidth;
@@ -10302,8 +10302,8 @@ function(window, undefined) {
 		}
 	};
 	CChartSpace.prototype.updateLinks = function () {
-		//Этот метод нужен, т. к. мы не полностью поддерживаем формат в котором в одном plotArea может быть несколько разных диаграмм(конкретных типов).
-		// Здесь мы берем первую из диаграмм лежащих в массиве plotArea.charts, а также выставляем ссылки для осей ;
+		//This method is needed because we don't fully support the format where one plotArea can have multiple different charts (of specific types).
+		// Here we take the first chart from the plotArea.charts array and also set axis references;
 		if (this.chart && this.chart.plotArea) {
 			var oCheckChart;
 			var oPlotArea = this.chart.plotArea;
@@ -10351,7 +10351,7 @@ function(window, undefined) {
 							}
 						}
 					} else {
-						if (axis_by_types.valAx.length > 1) {//TODO: выставлять оси исходя из настроек
+						if (axis_by_types.valAx.length > 1) {//TODO: set axes based on settings
 							oPlotArea.valAx = axis_by_types.valAx[1];
 							oPlotArea.catAx = axis_by_types.valAx[0];
 						}
@@ -11469,7 +11469,7 @@ function(window, undefined) {
 			oSeria.asc_setValues(sRange);
 			return true;
 		}
-		// пока только для Spreadsheet
+		// for now only for Spreadsheet
 		return false;
 	};
 	CChartSpace.prototype.SetSeriaXValues = function (sRange, nSeria) {
@@ -11495,7 +11495,7 @@ function(window, undefined) {
 			oSeria.asc_setXValues(sRange);
 			return true;
 		}
-		// пока только для Spreadsheet
+		// for now only for Spreadsheet
 		return false;
 	};
 	CChartSpace.prototype.SetSeriaName = function (sName, nSeria) {
@@ -11574,7 +11574,7 @@ function(window, undefined) {
 			}
 		}
 
-		// пока только для Spreadsheet
+		// for now only for Spreadsheet
 		return false;
 	};
 	CChartSpace.prototype.RemoveSeria = function (nSeria) {
@@ -13913,7 +13913,7 @@ function(window, undefined) {
 			return;
 		}
 
-		// сheck if diagonal labels can fit into axis width
+		// check if diagonal labels can fit into axis width
 		// also other suggestions to calculate diagonal width can be found in this function in commit: 616c0a0665bb0b09e81d9bc25df120ddf3c6783a
 		if (this.isUserDefinedLabelFormat || this.sDataType === 'string') {
 			// multiplier is the square root of 2;

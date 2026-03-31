@@ -416,8 +416,8 @@ function CHistory(Document)
 	CHistoryWord.call(this, Document);
 
 	this.Index    = -1;
-	this.SavedIndex = null;			// Номер точки отката, на которой произошло последнее сохранение
-	this.ForceSave  = false;       // Нужно сохранение, случается, когда у нас точка SavedIndex смещается из-за объединения точек, и мы делаем Undo
+	this.SavedIndex = null;			// Number of the rollback point where the last save occurred
+	this.ForceSave  = false;       // Save is needed, happens when our SavedIndex point shifts due to merging points, and we do Undo
 	this.RecIndex = -1;
 	this.Points   = [];
 	this.workbook = Document;
@@ -425,7 +425,7 @@ function CHistory(Document)
 	this.Api                  = null;
 	this.CollaborativeEditing = null;
 
-	this.CanNotAddChanges = false;//флаг для отслеживания ошибок добавления изменений без точки:Create_NewPoint->Add->Save_Changes->Add
+	this.CanNotAddChanges = false;//flag for tracking errors of adding changes without a point:Create_NewPoint->Add->Save_Changes->Add
 	//this.CollectChanges       = false;
 	//this.UndoRedoInProgress   = false; //
 
@@ -452,23 +452,23 @@ function CHistory(Document)
 
 	this.TurnOffHistory = 0;
 	this.RegisterClasses = 0;
-	//this.MinorChanges    = false; // Данный параметр нужен, чтобы определить влияют ли добавленные изменения на пересчет
+	//this.MinorChanges    = false; // This parameter is needed to determine if the added changes affect recalculation
 
 	this.BinaryWriter = this.memory = new AscCommon.CMemory();
 
 	// this.FileCheckSum = 0;
 	// this.FileSize     = 0;
 
-	// Параметры для специального сохранения для локальной версии редактора
+	// Parameters for special saving for local version of the editor
 	this.UserSaveMode   = false;
-	this.UserSavedIndex = null;  // Номер точки, на которой произошло последнее сохранение пользователем (не автосохранение)
+	this.UserSavedIndex = null;  // Number of the point where the last save by user occurred (not auto-save)
 
 	this.StoredData = [];
 	this.LastState = null;
 
 	//todo remove all below
 	this.Transaction = 0;
-    this.LocalChange = false;//если true все добавленный изменения не пойдут в совместное редактирование.
+    this.LocalChange = false;//if true all added changes will not go to collaborative editing.
 
 	this.lastDrawingObjects = null;
 
@@ -533,7 +533,7 @@ CHistory.prototype.Can_Redo = function()
 /** @returns {boolean} */
 CHistory.prototype.Undo = function(Options)
 {
-  // Проверяем можно ли сделать Undo
+  // Check if Undo can be performed
   if (true !== this.Can_Undo()) {
     return false;
   }
@@ -544,7 +544,7 @@ CHistory.prototype.Undo = function(Options)
 	var oRedoObjectParam = this.oRedoObjectParam = new AscCommonExcel.RedoObjectParam();
 	this.UndoRedoPrepare(oRedoObjectParam, true);
 
-	// Откатываем все действия в обратном порядке (относительно их выполенения)
+	// Roll back all actions in reverse order (relative to their execution)
 	var Point = null;
 	if (undefined !== Options && null !== Options && true === Options.All)
 	{
@@ -587,7 +587,7 @@ CHistory.prototype.UndoRedoPrepare = function (oRedoObjectParam, bUndo, bKeepTur
 		oRedoObjectParam.bIsOn = true;
 		this.TurnOff();
 	}
-	/* отключаем отрисовку на случай необходимости пересчета ячеек, заносим ячейку, при необходимости в список перерисовываемых */
+	/* disable rendering in case of need to recalculate cells, add cell to the list of redrawn if necessary */
 	this.workbook.dependencyFormulas.lockRecal();
 
 	if (bUndo)
@@ -614,7 +614,7 @@ CHistory.prototype.UndoRedoPrepare = function (oRedoObjectParam, bUndo, bKeepTur
 };
 CHistory.prototype.RedoAdd = function(oRedoObjectParam, Class, Type, sheetid, range, Data, LocalChange, undoRedoItemSerializable)
 {
-	//todo сделать что-нибудь с Is_On
+	//todo do something with Is_On
 	var bNeedOff = false;
 	if(false == this.Is_On())
 	{
@@ -633,7 +633,7 @@ CHistory.prototype.RedoAdd = function(oRedoObjectParam, Class, Type, sheetid, ra
 		this.workbook.setActiveById(oRedoObjectParam.activeSheet);
 	}
 
-	// ToDo Убрать это!!!
+	// ToDo Remove this!!!
 	if(Class && !Class.Load) {
 		Class.Redo( Type, Data, sheetid );
 	}
@@ -691,7 +691,7 @@ CHistory.prototype.RemoveLastPoint = function()
 };
 CHistory.prototype.Clear_Redo = function()
 {
-	// Удаляем ненужные точки
+	// Remove unnecessary points
 	this.Points.length = this.Index + 1;
 };
 	CHistory.prototype.RedoExecuteItem = function(Item, oRedoObjectParam, isLoad)
@@ -711,7 +711,7 @@ CHistory.prototype.Clear_Redo = function()
 	}
 CHistory.prototype.RedoExecute = function(Point, oRedoObjectParam)
 {
-	// Выполняем все действия в прямом порядке
+	// Execute all actions in direct order
 	for ( var Index = 0; Index < Point.Items.length; Index++ )
 	{
 		var Item = Point.Items[Index];
@@ -741,7 +741,7 @@ CHistory.prototype.UndoRedoEnd = function (Point, oRedoObjectParam, bUndo) {
 			t.workbook.oApi.asc_AfterChangeColorScheme();
 		}
 
-		//синхронизация index и id worksheet
+		//synchronization of index and worksheet id
 		if (oRedoObjectParam.bUpdateWorksheetByModel)
 			this.workbook.handlers.trigger("updateWorksheetByModel");
 
@@ -773,12 +773,12 @@ CHistory.prototype.UndoRedoEnd = function (Point, oRedoObjectParam, bUndo) {
 		}
 
 		if (this.workbook.bCollaborativeChanges) {
-		    //active может поменяться только при remove, hide листов
+		    //active can only change when removing, hiding sheets
             var ws = this.workbook.getActiveWs();
             this.workbook.handlers.trigger('showWorksheet', ws.getId());
 		}
 		else {
-		    // ToDo какое-то не очень решение брать 0-й элемент и у него получать индекс!
+		    // ToDo not a great solution to take the 0th element and get the index from it!
 		    var nSheetId = (null !== oState) ? oState[0].worksheetId : ((this.workbook.bRedoChanges && null != Point.RedoSheetId) ? Point.RedoSheetId : Point.UndoSheetId);
 		    if (null !== nSheetId)
 		        this.workbook.handlers.trigger('showWorksheet', nSheetId);
@@ -814,7 +814,7 @@ CHistory.prototype.UndoRedoEnd = function (Point, oRedoObjectParam, bUndo) {
 			this.workbook.bUndoChanges = false;
 		else
 			this.workbook.bRedoChanges = false;
-		//TODO вызывать только в случае, если были изменения строк/столбцов и отдельно для строк и столбцов
+		//TODO call only if there were changes to rows/columns and separately for rows and columns
 		this.workbook.handlers.trigger("updateGroupData");
 		this.workbook.handlers.trigger("drawWS");
 
@@ -874,7 +874,7 @@ CHistory.prototype.UndoRedoEnd = function (Point, oRedoObjectParam, bUndo) {
 };
 CHistory.prototype.Redo = function()
 {
-	// Проверяем можно ли сделать Redo
+	// Check if Redo can be performed
 	if ( true != this.Can_Redo() )
 		return;
 
@@ -936,7 +936,7 @@ CHistory.prototype.Get_RecalcData = function(Point2)
 	{
 		//for ( var Pos = this.RecIndex + 1; Pos <= this.Index; Pos++ )
 		{
-			// Считываем изменения, начиная с последней точки, и смотрим что надо пересчитать.
+			// Read changes starting from the last point and see what needs to be recalculated.
 			var Point;
 			if(Point2)
 			{
@@ -948,7 +948,7 @@ CHistory.prototype.Get_RecalcData = function(Point2)
 			}
 			if(Point)
 			{
-				// Выполняем все действия в прямом порядке
+				// Execute all actions in direct order
 				for ( var Index = 0; Index < Point.Items.length; Index++ )
 				{
 					var Item = Point.Items[Index];
@@ -1031,14 +1031,14 @@ CHistory.prototype.Set_Additional_ExtendDocumentToPos = function()
 
 CHistory.prototype.CheckUnionLastPoints = function()
 {
-	// Не объединяем точки истории, если на предыдущей точке произошло сохранение
+	// Don't merge history points if save occurred at the previous point
 	if ( this.Points.length < 2)
 		return;
 
 	var Point1 = this.Points[this.Points.length - 2];
 	var Point2 = this.Points[this.Points.length - 1];
 
-	// Не объединяем слова больше 63 элементов
+	// Don't merge words with more than 63 elements
 	if ( Point1.Items.length > 63 )
 		return;
 
@@ -1107,24 +1107,24 @@ CHistory.prototype.Create_NewPoint = function(nDescription)
 	var wsActive = this.workbook.getActiveWs();
 	if (wsActive) {
 		UndoSheetId = wsActive.getId();
-		// ToDo Берем всегда, т.к. в случае с LastState мы можем не попасть на нужный лист и не заселектить нужный диапазон!
+		// ToDo We always take it, because in case of LastState we might not get to the right sheet and not select the right range!
 		oSelectRange = wsActive.getSelection().getLast(); // ToDo get only last selection range
 	}
 
-    // Создаем новую точку
+    // Create a new point
     this.Points[++this.Index] = {
-		Items : Items, // Массив изменений, начиная с текущего момента
+		Items : Items, // Array of changes starting from the current moment
 		UpdateRigions : UpdateRigions,
 		UndoSheetId: UndoSheetId,
         RedoSheetId: null,
 		SelectRange : oSelectRange,
 		SelectRangeRedo : oSelectRange,
-		Time  : Time,   // Текущее время
+		Time  : Time,   // Current time
 		SelectionState : oSelectionState,
 			Description : nDescription
     };
 
-    // Удаляем ненужные точки
+    // Remove unnecessary points
     this.Points.length = this.Index + 1;
 
 	window['AscCommon'].g_specialPasteHelper.SpecialPasteButton_Hide();
@@ -1143,21 +1143,21 @@ CHistory.prototype.Create_NewPoint = function(nDescription)
 	return true;
 };
 	/**
-	 * Специальная функция, для создания точки, чтобы отловить все изменения, которые происходят. После использования
-	 * данная точка ДОЛЖНА быть удалена через функцию Remove_LastPoint.
-	 * @param {number} description - идентификатор действия
+	 * Special function to create a point to capture all changes that occur. After use,
+	 * this point MUST be deleted via the Remove_LastPoint function.
+	 * @param {number} description - action identifier
 	 */
 	CHistory.prototype.CreateNewPointToCollectChanges = function(description)
 	{
-		// Создаем новую точку
+		// Create a new point
 		this.Points[++this.Index] = {
-			Items : [], // Массив изменений, начиная с текущего момента
+			Items : [], // Array of changes starting from the current moment
 			UpdateRigions : {},
 			UndoSheetId: null,
 			RedoSheetId: null,
 			SelectRange : null,
 			SelectRangeRedo : null,
-			Time  : null,   // Текущее время
+			Time  : null,   // Current time
 			SelectionState : null
 		};
 
@@ -1168,9 +1168,9 @@ CHistory.prototype.Create_NewPoint = function(nDescription)
 		return this.Index;
 	};
 
-// Регистрируем новое изменение:
-// Class - объект, в котором оно произошло
-// Data  - сами изменения
+// Register a new change:
+// Class - the object where it occurred
+// Data  - the changes themselves
 CHistory.prototype.Add = function(Class, Type, sheetid, range, Data, LocalChange, isRedoAdd)
 {
 	if (!this.CanAddChanges())
@@ -1500,7 +1500,7 @@ CHistory.prototype.Is_On = function()
 		for (var i = 0; i < DeletePointIndex; ++i) {
 			var point = this.Points[i];
 			for (var j = 0; j < point.Items.length; ++j) {
-				if (!point.Items[j].LocalChange) {//LocalChange изменения не пойдут в совместное редактирование.
+				if (!point.Items[j].LocalChange) {//LocalChange changes will not go to collaborative editing.
 					DeleteIndex += 1;
 				}
 			}
@@ -1521,7 +1521,7 @@ CHistory.prototype.Is_On = function()
 };
 CHistory.prototype.GetSerializeArray = function()
 {
-	//todo избавиться от GetSerializeArray. ходить по массиву
+	//todo get rid of GetSerializeArray. iterate through the array
 	var aRes = [];
 	var i = 0;
 	if (null != this.SavedIndex)
@@ -1541,7 +1541,7 @@ CHistory.prototype.GetSerializeArray = function()
 	CHistory.prototype.GetLocalChangesSize = function() {
 		function GetBase64Size(binarySize)
 		{
-			// Бинарник пишется Binary.Len + ";" + base64Encode(Binary.Data)
+			// Binary is written as Binary.Len + ";" + base64Encode(Binary.Data)
 			return ((binarySize + ";").length + (((4 * binarySize / 3) + 3) & ~3));
 		}
 		let res = 0;
@@ -1571,7 +1571,7 @@ CHistory.prototype.GetSerializeArray = function()
 		}
 	};
 	/**
-	 * Удаляем изменения из истории, которые сохранены на сервере. Это происходит при подключении второго пользователя
+	 * Remove changes from history that are saved on the server. This happens when a second user connects
 	 */
 	CHistory.prototype.RemovePointsByDeleteIndex = function()
 	{

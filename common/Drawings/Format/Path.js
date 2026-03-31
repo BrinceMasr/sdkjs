@@ -1349,7 +1349,7 @@ function (window, undefined) {
 	};
 	Path.prototype.draw = function (shape_drawer) {
 		if (shape_drawer.bIsCheckBounds === true && this.fill == "none") {
-			// это для текстур
+			// this is for textures
 			return;
 		}
 		let bIsDrawLast = false;
@@ -2332,7 +2332,7 @@ function (window, undefined) {
 
 		const intersections = [];
 
-		// Проверяем, находятся ли точки пересечения в пределах отрезка (t в диапазоне [0,1])
+		// Check if intersection points are within the segment (t in range [0,1])
 		if (t1 >= 0 && t1 <= 1) {
 			intersections.push({
 				t: t1,
@@ -2640,7 +2640,7 @@ function (window, undefined) {
 			return;
 		}
 		if (shape_drawer.bIsCheckBounds === true && this.fill == "none") {
-			// это для текстур
+			// this is for textures
 			return;
 		}
 		let bIsDrawLast = false;

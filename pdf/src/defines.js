@@ -158,10 +158,10 @@
     FormatType["CUSTOM"]        = FormatType.CUSTOM;
 
     const SpecialFormatType = {
-        ZIP_CODE: 0,       // Почтовый индекс (ZIP Code)
-        ZIP_PLUS_4: 1,     // Почтовый индекс + 4 (ZIP + 4)
-        PHONE: 2,          // Телефонный номер
-        SSN: 3             // Социальное страхование (SSN)
+        ZIP_CODE: 0,       // Postal code (ZIP Code)
+        ZIP_PLUS_4: 1,     // Postal code + 4 (ZIP + 4)
+        PHONE: 2,          // Phone number
+        SSN: 3             // Social Security Number (SSN)
     }
 
     SpecialFormatType["ZIP_CODE"] = SpecialFormatType.ZIP_CODE;

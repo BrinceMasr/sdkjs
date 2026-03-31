@@ -533,7 +533,7 @@ CCellCommentator.sStartCommentId = 'comment_';
 CCellCommentator.prototype.isLockedComment = function(oComment, callbackFunc) {
 	var objectGuid = oComment.asc_getId();
 	if (objectGuid) {
-		// Комментарии не должны влиять на lock-листа, поэтому вместо добавления нового c_oAscLockTypeElem, поменяем имя листа
+		// Comments should not affect sheet locking, so instead of adding a new c_oAscLockTypeElem, we change the sheet name
 		var sheetId = CCellCommentator.sStartCommentId;
 		if (!oComment.bDocument)
 			sheetId += this.model.getId();
@@ -704,7 +704,7 @@ CCellCommentator.prototype.isLockedComment = function(oComment, callbackFunc) {
 	};
 
 CCellCommentator.prototype.updateCommentsDependencies = function(bInsert, operType, updateRange) {
-	// ToDo переделать функцию, странная какая-то
+	// ToDo refactor this function, it's somewhat strange
 	var t = this;
 	var UpdatePair = function (comment, bChange) {
 		this.comment = comment;
@@ -1031,7 +1031,7 @@ CCellCommentator.prototype.selectComment = function(id) {
 	var comment = this.findComment(id);
 	var metrics;
 
-	// Чистим предыдущий селект
+	// Clear the previous selection
 	this.cleanLastSelection();
 	this.lastSelectedId = null;
 

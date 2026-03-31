@@ -1441,7 +1441,7 @@
 
 		CGroupShape.prototype.recalculateLocalTransform = CShape.prototype.recalculateLocalTransform;
 
-		CGroupShape.prototype.bringToFront = function ()//перемещаем заселекченые объекты наверх
+		CGroupShape.prototype.bringToFront = function ()//move selected objects to the top
 		{
 			var i;
 			var arrDrawings = [];

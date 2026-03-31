@@ -157,7 +157,7 @@ function CalculateGuideValue(name, formula, x, y, z, gdLst)
 {
     var xt, yt, zt;
 
-    xt=gdLst[x];  //TODO : возможно, что gdLst[x] еще не расчитан
+    xt=gdLst[x];  //TODO : possibly gdLst[x] is not yet calculated
     if(xt===undefined)
         xt=parseInt(x,10);
 

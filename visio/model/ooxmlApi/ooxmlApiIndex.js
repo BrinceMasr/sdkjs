@@ -98,8 +98,8 @@
 
 	/**
 	 *    // Docs old:
-	 * // Элемент Rel (ForeignData_Type complexType): https://learn.microsoft.com/ru-ru/office/client-developer/visio/rel-element-foreigndata_type-complextypevisio-xml
-	 * // ForeignData_Type complexType: https://learn.microsoft.com/ru-ru/office/client-developer/visio/foreigndata_type-complextypevisio-xml
+	 * // Element Rel (ForeignData_Type complexType): https://learn.microsoft.com/en-us/office/client-developer/visio/rel-element-foreigndata_type-complextypevisio-xml
+	 * // ForeignData_Type complexType: https://learn.microsoft.com/en-us/office/client-developer/visio/foreigndata_type-complextypevisio-xml
 	 * @returns {ForeignData_Type}
 	 * @constructor
 	 */
@@ -832,8 +832,8 @@
 
 	/**
 	 * Docs old:
-	 * Элемент RefBy (Cell_Type complexType): https://learn.microsoft.com/ru-ru/office/client-developer/visio/refby-element-cell_type-complextypevisio-xml
-	 * Cell_Type complexType: https://learn.microsoft.com/ru-ru/office/client-developer/visio/cell_type-complextypevisio-xml
+	 * Element RefBy (Cell_Type complexType): https://learn.microsoft.com/en-us/office/client-developer/visio/refby-element-cell_type-complextypevisio-xml
+	 * Cell_Type complexType: https://learn.microsoft.com/en-us/office/client-developer/visio/cell_type-complextypevisio-xml
 	 * @return {Cell_Type}
 	 * @constructor
 	 */
@@ -1919,9 +1919,9 @@
 
 	/**
 	 * // Docs old:
-	 * // Элемент PageSheet (Page_Type complexType): https://learn.microsoft.com/ru-ru/office/client-developer/visio/pagesheet-element-page_type-complextypevisio-xml
-	 * // Элемент Rel (Page_Type complexType): https://learn.microsoft.com/ru-ru/office/client-developer/visio/rel-element-page_type-complextypevisio-xml
-	 * // Page_Type complexType: https://learn.microsoft.com/ru-ru/office/client-developer/visio/page_type-complextypevisio-xml
+	 * // Element PageSheet (Page_Type complexType): https://learn.microsoft.com/en-us/office/client-developer/visio/pagesheet-element-page_type-complextypevisio-xml
+	 * // Element Rel (Page_Type complexType): https://learn.microsoft.com/en-us/office/client-developer/visio/rel-element-page_type-complextypevisio-xml
+	 * // Page_Type complexType: https://learn.microsoft.com/en-us/office/client-developer/visio/page_type-complextypevisio-xml
 	 * @returns {Page_Type}
 	 * @constructor
 	 */
@@ -2026,8 +2026,8 @@
 
 	/**
 	 * // Docs old:
-	 *    // Элемент Shapes (ShapeSheet_Type complexType): https://learn.microsoft.com/ru-ru/office/client-developer/visio/shapes-element-shapesheet_type-complextypevisio-xml
-	 *    // ShapeSheet_Type complexType: https://learn.microsoft.com/ru-ru/office/client-developer/visio/shapesheet_type-complextypevisio-xml
+	 *    // Element Shapes (ShapeSheet_Type complexType): https://learn.microsoft.com/en-us/office/client-developer/visio/shapes-element-shapesheet_type-complextypevisio-xml
+	 *    // ShapeSheet_Type complexType: https://learn.microsoft.com/en-us/office/client-developer/visio/shapesheet_type-complextypevisio-xml
 	 * @returns {ShapeSheet_Type}
 	 * @constructor
 	 * @extends SheetStorageAndStyles

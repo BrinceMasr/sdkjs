@@ -709,7 +709,7 @@ function (window, undefined) {
 				if (pMat1[i][j] && pMat2[i][j]) {
 					bEmpty = false;
 
-					//MS выдает ошибку только если первый элемент строка. LO - если любой.
+					//MS throws an error only if the first element is a string. LO - if any element is.
 					if (i === 0 && j === 0 && cElementType.string === pMat1[i][j].type) {
 						return new cError(cErrorType.division_by_zero);
 					}
@@ -1855,7 +1855,7 @@ function (window, undefined) {
 	}
 
 	function prepeareGrowthTrendCalculation(t, arg) {
-		//если первое значение число
+		//if first value is number
 		arg[0] = tryNumberToArray(arg[0]);
 		if (arg[1]) {
 			arg[1] = tryNumberToArray(arg[1]);
@@ -4885,14 +4885,14 @@ function (window, undefined) {
 	cCHITEST.prototype.Calculate = function (arg) {
 
 		var arg2 = [arg[0], arg[1]];
-		//если первое или второе значение строка
+		//if first or second value is string
 		if (cElementType.string === arg[0].type || cElementType.bool === arg[0].type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 		if (cElementType.string === arg[1].type || cElementType.bool === arg[1].type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
-		//если первое или второе значение число
+		//if first or second value is number
 		if (cElementType.number === arg[0].type) {
 			arg2[0] = new cArray();
 			arg2[0].addElement(arg[0]);
@@ -5460,14 +5460,14 @@ function (window, undefined) {
 	cCOVARIANCE_P.prototype.Calculate = function (arg) {
 
 		var arg2 = [arg[0], arg[1]];
-		//если первое или второе значение строка
+		//if first or second value is string
 		if (cElementType.string === arg[0].type || cElementType.bool === arg[0].type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 		if (cElementType.string === arg[1].type || cElementType.bool === arg[1].type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
-		//если первое или второе значение число
+		//if first or second value is number
 		if (cElementType.number === arg[0].type) {
 			arg2[0] = new cArray();
 			arg2[0].addElement(arg[0]);
@@ -5555,14 +5555,14 @@ function (window, undefined) {
 	cCOVARIANCE_S.prototype.Calculate = function (arg) {
 
 		var arg2 = [arg[0], arg[1]];
-		//если первое или второе значение строка
+		//if first or second value is string
 		if (cElementType.string === arg[0].type || cElementType.bool === arg[0].type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 		if (cElementType.string === arg[1].type || cElementType.bool === arg[1].type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
-		//если первое или второе значение число
+		//if first or second value is number
 		if (cElementType.number === arg[0].type) {
 			arg2[0] = new cArray();
 			arg2[0].addElement(arg[0]);
@@ -6436,7 +6436,7 @@ function (window, undefined) {
 	cFORECAST_ETS_CONFINT.prototype.argumentsType = [argType.number, argType.reference, argType.reference, argType.number, argType.number,
 		argType.number, argType.number];
 	cFORECAST_ETS_CONFINT.prototype.Calculate = function (arg) {
-		//результаты данной фукнции соответсвуют результатам LO, но отличаются от MS!!!
+		//results of this function match LO results, but differ from MS!!!
 
 		let oArguments = this._prepareArguments(arg, arguments[1], true,
 			[null, cElementType.array, cElementType.array]);
@@ -6528,7 +6528,7 @@ function (window, undefined) {
 	cFORECAST_ETS_SEASONALITY.prototype.argumentsType = [argType.reference, argType.reference, argType.number, argType.number];
 	cFORECAST_ETS_SEASONALITY.prototype.Calculate = function (arg) {
 
-		//результаты данной фукнции соответсвуют результатам LO, но отличаются от MS!!!
+		//results of this function match LO results, but differ from MS!!!
 		let oArguments = this._prepareArguments(arg, arguments[1], true, [cElementType.array, cElementType.array]);
 		let argClone = oArguments.args;
 
@@ -7788,7 +7788,7 @@ function (window, undefined) {
 		//return matrix [col][row]
 		let mat = CalculateRGPRKP(pMatY, pMatX, bConstant, bStats);
 
-		//TODO далее функцию необходимо отптимизировать и сразу формировать итоговую матрицу без промежуточного транспонирования
+		//TODO further optimize the function to directly form the final matrix without intermediate transposition
 		if (mat && mat[0] && mat[0][0] !== undefined) {
 			let tMatrix = [], res = new cArray();
 
@@ -7855,7 +7855,7 @@ function (window, undefined) {
 		//return matrix [col][row]
 		let mat = CalculateRGPRKP(pMatY, pMatX, bConstant, bStats, true);
 
-		//TODO далее функцию необходимо отптимизировать и сразу формировать итоговую матрицу без промежуточного транспонирования
+		//TODO further optimize the function to directly form the final matrix without intermediate transposition
 		if (mat && mat[0] && mat[0][0] !== undefined) {	
 			for (let i = 0; i < mat.length; i++) {
 				for (let j = 0; j < mat[i].length; j++) {
@@ -8346,7 +8346,7 @@ function (window, undefined) {
 				}
 				for (j = 0; j < arg1Matrix[i].length; ++j) {
 					if (arg0Matrix[i][j] && !AscCommonExcel.matching(arg1Matrix[i][j], matchingInfo)) {
-						//MS считает в данном случае, что значение 0 (из диапазона условий) соответсвует условию = ""
+						//MS considers in this case that value 0 (from the criteria range) matches the condition = ""
 						if (!(null === matchingInfo.op && "" === matchingInfo.val.value && 0 ===
 							arg1Matrix[i][j].value)) {
 							arg0Matrix[i][j] = null;
@@ -8459,7 +8459,7 @@ function (window, undefined) {
 				}
 				for (j = 0; j < arg1Matrix[i].length; ++j) {
 					if (arg0Matrix[i][j] && !AscCommonExcel.matching(arg1Matrix[i][j], matchingInfo)) {
-						//MS считает в данном случае, что значение 0 (из диапазона условий) соответсвует условию = ""
+						//MS considers in this case that value 0 (from the criteria range) matches the condition = ""
 						if (!(null === matchingInfo.op && "" === matchingInfo.val.value && 0 ===
 							arg1Matrix[i][j].value)) {
 							arg0Matrix[i][j] = null;
@@ -8836,7 +8836,7 @@ function (window, undefined) {
 	}
 
 	//***array-formula***
-	//TODO другое поведение для формул массива!!!
+	//TODO different behavior for array formulas!!!
 	cMODE_MULT.prototype = Object.create(cBaseFunction.prototype);
 	cMODE_MULT.prototype.constructor = cMODE_MULT;
 	cMODE_MULT.prototype.name = 'MODE.MULT';
@@ -11302,7 +11302,7 @@ function (window, undefined) {
 			var fP = argArray[0];
 			var fDF = parseInt(argArray[1]);
 
-			//ms игнорирует услвие fP > 1. сделал как в документации
+			//ms ignores condition fP > 1. implemented as in documentation
 			if (fDF < 1.0 || fP <= 0 || fP > 1) {
 				return new cError(cErrorType.not_numeric);
 			}
@@ -11400,11 +11400,11 @@ function (window, undefined) {
 	cTRIMMEAN.prototype.Calculate = function (arg) {
 
 		var arg2 = [arg[0], arg[1]];
-		//если первое значение строка
+		//if first value is string
 		if (cElementType.string === arg[0].type || cElementType.bool === arg[0].type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
-		//если первое значение число
+		//if first value is number
 		if (cElementType.number === arg[0].type) {
 			arg2[0] = new cArray();
 			arg2[0].addElement(arg[0]);
@@ -11478,14 +11478,14 @@ function (window, undefined) {
 	cTTEST.prototype.Calculate = function (arg) {
 
 		var arg2 = [arg[0], arg[1], arg[2], arg[3]];
-		//если первое или второе значение строка
+		//if first or second value is string
 		if (cElementType.string === arg[0].type || cElementType.bool === arg[0].type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 		if (cElementType.string === arg[1].type || cElementType.bool === arg[1].type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
-		//если первое или второе значение число
+		//if first or second value is number
 		if (cElementType.number === arg[0].type) {
 			arg2[0] = new cArray();
 			arg2[0].addElement(arg[0]);
@@ -12109,11 +12109,11 @@ function (window, undefined) {
 	cZTEST.prototype.Calculate = function (arg) {
 
 		var arg2 = arg[2] ? [arg[0], arg[1], arg[2]] : [arg[0], arg[1]];
-		//если первое или второе значение строка
+		//if first or second value is string
 		if (cElementType.string === arg[0].type || cElementType.bool === arg[0].type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
-		//если первое или второе значение число
+		//if first or second value is number
 		if (cElementType.number === arg[0].type) {
 			arg2[0] = new cArray();
 			arg2[0].addElement(arg[0]);

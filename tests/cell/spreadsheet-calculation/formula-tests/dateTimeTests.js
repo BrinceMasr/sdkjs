@@ -233,7 +233,7 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-		//формируем массив значений
+		//form array of values
 		const randomArray = [];
 		let randomStrArray = "{";
 		let maxArg = 4;
@@ -7635,31 +7635,31 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 6);
 
-		oParser = new parserFormula("WEEKNUM(DATE(2007,1,1),15)", "A2", ws);//понед
+		oParser = new parserFormula("WEEKNUM(DATE(2007,1,1),15)", "A2", ws);//Mon
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 1);
 
-		oParser = new parserFormula("WEEKNUM(DATE(2008,1,1),15)", "A2", ws);//втор
+		oParser = new parserFormula("WEEKNUM(DATE(2008,1,1),15)", "A2", ws);//Tue
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 1);
 
-		oParser = new parserFormula("WEEKNUM(DATE(2003,1,1),15)", "A2", ws);//сред
+		oParser = new parserFormula("WEEKNUM(DATE(2003,1,1),15)", "A2", ws);//Wed
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 1);
 
-		oParser = new parserFormula("WEEKNUM(DATE(2009,1,1),15)", "A2", ws);//чет
+		oParser = new parserFormula("WEEKNUM(DATE(2009,1,1),15)", "A2", ws);//Thu
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 1);
 
-		oParser = new parserFormula("WEEKNUM(DATE(2010,1,1),15)", "A2", ws);//пят
+		oParser = new parserFormula("WEEKNUM(DATE(2010,1,1),15)", "A2", ws);//Fri
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 1);
 
-		oParser = new parserFormula("WEEKNUM(DATE(2011,1,1),15)", "A2", ws);//суб
+		oParser = new parserFormula("WEEKNUM(DATE(2011,1,1),15)", "A2", ws);//Sat
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 1);
 
-		oParser = new parserFormula("WEEKNUM(DATE(2012,1,1),11)", "A2", ws);//вск
+		oParser = new parserFormula("WEEKNUM(DATE(2012,1,1),11)", "A2", ws);//Sun
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 1);
 

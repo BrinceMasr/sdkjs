@@ -94,7 +94,7 @@ $(function () {
         var d = isStartPoint ? ws.changeSelectionStartPoint(dc, dr, isCoord, isCtrl) :
             ws.changeSelectionEndPoint(dc, dr, isCoord, isCoord && this.keepType);
         if (!isCoord && !isStartPoint) {
-            // Выделение с зажатым shift
+            // Selection with shift held down
             this.canUpdateAfterShiftUp = true;
         }
         this.keepType = isCoord;

@@ -192,7 +192,7 @@
 			"theme":      oNoteMaster.Theme ? (this.themesMap[oNoteMaster.Theme.Id] ? oNoteMaster.Theme.Id : this.SerTheme(oNoteMaster.Theme)) : null
 		}
 
-		// мапим, чтобы не записывать несколько раз
+		// Map to avoid writing multiple times
 		this.notesMasterMap[oNoteMaster.Id] = oNotesMasterObj;
 
 		return oNotesMasterObj;
@@ -200,9 +200,9 @@
 	WriterToJSON.prototype.SerNotes = function(oNote)
 	{
 		return {
-			"lock":             undefined, /// ??? вроде не нужно
+			"lock":             undefined, /// ??? probably not needed
 			"clrMapOvr":        this.SerColorMapOvr(oNote.clrMap),
-			"graphicObjects":   undefined, /// ??? вроде не нужно
+			"graphicObjects":   undefined, /// ??? probably not needed
 			"cSld":             this.SerCSld(oNote.cSld),
 			"showMasterPhAnim": oNote.showMasterPhAnim,
 			"showMasterSp":     oNote.showMasterSp,
@@ -394,7 +394,7 @@
 		var oMaster = oSlide.Layout.Master.Id;
 		var oLayout = oSlide.Layout.Id;
 
-		// нет смысла тащить master за слайдом без layout
+		// No point in carrying master with slide without layout
 		if (bWriteLayout || (bWriteMaster && bWriteAllMasLayouts))
 		{
 			if (bWriteMaster)
@@ -1838,7 +1838,7 @@
 	ReaderFromJSON.prototype.TableStylesFromJSON = function(oParsedStyles)
 	{
 		this.RestoredStylesMap = {};
-		// восстанавливаем все стили и мапим по старым id (т.к. создаются с новыми)
+		// Restore all styles and map by old id (since they are created with new ones)
 		for (var key in oParsedStyles)
 			this.RestoredStylesMap[key] = this.TableStyleFromJSON(oParsedStyles[key]);
 	};
@@ -1878,7 +1878,7 @@
 		var oStyles = private_GetStyles();
 		if (oTableStyle)
 		{
-			// если такого стиля нет - добавляем новый
+			// If such style doesn't exist - add new one
 			var nExistingStyleId = oStyles.GetStyleIdByName(oTableStyle.Name);
 			if (nExistingStyleId === null)
 			{
@@ -1887,7 +1887,7 @@
 			else
 			{
 				var oExistingStyle = oStyles.Get(nExistingStyleId);
-				// если стили идентичны, стиль не добавляем
+				// If styles are identical, don't add the style
 				if (!oTableStyle.IsEqual(oExistingStyle))
 					oStyles.Add(oTableStyle);
 				else
@@ -2125,7 +2125,7 @@
 		oLayout.setType(nLayoutType);
 		oLayout.ImageBase64 = oParsedLayout["imgBase64"];
 
-		// мапим, чтобы повторно не восстанавливать
+		// Map to avoid restoring multiple times
 		this.layoutsMap[oParsedLayout["id"]] = oLayout;
 
 		if (this.mastersMap[oParsedLayout["master"]])
@@ -2173,7 +2173,7 @@
 				oLayout = this.layoutsMap[oParsedSlide["layout"]];
 		}
 
-		// установим MasterSlide для Layout, если не задан
+		// Set MasterSlide for Layout if not specified
 		if (!oLayout.Master)
 		{
 			oMaster = oPresentation.getDefaultMasterSlide();
@@ -2359,7 +2359,7 @@
 		oParsedNotesMaster["hf"] && oNotesMaster.setHF(this.HFFromJSON(oParsedNotesMaster["hf"]));
 		oParsedNotesMaster["notesStyle"] && oNotesMaster.setNotesStyle(this.LstStyleFromJSON(oParsedNotesMaster["notesStyle"]));
 
-		// oTheme здесь будет либо объект темы, либо Id по которому тема уже создана и замаплена
+		// oTheme here will be either theme object or Id by which theme is already created and mapped
 		var oTheme = typeof oParsedNotesMaster["theme"] === "object" ? this.ThemeFromJSON(oParsedNotesMaster["theme"]) : oParsedNotesMaster["theme"];
 		typeof oParsedNotesMaster["theme"] === "object" ? oNotesMaster.setTheme(oTheme) : oNotesMaster.setTheme(this.themesMap[oTheme]);
 

@@ -131,14 +131,14 @@
 		};
 
 		CellTextRender.prototype.getPrevWord = function (pos) {
-			//TODO регулярку не меняю, перегоняю в строку
+			//TODO not changing the regex, converting to string
 			let s = AscCommonExcel.convertUnicodeToSimpleString(this.chars);
 			let i = asc_lastindexof(s.slice(0, pos), this.reWordBegining);
 			return i >= 0 ? i + 1 : 0;
 		};
 
 		CellTextRender.prototype.getNextWord = function (pos) {
-			//TODO регулярку не меняю, перегоняю в строку
+			//TODO not changing the regex, converting to string
 			let s = AscCommonExcel.convertUnicodeToSimpleString(this.chars);
 			let i = s.slice(pos).search(this.reWordBegining);
 			return i >= 0 ? pos + (i + 1) : this.getEndOfLine(pos);
@@ -153,7 +153,7 @@
 				}
 			}
 
-			// pos - в конце текста
+			// pos - at the end of text
 			var lastLine = l.length - 1;
 			var lastChar = this.chars.length - 1;
 			return this.charWidths[lastChar] !== 0 ? l[lastLine].beg : pos;
@@ -170,7 +170,7 @@
 				}
 			}
 
-			// pos - на последней линии
+			// pos - on the last line
 			var lastChar = this.chars.length - 1;
 			return pos > lastChar ? pos : lastChar + (this.charWidths[lastChar] !== 0 ? 1 : 0);
 		};
@@ -192,7 +192,7 @@
 				}
 			}
 
-			// pos - в конце текста
+			// pos - at the end of text
 			var lastLine = l.length - 1;
 			var lastChar = this.chars.length - 1;
 			return this.charWidths[lastChar] === 0 || l.length < 2 ?
@@ -211,7 +211,7 @@
 				}
 			}
 
-			// pos - на последней линии
+			// pos - on the last line
 			return this.chars.length;
 		};
 
@@ -327,13 +327,13 @@
 			if (Math.abs(x - _x) < dist)
 				resultPos = line === this.getLinesCount() - 1 ?  lineInfo.end + 1 : lineInfo.end;
 
-			// Если текст обрабатывался как bidi, корректируем позицию
+			// If text was processed as bidi, adjust the position
 			if (this.bidiProcessed && this.baseDirection === AscFonts.HB_DIRECTION.HB_DIRECTION_RTL) {
 				let line = this.getLineByY(y, topLine, zoom);
 				if (line >= 0) {
 					let lineInfo = this.getLineInfo(line);
-					// Для RTL строк логика поиска позиции может быть скорректирована
-					// Пока оставляем базовую логику, но это место для дальнейших улучшений
+					// For RTL lines, the position search logic may be adjusted
+					// For now keeping the base logic, but this is a place for future improvements
 				}
 			}
 

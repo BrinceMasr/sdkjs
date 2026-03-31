@@ -322,9 +322,9 @@
     function calculateAngle(x1, y1, x2, y2) {
         let dy = y2 - y1;
         let dx = x2 - x1;
-        let theta = Math.atan2(dy, dx); // диапазон [-PI, PI]
-        theta *= 180 / Math.PI; // радианы в градусы
-        // если нужен угол в диапазоне [0, 360)
+        let theta = Math.atan2(dy, dx); // range [-PI, PI]
+        theta *= 180 / Math.PI; // radians to degrees
+        // if angle in range [0, 360) is needed
         if (theta < 0) theta = 360 + theta;
         return theta;
     }

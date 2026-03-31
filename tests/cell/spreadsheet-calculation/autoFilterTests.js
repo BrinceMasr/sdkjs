@@ -671,7 +671,7 @@ $(function () {
 		// Check data range
 		checkFilterRef(assert, 0, 0, 4, 0);
 
-		// Imitate choosing filter "В этом году"
+		// Imitate choosing filter "This year"
 		ws.autoFilters = createDynamicFilter(ws, Asc.c_oAscDynamicAutoFilter.thisYear, 0);
 
 		//Checking work of filter
@@ -729,7 +729,7 @@ $(function () {
 		// Check data range
 		checkFilterRef(assert, 0, 0, 4, 0);
 
-		// Imitate choosing filter "В прошлом году"
+		// Imitate choosing filter "Last year"
 		ws.autoFilters = createDynamicFilter(ws, Asc.c_oAscDynamicAutoFilter.lastYear, 0);
 
 		//Checking work of filter

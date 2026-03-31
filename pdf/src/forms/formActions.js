@@ -318,8 +318,8 @@
 
                 let nMinZoom = Math.min(nHorZoom, nVerZoom);
                 
-                // далее вычисляем ширину с новым потенциальным зумом,
-                // если при данных размерах будет добавлен скролл, то вычитаем его ширину и пересчитываем zoom
+                // next we calculate width with new potential zoom,
+                // if scroll will be added at these dimensions, then we subtract its width and recalculate zoom
                 let nNewPageW = (oViewer.file.pages[nPageIdx].W * 96 * nMinZoom / oViewer.file.pages[nPageIdx].Dpi) >> 0;
                 if (nNewPageW > oViewer.width) {
                     nVerZoom = (((oViewer.canvas.height - oViewer.scrollWidth) / (nRectH)) * 100 >> 0) / 100;
@@ -356,7 +356,7 @@
 
         oActionsQueue.SetCurAction(this);
         
-        // если onFocus но форма не активна, то скипаем дейсвтие
+        // if onFocus but form is not active, then skip action
         if (this.GetTriggerType() == PDF_TRIGGERS_TYPES.OnFocus && oField != oDoc.activeForm) {
             oActionsQueue.Continue();
             return;
@@ -372,7 +372,7 @@
         if (nZoom && oViewer.zoom != nZoom)
             oViewer.setZoom(nZoom, true);
 
-        // выставляем смещения
+        // set offsets
         let yOffset = this.rect.top != null ? this.rect.top : 0;
         let xOffset = this.rect.left != null ? this.rect.left : 0;
 
@@ -380,10 +380,10 @@
             let oTr = oDoc.pagesTransform[nPageIdx].invert;
             let oPos = oTr.TransformPoint(xOffset, yOffset);
 
-            oViewer.disabledPaintOnScroll = true; // вырубаем отрисовку на скроле
+            oViewer.disabledPaintOnScroll = true; // disable drawing on scroll
             oViewer.scrollToXY(oViewer.scrollY + oPos.y, oViewer.scrollX + oPos.x);
             oViewer.disabledPaintOnScroll = false;
-            oViewer.needRedraw = true; // в конце Actions выполним отрисовку
+            oViewer.needRedraw = true; // at the end of Actions we'll perform drawing
         }
 
         oActionsQueue.Continue();
@@ -491,7 +491,7 @@
 
         oActionsQueue.SetCurAction(this);
 
-        // если onFocus но форма не активна, то скипаем дейсвтие
+        // if onFocus but form is not active, then skip action
         if (this.GetTriggerType() == PDF_TRIGGERS_TYPES.OnFocus && oField != oDoc.activeForm) {
             oActionsQueue.Continue();
             return;
@@ -540,7 +540,7 @@
 
         oActionsQueue.SetCurAction(this);
 
-        // если onFocus но форма не активна, то скипаем дейсвтие
+        // if onFocus but form is not active, then skip action
         if (this.GetTriggerType() == PDF_TRIGGERS_TYPES.OnFocus && oField != oDoc.activeForm) {
             oActionsQueue.Continue();
             return;
@@ -583,7 +583,7 @@
 
         oActionsQueue.SetCurAction(this);
 
-        // если onFocus но форма не активна, то скипаем дейсвтие
+        // if onFocus but form is not active, then skip action
         if (this.GetTriggerType() == PDF_TRIGGERS_TYPES.OnFocus && oField != oDoc.activeForm) {
             oActionsQueue.Continue();
             return;
@@ -632,7 +632,7 @@
 
         oActionsQueue.SetCurAction(this);
 
-        // если onFocus но форма не активна, то скипаем дейсвтие
+        // if onFocus but form is not active, then skip action
         if (this.GetTriggerType() == PDF_TRIGGERS_TYPES.OnFocus && oField != oDoc.activeForm) {
             oActionsQueue.Continue();
             return;
@@ -667,7 +667,7 @@
     function CActionRunScript(script) {
         CActionBase.call(this, ACTIONS_TYPES.JavaScript);
         this.script = script;
-        this.bContinueAfterEval = true; // выключаем на асинхронных операциях
+        this.bContinueAfterEval = true; // disable on asynchronous operations
     };
     CActionRunScript.prototype = Object.create(CActionBase.prototype);
 	CActionRunScript.prototype.constructor = CActionRunScript;
@@ -682,7 +682,7 @@
 
         oActionsQueue.SetCurAction(this);
 
-        // если onFocus но форма не активна, то скипаем дейсвтие
+        // if onFocus but form is not active, then skip action
         if (this.GetTriggerType() == PDF_TRIGGERS_TYPES.OnFocus && oField != oDoc.activeForm) {
             oActionsQueue.Continue();
             return;

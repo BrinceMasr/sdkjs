@@ -84,7 +84,7 @@
 		return (!this.m_bTurnOff);
 	};
 	/**
-	 * Получаем указатель на класс по Id
+	 * Get pointer to class by Id
 	 * @param Id
 	 * @returns {*}
 	 */
@@ -110,7 +110,7 @@
 		return this.m_aPairs[id];
 	};
 	/**
-	 * Получаем Id, по классу (вообще, данную функцию лучше не использовать)
+	 * Get Id by class (in general, it is better not to use this function)
 	 * @param Class
 	 * @returns {*}
 	 */
@@ -602,11 +602,11 @@
 		// }
 	};
 	//-----------------------------------------------------------------------------------
-	// Функции для работы с совместным редактирования
+	// Functions for collaborative editing
 	//-----------------------------------------------------------------------------------
 	CTableId.prototype.Unlock = function(Data)
 	{
-		// Ничего не делаем
+		// Do nothing
 	};
 
 	window["AscCommon"].g_oTableId = new CTableId();

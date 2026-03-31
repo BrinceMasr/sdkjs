@@ -133,8 +133,8 @@ function CSpellchecker(settings)
 
 			var _t = this;
 
-			// для "обычного воркера" - обрабатываем ошибку, чтобы он не влиял на работу редактора
-			// и если ошибка из wasm модуля - то просто попробуем js версию - и рестартанем
+			// for a "regular worker" - handle the error so it doesn't affect the editor's operation
+			// and if the error is from the wasm module - just try the js version - and restart
 			this.worker.onerror = function(e) {
 				if (e.preventDefault)
 					e.preventDefault();

@@ -450,7 +450,7 @@
 
 	function GetLoadInfoForMeasurer(info, lStyle)
 	{
-		// подбираем шрифт по стилю
+		// select font by style
 		var sReturnName = info.Name;
 		var bNeedBold   = false;
 		var bNeedItalic = false;

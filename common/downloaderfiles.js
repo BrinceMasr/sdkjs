@@ -46,7 +46,7 @@ function FileHandler() {
             window.focus();
         }
         else {
-			//делаем как docs.google.com, решение с form submit в схеме с socket вызывало ошибку 405 (Method Not Allowed)
+			//doing like docs.google.com, solution with form submit in socket scheme caused error 405 (Method Not Allowed)
             var frmWindow = getIFrameWindow( file );
 //            frmWindow.focus();
         }

@@ -1150,8 +1150,8 @@ function (window, undefined) {
 
 			unitConverterArr = {};
 			var generateWeightAndMass = function () {
-				//Вес и масса
-				unitConverterArr["g"] = {};//грамм
+				//Weight and mass
+				unitConverterArr["g"] = {};//Gram
 
 				unitConverterArr["g"]["sg"] = 0.0000685220500053478;
 				unitConverterArr["g"]["lbm"] = 0.0022046226218487763;
@@ -1170,7 +1170,7 @@ function (window, undefined) {
 				unitConverterArr["g"]["brton"] = 0.0000009842065;
 
 
-				unitConverterArr["sg"] = {};//Слэг
+				unitConverterArr["sg"] = {};//Slug
 
 				unitConverterArr["sg"]["lbm"] = 32.1739194101648;
 				unitConverterArr["sg"]["u"] = 8.78861184032002E+027;
@@ -1188,7 +1188,7 @@ function (window, undefined) {
 				unitConverterArr["sg"]["brton"] = 0.0143633545686854;
 
 
-				unitConverterArr["lbm"] = {};//Фунт массы (эвердьюпойс)
+				unitConverterArr["lbm"] = {};//Pound mass (avoirdupois)
 
 				unitConverterArr["lbm"]["u"] = 2.73159503145377E+026;
 				unitConverterArr["lbm"]["ozm"] = 16.0000023429409;
@@ -1205,7 +1205,7 @@ function (window, undefined) {
 				unitConverterArr["lbm"]["brton"] = 0.000446428499604793;
 
 
-				unitConverterArr["u"] = {};//атомная единица массы
+				unitConverterArr["u"] = {};//Atomic mass unit
 
 				unitConverterArr["u"]["ozm"] = 5.85738448002141E-026;
 				unitConverterArr["u"]["grain"] = 2.56260526786422E-023;
@@ -1221,7 +1221,7 @@ function (window, undefined) {
 				unitConverterArr["u"]["brton"] = 1.63431436382135E-030;
 
 
-				unitConverterArr["ozm"] = {};//Унция
+				unitConverterArr["ozm"] = {};//Ounce
 
 				unitConverterArr["ozm"]["grain"] = 437.499924514917;
 				unitConverterArr["ozm"]["cwt"] = 0.000624999825459436;
@@ -1236,7 +1236,7 @@ function (window, undefined) {
 				unitConverterArr["ozm"]["brton"] = 0.0000279017771395361;
 
 
-				unitConverterArr["grain"] = {};//Гран
+				unitConverterArr["grain"] = {};//Grain
 
 				unitConverterArr["grain"]["cwt"] = 0.00000142857127610345;
 				unitConverterArr["grain"]["shweight"] = 0.00000142857152114129;
@@ -1250,7 +1250,7 @@ function (window, undefined) {
 				unitConverterArr["grain"]["brton"] = 0.0000000637755016083088;
 
 
-				unitConverterArr["cwt"] = {};//Американский (короткий) центнер
+				unitConverterArr["cwt"] = {};//U.S. (short) hundredweight
 
 				unitConverterArr["cwt"]["shweight"] = 1.00000017152651;
 				unitConverterArr["cwt"]["uk_cwt"] = 0.892857142857143;
@@ -1263,7 +1263,7 @@ function (window, undefined) {
 				unitConverterArr["cwt"]["brton"] = 0.0446428558904405;
 
 
-				unitConverterArr["shweight"] = {};//Американский (короткий) центнер
+				unitConverterArr["shweight"] = {};//U.S. (short) hundredweight
 
 				unitConverterArr["shweight"]["uk_cwt"] = 0.892856989708499;
 				unitConverterArr["shweight"]["lcwt"] = 0.892856989708499;
@@ -1275,7 +1275,7 @@ function (window, undefined) {
 				unitConverterArr["shweight"]["brton"] = 0.0446428482330085;
 
 
-				unitConverterArr["uk_cwt"] = {};//Английский (длинный) центнер
+				unitConverterArr["uk_cwt"] = {};//Imperial (long) hundredweight
 
 				unitConverterArr["uk_cwt"]["lcwt"] = 1;
 				unitConverterArr["uk_cwt"]["hweight"] = 0.999999971945867;
@@ -1286,7 +1286,7 @@ function (window, undefined) {
 				unitConverterArr["uk_cwt"]["brton"] = 0.0499999985972934;
 
 
-				unitConverterArr["lcwt"] = {};//Английский (длинный) центнер
+				unitConverterArr["lcwt"] = {};//Imperial (long) hundredweight
 
 				unitConverterArr["lcwt"]["hweight"] = 0.999999971945867;
 				unitConverterArr["lcwt"]["stone"] = 7.99999774347312;
@@ -1296,7 +1296,7 @@ function (window, undefined) {
 				unitConverterArr["lcwt"]["brton"] = 0.0499999985972934;
 
 
-				unitConverterArr["lcwt"] = {};//Английский (длинный) центнер
+				unitConverterArr["lcwt"] = {};//Imperial (long) hundredweight
 
 				unitConverterArr["lcwt"]["hweight"] = 0.999999971945867;
 				unitConverterArr["lcwt"]["stone"] = 7.99999774347312;
@@ -1306,7 +1306,7 @@ function (window, undefined) {
 				unitConverterArr["lcwt"]["brton"] = 0.0499999985972934;
 
 
-				unitConverterArr["hweight"] = {};//Английский (длинный) центнер
+				unitConverterArr["hweight"] = {};//Imperial (long) hundredweight
 
 				unitConverterArr["hweight"]["stone"] = 7.99999796790613;
 				unitConverterArr["hweight"]["ton"] = 0.0559999857753429;
@@ -1315,7 +1315,7 @@ function (window, undefined) {
 				unitConverterArr["hweight"]["brton"] = 0.05;
 
 
-				unitConverterArr["stone"] = {};//Стоун
+				unitConverterArr["stone"] = {};//Stone
 
 				unitConverterArr["stone"]["ton"] = 0.007;
 				unitConverterArr["stone"]["uk_ton"] = 0.00625000176291212;
@@ -1323,20 +1323,20 @@ function (window, undefined) {
 				unitConverterArr["stone"]["brton"] = 0.00625000158757374;
 
 
-				unitConverterArr["ton"] = {};//Тонна
+				unitConverterArr["ton"] = {};//Ton
 
 				unitConverterArr["ton"]["uk_ton"] = 0.892857394701732;
 				unitConverterArr["ton"]["LTON"] = 0.892857394701732;
 				unitConverterArr["ton"]["brton"] = 0.892857369653392;
 
 
-				unitConverterArr["uk_ton"] = {};//Стандартная тонна
+				unitConverterArr["uk_ton"] = {};//Imperial ton
 
 				unitConverterArr["uk_ton"]["LTON"] = 1;
 				unitConverterArr["uk_ton"]["brton"] = 0.999999971945867;
 
 
-				unitConverterArr["LTON"] = {};//Стандартная тонна
+				unitConverterArr["LTON"] = {};//Imperial ton
 
 				unitConverterArr["LTON"]["brton"] = 0.999999971945867;
 			};
@@ -1487,7 +1487,7 @@ function (window, undefined) {
 
 			var generateTime = function () {
 
-				unitConverterArr["yr"] = {};//Год
+				unitConverterArr["yr"] = {};//Year
 
 				unitConverterArr["yr"]["day"] = 365.25;
 				unitConverterArr["yr"]["d"] = 365.25;
@@ -1498,7 +1498,7 @@ function (window, undefined) {
 				unitConverterArr["yr"]["s"] = 31557600;
 
 
-				unitConverterArr["day"] = {};//День
+				unitConverterArr["day"] = {};//Day
 
 				unitConverterArr["day"]["d"] = 1;
 				unitConverterArr["day"]["hr"] = 24;
@@ -1508,7 +1508,7 @@ function (window, undefined) {
 				unitConverterArr["day"]["s"] = 86400;
 
 
-				unitConverterArr["d"] = {};//День
+				unitConverterArr["d"] = {};//Day
 
 				unitConverterArr["d"]["hr"] = 24;
 				unitConverterArr["d"]["mn"] = 1440;
@@ -1517,7 +1517,7 @@ function (window, undefined) {
 				unitConverterArr["d"]["s"] = 86400;
 
 
-				unitConverterArr["hr"] = {};//Час
+				unitConverterArr["hr"] = {};//Hour
 
 				unitConverterArr["hr"]["mn"] = 60;
 				unitConverterArr["hr"]["min"] = 60;
@@ -1525,20 +1525,20 @@ function (window, undefined) {
 				unitConverterArr["hr"]["s"] = 3600;
 
 
-				unitConverterArr["mn"] = {};//Минуты
+				unitConverterArr["mn"] = {};//Minutes
 
 				unitConverterArr["mn"]["min"] = 1;
 				unitConverterArr["mn"]["sec"] = 60;
 				unitConverterArr["mn"]["s"] = 60;
 
 
-				unitConverterArr["min"] = {};//Минуты
+				unitConverterArr["min"] = {};//Minutes
 
 				unitConverterArr["min"]["sec"] = 60;
 				unitConverterArr["min"]["s"] = 60;
 
 
-				unitConverterArr["sec"] = {};//Секунды
+				unitConverterArr["sec"] = {};//Seconds
 
 				unitConverterArr["sec"]["s"] = 1;
 			};
@@ -1546,7 +1546,7 @@ function (window, undefined) {
 			var generatePressure = function () {
 
 				//p parameter do not support by LO(p === Pa in MS DOC)
-				unitConverterArr["Pa"] = {};//Паскаль
+				unitConverterArr["Pa"] = {};//Pascal
 
 				//unitConverterArr["Pa"]["p"] = ;
 				unitConverterArr["Pa"]["atm"] = 0.00000986923299998193;
@@ -1555,7 +1555,7 @@ function (window, undefined) {
 				unitConverterArr["Pa"]["psi"] = 0.0001450377;
 				unitConverterArr["Pa"]["Torr"] = 0.007500638;
 
-				unitConverterArr["atm"] = {};//Атмосфера
+				unitConverterArr["atm"] = {};//Atmosphere
 
 				unitConverterArr["atm"]["at"] = 1;
 				unitConverterArr["atm"]["mmHg"] = 760;
@@ -1563,20 +1563,20 @@ function (window, undefined) {
 				unitConverterArr["atm"]["Torr"] = 760.00211972032;
 
 
-				unitConverterArr["at"] = {};//Атмосфера
+				unitConverterArr["at"] = {};//Atmosphere
 
 				unitConverterArr["at"]["mmHg"] = 760;
 				unitConverterArr["at"]["psi"] = 14.6959444569062;
 				unitConverterArr["at"]["Torr"] = 760.00211972032;
 
 
-				unitConverterArr["mmHg"] = {};//Миллиметр ртутного столба
+				unitConverterArr["mmHg"] = {};//Millimeter of mercury
 
 				unitConverterArr["mmHg"]["psi"] = 0.019336769022245;
 				unitConverterArr["mmHg"]["Torr"] = 1.00000278910568;
 
 
-				unitConverterArr["psi"] = {};//Фунт на квадратный дюйм
+				unitConverterArr["psi"] = {};//Pound per square inch
 
 				unitConverterArr["psi"]["Torr"] = 51.7150920071126;
 			};
@@ -1772,9 +1772,9 @@ function (window, undefined) {
 
 				unitConverterArr["T"]["ga"] = 10000;
 
-				//***TODO пересмотреть коэфиициэнты у температуры!!!!!***
+				//***TODO review the temperature coefficients!!!!!***
 				//Temperature
-				//type 0 - умножение, 1 - сложение
+				//type 0 - multiplication, 1 - addition
 				unitConverterArr["C"] = {};//Degree Celsius
 
 				unitConverterArr["C"]["cel"] = 1;

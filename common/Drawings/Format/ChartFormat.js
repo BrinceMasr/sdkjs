@@ -2418,7 +2418,7 @@
 		return null;
 	}
 
-    var SCALE_INSET_COEFF = 1.016;//Возможно придется уточнять
+    var SCALE_INSET_COEFF = 1.016;//May need to be refined
     function CDLbl() {
         CBaseChartObject.call(this);
         this.bDelete = null;
@@ -2816,12 +2816,12 @@
                         break;
                     }
                     case 2: //dist
-                    {// (Text Anchor Enum ( Distributed )) TODO: пока выравнивание  по центру. Переделать!
+                    {// (Text Anchor Enum ( Distributed )) TODO: currently center alignment. Needs to be reworked!
                         _vertical_shift = (_text_rect_height - _content_height) * 0.5;
                         break;
                     }
                     case 3: //just
-                    {// (Text Anchor Enum ( Justified )) TODO: пока выравнивание  по центру. Переделать!
+                    {// (Text Anchor Enum ( Justified )) TODO: currently center alignment. Needs to be reworked!
                         _vertical_shift = (_text_rect_height - _content_height) * 0.5;
                         break;
                     }
@@ -3313,7 +3313,7 @@
             return oChartSpace.extX / 5;
         }
         else {
-            return 20000;//надписи для осей значений не переносятся поэтому выставляем большую ширину.
+            return 20000;//value axis labels don't wrap so we set a large width.
         }
     };
     CDLbl.prototype.getBodyPr = function() {
@@ -3334,7 +3334,7 @@
         }
         ret.merge(oBaseBodyPr);
         var nVert = ret.vert;
-        //Пока не поддерживаем bodyPr.rot. Костыль под эффект_штурмовика.docx.
+        //We don't support bodyPr.rot yet. Workaround for effect_stormtrooper.docx.
         if(AscFormat.isRealNumber(ret.rot) && 0 !== ret.rot) {
             if(Math.abs(ret.rot - 5400000) < 1000) {
                 if(ret.vert === AscFormat.nVertTTvert270) {
@@ -3385,7 +3385,7 @@
         if(this.txBody) {
             var bodyPr = this.getBodyPr();
             var max_box_width = this.getMaxWidth(bodyPr);
-            /*получено экспериментальным путем нужно уточнить*/
+            /*obtained experimentally, needs to be refined*/
             var max_content_width = max_box_width - 2 * SCALE_INSET_COEFF;
 
             var content = this.txBody.content;
@@ -5253,7 +5253,7 @@
         this.spPr = null;
         this.axId = [];
 
-        //ТоDo
+        //TODO
         this.valAx = null;
         this.catAx = null;
         this.serAx = null;
@@ -5396,7 +5396,7 @@
             }
         }
 
-        //выставим пересечения осей в копии
+        //set axis crosses in the copy
 
         for(i = 0; i < this.axId.length; ++i) {
             cur_axis = this.axId[i];
@@ -5509,7 +5509,7 @@
         return null;
     };
     CPlotArea.prototype.addAxis = function(axis) {
-        //сначала проверим не лежит ли ось уже в plotArea
+        //first check if the axis is already in plotArea
         if(!axis)
             return;
         var i;
@@ -5517,7 +5517,7 @@
             if(this.axId[i] === axis)
                 return;
         }
-        //если такой оси нет, можно добавлять.
+        //if there's no such axis, we can add it.
         AscCommon.History.CanAddChanges() && AscCommon.History.Add(new CChangesDrawingsContent(this, AscDFH.historyitem_PlotArea_AddAxis, this.axId.length, [axis], true));
         this.axId.push(axis);
         this.setParentToChild(axis);
@@ -5539,7 +5539,7 @@
             var chart = this.charts.splice(pos, 1)[0];
             AscCommon.History.CanAddChanges() && AscCommon.History.Add(new CChangesDrawingsContent(this, AscDFH.historyitem_PlotArea_RemoveChart, pos, [chart], false));
             this.onChangeDataRefs();
-            //удалим все оси этой диаграммы, проверив прежде нет ли ссылок на данные оси в других диаграммах
+            //delete all axes of this chart, first checking if there are references to these axes in other charts
             if(Array.isArray(chart.axId)) {
                 var chart_axis = chart.axId;
                 for(var i = 0; i < chart_axis.length; ++i) {
@@ -6790,9 +6790,9 @@
 		}
 	}
     CPlotArea.prototype.initPostOpen = function(aChartWithAxis) {
-        // выставляем axis в chart
-        // TODO: 1. Диаграмм может быть больше, но мы пока работаем только с одной
-        // TODO: 2. Избавиться от oIdToAxisMap, aChartWithAxis, т.к. они здесь больше не нужны
+        // set axis in chart
+        // TODO: 1. There may be more charts, but we only work with one for now
+        // TODO: 2. Get rid of oIdToAxisMap, aChartWithAxis, as they are no longer needed here
         ///  var oZeroChart = this.charts[0];
         ///  if ( oZeroChart )
         ///  {
@@ -8766,7 +8766,7 @@
 
         ret.putInvertCatOrder(this.isReversed());
 
-        //настройки пересечения с другой осью
+        //settings for crossing with another axis
 
         var crossAx = this.crossAx;
 
@@ -8811,7 +8811,7 @@
         else
             ret.putTickLabelsPos(c_oAscTickLabelsPos.TICK_LABEL_POSITION_NEXT_TO);
 
-        //настройки засечек на оси
+        //axis tick mark settings
         if(AscFormat.isRealNumber(this.majorTickMark))
             ret.putMajorTickMark(this.majorTickMark);
         else
@@ -9220,7 +9220,7 @@
         var ret = new AscCommon.asc_ValAxisSettings();
         var scaling = this.scaling;
 
-        //настройки логарифмической шкалы
+        //logarithmic scale settings
         if(scaling && AscFormat.isRealNumber(scaling.logBase)) {
             ret.putLogScale(true);
             ret.putLogBase(scaling.logBase);
@@ -9231,7 +9231,7 @@
 
 				const aPoints = this.isVertical() ? this.yPoints : this.xPoints;
         const oMinMaxOnAxis = getMinMaxFromArrPoints(aPoints);
-        //настроки максимального значения по оси
+        //maximum axis value settings
         if(scaling && AscFormat.isRealNumber(scaling.max)) {
             ret.putMaxValRule(c_oAscValAxisRule.fixed);
             ret.putMaxVal(scaling.max);
@@ -9241,7 +9241,7 @@
             ret.putMaxVal(oMinMaxOnAxis.max);
         }
 
-        //настройки минимального значения по оси
+        //minimum axis value settings
         if(scaling && AscFormat.isRealNumber(scaling.min)) {
             ret.putMinValRule(c_oAscValAxisRule.fixed);
             ret.putMinVal(scaling.min);
@@ -9251,10 +9251,10 @@
             ret.putMinVal(oMinMaxOnAxis.min);
         }
 
-        //настройка ориентации оси
+        //axis orientation setting
         ret.putInvertValOrder(this.isReversed());
 
-        //настройка множителя единиц на оси
+        //axis unit multiplier setting
         if(isRealObject(this.dispUnits)) {
             var disp_units = this.dispUnits;
             if(AscFormat.isRealNumber(disp_units.builtInUnit)) {
@@ -9276,7 +9276,7 @@
             ret.putShowUnitsOnChart(false);
         }
 
-        //настройки засечек на оси
+        //axis tick mark settings
         if(AscFormat.isRealNumber(this.majorTickMark))
             ret.putMajorTickMark(this.majorTickMark);
         else
@@ -9294,7 +9294,7 @@
 
         var crossAx = this.crossAx;
         if(crossAx) {
-            //настройки пересечения с другой осью
+            //settings for crossing with another axis
             if(AscFormat.isRealNumber(crossAx.crossesAt)) {
                 ret.putCrossesRule(c_oAscCrossesRule.value);
                 ret.putCrosses(crossAx.crossesAt);

@@ -35,7 +35,7 @@
 (function (window) {
 	
 	/**
-	 * Класс локальной истории изменений
+	 * Local history of changes class
 	 * @param logicDocument
 	 * @constructor
 	 */
@@ -47,7 +47,7 @@
 	History.prototype.constructor = History;
 	
 	History.prototype.ClearAdditional = function() {
-		// Ничего не делаем
+		// Do nothing
 	};
 	History.prototype.GetLastPointSourceObjectsPdf = function() {
 		if (this.Index !== -1) {
@@ -90,11 +90,11 @@
 	};
 	History.prototype.CheckUnionLastPoints = function()
     {
-        // Не объединяем точки во время Undo/Redo
+        // Don't merge points during Undo/Redo
         if (this.Index < this.Points.length - 1)
         	return false;
 
-        // Не объединяем точки истории, если на предыдущей точке произошло сохранение
+        // Don't merge history points if save occurred at the previous point
         if (this.Points.length < 2
             || (true !== this.Is_UserSaveMode() && null !== this.SavedIndex && this.SavedIndex >= this.Points.length - 2)
             || (true === this.Is_UserSaveMode() && null !== this.UserSavedIndex && this.UserSavedIndex >= this.Points.length - 2))
@@ -103,12 +103,12 @@
         var Point1 = this.Points[this.Points.length - 2];
         var Point2 = this.Points[this.Points.length - 1];
 
-        // запрет на объединение
+        // union is prohibited
         if (Point1.forbidUnion || Point2.forbidUnion) {
             return false;
         }
 
-        // Не объединяем слова больше 63 элементов
+        // Don't merge words with more than 63 elements
         if (Point1.Items.length > 63 && AscDFH.historydescription_Document_AddLetterUnion === Point1.Description)
             return false;
 
@@ -124,7 +124,7 @@
         if ((AscDFH.historydescription_Document_CompositeInput === Point1.Description || AscDFH.historydescription_Document_CompositeInputReplace === Point1.Description)
             && AscDFH.historydescription_Document_CompositeInputReplace === Point2.Description)
         {
-            // Ничего не делаем. Эта ветка означает, что эти две точки можно объединить
+            // Do nothing. This branch means these two points can be merged
             NewDescription = Point1.Description;
         }
 		else if (AscDFH.historydescription_Document_CompositeInput === Point1.Description
@@ -132,7 +132,7 @@
 			|| AscDFH.historydescription_Document_CompositeInput === Point2.Description
 			|| AscDFH.historydescription_Document_CompositeInputReplace === Point2.Description)
 		{
-			// Композитный ввод не разрешаем объединять ни с чем, кроме композитного ввода
+			// Composite input is not allowed to merge with anything except composite input
 			return false;
 		}
 		else if ((AscDFH.historydescription_Document_AddLetter === Point1.Description || AscDFH.historydescription_Document_AddLetterUnion === Point1.Description)
@@ -230,7 +230,7 @@
 			contentChanges.RemoveByHistoryItem(Item);
 	};
 		/**
-	 * Проверяем лок для последних нескольких точек
+	 * Check lock for the last several points
 	 * @param pointCount
 	 */
 	History.prototype.checkLock = function(pointCount)

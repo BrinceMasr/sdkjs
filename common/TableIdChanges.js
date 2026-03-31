@@ -61,16 +61,16 @@
 	};
 	CChangesTableIdAdd.prototype.WriteToBinary = function(Writer)
 	{
-		// String   : Id элемента
-		// Varibale : сам элемент
+		// String   : Element Id
+		// Variable : The element itself
 
 		Writer.WriteString2(this.Id);
 		this.NewClass.Write_ToBinary2(Writer);
 	};
 	CChangesTableIdAdd.prototype.ReadFromBinary = function(Reader)
 	{
-		// String   : Id элемента
-		// Varibale : сам элемент
+		// String   : Element Id
+		// Variable : The element itself
 
 		this.Id       = Reader.GetString2();
 		this.NewClass = this.private_ReadClassFromBinary(Reader);
@@ -146,7 +146,7 @@
 		// Long : LastPoint
 		// Long : SumIndex
 		// Long : DeletedIndex
-		// String : Версия SDK
+		// String : SDK version
 
 		Writer.WriteLong(this.FileCheckSum);
 		Writer.WriteLong(this.FileSize);
@@ -170,7 +170,7 @@
 		// Long : LastPoint
 		// Long : SumIndex
 		// Long : DeletedIndex
-		// String : Версия SDK
+		// String : SDK version
 
 		this.FileCheckSum  = Reader.GetLong();
 		this.FileSize      = Reader.GetLong();
@@ -203,7 +203,7 @@
 		// }
 		// else
 		// {
-		// 	// Потому что мы не учитываем данное изменение
+		// 	// Because we don't count this change
 		// 	CollaborativeEditing.m_nErrorLog_SumIndex += CollaborativeEditing.m_nErrorLog_SavedPCC + 1;
 		// 	if (this.PointIndex === this.StartPoint)
 		// 	{
@@ -226,7 +226,7 @@
 		// console.log("SumIndex     " + this.SumIndex);
 		// console.log("SDK build    " + this.VersionString);
 		// console.log("DeletedIndex " + (-10 === this.DeletedIndex ? null : this.DeletedIndex));
-		// // -1 Чтобы не учитывалось данное изменение
+		// // -1 So that this change is not counted
 		// CollaborativeEditing.m_nErrorLog_SavedPCC          = this.ItemsCount;
 		// CollaborativeEditing.m_nErrorLog_PointChangesCount = -1;
 		// CollaborativeEditing.m_nErrorLog_CurPointIndex     = this.PointIndex;
@@ -337,7 +337,7 @@ AscDFH.changesFactory[AscDFH.historyitem_Common_AddWatermark] = AscCommon.CChang
 
 
 //----------------------------------------------------------------------------------------------------------------------
-// Карта зависимости изменений
+// Changes dependency map
 //----------------------------------------------------------------------------------------------------------------------
 AscDFH.changesRelationMap[AscDFH.historyitem_TableId_Add]         = [AscDFH.historyitem_TableId_Add];
 AscDFH.changesRelationMap[AscDFH.historyitem_TableId_Reset]       = [AscDFH.historyitem_TableId_Reset];
