@@ -538,7 +538,7 @@
 	};
 	baseEditorsApi.prototype.isLogPluginCommands = function()
 	{
-		return false;
+		return window.localStorage && window.localStorage.getItem("asc_plugin_commands_log") === "true";
 	};
 	baseEditorsApi.prototype.log = function(msg)
 	{
@@ -4303,8 +4303,7 @@
 
 	baseEditorsApi.prototype.asc_Remove = function()
 	{
-		if (AscCommon.g_inputContext)
-			AscCommon.g_inputContext.emulateKeyDownApi(46);
+		AscCommon.emulateKeyDownApi(this, 46);
 	};
 
 	// System input
@@ -5791,8 +5790,18 @@
 		{
 			for (let i = 0, len = arguments.length; i < len; i++)
 			{
-				if (types && types[i] && types[i].prototype && types[i].prototype.fromCValue)
-					arguments[i] = types[i].prototype.fromCValue(arguments[i]);
+				if (types && types[i])
+				{
+					if (Array.isArray(types[i]) && Array.isArray(arguments[i]) && types[i][0].prototype && types[i][0].prototype.fromCValue)
+					{
+						for (let j = 0, lenJ = arguments[i].length; j < lenJ; j++)
+						{
+							arguments[i][j] = types[i][0].prototype.fromCValue(arguments[i][j]);
+						}
+					}
+					else if (types[i].prototype && types[i].prototype.fromCValue)
+						arguments[i] = types[i].prototype.fromCValue(arguments[i]);
+				}
 			}
 			if (!this[name])
 				console.log("Wrap unexisted function: " + name);
@@ -5848,6 +5857,12 @@
 
 		if (window.g_asc_plugins)
 			window.g_asc_plugins.onUpdateOptions();
+	};
+
+	baseEditorsApi.prototype.setPluginsDisabled = function(guids)
+	{
+		if (window.g_asc_plugins)
+			window.g_asc_plugins.setPluginsDisabled(guids);
 	};
 
 	baseEditorsApi.prototype.getCustomProperties = function() {
@@ -6317,6 +6332,7 @@
 	prot['asc_applyAscShortcuts'] = prot.asc_applyAscShortcuts;
 
 	prot['setPluginsOptions'] = prot.setPluginsOptions;
+	prot['setPluginsDisabled'] = prot.setPluginsDisabled;
 	prot['asc_pluginButtonDockChanged'] = prot.asc_pluginButtonDockChanged;
 
 	// passwords
