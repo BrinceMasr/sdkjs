@@ -1617,8 +1617,6 @@ function CDrawingDocument()
 		{
 			this.m_oWordControl.Thumbnails.LockMainObjType = true;
 
-			// since Serega sends a hundred times - we make this workaround ---------------------
-
 			this.m_oWordControl.SlideDrawer.CheckSlide(this.SlideCurrent);
 			this.m_oWordControl.CalculateDocumentSize(false);
 			// --------------------------------------------------------------------------------
@@ -1680,7 +1678,6 @@ function CDrawingDocument()
 
 		this.m_oWordControl.Thumbnails.LockMainObjType = true;
 
-		// since Serega sends a hundred times - we make this workaround ---------------------
 		this.m_oWordControl.SlideDrawer.CheckSlide(this.SlideCurrent);
 		this.m_oWordControl.CalculateDocumentSize(false);
 		// --------------------------------------------------------------------------------
@@ -6642,7 +6639,7 @@ function CSlideDrawer()
 
 		if (true)
 		{
-			// ideally if there was only resize
+			// here should be only resize
 			dKoef = this.m_oWordControl.m_nZoomValue * g_dKoef_mm_to_pix / 100;
 			dKoef *= AscCommon.AscBrowser.retinaPixelRatio;
 
