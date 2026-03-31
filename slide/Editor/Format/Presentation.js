@@ -2470,7 +2470,7 @@ CPresentation.prototype.GetAllTableStyles = function () {
 	}
 	return aStyles;
 };
-// Perform initial actions based on the Document
+// Perform initial actions based on the presentation
 CPresentation.prototype.Init = function () {
 
 };
@@ -3401,7 +3401,7 @@ CPresentation.prototype.GetTargetPosition = function () {
 	return oPosition;
 };
 
-// Drawing the Document content
+// Drawing the presentation slide
 CPresentation.prototype.Draw = function (nPageIndex, pGraphics) {
 	if (!pGraphics.isBoundsChecker()) {
 		AscCommon.CollaborativeEditing.Update_ForeignCursorsPositions();
@@ -11243,31 +11243,31 @@ CPresentation.prototype.IsDoNotExpandShiftReturn = function () {
 CPresentation.prototype.IsActionStarted = function () {
 };
 /**
- * Notify the document that recalculation is required
+ * Notify the presentation that recalculation is required
  */
 CPresentation.prototype.Recalculate2 = function () {
 	this.Recalculate();
 };
 /**
- * Notify the document that the selection state needs to be updated
+ * Notify the presentation that the selection state needs to be updated
  */
 CPresentation.prototype.UpdateSelection = function () {
 	this.Document_UpdateSelectionState();
 };
 /**
- * Notify the document that the interface state needs to be updated
+ * Notify the presentation that the interface state needs to be updated
  */
 CPresentation.prototype.UpdateInterface = function () {
 	this.Document_UpdateInterfaceState();
 };
 /**
- * Notify the document that the rulers need to be updated
+ * Notify the presentation that the rulers need to be updated
  */
 CPresentation.prototype.UpdateRulers = function () {
 	this.Document_UpdateRulersState();
 };
 /**
- * Notify the document that the Undo/Redo button state needs to be updated
+ * Notify the presentation that the Undo/Redo button state needs to be updated
  */
 CPresentation.prototype.UpdateUndoRedo = function () {
 	this.Document_UpdateUndoRedoState();
