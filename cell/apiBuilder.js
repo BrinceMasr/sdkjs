@@ -8981,15 +8981,12 @@
 	 * Returns an array of ApiName objects.
 	 * @memberof ApiWorksheet
 	 * @typeofeditors ["CSE"]
-	 * @returns {ApiName[]}
+	 * @returns {ApiName[]} - Returns an empty array if no defined names are found.
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/GetDefNames.js
 	 */
 	ApiWorksheet.prototype.GetDefNames = function () {
 		var res = this.worksheet.workbook.getDefinedNamesWS(this.worksheet.getId());
 		var name = [];
-		if (!res.length) {
-			return [new ApiName(undefined)]
-		}
 		for (var i = 0; i < res.length; i++) {
 			name.push(new ApiName(res[i]));
 		}
