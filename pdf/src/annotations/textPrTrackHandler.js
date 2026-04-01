@@ -34,7 +34,7 @@
 
 (function(window) {
 	/**
-	 * Class controls formula track work events. You can call update events on this class as many times
+	 * Class controls text properties track events. You can call update events on this class as many times
 	 * as you want, and this class only sends events to the renderer and interface when something
 	 * has actually changed
 	 *

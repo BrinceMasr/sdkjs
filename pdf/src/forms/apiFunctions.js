@@ -280,7 +280,7 @@
 
         let sNewValue = sValue.slice(0, nSelStart) + sChange + sValue.slice(nSelEnd);
         
-        // decimal separator that can be entered
+        // decimal separator that can be used
         switch (sepStyle) {
             case 0:
             case 1:
@@ -367,7 +367,7 @@
             return !isNaN(str) && isFinite(str);
         }
 
-        // decimal separator that can be entered
+        // decimal separator that can be used
         switch (sepStyle) {
             case 0:
             case 1:

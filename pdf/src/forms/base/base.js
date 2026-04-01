@@ -1187,7 +1187,7 @@
             oGraphicsPDF.SetStrokeStyle(color.r, color.g, color.b);
         }
 
-        // adjust coordinates for border
+        // adjust coordinates by border
         Y += nLineWidth / 2;
         X += nLineWidth / 2;
         nWidth  -= nLineWidth;
@@ -3203,7 +3203,7 @@
             memory.WriteByte(nAlignType);
         }
 
-        // first field flags will go here
+        // first field flags will set here
         memory.widgetFlags   = 0;
         memory.posForWidgetFlags  = memory.GetCurPosition();
         memory.Skip(4);
@@ -3240,7 +3240,7 @@
             }    
         }
 
-        // second field flags will go here
+        // second field flags will set here
         memory.fieldDataFlags   = 0;
         memory.posForFieldDataFlags  = memory.GetCurPosition();
         memory.Skip(4);
@@ -3509,7 +3509,7 @@
             return;
         }
 
-        // command length will go here
+        // command length will set here
         let nStartPos = memory.GetCurPosition();
         memory.Skip(4);
 

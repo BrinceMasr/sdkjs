@@ -383,7 +383,7 @@
             oViewer.disabledPaintOnScroll = true; // disable drawing on scroll
             oViewer.scrollToXY(oViewer.scrollY + oPos.y, oViewer.scrollX + oPos.x);
             oViewer.disabledPaintOnScroll = false;
-            oViewer.needRedraw = true; // at the end of Actions we'll perform drawing
+            oViewer.needRedraw = true; // at the end of Actions we'll perform repaint
         }
 
         oActionsQueue.Continue();

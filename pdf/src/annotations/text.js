@@ -215,7 +215,6 @@
         if (this.IsHidden() == true)
             return;
 
-        // note: oGraphic parameter for track drawing
         if (!this.graphicObjects)
             this.graphicObjects = new AscFormat.DrawingObjectsController(this);
 

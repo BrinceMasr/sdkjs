@@ -589,7 +589,6 @@
         return fontMap;
     };
     CAnnotationStamp.prototype.WriteRenderToBinary = function(memory) {
-        // currently only for shape-based
         if (this.IsNeedDrawFromStream() || !memory.docRenderer || (memory.isForSplit || memory.isCopyPaste)) {
             return;
         }

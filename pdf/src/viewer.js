@@ -3018,7 +3018,7 @@
 					ctx.rotate(angleRad);
 					ctx.drawImage(imagePage, 0, 0, imgWidth, imgHeight, 0, -h >> 1, w, h);
 					break;
-				default: // 0 degrees, default
+				default: // 0 degrees by default
 					ctx.drawImage(imagePage,  0, 0, imgWidth, imgHeight, cx - (w >> 1), yInd, w, h);
 					break;
 			}

@@ -502,7 +502,7 @@
     function drawZigZagLine(oGraphicsPDF, X1, Y1, X2, Y2, nLineW) {
         let length = Math.sqrt(Math.pow(X2 - X1, 2) + Math.pow(Y2 - Y1, 2));
         // Wave parameters
-        let wavelength = 2;          // length of one "tooth"
+        let wavelength = 2;          // length of one elevation
         let amplitude = nLineW * 1;  // wave height
         let dx = (X2 - X1) / length;
         let dy = (Y2 - Y1) / length;
@@ -510,7 +510,7 @@
         let ny = dx;
     
         // How many segments will fit on the entire length?
-        // One period (full tooth - up-down) takes 2 segments of wavelength/2 each,
+        // One period (1 wave up-down) takes 2 segments of wavelength/2 each,
         // but for simplicity we'll take wavelength as a full period.
         let segments = Math.floor(length / wavelength);
     

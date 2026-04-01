@@ -258,7 +258,7 @@
         this.SetNeedRecalc(true);
     };
     CPdfGroupShape.prototype.IncreaseDecreaseIndent = function(bIncrease) {
-        // Increase_ParagraphLevel for shapes from presentations
+        // Increase_ParagraphLevel for shapes from presentation
         this.GetDocContent().Increase_ParagraphLevel(bIncrease);
         this.SetNeedRecalc(true);
     };
@@ -303,7 +303,7 @@
                     }
                     // Handle table border movement
                     else if (null != content.Selection.Data && true === content.Selection.Data.TableBorder && type_Table == content.Content[content.Selection.Data.Pos].GetType()) {
-                        // Remove cursor if it was there
+                        // Remove cursor
                         drawing_document.TargetEnd();
                     } else {
                         if (false === content.IsSelectionEmpty()) {

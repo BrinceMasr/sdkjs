@@ -186,7 +186,7 @@ CPDFCollaborativeEditing.prototype.Send_Changes = function(IsUserSave, Additiona
 	AscCommon.DocumentEditorApi.prototype.asc_Save.apply(this, arguments);
 	
 	
-    // Generate our changes
+    // Generate own changes
     let StartPoint = ( null === oHistory.SavedIndex ? 0 : oHistory.SavedIndex + 1 );
     let LastPoint = -1;
 
@@ -282,7 +282,7 @@ CPDFCollaborativeEditing.prototype.Send_Changes = function(IsUserSave, Additiona
     // TODO: While history is cleared on save, we need to update Undo/Redo
     editor.WordControl.m_oLogicDocument.Document_UpdateUndoRedoState();
 
-    // We don't check our own locks. When all users leave, redraw happens and our own locks are no longer drawn.
+    // We don't check own locks. When all users leave, redraw happens and own locks are no longer drawn.
     if (0 !== UnlockCount || 1 !== this.m_nUseType) {
         // Redraw the document (to update locks)
         editor.getDocumentRenderer().paint();

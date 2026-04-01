@@ -90,11 +90,11 @@
 	};
 	History.prototype.CheckUnionLastPoints = function()
     {
-        // Don't merge points during Undo/Redo
+        // Don't unite points during Undo/Redo
         if (this.Index < this.Points.length - 1)
         	return false;
 
-        // Don't merge history points if save occurred at the previous point
+        // Don't unite history points if save occurred at the previous point
         if (this.Points.length < 2
             || (true !== this.Is_UserSaveMode() && null !== this.SavedIndex && this.SavedIndex >= this.Points.length - 2)
             || (true === this.Is_UserSaveMode() && null !== this.UserSavedIndex && this.UserSavedIndex >= this.Points.length - 2))
@@ -108,7 +108,7 @@
             return false;
         }
 
-        // Don't merge words with more than 63 elements
+        // Don't unite words with more than 63 elements
         if (Point1.Items.length > 63 && AscDFH.historydescription_Document_AddLetterUnion === Point1.Description)
             return false;
 
@@ -124,7 +124,7 @@
         if ((AscDFH.historydescription_Document_CompositeInput === Point1.Description || AscDFH.historydescription_Document_CompositeInputReplace === Point1.Description)
             && AscDFH.historydescription_Document_CompositeInputReplace === Point2.Description)
         {
-            // Do nothing. This branch means these two points can be merged
+            // Do nothing. This case means these two points can be united
             NewDescription = Point1.Description;
         }
 		else if (AscDFH.historydescription_Document_CompositeInput === Point1.Description
@@ -132,7 +132,7 @@
 			|| AscDFH.historydescription_Document_CompositeInput === Point2.Description
 			|| AscDFH.historydescription_Document_CompositeInputReplace === Point2.Description)
 		{
-			// Composite input is not allowed to merge with anything except composite input
+			// Composite input is not allowed to unite with anything except composite input
 			return false;
 		}
 		else if ((AscDFH.historydescription_Document_AddLetter === Point1.Description || AscDFH.historydescription_Document_AddLetterUnion === Point1.Description)

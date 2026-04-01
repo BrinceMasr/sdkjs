@@ -570,7 +570,7 @@
                     }
                     // Handle table border movement
                     else if (null != content.Selection.Data && true === content.Selection.Data.TableBorder && type_Table == content.Content[content.Selection.Data.Pos].GetType()) {
-                        // Remove cursor if it was present
+                        // Remove cursor
                         drawing_document.TargetEnd();
                     } else {
                         if (false === content.IsSelectionEmpty()) {

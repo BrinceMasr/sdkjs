@@ -1906,7 +1906,7 @@ var CPresentation = CPresentation || function(){};
             this.activeDrawing          = oObject;
             this.mouseDownLinkObject    = null;
         }
-        // means Link object
+        // this is Link object
         else {
             this.mouseDownField         = null;
             this.mouseDownAnnot         = null;
@@ -7883,7 +7883,7 @@ var CPresentation = CPresentation || function(){};
 
         let HaveChanges = this.History.Have_Changes(true);
         if (true !== HaveChanges && (true === this.CollaborativeEditing.Have_OtherChanges() || 0 !== this.CollaborativeEditing.getOwnLocksLength())) {
-            // Accept others' changes. We have none, but need to call send function to release locks.
+            // Accept others' changes. Own changes is none, but need to call send function to release locks.
             this.CollaborativeEditing.Apply_Changes();
             this.CollaborativeEditing.Send_Changes();
         }
@@ -9752,7 +9752,7 @@ var CPresentation = CPresentation || function(){};
                 oForm.SetTextFontActual(AscPDF.DEFAULT_FIELD_FONT);
             }
 
-            // internal key for sending back (why? - they asked for it)
+            // internal key for use it only on save
             oForm.SetFontKey(oFontInfo["key"]);
 
             if (oFontInfo["size"] != null)

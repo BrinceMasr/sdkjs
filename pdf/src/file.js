@@ -1055,7 +1055,7 @@ void main() {\n\
                 if (stream.GetChar())
                     stream.Skip(8);
                 stream.Skip(12);
-                // Do not merge - GetLong will read the required value only after skip 12
+                // Do not unite - GetLong will read the required value only after skip 12
                 stream.Skip(12 * stream.GetLong() - 4);
             }
 

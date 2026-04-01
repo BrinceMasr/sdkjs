@@ -2117,7 +2117,7 @@
     };
     CTextField.prototype.CheckFormViewWindow = function()
     {
-        // total content dimensions
+        // whole content dimensions
         let oPageBounds = this.content.GetContentBounds(0);
         let oFormBounds = this.getFormRelRect();
 		
