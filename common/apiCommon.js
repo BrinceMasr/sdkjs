@@ -2735,8 +2735,6 @@ function (window, undefined) {
 			}
 		}
 		else {
-
-			// TODO: For now we don't work with Color and Fill separately, so we write both
 			this.Value = Asc.c_oAscShdNil;
 			this.Color = CreateAscColorCustom(255, 255, 255);
 			this.Fill = CreateAscColorCustom(255, 255, 255);
@@ -2913,16 +2911,16 @@ function (window, undefined) {
 	function asc_CParagraphSpacing(obj) {
 
 		if (obj) {
-			this.Line = (undefined != obj.Line) ? obj.Line : null; // Line spacing within paragraph
-			this.LineRule = (undefined != obj.LineRule) ? obj.LineRule : null; // Type of line spacing
-			this.Before = (undefined != obj.Before) ? obj.Before : null; // Additional spacing before paragraph
-			this.After = (undefined != obj.After) ? obj.After : null; // Additional spacing after paragraph
+			this.Line = (undefined != obj.Line) ? obj.Line : null;
+			this.LineRule = (undefined != obj.LineRule) ? obj.LineRule : null;
+			this.Before = (undefined != obj.Before) ? obj.Before : null;
+			this.After = (undefined != obj.After) ? obj.After : null;
 		}
 		else {
-			this.Line = undefined; // Line spacing within paragraph
-			this.LineRule = undefined; // Type of line spacing
-			this.Before = undefined; // Additional spacing before paragraph
-			this.After = undefined; // Additional spacing after paragraph
+			this.Line = undefined;
+			this.LineRule = undefined;
+			this.Before = undefined;
+			this.After = undefined;
 		}
 	}
 
@@ -2954,14 +2952,14 @@ function (window, undefined) {
 	/** @constructor */
 	function asc_CParagraphInd(obj) {
 		if (obj) {
-			this.Left = (undefined != obj.Left) ? obj.Left : null; // Left indent
-			this.Right = (undefined != obj.Right) ? obj.Right : null; // Right indent
-			this.FirstLine = (undefined != obj.FirstLine) ? obj.FirstLine : null; // First line
+			this.Left = (undefined != obj.Left) ? obj.Left : null;
+			this.Right = (undefined != obj.Right) ? obj.Right : null;
+			this.FirstLine = (undefined != obj.FirstLine) ? obj.FirstLine : null;
 		}
 		else {
-			this.Left = undefined; // Left indent
-			this.Right = undefined; // Right indent
-			this.FirstLine = undefined; // First line
+			this.Left = undefined;
+			this.Right = undefined;
+			this.FirstLine = undefined;
 		}
 	}
 
@@ -3033,23 +3031,6 @@ function (window, undefined) {
 			this.CanEditInlineCC = undefined !== obj.CanEditInlineCC ? obj.CanEditInlineCC : true;
 		}
 		else {
-			//ContextualSpacing : false,            // Whether to remove spacing between paragraphs of the same style
-			//
-			//    Ind :
-			//    {
-			//        Left      : 0,                    // Left indent
-			//        Right     : 0,                    // Right indent
-			//        FirstLine : 0                     // First line
-			//    },
-			//
-			//    Jc : align_Left,                      // Paragraph alignment
-			//
-			//    KeepLines : false,                    // move paragraph to new page,
-			//                                          // if it doesn't fit entirely on the current one
-			//    KeepNext  : false,                    // move paragraph together with the next paragraph
-			//
-			//    PageBreakBefore : false,              // start paragraph from new page
-
 			this.Bidi = undefined;
 			this.ContextualSpacing = undefined;
 			this.Ind = new asc_CParagraphInd();
@@ -5346,10 +5327,16 @@ function (window, undefined) {
 		this.WrappingStyle = v;
 	};
 
-	// Returns an object of class Asc.asc_CPaddings
+	/**
+	 * @returns {asc_CPaddings}
+	 */
 	asc_CImgProperty.prototype.asc_getPaddings = function () {
 		return this.Paddings;
-	}; // Argument is an object of class Asc.asc_CPaddings
+	};
+	/**
+	 *
+	 * @param v {asc_CPaddings}
+	 */
 	asc_CImgProperty.prototype.asc_putPaddings = function (v) {
 		this.Paddings = v;
 	};
@@ -5358,10 +5345,16 @@ function (window, undefined) {
 	};
 	asc_CImgProperty.prototype.asc_putAllowOverlap = function (v) {
 		this.AllowOverlap = v;
-	}; // Returns an object of class CPosition
+	};
+	/**
+	 * @returns {Asc.CPosition}
+	 */
 	asc_CImgProperty.prototype.asc_getPosition = function () {
 		return this.Position;
-	}; // Argument is an object of class CPosition
+	};
+	/**
+	 * @param v {Asc.CPosition}
+	 */
 	asc_CImgProperty.prototype.asc_putPosition = function (v) {
 		this.Position = v;
 	};
@@ -6123,7 +6116,7 @@ function (window, undefined) {
 
 
 	/**
-	 * Class for working with hyperlinks interface
+	 * Class for working with hyperlinks in UI
 	 * @param obj
 	 * @constructor
 	 */
@@ -7269,7 +7262,7 @@ function (window, undefined) {
 
 	// ----------------------------- plugins ------------------------------- //
 	let PluginType = {
-		System: 0,      // System, non-disableable plugin.
+		System: 0,      // System, can't be disabled.
 		Background: 1,  // Background plugin. Same as system, but can be disabled.
 		Window: 2,      // Window
 		Panel: 3,       // Panel
@@ -7941,12 +7934,16 @@ function (window, undefined) {
 	{
 		this.WrappingStyle = v;
 	};
-	// Returns an object of class Asc.asc_CPaddings
+	/**
+	 * @returns {Asc.asc_CPaddings}
+	 */
 	CAscChartProp.prototype.get_Paddings      = function()
 	{
 		return this.Paddings;
 	};
-	// Argument is an object of class Asc.asc_CPaddings
+	/**
+	 * @param v {Asc.asc_CPaddings}
+	 */
 	CAscChartProp.prototype.put_Paddings      = function(v)
 	{
 		this.Paddings = v;
@@ -7959,12 +7956,16 @@ function (window, undefined) {
 	{
 		this.AllowOverlap = v;
 	};
-	// Returns an object of class CPosition
+	/**
+	 * @returns {Asc.CPosition}
+	 */
 	CAscChartProp.prototype.get_Position      = function()
 	{
 		return this.Position;
 	};
-	// Argument is an object of class CPosition
+	/**
+	 * @param v {Asc.CPosition}
+	 */
 	CAscChartProp.prototype.put_Position      = function(v)
 	{
 		this.Position = v;

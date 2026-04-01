@@ -30,10 +30,10 @@
  *
  */
 
-window['AscApplyChanges'] = true;	// Flag for verification
+window['AscApplyChanges'] = true;
 window['AscChanges'] = [
 
-];			// Array of change strings - changes of all users [[changes_1],[changes_2],..,[changes_n]]
+];			// Array of changes - changes of all users [[changes_1],[changes_2],..,[changes_n]]
 
 // Only for non-minified version. Do not include this file in the build!!!
-window['AscNotLoadAllScript'] = true;	// Flag for verification
+window['AscNotLoadAllScript'] = true;
