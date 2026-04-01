@@ -5436,7 +5436,7 @@
 	 */
 	Api.Save = function()
 	{
-		this.SaveAfterMacros = true;
+		Asc.editor.SaveAfterMacros = true;
 		return true;
 	};
 
