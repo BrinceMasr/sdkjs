@@ -12880,7 +12880,7 @@ function parseStringToCElement (val, cultureInfo) {
 
 	/**
 	 * Checks if any error in sum range corresponds to a non-matching search row.
-	 * Used for <> operator complement approach. O(E × log K) per column.
+	 * Used for <> operator complement approach. O(E * log K) per column.
 	 * @returns {cError|null}
 	 */
 	SumIfTypedCache.prototype.checkErrorsForNotEqual = function(searchRange, sumRange, sumCache, type, equalFn, searchValue) {
@@ -12931,7 +12931,7 @@ function parseStringToCElement (val, cultureInfo) {
 
 	/**
 	 * Checks if any error in sum range corresponds to an empty search row.
-	 * Used for ="" complement approach. O(E × T × log K) per column.
+	 * Used for ="" complement approach. O(E * T * log K) per column.
 	 * @returns {cError|null}
 	 */
 	SumIfTypedCache.prototype.checkErrorsForEmpty = function(searchRange, sumRange, sumCache) {
