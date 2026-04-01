@@ -3111,17 +3111,6 @@
 		}
 	};
 
-	/**
-	 * @param {string} s1
-	 * @param {string} s2
-	 * @return {number}
-	 */
-	function stringCompare(s1, s2) {
-		if (s1 === s2) {
-			return 0;
-		}
-		return s1.localeCompare(s2, AscCommon.g_oDefaultCultureInfo ? AscCommon.g_oDefaultCultureInfo.Name : "en");
-	}
 	function ForwardTransformationFormula(elem, formula, parsed) {
 		this.elem = elem;
 		this.formula = formula;
@@ -21537,7 +21526,7 @@
 							if (_b && null != _b.text) {
 								var val1 = caseSensitive ? _a.text : _a.text.toUpperCase();
 								var val2 = caseSensitive ? _b.text : _b.text.toUpperCase();
-								res = stringCompare(val1, val2);
+								res = AscCommon.stringCompare(val1, val2);
 							} else if(_b && null != _b.num) {
 								res = 1;
 							} else {
@@ -26788,6 +26777,5 @@
 
 	window['AscCommonExcel'].mergeCustomFunctions = mergeCustomFunctions;
 	window['AscCommonExcel'].safeJsonParse = safeJsonParse;
-	window['AscCommonExcel'].stringCompare = stringCompare;
 
 })(window);
