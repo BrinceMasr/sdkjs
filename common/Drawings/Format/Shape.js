@@ -2055,10 +2055,12 @@
 					if (this.bWordShape) {
 						this.setBodyPr(new_body_pr);
 					} else {
-						if (this.txBody) {
-							this.txBody.setBodyPr(new_body_pr);
+						if (!this.txBody) {
+							this.createTextBody();
 						}
+						this.txBody.setBodyPr(new_body_pr);
 					}
+
 					if (this.isObjectInSmartArt() && !props.bNotCopyToPoints) {
 						this.copyTextInfoFromShapeToPoint(paddings);
 					}
