@@ -6624,6 +6624,11 @@ background-repeat: no-repeat;\
 		if (0 == this.WordControl.splitters[0].position)
 			bIsShow = false;
 
+		this.syncOnThumbnailsShowWithFlag(bIsShow);
+	};
+
+	asc_docs_api.prototype.syncOnThumbnailsShowWithFlag = function(bIsShow)
+	{
 		this.sendEvent("asc_onThumbnailsShow", bIsShow);
 	};
 

@@ -89,6 +89,7 @@
 		this.Name = "";
 		this.IsSupportNotes = true;
 		this.IsSupportAnimPane = true;
+		this.IsSupportThumbnails = true;
 
 		this.EditorType = "presentations";
 
@@ -1780,7 +1781,7 @@
 	};
 	CEditorPage.prototype.onSplitterResize = function (isNoNeedResize) {
 		if (!this.IsThumbnailsSupported()) {
-			this.splitters[0].setPosition(0);
+			this.splitters[0].setPosition(0, false, true);
 		}
 		if (Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.left) {
 			this.m_oThumbnailsContainer.Bounds.AbsW = this.splitters[0].position;
@@ -5035,6 +5036,22 @@
 		this.splitters[2].setPosition(0);
 		Asc.editor.sendEvent('asc_onCloseAnimPane');
 		this.onSplitterResize();
+	};
+	CEditorPage.prototype.setThumbnailsEnable = function (bEnabled) {
+		if (bEnabled == this.IsSupportThumbnails)
+			return;
+
+		this.IsSupportThumbnails = bEnabled;
+		this.ShowThumbnails(bEnabled);
+	};
+	CEditorPage.prototype.ShowThumbnails = function (bShow) {
+		if (this.IsThumbnailsShown() === bShow)
+			return;
+
+		Asc.editor.syncOnThumbnailsShowWithFlag(bShow);
+	};
+	CEditorPage.prototype.IsThumbnailsShown = function () {
+		return this.splitters[0].position > 0;
 	};
 	CEditorPage.prototype.IsNotesSupported = function () {
 		return this.IsSupportNotes && this.m_oApi.IsNotesSupported();

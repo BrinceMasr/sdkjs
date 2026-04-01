@@ -204,6 +204,7 @@
 		wordControl.GoToPage(0);
 		wordControl.setNotesEnable(true);
 		wordControl.setAnimPaneEnable(true);
+		wordControl.setThumbnailsEnable(true);
 		api.hideMediaControl();
 		api.asc_hideComments();
 		presentation.Recalculate({Drawings: {All: true, Map: {}}});
@@ -686,6 +687,7 @@
 		presentation.Recalculate({Drawings: {All: true, Map: {}}});
 		wordControl.setNotesEnable(false);
 		wordControl.setAnimPaneEnable(false);
+		wordControl.setThumbnailsEnable(true);
 		api.hideMediaControl();
 		api.asc_hideComments();
 		presentation.Document_UpdateInterfaceState();
@@ -1318,6 +1320,7 @@
 		wordControl.GoToPage(nIdx);
 		wordControl.setNotesEnable(false);
 		wordControl.setAnimPaneEnable(false);
+		wordControl.setThumbnailsEnable(false);
 		api.hideMediaControl();
 		api.asc_hideComments();
 		presentation.Document_UpdateInterfaceState();
@@ -1417,6 +1420,7 @@
 		wordControl.GoToPage(0);
 		wordControl.setNotesEnable(false);
 		wordControl.setAnimPaneEnable(false);
+		wordControl.setThumbnailsEnable(false);
 		api.hideMediaControl();
 		api.asc_hideComments();
 		presentation.Document_UpdateInterfaceState();
