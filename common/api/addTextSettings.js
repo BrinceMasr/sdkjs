@@ -40,7 +40,7 @@
 	function CAddTextSettings()
 	{
 		this.TextPr        = null;
-		this.CursorOutside = false; // Works together with TextPr
+		this.CursorOutside = false;
 		this.WrapSpaces    = false;
 	}
 	CAddTextSettings.prototype.SetTextPr = function(oTextPr)
