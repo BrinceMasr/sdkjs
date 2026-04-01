@@ -8679,6 +8679,47 @@
 	};
 
 	/**
+	 * Returns an array of ApiListObject objects representing the formatted tables on the worksheet.
+	 * @memberof ApiWorksheet
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiListObject[]}
+	 */
+	ApiWorksheet.prototype.GetListObjects = function () {
+		var parts = this.worksheet.TableParts;
+		var res = [];
+		if (!parts) {
+			return res;
+		}
+		for (var i = 0; i < parts.length; i++) {
+			res.push(new ApiListObject(parts[i], this));
+		}
+		return res;
+	};
+
+	/**
+	 * Adds a formatted table to the worksheet and returns the ApiListObject object.
+	 * @memberof ApiWorksheet
+	 * @typeofeditors ["CSE"]
+	 * @param {XlListObjectSourceType} [sSourceType="xlSrcRange"] - The source type for the table. Currently only <b>"xlSrcRange"</b> is supported.
+	 * @param {string} [sSource] - The range to which the table will be applied, e.g. <b>"A1:D10"</b>. Required when <em>sSourceType</em> is <b>"xlSrcRange"</b>.
+	 * @param {boolean} [bLinkSource=false] - Not supported. Specifies whether the external data source should be linked to the ListObject. Only applicable when <em>sSourceType</em> is <b>"xlSrcExternal"</b>.
+	 * @param {XlYesNoGuess} [sHasHeaders="xlGuess"] - Specifies whether the source range has column labels.
+	 * <b>"xlYes"</b> — the first row contains headers; <b>"xlNo"</b> — a header row will be added automatically; <b>"xlGuess"</b> — the application determines the location of the header.
+	 * @param {string} [sDestination] - Not supported. The destination cell for the top-left corner of the table. Only applicable when <em>sSourceType</em> is <b>"xlSrcExternal"</b>.
+	 * @param {string} [sTableStyleName="TableStyleLight9"] - The table style name.
+	 * @returns {ApiListObject | null}
+	 */
+	ApiWorksheet.prototype.AddListObject = function (sSourceType, sSource, bLinkSource, sHasHeaders, sDestination, sTableStyleName) {
+		var styleName = sTableStyleName || "TableStyleLight9";
+		var ascRange = AscCommonExcel.g_oRangeCache.getAscRange(sSource);
+		var hasHeaders = (sHasHeaders === "xlYes") ? true : (sHasHeaders === "xlNo") ? false : undefined;
+		this.worksheet.autoFilters.addAutoFilter(styleName, ascRange, hasHeaders);
+		var parts = this.worksheet.TableParts;
+		var newPart = parts && parts[parts.length - 1];
+		return newPart ? new ApiListObject(newPart, this) : null;
+	};
+
+	/**
 	 * Sets the width of the specified column.
 	 * One unit of column width is equal to the width of one character in the Normal style.
 	 * For proportional fonts, the width of the character 0 (zero) is used.
@@ -10154,7 +10195,8 @@
 			col2 = isOneCell ? "" : ((ColAbs ? ":$" : ":") + AscCommon.g_oCellAddressUtils.colnumToColstr(col2));
 			value = isOneCol ? col1 + col2 : isOneRow ? row1 + ":" + row2 : col1 + row1 + col2 + row2;
 		}
-		return (External) ? '[' + ws.workbook.oApi.DocInfo.Title + ']' + AscCommon.parserHelp.get3DRef(ws.sName, value) : value;
+		var title = ws.workbook.oApi && ws.workbook.oApi.DocInfo && ws.workbook.oApi.DocInfo.Title || "";
+		return (External) ? '[' + title + ']' + AscCommon.parserHelp.get3DRef(ws.sName, value) : value;
 	};
 	Object.defineProperty(ApiRange.prototype, "Address", {
 		get: function () {
@@ -27909,6 +27951,211 @@
         }
     });
 
+	/**
+	 * Specifies the data source for the ListObject.
+	 * Only <b>"xlSrcRange"</b> is currently supported.
+	 * @typedef {("xlSrcRange" | "xlSrcExternal" | "xlSrcQuery" | "xlSrcModel")} XlListObjectSourceType
+	 */
+
+	/**
+	 * Specifies whether the first row of the source range contains column headers.
+	 * @typedef {("xlYes" | "xlNo" | "xlGuess")} XlYesNoGuess
+	 */
+
+	/**
+	 * Class representing a formatted table.
+	 * @constructor
+	 * @property {string} Name - Returns the display name of the table.
+	 * @property {ApiRange} Range - Returns the range occupied by the table.
+	 */
+	function ApiListObject(tablePart, ws) {
+		this.tablePart = tablePart;
+		this.ws = ws;
+	}
+
+	/**
+	 * Returns a Boolean value that indicates whether the ListObject is active,
+	 * i.e., whether the active cell is within the range of the ListObject.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {boolean}
+	 */
+	ApiListObject.prototype.GetActive = function () {
+		var ref = this.tablePart.Ref;
+		if (!ref) {
+			return false;
+		}
+		var activeCell = this.ws.worksheet.selectionRange.activeCell;
+		return activeCell.row >= ref.r1 && activeCell.row <= ref.r2 &&
+			activeCell.col >= ref.c1 && activeCell.col <= ref.c2;
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "Active", {
+		get: function () {
+			return this.GetActive();
+		}
+	});
+
+	/**
+	 * Returns the alternative text for the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 */
+	ApiListObject.prototype.GetAlternativeText = function () {
+		return this.tablePart.altText || "";
+	};
+
+	/**
+	 * Sets the alternative text for the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @param {string} sAltText - The alternative text string.
+	 */
+	ApiListObject.prototype.SetAlternativeText = function (sAltText) {
+		this.tablePart.changeAltText(sAltText);
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "AlternativeText", {
+		get: function () {
+			return this.GetAlternativeText();
+		},
+		set: function (sAltText) {
+			this.SetAlternativeText(sAltText);
+		}
+	});
+
+	/**
+	 * Returns the comment (summary alternative text) for the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 */
+	ApiListObject.prototype.GetComment = function () {
+		return this.tablePart.altTextSummary || "";
+	};
+
+	/**
+	 * Sets the comment (summary alternative text) for the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @param {string} sComment - The comment string.
+	 */
+	ApiListObject.prototype.SetComment = function (sComment) {
+		this.tablePart.changeAltTextSummary(sComment);
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "Comment", {
+		get: function () {
+			return this.GetComment();
+		},
+		set: function (sComment) {
+			this.SetComment(sComment);
+		}
+	});
+
+	/**
+	 * Returns the display name of the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 */
+	ApiListObject.prototype.GetName = function () {
+		return this.tablePart.DisplayName;
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "Name", {
+		get: function () {
+			return this.GetName();
+		}
+	});
+
+	/**
+	 * Returns the ApiRange object that represents the range of the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiRange | null}
+	 */
+	ApiListObject.prototype.GetRange = function () {
+		var bbox = this.tablePart.Ref;
+		if (!bbox) { return null; }
+		return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this.ws.worksheet, bbox));
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "Range", {
+		get: function () {
+			return this.GetRange();
+		}
+	});
+
+	/**
+	 * Returns the range of the data rows in the table, excluding the header row and totals row.
+	 * Returns null if the table has no data rows.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiRange | null}
+	 */
+	ApiListObject.prototype.GetDataBodyRange = function () {
+		var ref = this.tablePart.Ref;
+		if (!ref) {
+			return null;
+		}
+		var r1 = ref.r1 + (this.tablePart.isHeaderRow() ? 1 : 0);
+		var r2 = ref.r2 - (this.tablePart.TotalsRowCount || 0);
+		if (r1 > r2) {
+			return null;
+		}
+		var bbox = new Asc.Range(ref.c1, r1, ref.c2, r2);
+		return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this.ws.worksheet, bbox));
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "DataBodyRange", {
+		get: function () {
+			return this.GetDataBodyRange();
+		}
+	});
+
+	/**
+	 * Deletes the ListObject object and clears the cell formatting.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 */
+	ApiListObject.prototype.Delete = function () {
+		var ref = this.tablePart.Ref;
+		if (!ref) {
+			return;
+		}
+		this.ws.worksheet.autoFilters.isEmptyAutoFilters(ref);
+	};
+
+	/**
+	 * Removes the list functionality from the ListObject and converts it to a regular data range.
+	 * Cell data, formatting, and formulas remain on the sheet.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 */
+	ApiListObject.prototype.Unlist = function () {
+		var ref = this.tablePart.Ref;
+		if (!ref) {
+			return;
+		}
+		this.ws.worksheet.autoFilters.isEmptyAutoFilters(ref, null, null, true);
+	};
+
+	/**
+	 * Resizes the ListObject to a new range. Cells are not inserted or moved.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @param {string} sRange - The new range for the table, e.g. <b>"A1:D10"</b>.
+	 */
+	ApiListObject.prototype.Resize = function (sRange) {
+		var ascRange = AscCommonExcel.g_oRangeCache.getAscRange(sRange);
+		if (!ascRange) {
+			return;
+		}
+		this.ws.worksheet.autoFilters.changeTableRange(this.tablePart.DisplayName, ascRange);
+	};
+
 	Api["Format"]                = Api.Format;
 	Api["AddSheet"]              = Api.AddSheet;
 	Api["GetSheets"]             = Api.GetSheets;
@@ -28033,6 +28280,8 @@
 	ApiWorksheet.prototype["GetAllPivotTables"] = ApiWorksheet.prototype.GetAllPivotTables;
 	ApiWorksheet.prototype["RefreshAllPivots"] = ApiWorksheet.prototype.RefreshAllPivots;
 	ApiWorksheet.prototype["GetCustomXmlParts"] = ApiWorksheet.prototype.GetCustomXmlParts;
+	ApiWorksheet.prototype["GetListObjects"]  = ApiWorksheet.prototype.GetListObjects;
+	ApiWorksheet.prototype["AddListObject"]   = ApiWorksheet.prototype.AddListObject;
 
     ApiAutoFilter.prototype["ShowAllData"] = ApiAutoFilter.prototype.ShowAllData;
     ApiAutoFilter.prototype["ApplyFilter"] = ApiAutoFilter.prototype.ApplyFilter;
@@ -28046,6 +28295,18 @@
     ApiFilter.prototype["GetOperator"] = ApiFilter.prototype.GetOperator;
     ApiFilter.prototype["GetOn"] = ApiFilter.prototype.GetOn;
     ApiFilter.prototype["GetParent"] = ApiFilter.prototype.GetParent;
+
+	ApiListObject.prototype["GetActive"]          = ApiListObject.prototype.GetActive;
+	ApiListObject.prototype["GetAlternativeText"] = ApiListObject.prototype.GetAlternativeText;
+	ApiListObject.prototype["SetAlternativeText"] = ApiListObject.prototype.SetAlternativeText;
+	ApiListObject.prototype["GetComment"]         = ApiListObject.prototype.GetComment;
+	ApiListObject.prototype["SetComment"]         = ApiListObject.prototype.SetComment;
+	ApiListObject.prototype["GetDataBodyRange"]   = ApiListObject.prototype.GetDataBodyRange;
+	ApiListObject.prototype["GetName"]            = ApiListObject.prototype.GetName;
+	ApiListObject.prototype["GetRange"]           = ApiListObject.prototype.GetRange;
+	ApiListObject.prototype["Delete"]             = ApiListObject.prototype.Delete;
+	ApiListObject.prototype["Unlist"]             = ApiListObject.prototype.Unlist;
+	ApiListObject.prototype["Resize"]             = ApiListObject.prototype.Resize;
 
 	ApiRange.prototype["GetClassType"] = ApiRange.prototype.GetClassType;
 	ApiRange.prototype["GetRow"] = ApiRange.prototype.GetRow;
