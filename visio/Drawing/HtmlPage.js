@@ -1724,7 +1724,7 @@
 			AscCommon.addMouseEvent(this.m_oBody.HtmlElement, "up", this.onBodyMouseUp);
 		}
 
-		// in mobile version - during transition - position/size is not updated
+		// in mobile version, position/size is not updated during transition
 		if (this.m_oApi.isMobileVersion) {
 			var _t = this;
 			document.addEventListener && document.addEventListener("transitionend", function () { _t.OnResize(false); }, false);
@@ -2675,7 +2675,7 @@
 		var _x = -this.m_dScrollX + _centerX - _centerSlideX - _hor_width_left;
 		var _y = -(this.m_dScrollY - this.SlideScrollMIN) + _centerY - _centerSlideY - _ver_height_top;
 
-		// now calculate what positions are needed for the slide to be centered
+		// now calculate positions needed to center slide
 		var _x_c = _centerX - _centerSlideX;
 		var _y_c = _centerY - _centerSlideY;
 		this.m_dScrollX_Central = _centerX - _centerSlideX - _hor_width_left - _x_c;
@@ -2727,7 +2727,7 @@
 			return true;
 		}
 
-		// protection from internal scrolls. we prevent ONLY the topmost from onMouseWheel
+		// protection against internal scrolls. we prevent ONLY topmost from onMouseWheel
 		this.m_nVerticalSlideChangeOnScrollEnabled = false;
 
 		var newTime = new Date().getTime();
@@ -3359,7 +3359,7 @@
 		if (oWordControl.m_oDrawingDocument.TransitionSlide.IsPlaying())
 			oWordControl.m_oDrawingDocument.TransitionSlide.End(true);
 
-		// after fullscreen X, Y may change after calling Resize.
+		// after exiting fullscreen, X and Y may change after calling Resize.
 		oWordControl.checkBodyOffset();
 
 		if (!oThis.m_bIsIE) {
@@ -3860,7 +3860,7 @@
 
 		if (oWordControl.Thumbnails.FocusObjType == FOCUS_OBJECT_THUMBNAILS) {
 			if (0 == oWordControl.splitters[0].position) {
-				// thumbnails are not visible. Why process keyboard for them then
+				// thumbnails are not visible. no need to process keyboard events for them
 				e.preventDefault();
 				return false;
 			}
@@ -3889,7 +3889,7 @@
 		oWordControl.bIsUseKeyPress = ((_ret_mouseDown & keydownresult_PreventKeyPress) != 0) ? false : true;
 
 		if ((_ret_mouseDown & keydownresult_PreventDefault) != 0) {
-			// removing prevent with alt. Italians were really unhappy about it.
+			// remove prevent with alt. workaround for Italian keyboard layout
 			e.preventDefault();
 		}
 
@@ -3928,7 +3928,7 @@
 		oWordControl.EndUpdateOverlay();
 
 		if ((_ret_mouseDown & keydownresult_PreventDefault) != 0) {
-			// removing prevent with alt. Italians were really unhappy about it.
+			// remove prevent with alt. workaround for Italian keyboard layout
 			e.preventDefault();
 			return false;
 		}

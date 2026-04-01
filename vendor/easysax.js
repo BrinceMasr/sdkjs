@@ -573,7 +573,7 @@ function EasySAXParser(config) {
                 return;
             };
 
-            if (indexStartXML !== i && !stopEmit) { // everything before the tag is text
+            if (indexStartXML !== i && !stopEmit) { // everything before tag is text
                 var text = xml.substring(indexStartXML, i);
                 indexStartXML = i; // parsing completed up to this position
 
@@ -692,7 +692,7 @@ function EasySAXParser(config) {
                 isTagStart = false;
                 isTagEnd = true;
 
-                // verify that the closing tag matches the opening tag
+                // verify that closing tag matches opening tag
                 if (!parseStackNodes.length) {
                     returnError = 'close tag, requires open tag';
                     isParseStop = true; // further parsing is impossible
@@ -708,7 +708,7 @@ function EasySAXParser(config) {
                     return;
                 };
 
-                // verify that the closing tag has no extra characters
+                // verify that closing tag has no extra characters
                 for(; iQ < indexEndNode; iQ++) {
                     var wNext = xml.charCodeAt(iQ);
                     if (wNext === 32 || wNext === 9 || wNext === 10 || wNext === 11 || wNext === 12 || wNext === 13) { // \f\n\r\t\v
@@ -964,7 +964,7 @@ function EasySAXParser(config) {
             }
         };
 
-        if (indexStartXML !== i) { // everything before the tag is text
+        if (indexStartXML !== i) { // everything before tag is text
             var text = xml.substring(indexStartXML, i);
             indexStartXML = i; // parsing completed up to this position
 
