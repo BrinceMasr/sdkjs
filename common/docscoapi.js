@@ -44,7 +44,7 @@
   var c_oAscServerCommandErrors = AscCommon.c_oAscServerCommandErrors;
   var c_oAscForceSaveTypes = AscCommon.c_oAscForceSaveTypes;
 
-  // Wrapper class for online and offline operation
+  // Wrapper class for online/offline operation
   function CDocsCoApi() {
     this._CoAuthoringApi = new DocsCoApi();
     this._onlineWork = false;
@@ -116,7 +116,7 @@
       this._CoAuthoringApi.onChangesIndex = function(changesIndex) {
         t.callback_OnChangesIndex(changesIndex);
       };
-      // Callback when there is more than 1 user
+      // Callback when more than 1 user
       this._CoAuthoringApi.onStartCoAuthoring = function(e, isWaitAuth) {
         t.callback_OnStartCoAuthoring(e, isWaitAuth);
       };
@@ -458,8 +458,8 @@
   };
 
   /**
-   * Event about disconnection from the server
-   * @param {jQuery} e  event about disconnection with reason
+   * Event on server disconnect
+   * @param {jQuery} e  disconnect event with reason
    * @param {code: AscCommon.c_oCloseCode.drop} code
    */
   CDocsCoApi.prototype.callback_OnDisconnect = function(e, code) {
@@ -591,9 +591,9 @@
 	this._lastForceSaveButtonTime = -2;//-2 to allow first save without changes
 	this._lastForceSaveTimeoutTime = null;
     this._indexUser = -1;
-    // If there is more than 1 user, co-editing is active
+    // If more than 1 user, co-editing is active
     this.isCoAuthoring = false;
-    // We disconnected from co-editing ourselves
+    // Co-editing closed by us
     this.isCloseCoAuthoring = false;
 
     //websocket payload size is limited by https://github.com/faye/faye-websocket-node#initialization-options (64 MiB)
@@ -601,14 +601,14 @@
     //"1.5MB" is choosen to avoid disconnect(after 25s) while downloading/uploading oversized changes with 0.5Mbps connection
     this.websocketMaxPayloadSize = 1572864;
     this._serverChangesSize = 0;
-    // Current index for the number of changes
+    // Current changes index
     this.currentIndex = 0;
     this.currentIndexEnd = 0;
-    // Index from which we start saving changes
+    // Index from which saving starts
     this.deleteIndex = 0;
     // Array of changes
     this.arrayChanges = null;
-    // Time of last save (for connection disconnect)
+    // Time of last save - for disconnect handling
     this.lastOtherSaveTime = -1;
 	this.lastOwnSaveTime = -1;
     // Local changes index
@@ -628,7 +628,7 @@
     this.maxAttemptCount = 50;
     this.reconnectInterval = 2000;
     this.errorTimeOut = 10000;
-    this.errorTimeOutSave = 60000;	// ToDo should refactor this, as changes may be duplicated...
+    this.errorTimeOutSave = 60000;	// ToDo refactor - changes may be duplicated...
 
     this._docid = null;
     this._documentCallbackUrl = null;
@@ -653,7 +653,7 @@
     this.IsAnonymousUser = undefined;
     this.coEditingMode = undefined;
     this.headingsColor = undefined;
-    this._isReSaveAfterAuth = false;	// Flag for saving after re-authorization (for connection disconnect during save)
+    this._isReSaveAfterAuth = false;	// Flag for save after re-authorization - for disconnect during save
     this._lockBuffer = [];
     this._saveChangesChunks = [];
     this._authChanges = [];
@@ -722,7 +722,7 @@
 
   DocsCoApi.prototype.askLock = function(arrayBlockId, callback) {
     if (ConnectionState.SaveChanges === this._state || ConnectionState.AskSaveChanges === this._state) {
-      // We are in save mode. Locks will be requested after completion.
+      // In save mode. Request locks after completion.
       this._lockBuffer.push(new LockBufferElement(arrayBlockId, callback));
       return;
     }
@@ -748,7 +748,7 @@
 
     if (!isLock) {
       if (this._lockCallbacksErrorTimerId.hasOwnProperty(idLockInArray)) {
-        // Cannot request lock for the same id twice without waiting for a response
+        // Cannot request same lock id twice without waiting for response
         return;
       }
       //Ask
@@ -768,7 +768,7 @@
       }
       this._send({"type": 'getLock', 'block': arrayBlockId});
     } else {
-      // Return error because elements are locked
+      // Return error - elements locked
       window.setTimeout(function() {
         if (callback) {
           callback({error: idLockInArray + '-lock'});
@@ -779,7 +779,7 @@
 
   DocsCoApi.prototype.askSaveChanges = function(callback) {
     if (this._saveCallback[this._saveCallback.length - 1]) {
-      // We haven't processed the old callback yet and are waiting for a response
+      // Previous callback still pending
       return;
     }
 
@@ -788,7 +788,7 @@
       clearTimeout(this.saveLockCallbackErrorTimeOutId);
     }
 
-    // Check the state, if we are not connected, send an error immediately
+    // Check state - if not connected, send error immediately
     if (ConnectionState.Authorized !== this._state) {
       this.saveLockCallbackErrorTimeOutId = window.setTimeout(function() {
         if (callback) {
@@ -822,7 +822,7 @@
   };
 
   DocsCoApi.prototype.unSaveLock = function() {
-    // ToDo when connection is lost, we need to stop doing unSaveLock!
+    // ToDo stop calling unSaveLock on disconnect!
     var t = this;
     this.unSaveLockCallbackErrorTimeOutId = window.setTimeout(function() {
       t.unSaveLockCallbackErrorTimeOutId = null;
@@ -899,7 +899,7 @@
   };
 
   DocsCoApi.prototype.getUsers = function() {
-    // Specifically for the ability to get after authorization is complete (Should be refactored)
+    // Allows get after authorization completes (should be refactored)
     if (this.onAuthParticipantsChanged) {
       this.onAuthParticipantsChanged(this._participants, this._userId);
     }
@@ -911,7 +911,7 @@
   };
 
   DocsCoApi.prototype.disconnect = function(opt_code, opt_reason) {
-    // Disconnecting ourselves
+    // Disconnect initiated by us
     this.isCloseCoAuthoring = true;
     if (opt_code) {
       this.onDisconnect(opt_reason, opt_code);
@@ -1514,13 +1514,13 @@
 
       this._onServerVersion(data);
 
-      // We should only connect to get the file. Co-editing has already been disabled.
+      // Only connect to get file. Co-editing already disabled.
       if (this.isCloseCoAuthoring) {
         return;
       }
 
       this._onLicenseChanged(data);
-      // We have already authorized, need to update users (as users could have joined and left while we had no connection)
+      // Already authorized - update users, as users could have joined and left while connection was down
       this._onAuthParticipantsChanged(data['participants']);
 
       //if (this.ownedLockBlocks && this.ownedLockBlocks.length > 0) {
@@ -1549,7 +1549,7 @@
       return;
     }
     if (data['result'] === 1) {
-      // Set flag that we have already authorized
+      // Set flag: already authorized
       this._isAuth = true;
 
       //TODO: add checks
@@ -1582,7 +1582,7 @@
         this._onHasForgotten();
       }
 
-      // Applying user changes
+      // Apply user changes
       if (window['AscApplyChanges'] && window['AscChanges']) {
         var userOfflineChanges = window['AscChanges'], changeOneUser;
         for (var i = 0; i < userOfflineChanges.length; ++i) {
@@ -1592,7 +1592,7 @@
         }
       }
       this._updateAuthChanges();
-      // Always need to send this, as we rely on it when opening
+      // Always send this - opening relies on it
       if (this.onFirstLoadChangesEnd) {
         this.onFirstLoadChangesEnd(data['openedAt']);
       }
@@ -1667,7 +1667,7 @@
     return this._docid;
   };
   DocsCoApi.prototype.setDocId = function(docid) {
-    //todo possibly need to change sockjs_url
+    //todo may need to change sockjs_url
     this._docid = docid;
     this.socketio_url = AscCommon.getBaseUrlPathname() + '../../../../doc/' + docid + '/c';
   };
@@ -1932,7 +1932,7 @@
 	};
 	DocsCoApi.prototype._onServerClose = function (explicit) {
 		if (ConnectionState.SaveChanges === this._state) {
-			// We were saving changes and the connection was lost
+			// Connection lost during save
 			this._isReSaveAfterAuth = true;
 			// Clear the previous timer
 			if (null !== this.saveCallbackErrorTimeOutId) {

@@ -869,7 +869,7 @@
 		if (!window['IS_NATIVE_EDITOR'])
 		{
 			loadFileContent(sFileUrl, function (httpRequest) {
-					//get the URL to the folder with the file
+					//get URL of file folder
 					var url;
 					var nIndex = sFileUrl.lastIndexOf("/");
 					url = (-1 !== nIndex) ? sFileUrl.substring(0, nIndex + 1) : sFileUrl;
@@ -937,7 +937,7 @@
 		{
 			var stream = window["native"]["openFileCommand"](sFileUrl, changesUrl, Signature);
  
-            //get url to the folder with the file
+            //get URL of file folder
             var url;
             var nIndex = sFileUrl.lastIndexOf("/");
             url = (-1 !== nIndex) ? sFileUrl.substring(0, nIndex + 1) : sFileUrl;
@@ -956,7 +956,7 @@
 
 	function sendCommand(editor, fCallback, rdata, dataContainer)
 	{
-		//json must not exceed size 2097152, otherwise an exception will occur when reading it
+		//json must not exceed 2097152, otherwise reading throws exception
 		if (null == rdata["savetype"])
 		{
 			editor.CoAuthoringApi.openDocument(rdata);
@@ -1362,16 +1362,16 @@
 			}
 
 			if (!this.regExp_namedRanges.test(ch1))
-			{//if first character is not in str_namedRanges, then definitely need to escape
+			{//if first character is not in str_namedRanges, escaping is required
 				return false;
 			}
 			else
 			{
 				if (this.regExp_namedSheetsRange.test(str) || this.regExp_strOperator.test(str))
-				{//first character is valid. check the entire string for characters that require escaping
+				{//first character is valid. check full string for characters requiring escaping
 					return false;
 				}
-				//check that sheet name doesn't match valid cell address, in both A1 and RC styles.
+				//check that sheet name doesn't match valid cell address in A1 or RC style
 				var match = str.match(rx_ref);
 				if (match != null)
 				{
@@ -1564,7 +1564,7 @@
 
 	function build_rx_error(local)
 	{
-		// ToDo refactor to a more correct implementation. Not quite correct copying
+		// ToDo refactor to more correct implementation. Copying not fully correct
 		local = local ? local : {
 			"nil":     "#NULL!",
 			"div":     "#DIV\/0!",
@@ -1608,7 +1608,7 @@
 
 	function build_rx_cell_func(local)
 	{
-		// ToDo refactor to a more correct implementation. Not quite correct copying
+		// ToDo refactor to more correct implementation. Copying not fully correct
 		local = local ? local : {
 			"address": "address",
 			"col": "col",
@@ -1712,7 +1712,7 @@
 	};
 
 	//todo get from server config
-	var c_oAscImageUploadProp = {//Not all browsers allow getting file info before upload (e.g. ie9), when changing params here need to change similar params in web.common
+	var c_oAscImageUploadProp = {//Not all browsers allow getting file info before upload (e.g. ie9); if params change here, change matching params in web.common
 		MaxFileSize:      25000000, //25 mb
 		SupportedFormats: ["jpg", "jpeg", "jpe", "png", "gif", "bmp", "svg", "tiff", "tif"]
 	};
@@ -2778,7 +2778,7 @@
 	{
 		var inputName = 'apiiuFile';
 		var input = document.getElementById(inputName);
-		//remove to clear input from previous value
+		//remove to clear previous input value
 		if (input)
 		{
 			document.body.removeChild(input);
@@ -2882,9 +2882,9 @@
 	var	str_namedSheetsRange  = "\u0001-\u0026\u0028-\u0029\u002B-\u002D\u003B-\u003E\u0040\u005E\u0060\u007B-\u007F\u0082\u0084\u008B\u0092\u0095\u0098\u009B\u00A0\u00A6\u00A9\u00AB-\u00AC\u00AE\u00BB\u0378-\u0379\u037E-\u0383\u0387\u038B\u038D\u03A2\u0524-\u0530\u0557-\u0558\u055A-\u0560\u0588-\u0590\u05BE\u05C0\u05C3\u05C6\u05C8-\u05CF\u05EB-\u05EF\u05F3-\u05FF\u0604-\u0605\u0609-\u060A\u060C-\u060D\u061B-\u061E\u0620\u065F\u066A-\u066D\u06D4\u0700-\u070E\u074B-\u074C\u07B2-\u07BF\u07F7-\u07F9\u07FB-\u0900\u093A-\u093B\u094E-\u094F\u0955-\u0957\u0964-\u0965\u0970\u0973-\u097A\u0980\u0984\u098D-\u098E\u0991-\u0992\u09A9\u09B1\u09B3-\u09B5\u09BA-\u09BB\u09C5-\u09C6\u09C9-\u09CA\u09CF-\u09D6\u09D8-\u09DB\u09DE\u09E4-\u09E5\u09FB-\u0A00\u0A04\u0A0B-\u0A0E\u0A11-\u0A12\u0A29\u0A31\u0A34\u0A37\u0A3A-\u0A3B\u0A3D\u0A43-\u0A46\u0A49-\u0A4A\u0A4E-\u0A50\u0A52-\u0A58\u0A5D\u0A5F-\u0A65\u0A76-\u0A80\u0A84\u0A8E\u0A92\u0AA9\u0AB1\u0AB4\u0ABA-\u0ABB\u0AC6\u0ACA\u0ACE-\u0ACF\u0AD1-\u0ADF\u0AE4-\u0AE5\u0AF0\u0AF2-\u0B00\u0B04\u0B0D-\u0B0E\u0B11-\u0B12\u0B29\u0B31\u0B34\u0B3A-\u0B3B\u0B45-\u0B46\u0B49-\u0B4A\u0B4E-\u0B55\u0B58-\u0B5B\u0B5E\u0B64-\u0B65\u0B72-\u0B81\u0B84\u0B8B-\u0B8D\u0B91\u0B96-\u0B98\u0B9B\u0B9D\u0BA0-\u0BA2\u0BA5-\u0BA7\u0BAB-\u0BAD\u0BBA-\u0BBD\u0BC3-\u0BC5\u0BC9\u0BCE-\u0BCF\u0BD1-\u0BD6\u0BD8-\u0BE5\u0BFB-\u0C00\u0C04\u0C0D\u0C11\u0C29\u0C34\u0C3A-\u0C3C\u0C45\u0C49\u0C4E-\u0C54\u0C57\u0C5A-\u0C5F\u0C64-\u0C65\u0C70-\u0C77\u0C80-\u0C81\u0C84\u0C8D\u0C91\u0CA9\u0CB4\u0CBA-\u0CBB\u0CC5\u0CC9\u0CCE-\u0CD4\u0CD7-\u0CDD\u0CDF\u0CE4-\u0CE5\u0CF0\u0CF3-\u0D01\u0D04\u0D0D\u0D11\u0D29\u0D3A-\u0D3C\u0D45\u0D49\u0D4E-\u0D56\u0D58-\u0D5F\u0D64-\u0D65\u0D76-\u0D78\u0D80-\u0D81\u0D84\u0D97-\u0D99\u0DB2\u0DBC\u0DBE-\u0DBF\u0DC7-\u0DC9\u0DCB-\u0DCE\u0DD5\u0DD7\u0DE0-\u0DF1\u0DF4-\u0E00\u0E3B-\u0E3E\u0E4F\u0E5A-\u0E80\u0E83\u0E85-\u0E86\u0E89\u0E8B-\u0E8C\u0E8E-\u0E93\u0E98\u0EA0\u0EA4\u0EA6\u0EA8-\u0EA9\u0EAC\u0EBA\u0EBE-\u0EBF\u0EC5\u0EC7\u0ECE-\u0ECF\u0EDA-\u0EDB\u0EDE-\u0EFF\u0F04-\u0F12\u0F3A-\u0F3D\u0F48\u0F6D-\u0F70\u0F85\u0F8C-\u0F8F\u0F98\u0FBD\u0FCD\u0FD0-\u0FFF\u104A-\u104F\u109A-\u109D\u10C6-\u10CF\u10FB\u10FD-\u10FF\u115A-\u115E\u11A3-\u11A7\u11FA-\u11FF\u1249\u124E-\u124F\u1257\u1259\u125E-\u125F\u1289\u128E-\u128F\u12B1\u12B6-\u12B7\u12BF\u12C1\u12C6-\u12C7\u12D7\u1311\u1316-\u1317\u135B-\u135E\u1361-\u1368\u137D-\u137F\u139A-\u139F\u13F5-\u1400\u166D-\u166E\u1677-\u167F\u169B-\u169F\u16EB-\u16ED\u16F1-\u16FF\u170D\u1715-\u171F\u1735-\u173F\u1754-\u175F\u176D\u1771\u1774-\u177F\u17D4-\u17D6\u17D8-\u17DA\u17DE-\u17DF\u17EA-\u17EF\u17FA-\u180A\u180F\u181A-\u181F\u1878-\u187F\u18AB-\u18FF\u191D-\u191F\u192C-\u192F\u193C-\u193F\u1941-\u1945\u196E-\u196F\u1975-\u197F\u19AA-\u19AF\u19CA-\u19CF\u19DA-\u19DF\u1A1C-\u1AFF\u1B4C-\u1B4F\u1B5A-\u1B60\u1B7D-\u1B7F\u1BAB-\u1BAD\u1BBA-\u1BFF\u1C38-\u1C3F\u1C4A-\u1C4C\u1C7E-\u1CFF\u1DE7-\u1DFD\u1F16-\u1F17\u1F1E-\u1F1F\u1F46-\u1F47\u1F4E-\u1F4F\u1F58\u1F5A\u1F5C\u1F5E\u1F7E-\u1F7F\u1FB5\u1FC5\u1FD4-\u1FD5\u1FDC\u1FF0-\u1FF1\u1FF5\u1FFF\u200e\u2011-\u2012\u2017\u2019-\u201B\u201E-\u201F\u2022-\u2024\u2031\u2034\u2036-\u203A\u203C-\u2043\u2045-\u2051\u2053-\u205E\u2065-\u2069\u2072-\u2073\u207D-\u207E\u208D-\u208F\u2095-\u209F\u20B6-\u20CF\u20F1-\u20FF\u2150-\u2152\u2189-\u218F\u2329-\u232A\u23E8-\u23FF\u2427-\u243F\u244B-\u245F\u269E-\u269F\u26BD-\u26BF\u26C4-\u2700\u2705\u270A-\u270B\u2728\u274C\u274E\u2753-\u2755\u2757\u275F-\u2760\u2768-\u2775\u2795-\u2797\u27B0\u27BF\u27C5-\u27C6\u27CB\u27CD-\u27CF\u27E6-\u27EF\u2983-\u2998\u29D8-\u29DB\u29FC-\u29FD\u2B4D-\u2B4F\u2B55-\u2BFF\u2C2F\u2C5F\u2C70\u2C7E-\u2C7F\u2CEB-\u2CFC\u2CFE-\u2CFF\u2D26-\u2D2F\u2D66-\u2D6E\u2D70-\u2D7F\u2D97-\u2D9F\u2DA7\u2DAF\u2DB7\u2DBF\u2DC7\u2DCF\u2DD7\u2DDF\u2E00-\u2E2E\u2E30-\u2E7F\u2E9A\u2EF4-\u2EFF\u2FD6-\u2FEF\u2FFC-\u2FFF\u3018-\u301C\u3030\u303D\u3040\u3097-\u3098\u30A0\u3100-\u3104\u312E-\u3130\u318F\u31B8-\u31BF\u31E4-\u31EF\u321F\u3244-\u324F\u32FF\u4DB6-\u4DBF\u9FC4-\u9FFF\uA48D-\uA48F\uA4C7-\uA4FF\uA60D-\uA60F\uA62C-\uA63F\uA660-\uA661\uA673-\uA67B\uA67E\uA698-\uA6FF\uA78D-\uA7FA\uA82C-\uA83F\uA874-\uA87F\uA8C5-\uA8CF\uA8DA-\uA8FF\uA92F\uA954-\uA9FF\uAA37-\uAA3F\uAA4E-\uAA4F\uAA5A-\uABFF\uD7A4-\uD7FF\uFA2E-\uFA2F\uFA6B-\uFA6F\uFADA-\uFAFF\uFB07-\uFB12\uFB18-\uFB1C\uFB37\uFB3D\uFB3F\uFB42\uFB45\uFBB2-\uFBD2\uFD3E-\uFD4F\uFD90-\uFD91\uFDC8-\uFDEF\uFDFE-\uFDFF\uFE10-\uFE1F\uFE27-\uFE2F\uFE32\uFE45-\uFE48\uFE53\uFE58\uFE67\uFE6C-\uFE6F\uFE75\uFEFD-\uFEFE\uFF00\uFF5F-\uFF60\uFFBF-\uFFC1\uFFC8-\uFFC9\uFFD0-\uFFD1\uFFD8-\uFFD9\uFFDD-\uFFDF\uFFE7\uFFEF-\uFFF8\uFFFE-\uFFFF",
 		rx_operators          = /^ *[-+*\/^&%<=>:] */,
 		rg                    = new XRegExp("^((?:_xlfn.)?[\\p{L}\\d._]+ *)[-+*/^&%<=>:;\\(\\)]"),
-		//TODO for fixing formula input SUM(A1:B1.) - changing rgRange/rgRangeR1C1 ,
-		// there are other symbols that ms complains about similarly - ~@#(we also complain, but don't highlight range before these symbols).
-		// to check, enter SUM(A1:B1@) in a cell
+		//TODO for formula input fix SUM(A1:B1.) - change rgRange/rgRangeR1C1,
+		// MS also complains about other symbols - ~@# (we also complain, but do not highlight range before them).
+		// to test, enter SUM(A1:B1@) in cell
 		rgRange               = /^(\$?[A-Za-z]+\$?\d+:\$?[A-Za-z]+\$?\d+)(?:[-+*\/^&%<=>: ;),.]|$)/,
 		rgRangeR1C1           = /^(([Rr]{1}(\[)?(-?\d*)(\])?)([Cc]{1}(\[)?(-?\d*)(\])?):([Rr]{1}(\[)?(-?\d*)(\])?)([Cc]{1}(\[)?(-?\d*)(\])?))([-+*\/^&%<=>: ;),.]|$)/,
 		rgCols                = /^(\$?[A-Za-z]+:\$?[A-Za-z]+)(?:[-+*\/^&%<=>: ;),]|$)/,
@@ -2923,7 +2923,7 @@
 		rx_arraySeparatorsDef = /^ *[,;] */,
 		rx_numberDef          = /^ *[+-]?\d*(\d|\.)\d*([eE][+-]?\d+)?/,
 		rx_CommaDef           = /^ *[,;] */,
-		//not merging with named range check for now, think about merging. when merging in formula parser there's a problem - we don't get into isName, and then go into isFunc
+		//not merging with named range check for now. consider merge later. in formula parser, merge skips isName and goes to isFunc
 		rx_r1c1DefError       = /^(?!(([Rr]|[Cc]|([Rr][Cc]))(\d)))/i,
 
 		rx_ControlSymbols     = /^ *[\u0000-\u001F\u007F-\u009F] */,
@@ -3115,7 +3115,7 @@
 	}
 
 	/**
-	 * helper object for parsing formulas and checking strings against regular expressions listed above.
+	 * helper object for formula parsing and string checks against regexes above.
 	 * @constructor
 	 */
 	function parserHelper()
@@ -3498,7 +3498,7 @@
 			this._reset();
 		}
 
-		//check for [0-9] - in this form we get references when opening.
+		//check [0-9] - references arrive in this form on open
 		var subSTR = formula.substring(start_pos);
 		var external = XRegExp.exec(subSTR, rx_ref_external);
 		var externalLength = 0;
@@ -3507,11 +3507,11 @@
 			subSTR = formula.substring(start_pos + externalLength);
 			external = external[2];
 		} else {
-			//1. when entering in cell
+			//1. on cell input
 			//check for reference when entering 'C:\Users\[test.xlsx]Sheet1'!$A$1 (with backslash also needs to be recognized) / 'https://test.net/[test.xlsx]Sheet1'!$A$1
-			//need to extract filename and path, then check the path
-			//if path is specified, reference must be in single quotes, if just filename in [] - in MS this means the file is open, when closed the path is added
-			//not implementing open files for now, only working with paths
+			//need to extract filename and path, then validate path
+			//if path is specified, reference must be in single quotes. filename in [] means file is open in MS; on close, path is added
+			//open files not supported for now, paths only
 			//also references like [] + ! + Defname should be handled same as [] + SheetName + ! + Defname
 			external = parseExternalLink(subSTR);
 			if (external) {
@@ -4023,16 +4023,16 @@
 		}
 		return false;
 	};
-// Parse reference to range in sheet
+// Parse sheet range reference
 	parserHelper.prototype.parse3DRef = function (formula)
 	{
-		// First get the sheet
+		// First get sheet
 		var is3DRefResult = this.is3DRef(formula, 0);
 		if (is3DRefResult && true === is3DRefResult[0])
 		{
 			// Sheet name in reference
 			var sheetName = is3DRefResult[1];
-			// Find start of range
+			// Find range start
 			var indexStartRange = null !== this.pCurrPos ? this.pCurrPos : formula.indexOf("!") + 1;
 			if (this.isArea(formula, indexStartRange) || this.isRef(formula, indexStartRange))
 			{
@@ -4042,10 +4042,10 @@
 					return null;
 			}
 		}
-		// Return error
+		// Return null on error
 		return null;
 	};
-// Returns reference to range with sheet (sheet name is escaped)
+// Returns range reference with sheet (sheet name escaped)
 	parserHelper.prototype.get3DRef = function (sheet, range)
 	{
 		sheet = sheet.split(":");
@@ -4169,7 +4169,7 @@
 			}
 			else if (cDialogType.FormatTable === dialogType)
 			{
-				// ToDo remove this check, replace with a more proper one after fixing the _searchFilters function
+				// ToDo remove check, replace with proper one after _searchFilters fix
 				if (true === wb.getWorksheet().model.autoFilters.isRangeIntersectionTableOrFilter(range)) {
 					return Asc.c_oAscError.ID.AutoFilterDataRangeError;
 				} else if (wb.getWorksheet().intersectionFormulaArray(range, true, true, true)) {
@@ -4180,7 +4180,7 @@
 			}
 			else if (cDialogType.FormatTableChangeRange === dialogType)
 			{
-				// ToDo remove this check, replace with a more proper one after fixing the _searchFilters function
+				// ToDo remove check, replace with proper one after _searchFilters fix
 				checkChangeRange = wb.getWorksheet().af_checkChangeRange(range);
 				if (null !== checkChangeRange)
 					return checkChangeRange;

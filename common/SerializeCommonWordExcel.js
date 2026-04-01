@@ -192,7 +192,7 @@ BinaryCommonWriter.prototype.WriteItemWithLength = function(fWrite)
 };
 BinaryCommonWriter.prototype.WriteItemWithLengthStart = function()
 {
-    //Remember the position to write the length there at the end
+    //Remember position to write length at end
     var nStart = this.memory.GetCurPosition();
     this.memory.Skip(4);
     return nStart;
@@ -469,7 +469,7 @@ Binary_CommonReader.prototype.ReadTable = function(fReadContent)
     if(c_oSerConstants.ReadOk != res)
         return res;
     var stLen = this.stream.GetULongLE();
-    //Check if there is data for the whole table, then we can safely use get functions
+    //Check whether whole table has enough data, then safely use get functions
     res = this.stream.EnterFrame(stLen);
     if(c_oSerConstants.ReadOk != res)
         return res;
@@ -1048,7 +1048,7 @@ var g_oCellAddressUtils = new CellAddressUtils();
 		this.col = Math.max(0, Math.min(this.col - 1, gc_nMaxCol0));
 	};
 	CellBase.prototype.toRefA1 = function (row, col) {
-		//TODO function works incorrectly if the number of columns exceeds 26
+		//TODO function works incorrectly if column count exceeds 26
 		var res = '';
 		do {
 			res += String.fromCharCode(col % 26 + 65);
@@ -1073,13 +1073,13 @@ function CellAddress(){
 	this.bIsRow = false;
 	this.colLetter = null;
 	if(1 == argc){
-		//ID in "A1" format was passed directly
+		//ID in "A1" format passed directly
 		this.id = arguments[0].toUpperCase();
 		this._invalidCoord = true;
 		this._checkId();
 	}
 	else if(2 == argc){
-		//address in format (1,1) = "A1". Internal format starts from 1
+		//address in format (1,1) = "A1". Internal format starts at 1
 		this.row = arguments[0];
 		this.col = arguments[1];
 		this._checkCoord();
@@ -1118,10 +1118,10 @@ CellAddress.prototype._recalculate=function(bCoord, bId){
 	if(bCoord && this._invalidCoord){
 		this._invalidCoord = false;
 		var sId = this.id;
-		this.row = this.col = 0;//set invalid values to avoid assigning them in every else branch
+		this.row = this.col = 0;//set invalid values to avoid assignment in every else branch
 		var indexes = {}, i = -1, indexesCount = 0;
 		while ((i = sId.indexOf("$", i + 1)) != -1) {
-		    indexes[i - indexesCount++] = 1;//subtract count so that indexes point to the character following them after $ removal
+		    indexes[i - indexesCount++] = 1;//subtract count so indexes point to next character after $ removal
 		}
 		if (indexesCount <= 2) {
 		    if (indexesCount > 0)

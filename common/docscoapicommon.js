@@ -38,7 +38,7 @@
  */
   function(window, undefined) {
   /**
-   * User class for collaborative editing/viewing document
+   * User class for collaborative document editing/viewing
    * -----------------------------------------------------------------------------
    *
    * @constructor
@@ -49,7 +49,7 @@
     this.idOriginal = null;	// unique user id
     this.userName = null;		// user name
     this.state = undefined;	// state (true - connected, false - disconnected)
-    this.indexUser = -1;		// User index (actually equals number of document accesses on server)
+    this.indexUser = -1;		// User index - effectively number of document joins on server
     this.color = null;			// user color
     this.view = false;			// view(true), editor(false)
     //todo type: edit, review, fill forms, live viewer...
