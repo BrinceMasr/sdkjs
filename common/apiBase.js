@@ -65,7 +65,7 @@
 
 		this.isViewMode = false;
 		this.restrictions = Asc.c_oAscRestrictionType.None;
-		this.isCanSendChanges = true; // Flag indicating ability to send changes (set externally)
+		this.isCanSendChanges = true; // Can we send current user changes (set externally)
 
 		this.FontLoader  = null;
 		this.ImageLoader = null;
@@ -112,8 +112,8 @@
 		// AutoSave
 		this.autoSaveGap = 0;					// Autosave interval (0 means no autosave) in milliseconds
 		this.lastSaveTime = null;				// Last save time
-		this.autoSaveGapFast = 2000;			// Fast autosave interval (when alone) - 2 sec
-		this.autoSaveGapSlow = 10 * 60 * 1000;	// Slow autosave interval (when collaborating) - 10 minutes
+		this.autoSaveGapFast = 2000;			// Interval for fast collaboration - 2 sec
+		this.autoSaveGapSlow = 10 * 60 * 1000;	// Interval for slow collaboration - 10 minutes
 		this.intervalWaitAutoSave = 1000;
 
 		// Unlock document
@@ -121,7 +121,7 @@
 		this.canUnlockDocument2 = false;		// Duplicate flag, only for saveChanges or unLockDocument
 		this.canStartCoAuthoring = false;
 
-		this.isDocumentCanSave = false;			// Flag indicating ability to save document (whether save button is active)
+		this.isDocumentCanSave = false;			// Can we save document (whether save button is active)
 
 		// translate manager
 		this.translateManager = AscCommon.translateManager.init(config['translate']);
@@ -163,14 +163,14 @@
 		this.isProtectionSupport = true;
 		this.isAnonymousSupport = true;
 
-		this.canSave    = true;        // Flag to prevent saving until the previous save completes
-		this.IsUserSave = false;    // Flag controlling whether save was initiated by user or not (default - no)
+		this.canSave    = true;  // Don't save while current save in progress
+		this.IsUserSave = false; // Save initiated by user or not
 		this.isForceSaveOnUserSave = false;
         this.forceSaveButtonTimeout = null;
         this.forceSaveButtonContinue = false;
         this.forceSaveTimeoutTimeout = null;
 		this.forceSaveForm = null;
-		this.forceSaveUndoRequest = false; // Flag to know that this save came from an Undo request in collaborative mode
+		this.forceSaveUndoRequest = false; // Save came from Undo in collaboration
 		this.forceSaveSendFormRequest = false;
 		this.forceSaveDisconnectRequest = false;
 		this.forceSaveOformRequest = false;
@@ -179,7 +179,7 @@
 		// Version History
 		this.VersionHistory = null;				// Object responsible for a point in the version list
 
-		// Flags for applying properties via sliders
+		// Flags for applying properties using sliders
 		this.noCreatePoint     = false;
 		this.exucuteHistory    = false;
 		this.exucuteHistoryEnd = false;
@@ -860,8 +860,8 @@
 	 */
 	baseEditorsApi.prototype.asc_setRestriction              = function(val, additionalSettings)
 	{
-		// If the OnlySignatures flag is set, it cannot be overridden except by explicitly removing it via
-		// editor.removeRestriction(Asc.c_oAscRestrictionType.OnlySignatures)
+		// If the OnlySignatures flag is set, it cannot be overridden here. It must be explicitly removed using
+		// Asc.editor.removeRestriction(Asc.c_oAscRestrictionType.OnlySignatures)
 		if (this.restrictions & Asc.c_oAscRestrictionType.OnlySignatures)
 			return;
 
@@ -1481,16 +1481,16 @@
 	};
 	baseEditorsApi.prototype.asyncFontStartLoaded                = function()
 	{
-		// here emit event about menu freeze
+		// Send event to freeze UI
 		this.sync_StartAction(c_oAscAsyncActionType.Information, c_oAscAsyncAction.LoadFont);
 	};
 	baseEditorsApi.prototype.asyncImageStartLoaded               = function()
 	{
-		// here emit event about menu freeze
+		// Send event to freeze UI
 	};
 	baseEditorsApi.prototype.asyncImagesDocumentStartLoaded      = function(aImages)
 	{
-		// freeze event is not needed... it's already frozen
+		// Freeze UI is not needed... it's already frozen
 		// just need to show information in status bar (that image loading started)
 	};
 	baseEditorsApi.prototype.onDocumentContentReady              = function()
@@ -1750,12 +1750,15 @@
 			this.CoAuthoringApi.unLockDocument(false, true);
 		}
 	};
-	// Setting autosave interval (0 - means no autosave)
+	/**
+	 * Setting autosave interval
+	 * @param autoSaveGap {number} interval in seconds, 0 - means no autosave
+	 */
 	baseEditorsApi.prototype.asc_setAutoSaveGap                  = function(autoSaveGap)
 	{
 		if (typeof autoSaveGap === "number")
 		{
-			this.autoSaveGap = autoSaveGap * 1000; // They set it in seconds
+			this.autoSaveGap = autoSaveGap * 1000;
 		}
 	};
 	baseEditorsApi.prototype.checkChangesSize = function() {
@@ -2312,13 +2315,10 @@
 		}
 		this.arrPreOpenLocksObjects = [];
 	};
-	// server disconnect
 	baseEditorsApi.prototype.asc_coAuthoringDisconnect           = function()
 	{
 		this.CoAuthoringApi.disconnect();
 		this.isCoAuthoringEnable = false;
-
-		// Set view mode
 		this.asc_setViewMode(true);
 	};
 	baseEditorsApi.prototype.asc_stopSaving                      = function()
@@ -4276,7 +4276,7 @@
 	{
 	};
 	/**
-	 * Get text (as array of unicode values) that will be added on KeyDown event
+	 * Get text (as array of unicode code points) that will be added on KeyDown event
 	 * @param e
 	 * @returns {Number[]}
 	 */
@@ -4319,7 +4319,6 @@
 		if (0 == this.lastWorkTime)
 			return 0;
 
-		// if plugin is working - we are too
 		if (this.pluginsManager && this.pluginsManager.isWorked())
 			return 0;
 
@@ -4438,7 +4437,6 @@
 			let sDivId;
 			let oNumberingInfo;
 
-			// This is the correct type for passing information
 			if (arrDrawingInfo[i]["numberingInfo"])
 			{
 				arrAdaptedDrawingInfo.push(arrDrawingInfo[i]);
@@ -4963,7 +4961,6 @@
 
 	baseEditorsApi.prototype.initShortcuts = function(arrShortcuts, isRemoveBeforeAdd)
 	{
-		// Array
 		// [[ActionType, KeyCode, Ctrl, Shift, Alt]]
 		for (var nIndex = 0, nCount = arrShortcuts.length; nIndex < nCount; ++nIndex)
 		{
@@ -5293,7 +5290,7 @@
         return false;
 	};
 
-    // this is for deferred actions on click (dialogs in mobile version)
+    // this is for delayed actions on click (dialogs in mobile version)
 	baseEditorsApi.prototype.setHandlerOnClick = function(handler)
 	{
 		this._handlerOnClick = handler;
@@ -5478,7 +5475,7 @@
 		// 4) get signature and signature info.
 		// 5) add this data to archive
 
-		// TODO: check if signing plugin exists
+		// TODO: check if there is a plugin for signing
 
 		let plugin = window.g_asc_plugins ? window.g_asc_plugins.getSign() : null;
 		if (!plugin)
