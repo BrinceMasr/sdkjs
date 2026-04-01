@@ -7542,7 +7542,7 @@
 	 * @param {EMU} width - The column width measured in English measure units.
 	 * @returns {EMU | null} - Returns the actual column width set (in EMU), or null if the column index is invalid.
 	 *
-	 * @since 9.5.0
+	 * @since 9.4.0
 	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/SetColumnWidth.js
 	 */
 	ApiTable.prototype.SetColumnWidth = function (columnIndex, width) {
@@ -7590,7 +7590,7 @@
 	 * @param {number} columnIndex - The zero-based column index.
 	 * @returns {EMU | null}
 	 *
-	 * @since 9.5.0
+	 * @since 9.4.0
 	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/GetColumnWidth.js
 	 */
 	ApiTable.prototype.GetColumnWidth = function (columnIndex) {
@@ -7689,7 +7689,7 @@
 	 *
 	 * @returns {EMU | null}
 	 *
-	 * @since 9.5.0
+	 * @since 9.4.0
 	 * @see office-js-api/Examples/{Editor}/ApiTableRow/Methods/GetHeight.js
 	 */
 	ApiTableRow.prototype.GetHeight = function () {
