@@ -3517,7 +3517,7 @@
 				}
 			},
 
-			//TODO get rid of split, pass cellId and tableName
+			//TODO need remove split, pass cellId and tableName
 			_getPressedFilter: function (activeRange, cellId) {
 				var worksheet = this.worksheet;
 

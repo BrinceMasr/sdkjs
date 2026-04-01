@@ -1607,8 +1607,8 @@ NumFormat.prototype =
 				if(0 == res.frac && 0 == res.dec && false === this.bDateTime)
 					res.sign = SignType.Null;
 			}
-            //After rounding the result may be zero,
-            //but didn't move the sign check here because rounding requires a non-negative number
+			//After rounding the result may be zero,
+			//but didn't move the sign check here because rounding requires a non-negative number
 
             if(this.bDateTime === true)
 				res.date = this.parseDate(number);

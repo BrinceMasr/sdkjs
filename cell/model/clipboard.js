@@ -258,7 +258,7 @@
 						//only values (values are pasted instead of formulas as well)
 						this._clean();
 						this.val = true;
-						//we preserve images from Word in this situation
+						//save images from Word in this situation
 						if (window['AscCommon'].g_specialPasteHelper.specialPasteData.pasteFromWord) {
 							this.images = true;
 						}

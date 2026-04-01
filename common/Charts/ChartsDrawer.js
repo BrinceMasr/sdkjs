@@ -249,7 +249,6 @@ CChartsDrawer.prototype =
 	init: function(chartSpace) {
 		//create area
 		this.areaChart = new areaChart();
-		//create area
 		this.plotAreaChart = new plotAreaChart();
 		//Floor This element specifies the floor of a 3D chart.
 		this.floor3DChart = new floor3DChart();

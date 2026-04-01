@@ -2659,7 +2659,7 @@
   };
 
   WorkbookView.prototype.updateWorksheetByModel = function() {
-    // ToDo Made a small workaround for showing the sheet. I think we should switch from wsViews to wsViewsId (store by id)
+    // ToDo Small stub for showing the sheet. I think we should switch from wsViews to wsViewsId (store by id)
     var oldActiveWs;
     if (-1 !== this.wsActive) {
       oldActiveWs = this.wsViews[this.wsActive];

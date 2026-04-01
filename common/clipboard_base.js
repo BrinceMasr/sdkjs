@@ -682,7 +682,7 @@
 
 		StartFocus : function()
 		{
-			// don't spawn timers
+			// avoid creating duplicate timers
 			this.EndFocus(false);
 
 			this.CopyPasteFocus = true;

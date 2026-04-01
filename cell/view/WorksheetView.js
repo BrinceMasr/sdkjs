@@ -10920,7 +10920,7 @@ function isAllowPasteLink(pastedWb) {
         if (moveHeight > 0) {
             ctx.drawImage(ctx.getCanvas(), x, y, oldW, moveHeight, x + dx, y - dy, oldW, moveHeight);
 
-            // Workaround for safari (http://bugzilla.onlyoffice.com/show_bug.cgi?id=25546). 'copy' mode first erases, then
+            // Stub for safari (http://bugzilla.onlyoffice.com/show_bug.cgi?id=25546). 'copy' mode first erases, then
             // draws (and since we draw on ourselves, the image will be empty)
             if (AscBrowser.isSafari) {
                 this.drawingGraphicCtx.moveImageDataSafari(x, y, oldW, moveHeight, x + dx, y - dy);
@@ -11316,7 +11316,7 @@ function isAllowPasteLink(pastedWb) {
         if (moveWidth > 0) {
             this._drawImage(ctx, ctx.getCanvas(), x + this.getRightToLeftOffset(), y, moveWidth, ctxH, x - dx + this.getRightToLeftOffset(), y, moveWidth, ctxH);
 
-            // Workaround for safari (http://bugzilla.onlyoffice.com/show_bug.cgi?id=25546). 'copy' mode first erases, then
+            // Stub for safari (http://bugzilla.onlyoffice.com/show_bug.cgi?id=25546). 'copy' mode first erases, then
             // draws (and since we draw on ourselves, the image will be empty)
 
 			this._moveImageData(x, y, moveWidth, ctxH, x - dx, y, moveWidth, ctxH);

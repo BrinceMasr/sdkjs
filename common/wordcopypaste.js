@@ -150,7 +150,7 @@ function ResetNewUrls(data, aUrls, aBuilderImagesByUrl, oImageMap)
     }
 }
 
-//TODO regarding the coefficient, can't find a suitable conversion. review.
+//TODO can't find a suitable conversion. review.
 var koef_mm_to_indent = 3.88;
 
 var PasteElementsId = {
