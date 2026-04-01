@@ -3321,7 +3321,7 @@
 		const currentSlideIndex = this.m_oWordControl.m_oDrawingDocument.SlideCurrent;
 		const scrollYMm = this.m_dScrollY * g_dKoef_pix_to_mm;
 
-		if (!this.outlineView.outlineShape) {
+		if (/*!this.outlineView.outlineShape*/true) {
 			const outlineWidth = widthMM - this.outlineLeftMarginMM;
 			this.outlineView.updateAll(outlineWidth, heightMM, currentSlideIndex);
 		}
