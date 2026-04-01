@@ -4783,7 +4783,7 @@
 		this.m_nCount = Count; // Number of added/deleted elements
 		this.m_pData = Data;  // Data from history associated with this change
 
-		// Break complex action into simple ones
+		// Divide complex action into simple ones
 		this.m_aPositions = this.Make_ArrayOfSimpleActions(Type, Pos, Count);
 	}
 
