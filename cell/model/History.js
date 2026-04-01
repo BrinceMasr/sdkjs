@@ -544,7 +544,7 @@ CHistory.prototype.Undo = function(Options)
 	var oRedoObjectParam = this.oRedoObjectParam = new AscCommonExcel.RedoObjectParam();
 	this.UndoRedoPrepare(oRedoObjectParam, true);
 
-	// Roll back all actions in reverse order (relative to their execution)
+	// Revert all actions in reverse order (relative to their execution)
 	var Point = null;
 	if (undefined !== Options && null !== Options && true === Options.All)
 	{
@@ -1170,7 +1170,7 @@ CHistory.prototype.Create_NewPoint = function(nDescription)
 
 // Register a new change:
 // Class - the object where it occurred
-// Data  - the changes themselves
+// Data  - changes
 CHistory.prototype.Add = function(Class, Type, sheetid, range, Data, LocalChange, isRedoAdd)
 {
 	if (!this.CanAddChanges())
@@ -1521,7 +1521,7 @@ CHistory.prototype.Is_On = function()
 };
 CHistory.prototype.GetSerializeArray = function()
 {
-	//todo get rid of GetSerializeArray. iterate through the array
+	//todo need remove GetSerializeArray. iterate through the array
 	var aRes = [];
 	var i = 0;
 	if (null != this.SavedIndex)

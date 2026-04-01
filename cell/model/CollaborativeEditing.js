@@ -183,7 +183,7 @@
 		};
 		CCollaborativeEditing.prototype._addCheckLock = function (lockInfo, callback) {
 			if (false !== this.getLockIntersection(lockInfo, c_oAscLockTypes.kLockTypeMine, false)) {
-				// Editing ourselves
+				// Self editing
 				AscCommonExcel.applyFunction(callback, true);
 				return c_oAscLockTypes.kLockTypeMine;
 			} else if (false !== this.getLockIntersection(lockInfo, c_oAscLockTypes.kLockTypeOther, false)) {
@@ -1171,7 +1171,7 @@
 			else
 				return (position + inc);
 		};
-		// Recalculation for ourselves
+		// Recalculation for me
 		CRecalcIndexElement.prototype.getLockMe = function (position) {
 			var inc = (c_oAscRecalcIndexTypes.RecalcIndexAdd === this._recalcType) ? -1 : +1;
 			if (position < this._position)
@@ -1256,7 +1256,7 @@
 
 			return newPosition;
 		};
-		// Recalculation for ourselves
+		// Recalculation for me
 		CRecalcIndex.prototype.getLockMe = function (position) {
 			var newPosition = position;
 			var count = this._arrElements.length;
