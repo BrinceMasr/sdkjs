@@ -20672,6 +20672,22 @@ $(function () {
 		ws.getRange2("A301:B320").cleanAll();      // Group 1 zone
 		ws.getRange2("F301:G320").cleanAll();      // Group 2 zone
 		ws.getRange2("A600:D606").cleanAll();      // Table1 zone
+		ws.getRange2("BN1:BO6").cleanAll();
+
+		// Data for Case #20 (Bounded): criteria range with zeros and truly empty cells
+		ws.getRange2("BN1").setValue("0");
+		// BN2 intentionally left empty
+		ws.getRange2("BN3").setValue("1");
+		ws.getRange2("BN4").setValue("0");
+		// BN5 intentionally left empty
+		ws.getRange2("BN6").setValue("2");
+		// BN7 intentionally left empty — used as the empty-cell criteria reference
+		ws.getRange2("BO1").setValue("10");
+		ws.getRange2("BO2").setValue("20");
+		ws.getRange2("BO3").setValue("30");
+		ws.getRange2("BO4").setValue("40");
+		ws.getRange2("BO5").setValue("50");
+		ws.getRange2("BO6").setValue("60");
 
 		// Data setup for comprehensive SUMIF testing
 		ws.getRange2("A301").setValue("10");
@@ -21890,6 +21906,14 @@ $(function () {
 		assert.strictEqual(ws.getRange2("BH5").getValue(), "2", "Recalc after: SUMIF IN = 2");
 		assert.strictEqual(ws.getRange2("BH6").getValue(), "4", "Recalc after: SUMIF OUT = 4");
 		assert.strictEqual(ws.getRange2("BH7").getValue(), "-2", "Recalc after: Balance = -2");
+
+		// Case #21: Area, Ref, Area. Empty cell reference as criteria is treated as 0, not as empty string.
+		// Range BN1:BN6 = {0, <empty>, 1, 0, <empty>, 2} — 2 zeros and 2 truly empty cells; criteria cell BN7 is empty.
+		// Expected: 50 = 10 + 40 (only cells with value 0 match, empty cells in range are not summed).
+		AscCommonExcel.g_oSumIfCache.clean();
+		oParser = new parserFormula('SUMIF(BN1:BN6, BN7, BO1:BO6)', "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 50, 'Test: Bounded case: Area, Ref, Area. Empty cell reference as criteria is treated as 0, sums values where criteria cell equals 0');
 
 		// Cleanup: remove named ranges
 		wb.delDefinesNames(defNameSumIfRange);

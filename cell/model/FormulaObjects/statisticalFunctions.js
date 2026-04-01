@@ -12550,6 +12550,9 @@ function parseStringToCElement (val, cultureInfo) {
 		}
 		if (cElementType.cell === arg1.type || cElementType.cell3D === arg1.type) {
 			arg1 = arg1.getValue();
+			if (arg1.type === cElementType.empty) {
+				arg1 = new cNumber(0);
+			}
 		}
 		return calculateOne(arg0, arg1);
 	};
@@ -13095,6 +13098,9 @@ function parseStringToCElement (val, cultureInfo) {
 		}
 		if (cElementType.cell === arg1.type || cElementType.cell3D === arg1.type) {
 			arg1 = arg1.getValue();
+			if (arg1.type === cElementType.empty) {
+				arg1 = new cNumber(0);
+			}
 		}
 		return calculateOne(arg0, arg1, arg2);
 	};

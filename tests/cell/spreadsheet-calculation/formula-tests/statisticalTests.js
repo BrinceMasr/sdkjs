@@ -1437,6 +1437,23 @@ $(function () {
 		ws.getRange2("T301:T310").cleanAll();
 		ws.getRange2("Y301:Y310").cleanAll();
 		ws.getRange2("A598:A610").cleanAll();
+		ws.getRange2("BQ301:BR307").cleanAll();
+
+		// Data for Case #20 (Bounded): criteria range with zeros and truly empty cells
+		ws.getRange2("BQ301").setValue("0");
+		// BQ302 intentionally left empty
+		ws.getRange2("BQ303").setValue("1");
+		ws.getRange2("BQ304").setValue("0");
+		// BQ305 intentionally left empty
+		ws.getRange2("BQ306").setValue("2");
+		// BQ307 intentionally left empty — used as the empty-cell criteria reference
+		ws.getRange2("BR301").setValue("10");
+		ws.getRange2("BR302").setValue("20");
+		ws.getRange2("BR303").setValue("30");
+		ws.getRange2("BR304").setValue("40");
+		ws.getRange2("BR305").setValue("50");
+		ws.getRange2("BR306").setValue("60");
+
 		// Table type (A600:D606): header row A600:D600, data rows A601:D606
 		getTableType(599, 0, 605, 3);
 		ws.getRange2("A601").setValue("5");
@@ -2657,6 +2674,14 @@ $(function () {
 		oParser = new parserFormula('AVERAGEIF(A301:A310, Sheet1:Sheet2!A1:B1, B301:B310)', "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#DIV/0!");
+
+		// Case #20: Area, Ref, Area. Empty cell reference as criteria is treated as 0, not as empty string.
+		// Range BQ301:BQ306 = {0, <empty>, 1, 0, <empty>, 2} — 2 zeros and 2 truly empty cells; criteria cell BQ307 is empty.
+		// Expected: 25 = (10 + 40) / 2 (only cells with value 0 match, empty cells in range are not averaged).
+		AscCommonExcel.g_oAverageIfCache.clean();
+		oParser = new parserFormula('AVERAGEIF(BQ301:BQ306, BQ307, BR301:BR306)', "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 25, 'Test: Bounded case: Area, Ref, Area. Empty cell reference as criteria is treated as 0, averages values where criteria cell equals 0');
 
 		// Cleanup: remove named ranges
 		wb.delDefinesNames(defNameAvgIfRange);
@@ -10182,6 +10207,16 @@ $(function () {
 	QUnit.test("Test: \"COUNTIF\"", function (assert) {
 
 		ws.getRange2("A1:J210").cleanAll();
+		ws.getRange2("AG1:AG7").cleanAll();
+
+		// Data for Case #39 (Bounded): criteria range with zeros and truly empty cells
+		ws.getRange2("AG1").setValue("0");
+		// AG2 intentionally left empty
+		ws.getRange2("AG3").setValue("1");
+		ws.getRange2("AG4").setValue("0");
+		// AG5 intentionally left empty
+		ws.getRange2("AG6").setValue("2");
+		// AG7 intentionally left empty — used as the empty-cell criteria reference
 
 		ws.getRange2("A7").setValue("3");
 		ws.getRange2("B7").setValue("10");
@@ -11131,6 +11166,14 @@ $(function () {
 		oParser = new parserFormula('COUNTIF(A324:A356, Sheet1:Sheet2!A1:B1)', "AC7", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 0);
+
+		// Case #39: Area, Ref. Empty cell reference as criteria is treated as 0, not as empty string.
+		// Range AG1:AG6 = {0, <empty>, 1, 0, <empty>, 2} — 2 zeros and 2 truly empty cells; criteria cell AG7 is empty.
+		// Expected: 2 (only cells with value 0 match, empty cells in range are not counted).
+		AscCommonExcel.g_oCountIfCache.clean();
+		oParser = new parserFormula('COUNTIF(AG1:AG6, AG7)', "C2", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Bounded case: Area, Ref. Empty cell reference as criteria is treated as 0, counts 2 cells with value 0');
 
 		testArrayFormula2(assert, "COUNTIF", 2, 2);
 	});
