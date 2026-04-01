@@ -2099,7 +2099,7 @@
 					this.MouseThumbnailsAnimateScrollBottomTimer = -1;
 				}
 				if (this.MouseThumbnailsAnimateScrollTopTimer == -1) {
-					this.MouseThumbnailsAnimateScrollTopTimer = setInterval(this.OnScrollTrackTop, 50);
+					this.MouseThumbnailsAnimateScrollTopTimer = setInterval(this.OnScrollTrackTop.bind(this), 50);
 				}
 				break;
 
@@ -2109,7 +2109,7 @@
 					this.MouseThumbnailsAnimateScrollTopTimer = -1;
 				}
 				if (-1 == this.MouseThumbnailsAnimateScrollBottomTimer) {
-					this.MouseThumbnailsAnimateScrollBottomTimer = setInterval(this.OnScrollTrackBottom, 50);
+					this.MouseThumbnailsAnimateScrollBottomTimer = setInterval(this.OnScrollTrackBottom.bind(this), 50);
 				}
 				break;
 		}
@@ -2683,8 +2683,7 @@
 							const srcPara = srcContent.Content[hit.sourceParagraphIdx];
 							if (srcPara) {
 								const outlinePara = this.outlineView.outlineShape.txBody.content.Content[hit.paragraphIdx];
-								srcPara.Set_ParaContentPos(caretInfo, true, -1, -1, false);
-								outlinePara.Document_SetThisElementCurrent();
+								srcPara.Set_ParaContentPos(caretInfo, true, -1, -1, false); //todo
 							}
 						}
 					}
@@ -3321,7 +3320,7 @@
 		const currentSlideIndex = this.m_oWordControl.m_oDrawingDocument.SlideCurrent;
 		const scrollYMm = this.m_dScrollY * g_dKoef_pix_to_mm;
 
-		if (/*!this.outlineView.outlineShape*/true) {
+		if (!this.outlineView.outlineShape) {
 			const outlineWidth = widthMM - this.outlineLeftMarginMM;
 			this.outlineView.updateAll(outlineWidth, heightMM, currentSlideIndex);
 		}
@@ -4125,7 +4124,7 @@
 					this.MouseThumbnailsAnimateScrollBottomTimer = -1;
 				}
 				if (this.MouseThumbnailsAnimateScrollTopTimer == -1) {
-					this.MouseThumbnailsAnimateScrollTopTimer = setInterval(this.OnScrollTrackTop, 50);
+					this.MouseThumbnailsAnimateScrollTopTimer = setInterval(this.OnScrollTrackTop.bind(this), 50);
 				}
 				break;
 
@@ -4135,7 +4134,7 @@
 					this.MouseThumbnailsAnimateScrollTopTimer = -1;
 				}
 				if (-1 == this.MouseThumbnailsAnimateScrollBottomTimer) {
-					this.MouseThumbnailsAnimateScrollBottomTimer = setInterval(this.OnScrollTrackBottom, 50);
+					this.MouseThumbnailsAnimateScrollBottomTimer = setInterval(this.OnScrollTrackBottom.bind(this), 50);
 				}
 				break;
 		}

@@ -1353,8 +1353,8 @@ function CDrawingDocument()
 			dKoefY = g_dKoef_mm_to_pix * dPR;
 		} else if (this.m_oWordControl.IsThumbnailsSupported() && this.m_oWordControl.Thumbnails && this.m_oLogicDocument.IsFocusOnOutline()) {
 			overlay = this.m_oWordControl.Thumbnails.m_oOverlayApi;
-			xDst = this.m_oWordControl.Thumbnails.outlineLeftMarginMM;
-			yDst = this.m_oWordControl.Thumbnails.m_dScrollY;
+			xDst = 0;
+			yDst = 0;
 			dKoefX = g_dKoef_mm_to_pix * dPR;
 			dKoefY = g_dKoef_mm_to_pix * dPR;
 		}
