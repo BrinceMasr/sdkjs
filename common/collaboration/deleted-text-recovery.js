@@ -90,7 +90,7 @@
 	// Private area
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/**
-	 * Initialize and create intermediate data for displaying deleted text in the current revision
+	 * Collect changes for displaying deleted text in the current revision
 	 */
 	DeletedTextRecovery.prototype.HandleChanges = function()
 	{
@@ -108,7 +108,7 @@
 		this.m_RewiewDelPoints = arrChanges;
 	};
 	/**
-	 * Get prepared data split by points
+	 * Get changes separated by points
 	 * @return {*[]}
 	 */
 	DeletedTextRecovery.prototype.GetChanges = function()
@@ -359,7 +359,7 @@
 		if (!oReviewInfoParent === undefined)
 			return;
 
-		// TODO: The check for which classes to iterate through should be refactored
+		// TODO: Refactor the check which classes should be iterated
 		if (!oReviewInfoParent || !oReviewInfoParent.GetReviewInfo)
 		{
 			if (oReviewInfoParent instanceof ParaMath)

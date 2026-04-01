@@ -1714,7 +1714,7 @@ window.AscCommon.g_cIsBeta = "false";
 		kLockTypeMine   : 2, // this object is locked by the current user
 		kLockTypeOther  : 3, // this object is locked by another (not current) user
 		kLockTypeOther2 : 4, // this object is locked by another (not current) user (updates already received)
-		kLockTypeOther3 : 5  // this object was locked (updates received) and is locked again
+		kLockTypeOther3 : 5  // this object was locked (updates received) and it was locked again after
 	};
 
 	var c_oAscFormatPainterState = {
@@ -1926,9 +1926,9 @@ window.AscCommon.g_cIsBeta = "false";
 
 	// Print type
 	var c_oAscPrintType = {
-		ActiveSheets: 0,	// Active sheets
-		EntireWorkbook: 1,	// Entire workbook
-		Selection: 2		// Selected range
+		ActiveSheets: 0,
+		EntireWorkbook: 1,
+		Selection: 2
 	};
 
 	var c_oZoomType = {
@@ -2199,8 +2199,8 @@ window.AscCommon.g_cIsBeta = "false";
 	var c_oAscMaxFormulaReferenceLength = 2048;
 	var c_oAscMaxTableColumnTextLength  = 256;
 
-	var changestype_None                      = 0; // Nothing happens with the selected element (check is done via additional parameter)
-	var changestype_Paragraph_Content         = 1; // Adding/removing elements in paragraph
+	var changestype_None                      = 0; // Nothing happens with the selected element (check is done using additional parameter)
+	var changestype_Paragraph_Content         = 1; // Adding/removing contents of paragraph
 	var changestype_Paragraph_Properties      = 2; // Changing paragraph properties
 	var changestype_Paragraph_AddText         = 3; // Adding text
 	var changestype_Paragraph_TextProperties  = 4; // Changing text settings
@@ -2215,8 +2215,8 @@ window.AscCommon.g_cIsBeta = "false";
 	var changestype_ContentControl_Properties = 25; // Changing container properties
 	var changestype_ContentControl_Add        = 26; // Adding container
 	var changestype_HdrFtr                    = 30; // Changes to header/footer (any changes)
-	var changestype_Remove                    = 40; // Deletion via backspace key (backward deletion)
-	var changestype_Delete                    = 41; // Deletion via delete key (forward deletion)
+	var changestype_Remove                    = 40; // Deletion using backspace key (backward deletion)
+	var changestype_Delete                    = 41; // Deletion using delete key (forward deletion)
 	var changestype_Drawing_Props             = 51; // Changing shape properties
 	var changestype_ColorScheme               = 60; // Changing color scheme
 	var changestype_Text_Props                = 61; // Changing text properties
@@ -2564,140 +2564,140 @@ window.AscCommon.g_cIsBeta = "false";
 
 
 	var c_oAscSmartArtTypes = {
-		AccentedPicture: 0, // Accented picture
-		Balance: 1, // Balance
-		TitledPictureBlocks: 2, // Titled picture blocks
-		PictureAccentBlocks: 3, // Picture accent blocks
-		BlockCycle: 4, // Block cycle
-		StackedVenn: 5, // Stacked Venn
-		VerticalEquation: 6, // Vertical equation
-		VerticalBlockList: 7, // Vertical block list
-		VerticalBendingProcess: 8, // Vertical bending process
-		VerticalBulletList: 9, // Vertical bullet list
-		VerticalCurvedList: 10, // Vertical curved list
-		VerticalProcess: 11, // Vertical process
-		VerticalBoxList: 12, // Vertical box list
-		VerticalPictureList: 13, // Vertical picture list
-		VerticalCircleList: 14, // Vertical circle list
-		VerticalPictureAccentList: 15, // Vertical picture accent list
-		VerticalArrowList: 16, // Vertical arrow list
-		VerticalChevronList: 17, // Vertical chevron list
-		VerticalAccentList: 18, // Vertical accent list
-		NestedTarget: 19, // Nested target
-		Funnel: 20, // Funnel
-		UpwardArrow: 21, // Upward arrow
-		IncreasingArrowsProcess: 22, // Increasing arrows process
-		StepUpProcess: 23, // Step up process
-		CircularPictureCallout: 24, // Circular picture callout
-		HorizontalHierarchy: 25, // Horizontal hierarchy
-		HorizontalLabeledHierarchy: 26, // Horizontal labeled hierarchy
-		HorizontalMultiLevelHierarchy: 27, // Horizontal multi-level hierarchy
-		HorizontalOrganizationChart: 28, // Horizontal organization chart
-		HorizontalBulletList: 29, // Horizontal bullet list
-		HorizontalPictureList: 30, // Horizontal picture list
-		ClosedChevronProcess: 31, // Closed chevron process
-		HierarchyList: 32, // Hierarchy list
-		Hierarchy: 33, // Hierarchy
-		CirclePictureHierarchy: 34, // Circle picture hierarchy
-		LabeledHierarchy: 35, // Labeled hierarchy
-		InvertedPyramid: 36, // Inverted pyramid
-		HexagonCluster: 37, // Hexagon cluster
-		CircleRelationship: 38, // Circle relationship
-		CircleAccentTimeline: 39, // Circle accent timeline
-		CircularBendingProcess: 40, // Circular bending process
-		ArrowRibbon: 41, // Arrow ribbon
-		LinearVenn: 42, // Linear Venn
-		PictureLineup: 43, // Picture lineup
-		TitlePictureLineup: 44, // Title picture lineup
-		BendingPictureCaptionList: 45, // Bending picture caption list
-		BendingPictureAccentList: 46, // Bending picture accent list
-		TitledMatrix: 47, // Titled matrix
-		IncreasingCircleProcess: 48, // Increasing circle process
-		BendingPictureBlocks: 49, // Bending picture blocks
-		BendingPictureCaption: 50, // Bending picture caption
-		BendingPictureSemiTransparentText: 51, // Bending picture semi-transparent text
-		NonDirectionalCycle: 52, // Non-directional cycle
-		ContinuousBlockProcess: 53, // Continuous block process
-		ContinuousPictureList: 54, // Continuous picture list
-		ContinuousCycle: 55, // Continuous cycle
-		DescendingBlockList: 56, // Descending block list
-		StepDownProcess: 57, // Step down process
-		ReverseList: 58, // Reverse list
-		OrganizationChart: 59, // Organization chart
-		NameAndTitleOrganizationChart: 60, // Name and title organization chart
-		AlternatingFlow: 61, // Alternating flow
-		PyramidList: 62, // Pyramid list
-		PlusAndMinus: 63, // Plus and minus
-		RepeatingBendingProcess: 64, // Repeating bending process
-		CaptionedPictures: 65, // Captioned pictures
-		DetailedProcess: 66, // Detailed process
-		PictureStrips: 67, // Picture strips
-		HalfCircleOrganizationChart: 68, // Half circle organization chart
-		PhasedProcess: 69, // Phased process
-		BasicVenn: 70, // Basic Venn
-		BasicTimeline: 71, // Basic timeline
-		BasicPie: 72, // Basic pie
-		BasicMatrix: 73, // Basic matrix
-		BasicPyramid: 74, // Basic pyramid
-		BasicRadial: 75, // Basic radial
-		BasicTarget: 76, // Basic target
-		BasicBlockList: 77, // Basic block list
-		BasicBendingProcess: 78, // Basic bending process
-		BasicProcess: 79, // Basic process
-		BasicChevronProcess: 80, // Basic chevron process
-		BasicCycle: 81, // Basic cycle
-		OpposingIdeas: 82, // Opposing ideas
-		OpposingArrows: 83, // Opposing arrows
-		RandomToResultProcess: 84, // Random to result process
-		SubStepProcess: 85, // Sub-step process
-		PieProcess: 86, // Pie process
-		AccentProcess: 87, // Accent process
-		AscendingPictureAccentProcess: 88, // Ascending picture accent process
-		PictureAccentProcess: 89, // Picture accent process
-		RadialVenn: 90, // Radial Venn
-		RadialCycle: 91, // Radial cycle
-		RadialCluster: 92, // Radial cluster
-		RadialList: 93, // Radial list
-		MultiDirectionalCycle: 94, // Multi-directional cycle
-		DivergingRadial: 95, // Diverging radial
-		DivergingArrows: 96, // Diverging arrows
-		FramedTextPicture: 97, // Framed text picture
-		GroupedList: 98, // Grouped list
-		SegmentedPyramid: 99, // Segmented pyramid
-		SegmentedProcess: 100, // Segmented process
-		SegmentedCycle: 101, // Segmented cycle
-		PictureGrid: 102, // Picture grid
-		GridMatrix: 103, // Grid matrix
-		SpiralPicture: 104, // Spiral picture
-		StackedList: 105, // Stacked list
-		PictureCaptionList: 106, // Picture caption list
-		ProcessList: 107, // Process list
-		BubblePictureList: 108, // Bubble picture list
-		SquareAccentList: 109, // Square accent list
-		LinedList: 110, // Lined list
-		PictureAccentList: 111, // Picture accent list
-		TitledPictureAccentList: 112, // Titled picture accent list
-		SnapshotPictureList: 113, // Snapshot picture list
-		ContinuousArrowProcess: 114, // Continuous arrow process
-		CircleArrowProcess: 115, // Circle arrow process
-		ProcessArrows: 116, // Process arrows
-		StaggeredProcess: 117, // Staggered process
-		ConvergingRadial: 118, // Converging radial
-		ConvergingArrows: 119, // Converging arrows
-		TableHierarchy: 120, // Table hierarchy
-		TableList: 121, // Table list
-		TextCycle: 122, // Text cycle
-		TrapezoidList: 123, // Trapezoid list
-		DescendingProcess: 124, // Descending process
-		ChevronList: 125, // Chevron list
-		Equation: 126, // Equation
-		CounterbalanceArrows: 127, // Counterbalance arrows
-		TargetList: 128, // Target list
-		CycleMatrix: 129, // Cycle matrix
-		AlternatingPictureBlocks: 130, // Alternating picture blocks
-		AlternatingPictureCircles: 131, // Alternating picture circles
-		AlternatingHexagonList: 132, // Alternating hexagon list
-		Gear: 133, // Gear
+		AccentedPicture: 0,
+		Balance: 1,
+		TitledPictureBlocks: 2,
+		PictureAccentBlocks: 3,
+		BlockCycle: 4,
+		StackedVenn: 5,
+		VerticalEquation: 6,
+		VerticalBlockList: 7,
+		VerticalBendingProcess: 8,
+		VerticalBulletList: 9,
+		VerticalCurvedList: 10,
+		VerticalProcess: 11,
+		VerticalBoxList: 12,
+		VerticalPictureList: 13,
+		VerticalCircleList: 14,
+		VerticalPictureAccentList: 15,
+		VerticalArrowList: 16,
+		VerticalChevronList: 17,
+		VerticalAccentList: 18,
+		NestedTarget: 19,
+		Funnel: 20,
+		UpwardArrow: 21,
+		IncreasingArrowsProcess: 22,
+		StepUpProcess: 23,
+		CircularPictureCallout: 24,
+		HorizontalHierarchy: 25,
+		HorizontalLabeledHierarchy: 26,
+		HorizontalMultiLevelHierarchy: 27,
+		HorizontalOrganizationChart: 28,
+		HorizontalBulletList: 29,
+		HorizontalPictureList: 30,
+		ClosedChevronProcess: 31,
+		HierarchyList: 32,
+		Hierarchy: 33,
+		CirclePictureHierarchy: 34,
+		LabeledHierarchy: 35,
+		InvertedPyramid: 36,
+		HexagonCluster: 37,
+		CircleRelationship: 38,
+		CircleAccentTimeline: 39,
+		CircularBendingProcess: 40,
+		ArrowRibbon: 41,
+		LinearVenn: 42,
+		PictureLineup: 43,
+		TitlePictureLineup: 44,
+		BendingPictureCaptionList: 45,
+		BendingPictureAccentList: 46,
+		TitledMatrix: 47,
+		IncreasingCircleProcess: 48,
+		BendingPictureBlocks: 49,
+		BendingPictureCaption: 50,
+		BendingPictureSemiTransparentText: 51,
+		NonDirectionalCycle: 52,
+		ContinuousBlockProcess: 53,
+		ContinuousPictureList: 54,
+		ContinuousCycle: 55,
+		DescendingBlockList: 56,
+		StepDownProcess: 57,
+		ReverseList: 58,
+		OrganizationChart: 59,
+		NameAndTitleOrganizationChart: 60,
+		AlternatingFlow: 61,
+		PyramidList: 62,
+		PlusAndMinus: 63,
+		RepeatingBendingProcess: 64,
+		CaptionedPictures: 65,
+		DetailedProcess: 66,
+		PictureStrips: 67,
+		HalfCircleOrganizationChart: 68,
+		PhasedProcess: 69,
+		BasicVenn: 70,
+		BasicTimeline: 71,
+		BasicPie: 72,
+		BasicMatrix: 73,
+		BasicPyramid: 74,
+		BasicRadial: 75,
+		BasicTarget: 76,
+		BasicBlockList: 77,
+		BasicBendingProcess: 78,
+		BasicProcess: 79,
+		BasicChevronProcess: 80,
+		BasicCycle: 81,
+		OpposingIdeas: 82,
+		OpposingArrows: 83,
+		RandomToResultProcess: 84,
+		SubStepProcess: 85,
+		PieProcess: 86,
+		AccentProcess: 87,
+		AscendingPictureAccentProcess: 88,
+		PictureAccentProcess: 89,
+		RadialVenn: 90,
+		RadialCycle: 91,
+		RadialCluster: 92,
+		RadialList: 93,
+		MultiDirectionalCycle: 94,
+		DivergingRadial: 95,
+		DivergingArrows: 96,
+		FramedTextPicture: 97,
+		GroupedList: 98,
+		SegmentedPyramid: 99,
+		SegmentedProcess: 100,
+		SegmentedCycle: 101,
+		PictureGrid: 102,
+		GridMatrix: 103,
+		SpiralPicture: 104,
+		StackedList: 105,
+		PictureCaptionList: 106,
+		ProcessList: 107,
+		BubblePictureList: 108,
+		SquareAccentList: 109,
+		LinedList: 110,
+		PictureAccentList: 111,
+		TitledPictureAccentList: 112,
+		SnapshotPictureList: 113,
+		ContinuousArrowProcess: 114,
+		CircleArrowProcess: 115,
+		ProcessArrows: 116,
+		StaggeredProcess: 117,
+		ConvergingRadial: 118,
+		ConvergingArrows: 119,
+		TableHierarchy: 120,
+		TableList: 121,
+		TextCycle: 122,
+		TrapezoidList: 123,
+		DescendingProcess: 124,
+		ChevronList: 125,
+		Equation: 126,
+		CounterbalanceArrows: 127,
+		TargetList: 128,
+		CycleMatrix: 129,
+		AlternatingPictureBlocks: 130,
+		AlternatingPictureCircles: 131,
+		AlternatingHexagonList: 132,
+		Gear: 133,
 
 		// Office.com
 		ArchitectureLayout: 134,

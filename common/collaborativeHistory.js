@@ -35,7 +35,7 @@
 (function (window)
 {
 	/**
-	 * Class for working with shared history in collaborative editing
+	 * Class for working with a common history in collaborative editing
 	 * @param {AscCommon.CCollaborativeEditingBase} coEditing
 	 * @constructor
 	 */
@@ -54,7 +54,7 @@
 		this.textRecovery = null;
 	}
 	/**
-	 * Split revision changes for displaying revision history
+	 * Split changes by points
 	 */
 	CCollaborativeHistory.prototype.SplitChangesByPoints = function ()
 	{
@@ -134,9 +134,9 @@
 		else
 			this.SyncIndex = this.Changes.length;
 
-		// TODO: For now we do this as a single point to roll back. Need to iterate through the array and split it
-		//       by individual actions. In principle, this scheme works in fast collaborative editing,
-		//       so usually two points don't have time to get into one save.
+		// TODO: For now we do this as a single point to undo. Need to iterate through the array and split it
+		//       by individual actions. In fact, this scheme works in fast collaborative editing,
+		//       so two points shouldn't fall into one save.
 		if (ownChanges.length > 0)
 		{
 			this.OwnRanges.push(new COwnRange(this.Changes.length, ownChanges.length));
@@ -206,9 +206,9 @@
 		return changes;
 	};
 	/**
-	 * Roll back a specified number of actions
+	 * Undo a specified number of actions
 	 * @param {number} count
-	 * @returns {[]} returns array of rolled back actions
+	 * @returns {[]} returns array of reverted changes
 	 */
 	CCollaborativeHistory.prototype.UndoGlobalChanges = function(count)
 	{
@@ -248,7 +248,7 @@
 	};
 	/**
 	 * Undo all actions that fell into the last history point
-	 * @returns {[]} returns array of undone actions
+	 * @returns {[]} returns array of reverted changes
 	 */
 	CCollaborativeHistory.prototype.UndoGlobalPoint = function()
 	{
@@ -273,7 +273,6 @@
 	/**
 	 * Get the number of history positions in the current revision
 	 * @return {number}
-	 * @constructor
 	 */
 	CCollaborativeHistory.prototype.GetGlobalPointCount = function()
 	{
@@ -339,7 +338,7 @@
 	}
 	/**
 	 * Undo own last actions by rolling them through others' changes
-	 * @returns {[]} returns array of new actions
+	 * @returns {[]} returns array of new changes
 	 */
 	CCollaborativeHistory.prototype.UndoOwnPoint = function()
 	{
@@ -441,9 +440,10 @@
 	{
 		// On the first step we commute the given batch of changes with the latest changes. We look at what set
 		// of changes we get.
-		// Our object model is simple: a class that possibly has an array of elements (also classes), which possibly
-		// has a set of properties. Therefore we have exactly 2 types of changes: changes inside the array of elements, or property
-		// changes. Changes of these two types commute with each other, changes of different classes also commute.
+		// Our object model is simple: a class that possibly has a content as an array of elements (also classes),
+		// and also this class may have a set of properties. Therefore we have exactly 2 types of changes:
+		// content changes or property changes.
+		// Changes of these two types commute with each other, changes of different classes also commute.
 
 		if (this.OwnRanges.length <= 0)
 			return [];
@@ -482,7 +482,7 @@
 			else if (oChange.IsSpreadsheetChange())
 			{
 				let _oChange = oChange.Copy();
-				// It's more convenient to create the reverse change first
+				// Create the reverse change first
 				let oReverseChange = _oChange.CreateReverseChange();
 				if (oReverseChange) {
 					if (this.CommuteRelated(oClass, oReverseChange, nPosition + nCount))
@@ -492,9 +492,9 @@
 					}
 					else
 					{
-						//todo for autoshapes we don't need to hide the entire point
-						//in tables the entire point is not accepted
-						//for example when inserting a column, the fill of the adjacent column is copied
+						// TODO: for autoshapes we don't need to hide the entire point
+						//       in tables the entire point is not accepted
+						//       for example when inserting a column, the fill of the adjacent column is copied
 						arrReverseChanges = [];
 						for (let i = nCount - 1; i > nIndex; --i)
 						{
@@ -632,11 +632,10 @@
 	CCollaborativeHistory.prototype.CommutePropertyChange = function(oClass, oChange, nStartPosition)
 	{
 		// In GoogleDocs if 2 users modify the same property of the same class, then Undo works
-		// for both. For example, the first user sets paragraph to center (initially left), the second one after that to right
-		// alignment. Then on Undo the first user returns paragraph to left alignment, and the second to center, regardless of
-		// the sequence in which they call Undo.
-		// We do it like them: i.e., we always roll back property changes, even if this property was changed in subsequent
-		// changes.
+		// for both. For example, the first user sets paragraph align to center (initially left), the second one after
+		// that sets its to right alignment. Then on Undo the first user returns paragraph to left alignment, and the
+		// second to center, regardless of the sequence in which they call Undo.
+		// We do the same: always roll back property changes, even if this property was changed in subsequent changes.
 
 		// Alternative here: don't roll back the property if it was changed in one of the subsequent actions. (for this
 		// option to work, you need to implement the IsRelated function for all changes).
@@ -689,8 +688,8 @@
 		let oLogicDocument = this.CoEditing.GetLogicDocument();
 
 		// It may happen that in some DocumentContent classes all elements were deleted, or
-		// in the Paragraph class the end-of-paragraph mark was deleted. We need to check all classes for correctness, and if
-		// necessary, add additional changes.
+		// in the Paragraph class the end-of-paragraph mark was deleted. We need to check all classes and if
+		// necessary, make additional changes to normalize them
 
 		var mapDrawings         = {};
 		var mapDocumentContents = {};
