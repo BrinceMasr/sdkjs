@@ -28064,9 +28064,67 @@
 		return this.tablePart.DisplayName;
 	};
 
+	/**
+	 * Sets the name of the table. Equivalent to SetDisplayName.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @param {string} sName
+	 */
+	ApiListObject.prototype.SetName = function (sName) {
+		this.ws.worksheet.autoFilters.changeDisplayNameTable(this.tablePart.DisplayName, sName);
+	};
+
 	Object.defineProperty(ApiListObject.prototype, "Name", {
 		get: function () {
 			return this.GetName();
+		},
+		set: function (sName) {
+			this.SetName(sName);
+		}
+	});
+
+	/**
+	 * Returns the ApiWorksheet object that is the parent of the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiWorksheet}
+	 */
+	ApiListObject.prototype.GetParent = function () {
+		return this.ws;
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "Parent", {
+		get: function () {
+			return this.GetParent();
+		}
+	});
+
+	/**
+	 * Returns the display name of the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 */
+	ApiListObject.prototype.GetDisplayName = function () {
+		return this.tablePart.DisplayName;
+	};
+
+	/**
+	 * Sets the display name of the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @param {string} sDisplayName - The new display name for the table.
+	 */
+	ApiListObject.prototype.SetDisplayName = function (sDisplayName) {
+		this.ws.worksheet.autoFilters.changeDisplayNameTable(this.tablePart.DisplayName, sDisplayName);
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "DisplayName", {
+		get: function () {
+			return this.GetDisplayName();
+		},
+		set: function (sDisplayName) {
+			this.SetDisplayName(sDisplayName);
 		}
 	});
 
@@ -28085,6 +28143,134 @@
 	Object.defineProperty(ApiListObject.prototype, "Range", {
 		get: function () {
 			return this.GetRange();
+		}
+	});
+
+	/**
+	 * Returns the range of the header row of the table.
+	 * Returns null if the table has no header row.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiRange | null}
+	 */
+	ApiListObject.prototype.GetHeaderRowRange = function () {
+		var ref = this.tablePart.Ref;
+		if (!ref || !this.tablePart.isHeaderRow()) {
+			return null;
+		}
+		var bbox = new Asc.Range(ref.c1, ref.r1, ref.c2, ref.r1);
+		return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this.ws.worksheet, bbox));
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "HeaderRowRange", {
+		get: function () {
+			return this.GetHeaderRowRange();
+		}
+	});
+
+	/**
+	 * Returns whether the AutoFilter dropdown buttons are displayed on the header row of the table.
+	 * Returns true by default for a new table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {boolean}
+	 */
+	ApiListObject.prototype.GetShowAutoFilter = function () {
+		return !!this.tablePart.AutoFilter;
+	};
+
+	/**
+	 * Sets whether the AutoFilter is present on the table.
+	 * Setting to false removes the AutoFilter entirely; setting to true creates it if not present.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @param {boolean} bShow
+	 */
+	ApiListObject.prototype.SetShowAutoFilter = function (bShow) {
+		if (bShow) {
+			if (!this.tablePart.AutoFilter) {
+				this.tablePart.addAutoFilter();
+			}
+		} else {
+			this.tablePart.AutoFilter = null;
+		}
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "ShowAutoFilter", {
+		get: function () {
+			return this.GetShowAutoFilter();
+		},
+		set: function (bShow) {
+			this.SetShowAutoFilter(bShow);
+		}
+	});
+
+	/**
+	 * Returns whether the AutoFilter dropdown arrows are displayed on the header row of the table.
+	 * Returns true by default for a new table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {boolean}
+	 */
+	ApiListObject.prototype.GetShowAutoFilterDropDown = function () {
+		if (!this.tablePart.AutoFilter) {
+			return false;
+		}
+		return this.tablePart.isShowButton() !== false;
+	};
+
+	/**
+	 * Sets whether the AutoFilter dropdown arrows are displayed on the header row of the table.
+	 * Does not remove the AutoFilter itself, only hides or shows the dropdown buttons.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @param {boolean} bShow - Pass true to show the dropdown arrows, false to hide them.
+	 */
+	ApiListObject.prototype.SetShowAutoFilterDropDown = function (bShow) {
+		this.tablePart.showButton(bShow);
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "ShowAutoFilterDropDown", {
+		get: function () {
+			return this.GetShowAutoFilterDropDown();
+		},
+		set: function (bShow) {
+			this.SetShowAutoFilterDropDown(bShow);
+		}
+	});
+
+	/**
+	 * Returns whether the header row is displayed for the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {boolean}
+	 */
+	ApiListObject.prototype.GetShowHeaders = function () {
+		return this.tablePart.isHeaderRow();
+	};
+
+	/**
+	 * Sets whether the header row is displayed for the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @param {boolean} bShow
+	 */
+	ApiListObject.prototype.SetShowHeaders = function (bShow) {
+		if (this.GetShowHeaders() !== bShow) {
+			this.ws.worksheet.autoFilters.changeFormatTableInfo(
+				this.tablePart.DisplayName,
+				Asc.c_oAscChangeTableStyleInfo.rowHeader,
+				bShow
+			);
+		}
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "ShowHeaders", {
+		get: function () {
+			return this.GetShowHeaders();
+		},
+		set: function (bShow) {
+			this.SetShowHeaders(bShow);
 		}
 	});
 
@@ -28112,6 +28298,181 @@
 	Object.defineProperty(ApiListObject.prototype, "DataBodyRange", {
 		get: function () {
 			return this.GetDataBodyRange();
+		}
+	});
+
+	/**
+	 * Returns whether banded column formatting is applied to the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {boolean}
+	 */
+	ApiListObject.prototype.GetShowTableStyleColumnStripes = function () {
+		return !!this.tablePart.TableStyleInfo.ShowColumnStripes;
+	};
+
+	/**
+	 * Sets whether banded column formatting is applied to the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @param {boolean} bShow
+	 */
+	ApiListObject.prototype.SetShowTableStyleColumnStripes = function (bShow) {
+		if (this.GetShowTableStyleColumnStripes() !== bShow) {
+			this.ws.worksheet.autoFilters.changeFormatTableInfo(
+				this.tablePart.DisplayName,
+				Asc.c_oAscChangeTableStyleInfo.columnBanded,
+				bShow
+			);
+		}
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "ShowTableStyleColumnStripes", {
+		get: function () {
+			return this.GetShowTableStyleColumnStripes();
+		},
+		set: function (bShow) {
+			this.SetShowTableStyleColumnStripes(bShow);
+		}
+	});
+
+	/**
+	 * Returns whether the first column formatting is applied to the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {boolean}
+	 */
+	ApiListObject.prototype.GetShowTableStyleFirstColumn = function () {
+		return !!this.tablePart.TableStyleInfo.ShowFirstColumn;
+	};
+
+	/**
+	 * Sets whether the first column formatting is applied to the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @param {boolean} bShow
+	 */
+	ApiListObject.prototype.SetShowTableStyleFirstColumn = function (bShow) {
+		if (this.GetShowTableStyleFirstColumn() !== bShow) {
+			this.ws.worksheet.autoFilters.changeFormatTableInfo(
+				this.tablePart.DisplayName,
+				Asc.c_oAscChangeTableStyleInfo.columnFirst,
+				bShow
+			);
+		}
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "ShowTableStyleFirstColumn", {
+		get: function () {
+			return this.GetShowTableStyleFirstColumn();
+		},
+		set: function (bShow) {
+			this.SetShowTableStyleFirstColumn(bShow);
+		}
+	});
+
+	/**
+	 * Returns whether the last column formatting is applied to the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {boolean}
+	 */
+	ApiListObject.prototype.GetShowTableStyleLastColumn = function () {
+		return !!this.tablePart.TableStyleInfo.ShowLastColumn;
+	};
+
+	/**
+	 * Sets whether the last column formatting is applied to the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @param {boolean} bShow
+	 */
+	ApiListObject.prototype.SetShowTableStyleLastColumn = function (bShow) {
+		if (this.GetShowTableStyleLastColumn() !== bShow) {
+			this.ws.worksheet.autoFilters.changeFormatTableInfo(
+				this.tablePart.DisplayName,
+				Asc.c_oAscChangeTableStyleInfo.columnLast,
+				bShow
+			);
+		}
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "ShowTableStyleLastColumn", {
+		get: function () {
+			return this.GetShowTableStyleLastColumn();
+		},
+		set: function (bShow) {
+			this.SetShowTableStyleLastColumn(bShow);
+		}
+	});
+
+	/**
+	 * Returns whether banded row formatting is applied to the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {boolean}
+	 */
+	ApiListObject.prototype.GetShowTableStyleRowStripes = function () {
+		return !!this.tablePart.TableStyleInfo.ShowRowStripes;
+	};
+
+	/**
+	 * Sets whether banded row formatting is applied to the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @param {boolean} bShow
+	 */
+	ApiListObject.prototype.SetShowTableStyleRowStripes = function (bShow) {
+		if (this.GetShowTableStyleRowStripes() !== bShow) {
+			this.ws.worksheet.autoFilters.changeFormatTableInfo(
+				this.tablePart.DisplayName,
+				Asc.c_oAscChangeTableStyleInfo.rowBanded,
+				bShow
+			);
+		}
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "ShowTableStyleRowStripes", {
+		get: function () {
+			return this.GetShowTableStyleRowStripes();
+		},
+		set: function (bShow) {
+			this.SetShowTableStyleRowStripes(bShow);
+		}
+	});
+
+	/**
+	 * Returns whether the totals row is displayed for the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {boolean}
+	 */
+	ApiListObject.prototype.GetShowTotals = function () {
+		return !!this.tablePart.TotalsRowCount;
+	};
+
+	/**
+	 * Sets whether the totals row is displayed for the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @param {boolean} bShow
+	 */
+	ApiListObject.prototype.SetShowTotals = function (bShow) {
+		if (this.GetShowTotals() !== bShow) {
+			this.ws.worksheet.autoFilters.changeFormatTableInfo(
+				this.tablePart.DisplayName,
+				Asc.c_oAscChangeTableStyleInfo.rowTotal,
+				bShow
+			);
+		}
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "ShowTotals", {
+		get: function () {
+			return this.GetShowTotals();
+		},
+		set: function (bShow) {
+			this.SetShowTotals(bShow);
 		}
 	});
 
@@ -28155,6 +28516,102 @@
 		}
 		this.ws.worksheet.autoFilters.changeTableRange(this.tablePart.DisplayName, ascRange);
 	};
+
+	/**
+	 * Returns the source type of the table. Always returns "xlSrcRange" for range-based tables.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 */
+	ApiListObject.prototype.GetSourceType = function () {
+		return "xlSrcRange";
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "SourceType", {
+		get: function () {
+			return this.GetSourceType();
+		}
+	});
+
+	/**
+	 * Returns the name of the table style applied to the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 */
+	ApiListObject.prototype.GetTableStyle = function () {
+		return this.tablePart.TableStyleInfo && this.tablePart.TableStyleInfo.Name || "";
+	};
+
+	/**
+	 * Sets the table style by name.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @param {string} sStyleName
+	 */
+	ApiListObject.prototype.SetTableStyle = function (sStyleName) {
+		this.ws.worksheet.autoFilters.changeTableStyleInfo(sStyleName, this.tablePart.Ref);
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "TableStyle", {
+		get: function () {
+			return this.GetTableStyle();
+		},
+		set: function (sStyleName) {
+			this.SetTableStyle(sStyleName);
+		}
+	});
+
+	/**
+	 * Returns the range of the totals row of the table.
+	 * Returns null if the table has no totals row.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiRange | null}
+	 */
+	ApiListObject.prototype.GetTotalsRowRange = function () {
+		var ref = this.tablePart.Ref;
+		if (!ref || !this.tablePart.TotalsRowCount) {
+			return null;
+		}
+		var bbox = new Asc.Range(ref.c1, ref.r2, ref.c2, ref.r2);
+		return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this.ws.worksheet, bbox));
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "TotalsRowRange", {
+		get: function () {
+			return this.GetTotalsRowRange();
+		}
+	});
+
+	/**
+	 * Returns the summary description (alternative text summary) for the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 */
+	ApiListObject.prototype.GetSummary = function () {
+		return this.GetComment();
+	};
+
+	/**
+	 * Sets the summary description (alternative text summary) for the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @param {string} sSummary
+	 */
+	ApiListObject.prototype.SetSummary = function (sSummary) {
+		this.SetComment(sSummary);
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "Summary", {
+		get: function () {
+			return this.GetSummary();
+		},
+		set: function (sSummary) {
+			this.SetSummary(sSummary);
+		}
+	});
 
 	Api["Format"]                = Api.Format;
 	Api["AddSheet"]              = Api.AddSheet;
@@ -28301,9 +28758,36 @@
 	ApiListObject.prototype["SetAlternativeText"] = ApiListObject.prototype.SetAlternativeText;
 	ApiListObject.prototype["GetComment"]         = ApiListObject.prototype.GetComment;
 	ApiListObject.prototype["SetComment"]         = ApiListObject.prototype.SetComment;
+	ApiListObject.prototype["GetShowAutoFilter"]          = ApiListObject.prototype.GetShowAutoFilter;
+	ApiListObject.prototype["SetShowAutoFilter"]          = ApiListObject.prototype.SetShowAutoFilter;
+	ApiListObject.prototype["GetShowAutoFilterDropDown"]  = ApiListObject.prototype.GetShowAutoFilterDropDown;
+	ApiListObject.prototype["SetShowAutoFilterDropDown"]  = ApiListObject.prototype.SetShowAutoFilterDropDown;
+	ApiListObject.prototype["GetShowHeaders"]                    = ApiListObject.prototype.GetShowHeaders;
+	ApiListObject.prototype["SetShowHeaders"]                    = ApiListObject.prototype.SetShowHeaders;
+	ApiListObject.prototype["GetShowTableStyleColumnStripes"]    = ApiListObject.prototype.GetShowTableStyleColumnStripes;
+	ApiListObject.prototype["SetShowTableStyleColumnStripes"]    = ApiListObject.prototype.SetShowTableStyleColumnStripes;
+	ApiListObject.prototype["GetShowTableStyleFirstColumn"]      = ApiListObject.prototype.GetShowTableStyleFirstColumn;
+	ApiListObject.prototype["SetShowTableStyleFirstColumn"]      = ApiListObject.prototype.SetShowTableStyleFirstColumn;
+	ApiListObject.prototype["GetShowTableStyleLastColumn"]       = ApiListObject.prototype.GetShowTableStyleLastColumn;
+	ApiListObject.prototype["SetShowTableStyleLastColumn"]       = ApiListObject.prototype.SetShowTableStyleLastColumn;
+	ApiListObject.prototype["GetShowTableStyleRowStripes"]       = ApiListObject.prototype.GetShowTableStyleRowStripes;
+	ApiListObject.prototype["SetShowTableStyleRowStripes"]       = ApiListObject.prototype.SetShowTableStyleRowStripes;
+	ApiListObject.prototype["GetShowTotals"]                     = ApiListObject.prototype.GetShowTotals;
+	ApiListObject.prototype["SetShowTotals"]                     = ApiListObject.prototype.SetShowTotals;
+	ApiListObject.prototype["GetHeaderRowRange"]   = ApiListObject.prototype.GetHeaderRowRange;
 	ApiListObject.prototype["GetDataBodyRange"]   = ApiListObject.prototype.GetDataBodyRange;
-	ApiListObject.prototype["GetName"]            = ApiListObject.prototype.GetName;
+	ApiListObject.prototype["GetDisplayName"]      = ApiListObject.prototype.GetDisplayName;
+	ApiListObject.prototype["SetDisplayName"]      = ApiListObject.prototype.SetDisplayName;
+	ApiListObject.prototype["GetParent"]            = ApiListObject.prototype.GetParent;
+	ApiListObject.prototype["GetName"]             = ApiListObject.prototype.GetName;
+	ApiListObject.prototype["SetName"]             = ApiListObject.prototype.SetName;
 	ApiListObject.prototype["GetRange"]           = ApiListObject.prototype.GetRange;
+	ApiListObject.prototype["GetSourceType"]      = ApiListObject.prototype.GetSourceType;
+	ApiListObject.prototype["GetTableStyle"]      = ApiListObject.prototype.GetTableStyle;
+	ApiListObject.prototype["SetTableStyle"]      = ApiListObject.prototype.SetTableStyle;
+	ApiListObject.prototype["GetTotalsRowRange"]  = ApiListObject.prototype.GetTotalsRowRange;
+	ApiListObject.prototype["GetSummary"]         = ApiListObject.prototype.GetSummary;
+	ApiListObject.prototype["SetSummary"]         = ApiListObject.prototype.SetSummary;
 	ApiListObject.prototype["Delete"]             = ApiListObject.prototype.Delete;
 	ApiListObject.prototype["Unlist"]             = ApiListObject.prototype.Unlist;
 	ApiListObject.prototype["Resize"]             = ApiListObject.prototype.Resize;
