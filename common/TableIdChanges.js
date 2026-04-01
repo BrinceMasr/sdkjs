@@ -226,7 +226,7 @@
 		// console.log("SumIndex     " + this.SumIndex);
 		// console.log("SDK build    " + this.VersionString);
 		// console.log("DeletedIndex " + (-10 === this.DeletedIndex ? null : this.DeletedIndex));
-		// // -1 So that this change is not counted
+		// // -1 because we shouldn't count this change
 		// CollaborativeEditing.m_nErrorLog_SavedPCC          = this.ItemsCount;
 		// CollaborativeEditing.m_nErrorLog_PointChangesCount = -1;
 		// CollaborativeEditing.m_nErrorLog_CurPointIndex     = this.PointIndex;

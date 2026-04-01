@@ -1423,16 +1423,16 @@
 	//
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	window['AscDFH'].historyitem_recalctype_Inline    = 0; // Changes occurred in regular text (with top class CDocument)
-	window['AscDFH'].historyitem_recalctype_Flow      = 1; // Changes occurred in a "floating" object
-	window['AscDFH'].historyitem_recalctype_HdrFtr    = 2; // Changes occurred in header/footer
-	window['AscDFH'].historyitem_recalctype_Drawing   = 3; // Changes occurred in drawing
-	window['AscDFH'].historyitem_recalctype_NotesEnd  = 4; // Changes occurred in footnotes at the end of document
+	window['AscDFH'].historyitem_recalctype_Inline    = 0; // Changes in regular text (with top class CDocument)
+	window['AscDFH'].historyitem_recalctype_Flow      = 1; // Changes in a "floating" object
+	window['AscDFH'].historyitem_recalctype_HdrFtr    = 2; // Changes in header/footer
+	window['AscDFH'].historyitem_recalctype_Drawing   = 3; // Changes in drawing
+	window['AscDFH'].historyitem_recalctype_NotesEnd  = 4; // Changes in footnotes at the end of document
 	window['AscDFH'].historyitem_recalctype_FromStart = 0xFFFF; // Changes require full document recalculation from the beginning
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//
-	// Types of classes in which changes occurred (types are needed for collaborative editing)
+	// Class types where changes occurred (types needed for collaboration)
 	//
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2380,7 +2380,7 @@
 	window["AscDFH"].historyitem_Endnotes_AddEndnote    = window["AscDFH"].historyitem_type_Endnotes | 1;
 	window["AscDFH"].historyitem_Endnotes_RemoveEndnote = window["AscDFH"].historyitem_type_Endnotes | 2;
 	//------------------------------------------------------------------------------------------------------------------
-	// General purpose graphic classes (not bound to a specific class)
+	// Common graphics classes
 	//------------------------------------------------------------------------------------------------------------------
 	window['AscDFH'].historyitem_AutoShapes_SetDrawingBaseCoors      = window['AscDFH'].historyitem_type_CommonShape | 101;
 	window['AscDFH'].historyitem_AutoShapes_SetWorksheet             = window['AscDFH'].historyitem_type_CommonShape | 102;
@@ -2416,7 +2416,7 @@
 
 	window['AscDFH'].historyitem_Common_AddWatermark = window['AscDFH'].historyitem_type_CommonShape | 401;
 	//------------------------------------------------------------------------------------------------------------------
-	// Graphic classes
+	// Graphics classes
 	//------------------------------------------------------------------------------------------------------------------
 	window['AscDFH'].historyitem_Presentation_AddSlide                    = window['AscDFH'].historyitem_type_Presentation | 1;
 	window['AscDFH'].historyitem_Presentation_RemoveSlide                 = window['AscDFH'].historyitem_type_Presentation | 2;
@@ -4300,7 +4300,7 @@
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//
-	// Types of actions that a user can perform
+	// Types of user actions
 	//
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -5323,7 +5323,7 @@
 	CChangesBaseBoolProperty.prototype.WriteToBinary = function(Writer)
 	{
 		// Long  : Flag
-		// 1-bit : Whether to highlight these changes
+		// 1-bit : Highlight changes or not
 		// 2-bit : IsUndefined New
 		// 3-bit : New value
 		// 4-bit : IsUndefined Old
@@ -5349,7 +5349,7 @@
 	CChangesBaseBoolProperty.prototype.ReadFromBinary = function(Reader)
 	{
 		// Long  : Flag
-		// 1-bit : Whether to highlight these changes
+		// 1-bit : Highlight changes or not
 		// 2-bit : IsUndefined New
 		// 3-bit : New value
 		// 4-bit : IsUndefined Old
@@ -5392,7 +5392,7 @@
 	CChangesBaseDoubleProperty.prototype.WriteToBinary = function(Writer)
 	{
 		// Long  : Flag
-		// 1-bit : Whether to highlight these changes
+		// 1-bit : Highlight changes or not
 		// 2-bit : IsUndefined New
 		// 3-bit : IsUndefined Old
 		// double : New
@@ -5420,7 +5420,7 @@
 	CChangesBaseDoubleProperty.prototype.ReadFromBinary = function(Reader)
 	{
 		// Long  : Flag
-		// 1-bit : Whether to highlight these changes
+		// 1-bit : Highlight changes or not
 		// 2-bit : IsUndefined New
 		// 3-bit : IsUndefined Old
 		// double : New
@@ -5460,7 +5460,7 @@
 	CChangesBaseObjectProperty.prototype.WriteToBinary = function(Writer)
 	{
 		// Long  : Flag
-		// 1-bit : Whether to highlight these changes
+		// 1-bit : Highlight changes or not
 		// 2-bit : IsUndefined New
 		// 3-bit : IsUndefined Old
 		// Variable : New
@@ -5490,7 +5490,7 @@
 	CChangesBaseObjectProperty.prototype.ReadFromBinary = function(Reader)
 	{
 		// Long  : Flag
-		// 1-bit : Whether to highlight these changes
+		// 1-bit : Highlight changes or not
 		// 2-bit : IsUndefined New
 		// 3-bit : IsUndefined Old
 		// Variable : New
@@ -5564,7 +5564,7 @@
 	CChangesBaseLongProperty.prototype.WriteToBinary = function(Writer)
 	{
 		// Long  : Flag
-		// 1-bit : Whether to highlight these changes
+		// 1-bit : Highlight changes or not
 		// 2-bit : IsUndefined New
 		// 3-bit : IsUndefined Old
 		// long : New
@@ -5592,7 +5592,7 @@
 	CChangesBaseLongProperty.prototype.ReadFromBinary = function(Reader)
 	{
 		// Long  : Flag
-		// 1-bit : Whether to highlight these changes
+		// 1-bit : Highlight changes or not
 		// 2-bit : IsUndefined New
 		// 3-bit : IsUndefined Old
 		// long : New
@@ -5632,7 +5632,7 @@
 	CChangesBaseStringProperty.prototype.WriteToBinary = function(Writer)
 	{
 		// Long  : Flag
-		// 1-bit : Whether to highlight these changes
+		// 1-bit : Highlight changes or not
 		// 2-bit : IsUndefined New
 		// 3-bit : IsUndefined Old
 		// string : New
@@ -5660,7 +5660,7 @@
 	CChangesBaseStringProperty.prototype.ReadFromBinary = function(Reader)
 	{
 		// Long  : Flag
-		// 1-bit : Whether to highlight these changes
+		// 1-bit : Highlight changes or not
 		// 2-bit : IsUndefined New
 		// 3-bit : IsUndefined Old
 		// string : New
@@ -5700,7 +5700,7 @@
 	CChangesBaseByteProperty.prototype.WriteToBinary = function(Writer)
 	{
 		// Long  : Flag
-		// 1-bit : Whether to highlight these changes
+		// 1-bit : Highlight changes or not
 		// 2-bit : IsUndefined New
 		// 3-bit : IsUndefined Old
 		// byte  : New
@@ -5728,7 +5728,7 @@
 	CChangesBaseByteProperty.prototype.ReadFromBinary = function(Reader)
 	{
 		// Long  : Flag
-		// 1-bit : Whether to highlight these changes
+		// 1-bit : Highlight changes or not
 		// 2-bit : IsUndefined New
 		// 3-bit : IsUndefined Old
 		// byte  : New

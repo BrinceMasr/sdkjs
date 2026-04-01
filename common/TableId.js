@@ -110,9 +110,9 @@
 		return this.m_aPairs[id];
 	};
 	/**
-	 * Get Id by class (in general, it is better not to use this function)
+	 * Get Id by class (better not to use this function)
 	 * @param Class
-	 * @returns {*}
+	 * @returns {?string}
 	 */
 	CTableId.prototype.Get_ByClass = function(Class)
 	{
