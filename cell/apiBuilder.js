@@ -29095,6 +29095,641 @@
 		range.deleteCellsShiftUp();
 	};
 
+	// -------------------------------------------------------------------------
+	// ApiSort
+	// -------------------------------------------------------------------------
+
+	function _sortByToStr(sortBy) {
+		switch (sortBy) {
+			case Asc.ESortBy.sortbyCellColor:
+				return "xlSortOnCellColor";
+			case Asc.ESortBy.sortbyFontColor:
+				return "xlSortOnFontColor";
+			case Asc.ESortBy.sortbyIcon:
+				return "xlSortOnIcon";
+			default:
+				return "xlSortOnValues";
+		}
+	}
+
+	function _sortByFromStr(sortOn) {
+		switch (sortOn) {
+			case "xlSortOnCellColor":
+				return Asc.c_oAscSortOptions.ByColorFill;
+			case "xlSortOnFontColor":
+				return Asc.c_oAscSortOptions.ByColorFont;
+			case "xlSortOnIcon":
+				return Asc.c_oAscSortOptions.ByIcon;
+			default:
+				return Asc.c_oAscSortOptions.ByValue;
+		}
+	}
+
+	function _sortMethodToStr(sortMethod) {
+		switch (sortMethod) {
+			case AscCommonExcel.ESortMethod.sortmethodStroke:
+				return "xlStroke";
+			default:
+				return "xlPinYin";
+		}
+	}
+
+	function _sortMethodFromStr(sortMethod) {
+		switch (sortMethod) {
+			case "xlStroke":
+				return AscCommonExcel.ESortMethod.sortmethodStroke;
+			default:
+				return AscCommonExcel.ESortMethod.sortmethodPinYin;
+		}
+	}
+
+	/**
+	 * Class representing the sort state of a list object (table).
+	 * @constructor
+	 * @param {ApiListObject} listObject - The parent list object.
+	 */
+	function ApiSort(listObject) {
+		this.listObject   = listObject;
+		this._fields      = [];
+		this._matchCase   = false;
+		this._orientation = "xlTopToBottom";
+		this._sortMethod  = "xlPinYin";
+		var ss = listObject.tablePart.SortState;
+		if (ss) {
+			this._matchCase   = !!ss.CaseSensitive;
+			this._orientation = ss.ColumnSort ? "xlLeftToRight" : "xlTopToBottom";
+			this._sortMethod  = _sortMethodToStr(ss.SortMethod);
+			if (ss.SortConditions) {
+				for (var i = 0; i < ss.SortConditions.length; i++) {
+					var sc = ss.SortConditions[i];
+					this._fields.push({
+						absColIndex:  sc.Ref.c1,
+						sortOn:       _sortByToStr(sc.ConditionSortBy),
+						descending:   !!sc.ConditionDescending,
+						customOrder:  null,
+						dataOption:   "xlSortNormal",
+						subField:     null,
+						sortOnValue:  null
+					});
+				}
+			}
+		}
+	}
+
+	/**
+	 * Returns the sort fields collection.
+	 * @memberof ApiSort
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiSortFields}
+	 */
+	ApiSort.prototype.GetSortFields = function () {
+		return new ApiSortFields(this);
+	};
+
+	Object.defineProperty(ApiSort.prototype, "SortFields", {
+		get: function () {
+			return this.GetSortFields();
+		}
+	});
+
+	/**
+	 * Returns whether the sort is case-sensitive.
+	 * @memberof ApiSort
+	 * @typeofeditors ["CSE"]
+	 * @returns {boolean}
+	 */
+	ApiSort.prototype.GetMatchCase = function () {
+		return this._matchCase;
+	};
+
+	/**
+	 * Sets whether the sort is case-sensitive.
+	 * @memberof ApiSort
+	 * @typeofeditors ["CSE"]
+	 * @param {boolean} bMatchCase
+	 */
+	ApiSort.prototype.SetMatchCase = function (bMatchCase) {
+		this._matchCase = !!bMatchCase;
+	};
+
+	Object.defineProperty(ApiSort.prototype, "MatchCase", {
+		get: function () {
+			return this.GetMatchCase();
+		},
+		set: function (val) {
+			this.SetMatchCase(val);
+		}
+	});
+
+	/**
+	 * Returns the header setting. Always "xlYes" for a ListObject.
+	 * @memberof ApiSort
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 */
+	ApiSort.prototype.GetHeader = function () {
+		return "xlYes";
+	};
+
+	Object.defineProperty(ApiSort.prototype, "Header", {
+		get: function () {
+			return this.GetHeader();
+		}
+	});
+
+	/**
+	 * Returns the sort orientation: "xlTopToBottom" or "xlLeftToRight".
+	 * @memberof ApiSort
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 */
+	ApiSort.prototype.GetOrientation = function () {
+		return this._orientation;
+	};
+
+	/**
+	 * Sets the sort orientation.
+	 * @memberof ApiSort
+	 * @typeofeditors ["CSE"]
+	 * @param {"xlTopToBottom" | "xlLeftToRight"} sOrientation
+	 */
+	ApiSort.prototype.SetOrientation = function (sOrientation) {
+		this._orientation = sOrientation === "xlLeftToRight" ? "xlLeftToRight" : "xlTopToBottom";
+	};
+
+	Object.defineProperty(ApiSort.prototype, "Orientation", {
+		get: function () {
+			return this.GetOrientation();
+		},
+		set: function (val) {
+			this.SetOrientation(val);
+		}
+	});
+
+	/**
+	 * Returns the sort method: "xlPinYin" or "xlStroke".
+	 * @memberof ApiSort
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 */
+	ApiSort.prototype.GetSortMethod = function () {
+		return this._sortMethod;
+	};
+
+	/**
+	 * Sets the sort method.
+	 * @memberof ApiSort
+	 * @typeofeditors ["CSE"]
+	 * @param {"xlPinYin" | "xlStroke"} sSortMethod
+	 */
+	ApiSort.prototype.SetSortMethod = function (sSortMethod) {
+		this._sortMethod = sSortMethod === "xlStroke" ? "xlStroke" : "xlPinYin";
+	};
+
+	Object.defineProperty(ApiSort.prototype, "SortMethod", {
+		get: function () {
+			return this.GetSortMethod();
+		},
+		set: function (val) {
+			this.SetSortMethod(val);
+		}
+	});
+
+	/**
+	 * Returns the data body range that the sort applies to.
+	 * @memberof ApiSort
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiRange | null}
+	 */
+	ApiSort.prototype.GetRng = function () {
+		return this.listObject.GetDataBodyRange();
+	};
+
+	Object.defineProperty(ApiSort.prototype, "Rng", {
+		get: function () {
+			return this.GetRng();
+		}
+	});
+
+	/**
+	 * No-op for a ListObject — the sort range is always the data body range.
+	 * @memberof ApiSort
+	 * @typeofeditors ["CSE"]
+	 */
+	ApiSort.prototype.SetRange = function () {
+	};
+
+	/**
+	 * Applies the current sort settings to the table.
+	 * @memberof ApiSort
+	 * @typeofeditors ["CSE"]
+	 */
+	ApiSort.prototype.Apply = function () {
+		if (!this._fields.length) {
+			return;
+		}
+		var tablePart = this.listObject.tablePart;
+		var ws        = this.listObject.ws.worksheet;
+		var ref       = tablePart.Ref;
+		if (!ref) {
+			return;
+		}
+		var columnSort = this._orientation !== "xlLeftToRight";
+		var startRow   = ref.r1 + (tablePart.isHeaderRow() ? 1 : 0);
+		var endRow     = ref.r2 - (tablePart.isTotalsRow() ? 1 : 0);
+		var props      = new Asc.CSortProperties(ws);
+		props.columnSort    = columnSort;
+		props.caseSensitive = this._matchCase;
+		props.hasHeaders    = false;
+		props.levels        = [];
+		for (var i = 0; i < this._fields.length; i++) {
+			var field = this._fields[i];
+			var level = new Asc.CSortPropertiesLevel();
+			if (columnSort) {
+				level.index = field.absColIndex - ref.c1;
+			} else {
+				level.index = field.absColIndex - ref.r1;
+			}
+			level.descending = field.descending
+				? Asc.c_oAscSortOptions.Descending
+				: Asc.c_oAscSortOptions.Ascending;
+			level.sortBy = _sortByFromStr(field.sortOn);
+			props.levels.push(level);
+		}
+		var range = new Asc.Range(ref.c1, startRow, ref.c2, endRow);
+		ws.setCustomSort(props, tablePart, null, null, range);
+	};
+
+	// -------------------------------------------------------------------------
+	// ApiSortFields
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Class representing the collection of sort fields for a Sort object.
+	 * @constructor
+	 * @param {ApiSort} apiSort - The parent sort object.
+	 */
+	function ApiSortFields(apiSort) {
+		this._sort = apiSort;
+	}
+
+	/**
+	 * Returns the number of sort fields.
+	 * @memberof ApiSortFields
+	 * @typeofeditors ["CSE"]
+	 * @returns {number}
+	 */
+	ApiSortFields.prototype.GetCount = function () {
+		return this._sort._fields.length;
+	};
+
+	Object.defineProperty(ApiSortFields.prototype, "Count", {
+		get: function () {
+			return this.GetCount();
+		}
+	});
+
+	/**
+	 * Returns the sort field at the given 1-based index.
+	 * @memberof ApiSortFields
+	 * @typeofeditors ["CSE"]
+	 * @param {number} nIndex - 1-based index.
+	 * @returns {ApiSortField | null}
+	 */
+	ApiSortFields.prototype.Item = function (nIndex) {
+		var fieldObj = this._sort._fields[nIndex - 1];
+		if (!fieldObj) {
+			return null;
+		}
+		return new ApiSortField(fieldObj, this._sort);
+	};
+
+	/**
+	 * Adds a sort field to the collection.
+	 * @memberof ApiSortFields
+	 * @typeofeditors ["CSE"]
+	 * @param {ApiRange} Key - A range within the table that defines the sort column.
+	 * @param {string} [SortOn="xlSortOnValues"] - "xlSortOnValues", "xlSortOnCellColor", "xlSortOnFontColor", "xlSortOnIcon".
+	 * @param {string} [Order="xlAscending"] - "xlAscending" or "xlDescending".
+	 * @param {*} [CustomOrder]
+	 * @param {string} [DataOption="xlSortNormal"] - "xlSortNormal" or "xlSortTextAsNumbers".
+	 * @returns {ApiSortField | null}
+	 */
+	ApiSortFields.prototype.Add = function (Key, SortOn, Order, CustomOrder, DataOption) {
+		if (!(Key instanceof ApiRange)) {
+			return null;
+		}
+		var fieldObj = {
+			absColIndex:  Key.range.bbox.c1,
+			sortOn:       SortOn       || "xlSortOnValues",
+			descending:   Order === "xlDescending",
+			customOrder:  CustomOrder  || null,
+			dataOption:   DataOption   || "xlSortNormal",
+			subField:     null
+		};
+		this._sort._fields.push(fieldObj);
+		return new ApiSortField(fieldObj, this._sort);
+	};
+
+	/**
+	 * Adds a sort field with subfield support for linked data types (Stocks, Geography).
+	 * @memberof ApiSortFields
+	 * @typeofeditors ["CSE"]
+	 * @param {ApiRange} Key - A range within the table that defines the sort column.
+	 * @param {string} [SortOn="xlSortOnValues"] - "xlSortOnValues", "xlSortOnCellColor", "xlSortOnFontColor", "xlSortOnIcon".
+	 * @param {string} [Order="xlAscending"] - "xlAscending" or "xlDescending".
+	 * @param {*} [CustomOrder]
+	 * @param {string} [DataOption="xlSortNormal"] - "xlSortNormal" or "xlSortTextAsNumbers".
+	 * @param {string} [SubField] - Subfield name for linked data types (e.g. "Population", "Volume").
+	 * @returns {ApiSortField | null}
+	 */
+	ApiSortFields.prototype.Add2 = function (Key, SortOn, Order, CustomOrder, DataOption, SubField) {
+		if (!(Key instanceof ApiRange)) {
+			return null;
+		}
+		var fieldObj = {
+			absColIndex:  Key.range.bbox.c1,
+			sortOn:       SortOn       || "xlSortOnValues",
+			descending:   Order === "xlDescending",
+			customOrder:  CustomOrder  || null,
+			dataOption:   DataOption   || "xlSortNormal",
+			subField:     SubField     || null
+		};
+		this._sort._fields.push(fieldObj);
+		return new ApiSortField(fieldObj, this._sort);
+	};
+
+	/**
+	 * Removes all sort fields from the collection.
+	 * @memberof ApiSortFields
+	 * @typeofeditors ["CSE"]
+	 */
+	ApiSortFields.prototype.Clear = function () {
+		this._sort._fields = [];
+	};
+
+	// -------------------------------------------------------------------------
+	// ApiSortField
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Class representing a single sort field within a SortFields collection.
+	 * @constructor
+	 * @param {object} fieldObj - Internal field descriptor.
+	 * @param {ApiSort} apiSort - The parent sort object.
+	 */
+	function ApiSortField(fieldObj, apiSort) {
+		this._fieldObj = fieldObj;
+		this._sort     = apiSort;
+	}
+
+	/**
+	 * Returns the sort key range (the full table column).
+	 * @memberof ApiSortField
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiRange | null}
+	 */
+	ApiSortField.prototype.GetKey = function () {
+		var tablePart = this._sort.listObject.tablePart;
+		var ref       = tablePart.Ref;
+		if (!ref) {
+			return null;
+		}
+		var c    = this._fieldObj.absColIndex;
+		var bbox = new Asc.Range(c, ref.r1, c, ref.r2);
+		return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this._sort.listObject.ws.worksheet, bbox));
+	};
+
+	Object.defineProperty(ApiSortField.prototype, "Key", {
+		get: function () {
+			return this.GetKey();
+		}
+	});
+
+	/**
+	 * Returns the sort-on type: "xlSortOnValues", "xlSortOnCellColor", "xlSortOnFontColor", "xlSortOnIcon".
+	 * @memberof ApiSortField
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 */
+	ApiSortField.prototype.GetSortOn = function () {
+		return this._fieldObj.sortOn;
+	};
+
+	/**
+	 * Sets the sort-on type.
+	 * @memberof ApiSortField
+	 * @typeofeditors ["CSE"]
+	 * @param {string} sSortOn - "xlSortOnValues", "xlSortOnCellColor", "xlSortOnFontColor", "xlSortOnIcon".
+	 */
+	ApiSortField.prototype.SetSortOn = function (sSortOn) {
+		this._fieldObj.sortOn = sSortOn || "xlSortOnValues";
+	};
+
+	Object.defineProperty(ApiSortField.prototype, "SortOn", {
+		get: function () {
+			return this.GetSortOn();
+		},
+		set: function (val) {
+			this.SetSortOn(val);
+		}
+	});
+
+	/**
+	 * Returns the sort order: "xlAscending" or "xlDescending".
+	 * @memberof ApiSortField
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 */
+	ApiSortField.prototype.GetOrder = function () {
+		return this._fieldObj.descending ? "xlDescending" : "xlAscending";
+	};
+
+	/**
+	 * Sets the sort order.
+	 * @memberof ApiSortField
+	 * @typeofeditors ["CSE"]
+	 * @param {string} sOrder - "xlAscending" or "xlDescending".
+	 */
+	ApiSortField.prototype.SetOrder = function (sOrder) {
+		this._fieldObj.descending = sOrder === "xlDescending";
+	};
+
+	Object.defineProperty(ApiSortField.prototype, "Order", {
+		get: function () {
+			return this.GetOrder();
+		},
+		set: function (val) {
+			this.SetOrder(val);
+		}
+	});
+
+	/**
+	 * Returns the 1-based priority of this sort field within the collection.
+	 * @memberof ApiSortField
+	 * @typeofeditors ["CSE"]
+	 * @returns {number}
+	 */
+	ApiSortField.prototype.GetPriority = function () {
+		return this._sort._fields.indexOf(this._fieldObj) + 1;
+	};
+
+	/**
+	 * Sets the 1-based priority of this sort field, repositioning it within the collection.
+	 * @memberof ApiSortField
+	 * @typeofeditors ["CSE"]
+	 * @param {number} nPriority
+	 */
+	ApiSortField.prototype.SetPriority = function (nPriority) {
+		var fields = this._sort._fields;
+		var idx    = fields.indexOf(this._fieldObj);
+		if (idx === -1) {
+			return;
+		}
+		var newIdx = Math.max(0, Math.min(nPriority - 1, fields.length - 1));
+		if (idx === newIdx) {
+			return;
+		}
+		fields.splice(idx, 1);
+		fields.splice(newIdx, 0, this._fieldObj);
+	};
+
+	Object.defineProperty(ApiSortField.prototype, "Priority", {
+		get: function () {
+			return this.GetPriority();
+		},
+		set: function (val) {
+			this.SetPriority(val);
+		}
+	});
+
+	/**
+	 * Returns the custom sort order for this field, or null if none is set.
+	 * @memberof ApiSortField
+	 * @typeofeditors ["CSE"]
+	 * @returns {* | null}
+	 */
+	ApiSortField.prototype.GetCustomOrder = function () {
+		return this._fieldObj.customOrder;
+	};
+
+	/**
+	 * Sets a custom sort order for this field.
+	 * @memberof ApiSortField
+	 * @typeofeditors ["CSE"]
+	 * @param {*} customOrder
+	 */
+	ApiSortField.prototype.SetCustomOrder = function (customOrder) {
+		this._fieldObj.customOrder = customOrder;
+	};
+
+	Object.defineProperty(ApiSortField.prototype, "CustomOrder", {
+		get: function () {
+			return this.GetCustomOrder();
+		},
+		set: function (val) {
+			this.SetCustomOrder(val);
+		}
+	});
+
+	/**
+	 * Returns the data option: "xlSortNormal" or "xlSortTextAsNumbers".
+	 * @memberof ApiSortField
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 */
+	ApiSortField.prototype.GetDataOption = function () {
+		return this._fieldObj.dataOption || "xlSortNormal";
+	};
+
+	/**
+	 * Sets the data option.
+	 * @memberof ApiSortField
+	 * @typeofeditors ["CSE"]
+	 * @param {string} sDataOption - "xlSortNormal" or "xlSortTextAsNumbers".
+	 */
+	ApiSortField.prototype.SetDataOption = function (sDataOption) {
+		this._fieldObj.dataOption = sDataOption === "xlSortTextAsNumbers" ? "xlSortTextAsNumbers" : "xlSortNormal";
+	};
+
+	Object.defineProperty(ApiSortField.prototype, "DataOption", {
+		get: function () {
+			return this.GetDataOption();
+		},
+		set: function (val) {
+			this.SetDataOption(val);
+		}
+	});
+
+	/**
+	 * Returns the value (color or null) by which this sort field is sorted.
+	 * For color-based sorts returns the fill/font color; otherwise returns null.
+	 * @memberof ApiSortField
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiColor | null}
+	 */
+	ApiSortField.prototype.GetSortOnValue = function () {
+		return this._fieldObj.sortOnValue || null;
+	};
+
+	Object.defineProperty(ApiSortField.prototype, "SortOnValue", {
+		get: function () {
+			return this.GetSortOnValue();
+		}
+	});
+
+	/**
+	 * Sets an icon for icon-based sorting.
+	 * @memberof ApiSortField
+	 * @typeofeditors ["CSE"]
+	 * @param {*} Icon
+	 */
+	ApiSortField.prototype.SetIcon = function (Icon) {
+		this._fieldObj.sortOn      = "xlSortOnIcon";
+		this._fieldObj.sortOnValue = Icon;
+	};
+
+	/**
+	 * Changes the sort key column.
+	 * @memberof ApiSortField
+	 * @typeofeditors ["CSE"]
+	 * @param {ApiRange} rng - New sort key range.
+	 */
+	ApiSortField.prototype.ModifyKey = function (rng) {
+		if (!(rng instanceof ApiRange)) {
+			return;
+		}
+		this._fieldObj.absColIndex = rng.range.bbox.c1;
+	};
+
+	/**
+	 * Removes this sort field from the collection.
+	 * @memberof ApiSortField
+	 * @typeofeditors ["CSE"]
+	 */
+	ApiSortField.prototype.Delete = function () {
+		var idx = this._sort._fields.indexOf(this._fieldObj);
+		if (idx !== -1) {
+			this._sort._fields.splice(idx, 1);
+		}
+	};
+
+	/**
+	 * Returns the Sort object for this list object.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiSort}
+	 */
+	ApiListObject.prototype.GetSort = function () {
+		return new ApiSort(this);
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "Sort", {
+		get: function () {
+			return this.GetSort();
+		}
+	});
+
 	Api["Format"]                = Api.Format;
 	Api["AddSheet"]              = Api.AddSheet;
 	Api["GetSheets"]             = Api.GetSheets;
@@ -29278,6 +29913,7 @@
 	ApiListObject.prototype["AddListColumn"]   = ApiListObject.prototype.AddListColumn;
 	ApiListObject.prototype["GetListRows"]     = ApiListObject.prototype.GetListRows;
 	ApiListObject.prototype["AddListRow"]      = ApiListObject.prototype.AddListRow;
+	ApiListObject.prototype["GetSort"] = ApiListObject.prototype.GetSort;
 
 	ApiListRow.prototype["GetIndex"]  = ApiListRow.prototype.GetIndex;
 	ApiListRow.prototype["GetParent"] = ApiListRow.prototype.GetParent;
@@ -29294,6 +29930,40 @@
 	ApiListColumn.prototype["SetTotalsCalculation"] = ApiListColumn.prototype.SetTotalsCalculation;
 	ApiListColumn.prototype["GetTotal"]             = ApiListColumn.prototype.GetTotal;
 	ApiListColumn.prototype["Delete"]               = ApiListColumn.prototype.Delete;
+
+	ApiSort.prototype["GetSortFields"]  = ApiSort.prototype.GetSortFields;
+	ApiSort.prototype["GetMatchCase"]   = ApiSort.prototype.GetMatchCase;
+	ApiSort.prototype["SetMatchCase"]   = ApiSort.prototype.SetMatchCase;
+	ApiSort.prototype["GetHeader"]      = ApiSort.prototype.GetHeader;
+	ApiSort.prototype["GetOrientation"] = ApiSort.prototype.GetOrientation;
+	ApiSort.prototype["SetOrientation"] = ApiSort.prototype.SetOrientation;
+	ApiSort.prototype["GetSortMethod"]  = ApiSort.prototype.GetSortMethod;
+	ApiSort.prototype["SetSortMethod"]  = ApiSort.prototype.SetSortMethod;
+	ApiSort.prototype["GetRng"]         = ApiSort.prototype.GetRng;
+	ApiSort.prototype["SetRange"]       = ApiSort.prototype.SetRange;
+	ApiSort.prototype["Apply"]          = ApiSort.prototype.Apply;
+
+	ApiSortFields.prototype["GetCount"] = ApiSortFields.prototype.GetCount;
+	ApiSortFields.prototype["Item"]     = ApiSortFields.prototype.Item;
+	ApiSortFields.prototype["Add"]      = ApiSortFields.prototype.Add;
+	ApiSortFields.prototype["Add2"]     = ApiSortFields.prototype.Add2;
+	ApiSortFields.prototype["Clear"]    = ApiSortFields.prototype.Clear;
+
+	ApiSortField.prototype["GetKey"]          = ApiSortField.prototype.GetKey;
+	ApiSortField.prototype["GetSortOn"]       = ApiSortField.prototype.GetSortOn;
+	ApiSortField.prototype["SetSortOn"]       = ApiSortField.prototype.SetSortOn;
+	ApiSortField.prototype["GetOrder"]        = ApiSortField.prototype.GetOrder;
+	ApiSortField.prototype["SetOrder"]        = ApiSortField.prototype.SetOrder;
+	ApiSortField.prototype["GetPriority"]     = ApiSortField.prototype.GetPriority;
+	ApiSortField.prototype["SetPriority"]     = ApiSortField.prototype.SetPriority;
+	ApiSortField.prototype["GetCustomOrder"]  = ApiSortField.prototype.GetCustomOrder;
+	ApiSortField.prototype["SetCustomOrder"]  = ApiSortField.prototype.SetCustomOrder;
+	ApiSortField.prototype["GetDataOption"]   = ApiSortField.prototype.GetDataOption;
+	ApiSortField.prototype["SetDataOption"]   = ApiSortField.prototype.SetDataOption;
+	ApiSortField.prototype["GetSortOnValue"]  = ApiSortField.prototype.GetSortOnValue;
+	ApiSortField.prototype["SetIcon"]         = ApiSortField.prototype.SetIcon;
+	ApiSortField.prototype["ModifyKey"]       = ApiSortField.prototype.ModifyKey;
+	ApiSortField.prototype["Delete"]          = ApiSortField.prototype.Delete;
 
 	ApiRange.prototype["GetClassType"] = ApiRange.prototype.GetClassType;
 	ApiRange.prototype["GetRow"] = ApiRange.prototype.GetRow;

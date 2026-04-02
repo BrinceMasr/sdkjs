@@ -649,5 +649,214 @@ $(function ()
 			assert.equal(ws.GetRange("B3").GetValue(), "Alice", "First row still has Alice");
 			assert.equal(ws.GetRange("B4").GetValue(), "Carol", "Second row now has Carol after Bob was deleted");
 		});
+
+		QUnit.test("GetSort - defaults", function (assert)
+		{
+			initializeTest();
+
+			var tbl = ws.AddListObject("xlSrcRange", "B2:D5");
+			var sort = tbl.GetSort();
+
+			assert.ok(sort !== null, "GetSort returns an object");
+			assert.equal(sort.GetHeader(), "xlYes", "Header is always xlYes");
+			assert.equal(sort.GetMatchCase(), false, "Default MatchCase is false");
+			assert.equal(sort.GetOrientation(), "xlTopToBottom", "Default orientation is xlTopToBottom");
+			assert.equal(sort.GetSortMethod(), "xlPinYin", "Default sort method is xlPinYin");
+			assert.ok(tbl.Sort !== null, "Sort property works");
+
+			var rng = sort.GetRng();
+			assert.ok(rng !== null, "GetRng returns a range");
+			assert.equal(rng.GetAddress(true, true), "$B$3:$D$5", "Rng is the data body range");
+		});
+
+		QUnit.test("Sort - MatchCase/Orientation/SortMethod", function (assert)
+		{
+			initializeTest();
+
+			var tbl  = ws.AddListObject("xlSrcRange", "B2:D5");
+			var sort = tbl.GetSort();
+
+			sort.SetMatchCase(true);
+			assert.equal(sort.GetMatchCase(), true, "MatchCase set to true");
+
+			sort.SetOrientation("xlLeftToRight");
+			assert.equal(sort.GetOrientation(), "xlLeftToRight", "Orientation set to xlLeftToRight");
+
+			sort.SetSortMethod("xlStroke");
+			assert.equal(sort.GetSortMethod(), "xlStroke", "SortMethod set to xlStroke");
+
+			sort.MatchCase = false;
+			assert.equal(sort.MatchCase, false, "MatchCase property setter works");
+
+			sort.Orientation = "xlTopToBottom";
+			assert.equal(sort.Orientation, "xlTopToBottom", "Orientation property setter works");
+		});
+
+		QUnit.test("SortFields - Add/Add2/Count/Item/Clear", function (assert)
+		{
+			initializeTest();
+
+			var tbl    = ws.AddListObject("xlSrcRange", "B2:D5");
+			var sort   = tbl.GetSort();
+			var fields = sort.GetSortFields();
+
+			assert.equal(fields.GetCount(), 0, "Initially no sort fields");
+			assert.equal(fields.Count, 0, "Count property works");
+
+			var sf = fields.Add(ws.GetRange("B2"), "xlSortOnValues", "xlAscending");
+			assert.ok(sf !== null, "Add returns a SortField");
+			assert.equal(fields.Count, 1, "Count is 1 after Add");
+
+			fields.Add(ws.GetRange("C2"), "xlSortOnValues", "xlDescending");
+			assert.equal(fields.Count, 2, "Count is 2 after second Add");
+
+			assert.strictEqual(fields.Add(null), null, "Add with non-ApiRange key returns null");
+
+			var sf2 = fields.Add2(ws.GetRange("D2"), "xlSortOnValues", "xlAscending", null, "xlSortNormal", "Population");
+			assert.ok(sf2 !== null, "Add2 returns a SortField");
+			assert.equal(fields.Count, 3, "Count is 3 after Add2");
+
+			var item = fields.Item(1);
+			assert.ok(item !== null, "Item(1) returns a SortField");
+			assert.equal(item.GetSortOn(), "xlSortOnValues", "SortField.GetSortOn works");
+			assert.equal(item.GetOrder(), "xlAscending", "SortField.GetOrder works for ascending");
+			assert.equal(fields.Item(2).GetOrder(), "xlDescending", "SortField.GetOrder works for descending");
+			assert.equal(item.GetPriority(), 1, "SortField.GetPriority returns 1 for first field");
+			assert.equal(fields.Item(2).GetPriority(), 2, "SortField.GetPriority returns 2 for second field");
+
+			fields.Clear();
+			assert.equal(fields.Count, 0, "Count is 0 after Clear");
+		});
+
+		QUnit.test("SortField - SortOn/Order/Priority/CustomOrder/DataOption writable", function (assert)
+		{
+			initializeTest();
+
+			var tbl    = ws.AddListObject("xlSrcRange", "B2:D5");
+			var fields = tbl.GetSort().SortFields;
+
+			var sf = fields.Add(ws.GetRange("B2"), "xlSortOnValues", "xlAscending");
+
+			sf.SetSortOn("xlSortOnCellColor");
+			assert.equal(sf.GetSortOn(), "xlSortOnCellColor", "SetSortOn works");
+			sf.SortOn = "xlSortOnValues";
+			assert.equal(sf.SortOn, "xlSortOnValues", "SortOn property setter works");
+
+			sf.SetOrder("xlDescending");
+			assert.equal(sf.GetOrder(), "xlDescending", "SetOrder works");
+			sf.Order = "xlAscending";
+			assert.equal(sf.Order, "xlAscending", "Order property setter works");
+
+			sf.SetCustomOrder("myList");
+			assert.equal(sf.GetCustomOrder(), "myList", "SetCustomOrder works");
+			sf.CustomOrder = null;
+			assert.strictEqual(sf.CustomOrder, null, "CustomOrder property setter works");
+
+			sf.SetDataOption("xlSortTextAsNumbers");
+			assert.equal(sf.GetDataOption(), "xlSortTextAsNumbers", "SetDataOption works");
+			sf.DataOption = "xlSortNormal";
+			assert.equal(sf.DataOption, "xlSortNormal", "DataOption property setter works");
+		});
+
+		QUnit.test("SortField - Priority writable / SetPriority reorders", function (assert)
+		{
+			initializeTest();
+
+			var tbl    = ws.AddListObject("xlSrcRange", "B2:D5");
+			var fields = tbl.GetSort().SortFields;
+
+			fields.Add(ws.GetRange("B2"), "xlSortOnValues", "xlAscending");
+			fields.Add(ws.GetRange("C2"), "xlSortOnValues", "xlAscending");
+			fields.Add(ws.GetRange("D2"), "xlSortOnValues", "xlAscending");
+
+			// Move last field to priority 1
+			var sf = fields.Item(3);
+			sf.SetPriority(1);
+			assert.equal(fields.Item(1).GetKey().GetAddress(true, true), "$D$2:$D$5", "After SetPriority(1): D is first");
+			assert.equal(fields.Item(2).GetKey().GetAddress(true, true), "$B$2:$B$5", "After SetPriority(1): B is second");
+			assert.equal(fields.Item(3).GetKey().GetAddress(true, true), "$C$2:$C$5", "After SetPriority(1): C is third");
+			assert.equal(sf.GetPriority(), 1, "GetPriority reflects new position");
+
+			sf.Priority = 3;
+			assert.equal(fields.Item(3).GetKey().GetAddress(true, true), "$D$2:$D$5", "After Priority=3: D is back at end");
+		});
+
+		QUnit.test("SortField - SortOnValue/SetIcon", function (assert)
+		{
+			initializeTest();
+
+			var tbl    = ws.AddListObject("xlSrcRange", "B2:D5");
+			var fields = tbl.GetSort().SortFields;
+
+			var sf = fields.Add(ws.GetRange("B2"), "xlSortOnValues", "xlAscending");
+			assert.strictEqual(sf.GetSortOnValue(), null, "SortOnValue is null for value sort");
+			assert.strictEqual(sf.SortOnValue, null, "SortOnValue property works");
+
+			sf.SetIcon("someIcon");
+			assert.equal(sf.GetSortOn(), "xlSortOnIcon", "SetIcon sets sortOn to xlSortOnIcon");
+			assert.equal(sf.GetSortOnValue(), "someIcon", "SetIcon stores the icon in SortOnValue");
+		});
+
+		QUnit.test("SortField - GetKey/ModifyKey/Delete", function (assert)
+		{
+			initializeTest();
+
+			var tbl    = ws.AddListObject("xlSrcRange", "B2:D5");
+			var sort   = tbl.GetSort();
+			var fields = sort.SortFields;
+
+			fields.Add(ws.GetRange("B2"), "xlSortOnValues", "xlAscending");
+			fields.Add(ws.GetRange("C2"), "xlSortOnValues", "xlAscending");
+
+			var sf = fields.Item(1);
+			var keyRng = sf.GetKey();
+			assert.ok(keyRng !== null, "GetKey returns a range");
+			assert.equal(keyRng.GetAddress(true, true), "$B$2:$B$5", "Key range spans full table column B");
+
+			sf.ModifyKey(ws.GetRange("D2"));
+			assert.equal(sf.GetKey().GetAddress(true, true), "$D$2:$D$5", "ModifyKey changed key to column D");
+
+			fields.Item(1).Delete();
+			assert.equal(fields.Count, 1, "Count is 1 after Delete of first field");
+			assert.equal(fields.Item(1).GetKey().GetAddress(true, true), "$C$2:$C$5", "Remaining field is column C");
+		});
+
+		QUnit.test("Sort - Apply sorts table data", function (assert)
+		{
+			initializeTest();
+
+			// Create table with header in B2, data in B3:D5
+			var tbl = ws.AddListObject("xlSrcRange", "B2:D5");
+			ws.GetRange("B2").SetValue("Name");
+			ws.GetRange("B3").SetValue("Charlie");
+			ws.GetRange("B4").SetValue("Alice");
+			ws.GetRange("B5").SetValue("Bob");
+
+			var sort   = tbl.GetSort();
+			var fields = sort.GetSortFields();
+			fields.Clear();
+			fields.Add(ws.GetRange("B2"), "xlSortOnValues", "xlAscending");
+			sort.Apply();
+
+			assert.equal(ws.GetRange("B3").GetValue(), "Alice",   "After ascending sort: row 1 = Alice");
+			assert.equal(ws.GetRange("B4").GetValue(), "Bob",     "After ascending sort: row 2 = Bob");
+			assert.equal(ws.GetRange("B5").GetValue(), "Charlie", "After ascending sort: row 3 = Charlie");
+
+			// Sort descending
+			var sort2   = tbl.GetSort();
+			var fields2 = sort2.GetSortFields();
+			fields2.Clear();
+			fields2.Add(ws.GetRange("B2"), "xlSortOnValues", "xlDescending");
+			sort2.Apply();
+
+			assert.equal(ws.GetRange("B3").GetValue(), "Charlie", "After descending sort: row 1 = Charlie");
+			assert.equal(ws.GetRange("B4").GetValue(), "Bob",     "After descending sort: row 2 = Bob");
+			assert.equal(ws.GetRange("B5").GetValue(), "Alice",   "After descending sort: row 3 = Alice");
+
+			// Sort state is persisted — a fresh GetSort() reflects last applied
+			var sort3 = tbl.GetSort();
+			assert.equal(sort3.GetSortFields().Count, 1, "Persisted sort state has 1 field");
+			assert.equal(sort3.GetSortFields().Item(1).GetOrder(), "xlDescending", "Persisted sort order is xlDescending");
+		});
 	});
 });
