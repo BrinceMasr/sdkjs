@@ -27587,9 +27587,17 @@
      * @property {ApiWorksheet} Parent - Returns the ApiWorksheet object that contains the AutoFilter.
      * @property {ApiRange | null} Range - Returns the ApiRange object that represents the AutoFilter range; null if no AutoFilter is defined.
      */
-    function ApiAutoFilter(ws) {
+    function ApiAutoFilter(ws, listObject) {
         this.ws = ws;
+        this.listObject = listObject || null;
     }
+
+    ApiAutoFilter.prototype._getAutoFilter = function () {
+        if (this.listObject) {
+            return this.listObject.tablePart.AutoFilter || null;
+        }
+        return this.ws && this.ws.worksheet && this.ws.worksheet.AutoFilter || null;
+    };
 
     /**
      * Reapplies the AutoFilter to the worksheet using the existing filter criteria.
@@ -27606,9 +27614,13 @@
      */
     ApiAutoFilter.prototype.ApplyFilter = function () {
         if (this.GetFilterMode()) {
-            const Id = this.ws.worksheet.Id;
-            if (Id) {
-                this.ws.worksheet.workbook.oApi.asc_reapplyAutoFilter(null, Id);
+            if (this.listObject) {
+                this.ws.worksheet.autoFilters.reapplyAutoFilter(this.listObject.tablePart.DisplayName);
+            } else {
+                const Id = this.ws.worksheet.Id;
+                if (Id) {
+                    this.ws.worksheet.workbook.oApi.asc_reapplyAutoFilter(null, Id);
+                }
             }
         }
     };
@@ -27628,13 +27640,13 @@
      */
     ApiAutoFilter.prototype.ShowAllData = function () {
         if (this.GetFilterMode()) {
-            // const localWs = this.ws.worksheet;
-            // var bbox = localWs.AutoFilter.Ref;
-            // localWs.autoFilters.deleteAutoFilter(bbox);
-            // localWs.autoFilters.addAutoFilter(null, bbox);
-            const Id = this.ws.worksheet.Id;
-            if (Id) {
-                this.ws.worksheet.workbook.oApi.asc_clearFilter(Id);
+            if (this.listObject) {
+                this.ws.worksheet.autoFilters.isApplyAutoFilterInCell(this.listObject.tablePart.Ref, true);
+            } else {
+                const Id = this.ws.worksheet.Id;
+                if (Id) {
+                    this.ws.worksheet.workbook.oApi.asc_clearFilter(Id);
+                }
             }
         }
     };
@@ -27647,14 +27659,8 @@
      * @see office-js-api/Examples/{Editor}/ApiAutoFilter/Methods/GetFilters.js
      */
     ApiAutoFilter.prototype.GetFilters = function () {
-        const cols =
-            this.ws &&
-            this.ws.worksheet &&
-            this.ws.worksheet.AutoFilter &&
-            this.ws.worksheet.AutoFilter.FilterColumns
-                ? this.ws.worksheet.AutoFilter.FilterColumns
-                : [];
-
+        var af = this._getAutoFilter();
+        var cols = af && af.FilterColumns ? af.FilterColumns : [];
         return createAutoFilterArray(this, cols);
     };
 
@@ -27672,7 +27678,7 @@
      * @see office-js-api/Examples/{Editor}/ApiAutoFilter/Methods/GetFilterMode.js
      */
     ApiAutoFilter.prototype.GetFilterMode = function () {
-        return !!(this.ws && this.ws.worksheet && this.ws.worksheet.AutoFilter);
+        return !!this._getAutoFilter();
     };
 
     Object.defineProperty(ApiAutoFilter.prototype, "FilterMode", {
@@ -27689,7 +27695,7 @@
      * @see office-js-api/Examples/{Editor}/ApiAutoFilter/Methods/GetParent.js
      */
     ApiAutoFilter.prototype.GetParent = function () {
-        return this.ws;
+        return this.listObject || this.ws;
     };
 
     Object.defineProperty(ApiAutoFilter.prototype, "Parent", {
@@ -27706,17 +27712,11 @@
      * @see office-js-api/Examples/{Editor}/ApiAutoFilter/Methods/GetRange.js
      */
     ApiAutoFilter.prototype.GetRange = function () {
-        if (
-            !this.ws ||
-            !this.ws.worksheet ||
-            !this.ws.worksheet.AutoFilter ||
-            !this.ws.worksheet.AutoFilter.Ref
-        ) {
+        var af = this._getAutoFilter();
+        if (!af || !af.Ref) {
             return null;
         }
-
-        var bbox = this.ws.worksheet.AutoFilter.Ref;
-        return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this.ws.worksheet, bbox));
+        return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this.ws.worksheet, af.Ref));
     };
 
     Object.defineProperty(ApiAutoFilter.prototype, "Range", {
@@ -28275,6 +28275,26 @@
 	});
 
 	/**
+	 * Returns the ApiAutoFilter object representing the autofilter applied to the table.
+	 * Returns null if the table has no autofilter.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiAutoFilter | null}
+	 */
+	ApiListObject.prototype.GetAutoFilter = function () {
+		if (!this.tablePart.AutoFilter) {
+			return null;
+		}
+		return new ApiAutoFilter(this.ws, this);
+	};
+
+	Object.defineProperty(ApiListObject.prototype, "AutoFilter", {
+		get: function () {
+			return this.GetAutoFilter();
+		}
+	});
+
+	/**
 	 * Returns the range of the data rows in the table, excluding the header row and totals row.
 	 * Returns null if the table has no data rows.
 	 * @memberof ApiListObject
@@ -28762,6 +28782,7 @@
 	ApiListObject.prototype["SetShowAutoFilter"]          = ApiListObject.prototype.SetShowAutoFilter;
 	ApiListObject.prototype["GetShowAutoFilterDropDown"]  = ApiListObject.prototype.GetShowAutoFilterDropDown;
 	ApiListObject.prototype["SetShowAutoFilterDropDown"]  = ApiListObject.prototype.SetShowAutoFilterDropDown;
+	ApiListObject.prototype["GetAutoFilter"]                     = ApiListObject.prototype.GetAutoFilter;
 	ApiListObject.prototype["GetShowHeaders"]                    = ApiListObject.prototype.GetShowHeaders;
 	ApiListObject.prototype["SetShowHeaders"]                    = ApiListObject.prototype.SetShowHeaders;
 	ApiListObject.prototype["GetShowTableStyleColumnStripes"]    = ApiListObject.prototype.GetShowTableStyleColumnStripes;

@@ -103,6 +103,26 @@ $(function ()
 			assert.equal(tbl.GetComment(), "Q3 report data", "Comment set via property");
 		});
 
+		QUnit.test("AutoFilter", function (assert)
+		{
+			initializeTest();
+
+			var tbl = ws.AddListObject("xlSrcRange", "B2:D5");
+
+			var af = tbl.GetAutoFilter();
+			assert.ok(af !== null, "GetAutoFilter returns non-null for a table with autofilter");
+			assert.ok(tbl.AutoFilter !== null, "AutoFilter property returns non-null");
+
+			assert.equal(af.GetFilterMode(), true, "FilterMode is true when autofilter exists");
+			assert.equal(af.GetFilters().length, 0, "GetFilters returns empty array when no filters applied");
+			assert.equal(af.GetRange().GetAddress(true, true), "$B$2:$D$5", "AutoFilter range matches table range");
+			assert.equal(af.GetParent().GetName(), tbl.GetName(), "GetParent returns the parent ListObject");
+
+			// ShowAutoFilter = false removes AutoFilter → GetAutoFilter returns null
+			tbl.SetShowAutoFilter(false);
+			assert.equal(tbl.GetAutoFilter(), null, "GetAutoFilter returns null after ShowAutoFilter set to false");
+		});
+
 		QUnit.test("ShowAutoFilter and ShowAutoFilterDropDown", function (assert)
 		{
 			initializeTest();
