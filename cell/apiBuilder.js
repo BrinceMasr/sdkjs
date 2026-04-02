@@ -27979,6 +27979,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {boolean}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetActive.js
 	 */
 	ApiListObject.prototype.GetActive = function () {
 		var ref = this.tablePart.Ref;
@@ -28001,6 +28002,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {string}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetAlternativeText.js
 	 */
 	ApiListObject.prototype.GetAlternativeText = function () {
 		return this.tablePart.altText || "";
@@ -28011,6 +28013,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @param {string} sAltText - The alternative text string.
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetAlternativeText.js
 	 */
 	ApiListObject.prototype.SetAlternativeText = function (sAltText) {
 		this.tablePart.changeAltText(sAltText);
@@ -28030,6 +28033,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {string}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetComment.js
 	 */
 	ApiListObject.prototype.GetComment = function () {
 		return this.tablePart.altTextSummary || "";
@@ -28040,6 +28044,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @param {string} sComment - The comment string.
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetComment.js
 	 */
 	ApiListObject.prototype.SetComment = function (sComment) {
 		this.tablePart.changeAltTextSummary(sComment);
@@ -28059,6 +28064,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {string}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetName.js
 	 */
 	ApiListObject.prototype.GetName = function () {
 		return this.tablePart.DisplayName;
@@ -28069,6 +28075,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @param {string} sName
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetName.js
 	 */
 	ApiListObject.prototype.SetName = function (sName) {
 		this.ws.worksheet.autoFilters.changeDisplayNameTable(this.tablePart.DisplayName, sName);
@@ -28088,6 +28095,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiWorksheet}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetParent.js
 	 */
 	ApiListObject.prototype.GetParent = function () {
 		return this.ws;
@@ -28104,6 +28112,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {string}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetDisplayName.js
 	 */
 	ApiListObject.prototype.GetDisplayName = function () {
 		return this.tablePart.DisplayName;
@@ -28114,6 +28123,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @param {string} sDisplayName - The new display name for the table.
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetDisplayName.js
 	 */
 	ApiListObject.prototype.SetDisplayName = function (sDisplayName) {
 		this.ws.worksheet.autoFilters.changeDisplayNameTable(this.tablePart.DisplayName, sDisplayName);
@@ -28133,6 +28143,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiRange | null}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetRange.js
 	 */
 	ApiListObject.prototype.GetRange = function () {
 		var bbox = this.tablePart.Ref;
@@ -28152,6 +28163,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiRange | null}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetHeaderRowRange.js
 	 */
 	ApiListObject.prototype.GetHeaderRowRange = function () {
 		var ref = this.tablePart.Ref;
@@ -28174,6 +28186,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {boolean}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetShowAutoFilter.js
 	 */
 	ApiListObject.prototype.GetShowAutoFilter = function () {
 		return !!this.tablePart.AutoFilter;
@@ -28185,6 +28198,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} bShow
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetShowAutoFilter.js
 	 */
 	ApiListObject.prototype.SetShowAutoFilter = function (bShow) {
 		if (bShow) {
@@ -28211,6 +28225,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {boolean}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetShowAutoFilterDropDown.js
 	 */
 	ApiListObject.prototype.GetShowAutoFilterDropDown = function () {
 		if (!this.tablePart.AutoFilter) {
@@ -28225,6 +28240,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} bShow - Pass true to show the dropdown arrows, false to hide them.
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetShowAutoFilterDropDown.js
 	 */
 	ApiListObject.prototype.SetShowAutoFilterDropDown = function (bShow) {
 		this.tablePart.showButton(bShow);
@@ -28244,6 +28260,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {boolean}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetShowHeaders.js
 	 */
 	ApiListObject.prototype.GetShowHeaders = function () {
 		return this.tablePart.isHeaderRow();
@@ -28254,6 +28271,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} bShow
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetShowHeaders.js
 	 */
 	ApiListObject.prototype.SetShowHeaders = function (bShow) {
 		if (this.GetShowHeaders() !== bShow) {
@@ -28280,6 +28298,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiAutoFilter | null}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetAutoFilter.js
 	 */
 	ApiListObject.prototype.GetAutoFilter = function () {
 		if (!this.tablePart.AutoFilter) {
@@ -28300,6 +28319,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiRange | null}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetDataBodyRange.js
 	 */
 	ApiListObject.prototype.GetDataBodyRange = function () {
 		var ref = this.tablePart.Ref;
@@ -28326,6 +28346,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {boolean}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetShowTableStyleColumnStripes.js
 	 */
 	ApiListObject.prototype.GetShowTableStyleColumnStripes = function () {
 		return !!this.tablePart.TableStyleInfo.ShowColumnStripes;
@@ -28336,6 +28357,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} bShow
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetShowTableStyleColumnStripes.js
 	 */
 	ApiListObject.prototype.SetShowTableStyleColumnStripes = function (bShow) {
 		if (this.GetShowTableStyleColumnStripes() !== bShow) {
@@ -28361,6 +28383,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {boolean}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetShowTableStyleFirstColumn.js
 	 */
 	ApiListObject.prototype.GetShowTableStyleFirstColumn = function () {
 		return !!this.tablePart.TableStyleInfo.ShowFirstColumn;
@@ -28371,6 +28394,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} bShow
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetShowTableStyleFirstColumn.js
 	 */
 	ApiListObject.prototype.SetShowTableStyleFirstColumn = function (bShow) {
 		if (this.GetShowTableStyleFirstColumn() !== bShow) {
@@ -28396,6 +28420,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {boolean}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetShowTableStyleLastColumn.js
 	 */
 	ApiListObject.prototype.GetShowTableStyleLastColumn = function () {
 		return !!this.tablePart.TableStyleInfo.ShowLastColumn;
@@ -28406,6 +28431,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} bShow
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetShowTableStyleLastColumn.js
 	 */
 	ApiListObject.prototype.SetShowTableStyleLastColumn = function (bShow) {
 		if (this.GetShowTableStyleLastColumn() !== bShow) {
@@ -28431,6 +28457,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {boolean}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetShowTableStyleRowStripes.js
 	 */
 	ApiListObject.prototype.GetShowTableStyleRowStripes = function () {
 		return !!this.tablePart.TableStyleInfo.ShowRowStripes;
@@ -28441,6 +28468,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} bShow
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetShowTableStyleRowStripes.js
 	 */
 	ApiListObject.prototype.SetShowTableStyleRowStripes = function (bShow) {
 		if (this.GetShowTableStyleRowStripes() !== bShow) {
@@ -28466,6 +28494,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {boolean}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetShowTotals.js
 	 */
 	ApiListObject.prototype.GetShowTotals = function () {
 		return !!this.tablePart.TotalsRowCount;
@@ -28476,6 +28505,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} bShow
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetShowTotals.js
 	 */
 	ApiListObject.prototype.SetShowTotals = function (bShow) {
 		if (this.GetShowTotals() !== bShow) {
@@ -28500,6 +28530,7 @@
 	 * Deletes the ListObject object and clears the cell formatting.
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/Delete.js
 	 */
 	ApiListObject.prototype.Delete = function () {
 		var ref = this.tablePart.Ref;
@@ -28514,6 +28545,7 @@
 	 * Cell data, formatting, and formulas remain on the sheet.
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/Unlist.js
 	 */
 	ApiListObject.prototype.Unlist = function () {
 		var ref = this.tablePart.Ref;
@@ -28528,6 +28560,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @param {string} sRange - The new range for the table, e.g. <b>"A1:D10"</b>.
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/Resize.js
 	 */
 	ApiListObject.prototype.Resize = function (sRange) {
 		var ascRange = AscCommonExcel.g_oRangeCache.getAscRange(sRange);
@@ -28542,6 +28575,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {string}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetSourceType.js
 	 */
 	ApiListObject.prototype.GetSourceType = function () {
 		return "xlSrcRange";
@@ -28558,6 +28592,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {string}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetTableStyle.js
 	 */
 	ApiListObject.prototype.GetTableStyle = function () {
 		return this.tablePart.TableStyleInfo && this.tablePart.TableStyleInfo.Name || "";
@@ -28568,6 +28603,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @param {string} sStyleName
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetTableStyle.js
 	 */
 	ApiListObject.prototype.SetTableStyle = function (sStyleName) {
 		this.ws.worksheet.autoFilters.changeTableStyleInfo(sStyleName, this.tablePart.Ref);
@@ -28588,6 +28624,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiRange | null}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetTotalsRowRange.js
 	 */
 	ApiListObject.prototype.GetTotalsRowRange = function () {
 		var ref = this.tablePart.Ref;
@@ -28609,6 +28646,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {string}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetSummary.js
 	 */
 	ApiListObject.prototype.GetSummary = function () {
 		return this.GetComment();
@@ -28619,6 +28657,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @param {string} sSummary
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetSummary.js
 	 */
 	ApiListObject.prototype.SetSummary = function (sSummary) {
 		this.SetComment(sSummary);
@@ -28638,6 +28677,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiListColumn[]}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetListColumns.js
 	 */
 	ApiListObject.prototype.GetListColumns = function () {
 		var columns = this.tablePart.TableColumns;
@@ -28658,6 +28698,7 @@
 	 * @typeofeditors ["CSE"]
 	 * @param {number} [nPosition] - The 1-based position at which to insert the new column.
 	 * @returns {ApiListColumn | null}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/AddListColumn.js
 	 */
 	ApiListObject.prototype.AddListColumn = function (nPosition) {
 		var tablePart = this.tablePart;
@@ -28705,6 +28746,7 @@
 	 * @memberof ApiListColumn
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiRange | null}
+	 * @see office-js-api/Examples/Cell/ApiListColumn/Methods/GetDataBodyRange.js
 	 */
 	ApiListColumn.prototype.GetDataBodyRange = function () {
 		var tablePart = this.listObject.tablePart;
@@ -28726,6 +28768,7 @@
 	 * @memberof ApiListColumn
 	 * @typeofeditors ["CSE"]
 	 * @returns {number}
+	 * @see office-js-api/Examples/Cell/ApiListColumn/Methods/GetIndex.js
 	 */
 	ApiListColumn.prototype.GetIndex = function () {
 		var columns = this.listObject.tablePart.TableColumns;
@@ -28751,6 +28794,7 @@
 	 * @memberof ApiListColumn
 	 * @typeofeditors ["CSE"]
 	 * @returns {string}
+	 * @see office-js-api/Examples/Cell/ApiListColumn/Methods/GetName.js
 	 */
 	ApiListColumn.prototype.GetName = function () {
 		return this.tableColumn.getTableColumnName() || "";
@@ -28761,6 +28805,7 @@
 	 * @memberof ApiListColumn
 	 * @typeofeditors ["CSE"]
 	 * @param {string} sName - The new column name.
+	 * @see office-js-api/Examples/Cell/ApiListColumn/Methods/SetName.js
 	 */
 	ApiListColumn.prototype.SetName = function (sName) {
 		this.tableColumn.setTableColumnName(sName);
@@ -28780,6 +28825,7 @@
 	 * @memberof ApiListColumn
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiListObject}
+	 * @see office-js-api/Examples/Cell/ApiListColumn/Methods/GetParent.js
 	 */
 	ApiListColumn.prototype.GetParent = function () {
 		return this.listObject;
@@ -28796,6 +28842,7 @@
 	 * @memberof ApiListColumn
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiRange | null}
+	 * @see office-js-api/Examples/Cell/ApiListColumn/Methods/GetRange.js
 	 */
 	ApiListColumn.prototype.GetRange = function () {
 		var tablePart = this.listObject.tablePart;
@@ -28817,6 +28864,7 @@
 	 * @memberof ApiListColumn
 	 * @typeofeditors ["CSE"]
 	 * @returns {XlTotalsCalculation}
+	 * @see office-js-api/Examples/Cell/ApiListColumn/Methods/GetTotalsCalculation.js
 	 */
 	ApiListColumn.prototype.GetTotalsCalculation = function () {
 		var fn = this.tableColumn.getTotalsRowFunction();
@@ -28849,6 +28897,7 @@
 	 * @memberof ApiListColumn
 	 * @typeofeditors ["CSE"]
 	 * @param {XlTotalsCalculation} sType - The totals calculation type.
+	 * @see office-js-api/Examples/Cell/ApiListColumn/Methods/SetTotalsCalculation.js
 	 */
 	ApiListColumn.prototype.SetTotalsCalculation = function (sType) {
 		var fn;
@@ -28904,6 +28953,7 @@
 	 * @memberof ApiListColumn
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiRange | null}
+	 * @see office-js-api/Examples/Cell/ApiListColumn/Methods/GetTotal.js
 	 */
 	ApiListColumn.prototype.GetTotal = function () {
 		var tablePart = this.listObject.tablePart;
@@ -28936,6 +28986,7 @@
 	 * Deletes the column from the table.
 	 * @memberof ApiListColumn
 	 * @typeofeditors ["CSE"]
+	 * @see office-js-api/Examples/Cell/ApiListColumn/Methods/Delete.js
 	 */
 	ApiListColumn.prototype.Delete = function () {
 		var tablePart = this.listObject.tablePart;
@@ -28957,6 +29008,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiListRow[]}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetListRows.js
 	 */
 	ApiListObject.prototype.GetListRows = function () {
 		var tablePart = this.tablePart;
@@ -28981,6 +29033,7 @@
 	 * @typeofeditors ["CSE"]
 	 * @param {number} [nPosition] - The 1-based position within the data body at which to insert the row.
 	 * @returns {ApiListRow | null}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/AddListRow.js
 	 */
 	ApiListObject.prototype.AddListRow = function (nPosition) {
 		var tablePart = this.tablePart;
@@ -29026,6 +29079,7 @@
 	 * @memberof ApiListRow
 	 * @typeofeditors ["CSE"]
 	 * @returns {number}
+	 * @see office-js-api/Examples/Cell/ApiListRow/Methods/GetIndex.js
 	 */
 	ApiListRow.prototype.GetIndex = function () {
 		return this.index;
@@ -29042,6 +29096,7 @@
 	 * @memberof ApiListRow
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiListObject}
+	 * @see office-js-api/Examples/Cell/ApiListRow/Methods/GetParent.js
 	 */
 	ApiListRow.prototype.GetParent = function () {
 		return this.listObject;
@@ -29058,6 +29113,7 @@
 	 * @memberof ApiListRow
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiRange | null}
+	 * @see office-js-api/Examples/Cell/ApiListRow/Methods/GetRange.js
 	 */
 	ApiListRow.prototype.GetRange = function () {
 		var tablePart = this.listObject.tablePart;
@@ -29081,6 +29137,7 @@
 	 * Deletes the row from the table.
 	 * @memberof ApiListRow
 	 * @typeofeditors ["CSE"]
+	 * @see office-js-api/Examples/Cell/ApiListRow/Methods/Delete.js
 	 */
 	ApiListRow.prototype.Delete = function () {
 		var tablePart = this.listObject.tablePart;
@@ -29134,15 +29191,6 @@
 		}
 	}
 
-	function _sortMethodFromStr(sortMethod) {
-		switch (sortMethod) {
-			case "xlStroke":
-				return AscCommonExcel.ESortMethod.sortmethodStroke;
-			default:
-				return AscCommonExcel.ESortMethod.sortmethodPinYin;
-		}
-	}
-
 	/**
 	 * Class representing the sort state of a list object (table).
 	 * @constructor
@@ -29181,6 +29229,7 @@
 	 * @memberof ApiSort
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiSortFields}
+	 * @see office-js-api/Examples/Cell/ApiSort/Methods/GetSortFields.js
 	 */
 	ApiSort.prototype.GetSortFields = function () {
 		return new ApiSortFields(this);
@@ -29197,6 +29246,7 @@
 	 * @memberof ApiSort
 	 * @typeofeditors ["CSE"]
 	 * @returns {boolean}
+	 * @see office-js-api/Examples/Cell/ApiSort/Methods/GetMatchCase.js
 	 */
 	ApiSort.prototype.GetMatchCase = function () {
 		return this._matchCase;
@@ -29207,6 +29257,7 @@
 	 * @memberof ApiSort
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} bMatchCase
+	 * @see office-js-api/Examples/Cell/ApiSort/Methods/SetMatchCase.js
 	 */
 	ApiSort.prototype.SetMatchCase = function (bMatchCase) {
 		this._matchCase = !!bMatchCase;
@@ -29226,6 +29277,7 @@
 	 * @memberof ApiSort
 	 * @typeofeditors ["CSE"]
 	 * @returns {string}
+	 * @see office-js-api/Examples/Cell/ApiSort/Methods/GetHeader.js
 	 */
 	ApiSort.prototype.GetHeader = function () {
 		return "xlYes";
@@ -29242,6 +29294,7 @@
 	 * @memberof ApiSort
 	 * @typeofeditors ["CSE"]
 	 * @returns {string}
+	 * @see office-js-api/Examples/Cell/ApiSort/Methods/GetOrientation.js
 	 */
 	ApiSort.prototype.GetOrientation = function () {
 		return this._orientation;
@@ -29252,6 +29305,7 @@
 	 * @memberof ApiSort
 	 * @typeofeditors ["CSE"]
 	 * @param {"xlTopToBottom" | "xlLeftToRight"} sOrientation
+	 * @see office-js-api/Examples/Cell/ApiSort/Methods/SetOrientation.js
 	 */
 	ApiSort.prototype.SetOrientation = function (sOrientation) {
 		this._orientation = sOrientation === "xlLeftToRight" ? "xlLeftToRight" : "xlTopToBottom";
@@ -29271,6 +29325,7 @@
 	 * @memberof ApiSort
 	 * @typeofeditors ["CSE"]
 	 * @returns {string}
+	 * @see office-js-api/Examples/Cell/ApiSort/Methods/GetSortMethod.js
 	 */
 	ApiSort.prototype.GetSortMethod = function () {
 		return this._sortMethod;
@@ -29281,6 +29336,7 @@
 	 * @memberof ApiSort
 	 * @typeofeditors ["CSE"]
 	 * @param {"xlPinYin" | "xlStroke"} sSortMethod
+	 * @see office-js-api/Examples/Cell/ApiSort/Methods/SetSortMethod.js
 	 */
 	ApiSort.prototype.SetSortMethod = function (sSortMethod) {
 		this._sortMethod = sSortMethod === "xlStroke" ? "xlStroke" : "xlPinYin";
@@ -29300,6 +29356,7 @@
 	 * @memberof ApiSort
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiListObject}
+	 * @see office-js-api/Examples/Cell/ApiSort/Methods/GetParent.js
 	 */
 	ApiSort.prototype.GetParent = function () {
 		return this.listObject;
@@ -29316,6 +29373,7 @@
 	 * @memberof ApiSort
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiRange | null}
+	 * @see office-js-api/Examples/Cell/ApiSort/Methods/GetRng.js
 	 */
 	ApiSort.prototype.GetRng = function () {
 		return this.listObject.GetDataBodyRange();
@@ -29331,6 +29389,7 @@
 	 * No-op for a ListObject — the sort range is always the data body range.
 	 * @memberof ApiSort
 	 * @typeofeditors ["CSE"]
+	 * @see office-js-api/Examples/Cell/ApiSort/Methods/SetRange.js
 	 */
 	ApiSort.prototype.SetRange = function () {
 	};
@@ -29339,6 +29398,7 @@
 	 * Applies the current sort settings to the table.
 	 * @memberof ApiSort
 	 * @typeofeditors ["CSE"]
+	 * @see office-js-api/Examples/Cell/ApiSort/Methods/Apply.js
 	 */
 	ApiSort.prototype.Apply = function () {
 		if (!this._fields.length) {
@@ -29390,16 +29450,11 @@
 	}
 
 	/**
-	 * Returns the number of sort fields.
-	 * @memberof ApiSortFields
-	 * @typeofeditors ["CSE"]
-	 * @returns {number}
-	 */
-	/**
 	 * Returns the parent Sort object.
 	 * @memberof ApiSortFields
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiSort}
+	 * @see office-js-api/Examples/Cell/ApiSortFields/Methods/GetParent.js
 	 */
 	ApiSortFields.prototype.GetParent = function () {
 		return this._sort;
@@ -29411,6 +29466,13 @@
 		}
 	});
 
+	/**
+	 * Returns the number of sort fields.
+	 * @memberof ApiSortFields
+	 * @typeofeditors ["CSE"]
+	 * @returns {number}
+	 * @see office-js-api/Examples/Cell/ApiSortFields/Methods/GetCount.js
+	 */
 	ApiSortFields.prototype.GetCount = function () {
 		return this._sort._fields.length;
 	};
@@ -29427,6 +29489,7 @@
 	 * @typeofeditors ["CSE"]
 	 * @param {number} nIndex - 1-based index.
 	 * @returns {ApiSortField | null}
+	 * @see office-js-api/Examples/Cell/ApiSortFields/Methods/Item.js
 	 */
 	ApiSortFields.prototype.Item = function (nIndex) {
 		var fieldObj = this._sort._fields[nIndex - 1];
@@ -29446,6 +29509,7 @@
 	 * @param {*} [CustomOrder]
 	 * @param {string} [DataOption="xlSortNormal"] - "xlSortNormal" or "xlSortTextAsNumbers".
 	 * @returns {ApiSortField | null}
+	 * @see office-js-api/Examples/Cell/ApiSortFields/Methods/Add.js
 	 */
 	ApiSortFields.prototype.Add = function (Key, SortOn, Order, CustomOrder, DataOption) {
 		if (!(Key instanceof ApiRange)) {
@@ -29474,6 +29538,7 @@
 	 * @param {string} [DataOption="xlSortNormal"] - "xlSortNormal" or "xlSortTextAsNumbers".
 	 * @param {string} [SubField] - Subfield name for linked data types (e.g. "Population", "Volume").
 	 * @returns {ApiSortField | null}
+	 * @see office-js-api/Examples/Cell/ApiSortFields/Methods/Add2.js
 	 */
 	ApiSortFields.prototype.Add2 = function (Key, SortOn, Order, CustomOrder, DataOption, SubField) {
 		if (!(Key instanceof ApiRange)) {
@@ -29495,6 +29560,7 @@
 	 * Removes all sort fields from the collection.
 	 * @memberof ApiSortFields
 	 * @typeofeditors ["CSE"]
+	 * @see office-js-api/Examples/Cell/ApiSortFields/Methods/Clear.js
 	 */
 	ApiSortFields.prototype.Clear = function () {
 		this._sort._fields = [];
@@ -29516,16 +29582,11 @@
 	}
 
 	/**
-	 * Returns the sort key range (the full table column).
-	 * @memberof ApiSortField
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange | null}
-	 */
-	/**
 	 * Returns the parent SortFields collection.
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiSortFields}
+	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetParent.js
 	 */
 	ApiSortField.prototype.GetParent = function () {
 		return new ApiSortFields(this._sort);
@@ -29537,6 +29598,13 @@
 		}
 	});
 
+	/**
+	 * Returns the sort key range (the full table column).
+	 * @memberof ApiSortField
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiRange | null}
+	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetKey.js
+	 */
 	ApiSortField.prototype.GetKey = function () {
 		var tablePart = this._sort.listObject.tablePart;
 		var ref       = tablePart.Ref;
@@ -29559,6 +29627,7 @@
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
 	 * @returns {string}
+	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetSortOn.js
 	 */
 	ApiSortField.prototype.GetSortOn = function () {
 		return this._fieldObj.sortOn;
@@ -29569,6 +29638,7 @@
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
 	 * @param {string} sSortOn - "xlSortOnValues", "xlSortOnCellColor", "xlSortOnFontColor", "xlSortOnIcon".
+	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetSortOn.js
 	 */
 	ApiSortField.prototype.SetSortOn = function (sSortOn) {
 		this._fieldObj.sortOn = sSortOn || "xlSortOnValues";
@@ -29588,6 +29658,7 @@
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
 	 * @returns {string}
+	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetOrder.js
 	 */
 	ApiSortField.prototype.GetOrder = function () {
 		return this._fieldObj.descending ? "xlDescending" : "xlAscending";
@@ -29598,6 +29669,7 @@
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
 	 * @param {string} sOrder - "xlAscending" or "xlDescending".
+	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetOrder.js
 	 */
 	ApiSortField.prototype.SetOrder = function (sOrder) {
 		this._fieldObj.descending = sOrder === "xlDescending";
@@ -29617,6 +29689,7 @@
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
 	 * @returns {number}
+	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetPriority.js
 	 */
 	ApiSortField.prototype.GetPriority = function () {
 		return this._sort._fields.indexOf(this._fieldObj) + 1;
@@ -29627,6 +29700,7 @@
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
 	 * @param {number} nPriority
+	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetPriority.js
 	 */
 	ApiSortField.prototype.SetPriority = function (nPriority) {
 		var fields = this._sort._fields;
@@ -29656,6 +29730,7 @@
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
 	 * @returns {* | null}
+	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetCustomOrder.js
 	 */
 	ApiSortField.prototype.GetCustomOrder = function () {
 		return this._fieldObj.customOrder;
@@ -29666,6 +29741,7 @@
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
 	 * @param {*} customOrder
+	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetCustomOrder.js
 	 */
 	ApiSortField.prototype.SetCustomOrder = function (customOrder) {
 		this._fieldObj.customOrder = customOrder;
@@ -29685,6 +29761,7 @@
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
 	 * @returns {string}
+	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetDataOption.js
 	 */
 	ApiSortField.prototype.GetDataOption = function () {
 		return this._fieldObj.dataOption || "xlSortNormal";
@@ -29695,6 +29772,7 @@
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
 	 * @param {string} sDataOption - "xlSortNormal" or "xlSortTextAsNumbers".
+	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetDataOption.js
 	 */
 	ApiSortField.prototype.SetDataOption = function (sDataOption) {
 		this._fieldObj.dataOption = sDataOption === "xlSortTextAsNumbers" ? "xlSortTextAsNumbers" : "xlSortNormal";
@@ -29715,6 +29793,7 @@
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiColor | null}
+	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetSortOnValue.js
 	 */
 	ApiSortField.prototype.GetSortOnValue = function () {
 		return this._fieldObj.sortOnValue || null;
@@ -29731,6 +29810,7 @@
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
 	 * @param {*} Icon
+	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetIcon.js
 	 */
 	ApiSortField.prototype.SetIcon = function (Icon) {
 		this._fieldObj.sortOn      = "xlSortOnIcon";
@@ -29742,6 +29822,7 @@
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
 	 * @param {ApiRange} rng - New sort key range.
+	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/ModifyKey.js
 	 */
 	ApiSortField.prototype.ModifyKey = function (rng) {
 		if (!(rng instanceof ApiRange)) {
@@ -29754,6 +29835,7 @@
 	 * Removes this sort field from the collection.
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
+	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/Delete.js
 	 */
 	ApiSortField.prototype.Delete = function () {
 		var idx = this._sort._fields.indexOf(this._fieldObj);
@@ -29767,6 +29849,7 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiSort}
+	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetSort.js
 	 */
 	ApiListObject.prototype.GetSort = function () {
 		return new ApiSort(this);
