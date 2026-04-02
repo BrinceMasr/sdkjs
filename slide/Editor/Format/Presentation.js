@@ -2652,7 +2652,7 @@ CPresentation.prototype.CheckTargetUpdate = function () {
 };
 CPresentation.prototype.RecalculateOutlineCurPos = function (bUpdateX, bUpdateY) {
 	if (this.IsFocusOnOutline()) {
-		const oTargetDocContent = Asc.editor.WordControl.Thumbnails.outlineView.getTargetDocContent();
+		const oTargetDocContent = Asc.editor.WordControl.Thumbnails.outlineView.getDocContent();
 		oTargetDocContent.RecalculateCurPos(bUpdateX, bUpdateY);
 		return true;
 	}

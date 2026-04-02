@@ -2606,6 +2606,13 @@
 	};
 
 	// events
+	COutlineThumbnailsManager.prototype.getSelectedPage = function () {
+		const selectedPage = this.outlineView.getSelectedSlide();
+		if (selectedPage !== null) {
+			return selectedPage;
+		}
+		return this.m_oWordControl.m_oDrawingDocument.SlideCurrent;
+	};
 	COutlineThumbnailsManager.prototype.onMouseDown = function (e) {
 		const mobileTouchManager = this.m_oWordControl ? this.m_oWordControl.MobileTouchManagerThumbnails : null;
 		if (mobileTouchManager && mobileTouchManager.checkTouchEvent(e, true)) {
@@ -2659,41 +2666,16 @@
 
 			const outlineXMm = pos.X * g_dKoef_pix_to_mm;
 			const outlineYMm = pos.Y * g_dKoef_pix_to_mm;
-			if (outlineXMm > this.outlineLeftMarginMM) {
-
-				const hit = this.outlineView.getOutlineParagraphAtPosition(outlineYMm / pR);
-				if (hit) {
-					this.SelectPageEnabled = false;
-					this.m_oWordControl.GoToPage(hit.slideIndex);
-					this.SelectPageEnabled = true;
-					this.outlineView.selectionSetStart(global_mouseEvent, outlineXMm / pR, outlineYMm / pR, hit.slideIndex)
-					const caretInfo = this.outlineView.getOutlineCursorPos();
-
-
-					const presentation = this.m_oWordControl.m_oLogicDocument;
-					const controller = presentation.GetCurrentController();
-					if (controller && hit.sourceShape) {
-						controller.resetSelection(true);
-						controller.selectObject(hit.sourceShape, hit.slideIndex);
-						controller.selection.textSelection = hit.sourceShape;
-						const srcContent = hit.sourceShape.txBody && hit.sourceShape.txBody.content;
-						if (srcContent && caretInfo) {
-							srcContent.CurPos.ContentPos = hit.sourceParagraphIdx;
-							srcContent.Selection.Use = false;
-							const srcPara = srcContent.Content[hit.sourceParagraphIdx];
-							if (srcPara) {
-								const outlinePara = this.outlineView.outlineShape.txBody.content.Content[hit.paragraphIdx];
-								srcPara.Set_ParaContentPos(caretInfo, true, -1, -1, false); //todo
-							}
-						}
-					}
-
-
+			this.outlineView.selectionSetStart(global_mouseEvent, outlineXMm / pR, outlineYMm / pR, 0)
+			const selectedPage = this.outlineView.getSelectedSlide();
+			if (selectedPage !== null) {
+				this.SelectPageEnabled = false;
+				this.m_oWordControl.GoToPage(selectedPage);
+				this.SelectPageEnabled = true;
+			}
 					this.OnUpdateOverlay();
 					checkSelectionEnd();
 					return false;
-				}
-			}
 		}
 
 		if (pos.Page == -1) {
@@ -3328,6 +3310,7 @@
 		this.m_oWordControl.m_oApi.clearEyedropperImgData();
 		this.outlineView.draw(graphics);
 		this.outlineView.drawDecorations(graphics, currentSlideIndex, scrollYMm, this.outlineLeftMarginMM);
+		this.m_oWordControl.m_oDrawingDocument.UpdateTargetNoAttack();
 	};
 
 	COutlineThumbnailsManager.prototype.onCheckUpdate = function()
@@ -3449,13 +3432,17 @@
 		// const context = canvas.getContext("2d");
 		// this.getOutlineGraphics(canvas);
 
-		if ((this.MouseDownTrack.IsDragged())) {
-			const shape = this.outlineView.outlineShape;
-			if (shape) {
+		const shape = this.outlineView.outlineShape;
+		if (shape) {
+			if ((this.MouseDownTrack.IsDragged())) {
 				const pos = this.ConvertCoords(global_mouseEvent.X, global_mouseEvent.Y);
 				shape.selectionSetEnd(global_mouseEvent, pos.X * g_dKoef_pix_to_mm / AscCommon.AscBrowser.retinaPixelRatio, pos.Y * g_dKoef_pix_to_mm / AscCommon.AscBrowser.retinaPixelRatio, 0);
 				shape.updateSelectionState(this.m_oWordControl.m_oDrawingDocument);
 				this.m_oWordControl.OnUpdateOverlay();
+			} else {
+				this.m_oWordControl.m_oDrawingDocument.UpdateTargetNoAttack();
+				//todo
+				// shape.updateSelectionState(this.m_oWordControl.m_oDrawingDocument);
 			}
 		}
 		// if (this.MouseDownTrack.IsDragged()) {
