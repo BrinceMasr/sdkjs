@@ -12660,7 +12660,7 @@ function parseStringToCElement (val, cultureInfo) {
 		const unshiftDataArrays = {};
 		const unshiftIndexesArrays = {};
 		range._foreachNoEmpty(function (cell, r, c) {
-			const value = checkTypeCell(cell, true);
+			const value = checkTypeCell(cell, true, true);
 			if (value.type === cElementType.number || value.type === cElementType.error) {
 				if (!unshiftDataArrays[value.type]) {
 					unshiftDataArrays[value.type] = [];
@@ -12681,7 +12681,7 @@ function parseStringToCElement (val, cultureInfo) {
 	SumIfSumRangeCache.prototype.updateDataAfter = function (range, column, endIndex) {
 		const t = this;
 		range._foreachNoEmpty(function (cell, r, c) {
-			const value = checkTypeCell(cell, true);
+			const value = checkTypeCell(cell, true, true);
 			if (r > column.end) {
 				if (value.type === cElementType.number || value.type === cElementType.error) {
 					t.pushValue(column, value, r);
