@@ -797,6 +797,30 @@ $(function ()
 			assert.equal(sf.GetSortOnValue(), "someIcon", "SetIcon stores the icon in SortOnValue");
 		});
 
+		QUnit.test("Sort/SortFields/SortField - Parent", function (assert)
+		{
+			initializeTest();
+
+			var tbl    = ws.AddListObject("xlSrcRange", "B2:D5");
+			var sort   = tbl.GetSort();
+			var fields = sort.GetSortFields();
+			fields.Add(ws.GetRange("B2"), "xlSortOnValues", "xlAscending");
+
+			// ApiSort.GetParent() returns the ApiListObject
+			assert.strictEqual(sort.GetParent(), tbl,  "ApiSort.GetParent() returns the parent ApiListObject");
+			assert.strictEqual(sort.Parent,      tbl,  "ApiSort.Parent property works");
+
+			// ApiSortFields.GetParent() returns the ApiSort
+			assert.strictEqual(fields.GetParent(), sort, "ApiSortFields.GetParent() returns the parent ApiSort");
+			assert.strictEqual(fields.Parent,      sort, "ApiSortFields.Parent property works");
+
+			// ApiSortField.GetParent() returns an ApiSortFields wrapping the same collection
+			var sf = fields.Item(1);
+			assert.ok(sf.GetParent() instanceof Object,       "ApiSortField.GetParent() returns an object");
+			assert.equal(sf.GetParent().GetCount(), 1,        "ApiSortField.Parent wraps the same SortFields collection");
+			assert.equal(sf.Parent.GetCount(),      1,        "ApiSortField.Parent property works");
+		});
+
 		QUnit.test("SortField - GetKey/ModifyKey/Delete", function (assert)
 		{
 			initializeTest();

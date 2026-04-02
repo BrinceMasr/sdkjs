@@ -29296,6 +29296,22 @@
 	});
 
 	/**
+	 * Returns the parent list object.
+	 * @memberof ApiSort
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiListObject}
+	 */
+	ApiSort.prototype.GetParent = function () {
+		return this.listObject;
+	};
+
+	Object.defineProperty(ApiSort.prototype, "Parent", {
+		get: function () {
+			return this.GetParent();
+		}
+	});
+
+	/**
 	 * Returns the data body range that the sort applies to.
 	 * @memberof ApiSort
 	 * @typeofeditors ["CSE"]
@@ -29379,6 +29395,22 @@
 	 * @typeofeditors ["CSE"]
 	 * @returns {number}
 	 */
+	/**
+	 * Returns the parent Sort object.
+	 * @memberof ApiSortFields
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiSort}
+	 */
+	ApiSortFields.prototype.GetParent = function () {
+		return this._sort;
+	};
+
+	Object.defineProperty(ApiSortFields.prototype, "Parent", {
+		get: function () {
+			return this.GetParent();
+		}
+	});
+
 	ApiSortFields.prototype.GetCount = function () {
 		return this._sort._fields.length;
 	};
@@ -29489,6 +29521,22 @@
 	 * @typeofeditors ["CSE"]
 	 * @returns {ApiRange | null}
 	 */
+	/**
+	 * Returns the parent SortFields collection.
+	 * @memberof ApiSortField
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiSortFields}
+	 */
+	ApiSortField.prototype.GetParent = function () {
+		return new ApiSortFields(this._sort);
+	};
+
+	Object.defineProperty(ApiSortField.prototype, "Parent", {
+		get: function () {
+			return this.GetParent();
+		}
+	});
+
 	ApiSortField.prototype.GetKey = function () {
 		var tablePart = this._sort.listObject.tablePart;
 		var ref       = tablePart.Ref;
@@ -29931,6 +29979,7 @@
 	ApiListColumn.prototype["GetTotal"]             = ApiListColumn.prototype.GetTotal;
 	ApiListColumn.prototype["Delete"]               = ApiListColumn.prototype.Delete;
 
+	ApiSort.prototype["GetParent"]      = ApiSort.prototype.GetParent;
 	ApiSort.prototype["GetSortFields"]  = ApiSort.prototype.GetSortFields;
 	ApiSort.prototype["GetMatchCase"]   = ApiSort.prototype.GetMatchCase;
 	ApiSort.prototype["SetMatchCase"]   = ApiSort.prototype.SetMatchCase;
@@ -29943,12 +29992,14 @@
 	ApiSort.prototype["SetRange"]       = ApiSort.prototype.SetRange;
 	ApiSort.prototype["Apply"]          = ApiSort.prototype.Apply;
 
+	ApiSortFields.prototype["GetParent"] = ApiSortFields.prototype.GetParent;
 	ApiSortFields.prototype["GetCount"] = ApiSortFields.prototype.GetCount;
 	ApiSortFields.prototype["Item"]     = ApiSortFields.prototype.Item;
 	ApiSortFields.prototype["Add"]      = ApiSortFields.prototype.Add;
 	ApiSortFields.prototype["Add2"]     = ApiSortFields.prototype.Add2;
 	ApiSortFields.prototype["Clear"]    = ApiSortFields.prototype.Clear;
 
+	ApiSortField.prototype["GetParent"]       = ApiSortField.prototype.GetParent;
 	ApiSortField.prototype["GetKey"]          = ApiSortField.prototype.GetKey;
 	ApiSortField.prototype["GetSortOn"]       = ApiSortField.prototype.GetSortOn;
 	ApiSortField.prototype["SetSortOn"]       = ApiSortField.prototype.SetSortOn;
