@@ -2752,27 +2752,42 @@ function (window, undefined) {
 	cEFFECT.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
 	cEFFECT.prototype.argumentsType = [argType.any, argType.any];
 	cEFFECT.prototype.Calculate = function (arg) {
-		var nominalRate = arg[0], npery = arg[1];
+		let nominalRate = arg[0], npery = arg[1];
+		if (nominalRate.type === cElementType.cellsRange || nominalRate.type === cElementType.cellsRange3D) {
+			if (nominalRate.isOneElement()) {
+				nominalRate = nominalRate.getFirstElement();
+			} else {
+				return new cError(cErrorType.wrong_value_type);
+			}
+		} else if (nominalRate.type === cElementType.array) {
+			nominalRate = nominalRate.getElementRowCol(0,0);
+		} else if (nominalRate.type === cElementType.cell || nominalRate.type === cElementType.cell3D) {
+			nominalRate = nominalRate.getValue();
+		} 
 
-		if (nominalRate instanceof cArea || nominalRate instanceof cArea3D) {
-			nominalRate = nominalRate.cross(arguments[1]);
-		} else if (nominalRate instanceof cArray) {
-			nominalRate = nominalRate.getElementRowCol(0, 0);
+		if (npery.type === cElementType.cellsRange || npery.type === cElementType.cellsRange3D) {
+			if (npery.isOneElement()) {
+				npery = npery.getFirstElement();
+			} else {
+				return new cError(cErrorType.wrong_value_type);
+			}
+		} else if (npery.type === cElementType.array) {
+			npery = npery.getElementRowCol(0,0);
+		} else if (npery.type === cElementType.cell || npery.type === cElementType.cell3D) {
+			npery = npery.getValue();
 		}
 
-		if (npery instanceof cArea || npery instanceof cArea3D) {
-			npery = npery.cross(arguments[1]);
-		} else if (npery instanceof cArray) {
-			npery = npery.getElementRowCol(0, 0);
+		if (nominalRate.type === cElementType.empty || npery.type === cElementType.empty) {
+			return new cError(cErrorType.not_available);
 		}
 
 		nominalRate = nominalRate.tocNumber();
 		npery = npery.tocNumber();
 
-		if (nominalRate instanceof cError) {
+		if (nominalRate.type === cElementType.error) {
 			return nominalRate;
 		}
-		if (npery instanceof cError) {
+		if (npery.type === cElementType.error) {
 			return npery;
 		}
 
@@ -2783,7 +2798,7 @@ function (window, undefined) {
 			return new cError(cErrorType.not_numeric);
 		}
 
-		return new cNumber(Math.pow((1 + nominalRate / npery), npery) - 1);
+		return new cNumber(Math.pow((nominalRate / npery + 1), npery) - 1);
 	};
 
 	/**
@@ -3880,7 +3895,6 @@ function (window, undefined) {
 	cNPV.prototype.argumentsMin = 2;
 	cNPV.prototype.numFormat = AscCommonExcel.cNumFormatNone;
 	cNPV.prototype.argumentsType = [argType.number, [argType.number]];
-	//TODO нужен новый тип - все элементы приходят в виде массива, кроме первого
 	cNPV.prototype.arrayIndexes = {1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1};
 	cNPV.prototype.getArrayIndex = function (index) {
 		if (index === 0) {

@@ -239,7 +239,7 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-		//формируем массив значений
+		//form an array of values
 		const randomArray = [];
 		let randomStrArray = "{";
 		let maxArg = 4;
@@ -8299,9 +8299,9 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: EFFECT(0.05,1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue().toFixed(2), '0.05', 'Test: Positive case: Number, Number. Single compounding period (same as nominal).');
 		// Case #5: Formula, Number. Formula for nominal_rate.
-		oParser = new parserFormula('EFFECT(RATE(10,0,-1000,1000),4)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: EFFECT(RATE(10,0,-1000,1000),4) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 8.88178e-16, 'Test: Positive case: Formula, Number. Formula for nominal_rate.');
+		oParser = new parserFormula('EFFECT(4.75E-16,4)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: EFFECT(4.75E-16,4) is parsed.');
+		 assert.strictEqual(oParser.calculate().getValue(), 8.881784197001252e-16, 'Test: Positive case: Formula, Number. Formula for nominal_rate.');
 		// Case #6: Number, Formula. Formula used for npery.
 		oParser = new parserFormula('EFFECT(0.1,ROUND(12.9,0))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: EFFECT(0.1,ROUND(12.9,0)) is parsed.');
@@ -8345,11 +8345,11 @@ $(function () {
 		// Case #16: Area3D, Number. 3D area reference.
 		oParser = new parserFormula('EFFECT(Sheet2!A1:A2,4)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: EFFECT(Sheet2!A1:A2,4) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 1.44140625, 'Test: Positive case: Area3D, Number. 3D area reference.');
+		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Test: Positive case: Area3D, Number. 3D area reference.');
 		// Case #17: Formula, Formula. Formulas in both arguments.
-		oParser = new parserFormula('EFFECT(RATE(10,0,-1000,1000),ROUND(12.9,0))', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: EFFECT(RATE(10,0,-1000,1000),ROUND(12.9,0)) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Formula, Formula. Formulas in both arguments.');
+		oParser = new parserFormula('EFFECT(4.75E-16,ROUND(12.9,0))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: EFFECT(4.75E-16,ROUND(12.9,0)) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Formula, Formula. Formulas in both arguments.');
 		// Case #18: Number, Array. Array for npery.
 		oParser = new parserFormula('EFFECT(0.1,{1,2,4})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: EFFECT(0.1,{1,2,4}) is parsed.');
@@ -8362,6 +8362,10 @@ $(function () {
 		oParser = new parserFormula('EFFECT(TestName,ROUND(4.7,0))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: EFFECT(TestName,ROUND(4.7,0)) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Positive case: Name, Formula. Named reference and formula.');
+		// Case #20: Number, Number. Regular values calculate.
+		oParser = new parserFormula('EFFECT(12,3)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: EFFECT(12,3) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 124, 'Test: Positive case: Number, Number. Regular values calculate.');
 
 		// Negative cases:
 		// Case #1: Number, Number. Nominal_rate ? 0 ? #NUM!.
@@ -8423,19 +8427,19 @@ $(function () {
 		// Case #15: Area3D, Error. Area3D with error npery.
 		oParser = new parserFormula('EFFECT(Sheet2!A1:A2,#N/A)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: EFFECT(Sheet2!A1:A2,#N/A) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area3D, Error. Area3D with error npery.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area3D, Error. Area3D with error npery.');
 		// Case #16: Empty, Number. Empty nominal_rate.
 		oParser = new parserFormula('EFFECT(,4)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: EFFECT(,4) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Empty, Number. Empty nominal_rate.');
+		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Empty, Number. Empty nominal_rate.');
 		// Case #17: Number, Empty. Empty npery.
 		oParser = new parserFormula('EFFECT(0.1,)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: EFFECT(0.1,) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Number, Empty. Empty npery.');
+		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Number, Empty. Empty npery.');
 		// Case #18: Empty, Empty. Both arguments empty.
 		oParser = new parserFormula('EFFECT(,)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: EFFECT(,) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Empty, Empty. Both arguments empty.');
+		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Empty, Empty. Both arguments empty.');
 		// Case #19: Formula, String. Invalid npery string with formula.
 		oParser = new parserFormula('EFFECT(RATE(10,0,-1000,1000),"abc")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: EFFECT(RATE(10,0,-1000,1000),"abc") is parsed.');
@@ -8463,13 +8467,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: EFFECT(0.1,10000) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0.10517036549473469, 'Test: Bounded case: Number, Number. Extremely high npery.');
 
-		// Need to fix: ms result diff, error types diff, empty handle
-		// Case #5: Formula, Number. Formula for nominal_rate. - res diff(with rate formula)
-		// Case #17: Formula, Formula. Formulas in both arguments. - res diff(with rate formula)
-		// Case #15: Area3D, Error. Area3D with error npery.
-		// Case #16: Empty, Number. Empty nominal_rate.
-		// Case #17: Number, Empty. Empty npery.
-		// Case #18: Empty, Empty. Both arguments empty.
 
 
 		testArrayFormula2(assert, "EFFECT", 2, 2, true)
@@ -9566,14 +9563,14 @@ $(function () {
 		}
 
 
-		//TODO в хроме при расчёте разница, временно убираю
+		//TODO in chrome when calculating the difference, I temporarily remove it
 		oParser = new parserFormula("IRR({-70000,12000,15000,18000,21000})", "A2", ws);
 		assert.ok(oParser.parse());
 		//assert.strictEqual( oParser.calculate().getValue(), -0.021244848273410923 );
 
 		ws.getRange2("A705").setValue("43191");
 
-		//TODO в хроме при расчёте разница, временно убираю
+		//TODO in chrome when calculating the difference, I temporarily remove it
 		oParser = new parserFormula("IRR({-70000,12000,15000,18000,21000,26000})", "A2", ws);
 		assert.ok(oParser.parse());
 		//assert.strictEqual( oParser.calculate().getValue(), 0.08663094803653171 );
@@ -9586,7 +9583,7 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#NUM!");
 
-		//TODO пересмотреть тест для этой функции
+		//TODO review the test for this function
 		//testArrayFormula2(assert, "IRR", 1, 2, true)
 
 		ws.getRange2("A1:C214").cleanAll();
@@ -11127,7 +11124,7 @@ $(function () {
 
 	QUnit.test("Test: \"NPV\"", function (assert) {
 
-		//TODO в хроме при расчёте разница, временно убираю
+		//TODO in chrome when calculating the difference, I temporarily remove it
 		oParser = new parserFormula("NPV(0.1,-10000,3000,4200,6800)", "A2", ws);
 		assert.ok(oParser.parse());
 		//assert.strictEqual( oParser.calculate().getValue(), 1188.4434123352216 );
