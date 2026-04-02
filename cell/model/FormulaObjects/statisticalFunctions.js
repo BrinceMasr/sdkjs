@@ -39,8 +39,6 @@
 function (window, undefined) {
 	var cDate = Asc.cDate;
 	var fSortAscending = AscCommon.fSortAscending;
-	var gc_nMaxRow0 = AscCommon.gc_nMaxRow0;
-	var gc_nMaxCol0 = AscCommon.gc_nMaxCol0;
 
 	var cElementType = AscCommonExcel.cElementType;
 	var cErrorType = AscCommonExcel.cErrorType;
@@ -1024,7 +1022,6 @@ function (window, undefined) {
 		return res;
 	}
 
-
 	function getBetaDistPDF(fX, fA, fB) {
 		// special cases
 		if (fA === 1) {
@@ -1075,7 +1072,6 @@ function (window, undefined) {
 				return 0;
 			}
 		}
-
 
 		var fLogDblMax = Math.log(2.22507e+308);
 		var fLogDblMin = Math.log(2.22507e-308);
@@ -1625,7 +1621,6 @@ function (window, undefined) {
 		return a - b;
 	}
 
-
 	function lcl_CalculateColumnMeans(pX, pResMat, nC, nR) {
 		for (var i = 0; i < nC; i++) {
 			var fSum = 0.0;
@@ -1678,7 +1673,6 @@ function (window, undefined) {
 
 	// same with transposed matrix A, N is count of columns, K count of rows
 	function lcl_TCalculateQRdecomposition(pMatA, pVecR, nK, nN) {
-
 
 		var fSum;
 		// ScMatrix matrices are zero based, index access (column,row)
@@ -2240,7 +2234,6 @@ function (window, undefined) {
 			return;
 		}
 
-
 		//********
 		// Fill unused cells in pResMat; order (column,row)
 		if (bStats) {
@@ -2250,7 +2243,6 @@ function (window, undefined) {
 				pResMat[i][4] = null;//->PutError( FormulaError::NotAvailable, i, 4);
 			}
 		}
-
 
 		// Uses sum(x-MeanX)^2 and not [sum x^2]-N * MeanX^2 in case bConstant.
 		// Clone constant matrices, so that Mat = Mat - Mean is possible.
@@ -2275,7 +2267,6 @@ function (window, undefined) {
 				}
 			}
 		}
-
 
 		let fIntercept, fSSreg, fDegreesFreedom, fSSresid, fFstatistic, fRMSE, fSigmaSlope, fSigmaIntercept, fR2;
 		let aVecR, pMeans, pMatZ, pSlopes, bIsSingular, row, col, fPart;
@@ -2417,16 +2408,13 @@ function (window, undefined) {
 					pResMat[K - 1 - i][0] = _bRKP ? Math.exp(getDouble(pSlopes, i)) : getDouble(pSlopes, i);
 				}
 
-
 				if (bStats) {
 					fSSreg = 0.0;
 					fSSresid = 0.0;
 					// re-use memory of Z;
 
-
 					//*********
 					fillDouble(pMatZ, 0.0, 0, 0, 0, N - 1);
-
 
 					// Z = R * Slopes
 					lcl_ApplyUpperRightTriangle(pMatX, aVecR, pSlopes, pMatZ, K, false);
@@ -2436,13 +2424,11 @@ function (window, undefined) {
 					}
 					fSSreg = lcl_GetSumProduct(pMatZ, pMatZ, N);
 
-
 					//********
 					// re-use Y for residuals, Y = Y-Z
 					for (row = 0; row < N; row++) {
 						putDouble(pMatY, row, getDouble(pMatY, row) - getDouble(pMatZ, row));
 					}
-
 
 					fSSresid = lcl_GetSumProduct(pMatY, pMatY, N);
 					pResMat[0][4] = fSSreg;
@@ -2456,12 +2442,10 @@ function (window, undefined) {
 						pResMat[0][3] = null; //->PutError( FormulaError::NotAvailable, 0, 3); // F
 						pResMat[1][2] = 0;//->PutDouble(0.0, 1, 2); // RMSE
 
-
 						//********
 						for (i = 0; i < K; i++) {
 							pResMat[K - 1 - i][1] = 0;//->PutDouble(0.0, K-1-i, 1);
 						}
-
 
 						// SigmaIntercept = RMSE * sqrt(...) = 0
 						if (bConstant) {
@@ -2488,7 +2472,6 @@ function (window, undefined) {
 						// a whole matrix, but iterate over unit vectors.
 						fSigmaIntercept = 0.0;
 
-
 						//********
 						for (col = 0; col < K; col++) {
 							//re-use memory of MatZ
@@ -2508,7 +2491,6 @@ function (window, undefined) {
 								fSigmaIntercept += fPart * getDouble(pMeans, col);
 							}
 						}
-
 
 						if (bConstant) {
 							fSigmaIntercept = fRMSE * Math.sqrt(fSigmaIntercept + 1.0 / N);
@@ -2563,14 +2545,12 @@ function (window, undefined) {
 					lcl_TApplyHouseholderTransformation(pMatX, row, pMatZ, N);
 				}
 
-
 				//*******
 				// B = R^(-1) * Q' * Y <=> B = R^(-1) * Z <=> R * B = Z
 				// result Z should have zeros for index>=K; if not, ignore values
 				for (col = 0; col < K; col++) {
 					pSlopes[col][0] = pMatZ[col][0];
 				}
-
 
 				lcl_SolveWithUpperRightTriangle(pMatX, aVecR, pSlopes, K, true);
 				fIntercept = 0.0;
@@ -2588,10 +2568,8 @@ function (window, undefined) {
 					fSSresid = 0.0;
 					// re-use memory of Z;
 
-
 					//*********
 					//pMatZ->FillDouble(0.0, 0, 0, N-1, 0);
-
 
 					// Z = R * Slopes
 					lcl_ApplyUpperRightTriangle(pMatX, aVecR, pSlopes, pMatZ, K, true);
@@ -2601,13 +2579,11 @@ function (window, undefined) {
 					}
 					fSSreg = lcl_GetSumProduct(pMatZ, pMatZ, N);
 
-
 					//********
 					// re-use Y for residuals, Y = Y-Z
 					for (col = 0; col < N; col++) {
 						pMatY[0][col] = pMatY[0][col] - pMatZ[0][col];
 					}
-
 
 					fSSresid = lcl_GetSumProduct(pMatY, pMatY, N);
 					pResMat[0][4] = fSSreg;
@@ -2624,11 +2600,9 @@ function (window, undefined) {
 						pResMat[1][2] = 0; // RMSE
 						// SigmaSlope[i] = RMSE * sqrt(matrix[i,i]) = 0 * sqrt(...) = 0
 
-
 						for (i = 0; i < K; i++) {
 							pResMat[K - 1 - i][1] = 0;
 						}
-
 
 						// SigmaIntercept = RMSE * sqrt(...) = 0
 						if (bConstant) {
@@ -2656,7 +2630,6 @@ function (window, undefined) {
 						// a whole matrix, but iterate over unit vectors.
 						// (R' R) ^(-1) is symmetric
 
-
 						//********
 						fSigmaIntercept = 0.0;
 
@@ -2676,7 +2649,6 @@ function (window, undefined) {
 								fSigmaIntercept += fPart * pMeans[0][row];
 							}
 						}
-
 
 						if (bConstant) {
 							fSigmaIntercept = fRMSE * Math.sqrt(fSigmaIntercept + 1.0 / N);
@@ -2810,7 +2782,6 @@ function (window, undefined) {
 		return res;
 	};
 
-
 	function ScETSForecastCalculation(nSize) {
 		//SvNumberFormatter* mpFormatter;
 		this.maRange = [];   // data (X, Y)
@@ -2882,7 +2853,6 @@ function (window, undefined) {
 
 	ScETSForecastCalculation.prototype = Object.create(ScETSForecastCalculation.prototype);
 	ScETSForecastCalculation.prototype.constructor = ScETSForecastCalculation;
-
 
 	ScETSForecastCalculation.prototype.PreprocessDataRange =
 		function (rMatX, rMatY, rSmplInPrd, bDataCompletion, nAggregation, rTMat, eETSType) {
@@ -3102,7 +3072,6 @@ function (window, undefined) {
 			return true;
 		};
 
-
 	ScETSForecastCalculation.prototype.initData = function () {
 		// give various vectors size and initial value
 		this.mpBase = [];
@@ -3218,7 +3187,6 @@ function (window, undefined) {
 		return true;
 	};
 
-
 	ScETSForecastCalculation.prototype.calcAccuracyIndicators = function () {
 		var fSumAbsErr = 0.0;
 		var fSumDivisor = 0.0;
@@ -3244,7 +3212,6 @@ function (window, undefined) {
 		this.mfSMAPE = fSumAbsPercErr * 2.0 / nCalcCount;
 	};
 
-
 	ScETSForecastCalculation.prototype.CalcPeriodLen = function () {
 		var nBestVal = this.mnCount;
 		var fBestME = Number.MAX_VALUE;
@@ -3267,7 +3234,6 @@ function (window, undefined) {
 		}
 		return nBestVal;
 	};
-
 
 	ScETSForecastCalculation.prototype.CalcAlphaBetaGamma = function () {
 		var f0 = 0.0;
@@ -3352,7 +3318,6 @@ function (window, undefined) {
 		}
 		this.calcAccuracyIndicators();
 	};
-
 
 	ScETSForecastCalculation.prototype.CalcBetaGamma = function () {
 		var f0 = 0.0;
@@ -3453,7 +3418,6 @@ function (window, undefined) {
 		}
 	};
 
-
 	ScETSForecastCalculation.prototype.refill = function () {
 		// refill mpBase, mpTrend, mpPerIdx and mpForecast with values
 		// using the calculated mfAlpha, (mfBeta), mfGamma
@@ -3493,7 +3457,6 @@ function (window, undefined) {
 		this.calcAccuracyIndicators();
 	};
 
-
 	ScETSForecastCalculation.prototype.convertXtoMonths = function (x) {
 		//Date aNullDate = *( mpFormatter->GetNullDate() );
 		var aDate = cDate.prototype.getDateFromExcel(x);
@@ -3518,7 +3481,6 @@ function (window, undefined) {
 		}
 		return (12.0 * nYear + nMonth + (aDate.getDate() - this.mnMonthDay) / fMonthLength);
 	};
-
 
 	ScETSForecastCalculation.prototype.GetForecast = function (fTarget, rForecast) {
 		if (!this.initCalc()) {
@@ -3594,7 +3556,6 @@ function (window, undefined) {
 		}
 		return rFcMat;
 	};
-
 
 	ScETSForecastCalculation.prototype.GetStatisticValue = function (rTypeMat) {
 		if (!this.initCalc()) {
@@ -3787,7 +3748,6 @@ function (window, undefined) {
 		return rPIMat;
 	};
 
-
 	ScETSForecastCalculation.prototype.GetEDSPredictionIntervals = function (rTMat, fPILevel) {
 		if (!this.initCalc()) {
 			return false;
@@ -3826,7 +3786,6 @@ function (window, undefined) {
 				((1 + 4 * o + 5 * o * o) + 2 * (i) * fPILevel * (1 + 3 * o) + 2 * (i * i) * fPILevel *
 					fPILevel));
 		}
-
 
 		for (var i = 0; i < nR; i++) {
 			for (var j = 0; j < nC; j++) {
@@ -4115,90 +4074,7 @@ function (window, undefined) {
 	cAVERAGEIF.prototype.exactTypes = {0: 1, 2: 1};
 	cAVERAGEIF.prototype.argumentsType = [argType.reference, argType.any, argType.reference];
 	cAVERAGEIF.prototype.Calculate = function (arg) {
-		let arg0 = arg[0], arg1 = arg[1], arg2 = arg[2] ? arg[2] : arg[0], _sum = 0, _count = 0, matchingInfo, ws;
-		if ((cElementType.cell !== arg0.type && cElementType.cell3D !== arg0.type && cElementType.cellsRange !==
-			arg0.type && cElementType.cellsRange3D !== arg0.type) ||
-			(cElementType.cell !== arg2.type && cElementType.cell3D !== arg2.type && cElementType.cellsRange !==
-				arg2.type && cElementType.cellsRange3D !== arg2.type)) {
-			return new cError(cErrorType.wrong_value_type);
-		}
-
-		if (cElementType.cellsRange === arg1.type || cElementType.cellsRange3D === arg1.type) {
-			arg1 = arg1.cross(arguments[1]);
-		} else if (cElementType.array === arg1.type) {
-			arg1 = arg1.getElementRowCol(0, 0);
-		}
-
-		arg1 = arg1.tocString();
-
-		if (cElementType.string !== arg1.type) {
-			return new cError(cErrorType.wrong_value_type);
-		}
-
-		let r = arg0.getRange(), r2 = arg2.getRange();
-
-		ws = arg0.getWS();
-		matchingInfo = AscCommonExcel.matchingValue(arg1);
-		if (cElementType.cellsRange === arg0.type || cElementType.cellsRange3D === arg0.type) {
-			arg0.foreach2(function (v, cell, row, col) {
-				if (matching(v, matchingInfo)) {
-					let val;
-					if ((r2.bbox.r1 === 0 && r2.bbox.r2 === gc_nMaxRow0) || 
-						(r2.bbox.c1 === 0 && r2.bbox.c2 === gc_nMaxCol0)) {
-						let targetRow = row;
-						let targetCol = col;
-						
-						if (r2.bbox.r1 === 0 && r2.bbox.r2 === gc_nMaxRow0) {
-							targetCol = r2.bbox.c1 + (col - r.bbox.c1);
-							if (targetCol < r2.bbox.c1 || targetCol > r2.bbox.c2) {
-								return;
-							}
-						}
-						
-						if (r2.bbox.c1 === 0 && r2.bbox.c2 === gc_nMaxCol0) {
-							targetRow = r2.bbox.r1 + (row - r.bbox.r1);
-							if (targetRow < r2.bbox.r1 || targetRow > r2.bbox.r2) {
-								return;
-							}
-						}
-						
-						ws._getCellNoEmpty(targetRow, targetCol, function (cell) {
-							val = checkTypeCell(cell);
-						});
-					} else {
-						let offset = new AscCommon.CellBase(row - r.bbox.r1, col - r.bbox.c1);
-						r2.setOffset(offset);
-
-						ws._getCellNoEmpty(r2.bbox.r1, r2.bbox.c1, function (cell) {
-							val = checkTypeCell(cell);
-						});
-
-						offset.col *= -1;
-						offset.row *= -1;
-						r2.setOffset(offset);
-					}
-
-					if (cElementType.number === val.type) {
-						_sum += val.getValue();
-						_count++;
-					}
-				}
-			})
-		} else {
-			if (matching(arg0.getValue(), matchingInfo)) {
-				let val = arg2.getFirstElement ? arg2.getFirstElement() : arg2.getValue();
-				if (cElementType.number === val.type) {
-					_sum += val.getValue();
-					_count++;
-				}
-			}
-		}
-
-		if (0 === _count) {
-			return new cError(cErrorType.division_by_zero);
-		} else {
-			return new cNumber(_sum / _count);
-		}
+		return g_oAverageIfCache.calculate(arg, arguments[1]);
 	};
 
 	/**
@@ -4281,7 +4157,6 @@ function (window, undefined) {
 				}
 			}
 		}
-
 
 		if (0 === _count) {
 			return new cError(cErrorType.division_by_zero);
@@ -4608,7 +4483,6 @@ function (window, undefined) {
 
 		return this._findArrayInNumberArguments(oArguments, calcBinom);
 	};
-
 
 	/**
 	 * @constructor
@@ -6399,7 +6273,6 @@ function (window, undefined) {
 			return isError;
 		}
 
-
 		// todo bug 36721:
 		// The prediction result differs from ms - due to different smoothing coefficients (alpha, beta, gamma)
 		// Error values ​​are interpreted differently in MS, and because of this, the values ​​of the smoothing coefficients do not match, which at the end affects the result
@@ -6534,7 +6407,6 @@ function (window, undefined) {
 
 		argClone[2] = argClone[2] ? argClone[2].tocNumber() : new cNumber(1);
 		argClone[3] = argClone[3] ? argClone[3].tocNumber() : new cNumber(1);
-
 
 		let argError;
 		if (argError = this._checkErrorArg(argClone)) {
@@ -6742,7 +6614,6 @@ function (window, undefined) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 
-
 		if (arg0.type === cElementType.cellsRange || arg0.type === cElementType.array) {
 			arg0 = arg0.getMatrix();
 		} else if (arg0.type === cElementType.cellsRange3D) {
@@ -6810,7 +6681,6 @@ function (window, undefined) {
 
 		return this._findArrayInNumberArguments(oArguments, calcFTest);
 	};
-
 
 	/**
 	 * @constructor
@@ -7013,7 +6883,6 @@ function (window, undefined) {
 	cGAMMALN.prototype.argumentsMax = 1;
 	cGAMMALN.prototype.argumentsType = [argType.number];
 	cGAMMALN.prototype.Calculate = function (arg) {
-
 
 		/*
 		 from OpenOffice Source.
@@ -7381,7 +7250,6 @@ function (window, undefined) {
 			return arg3;
 		}
 
-
 		arg0 = Math.floor(arg0);
 		arg1 = Math.floor(arg1);
 		arg2 = Math.floor(arg2);
@@ -7457,7 +7325,6 @@ function (window, undefined) {
 			return isNaN(res) ? new cError(cErrorType.not_numeric) : new cNumber(res);
 		}
 
-
 		return this._findArrayInNumberArguments(oArguments, hypgeomdist);
 	};
 
@@ -7527,7 +7394,6 @@ function (window, undefined) {
 
 		}
 
-
 		const max_num = 1 * Math.pow(10,155); // 1E+155 - max number in this function (ms reference)
 		let arg0 = arg[0], arg1 = arg[1], arr0 = [], arr1 = [];
 
@@ -7560,7 +7426,6 @@ function (window, undefined) {
 		} else {
 			arr0.push(arg0);
 		}
-
 
 		if (arg1.type === cElementType.cellsRange || arg1.type === cElementType.cellsRange3D) {
 			arr1 = arg1.getValue();
@@ -7740,7 +7605,6 @@ function (window, undefined) {
 			return new cError(cErrorType.not_numeric);
 		}
 
-
 		if (cElementType.cellsRange === arg1.type || cElementType.cellsRange3D === arg1.type) {
 			arg1 = arg1.cross(arguments[1]);
 		} else if (cElementType.array === arg1.type) {
@@ -7850,7 +7714,6 @@ function (window, undefined) {
 			bStats = getBoolValue(argClone[3], false),
 			res = new cArray(),
 			tMatrix = [];
-
 
 		//return matrix [col][row]
 		let mat = CalculateRGPRKP(pMatY, pMatX, bConstant, bStats, true);
@@ -9083,10 +8946,8 @@ function (window, undefined) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 
-
 		return normdist(arg0.getValue(), arg1.getValue(), arg2.getValue(), arg3.toBool());
 	};
-
 
 	/**
 	 * @constructor
@@ -9744,7 +9605,6 @@ function (window, undefined) {
 		return this._findArrayInNumberArguments(oArguments, calcPhi);
 	};
 
-
 	/**
 	 * @constructor
 	 * @extends {AscCommonExcel.cBaseFunction}
@@ -9893,7 +9753,6 @@ function (window, undefined) {
 		} else {
 			return new cError(cErrorType.not_available);
 		}
-
 
 		if (arg2 instanceof cArea || arg2 instanceof cArea3D) {
 			arg2 = arg2.cross(arguments[1]);
@@ -10242,7 +10101,6 @@ function (window, undefined) {
 			}
 		}
 
-
 		var arg0 = arg[0], arg1 = arg[1], arr0 = [], arr1 = [];
 
 		if (arg0 instanceof cArea) {
@@ -10440,7 +10298,6 @@ function (window, undefined) {
 				return new cNumber(sumXDeltaYDelta / sqrXDelta);
 			}
 		}
-
 
 		var arg0 = arg[0], arg1 = arg[1], arr0 = [], arr1 = [];
 
@@ -11003,7 +10860,6 @@ function (window, undefined) {
 
 			}
 
-
 			if (sqrXDelta == 0 || sqrYDelta == 0 || xLength < 3) {
 				return new cError(cErrorType.division_by_zero);
 			} else {
@@ -11011,7 +10867,6 @@ function (window, undefined) {
 					Math.sqrt((1 / (xLength - 2)) * (sqrYDelta - sumXDeltaYDelta * sumXDeltaYDelta / sqrXDelta)));
 			}
 		}
-
 
 		var arg0 = arg[0], arg1 = arg[1], arr0 = [], arr1 = [];
 
@@ -12536,8 +12391,8 @@ function parseStringToCElement (val, cultureInfo) {
 				const indexesArray = column.indexes[oldType];
 				const dataArray = column.data[oldType];
 				if (dataArray && indexesArray) {
-					const removeIndex = indexesArray.indexOf(changedIndex);
-					if (removeIndex !== -1) {
+					const removeIndex = this.findLowerIndexInTyped(changedIndex, indexesArray);
+					if (removeIndex < indexesArray.length && indexesArray[removeIndex] === changedIndex) {
 						dataArray.splice(removeIndex, 1);
 						indexesArray.splice(removeIndex, 1);
 					}
@@ -12593,6 +12448,66 @@ function parseStringToCElement (val, cultureInfo) {
 		}
 	};
 
+	function validateSumIfArgs(arg0, arg1, arg2, criteria3DError) {
+		if (cElementType.error === arg0.type) {
+			return arg0;
+		}
+		if (arg2 && cElementType.error === arg2.type) {
+			return arg2;
+		}
+		const isRange = function(t) {
+			return t === cElementType.cell || t === cElementType.cell3D ||
+				t === cElementType.cellsRange || t === cElementType.cellsRange3D;
+		};
+		if (!isRange(arg0.type)) {
+			return new cError(cErrorType.wrong_value_type);
+		}
+		if (!isRange(arg2.type)) {
+			return new cError(cErrorType.wrong_value_type);
+		}
+		if (arg0.type === cElementType.cellsRange3D && !arg0.isSingleSheet()) {
+			return new cError(cErrorType.wrong_value_type);
+		}
+		if (arg2.type === cElementType.cellsRange3D && !arg2.isSingleSheet()) {
+			return new cError(cErrorType.wrong_value_type);
+		}
+		if (arg1.type === cElementType.cellsRange3D && !arg1.isSingleSheet()) {
+			return criteria3DError;
+		}
+		return null;
+	}
+
+	function iterateCriteriaArg(arg0, arg1, arg2, calculateOne) {
+		if (arg1.type === cElementType.cellsRange || arg1.type === cElementType.cellsRange3D) {
+			let matrix = arg1.getMatrix();
+			if (arg1.type === cElementType.cellsRange3D) {
+				matrix = matrix[0];
+			}
+			const result = new cArray();
+			for (let row = 0; row < matrix.length; row += 1) {
+				result.addRow();
+				for (let col = 0; col < matrix[row].length; col += 1) {
+					result.addElementInRow(calculateOne(arg0, matrix[row][col], arg2), row);
+				}
+			}
+			return result;
+		}
+		if (arg1.type === cElementType.array) {
+			const dimensions = arg1.getDimensions();
+			const result = new cArray();
+			for (let row = 0; row < dimensions.row; row += 1) {
+				result.addRow();
+				for (let col = 0; col < dimensions.col; col += 1) {
+					result.addElementInRow(calculateOne(arg0, arg1.getElementRowCol(row, col), arg2), row);
+				}
+			}
+			return result;
+		}
+		return null;
+	}
+
+	// -------------------------------------------------------CountIfCache-------------------------------------------------
+
 	/**
 	 * @constructor
 	 */
@@ -12604,7 +12519,8 @@ function parseStringToCElement (val, cultureInfo) {
 	CountIfCache.prototype.constructor = CountIfCache;
 
 	CountIfCache.prototype.calculate = function (arg, _arg1) {
-		let arg0 = arg[0], arg1 = arg[1];
+		const arg0 = arg[0];
+		let arg1 = arg[1];
 
 		if (cElementType.error === arg0.type) {
 			return arg0;
@@ -12619,54 +12535,33 @@ function parseStringToCElement (val, cultureInfo) {
 		if (arg1.type === cElementType.cellsRange3D && !arg1.isSingleSheet()) {
 			return new cNumber(0);
 		}
+
 		const t = this;
 		function calculateOne(rangeOrCell, condition) {
 			if (cElementType.cell === rangeOrCell.type || cElementType.cell3D === rangeOrCell.type || cElementType.cellsRange === rangeOrCell.type || cElementType.cellsRange3D === rangeOrCell.type) {
 				return t._get(rangeOrCell, condition);
-			} else {
-				return new cError(cErrorType.wrong_value_type);
 			}
+			return new cError(cErrorType.wrong_value_type);
 		}
 
-		if (cElementType.cellsRange === arg1.type || cElementType.cellsRange3D === arg1.type) {
-			let matrix = arg1.getMatrix();
-			if (cElementType.cellsRange3D === arg1.type) {
-				matrix = matrix[0];
-			}
-			const result = new cArray();
-			for (let row = 0; row < matrix.length; row += 1) {
-				result.addRow();
-				for (let col = 0; col < matrix[row].length; col += 1) {
-					const condition = matrix[row][col];
-					const calculateResult = calculateOne(arg0, condition);
-					result.addElementInRow(calculateResult, row);
-				}
-			}
-			return result;
-		} else if (cElementType.array === arg1.type) {
-			const dimensions = arg1.getDimensions();
-			const colCount = dimensions.col;
-			const rowCount = dimensions.row;
-			const result = new cArray();
-			for (let row = 0; row < rowCount; row += 1) {
-				result.addRow();
-				for (let col = 0; col < colCount; col += 1) {
-					const condition = arg1.getElementRowCol(row, col);
-					const calculateResult = calculateOne(arg0, condition);
-					result.addElementInRow(calculateResult, row);
-				}
-			}
-			return result;
-		} else if (cElementType.cell === arg1.type || cElementType.cell3D === arg1.type) {
+		const arrayResult = iterateCriteriaArg(arg0, arg1, undefined, calculateOne);
+		if (arrayResult) {
+			return arrayResult;
+		}
+		if (cElementType.cell === arg1.type || cElementType.cell3D === arg1.type) {
 			arg1 = arg1.getValue();
+			if (arg1.type === cElementType.empty) {
+				arg1 = new cNumber(0);
+			}
 		}
 		return calculateOne(arg0, arg1);
 	};
-	CountIfCache.prototype._get = function (range, arg1) {
+	CountIfCache.prototype._get = function (range, arg1, sumRange) {
 		const ws = range.getWS();
-		let res, wsId = ws.getId(),
-			sRangeName = wsId + g_cCharDelimiter + range.getBBox0().getName(), cacheElem = this.cacheId[sRangeName],
-			valueForSearching = arg1.getValue();
+		const wsId = ws.getId();
+		const sRangeName = wsId + g_cCharDelimiter + range.getBBox0().getName();
+		let cacheElem = this.cacheId[sRangeName];
+		const valueForSearching = arg1.getValue();
 
 		if (!cacheElem) {
 			cacheElem = {elements: {}, results: {}};
@@ -12678,18 +12573,20 @@ function parseStringToCElement (val, cultureInfo) {
 			}
 			cacheRange.add(range.getBBox0(), cacheElem);
 		}
-		let sInputKey = valueForSearching;
-		res = cacheElem.results[sInputKey];
-
+		const sInputKey = sumRange
+			? valueForSearching + g_cCharDelimiter + wsId + g_cCharDelimiter + sumRange.bbox.getName()
+			: valueForSearching;
+		let res = cacheElem.results[sInputKey];
 		if (!res) {
-			cacheElem.results[sInputKey] = res = this._calculate(range, arg1);
+			cacheElem.results[sInputKey] = res = this._calculate(range, arg1, sumRange);
 		}
 		return res;
 	};
+
 	CountIfCache.prototype._calculate = function (range, arg1) {
 		let _count = 0;
-		let matchingInfo = AscCommonExcel.matchingValue(arg1, parseStringToCElement);
-		let type = matchingInfo.val.type;
+		const matchingInfo = AscCommonExcel.matchingValue(arg1, parseStringToCElement);
+		const type = matchingInfo.val.type;
 		let searchValue = matchingInfo.val;
 		if (type === cElementType.string) {
 			searchValue = searchValue.toString().toLowerCase();
@@ -12707,8 +12604,7 @@ function parseStringToCElement (val, cultureInfo) {
 				let matchingFunction = getMatchingFunction(cElementType.string, '=', false);
 				emptyCount += this.typedCache.calculate(range, cElementType.string, matchingFunction, searchValue);
 				return new cNumber(emptyCount);
-			}
-			if (matchingInfo.op === "<>") {
+			} else if (matchingInfo.op === "<>") {
 				const elemsCount = this.typedCache.getElemsCount(range);
 				return new cNumber(elemsCount);
 			}
@@ -12733,12 +12629,12 @@ function parseStringToCElement (val, cultureInfo) {
 		return new cNumber(_count);
 	};
 	CountIfCache.prototype.remove = function (cell, dataOld, dataNew) {
-		var wsId = cell.ws.getId();
-		var cacheRange = this.cacheRanges[wsId];
+		const wsId = cell.ws.getId();
+		const cacheRange = this.cacheRanges[wsId];
 		if (cacheRange) {
-			var oGetRes = cacheRange.get(new Asc.Range(cell.nCol, cell.nRow, cell.nCol, cell.nRow));
-			for (var i = 0, length = oGetRes.all.length; i < length; ++i) {
-				var elem = oGetRes.all[i];
+			const oGetRes = cacheRange.get(new Asc.Range(cell.nCol, cell.nRow, cell.nCol, cell.nRow));
+			for (let i = 0; i < oGetRes.all.length; i += 1) {
+				const elem = oGetRes.all[i];
 				elem.data.results = {};
 			}
 		}
@@ -12750,10 +12646,618 @@ function parseStringToCElement (val, cultureInfo) {
 		this.typedCache.clean();
 	};
 
+	// -------------------------------------------------------SumIfSumRangeCache------------------------------------------
+
+	function SumIfSumRangeCache() {
+		CountIfTypedCache.call(this);
+	}
+
+	SumIfSumRangeCache.prototype = Object.create(CountIfTypedCache.prototype);
+	SumIfSumRangeCache.prototype.constructor = SumIfSumRangeCache;
+
+	SumIfSumRangeCache.prototype.updateDataBefore = function(range, column, startIndex) {
+		column.start = startIndex;
+		const unshiftDataArrays = {};
+		const unshiftIndexesArrays = {};
+		range._foreachNoEmpty(function (cell, r, c) {
+			const value = checkTypeCell(cell, true, true);
+			if (value.type === cElementType.number || value.type === cElementType.error) {
+				if (!unshiftDataArrays[value.type]) {
+					unshiftDataArrays[value.type] = [];
+				}
+				if (!unshiftIndexesArrays[value.type]) {
+					unshiftIndexesArrays[value.type] = [];
+				}
+				const unshiftDataArray = unshiftDataArrays[value.type];
+				const unshiftIndexesArray = unshiftIndexesArrays[value.type];
+				let valueToAdd = value.value;
+				unshiftDataArray.push(valueToAdd);
+				unshiftIndexesArray.push(r);
+			}
+		});
+		this.unshiftValues(column, unshiftDataArrays, unshiftIndexesArrays);
+	};
+
+	SumIfSumRangeCache.prototype.updateDataAfter = function (range, column, endIndex) {
+		const t = this;
+		range._foreachNoEmpty(function (cell, r, c) {
+			const value = checkTypeCell(cell, true, true);
+			if (r > column.end) {
+				if (value.type === cElementType.number || value.type === cElementType.error) {
+					t.pushValue(column, value, r);
+				}
+				column.end = r;
+			}
+		});
+		column.end = endIndex;
+	};
+
+	SumIfSumRangeCache.prototype.changeData = function (cell, dataOld, dataNew) {
+		const wsId = cell.ws.getId();
+		const data = this.data[wsId];
+		if (data) {
+			let oldValue = null;
+			let oldType = null;
+			if (dataOld) {
+				const oldCellValue = dataOld.value;
+				oldType = oldCellValue && oldCellValue.type;
+				oldValue = oldType === cElementType.number ? oldCellValue.number : oldCellValue.text;
+				if (oldValue && oldType === cElementType.error) {
+					oldValue = new cError(oldValue).errorType;
+				}
+			}
+			let newValue = null;
+			let newType = null;
+			if (dataNew) {
+				newType = dataNew.type;
+				newValue = dataNew.value;
+				if (newType !== cElementType.error && newType !== cElementType.number) {
+					newValue = null;
+					newType = null;
+				} else if (newValue && newType === cElementType.error) {
+					newValue = new cError(newValue).errorType;
+				}
+			}
+			if (oldType === newType && newValue === oldValue) {
+				return;
+			}
+			this.changeColumnsData(wsId, cell, oldValue, oldType, newValue, newType);
+		}
+	};
+	function gallopAdvance(indexes, startIndex, len, targetRow) {
+		if (!indexes || startIndex >= len || indexes[startIndex] >= targetRow) {
+			return startIndex;
+		}
+		let lo = startIndex;
+		let step = 1;
+		let hi = lo + step;
+		while (hi < len && indexes[hi] < targetRow) {
+			lo = hi;
+			step <<= 1;
+			hi = lo + step;
+		}
+		if (hi > len) {
+			hi = len;
+		}
+		while (lo < hi) {
+			const m = (lo + hi) >>> 1;
+			if (indexes[m] < targetRow) {
+				lo = m + 1;
+			} else {
+				hi = m;
+			}
+		}
+		return lo;
+	}
+
+	// -------------------------------------------------------SumIfTypedCache-----------------------------------------------
+
+	function SumIfTypedCache() {
+		CountIfTypedCache.call(this);
+	}
+
+	SumIfTypedCache.prototype = Object.create(CountIfTypedCache.prototype);
+	SumIfTypedCache.prototype.constructor = SumIfTypedCache;
+
+	/**
+	 * Sums and counts all number values in the sum range. O(N_sum) per column.
+	 * @returns {{sum: number, count: number}}
+	 */
+	SumIfTypedCache.prototype.sumColumnTotalInRange = function(searchRange, sumRange, sumCache) {
+		let sum = 0;
+		let count = 0;
+		const searchRangeWs = searchRange.getWS();
+		const searchRangeBbox = searchRange.getBBox0();
+		const sumRangeWs = sumRange.getWorksheet();
+		const sumRangeWsId = sumRangeWs.getId();
+		const sumRangeBbox = sumRange.getBBox0();
+		const columnsOffset = searchRangeBbox.c1 - sumRangeBbox.c1;
+
+		for (let i = sumRangeBbox.c1; i <= sumRangeBbox.c2; i += 1) {
+			const searchColumnIndex = columnsOffset + i;
+			this.updateColumnData(searchRangeWs, searchColumnIndex, searchRangeBbox.r1, searchRangeBbox.r2);
+			sumCache.updateColumnData(sumRangeWs, i, sumRangeBbox.r1, sumRangeBbox.r2);
+
+			const sumColumn = sumCache.data[sumRangeWsId][i];
+			const sumData = sumColumn.data[cElementType.number];
+			const sumIndexes = sumColumn.indexes[cElementType.number];
+			if (sumData) {
+				const first = sumCache.findLowerIndexInTyped(sumRangeBbox.r1, sumIndexes);
+				const last = sumCache.findHigherIndexInTyped(sumRangeBbox.r2, sumIndexes);
+				for (let j = first; j < last; j += 1) {
+					sum += sumData[j];
+				}
+				count += last - first;
+			}
+		}
+		return {sum: sum, count: count};
+	};
+
+	/**
+	 * Sums values from sum range for rows where the search column has ANY data.
+	 * Uses advancing pointers for O(N_sum + K_total) per column.
+	 * @returns {{sum: number|null, count: number|null, error: cError|null}}
+	 */
+	SumIfTypedCache.prototype.sumForNonEmpty = function(searchRange, sumRange, sumCache, ignoreErrors) {
+		let sum = 0;
+		let count = 0;
+		const searchRangeWs = searchRange.getWS();
+		const searchRangeWsId = searchRangeWs.getId();
+		const searchRangeBbox = searchRange.getBBox0();
+		const sumRangeWs = sumRange.getWorksheet();
+		const sumRangeWsId = sumRangeWs.getId();
+		const sumRangeBbox = sumRange.getBBox0();
+		const columnsOffset = searchRangeBbox.c1 - sumRangeBbox.c1;
+
+		for (let i = sumRangeBbox.c1; i <= sumRangeBbox.c2; i += 1) {
+			const searchColumnIndex = columnsOffset + i;
+			this.updateColumnData(searchRangeWs, searchColumnIndex, searchRangeBbox.r1, searchRangeBbox.r2);
+			sumCache.updateColumnData(sumRangeWs, i, sumRangeBbox.r1, sumRangeBbox.r2);
+
+			const searchColumn = this.data[searchRangeWsId][searchColumnIndex];
+			const sumColumn = sumCache.data[sumRangeWsId][i];
+			const rowSumOffset = sumRangeBbox.r1 - searchRangeBbox.r1;
+
+			// 4 advancing pointers, one per type — amortized O(1) per sum entry to check if search row has ANY data
+			const sNumIdx = searchColumn.indexes[cElementType.number];
+			const sStrIdx = searchColumn.indexes[cElementType.string];
+			const sBoolIdx = searchColumn.indexes[cElementType.bool];
+			const sErrIdx = searchColumn.indexes[cElementType.error];
+
+			let sNumPtr = sNumIdx ? this.findLowerIndexInTyped(searchRangeBbox.r1, sNumIdx) : 0;
+			let sStrPtr = sStrIdx ? this.findLowerIndexInTyped(searchRangeBbox.r1, sStrIdx) : 0;
+			let sBoolPtr = sBoolIdx ? this.findLowerIndexInTyped(searchRangeBbox.r1, sBoolIdx) : 0;
+			let sErrPtr = sErrIdx ? this.findLowerIndexInTyped(searchRangeBbox.r1, sErrIdx) : 0;
+			const sNumEnd = sNumIdx ? this.findHigherIndexInTyped(searchRangeBbox.r2, sNumIdx) : 0;
+			const sStrEnd = sStrIdx ? this.findHigherIndexInTyped(searchRangeBbox.r2, sStrIdx) : 0;
+			const sBoolEnd = sBoolIdx ? this.findHigherIndexInTyped(searchRangeBbox.r2, sBoolIdx) : 0;
+			const sErrEnd = sErrIdx ? this.findHigherIndexInTyped(searchRangeBbox.r2, sErrIdx) : 0;
+
+			const sumErrorIndexes = sumColumn.indexes[cElementType.error];
+			const sumErrorData = sumColumn.data[cElementType.error];
+			if (sumErrorIndexes && !ignoreErrors) {
+				const firstErr = sumCache.findLowerIndexInTyped(sumRangeBbox.r1, sumErrorIndexes);
+				const lastErr = sumCache.findHigherIndexInTyped(sumRangeBbox.r2, sumErrorIndexes);
+				for (let j = firstErr; j < lastErr; j += 1) {
+					const searchRow = sumErrorIndexes[j] - rowSumOffset;
+					if (this.hasDataAtRow(searchColumn, searchRow)) {
+						return {sum: null, count: null, error: new cError(sumErrorData[j])};
+					}
+				}
+			}
+
+			const sumData = sumColumn.data[cElementType.number];
+			const sumIndexes = sumColumn.indexes[cElementType.number];
+			if (sumData) {
+				const first = sumCache.findLowerIndexInTyped(sumRangeBbox.r1, sumIndexes);
+				const last = sumCache.findHigherIndexInTyped(sumRangeBbox.r2, sumIndexes);
+				for (let j = first; j < last; j += 1) {
+					const searchRow = sumIndexes[j] - rowSumOffset;
+					let found = false;
+					// advance each type pointer forward to searchRow; exact match means the search cell has a value of that type
+					if (sNumIdx) {
+						while (sNumPtr < sNumEnd && sNumIdx[sNumPtr] < searchRow) sNumPtr += 1;
+						if (sNumPtr < sNumEnd && sNumIdx[sNumPtr] === searchRow) found = true;
+					}
+					if (!found && sStrIdx) {
+						while (sStrPtr < sStrEnd && sStrIdx[sStrPtr] < searchRow) sStrPtr += 1;
+						if (sStrPtr < sStrEnd && sStrIdx[sStrPtr] === searchRow) found = true;
+					}
+					if (!found && sBoolIdx) {
+						while (sBoolPtr < sBoolEnd && sBoolIdx[sBoolPtr] < searchRow) sBoolPtr += 1;
+						if (sBoolPtr < sBoolEnd && sBoolIdx[sBoolPtr] === searchRow) found = true;
+					}
+					if (!found && sErrIdx) {
+						while (sErrPtr < sErrEnd && sErrIdx[sErrPtr] < searchRow) sErrPtr += 1;
+						if (sErrPtr < sErrEnd && sErrIdx[sErrPtr] === searchRow) found = true;
+					}
+					if (found) {
+						sum += sumData[j];
+						count += 1;
+					}
+				}
+			}
+		}
+		return {sum: sum, count: count, error: null};
+	};
+
+	/**
+	 * Checks if any error in sum range corresponds to a non-matching search row.
+	 * Used for <> operator complement approach. O(E * log K) per column.
+	 * @returns {cError|null}
+	 */
+	SumIfTypedCache.prototype.checkErrorsForNotEqual = function(searchRange, sumRange, sumCache, type, equalFn, searchValue) {
+		const searchRangeWs = searchRange.getWS();
+		const searchRangeWsId = searchRangeWs.getId();
+		const searchRangeBbox = searchRange.getBBox0();
+		const sumRangeWs = sumRange.getWorksheet();
+		const sumRangeWsId = sumRangeWs.getId();
+		const sumRangeBbox = sumRange.getBBox0();
+		const columnsOffset = searchRangeBbox.c1 - sumRangeBbox.c1;
+
+		for (let i = sumRangeBbox.c1; i <= sumRangeBbox.c2; i += 1) {
+			const searchColumnIndex = columnsOffset + i;
+			this.updateColumnData(searchRangeWs, searchColumnIndex, searchRangeBbox.r1, searchRangeBbox.r2);
+			sumCache.updateColumnData(sumRangeWs, i, sumRangeBbox.r1, sumRangeBbox.r2);
+
+			const searchColumn = this.data[searchRangeWsId][searchColumnIndex];
+			const sumColumn = sumCache.data[sumRangeWsId][i];
+			const rowSumOffset = sumRangeBbox.r1 - searchRangeBbox.r1;
+
+			const errorIndexes = sumColumn.indexes[cElementType.error];
+			const errorData = sumColumn.data[cElementType.error];
+			if (!errorIndexes) continue;
+
+			const firstError = sumCache.findLowerIndexInTyped(sumRangeBbox.r1, errorIndexes);
+			const lastError = sumCache.findHigherIndexInTyped(sumRangeBbox.r2, errorIndexes);
+
+			const typeIndexes = searchColumn.indexes[type];
+			const typeData = searchColumn.data[type];
+
+			for (let j = firstError; j < lastError; j += 1) {
+				const searchRow = errorIndexes[j] - rowSumOffset;
+				if (searchRow < searchRangeBbox.r1 || searchRow > searchRangeBbox.r2) continue;
+				let isMatch = false;
+				if (typeIndexes) {
+					const idx = this.findLowerIndexInTyped(searchRow, typeIndexes);
+					if (idx < typeIndexes.length && typeIndexes[idx] === searchRow) {
+						isMatch = equalFn(typeData[idx], searchValue);
+					}
+				}
+				if (!isMatch) {
+					return new cError(errorData[j]);
+				}
+			}
+		}
+		return null;
+	};
+
+	/**
+	 * Checks if any error in sum range corresponds to an empty search row.
+	 * Used for ="" complement approach. O(E * T * log K) per column.
+	 * @returns {cError|null}
+	 */
+	SumIfTypedCache.prototype.checkErrorsForEmpty = function(searchRange, sumRange, sumCache) {
+		const searchRangeWs = searchRange.getWS();
+		const searchRangeWsId = searchRangeWs.getId();
+		const searchRangeBbox = searchRange.getBBox0();
+		const sumRangeWs = sumRange.getWorksheet();
+		const sumRangeWsId = sumRangeWs.getId();
+		const sumRangeBbox = sumRange.getBBox0();
+		const columnsOffset = searchRangeBbox.c1 - sumRangeBbox.c1;
+
+		for (let i = sumRangeBbox.c1; i <= sumRangeBbox.c2; i += 1) {
+			const searchColumnIndex = columnsOffset + i;
+			this.updateColumnData(searchRangeWs, searchColumnIndex, searchRangeBbox.r1, searchRangeBbox.r2);
+			sumCache.updateColumnData(sumRangeWs, i, sumRangeBbox.r1, sumRangeBbox.r2);
+
+			const searchColumn = this.data[searchRangeWsId][searchColumnIndex];
+			const sumColumn = sumCache.data[sumRangeWsId][i];
+			const rowSumOffset = sumRangeBbox.r1 - searchRangeBbox.r1;
+
+			const errorIndexes = sumColumn.indexes[cElementType.error];
+			const errorData = sumColumn.data[cElementType.error];
+			if (!errorIndexes) continue;
+
+			const firstError = sumCache.findLowerIndexInTyped(sumRangeBbox.r1, errorIndexes);
+			const lastError = sumCache.findHigherIndexInTyped(sumRangeBbox.r2, errorIndexes);
+
+			for (let j = firstError; j < lastError; j += 1) {
+				const searchRow = errorIndexes[j] - rowSumOffset;
+				if (searchRow < searchRangeBbox.r1 || searchRow > searchRangeBbox.r2) continue;
+				if (!this.hasDataAtRow(searchColumn, searchRow, true)) {
+					return new cError(errorData[j]);
+				}
+			}
+		}
+		return null;
+	};
+
+	SumIfTypedCache.prototype.calculate = function(searchRange, sumRange, sumCache, type, matchingFunction, searchValue, convertToNumber, skipErrors) {
+		let sum = 0;
+		let count = 0;
+
+		const searchRangeWs = searchRange.getWS();
+		const searchRangeWsId = searchRangeWs.getId();
+		const searchRangeBbox = searchRange.getBBox0();
+		const sumRangeWs = sumRange.getWorksheet();
+		const sumRangeWsId = sumRangeWs.getId();
+		const sumRangeBbox = sumRange.getBBox0();
+
+		const columnsOffset = sumRangeBbox.c1 - searchRangeBbox.c1;
+
+		for (let i = searchRangeBbox.c1; i <= searchRangeBbox.c2; i += 1) {
+			const sumColumnIndex = columnsOffset + i;
+
+			this.updateColumnData(searchRangeWs, i, searchRangeBbox.r1, searchRangeBbox.r2);
+			sumCache.updateColumnData(sumRangeWs, sumColumnIndex, sumRangeBbox.r1, sumRangeBbox.r2);
+
+			const searchColumn = this.data[searchRangeWsId][i];
+			const sumColumn = sumCache.data[sumRangeWsId][sumColumnIndex];
+
+			const searchTypedData = searchColumn.data[type];
+			const searchTypedIndexes = searchColumn.indexes[type];
+
+			const sumData = sumColumn.data[cElementType.number];
+			const sumIndexes = sumColumn.indexes[cElementType.number];
+
+			const errorIndexes = skipErrors ? null : sumColumn.indexes[cElementType.error];
+			const errorData = skipErrors ? null : sumColumn.data[cElementType.error];
+
+			if (searchTypedData) {
+				const rowSumOffset = sumRangeBbox.r1 - searchRangeBbox.r1;
+
+				const firstIndex = this.findLowerIndexInTyped(searchRangeBbox.r1, searchTypedIndexes);
+				const lastIndex = this.findHigherIndexInTyped(searchRangeBbox.r2, searchTypedIndexes);
+
+				let currentSumIndex = sumIndexes && sumCache.findLowerIndexInTyped(searchTypedIndexes[firstIndex] + rowSumOffset, sumIndexes);
+				let currentErrorIndex = errorIndexes && sumCache.findLowerIndexInTyped(searchTypedIndexes[firstIndex] + rowSumOffset, errorIndexes);
+
+				const sumLen = sumIndexes ? sumIndexes.length : 0;
+				const errLen = errorIndexes ? errorIndexes.length : 0;
+
+				if (convertToNumber) {
+					for (let j = firstIndex; j < lastIndex; j += 1) {
+						const value = AscCommon.g_oFormatParser.parseLocaleNumber(searchTypedData[j]);
+						if (isNaN(value) || !matchingFunction(value, searchValue)) continue;
+						// Early exit only on matches (runs K_match times, not K_search times)
+						if ((!sumIndexes || currentSumIndex >= sumLen) && (!errorIndexes || currentErrorIndex >= errLen)) break;
+						const targetRow = searchTypedIndexes[j] + rowSumOffset;
+						currentSumIndex = gallopAdvance(sumIndexes, currentSumIndex, sumLen, targetRow);
+						currentErrorIndex = gallopAdvance(errorIndexes, currentErrorIndex, errLen, targetRow);
+						// Check after gallop: pointer may land on targetRow whether or not it needed to advance
+						if (errorIndexes && currentErrorIndex < errLen && errorIndexes[currentErrorIndex] === targetRow) {
+							return {sum: null, count: null, error: new cError(errorData[currentErrorIndex])};
+						}
+						if (sumIndexes && currentSumIndex < sumLen && sumIndexes[currentSumIndex] === targetRow) {
+							sum += sumData[currentSumIndex];
+							count += 1;
+							currentSumIndex += 1;
+						}
+					}
+				} else {
+					for (let j = firstIndex; j < lastIndex; j += 1) {
+						if (!matchingFunction(searchTypedData[j], searchValue)) continue;
+						// Early exit only on matches (runs K_match times, not K_search times)
+						if ((!sumIndexes || currentSumIndex >= sumLen) && (!errorIndexes || currentErrorIndex >= errLen)) break;
+						const targetRow = searchTypedIndexes[j] + rowSumOffset;
+						currentSumIndex = gallopAdvance(sumIndexes, currentSumIndex, sumLen, targetRow);
+						currentErrorIndex = gallopAdvance(errorIndexes, currentErrorIndex, errLen, targetRow);
+						// Check after gallop: pointer may land on targetRow whether or not it needed to advance
+						if (errorIndexes && currentErrorIndex < errLen && errorIndexes[currentErrorIndex] === targetRow) {
+							return {sum: null, count: null, error: new cError(errorData[currentErrorIndex])};
+						}
+						if (sumIndexes && currentSumIndex < sumLen && sumIndexes[currentSumIndex] === targetRow) {
+							sum += sumData[currentSumIndex];
+							count += 1;
+							currentSumIndex += 1;
+						}
+					}
+				}
+			}
+		}
+		return {sum: sum, count: count, error: null};
+	};
+
+	// -------------------------------------------------------SumIfCache---------------------------------------------------
+
+	/**
+	 * @constructor
+	 */
+	function SumIfCache() {
+		this.cacheId = {};
+		this.cacheRanges = {};
+		this.typedCache = new SumIfTypedCache();
+		this.sumRangeCache = new SumIfSumRangeCache();
+	}
+	SumIfCache.prototype = Object.create(CountIfCache.prototype);
+	SumIfCache.prototype.constructor = SumIfCache;
+	SumIfCache.prototype.criteria3DError = new cNumber(0);
+
+	SumIfCache.prototype.calculate = function (arg, _arg1) {
+		const arg0 = arg[0];
+		let arg1 = arg[1];
+		const arg2 = arg[2] ? arg[2] : arg[0];
+
+		const validationError = validateSumIfArgs(arg0, arg1, arg2, this.criteria3DError);
+		if (validationError) {
+			return validationError;
+		}
+
+		const t = this;
+		function calculateOne(rangeOrCell, condition, sumRangeOrCell) {
+			const bbox = rangeOrCell.getBBox0();
+			const sumBbox = sumRangeOrCell.getBBox0();
+			const realSumBbox = new AscCommonExcel.Range(sumRangeOrCell.getWS(), sumBbox.r1, sumBbox.c1, sumBbox.r1 + (bbox.r2 - bbox.r1), sumBbox.c1 + (bbox.c2 - bbox.c1));
+			return t._get(rangeOrCell, condition, realSumBbox);
+		}
+
+		const arrayResult = iterateCriteriaArg(arg0, arg1, arg2, calculateOne);
+		if (arrayResult) {
+			return arrayResult;
+		}
+		if (cElementType.cell === arg1.type || cElementType.cell3D === arg1.type) {
+			arg1 = arg1.getValue();
+			if (arg1.type === cElementType.empty) {
+				arg1 = new cNumber(0);
+			}
+		}
+		return calculateOne(arg0, arg1, arg2);
+	};
+
+	SumIfCache.prototype._calculate = function (range, arg1, sumRange) {
+		let _sum = 0;
+		let _count = 0;
+		const matchingInfo = AscCommonExcel.matchingValue(arg1, parseStringToCElement);
+		const type = matchingInfo.val.type;
+		let searchValue = matchingInfo.val;
+		if (type === cElementType.string) {
+			searchValue = searchValue.toString().toLowerCase();
+		} else if (type === cElementType.error) {
+			searchValue = searchValue.errorType;
+		} else {
+			searchValue = searchValue.value;
+		}
+
+		if (searchValue === "") {
+			if (matchingInfo.op === "=" || matchingInfo.op === null) {
+				// Complement: sum(empty) = totalSum - sumForNonEmpty + sum(string="")
+				const errorResult = this.typedCache.checkErrorsForEmpty(range, sumRange, this.sumRangeCache);
+				if (errorResult) {
+					return errorResult;
+				}
+
+				const total = this.typedCache.sumColumnTotalInRange(range, sumRange, this.sumRangeCache);
+				const nonEmptyResult = this.typedCache.sumForNonEmpty(range, sumRange, this.sumRangeCache, true);
+				if (nonEmptyResult.error !== null) {
+					return nonEmptyResult.error;
+				}
+
+				const matchingFunction = getMatchingFunction(cElementType.string, '=', false);
+				const emptyStringResult = this.typedCache.calculate(range, sumRange, this.sumRangeCache, cElementType.string, matchingFunction, searchValue);
+				if (emptyStringResult.error !== null) {
+					return emptyStringResult.error;
+				}
+
+				_sum = total.sum - nonEmptyResult.sum + emptyStringResult.sum;
+				_count = total.count - nonEmptyResult.count + emptyStringResult.count;
+			} else if (matchingInfo.op === "<>") {
+				// complement: sum(<>"") = rows with any value; sumForNonEmpty is exactly that
+				const calculatingResult = this.typedCache.sumForNonEmpty(range, sumRange, this.sumRangeCache);
+				if (calculatingResult.error !== null) {
+					return calculatingResult.error;
+				}
+				_sum = calculatingResult.sum;
+				_count = calculatingResult.count;
+			}
+		} else {
+			const isWildcard = type === cElementType.string && (searchValue.indexOf('*') !== -1 || searchValue.indexOf('?') !== -1);
+			if ((matchingInfo.op === '=' || matchingInfo.op === null) && !isWildcard) {
+				const matchingFunction = getMatchingFunction(type, matchingInfo.op, isWildcard);
+				let calculatingResult = this.typedCache.calculate(range, sumRange, this.sumRangeCache, type, matchingFunction, searchValue);
+				if (calculatingResult.error !== null) {
+					return calculatingResult.error;
+				}
+				_sum = calculatingResult.sum;
+				_count = calculatingResult.count;
+				if (type === cElementType.number) {
+					// also sum string cells that parse to the same number (e.g. cell "5" with criteria 5)
+					calculatingResult = this.typedCache.calculate(range, sumRange, this.sumRangeCache, cElementType.string, matchingFunction, searchValue, true);
+					if (calculatingResult.error !== null) {
+						return calculatingResult.error;
+					}
+					_sum += calculatingResult.sum;
+					_count += calculatingResult.count;
+				}
+			} else if (matchingInfo.op === '<>') {
+				// Complement: sum(<>) = totalSum - sum(=)
+				const equalFn = getMatchingFunction(type, '=', isWildcard);
+				const errorResult = this.typedCache.checkErrorsForNotEqual(range, sumRange, this.sumRangeCache, type, equalFn, searchValue);
+				if (errorResult) {
+					return errorResult;
+				}
+
+				const total = this.typedCache.sumColumnTotalInRange(range, sumRange, this.sumRangeCache);
+				const matchResult = this.typedCache.calculate(range, sumRange, this.sumRangeCache, type, equalFn, searchValue, false, true);
+				_sum = total.sum - matchResult.sum;
+				_count = total.count - matchResult.count;
+			} else {
+				const matchingFunction = getMatchingFunction(type, matchingInfo.op, isWildcard);
+				const calculatingResult = this.typedCache.calculate(range, sumRange, this.sumRangeCache, type, matchingFunction, searchValue);
+				if (calculatingResult.error !== null) {
+					return calculatingResult.error;
+				}
+				_sum = calculatingResult.sum;
+				_count = calculatingResult.count;
+			}
+		}
+		return this._finalizeResult(_sum, _count);
+	};
+
+	/**
+	 * @param {number} sum
+	 * @param {number} count
+	 * @returns {cNumber}
+	 */
+	SumIfCache.prototype._finalizeResult = function (sum, count) {
+		return new cNumber(sum);
+	};
+
+	SumIfCache.prototype.remove = function (cell, dataOld, dataNew) {
+		CountIfCache.prototype.remove.call(this, cell, dataOld, dataNew);
+		this.sumRangeCache.changeData(cell, dataOld, dataNew);
+	};
+
+	SumIfCache.prototype.clean = function () {
+		CountIfCache.prototype.clean.call(this);
+		this.sumRangeCache.clean();
+	};
+
+	// -------------------------------------------------------AverageIfTypedCache------------------------------------------
+
+	/**
+	 * Typed cache for AVERAGEIF criteria range. Extends SumIfTypedCache with count tracking alongside sum.
+	 * @constructor
+	 */
+	function AverageIfTypedCache() {
+		SumIfTypedCache.call(this);
+	}
+
+	AverageIfTypedCache.prototype = Object.create(SumIfTypedCache.prototype);
+	AverageIfTypedCache.prototype.constructor = AverageIfTypedCache;
+
+	// -------------------------------------------------------AverageIfCache----------------------------------------------
+
+	/**
+	 * @constructor
+	 */
+	function AverageIfCache() {
+		this.cacheId = {};
+		this.cacheRanges = {};
+		this.typedCache = new AverageIfTypedCache();
+		this.sumRangeCache = new SumIfSumRangeCache();
+	}
+	AverageIfCache.prototype = Object.create(SumIfCache.prototype);
+	AverageIfCache.prototype.constructor = AverageIfCache;
+	AverageIfCache.prototype.criteria3DError = new cError(cErrorType.division_by_zero);
+
+	/**
+	 * @param {number} sum
+	 * @param {number} count
+	 * @returns {cNumber|cError}
+	 */
+	AverageIfCache.prototype._finalizeResult = function (sum, count) {
+		if (count === 0) {
+			return new cError(cErrorType.division_by_zero);
+		}
+		return new cNumber(sum / count);
+	};
+
 
 	let g_oFormulaRangesCache = new FormulaRangesCache();
 	let g_oCountIfCache = new CountIfCache();
-
+	let g_oSumIfCache = new SumIfCache();
+	let g_oAverageIfCache = new AverageIfCache();
 
 	//----------------------------------------------------------export----------------------------------------------------
 	window['AscCommonExcel'] = window['AscCommonExcel'] || {};
@@ -12788,6 +13292,8 @@ function parseStringToCElement (val, cultureInfo) {
 
 	window['AscCommonExcel'].g_oFormulaRangesCache = g_oFormulaRangesCache;
 	window['AscCommonExcel'].g_oCountIfCache = g_oCountIfCache;
+	window['AscCommonExcel'].g_oSumIfCache = g_oSumIfCache;
+	window['AscCommonExcel'].g_oAverageIfCache = g_oAverageIfCache;
 	window['AscCommonExcel'].CountIfTypedCache = CountIfTypedCache;
 	window['AscCommonExcel'].parseStringToCElement = parseStringToCElement;
 
