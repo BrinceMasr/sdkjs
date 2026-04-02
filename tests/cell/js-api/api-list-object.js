@@ -459,5 +459,195 @@ $(function ()
 			tbl.Resize("A1:B5");
 			assert.equal(ws.GetListObjects()[0].GetRange().GetAddress(true, true), "$A$1:$B$5", "Range is $A$1:$B$5 after Resize to smaller range");
 		});
+
+		QUnit.test("GetListColumns", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("B2").SetValue("Name");
+			ws.GetRange("C2").SetValue("Age");
+			ws.GetRange("D2").SetValue("Score");
+			var tbl = ws.AddListObject("xlSrcRange", "B2:D5");
+			var cols = tbl.GetListColumns();
+
+			assert.equal(cols.length, 3, "GetListColumns returns array with 3 elements");
+			assert.equal(cols[0].GetName(), "Name",  "cols[0] is Name");
+			assert.equal(cols[1].GetName(), "Age",   "cols[1] is Age");
+			assert.equal(cols[2].GetName(), "Score", "cols[2] is Score");
+		});
+
+		QUnit.test("ListColumn - Index, Name, Parent, Range, DataBodyRange", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("B2").SetValue("Name");
+			ws.GetRange("C2").SetValue("Age");
+			ws.GetRange("D2").SetValue("Score");
+			var tbl = ws.AddListObject("xlSrcRange", "B2:D5");
+			var cols = tbl.GetListColumns();
+			var col1 = cols[0];
+			var col2 = cols[1];
+			var col3 = cols[2];
+
+			assert.equal(col1.GetIndex(), 1, "GetIndex returns 1 for first column");
+			assert.equal(col2.GetIndex(), 2, "GetIndex returns 2 for second column");
+			assert.equal(col3.Index, 3, "Index property returns 3 for third column");
+
+			assert.strictEqual(col1.GetParent(), tbl, "GetParent returns the parent ApiListObject");
+			assert.strictEqual(col1.Parent, tbl, "Parent property matches GetParent");
+
+			assert.equal(col2.GetName(), "Age", "GetName returns Age");
+			col2.SetName("Years");
+			assert.equal(col2.GetName(), "Years", "GetName returns updated name after SetName");
+			col2.Name = "Age";
+			assert.equal(col2.Name, "Age", "Name property setter and getter work");
+
+			// Table B2:D5, header row 2, data rows 3-5
+			assert.equal(col1.GetRange().GetAddress(true, true), "$B$2:$B$5", "Range for first column includes header");
+			assert.equal(col2.GetRange().GetAddress(true, true), "$C$2:$C$5", "Range for second column");
+			assert.equal(col1.Range.GetAddress(true, true), "$B$2:$B$5", "Range property works");
+
+			assert.equal(col1.GetDataBodyRange().GetAddress(true, true), "$B$3:$B$5", "DataBodyRange excludes header row");
+			assert.equal(col2.DataBodyRange.GetAddress(true, true), "$C$3:$C$5", "DataBodyRange property works");
+		});
+
+		QUnit.test("ListColumn - TotalsCalculation, Total", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("B2").SetValue("Name");
+			ws.GetRange("C2").SetValue("Age");
+			ws.GetRange("D2").SetValue("Score");
+			var tbl = ws.AddListObject("xlSrcRange", "B2:D5");
+			var cols = tbl.GetListColumns();
+			var col1 = cols[0];
+			var col2 = cols[1];
+			var col3 = cols[2];
+
+			assert.equal(col2.GetTotalsCalculation(), "xlTotalsCalculationNone", "Default TotalsCalculation is None");
+			assert.equal(col1.GetTotal(), null, "Total is null when table has no totals row");
+
+			tbl.SetShowTotals(true);
+
+			// when totals row is shown: Sum function is auto-assigned to last column
+			assert.equal(col3.GetTotalsCalculation(), "xlTotalsCalculationSum", "Last column gets Sum when totals shown");
+			assert.equal(col2.GetTotalsCalculation(), "xlTotalsCalculationNone", "Middle column stays None");
+
+			// Table B2:D5 + totals row → B2:D6, totals row is row 6
+			assert.equal(col1.GetTotal().GetAddress(true, true), "$B$6", "Total for first column is the totals row cell");
+			assert.equal(col3.Total.GetAddress(true, true), "$D$6", "Total property for third column");
+
+			col2.SetTotalsCalculation("xlTotalsCalculationCount");
+			assert.equal(col2.GetTotalsCalculation(), "xlTotalsCalculationCount", "TotalsCalculation is Count after SetTotalsCalculation");
+			assert.equal(col2.TotalsCalculation, "xlTotalsCalculationCount", "TotalsCalculation property getter works");
+
+			col2.TotalsCalculation = "xlTotalsCalculationAverage";
+			assert.equal(col2.TotalsCalculation, "xlTotalsCalculationAverage", "TotalsCalculation set via property");
+		});
+
+		QUnit.test("AddListColumn", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("B2").SetValue("Name");
+			ws.GetRange("C2").SetValue("Age");
+			ws.GetRange("D2").SetValue("Score");
+			var tbl = ws.AddListObject("xlSrcRange", "B2:D5");
+
+			assert.equal(tbl.GetListColumns().length, 3, "Initial count is 3");
+
+			var newCol = tbl.AddListColumn();
+			assert.equal(tbl.GetListColumns().length, 4, "Count is 4 after AddListColumn()");
+			assert.ok(newCol !== null, "AddListColumn() returns the new column");
+			assert.equal(newCol.GetIndex(), 4, "Appended column index is 4");
+
+			var insertedCol = tbl.AddListColumn(2);
+			assert.equal(tbl.GetListColumns().length, 5, "Count is 5 after AddListColumn(2)");
+			assert.equal(insertedCol.GetIndex(), 2, "Inserted column index is 2");
+			assert.equal(tbl.GetListColumns()[2].GetName(), "Age", "Former second column is now third");
+		});
+
+		QUnit.test("ListColumn - Delete", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("B2").SetValue("Name");
+			ws.GetRange("C2").SetValue("Age");
+			ws.GetRange("D2").SetValue("Score");
+			var tbl = ws.AddListObject("xlSrcRange", "B2:D5");
+
+			assert.equal(tbl.GetListColumns().length, 3, "Initial count is 3");
+
+			tbl.GetListColumns()[1].Delete();
+			var remaining = tbl.GetListColumns();
+			assert.equal(remaining.length, 2, "Count is 2 after deleting middle column");
+			assert.equal(remaining[0].GetName(), "Name",  "First column is still Name");
+			assert.equal(remaining[1].GetName(), "Score", "Second column is now Score");
+		});
+
+		QUnit.test("GetListRows", function (assert)
+		{
+			initializeTest();
+
+			// Table B2:D5: header row 2, data rows 3-5
+			var tbl = ws.AddListObject("xlSrcRange", "B2:D5");
+			var rows = tbl.GetListRows();
+
+			assert.equal(rows.length, 3, "GetListRows returns 3 data rows");
+			assert.equal(rows[0].GetIndex(), 1, "rows[0].GetIndex() is 1");
+			assert.equal(rows[1].GetIndex(), 2, "rows[1].GetIndex() is 2");
+			assert.equal(rows[2].Index, 3, "rows[2].Index property is 3");
+
+			assert.equal(rows[0].GetRange().GetAddress(true, true), "$B$3:$D$3", "First data row range");
+			assert.equal(rows[2].GetRange().GetAddress(true, true), "$B$5:$D$5", "Last data row range");
+			assert.equal(rows[1].Range.GetAddress(true, true), "$B$4:$D$4", "Range property works");
+
+			assert.strictEqual(rows[0].GetParent(), tbl, "GetParent returns the parent ApiListObject");
+			assert.strictEqual(rows[0].Parent, tbl, "Parent property works");
+
+			// Totals row is excluded from data rows
+			tbl.SetShowTotals(true);
+			var rowsWithTotals = tbl.GetListRows();
+			assert.equal(rowsWithTotals.length, 3, "GetListRows still returns 3 when totals row is shown");
+			assert.equal(rowsWithTotals[2].GetRange().GetAddress(true, true), "$B$5:$D$5", "Last data row is still row 5, not the totals row");
+		});
+
+		QUnit.test("AddListRow", function (assert)
+		{
+			initializeTest();
+
+			var tbl = ws.AddListObject("xlSrcRange", "B2:D5");
+
+			assert.equal(tbl.GetListRows().length, 3, "Initial data row count is 3");
+
+			// Append at end
+			var newRow = tbl.AddListRow();
+			assert.ok(newRow !== null, "AddListRow() returns the new row");
+			assert.equal(tbl.GetListRows().length, 4, "Count is 4 after AddListRow()");
+			assert.equal(newRow.GetIndex(), 4, "Appended row index is 4");
+			assert.equal(newRow.GetRange().GetAddress(true, true), "$B$6:$D$6", "Appended row range is row 6");
+
+			// Insert at position 2
+			var insertedRow = tbl.AddListRow(2);
+			assert.equal(tbl.GetListRows().length, 5, "Count is 5 after AddListRow(2)");
+			assert.equal(insertedRow.GetIndex(), 2, "Inserted row index is 2");
+		});
+
+		QUnit.test("ListRow - Delete", function (assert)
+		{
+			initializeTest();
+
+			var tbl = ws.AddListObject("xlSrcRange", "B2:D5");
+			ws.GetRange("B3").SetValue("Alice");
+			ws.GetRange("B4").SetValue("Bob");
+			ws.GetRange("B5").SetValue("Carol");
+
+			assert.equal(tbl.GetListRows().length, 3, "Initial count is 3");
+
+			tbl.GetListRows()[1].Delete();
+			assert.equal(tbl.GetListRows().length, 2, "Count is 2 after deleting middle row");
+			assert.equal(ws.GetRange("B3").GetValue(), "Alice", "First row still has Alice");
+			assert.equal(ws.GetRange("B4").GetValue(), "Carol", "Second row now has Carol after Bob was deleted");
+		});
 	});
 });

@@ -28633,6 +28633,468 @@
 		}
 	});
 
+	/**
+	 * Returns an array of all columns in the table.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiListColumn[]}
+	 */
+	ApiListObject.prototype.GetListColumns = function () {
+		var columns = this.tablePart.TableColumns;
+		var result = [];
+		if (!columns) {
+			return result;
+		}
+		for (var i = 0; i < columns.length; i++) {
+			result.push(new ApiListColumn(columns[i], this));
+		}
+		return result;
+	};
+
+	/**
+	 * Adds a new column to the table at the specified 1-based position.
+	 * If no position is provided, the column is appended at the end.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @param {number} [nPosition] - The 1-based position at which to insert the new column.
+	 * @returns {ApiListColumn | null}
+	 */
+	ApiListObject.prototype.AddListColumn = function (nPosition) {
+		var tablePart = this.tablePart;
+		var ws = this.ws.worksheet;
+		var ref = tablePart.Ref;
+		if (!ref) {
+			return null;
+		}
+		var count = tablePart.TableColumns ? tablePart.TableColumns.length : 0;
+		var range, displayName;
+		if (nPosition === undefined || nPosition === null || nPosition > count) {
+			range = ws.getRange3(ref.r1, ref.c2 + 1, ref.r2, ref.c2 + 1);
+			displayName = tablePart.DisplayName;
+			nPosition = count + 1;
+		} else {
+			var colIndex = ref.c1 + (nPosition - 1);
+			range = ws.getRange3(ref.r1, colIndex, ref.r2, colIndex);
+			displayName = undefined;
+		}
+		range.addCellsShiftRight(displayName);
+		var columns = tablePart.TableColumns;
+		if (!columns || !columns[nPosition - 1]) {
+			return null;
+		}
+		return new ApiListColumn(columns[nPosition - 1], this);
+	};
+
+	// -------------------------------------------------------------------------
+	// ApiListColumn
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Class representing a single column in a list object (table).
+	 * @constructor
+	 * @param {AscCommonExcel.TableColumn} tableColumn - The internal table column object.
+	 * @param {ApiListObject} listObject - The parent list object.
+	 */
+	function ApiListColumn(tableColumn, listObject) {
+		this.tableColumn = tableColumn;
+		this.listObject  = listObject;
+	}
+
+	/**
+	 * Returns the range of the data body of the column, excluding the header and totals rows.
+	 * @memberof ApiListColumn
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiRange | null}
+	 */
+	ApiListColumn.prototype.GetDataBodyRange = function () {
+		var tablePart = this.listObject.tablePart;
+		var bbox = this.tableColumn.getRange(tablePart, false, false);
+		if (!bbox) {
+			return null;
+		}
+		return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this.listObject.ws.worksheet, bbox));
+	};
+
+	Object.defineProperty(ApiListColumn.prototype, "DataBodyRange", {
+		get: function () {
+			return this.GetDataBodyRange();
+		}
+	});
+
+	/**
+	 * Returns the 1-based index of the column within the table.
+	 * @memberof ApiListColumn
+	 * @typeofeditors ["CSE"]
+	 * @returns {number}
+	 */
+	ApiListColumn.prototype.GetIndex = function () {
+		var columns = this.listObject.tablePart.TableColumns;
+		if (!columns) {
+			return -1;
+		}
+		for (var i = 0; i < columns.length; i++) {
+			if (columns[i] === this.tableColumn) {
+				return i + 1;
+			}
+		}
+		return -1;
+	};
+
+	Object.defineProperty(ApiListColumn.prototype, "Index", {
+		get: function () {
+			return this.GetIndex();
+		}
+	});
+
+	/**
+	 * Returns the name of the table column.
+	 * @memberof ApiListColumn
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 */
+	ApiListColumn.prototype.GetName = function () {
+		return this.tableColumn.getTableColumnName() || "";
+	};
+
+	/**
+	 * Sets the name of the table column.
+	 * @memberof ApiListColumn
+	 * @typeofeditors ["CSE"]
+	 * @param {string} sName - The new column name.
+	 */
+	ApiListColumn.prototype.SetName = function (sName) {
+		this.tableColumn.setTableColumnName(sName);
+	};
+
+	Object.defineProperty(ApiListColumn.prototype, "Name", {
+		get: function () {
+			return this.GetName();
+		},
+		set: function (sName) {
+			this.SetName(sName);
+		}
+	});
+
+	/**
+	 * Returns the parent list object.
+	 * @memberof ApiListColumn
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiListObject}
+	 */
+	ApiListColumn.prototype.GetParent = function () {
+		return this.listObject;
+	};
+
+	Object.defineProperty(ApiListColumn.prototype, "Parent", {
+		get: function () {
+			return this.GetParent();
+		}
+	});
+
+	/**
+	 * Returns the range of the entire column, including the header and totals rows.
+	 * @memberof ApiListColumn
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiRange | null}
+	 */
+	ApiListColumn.prototype.GetRange = function () {
+		var tablePart = this.listObject.tablePart;
+		var bbox = this.tableColumn.getRange(tablePart, true, true);
+		if (!bbox) {
+			return null;
+		}
+		return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this.listObject.ws.worksheet, bbox));
+	};
+
+	Object.defineProperty(ApiListColumn.prototype, "Range", {
+		get: function () {
+			return this.GetRange();
+		}
+	});
+
+	/**
+	 * Returns the totals calculation type for the column.
+	 * @memberof ApiListColumn
+	 * @typeofeditors ["CSE"]
+	 * @returns {XlTotalsCalculation}
+	 */
+	ApiListColumn.prototype.GetTotalsCalculation = function () {
+		var fn = this.tableColumn.getTotalsRowFunction();
+		switch (fn) {
+			case Asc.ETotalsRowFunction.totalrowfunctionAverage:
+				return "xlTotalsCalculationAverage";
+			case Asc.ETotalsRowFunction.totalrowfunctionCount:
+				return "xlTotalsCalculationCount";
+			case Asc.ETotalsRowFunction.totalrowfunctionCountNums:
+				return "xlTotalsCalculationCountNums";
+			case Asc.ETotalsRowFunction.totalrowfunctionCustom:
+				return "xlTotalsCalculationCustom";
+			case Asc.ETotalsRowFunction.totalrowfunctionMax:
+				return "xlTotalsCalculationMax";
+			case Asc.ETotalsRowFunction.totalrowfunctionMin:
+				return "xlTotalsCalculationMin";
+			case Asc.ETotalsRowFunction.totalrowfunctionStdDev:
+				return "xlTotalsCalculationStdDev";
+			case Asc.ETotalsRowFunction.totalrowfunctionSum:
+				return "xlTotalsCalculationSum";
+			case Asc.ETotalsRowFunction.totalrowfunctionVar:
+				return "xlTotalsCalculationVar";
+			default:
+				return "xlTotalsCalculationNone";
+		}
+	};
+
+	/**
+	 * Sets the totals calculation type for the column.
+	 * @memberof ApiListColumn
+	 * @typeofeditors ["CSE"]
+	 * @param {XlTotalsCalculation} sType - The totals calculation type.
+	 */
+	ApiListColumn.prototype.SetTotalsCalculation = function (sType) {
+		var fn;
+		switch (sType) {
+			case "xlTotalsCalculationAverage":
+				fn = Asc.ETotalsRowFunction.totalrowfunctionAverage;
+				break;
+			case "xlTotalsCalculationCount":
+				fn = Asc.ETotalsRowFunction.totalrowfunctionCount;
+				break;
+			case "xlTotalsCalculationCountNums":
+				fn = Asc.ETotalsRowFunction.totalrowfunctionCountNums;
+				break;
+			case "xlTotalsCalculationCustom":
+				fn = Asc.ETotalsRowFunction.totalrowfunctionCustom;
+				break;
+			case "xlTotalsCalculationMax":
+				fn = Asc.ETotalsRowFunction.totalrowfunctionMax;
+				break;
+			case "xlTotalsCalculationMin":
+				fn = Asc.ETotalsRowFunction.totalrowfunctionMin;
+				break;
+			case "xlTotalsCalculationNone":
+				fn = Asc.ETotalsRowFunction.totalrowfunctionNone;
+				break;
+			case "xlTotalsCalculationStdDev":
+				fn = Asc.ETotalsRowFunction.totalrowfunctionStdDev;
+				break;
+			case "xlTotalsCalculationSum":
+				fn = Asc.ETotalsRowFunction.totalrowfunctionSum;
+				break;
+			case "xlTotalsCalculationVar":
+				fn = Asc.ETotalsRowFunction.totalrowfunctionVar;
+				break;
+			default:
+				return;
+		}
+		this.tableColumn.setTotalsRowFunction(fn);
+	};
+
+	Object.defineProperty(ApiListColumn.prototype, "TotalsCalculation", {
+		get: function () {
+			return this.GetTotalsCalculation();
+		},
+		set: function (sType) {
+			this.SetTotalsCalculation(sType);
+		}
+	});
+
+	/**
+	 * Returns the range of the totals row cell for the column.
+	 * Returns null if the table has no totals row.
+	 * @memberof ApiListColumn
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiRange | null}
+	 */
+	ApiListColumn.prototype.GetTotal = function () {
+		var tablePart = this.listObject.tablePart;
+		if (!tablePart.isTotalsRow()) {
+			return null;
+		}
+		var ref = tablePart.Ref;
+		var col = null;
+		var columns = tablePart.TableColumns;
+		for (var i = 0; i < columns.length; i++) {
+			if (columns[i] === this.tableColumn) {
+				col = ref.c1 + i;
+				break;
+			}
+		}
+		if (col === null) {
+			return null;
+		}
+		var bbox = new Asc.Range(col, ref.r2, col, ref.r2);
+		return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this.listObject.ws.worksheet, bbox));
+	};
+
+	Object.defineProperty(ApiListColumn.prototype, "Total", {
+		get: function () {
+			return this.GetTotal();
+		}
+	});
+
+	/**
+	 * Deletes the column from the table.
+	 * @memberof ApiListColumn
+	 * @typeofeditors ["CSE"]
+	 */
+	ApiListColumn.prototype.Delete = function () {
+		var tablePart = this.listObject.tablePart;
+		var ws = this.listObject.ws.worksheet;
+		var bbox = this.tableColumn.getRange(tablePart, true, true);
+		if (!bbox) {
+			return;
+		}
+		var range = ws.getRange3(bbox.r1, bbox.c1, bbox.r2, bbox.c2);
+		range.deleteCellsShiftLeft();
+	};
+
+	// -------------------------------------------------------------------------
+	// ApiListRow
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Returns an array of all data rows in the table, excluding the header and totals rows.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiListRow[]}
+	 */
+	ApiListObject.prototype.GetListRows = function () {
+		var tablePart = this.tablePart;
+		var ref = tablePart.Ref;
+		var result = [];
+		if (!ref) {
+			return result;
+		}
+		var startRow = ref.r1 + (tablePart.isHeaderRow() ? 1 : 0);
+		var endRow   = ref.r2 - (tablePart.isTotalsRow() ? 1 : 0);
+		var count    = endRow - startRow + 1;
+		for (var i = 1; i <= count; i++) {
+			result.push(new ApiListRow(i, this));
+		}
+		return result;
+	};
+
+	/**
+	 * Adds a new data row to the table at the specified 1-based position.
+	 * If no position is provided, the row is appended at the end.
+	 * @memberof ApiListObject
+	 * @typeofeditors ["CSE"]
+	 * @param {number} [nPosition] - The 1-based position within the data body at which to insert the row.
+	 * @returns {ApiListRow | null}
+	 */
+	ApiListObject.prototype.AddListRow = function (nPosition) {
+		var tablePart = this.tablePart;
+		var ws = this.ws.worksheet;
+		var ref = tablePart.Ref;
+		if (!ref) {
+			return null;
+		}
+		var startRow = ref.r1 + (tablePart.isHeaderRow() ? 1 : 0);
+		var endRow   = ref.r2 - (tablePart.isTotalsRow() ? 1 : 0);
+		var count    = endRow - startRow + 1;
+		var range, displayName;
+		if (nPosition === undefined || nPosition === null || nPosition > count) {
+			// Append at end: insert below the last data row (or push the totals row down)
+			var hasTotals = tablePart.isTotalsRow();
+			var insertRow = hasTotals ? ref.r2 : ref.r2 + 1;
+			range       = ws.getRange3(insertRow, ref.c1, insertRow, ref.c2);
+			displayName = hasTotals ? undefined : tablePart.DisplayName;
+			nPosition   = count + 1;
+		} else {
+			// Insert above the row at nPosition
+			var rowIndex = startRow + (nPosition - 1);
+			range       = ws.getRange3(rowIndex, ref.c1, rowIndex, ref.c2);
+			displayName = undefined;
+		}
+		range.addCellsShiftBottom(displayName);
+		return new ApiListRow(nPosition, this);
+	};
+
+	/**
+	 * Class representing a single data row in a list object (table).
+	 * @constructor
+	 * @param {number} nIndex - The 1-based index of the row within the data body.
+	 * @param {ApiListObject} listObject - The parent list object.
+	 */
+	function ApiListRow(nIndex, listObject) {
+		this.index      = nIndex;
+		this.listObject = listObject;
+	}
+
+	/**
+	 * Returns the 1-based index of the row within the data body of the table.
+	 * @memberof ApiListRow
+	 * @typeofeditors ["CSE"]
+	 * @returns {number}
+	 */
+	ApiListRow.prototype.GetIndex = function () {
+		return this.index;
+	};
+
+	Object.defineProperty(ApiListRow.prototype, "Index", {
+		get: function () {
+			return this.GetIndex();
+		}
+	});
+
+	/**
+	 * Returns the parent list object.
+	 * @memberof ApiListRow
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiListObject}
+	 */
+	ApiListRow.prototype.GetParent = function () {
+		return this.listObject;
+	};
+
+	Object.defineProperty(ApiListRow.prototype, "Parent", {
+		get: function () {
+			return this.GetParent();
+		}
+	});
+
+	/**
+	 * Returns the range of the entire row, spanning all columns of the table.
+	 * @memberof ApiListRow
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiRange | null}
+	 */
+	ApiListRow.prototype.GetRange = function () {
+		var tablePart = this.listObject.tablePart;
+		var ref = tablePart.Ref;
+		if (!ref) {
+			return null;
+		}
+		var startRow = ref.r1 + (tablePart.isHeaderRow() ? 1 : 0);
+		var absRow   = startRow + (this.index - 1);
+		var bbox = new Asc.Range(ref.c1, absRow, ref.c2, absRow);
+		return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this.listObject.ws.worksheet, bbox));
+	};
+
+	Object.defineProperty(ApiListRow.prototype, "Range", {
+		get: function () {
+			return this.GetRange();
+		}
+	});
+
+	/**
+	 * Deletes the row from the table.
+	 * @memberof ApiListRow
+	 * @typeofeditors ["CSE"]
+	 */
+	ApiListRow.prototype.Delete = function () {
+		var tablePart = this.listObject.tablePart;
+		var ref = tablePart.Ref;
+		if (!ref) {
+			return;
+		}
+		var startRow = ref.r1 + (tablePart.isHeaderRow() ? 1 : 0);
+		var absRow   = startRow + (this.index - 1);
+		var ws = this.listObject.ws.worksheet;
+		var range = ws.getRange3(absRow, ref.c1, absRow, ref.c2);
+		range.deleteCellsShiftUp();
+	};
+
 	Api["Format"]                = Api.Format;
 	Api["AddSheet"]              = Api.AddSheet;
 	Api["GetSheets"]             = Api.GetSheets;
@@ -28810,8 +29272,28 @@
 	ApiListObject.prototype["GetSummary"]         = ApiListObject.prototype.GetSummary;
 	ApiListObject.prototype["SetSummary"]         = ApiListObject.prototype.SetSummary;
 	ApiListObject.prototype["Delete"]             = ApiListObject.prototype.Delete;
-	ApiListObject.prototype["Unlist"]             = ApiListObject.prototype.Unlist;
-	ApiListObject.prototype["Resize"]             = ApiListObject.prototype.Resize;
+	ApiListObject.prototype["Unlist"]          = ApiListObject.prototype.Unlist;
+	ApiListObject.prototype["Resize"]          = ApiListObject.prototype.Resize;
+	ApiListObject.prototype["GetListColumns"]  = ApiListObject.prototype.GetListColumns;
+	ApiListObject.prototype["AddListColumn"]   = ApiListObject.prototype.AddListColumn;
+	ApiListObject.prototype["GetListRows"]     = ApiListObject.prototype.GetListRows;
+	ApiListObject.prototype["AddListRow"]      = ApiListObject.prototype.AddListRow;
+
+	ApiListRow.prototype["GetIndex"]  = ApiListRow.prototype.GetIndex;
+	ApiListRow.prototype["GetParent"] = ApiListRow.prototype.GetParent;
+	ApiListRow.prototype["GetRange"]  = ApiListRow.prototype.GetRange;
+	ApiListRow.prototype["Delete"]    = ApiListRow.prototype.Delete;
+
+	ApiListColumn.prototype["GetDataBodyRange"]     = ApiListColumn.prototype.GetDataBodyRange;
+	ApiListColumn.prototype["GetIndex"]             = ApiListColumn.prototype.GetIndex;
+	ApiListColumn.prototype["GetName"]              = ApiListColumn.prototype.GetName;
+	ApiListColumn.prototype["SetName"]              = ApiListColumn.prototype.SetName;
+	ApiListColumn.prototype["GetParent"]            = ApiListColumn.prototype.GetParent;
+	ApiListColumn.prototype["GetRange"]             = ApiListColumn.prototype.GetRange;
+	ApiListColumn.prototype["GetTotalsCalculation"] = ApiListColumn.prototype.GetTotalsCalculation;
+	ApiListColumn.prototype["SetTotalsCalculation"] = ApiListColumn.prototype.SetTotalsCalculation;
+	ApiListColumn.prototype["GetTotal"]             = ApiListColumn.prototype.GetTotal;
+	ApiListColumn.prototype["Delete"]               = ApiListColumn.prototype.Delete;
 
 	ApiRange.prototype["GetClassType"] = ApiRange.prototype.GetClassType;
 	ApiRange.prototype["GetRow"] = ApiRange.prototype.GetRow;
