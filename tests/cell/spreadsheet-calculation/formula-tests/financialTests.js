@@ -8448,6 +8448,21 @@ $(function () {
 		oParser = new parserFormula('EFFECT(0.1,SQRT(-1))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: EFFECT(0.1,SQRT(-1)) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number, Formula. Error from invalid formula.');
+		// 'Sheet1:Sheet2'!A1
+		let multiAreaLink = "" + ws.getName() + ":" + ws2.getName() + "!A1";
+		// Case #21: Area3d,Array. 3D area used. 2 of 3 arguments used.
+		oParser = new parserFormula('EFFECT('+multiAreaLink+',12)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: EFFECT('+multiAreaLink+',12) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area3d,Number. 3D area used. 2 of 2 arguments used.');
+		// Case #22: Array,Area3d. 3D area used. 2 of 3 arguments used.
+		oParser = new parserFormula('EFFECT({-100,100},'+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: EFFECT({-100,100},'+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Number,Area3d. 3D area used. 2 of 2 arguments used.');
+		// Case #23: Area3d,Area3d. 3D area used. 2 of 2 arguments used.
+		oParser = new parserFormula('EFFECT('+multiAreaLink+','+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: EFFECT('+multiAreaLink+','+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area3d,Area3d. 3D area used. 2 of 2 arguments used.');
+
 
 		// Bounded cases:
 		// Case #1: Number, Number. Minimum positive nominal_rate.

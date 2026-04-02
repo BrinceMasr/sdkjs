@@ -2754,6 +2754,10 @@ function (window, undefined) {
 	cEFFECT.prototype.Calculate = function (arg) {
 		let nominalRate = arg[0], npery = arg[1];
 		if (nominalRate.type === cElementType.cellsRange || nominalRate.type === cElementType.cellsRange3D) {
+			if (nominalRate.isSingleSheet && !nominalRate.isSingleSheet()) {
+				return new cError(cErrorType.wrong_value_type);
+			}
+
 			if (nominalRate.isOneElement()) {
 				nominalRate = nominalRate.getFirstElement();
 			} else {
@@ -2766,6 +2770,10 @@ function (window, undefined) {
 		} 
 
 		if (npery.type === cElementType.cellsRange || npery.type === cElementType.cellsRange3D) {
+			if (npery.isSingleSheet && !npery.isSingleSheet()) {
+				return new cError(cErrorType.wrong_value_type);
+			}
+
 			if (npery.isOneElement()) {
 				npery = npery.getFirstElement();
 			} else {
