@@ -1528,8 +1528,15 @@
 			if (posY < 0) {
 				posY = 0;
 			}
+			else if (posY > this.scrollMaxY) {
+				posY = this.this.scrollMaxY;
+			}
+			
 			if (posX < 0) {
 				posX = 0;
+			}
+			else if (posX > this.scrollMaxX) {
+				posX = this.scrollMaxX;
 			}
 			
 			this.m_oScrollVerApi.scrollToY(posY);
