@@ -1528,12 +1528,25 @@ CHistory.prototype.private_PostProcessingRecalcData = function()
 			}
 			else
 			{
-				var oChange = oPoint.Items[nItemsCount - 1].Data;
-				if (!oChange || !oChange.IsContentChange())
-					return false;
-				
-				let nChangeItemsCount = oChange.GetItemsCount();
-				return (nChangeItemsCount > 0 && AscDFH.historyitem_ParaRun_AddItem === oChange.GetType() && oChange.GetItem(nChangeItemsCount - 1) === oLastElement);
+				for (let changeIndex = nItemsCount - 1; changeIndex >= 0; changeIndex--) {
+					const change = oPoint.Items[changeIndex].Data;
+					if (!change || !change.IsContentChange()) {
+						continue;
+					}
+
+					const changeType = change.GetType();
+					if (changeType !== AscDFH.historyitem_ParaRun_AddItem) {
+						return false;
+					}
+
+					const changeItemsCount = change.GetItemsCount();
+					if (changeItemsCount <= 0) {
+						return false;
+					}
+
+					const isSameLastElement = change.GetItem(changeItemsCount - 1) === oLastElement;
+					return isSameLastElement;
+				}
 			}
 		}
 
