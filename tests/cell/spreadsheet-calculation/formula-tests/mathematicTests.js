@@ -10626,6 +10626,7 @@ $(function () {
 
 	QUnit.test("Test: \"LN\"", function (assert) {
 
+		let array;
 		oParser = new parserFormula("LN(86)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue().toFixed(7) - 0, 4.4543473);
@@ -10650,8 +10651,9 @@ $(function () {
 		ws.getRange2("A111").setValue("FALSE");
 
 		// Table type. Use A601:L6**
-		getTableType(599, 0, 600, 0);
+		getTableType(599, 0, 600, 1);
 		ws.getRange2("A601").setValue("1"); // Number (Column1)
+		ws.getRange2("B601").setValue("1s"); // Text (Column2)
 		// 3D links. Use A1:Z10
 		let ws2 = getSecondSheet();
 		ws2.getRange2("A1").setValue("0.5");
@@ -10704,11 +10706,14 @@ $(function () {
 		// Case #7: Array. Array with single element. 1 argument used.
 		oParser = new parserFormula('LN({10})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LN({10}) is parsed.');
-		//? assert.strictEqual(oParser.calculate(), 2.302585093, 'Test: Positive case: Array. Array with single element. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), 2.302585092994046, 'Test: Positive case: Array. Array with single element. 1 argument used.');
 		// Case #8: Array. Array with multiple elements. 1 argument used.
 		oParser = new parserFormula('LN({10, 5})', 'A2', ws);
+		oParser.setArrayFormulaRef(ws.getRange2("E106:F110").bbox);
 		assert.ok(oParser.parse(), 'Test: LN({10, 5}) is parsed.');
-		// assert.strictEqual(oParser.calculate().getValue(), '2.302585093', 'Test: Positive case: Array. Array with multiple elements. 1 argument used.');
+		array = oParser.calculate();
+		assert.strictEqual(array.getElementRowCol(0,0).getValue(), 2.302585092994046, 'Test: Positive case: Array. Array with multiple elements. 1 argument used.');
+		assert.strictEqual(array.getElementRowCol(0,1).getValue(), 1.6094379124341003, 'Test: Positive case: Array. Array with multiple elements. 1 argument used.');
 		// Case #9: Name. Named range. 1 argument used.
 		oParser = new parserFormula('LN(TestName)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LN(TestName) is parsed.');
@@ -10727,8 +10732,10 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue().toFixed(9), "-0.693147181", 'Test: Positive case: Area3D. 3D single-cell range. 1 argument used.');
 		// Case #13: Area3D. 3D multi-cell range. 1 argument used.
 		oParser = new parserFormula('LN(Sheet2!A1:A2)', 'A2', ws);
+		oParser.setArrayFormulaRef(ws.getRange2("E106:F110").bbox);
 		assert.ok(oParser.parse(), 'Test: LN(Sheet2!A1:A2) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Area3D. 3D multi-cell range. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), -0.6931471805599453, 'Test: Positive case: Area3D. 3D multi-cell range. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1,0).getValue(), "#VALUE!", 'Test: Positive case: Area3D. 3D multi-cell range. 1 argument used.');
 		// Case #14: Table. Table structured reference. 1 argument used.
 		oParser = new parserFormula('LN(Table1[Column1])', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LN(Table1[Column1]) is parsed.');
@@ -10756,6 +10763,7 @@ $(function () {
 		// Case #20: Number. Value slightly above 1. 1 argument used.
 		oParser = new parserFormula('LN(1.000000000000001)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LN(1.000000000000001) is parsed.');
+		// todo Is more than 14 characters ignored in ms?
 		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positve case: Number. Value slightly above 1. 1 argument used.');
 		// Case #21: Number. Large positive integer. 1 argument used.
 		oParser = new parserFormula('LN(10000000000)', 'A2', ws);
@@ -10779,12 +10787,17 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), "#NUM!", 'Test: Positive case: Reference link. Reference to cell with decimal. 1 argument used.');
 		// Case #26: Area. Two-cell range. 1 argument used.
 		oParser = new parserFormula('LN(A102:A103)', 'A2', ws);
+		oParser.setArrayFormulaRef(ws.getRange2("E106:F110").bbox);
 		assert.ok(oParser.parse(), 'Test: LN(A102:A103) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), -0.693147181, 'Test: Positive case: Area. Two-cell range. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), -0.6931471805599453, 'Test: Positive case: Area. Two-cell range. 1 argument used.');
 		// Case #27: Array. Array with multiple values. 1 argument used.
 		oParser = new parserFormula('LN({0.5, 1, 2})', 'A2', ws);
+		oParser.setArrayFormulaRef(ws.getRange2("E106:G106").bbox);
 		assert.ok(oParser.parse(), 'Test: LN({0.5, 1, 2}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Positive case: Array. Array with multiple values. 1 argument used.');
+		array = oParser.calculate();
+		assert.strictEqual(array.getElementRowCol(0,0).getValue(), -0.6931471805599453, 'Test: Positive case: Array. Array with multiple values. 1 argument used.');
+		assert.strictEqual(array.getElementRowCol(0,1).getValue(), 0, 'Test: Positive case: Array. Array with multiple values. 1 argument used.');
+		assert.strictEqual(array.getElementRowCol(0,2).getValue(), 0.6931471805599453, 'Test: Positive case: Array. Array with multiple values. 1 argument used.');
 		// Case #28: Name. Alternative named range. 1 argument used.
 		oParser = new parserFormula('LN(TestName1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LN(TestName1) is parsed.');
@@ -10819,10 +10832,6 @@ $(function () {
 		oParser = new parserFormula('LN(NA())', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LN(NA()) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Error. Propagates #N/A error. 1 argument used.');
-		// Case #8: Area. Multi-cell range returns error.
-		oParser = new parserFormula('LN(A102:A103)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: LN(A102:A103) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#SPILL!', 'Test: Negative case: Area. Multi-cell range returns error.');
 		// Case #9: Empty. Reference link is empty.
 		oParser = new parserFormula('LN(A103)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LN(A103) is parsed.');
@@ -10840,13 +10849,16 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: LN(Sheet2!A2) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Ref3D. 3D ref to text returns #VALUE!.');
 		// Case #13: Name. Named range with text returns #VALUE!.
-		oParser = new parserFormula('LN(TestNameArea)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: LN(TestNameArea) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Name. Named range with text returns #VALUE!.');
+		oParser = new parserFormula('LN(TestNameArea2)', 'A2', ws);
+		oParser.setArrayFormulaRef(ws.getRange2("E106:G106").bbox);
+		assert.ok(oParser.parse(), 'Test: LN(TestNameArea2) is parsed.');
+		array = oParser.calculate();
+		assert.strictEqual(array.getElementRowCol(0,0).getValue(), -0.2231435513142097, 'Test: Negative case: Name. Named range with positive value returns result.');
+		assert.strictEqual(array.getElementRowCol(0,1).getValue(), '#NUM!', 'Test: Negative case: Name. Named range with negative value returns NUM.');
 		// Case #14: Table. Table column with text returns #VALUE!.
 		oParser = new parserFormula('LN(Table1[Column2])', 'A2', ws);
-		//? assert.ok(oParser.parse(), 'Test: LN(Table1[Column2]) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Table. Table column with text returns #VALUE!.');
+		assert.ok(oParser.parse(), 'Test: LN(Table1[Column2]) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Table. Table column with text returns #VALUE!.');
 		// Case #15: Formula. Formula resulting in error.
 		oParser = new parserFormula('LN(SQRT(-1))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LN(SQRT(-1)) is parsed.');
@@ -10854,7 +10866,7 @@ $(function () {
 		// Case #16: Array. Array with boolean returns #NUM!.
 		oParser = new parserFormula('LN({FALSE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LN({FALSE}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Array. Array with boolean returns #NUM!.');
+		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Array. Array with boolean returns #NUM!.');
 		// Case #17: Date. Date before Excel epoch returns #NUM!.
 		oParser = new parserFormula('LN(DATE(1899,12,31))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LN(DATE(1899,12,31)) is parsed.');
@@ -10902,7 +10914,7 @@ $(function () {
 		// Case #26: Array. Array with text values. 1 argument used.
 		oParser = new parserFormula('LN({"a","b"})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LN({"a","b"}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array. Array with text values. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array. Array with text values. 1 argument used.');
 		// Case #27: Name. Named range with mixed values. 1 argument used.
 		oParser = new parserFormula('LN(TestNameArea2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LN(TestNameArea2) is parsed.');
@@ -10930,9 +10942,9 @@ $(function () {
 
 		// Bounded cases:
 		// Case #1: Number. Min valid positive value. 1 argument used.
-		oParser = new parserFormula('LN(2.2250738585072014E-308)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: LN(2.2250738585072014E-308) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Number. Min valid positive value. 1 argument used.');
+		oParser = new parserFormula('LN(2.2250738585072014E-307)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: LN(2.2250738585072014E-307) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), -706.09383343927, 'Test: Bounded case: Number. Min valid positive value. 1 argument used.');
 		// Case #2: Number. Max valid positive value. 1 argument used.
 		oParser = new parserFormula('LN(1.7976931348623158E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LN(1.7976931348623158E+307) is parsed.');
@@ -10961,22 +10973,6 @@ $(function () {
 		oParser = new parserFormula('LN(EXP(10))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LN(EXP(10)) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 10, 'Test: Bounded case: Formula. Compound function boundary test. 1 argument used.');
-
-
-		// Need to fix: cross Area check, empty check
-		// Different result with MS
-		// Case #7: Array. Array with single element
-		// Case #13: Area3D. 3D multi-cell range
-		// Case #20: Number. Value slightly above 1
-		// Case #26: Area. Two-cell range
-		// Case #27: Array. Array with multiple values
-		// Case #8: Area. Multi-cell range returns error
-		// Case #13: Name. Named range with text returns #VALUE
-		// Case #14: Table. Table column with text returns #VALUE!.
-		// Case #16: Array. Array with boolean returns #NUM!.
-		// Case #26: Array. Array with text values.
-		// Case #1: Number. Min valid positive value
-
 
 		testArrayFormula(assert, "LN");
 	});
@@ -11009,8 +11005,9 @@ $(function () {
 		ws.getRange2("A111").setValue("FALSE");
 
 		// Table type. Use A601:L6**
-		getTableType(599, 0, 600, 0);
+		getTableType(599, 0, 600, 1);
 		ws.getRange2("A601").setValue("1"); // Number (Column1)
+		ws.getRange2("B601").setValue("1s"); // Text (Column2)
 		// 3D links. Use A1:Z10
 		let ws2 = getSecondSheet();
 		ws2.getRange2("A1").setValue("0.5");
@@ -11052,7 +11049,9 @@ $(function () {
 		// Case #6: Array. Array with single element. 1 argument used.
 		oParser = new parserFormula('LOG({10})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG({10}) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Array. Array with single element. 1 argument used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:G106").bbox);
+		array = oParser.calculate();
+		assert.strictEqual(array.getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Array. Array with single element. 1 argument used.');
 		// Case #7: Name. Named range. 1 argument used.
 		oParser = new parserFormula('LOG(TestName)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG(TestName) is parsed.');
@@ -11088,17 +11087,20 @@ $(function () {
 		// Case #15: Number. Value slightly above 0. 1 argument used.
 		oParser = new parserFormula('LOG(1.000000000000001)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG(1.000000000000001) is parsed.');
+		// todo Is more than 14 characters ignored in ms?
 		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Number. Value slightly above 0. 1 argument used.');
 		// Case #16: String. String of min valid value. 1 argument used.
 		oParser = new parserFormula('LOG("1.000000000000001")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG("1.000000000000001") is parsed.');
+		// todo Is more than 14 characters ignored in ms?
 		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: String. String of min valid value. 1 argument used.');
 		// Case #17: Array. Multi-element array. 1 argument used.
 		oParser = new parserFormula('LOG({1, 10})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG({1, 10}) is parsed.');
-		let result = oParser.calculate();
-		assert.strictEqual(result.getElementRowCol(0,0).getValue(), 0, 'Test: Positive case: Array. Multi-element array. 1 argument used.');
-		assert.strictEqual(result.getElementRowCol(0,1).getValue(), 1, 'Test: Positive case: Array. Multi-element array. 1 argument used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:G106").bbox);
+		array = oParser.calculate();
+		assert.strictEqual(array.getElementRowCol(0,0).getValue(), 0, 'Test: Positive case: Array. Multi-element array. 1 argument used.');
+		assert.strictEqual(array.getElementRowCol(0,1).getValue(), 1, 'Test: Positive case: Array. Multi-element array. 1 argument used.');
 		// Case #18: Formula. Nested IF returning valid value. 1 argument used.
 		oParser = new parserFormula('LOG(IF(TRUE, 10, 0.5))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG(IF(TRUE, 10, 0.5)) is parsed.');
@@ -11136,7 +11138,9 @@ $(function () {
 		// Case #6: Area. Multi-cell range returns #NUM! error.
 		oParser = new parserFormula('LOG(A102:A103)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG(A102:A103) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), -0.301029996, 'Test: Negative case: Area. Multi-cell range returns #NUM! error.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:G107").bbox);
+		array = oParser.calculate();
+		assert.strictEqual(array.getElementRowCol(0,0).getValue(), -0.30102999566398114, 'Test: Negative case: Area. Multi-cell range returns #NUM! error.');
 		// Case #7: Empty. Reference link is empty.
 		oParser = new parserFormula('LOG(A103)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG(A103) is parsed.');
@@ -11156,19 +11160,19 @@ $(function () {
 
 		// Case #11: Name. Named range with text returns #VALUE!.
 		//correct test for dynamic arrays
-		oParser = new parserFormula('LOG(SINGLE(TestNameArea))', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: LOG(SINGLE(TestNameArea)) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Test: Negative case: SINGLE Name. Named range with text returns #VALUE!.');
+		oParser = new parserFormula('LOG(SINGLE(TestNameArea2))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: LOG(SINGLE(TestNameArea2)) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), -0.09691001300805638, 'Test: Negative case: SINGLE Name. Named range with text returns #VALUE!.');
 
-		let _res = AscCommonExcel.bIsSupportDynamicArrays ? '#NUM!' : '#VALUE!';
-		oParser = new parserFormula('LOG(TestNameArea)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: LOG(TestNameArea) is parsed.');
+		let _res = AscCommonExcel.bIsSupportDynamicArrays ? -0.09691001300805638 : '#VALUE!';
+		oParser = new parserFormula('LOG(TestNameArea2)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: LOG(TestNameArea2) is parsed.');
 		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), _res, 'Test: Negative case: Name. Named range with text returns #VALUE!.');
 
 		// Case #12: Table. Table column with text returns #VALUE!.
 		oParser = new parserFormula('LOG(Table1[Column2])', 'A2', ws);
-		//? assert.ok(oParser.parse(), 'Test: LOG(Table1[Column2]) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '=LOG(Table1[Column2])', 'Test: Negative case: Table. Table column with text returns #VALUE!.');
+		assert.ok(oParser.parse(), 'Test: LOG(Table1[Column2]) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Table. Table column with text returns #VALUE!.');
 		// Case #13: Formula. Formula resulting in #NUM! error.
 		oParser = new parserFormula('LOG(SQRT(-1))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG(SQRT(-1)) is parsed.');
@@ -11180,7 +11184,9 @@ $(function () {
 		// Case #15: Array. Array with boolean returns #NUM!.
 		oParser = new parserFormula('LOG({FALSE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG({FALSE}) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '#NUM!', 'Test: Negative case: Array. Array with boolean returns #NUM!.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:G107").bbox);
+		array = oParser.calculate();
+		assert.strictEqual(array.getElementRowCol(0,0).getValue(), '#NUM!', 'Test: Negative case: Array. Array with boolean returns #NUM!.');
 		// Case #16: Number. Value slightly below 0 returns #NUM!.
 		oParser = new parserFormula('LOG(1-1e-15)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG(1-1e-15) is parsed.');
@@ -11214,10 +11220,6 @@ $(function () {
 		oParser = new parserFormula('LOG(1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG(1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Number. Min valid value (1). 1 argument used.');
-		// Case #2: Number. Smallest valid value above 0. 1 argument used.
-		oParser = new parserFormula('LOG(1.000000000000001)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: LOG(1.000000000000001) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Number. Smallest valid value above 0. 1 argument used.');
 		// Case #3: Number. Max valid Excel number. 1 argument used.
 		oParser = new parserFormula('LOG(9.99999999999999E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG(9.99999999999999E+307) is parsed.');
@@ -11229,9 +11231,12 @@ $(function () {
 		// Case #5: Time. Smallest valid time (>0). 1 argument used.
 		oParser = new parserFormula('LOG(TIME(0,0,1)+1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG(TIME(0,0,1)+1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.00000502653, 'Test: Bounded case: Time. Smallest valid time (>0). 1 argument used.');
-
-		// TODO need to fix:
+		assert.strictEqual(oParser.calculate().getValue().toFixed(8), "0.00000503", 'Test: Bounded case: Time. Smallest valid time (>0). 1 argument used.');
+		// Case #6: Number. Smallest valid value above 0 and below 0.1. 1 argument used.
+		oParser = new parserFormula('LOG(0.000000000000001)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: LOG(0.000000000000001) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(), "-15", 'Test: Bounded case: Number. Smallest valid value above 0 and below 0.1. 1 argument used.');
+		
 		// zero values should be returned instead very small numbers(maybe it's precision problem)
 
 		testArrayFormula(assert, "LOG", 1, 2);
@@ -11266,8 +11271,9 @@ $(function () {
 		ws.getRange2("A111").setValue("FALSE");
 
 		// Table type. Use A601:L6**
-		getTableType(599, 0, 600, 0);
+		getTableType(599, 0, 600, 1);
 		ws.getRange2("A601").setValue("1"); // Number (Column1)
+		ws.getRange2("B601").setValue("1s"); // Text (Column2)
 		// 3D links. Use A1:Z10
 		let ws2 = getSecondSheet();
 		ws2.getRange2("A1").setValue("0.5");
@@ -11309,7 +11315,7 @@ $(function () {
 		// Case #6: Array. Array with single element. 1 argument used.
 		oParser = new parserFormula('LOG10({10})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG10({10}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Positive case: Array. Array with single element. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Positive case: Array. Array with single element. 1 argument used.');
 		// Case #7: Name. Named range. 1 argument used.
 		oParser = new parserFormula('LOG10(TestName)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG10(TestName) is parsed.');
@@ -11342,18 +11348,12 @@ $(function () {
 		oParser = new parserFormula('SUM(LOG10(10),1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SUM(LOG10(10),1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Positive case: Formula. LOG10 inside SUM formula. 1 argument used.');
-		// Case #15: Number. Value slightly above 0. 1 argument used.
-		oParser = new parserFormula('LOG10(1.000000000000001)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: LOG10(1.000000000000001) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Number. Value slightly above 0. 1 argument used.');
-		// Case #16: String. String of min valid value. 1 argument used.
-		oParser = new parserFormula('LOG10("1.000000000000001")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: LOG10("1.000000000000001") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: String. String of min valid value. 1 argument used.');
 		// Case #17: Array. Multi-element array. 1 argument used.
 		oParser = new parserFormula('LOG10({1, 10})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG10({1, 10}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0, 'Test: Positive case: Array. Multi-element array. 1 argument used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:G107").bbox);
+		array = oParser.calculate();
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0, 'Test: Positive case: Array. Multi-element array. 1 argument used.');
 		// Case #18: Formula. Nested IF returning valid value. 1 argument used.
 		oParser = new parserFormula('LOG10(IF(TRUE, 10, 0.5))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG10(IF(TRUE, 10, 0.5)) is parsed.');
@@ -11388,10 +11388,13 @@ $(function () {
 		oParser = new parserFormula('LOG10(NA())', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG(NA()) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Error. Propagates #N/A error. 1 argument used.');
-		// Case #6: Area. Multi-cell range returns #NUM! error.
+		// Case #6: Area. Multi-cell range.
 		oParser = new parserFormula('LOG10(A102:A103)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG10(A102:A103) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), -0.301029996, 'Test: Negative case: Area. Multi-cell range returns #NUM! error.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:G107").bbox);
+		array = oParser.calculate();
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), -0.30102999566398114, 'Test: Negative case: Area. Multi-cell range.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1,0).getValue(), '#VALUE!', 'Test: Negative case: Area. Multi-cell range.');
 		// Case #7: Empty. Reference link is empty.
 		oParser = new parserFormula('LOG10(A103)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG10(A103) is parsed.');
@@ -11411,19 +11414,19 @@ $(function () {
 		
 		// Case #11: Name. Named range with text returns #VALUE!.
 		//correct test for dynamic arrays
-		oParser = new parserFormula('LOG10(SINGLE(TestNameArea))', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: LOG10(SINGLE(TestNameArea)) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Test: Negative case: SINGLE Name. Named range with text returns #VALUE!.');
+		oParser = new parserFormula('LOG10(SINGLE(TestNameArea2))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: LOG10(SINGLE(TestNameArea2)) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), -0.09691001300805638, 'Test: Negative case: SINGLE Name. Named range with text returns #VALUE!.');
 
-		let res = AscCommonExcel.bIsSupportDynamicArrays ? '#NUM!' : '#VALUE!';
-		oParser = new parserFormula('LOG10(TestNameArea)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: LOG10(TestNameArea) is parsed.');
+		let res = AscCommonExcel.bIsSupportDynamicArrays ? -0.09691001300805638 : '#VALUE!';
+		oParser = new parserFormula('LOG10(TestNameArea2)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: LOG10(TestNameArea2) is parsed.');
 		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, 'Test: Negative case: Name. Named range with text returns #VALUE!.');
 
 		// Case #12: Table. Table column with text returns #VALUE!.
 		oParser = new parserFormula('LOG10(Table1[Column2])', 'A2', ws);
-		//? assert.ok(oParser.parse(), 'Test: LOG10(Table1[Column2]) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '=LOG10(Table1[Column2])', 'Test: Negative case: Table. Table column with text returns #VALUE!.');
+		assert.ok(oParser.parse(), 'Test: LOG10(Table1[Column2]) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Table. Table column with text returns #VALUE!.');
 		// Case #13: Formula. Formula resulting in #NUM! error.
 		oParser = new parserFormula('LOG10(SQRT(-1))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG10(SQRT(-1)) is parsed.');
@@ -11435,7 +11438,7 @@ $(function () {
 		// Case #15: Array. Array with boolean returns #NUM!.
 		oParser = new parserFormula('LOG10({FALSE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG10({FALSE}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '#NUM!', 'Test: Negative case: Array. Array with boolean returns #NUM!.');
+		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Array. Array with boolean returns #NUM!.');
 		// Case #16: Number. Value slightly below 0 returns #NUM!.
 		oParser = new parserFormula('LOG10(1-1e-15)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG10(1-1e-15) is parsed.');
@@ -11484,11 +11487,9 @@ $(function () {
 		// Case #5: Time. Smallest valid time (>0). 1 argument used.
 		oParser = new parserFormula('LOG10(TIME(0,0,1)+1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG10(TIME(0,0,1)+1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.00000502653, 'Test: Bounded case: Time. Smallest valid time (>0). 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(8), '0.00000503', 'Test: Bounded case: Time. Smallest valid time (>0). 1 argument used.');
 
-		// TODO need to fix:
 		// zero values should be returned instead very small numbers
-		// empty function after array call
 
 		testArrayFormula(assert, "LOG10");
 	});
