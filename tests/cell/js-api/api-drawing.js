@@ -47,7 +47,7 @@
 		let gs1 = AscTest.JsApi.CreateGradientStop(AscTest.JsApi.CreateRGBColor(255, 213, 191), 0);
 		let gs2 = AscTest.JsApi.CreateGradientStop(AscTest.JsApi.CreateRGBColor(255, 111, 61), 100000);
 		fill = AscTest.JsApi.CreateRadialGradientFill([gs1, gs2]);
-		shape.Fill(fill);
+		shape.SetFill(fill);
 
         assert.ok(shape.Drawing.spPr.Fill.fill instanceof AscFormat.CGradFill, "Shape created and filled with gradient");
         assert.strictEqual(shape.Drawing.spPr.Fill.fill.colors.length, 2, 'Check colors of gradient amount');
