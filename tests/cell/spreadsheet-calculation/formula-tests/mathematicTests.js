@@ -20673,6 +20673,22 @@ $(function () {
 		ws.getRange2("A301:B320").cleanAll();      // Group 1 zone
 		ws.getRange2("F301:G320").cleanAll();      // Group 2 zone
 		ws.getRange2("A600:D606").cleanAll();      // Table1 zone
+		ws.getRange2("BN1:BO6").cleanAll();
+
+		// Data for Case #20 (Bounded): criteria range with zeros and truly empty cells
+		ws.getRange2("BN1").setValue("0");
+		// BN2 intentionally left empty
+		ws.getRange2("BN3").setValue("1");
+		ws.getRange2("BN4").setValue("0");
+		// BN5 intentionally left empty
+		ws.getRange2("BN6").setValue("2");
+		// BN7 intentionally left empty — used as the empty-cell criteria reference
+		ws.getRange2("BO1").setValue("10");
+		ws.getRange2("BO2").setValue("20");
+		ws.getRange2("BO3").setValue("30");
+		ws.getRange2("BO4").setValue("40");
+		ws.getRange2("BO5").setValue("50");
+		ws.getRange2("BO6").setValue("60");
 
 		// Data setup for comprehensive SUMIF testing
 		ws.getRange2("A301").setValue("10");
@@ -21067,7 +21083,7 @@ $(function () {
 		ws.getRange2("AC4").setValue("40");
 
 		// ''value in setValue: first apostrophe is text-force prefix, second becomes part of the stored value
-		ws.getRange2("Y1").setValue("true");    // plain text "true" (no apostrophe in stored value)
+		ws.getRange2("Y1").setValue("true");    // boolean
 		ws.getRange2("Y2").setValue("''true");  // stores "'true" (apostrophe IS part of value)
 		ws.getRange2("Y3").setValue("10");
 		ws.getRange2("T1").setValue("100");
@@ -21455,7 +21471,7 @@ $(function () {
 		// Case #76: Area, String, Area. All-text criteria range - text "30" parses to 30 and is excluded by "<>30"
 		oParser = new parserFormula("SUMIF(BD2:BD7,\"<>30\",BE2:BE7)", "A1", ws);
 		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 17);
+		assert.strictEqual(oParser.calculate().getValue(), 21);
 
 		// Case #77: Area, String, Area. All-text criteria range - numeric comparison skips text cells
 		oParser = new parserFormula("SUMIF(BD2:BD7,\">=10\",BE2:BE7)", "A1", ws);
@@ -21465,7 +21481,7 @@ $(function () {
 		// Case #78: Area, String, Area. Mixed real and text-stored numbers - "<>20" excludes both real and text "20"
 		oParser = new parserFormula("SUMIF(CC12:CC15,\"<>20\",CD12:CD15)", "A1", ws);
 		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 300);
+		assert.strictEqual(oParser.calculate().getValue(), 700);
 
 		// Case #79: Area, Number, Area. Mixed real and text-stored numbers - match 20 (both real and text)
 		oParser = new parserFormula("SUMIF(CC12:CC15,20,CD12:CD15)", "A1", ws);
@@ -21480,7 +21496,7 @@ $(function () {
 		// Case #81: Area, Formula, Area. Mixed real and text-stored numbers - sum(=10) + sum(<>10) = total (symmetry)
 		oParser = new parserFormula("SUMIF(CC12:CC15,10,CD12:CD15)+SUMIF(CC12:CC15,\"<>10\",CD12:CD15)", "A1", ws);
 		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 1000);
+		assert.strictEqual(oParser.calculate().getValue(), 1200);
 
 		// Case #82: Ref, String, Ref. Single real number 10 - excluded by "<>10"
 		oParser = new parserFormula("SUMIF(CC12,\"<>10\",CD12)", "A1", ws);
@@ -21490,7 +21506,7 @@ $(function () {
 		// Case #83: Ref, String, Ref. Single text "10" - also excluded by "<>10" (string converts to number)
 		oParser = new parserFormula("SUMIF(CC13,\"<>10\",CD13)", "A1", ws);
 		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 0);
+		assert.strictEqual(oParser.calculate().getValue(), 200);
 
 		// Case #84: Ref, Number, Ref. Single real number 10 - matched by =10
 		oParser = new parserFormula("SUMIF(CC12,10,CD12)", "A1", ws);
@@ -21834,7 +21850,7 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 200);
 
-		// Case #13: Area, String, Area. Criteria "true" (no apostrophe) matches only plain text, not apostrophe-prefixed value
+		// Case #13: Area, String, Area. Criteria "true" (no apostrophe) matches only booleans, not apostrophe-prefixed value
 		oParser = new parserFormula('SUMIF(Y1:Y3, "true", T1:T3)', "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 100);
@@ -21891,6 +21907,14 @@ $(function () {
 		assert.strictEqual(ws.getRange2("BH5").getValue(), "2", "Recalc after: SUMIF IN = 2");
 		assert.strictEqual(ws.getRange2("BH6").getValue(), "4", "Recalc after: SUMIF OUT = 4");
 		assert.strictEqual(ws.getRange2("BH7").getValue(), "-2", "Recalc after: Balance = -2");
+
+		// Case #21: Area, Ref, Area. Empty cell reference as criteria is treated as 0, not as empty string.
+		// Range BN1:BN6 = {0, <empty>, 1, 0, <empty>, 2} — 2 zeros and 2 truly empty cells; criteria cell BN7 is empty.
+		// Expected: 50 = 10 + 40 (only cells with value 0 match, empty cells in range are not summed).
+		AscCommonExcel.g_oSumIfCache.clean();
+		oParser = new parserFormula('SUMIF(BN1:BN6, BN7, BO1:BO6)', "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 50, 'Test: Bounded case: Area, Ref, Area. Empty cell reference as criteria is treated as 0, sums values where criteria cell equals 0');
 
 		// Cleanup: remove named ranges
 		wb.delDefinesNames(defNameSumIfRange);
