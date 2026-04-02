@@ -379,13 +379,10 @@ var editor;
   };
 
   spreadsheet_api.prototype.asc_DownloadAs = function (options) {
-    if (!this.canSave || this.isFrameEditor() || c_oAscAdvancedOptionsAction.None !== this.advancedOptionsAction) {
+    // isFrameEditor is cell-specific (hypothetical guard, kept for safety); isLongAction covers the rest (old canSave/advancedOptionsAction removed).
+    if (this.isFrameEditor() || this.isLongAction()) {
       return;
     }
-    if (this.isLongAction()) {
-      return;
-    }
-
     this.downloadAs(c_oAscAsyncAction.DownloadAs, options);
   };
 	spreadsheet_api.prototype._saveCheck = function() {
