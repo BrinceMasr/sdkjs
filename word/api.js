@@ -3094,10 +3094,6 @@ background-repeat: no-repeat;\
 		if (this.WordControl.m_oLogicDocument)
 			this.WordControl.m_oLogicDocument.Statistics_Stop();
 	};
-	asc_docs_api.prototype.sync_DocInfoCallback         = function(obj)
-	{
-		this.sendEvent("asc_onDocInfo", new CDocInfoProp(obj));
-	};
 	asc_docs_api.prototype.sync_GetDocInfoStartCallback = function()
 	{
 		this.sendEvent("asc_onGetDocInfoStart");
@@ -3146,66 +3142,6 @@ background-repeat: no-repeat;\
 		//this.WordControl.m_oLogicDocument.TurnOn_InterfaceEvents();
 	};
 
-	function CDocInfoProp(obj)
-	{
-		if (obj)
-		{
-			this.PageCount      = obj.PageCount;
-			this.WordsCount     = obj.WordsCount;
-			this.ParagraphCount = obj.ParagraphCount;
-			this.SymbolsCount   = obj.SymbolsCount;
-			this.SymbolsWSCount = obj.SymbolsWSCount;
-		}
-		else
-		{
-			this.PageCount      = -1;
-			this.WordsCount     = -1;
-			this.ParagraphCount = -1;
-			this.SymbolsCount   = -1;
-			this.SymbolsWSCount = -1;
-		}
-	}
-
-	CDocInfoProp.prototype.get_PageCount      = function()
-	{
-		return this.PageCount;
-	};
-	CDocInfoProp.prototype.put_PageCount      = function(v)
-	{
-		this.PageCount = v;
-	};
-	CDocInfoProp.prototype.get_WordsCount     = function()
-	{
-		return this.WordsCount;
-	};
-	CDocInfoProp.prototype.put_WordsCount     = function(v)
-	{
-		this.WordsCount = v;
-	};
-	CDocInfoProp.prototype.get_ParagraphCount = function()
-	{
-		return this.ParagraphCount;
-	};
-	CDocInfoProp.prototype.put_ParagraphCount = function(v)
-	{
-		this.ParagraphCount = v;
-	};
-	CDocInfoProp.prototype.get_SymbolsCount   = function()
-	{
-		return this.SymbolsCount;
-	};
-	CDocInfoProp.prototype.put_SymbolsCount   = function(v)
-	{
-		this.SymbolsCount = v;
-	};
-	CDocInfoProp.prototype.get_SymbolsWSCount = function()
-	{
-		return this.SymbolsWSCount;
-	};
-	CDocInfoProp.prototype.put_SymbolsWSCount = function(v)
-	{
-		this.SymbolsWSCount = v;
-	};
 
 	/*callbacks*/
 	/*asc_docs_api.prototype.sync_CursorLockCallBack = function(isLock){
@@ -15865,16 +15801,6 @@ background-repeat: no-repeat;\
 	asc_docs_api.prototype['getJsApi'] = asc_docs_api.prototype.getJsApi;
 	asc_docs_api.prototype['scrollToTarget'] = asc_docs_api.prototype.scrollToTarget;
 	
-	CDocInfoProp.prototype['get_PageCount']             = CDocInfoProp.prototype.get_PageCount;
-	CDocInfoProp.prototype['put_PageCount']             = CDocInfoProp.prototype.put_PageCount;
-	CDocInfoProp.prototype['get_WordsCount']            = CDocInfoProp.prototype.get_WordsCount;
-	CDocInfoProp.prototype['put_WordsCount']            = CDocInfoProp.prototype.put_WordsCount;
-	CDocInfoProp.prototype['get_ParagraphCount']        = CDocInfoProp.prototype.get_ParagraphCount;
-	CDocInfoProp.prototype['put_ParagraphCount']        = CDocInfoProp.prototype.put_ParagraphCount;
-	CDocInfoProp.prototype['get_SymbolsCount']          = CDocInfoProp.prototype.get_SymbolsCount;
-	CDocInfoProp.prototype['put_SymbolsCount']          = CDocInfoProp.prototype.put_SymbolsCount;
-	CDocInfoProp.prototype['get_SymbolsWSCount']        = CDocInfoProp.prototype.get_SymbolsWSCount;
-	CDocInfoProp.prototype['put_SymbolsWSCount']        = CDocInfoProp.prototype.put_SymbolsWSCount;
 	CContextMenuData.prototype['get_Type']    = CContextMenuData.prototype.get_Type;
 	CContextMenuData.prototype['get_X']       = CContextMenuData.prototype.get_X;
 	CContextMenuData.prototype['get_Y']       = CContextMenuData.prototype.get_Y;
