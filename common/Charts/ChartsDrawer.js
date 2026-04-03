@@ -2163,7 +2163,7 @@ CChartsDrawer.prototype =
 					// find max value across each seria
 					for (let i = 0; i < series.length; i++) {
 						const seria = series[i];
-						if (seria) {
+						if (seria && !seria.isHidden) {
 							numCache = t.getNumCache(seria.val);
 							const ptCount = numCache && AscFormat.isRealNumber(numCache.ptCount) ? numCache.ptCount : 0;
 							// trendline can affect max value

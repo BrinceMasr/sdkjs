@@ -18992,6 +18992,7 @@
         if(this.info === 0) {
             return null;
         }
+        var bSkipHidden = !this.chartSpace || !this.chartSpace.chart || this.chartSpace.chart.plotVisOnly !== false;
         var aData = null;
         var aValHorRefs = this.val.getHorRefs();
         var aValVertRefs = this.val.getVertRefs();
@@ -19008,6 +19009,9 @@
             for(nVertRef = 0; nVertRef < aValVertRefs.length; ++nVertRef) {
                 oValVertRef = aValVertRefs[nVertRef];
                 for(nRow = oValVertRef.bbox.r1; nRow <= oValVertRef.bbox.r2; ++nRow) {
+                    if(bSkipHidden && oValVertRef.worksheet.getRowHidden(nRow)) {
+                        continue;
+                    }
                     oSeriesData = new CSeriesDataRefs(null);
                     aData.push(oSeriesData);
                     for(nHorRef = 0; nHorRef < aValHorRefs.length; ++nHorRef) {
@@ -19039,6 +19043,9 @@
             for(nHorRef = 0; nHorRef < aValHorRefs.length; ++nHorRef) {
                 oValHorRef = aValHorRefs[nHorRef];
                 for(nCol = oValHorRef.bbox.c1; nCol <= oValHorRef.bbox.c2; ++nCol) {
+                    if(bSkipHidden && oValHorRef.worksheet.getColHidden(nCol)) {
+                        continue;
+                    }
                     oSeriesData = new CSeriesDataRefs(null);
                     aData.push(oSeriesData);
                     for(nVertRef = 0; nVertRef < aValVertRefs.length; ++nVertRef) {
