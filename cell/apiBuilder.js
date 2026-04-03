@@ -27963,6 +27963,31 @@
 	 */
 
 	/**
+	 * Specifies the totals row calculation type for a list column.
+	 * @typedef {("xlTotalsCalculationNone" | "xlTotalsCalculationSum" | "xlTotalsCalculationAverage" | "xlTotalsCalculationCount" | "xlTotalsCalculationCountNums" | "xlTotalsCalculationMax" | "xlTotalsCalculationMin" | "xlTotalsCalculationStdDev" | "xlTotalsCalculationVar" | "xlTotalsCalculationCustom")} XlTotalsCalculation
+	 */
+
+	/**
+	 * Specifies what value is used as the sort criteria for the sort field.
+	 * @typedef {("xlSortOnValues" | "xlSortOnCellColor" | "xlSortOnFontColor" | "xlSortOnIcon")} XlSortOn
+	 */
+
+	/**
+	 * Specifies how to sort text in the sort field.
+	 * @typedef {("xlSortNormal" | "xlSortTextAsNumbers")} XlSortDataOption
+	 */
+
+	/**
+	 * Specifies the sort method for Chinese text.
+	 * @typedef {("xlPinYin" | "xlStroke")} XlSortMethod
+	 */
+
+	/**
+	 * Specifies the sort orientation: sort by rows (top to bottom) or by columns (left to right).
+	 * @typedef {("xlTopToBottom" | "xlLeftToRight")} XlSortOrientation
+	 */
+
+	/**
 	 * Class representing a formatted table.
 	 * @constructor
 	 * @property {string} Name - Returns the display name of the table.
@@ -28559,11 +28584,16 @@
 	 * Resizes the ListObject to a new range. Cells are not inserted or moved.
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
-	 * @param {string} sRange - The new range for the table, e.g. <b>"A1:D10"</b>.
+	 * @param {ApiRange | string} Range - The new range for the table as an ApiRange object or address string, e.g. <b>"A1:D10"</b>.
 	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/Resize.js
 	 */
-	ApiListObject.prototype.Resize = function (sRange) {
-		var ascRange = AscCommonExcel.g_oRangeCache.getAscRange(sRange);
+	ApiListObject.prototype.Resize = function (Range) {
+		var ascRange;
+		if (Range instanceof ApiRange) {
+			ascRange = Range.range.bbox;
+		} else {
+			ascRange = AscCommonExcel.g_oRangeCache.getAscRange(Range);
+		}
 		if (!ascRange) {
 			return;
 		}
@@ -29293,7 +29323,7 @@
 	 * Returns the sort orientation: "xlTopToBottom" or "xlLeftToRight".
 	 * @memberof ApiSort
 	 * @typeofeditors ["CSE"]
-	 * @returns {string}
+	 * @returns {XlSortOrientation}
 	 * @see office-js-api/Examples/Cell/ApiSort/Methods/GetOrientation.js
 	 */
 	ApiSort.prototype.GetOrientation = function () {
@@ -29304,7 +29334,7 @@
 	 * Sets the sort orientation.
 	 * @memberof ApiSort
 	 * @typeofeditors ["CSE"]
-	 * @param {"xlTopToBottom" | "xlLeftToRight"} sOrientation
+	 * @param {XlSortOrientation} sOrientation
 	 * @see office-js-api/Examples/Cell/ApiSort/Methods/SetOrientation.js
 	 */
 	ApiSort.prototype.SetOrientation = function (sOrientation) {
@@ -29324,7 +29354,7 @@
 	 * Returns the sort method: "xlPinYin" or "xlStroke".
 	 * @memberof ApiSort
 	 * @typeofeditors ["CSE"]
-	 * @returns {string}
+	 * @returns {XlSortMethod}
 	 * @see office-js-api/Examples/Cell/ApiSort/Methods/GetSortMethod.js
 	 */
 	ApiSort.prototype.GetSortMethod = function () {
@@ -29335,7 +29365,7 @@
 	 * Sets the sort method.
 	 * @memberof ApiSort
 	 * @typeofeditors ["CSE"]
-	 * @param {"xlPinYin" | "xlStroke"} sSortMethod
+	 * @param {XlSortMethod} sSortMethod
 	 * @see office-js-api/Examples/Cell/ApiSort/Methods/SetSortMethod.js
 	 */
 	ApiSort.prototype.SetSortMethod = function (sSortMethod) {
@@ -29504,10 +29534,10 @@
 	 * @memberof ApiSortFields
 	 * @typeofeditors ["CSE"]
 	 * @param {ApiRange} Key - A range within the table that defines the sort column.
-	 * @param {string} [SortOn="xlSortOnValues"] - "xlSortOnValues", "xlSortOnCellColor", "xlSortOnFontColor", "xlSortOnIcon".
-	 * @param {string} [Order="xlAscending"] - "xlAscending" or "xlDescending".
+	 * @param {XlSortOn} [SortOn="xlSortOnValues"] - The value used as the sort criteria.
+	 * @param {SortOrder} [Order="xlAscending"] - The sort order.
 	 * @param {*} [CustomOrder]
-	 * @param {string} [DataOption="xlSortNormal"] - "xlSortNormal" or "xlSortTextAsNumbers".
+	 * @param {XlSortDataOption} [DataOption="xlSortNormal"] - The data sort option.
 	 * @returns {ApiSortField | null}
 	 * @see office-js-api/Examples/Cell/ApiSortFields/Methods/Add.js
 	 */
@@ -29532,10 +29562,10 @@
 	 * @memberof ApiSortFields
 	 * @typeofeditors ["CSE"]
 	 * @param {ApiRange} Key - A range within the table that defines the sort column.
-	 * @param {string} [SortOn="xlSortOnValues"] - "xlSortOnValues", "xlSortOnCellColor", "xlSortOnFontColor", "xlSortOnIcon".
-	 * @param {string} [Order="xlAscending"] - "xlAscending" or "xlDescending".
+	 * @param {XlSortOn} [SortOn="xlSortOnValues"] - The value used as the sort criteria.
+	 * @param {SortOrder} [Order="xlAscending"] - The sort order.
 	 * @param {*} [CustomOrder]
-	 * @param {string} [DataOption="xlSortNormal"] - "xlSortNormal" or "xlSortTextAsNumbers".
+	 * @param {XlSortDataOption} [DataOption="xlSortNormal"] - The data sort option.
 	 * @param {string} [SubField] - Subfield name for linked data types (e.g. "Population", "Volume").
 	 * @returns {ApiSortField | null}
 	 * @see office-js-api/Examples/Cell/ApiSortFields/Methods/Add2.js
@@ -29619,6 +29649,9 @@
 	Object.defineProperty(ApiSortField.prototype, "Key", {
 		get: function () {
 			return this.GetKey();
+		},
+		set: function (rng) {
+			this.ModifyKey(rng);
 		}
 	});
 
@@ -29626,7 +29659,7 @@
 	 * Returns the sort-on type: "xlSortOnValues", "xlSortOnCellColor", "xlSortOnFontColor", "xlSortOnIcon".
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
-	 * @returns {string}
+	 * @returns {XlSortOn}
 	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetSortOn.js
 	 */
 	ApiSortField.prototype.GetSortOn = function () {
@@ -29637,7 +29670,7 @@
 	 * Sets the sort-on type.
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
-	 * @param {string} sSortOn - "xlSortOnValues", "xlSortOnCellColor", "xlSortOnFontColor", "xlSortOnIcon".
+	 * @param {XlSortOn} sSortOn - The value used as the sort criteria.
 	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetSortOn.js
 	 */
 	ApiSortField.prototype.SetSortOn = function (sSortOn) {
@@ -29657,7 +29690,7 @@
 	 * Returns the sort order: "xlAscending" or "xlDescending".
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
-	 * @returns {string}
+	 * @returns {SortOrder}
 	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetOrder.js
 	 */
 	ApiSortField.prototype.GetOrder = function () {
@@ -29668,7 +29701,7 @@
 	 * Sets the sort order.
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
-	 * @param {string} sOrder - "xlAscending" or "xlDescending".
+	 * @param {SortOrder} sOrder - The sort order.
 	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetOrder.js
 	 */
 	ApiSortField.prototype.SetOrder = function (sOrder) {
@@ -29760,7 +29793,7 @@
 	 * Returns the data option: "xlSortNormal" or "xlSortTextAsNumbers".
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
-	 * @returns {string}
+	 * @returns {XlSortDataOption}
 	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetDataOption.js
 	 */
 	ApiSortField.prototype.GetDataOption = function () {
@@ -29771,7 +29804,7 @@
 	 * Sets the data option.
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
-	 * @param {string} sDataOption - "xlSortNormal" or "xlSortTextAsNumbers".
+	 * @param {XlSortDataOption} sDataOption - The data sort option.
 	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetDataOption.js
 	 */
 	ApiSortField.prototype.SetDataOption = function (sDataOption) {

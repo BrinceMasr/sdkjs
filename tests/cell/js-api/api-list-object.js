@@ -692,6 +692,38 @@ $(function ()
 			assert.equal(sort.Orientation, "xlTopToBottom", "Orientation property setter works");
 		});
 
+		QUnit.test("Sort - MatchCase changes actual sort result on sheet", function (assert)
+		{
+			initializeTest();
+
+			// "c","B","a" — case-insensitive: a,B,c; case-sensitive: B,a,c (uppercase < lowercase)
+			ws.GetRange("A1").SetValue("Letter");
+			ws.GetRange("A2").SetValue("c");
+			ws.GetRange("A3").SetValue("B");
+			ws.GetRange("A4").SetValue("a");
+			var tbl = ws.AddListObject("xlSrcRange", "A1:A4");
+
+			var sort = tbl.GetSort();
+			sort.SetMatchCase(false);
+			sort.GetSortFields().Add(ws.GetRange("A1"), "xlSortOnValues", "xlAscending");
+			sort.Apply();
+
+			assert.equal(ws.GetRange("A2").GetValue(), "a", "Case-insensitive: row 1 = a");
+			assert.equal(ws.GetRange("A3").GetValue(), "B", "Case-insensitive: row 2 = B");
+			assert.equal(ws.GetRange("A4").GetValue(), "c", "Case-insensitive: row 3 = c");
+
+			ws.GetRange("A2").SetValue("c");
+			ws.GetRange("A3").SetValue("B");
+			ws.GetRange("A4").SetValue("a");
+
+			sort.SetMatchCase(true);
+			sort.Apply();
+
+			assert.equal(ws.GetRange("A2").GetValue(), "B", "Case-sensitive: row 1 = B");
+			assert.equal(ws.GetRange("A3").GetValue(), "a", "Case-sensitive: row 2 = a");
+			assert.equal(ws.GetRange("A4").GetValue(), "c", "Case-sensitive: row 3 = c");
+		});
+
 		QUnit.test("SortFields - Add/Add2/Count/Item/Clear", function (assert)
 		{
 			initializeTest();
@@ -758,6 +790,31 @@ $(function ()
 			assert.equal(sf.DataOption, "xlSortNormal", "DataOption property setter works");
 		});
 
+		QUnit.test("SortField - SetOrder changes actual sort result on sheet", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("A1").SetValue("Name");
+			ws.GetRange("A2").SetValue("Charlie");
+			ws.GetRange("A3").SetValue("Alice");
+			ws.GetRange("A4").SetValue("Bob");
+			var tbl  = ws.AddListObject("xlSrcRange", "A1:A4");
+			var sort = tbl.GetSort();
+			var sf   = sort.GetSortFields().Add(ws.GetRange("A1"), "xlSortOnValues", "xlAscending");
+			sort.Apply();
+
+			assert.equal(ws.GetRange("A2").GetValue(), "Alice",   "Ascending: row 1 = Alice");
+			assert.equal(ws.GetRange("A3").GetValue(), "Bob",     "Ascending: row 2 = Bob");
+			assert.equal(ws.GetRange("A4").GetValue(), "Charlie", "Ascending: row 3 = Charlie");
+
+			sf.SetOrder("xlDescending");
+			sort.Apply();
+
+			assert.equal(ws.GetRange("A2").GetValue(), "Charlie", "Descending: row 1 = Charlie");
+			assert.equal(ws.GetRange("A3").GetValue(), "Bob",     "Descending: row 2 = Bob");
+			assert.equal(ws.GetRange("A4").GetValue(), "Alice",   "Descending: row 3 = Alice");
+		});
+
 		QUnit.test("SortField - Priority writable / SetPriority reorders", function (assert)
 		{
 			initializeTest();
@@ -779,6 +836,37 @@ $(function ()
 
 			sf.Priority = 3;
 			assert.equal(fields.Item(3).GetKey().GetAddress(true, true), "$D$2:$D$5", "After Priority=3: D is back at end");
+		});
+
+		QUnit.test("SortField - SetPriority changes actual sort result on sheet", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("B2").SetValue("Name");   ws.GetRange("C2").SetValue("Score");
+			ws.GetRange("B3").SetValue("Charlie"); ws.GetRange("C3").SetValue(80);
+			ws.GetRange("B4").SetValue("Alice");   ws.GetRange("C4").SetValue(90);
+			ws.GetRange("B5").SetValue("Bob");     ws.GetRange("C5").SetValue(70);
+			var tbl = ws.AddListObject("xlSrcRange", "B2:C5");
+
+			var sort    = tbl.GetSort();
+			var fields  = sort.GetSortFields();
+			fields.Add(ws.GetRange("B2"), "xlSortOnValues", "xlAscending");
+			var sfScore = fields.Add(ws.GetRange("C2"), "xlSortOnValues", "xlAscending");
+			sort.Apply();
+
+			assert.equal(ws.GetRange("B3").GetValue(), "Alice",   "Name primary: row 1 = Alice");
+			assert.equal(ws.GetRange("B4").GetValue(), "Bob",     "Name primary: row 2 = Bob");
+			assert.equal(ws.GetRange("B5").GetValue(), "Charlie", "Name primary: row 3 = Charlie");
+
+			sfScore.SetPriority(1);
+			sort.Apply();
+
+			assert.equal(ws.GetRange("B3").GetValue(), "Bob",     "Score primary: row 1 = Bob");
+			assert.equal(ws.GetRange("C3").GetValue(), 70,        "Score primary: row 1 score = 70");
+			assert.equal(ws.GetRange("B4").GetValue(), "Charlie", "Score primary: row 2 = Charlie");
+			assert.equal(ws.GetRange("C4").GetValue(), 80,        "Score primary: row 2 score = 80");
+			assert.equal(ws.GetRange("B5").GetValue(), "Alice",   "Score primary: row 3 = Alice");
+			assert.equal(ws.GetRange("C5").GetValue(), 90,        "Score primary: row 3 score = 90");
 		});
 
 		QUnit.test("SortField - SortOnValue/SetIcon", function (assert)
@@ -845,6 +933,34 @@ $(function ()
 			assert.equal(fields.Item(1).GetKey().GetAddress(true, true), "$C$2:$C$5", "Remaining field is column C");
 		});
 
+		QUnit.test("SortField - ModifyKey changes sort column on sheet", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("A1").SetValue("Name");   ws.GetRange("B1").SetValue("Score");
+			ws.GetRange("A2").SetValue("Charlie"); ws.GetRange("B2").SetValue(70);
+			ws.GetRange("A3").SetValue("Alice");   ws.GetRange("B3").SetValue(90);
+			ws.GetRange("A4").SetValue("Bob");     ws.GetRange("B4").SetValue(80);
+			var tbl  = ws.AddListObject("xlSrcRange", "A1:B4");
+			var sort = tbl.GetSort();
+			var sf   = sort.GetSortFields().Add(ws.GetRange("A1"), "xlSortOnValues", "xlAscending");
+			sort.Apply();
+
+			assert.equal(ws.GetRange("A2").GetValue(), "Alice",   "Name key: row 1 = Alice");
+			assert.equal(ws.GetRange("A3").GetValue(), "Bob",     "Name key: row 2 = Bob");
+			assert.equal(ws.GetRange("A4").GetValue(), "Charlie", "Name key: row 3 = Charlie");
+
+			sf.ModifyKey(ws.GetRange("B1"));
+			sort.Apply();
+
+			assert.equal(ws.GetRange("B2").GetValue(), 70,        "Score key: row 1 score = 70");
+			assert.equal(ws.GetRange("A2").GetValue(), "Charlie", "Score key: row 1 = Charlie");
+			assert.equal(ws.GetRange("B3").GetValue(), 80,        "Score key: row 2 score = 80");
+			assert.equal(ws.GetRange("A3").GetValue(), "Bob",     "Score key: row 2 = Bob");
+			assert.equal(ws.GetRange("B4").GetValue(), 90,        "Score key: row 3 score = 90");
+			assert.equal(ws.GetRange("A4").GetValue(), "Alice",   "Score key: row 3 = Alice");
+		});
+
 		QUnit.test("Sort - Apply sorts table data", function (assert)
 		{
 			initializeTest();
@@ -881,6 +997,289 @@ $(function ()
 			var sort3 = tbl.GetSort();
 			assert.equal(sort3.GetSortFields().Count, 1, "Persisted sort state has 1 field");
 			assert.equal(sort3.GetSortFields().Item(1).GetOrder(), "xlDescending", "Persisted sort order is xlDescending");
+		});
+
+		QUnit.test("Sort - multi-column sort priority", function (assert)
+		{
+			initializeTest();
+
+			// Table: Name (B), Score (C), Rank (D)
+			// Two rows with the same Name — secondary sort by Score decides order
+			ws.GetRange("B2").SetValue("Name");  ws.GetRange("C2").SetValue("Score");
+			ws.GetRange("B3").SetValue("Alice");  ws.GetRange("C3").SetValue(80);
+			ws.GetRange("B4").SetValue("Bob");    ws.GetRange("C4").SetValue(90);
+			ws.GetRange("B5").SetValue("Alice");  ws.GetRange("C5").SetValue(70);
+			var tbl = ws.AddListObject("xlSrcRange", "B2:C5");
+
+			var sort   = tbl.GetSort();
+			var fields = sort.GetSortFields();
+			fields.Add(ws.GetRange("B2"), "xlSortOnValues", "xlAscending");
+			fields.Add(ws.GetRange("C2"), "xlSortOnValues", "xlDescending");
+			sort.Apply();
+
+			// Name ascending, Score descending: among two Alices the one with 80 comes first
+			assert.equal(ws.GetRange("B3").GetValue(), "Alice", "Row 1: Alice");
+			assert.equal(ws.GetRange("C3").GetValue(), 80,      "Row 1: Score 80");
+			assert.equal(ws.GetRange("B4").GetValue(), "Alice", "Row 2: Alice");
+			assert.equal(ws.GetRange("C4").GetValue(), 70,      "Row 2: Score 70");
+			assert.equal(ws.GetRange("B5").GetValue(), "Bob",   "Row 3: Bob");
+		});
+
+		QUnit.test("Sort - totals row not moved by sort", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("A1").SetValue("Product"); ws.GetRange("B1").SetValue("Price");
+			ws.GetRange("A2").SetValue("Oranges"); ws.GetRange("B2").SetValue(150);
+			ws.GetRange("A3").SetValue("Apples");  ws.GetRange("B3").SetValue(100);
+			ws.GetRange("A4").SetValue("Bananas"); ws.GetRange("B4").SetValue(80);
+			var tbl = ws.AddListObject("xlSrcRange", "A1:B4");
+			tbl.SetShowTotals(true);
+
+			// Totals row is now row 5
+			tbl.GetListColumns()[1].SetTotalsCalculation("xlTotalsCalculationSum");
+
+			var sort   = tbl.GetSort();
+			var fields = sort.GetSortFields();
+			fields.Add(ws.GetRange("A1"), "xlSortOnValues", "xlAscending");
+			sort.Apply();
+
+			// Data should be sorted, totals row must stay at row 5
+			assert.equal(ws.GetRange("A2").GetValue(), "Apples",  "After sort: row 1 = Apples");
+			assert.equal(ws.GetRange("A3").GetValue(), "Bananas", "After sort: row 2 = Bananas");
+			assert.equal(ws.GetRange("A4").GetValue(), "Oranges", "After sort: row 3 = Oranges");
+			assert.equal(tbl.GetTotalsRowRange().GetAddress(true, true), "$A$5:$B$5", "Totals row still at row 5 after sort");
+		});
+
+		QUnit.test("AddListRow with totals row - row inserted before totals", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("A1").SetValue("Item");
+			ws.GetRange("A2").SetValue("Apple");
+			ws.GetRange("A3").SetValue("Orange");
+			var tbl = ws.AddListObject("xlSrcRange", "A1:A3");
+			tbl.SetShowTotals(true);
+
+			// With totals: table is A1:A4 now (row 4 = totals)
+			var totalsAddr = tbl.GetTotalsRowRange().GetAddress(true, true);
+			assert.equal(totalsAddr, "$A$4", "Totals row at A4 before insert");
+
+			var newRow = tbl.AddListRow();
+			assert.ok(newRow !== null, "AddListRow returns a row object");
+			assert.equal(tbl.GetListRows().length, 3, "Table has 3 data rows after append");
+			// Totals row must shift down
+			assert.equal(tbl.GetTotalsRowRange().GetAddress(true, true), "$A$5", "Totals row shifted to A5 after insert");
+		});
+
+		QUnit.test("Resize - column and row counts update", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("A1").SetValue("A"); ws.GetRange("B1").SetValue("B"); ws.GetRange("C1").SetValue("C");
+			var tbl = ws.AddListObject("xlSrcRange", "A1:C4");
+			assert.equal(tbl.GetListColumns().length, 3, "Initial column count is 3");
+			assert.equal(tbl.GetListRows().length,    3, "Initial row count is 3");
+
+			// Resize to add a column and a row
+			tbl.Resize(ws.GetRange("A1:D5"));
+			assert.equal(tbl.GetListColumns().length, 4, "Column count is 4 after Resize");
+			assert.equal(tbl.GetListRows().length,    4, "Row count is 4 after Resize");
+			assert.equal(tbl.GetRange().GetAddress(true, true), "$A$1:$D$5", "Range updated after Resize with ApiRange");
+
+			// Resize to remove a column
+			tbl.Resize("A1:B5");
+			assert.equal(tbl.GetListColumns().length, 2, "Column count is 2 after shrink");
+			assert.equal(tbl.GetRange().GetAddress(true, true), "$A$1:$B$5", "Range updated after Resize with string");
+		});
+
+		QUnit.test("AddListColumn - data integrity after insert at position", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("A1").SetValue("Name");  ws.GetRange("B1").SetValue("Score");
+			ws.GetRange("A2").SetValue("Alice"); ws.GetRange("B2").SetValue(90);
+			ws.GetRange("A3").SetValue("Bob");   ws.GetRange("B3").SetValue(80);
+			var tbl = ws.AddListObject("xlSrcRange", "A1:B3");
+
+			// Insert column at position 2 (between Name and Score)
+			var newCol = tbl.AddListColumn(2);
+			assert.ok(newCol !== null, "AddListColumn(2) returns column");
+			assert.equal(newCol.GetIndex(), 2, "New column index is 2");
+			// Score is now column 3
+			assert.equal(tbl.GetListColumns()[2].GetName(), "Score", "Score shifted to column 3");
+			// Data in Score column must be preserved (now column C → D)
+			assert.equal(ws.GetRange("C2").GetValue(), 90, "Alice's Score data preserved in shifted column");
+			assert.equal(ws.GetRange("C3").GetValue(), 80, "Bob's Score data preserved in shifted column");
+		});
+
+		QUnit.test("DeleteRow - data shift and index correctness", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("A1").SetValue("Name");
+			ws.GetRange("A2").SetValue("Alice");
+			ws.GetRange("A3").SetValue("Bob");
+			ws.GetRange("A4").SetValue("Carol");
+			ws.GetRange("A5").SetValue("Dave");
+			var tbl = ws.AddListObject("xlSrcRange", "A1:A5");
+
+			// Delete row 2 (Bob)
+			tbl.GetListRows()[1].Delete();
+			assert.equal(tbl.GetListRows().length, 3, "3 data rows after deleting row 2");
+			assert.equal(ws.GetRange("A2").GetValue(), "Alice", "Row 1 still Alice");
+			assert.equal(ws.GetRange("A3").GetValue(), "Carol", "Row 2 is now Carol");
+			assert.equal(ws.GetRange("A4").GetValue(), "Dave",  "Row 3 is now Dave");
+
+			// Indices reset after deletion — get fresh rows
+			var rows = tbl.GetListRows();
+			assert.equal(rows[0].GetIndex(), 1, "First row index is 1");
+			assert.equal(rows[1].GetIndex(), 2, "Second row index is 2");
+			assert.equal(rows[2].GetIndex(), 3, "Third row index is 3");
+		});
+
+		QUnit.test("Two tables on same sheet - independent operations", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("A1").SetValue("Col1"); ws.GetRange("B1").SetValue("Col2");
+			ws.GetRange("D1").SetValue("ColA"); ws.GetRange("E1").SetValue("ColB");
+			var tbl1 = ws.AddListObject("xlSrcRange", "A1:B3");
+			var tbl2 = ws.AddListObject("xlSrcRange", "D1:E4");
+
+			assert.equal(ws.GetListObjects().length, 2, "Two tables on sheet");
+
+			// Rename one table — does not affect the other
+			tbl1.SetName("Table_One");
+			assert.equal(tbl1.GetName(), "Table_One", "tbl1 renamed");
+			assert.notEqual(tbl2.GetName(), "Table_One", "tbl2 name unchanged");
+
+			// Add column to tbl1 — does not affect tbl2
+			var colsBefore = tbl2.GetListColumns().length;
+			tbl1.AddListColumn();
+			assert.equal(tbl2.GetListColumns().length, colsBefore, "tbl2 column count unchanged after tbl1.AddListColumn");
+
+			// Show totals on tbl2 — tbl1 is unaffected
+			tbl2.SetShowTotals(true);
+			assert.equal(tbl1.GetShowTotals(), false, "tbl1 ShowTotals still false");
+			assert.equal(tbl2.GetShowTotals(), true,  "tbl2 ShowTotals is true");
+		});
+
+		QUnit.test("DataBodyRange - excludes both header and totals", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("B2").SetValue("Name"); ws.GetRange("C2").SetValue("Score");
+			ws.GetRange("B3").SetValue("Alice"); ws.GetRange("C3").SetValue(90);
+			ws.GetRange("B4").SetValue("Bob");   ws.GetRange("C4").SetValue(80);
+			ws.GetRange("B5").SetValue("Carol"); ws.GetRange("C5").SetValue(70);
+			var tbl = ws.AddListObject("xlSrcRange", "B2:C5");
+
+			assert.equal(tbl.GetDataBodyRange().GetAddress(true, true), "$B$3:$C$5", "DataBodyRange without totals");
+
+			tbl.SetShowTotals(true);
+			// Totals row added at row 6 — data body still B3:C5
+			assert.equal(tbl.GetDataBodyRange().GetAddress(true, true), "$B$3:$C$5", "DataBodyRange still excludes totals row");
+			assert.equal(tbl.GetRange().GetAddress(true, true), "$B$2:$C$6", "Full table range includes totals row");
+			assert.equal(tbl.GetTotalsRowRange().GetAddress(true, true), "$B$6:$C$6", "TotalsRowRange is correct row");
+		});
+
+		QUnit.test("SortField.Key setter works like ModifyKey", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("A1").SetValue("Name");  ws.GetRange("B1").SetValue("Score");
+			ws.GetRange("A2").SetValue("Alice"); ws.GetRange("B2").SetValue(90);
+			ws.GetRange("A3").SetValue("Bob");   ws.GetRange("B3").SetValue(80);
+			var tbl    = ws.AddListObject("xlSrcRange", "A1:B3");
+			var fields = tbl.GetSort().GetSortFields();
+			var sf     = fields.Add(ws.GetRange("A1"), "xlSortOnValues", "xlAscending");
+
+			assert.equal(sf.GetKey().GetAddress(true, true), "$A$1:$A$3", "Initial key is column A");
+			sf.Key = ws.GetRange("B1");
+			assert.equal(sf.GetKey().GetAddress(true, true), "$B$1:$B$3", "Key setter changed key to column B");
+		});
+
+		QUnit.test("SortField - Key setter changes sort column on sheet", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("A1").SetValue("Name");   ws.GetRange("B1").SetValue("Score");
+			ws.GetRange("A2").SetValue("Charlie"); ws.GetRange("B2").SetValue(70);
+			ws.GetRange("A3").SetValue("Alice");   ws.GetRange("B3").SetValue(90);
+			ws.GetRange("A4").SetValue("Bob");     ws.GetRange("B4").SetValue(80);
+			var tbl  = ws.AddListObject("xlSrcRange", "A1:B4");
+			var sort = tbl.GetSort();
+			var sf   = sort.GetSortFields().Add(ws.GetRange("A1"), "xlSortOnValues", "xlAscending");
+			sort.Apply();
+
+			assert.equal(ws.GetRange("A2").GetValue(), "Alice",   "Name key: row 1 = Alice");
+			assert.equal(ws.GetRange("A3").GetValue(), "Bob",     "Name key: row 2 = Bob");
+			assert.equal(ws.GetRange("A4").GetValue(), "Charlie", "Name key: row 3 = Charlie");
+
+			sf.Key = ws.GetRange("B1");
+			sort.Apply();
+
+			assert.equal(ws.GetRange("B2").GetValue(), 70,        "Score key: row 1 score = 70");
+			assert.equal(ws.GetRange("A2").GetValue(), "Charlie", "Score key: row 1 = Charlie");
+			assert.equal(ws.GetRange("B3").GetValue(), 80,        "Score key: row 2 score = 80");
+			assert.equal(ws.GetRange("A3").GetValue(), "Bob",     "Score key: row 2 = Bob");
+			assert.equal(ws.GetRange("B4").GetValue(), 90,        "Score key: row 3 score = 90");
+			assert.equal(ws.GetRange("A4").GetValue(), "Alice",   "Score key: row 3 = Alice");
+		});
+
+		QUnit.test("AddListRow - append shifts content below table", function (assert)
+		{
+			initializeTest();
+
+			var tbl = ws.AddListObject("xlSrcRange", "A1:A3");
+			ws.GetRange("A4").SetValue("sentinel");
+
+			tbl.AddListRow();
+			assert.equal(ws.GetRange("A5").GetValue(), "sentinel", "Sentinel shifted to A5 after append");
+			assert.equal(tbl.GetListRows().length, 3, "Table has 3 data rows after append");
+		});
+
+		QUnit.test("Resize - accepts ApiRange", function (assert)
+		{
+			initializeTest();
+
+			var tbl = ws.AddListObject("xlSrcRange", "A1:B3");
+			assert.equal(tbl.GetRange().GetAddress(true, true), "$A$1:$B$3", "Initial range");
+
+			// Resize via ApiRange object
+			tbl.Resize(ws.GetRange("A1:C4"));
+			assert.equal(tbl.GetRange().GetAddress(true, true), "$A$1:$C$4", "Resize via ApiRange: range updated");
+		});
+
+		QUnit.test("Resize - accepts string", function (assert)
+		{
+			initializeTest();
+
+			var tbl = ws.AddListObject("xlSrcRange", "A1:B3");
+			tbl.Resize("A1:B4");
+			assert.equal(tbl.GetRange().GetAddress(true, true), "$A$1:$B$4", "Resize via string: range updated");
+		});
+
+		QUnit.test("SortField.Key - writable property", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("A1").SetValue("Name");
+			ws.GetRange("B1").SetValue("Score");
+			ws.GetRange("A2").SetValue("Alice");
+			ws.GetRange("B2").SetValue(90);
+			ws.GetRange("A3").SetValue("Bob");
+			ws.GetRange("B3").SetValue(80);
+			var tbl  = ws.AddListObject("xlSrcRange", "A1:B3");
+			var sort = tbl.GetSort();
+			var sf   = sort.GetSortFields().Add(ws.GetRange("A1:A3"), "xlSortOnValues", "xlAscending");
+
+			assert.equal(sf.GetKey().GetAddress(true, true), "$A$1:$A$3", "Initial key is column A");
+
+			// Set Key via property setter
+			sf.Key = ws.GetRange("B1:B3");
+			assert.equal(sf.GetKey().GetAddress(true, true), "$B$1:$B$3", "Key setter changed key to column B");
 		});
 	});
 });
