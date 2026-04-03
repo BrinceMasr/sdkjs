@@ -29554,6 +29554,7 @@
 			subField:     null
 		};
 		this._sort._fields.push(fieldObj);
+		this._sort.Apply();
 		return new ApiSortField(fieldObj, this._sort);
 	};
 
@@ -29583,6 +29584,7 @@
 			subField:     SubField     || null
 		};
 		this._sort._fields.push(fieldObj);
+		this._sort.Apply();
 		return new ApiSortField(fieldObj, this._sort);
 	};
 
@@ -29594,6 +29596,7 @@
 	 */
 	ApiSortFields.prototype.Clear = function () {
 		this._sort._fields = [];
+		this._sort.Apply();
 	};
 
 	// -------------------------------------------------------------------------

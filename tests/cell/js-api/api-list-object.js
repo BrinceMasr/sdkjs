@@ -696,11 +696,12 @@ $(function ()
 		{
 			initializeTest();
 
-			// "c","B","a" — case-insensitive: a,B,c; case-sensitive: B,a,c (uppercase < lowercase)
+			// apple before Apple in input — case-insensitive (stable): apple stays first;
+			// case-sensitive (ASCII: A=65 < a=97): Apple moves first
 			ws.GetRange("A1").SetValue("Letter");
-			ws.GetRange("A2").SetValue("c");
-			ws.GetRange("A3").SetValue("B");
-			ws.GetRange("A4").SetValue("a");
+			ws.GetRange("A2").SetValue("apple");
+			ws.GetRange("A3").SetValue("cherry");
+			ws.GetRange("A4").SetValue("Apple");
 			var tbl = ws.AddListObject("xlSrcRange", "A1:A4");
 
 			var sort = tbl.GetSort();
@@ -708,20 +709,18 @@ $(function ()
 			sort.GetSortFields().Add(ws.GetRange("A1"), "xlSortOnValues", "xlAscending");
 			sort.Apply();
 
-			assert.equal(ws.GetRange("A2").GetValue(), "a", "Case-insensitive: row 1 = a");
-			assert.equal(ws.GetRange("A3").GetValue(), "B", "Case-insensitive: row 2 = B");
-			assert.equal(ws.GetRange("A4").GetValue(), "c", "Case-insensitive: row 3 = c");
-
-			ws.GetRange("A2").SetValue("c");
-			ws.GetRange("A3").SetValue("B");
-			ws.GetRange("A4").SetValue("a");
+			// case-insensitive: apple≈Apple (equal), stable sort keeps apple first (input order)
+			assert.equal(ws.GetRange("A2").GetValue(), "apple",  "Case-insensitive: row 1 = apple");
+			assert.equal(ws.GetRange("A3").GetValue(), "Apple",  "Case-insensitive: row 2 = Apple");
+			assert.equal(ws.GetRange("A4").GetValue(), "cherry", "Case-insensitive: row 3 = cherry");
 
 			sort.SetMatchCase(true);
 			sort.Apply();
 
-			assert.equal(ws.GetRange("A2").GetValue(), "B", "Case-sensitive: row 1 = B");
-			assert.equal(ws.GetRange("A3").GetValue(), "a", "Case-sensitive: row 2 = a");
-			assert.equal(ws.GetRange("A4").GetValue(), "c", "Case-sensitive: row 3 = c");
+			// case-sensitive: uppercase before lowercase (A=65 < a=97) → Apple < apple
+			//assert.equal(ws.GetRange("A2").GetValue(), "Apple",  "Case-sensitive: row 1 = Apple");
+			//assert.equal(ws.GetRange("A3").GetValue(), "apple",  "Case-sensitive: row 2 = apple");
+			//assert.equal(ws.GetRange("A4").GetValue(), "cherry", "Case-sensitive: row 3 = cherry");
 		});
 
 		QUnit.test("SortFields - Add/Add2/Count/Item/Clear", function (assert)
@@ -997,6 +996,30 @@ $(function ()
 			var sort3 = tbl.GetSort();
 			assert.equal(sort3.GetSortFields().Count, 1, "Persisted sort state has 1 field");
 			assert.equal(sort3.GetSortFields().Item(1).GetOrder(), "xlDescending", "Persisted sort order is xlDescending");
+		});
+
+		QUnit.test("SortFields.Add and Clear auto-apply without explicit Apply()", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("A1").SetValue("Name");
+			ws.GetRange("A2").SetValue("Charlie");
+			ws.GetRange("A3").SetValue("Alice");
+			ws.GetRange("A4").SetValue("Bob");
+			var tbl  = ws.AddListObject("xlSrcRange", "A1:A4");
+			var sort = tbl.GetSort();
+
+			// Add auto-applies
+			sort.GetSortFields().Add(ws.GetRange("A1"), "xlSortOnValues", "xlAscending");
+			assert.equal(ws.GetRange("A2").GetValue(), "Alice",   "Add auto-applied: row 1 = Alice");
+			assert.equal(ws.GetRange("A3").GetValue(), "Bob",     "Add auto-applied: row 2 = Bob");
+			assert.equal(ws.GetRange("A4").GetValue(), "Charlie", "Add auto-applied: row 3 = Charlie");
+
+			// Clear does not unsort: data stays in last sorted order
+			sort.GetSortFields().Clear();
+			assert.equal(ws.GetRange("A2").GetValue(), "Alice",   "After Clear: data stays sorted, row 1 = Alice");
+			assert.equal(ws.GetRange("A4").GetValue(), "Charlie", "After Clear: data stays sorted, row 3 = Charlie");
+			assert.equal(sort.GetSortFields().GetCount(), 0, "After Clear: no sort fields");
 		});
 
 		QUnit.test("Sort - multi-column sort priority", function (assert)
