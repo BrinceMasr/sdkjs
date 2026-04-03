@@ -1022,6 +1022,79 @@ $(function ()
 			assert.equal(sort.GetSortFields().GetCount(), 0, "After Clear: no sort fields");
 		});
 
+		QUnit.test("SortField - SetSortOnColor stores color and sortOn", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("A1").SetValue("Product");
+			ws.GetRange("A2").SetValue("Apples");
+			ws.GetRange("A3").SetValue("Oranges");
+			var tbl  = ws.AddListObject("xlSrcRange", "A1:A3");
+			var sort = tbl.GetSort();
+
+			var yellow = AscTest.JsApi.CreateColorFromRGB(255, 255, 0);
+			var field  = sort.GetSortFields().Add(ws.GetRange("A1"), "xlSortOnValues", "xlAscending");
+			field.SetSortOnColor(yellow, "xlSortOnCellColor");
+
+			assert.equal(field.GetSortOn(), "xlSortOnCellColor", "SetSortOnColor sets sortOn to xlSortOnCellColor");
+			assert.ok(field.GetSortOnValue() !== null, "GetSortOnValue returns the color after SetSortOnColor");
+			assert.equal(field.GetSortOnValue().GetRGB(), yellow.GetRGB(), "GetSortOnValue returns the same color");
+		});
+
+		QUnit.test("SortField - SetSortOnColor with xlSortOnFontColor", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("A1").SetValue("Product");
+			ws.GetRange("A2").SetValue("Apples");
+			var tbl  = ws.AddListObject("xlSrcRange", "A1:A2");
+			var sort = tbl.GetSort();
+
+			var red   = AscTest.JsApi.CreateColorFromRGB(255, 0, 0);
+			var field = sort.GetSortFields().Add(ws.GetRange("A1"), "xlSortOnValues", "xlAscending");
+			field.SetSortOnColor(red, "xlSortOnFontColor");
+
+			assert.equal(field.GetSortOn(), "xlSortOnFontColor", "SetSortOnColor sets sortOn to xlSortOnFontColor");
+			assert.equal(field.GetSortOnValue().GetRGB(), red.GetRGB(), "GetSortOnValue returns the font color");
+		});
+
+		QUnit.test("SortField - SetSortOnColor rejects non-ApiColor", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("A1").SetValue("Product");
+			ws.GetRange("A2").SetValue("Apples");
+			var tbl  = ws.AddListObject("xlSrcRange", "A1:A2");
+			var sort = tbl.GetSort();
+			var field = sort.GetSortFields().Add(ws.GetRange("A1"), "xlSortOnValues", "xlAscending");
+
+			field.SetSortOnColor("not a color", "xlSortOnCellColor");
+			assert.equal(field.GetSortOn(), "xlSortOnValues", "SetSortOnColor with non-ApiColor leaves sortOn unchanged");
+			assert.equal(field.GetSortOnValue(), null, "GetSortOnValue remains null");
+		});
+
+		QUnit.test("Sort - color sort puts colored row first", function (assert)
+		{
+			initializeTest();
+
+			ws.GetRange("A1").SetValue("Product");
+			ws.GetRange("A2").SetValue("Apples");
+			ws.GetRange("A3").SetValue("Oranges");
+			ws.GetRange("A4").SetValue("Bananas");
+
+			var yellow = AscTest.JsApi.CreateColorFromRGB(255, 255, 0);
+			ws.GetRange("A3").SetFillColor(yellow);
+
+			var tbl  = ws.AddListObject("xlSrcRange", "A1:A4");
+			var sort = tbl.GetSort();
+			sort.GetSortFields().Clear();
+			var field = sort.GetSortFields().Add(ws.GetRange("A1"), "xlSortOnCellColor", "xlAscending");
+			field.SetSortOnColor(yellow, "xlSortOnCellColor");
+			sort.Apply();
+
+			assert.equal(ws.GetRange("A2").GetValue(), "Oranges", "Yellow-colored row (Oranges) sorted to top");
+		});
+
 		QUnit.test("Sort - multi-column sort priority", function (assert)
 		{
 			initializeTest();

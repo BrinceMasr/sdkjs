@@ -12492,13 +12492,24 @@
 		}
 
 		let ws = this.range.worksheet;
-		let selectionRange = ws.selectionRange.getLast();
-		let api = ws.workbook.oApi;
 
+		// Detect if the range belongs to a formatted table (ListObject).
+		// tablePart is used throughout to pick the right filter object vs ws.AutoFilter.
+		let tablePart = null;
+		if (ws.TableParts && ws.TableParts.length) {
+			for (let _i = 0; _i < ws.TableParts.length; _i++) {
+				if (ws.TableParts[_i].Ref.containsRange(this.range.bbox)) {
+					tablePart = ws.TableParts[_i];
+					break;
+				}
+			}
+		}
 
 		let _range;
 		if (ws.AutoFilter) {
 			_range = ws.AutoFilter.Ref;
+		} else if (tablePart) {
+			_range = tablePart.Ref;
 		} else {
 			let filterProps = ws.autoFilters.getAddFormatTableOptions(this.range.bbox);
 			_range = filterProps && filterProps.range && AscCommonExcel.g_oRangeCache.getAscRange(filterProps.range);
@@ -12526,32 +12537,38 @@
 			}
 		}
 
-		//firstly add filter or remove filter
-		if (Field == null && ws.AutoFilter) {
-			ws.autoFilters.deleteAutoFilter(ws.AutoFilter.Ref);
-			//api.asc_changeAutoFilter(null, Asc.c_oAscChangeFilterOptions.filter, false);
+		// Add/remove AutoFilter
+		if (Field == null) {
+			if (!tablePart && ws.AutoFilter) {
+				// standalone AutoFilter: remove it
+				ws.autoFilters.deleteAutoFilter(ws.AutoFilter.Ref);
+			}
+			// Table AutoFilter is intrinsic to the table and cannot be removed via SetAutoFilter
 			return;
-		} else if (!ws.AutoFilter) {
-			ws.autoFilters.addAutoFilter(null, this.range.bbox);
-			//api.asc_addAutoFilter(null, null, this.range.bbox);
 		}
 
-		if (Field == null) {
-			return;
+		if (!ws.AutoFilter && !tablePart) {
+			// Standalone range without an AutoFilter: create one.
+			// For a table, tablePart.AutoFilter is intrinsic — no add needed.
+			ws.autoFilters.addAutoFilter(null, this.range.bbox);
 		}
 
 		if (Criteria1 == null) {
-			//clean current filter
-			ws.autoFilters.clearFilterColumn(Asc.Range(_range.c1 + Field, _range.r1, _range.c1 + Field, _range.r1).getName());
-			//api.asc_clearFilterColumn(Asc.range(_range.c1 + Field, _range.r1, _range.c1 + Field, _range.r1).getName());
+			// Clear the filter on this specific column only
+			let _clearCellId = Asc.Range(_range.c1 + Field - 1, _range.r1, _range.c1 + Field - 1, _range.r1).getName();
+			ws.autoFilters.clearFilterColumn(_clearCellId, tablePart ? tablePart.DisplayName : null);
 			return;
 		}
 
 		let cellId = Asc.Range(_range.c1 + Field - 1, _range.r1, _range.c1 + Field - 1, _range.r1).getName();
 
+		// _filterRef is either the tablePart or ws.AutoFilter — passed to getOpenAndClosedValues
+		// which handles both via filter.isAutoFilter()
+		let _filterRef = tablePart || ws.AutoFilter;
+
 		let createSimpleFilter = function () {
 			if (Criteria1 && Array.isArray(Criteria1)) {
-				let autoFiltersOptionsElements = ws.autoFilters.getOpenAndClosedValues(ws.AutoFilter, Field - 1);
+				let autoFiltersOptionsElements = ws.autoFilters.getOpenAndClosedValues(_filterRef, Field - 1);
 
 				let criteriaMap = {};
 				for (let i in Criteria1) {
@@ -12630,7 +12647,7 @@
 		};
 
 		//apply filtering
-		let isAutoFilter = this.range.worksheet && this.range.worksheet.AutoFilter && this.range.worksheet.AutoFilter.Ref.intersection(this.range.bbox);
+		let isAutoFilter = (ws.AutoFilter && ws.AutoFilter.Ref.intersection(this.range.bbox)) || tablePart !== null;
 		let autoFilterOptions;
 		if (isAutoFilter) {
 			switch (Operator) {
@@ -29415,14 +29432,14 @@
 		}
 	});
 
-	/**
-	 * No-op for a ListObject — the sort range is always the data body range.
-	 * @memberof ApiSort
-	 * @typeofeditors ["CSE"]
-	 * @see office-js-api/Examples/Cell/ApiSort/Methods/SetRange.js
-	 */
-	ApiSort.prototype.SetRange = function () {
-	};
+	// /**
+	//  * No-op for a ListObject — the sort range is always the data body range.
+	//  * @memberof ApiSort
+	//  * @typeofeditors ["CSE"]
+	//  * @see office-js-api/Examples/Cell/ApiSort/Methods/SetRange.js
+	//  */
+	// ApiSort.prototype.SetRange = function () {
+	// };
 
 	/**
 	 * Applies the current sort settings to the table.
@@ -29460,6 +29477,11 @@
 				? Asc.c_oAscSortOptions.Descending
 				: Asc.c_oAscSortOptions.Ascending;
 			level.sortBy = _sortByFromStr(field.sortOn);
+			if ((field.sortOn === "xlSortOnCellColor" || field.sortOn === "xlSortOnFontColor") &&
+					field.sortOnValue instanceof ApiColor) {
+				var _c = field.sortOnValue.color;
+				level.color = new Asc.asc_CColor(_c.getR(), _c.getG(), _c.getB());
+			}
 			props.levels.push(level);
 		}
 		var range = new Asc.Range(ref.c1, startRow, ref.c2, endRow);
@@ -29551,7 +29573,8 @@
 			descending:   Order === "xlDescending",
 			customOrder:  CustomOrder  || null,
 			dataOption:   DataOption   || "xlSortNormal",
-			subField:     null
+			subField:     null,
+			sortOnValue:  null
 		};
 		this._sort._fields.push(fieldObj);
 		this._sort.Apply();
@@ -29581,7 +29604,8 @@
 			descending:   Order === "xlDescending",
 			customOrder:  CustomOrder  || null,
 			dataOption:   DataOption   || "xlSortNormal",
-			subField:     SubField     || null
+			subField:     SubField     || null,
+			sortOnValue:  null
 		};
 		this._sort._fields.push(fieldObj);
 		this._sort.Apply();
@@ -29854,6 +29878,23 @@
 	};
 
 	/**
+	 * Sets the color for color-based sorting.
+	 * @memberof ApiSortField
+	 * @typeofeditors ["CSE"]
+	 * @param {ApiColor} oColor - The color to sort by.
+	 * @param {XlSortOn} [sSortOn="xlSortOnCellColor"] - "xlSortOnCellColor" or "xlSortOnFontColor".
+	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetSortOnColor.js
+	 */
+	ApiSortField.prototype.SetSortOnColor = function (oColor, sSortOn) {
+		if (!(oColor instanceof ApiColor)) {
+			return;
+		}
+		var sortOn = sSortOn === "xlSortOnFontColor" ? "xlSortOnFontColor" : "xlSortOnCellColor";
+		this._fieldObj.sortOn      = sortOn;
+		this._fieldObj.sortOnValue = oColor;
+	};
+
+	/**
 	 * Changes the sort key column.
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
@@ -30108,7 +30149,7 @@
 	ApiSort.prototype["GetSortMethod"]  = ApiSort.prototype.GetSortMethod;
 	ApiSort.prototype["SetSortMethod"]  = ApiSort.prototype.SetSortMethod;
 	ApiSort.prototype["GetRng"]         = ApiSort.prototype.GetRng;
-	ApiSort.prototype["SetRange"]       = ApiSort.prototype.SetRange;
+	//ApiSort.prototype["SetRange"]       = ApiSort.prototype.SetRange;
 	ApiSort.prototype["Apply"]          = ApiSort.prototype.Apply;
 
 	ApiSortFields.prototype["GetParent"] = ApiSortFields.prototype.GetParent;
@@ -30132,6 +30173,7 @@
 	ApiSortField.prototype["SetDataOption"]   = ApiSortField.prototype.SetDataOption;
 	ApiSortField.prototype["GetSortOnValue"]  = ApiSortField.prototype.GetSortOnValue;
 	ApiSortField.prototype["SetIcon"]         = ApiSortField.prototype.SetIcon;
+	ApiSortField.prototype["SetSortOnColor"]  = ApiSortField.prototype.SetSortOnColor;
 	ApiSortField.prototype["ModifyKey"]       = ApiSortField.prototype.ModifyKey;
 	ApiSortField.prototype["Delete"]          = ApiSortField.prototype.Delete;
 
