@@ -146,7 +146,7 @@
 		rt_END_SHEET_DATA: 146
 	};
 //dif:
-//Version:2 добавлены свойства колонок и строк CustomWidth, CustomHeight(раньше считались true)
+//Version:2 added column and row properties CustomWidth, CustomHeight (previously considered true)
     /** @enum */
     var c_oSerTableTypes =
     {
@@ -2249,7 +2249,7 @@
             //TableColumns
             if(null != table.TableColumns) {
                 if (ws) {
-                    //TODO пока оставляю. проверить необходим ли до сих пор вызов данной функции
+                    //TODO leaving for now. check if this function call is still necessary
                     table.syncTotalLabels(ws);
                 }
                 this.bs.WriteItem(c_oSer_TablePart.TableColumns, function(){oThis.WriteTableColumns(table.TableColumns);});
@@ -2830,7 +2830,7 @@
 		this.WriteQueryTableFields = function (queryTableFields, table) {
 			var oThis = this;
 			for (var i = 0, length = queryTableFields.length; i < length; ++i) {
-                //нужна синхронизация по id таблицы. поскольку, id генерируется в x2t по индексу колонки, то отправляем на сохранение именно индекс колонки
+                //synchronization by table id is needed. since id is generated in x2t by column index, we send the column index for saving
                 var tableColumnId = table.getIndexTableColumnById(queryTableFields[i].tableColumnId);
                 if (tableColumnId !== null) {
                     this.bs.WriteItem(c_oSer_QueryTableField.QueryTableField, function () {
@@ -3008,7 +3008,7 @@
 		this.oXfsStylesMap.push(this._getElem(style.xfs, style));
 	};
 	StylesForWrite.prototype.finalizeCellStyles = function() {
-		//XfId это порядковый номер, поэтому сортируем
+		//XfId is a sequential number, so we sort
 		this.oXfsStylesMap.sort(function(a, b) {
 			return a.XfId - b.XfId;
 		});
@@ -3087,7 +3087,7 @@
                 if(null != wb.TableStyles)
                     this.bs.WriteItem(c_oSerStylesTypes.TableStyles, function(){oThis.WriteTableStyles(wb.TableStyles);});
             }
-            //Dxfs пишется после TableStyles, потому что Dxfs может пополниться при записи TableStyles
+            //Dxfs is written after TableStyles, because Dxfs may be updated when writing TableStyles
             var dxfs = this.InitSaveManager.getDxfs();
 			if(null != dxfs && dxfs.length > 0) {
 				this.bs.WriteItem(c_oSerStylesTypes.Dxfs, function(){oThis.WriteDxfs(dxfs);});
@@ -3102,7 +3102,7 @@
 		            this.bs.WriteItem(c_oSerStylesTypes.SlicerStyles, function () {oThis.WriteSlicerStyles(slicerStyles);});
 	            }
 						}
-            //numfmts пишется в конце потому что они могут пополниться при записи Dxfs
+            //numfmts is written at the end because they may be updated when writing Dxfs
             this.bs.WriteItem(c_oSerStylesTypes.NumFmts, function(){oThis.WriteNumFmts();});
 
             if (wb && wb.TimelineStyles) {
@@ -3869,7 +3869,7 @@
                 if (this.wb.aComments.length > 0) {
                     this.bs.WriteItem(c_oSerWorkbookTypes.Comments, function() {oThis.WriteComments(oThis.wb.aComments);});
                 }
-                //TODO при чтении на клиенте - здесь строка, не пишем пока
+                //TODO when reading on client - this is a string, not writing for now
 				if (this.wb.connections && Array.isArray(oThis.wb.connections)) {
 					this.bs.WriteItem(c_oSerWorkbookTypes.Connections, function() {oThis.memory.WriteBuffer(oThis.wb.connections, 0, oThis.wb.connections.length)});
 				}
@@ -4007,8 +4007,8 @@
             if (null !== oDefinedName.LocalSheetId){
                 var _localSheetId = oDefinedName.LocalSheetId;
                 if (this.isCopyPaste === false) {
-                    //при переносе листов пишем только один лист
-                    // соответсвенно именованные диапазоны должны ссылаться на первый лист
+                    //when transferring sheets we write only one sheet
+                    // accordingly named ranges should reference the first sheet
                     _localSheetId = 0;
                 }
                 this.bs.WriteItem(c_oSerDefinedNameTypes.LocalSheetId, function(){oThis.memory.WriteLong(_localSheetId);});
@@ -5692,8 +5692,8 @@
 				this.memory.WriteByte(c_oSerPropLenType.Byte);
 				this.memory.WriteBool(sheetProtection.pivotTables);
 			}
-			//scenarios - в MS может быть всталена в true если только лист защищен
-			//если выставлена в true при незазищенном листе, то после сохранения и открытия в ms обратно в false возвращается
+			//scenarios - in MS can be set to true only if the sheet is protected
+			//if set to true on an unprotected sheet, after saving and opening in MS it returns back to false
 			if (null != sheetProtection.scenarios && sheetProtection.sheet) {
 				this.memory.WriteByte(c_oSerWorksheetProtection.Scenarios);
 				this.memory.WriteByte(c_oSerPropLenType.Byte);
@@ -5947,7 +5947,7 @@
 				this.bs.WriteItem(c_oSer_Pane.ActivePane, function(){oThis.memory.WriteByte(activePane);});
             }
 
-            // Всегда пишем Frozen
+            // Always write Frozen
             this.bs.WriteItem(c_oSer_Pane.State, function(){oThis.memory.WriteString3(AscCommonExcel.c_oAscPaneState.Frozen);});
             this.bs.WriteItem(c_oSer_Pane.TopLeftCell, function(){oThis.memory.WriteString3(oPane.topLeftFrozenCell.getID());});
 
@@ -6633,13 +6633,13 @@
                         {
                             curDrawing = oDrawingSelected[selDr];
 
-							//меняем graphicObject на время записи
+							//change graphicObject for the duration of writing
 							graphicObject = oDrawing.graphicObject;
 							oDrawing.graphicObject = curDrawing;
 
                             this.bs.WriteItem(c_oSerWorksheetsTypes.Drawing, function(){oThis.WriteDrawing(oDrawing, curDrawing);});
 
-							//возвращаем graphicObject обратно
+							//restore graphicObject back
 							oDrawing.graphicObject = graphicObject;
                         }
                     }
@@ -6825,7 +6825,7 @@
                     tempRow.setIndex(nRow0);
                     oThis.WriteRowAndFixEmpty(oThis.memory, cur, allRow, tempRow, excludedCount, oThis.stylesForWrite);
                 }
-                //готовим ячейку к записи
+                //prepare cell for writing
                 var nXfsId;
                 var cellXfs = cell.xfs;
                 nXfsId = oThis.stylesForWrite.add(cell.xfs);
@@ -7804,10 +7804,10 @@
         this.WriteMainTable = function()
         {
             var t = this;
-            var nTableCount = 128;//Специально ставим большое число, чтобы не увеличивать его при добавлении очередной таблицы.
-            this.nRealTableCount = 0;//Специально ставим большое число, чтобы не увеличивать его при добавлении очередной таблицы.
+            var nTableCount = 128;//Deliberately set a large number so we don't need to increase it when adding another table.
+            this.nRealTableCount = 0;//Deliberately set a large number so we don't need to increase it when adding another table.
             var nStart = this.Memory.GetCurPosition();
-            //вычисляем с какой позиции можно писать таблицы
+            //calculate from which position we can write tables
             var nmtItemSize = 5;//5 byte
             this.nLastFilePos = nStart + nTableCount * nmtItemSize;
             //Write mtLen
@@ -7872,11 +7872,11 @@
 			this.WriteReserved(new BinarySharedStringsTableWriter(this.Memory, this.wb, oBinaryStylesTableWriter, this.InitSaveManager), nSharedStringsPos);
             //Write Styles
 			this.WriteReserved(oBinaryStylesTableWriter, nStylesTablePos);
-            //Пишем количество таблиц
+            //Write the number of tables
             this.Memory.Seek(nStart);
             this.Memory.WriteByte(this.nRealTableCount);
 
-            //seek в конец, потому что GetBase64Memory заканчивает запись на текущей позиции.
+            //seek to the end, because GetBase64Memory finishes writing at the current position.
             this.Memory.Seek(this.nLastFilePos);
         };
         this.WriteTable = function(type, oTableSer)
@@ -7888,14 +7888,14 @@
             this.Memory.WriteLong(this.nLastFilePos);
 
             //Write table
-            //Запоминаем позицию в MainTable
+            //Remember the position in MainTable
             var nCurPos = this.Memory.GetCurPosition();
-            //Seek в свободную область
+            //Seek to free area
             this.Memory.Seek(this.nLastFilePos);
             oTableSer.Write();
-            //сдвигаем позицию куда можно следующую таблицу
+            //shift position where the next table can be written
             this.nLastFilePos = this.Memory.GetCurPosition();
-            //Seek вобратно в MainTable
+            //Seek back to MainTable
             this.Memory.Seek(nCurPos);
 
             this.nRealTableCount++;
@@ -7917,14 +7917,14 @@
             this.Memory.WriteLong(this.nLastFilePos);
 
             //Write table
-            //Запоминаем позицию в MainTable
+            //Remember the position in MainTable
             var nCurPos = this.Memory.GetCurPosition();
-            //Seek в свободную область
+            //Seek to free area
             this.Memory.Seek(this.nLastFilePos);
             oTableSer.Write();
-            //сдвигаем позицию куда можно следующую таблицу
+            //shift position where the next table can be written
             this.nLastFilePos = this.Memory.GetCurPosition();
-            //Seek вобратно в MainTable
+            //Seek back to MainTable
             this.Memory.Seek(nCurPos);
 
             this.nRealTableCount++;
@@ -8296,7 +8296,7 @@
             if ( c_oSer_SortState.ConditionRef == type )
                 oSortCondition.Ref = AscCommonExcel.g_oRangeCache.getAscRange(this.stream.GetString2LE(length));
             else if ( c_oSer_SortState.ConditionSortBy == type )
-                //TODO char? проверить
+                //TODO char? verify
                 oSortCondition.ConditionSortBy = this.stream.GetUChar();
             else if ( c_oSer_SortState.ConditionDescending == type )
                 oSortCondition.ConditionDescending = this.stream.GetBool();
@@ -11033,9 +11033,9 @@
                 });
 
 				if (!bNoBuildDep) {
-					//TODO возможно стоит делать это в worksheet после полного чтения
+					//TODO perhaps this should be done in worksheet after complete reading
 					//***array-formula***
-					//добавление ко всем ячейкам массива головной формулы
+					//adding the main formula to all cells in the array
 					for(var j = 0; j < tmp.formulaArray.length; j++) {
 						var curFormula = tmp.formulaArray[j];
 						var ref = curFormula.ref;
@@ -11083,7 +11083,7 @@
                 var oNewWorksheet = new AscCommonExcel.Worksheet(this.wb, wb.aWorksheets.length);
                 oNewWorksheet.aFormulaExt = [];
                 var DrawingDocument = oNewWorksheet.getDrawingDocument();
-				//TODO при copy/paste в word из excel необходимо подменить DrawingDocument из word - пересмотреть правку!
+				//TODO when copy/paste from excel to word, need to replace DrawingDocument from word - review this fix!
 				if(typeof editor != "undefined" && editor && editor.WordControl && editor.WordControl.m_oLogicDocument && editor.WordControl.m_oLogicDocument.DrawingDocument) {
                    this.wb.DrawingDocument = editor.WordControl.m_oLogicDocument.DrawingDocument;
                 }
@@ -12264,7 +12264,7 @@
 				tmp.ws.nRowsCount = Math.max(tmp.ws.nRowsCount, tmp.ws.cellsByColRowsCount);
 				tmp.prevRow = tmp.row.index;
 				tmp.prevCol = -1;
-				//читаем ячейки
+				//read cells
 				if (null !== tmp.pos && null !== tmp.len) {
 					var nOldPos = this.stream.GetCurPos();
 					this.stream.Seek2(tmp.pos);
@@ -12322,7 +12322,7 @@
 			}
 			else if ( c_oSerRowTypes.Cells == type )
 			{
-				//запоминам место чтобы читать Cells в конце, когда уже зачитан oRow.index
+				//remember position to read Cells at the end, when oRow.index is already read
 				tmp.pos = this.stream.GetCurPos();
 				tmp.len = length;
 				res = c_oSerConstants.ReadUnknown;
@@ -12367,7 +12367,7 @@
 				oCell.setRowCol(nRowIndex, oCellAddress.getCol0());
 			}
 			else if ( c_oSerCellTypes.RefRowCol === type ){
-				var nRow = this.stream.GetULongLE();//todo не используем можно убрать
+				var nRow = this.stream.GetULongLE();//todo not used, can be removed
 				oCell.setRowCol(nRowIndex, this.stream.GetULongLE());
 			}
 			else if( c_oSerCellTypes.Style === type )
@@ -12529,7 +12529,7 @@
             /** proprietary begin **/
             else if ( c_oSer_DrawingType.GraphicFrame == type )
             {
-                //todo удалить
+                //todo remove
                 res = this.bcr.Read1(length, function (t, l) {
                     return oThis.ReadGraphicFrame(t, l, oDrawing);
                 });
@@ -12949,7 +12949,7 @@
 				if (color) {
 					oDataBar.AxisColor = color;
 				} else {
-					//TODO наличие оси определяется по наличию AxisColor при отрисовке. других маркеров нет. пересмотреть!
+					//TODO axis presence is determined by the presence of AxisColor during rendering. no other markers. review!
 					oDataBar.AxisColor = new AscCommonExcel.RgbColor(0);
 				}
 			} else if (c_oSer_ConditionalFormattingDataBar.NegativeBorderColor === type) {
@@ -13838,7 +13838,7 @@
             }
 			if(!pasteBinaryFromExcel)
 				History.TurnOn();
-            //чтобы удалялся stream с бинарником
+            //so that the stream with binary is deleted
 			pptx_content_loader.Clear(true);
         };
         this.ReadMainTable = function(wb)
@@ -13885,7 +13885,7 @@
             var oMediaArray = {};
 
 
-            //****TODO Не нахожу в файле****
+            //****TODO Cannot find in file****
             wb.aWorksheets = [];
             if(null != nOtherTableOffset)
             {
@@ -13895,7 +13895,7 @@
             }
 
             this.InitOpenManager.initSchemeAndTheme(wb);
-            //****TODO Не нахожу в файле****
+            //****TODO Cannot find in file****
 
 
 
@@ -13910,7 +13910,7 @@
                 }
             }
 
-            //aCellXfs - внутри уже не нужна, поскольку вынес функцию InitStyleManager в InitOpenManager
+            //aCellXfs - no longer needed inside, since moved InitStyleManager function to InitOpenManager
 			this.InitOpenManager.oReadResult.stylesTableReader = new Binary_StylesTableReader(this.stream, wb/*, aCellXfs, this.InitOpenManager.copyPasteObj.isCopyPaste*/)
             if(null != nStyleTableOffset)
             {
@@ -14010,7 +14010,7 @@
                 }
             }
 			this.InitOpenManager.PostLoadPrepareDefNames(wb);
-            //todo инициализация формул из-за именованных диапазонов перенесена в wb.init ее надо вызывать в любом случае(Rev: 61959)
+            //todo formula initialization due to named ranges was moved to wb.init, it must be called in any case (Rev: 61959)
             if(!this.InitOpenManager.copyPasteObj.isCopyPaste || this.InitOpenManager.copyPasteObj.selectAllSheet)
             {
 				bwtr.ReadSheetDataExternal(false);
@@ -14172,7 +14172,7 @@
         this.name = null;
         this.pivot = true;
         this.table = true;
-        this.displayName = null; // Показываемое имя (для дефалтовых оно будет с пробелами, а для пользовательских совпадает с name)
+        this.displayName = null; // Display name (for default ones it will have spaces, for custom ones it matches name)
 
         this.blankRow = null;
         this.firstColumn = null;
@@ -14517,7 +14517,7 @@
             Border		: 7,
             NumFmts		: 8
         };
-        // Пишем тип и размер (версию не пишем)
+        // Write type and size (version is not written)
         var sStyles = "XLSY;;11499;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aQBiAHIAaQAJAQEGBQAAAAAAACZABhcAAAAAEgAAAAENAAAAAgEFAwXNZeYyc5npPwcAAAAAAKwAAAABBAAAACYAAAADKAAAAAQaAAAAMgAwACUAIAAtACAAQQBjAGMAZQBuAHQAMwAFBAAAAAEAAAAEIQAAAAABAAEBAAQBAAYEAAAAAAcEAgAAAAgEAQAAAAkEAAAAAAUqAAAAAQYDAAAAAgEBBAYOAAAAQwBhAGwAaQBiAHIAaQAJAQEGBQAAAAAAACZABhcAAAAAEgAAAAENAAAAAgEGAwXNZeYyc5npPwcAAAAAAKwAAAABBAAAACoAAAADKAAAAAQaAAAAMgAwACUAIAAtACAAQQBjAGMAZQBuAHQANAAFBAAAAAEAAAAEIQAAAAABAAEBAAQBAAYEAAAAAAcEAgAAAAgEAQAAAAkEAAAAAAUqAAAAAQYDAAAAAgEBBAYOAAAAQwBhAGwAaQBiAHIAaQAJAQEGBQAAAAAAACZABhcAAAAAEgAAAAENAAAAAgEHAwXNZeYyc5npPwcAAAAAAKwAAAABBAAAAC4AAAADKAAAAAQaAAAAMgAwACUAIAAtACAAQQBjAGMAZQBuAHQANQAFBAAAAAEAAAAEIQAAAAABAAEBAAQBAAYEAAAAAAcEAgAAAAgEAQAAAAkEAAAAAAUqAAAAAQYDAAAAAgEBBAYOAAAAQwBhAGwAaQBiAHIAaQAJAQEGBQAAAAAAACZABhcAAAAAEgAAAAENAAAAAgEIAwXNZeYyc5npPwcAAAAAAKwAAAABBAAAADIAAAADKAAAAAQaAAAAMgAwACUAIAAtACAAQQBjAGMAZQBuAHQANgAFBAAAAAEAAAAEIQAAAAABAAEBAAQBAAYEAAAAAAcEAgAAAAgEAQAAAAkEAAAAAAUqAAAAAQYDAAAAAgEBBAYOAAAAQwBhAGwAaQBiAHIAaQAJAQEGBQAAAAAAACZABhcAAAAAEgAAAAENAAAAAgEJAwXNZeYyc5npPwcAAAAAAKwAAAABBAAAAB8AAAADKAAAAAQaAAAANAAwACUAIAAtACAAQQBjAGMAZQBuAHQAMQAFBAAAAAEAAAAEIQAAAAABAAEBAAQBAAYEAAAAAAcEAgAAAAgEAQAAAAkEAAAAAAUqAAAAAQYDAAAAAgEBBAYOAAAAQwBhAGwAaQBiAHIAaQAJAQEGBQAAAAAAACZABhcAAAAAEgAAAAENAAAAAgEEAwWazExmJjPjPwcAAAAAAKwAAAABBAAAACMAAAADKAAAAAQaAAAANAAwACUAIAAtACAAQQBjAGMAZQBuAHQAMgAFBAAAAAEAAAAEIQAAAAABAAEBAAQBAAYEAAAAAAcEAgAAAAgEAQAAAAkEAAAAAAUqAAAAAQYDAAAAAgEBBAYOAAAAQwBhAGwAaQBiAHIAaQAJAQEGBQAAAAAAACZABhcAAAAAEgAAAAENAAAAAgEFAwWazExmJjPjPwcAAAAAAKwAAAABBAAAACcAAAADKAAAAAQaAAAANAAwACUAIAAtACAAQQBjAGMAZQBuAHQAMwAFBAAAAAEAAAAEIQAAAAABAAEBAAQBAAYEAAAAAAcEAgAAAAgEAQAAAAkEAAAAAAUqAAAAAQYDAAAAAgEBBAYOAAAAQwBhAGwAaQBiAHIAaQAJAQEGBQAAAAAAACZABhcAAAAAEgAAAAENAAAAAgEGAwWazExmJjPjPwcAAAAAAKwAAAABBAAAACsAAAADKAAAAAQaAAAANAAwACUAIAAtACAAQQBjAGMAZQBuAHQANAAFBAAAAAEAAAAEIQAAAAABAAEBAAQBAAYEAAAAAAcEAgAAAAgEAQAAAAkEAAAAAAUqAAAAAQYDAAAAAgEBBAYOAAAAQwBhAGwAaQBiAHIAaQAJAQEGBQAAAAAAACZABhcAAAAAEgAAAAENAAAAAgEHAwWazExmJjPjPwcAAAAAAKwAAAABBAAAAC8AAAADKAAAAAQaAAAANAAwACUAIAAtACAAQQBjAGMAZQBuAHQANQAFBAAAAAEAAAAEIQAAAAABAAEBAAQBAAYEAAAAAAcEAgAAAAgEAQAAAAkEAAAAAAUqAAAAAQYDAAAAAgEBBAYOAAAAQwBhAGwAaQBiAHIAaQAJAQEGBQAAAAAAACZABhcAAAAAEgAAAAENAAAAAgEIAwWazExmJjPjPwcAAAAAAKwAAAABBAAAADMAAAADKAAAAAQaAAAANAAwACUAIAAtACAAQQBjAGMAZQBuAHQANgAFBAAAAAEAAAAEIQAAAAABAAEBAAQBAAYEAAAAAAcEAgAAAAgEAQAAAAkEAAAAAAUqAAAAAQYDAAAAAgEBBAYOAAAAQwBhAGwAaQBiAHIAaQAJAQEGBQAAAAAAACZABhcAAAAAEgAAAAENAAAAAgEJAwWazExmJjPjPwcAAAAAAKwAAAABBAAAACAAAAADKAAAAAQaAAAANgAwACUAIAAtACAAQQBjAGMAZQBuAHQAMQAFBAAAAAEAAAAEIQAAAAABAAEBAAQBAAYEAAAAAAcEAgAAAAgEAQAAAAkEAAAAAAUqAAAAAQYDAAAAAgEABAYOAAAAQwBhAGwAaQBiAHIAaQAJAQEGBQAAAAAAACZABhcAAAAAEgAAAAENAAAAAgEEAwXNZGYyM5nZPwcAAAAAAKwAAAABBAAAACQAAAADKAAAAAQaAAAANgAwACUAIAAtACAAQQBjAGMAZQBuAHQAMgAFBAAAAAEAAAAEIQAAAAABAAEBAAQBAAYEAAAAAAcEAgAAAAgEAQAAAAkEAAAAAAUqAAAAAQYDAAAAAgEABAYOAAAAQwBhAGwAaQBiAHIAaQAJAQEGBQAAAAAAACZABhcAAAAAEgAAAAENAAAAAgEFAwXNZGYyM5nZPwcAAAAAAKwAAAABBAAAACgAAAADKAAAAAQaAAAANgAwACUAIAAtACAAQQBjAGMAZQBuAHQAMwAFBAAAAAEAAAAEIQAAAAABAAEBAAQBAAYEAAAAAAcEAgAAAAgEAQAAAAkEAAAAAAUqAAAAAQYDAAAAAgEABAYOAAAAQwBhAGwAaQBiAHIAaQAJAQEGBQAAAAAAACZABhcAAAAAEgAAAAENAAAAAgEGAwXNZGYyM5nZPwcAAAAAAKwAAAABBAAAACwAAAADKAAAAAQaAAAANgAwACUAIAAtACAAQQBjAGMAZQBuAHQANAAFBAAAAAEAAAAEIQAAAAABAAEBAAQBAAYEAAAAAAcEAgAAAAgEAQAAAAkEAAAAAAUqAAAAAQYDAAAAAgEABAYOAAAAQwBhAGwAaQBiAHIAaQAJAQEGBQAAAAAAACZABhcAAAAAEgAAAAENAAAAAgEHAwXNZGYyM5nZPwcAAAAAAKwAAAABBAAAADAAAAADKAAAAAQaAAAANgAwACUAIAAtACAAQQBjAGMAZQBuAHQANQAFBAAAAAEAAAAEIQAAAAABAAEBAAQBAAYEAAAAAAcEAgAAAAgEAQAAAAkEAAAAAAUqAAAAAQYDAAAAAgEABAYOAAAAQwBhAGwAaQBiAHIAaQAJAQEGBQAAAAAAACZABhcAAAAAEgAAAAENAAAAAgEIAwXNZGYy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";
 
         var oBinaryFileReader = new BinaryFileReader();
@@ -14615,16 +14615,16 @@
                 // XfId
                 if (null !== oStyleObject.xfs.XfId)
 					newXf.XfId = oStyleObject.xfs.XfId;
-                // ApplyBorder (ToDo возможно это свойство должно быть в xfs)
+                // ApplyBorder (ToDo this property may need to be in xfs)
                 if (null !== oStyleObject.xfs.ApplyBorder)
                     oCellStyle.ApplyBorder = oStyleObject.xfs.ApplyBorder;
-                // ApplyFill (ToDo возможно это свойство должно быть в xfs)
+                // ApplyFill (ToDo this property may need to be in xfs)
                 if (null !== oStyleObject.xfs.ApplyFill)
                     oCellStyle.ApplyFill = oStyleObject.xfs.ApplyFill;
-                // ApplyFont (ToDo возможно это свойство должно быть в xfs)
+                // ApplyFont (ToDo this property may need to be in xfs)
                 if (null !== oStyleObject.xfs.ApplyFont)
                     oCellStyle.ApplyFont = oStyleObject.xfs.ApplyFont;
-                // ApplyNumberFormat (ToDo возможно это свойство должно быть в xfs)
+                // ApplyNumberFormat (ToDo this property may need to be in xfs)
                 if (null !== oStyleObject.xfs.ApplyNumberFormat)
                     oCellStyle.ApplyNumberFormat = oStyleObject.xfs.ApplyNumberFormat;
                 oCellStyle.xfs = g_StyleCache.addXf(newXf);
@@ -14639,12 +14639,12 @@
             return fReadStyles(t, l, oOutput);
         });
 
-        // Если нет стилей в документе, то добавим
+        // If there are no styles in the document, add them
         if (0 === wb.CellStyles.CustomStyles.length && 0 < oOutput.length) {
             wb.CellStyles.CustomStyles.push(oOutput[0].clone());
             wb.CellStyles.CustomStyles[0].XfId = 0;
         }
-        // Если XfId не задан, то определим его
+        // If XfId is not set, determine it
         if (null == g_oDefaultFormat.XfId) {
             g_oDefaultFormat.XfId = 0;
         }
@@ -14869,7 +14869,7 @@
         this.Dxfs = [];
         this.sharedStringIndexMap = null;
 
-        //при чтении из xml
+        //when reading from xml
         this.legacyDrawingId = null;
     }
 
@@ -14983,8 +14983,8 @@
             }
         } else if (formula.v && formula.v.length <= AscCommon.c_oAscMaxFormulaLength) {
             if (formula.v.startsWith("_xludf.")) {
-                //при открытии подобных формул ms удаляет префикс
-                //TODO так же он проставляет флаг ca - рассмотреть стоит ли его нам доблавлять
+                //when opening such formulas ms removes the prefix
+                //TODO it also sets the ca flag - consider whether we should add it
                 formula.v = formula.v.replace("_xludf.", "");
             }
             if (formula.v.startsWith("IFERROR(__xludf.DUMMYFUNCTION(\"")) {
@@ -15005,13 +15005,13 @@
             } else {
                 offsetRow = 1;
             }
-            //проверка на ECellFormulaType.cellformulatypeArray нужна для:
-            //1.формула массива не может быть шаренной
-            //2.в случае, когда две ячейки в одном столбце - каждая формула массива
-            //и далее они становятся двумя шаренными
-            //после того, как формула становится шаренной, ref array у второй начинает ссылаться на первую ячейку
-            //поэтому при изменении второй ячейки из двух шаренных в функции _saveCellValueAfterEdit
-            //берём array ref и присваиваем ему введенные данные, и поэтому в первой ячейки появляются данные второй
+            //check for ECellFormulaType.cellformulatypeArray is needed for:
+            //1.array formula cannot be shared
+            //2.in case when two cells in one column - each is an array formula
+            //and then they become two shared formulas
+            //after the formula becomes shared, ref array of the second starts referencing the first cell
+            //therefore when changing the second cell of two shared in _saveCellValueAfterEdit function
+            //we take array ref and assign the entered data to it, and therefore the data of the second appears in the first cell
             if (prevFormula && formula.t !== ECellFormulaType.cellformulatypeArray &&
                 prevFormula.t !== ECellFormulaType.cellformulatypeArray &&
                 prevFormula.nRow + offsetRow === cell.nRow &&
@@ -15174,11 +15174,11 @@
         this.InitDxfs(oStyleObject.aDxfs);
         this.InitDxfs(oStyleObject.aExtDxfs);
 
-        // ToDo убрать - это заглушка
+        // ToDo remove - this is a stub
         var arrStyleMap = {};
         var nIndexStyleMap = 1;//0 reserver for Normal style
         var XfIdTmp;
-        // Список имен для стилей
+        // List of names for styles
         var oCellStyleNames = {};
         var normalXf = null;
 
@@ -15205,10 +15205,10 @@
                     oCellStyle.XfId = nIndexStyleMap++;
                 }
             } else
-                continue;	// Если его нет, то это ошибка по спецификации
+                continue;	// If it doesn't exist, this is an error according to specification
 
             var oCellStyleXfs = oStyleObject.aCellStyleXfs[XfIdTmp];
-            // Если есть стиль, но нет описания, то уберем этот стиль (Excel делает также)
+            // If there is a style but no description, remove this style (Excel does the same)
             if (null == oCellStyleXfs)
                 continue;
 
@@ -15255,27 +15255,27 @@
             // align
             if(null != oCellStyleXfs.align)
                 newXf.align = oCellStyleXfs.align;
-            // ApplyBorder (ToDo возможно это свойство должно быть в xfs)
+            // ApplyBorder (ToDo this property may need to be in xfs)
             if (null !== oCellStyleXfs.ApplyBorder)
                 oCellStyle.ApplyBorder = oCellStyleXfs.ApplyBorder;
-            // ApplyFill (ToDo возможно это свойство должно быть в xfs)
+            // ApplyFill (ToDo this property may need to be in xfs)
             if (null !== oCellStyleXfs.ApplyFill)
                 oCellStyle.ApplyFill = oCellStyleXfs.ApplyFill;
-            // ApplyFont (ToDo возможно это свойство должно быть в xfs)
+            // ApplyFont (ToDo this property may need to be in xfs)
             if (null !== oCellStyleXfs.ApplyFont)
                 oCellStyle.ApplyFont = oCellStyleXfs.ApplyFont;
-            // ApplyNumberFormat (ToDo возможно это свойство должно быть в xfs)
+            // ApplyNumberFormat (ToDo this property may need to be in xfs)
             if (null !== oCellStyleXfs.ApplyNumberFormat)
                 oCellStyle.ApplyNumberFormat = oCellStyleXfs.ApplyNumberFormat;
 
             oCellStyle.xfs = g_StyleCache.addXf(newXf);
-            // ToDo при отсутствии имени все не очень хорошо будет!
+            // ToDo if there's no name, things won't work well!
             this.wb.CellStyles.CustomStyles.push(oCellStyle);
             if (null !== oCellStyle.Name)
                 oCellStyleNames[oCellStyle.Name] = true;
         }
 
-        // ToDo стоит это переделать в дальнейшем (пробежимся по именам, и у отсутствующих создадим имя)
+        // ToDo this should be refactored later (iterate through names, and create names for missing ones)
         var nNewStyleIndex = 1, newStyleName;
         for (var i = 0, length = this.wb.CellStyles.CustomStyles.length; i < length; ++i) {
             if (null === this.wb.CellStyles.CustomStyles[i].Name) {
@@ -15287,7 +15287,7 @@
             }
         }
 
-        // ToDo это нужно будет переделать (проходимся по всем стилям и меняем у них XfId по порядку)
+        // ToDo this will need to be refactored (iterate through all styles and change their XfId in order)
 
         for(var i = 0, length = oStyleObject.aCellXfs.length; i < length; ++i) {
             var xfs = oStyleObject.aCellXfs[i];
@@ -15469,7 +15469,7 @@
         wb.SlicerStyles.concatStyles();
     };
     InitOpenManager.prototype.prepareAfterReadCols = function(oWorksheet, aTempCols) {
-        //если есть стиль последней колонки, назначаем его стилем всей таблицы и убираем из колонок
+        //if there is a style for the last column, assign it as the style for the entire table and remove from columns
         var oAllCol = null;
         if(aTempCols.length > 0)
         {
@@ -15623,11 +15623,11 @@
         if(null != defNameList ){
             for(var i = 0; i < defNameList.length; i++){
                 if(defNameList[i].Name !== filterDefName) {
-                    //TODO временная правка. на открытие может приходить _FilterDatabase. защищаемся от записи двух одинаковых именванных диапазона
+                    //TODO temporary fix. on open, _FilterDatabase may come. protecting against writing two identical named ranges
                     if(defNameList[i].Name === "_FilterDatabase") {
                         tempMap[defNameList[i].LocalSheetId] = 1;
                     }
-                    //на запись добавляем к области печати префикс
+                    //on write add prefix to print area
                     if(printAreaDefName === defNameList[i].Name && null != defNameList[i].LocalSheetId && true === defNameList[i].isXLNM) {
                         defNameList[i].Name = prefix + defNameList[i].Name;
                     }
@@ -15635,9 +15635,9 @@
             }
         }
 
-        //TODO пишем два одинаковых именованных диапазона с а/ф при открытии книги с а/ф
+        //TODO writing two identical named ranges with autofilter when opening workbook with autofilter
         //write filters defines name
-        //TODO сделать добавление данных именованных диапазонов при добавлении а/ф
+        //TODO implement adding these named ranges when adding autofilter
         var ws, ref, defNameRef, defName;
         for(var i = 0; i < this.wb.aWorksheets.length; i++) {
             ws = this.wb.aWorksheets[i];
@@ -15921,7 +15921,7 @@
                 type = ECellFormulaType.cellformulatypeArray;
                 formula = parsed.getFormula();
             } else if(this.isCopyPaste) {
-                //если выделена часть формулы, и первая ячейка формулы массива не входит в выделение
+                //if part of the formula is selected, and the first cell of the array formula is not in the selection
                 var intersection = arrayFormula.intersection(this.isCopyPaste);
                 if(intersection && intersection.r1 === cell.nRow && intersection.c1 === cell.nCol) {
                     ref = arrayFormula;
@@ -15932,8 +15932,8 @@
         } else {
             formula = parsed.getFormula();
         }
-        //TODO пока едиственный идентификатор, что внутри есть функция import - importFunctionsRangeLinks
-        //обходить каждый раз колстек - не хотелось бы замедлять сохранение, так же как и искать в строке
+        //TODO for now the only identifier that there's an import function inside - importFunctionsRangeLinks
+        //traversing the call stack each time - wouldn't want to slow down saving, same as searching in string
 
         //view ->sum(IMPORTRANGE("https://","Sheet1!A1"))+cos(1)
         //file -> IFERROR(__xludf.DUMMYFUNCTION("sum(IMPORTRANGE(""https://"",""Sheet1!A1""))+cos(1)"),123)</f>
@@ -15994,7 +15994,7 @@
 							if (oExternalReference.val) {
 								if (oExternalReference.val.externalBook) {
 									var relationship = externalWorkbookPart.getRelationship(oExternalReference.val.externalBook.Id);
-									//подменяем id на target
+									//replace id with target
 									if (relationship && relationship.targetFullName) {
 										oExternalReference.val.externalBook.Id = AscCommonExcel.decodeXmlPath(relationship.targetFullName);
 									}

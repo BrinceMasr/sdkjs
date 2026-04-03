@@ -1324,7 +1324,7 @@ CAscSlideTransition.prototype.fillXmlParams = function (aAttrNames, aAttrValues)
 AscDFH.drawingsConstructorsMap[AscDFH.historyitem_SlideSetTransition] = CAscSlideTransition;
 
 
-// информация о темах --------------------------------------------
+// theme information --------------------------------------------
 
 function CAscThemeInfo(themeInfo)
 {

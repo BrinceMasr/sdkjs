@@ -517,7 +517,7 @@
 	};
 
 	CSheetProtection.prototype.asc_setSheet = function (password, callback) {
-		//просталяю временный пароль, аспинхронная проверка пароля в asc_setProtectedSheet
+		//setting temporary password, asynchronous password verification in asc_setProtectedSheet
 		this.setSheet(!this.sheet);
 		if (this.sheet && password) {
 			var hashParams = AscCommon.generateHashParams();
@@ -577,7 +577,7 @@
 		this.selectUnlockedCells = val;
 	};
 	CSheetProtection.prototype.asc_setPassword = function (val) {
-		//генерируем хэш
+		//generate hash
 		this.algorithmName = "test";
 		this.hashValue = "test";
 		this.saltValue = "test";
@@ -820,7 +820,7 @@
 		return this.workbookSaltValue;
 	};
 	CWorkbookProtection.prototype.asc_setLockStructure = function (password, callback) {
-		//просталяю временный пароль, аспинхронная проверка пароля в asc_setProtectedWorkbook
+		//setting temporary password, asynchronous password verification in asc_setProtectedWorkbook
 		this.setLockStructure(!this.lockStructure);
 
 		if (this.lockStructure && password) {
@@ -868,7 +868,7 @@
 		this.workbookSpinCount = val;
 	};
 	CWorkbookProtection.prototype.asc_setPassword = function (val) {
-		//генерируем хэш
+		//generate hash
 		this.workbookAlgorithmName = "test";
 		this.workbookHashValue = "test";
 		this.workbookSaltValue = "test";
@@ -896,7 +896,7 @@
 		this.saltValue = null;
 		this.spinCount = null;
 
-		//пока прогоняю только на запись/чтение xml
+		//currently only running for xml write/read
 		this.securityDescriptors = null;
 
 		this._ws = ws;
@@ -997,7 +997,7 @@
 		var isChange = false;
 
 		var _setDiff = function (_range) {
-			//TODO объединть в одну функцию с dataValidation(.shift)
+			//TODO merge into one function with dataValidation(.shift)
 			var _newRanges, _offset, tempRange, intersection, otherPart, diff;
 
 			if (range && range.getType() === Asc.c_oAscSelectionType.RangeCells) {
@@ -1009,12 +1009,12 @@
 						diff = range.r2 - range.r1 + 1;
 
 						_newRanges = [];
-						//добавляем сдвинутую часть диапазона
+						//add shifted part of range
 						_newRanges.push(intersection);
 						_offset = new AscCommon.CellBase(offset.row > 0 ? diff : -diff, 0);
 						otherPart = _newRanges[0].difference(_range);
 						_newRanges[0].setOffset(_offset);
-						//исключаем сдвинутую часть из диапазона
+						//exclude shifted part from range
 						_newRanges = _newRanges.concat(otherPart);
 
 					}
@@ -1025,12 +1025,12 @@
 					if (intersection) {
 						diff = range.c2 - range.c1 + 1;
 						_newRanges = [];
-						//добавляем сдвинутую часть диапазона
+						//add shifted part of range
 						_newRanges.push(intersection);
 						_offset = new AscCommon.CellBase(0, offset.col > 0 ? diff : -diff, 0);
 						otherPart = _newRanges[0].difference(_range);
 						_newRanges[0].setOffset(_offset);
-						//исключаем сдвинутую часть из диапазона
+						//exclude shifted part from range
 						_newRanges = _newRanges.concat(otherPart);
 					}
 				}
@@ -1148,7 +1148,7 @@
 	};
 
 	CProtectedRange.prototype.contains = function (c, r) {
-		//TODO  в каком виде будет хранится sqref?
+		//TODO  what format will sqref be stored in?
 		for (var i = 0; i < this.sqref.length; i++) {
 			if (this.sqref[i].contains(c, r)) {
 				return true;
@@ -1158,7 +1158,7 @@
 	};
 
 	CProtectedRange.prototype.containsRange = function (range) {
-		//TODO  в каком виде будет хранится sqref?
+		//TODO  what format will sqref be stored in?
 		for (var i = 0; i < this.sqref.length; i++) {
 			if (this.sqref[i].containsRange(range)) {
 				return true;
@@ -1167,7 +1167,7 @@
 		return false;
 	};
 	CProtectedRange.prototype.intersection = function (range) {
-		//TODO  в каком виде будет хранится sqref?
+		//TODO  what format will sqref be stored in?
 		for (var i = 0; i < this.sqref.length; i++) {
 			if (this.sqref[i].intersection(range)) {
 				return true;
@@ -1176,7 +1176,7 @@
 		return false;
 	};
 	CProtectedRange.prototype.containsIntoRange = function (range) {
-		//TODO  в каком виде будет хранится sqref?
+		//TODO  what format will sqref be stored in?
 		for (var i = 0; i < this.sqref.length; i++) {
 			if (!range.containsRange(this.sqref[i])) {
 				return false;
@@ -1270,7 +1270,7 @@
 			this.spinCount = hashParams.spinCount;
 			this.algorithmName = AscCommon.c_oSerAlgorithmNameTypes.SHA_512;
 		}
-		//генерируем хэш
+		//generate hash
 		this.temporaryPassword = val;
 	};
 	CProtectedRange.prototype.asc_isPassword = function () {

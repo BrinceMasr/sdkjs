@@ -692,7 +692,7 @@
 			//var bBorder = this.graphicObject.Selection.Type2 === table_Selection_Border;
 			this.graphicObject.Selection_SetEnd(tx, ty, 0, e);
 			//if(g_mouse_event_type_up === e.Type && bBorder)
-			//    editor.WordControl.m_oLogicDocument.Recalculate();  TODO: пересчет вызывается в CTable
+			//    editor.WordControl.m_oLogicDocument.Recalculate();  TODO: recalculation is called in CTable
 		}
 	};
 

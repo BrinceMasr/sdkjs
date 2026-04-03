@@ -240,7 +240,7 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-		//формируем массив значений
+		// Create array of values
 		const randomArray = [];
 		let randomStrArray = "{";
 		let maxArg = 4;
@@ -14916,7 +14916,7 @@ $(function () {
 	}
 
 	QUnit.test("Test: \"FORECAST.ETS\"", function (assert) {
-		//результаты данного теста соответсвуют результатам LO, но отличаются от MS!!!
+		// Results of this test match LO results, but differ from MS!!!
 
 		putDataForForecastEts();
 
@@ -15373,8 +15373,8 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: FORECAST.ETS(45658,{1E-307,2E-307,3E-307},{45655,45656,45657},2,1,6) is parsed.');
 		//? assert.strictEqual(oParser.calculate().getValue(), 4e-307, 'Test: Bounded case: Number. Minimum valid array sizes (3 elements) with smallest valid values, all optional arguments used. 6 of 6 arguments used.');
 
-		// TODO много проблем с результатами вычислений - ошибки и значения отличные от реузльтатов мс.
-		// TODO также отрицательное число в первом аргументе крашит редактор в мс
+		// TODO many problems with calculation results - errors and values differ from MS results
+		// TODO also a negative number in the first argument crashes the editor in MS
 		// Need to fix:ms result diff, error types diff
 		// Case #1: Date,Number. Basic valid input: date for target_date, arrays with 3 elements for values and timeline. 3 of 6 arguments used. - result diff
 		// Case #2: Number,Area. Area with 3 cells for values and timeline, numeric target_date. 3 of 6 arguments used. - result diff
@@ -15722,13 +15722,13 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: FORECAST.ETS.CONFINT(45658,{1E-307,2E-307,3E-307},{45655,45656,45657},2,1,6) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Bounded case: Number. Minimum valid array sizes (3 elements) with smallest valid values, all optional arguments used. 6 of 6 arguments used.');
 
-		// TODO множество расхождений в результатах в этой функции. Нужно пересмотреть алгоритм расчета для того набора данных что используется в тестах
+		// TODO many discrepancies in results for this function. Need to review calculation algorithm for the dataset used in tests
 		// Need to fix: error type diff, MS result diff, missmatch array sizes
 
 	});
 
 	QUnit.test("Test: \"FORECAST.ETS.SEASONALITY\"", function (assert) {
-		//результаты данного теста соответсвуют результатам LO, но отличаются от MS!!!
+		// Results of this test match LO results, but differ from MS!!!
 
 		putDataForForecastEts();
 
@@ -16238,7 +16238,7 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"FORECAST.ETS.STAT\"", function (assert) {
-		//результаты данного теста соответсвуют результатам LO, но отличаются от MS!!!
+		// Results of this test match LO results, but differ from MS!!!
 
 		putDataForForecastEts();
 
@@ -16504,8 +16504,8 @@ $(function () {
 		//? assert.strictEqual(oParser.calculate().getValue(), 0.001, 'Test: Bounded case: Number. Minimum valid array sizes (3 elements) with smallest valid values, all optional arguments used. 6 of 6 arguments used.');
 
 
-		// TODO: ScETSForecastCalculation.prototype.prefillTrendData - добавить округление числа в this.mnSmplInPrd
-		// TODO множество расхождений в результатах в этой функции. Нужно пересмотреть алгоритм расчета для того набора данных что используется в тестах
+		// TODO: ScETSForecastCalculation.prototype.prefillTrendData - add number rounding in this.mnSmplInPrd
+		// TODO many discrepancies in results for this function. Need to review calculation algorithm for the dataset used in tests
 		// Need to fix: error types diff, MS result diff, array missmatch, Case #19 problem in tests
 
 	});
@@ -21656,7 +21656,7 @@ $(function () {
 		// Case #9: Empty, Number. Empty first argument - add empty args processing
 		// Case #10: Array, Empty. Empty k argument - - add empty args processing
 
-		//TODO нужна другая функция для тестирования
+		// TODO need a different function for testing
 		//testArrayFormula2(assert, "LARGE", 2, 2)
 	});
 
@@ -22214,7 +22214,7 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(8) - 0, 1.00732561);
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 1).getValue().toFixed(4) - 0, 133044.8167);
 
-		//todo необходимо перепроверить остальные значения в данном случае
+		// TODO need to recheck the remaining values in this case
 		oParser = new parserFormula("LOGEST(B101:B112,A101:A112,,true)", "A2", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(8) - 0, 1.00732561);
@@ -22225,7 +22225,7 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(8) - 0, 1.00732561);
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 1).getValue().toFixed(4) - 0, 133044.8167);
 
-		//todo необходимо перепроверить остальные значения в данном случае
+		// TODO need to recheck the remaining values in this case
 		oParser = new parserFormula("LOGEST(B101:B112,A101:A112,false,true)", "A2", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(8) - 0, 4.15001464);
@@ -22250,7 +22250,7 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(8) - 0, 1.0000838);
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 1).getValue().toFixed(4) - 0, 1);
 
-		//todo необходимо перепроверить остальные значения в данном случае
+		// TODO need to recheck the remaining values in this case
 		oParser = new parserFormula("LOGEST(A101:B105,A106:B110,true,true)", "A2", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(8) - 0, 1.00007701);
@@ -25830,7 +25830,7 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: MODE.MULT({1,1,2,2}) is parsed.');
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Bounded case: Array. Array with equal frequency modes (Excel returns first mode). 1 argument used.');
 
-		// TODO должна ли функция всегда возвращать массив, даже при единичных значениях?
+		// TODO should the function always return an array, even for single values?
 		// Need to fix: error handle, error different types return
 		// Case #3: String. Numeric strings converted to numbers with a mode. 3 arguments used.
 		// Case #5: Reference link. References to cells with numbers having a mode. 3 arguments used.
@@ -29195,7 +29195,7 @@ $(function () {
 		// Case #18: Area3D, Number. 3D range with invalid data returns #VALUE!.
 		// Case #20: String, Number. Empty string in array returns #VALUE!.
 
-		//TODO нужна другая функция для тестирования
+		// TODO need a different function for testing
 		//testArrayFormula2(assert, "PERCENTILE", 2, 2, null, true);
 	});
 
@@ -29699,7 +29699,7 @@ $(function () {
 		// Case #20: String, Number. Empty string in array returns #VALUE!.
 		// Case #18: Number, Number. Small k value. Returns 1.2.
 
-		//TODO нужна другая функция для тестирования
+		// TODO need a different function for testing
 		//testArrayFormula2(assert, "PERCENTILE.EXC", 2, 2, null, true)
 	});
 
@@ -29975,7 +29975,7 @@ $(function () {
 		// Case #6: Area. Multi-cell range for x returns #VALUE!. 2 of 3 arguments used.
 		// Case #7: Boolean. Boolean array returns #N/A. 2 of 3 arguments used.
 
-		//TODO нужен другой тест
+		// TODO need another test
 		//testArrayFormula2(assert, "PERCENTRANK", 2, 3, null, true);
 	});
 
@@ -30220,7 +30220,7 @@ $(function () {
 		// Case #7: Boolean. Boolean array returns #N/A. 2 of 3 arguments used.
 
 
-		//TODO нужен другой тест
+		// TODO need another test
 		//testArrayFormula2(assert, "PERCENTRANK.EXC", 2, 3, null, true);
 	});
 
@@ -32332,7 +32332,7 @@ $(function () {
 		// Case #11: Ref3D, Number. 3D reference to non-numeric cell returns #VALUE!. 2 arguments used.
 		// Case #19: Name3D, Number. 3D named range with non-numeric data returns #VALUE!. 2 arguments used.
 
-		//TODO нужна другая функция для тестирования
+		// TODO need a different function for testing
 		//testArrayFormula2(assert, "QUARTILE", 2, 2)
 	});
 
@@ -32869,7 +32869,7 @@ $(function () {
 		// Case #1: Array, Number. Array with valid numbers, quart = 1 (first quartile). 2 arguments used.
 		// Case #22: Area3D, Number. 3D range with non-numeric data returns #VALUE!. 2 arguments used.
 
-		//TODO нужна другая функция для тестирования
+		// TODO need a different function for testing
 		//testArrayFormula2(assert, "QUARTILE.EXC", 2, 2)
 	});
 
@@ -35013,7 +35013,7 @@ $(function () {
 		// Case #19: Number, String. Non-numeric string for k returns #VALUE!. 2 arguments used.
 		// Case #20: Array, Array. Multi-element array for k returns #NUM!. 2 arguments used.
 
-		//TODO нужна другая функция для тестирования
+		// TODO need a different function for testing
 		//testArrayFormula2(assert, "SMALL", 2, 2)
 	});
 
@@ -39226,7 +39226,7 @@ $(function () {
 		// Case #1: Array, Number. Largest valid array value, smallest valid percent. 2 arguments used.
 		// Case #2: Array, Number. Smallest valid array value, largest valid percent. 2 arguments used.
 
-		//TODO нужна другая функция для тестирования
+		// TODO need a different function for testing
 		//testArrayFormula2(assert, "TRIMMEAN", 2, 2);
 	});
 
@@ -39916,7 +39916,7 @@ $(function () {
 		// Case #19: Ref3D, Ref3D, Number, Number. 3D references with invalid data, returns #VALUE!. 4 of 4 arguments used.
 
 
-		//TODO нужна другая функция для тестирования
+		// TODO need a different function for testing
 		//testArrayFormula2(assert, "TTEST", 4, 4, null, true);
 	});
 
@@ -42475,7 +42475,7 @@ $(function () {
 		// Case #18: String. Date string converting to negative number, returns #VALUE!. 3 of 3 arguments used.
 
 
-		//TODO нужна другая функция для тестирования
+		// TODO need a different function for testing
 		//testArrayFormula2(assert, "Z.TEST", 2, 3, null, true);
 	});
 
@@ -42742,7 +42742,7 @@ $(function () {
 		// Case #15: Array. Array with boolean, returns #VALUE!. 3 of 3 arguments used.
 		// Case #18: String. Date string converting to negative number, returns #VALUE!. 3 of 3 arguments used.
 
-		//TODO нужна другая функция для тестирования
+		// TODO need a different function for testing
 		//testArrayFormula2(assert, "Z.TEST", 2, 3, null, true);
 	});
 

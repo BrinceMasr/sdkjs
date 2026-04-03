@@ -191,7 +191,7 @@
 			"sheetViews":            oWorksheet.sheetViews.length > 0 ? this.SerSheetViews(oWorksheet.sheetViews, oWorksheet) : undefined,
 			"sheetPr":               oWorksheet.sheetPr != null ? this.SerSheetPr(oWorksheet.sheetPr) : undefined,
 			"sparklineGroup":        oWorksheet.aSparklineGroups.length > 0 ? this.SerSparklineGroups(oWorksheet.aSparklineGroups) : undefined,
-			"headerFooter":          oWorksheet.headerFooter != null ? this.SerHdrFtrExcell(oWorksheet.headerFooter) : undefined, /// всегда лежит объект CHeaderFooterData
+			"headerFooter":          oWorksheet.headerFooter != null ? this.SerHdrFtrExcell(oWorksheet.headerFooter) : undefined, /// CHeaderFooterData object is always present
 			"dataValidations":       oWorksheet.dataValidations != null ? this.SerDataValidations(oWorksheet.dataValidations) : undefined,
 			"pivotTables":           oWorksheet.pivotTables.length > 0 ? this.SerPivotTables(oWorksheet.pivotTables) : undefined,
 			"slicers":               oWorksheet.aSlicers.length > 0 ? this.SerSlicers(oWorksheet.aSlicers) : undefined,
@@ -531,7 +531,7 @@
 		
 		return {
 			"activePane":  nActivePane != null ? ToXML_EActivePane(nActivePane) : undefined,
-			"state":       "frozen", // Всегда пишем Frozen
+			"state":       "frozen", // Always write Frozen
 			"topLeftCell": oPane.topLeftFrozenCell.getID(),
 			"xSplit":      0 < nCol ? nCol : undefined,
 			"ySplit":      0 < nRow ? nRow : undefined
@@ -1335,7 +1335,7 @@
 			"showDataAs": oDataField.showDataAs != null ? ToXml_ST_ShowDataAs(oDataField.showDataAs) : undefined,
 			"baseField":  oDataField.baseField != null ? oDataField.baseField : undefined,
 			"baseItem":   oDataField.baseItem != null ? oDataField.baseItem : undefined,
-			"numFmtId":   oDataField.num != null ? this.stylesForWrite.getNumIdByFormat(oDataField.num) : undefined, // тут, отсюда
+			"numFmtId":   oDataField.num != null ? this.stylesForWrite.getNumIdByFormat(oDataField.num) : undefined,
 			"extLst":     oDataField.extLst != null ? this.SerExtensionList(oDataField.extLst) : undefined
 		}
 	};
@@ -1578,7 +1578,7 @@
 			"colHierarchyUsage": aUsages
 		}
 	};
-	WriterToJSON.prototype.SerSlicers = function(aSlicers) // CT_slicers (такой объект создается на чтении, но по факту просто массив)
+	WriterToJSON.prototype.SerSlicers = function(aSlicers) // CT_slicers (this object is created on reading, but actually just an array)
 	{
 		var aResult = [];
 		for (var nSlicer = 0; nSlicer < aSlicers.length; nSlicer++)
@@ -1629,7 +1629,7 @@
 	{
 		return {
 			"sheetId":   oTable.sheetId,
-			"tabIdOpen": oTable.tabIdOpen, // to do возможно не нужно
+			"tabIdOpen": oTable.tabIdOpen, // to do possibly not needed
 			"name":      oTable.name
 		}
 	};
@@ -1640,9 +1640,9 @@
 	
 		return {
 			"tableId":        oCache.tableId != null ? oCache.tableId : undefined,
-			"tableIdOpen":    oCache.tableIdOpen != null ? oCache.tableIdOpen : undefined, // возможно не нужно
+			"tableIdOpen":    oCache.tableIdOpen != null ? oCache.tableIdOpen : undefined, // possibly not needed
 			"column":         oCache.column != null ? oCache.column : undefined,
-			"columnOpen":     oCache.columnOpen != null ? oCache.columnOpen : undefined, // возможно не нужно
+			"columnOpen":     oCache.columnOpen != null ? oCache.columnOpen : undefined, // possibly not needed
 			"sortOrder":      oCache.sortOrder != null ? ToXML_ST_tabularSlicerCacheSortOrder(oCache.sortOrder) : undefined,
 			"customListSort": oCache.customListSort != null ? oCache.customListSort : undefined,
 			"crossFilter":    oCache.crossFilter != null ? ToXML_ST_slicerCacheCrossFilter(oCache.crossFilter) : undefined
@@ -1802,7 +1802,7 @@
 			"measureGroups":         oCache.measureGroups !== null ? this.SerMeasureGroups(oCache.measureGroups) : undefined,
 			"maps":                  oCache.maps !== null ? this.SerMeasureDimensionMaps(oCache.maps) : undefined,
 			// ext
-			"pivotCacheDefinitionX14": oCache.pivotCacheDefinitionX14 !== null ? this.SerPivotCacheDefinitionX14(oCache.pivotCacheDefinitionX14) : undefined // to do (возожно стоит записать как extLst)
+			"pivotCacheDefinitionX14": oCache.pivotCacheDefinitionX14 !== null ? this.SerPivotCacheDefinitionX14(oCache.pivotCacheDefinitionX14) : undefined // to do (possibly should write as extLst)
 		}
 	};
 	WriterToJSON.prototype.SerPivotCacheRecords = function(oRecords) // CT_PivotCacheRecords
@@ -1933,7 +1933,7 @@
 			"ref":   oWSource.ref != null ? oWSource.ref : undefined,
 			"name":  oWSource.name != null ? oWSource.name : undefined,
 			"sheet": oWSource.sheet != null ? oWSource.sheet : undefined
-			//"r:id":  oSource.id != null ? oSource.id : undefined // мб не надо
+			//"r:id":  oSource.id != null ? oSource.id : undefined // maybe not needed
 		}
 	};
 	WriterToJSON.prototype.SerCacheFields = function(oFields) // CT_CacheFields
@@ -2590,8 +2590,8 @@
 		return {
 			"filterId":      oFilter.filterId != null ? oFilter.filterId : undefined,
 			"ref":           oFilter.ref != null ? this.SerRef(oFilter.ref) : undefined,
-			"tableIdOpen":   oFilter.tableIdOpen != null ? oFilter.tableIdOpen : undefined, // тут хз
-			"tableId":       oFilter.tableId != null ? oFilter.tableId : undefined, // мб не надо, надо смотреть
+			"tableIdOpen":   oFilter.tableIdOpen != null ? oFilter.tableIdOpen : undefined, // not sure here
+			"tableId":       oFilter.tableId != null ? oFilter.tableId : undefined, // maybe not needed, need to check
 			"columnsFilter": aColFilter.length > 0 ? aColFilter : undefined,
 			"sortRules":     oFilter.sortRules != null ? this.SerSortRules(oFilter.sortRules) : undefined
 		}
@@ -3292,7 +3292,7 @@
 		// table styles
 		oTableStyles = this.Workbook.TableStyles != null ? this.SerTableStyles(this.Workbook.TableStyles) : undefined;
 
-		//Dxfs пишется после TableStyles, потому что Dxfs может пополниться при записи TableStyles
+		//Dxfs is written after TableStyles because Dxfs may be updated when writing TableStyles
 		for (i = 0; i < this.InitSaveManager.aDxfs.length; i++)
 			aDxfs.push(this.SerDxf(this.InitSaveManager.aDxfs[i]));
 
@@ -3304,7 +3304,7 @@
 		// slicer styles
 		oSlicerStyles = this.SerSlicerStyles(oSlicerStyles);
 
-		//numfmts пишется в конце потому что они могут пополниться при записи Dxfs
+		//numfmts is written at the end because they may be updated when writing Dxfs
 		elems = this.stylesForWrite.oNumMap.elems;
 		for (var i = 0; i < elems.length; ++i)
 			aNumFmts.push(this.SerNumFmtExcell(elems[i], Asc.g_nNumsMaxId + i));
@@ -3720,7 +3720,7 @@
 				renameSheetMap[renameParams.lastName] = renameParams.newName;
 				api.asc_showWorksheet(where);
 				api.asc_setZoom(1);
-				// Посылаем callback об изменении списка листов
+				// Send callback about sheet list change
 				api.sheetsChanged();
 
 				for (let i = 0; i < oNewWorksheet.aSlicers.length; ++i) {
@@ -3872,7 +3872,7 @@
 		for (var nCol = 0; nCol < oParsedCols.length; nCol++)
 			aTempCols.push(this.ColFromJSON(oParsedCols[nCol], oWorksheet));
 
-		//если есть стиль последней колонки, назначаем его стилем всей таблицы и убираем из колонок
+		//if there is a style for the last column, assign it as style for entire table and remove from columns
 		var oAllCol = null;
 		if(aTempCols.length > 0)
 		{
@@ -4048,7 +4048,7 @@
 		{
 			oHyperlink = this.HyperlinkExcelFromJSON(aParsedLinks[nLink], oWorksheet);
 			aHyperlinks = oWorksheet.hyperlinkManager.get(oHyperlink.Ref.bbox);
-			//удаляем ссылки с тем же адресом
+			//delete links with the same address
 			for(var i = 0, length = aHyperlinks.all.length; i < length; i++)
 			{
 				var hyp = aHyperlinks.all[i];
@@ -4782,7 +4782,7 @@
 			oTable.altText = oParsed["altText"];
 		if (oParsed["altTextSummary"] != null)
 			oTable.altTextSummary = oParsed["altTextSummary"];
-		if (oParsed["id"] != null) // to do (похоже надо мапить)
+		if (oParsed["id"] != null) // to do (looks like mapping is needed)
 			oTable.id = oParsed["id"];
 		if (oParsed["queryTable"] != null)
 			oTable.QueryTable = this.QueryTableFromJSON(oParsed["queryTable"]);
@@ -6420,7 +6420,6 @@
 		for (var nElm = 0; nElm < aParsed.length; nElm++)
 			oSlicers.slicer.push(this.SlicerFromJSON(aParsed[nElm], oWorksheet));
 
-		// тут отсюда здесь
 		//return oSlicers;
 	};
 	ReaderFromJSON.prototype.SlicerFromJSON = function(oParsed, oWorksheet)
@@ -6519,7 +6518,7 @@
 			for (var nElm = 0; nElm < oParsed["selections"].length; nElm++)
 				oOlap.selections.push(this.OlapSlicerCacheSelectionFromJSON(oParsed["selections"][nElm]));
 		}
-		// to do (возможно стоит писать в какой-то общий массив, после оттуда зачитывать)
+		// to do (possibly should write to some common array, then read from there)
 		if (oParsed["pivotCacheDefinition"] != null)
 			oOlap.pivotCacheDefinition = this.PivotCacheDefinitionFromJSON(oParsed["pivotCacheDefinition"]);
 

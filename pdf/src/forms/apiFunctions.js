@@ -66,10 +66,10 @@
     
         let sRes = formatted[0].text;
     
-        // Обработка валюты
+        // Currency handling
         sRes = bCurrencyPrepend ? strCurrency + sRes : sRes + strCurrency;
     
-        // Обработка отрицательных значений
+        // Handling negative values
         if (sRes.includes("-")) {
             switch (negStyle) {
                 case 2: 
@@ -197,7 +197,7 @@
      * @returns {string} - The formatted value.
      */
     function FormatValueSpecial(value, psf) {
-        value = value.replace(/\D/g, ""); // Удаляем все нечисловые символы
+        value = value.replace(/\D/g, ""); // Remove all non-numeric characters
         
         switch (psf) {
             case 0:
@@ -280,7 +280,7 @@
 
         let sNewValue = sValue.slice(0, nSelStart) + sChange + sValue.slice(nSelEnd);
         
-        // разделитель дробной части, который можно ввести
+        // decimal separator that can be used
         switch (sepStyle) {
             case 0:
             case 1:
@@ -367,7 +367,7 @@
             return !isNaN(str) && isFinite(str);
         }
 
-        // разделитель дробной части, который можно ввести
+        // decimal separator that can be used
         switch (sepStyle) {
             case 0:
             case 1:
@@ -624,7 +624,7 @@
         let oDoc = editor.getDocumentRenderer().doc;
         let oForm = oDoc.event["target"].field;
         
-        // to do сделать обработку ms 
+        // TODO implement ms handling 
         let oCultureInfo = {};
         Object.assign(oCultureInfo, AscCommon.g_aCultureInfos[9]);
 
@@ -712,7 +712,7 @@
             return;
         }
 
-        // to do сделать обработку ms
+        // TODO implement ms handling
         let oCultureInfo = {};
         Object.assign(oCultureInfo, AscCommon.g_aCultureInfos[9]);
 
@@ -935,7 +935,7 @@
         let oTextFormat = new AscWord.CTextFormFormat();
         oFormMask.Set(mask);
 
-        // если текущее значение не подходит по маске, то ввод запрещаем
+        // if current value doesn't match mask, then we prohibit input
         let isCanEnter;
         if (oDoc.event["willCommit"])
             isCanEnter = sValue != "" ? oFormMask.Check(oTextFormat.GetBuffer(sValue), true) : true;
@@ -960,7 +960,7 @@
         let sNewValue = sValue.slice(0, nSelStart) + sChange + sValue.slice(nSelEnd);
         let arrBuffer = oTextFormat.GetBuffer(sNewValue);
         
-        // проверяем подходит ли по маске, если нет пытаемся скорректировать и проверяем снова
+        // check if it matches mask, if not we try to correct and check again
         isCanEnter = oFormMask.Check(arrBuffer);
         if (!isCanEnter) {
             if (inOnlyRemove == true) {
@@ -973,8 +973,8 @@
             isCanEnter = oFormMask.Check(arrBuffer);
 
             if (isCanEnter) {
-                // находим скорректированные символы для вставки после коррекции
-                let nCount = sCorrected.length - sValue.length; // кол-во вставленных скорректированных символов
+                // find corrected characters for insertion after correction
+                let nCount = sCorrected.length - sValue.length; // number of inserted corrected characters
                 let sFinalChanges = sCorrected.slice(nSelStart, nSelStart + nCount);
                 oDoc.event["rc"] = true;
                 oDoc.event["change"] = sFinalChanges;
@@ -1014,16 +1014,16 @@
         aFieldsNames.forEach(function(name) {
             let oField = oDoc.GetField(name);
 
-            // если по полному имени получили виджет, значит остальные с таким именем тоже виджеты
+            // if we got a widget by full name, then others with same name are also widgets
             if (oField.IsWidget() == true) {
-                // если имя поля совпадает с именем source поля (вызвавшего calculate), то нужно взять значение source поля
+                // if field name matches source field name (that called calculate), then we need to take source field value
                 let oSourceField = oDoc.GetCalculateInfo().GetSourceField();
                 if (oSourceField && oSourceField.GetFullName() == name)
                     aFields.push(oSourceField);
                 else
                     aFields.push(oField);
             }
-            // если не виджет, значит родитель, значит получаем все дочерние виджеты без повторений имён
+            // if not a widget, then it's a parent, so we get all child widgets without name duplicates
             else {
                 let aTmpFields = oDoc.GetAllWidgets(name);
                 let aFullNames = [];
@@ -1068,7 +1068,7 @@
                     let nFracCurr = nParsedNumber.toString().split('.')[1] ? nParsedNumber.toString().split('.')[1].length : 0;
                     let nMaxFrac = Math.max(nFracSum, nFracCurr);
                     
-                    return Math.round((sum + nParsedNumber) * (Math.pow(10, nMaxFrac))) / (Math.pow(10, nMaxFrac)); // исправляем беды с дробной частью
+                    return Math.round((sum + nParsedNumber) * (Math.pow(10, nMaxFrac))) / (Math.pow(10, nMaxFrac)); // fix fractional part issues
                 }, 0);
                 break;
             case "PRD":
@@ -1078,7 +1078,7 @@
                     let nFracCurr = nParsedNumber.toString().split('.')[1] ? nParsedNumber.toString().split('.')[1].length : 0;
                     let nMaxFrac = Math.max(nFracSum, nFracCurr);
                     
-                    return Math.round((sum * nParsedNumber) * (Math.pow(10, nMaxFrac))) / (Math.pow(10, nMaxFrac)); // исправляем беды с дробной частью
+                    return Math.round((sum * nParsedNumber) * (Math.pow(10, nMaxFrac))) / (Math.pow(10, nMaxFrac)); // fix fractional part issues
                 }, 1);
                 break;
             case "AVG":
@@ -1088,7 +1088,7 @@
                     let nFracCurr = nParsedNumber.toString().split('.')[1] ? nParsedNumber.toString().split('.')[1].length : 0;
                     let nMaxFrac = Math.max(nFracSum, nFracCurr);
 
-                    return Math.round((sum + nParsedNumber) * (Math.pow(10, nMaxFrac))) / (Math.pow(10, nMaxFrac)); // исправляем беды с дробной частью
+                    return Math.round((sum + nParsedNumber) * (Math.pow(10, nMaxFrac))) / (Math.pow(10, nMaxFrac)); // fix fractional part issues
                 }, 0);
                 nResult = nResult / aValues.length;
                 break;

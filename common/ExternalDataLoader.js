@@ -95,7 +95,7 @@
 					//c_oAscServerCommandErrors.NoError - everything all right
 					//c_oAscServerCommandErrors.NotModified - no file, no changes
 					//c_oAscServerCommandErrors.Token - wrong token
-					//inProgress && с c_oAscServerCommandErrors.NoError -> the function was called several times and did'nt wait answer
+					//inProgress && c_oAscServerCommandErrors.NoError -> the function was called several times and didn't wait for answer
 
 					//url - file link
 

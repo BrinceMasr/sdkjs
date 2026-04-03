@@ -94,7 +94,7 @@ $(function () {
         var d = isStartPoint ? ws.changeSelectionStartPoint(dc, dr, isCoord, isCtrl) :
             ws.changeSelectionEndPoint(dc, dr, isCoord, isCoord && this.keepType);
         if (!isCoord && !isStartPoint) {
-            // Выделение с зажатым shift
+            // Selection with Shift key held down
             this.canUpdateAfterShiftUp = true;
         }
         this.keepType = isCoord;
@@ -12902,7 +12902,7 @@ $(function () {
 		resCell = getCell(ws.getRange2("A1"));
 		assert.strictEqual(getNormalizedFormula(resCell), "SEQUENCE(10)*SEQUENCE(1,10)", "Multiplication table: formula correctly parsed");
 		
-		// Проверка выборочных значений в таблице умножения 10x10
+		// Verify sample values in 10x10 multiplication table
 		assert.strictEqual(Number(ws.getRange2("A1").getValue()), 1, "A1 = 1*1 = 1");
 		assert.strictEqual(Number(ws.getRange2("A10").getValue()), 10, "A10 = 10*1 = 10");
 		assert.strictEqual(Number(ws.getRange2("J1").getValue()), 10, "J1 = 1*10 = 10");

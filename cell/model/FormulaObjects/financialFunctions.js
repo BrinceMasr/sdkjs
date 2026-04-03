@@ -3573,7 +3573,7 @@ function (window, undefined) {
 	cNPV.prototype.argumentsMin = 2;
 	cNPV.prototype.numFormat = AscCommonExcel.cNumFormatNone;
 	cNPV.prototype.argumentsType = [argType.number, [argType.number]];
-	//TODO нужен новый тип - все элементы приходят в виде массива, кроме первого
+	//TODO need a new type - all elements are passed as arrays, except the first one
 	cNPV.prototype.arrayIndexes = {1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1};
 	cNPV.prototype.getArrayIndex = function (index) {
 		if (index === 0) {

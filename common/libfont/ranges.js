@@ -968,7 +968,7 @@
 			if (undefined === _char || 0 == _char)
 				return;
 
-			// ищем среди уже найденных
+			// search among already found
 			var _range = getRangeBySymbol(_char, this.UsedRanges);
 			if (_range != null)
 				return this.FontsByRange[_range.Name];

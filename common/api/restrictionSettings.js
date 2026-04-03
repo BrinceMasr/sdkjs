@@ -35,7 +35,7 @@
 (function (window)
 {
 	/**
-	 * Дополнительные настройки при выставлении asc_setRestriction в редакторах
+	 * Additional settings for asc_setRestriction method
 	 * @constructor
 	 */
 	function CRestrictionSettings()

@@ -36,7 +36,7 @@
 {
 	window["AscInputMethod"] = window["AscInputMethod"] || {};
 	///
-	// такие методы нужны в апи
+	// these methods are required in the API
 	// baseEditorsApi.prototype.Begin_CompositeInput = function()
 	// baseEditorsApi.prototype.Replace_CompositeText = function(arrCharCodes)
 	// baseEditorsApi.prototype.Set_CursorPosInCompositeText = function(nPos)
@@ -76,8 +76,8 @@
 		this.Api = api;
 
 		this.TargetId = null; // id caret
-		this.HtmlDiv  = null; // для незаметной реализации одной textarea недостаточно. parent для HtmlArea
-		this.HtmlArea = null; // HtmlArea - элемент для ввода
+		this.HtmlDiv  = null; // a single textarea is not enough for seamless implementation. parent for HtmlArea
+		this.HtmlArea = null; // HtmlArea - input element
 		this.ElementType = InputTextElementType.TextArea;
 
 		// ---------------------------------------------------------------
@@ -91,21 +91,21 @@
 		this.HtmlAreaWidth = 200;
 		// ---------------------------------------------------------------
 
-		// информация о текущем состоянии текста -------------------------
+		// current text state information -------------------------
 
-		// текущее значение в textarea
+		// current value in textarea
 		this.Text = "";
 
-		// текст до того, как пришли сообщения onCompositeStart/onCompositeUpdate
-		// т.е. текст, который пришел на onInput/onTextInput, и когда мы не внутри onComposite[Begin-End]
+		// text before onCompositeStart/onCompositeUpdate messages arrived
+		// i.e. text that came to onInput/onTextInput, when we are not inside onComposite[Begin-End]
 		this.TextBeforeComposition = "";
 
-		// в каком состоянии апи (композитный ли ввод сейчас)
+		// API state (whether composite input is active now)
 		this.IsComposition = false;
 
 		// ---------------------------------------------------------------
 
-		// не обрабатывать keyPress после keyDown
+		// do not process keyPress after keyDown
 		this.IsDisableKeyPress = false;
 
 		this.nativeFocusElement = null;
@@ -120,13 +120,13 @@
 		this.isInputHelpersPresent = false;
 		this.isInputHelpers = {};
 
-		// параметры для показа/скрытия виртуальной клавиатуры.
+		// parameters for showing/hiding virtual keyboard.
 		this.isHardCheckKeyboard = AscCommon.AscBrowser.isSailfish;
 
 		this.virtualKeyboardClickTimeout = -1;
 		this.virtualKeyboardReadOnly_ShowKeyboard = AscCommon.AscBrowser.isAndroid && AscCommon.AscBrowser.isMozilla;
 
-		// для сброса текста при фокусе
+		// for clearing text on focus
 		this.checkClearTextOnFocusTimerId = -1;
 
 		this.isDisableKeyboard = false;
@@ -147,7 +147,7 @@
 			console.log(value);
 	};
 
-	// для совместимости. убрал системный ввод
+	// for compatibility. removed system input
 	CTextInputPrototype.systemInputEnable = function()
 	{
 	};
@@ -177,7 +177,7 @@
 			return false;
 		}
 
-		// проверим - может это навигация в окне хэлпера
+		// check if this is navigation in the helper window
 		if (this.isInputHelpersPresent)
 		{
 			switch (e.keyCode)
@@ -284,8 +284,8 @@
 			}
 		}
 
-		// ios копирование и вырезка через клавиатуру внешнюю - требует селекта в фокусном textarea
-		// но если селектить - его видно. да и куча проблем. попробуем сэмулировать
+		// iOS copy and cut via external keyboard requires selection in focused textarea
+		// but if we select - it becomes visible, plus many other issues. let's try to emulate
 		if (this.Api.isMobileVersion && AscCommon.AscBrowser.isAppleDevices)
 		{
 			if (e.metaKey)
@@ -353,7 +353,7 @@
 			return false;
 		}
 
-		// вся обработка - в onInput
+		// all processing is in onInput
 	};
 	CTextInputPrototype.onKeyUp = function(e)
 	{
@@ -408,13 +408,13 @@
 
 		if (("compositionstart" === type) && this.IsComposition)
 		{
-			// не пришел end - пришлем сами
+			// end was not received - we'll send it ourselves
 			this.compositeEnd();
 		}
 
 		if (("compositionstart" === type || "compositionupdate" === type) && !this.IsComposition)
 		{
-			// начался композитный ввод
+			// composite input has started
 			this.TextBeforeComposition = this.Text;
 
 			this.log("compositionStart: " + this.TextBeforeComposition);
@@ -446,7 +446,7 @@
 		}
 		else
 		{
-			// текст может не только добавиться, но и замениться (например на маке зажать i - и выбрать вариант)
+			// text can not only be added but also replaced (for example on Mac hold i and select a variant)
 			let codesOld = [];
 			for (let iter = this.Text.getUnicodeIterator(); iter.check(); iter.next())
 				codesOld.push(iter.value());
@@ -469,12 +469,12 @@
 
 			newTextLength = newLen;
 
-			// удаляем то, чего уже нет
+			// remove what no longer exists
 			let codesRemove = undefined;
 			if (oldLen > equalsLen)
 				codesRemove = codesOld.slice(equalsLen);
 
-			// удаляем старые из массива
+			// remove old items from array
 			if (0 !== equalsLen)
 				codesNew.splice(0, equalsLen);
 
@@ -483,18 +483,18 @@
 
 			if (10 === lastSymbol)
 			{
-				// заглушка на интерфейс (если там enter был нажат - и сначала blur(), и только затем применение).
+				// interface workaround (if enter was pressed there - first blur(), then application).
 				this.clear();
 				return;
 			}
 
-			// добавляем новые
+			// add new items
 			isAsyncInput = this.checkTextInput(codesNew, codesRemove);
 		}
 
 		if (("compositionend" === type) && this.IsComposition)
 		{
-			// закончился композитный ввод
+			// composite input has ended
 			this.compositeEnd();
 
 			this.log("compositionEnd: " + newValue);
@@ -502,7 +502,7 @@
 
 		if (!isAsyncInput)
 		{
-			// если асинхронно - то на коллбеке придет onInput - и текст добавится позже
+			// if async - onInput will come on callback and text will be added later
 			this.Text = newValue;
 		}
 
@@ -514,19 +514,19 @@
 			let isClear = false;
 			switch (lastSymbol)
 			{
-				case 32: // пробел
-				case 46: // точка
-				case 44: // запятая
-				//case 12290: // азиатская точка
-				//case 65292: // азиатская запятая
+				case 32: // space
+				case 46: // period
+				case 44: // comma
+				//case 12290: // Asian period
+				//case 65292: // Asian comma
 				{
 					isClear = true;
 					break;
 				}
 				default:
 				{
-					// надеемся, что при вводе все-таки будут точки/пробелы/запятые
-					// если нет - то не даем копить до бесконечности.
+					// hoping that input will eventually contain periods/spaces/commas
+					// if not - don't let it accumulate indefinitely.
 					let currentTextLenMax = this.Api.isMobileVersion ? 20 : 100;
 					if (newTextLength > currentTextLenMax)
 						isClear = true;
@@ -643,7 +643,7 @@
 		{
 			if (!this.isSpaceOnKeyDown)
 			{
-				// иначе пробел добавился на onKeyDown
+				// otherwise space was added on onKeyDown
 				let keyObject = this.getKeyboardEventObject(code);
 				this.Api.onKeyDown(keyObject);
 				this.Api.onKeyUp(keyObject);
@@ -652,9 +652,9 @@
 		}
 		else
 		{
-			// TODO: отдельный метод в апи
-			// пока имитируем через keyCode - для keyDown/Up - сделаем такой код,
-			// который ни на что не влияет. код для буквы 'a' - 65
+			// TODO: separate method in API
+			// for now we emulate via keyCode - for keyDown/Up - we'll use a code
+			// that doesn't affect anything. code for letter 'a' is 65
 			let keyObject = this.getKeyboardEventObject(code);
 			let keyObjectUpDown = this.getKeyboardEventObject(65);
 
@@ -813,7 +813,7 @@
 
 		if (!this.IsLockTargetMode)
 		{
-			// никакого смысла прыгать курсором туда-сюда
+			// no point in jumping the cursor back and forth
 			if (_offset == 0 && this.compositionValue.length == 1)
 				_offset = 1;
 		}
@@ -863,9 +863,9 @@
 		else
 			this.ReadOnlyCounter--;
 
-		// при синхронной загрузке шрифтов (десктоп)
-		// может вызываться и в обратном порядке (setReadOnly(false), setReadOnly(true))
-		// поэтому сравнение с нулем неверно. отрицательные значение могут быть.
+		// during synchronous font loading (desktop)
+		// can be called in reverse order (setReadOnly(false), setReadOnly(true))
+		// so comparison with zero is incorrect. negative values are possible.
 
 		this.setReadOnlyWrapper((0 >= this.ReadOnlyCounter) ? false : true);
 	};
@@ -916,7 +916,7 @@
 		this.HtmlDiv.style.background = "transparent";
 		this.HtmlDiv.style.border     = "none";
 
-		// в хроме скроллируется редактор, когда курсор текстового поля выходит за пределы окна
+		// in Chrome the editor scrolls when the text field cursor goes beyond the window boundaries
 		if (AscCommon.AscBrowser.isChrome && !TEXT_INPUT_DEBUG)
 			this.HtmlDiv.style.position = "fixed";
 		else
@@ -1037,7 +1037,7 @@
 		else
 			oHtmlParent = document.getElementById(parent_id);
 
-		// нужен еще один родитель. чтобы скроллился он, а не oHtmlParent
+		// need another parent. so that it scrolls, not oHtmlParent
 		var oHtmlDivScrollable = document.createElement("div");
 		oHtmlDivScrollable.id = "area_id_main";
 		let styleZIndex = TEXT_INPUT_DEBUG ? "z-index:50;" : "z-index:0;";
@@ -1416,15 +1416,15 @@
 			}
 			if ("IFRAME" == _name)
 			{
-				// перехват клавиатуры
+				// keyboard interception
 				t.Api.asc_enableKeyEvents(false, true);
 				t.nativeFocusElement = null;
 				return;
 			}
 
-			// перехватывает ли элемент ввод
+			// whether the element intercepts input
 			var _oo_editor_input    = _getAttirbute(t.nativeFocusElement, "oo_editor_input", 3);
-			// нужно ли прокидывать нажатие клавиш элементу (ТОЛЬКО keyDown)
+			// whether to forward key presses to the element (keyDown ONLY)
 			var _oo_editor_keyboard = _getAttirbute(t.nativeFocusElement, "oo_editor_keyboard", 3);
 
 			if (!_oo_editor_input && !_oo_editor_keyboard)
@@ -1435,7 +1435,7 @@
 
 			if (_oo_editor_input == "true")
 			{
-				// перехват клавиатуры
+				// keyboard interception
 				t.Api.asc_enableKeyEvents(false, true);
 				t.nativeFocusElement = null;
 				return;
@@ -1443,13 +1443,13 @@
 
 			if (_isElementEditable && (_oo_editor_input != "false"))
 			{
-				// перехват клавиатуры
+				// keyboard interception
 				t.Api.asc_enableKeyEvents(false, true);
 				t.nativeFocusElement = null;
 				return;
 			}
 
-			// итак, ввод у нас. теперь определяем, нужна ли клавиатура элементу
+			// so, input is ours. now determine if the element needs the keyboard
 			if (_oo_editor_keyboard != "true")
 				t.nativeFocusElement = null;
 

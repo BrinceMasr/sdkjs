@@ -117,14 +117,14 @@
 
 	function CPluginsManager(api)
 	{
-		// обычные и системные храним отдельно
+		// regular and system plugins are stored separately
 		this.plugins          = [];
 		this.systemPlugins	  = [];
 
-		// мап guid => plugin
+		// map guid => plugin
 		this.pluginsMap = {};
 
-		// дополнитеьная информация по всем запущенным плагинам.
+		// additional information for all running plugins.
 		this.runnedPluginsMap = {}; // guid => { iframeId: "", currentVariation: 0, currentInit: false, isSystem: false, startData: {}, closeAttackTimer: -1, methodReturnAsync: false }
 
 		this.path             = "../../../../sdkjs-plugins/";
@@ -135,7 +135,7 @@
 
 		this.isSupportManyPlugins = (this.api.isMobileVersion || this.api.isEmbedVersion) ? false : true;
 
-		// используется только если this.isSupportManyPlugins === false
+		// used only if this.isSupportManyPlugins === false
 		this.runAndCloseData = null;
 
 		this.queueCommands = [];
@@ -145,20 +145,20 @@
 		this.internalCommandAsync = false;
 		this._internalEvents = {};
 
-		// посылать ли сообщения о плагине в интерфейс
-		// (визуальные - да, олеобъекты, обновляемые по ресайзу - нет)
+		// whether to send plugin messages to the interface
+		// (visual - yes, ole objects updated on resize - no)
 		this.sendsToInterface = {};
 
 		this.language = "en-EN";
 
-		// флаг для зашифрованного режима докладчика
+		// flag for encrypted presenter mode
 		this.sendEncryptionDataCounter = 0;
 		if (this.api.isCheckCryptoReporter)
 			this.checkCryptoReporter();
 
-		// сообщения, которые ДОЛЖНЫ отправиться в каждый плагин один раз
-		// например onDocumentContentReady
-		// объект - { name : data ] } - список
+		// messages that MUST be sent to each plugin once
+		// for example onDocumentContentReady
+		// object - { name : data ] } - list
 		this.mainEventTypes = {
 			"onDocumentContentReady" : true
 		};
@@ -176,7 +176,7 @@
 		// registration
 		unregisterAll : function()
 		{
-			// удаляем все, кроме запущенных
+			// delete all except running ones
 			for (let i = 0; i < this.plugins.length; i++)
 			{
 				if (!this.runnedPluginsMap[this.plugins[i].guid])
@@ -190,7 +190,7 @@
 
 		unregister : function(guid)
 		{
-			// нет плагина - нечего удалять
+			// no plugin - nothing to delete
 			if (!this.pluginsMap[guid])
 				return null;
 
@@ -230,12 +230,12 @@
 
 				if (this.runnedPluginsMap[guid])
 				{
-					// не меняем запущенный
+					// don't change the running one
 					continue;
 				}
 				else if (this.pluginsMap[guid])
 				{
-					// заменяем новым
+					// replace with new one
 					for (var j = 0; j < this.plugins.length; j++)
 					{
 						if (this.plugins[j].guid === guid && this.plugins[j].getIntVersion() < newPlugin.getIntVersion())
@@ -307,7 +307,7 @@
 			{
 				let guid = plugins[i].guid;
 
-				// системные не обновляем
+				// don't update system plugins
 				if (this.pluginsMap[guid])
 				{
 					continue;
@@ -339,7 +339,7 @@
 				{
 					if (oldPlugin.getIntVersion() < newPlugin.getIntVersion())
 					{
-						// нужно обновить
+						// need to update
 						for (let j = 0; j < this.plugins.length; j++)
 						{
 							if (this.plugins[j].guid === newPlugin.guid)
@@ -802,7 +802,7 @@
 					this.close(guid);
 				}
 
-				// защита от плохого плагина
+				// protection from a bad plugin
 				runObject.closeAttackTimer = setTimeout(function()
 				{
 					window.g_asc_plugins.close();
@@ -1005,7 +1005,7 @@
 
 			if (isRunned)
 			{
-				// запуск запущенного => закрытие (только для видимых, так как в интерфейсе "отжим" кнопки плагина - приходит run)
+				// running an already running plugin => close it (only for visible ones, since in the UI "releasing" the plugin button - sends run)
 				if (isSystem || isBackground)
 				{
 					if ((plugin.variations[runObject.currentVariation].initDataType === Asc.EPluginDataType.ole) &&
@@ -1033,7 +1033,7 @@
 				if ((plugin.variations[0].initDataType === Asc.EPluginDataType.ole) &&
 					data && data.getAttribute && data.getAttribute("objectId"))
 				{
-					// не запускаем сервис, если он отключен.
+					// don't start the service if it's disabled.
 					return false;
 				}
 				this.addUsedBackgroundPlugins(guid);
@@ -1041,7 +1041,7 @@
 
 			if (!isSystem && !this.isSupportManyPlugins && !isOnlyResize)
 			{
-				// смотрим, есть ли запущенный несистемный плагин
+				// check if there is a running non-system plugin
 				var guidOther = "";
 				for (let i in this.runnedPluginsMap)
 				{
@@ -1054,7 +1054,7 @@
 
 				if (guidOther !== "")
 				{
-					// стопим текущий, а после закрытия - стартуем новый.
+					// stop the current one, and after closing - start the new one.
 					this.runAndCloseData = {};
 					this.runAndCloseData.guid = guid;
 					this.runAndCloseData.variation = variation;
@@ -1108,7 +1108,7 @@
 			if (!plugin || !runObject)
 				return;
 
-			// приходили главные евенты. нужно их послать
+			// main events have arrived. need to send them
 			for (let mainEventType in this.mainEvents)
 			{
 				if (plugin.variations[runObject.currentVariation].eventsMap[mainEventType])
@@ -1137,7 +1137,7 @@
 			if (runObject.startData.getAttribute("resize") === true)
 				this.startLongAction();
 
-			// заглушка
+			// stub
 			if (this.api.WordControl && this.api.WordControl.m_oTimerScrollSelect !== -1)
 			{
 				clearInterval(this.api.WordControl.m_oTimerScrollSelect);
@@ -1304,7 +1304,7 @@
 					}
 					case Asc.EPluginDataType.ole:
 					{
-						// теперь выше задается
+						// now set above
 						break;
 					}
 					case Asc.EPluginDataType.desktop:
@@ -1492,7 +1492,7 @@
 		{
 			if (0 === this.queueCommands.length)
 			{
-				// значит был вызван плагинный метод не в плагине
+				// means a plugin method was called outside of a plugin
 				return;
 			}
 

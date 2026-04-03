@@ -313,7 +313,7 @@
 		return AscCommonExcel.UndoRedoDataTypes.Slicer;
 	};
 	CT_slicer.prototype.clone = function (ws) {
-		//если ws-> undefined, то клонирование для интерфейса, только CT_slicer без внутренних структур
+		//if ws-> undefined, then cloning for interface, only CT_slicer without internal structures
 		var res = new CT_slicer(ws);
 
 		res.name = this.name;
@@ -412,7 +412,7 @@
 		}
 
 		if (!this.cacheDefinition) {
-			//необходимо проверить, возможно данный кэш уже существует
+			//need to check, perhaps this cache already exists
 			var cache;
 			var caches = this.ws.getSlicerCachesBySourceName(name);
 			if (caches) {
@@ -675,7 +675,7 @@
 		History.Create_NewPoint();
 		History.StartTransaction();
 
-		//TODO передать информацию во view о смене caption
+		//TODO pass information to view about caption change
 		if (this.caption === oldVal) {
 			this.setCaption(newVal);
 		}
@@ -799,7 +799,7 @@
 	};
 
 	CT_slicer.prototype.getSortOrder = function () {
-		//TODO может быть не только таблица
+		//TODO may not only be a table
 		var table = this.cacheDefinition.getTableSlicerCache() || this.cacheDefinition.getTabular();
 		if (table) {
 			return table.sortOrder;
@@ -1026,7 +1026,7 @@
 
 		this.wb = wb;
 
-		//пока добавил объект для хранения типа, чтобы не проходится по внутреннему дереву
+		//for now I added an object to store the type, so as not to traverse the internal tree
 		this._type = null;
 
 		return this;
@@ -1039,7 +1039,7 @@
 		switch (type) {
 			case insertSlicerType.table: {
 				this.sourceName = name;
-				//TODO для генерации имени нужна отдельная функция
+				//TODO a separate function is needed for name generation
 				this.name = this.generateSlicerCacheName(name);
 				this.tableSlicerCache = new CT_tableSlicerCache();
 				this.tableSlicerCache.tableId = obj_name;
@@ -1053,7 +1053,7 @@
 				var cacheField = -1 !== fieldIndex && cacheFields[fieldIndex];
 				if (cacheField) {
 					this.sourceName = cacheField.asc_getName();
-					//TODO для генерации имени нужна отдельная функция
+					//TODO a separate function is needed for name generation
 					this.name = this.generateSlicerCacheName(name);
 					this.data = new CT_slicerCacheData();
 					this.data.tabular = new CT_tabularSlicerCache();
@@ -1130,7 +1130,7 @@
 			if (this.slicerCacheHideItemsWithNoData.length === 0) {
 				res.slicerCacheHideItemsWithNoData = this.slicerCacheHideItemsWithNoData;
 			} else {
-				//TODO проверить структуру
+				//TODO check the structure
 				for (i = 0; i < this.slicerCacheHideItemsWithNoData.length; i++) {
 					if (!res.slicerCacheHideItemsWithNoData) {
 						res.slicerCacheHideItemsWithNoData = [];
@@ -1167,7 +1167,7 @@
 
 		//replace not valid symbols
 		name = name.replace(/[-+*\/^&%<=>: ;//),]/g, "_");
-		//TODO дополнительная проверка - пересмотреть
+		//TODO additional check - needs review
 		if (!AscCommon.rx_defName.test(name)) {
 			name = name.replace(/[^a-zA-ZА-Яа-яЁё0-9]/gi, "_")
 		}
@@ -1303,13 +1303,13 @@
 	};
 
 	CT_slicerCacheDefinition.prototype.getIndexSheetCache = function () {
-		//TODO позже можно использовать данную функцию в функции getFilterValues. сейчас часть кода дублируется.
+		//TODO later this function can be used in getFilterValues. currently part of the code is duplicated.
 		var res = null;
 		var type = this.getType();
 		var wb = this.wb;
 		switch (type) {
 			case insertSlicerType.table: {
-				//пока беру первый элемент, поскольку не очень понятно в каких случаях их вообще может быть несколько
+				//for now taking the first element, since it's not clear in which cases there can be several
 				var tableCache = this.tableSlicerCache;
 				var tableObj = wb.getTableByName(tableCache.tableId, true);
 				res = tableObj ? tableObj.index : null;
@@ -1330,7 +1330,7 @@
 		var wb = this.wb;
 		switch (type) {
 			case insertSlicerType.table: {
-				//пока беру первый элемент, поскольку не очень понятно в каких случаях их вообще может быть несколько
+				//for now taking the first element, since it's not clear in which cases there can be several
 				var tableCache = this.tableSlicerCache;
 				var tableObj = wb.getTableByName(tableCache.tableId, true);
 				var table = tableObj ? tableObj.table : null;
@@ -1382,7 +1382,7 @@
 		var wb = this.wb;
 		switch (type) {
 			case insertSlicerType.table: {
-				//пока беру первый элемент, поскольку не очень понятно в каких случаях их вообще может быть несколько
+				//for now taking the first element, since it's not clear in which cases there can be several
 				var tableCache = this.tableSlicerCache;
 				var table = wb.getTableByName(tableCache.tableId);
 				if (table) {
@@ -1557,7 +1557,7 @@
 		var wb = this.wb;
 		switch (type) {
 			case insertSlicerType.table: {
-				//пока беру первый элемент, поскольку не очень понятно в каких случаях их вообще может быть несколько
+				//for now taking the first element, since it's not clear in which cases there can be several
 				var tableCache = this.tableSlicerCache;
 				var table = wb.getTableByName(tableCache.tableId);
 				if (table) {
@@ -1919,7 +1919,7 @@
 
 
 	function CT_olapSlicerCacheItem() {
-		this.p = [];//OlapSlicerCacheItemParent - состоит из одного поля, поэтому данную структуру не добавляю
+		this.p = [];//OlapSlicerCacheItemParent - consists of one field, so I don't add this structure
 		this.n = null;
 		this.c = null;
 		this.nd = false;
@@ -2426,7 +2426,7 @@
 	};
 
 	function CT_olapSlicerCacheSelection() {
-		this.p = [];//OlapSlicerCacheItemParent - состоит из одного поля, поэтому данную структуру не добавляю
+		this.p = [];//OlapSlicerCacheItemParent - consists of one field, so I don't add this structure
 		this.n = null;
 	}
 

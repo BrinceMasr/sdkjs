@@ -35,14 +35,14 @@
 (function(window)
 {
 	/**
-	 * Механизм поиска. Хранит параграфы (или PageMatch объект) с найденной строкой
+	 * Search mechanism. Stores paragraphs (or PageMatch object) with the found string
 	 * @constructor
 	 */
 	function CPdfSearch(oPdfDoc) {
 		AscCommonWord.CDocumentSearch.call(this, oPdfDoc);
 
-		this.Show			= false;	// флаг что надо хайлайтить PdfPageMatch результаты на странице
-		this.PagesMatches	= [];		// результаты поиска по страницам
+		this.Show			= false;	// flag indicating to highlight PdfPageMatch results on the page
+		this.PagesMatches	= [];		// search results by pages
 		this.PagesLines		= [];
 	}
 
@@ -61,7 +61,7 @@
 	CPdfSearch.prototype.Clear = function() {
 		this.Reset();
 
-		// Очищаем предыдущие элементы поиска
+		// Clear previous search elements
 		for (var Id in this.Elements) {
 			if (true != this.Elements[Id].pdfPageMatch) {
 				this.Elements[Id].ClearSearchResults();
@@ -89,7 +89,7 @@
         for (let i = 0; i < oPagesInfo.pages.length; i++) {
             let oPageInfo = oPagesInfo.pages[i];
 
-            // сначала ищем на самой странице, если не было конвертации в шейпы
+            // first search on the page itself, if there was no conversion to shapes
             let nStartIdx = this.Id;
             let oPdfPageResult;
             if (true != oFile.pages[i].isRecognized) {
@@ -100,15 +100,15 @@
                 }
             }
             
-            // затем ищем в drawings
+            // then search in drawings
             for (let j = 0; j < oPageInfo.drawings.length; ++j) {
                 oPageInfo.drawings[j].Search && oPageInfo.drawings[j].Search(this, search_Common);
             }
 
-			// to do (нужен поиск в формах, аннотациях?)
+			// to do (is search needed in forms, annotations?)
 
             this.PagesMatches[i] = [];
-            // в Elements все результаты поиска, в PagesMatches - результаты по страницам
+            // Elements contains all search results, PagesMatches contains results by pages
             for (let j = nStartIdx; j < this.Id; j++) {
                 this.PagesMatches[i].push(this.Elements[j]);
             }

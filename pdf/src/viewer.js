@@ -95,12 +95,12 @@
 		Page : 2
 	};
 
-	// класс страницы.
-	// isPainted - значит она когда-либо рисовалась и дорисовалась до конца (шрифты загружены)
-	// links - гиперссылки. они запрашиваются ТОЛЬКО у страниц на экране и у отрисованных страниц.
-	// так как нет смысла запрашивать ссылки у невидимых страниц и у страниц, которые мы в данный момент не можем отрисовать
-	// text - текстовые команды. они запрашиваются всегда, если есть какая-то страница без текстовых команд
-	// страницы на экране в приоритете.
+	// page class.
+	// isPainted - means it was ever drawn and finished drawing (fonts loaded)
+	// links - hyperlinks. they are requested ONLY for pages on screen and for already drawn pages.
+	// since there's no point in requesting links for invisible pages and pages we currently can't draw
+	// text - text commands. they are always requested if there's any page without text commands
+	// pages on screen have priority.
 	function CPageInfo()
 	{
 		this.Id = null;
@@ -109,9 +109,9 @@
 			AscCommon.g_oTableId.Add(this, this.Id);
 		}
 		
-		this.annotsContentChanges = new AscCommon.CContentChanges(); // список изменений(добавление/удаление элементов)
-        this.fieldsContentChanges = new AscCommon.CContentChanges(); // список изменений(добавление/удаление элементов)
-        this.drawingsContentChanges = new AscCommon.CContentChanges(); // список изменений(добавление/удаление элементов)
+		this.annotsContentChanges = new AscCommon.CContentChanges(); // list of changes (add/remove elements)
+        this.fieldsContentChanges = new AscCommon.CContentChanges(); // list of changes (add/remove elements)
+        this.drawingsContentChanges = new AscCommon.CContentChanges(); // list of changes (add/remove elements)
 
 		this.isPainted				= false;
 		this.links					= null;
@@ -297,7 +297,7 @@
         
         AscCommon.History.Add(new CChangesPDFDocumentFieldsContent(this, nPos, [oField], false));
 
-		// удаляем из родителя
+		// remove from parent
         let oParent = oField.GetParent();
         if (!isOnMove && oParent) {
             oParent.RemoveKid(oField);
@@ -455,7 +455,7 @@
 	{
 		this.pages = [];
 
-		// все страницы ДО this.countCurrentPage должны иметь текстовые команды
+		// all pages BEFORE this.countCurrentPage must have text commands
 		this.countTextPages = 0;
 	}
 	CDocumentPagesInfo.prototype.setCount = function(count)
@@ -707,12 +707,12 @@
 
 		this.timer = function()
 		{
-			// в порядке важности
+			// in order of importance
 
-			// 1) отрисовка
-			// 2) гиперссылки для видимых (и уже отрисованных!) страниц
-			// 3) табнейлы (если надо)
-			// 4) текстовые команды
+			// 1) rendering
+			// 2) hyperlinks for visible (and already rendered!) pages
+			// 3) thumbnails (if needed)
+			// 4) text commands
 
 			var isViewerTask = oThis.isRepaint;
 			if (oThis.isRepaint)
@@ -873,13 +873,13 @@
 		{
 			if (this.moduleState == ModuleState.Loaded)
 			{
-				// все загружено - ок
+				// everything is loaded - ok
 				return true;
 			}
 			
 			if (this.moduleState == ModuleState.Loading)
 			{
-				// загружается
+				// loading
 				return false;
 			}
 
@@ -888,7 +888,7 @@
 			var scriptElem = document.createElement('script');
 			scriptElem.onerror = function()
 			{
-				// TODO: пробуем грузить несколько раз
+				// TODO: try loading multiple times
 			};
 
 			var _t = this;
@@ -1091,7 +1091,7 @@
 			let _t = this;
 			let oDoc = this.getPDFDoc();
 
-			// в интерфейсе есть проблема - нужно посылать onDocumentContentReady после setAdvancedOptions
+			// there's a problem in the interface - need to send onDocumentContentReady after setAdvancedOptions
 			setTimeout(function(){
 
 				if (!_t.isStarted)
@@ -1204,7 +1204,7 @@
 			var _t = this;
 			if (this.file.isNeedPassword())
 			{
-				// при повторном вводе пароля - проблемы в интерфейсе, если синхронно
+				// when re-entering password - interface problems if done synchronously
 				setTimeout(function(){
 					_t.sendEvent("onNeedPassword");
 				}, 100);
@@ -1257,7 +1257,7 @@
 
 			this.Api.WordControl.m_oOverlayApi = this.overlay;
 
-			// TODO: Надо перенести в нормальное место
+			// TODO: Need to move to a proper place
 			let isLoad = AscCommon.g_oIdCounter.IsLoad();
 			AscCommon.g_oIdCounter.Set_Load(true);
 
@@ -1408,7 +1408,7 @@
 
 		this.clearZoomCoord = function()
 		{
-			// нужно очищать, чтобы при любом ресайзе мы не скролились к последней сохранённой точке
+			// need to clear so that on any resize we don't scroll to the last saved point
 			this.zoomCoordinate = null;
 		};
 
@@ -1512,7 +1512,7 @@
 			let nPage		= oActiveObj ? oActiveObj.GetPage() : undefined;
 
 			this.checkVisiblePages();
-			// выход из активного объекта если сместились на другую страницу
+			// exit active object if we moved to another page
 			if (oActiveObj && !(nPage >= this.startVisiblePage && nPage <= this.endVisiblePage)) {
 				oDoc.BlurActiveObject();
 			}
@@ -1543,7 +1543,7 @@
 			this.m_oScrollHorApi.scrollToX(posX);
 
 			this.checkVisiblePages();
-			// выход из активного объекта если сместились на другую страницу
+			// exit active object if we moved to another page
 			if (oActiveObj && !(nPage >= this.startVisiblePage && nPage <= this.endVisiblePage)) {
 				oDoc.BlurActiveObject();
 			}
@@ -1596,7 +1596,7 @@
 			if (!this.file || !this.file.isValid())
 				return;
 
-			// здесь картинки не обнуляем
+			// don't reset images here
 			for (let i = 0, len = this.file.pages.length; i < len; i++)
 			{
 				if (!this.drawingPages[i])
@@ -1626,7 +1626,7 @@
 			}
 
 			function isLandscape(angle) {
-				// Углы поворота, указывающие на ландшафтную ориентацию
+				// Rotation angles indicating landscape orientation
 				const landscapeAngles = [90, 270];
 				return landscapeAngles.includes(angle);
 			}
@@ -1640,7 +1640,7 @@
 				if (pageW > this.documentWidth)
 					this.documentWidth = pageW;
 			}
-			// прибавим немного
+			// add a little bit
 			this.documentWidth += (4 * AscCommon.AscBrowser.retinaPixelRatio) >> 0;
 
 			var curTop = this.betweenPages + this.offsetTop;
@@ -1689,7 +1689,7 @@
 			if (!pageObject)
 				return null;
 
-			// после конвертации не даем кликать линки на странице
+			// after conversion don't allow clicking links on the page
 			if (this.file.pages[pageObject.index].isRecognized) {
 				return null;
 			}
@@ -1754,12 +1754,12 @@
 
 			const nPage	= pageObject.index;
 
-			// координаты клика на странице в MM
+			// click coordinates on page in MM
 			let pageObjectMM = this.getPageByCoords2(AscCommon.global_mouseEvent.X, AscCommon.global_mouseEvent.Y);
 
 			let page = this.pagesInfo.pages[nPage];
 			
-			// если есть заселекченная shape base аннотация под мышкой, залезающая на другую страницу
+			// if there's a selected shape-based annotation under the mouse that extends to another page
 			if (oDoc.mouseDownAnnot) {
 				let oController = oDoc.GetController();
 				let oActiveAnnot = oDoc.mouseDownAnnot;
@@ -1782,7 +1782,7 @@
 
 			if (page.annots)
 			{
-				// сначала ищем text annot (sticky note)
+				// first search for text annot (sticky note)
 				for (let i = page.annots.length -1; i >= 0; i--)
 				{
 					let oAnnot = page.annots[i];
@@ -1812,7 +1812,7 @@
 					if (true !== bGetHidden && oAnnot.IsHidden() == true || oAnnot.IsComment())
 						continue;
 
-					// у draw аннотаций ищем по path
+					// for draw annotations search by path
 					if (oAnnot.IsShapeBased())
 					{
 						let isHitted = false;
@@ -1830,7 +1830,7 @@
 					if (pageObject.x >= oAnnot._rect[0] && pageObject.x <= oAnnot._rect[0] + nAnnotWidth &&
 						pageObject.y >= oAnnot._rect[1] && pageObject.y <= oAnnot._rect[1] + nAnnotHeight)
 					{
-						// у маркап аннотаций ищем по quads (т.к. rect too wide)
+						// for markup annotations search by quads (because rect too wide)
 						if (oAnnot.IsTextMarkup())
 						{
 							if (oAnnot.IsInQuads(pageObject.x, pageObject.y))
@@ -1846,7 +1846,7 @@
 				return false;
 			}
 
-			// не даем взаимодействовать с документом пока не произошла отрисовка
+			// don't allow interaction with document until rendering is complete
 			return this.scheduledRepaintTimer == null && this.isRepaint != true && this.initPaintDone == true && !this.isCMapLoading &&
 				(!Asc.editor.getPDFDoc().CollaborativeEditing.Get_GlobalLock() || Asc.editor.isViewMode);
 		};
@@ -2006,11 +2006,11 @@
 			{
 				if (oThis.getPDFDoc().mouseDownLinkObject)
 				{
-					// если нажали на ссылке - то не зажимаем лапу
+					// if clicked on a link - don't grab with hand
 					oThis.setCursorType("pointer");
 					return;
 				}
-				// режим лапы. просто начинаем режим Active - зажимаем лапу
+				// hand mode. just start Active mode - grab with hand
 				oThis.MouseHandObject.X = oThis.mouseDownCoords.X;
 				oThis.MouseHandObject.Y = oThis.mouseDownCoords.Y;
 				oThis.MouseHandObject.Active = true;
@@ -2063,7 +2063,7 @@
 
 			if (!e)
 			{
-				// здесь - имитируем моус мув ---------------------------
+				// here - emulating mouse move ---------------------------
 				e   = {};
 				e.pageX = AscCommon.global_mouseEvent.X;
 				e.pageY = AscCommon.global_mouseEvent.Y;
@@ -2120,7 +2120,7 @@
 				}
 			}
 
-			// если было нажатие - то отжимаем
+			// if there was a click - release it
 			if (wasMouseDown && (!oDoc.GetActiveObject() || Asc.editor.IsLinkTool() || Asc.editor.IsRedactTool())) {
 				let pageObjectLogic = oThis.getPageByCoords2(AscCommon.global_mouseEvent.X, AscCommon.global_mouseEvent.Y);
 				oThis.file.onMouseUp(pageObjectLogic.index, pageObjectLogic.x, pageObjectLogic.y);
@@ -2182,7 +2182,7 @@
 			{
 				if (oThis.canMovePageByHand())
 				{
-					// двигаем рукой
+					// moving with hand
 					oThis.setCursorType(AscCommon.Cursors.Grabbing);
 
 					var scrollX = AscCommon.global_mouseEvent.X - oThis.MouseHandObject.X;
@@ -2216,10 +2216,10 @@
 			{
 				if (oThis.getPDFDoc().mouseDownLinkObject)
 				{
-					// селект начат на ссылке. смотрим, нужно ли начать реально селект
+					// selection started on a link. checking if we need to actually start selection
 					if (oThis.isMouseDown)
 					{
-						// вышли за eps
+						// moved beyond eps
 						oThis.getPDFDoc().mouseDownLinkObject = null;
 						oThis.setCursorType("default");
 					}
@@ -2233,7 +2233,7 @@
 				{
 					if (oThis.canSelectPageText())
 					{
-						// нажатая мышка - курсор всегда default (так как за eps вышли)
+						// mouse pressed - cursor is always default (since we moved beyond eps)
 						oThis.setCursorType("default");
 
 						let pageObjectLogic = oThis.getPageByCoords2(AscCommon.global_mouseEvent.X, AscCommon.global_mouseEvent.Y);
@@ -2312,7 +2312,7 @@
 				if (values.y) oThis.m_oScrollVerApi.scrollBy(0, values.y, false);
 			}
 
-			// здесь - имитируем моус мув ---------------------------
+			// here - simulate mouse move ---------------------------
 			var _e   = {};
 			_e.pageX = AscCommon.global_mouseEvent.X;
 			_e.pageY = AscCommon.global_mouseEvent.Y;
@@ -2393,7 +2393,7 @@
 
 			if (scrollXVal != 0 || scrollYVal != 0)
 			{
-				// здесь - имитируем моус мув ---------------------------
+				// here - emulating mouse move ---------------------------
 				var _e   = {};
 				_e.pageX = AscCommon.global_mouseEvent.X;
 				_e.pageY = AscCommon.global_mouseEvent.Y;
@@ -2693,7 +2693,7 @@
 				
 				if (yPos < pageB && yMax > pageT)
 				{
-					// страница на экране
+					// page is on screen
 
 					if (-1 == lStartPage)
 						lStartPage = i;
@@ -2701,7 +2701,7 @@
 				}
 				else
 				{
-					// страница не видна - выкидываем из кэша
+					// page is not visible - remove from cache
 					if (page.Image)
 					{
 						if (this.file.cacheManager)
@@ -2770,7 +2770,7 @@
 
 			for (let i = this.startVisiblePage; i <= this.endVisiblePage; i++)
 			{
-				// отрисовываем страницу
+				// render the page
 				let page = this.drawingPages[i];
 				if (!page)
 					break;
@@ -2819,7 +2819,7 @@
 							bRedrawAnnotsOnMainLayer = true;
 						}
 
-						// нельзя кэшировать с вотермарком - так как есть поворот
+						// can't cache with watermark - because there's rotation
 						//if (this.Api.watermarkDraw)
 						//	this.Api.watermarkDraw.Draw(page.Image.getContext("2d"), w, h);
 					}
@@ -2909,7 +2909,7 @@
 			this.updateCurrentPage(this.pageDetector.getCurrentPage(this.currentPage));
 			let oActiveObj	= oDoc.GetActiveObject();
 
-			// выход из активного объекта если сместились на другую страницу
+			// exit active object if we moved to another page
 			if (oActiveObj && this.pageDetector.pages.map(function(item) {
 				return item.num;
 			}).includes(oActiveObj.GetPage()) == false) {
@@ -2922,7 +2922,7 @@
 			oDoc.UpdateInterface(true);
 			oDoc.UpdateInterfaceTracks();
 
-			// Обязательно делаем в конце, т.к. во время отрисовки происходит пересчет
+			// Must do at the end, since recalculation happens during rendering
 			this._checkTargetUpdate();
 
 			this.initPaintDone = true;
@@ -3025,7 +3025,7 @@
 					ctx.rotate(angleRad);
 					ctx.drawImage(imagePage, 0, 0, imgWidth, imgHeight, 0, -h >> 1, w, h);
 					break;
-				default: // 0 градусов, по умолчанию
+				default: // 0 degrees by default
 					ctx.drawImage(imagePage,  0, 0, imgWidth, imgHeight, cx - (w >> 1), yInd, w, h);
 					break;
 			}
@@ -3099,7 +3099,7 @@
 			{
 				while (this.pagesInfo.countTextPages < pagesCount)
 				{
-					// мы могли уже получить команды, так как видимые страницы в приоритете
+					// we might have already received commands, since visible pages have priority
 					if (null != this.file.pages[this.pagesInfo.countTextPages].text)
 					{
 						this.pagesInfo.countTextPages++;
@@ -3257,7 +3257,7 @@
 
 		this.isCanCopy = function()
 		{
-			// TODO: нужно прерываться после первого же символа
+			// TODO: need to break after the first character
 			var text_format = { Text : "" };
 			this.Copy(text_format);
 			text_format.Text = text_format.Text.replace(new RegExp("\n", 'g'), "");
@@ -3526,7 +3526,7 @@
 					bRetValue = true;
 				}
 			}
-			else if ( e.KeyCode == 36 ) // клавиша Home
+			else if ( e.KeyCode == 36 ) // Home key
 			{
 				if (oController.getTargetDocContent()) {
 					if (e.CtrlKey) {
@@ -3748,7 +3748,7 @@
 					}
 				}
 				else {
-					// рисуем на отдельном канвасе, кешируем
+					// draw on separate canvas, cache it
 					let tmpCanvas		= page.ImageForms ? page.ImageForms : document.createElement('canvas');
 					let tmpCanvasCtx	= tmpCanvas.getContext('2d');
 					
@@ -3853,7 +3853,7 @@
 					}
 				}
 				else {
-					// рисуем на отдельном канвасе, кешируем
+					// draw on separate canvas, cache it
 					let tmpCanvas		= page.ImageAnnots ? page.ImageAnnots : document.createElement('canvas');
 					let tmpCanvasCtx	= tmpCanvas.getContext('2d');
 					
@@ -3937,7 +3937,7 @@
 					}
 				}
 				else {
-					// рисуем на отдельном канвасе, кешируем
+					// draw on separate canvas, cache it
 					let tmpCanvas		= page.ImageDrawings ? page.ImageDrawings : document.createElement('canvas');
 					let tmpCanvasCtx	= tmpCanvas.getContext('2d');
 					
@@ -3991,7 +3991,7 @@
 					if (field.IsNeedDrawHighlight())
 						field.DrawHighlight(oCtx);
 
-					// маркеры
+					// markers
 					if (field.GetType() == AscPDF.FIELD_TYPES.combobox)
 						field.DrawMarker(oCtx);
 					else if (field.GetType() == AscPDF.FIELD_TYPES.text && field.IsDateFormat()) {
@@ -4003,7 +4003,7 @@
 
 		oCtx.restore();
 	};
-	// возвращает видимый рект страницы (процентах от полной), не учитывая поворот
+	// returns visible page rect (as percentage of full), not considering rotation
 	CHtmlPage.prototype.getViewingRect = function(nPage) {
 		let oPageDetector = this.pageDetector;
 
@@ -4046,7 +4046,7 @@
 			b : b
 		};
 	};
-	// возвращает видимый рект страницы (процентах от полной) учитывая поворот
+	// returns visible page rect (as percentage of full) considering rotation
 	CHtmlPage.prototype.getViewingRect2 = function(nPage) {
 		let oViewRect = this.getViewingRect(nPage);
 		let nRotAngle = this.getPageRotate(nPage);
@@ -4310,8 +4310,8 @@
 		else if (this.zoomMode === ZoomMode.Page)
 			this.zoom = this.calculateZoomToHeight();
 		
-		// в мобильной версии мы будем получать координаты от MobileTouchManager (до этого момента они уже должны быть) и не нужно их запоминать, так как мы перетрём нужные нам значения
-		// ну а если их нет и зум произошёл не от тача, то запоминаем их как при обычном зуме
+		// in mobile version we will receive coordinates from MobileTouchManager (they should already exist by this point) and don't need to remember them, as we will overwrite the values we need
+		// but if they don't exist and zoom didn't come from touch, then we remember them as with regular zoom
 		if (!this.zoomCoordinate)
 			this.fixZoomCoord( (this.width >> 1), (this.height >> 1) );
 		
@@ -4405,7 +4405,7 @@
 		if (this.zoomCoordinate && this.isDocumentContentReady && Asc.editor.isDocumentLoadComplete)
 		{
 			var newPoint = this.ConvertCoordsToCursor(this.zoomCoordinate.x, this.zoomCoordinate.y, this.zoomCoordinate.index);
-			// oldsize используется чтобы при смене ориентации экрана был небольшой скролл
+			// oldsize is used so that there is a small scroll when screen orientation changes
 			var shiftX = this.Api.isMobileVersion ? ( (oldsize.w - this.width) >> 1) : 0;
 			var shiftY = this.Api.isMobileVersion ? ( (oldsize.h - this.height) >> 1) : 0;
 			var newScrollX = this.scrollX + newPoint.x - this.zoomCoordinate.xShift + shiftX;
@@ -4491,7 +4491,7 @@
 		let aPagesInfo	= this.pagesInfo.pages;
 		let oFile		= this.file;
 
-		// по информации аннотаций определим какие были удалены
+		// based on annotation info, determine which ones were deleted
 		let oDoc = this.getPDFDoc();
 		oDoc.BlurActiveObject();
 		oDoc.RecalculateAll();
@@ -4710,20 +4710,20 @@
 
 					oMemory.WriteByte(167); // shape start
 
-					// тут будет длина комманд
+					// command length will be here
 					let nStartPos = oMemory.GetCurPosition();
 					oMemory.Skip(4);
 
-					// тут будет длина xml строки
+					// xml string length will be here
 					let nStrLengthPos = oMemory.GetCurPosition();
 					oMemory.Skip(4);
 
 					oTextShape.WriteToBinary(oMemory);
 
-					// запись длины xml строки
+					// write xml string length
 					let nEndPos = oMemory.GetCurPosition();
 					oMemory.Seek(nStrLengthPos);
-					oMemory.WriteLong(nEndPos - nStrLengthPos - 4); // вычитаем 4 так как должна быть длина строки, без учета команды длины
+					oMemory.WriteLong(nEndPos - nStrLengthPos - 4); // subtract 4 because it should be string length, without counting length command
 					oMemory.Seek(nEndPos);
 
 					let aRedactIds = oTextShape.GetRedactIds();
@@ -4732,17 +4732,17 @@
 						oMemory.WriteString(id);
 					});
 
-					// запись длины комманд
+					// write command length
 					nEndPos = oMemory.GetCurPosition();
 					oMemory.Seek(nStartPos);
 					oMemory.WriteLong(nEndPos - nStartPos);
 					oMemory.Seek(nEndPos);
 
-					// запись графики
-					oTextShape.draw(oRenderer); 
+					// write graphics
+					oTextShape.draw(oRenderer);
 
 					oMemory.WriteByte(168); // shape end
-					oMemory.WriteLong(4); // для обратной совместимости
+					oMemory.WriteLong(4); // for backward compatibility
 				}
 			}
 
@@ -4910,17 +4910,17 @@
 			return bNeedEdit;
 		}
 
-		// сначала edit исходных страниц
+		// first edit original pages
 		for (let i = 0; i < aPagesInfo.length; i++) {
 			if (checkNeedEditOrigPage(i)) {
 				writePageInfo.call(this, [AscPDF.CommandType.editPage, i], oFile.pages[i].originIndex);
 			}
 		}
 
-		// составляем порядок операций удаления/добавления страниц
+		// compose the order of page delete/add operations
 		let aOrder = generateOperations(oFile.originalPagesCount, oFile.pages);
 
-		// пишем по порядку
+		// write in order
 		for (let i = 0; i < aOrder.length; i++) {
 			writePageInfo.call(this, aOrder[i], undefined);
 		}
@@ -4984,12 +4984,12 @@
 
 			let nEndPos = oMemory.GetCurPosition();
 			
-			// количество изменённых родителей
+			// number of changed parents
 			oMemory.Seek(nPosForParentLenght);
 			oMemory.WriteLong(nParents);
 			oMemory.Seek(nEndPos);
 
-			// пишем изображения
+			// write images
 			oMemory.WriteLong(oMemory.images.length);
 			for (let i = 0; i < oMemory.images.length; i++) {
 				oMemory.WriteStringA(oMemory.images[i]);
@@ -4997,12 +4997,12 @@
 
 			nEndPos = oMemory.GetCurPosition();
 
-			// длина комманд с информацией о родителях, CO и картинках
+			// command length with parent info, CO and images
 			oMemory.Seek(nPosForLenght);
 			oMemory.WriteLong(nEndPos - nPosForLenght);
 			oMemory.Seek(nEndPos);
 
-			// Общая длина комманд
+			// Total command length
 			oMemory.Seek(nStartPos);
 			oMemory.WriteLong(nEndPos - nStartPos);
 			oMemory.Seek(nEndPos);
@@ -5020,7 +5020,7 @@
 		let aPagesInfo	= this.pagesInfo.pages;
 		let oFile		= this.file;
 
-		// по информации аннотаций определим какие были удалены
+		// based on annotation info, determine which ones were deleted
 		let oDoc = this.getPDFDoc();
 		oDoc.BlurActiveObject();
 		
@@ -5334,17 +5334,17 @@
 			return bNeedEdit;
 		}
 
-		// сначала edit исходных страниц
+		// first edit original pages
 		for (let i = 0; i < aPagesInfo.length; i++) {
 			if (checkNeedEditOrigPage(i)) {
 				writePageInfo.call(this, [AscPDF.CommandType.editPage, i], oFile.pages[i].originIndex);
 			}
 		}
 
-		// составляем порядок операций удаления/добавления страниц
+		// compose the order of page delete/add operations
 		let aOrder = generateOperations(oFile.originalPagesCount, oFile.pages);
 
-		// пишем по порядку
+		// write in order
 		for (let i = 0; i < aOrder.length; i++) {
 			writePageInfo.call(this, aOrder[i], undefined);
 		}
@@ -5408,12 +5408,12 @@
 
 			let nEndPos = oMemory.GetCurPosition();
 			
-			// количество изменённых родителей
+			// number of changed parents
 			oMemory.Seek(nPosForParentLenght);
 			oMemory.WriteLong(nParents);
 			oMemory.Seek(nEndPos);
 
-			// пишем изображения
+			// write images
 			oMemory.WriteLong(oMemory.images.length);
 			for (let i = 0; i < oMemory.images.length; i++) {
 				oMemory.WriteStringA(oMemory.images[i]);
@@ -5421,12 +5421,12 @@
 
 			nEndPos = oMemory.GetCurPosition();
 
-			// длина комманд с информацией о родителях, CO и картинках
+			// command length with parent info, CO and images
 			oMemory.Seek(nPosForLenght);
 			oMemory.WriteLong(nEndPos - nPosForLenght);
 			oMemory.Seek(nEndPos);
 
-			// Общая длина комманд
+			// Total command length
 			oMemory.Seek(nStartPos);
 			oMemory.WriteLong(nEndPos - nStartPos);
 			oMemory.Seek(nEndPos);
@@ -5439,7 +5439,7 @@
 
 	function CCurrentPageDetector(w, h)
 	{
-		// размеры окна
+		// window dimensions
 		this.width = w;
 		this.height = h;
 
@@ -5461,7 +5461,7 @@
 			currentVisibleH = Math.min(this.height, page.y + page.h) - Math.max(0, page.y);
 			if (currentVisibleH == page.h)
 			{
-				// первая полностью видимая страница
+				// first fully visible page
 				pageNum = i;
 				break;
 			}

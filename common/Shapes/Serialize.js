@@ -70,7 +70,7 @@ function CBuilderImages(blip_fill, full_url, image_shape, sp_pr, ln, text_pr, pa
     this.Run        = run;
     this.Paragraph  = paragraph;
     this.Bullet = bullet;
-    this.AdditionalUrls = [];//для wmf, ole
+    this.AdditionalUrls = [];//for wmf, ole
 }
 CBuilderImages.prototype =
 {
@@ -325,7 +325,7 @@ function BinaryPPTYLoader()
 
     this.LoadDocument = function()
     {
-        // чтение формата ppty
+        // reading ppty format
         var _main_tables = {};
         var s = this.stream;
         var err = 0;
@@ -516,7 +516,7 @@ function BinaryPPTYLoader()
                 var _nm_count = s.GetULong();
                 for (var i = 0; i < _nm_count; i++){
                     this.presentation.notesMasters[i] = this.ReadNoteMaster();
-                    this.presentation.notesMasters[i].setTheme(this.aThemes[0]);//TODO: убрать после того как будут сделаны рельсы
+                    this.presentation.notesMasters[i].setTheme(this.aThemes[0]);//TODO: remove after rels are implemented
                 }
             }
 
@@ -531,7 +531,7 @@ function BinaryPPTYLoader()
             }
         }
 
-        // теперь нужно прочитать используемые в презентации шрифты и картинки
+        // now we need to read fonts and images used in the presentation
         if (null == this.ImageMapChecker)
         {
             if (undefined != _main_tables["42"])
@@ -598,7 +598,7 @@ function BinaryPPTYLoader()
             }
         }
 
-        // все загружено, осталось расставить связи и загрузить картинки тем и шаблонов
+        // everything is loaded, now we need to establish relationships and load images from themes and layouts
         if (undefined != _main_tables["41"])
         {
             s.Seek2(_main_tables["41"]);
@@ -3347,7 +3347,7 @@ function BinaryPPTYLoader()
                             }
                             default:
                             {
-                                // пока никаких настроек градиента нет
+                                // no gradient settings for now
                                 var _len = s.GetULong();
                                 s.Skip2(_len);
                             }
@@ -3444,7 +3444,7 @@ function BinaryPPTYLoader()
                             }
                             default:
                             {
-                                // пока никаких настроек градиента нет
+                                // no gradient settings for now
                                 var _len = s.GetULong();
                                 s.Skip2(_len);
                             }
@@ -3454,7 +3454,7 @@ function BinaryPPTYLoader()
                     }
                     if (null != uni_fill.fill.lin && null != uni_fill.fill.path)
                     {
-                        // ms office не открывает такие файлы.
+                        // ms office does not open such files.
                         uni_fill.fill.setPath(null);
                     }
 
@@ -3516,7 +3516,7 @@ function BinaryPPTYLoader()
                             }
                             default:
                             {
-                                // пока никаких настроек градиента нет
+                                // no gradient settings for now
                                 s.SkipRecord();
                             }
                         }
@@ -8423,7 +8423,7 @@ function BinaryPPTYLoader()
 				s.Skip2(1);
 				this.ReadCell(row.Content[i]);
 
-				// удаляем
+				// remove
 				row.Remove_Cell(i);
 				i--;
 				_count--;
@@ -9389,7 +9389,7 @@ function BinaryPPTYLoader()
     this.CorrectBodyPr = function(bodyPr)
     {
 
-        //TODO: сделать через методы
+        //TODO: implement using methods
         var s = this.stream;
         var _end_rec = s.cur + s.GetULong() + 4;
 
@@ -10214,7 +10214,7 @@ function BinaryPPTYLoader()
 
         if(b_bullet)
             para_pr.Bullet = bullet;
-        // пока записи не поддерживаем
+        // records are not supported for now
         s.Seek2(_end_rec);
         return para_pr;
     };
@@ -11954,7 +11954,7 @@ function BinaryPPTYLoader()
 
         this.Clear = function(bClearStreamOnly)
         {
-            //вызывается пока только перед вставкой
+            //called only before paste for now
             this.Reader.stream = null;
             this.stream = null;
             this.BaseReader = null;

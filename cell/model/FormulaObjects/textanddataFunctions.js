@@ -118,7 +118,7 @@ function (window, undefined) {
 			return needIndex;
 		};
 
-		//instance_num - при отрицательном вхождении поиск с конца начинается
+		//instance_num - for negative values, search starts from the end
 		let instance_num = newArgs[2] && !(newArgs[2].type === cElementType.empty) ? newArgs[2] : new cNumber(1);
 		let match_mode = newArgs[3] && !(newArgs[3].type === cElementType.empty) ? newArgs[3] : new cBool(false);
 		let match_end = newArgs[4] && !(newArgs[4].type === cElementType.empty) ? newArgs[4] : new cBool(false);
@@ -545,7 +545,7 @@ function (window, undefined) {
 	}
 
 	//***array-formula***
-	//TODO пересмотреть функцию!!!
+	//TODO review this function!!!
 	cCONCATENATE.prototype = Object.create(cBaseFunction.prototype);
 	cCONCATENATE.prototype.constructor = cCONCATENATE;
 	cCONCATENATE.prototype.name = 'CONCATENATE';
@@ -1719,7 +1719,7 @@ function (window, undefined) {
 				return new cError(cErrorType.wrong_value_type)
 			}
 
-			//считаем количество вхождений cDecimalSeparator в строке
+			//count the number of occurrences of cDecimalSeparator in the string
 			var count = 0;
 			for (var i = 0; i < aInputString.length; i++) {
 				if (cDecimalSeparator === aInputString[i]) {
@@ -3292,7 +3292,7 @@ function (window, undefined) {
 	cTEXTJOIN.prototype.numFormat = AscCommonExcel.cNumFormatNone;
 	cTEXTJOIN.prototype.isXLFN = true;
 	cTEXTJOIN.prototype.argumentsType = [argType.text, argType.logical, argType.text, [argType.text]];
-	//TODO все, кроме 2 аргумента - массивы
+	//TODO all arguments except the 2nd are arrays
 	cTEXTJOIN.prototype.arrayIndexes = {0: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1};
 	cTEXTJOIN.prototype.getArrayIndex = function (index) {
 		if (index === 1) {
@@ -3642,17 +3642,17 @@ function (window, undefined) {
 	cTEXTSPLIT.prototype.isXLFN = true;
 	cTEXTSPLIT.prototype.Calculate = function (arg) {
 
-		//функция должна возвращать массив
+		//function should return an array
 		let text = arg[0];
 		if (text.type === cElementType.error) {
 			return text;
 		}
 
-		//второй/третий аргумент тоже может быть массивом, каждый из элементов каторого может быть разделителем
+		//second/third argument can also be an array, each element of which can be a delimiter
 		let col_delimiter = arg[1];
 		let row_delimiter = arg[2] ? arg[2] : null;
 
-		//если оба empty или хотя бы один из разделителей - пустая строка - ошибка
+		//if both are empty or at least one of the delimiters is an empty string - error
 		if (col_delimiter && row_delimiter && col_delimiter.type === cElementType.empty && row_delimiter.type === cElementType.empty) {
 			return new cError(cErrorType.wrong_value_type);
 		}
@@ -3695,7 +3695,7 @@ function (window, undefined) {
 		}
 		match_mode = match_mode.toBool();
 
-		//заполняющее_значение. Значение по умолчанию: #Н/Д.
+		//pad_with value. Default value: #N/A.
 		let pad_with = arg[5] ? arg[5] : new cError(cErrorType.not_available);
 		if (pad_with.type === cElementType.cell3D || pad_with.type === cElementType.cell) {
 			pad_with = pad_with.getValue();
@@ -3750,7 +3750,7 @@ function (window, undefined) {
 			return res;
 		};
 
-		//обрабатываю первый аргумент - диапазон выше, если сюда он приходит в виже диапазона, то беру первый элемент
+		//processing the first argument - if it arrives as a range, take the first element
 		var res;
 		if (cElementType.cellsRange3D === text.type || cElementType.cellsRange === text.type) {
 			text = text.getValue2(0, 0);
@@ -3772,7 +3772,7 @@ function (window, undefined) {
 		//let array = AscCommon.parseText(text, options);
 		let array = splitText(text, row_delimiter, col_delimiter);
 		if (array) {
-			//проверяем массив на пустые элементы +  дополняем массив pad_with
+			//check array for empty elements + pad array with pad_with
 
 			let rowCount = array.length;
 			let colCount = 0, i, j;

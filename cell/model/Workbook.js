@@ -87,7 +87,7 @@
 	var cErrorType = AscCommonExcel.cErrorType;
 
 	var g_nVerticalTextAngle = 255;
-	//определяется в WorksheetView.js
+	//defined in WorksheetView.js
 	var oDefaultMetrics = {
 		ColWidthChars: 0,
 		RowHeight: 0
@@ -479,9 +479,9 @@
 			if(!opt_noRemoveDependencies){
 				this.removeDependencies();
 			}
-			//для R1C1: ref - всегда строка в виде A1B1
-			//флаг opt_open - на открытие, undo/redo, принятие изменений - строка приходит в виде A1B1 - преобразовывать не нужно
-			//во всех остальных случаях парсим ref и заменяем на формат A1B1
+			//for R1C1: ref - always a string in A1B1 format
+			//opt_open flag - on open, undo/redo, accepting changes - string comes in A1B1 format - no conversion needed
+			//in all other cases parse ref and convert to A1B1 format
 			opt_open = opt_open || this.wb.bRedoChanges || this.wb.bUndoChanges;
 
 			this.ref = ref;
@@ -507,7 +507,7 @@
 			}
 		},
 		getRef: function(bLocale) {
-			//R1C1 - отдаём в зависимости от флага bLocale(для меню в виде R1C1)
+			//R1C1 - return depending on bLocale flag (for menu in R1C1 format)
 			var res, t = this;
 			if(!this.parsedRef.isParsed) {
 				AscCommonExcel.executeInR1C1Mode(false, function () {
@@ -530,9 +530,9 @@
 				var sheet = this.wb.getWorksheetById(this.sheetId);
 				index = sheet.getIndex();
 			}
-			//теперь тип используется ещё и при получении результата вычисления именованного диапазона
-			//так же заполняю при отркытии
-			//TODO - проверить, возможно необходимо убрать
+			//now the type is also used when getting the result of named range calculation
+			//also fill on open
+			//TODO - check, maybe needs to be removed
 			if (!this.type && this.wb && this.wb.getSlicerCacheByName(this.name)) {
 				this.type = Asc.c_oAscDefNameType.slicer;
 			}
@@ -584,8 +584,8 @@
 
 	function getVertexIndex(bbox) {
 		//without $
-		//значения в areaMap хранятся в виде A1B1
-		//данная функция используется только для получения данных из areaMap
+		//values in areaMap are stored in A1B1 format
+		//this function is only used for getting data from areaMap
 		var res;
 		AscCommonExcel.executeInR1C1Mode(false, function () {
 			res = bbox.getName(AscCommonExcel.referenceType.R);
@@ -888,7 +888,7 @@
 				tableNamesMap[tableName] = 1;
 				this.wb.deleteSlicersByTable(tableName, true);
 			}
-			//удаляю срезы, которые остались на данном листе, но привязаны к таблицам других листов
+			//delete slicers that remain on this sheet but are linked to tables of other sheets
 			if (ws.aSlicers) {
 				for (i = 0; i < ws.aSlicers.length; i++) {
 					ws.deleteSlicer(ws.aSlicers[i].name, true);
@@ -1124,7 +1124,7 @@
 			var range = AscCommonExcel.g_oRangeCache.getRange3D(name) ||
 				AscCommonExcel.g_oRangeCache.getAscRange(name);
 			if(!range) {
-				//проверяем на совпадение с именем диапазона в другом формате
+				//check for match with range name in another format
 				AscCommonExcel.executeInR1C1Mode(!AscCommonExcel.g_R1C1Mode, function () {
 					range = AscCommonExcel.g_oRangeCache.getRange3D(name) ||
 						AscCommonExcel.g_oRangeCache.getAscRange(name);
@@ -1161,8 +1161,8 @@
 			var sheetContainerFrom;
 			var opt_df = opt_sheet && opt_sheet.workbook && opt_sheet.workbook.dependencyFormulas ? opt_sheet.workbook.dependencyFormulas : null;
 			if(opt_df && opt_df.defNames && opt_df.defNames.sheet && opt_df.defNames.sheet[wsFrom.getId()]) {
-				//TODO пересмотреть!
-				//пока делаю только для им. диапазонов листа. в случае книгой - необходимо хранить map преообразований для redo
+				//TODO review!
+				//for now doing only for sheet named ranges. in case of workbook - need to store transformation map for redo
 				sheetContainerFrom = opt_df.defNames.sheet[wsFrom.getId()];
 			} else {
 				sheetContainerFrom = this.defNames.sheet[wsFrom.getId()];
@@ -1227,7 +1227,7 @@
 				return false;
 			}
 
-			//временная правка - не пишем именованный диапазоны, которые ссылаются на другие листы
+			//temporary fix - don't write named ranges that reference other sheets
 			var parsedRef = defName.parsedRef;
 			if (parsedRef) {
 				for (var i = 0; i < parsedRef.outStack.length; i++) {
@@ -1406,7 +1406,7 @@
 			}
 			var changedSheet = this.changedRange[sheetId];
 			if (!changedSheet) {
-				//{}, а не [], потому что при сборке может придти сразу много одинаковых ячеек
+				//{}, not [], because during collection many identical cells may arrive at once
 				changedSheet = {};
 				this.changedRange[sheetId] = changedSheet;
 			}
@@ -1432,7 +1432,7 @@
 			}
 			var changedSheet = this.changedCell[sheetId];
 			if (!changedSheet) {
-				//{}, а не [], потому что при сборке может придти сразу много одинаковых ячеек
+				//{}, not [], because during collection many identical cells may arrive at once
 				changedSheet = {};
 				this.changedCell[sheetId] = changedSheet;
 			}
@@ -1512,7 +1512,7 @@
 			var sheetId = cell.ws.getId();
 			var unparsedSheet = this.buildCell[sheetId];
 			if (!unparsedSheet) {
-				//{}, а не [], потому что при сборке может придти сразу много одинаковых ячеек
+				//{}, not [], because during collection many identical cells may arrive at once
 				unparsedSheet = {};
 				this.buildCell[sheetId] = unparsedSheet;
 			}
@@ -1525,9 +1525,9 @@
 			this.buildShared[shared.getIndexNumber()] = shared;
 		},
 		addToBuildDependencyArray: function(f) {
-			//TODO переммотреть! добавлять по индексу!
-			//добавляю не по индексу потому на момент вызова(setValue) ещё не проставились индексы формулам
-			//происходит это позже - в Cell.prototype.saveContent
+			//TODO review! add by index!
+			//not adding by index because at the time of call (setValue) formula indices are not yet set
+			//this happens later - in Cell.prototype.saveContent
 			this.buildArrayFormula.push(f);
 		},
 		addToBuildDependencyPivot: function(f) {
@@ -2899,7 +2899,7 @@
 		return sortedIndex;
 	}
 	BroadcastHelper.prototype._mergeDeleteSorted = function (events, eventsLen, del, delLen) {
-		//todo нельзя рассчитывать, что в addDelete будут приходить элементы из curElems и в порядке forEach(есть другие вызовы addDelete)
+		//todo can't assume that addDelete will receive elements from curElems and in forEach order (there are other addDelete calls)
 		//The forEach() method executes per each pair in insertion order.
 		let eventsIndex = 0;
 		let delIndex = 0;
@@ -3205,7 +3205,7 @@
 		this.DrawingDocument = new AscCommon.CDrawingDocument();
 		this.mathTrackHandler = new AscWord.CMathTrackHandler(this.DrawingDocument, oApi);
 
-		this.aComments = [];	// Комментарии к документу
+		this.aComments = [];	// Document comments
 		this.aWorksheets = [];
 		this.aWorksheetsById = {};
 		this.aCollaborativeActions = [];
@@ -3233,9 +3233,9 @@
 			this.oleSize = new AscCommonExcel.OleSizeSelectionRange(null, new Asc.Range(0, 0, 6, 9));
 		}
 
-		//при копировании листа с одного wb на другой необходимо менять в стеке
-		// формул лист и книгу(на которые ссылаемся) - например у элементов cStrucTable
-		//временно добавляю новый вставляемый лист, чтобы не передавать параметры через большое количество функций
+		//when copying a sheet from one workbook to another, need to change sheet and workbook in the formula stack
+		// (that we reference) - for example in cStrucTable elements
+		//temporarily adding new inserted sheet to avoid passing parameters through many functions
 		this.addingWorksheet = null;
 
 		this.workbookProtection = null;
@@ -3936,18 +3936,18 @@
 		//insertBefore - optional
 		var renameParams;
 		if(index >= 0 && index < this.aWorksheets.length){
-			//buildRecalc вызываем чтобы пересчиталося cwf(может быть пустым если сделать сдвиг формул и скопировать лист)
+			//calling buildRecalc to recalculate cwf (can be empty if you shift formulas and copy sheet)
 			this.dependencyFormulas.buildDependency();
 			AscCommon.History.TurnOff();
 			var wsActive = this.getActiveWs();
 			var wsFrom = opt_sheet ? opt_sheet : this.aWorksheets[index];
 			var newSheet = new Worksheet(this, -1, sId);
 			if(null != insertBefore && insertBefore >= 0 && insertBefore < this.aWorksheets.length){
-				//помещаем новый sheet перед insertBefore
+				//place new sheet before insertBefore
 				this.aWorksheets.splice(insertBefore, 0, newSheet);
 			}
 			else{
-				//помещаем новый sheet в конец
+				//place new sheet at the end
 				this.aWorksheets.push(newSheet);
 			}
 
@@ -3978,7 +3978,7 @@
 			if (opt_sheet /*&& !bFromRedo*/) {
 				this.dependencyFormulas.copyDefNameByWorkbook(wsFrom, newSheet, renameParams, opt_sheet);
 			}
-			//для формул. создаем копию this.cwf[this.Id] для нового листа.
+			//for formulas. create a copy of this.cwf[this.Id] for the new sheet.
 			//newSheet._BuildDependencies(wsFrom.getCwf());
 
 			//now insertBefore is index of inserted sheet
@@ -4024,18 +4024,18 @@
 	Workbook.prototype.insertWorksheet = function (index, sheet) {
 		var wsActive = this.getActiveWs();
 		if(null != index && index >= 0 && index < this.aWorksheets.length){
-			//помещаем новый sheet перед insertBefore
+			//place new sheet before insertBefore
 			this.aWorksheets.splice(index, 0, sheet);
 		}
 		else{
-			//помещаем новый sheet в конец
+			//place new sheet at the end
 			this.aWorksheets.push(sheet);
 		}
 		this.aWorksheetsById[sheet.getId()] = sheet;
 		this._updateWorksheetIndexes(wsActive);
 		this._insertWorksheetFormula(index);
 		this._insertTablePartsName(sheet);
-		//восстанавливаем список ячеек с формулами для sheet
+		//restore the list of cells with formulas for sheet
 		sheet._BuildDependencies(sheet.getCwf());
 		this.sortDependency();
 	};
@@ -4104,7 +4104,7 @@
 				break;
 			}
 		}
-		// Не нашли справа, ищем слева от текущего
+		// Not found on the right, search to the left of current
 		if (!bFound) {
 			for (i = nIndex - 1; i >= 0; --i) {
 				ws = this.getWorksheet(i);
@@ -4117,7 +4117,7 @@
 		return oRes;
 	};
 	Workbook.prototype.removeWorksheet=function(nIndex, outputParams, moveSheet){
-		//проверяем останется ли хоть один нескрытый sheet
+		//check if at least one non-hidden sheet will remain
 		var bEmpty = true;
 		for(var i = 0, length = this.aWorksheets.length; i < length; ++i)
 		{
@@ -4424,11 +4424,11 @@
 	Workbook.prototype.SerializeHistory = function(){
 		var aResData = [];
 		var aResSerializable = [];
-		//соединяем изменения, которые были до приема данных с теми, что получились после.
+		//merge changes that were before receiving data with those that resulted after.
 
 		var t, j, length2;
 
-		// Пересчитываем позиции
+		// Recalculate positions
 		AscCommon.CollaborativeEditing.Refresh_DCChanges();
 
 		var aActions = this.aCollaborativeActions.concat(AscCommon.History.GetSerializeArray());
@@ -4440,9 +4440,9 @@
 				let items = aActions[i];
 				for (j = 0, length2 = items.length; j < length2; ++j) {
 					var item = items[j];
-					// Пересчитываем позиции
+					// Recalculate positions
 					if (item.Data && item.Data.applyCollaborative) {
-						//не делаем копию oData, а сдвигаем в ней, потому что все равно после сериализации изменения потруться
+						//not making a copy of oData, but shifting in it, because changes will be erased after serialization anyway
 						if (item.Data.applyCollaborative(item.SheetId, this.oApi.collaborativeEditing)) {
 							AscCommon.History.Refresh_SpreadsheetChanges(item);
 						}
@@ -4706,12 +4706,12 @@
 	}
 	Workbook.prototype.DeserializeHistory = function(aChanges, fCallback, oColor){
 		var oThis = this;
-		//сохраняем те изменения, которые были до приема данных, потому что дальше undo/redo будет очищено
+		//save those changes that were before receiving data, because undo/redo will be cleared next
 		this.aCollaborativeActions = this.aCollaborativeActions.concat(AscCommon.History.GetSerializeArray());
 		if(aChanges.length > 0)
 		{
 			this.bCollaborativeChanges = true;
-			//собираем общую длину
+			//collect total length
 			var i, length = aChanges.length;
 
 			var aUndoRedoElems = this._DeserializeUndoRedoElems(aChanges);
@@ -4850,7 +4850,7 @@
 
 			var stream = new AscCommon.FT_Stream2(data, data.length);
 			stream.obj = null;
-			// Применяем изменения, пока они есть
+			// Apply changes while they exist
 			var _count = stream.GetLong();
 			var _pos = 4;
 			for (var i = 0; i < _count; i++)
@@ -4894,7 +4894,7 @@
 		var res = false;
 		var aSkipChanges = [[AscCommonExcel.g_oUndoRedoWorkbook.getClassType(), AscCH.historyitem_Workbook_Date1904]];
 
-		//при десериализации пропускаем изменение, если такое же есть в списке текущих у данного юзера
+		//during deserialization, skip the change if the same one exists in the current user's list
 		var isNeededChange = function (_change, _actionType, _classType) {
 			if (_change && _change.oClass) {
 				if (_actionType === undefined || _classType === undefined) {
@@ -4946,9 +4946,9 @@
 		{
 			var ws = this.aWorksheets[i];
 			res = ws.getTableIndexColumnByName(tableName, columnName);
-			//получаем имя через getTableNameColumnByIndex поскольку tableName приходит в том виде
-			//в котором набрал пользователь, те регистр может быть произвольным
-			//todo для того, чтобы два раза не бежать по колонкам можно сделать функцию которая возвращает полную информацию о колонке
+			//get the name via getTableNameColumnByIndex since tableName comes in the form
+			//that the user typed, i.e. the case may be arbitrary
+			//todo to avoid iterating through columns twice, create a function that returns full column info
 			//
 			if(res !== null){
 				res = {wsID:ws.getId(), index: res, name: ws.getTableNameColumnByIndex(tableName, res)};
@@ -4995,9 +4995,9 @@
 		this.dependencyFormulas.calcTree();
 	};
 	/**
-	 * Вычисляет ширину столбца для заданного количества символов
-	 * @param {Number} count  Количество символов
-	 * @returns {Number}      Ширина столбца в символах
+	 * Calculates column width for a given number of characters
+	 * @param {Number} count  Number of characters
+	 * @returns {Number}      Column width in characters
 	 */
 	Workbook.prototype.charCountToModelColWidth = function (count) {
 		if (count <= 0) {
@@ -5006,21 +5006,21 @@
 		return Asc.floor((count * this.maxDigitWidth + this.paddingPlusBorder) / this.maxDigitWidth * 256) / 256;
 	};
 	/**
-	 * Вычисляет ширину столбца в px
-	 * @param {Number} mcw  Количество символов
-	 * @returns {Number}    Ширина столбца в px
+	 * Calculates column width in px
+	 * @param {Number} mcw  Number of characters
+	 * @returns {Number}    Column width in px
 	 */
 	Workbook.prototype.modelColWidthToColWidth = function (mcw) {
 		return Asc.floor(((256 * mcw + Asc.floor(128 / this.maxDigitWidth)) / 256) * this.maxDigitWidth);
 	};
 	/**
-	 * Вычисляет количество символов по ширине столбца
-	 * @param {Number} w  Ширина столбца в px
-	 * @returns {Number}  Количество символов
+	 * Calculates number of characters based on column width
+	 * @param {Number} w  Column width in px
+	 * @returns {Number}  Number of characters
 	 */
 	Workbook.prototype.colWidthToCharCount = function (w) {
 		var pxInOneCharacter = this.maxDigitWidth + this.paddingPlusBorder;
-		// Когда меньше 1 символа, то просто считаем по пропорции относительно размера 1-го символа
+		// When less than 1 character, simply calculate proportionally relative to the size of 1 character
 		return w < pxInOneCharacter ?
 			(1 - Asc.floor(100 * (pxInOneCharacter - w) / pxInOneCharacter + 0.49999) / 100) :
 			Asc.floor((w - this.paddingPlusBorder) / this.maxDigitWidth * 100 + 0.5) / 100;
@@ -5042,7 +5042,7 @@
 			return;
 		}
 		AscCommon.History.Create_NewPoint();
-		//не делаем Duplicate потому что предполагаем что схема не будет менять частями, а только обьектом целиком.
+		//we don't do Duplicate because we assume the scheme won't change in parts, only as a whole object.
 		AscCommon.History.Add(AscCommonExcel.g_oUndoRedoWorkbook, AscCH.historyitem_Workbook_ChangeColorScheme, null,
 			null, new AscCommonExcel.UndoRedoData_ClrScheme(this.theme.themeElements.clrScheme, scheme));
 		this.theme.changeColorScheme(scheme);
@@ -5056,7 +5056,7 @@
 			return;
 		}
 		AscCommon.History.Create_NewPoint();
-		//не делаем Duplicate потому что предполагаем что схема не будет менять частями, а только обьектом целиком.
+		//we don't do Duplicate because we assume the scheme won't change in parts, only as a whole object.
 		AscCommon.History.Add(AscCommonExcel.g_oUndoRedoWorkbook, AscCH.historyitem_Workbook_ChangeColorScheme, null,
 			null, new AscCommonExcel.UndoRedoData_ClrScheme(this.theme.themeElements.clrScheme, scheme));
 		this.theme.changeColorScheme(scheme);
@@ -5075,7 +5075,7 @@
 			// Search on workbook
 			var key = result && (result.col + "-" + result.row);
 			if (!key || (options.isEqual(this.lastFindOptions) && this.lastFindCells[key])) {
-				// Мы уже находили данную ячейку, попробуем на другом листе
+				// We have already found this cell, let's try on another sheet
 				var i, active = this.getActive(), start = 0, end = this.getWorksheetCount();
 				var inc = options.scanForward ? +1 : -1;
 				for (i = active + inc; i < end && i >= start; i += inc) {
@@ -5089,7 +5089,7 @@
 					}
 				}
 				if (!result2 || searchEngine) {
-					// Мы дошли до конца или начала (в зависимости от направления, теперь пойдем до активного)
+					// We reached the end or beginning (depending on direction, now we'll go to the active one)
 					if (options.scanForward) {
 						i = 0;
 						end = active;
@@ -5823,7 +5823,7 @@
 			} else {
 				ws = this.getActiveWs();
 				range = AscCommonExcel.g_oRangeCache.getAscRange(sRange);
-				//может быть именованный диапазон
+				//could be a named range
 				if (!range) {
 					var dN = this.dependencyFormulas.getDefNameByName(sRange, ws.getId());
 					if (dN && dN.parsedRef) {
@@ -5910,16 +5910,16 @@
 	};
 
 	//*****external links*****
-	//при открытии ждём ссылок в виде [1]Sheet1!A1:A2, но если пользователь введёт такую ссылку, то текст самой ссылки будет уже "1", а индекс самой ссылки увеличится length + 1
-	//далее отображаем в таком виде в зависимости от самой ссылки 'https://s3.amazonaws.com/xlsx/[ExternalLinksDestination.xlsx]Sheet1'!A1:A2
-	//при вводе с клавиатуры сложнее - мс пропускает ссылки в достаточно странном виде 'abracadabra1://abracadabra2:[file.abracadabra3]Sheet1'!A1:A2
+	//on open we expect references like [1]Sheet1!A1:A2, but if user enters such a reference, the text will be "1" and the index will increase by length + 1
+	//then we display it depending on the reference itself like 'https://s3.amazonaws.com/xlsx/[ExternalLinksDestination.xlsx]Sheet1'!A1:A2
+	//keyboard input is more complex - MS allows references in a rather strange format 'abracadabra1://abracadabra2:[file.abracadabra3]Sheet1'!A1:A2
 	Workbook.prototype.getExternalLinkByIndex = function (index, needSplit) {
 		var res = this.externalReferences && this.externalReferences[index];
 		if (needSplit && res) {
-			//разбиваем на имя и путь
-			//ms обрабатывает http:/https:/ftp: и любая конструкция до : -  ..test..:
-			//предполагаем, что здесь уже лежит ссылка в грамотном виде
-			//ищем последний слэш или двоеточие и разделяем на части
+			//split into name and path
+			//MS handles http:/https:/ftp: and any construct up to : - ..test..:
+			//we assume the link is already in proper format here
+			//find the last slash or colon and split into parts
 			res = res.Id;
 			var lastSlash = "/";
 			var checkPrefix = "file:///";
@@ -6076,7 +6076,7 @@
 	};
 
 	Workbook.prototype.removeExternalReferences = function (arr) {
-		//пока предполагаю, что здесь будет массив asc_CExternalReference
+		//for now assuming there will be an array of asc_CExternalReference here
 		if (arr) {
 			var isChanged = false;
 			AscCommon.History.Create_NewPoint();
@@ -6085,11 +6085,11 @@
 				var eRIndex = this.getExternalLinkIndexByName(arr[i].externalReference.Id);
 				if (eRIndex != null) {
 
-					//TODO при undo кладутся в массив в обратном порядке - нужно всегда в одном порядке добавлять
+					//TODO on undo items are added to array in reverse order - need to always add in same order
 					this.removeExternalReference(eRIndex, true);
 					isChanged = true;
 
-					//TODO нужно заменить все ячейки просто значениями, где есть формулы, которые ссылаются на эту книгу
+					//TODO need to replace all cells with just values where there are formulas referencing this workbook
 					for (var j in arr[i].externalReference.worksheets) {
 						var removedSheet = arr[i].externalReference.worksheets[j];
 						if (removedSheet) {
@@ -6099,7 +6099,7 @@
 								if (parsed) {
 									var cell = parsed.parent;
 									if (cell && cell.nCol != null && cell.nRow != null) {
-										//нужно удалить формулу из этой ячейки
+										//need to remove the formula from this cell
 										parsed.ws._getCellNoEmpty(cell.nRow, cell.nCol, function(cell) {
 											var valueData = cell.getValueData();
 											valueData.formula = null;
@@ -6266,7 +6266,7 @@
 	};
 
 	Workbook.prototype.getExternalReferenceSheetsFromZip = function (stream) {
-		//TODO зачитать sharedStrings
+		//TODO read sharedStrings
 		const wb = this;
 		const oApi = Asc.editor;
 		if (!stream || !(oApi && oApi["asc_isSupportFeature"]("ooxml"))) {
@@ -6327,7 +6327,7 @@
 				var wsParts = [];
 
 				wbXml.sheets.forEach(function (wbSheetXml) {
-					//TODO нужно отсеять только необходимые листы
+					//TODO need to filter only the necessary sheets
 					if (null !== wbSheetXml.id && wbSheetXml.name) {
 						var wsPart = wbPart.getPartById(wbSheetXml.id);
 						wsParts.push({wsPart: wsPart, id: wbSheetXml.id, name: wbSheetXml.name, bHidden: wbSheetXml.bHidden, sheetId: wbSheetXml.sheetId});
@@ -6335,7 +6335,7 @@
 				});
 
 				wsParts.forEach(function (wbSheetXml) {
-					//TODO нужно отсеять только необходимые дипапазоны
+					//TODO need to filter only the necessary ranges
 					if (null !== wbSheetXml.id && wbSheetXml.name) {
 						var wsPart = wbSheetXml.wsPart;
 						var contentSheetXml = wsPart && wsPart.getDocumentContent();
@@ -6392,13 +6392,13 @@
 					xmlParserContext.InitOpenManager.tmp = tmp;
 
 					sheetDataElem.reader.setState(sheetDataElem.state);
-					//TODO пересмотреть фунцию fromXml
+					//TODO reconsider the fromXml function
 					sheetData.fromXml2(sheetDataElem.reader);
 
 					if (!bNoBuildDep) {
-						//TODO возможно стоит делать это в worksheet после полного чтения
+						//TODO perhaps this should be done in worksheet after full reading
 						//***array-formula***
-						//добавление ко всем ячейкам массива головной формулы
+						//adding the main formula to all cells in the array
 						for (var j = 0; j < tmp.formulaArray.length; j++) {
 							var curFormula = tmp.formulaArray[j];
 							var ref = curFormula.ref;
@@ -6439,7 +6439,7 @@
 	};
 
 	Workbook.prototype.removeExternalReferenceBySheet = function (sheetId) {
-		//пока предполагаю, что здесь будет массив asc_CExternalReference
+		//for now assuming there will be an array of asc_CExternalReference here
 		let index = this.getExternalLinkIndexBySheetId(sheetId);
 		if (index !== null) {
 			let eR = this.externalReferences[index - 1];
@@ -6447,7 +6447,7 @@
 			this.removeExternalReference(index, true);
 
 			// if (eR.SheetNames.length === 1) {
-			// 	//удаляем ссылку
+			// 	//delete the reference
 			// 	this.removeExternalReference(index, true);
 			// } else {
 			// 	let to = eR.clone();
@@ -6537,7 +6537,7 @@
 
 	Workbook.prototype.checkUserProtectedRangeName = function (name) {
 		var res = c_oAscDefinedNameReason.OK;
-		//TODO пересмотреть проверку на rx_defName
+		//TODO reconsider the rx_defName validation
 		if (!AscCommon.rx_protectedRangeName.test(name.toLowerCase()) || name.length > g_nDefNameMaxLength) {
 			return c_oAscDefinedNameReason.WrongName;
 		}
@@ -6737,7 +6737,7 @@
 			if (oPastedLinkInfo) {
 				if (oPastedLinkInfo.type === -1) {
 					const pasteSheetLinkName = oPastedLinkInfo.sheet;
-					//необходимо положить нужные данные в SheetDataSet
+					//need to put the required data into SheetDataSet
 					oMainExternalReference = this.externalReferences[oPastedLinkInfo.index - 1];
 					if (oMainExternalReference) {
 						oMainExternalReference.updateSheetData(pasteSheetLinkName, oPastedWS, arrRanges);
@@ -6853,7 +6853,7 @@
 					oHistoryRange = to;
 				AscCommon.History.Add(AscCommonExcel.g_oUndoRedoWorksheet, AscCH.historyitem_Worksheet_ChangeMerge, oThis.getId(), oHistoryRange, new UndoRedoData_FromTo(new UndoRedoData_BBox(from), new UndoRedoData_BBox(to)));
 			}
-			//расширяем границы
+			//expand boundaries
 			if(null != to){
 				var maxRow = gc_nMaxRow0 !== to.r2 ? to.r2 : to.r1;
 				var maxCol = gc_nMaxCol0 !== to.c2 ? to.c2 : to.c1;
@@ -6883,7 +6883,7 @@
 				data.Ref = oThis.getRange3(to.r1, to.c1, to.r2, to.c2);
 			else if (oChangeParam && oChangeParam.removeStyle && null != data.Ref)
 				data.Ref.cleanFormat();
-			//расширяем границы
+			//expand boundaries
 			if(null != to){
 				var maxRow = gc_nMaxRow0 !== to.r2 ? to.r2 : to.r1;
 				var maxCol = gc_nMaxCol0 !== to.c2 ? to.c2 : to.c1;
@@ -6923,16 +6923,16 @@
 
 		this.PagePrintOptions = new Asc.asc_CPageOptions(this);
 		//***array-formula***
-		//TODO пересмотреть. нужно для того, чтобы хранить ссылку на parserFormula главной ячейки при проходе по range массива
+		//TODO reconsider. needed to store a reference to parserFormula of the main cell when iterating through the array range
 		this.formulaArrayLink = null;
 
 		this.lastFindOptions = null;
 
-		//чтобы разделять ситуации, когда группы скрываются/открываются из меню(в данном случае не скрываются внутренние группы)
-		//и ситуацию, когда группы скрываются/открываются при скрытии строк/столбцов(все внутренние группы скрываются)
-		//этот флаг проставляются в true при скрытии групп из меню группировки(нажатие на +/- и скрытие целиком всего уровня)
-		//в данном случае не нужно при скрытии строк делать setCollapsed(из-за внутренних групп) и заносить данные в историю
-		//во всех остальных ситуациях это делать необходимо
+		//to distinguish situations when groups are collapsed/expanded from the menu (in this case inner groups are not collapsed)
+		//and the situation when groups are collapsed/expanded when hiding rows/columns (all inner groups are collapsed)
+		//this flag is set to true when collapsing groups from the grouping menu (clicking +/- and collapsing the entire level)
+		//in this case there is no need to call setCollapsed when hiding rows (due to inner groups) and save data to history
+		//in all other situations this is necessary
 		this.bExcludeCollapsed = false;
 
 		this.oNumFmtsOpen = {};
@@ -7040,7 +7040,7 @@
 		}
 	};
 	Worksheet.prototype.generateFontMap=function(oFontMap){
-		//пробегаемся по Drawing
+		//iterate through Drawings
 		for(var i = 0, length = this.Drawings.length; i < length; ++i)
 		{
 			var drawing = this.Drawings[i];
@@ -7048,7 +7048,7 @@
 				drawing.getAllFonts(oFontMap);
 		}
 
-		//пробегаемся по header/footer
+		//iterate through header/footer
 		if(this.headerFooter){
 			this.headerFooter.getAllFonts(oFontMap);
 		}
@@ -7151,7 +7151,7 @@
 		}
 
 		for (i = 0; i < wsFrom.aSlicers.length; ++i) {
-			//пока только для таблиц
+			//for now only for tables
 			var _slicer = wsFrom.aSlicers[i];
 			var _table = _slicer.getTableSlicerCache();
 			var pivotCache = _slicer.getPivotCache();
@@ -7247,7 +7247,7 @@
 				}
 
 				if(renameSheetMap && AscCommon.History.Is_On()) {
-					//пишем в историю для того, чтобы для случая redo не делать отложенное действия для всех листов
+					//write to history so that for redo case we don't do deferred actions for all sheets
 					var _oldF = parsed.Formula;
 					parsed.parse(null, null, null, null, renameSheetMap);
 					var _newF = parsed.Formula;
@@ -7437,7 +7437,7 @@
 
 		// Sheet Views
 		if (0 === this.sheetViews.length) {
-			// Даже если не было, создадим
+			// Even if there wasn't one, create it
 			this.sheetViews.push(new AscCommonExcel.asc_CSheetViewSettings());
 		}
 		//this.setTableFormulaAfterOpen();
@@ -7488,7 +7488,7 @@
 		} else if (range && range.isNull && range.isNull()) {
 			return;
 		} else if (range.ranges && range.getUnionRange) {
-			//объединяю в один
+			//merge into one
 			range = new AscCommonExcel.MultiplyRange([range.getUnionRange()]);
 		}
 		if (this.updateConditionalFormattingRange) {
@@ -8223,10 +8223,10 @@
 			t._removeCell(null, null, cell);
 		});
 
-		//ms не удаляет collapsed с удаляемой строки, он наследует это свойство следующей
+		//ms doesn't remove collapsed from the deleted row, it inherits this property from the next one
 		if(collapsedInfo !== null && lastRowIndex === stop) {
 			this._getRow(stop + 1, function(row) {
-				//TODO проверить!!!
+				//TODO verify!!!
 				//if(collapsedInfo >= row.getOutlineLevel()) {
 					//row.setCollapsed(true);
 					t.setCollapsedRow(true, null, row);
@@ -8408,7 +8408,7 @@
 
 		if(collapsedInfo !== null && lastRowIndex === stop) {
 			var curCol = this._getCol(stop + 1);
-			//TODO проверить!!!
+			//TODO verify!!!
 			if(curCol /*&& collapsedInfo >= curCol.getOutlineLevel()*/) {
 				t.setCollapsedCol(true, null, curCol);
 			}
@@ -8545,7 +8545,7 @@
 		return this.workbook.getDefaultSize();
 	};
 	Worksheet.prototype.getBaseColWidth = function () {
-		return this.oSheetFormatPr.nBaseColWidth || 8; // Число символов для дефалтовой ширины (по умолчинию 8)
+		return this.oSheetFormatPr.nBaseColWidth || 8; // Number of characters for default width (default is 8)
 	};
 	Worksheet.prototype.charCountToModelColWidth = function (count) {
 		return this.workbook.charCountToModelColWidth(count);
@@ -8558,7 +8558,7 @@
 	};
 	Worksheet.prototype.getColWidth=function(index){
 		//index 0 based
-		//Результат в пунктах
+		//Result in points
 		var col = this._getColNoEmptyWithAll(index);
 		if(null != col && null != col.width)
 			return col.width;
@@ -8735,7 +8735,7 @@
 			}
 		}
 	};
-	//TODO если collapsed не будет выставляться и заносится, удалить
+	//TODO if collapsed won't be set and stored, delete this
 	Worksheet.prototype.setCollapsedCol = function (bCollapse, colIndex, curCol) {
 		var oThis = this;
 		var fProcessCol = function(col){
@@ -8884,9 +8884,9 @@
 		}
 	};
 	Worksheet.prototype.getDefaultHeight=function(){
-		// ToDo http://bugzilla.onlyoffice.com/show_bug.cgi?id=19666 (флага CustomHeight нет)
+		// ToDo http://bugzilla.onlyoffice.com/show_bug.cgi?id=19666 (no CustomHeight flag)
 		var dRes = null;
-		// Нужно возвращать выставленную, только если флаг CustomHeight = true
+		// Need to return the set value only if CustomHeight flag = true
 		if(null != this.oSheetFormatPr.oAllRow && this.oSheetFormatPr.oAllRow.getCustomHeight())
 			dRes = this.oSheetFormatPr.oAllRow.h;
 		return dRes;
@@ -9028,7 +9028,7 @@
 			};
 			if(0 == _start && gc_nMaxRow0 == _stop)
 			{
-				// ToDo реализовать скрытие всех строк!
+				// ToDo implement hiding all rows!
 			}
 			else
 			{
@@ -9052,7 +9052,7 @@
 					});
 				}
 
-				if(startIndex !== null)//заносим последние строки
+				if(startIndex !== null)//save the last rows
 				{
 					updateRange = new Asc.Range(0, startIndex, gc_nMaxCol0, endIndex);
 					AscCommon.History.Add(AscCommonExcel.g_oUndoRedoWorksheet, AscCH.historyitem_Worksheet_RowHide, oThis.getId(),updateRange, new UndoRedoData_FromToRowCol(bHidden, startIndex, endIndex));
@@ -9186,7 +9186,7 @@
 		return this.getRange3(r1, c1, r1, c1);
 	};
 	Worksheet.prototype.getRange=function(cellAdd1, cellAdd2){
-		//Если range находится за границами ячеек расширяем их
+		//If range is beyond cell boundaries, expand them
 		var nRow1 = cellAdd1.getRow0();
 		var nCol1 = cellAdd1.getCol0();
 		var nRow2 = cellAdd2.getRow0();
@@ -9554,7 +9554,7 @@
 			bbox.setOffset(offset);
 			wsTo.mergeManager.add(bbox, elem.data);
 		}
-		//todo сделать для пересечения
+		//todo implement for intersection
 		if (!copyRange || null === intersection) {
 			for (i = 0; i < prepared.hyperlinks.length; i++) {
 				elem = prepared.hyperlinks[i];
@@ -9573,12 +9573,12 @@
 		AscCommon.History.LocalChange = false;
 	};
 	Worksheet.prototype._moveCleanRanges = function(oBBoxFrom, oBBoxTo, copyRange, wsTo) {
-		//удаляем to через историю, для undo
+		//delete to through history, for undo
 		var cleanRanges = this._prepareMoveRangeGetCleanRanges(oBBoxFrom, oBBoxTo, wsTo);
 		for (var i = 0; i < cleanRanges.length; i++) {
 			var range = cleanRanges[i];
 			range.cleanAll();
-			//выставляем для slave refError
+			//set refError for slave
 			if (!copyRange)
 				this.workbook.dependencyFormulas.deleteNodes(wsTo.getId(), range.getBBox0());
 		}
@@ -9685,13 +9685,13 @@
 				moveCells(copyRange, oBBoxFrom.c1 + i, oBBoxTo.c1 + i, oBBoxFrom.r1, oBBoxTo.r1, oBBoxFrom.r2 - oBBoxFrom.r1 + 1);
 			}
 		}
-		// ToDo возможно нужно уменьшить диапазон обновления
+		// ToDo possibly need to reduce the update range
 		AscCommon.History.Add(AscCommonExcel.g_oUndoRedoWorksheet, AscCH.historyitem_Worksheet_MoveRange,
 			this.getId(), new Asc.Range(0, 0, gc_nMaxCol0, gc_nMaxRow0),
 			new UndoRedoData_FromTo(new UndoRedoData_BBox(oBBoxFrom), new UndoRedoData_BBox(oBBoxTo), copyRange, wsTo.getId()));
 		if(moveToOtherSheet) {
-			//сделано для того, чтобы происходил пересчет/обновление данных на другом листе
-			//таким образом заносим диапазон обновления в UpdateRigions
+			//done so that recalculation/data update happens on another sheet
+			//this way we add the update range to UpdateRegions
 			AscCommon.History.Add(AscCommonExcel.g_oUndoRedoWorksheet, AscCH.historyitem_Worksheet_Null, wsTo.getId(), oBBoxTo, new UndoRedoData_FromTo(null, null));
 		}
 
@@ -9734,7 +9734,7 @@
 					AscCommon.History.TurnOn();
 				} else {
 					//***array-formula***
-					//TODO возможно стоит это делать в dependencyFormulas.move
+					//TODO perhaps this should be done in dependencyFormulas.move
 					if(arrayFormula) {
 						if(isFirstCellArray) {
 							newFormula = oThis._moveCellsFormula(cell, formula, cellWithFormula, copyRange, oBBoxFrom, wsTo);
@@ -9825,7 +9825,7 @@
 		return true;
 	};
 	Worksheet.prototype._shiftCellsLeft=function(oBBox){
-		//todo удаление когда есть замерженые ячейки
+		//todo deletion when there are merged cells
 		var t = this;
 		var nLeft = oBBox.c1;
 		var nRight = oBBox.c2;
@@ -9869,7 +9869,7 @@
 		if (this.workbook.handlers) {
 			this.workbook.handlers.trigger("changeDocument", AscCommonExcel.docChangedType.sheetContent, this, null, this.getId());
 		}
-		//todo проверить не уменьшились ли границы таблицы
+		//todo check if table boundaries have decreased
 	};
 	Worksheet.prototype._shiftCellsUp=function(oBBox){
 		var t = this;
@@ -9912,7 +9912,7 @@
 		if (this.workbook.handlers) {
 			this.workbook.handlers.trigger("changeDocument", AscCommonExcel.docChangedType.sheetContent, this, null, this.getId());
 		}
-		//todo проверить не уменьшились ли границы таблицы
+		//todo check if table boundaries have decreased
 	};
 	Worksheet.prototype._shiftCellsRight=function(oBBox, displayNameFormatTable){
 		var nLeft = oBBox.c1;
@@ -10039,8 +10039,8 @@
 		this.workbook.dependencyFormulas.notifyChanged(renameRes.changed);
 		AscCommon.History.Add(AscCommonExcel.g_oUndoRedoWorksheet, AscCH.historyitem_Worksheet_ShiftCellsBottom, this.getId(), oActualRange, new UndoRedoData_BBox(oBBox));
 
-		//пока перенес добавление только последней строки(в данном случае порядок занесения в истрию должен быть именно в таком порядке)
-		//TODO возможно стоит полностью перенести сюда обработку для ф/т и а/ф
+		//for now moved only the last row addition (in this case the order of history entries must be exactly in this order)
+		//TODO perhaps should completely move the handling for formatted tables and auto filters here
 		if (!this.workbook.bUndoChanges && undefined !== displayNameFormatTable) {
 			redrawTablesArr = this.autoFilters.insertRows("insCell", oBBox, c_oAscInsertOptions.InsertCellsAndShiftDown,
 				displayNameFormatTable);
@@ -10062,7 +10062,7 @@
 	};
 	Worksheet.prototype._BuildDependencies=function(cellRange){
 		/*
-		 Построение графа зависимостей.
+		 Building the dependency graph.
 		 */
 		var ca;
 		for (var i in cellRange) {
@@ -10248,7 +10248,7 @@
 	};
 	Worksheet.prototype._expandRangeByMergedGetOuter = function(range){
 		var aOuter = [];
-		//смотрим только границы
+		//check only boundaries
 		this._expandRangeByMergedAddToOuter(aOuter, range, this.mergeManager.get(new Asc.Range(range.c1, range.r1, range.c1, range.r2)));
 		if(range.c1 != range.c2)
 		{
@@ -10360,7 +10360,7 @@
 						isChange = true;
 					}
 
-					//необходимо ещё сдвинуть _f
+					//also need to shift _f
 					if ((offset.row < 0 || offset.col < 0) && _elem && _elem._f && range.containsRange(_elem._f)) {
 						_elem.f = null;
 						_elem._f = null;
@@ -10398,8 +10398,8 @@
 				wsFrom = this;
 			}
 
-			//TODO проверить, необходимо ли чистить?
-			//чистим ту область, куда переносим
+			//TODO check if cleaning is necessary?
+			//clean the area we're moving to
 			//wsTo.removeSparklineGroup
 
 			wsFrom.aSparklineGroups.forEach(function (val) {
@@ -10424,7 +10424,7 @@
 							}
 						} else {
 							if (oBBoxFrom.containsRange(cloneElem.sqRef)) {
-								//тут необходимо добавить новый спакрлайн на новом листе
+								//here we need to add a new sparkline on the new sheet
 								moveOnNewSheet = true;
 								cloneElem.sqRef.setOffset(offset);
 								aSparkLinesToSheet.push(cloneElem);
@@ -10432,7 +10432,7 @@
 							}
 						}
 
-						//необходимо ещё сдвинуть _f
+						//also need to shift _f
 						if (_elem && _elem._f && cloneElem._f) {
 							if (wsTo === wsFrom) {
 								if (cloneElem._f.intersection(oBBoxFrom)) {
@@ -10443,8 +10443,8 @@
 										_isChangeF = true;
 									} else {
 
-										//при перемещении есть такой нюанс - если перемещаем последнюю ячейку формулы вниз(вверх аналогично для первой строки) + не затрагиваем весь диапазон формулы
-										//то формулу растягиваем до перемещаемой ячейки
+										//when moving there's this nuance - if we move the last cell of a formula down (up similarly for the first row) + don't affect the entire formula range
+										//then we extend the formula to the moved cell
 
 										var bColF = cloneElem._f.c1 === cloneElem._f.c2;
 										if (bColF) {
@@ -10478,7 +10478,7 @@
 								}
 							} else {
 								if (isMove) {
-									//если реальный перенос внутри книги, а не копирование/вставка
+									//if this is a real move within the workbook, not copy/paste
 									if (oBBoxFrom.containsRange(cloneElem._f)) {
 										cloneElem._f.setOffset(offset);
 										if (wsTo.sName !== cloneElem._f.sheet) {
@@ -10511,7 +10511,7 @@
 							wsFrom.removeSparklines(oBBoxFrom);
 						}
 
-						//если, допустим, перенесли все спарклайны на другой лист, то необходимо удалить группы здесь и добавить новую группы
+						//if, for example, all sparklines were moved to another sheet, then we need to delete the groups here and add a new group
 						if (aSparklines.length !== 0) {
 							val.setSparklines(aSparklines, true, true);
 						}
@@ -10596,7 +10596,7 @@
 		if (this.TableParts && this.TableParts.length) {
 			for (var i = 0; i < this.TableParts.length; i++) {
 				var table = this.TableParts[i];
-				//TODO пока заменяем при открытии на TotalsRowFormula
+				//TODO for now replacing with TotalsRowFormula on open
 				table.checkTotalRowFormula(this);
 			}
 		}
@@ -12097,15 +12097,15 @@
 		this.bIgnoreWriteFormulas = val;
 	};
 	Worksheet.prototype.checkShiftArrayFormulas = function (range, offset) {
-		//проверка на частичный сдвиг формулы массива
-		//проверка на внутренний сдвиг
+		//check for partial shift of array formula
+		//check for internal shift
 		var res = true;
 
 		var isHor = offset && offset.col;
 		var isDelete = offset && (offset.col < 0 || offset.row < 0);
 
 		var checkRange = function(formulaRange) {
-			//частичное выделение при удалении столбца/строки
+			//partial selection when deleting column/row
 			if(isDelete && formulaRange.intersection(range) && !range.containsRange(formulaRange)) {
 				return false;
 			}
@@ -12180,8 +12180,8 @@
 				}
 			}
 		}
-		//TODO не учитываются настройки для всей строки
-		//по this.rowsData.indexB ориентироваться не могу, поскольку при undo в большинстве случаев он остаётся неизменным
+		//TODO settings for entire row are not taken into account
+		//cannot rely on this.rowsData.indexB since in most cases it remains unchanged during undo
 		this.nRowsCount = Math.max(maxTableRow, this.cellsByColRowsCount/*, this.rowsData && this.rowsData.indexB ? this.rowsData.indexB : 0*/);
 	};
 	Worksheet.prototype.fromXLSB = function(stream, type, tmp, aCellXfs, fInitCellAfterRead) {
@@ -12216,8 +12216,8 @@
 
 	//need recalculate formulas after change rows
 	Worksheet.prototype.needRecalFormulas = function(start, stop) {
-		//TODO в данном случае необходим пересчёт только тез формул, которые зависят от данных строк + те, которые
-		// меняют своё значение в зависимости от скрытия/раскрыватия строк
+		//TODO in this case only formulas that depend on these rows need to be recalculated + those that
+		// change their value depending on row hiding/showing
 		var res = false;
 
 		if(this.AutoFilter && this.AutoFilter.isApplyAutoFilter()) {
@@ -12294,7 +12294,7 @@
 		var c1 = byRow ? columnRange.c1 : columnRange.c1;
 		var c2 = byRow ? columnRange.c2 : columnRange.c1;
 		ws.getRange3(r1, c1, r2, c2)._foreachNoEmpty(function(cell) {
-			//добавляем без цвета ячейку
+			//add cell without color
 			if (!cell) {
 				if (true !== alreadyAddColors[null]) {
 					alreadyAddColors[null] = true;
@@ -12340,7 +12340,7 @@
 			addCellColorsToArray(xfs);
 		});
 
-		//если один элемент в массиве, не отправляем его в меню
+		//if only one element in array, don't send it to menu
 		if (res.colors.length === 1 && !notCheckOneColor) {
 			res.colors = [];
 		}
@@ -12364,7 +12364,7 @@
 		}
 		var bAlreadyDel = false;
 		if (offset.row < 0 || offset.col < 0) {
-			//смотрим, не попал ли в выделение целиком
+			//check if it falls entirely within the selection
 			bAlreadyDel = this.deleteSortState(range);
 		}
 		if(!bAlreadyDel) {
@@ -12424,7 +12424,7 @@
 				return _res.toLocaleString();
 			}
 
-			//TODO если полная проверка, то выводим ошибки - если нет, то вовзращаем пустую строку
+			//TODO if full validation, output errors - if not, return empty string
 			var result = "";
 			if (type === Asc.c_oAscFormulaArgumentType.number) {
 				_res = _res.tocNumber();
@@ -12523,14 +12523,14 @@
 			if (res) {
 				const maxArrayRowCount = 20;
 				const maxArrayColCount = 20;
-				//TODO рассчеты аргументов зависят от конкретных функций
-				//допустим, sum и acos - типа аргумента number, но результат для cellsRange3D разный
+				//TODO argument calculations depend on specific functions
+				//for example, sum and acos - argument type is number, but result for cellsRange3D is different
 
 				if (res.type === AscCommonExcel.cElementType.cell || res.type === AscCommonExcel.cElementType.cell3D) {
 					res = res.getValue();
 				}
 
-				//TODO если полная проверка, то выводим ошибки - если нет, то вовзращаем пустую строку
+				//TODO if full validation, output errors - if not, return empty string
 				if (type === undefined || type === null || res.type === AscCommonExcel.cElementType.error) {
 					return {str: res.toLocaleString(), obj: res};
 				}
@@ -12613,7 +12613,7 @@
 		AscCommon.History.Create_NewPoint();
 		AscCommon.History.StartTransaction();
 
-		//TODO недостаточно ли вместо всей данной длинной структуры использовать только tableId(name) и columnName?
+		//TODO isn't it enough to use only tableId(name) and columnName instead of this whole long structure?
 		var slicer = new window['Asc'].CT_slicer(this);
 		slicer.cacheDefinition = slicerCacheDefinition || null;
 		var isNewCache = slicer.init(name, obj_name, type, undefined, pivotTable);
@@ -12653,7 +12653,7 @@
 			if ((!this.workbook.bUndoChanges && !this.workbook.bRedoChanges) || doDelDefName)
 			{
 				var cache = slicerObj.obj.getCacheDefinition();
-				//удаляем именованный диапазон только если на данный кэш уже никто не ссылается
+				//delete named range only if no one references this cache anymore
 				if (cache && null === this.workbook.getSlicersByCacheName(cache.name)) {
 					var defName = this.workbook.getDefinesNames(cache.name);
 					if (defName) {
@@ -12769,7 +12769,7 @@
 	Worksheet.prototype.getSlicersByTableName = function (val) {
 		var res = [];
 		for (var i = 0; i < this.aSlicers.length; i++) {
-			//пока сделал только для форматированных таблиц
+			//for now implemented only for formatted tables
 			var tableSlicerCache = this.aSlicers[i] && this.aSlicers[i].getTableSlicerCache();
 			if (tableSlicerCache && tableSlicerCache.tableId === val) {
 				res.push(this.aSlicers[i]);
@@ -12781,7 +12781,7 @@
 	Worksheet.prototype.getSlicersByTableColName = function (tableName, colName) {
 		var res = [];
 		for (var i = 0; i < this.aSlicers.length; i++) {
-			//пока сделал только для форматированных таблиц
+			//for now implemented only for formatted tables
 			var tableSlicerCache = this.aSlicers[i] && this.aSlicers[i].getTableSlicerCache();
 			if (tableSlicerCache && tableSlicerCache.tableId === tableName && tableSlicerCache.column === colName) {
 				res.push(this.aSlicers[i]);
@@ -13218,7 +13218,7 @@
 						this.clearDataValidation([oBBoxFrom], true);
 					}
 
-					//далее необходимо создать новые объекты на новом листе
+					//next we need to create new objects on the new sheet
 					for (var i = 0; i < aDataValidations.length; i++) {
 						wsTo.addDataValidation(aDataValidations[i], true);
 					}
@@ -13405,16 +13405,16 @@
 			wsTo = this;
 		}
 		if (false === this.workbook.bUndoChanges && false === this.workbook.bRedoChanges) {
-			//чистим ту область, куда переносим
+			//clean the area we're moving to
 			wsTo.clearConditionalFormattingRulesByRanges([oBBoxTo], oBBoxFrom);
 
 			if (!wsFrom) {
 				wsFrom = this;
 			}
 			wsFrom.forEachConditionalFormattingRules(function (_rule) {
-				//если клонируем - то добавляем новое правило со смещенным диапазоном пересечения
-				//если нет + если в пределах одного листа - меняем диапазона у текущего правила
-				//если на другой лист - меняем диапазон у текущего правила + создаём новое со смещенным диапазоном пересечения
+				//if cloning - add new rule with shifted intersection range
+				//if not + if within same sheet - change range of current rule
+				//if to another sheet - change range of current rule + create new one with shifted intersection range
 
 				var isChanged = null;
 				var ruleRanges = _rule.ranges;
@@ -13439,7 +13439,7 @@
 					}
 				}
 				if (isChanged) {
-					//в случае клонирования фрагмента - создаём новое правило
+					//in case of fragment cloning - create new rule
 					var _newRule;
 					if (copyRange) {
 						_newRule = _rule.clone();
@@ -13519,7 +13519,7 @@
 			return null;
 		}
 
-		//todo закрепленные области
+		//todo frozen panes
 		var newVal;
 		if (range.c1 === 0 && range.r1 === 0) {
 			newVal = null;
@@ -13563,7 +13563,7 @@
 	};
 
 	Worksheet.prototype.setCustomSort = function(props, obj, doNotSortRange, cellCommentator, opt_range) {
-		//формируем sortState из настроек
+		//form sortState from settings
 		var t = this;
 		var selection = opt_range ? opt_range : this.selectionRange.getLast();
 		var sortState = new AscCommonExcel.SortState();
@@ -13743,7 +13743,7 @@
 		var res = false;
 
 		if (this.sheetProtection && this.sheetProtection.getSheet()) {
-			//если тип не определен возвращаем защищен лист или нет
+			//if type is not defined, return whether sheet is protected or not
 			res = true;
 			switch (type) {
 				case Asc.c_oAscSheetProtectType.objects:
@@ -13859,7 +13859,7 @@
 	};
 
 	Worksheet.prototype.checkProtectedRangesPassword = function (val, data, callback) {
-		//здесь првоеряем в тч при попытке ввода в ячейку
+		//here we check including when attempting to input into a cell
 		var t = this;
 		if (this.aProtectedRanges && this.aProtectedRanges.length) {
 			var aCheckHash = [];
@@ -13902,7 +13902,7 @@
 
 	Worksheet.prototype.checkProtectedRangeName = function (name) {
 		var res = c_oAscDefinedNameReason.OK;
-		//TODO пересмотреть проверку на rx_defName
+		//TODO reconsider the rx_defName validation
 		if (!AscCommon.rx_protectedRangeName.test(name.toLowerCase()) || name.length > g_nDefNameMaxLength) {
 			return c_oAscDefinedNameReason.WrongName;
 		}
@@ -14006,7 +14006,7 @@
 			var cellxfs = cell && cell.xfs;
 			var isLocked = cellxfs && cellxfs.asc_getLocked();
 			if (isLocked === false) {
-				//исключаем ячейку из общего диапазона
+				//exclude cell from the general range
 				var _range = new Asc.Range(cell.nCol, cell.nRow, cell.nCol, cell.nRow);
 				var newRange = [];
 				for (var i = 0; i < res.length; i++) {
@@ -14149,7 +14149,7 @@
 			return;
 		}
 		if (false === this.workbook.bUndoChanges && false === this.workbook.bRedoChanges) {
-			//чистим ту область, куда переносим
+			//clean the area we're moving to
 			if (wsTo.aProtectedRanges && wsTo.aProtectedRanges.length) {
 				wsTo.aProtectedRanges.forEach(function (_protectedRange) {
 					t.tryClearProtectedRange(_protectedRange, [oBBoxTo]);
@@ -14162,9 +14162,9 @@
 
 			if (wsFrom.aProtectedRanges && wsFrom.aProtectedRanges.length) {
 				wsFrom.aProtectedRanges.forEach(function (pR) {
-					//если клонируем - то добавляем новый диапазон со смещенным диапазоном пересечения
-					//если нет + если в пределах одного листа - меняем диапазона у текущего правила
-					//если на другой лист - меняем диапазон у текущего + создаём новый со смещенным диапазоном пересечения
+					//if cloning - add new range with shifted intersection range
+					//if not + if within same sheet - change range of current rule
+					//if to another sheet - change range of current + create new one with shifted intersection range
 
 					var isChanged = null;
 					var _protectedSqref = pR.sqref;
@@ -14191,7 +14191,7 @@
 						}
 					}
 					if (isChanged) {
-						//в случае клонирования фрагмента - создаём новый
+						//in case of fragment cloning - create new one
 						var _newPr;
 						if (copyRange) {
 							if (wsFrom === wsTo) {
@@ -15439,13 +15439,13 @@
 						new Asc.Range(this.nCol, this.nRow, this.nCol, this.nRow),
 						new UndoRedoData_CellSimpleData(this.nRow, this.nCol, DataOld, DataNew));
 		}
-		//sortDependency вызывается ниже AscCommon.History.Add(AscCH.historyitem_Cell_ChangeValue, потому что в ней может быть выставлен формат ячейки(если это текстовый, то принимая изменения формула станет текстом)
+		//sortDependency is called after AscCommon.History.Add(AscCH.historyitem_Cell_ChangeValue, because it may set the cell format (if it's text, then accepting changes the formula becomes text)
 		this.ws.workbook.sortDependency();
 		if (!this.ws.workbook.dependencyFormulas.isLockRecal()) {
 			this._adjustCellFormat();
 		}
 
-		//todo не должны удаляться ссылки, если сделать merge ее части.
+		//todo links should not be deleted if merging part of it.
 		if (this.isNullTextString() && !this.isFormula()) {
 			var cell = this.ws.getCell3(this.nRow, this.nCol);
 			cell.removeHyperlink();
@@ -15459,7 +15459,7 @@
 	};
 
 	Cell.prototype.checkRemoveExternalReferences=function(fNew, fOld) {
-		//1.проверяем, были ли ссылки на внешние данные
+		//1.check if there were references to external data
 		let externalLinks;
 		let i;
 		if (fOld && (!fNew || fNew.Formula !== fOld.Formula) && fOld.outStack) {
@@ -15501,7 +15501,7 @@
 		}
 
 
-		//2. проверяем, каких ссылок не осталось в новых данных
+		//2. check which references are no longer in the new data
 		if (externalLinks && fNew && fNew.outStack) {
 			for (i = 0; i < fNew.outStack.length; i++) {
 				if (fNew.outStack[i].externalLink) {
@@ -15519,7 +15519,7 @@
 			}
 		}
 
-		//3. проверям, не ссылаются ли на эти ссылки кто-то другой
+		//3. check if anyone else references these links
 		if (externalLinks && fOld) {
 			let listenerId = fOld.getListenerId();
 
@@ -15557,7 +15557,7 @@
 			}
 		}
 
-		// //3. проверям, не ссылаются ли на эти ссылки кто-то другой
+		// //3. check if anyone else references these links
 		// if (externalLinks && fOld) {
 		// 	let listenerId = fOld.getListenerId();
 		// 	for (i in externalLinks) {
@@ -15565,7 +15565,7 @@
 		// 			let sheetId = externalLinks[i];
 		// 			let sheetContainer = fOld.wb && fOld.wb.dependencyFormulas && fOld.wb.dependencyFormulas.sheetListeners && fOld.wb.dependencyFormulas.sheetListeners[sheetId];
 		// 			if (sheetContainer && Object.keys(sheetContainer.cellMap).length === 0) {
-		// 				//если есть ссылки на внешние источники, необходимо их удалить
+		// 				//if there are references to external sources, need to delete them
 		// 				this.ws && this.ws.workbook && this.ws.workbook.removeExternalReferenceBySheet(sheetId);
 		// 			}
 		// 		}
@@ -15592,8 +15592,8 @@
 		var newFP = null;
 		if (false == bIsTextFormat || (byRef && !isFirstArrayFormulaCell)) {
 			/*
-			 Устанавливаем значение в Range ячеек. При этом происходит проверка значения на формулу.
-			 Если значение является формулой, то проверяем содержиться ли в ячейке формула или нет, если "да" - то очищаем в графе зависимостей список, от которых зависит формула(masterNodes), позже будет построен новый. Затем выставляем флаг о необходимости дальнейшего пересчета, и заносим ячейку в список пересчитываемых ячеек.
+			 Set value in cell Range. This includes checking if value is a formula.
+			 If value is a formula, check if cell contains a formula or not, if "yes" - clear the list of dependencies in dependency graph (masterNodes), will be rebuilt later. Then set flag for recalculation needed, and add cell to list of cells to recalculate.
 			 */
 			if (null != val && val[0] == "=" && val.length > 1) {
 				//***array-formula***
@@ -15677,7 +15677,7 @@
 		if(AscCommon.History.Is_On() && false == DataOld.isEqual(DataNew)) {
 			AscCommon.History.Add(AscCommonExcel.g_oUndoRedoCell, AscCH.historyitem_Cell_ChangeValue, this.ws.getId(), new Asc.Range(this.nCol, this.nRow, this.nCol, this.nRow), new UndoRedoData_CellSimpleData(this.nRow, this.nCol, DataOld, DataNew));
 		}
-		//todo не должны удаляться ссылки, если сделать merge ее части.
+		//todo links should not be deleted if merging part of it.
 		if(this.isNullTextString())
 		{
 			var cell = this.ws.getCell3(this.nRow, this.nCol);
@@ -15867,7 +15867,7 @@
 			var oldStyleName = this.ws.workbook.CellStyles.getStyleNameByXfId(oRes.oldVal);
 			AscCommon.History.Add(AscCommonExcel.g_oUndoRedoCell, AscCH.historyitem_Cell_Style, this.ws.getId(), new Asc.Range(this.nCol, this.nRow, this.nCol, this.nRow), new UndoRedoData_CellSimpleData(this.nRow, this.nCol, oldStyleName, val));
 
-			// Выставляем стиль
+			// Apply style
 			oStyle = this.ws.workbook.CellStyles.getStyleByXfId(oRes.newVal);
 			if (oStyle.ApplyFont)
 				this.setFont(oStyle.getFont());
@@ -15917,7 +15917,7 @@
 	Cell.prototype.setFont=function(val, bModifyValue){
 		if(false != bModifyValue)
 		{
-			//убираем комплексные строки
+			//remove complex strings
 			if(null != this.multiText && false == this.ws.workbook.bUndoChanges && false == this.ws.workbook.bRedoChanges)
 			{
 				var oldVal = null;
@@ -16122,8 +16122,8 @@
 	Cell.prototype.getValueForEdit2 = function() {
 		this._checkDirty();
 		var cultureInfo = AscCommon.g_oDefaultCultureInfo;
-		//todo проблема точности. в excel у чисел только 15 значащих цифр у нас больше.
-		//применяем форматирование
+		//todo precision issue. in excel numbers have only 15 significant digits, we have more.
+		//apply formatting
 		var oValueText = null;
 		var oValueArray = null;
 		var xfs = this.getCompiledStyle();
@@ -16131,7 +16131,7 @@
 			if (!((this.ws && this.ws.getSheetProtection() && this.xfs && this.xfs.getHidden() ||
 				(this.ws.isUserProtectedRangesIntersectionCell(this, null, null, Asc.c_oSerUserProtectedRangeType.View))))) {
 				this.processFormula(function (parsed) {
-					// ToDo если будет притормаживать, то завести переменную и не рассчитывать каждый раз!
+					// ToDo if it slows down, create a variable and don't recalculate every time!
 					oValueText = "=" + parsed.assembleLocale(AscCommonExcel.cFormulaFunctionToLocale, true);
 				});
 			}
@@ -16164,7 +16164,7 @@
 								}
 								else if(oTargetFormat.bDateTime)
 								{
-									//Если число не подходит под формат даты возвращаем само число
+									//If number doesn't fit date format, return the number itself
 									if(false == oTargetFormat.isInvalidDateValue(nValue))
 									{
 										var bDate = oTargetFormat.bDate;
@@ -16329,7 +16329,7 @@
 		return new UndoRedoData_CellValueData(formula, new AscCommonExcel.CCellValue(this), formulaRef, ca, cm, vm, aca);
 	};
 	Cell.prototype.setValueData = function(Val){
-		//значения устанавляваются через setValue, чтобы пересчитались формулы
+		//values are set through setValue so that formulas are recalculated
 		if (null != Val.formula) {
 			let caProps = {
 				ca: Val.ca,
@@ -17092,7 +17092,7 @@
 				this.processFormula(function(parsed) {
 					if (!isCalc) {
 						//***array-formula***
-						//добавлен последний параметр для обработки формулы массива
+						//added last parameter for array formula processing
 						if(parsed.getArrayFormulaRef()) {
 							const listenerId = parsed.getListenerId();
 							if(parsed.checkFirstCellArray(t) && !calculatedArrayFormulas[listenerId]) {
@@ -17199,9 +17199,9 @@
 				} else if (typeof valueCalc.numFormat === "string") {
 					t.setNum(new AscCommonExcel.Num({f: valueCalc.numFormat}));
 				} else if (AscCommonExcel.cNumFormatFirstCell === valueCalc.numFormat) {
-					//ищет в формуле первый рэндж и устанавливает формат ячейки как формат первой ячейки в рэндже
-					//принимают формат первой ячейки в рейндже только функции с inheritFormat = true
-					//причём это не касается внутренних функий в формуле. если одна из внешних функций принимает формат, тогда выставляем формат у ячейки
+					//finds first range in formula and sets cell format as format of first cell in range
+					//only functions with inheritFormat = true accept format of first cell in range
+					//this doesn't apply to internal functions in formula. if one of external functions accepts format, then we set format on cell
 
 					var r = parsed.getFirstRange();
 					if (r && r.getNumFormatStr) {
@@ -17258,7 +17258,7 @@
 					this.setValueTextInternal(res.getValue().toString());
 			}
 
-			//обработка для функции hyperlink. необходимо проставить формат.
+			//handling for hyperlink function. need to set format.
 			var isArray = parsed.getArrayFormulaRef();
 			var firstArrayRef = parsed.checkFirstCellArray(this);
 			if(res.getHyperlink && null !== res.getHyperlink() && (!isArray || (isArray && firstArrayRef))) {
@@ -17392,11 +17392,11 @@
 			} else if (CellValueType.Number == this.type && null != this.number) {
 				bNeedMeasure = false;
 				var bFindResult = false;
-				//варируем dDigitsCount чтобы результат влез в ячейку
+				//vary dDigitsCount so result fits in cell
 				var nTempDigCount = Math.ceil(dDigitsCount);
 				var sOriginText = this.number;
 				while (nTempDigCount >= 1) {
-					//Строим подходящий general format
+					//Build appropriate general format
 					var sGeneral = AscCommon.DecodeGeneralFormat(sOriginText, this.type, nTempDigCount);
 					if (null != sGeneral) {
 						oNumFormat = oNumFormatCache.get(sGeneral);
@@ -17410,7 +17410,7 @@
 							break;
 						} else {
 							aRes = this._getValue2Result(sText, aText, isMultyText, opt_AffectingText);
-							//Проверяем влезает ли текст
+							//Check if text fits
 							if (true == fIsFitMeasurer(aRes)) {
 								bFindResult = true;
 								break;
@@ -17444,7 +17444,7 @@
 		}
 		if (bNeedMeasure) {
 			aRes = this._getValue2Result(sText, aText, isMultyText, opt_AffectingText);
-			//Проверяем влезает ли текст
+			//Check if text fits
 			if (false == fIsFitMeasurer(aRes)) {
 				aRes = null;
 				sText = null;
@@ -17478,7 +17478,7 @@
 					return cErrorOrigin["ref"];
 					break;
 				case cErrorLocal["name"]:
-				case cErrorLocal["name"].replace('\\', ''): // ToDo это неправильная правка для бага 32463 (нужно переделать parse формул)
+				case cErrorLocal["name"].replace('\\', ''): // ToDo this is an incorrect fix for bug 32463 (need to redo formula parsing)
 					return cErrorOrigin["name"];
 					break;
 				case cErrorLocal["num"]:
@@ -17542,11 +17542,11 @@
 				}
 				else
 				{
-					//распознаем формат
+					//recognize format
 					var res = AscCommon.g_oFormatParser.parse(val, null, oNumFormat.getType(), oNumFormat.sFormat);
 					if(null != res)
 					{
-						//Сравниваем с текущим форматом, если типы совпадают - меняем только значение ячейки
+						//Compare with current format, if types match - change only cell value
 						var nFormatType = oNumFormat.getType();
 						if(!((c_oAscNumFormatType.Percent == nFormatType && res.bPercent) ||
 							(c_oAscNumFormatType.Currency == nFormatType && res.bCurrency) ||
@@ -17560,7 +17560,7 @@
 					else
 					{
 						this.setTypeInternal(CellValueType.String);
-						//проверяем QuotePrefix
+						//check QuotePrefix
 						if(val.length > 0 && "'" == val[0])
 						{
 							this.setQuotePrefix(true);
@@ -17577,7 +17577,7 @@
 	};
 	Cell.prototype._autoformatHyperlink = function(val){
 		if (AscCommon.rx_allowedProtocols.test(val) || /^(www.)|@/i.test(val)) {
-			// Удаляем концевые пробелы и переводы строки перед проверкой гиперссылок
+			// Remove trailing spaces and line breaks before checking hyperlinks
 			val = val.replace(/\s+$/, '');
 			var typeHyp = AscCommon.getUrlType(val);
 			if (AscCommon.c_oAscUrlType.Invalid != typeHyp) {
@@ -17605,7 +17605,7 @@
 		{
 			this.cleanText();
 			this.setTypeInternal(CellValueType.String);
-			//проверяем можно ли перевести массив в простую строку.
+			//check if array can be converted to simple string.
 			if(aVal.length > 0)
 			{
 				this.multiText = [];
@@ -17622,7 +17622,7 @@
 				this._subtractFontFromMultiText(xfTableAndCond && xfTableAndCond.font);
 				this._minimizeMultiText(true);
 			}
-			//обрабатываем QuotePrefix
+			//handle QuotePrefix
 			if(null != this.text)
 			{
 				if(this.text.length > 0 && "'" == this.text[0])
@@ -17659,7 +17659,7 @@
 		var bRes = false;
 		if(null != this.multiText)
 		{
-			//проверяем поменяются ли свойства
+			//check if properties will change
 			var bChange = false;
 			for(var i = 0, length = this.multiText.length; i < length; ++i)
 			{
@@ -17680,7 +17680,7 @@
 						fAction(elem.format)
 				}
 				this.setValueMultiTextInternal(newMultiText);
-				//пробуем преобразовать в простую строку
+				//try to convert to simple string
 				if(this._minimizeMultiText(false))
 				{
 					var DataNew = this.getValueData();
@@ -17773,7 +17773,7 @@
 				return cErrorLocal["ref"];
 				break;
 			case cErrorOrigin["name"]:
-				return cErrorLocal["name"].replace('\\', ''); // ToDo это неправильная правка для бага 32463 (нужно переделать parse формул)
+				return cErrorLocal["name"].replace('\\', ''); // ToDo this is an incorrect fix for bug 32463 (need to redo formula parsing)
 				break;
 			case cErrorOrigin["num"]:
 				return cErrorLocal["num"];
@@ -17838,7 +17838,7 @@
 				else
 					this.setFont(oIntersectFont, false);
 			}
-			//если у всех элементов один формат, то сохраняем только текст
+			//if all elements have the same format, save only text
 			var bIsEqual = true;
 			for (var i = 0, length = this.multiText.length; i < length; i++)
 			{
@@ -18846,7 +18846,7 @@
 			this._foreachCol(actionCol, actionCell);
 		else
 		{
-			//сюда не должны заходить вообще
+			//should never enter here at all
 			// this._foreachRow(actionRow, actionCell);
 			// if(null != actionCol)
 			// this._foreachCol(actionCol, null);
@@ -18940,9 +18940,9 @@
 	Range.prototype.setValue=function(val, callback, isCopyPaste, byRef, ignoreHyperlink, dynamicRangeProps){
 		AscCommon.History.Create_NewPoint();
 		AscCommon.History.StartTransaction();
-		//не хотелось бы вводить дополнительный параметр, поэтому если byRef == null
-		//то в качестве значения придёт формула, которой необходимо сделать offset в зависимости от range
-		//при вызове данной функции обратить внимание на  параметр byRef
+		//didn't want to introduce additional parameter, so if byRef == null
+		//then the value will be a formula that needs to be offset depending on range
+		//when calling this function pay attention to byRef parameter
 		var _formula, t = this, activeCell;
 		if (byRef === null) {
 			_formula = new AscCommonExcel.parserFormula(val.substr(1), null, this.worksheet);
@@ -19002,7 +19002,7 @@
 		AscCommon.History.StartTransaction();
 		//[{"text":"qwe","format":{"b":true, "i":false, "u":Asc.EUnderline.underlineNone, "s":false, "fn":"Arial", "fs": 12, "c": 0xff00ff, "va": "subscript"  }},{}...]
 		/*
-		 Устанавливаем значение в Range ячеек. В отличае от setValue, сюда мы попадаем только в случае ввода значения отличного от формулы. Таким образом, если в ячейке была формула, то для нее в графе очищается список ячеек от которых зависела. После чего выставляем флаг о необходимости пересчета.
+		 Set value in a Range of cells. Unlike setValue, we only get here when entering a value that is not a formula. Thus, if the cell had a formula, the list of cells it depended on is cleared from the graph. Then we set the flag indicating the need for recalculation.
 		 */
 
 		let t = this;
@@ -19462,7 +19462,7 @@
 	};
 	Range.prototype._setBorderMerge=function(bLeft, bTop, bRight, bBottom, oNewBorder, oCurBorder){
 		var oTargetBorder = new Border();
-		//не делаем clone для свойств потому у нас нельзя поменять свойство отдельное свойство border можно только применить border целиком
+		//don't clone properties because we can't change individual property, border can only be applied as a whole
 		if(bLeft)
 			oTargetBorder.l = oNewBorder.l;
 		else
@@ -19575,8 +19575,8 @@
 		}
 	};
 	Range.prototype.setBorder=function(border){
-		//border = null очисть border
-		//"ih" - внутренние горизонтальные, "iv" - внутренние вертикальные
+		//border = null clears border
+		//"ih" - internal horizontal, "iv" - internal vertical
 		AscCommon.History.Create_NewPoint();
 		var _this = this;
 		var oBBox = this.bbox;
@@ -19600,7 +19600,7 @@
 						  function(cell){
 							  _this._setCellBorder(oBBox, cell, border);
 						  });
-		//убираем граничные border
+		//remove boundary borders
 		var aEdgeBorders = [];
 		if(oBBox.c1 > 0 && (null == border || (border.l && !border.l.isEmpty())))
 			aEdgeBorders.push(this.worksheet.getRange3(oBBox.r1, oBBox.c1 - 1, oBBox.r2, oBBox.c1 - 1));
@@ -20027,7 +20027,7 @@
 	Range.prototype.getStyleName=function(){
 		var res = this.worksheet.workbook.CellStyles.getStyleNameByXfId(this.getXfId());
 
-		// ToDo убрать эту заглушку (нужно делать на открытии) в InitStyleManager
+		// ToDo remove this stub (should be done on open) in InitStyleManager
 		return res || this.worksheet.workbook.CellStyles.getStyleNameByXfId(g_oDefaultFormat.XfId);
 	};
 	Range.prototype.getTableStyle=function(){
@@ -20059,9 +20059,9 @@
 	Range.prototype.getNumFormatType=function(){
 		return this.getNumFormat().getType();
 	};
-// Узнаем отличается ли шрифт (размер и гарнитура) в ячейке от шрифта в строке
+// Check if font (size and typeface) in cell differs from font in row
 	Range.prototype.isNotDefaultFont = function () {
-		// Получаем фонт ячейки
+		// Get cell font
 		var t = this;
 		var cellFont = this.getFont();
 		var rowFont = g_oDefaultFormat.Font;
@@ -20075,8 +20075,8 @@
 		return (cellFont.getName() !== rowFont.getName() || cellFont.getSize() !== rowFont.getSize());
 	};
 	Range.prototype.getFont = function (original) {
-		// ToDo разобраться. Есть предположение, что эта функция не нужна и она работает не верно
-		//  при выставлении стиля всему столбцу и тексте в ячейке
+		// ToDo investigate. There is an assumption that this function is not needed and doesn't work correctly
+		//  when setting style for entire column and text in cell
 		var t = this;
 		var nRow = this.bbox.r1;
 		var nCol = this.bbox.c1;
@@ -20095,11 +20095,11 @@
 		return font;
 	};
 	Range.prototype.getAlignHorizontalByValue=function(align){
-		//возвращает Align в зависимости от значния в ячейке
+		//returns Align depending on value in cell
 		//values:  none, center, justify, left , right, null
 		var t = this;
 		if(null == align){
-			//пытаемся определить по значению
+			//try to determine by value
 			var nRow = this.bbox.r1;
 			var nCol = this.bbox.c1;
 			this.worksheet._getCellNoEmpty(nRow, nCol, function(cell) {
@@ -20122,10 +20122,10 @@
 						case CellValueType.Bool:
 						case CellValueType.Error:align = AscCommon.align_Center;break;
 						default:
-							//Если есть value и не проставлен тип значит это число, у всех остальных типов значение не null
+							//If there is value and type is not set then it's a number, for all other types value is not null
 							if(t.getValueWithoutFormat())
 							{
-								//смотрим
+								//check
 								var oNumFmt = t.getNumFormat();
 								if(true == oNumFmt.isTextFormat())
 									align = AscCommon.align_Left;
@@ -20198,8 +20198,8 @@
 		return isHidden;
 	};
 	Range.prototype.getBorderSrc = function (opt_row, opt_col) {
-		//Возвращает как записано в файле, не проверяя бордеры соседних ячеек
-		//формат
+		//Returns as written in file, without checking borders of neighboring cells
+		//format
 		//\{"l": {"s": "solid", "c": 0xff0000}, "t": {} ,"r": {} ,"b": {} ,"d": {},"dd": false ,"du": false }
 		//"s" values: none, thick, thin, medium, dashDot, dashDotDot, dashed, dotted, double, hair, mediumDashDot, mediumDashDotDot, mediumDashed, slantDashDot
 		//"dd" diagonal line, starting at the top left corner of the cell and moving down to the bottom right corner of the cell
@@ -20217,8 +20217,8 @@
 		return border;
 	};
 	Range.prototype.getBorder = function (opt_row, opt_col) {
-		//Возвращает как записано в файле, не проверяя бордеры соседних ячеек
-		//формат
+		//Returns as written in file, without checking borders of neighboring cells
+		//format
 		//\{"l": {"s": "solid", "c": 0xff0000}, "t": {} ,"r": {} ,"b": {} ,"d": {},"dd": false ,"du": false }
 		//"s" values: none, thick, thin, medium, dashDot, dashDotDot, dashed, dotted, double, hair, mediumDashDot, mediumDashDotDot, mediumDashed, slantDashDot
 		//"dd" diagonal line, starting at the top left corner of the cell and moving down to the bottom right corner of the cell
@@ -20226,7 +20226,7 @@
 		return this.getBorderSrc(opt_row, opt_col) || g_oDefaultFormat.Border;
 	};
 	Range.prototype.getBorderFull=function(){
-		//Возвращает как excel, т.е. проверяет бордеры соседних ячеек
+		//Returns like excel, i.e. checks borders of neighboring cells
 		//
 		//\{"l": {"s": "solid", "c": 0xff0000}, "t": {} ,"r": {} ,"b": {} ,"d": {},"dd": false ,"du": false }
 		//"s" values: none, thick, thin, medium, dashDot, dashDotDot, dashed, dotted, double, hair, mediumDashDot, mediumDashDotDot, mediumDashed, slantDashDot
@@ -20263,7 +20263,7 @@
 		return borders;
 	};
 	Range.prototype.getAlign=function(){
-		//угол от -90 до 90 против часовой стрелки от оси OX
+		//angle from -90 to 90 counterclockwise from OX axis
 		var t = this;
 		var nRow = this.bbox.r1;
 		var nCol = this.bbox.c1;
@@ -20301,14 +20301,14 @@
 			this.unmerge();
 			if(type == Asc.c_oAscMergeOptions.MergeCenter)
 			{
-				//сбрасываем AlignHorizontal
+				//reset AlignHorizontal
 				this.setAlignHorizontal(null);
 				AscCommon.History.EndTransaction();
 				return;
 			}
 		}
 
-		//пробегаемся по границе диапазона, чтобы посмотреть какие границы нужно оставлять
+		//iterate through range boundary to see which borders to keep
 		var oLeftBorder = null;
 		var oTopBorder = null;
 		var oRightBorder = null;
@@ -20443,10 +20443,10 @@
 			this.worksheet.getId(),
 			firstMergeCellIndex
 		);
-		//правила работы с гиперссылками во время merge(отличются от Excel в случаем областей, например hyperlink: C3:D3 мержим C2:C3)
-		// 1)оставляем все ссылки, которые не полностью лежат в merge области
-		// 2)оставляем многоклеточные ссылки, top граница которых совпадает с top границей merge области, а высота merge > 1 или совпадает с высотой области merge
-		// 3)оставляем и переносим в первую ячейку одну одноклеточную ссылку, если она находится в первой ячейке с данными
+		//hyperlink handling rules during merge (differ from Excel in case of regions, e.g. hyperlink: C3:D3 merging C2:C3)
+		// 1)keep all links that don't completely lie in merge area
+		// 2)keep multi-cell links whose top border matches top border of merge area, and merge height > 1 or matches merge area height
+		// 3)keep and move to first cell one single-cell link if it's in the first cell with data
 		var aHyperlinks = this.worksheet.hyperlinkManager.get(oBBox);
 		var aHyperlinksToRestore = [];
 		for(var i = 0, length = aHyperlinks.inner.length; i < length; i++)
@@ -20462,7 +20462,7 @@
 				aHyperlinksToRestore.push(elem.data);
 		}
 		this.cleanAll();
-		//восстанавливаем hyperlink
+		//restore hyperlink
 		for(var i = 0, length = aHyperlinksToRestore.length; i < length; i++)
 		{
 			var elem = aHyperlinksToRestore[i];
@@ -20485,7 +20485,7 @@
 		else if(null != oLeftTopCellStyle)
 			oTargetStyle = oLeftTopCellStyle.clone();
 
-		//убираем бордеры
+		//remove borders
 		if(null != oTargetStyle)
 		{
 			if(null != oTargetStyle.border)
@@ -20544,7 +20544,7 @@
 							  }
 						  },
 						  function(cell, nRow, nCol, nRowStart, nColStart){
-							  //важно установить именно здесь, чтобы ячейка не удалилась после применения стилей.
+							  //important to set it exactly here so the cell is not deleted after applying styles.
 							  if(null == oTargetStyle)
 								  cell.setStyle(null);
 							  else
@@ -20648,7 +20648,7 @@
 		if(false == this.worksheet.workbook.bUndoChanges && false == this.worksheet.workbook.bRedoChanges)
 			this.worksheet.mergeManager.add(this.bbox, 1);
 
-		//сбрасываем dataValidation кроме 1 ячейки
+		//reset dataValidation except for the 1st cell
 		var dataValidationRanges = Asc.Range(this.bbox.c1, this.bbox.r1, this.bbox.c1, this.bbox.r1).difference(this.bbox);
 		if (dataValidationRanges) {
 			this.worksheet.clearDataValidation(dataValidationRanges, true);
@@ -20698,14 +20698,14 @@
 					}
 				}
 			};
-			//todo возможно надо сделать оптимизацию для скрытых строк
+			//todo possibly need to optimize for hidden rows
 			var aHyperlinks = this.worksheet.hyperlinkManager.get(this.bbox);
 			for(var i = 0, length = aHyperlinks.all.length; i < length; i++)
 			{
 				var hyp = aHyperlinks.all[i];
 				var hypBBox = hyp.bbox.intersectionSimple(this.bbox);
 				fAddToTempRows(oTempRows, hypBBox, hyp.data);
-				//расширяем гиперссылки на merge ячейках
+				//expand hyperlinks on merged cells
 				var aMerged = this.worksheet.mergeManager.get(hyp.bbox);
 				for(var j = 0, length2 = aMerged.all.length; j < length2; j++)
 				{
@@ -20714,7 +20714,7 @@
 					fAddToTempRows(oTempRows, mergeBBox, hyp.data);
 				}
 			}
-			//формируем результат
+			//form the result
 			for(var i in oTempRows)
 			{
 				var nRowIndex = i - 0;
@@ -20747,7 +20747,7 @@
 		if(null != val && false == val.isValid())
 			return;
 
-		//проверяем, может эта ссылка уже существует
+		//check if this link already exists
 		var i, length, hyp;
 		var bExist = false;
 		var aHyperlinks = this.worksheet.hyperlinkManager.get(this.bbox);
@@ -20766,7 +20766,7 @@
 			AscCommon.History.StartTransaction();
 			if(false == this.worksheet.workbook.bUndoChanges && false == this.worksheet.workbook.bRedoChanges)
 			{
-				//удаляем ссылки с тем же адресом
+				//delete links with the same address
 				for(i = 0, length = aHyperlinks.all.length; i < length; i++)
 				{
 					hyp = aHyperlinks.all[i];
@@ -20774,7 +20774,7 @@
 						this.worksheet.hyperlinkManager.removeElement(hyp);
 				}
 			}
-			//todo перейти на CellStyle
+			//todo switch to CellStyle
 			if(true != bWithoutStyle)
 			{
 				var oHyperlinkFont = new AscCommonExcel.Font();
@@ -20860,7 +20860,7 @@
 		if (preDeleteAction)
 			preDeleteAction();
 
-		//удаляем крайние колонки и ячейки
+		//delete edge columns and cells
 		var i, length, colIndex;
 		for(i = 0, length = canShiftRes.aColsToDelete.length; i < length; ++i){
 			colIndex = canShiftRes.aColsToDelete[i].index;
@@ -20874,7 +20874,7 @@
 		var nRangeType = this._getRangeType(oBBox);
 		var mergeManager = this.worksheet.mergeManager;
 		this.worksheet.workbook.dependencyFormulas.lockRecal();
-		//todo вставить предупреждение, что будет unmerge
+		//todo insert warning that unmerge will occur
 		AscCommon.History.Create_NewPoint();
 		AscCommon.History.StartTransaction();
 		var oShiftGet = null;
@@ -20900,7 +20900,7 @@
 			}
 			AscCommon.History.LocalChange = false;
 		}
-		//сдвигаем ячейки
+		//shift cells
 		if(bLeft)
 		{
 			if(c_oRangeType.Range == nRangeType)
@@ -20971,7 +20971,7 @@
 		if (preDeleteAction)
 			preDeleteAction();
 
-		//удаляем крайние колонки и ячейки
+		//delete edge columns and cells
 		var i, length, rowIndex;
 		for(i = 0, length = canShiftRes.aRowsToDelete.length; i < length; ++i){
 			rowIndex = canShiftRes.aRowsToDelete[i];
@@ -20985,7 +20985,7 @@
 		var nRangeType = this._getRangeType(oBBox);
 		var mergeManager = this.worksheet.mergeManager;
 		this.worksheet.workbook.dependencyFormulas.lockRecal();
-		//todo вставить предупреждение, что будет unmerge
+		//todo insert warning that unmerge will occur
 		AscCommon.History.Create_NewPoint();
 		AscCommon.History.StartTransaction();
 		var oShiftGet = null;
@@ -21011,7 +21011,7 @@
 			}
 			AscCommon.History.LocalChange = false;
 		}
-		//сдвигаем ячейки
+		//shift cells
 		if(bUp)
 		{
 			if(c_oRangeType.Range == nRangeType)
@@ -21113,7 +21113,7 @@
 		AscCommon.History.Create_NewPoint();
 		AscCommon.History.StartTransaction();
 		this.unmerge();
-		//удаляем только гиперссылки, которые полностью лежат в области
+		//delete only hyperlinks that are completely within the area
 		var aHyperlinks = this.worksheet.hyperlinkManager.get(this.bbox);
 		for(var i = 0, length = aHyperlinks.inner.length; i < length; ++i)
 			this.removeHyperlink(aHyperlinks.inner[i]);
@@ -21137,7 +21137,7 @@
 	Range.prototype.cleanHyperlinks=function(){
 		AscCommon.History.Create_NewPoint();
 		AscCommon.History.StartTransaction();
-		//удаляем только гиперссылки, которые полностью лежат в области
+		//delete only hyperlinks that are completely within the area
 		var aHyperlinks = this.worksheet.hyperlinkManager.get(this.bbox);
 		for(var i = 0, length = aHyperlinks.inner.length; i < length; ++i)
 			this.removeHyperlink(aHyperlinks.inner[i]);
@@ -21146,8 +21146,8 @@
 	Range.prototype.sort = function (nOption, nStartRowCol, sortColor, opt_guessHeader, opt_by_row, opt_custom_sort) {
 		var bbox = this.bbox;
 		if (opt_guessHeader) {
-			//если тип ячеек первого и второго row попарно совпадает, то считаем первую строку заголовком
-			//todo рассмотреть замерженые ячейки. стили тоже влияют, но непонятно как сравнивать border
+			//if cell types of first and second row match pairwise, we consider the first row as a header
+			//todo consider merged cells. styles also affect this, but unclear how to compare border
 			var bIgnoreFirstRow = ignoreFirstRowSort(this.worksheet, bbox);
 
 			if (bIgnoreFirstRow) {
@@ -21156,7 +21156,7 @@
 			}
 		}
 
-		//todo горизонтальная сортировка
+		//todo horizontal sorting
 		var aMerged = this.worksheet.mergeManager.get(bbox);
 		if (aMerged.outer.length > 0 || (aMerged.inner.length > 0 && null == _isSameSizeMerged(bbox, aMerged.inner, true))) {
 			return null;
@@ -21168,11 +21168,11 @@
 			var merged = aMerged.inner[0];
 			if (opt_by_row) {
 				nMergedWidth = merged.bbox.c2 - merged.bbox.c1 + 1;
-				//меняем nStartCol, потому что приходит колонка той ячейки, на которой начали выделение
+				//change nStartCol because we receive the column of the cell where selection started
 				nStartRowCol = merged.bbox.r1;
 			} else {
 				nMergedHeight = merged.bbox.r2 - merged.bbox.r1 + 1;
-				//меняем nStartCol, потому что приходит колонка той ячейки, на которой начали выделение
+				//change nStartCol because we receive the column of the cell where selection started
 				nStartRowCol = merged.bbox.c1;
 			}
 
@@ -21197,7 +21197,7 @@
 		var nLastCol0 = elemObj.nLastCol0;
 
 
-		//проверяем что это не пустая операция
+		//check that this is not an empty operation
 		var aSortData = [];
 		var nHiddenCount = 0;
 		var oFromArray = {};
@@ -21259,7 +21259,7 @@
 
 
 		if (aSortData.length > 0) {
-			//добавляем индексы перехода пустых ячеек(нужно для сортировки комментариев)
+			//add transition indices for empty cells (needed for sorting comments)
 			var nRowColMin = opt_by_row ? nColMin : nRowMin;
 			var nRowColMax = opt_by_row ? nColMax : nRowMax;
 			var hiddenFunc = opt_by_row ? oThis.worksheet.getColHidden : oThis.worksheet.getRowHidden;
@@ -21328,8 +21328,8 @@
 		}
 		if(opt_custom_sort) {
 			//caseSensitive = opt_custom_sort.CaseSensitive;
-			//пока игнорируем данный флаг, поскольку сравнения строк в excel при сортировке работает иначе(например - "Green" > "green")
-			//возможно, стоит воспользоваться функцией localeCompare - но для этого необходимо проверить грамотное ли сравнение будет
+			//for now we ignore this flag, since string comparison in excel sorting works differently (e.g. "Green" > "green")
+			//possibly worth using localeCompare function - but need to verify if the comparison will be correct
 		}
 
 		var nLastRow0, nLastCol0;
@@ -21380,11 +21380,11 @@
 			return res;
 		};
 
-		//собираем массив обьектов для сортировки
+		//collect array of objects for sorting
 		var aSortElems = [];
 		var putElem = false;
 		var fAddSortElems = function (oCell, nRow0, nCol0) {
-			//не сортируем сткрытие строки
+			//don't sort hidden rows
 			if ((opt_by_row && !oThis.worksheet.getColHidden(nCol0)) || (!opt_by_row && !oThis.worksheet.getRowHidden(nRow0))) {
 				if (!opt_by_row && nLastRow0 < nRow0) {
 					nLastRow0 = nRow0;
@@ -21491,7 +21491,7 @@
 		//color sort
 		var colorFillCmp = function (color1, color2, _customCellColor) {
 			var res = false;
-			//TODO возможно так сравнивать не правильно, позже пересмотреть
+			//TODO possibly comparing this way is incorrect, review later
 			if (colorFill || _customCellColor === true) {
 				res = (color1 !== null && color2 !== null && color1.rgb === color2.rgb) || (color1 === color2);
 			} else if ((colorText || _customCellColor === false) && color1 && color1.length) {
@@ -21534,9 +21534,9 @@
 				var res = 0;
 				var nullVal = false;
 				var compare = function(_a, _b, _sortCondition) {
-					//если есть opt_custom_sort(->sortConditions) - тогда может быть несколько условий сортировки
-					//в данном случае идём по отдельной ветке и по-другому обрабатываем сортировку по цвету
-					//TODO стоит рассмотреть вариант одной обработки для разных вариантов сортировки
+					//if opt_custom_sort(->sortConditions) exists - then there can be multiple sort conditions
+					//in this case we go through a separate branch and handle color sorting differently
+					//TODO consider having one handler for different sorting options
 					if(_sortCondition && (_sortCondition.ConditionSortBy === Asc.ESortBy.sortbyCellColor || _sortCondition.ConditionSortBy === Asc.ESortBy.sortbyFontColor)) {
 						if(!_a || !_b) {
 							return res;
@@ -21633,7 +21633,7 @@
 			}
 			oSortedIndexes[nFrom] = nTo;
 		}
-		//сортируются только одинарные гиперссылки, все неодинарные оставляем
+		//only single hyperlinks are sorted, all non-single ones are left as is
 		var aSortedHyperlinks = [], hyp;
 		if (false == this.worksheet.workbook.bUndoChanges && (false == this.worksheet.workbook.bRedoChanges || this.worksheet.workbook.bCollaborativeChanges)) {
 			AscCommon.History.LocalChange = true;
@@ -21645,8 +21645,8 @@
 					nFrom = opt_by_row ? elem.bbox.c1 : elem.bbox.r1;
 					nTo = oSortedIndexes[nFrom];
 					if (null != nTo) {
-						//удаляем ссылки, а не перемещаем, чтобы не было конфликтов(например в случае если все ячейки имеют ссылки
-						// и их надо передвинуть)
+						//delete links instead of moving them to avoid conflicts (e.g. when all cells have links
+						// and they need to be moved)
 						this.worksheet.hyperlinkManager.removeElement(elem);
 						var oNewHyp = hyp.clone();
 						if(opt_by_row) {
@@ -21734,7 +21734,7 @@
 
 		if (false == this.worksheet.workbook.bUndoChanges && (false == this.worksheet.workbook.bRedoChanges || this.worksheet.workbook.bCollaborativeChanges)) {
 			AscCommon.History.LocalChange = true;
-			//восстанавливаем удаленые гиперссылки
+			//restore deleted hyperlinks
 			if (aSortedHyperlinks.length > 0) {
 				for (i = 0, length = aSortedHyperlinks.length; i < length; i++) {
 					hyp = aSortedHyperlinks[i];
@@ -21818,7 +21818,7 @@
 				return _res;
 			};
 
-			//проверяем что merge ячеки полностью заполняют область
+			//check that merged cells completely fill the area
 			var nBBoxWidth = bbox.c2 - bbox.c1 + 1;
 			var nBBoxHeight = bbox.r2 - bbox.r1 + 1;
 			if (checkProportion && nBBoxWidth % nWidth === 0 && nBBoxHeight % nHeight === 0) {
@@ -21853,7 +21853,7 @@
 	}
 	function _canPromote(from, wsFrom, to, wsTo, bIsPromote, nWidth, nHeight, bVertical, nIndex) {
 		var oRes = {oMergedFrom: null, oMergedTo: null, to: to};
-		//если надо только удалить внутреннее содержимое не смотрим на замерженость
+		//if we only need to delete inner content, we don't check for merged cells
 		if(!bIsPromote || !((true == bVertical && nIndex >= 0 && nIndex < nHeight) || (false == bVertical && nIndex >= 0 && nIndex < nWidth)))
 		{
 			if(null != to){
@@ -21869,7 +21869,7 @@
 						oRes.oMergedTo = oMergedTo;
 						if (bIsPromote) {
 							if (oMergedFrom.inner.length > 0) {
-								//merge области должны иметь одинаковый размер
+								//merge areas must have the same size
 								var oSizeFrom = _isSameSizeMerged(from, oMergedFrom.inner);
 								var oSizeTo = _isSameSizeMerged(to, oMergedTo.inner);
 								if (!(null != oSizeFrom && null != oSizeTo && oSizeTo.width == oSizeFrom.width && oSizeTo.height == oSizeFrom.height))
@@ -21884,7 +21884,7 @@
 		}
 		return oRes;
 	}
-// Подготовка Copy Style
+// Copy Style preparation
 	function preparePromoteFromTo(from, to) {
 		var bSuccess = true;
 		if (to.isOneCell())
@@ -21900,11 +21900,11 @@
 			bSuccess = false;
 		return bSuccess;
 	}
-// Перед promoteFromTo обязательно должна быть вызывана функция preparePromoteFromTo
+// Before promoteFromTo, the preparePromoteFromTo function must be called
 	function promoteFromTo(from, wsFrom, to, wsTo) {
 		var bVertical = true;
 		var nIndex = 1;
-		//проверяем можно ли осуществить promote
+		//check if we can perform promote
 		var oCanPromote = _canPromote(from, wsFrom, to, wsTo, false, 1, 1, bVertical, nIndex);
 		if(null != oCanPromote)
 		{
@@ -21923,7 +21923,7 @@
 				oSelectionRedo.assign(to.c1, to.r1, to.c2, to.r2);
 				AscCommon.History.SetSelectionRedo(oSelectionRedo);
 			}
-			//удаляем merge ячейки в to(после _canPromote должны остаться только inner)
+			//delete merge cells in 'to' (after _canPromote only inner should remain)
 			wsTo.mergeManager.remove(to, true);
 			_promoteFromTo(from, wsFrom, to, wsTo, false, oCanPromote, false, bVertical, nIndex);
 		}
@@ -21969,11 +21969,11 @@
 					oPromoteAscRange = new Asc.Range(oBBox.c1 + nIndex, oBBox.r1, oBBox.c1 - 1, oBBox.r2);
 			}
 		}
-		//проверяем можно ли осуществить promote
+		//check if we can perform promote
 		return _canPromote(oBBox, this.worksheet, oPromoteAscRange, this.worksheet, true, nWidth, nHeight, bVertical, nIndex);
 	};
 	Range.prototype.promote=function(bCtrl, bVertical, nIndex, oCanPromote){
-		//todo отдельный метод для promote в таблицах и merge в таблицах
+		//todo separate method for promote in tables and merge in tables
 		if (!oCanPromote) {
 			oCanPromote = this.canPromote(bCtrl, bVertical, nIndex);
 		}
@@ -22265,20 +22265,20 @@
 		}
 		var nWidth = from.c2 - from.c1 + 1;
 		var nHeight = from.r2 - from.r1 + 1;
-		//удаляем текст или все в области для заполнения
+		//delete text or everything in the fill area
 		if(bIsPromote && nIndex >= 0 && ((true == bVertical && nHeight > nIndex) || (false == bVertical && nWidth > nIndex)))
 		{
-			//удаляем только текст в области для заполнения
+			//delete only text in the fill area
 			toRange.cleanText();
 		}
 		else
 		{
-			//удаляем все в области для заполнения
+			//delete everything in the fill area
 			if(bIsPromote)
 				toRange.cleanAll();
 			else
 				toRange.cleanFormat();
-			//собираем все данные
+			//collect all data
 			var bReverse = false;
 			if(nIndex < 0)
 				bReverse = true;
@@ -22332,7 +22332,7 @@
 										nVal = sValue - 0;
 									else
 									{
-										//если текст заканчивается на цифру тоже используем ее
+										//if text ends with a digit, use it too
 										var nEndIndex = sValue.length;
 										for(var k = sValue.length - 1; k >= 0; --k)
 										{
@@ -22378,7 +22378,7 @@
 			var bCopy = false;
 			if(bCtrl)
 				bCopy = true;
-			//в случае одной ячейки с числом меняется смысл bCtrl
+			//in case of a single cell with a number, the meaning of bCtrl changes
 			if(1 == nWidth && 1 == nHeight && oPromoteHelper.isOnlyIntegerSequence()) {
 				let fillType = wsTo && wsTo.getActiveFillType();
 				if (fillType !== Asc.c_oAscFillType.fillDown && fillType !== Asc.c_oAscFillType.fillUp
@@ -22388,7 +22388,7 @@
 			}
 			oPromoteHelper.setFillMenuChosenProp(wsFrom.getFillMenuChosenProp());
 			oPromoteHelper.finishAdd(bCopy);
-			//заполняем ячейки данными
+			//fill cells with data
 			var nStartRow, nEndRow, nStartCol, nEndCol, nColDx, bRowFirst;
 			if(bVertical)
 			{
@@ -22495,7 +22495,7 @@
 								}
 								else if(null != oFromCell)
 								{
-									//копируем полностью
+									//copy completely
 									if(!oFromCell.isFormula()){
 										oCopyCell.setValueData(oFromCell.getValueData());
 										//todo
@@ -22548,7 +22548,7 @@
 									}
 								}
 							}
-							//выставляем стиль после текста, потому что если выставить числовой стиль ячейки 'text', то после этого не применится формула
+							//set style after text, because if you set the cell number style to 'text', then the formula will not be applied afterwards
 							if (null != oFromCell) {
 								oCopyCell.setStyle(oFromCell.getStyle());
 								if (bIsPromote)
@@ -22561,7 +22561,7 @@
 			if(bIsPromote) {
 				wb.dependencyFormulas.addToChangedRange( wsTo.Id, to );
 			}
-			//добавляем замерженые области
+			//add merged areas
 			var nDx = from.c2 - from.c1 + 1;
 			var nDy = from.r2 - from.r1 + 1;
 			var oMergedFrom = oCanPromote.oMergedFrom;
@@ -22586,8 +22586,8 @@
 			}
 			if(bIsPromote)
 			{
-				//добавляем ссылки
-				//не как в Excel поддерживаются ссылки на диапазоны
+				//add hyperlinks
+				//unlike Excel, links to ranges are supported
 				var oHyperlinks = wsFrom.hyperlinkManager.get(from);
 				if(oHyperlinks.inner.length > 0)
 				{
@@ -22669,7 +22669,7 @@
 				aRules = wsFrom.getIntersectionRules(from);
 			}
 			if(aRules && aRules.length > 0) {
-				//TODO сделать объединение диапазонов! (допустим, при копировании стиля на несколько ячеек)
+				//TODO implement range merging! (for example, when copying style to multiple cells)
 				var newRules = [];
 				for (var i = to.c1; i <= to.c2; i += nDx) {
 					for (var j = to.r1; j <= to.r2; j += nDy) {
@@ -22970,12 +22970,12 @@
 	 * @constructor
 	 */
 	function PromoteHelper(bVerical, bReverse, bbox){
-		//автозаполнение происходит всегда в правую сторону, поэтому менются индексы в методе add, и это надо учитывать при вызове getNext
+		//autofill always goes to the right, so indices are changed in the add method, and this must be taken into account when calling getNext
 		this.bVerical = bVerical;
 		this.bReverse = bReverse;
 		this.bbox = bbox;
 		this.oDataRow = {};
-		//для get
+		//for get
 		this.oCurRow = null;
 		this.nCurColIndex = null;
 		this.nRowLength = 0;
@@ -23005,7 +23005,7 @@
 	PromoteHelper.prototype = {
 		add: function(nRow, nCol, nVal, bDelimiter, sPrefix, padding, bDate, oAdditional, aTimePeriods){
 			if(this.bVerical) {
-				//транспонируем для удобства
+				//transpose for convenience
 				var temp = nRow;
 				nRow = nCol;
 				nCol = temp;
@@ -23050,14 +23050,14 @@
 			return bRes;
 		},
 		_promoteSequence: function(aDigits){
-			// Это коэффициенты линейного приближения (http://office.microsoft.com/ru-ru/excel-help/HP010072685.aspx)
-			// y=a1*x+a0 (где: x=0,1....; y=значения в ячейках; a0 и a1 - это решения приближения функции методом наименьших квадратов
+			// These are linear approximation coefficients (http://office.microsoft.com/ru-ru/excel-help/HP010072685.aspx)
+			// y=a1*x+a0 (where: x=0,1....; y=values in cells; a0 and a1 are solutions of function approximation using the least squares method
 			// (n+1)*a0        + (x0+x1+....)      *a1=(y0+y1+...)
 			// (x0+x1+....)*a0 + (x0*x0+x1*x1+....)*a1=(y0*x0+y1*x1+...)
 			// http://www.exponenta.ru/educat/class/courses/vvm/theme_7/theory.asp
 			var a0 = 0.0;
 			var a1 = 0.0;
-			// Индекс X
+			// Index X
 			var nX = 0;
 			if(1 == aDigits.length)
 			{
@@ -23078,14 +23078,14 @@
 				// (y0*x0+y1*x1+...)
 				var dYiXi = 0.0;
 
-				// Цикл по всем строкам
+				// Loop through all rows
 				for (var i = 0, length = aDigits.length; i < length; ++i)
 				{
 					var data = aDigits[i];
 					nX = data.x;
 					var dValue = data.y;
 
-					// Вычисляем значения
+					// Calculate values
 					nXi += nX;
 					nXiXi += nX * nX;
 					dYi += dValue;
@@ -23093,12 +23093,12 @@
 				}
 				nX++;
 
-				// Теперь решаем систему уравнений
-				// Общий детерминант
+				// Now solve the system of equations
+				// Common determinant
 				var dD = nN * nXiXi - nXi * nXi;
-				// Детерминант первого корня
+				// Determinant of the first root
 				var dD1 = dYi * nXiXi - nXi * dYiXi;
-				// Детерминант второго корня
+				// Determinant of the second root
 				var dD2 = nN * dYiXi - dYi * nXi;
 
 				a0 = dD1 / dD;
@@ -23111,7 +23111,7 @@
 				var oFirstData = aCurSequence[0];
 				var bCanPromote = true;
 				const bFillHandleRightClick = this.getFillHandleRightClick();
-				//если последовательность состоит из одного числа и той же колонке есть еще последовательности, то надо копировать, а не автозаполнять
+				//if the sequence consists of one number and there are other sequences in the same column, then copy instead of autofill
 				if(aCurSequence.length === 1 && !bFillHandleRightClick) {
 					var bVisitRowIndex = false;
 					var oVisitData = null;
@@ -23155,8 +23155,8 @@
 					var nIndexDif = null;
 					var nValueDif = null;
 					var nMaxPadding = 0;
-					//анализируем последовательность, если числа расположены не на одинаковом расстоянии, то считаем их сплошной последовательностью
-					//последовательность с промежутками может быть только целочисленной
+					//analyze the sequence, if numbers are not equally spaced, consider them as a continuous sequence
+					//a sequence with gaps can only be integer
 					for(let i = 0, length = aCurSequence.length; i < length; i++) {
 						var data = aCurSequence[i];
 						var nCurX = data.getCol();
@@ -23193,7 +23193,7 @@
 						if(nIndexDif > 1)
 							bWithSpace = true;
 					}
-					//заполняем массив с координатами
+					//fill array with coordinates
 					var bExistSpace = false;
 					nPrevX = null;
 					var aDigits = [];
@@ -23207,7 +23207,7 @@
 						if(null != nPrevX && nCurX - nPrevX > 1)
 							bExistSpace = true;
 						var y = data.getVal();
-						//даты автозаполняем только по целой части
+						//autofill dates only by integer part
 						if(data.getIsDate() && !data.getIsDateTime() && !data.getIsMixedDateFormat() && !data.getIsTime()) {
 							y = parseInt(y);
 						}
@@ -23255,7 +23255,7 @@
 								oSequence.a1 = (1 / 86400) * 3600;
 							}
 							if (this.bReverse) {
-								//меняем коэффициенты для случая одного числа в последовательности, иначе она в любую сторону будет возрастающей
+								//change coefficients for the case of one number in the sequence, otherwise it will be ascending in any direction
 								oSequence.a1 *= -1;
 								if (bTime && oSequence.a0 === 0) {
 									oSequence.a0 = 1;
@@ -23265,7 +23265,7 @@
 						if (aDigits.length === 2 && bDateTime) {
 							this.initDiffDirectionDateTime(aDigits);
 						}
-						//для дат и чисел с префиксом автозаполняются только целочисленные последовательности
+						//for dates and numbers with prefix, only integer sequences are autofilled
 						let nFirstVal = oFirstData.getVal();
 						let bIsNotIntegerSequence = oSequence.a1 !== parseInt(oSequence.a1);
 						let bDateCalcModeHasDiffDay = aDigits.length > 1 && bIsCalcDateMode && this.isDiffDaysForCalcMode(aDigits, nFirstVal);
@@ -23345,7 +23345,7 @@
 				for(var i = 0, length = aSortRowIndex.length; i < length; i++) {
 					var nRowIndex = aSortRowIndex[i];
 					var row = this.oDataRow[nRowIndex];
-					//собираем информация о последовательностях в row
+					//collect information about sequences in row
 					var aSortIndex = [];
 					for(var j in row)
 						aSortIndex.push(j - 0);

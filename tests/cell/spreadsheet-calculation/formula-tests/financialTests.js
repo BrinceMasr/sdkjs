@@ -239,7 +239,7 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-		//формируем массив значений
+		// Create array of values
 		const randomArray = [];
 		let randomStrArray = "{";
 		let maxArg = 4;
@@ -9623,14 +9623,14 @@ $(function () {
 		}
 
 
-		//TODO в хроме при расчёте разница, временно убираю
+		// TODO there is a calculation difference in Chrome, temporarily removing
 		oParser = new parserFormula("IRR({-70000,12000,15000,18000,21000})", "A2", ws);
 		assert.ok(oParser.parse());
 		//assert.strictEqual( oParser.calculate().getValue(), -0.021244848273410923 );
 
 		ws.getRange2("A705").setValue("43191");
 
-		//TODO в хроме при расчёте разница, временно убираю
+		// TODO there is a calculation difference in Chrome, temporarily removing
 		oParser = new parserFormula("IRR({-70000,12000,15000,18000,21000,26000})", "A2", ws);
 		assert.ok(oParser.parse());
 		//assert.strictEqual( oParser.calculate().getValue(), 0.08663094803653171 );
@@ -9643,7 +9643,7 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#NUM!");
 
-		//TODO пересмотреть тест для этой функции
+		// TODO review test for this function
 		//testArrayFormula2(assert, "IRR", 1, 2, true)
 
 		ws.getRange2("A1:C214").cleanAll();
@@ -11184,7 +11184,7 @@ $(function () {
 
 	QUnit.test("Test: \"NPV\"", function (assert) {
 
-		//TODO в хроме при расчёте разница, временно убираю
+		// TODO there is a calculation difference in Chrome, temporarily removing
 		oParser = new parserFormula("NPV(0.1,-10000,3000,4200,6800)", "A2", ws);
 		assert.ok(oParser.parse());
 		//assert.strictEqual( oParser.calculate().getValue(), 1188.4434123352216 );
@@ -17692,7 +17692,7 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: XIRR({-100,200},{1,2958465},-1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Bounded case: Array. Negative guess with extreme dates.');
 
-		// TODO множественное расхождение в базовых результатах с ms
+		// TODO multiple discrepancies in base results compared to MS
 		// Need to fix:
 		// Case #1: Number,Number,Number. Basic valid input: cash flows and dates as arrays, guess provided. 3 of 3 arguments used.
 		// Case #2: Number,Number. Valid input without guess. 2 of 3 arguments used.

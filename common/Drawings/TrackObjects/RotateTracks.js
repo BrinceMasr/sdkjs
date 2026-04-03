@@ -216,7 +216,7 @@
 		this.lineStructure = oLineStructure;
 		this.isBulletSymbol = bIsBulletSymbol;
 		this.SpaceTextElements = [];
-		/*позиция символа*/
+		/*character position*/
 		this.x = x;
 		this.y = y;
 

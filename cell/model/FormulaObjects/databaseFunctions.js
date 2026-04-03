@@ -241,8 +241,8 @@ function (window, undefined) {
 			res = true;
 		} else {
 			var conditionObj = AscCommonExcel.matchingValue(condition);
-			//если строка, без операторов, добавляем * для поиска совпадений начинающихся с данной строки
-			//так делает MS. lo ищет строгие совпадения
+			//if a string has no operators, add * to search for matches starting with that string
+			//this is how MS does it. LO searches for exact matches
 			if (null === conditionObj.op && cElementType.string === conditionObj.val.type) {
 				conditionObj.val.value += "*";
 			}
@@ -262,7 +262,7 @@ function (window, undefined) {
 				if (bIsCondition) {
 					if (0 === i) {
 						arr[j] = header;
-						if (map.hasOwnProperty(header)) {//если находим такой же заголовок, пропускаем
+						if (map.hasOwnProperty(header)) {//if a duplicate header is found, skip it
 							continue;
 						} else {
 							map[header] = [];
@@ -272,7 +272,7 @@ function (window, undefined) {
 					}
 				} else {
 					if (0 === i) {
-						if (map.hasOwnProperty(header)) {//если находим такой же заголовок, пропускаем
+						if (map.hasOwnProperty(header)) {//if a duplicate header is found, skip it
 							continue;
 						} else {
 							map[header] = [];
@@ -292,15 +292,15 @@ function (window, undefined) {
 
 	function getNeedValuesFromDataBase(dataBase, field, conditionData, bIsGetObjArray, doNotCheckEmptyField) {
 
-		//заполняем map название столбца-> его содержимое(из базы данных)
+		//fill the map: column name -> its content (from the database)
 		var databaseObj = convertDatabase(dataBase);
 		var headersArr = databaseObj.arr, headersDataMap = databaseObj.map;
 
-		//заполняем map название столбца-> его содержимое(из условий)
+		//fill the map: column name -> its content (from conditions)
 		databaseObj = convertDatabase(conditionData, true);
 		var headersConditionArr = databaseObj.arr, headersConditionMap = databaseObj.map;
 
-		//преобразуем аргумент поле
+		//convert the field argument
 		if (cElementType.cell === field.type || cElementType.cell3D === field.type) {
 			field = field.getValue();
 		}
@@ -314,7 +314,7 @@ function (window, undefined) {
 		if (cElementType.error === isNumberField.type) {
 			field = field.getValue();
 		} else {
-			//если поле задано числом, то выбираем заголовок столбца с данным именем
+			//if the field is specified as a number, select the column header with that name
 			var number = isNumberField.getValue();
 			if (headersArr[number - 1]) {
 				field = headersArr[number - 1];
@@ -336,7 +336,7 @@ function (window, undefined) {
 				var condition = conditionData[i][j];
 				var header = headersConditionArr[j];
 
-				//проходимся по всем строкам данного столбца из базы и смотрим что нам подходит по условию
+				//iterate through all rows of this column from the database and check which ones match the condition
 				var databaseData = headersDataMap[header];
 
 				if (!databaseData) {
@@ -508,7 +508,7 @@ function (window, undefined) {
 		var isEmptyField = cElementType.empty === argClone[1].type;
 		var count = 0;
 		for (var i = 0; i < resArr.length; i++) {
-			//если Поле пустое, то ms игнорирует числовой формат полученных данных
+			//if the Field is empty, MS ignores the numeric format of the retrieved data
 			if (isEmptyField) {
 				count++;
 			} else {

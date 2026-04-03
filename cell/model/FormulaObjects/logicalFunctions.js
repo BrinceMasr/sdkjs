@@ -561,8 +561,8 @@ function (window, undefined) {
 						allCellsEmpty = false;
 					}
 				}
-				//если диапазон пустой - выдаём ошибку
-				//если диапазон содержит хоть одну непустую ячейку(без ошибки) - результат false
+				//if the range is empty - return an error
+				//if the range contains at least one non-empty cell (without an error) - the result is false
 				if (argResult == null && !allCellsEmpty) {
 					argResult = new cBool(false);
 				} else if (allCellsEmpty) {

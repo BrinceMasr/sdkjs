@@ -2862,7 +2862,7 @@
 	 */
 	
 	/**
-	 * Сalculates or predicts a future value based on existing (historical) values by using the AAA version of the Exponential Smoothing (ETS) algorithm.
+	 * Calculates or predicts a future value based on existing (historical) values by using the AAA version of the Exponential Smoothing (ETS) algorithm.
 	 * @memberof ApiWorksheetFunction
 	 * @typeofeditors ["CSE"]
 	 * @param {ApiRange | ApiName | number} arg1 - A date for which a new value will be predicted. Must be after the last date in the timeline.
@@ -7533,7 +7533,7 @@
 
 		var oRange = oSheet.GetRangeByNumber(rowIndex, 0);
 
-		// определяем количество строк с данными
+		// determine the number of rows with data
 		while (oRange.GetValue() !== "") {
 			rowsCount++;
 			rowIndex++;
@@ -7541,7 +7541,7 @@
 		}
 
 		oRange = oSheet.GetRangeByNumber(1, colIndex);
-		// определяем количество столбцов с данными
+		// determine the number of columns with data
 		while (oRange.GetValue() !== "") {
 			colsCount++;
 			colIndex++;
@@ -7848,7 +7848,7 @@
 			comment.asc_putText(sText);
 			let author = ((typeof (sAuthor) === 'string' && sAuthor.trim() !== '') ? sAuthor : Asc['editor'].User.asc_getUserName());
 			comment.asc_putUserName(author);
-			// todo проверить как в документа добавлются (надо ли выставлять этот параметр)
+			// todo check how it is added in documents (whether this parameter needs to be set)
 			// comment.asc_putUserId(Asc['editor'].User.asc_getId());
 			comment.asc_putDocumentFlag(true);
 			Asc.editor.asc_addComment(comment);
@@ -10119,7 +10119,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/GetAddress.js
 	 */
 	ApiRange.prototype.GetAddress = function (RowAbs, ColAbs, RefStyle, External, RelativeTo) {
-		// todo поправить, чтобы возвращал адреса всех areas внутри range
+		// todo fix to return addresses of all areas inside range
 		var range = this.range.bbox;
 		var isOneCell = this.range.isOneCell();
 		var isOneCol = (this.range.bbox.c1 === this.range.bbox.c2 && this.range.bbox.r1 === 0 && this.range.bbox.r2 === AscCommon.gc_nMaxRow0);
@@ -11106,7 +11106,7 @@
 			comment.asc_putText(sText);
 			let author = ((typeof (sAuthor) === 'string' && sAuthor.trim() !== '') ? sAuthor : Asc['editor'].User.asc_getUserName());
 			comment.asc_putUserName(author);
-			// todo проверить как в документа добавлются (надо ли выставлять этот параметр)
+			// todo check how it is added in documents (whether this parameter needs to be set)
 			// comment.asc_putUserId(Asc['editor'].User.asc_getId());
 			comment.asc_putCol(this.range.bbox.c1);
 			comment.asc_putRow(this.range.bbox.r1);
@@ -20220,7 +20220,7 @@
 		worksheet.dataValidations.deleteMassValidations(this.validations, worksheet, rangeBbox, true);
 		
 
-		// Очищаем ссылку на validation
+		// Clear the reference to validation
 		this.validations = [];
 		return this;
 	};
@@ -20605,7 +20605,7 @@
 		return this.range;
 	};
 
-	// Property implementations с использованием новых методов
+	// Property implementations using new methods
 	Object.defineProperty(ApiValidation.prototype, "Type", {
 		get: function() {
 			return this.GetType();
@@ -21142,9 +21142,9 @@
 				props.asc_setAboveAverage(true);
 				props.asc_setEqualAverage(false);
 				props.asc_setStdDev(0);
-				// Operator может переопределить настройки
+				// Operator can override settings
 				if (Operator !== undefined) {
-					// Здесь можно добавить логику для различных типов above/below average
+					// Logic for various above/below average types can be added here
 				}
 				break;
 
@@ -22928,7 +22928,7 @@
 			return null;
 		}
 
-		// DateOperator применяется только для условий типа xlTimePeriod
+		// DateOperator applies only to xlTimePeriod type conditions
 		if (this.rule.type !== Asc.ECfType.timePeriod) {
 			return null;
 		}
@@ -22949,7 +22949,7 @@
 			return;
 		}
 
-		// DateOperator применяется только для условий типа xlTimePeriod
+		// DateOperator applies only to xlTimePeriod type conditions
 		if (this.rule.type !== Asc.ECfType.timePeriod) {
 			return;
 		}
@@ -23169,7 +23169,7 @@
 	// 		return 0; // xlAllValues
 	// 	}
 	//
-	// 	// Возвращаем значение области расчета для сводных таблиц
+	// 	// Return the calculation scope value for pivot tables
 	// 	return this.rule.pivot.calcFor || 0;
 	// };
 
@@ -26709,7 +26709,7 @@
 			return;
 		}
 
-		// Создаем или обновляем iconSet
+		// Create or update iconSet
 		if (!this.iconSet) {
 			this.iconSet = new window['AscCommonExcel'].CConditionalFormatIconSet();
 		}
@@ -26717,12 +26717,12 @@
 		this.iconSet.asc_setIconSet(iconData.iconSetType);
 		this.iconSet.asc_setIndex(iconData.iconIndex);
 
-		// Обновляем правило через parent
+		// Update the rule through parent
 		let t = this;
 		this.parent.private_changeStyle(function (newRule) {
 			let iconSetElement = newRule.aRuleElements && newRule.aRuleElements[0];
 			if (iconSetElement && iconSetElement.aIconSets) {
-				// Убеждаемся что массив достаточно большой
+				// Make sure the array is large enough
 				while (iconSetElement.aIconSets.length <= t.index) {
 					iconSetElement.aIconSets.push(new window['AscCommonExcel'].CConditionalFormatIconSet());
 				}

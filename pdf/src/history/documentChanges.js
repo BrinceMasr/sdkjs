@@ -972,7 +972,7 @@ CChangesPDFDocumentRotatePage.prototype.private_SetValue = function(Value)
     if (-1 !== nPageIdx) {
         oFile.pages[nPageIdx].Rotate = Value;
 
-        // sticky note всегда неповернуты
+        // sticky notes are always non-rotated
         oDoc.Viewer.pagesInfo.pages[nPageIdx].annots.forEach(function(annot) {
             if (annot.IsComment()) {
                 annot.AddToRedraw();

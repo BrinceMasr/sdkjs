@@ -608,7 +608,7 @@
                 }
                 if ("no_build" === obj["error"])
 				{
-					// проблемы - но такие, при которых просто не собираем файл...
+					// problems - but ones where we just don't build the file...
 					window["AscDesktopEditor"]["buildCryptedEnd"](true);
 					return;
 				}
@@ -1443,9 +1443,9 @@
 		const isLocal = ( (window["AscDesktopEditor"] !== undefined) && (window.location.protocol.indexOf('file') !== -1) );
 		if (isLocal)
 		{
-			// Отдаём весь конфиг, внутри вычислим путь к deploy
-			// TODO: отслеживать возможные ошибки при +/- плагинов: из ++кода отправлять статус операции и на основе его отправлять в менеджер плагинов корректный ответ.
-			// UPD: done. Ничего не изменять в менеджере плагинов, если guid пуст
+			// Pass the entire config, the path to deploy will be calculated inside
+			// TODO: track possible errors when adding/removing plugins: send operation status from native code and based on it send correct response to plugin manager.
+			// UPD: done. Do not change anything in plugin manager if guid is empty
 
             let result = window["AscDesktopEditor"]["PluginInstall"](JSON.stringify(config));
 
@@ -1570,8 +1570,8 @@
 
 		const isLocal = ( (window["AscDesktopEditor"] !== undefined) && (window.location.protocol.indexOf('file') !== -1) );
 		if (isLocal) {
-			// В случае Desktop не работаем с localStorage и extensions, этот метод может быть вызван из интерфейса
-			// если по какой-то причине (неактуальный cache) у пользователя есть asc_plugins_installed, asc_plugins_removed, то их нужно игнорировать/удалить
+			// In case of Desktop, we don't work with localStorage and extensions, this method can be called from the interface
+			// if for some reason (outdated cache) the user has asc_plugins_installed, asc_plugins_removed, they should be ignored/deleted
 			return;
 		}
 
@@ -1611,13 +1611,13 @@
 			}
 		}
 
-		// этот метод может быть вызван из интерфейса - нужен таймаут для web-apps
+		// this method can be called from the interface - a timeout is needed for web-apps
 		if (isRemovedPresent || isInstalledPresent) {
 
 			setTimeout(function () {
 
-				// в принципе можно не удалять, так как если ничего не поменялось - то не зайдем второй раз сюда.
-				// но зачем еще раз парсить
+				// in principle, we don't need to delete, since if nothing has changed - we won't enter here again.
+				// but why parse again
 				window.g_asc_plugins.api.disableCheckInstalledPlugins = true;
 
 				if (isRemovedPresent)
@@ -1721,20 +1721,20 @@
 	Api.prototype["pluginMethod_GetInstalledPlugins"] = function()
 	{
 		/*
-			формат объекта 
+			object format
 			{
-				url: url на конфиг (хотя по факту он не нужен, так как конфиг есть в этом объекте и внутри маркетплейса тоже),
-				guid: guid плагина,
-				canRemoved: флаг, может ли быть удалён плагин или нет (true/false),
-				obj: конфиг установленного плагина (от туда берется версия и сравнивается с текущей для проверки обновлений)
+				url: url to config (although in fact it's not needed, since the config is in this object and inside the marketplace too),
+				guid: plugin guid,
+				canRemoved: flag indicating whether the plugin can be removed or not (true/false),
+				obj: installed plugin config (the version is taken from there and compared with the current one to check for updates)
 			}
 		*/
 
 		const isLocal = ( (window["AscDesktopEditor"] !== undefined) && (window.location.protocol.indexOf('file') !== -1) );
 
-		// В случае Desktop нужно проверить какие плагины нельзя удалять. В UpdateInstallPlugins работаем с двумя типами папок.
-		// Пока проверка тут, но грамотнее будет сделать и использовать доп.свойство isSystemInstall класса CPlugin
-		// т.к. не будем лишний раз парсить папки, только при +/- плагинов.
+		// In case of Desktop, we need to check which plugins cannot be removed. In UpdateInstallPlugins we work with two types of folders.
+		// For now the check is here, but it would be better to create and use additional property isSystemInstall of CPlugin class
+		// since we won't parse folders unnecessarily, only when adding/removing plugins.
 		let protectedPlugins = [];
 
 		if (isLocal) {
@@ -1745,7 +1745,7 @@
 				protectedPlugins.push(_pluginsTmp[0]["pluginsData"][i]["guid"]);
 			}
 			
-			// Также смотрим плагины из папки пользователя, возможно там есть обновленные системные
+			// Also look at plugins from the user folder, there may be updated system plugins there
 			len = _pluginsTmp[1]["pluginsData"].length;
 			for (var i = 0; i < len; i++) {
 				if (_pluginsTmp[1]["pluginsData"][i]["canRemoved"] === false)
@@ -1777,7 +1777,7 @@
 		if (isLocal)
 			return returnArray;
 
-		// нужно послать и удаленные. так как удаленный может не быть в сторе. тогда его никак не установить обратно
+		// need to also send removed plugins. since a removed plugin may not be in the store. then there's no way to install it back
 		let currentRemovedPlugins = getLocalStorageItem("asc_plugins_removed");
 
 		if (currentRemovedPlugins)
@@ -1817,13 +1817,13 @@
 
 		if (isLocal)
 		{
-			// Вызываем только этот ++код, никаких дополнительных действий типа:
+			// We only call this native code, no additional actions like:
 			// window.g_asc_plugins.unregister(guid), window["UpdateInstallPlugins"](), this.sendEvent("asc_onPluginsReset"), window.g_asc_plugins.updateInterface()
-			// не требуется, т.к. ++код вызывает UpdateInstallPlugins, в нём идёт перестроение списка плагинов и обновление интерфейса.
-			// Просто отдаём менеджеру плагинов ответ.
-			// TODO: отслеживать возможные ошибки при +/- плагинов:
-			// из ++кода отправлять статус операции и на основе его отправлять в менеджер плагинов корректный ответ.
-			// ничего не изменять в менеджере плагинов, если guid пуст
+			// are required, because the native code calls UpdateInstallPlugins, which rebuilds the plugin list and updates the interface.
+			// We just send the response to the plugin manager.
+			// TODO: track possible errors when adding/removing plugins:
+			// send operation status from native code and based on it send correct response to plugin manager.
+			// do not change anything in plugin manager if guid is empty
 
 			let result = window["AscDesktopEditor"]["PluginUninstall"](guid, backup);
 						

@@ -99,7 +99,7 @@ function CTransitionAnimation(htmlpage)
 
     this.CalculateRect = function()
     {
-        // эта функция определяет, где находится рект для перехода
+        // this function determines where the rect for transition is located
 
 
         var _rect   = editor.WordControl.m_oDrawingDocument.SlideCurrectRect;
@@ -118,7 +118,7 @@ function CTransitionAnimation(htmlpage)
         var _w_mm = this.HtmlPage.m_oLogicDocument.GetWidthMM();
         var _h_mm = this.HtmlPage.m_oLogicDocument.GetHeightMM();
 
-        // проверим аспект
+        // check the aspect ratio
         var aspectDisplay = _width / _height;
         var aspectPres = _w_mm / _h_mm;
 
@@ -175,7 +175,7 @@ function CTransitionAnimation(htmlpage)
         var oSlide = this.GetSlide(slide_num);
         var oPlayer = oSlide.getAnimationPlayer();
 
-        // не кэшируем вотермарк никогда
+        // never cache the watermark
         let oldWatermark = this.HtmlPage.m_oApi.watermarkDraw;
         this.HtmlPage.m_oApi.watermarkDraw = null;
         oPlayer.drawFrame(CacheImage.Image, {x: 0, y: 0, w: _w, h: _h});
@@ -474,7 +474,7 @@ function CTransitionAnimation(htmlpage)
             var _ctx1 = null;
             if (null == oThis.DemonstrationObject)
             {
-                // отрисовываем на основной канве картинку первого слайда
+                // draw the first slide image on the main canvas
                 _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext('2d');
                 _ctx1.fillStyle = GlobalSkin.BackgroundColor;
                 _ctx1.fillRect(0, 0, oThis.HtmlPage.m_oEditor.HtmlElement.width, oThis.HtmlPage.m_oEditor.HtmlElement.height);
@@ -545,7 +545,7 @@ function CTransitionAnimation(htmlpage)
                         var _ctx1 = null;
                         if (null == oThis.DemonstrationObject)
                         {
-                            // отрисовываем на основной канве картинку первого слайда
+                            // draw the first slide image on the main canvas
                             _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext('2d');
                         }
                         else
@@ -594,7 +594,7 @@ function CTransitionAnimation(htmlpage)
                         var _ctx1 = null;
                         if (null == oThis.DemonstrationObject)
                         {
-                            // отрисовываем на основной канве картинку первого слайда
+                            // draw the first slide image on the main canvas
                             _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext('2d');
                         }
                         else
@@ -673,7 +673,7 @@ function CTransitionAnimation(htmlpage)
 
             if (null == oThis.DemonstrationObject)
             {
-                // отрисовываем на основной канве картинку первого слайда
+                // draw the first slide image on the main canvas
                 var _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext('2d');
                 _ctx1.fillStyle = GlobalSkin.BackgroundColor;
                 _ctx1.fillRect(0, 0, oThis.HtmlPage.m_oEditor.HtmlElement.width, oThis.HtmlPage.m_oEditor.HtmlElement.height);
@@ -809,7 +809,7 @@ function CTransitionAnimation(htmlpage)
             var _ctx1 = null;
             if (null == oThis.DemonstrationObject)
             {
-                // отрисовываем на основной канве картинку первого слайда
+                // draw the first slide image on the main canvas
                 _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext('2d');
                 _ctx1.fillStyle = GlobalSkin.BackgroundColor;
                 _ctx1.fillRect(0, 0, oThis.HtmlPage.m_oEditor.HtmlElement.width, oThis.HtmlPage.m_oEditor.HtmlElement.height);
@@ -1144,7 +1144,7 @@ function CTransitionAnimation(htmlpage)
                 _ctx2.translate(_cPosX, _cPosY);
                 _ctx2.rotate(Math.PI/2 - _ang);
 
-                // потом расчитать точнее!!!
+                // TODO: calculate more precisely later!!!
                 _ctx2.fillStyle = "#000000";
                 _ctx2.fillRect(-_hDstN2 - _gradW, -_wDstN / 2, _gradW, _wDstN);
                 _ctx2.beginPath();
@@ -1200,7 +1200,7 @@ function CTransitionAnimation(htmlpage)
                 _ctx2.translate(_cPosX, _cPosY);
                 _ctx2.rotate(_ang - Math.PI / 2);
 
-                // потом расчитать точнее!!!
+                // TODO: calculate more precisely later!!!
                 _ctx2.fillStyle = "#000000";
                 _ctx2.fillRect(_wDstN2, -_hDstN / 2, _gradW, _hDstN);
                 _ctx2.beginPath();
@@ -1256,7 +1256,7 @@ function CTransitionAnimation(htmlpage)
                 _ctx2.translate(_cPosX, _cPosY);
                 _ctx2.rotate(_ang - Math.PI / 2);
 
-                // потом расчитать точнее!!!
+                // TODO: calculate more precisely later!!!
                 _ctx2.fillStyle = "#000000";
                 _ctx2.fillRect(-_wDstN2 - _gradW, -_hDstN / 2, _gradW, _hDstN);
                 _ctx2.beginPath();
@@ -1312,7 +1312,7 @@ function CTransitionAnimation(htmlpage)
                 _ctx2.translate(_cPosX, _cPosY);
                 _ctx2.rotate(Math.PI/2 - _ang);
 
-                // потом расчитать точнее!!!
+                // TODO: calculate more precisely later!!!
                 _ctx2.fillStyle = "#000000";
                 _ctx2.fillRect(_hDstN2, -_wDstN / 2, _gradW, _wDstN);
                 _ctx2.beginPath();
@@ -1381,7 +1381,7 @@ function CTransitionAnimation(htmlpage)
 
         if (oThis.TimerId === null)
         {
-            // отрисовываем на основной канве картинку первого слайда
+            // draw the first slide image on the main canvas
             var _ctx1 = null;
             if (null == oThis.DemonstrationObject)
             {
@@ -1716,7 +1716,7 @@ function CTransitionAnimation(htmlpage)
             var _ctx1 = null;
             if (null == oThis.DemonstrationObject)
             {
-                // отрисовываем на основной канве картинку первого слайда
+                // draw the first slide image on the main canvas
                 _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext('2d');
                 _ctx1.fillStyle = GlobalSkin.BackgroundColor;
                 _ctx1.fillRect(0, 0, oThis.HtmlPage.m_oEditor.HtmlElement.width, oThis.HtmlPage.m_oEditor.HtmlElement.height);
@@ -1867,7 +1867,7 @@ function CTransitionAnimation(htmlpage)
             var _ctx1 = null;
             if (null == oThis.DemonstrationObject)
             {
-                // отрисовываем на основной канве картинку первого слайда
+                // draw the first slide image on the main canvas
                 _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext('2d');
                 _ctx1.fillStyle = GlobalSkin.BackgroundColor;
                 _ctx1.fillRect(0, 0, oThis.HtmlPage.m_oEditor.HtmlElement.width, oThis.HtmlPage.m_oEditor.HtmlElement.height);
@@ -2018,7 +2018,7 @@ function CTransitionAnimation(htmlpage)
             var _ctx1 = null;
             if (null == oThis.DemonstrationObject)
             {
-                // отрисовываем на основной канве картинку первого слайда
+                // draw the first slide image on the main canvas
                 _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext('2d');
                 _ctx1.fillStyle = GlobalSkin.BackgroundColor;
                 _ctx1.fillRect(0, 0, oThis.HtmlPage.m_oEditor.HtmlElement.width, oThis.HtmlPage.m_oEditor.HtmlElement.height);
@@ -2490,7 +2490,7 @@ function CTransitionAnimation(htmlpage)
                 var _ctx1 = null;
                 if (null == oThis.DemonstrationObject)
                 {
-                    // отрисовываем на основной канве картинку первого слайда
+                    // draw the first slide image on the main canvas
                     _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext('2d');
                     _ctx1.fillStyle = GlobalSkin.BackgroundColor;
                     _ctx1.fillRect(0, 0, oThis.HtmlPage.m_oEditor.HtmlElement.width, oThis.HtmlPage.m_oEditor.HtmlElement.height);
@@ -2549,7 +2549,7 @@ function CTransitionAnimation(htmlpage)
                 var _ctx1 = null;
                 if (null == oThis.DemonstrationObject)
                 {
-                    // отрисовываем на основной канве картинку первого слайда
+                    // draw the first slide image on the main canvas
                     _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext('2d');
                     _ctx1.fillStyle = GlobalSkin.BackgroundColor;
                     _ctx1.fillRect(0, 0, oThis.HtmlPage.m_oEditor.HtmlElement.width, oThis.HtmlPage.m_oEditor.HtmlElement.height);
@@ -2610,7 +2610,7 @@ function CTransitionAnimation(htmlpage)
                     var _ctx1 = null;
                     if (null == oThis.DemonstrationObject)
                     {
-                        // отрисовываем на основной канве картинку первого слайда
+                        // draw the first slide image on the main canvas
                         _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext('2d');
                         _ctx1.fillStyle = GlobalSkin.BackgroundColor;
                         _ctx1.fillRect(0, 0, oThis.HtmlPage.m_oEditor.HtmlElement.width, oThis.HtmlPage.m_oEditor.HtmlElement.height);
@@ -2649,8 +2649,8 @@ function CTransitionAnimation(htmlpage)
                     _ctx2.clearRect(oThis.Rect.x, oThis.Rect.y, oThis.Rect.w, oThis.Rect.h);
                 }
 
-                // начинаем с угла в -45 градусов. затем крутим против часовой стрелки на 360 + 45 градусов
-                // размер - от 5% до 100%
+                // start from angle of -45 degrees, then rotate counter-clockwise by 360 + 45 degrees
+                // size - from 5% to 100%
                 var _angle = -45 + 405 * _part;
                 var _scale = (0.05 + 0.95 * _part);
                 _angle *= (Math.PI / 180);
@@ -3872,7 +3872,7 @@ function CDemonstrationManager(htmlpage)
         const oSlide = this.GetSlide(slide_num);
         const oPlayer = oSlide.getAnimationPlayer();
 
-        // не кэшируем вотермарк никогда
+        // never cache the watermark
         let oldWatermark = this.HtmlPage.m_oApi.watermarkDraw;
         this.HtmlPage.m_oApi.watermarkDraw = null;
 				const oOldAnnotations = this.SlideAnnotations;
@@ -4349,8 +4349,8 @@ function CDemonstrationManager(htmlpage)
 
     this.StartTransition = function(_transition, is_first, is_backward)
     {
-        // сначала проверим, создан ли уже оверлей (в идеале спрашивать еще у транзишна, нужен ли ему оверлей)
-        // пока так.
+        // first check if overlay is already created (ideally should also ask transition if it needs overlay)
+        // for now this way.
         if (null == oThis.Overlay)
         {
             oThis.Overlay = document.createElement('canvas');
@@ -4485,7 +4485,7 @@ function CDemonstrationManager(htmlpage)
 
 
 
-        // теперь запустим функцию
+        // now let's run the function
         var _slides = oThis.HtmlPage.m_oLogicDocument.Slides;
         var nSlideNum = oThis.SlideNum;
         var oSlide = _slides[nSlideNum];
@@ -5267,7 +5267,7 @@ function CDemonstrationManager(htmlpage)
                 oThis.HtmlPage.m_oApi.disableReporterEvents = true;
             }
 
-            // после fullscreen возможно изменение X, Y после вызова Resize.
+            // after fullscreen, X and Y may change after calling Resize.
             oThis.HtmlPage.checkBodyOffset();
 
             if(oThis.CheckMouseDown(documentMI.x, documentMI.y, documentMI.page))

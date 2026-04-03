@@ -46,12 +46,12 @@
 
 	const DEFAULT_TEXTFONTINFO = new CTextFontInfo();
 
-	// Функции для возможной перегрузки
-	// 1. FlushGrapheme - основная функция, которую нужно ОБЯЗАТЕЛЬНО реализовывать в дочернем классе
-	// 2. Shape - простая функция для шейпинга текста
-	// 3. GetFontInfo - получаем информацию о шрифте на момент составления графем
-	// 4. GetCodePoint - данная функция нужна, чтобы в буфере можно было хранить не сам юникод, а его содержащий класс
-	// 5. GetLigaturesType - какие лигатуры поддерживать
+	// Functions that can be overridden
+	// 1. FlushGrapheme - main function that MUST be implemented in the derived class
+	// 2. Shape - simple function for text shaping
+	// 3. GetFontInfo - get font information at the time of grapheme composition
+	// 4. GetCodePoint - this function is needed so that the buffer can store not the unicode itself, but a class containing it
+	// 5. GetLigaturesType - which ligatures to support
 
 	/**
 	 * @constructor
@@ -120,7 +120,7 @@
 
 		AscFonts.HB_ShapeString(this, nFontId, oFontInfo.Style, this.FontId, this.GetLigaturesType(nScript), nScript, this.Direction, "en");
 
-		// Значит шрифт был подобран, возвращаем назад состояние отрисовщика
+		// This means the font was substituted, restore the renderer state
 		if (this.FontId.m_pFaceInfo.family_name !== oFontInfo.Name)
 		{
 			AscCommon.g_oTextMeasurer.SetFontInternal(oFontInfo.Name, AscFonts.MEASURE_FONTSIZE, oFontInfo.Style);

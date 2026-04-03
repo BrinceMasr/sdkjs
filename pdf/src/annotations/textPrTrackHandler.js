@@ -34,9 +34,9 @@
 
 (function(window) {
 	/**
-	 * Класс контролирует события работы трека формулы. Вызывать у этого класса события обновления можно
-	 * сколько угодно раз, а этот класс уже отрисовщику и в интерфейс посылает события, только когда реально что-то
-	 * изменилось
+	 * Class controls text properties track events. You can call update events on this class as many times
+	 * as you want, and this class only sends events to the renderer and interface when something
+	 * has actually changed
 	 *
 	 * @constructor
 	 */
@@ -96,38 +96,38 @@
 		}
 
         let aOrigRect   = oAnnot.GetRect();
-        let aRD         = oAnnot.GetRectangleDiff() || [0, 0, 0, 0]; // отступ координат фигуры с текстом от ректа аннотации
+        let aRD         = oAnnot.GetRectangleDiff() || [0, 0, 0, 0]; // offset of text shape coordinates from annotation rect
         let nPage       = oAnnot.GetPage();
 		let oTr			= oDoc.pagesTransform[nPage].invert;
 		
-        let aFreeTextRect = []; // прямоугольник
+        let aFreeTextRect = []; // rectangle
 
-        // левый верхний
+        // top left
         aFreeTextRect.push({
             x: (aOrigRect[0] + aRD[0]),
             y: (aOrigRect[1] + aRD[1])
         });
-        // правый верхний
+        // top right
         aFreeTextRect.push({
             x: (aOrigRect[2] - aRD[2]),
             y: (aOrigRect[1] + aRD[1])
         });
-        // правый нижний
+        // bottom right
         aFreeTextRect.push({
             x: (aOrigRect[2] - aRD[2]),
             y: (aOrigRect[3] - aRD[3])
         });
-        // левый нижний
+        // bottom left
         aFreeTextRect.push({
             x: (aOrigRect[0] + aRD[0]),
             y: (aOrigRect[3] - aRD[3])
         });
 
-		
-		let oPoint1 = oTr.TransformPoint(aFreeTextRect[0].x, aFreeTextRect[0].y); // левый верхний
-		let oPoint2 = oTr.TransformPoint(aFreeTextRect[1].x, aFreeTextRect[1].y); // правый верхний
-		let oPoint3 = oTr.TransformPoint(aFreeTextRect[2].x, aFreeTextRect[2].y); // правый нижний
-		let oPoint4 = oTr.TransformPoint(aFreeTextRect[3].x, aFreeTextRect[3].y); // левый нижний
+
+		let oPoint1 = oTr.TransformPoint(aFreeTextRect[0].x, aFreeTextRect[0].y); // top left
+		let oPoint2 = oTr.TransformPoint(aFreeTextRect[1].x, aFreeTextRect[1].y); // top right
+		let oPoint3 = oTr.TransformPoint(aFreeTextRect[2].x, aFreeTextRect[2].y); // bottom right
+		let oPoint4 = oTr.TransformPoint(aFreeTextRect[3].x, aFreeTextRect[3].y); // bottom left
 
 		let xMin = Math.min(oPoint1.x, oPoint2.x, oPoint3.x, oPoint4.x);
 		let yMin = Math.min(oPoint1.y, oPoint2.y, oPoint3.y, oPoint4.y);

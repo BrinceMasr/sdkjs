@@ -3399,7 +3399,7 @@
 					//TODO:this.checkSelectedObjectsAndCallback(this.setCellStyleCallBack, [name]);
 				},
 
-				// Увеличение размера шрифта
+				// Increase font size
 				increaseFontSize: function () {
 
 					if (this.checkSelectedObjectsProtectionText()) {
@@ -3409,7 +3409,7 @@
 
 				},
 
-				// Уменьшение размера шрифта
+				// Decrease font size
 				decreaseFontSize: function () {
 					if (this.checkSelectedObjectsProtectionText()) {
 						return;
@@ -5106,7 +5106,7 @@
 				},
 
 				getSeriesDefault: function (type) {
-					// Обновлены тестовые данные для новой диаграммы
+					// Updated test data for new chart
 					var series = [], seria, Cat;
 					var createItem = function (value) {
 						return {numFormatStr: "General", isDateTimeFormat: false, val: value, isHidden: false};
@@ -6464,7 +6464,7 @@
 
 					} else if (oEvent.KeyCode === 88 && bCanEdit && true === bIsCtrl) // Ctrl + X - cut
 					{
-						//не возвращаем true чтобы не было preventDefault
+						//don't return true to avoid preventDefault
 					} else if ((oEvent.KeyCode === 93 && !oEvent.MacCmdKey) || 57351 === oEvent.KeyCode/*in Opera there is such a code*/) // context menu
 					{
 						nRetValue = keydownresult_PreventDefault;
@@ -8681,7 +8681,7 @@
 						ascSelectedObjects.push(new AscCommon.asc_CSelectedObject(Asc.c_oAscTypeSelectElement.Image, new Asc.asc_CImgProperty(ret[i])));
 					}
 
-					// Текстовые свойства объекта
+					// Text properties of the object
 					var ParaPr = this.getParagraphParaPr();
 					var TextPr = this.getParagraphTextPr();
 					if (ParaPr && TextPr) {
@@ -9147,7 +9147,7 @@
 						this.setParagraphNumbering(Props.Bullet)
 					}
 
-					// TODO: как только разъединят настройки параграфа и текста переделать тут
+					// TODO: refactor here once paragraph and text settings are separated
 					var TextPr = new CTextPr();
 
 					if (true === Props.Subscript)
@@ -10385,7 +10385,7 @@
 			if (this.m_bIsBreak)
 				return;
 
-			// TODO: нужен другой метод отрисовки!!!
+			// TODO: a different rendering method is needed!!!
 			var _x = this.m_oFullTransform.TransformPointX(x, y);
 			var _y = this.m_oFullTransform.TransformPointY(x, y);
 			this.Bounds.CheckRect(_x, _y, 1, 1);
@@ -10440,7 +10440,7 @@
 			this.Bounds.CheckPoint(_x4, _y4);
 		};
 
-		// мега крутые функции для таблиц
+		// super cool functions for tables
 		CSlideBoundsChecker.prototype.drawHorLineExt = function(align, y, x, r, penW, leftMW, rightMW) {
 			this.drawHorLine(align, y, x + leftMW, r + rightMW);
 		};
@@ -10648,7 +10648,7 @@
 				var loader = AscCommon.g_font_loader;
 				var fontinfo = g_fontApplication.GetFontInfo("Cambria Math");
 				if (undefined === fontinfo) {
-					// нет Cambria Math - нет и формул
+					// no Cambria Math - no formulas
 					return;
 				}
 
