@@ -26991,33 +26991,6 @@
 	{
 		return "signatureForm";
 	};
-	/**
-	 * Locks the aspect ratio of the current signature form.
-	 * @memberof ApiSignatureForm
-	 * @param {boolean} [isLock=true] - Specifies if the aspect ratio of the current picture form will be locked (true) or not (false).
-	 * @typeofeditors ["CDE", "CFE"]
-	 * @returns {boolean}
-	 * @since 9.4.0
-	 * @see office-js-api/Examples/{Editor}/ApiSignatureForm/Methods/SetLockAspectRatio.js
-	 */
-	ApiSignatureForm.prototype.SetLockAspectRatio = ApiPictureForm.prototype.SetLockAspectRatio;
-	/**
-	 * Checks if the aspect ratio of the current signature form is locked or not.
-	 * @memberof ApiSignatureForm
-	 * @typeofeditors ["CDE", "CFE"]
-	 * @returns {boolean}
-	 * @since 9.4.0
-	 * @see office-js-api/Examples/{Editor}/ApiSignatureForm/Methods/IsLockAspectRatio.js
-	 */
-	ApiSignatureForm.prototype.IsLockAspectRatio = ApiPictureForm.prototype.IsLockAspectRatio;
-	/**
-	 * Returns an image in the base64 format from the current picture form.
-	 * @memberof ApiSignatureForm
-	 * @typeofeditors ["CDE", "CFE"]
-	 * @returns {Base64Img}
-	 * @since 9.4.0
-	 * @see office-js-api/Examples/{Editor}/ApiSignatureForm/Methods/GetImage.js
-	 */
 	ApiSignatureForm.prototype.GetImage = ApiPictureForm.prototype.GetImage;
 	/**
 	 * Sets an image to the current picture form.
@@ -30684,12 +30657,10 @@
 	ApiComplexForm.prototype["ClearContent"] = ApiComplexForm.prototype.ClearContent;
 	ApiComplexForm.prototype["Copy"]         = ApiComplexForm.prototype.Copy;
 	
-	ApiSignatureForm.prototype["GetClassType"]       = ApiSignatureForm.prototype.GetClassType;
-	ApiSignatureForm.prototype["SetLockAspectRatio"] = ApiSignatureForm.prototype.SetLockAspectRatio;
-	ApiSignatureForm.prototype["IsLockAspectRatio"]  = ApiSignatureForm.prototype.IsLockAspectRatio;
-	ApiSignatureForm.prototype["GetImage"]           = ApiSignatureForm.prototype.GetImage;
-	ApiSignatureForm.prototype["SetImage"]           = ApiSignatureForm.prototype.SetImage;
-	ApiSignatureForm.prototype["Copy"]               = ApiSignatureForm.prototype.Copy;
+	ApiSignatureForm.prototype["GetClassType"] = ApiSignatureForm.prototype.GetClassType;
+	ApiSignatureForm.prototype["GetImage"]     = ApiSignatureForm.prototype.GetImage;
+	ApiSignatureForm.prototype["SetImage"]     = ApiSignatureForm.prototype.SetImage;
+	ApiSignatureForm.prototype["Copy"]         = ApiSignatureForm.prototype.Copy;
 	
 	ApiComboBoxForm.prototype["GetClassType"]    = ApiComboBoxForm.prototype.GetClassType;
 	ApiComboBoxForm.prototype["GetListValues"]   = ApiComboBoxForm.prototype.GetListValues;

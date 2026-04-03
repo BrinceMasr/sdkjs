@@ -32,5 +32,6 @@
 
 $(function()
 {
-	AscTest.JsApi.CreateTextForm = AscBuilder.Word.Api.CreateTextForm.bind(AscTest.Editor);
+	AscTest.JsApi.CreateTextForm      = AscBuilder.Word.Api.CreateTextForm.bind(AscTest.Editor);
+	AscTest.JsApi.CreateSignatureForm = AscBuilder.Word.Api.CreateSignatureForm.bind(AscTest.Editor);
 });
