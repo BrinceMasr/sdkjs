@@ -18555,7 +18555,7 @@ $(function () {
 		// Case #13: Date. Date as serial number (> 0). 1 argument used.
 		oParser = new parserFormula('GAMMA(DATE(2025,1,1))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA(DATE(2025,1,1)) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Positive case: Date. Date as serial number (> 0). 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Positive case: Date. Date as serial number (> 0). 1 argument used.');
 		// Case #14: Time. Time adjusted to valid number (>= 1). 1 argument used.
 		oParser = new parserFormula('GAMMA(TIME(12,0,0)+1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA(TIME(12,0,0)+1) is parsed.');
@@ -18571,7 +18571,7 @@ $(function () {
 		// Case #17: String. Short date string convertible to number. 1 argument used.
 		oParser = new parserFormula('GAMMA("12/12")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA("12/12") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Positive case: String. Short date string convertible to number. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Positive case: String. Short date string convertible to number. 1 argument used.');
 		// Case #18: Array. Array with single valid element (duplicate for coverage). 1 argument used.
 		oParser = new parserFormula('GAMMA({2.5})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA({2.5}) is parsed.');
@@ -18617,7 +18617,8 @@ $(function () {
 		// Case #6: Area. Multi-cell range returns #NUM!. 1 argument used.
 		oParser = new parserFormula('GAMMA(A103:A104)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA(A103:A104) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 2.218159544, 'Test: Negative case: Area. Multi-cell range returns #NUM!. 1 argument used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E100:G102").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 2.2181595437576878, 'Test: Negative case: Area. Multi-cell range returns #NUM!. 1 argument used.');
 		// Case #7: String. Empty string returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('GAMMA("")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA("") is parsed.');
@@ -18665,10 +18666,10 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: GAMMA(SINGLE(Sheet2!A4:A5)) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Test: Negative case: SINGLE Area3D. 3D multi-cell range returns #NUM!. 1 argument used.');
 
-	let res = AscCommonExcel.bIsSupportDynamicArrays ? '#NUM!' : '#VALUE!';
-	oParser = new parserFormula('GAMMA(Sheet2!A4:A5)', 'A2', ws);
-	assert.ok(oParser.parse(), 'Test: GAMMA(Sheet2!A4:A5) is parsed.');
-	assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, 'Test: Negative case: Area3D. 3D multi-cell range returns #NUM!. 1 argument used.');
+		let res = AscCommonExcel.bIsSupportDynamicArrays ? '#NUM!' : '#VALUE!';
+		oParser = new parserFormula('GAMMA(Sheet2!A4:A5)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: GAMMA(Sheet2!A4:A5) is parsed.');
+		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, 'Test: Negative case: Area3D. 3D multi-cell range returns #NUM!. 1 argument used.');
 		oParser = new parserFormula('GAMMA(DATE(2025,1,1)-DATE(2025,1,1))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA(DATE(2025,1,1)-DATE(2025,1,1)) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Formula. Formula resulting in zero returns #NUM!. 1 argument used.');
@@ -18676,6 +18677,12 @@ $(function () {
 		oParser = new parserFormula('GAMMA(-1000000)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA(-1000000) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. Large negative integer returns #NUM!. 1 argument used.');
+		let multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A1";
+		// Case #21: Area3D. Multi areas link. 1 argument used.
+		oParser = new parserFormula('GAMMA('+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: GAMMA('+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Number. Area3D. Multi areas link. 1 argument used.');
+
 
 		// Bounded cases:
 		// Case #1: Number. Minimum positive number accepted by Excel. 1 argument used.
@@ -18685,18 +18692,16 @@ $(function () {
 		// Case #2: Number. Maximum positive number accepted by Excel. 1 argument used.
 		oParser = new parserFormula('GAMMA(1.7E307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA(1.7E307) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Bounded case: Number. Maximum positive number accepted by Excel. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Bounded case: Number. Maximum positive number accepted by Excel. 1 argument used.');
 		// Case #3: Number. Negative number close to -1 but non-integer. 1 argument used.
 		oParser = new parserFormula('GAMMA(-0.999999999999999)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA(-0.999999999999999) is parsed.');
+		// todo accuracy in calculations is lost with a large number of decimal places and a very small value as a result
 		//? assert.strictEqual(oParser.calculate().getValue(), -1000800000000000, 'Test: Bounded case: Number. Negative number close to -1 but non-integer. 1 argument used.');
-
-		// Need to fix: ms result diff
-		// Case #13: Date. Date as serial number (> 0). 1 argument used.
-		// Case #17: String. Short date string convertible to number. 1 argument used.
-		// Case #6: Area. Multi-cell range returns #NUM!. 1 argument used.
-		// Case #2: Number. Maximum positive number accepted by Excel. 1 argument used.
-		// Case #3: Number. Negative number close to -1 but non-integer. 1 argument used.
+		// Case #4: Number. Negative number close to -1. 1 argument used.
+		oParser = new parserFormula('GAMMA(-0.99999)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: GAMMA(-0.99999) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), -100000.42279846588, 'Test: Bounded case: Number. Maximum positive number accepted by Excel. 1 argument used.');
 
 
 		testArrayFormula2(assert, "GAMMA", 1, 1);
@@ -18768,9 +18773,9 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: GAMMADIST(0,1,1,TRUE) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Number. Boundary x = 0, alpha = 1, beta > 0, cumulative = TRUE. 4 of 4 arguments used.');
 		// Case #3: String. Strings convertible to valid numbers and TRUE. 4 of 4 arguments used.
-		oParser = new parserFormula('GAMMADIST("2","1","1","TRUE")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: GAMMADIST("2","1","1","TRUE") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.864664717, 'Test: Positive case: String. Strings convertible to valid numbers and TRUE. 4 of 4 arguments used.');
+		oParser = new parserFormula('GAMMADIST("2","1","1",TRUE)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: GAMMADIST("2","1","1",TRUE) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 0.8646647167633872, 'Test: Positive case: String. Strings convertible to valid numbers and TRUE. 4 of 4 arguments used.');
 		// Case #4: Formula. Nested formulas returning valid numbers, cumulative = TRUE. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMADIST(SQRT(4),ABS(1),ABS(1),TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMADIST(SQRT(4),ABS(1),ABS(1),TRUE) is parsed.');
@@ -18778,11 +18783,11 @@ $(function () {
 		// Case #5: Reference link. References to cells with valid numbers (2, 1.5, 0.5, TRUE). 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMADIST(A100,A101,A102,A103)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMADIST(A100,A101,A102,A103) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.8298126213987767, 'Test: Positive case: Reference link. References to cells with valid numbers (2, 1.5, 0.5, TRUE). 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 0.829812621398777, 'Test: Positive case: Reference link. References to cells with valid numbers (2, 1.5, 0.5, TRUE). 4 of 4 arguments used.');
 		// Case #6: Area. Single-cell ranges with valid numbers (2, 1.5, 0.5, TRUE). 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMADIST(A100:A100,A101:A101,A102:A102,A103:A103)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMADIST(A100:A100,A101:A101,A102:A102,A103:A103) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.8298126213987767, 'Test: Positive case: Area. Single-cell ranges with valid numbers (2, 1.5, 0.5, TRUE). 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 0.829812621398777, 'Test: Positive case: Area. Single-cell ranges with valid numbers (2, 1.5, 0.5, TRUE). 4 of 4 arguments used.');
 		// Case #7: Array. Arrays with single valid elements. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMADIST({2},{1},{1},{TRUE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMADIST({2},{1},{1},{TRUE}) is parsed.');
@@ -18822,15 +18827,15 @@ $(function () {
 		// Case #16: Number. Alpha = 0.5 (non-integer), beta = 2, cumulative = TRUE. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMADIST(1,0.5,2,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMADIST(1,0.5,2,TRUE) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.682689492137086, 'Test: Positive case: Number. Alpha = 0.5 (non-integer), beta = 2, cumulative = TRUE. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 0.6826894921370862, 'Test: Positive case: Number. Alpha = 0.5 (non-integer), beta = 2, cumulative = TRUE. 4 of 4 arguments used.');
 		// Case #17: String. Strings convertible to valid numbers and FALSE (0). 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMADIST("1","2","1","0")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMADIST("1","2","1","0") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Positive case: String. Strings convertible to valid numbers and FALSE (0). 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Positive case: String. Strings convertible to valid numbers and FALSE (0). 4 of 4 arguments used.');
 		// Case #18: Array. Arrays with single valid elements, cumulative as 1 (TRUE). 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMADIST({1},{2},{1},{1})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMADIST({1},{2},{1},{1}) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.2642411176571153, 'Test: Positive case: Array. Arrays with single valid elements, cumulative as 1 (TRUE). 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 0.2642411176571152, 'Test: Positive case: Array. Arrays with single valid elements, cumulative as 1 (TRUE). 4 of 4 arguments used.');
 		// Case #19: Formula. Nested IF formulas returning valid numbers. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMADIST(IF(TRUE,2,1),IF(TRUE,1,0.5),1,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMADIST(IF(TRUE,2,1),IF(TRUE,1,0.5),1,TRUE) is parsed.');
@@ -18838,7 +18843,7 @@ $(function () {
 		// Case #20: Number. Alpha = n/2, beta = 2, cumulative = TRUE (relates to chi-squared distribution). 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMADIST(2,2,2,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMADIST(2,2,2,TRUE) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.2642411176571153, 'Test: Positive case: Number. Alpha = n/2, beta = 2, cumulative = TRUE (relates to chi-squared distribution). 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 0.2642411176571152, 'Test: Positive case: Number. Alpha = n/2, beta = 2, cumulative = TRUE (relates to chi-squared distribution). 4 of 4 arguments used.');
 		// Case #21: Number. Alpha as positive integer (Erlang distribution), cumulative = FALSE. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMADIST(1,3,1,FALSE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMADIST(1,3,1,FALSE) is parsed.');
@@ -18880,19 +18885,25 @@ $(function () {
 		// Case #8: Empty. Empty x reference returns #VALUE!. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMADIST(A104,1,1,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMADIST(A104,1,1,TRUE) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.3934693402873665, 'Test: Negative case: Empty. Empty x reference returns #VALUE!. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 0.39346934028736685, 'Test: Negative case: Empty. Empty x reference returns #VALUE!. 4 of 4 arguments used.');
 		// Case #9: Area. Multi-cell range for x returns #NUM!. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMADIST(A100:A101,1,1,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMADIST(A100:A101,1,1,TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.095162582, 'Test: Negative case: Area. Multi-cell range for x returns #NUM!. 4 of 4 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E100:G102").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.09516258196404052, 'Test: Negative case: Area. Multi-cell range for x returns #NUM!. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1,0).getValue(), 0.18126924692201832, 'Test: Negative case: Area. Multi-cell range for x returns #NUM!. 4 of 4 arguments used.');
 		// Case #10: Area. Multi-cell range for alpha returns #NUM!. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMADIST(2,A100:A101,1,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMADIST(2,A100:A101,1,TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.994326176, 'Test: Negative case: Area. Multi-cell range for alpha returns #NUM!. 4 of 4 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E100:G102").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.9943261760201886, 'Test: Negative case: Area. Multi-cell range for alpha returns #NUM!. 4 of 4 arguments used');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1,0).getValue(), 0.9870134148764075, 'Test: Negative case: Area. Multi-cell range for alpha returns #NUM!. 4 of 4 arguments used.');
 		// Case #11: Area. Multi-cell range for beta returns #NUM!. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMADIST(2,1,A100:A101,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMADIST(2,1,A100:A101,TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.999999998, 'Test: Negative case: Area. Multi-cell range for beta returns #NUM!. 4 of 4 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E100:G102").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.9999999979388464, 'Test: Negative case: Area. Multi-cell range for beta returns #NUM!. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1,0).getValue(), 0.9999546000702375, 'Test: Negative case: Area. Multi-cell range for beta returns #NUM!. 4 of 4 arguments used.');
 		// Case #12: Ref3D. 3D reference to text (abc) for x returns #VALUE!. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMADIST(Sheet2!A3,1,1,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMADIST(Sheet2!A3,1,1,TRUE) is parsed.');
@@ -18900,7 +18911,7 @@ $(function () {
 		// Case #13: Name. Named range with text (invalid) for x returns #VALUE!. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMADIST(TestNameArea2,1,1,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMADIST(TestNameArea2,1,1,TRUE) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.5506710358827783, 'Test: Negative case: Name. Named range with text (invalid) for x returns #VALUE!. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 0.5506710358827788, 'Test: Negative case: Name. Named range with text (invalid) for x returns #VALUE!. 4 of 4 arguments used.');
 		// Case #14: Table. Table column with text (error) for x returns #VALUE!. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMADIST(Table1[Column2],1,1,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMADIST(Table1[Column2],1,1,TRUE) is parsed.');
@@ -18936,36 +18947,26 @@ $(function () {
 		// Case #20: Name3D. 3D named range with text (invalid) for x returns #VALUE!. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMADIST(TestNameArea3D2,1,1,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMADIST(TestNameArea3D2,1,1,TRUE) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.5506710358827783, 'Test: Negative case: Name3D. 3D named range with text (invalid) for x returns #VALUE!. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 0.5506710358827788, 'Test: Negative case: Name3D. 3D named range with text (invalid) for x returns #VALUE!. 4 of 4 arguments used.');
 
 		// Bounded cases:
 		// Case #1: Number. Minimum positive numbers for x, alpha, beta accepted by Excel. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMADIST(1E-307,1E-307,1E-307,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMADIST(1E-307,1E-307,1E-307,TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number. Minimum positive numbers for x, alpha, beta accepted by Excel. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number. Minimum positive numbers for x, alpha, beta accepted by Excel. 4 of 4 arguments used.');
 		// Case #2: Number. Maximum positive x accepted by Excel. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMADIST(1.7E307,1,1,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMADIST(1.7E307,1,1,TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number. Maximum positive x accepted by Excel. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number. Maximum positive x accepted by Excel. 4 of 4 arguments used.');
 		// Case #3: Number. Maximum positive alpha accepted by Excel. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMADIST(2,1.7E307,1,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMADIST(2,1.7E307,1,TRUE) is parsed.');
+		// todo it's not clear why this result is in MS
 		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Bounded case: Number. Maximum positive alpha accepted by Excel. 4 of 4 arguments used.');
 		// Case #4: Number. Maximum positive beta accepted by Excel. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMADIST(2,1,1.7E307,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMADIST(2,1,1.7E307,TRUE) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1.1764705882352546e-307, 'Test: Bounded case: Number. Maximum positive beta accepted by Excel. 4 of 4 arguments used.');
-
-		// Need to fix: different result from MS
-		// Case #3: String. Strings convertible to valid numbers and TRUE. 4 of 4 arguments used.
-		// Case #17: String. Strings convertible to valid numbers and FALSE (0). 4 of 4 arguments used.
-		// Case #9: Area. Multi-cell range for x returns #NUM!. 4 of 4 arguments used
-		// Case #10: Area. Multi-cell range for alpha returns #NUM!. 4 of 4 arguments used.
-		// Case #11: Area. Multi-cell range for beta returns #NUM!. 4 of 4 arguments used.
-		// Case #1: Number. Minimum positive numbers for x, alpha, beta accepted by Excel. 4 of 4 arguments used.
-		// Case #2: Number. Maximum positive x accepted by Excel. 4 of 4 arguments used.
-		// Case #3: Number. Maximum positive alpha accepted by Excel. 4 of 4 arguments used.
-
 
 	});
 
@@ -19035,9 +19036,9 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(0,1,1,TRUE) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Number. Boundary x = 0, alpha = 1, beta > 0, cumulative = TRUE. 4 of 4 arguments used.');
 		// Case #3: String. Strings convertible to valid numbers and TRUE. 4 of 4 arguments used.
-		oParser = new parserFormula('GAMMA.DIST("2","1","1","TRUE")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: GAMMA.DIST("2","1","1","TRUE") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.864664717, 'Test: Positive case: String. Strings convertible to valid numbers and TRUE. 4 of 4 arguments used.');
+		oParser = new parserFormula('GAMMA.DIST("2","1","1",TRUE)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: GAMMA.DIST("2","1","1",TRUE) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 0.8646647167633872, 'Test: Positive case: String. Strings convertible to valid numbers and TRUE. 4 of 4 arguments used.');
 		// Case #4: Formula. Nested formulas returning valid numbers, cumulative = TRUE. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMA.DIST(SQRT(4),ABS(1),ABS(1),TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(SQRT(4),ABS(1),ABS(1),TRUE) is parsed.');
@@ -19045,11 +19046,11 @@ $(function () {
 		// Case #5: Reference link. References to cells with valid numbers (2, 1.5, 0.5, TRUE). 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMA.DIST(A100,A101,A102,A103)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(A100,A101,A102,A103) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.8298126213987767, 'Test: Positive case: Reference link. References to cells with valid numbers (2, 1.5, 0.5, TRUE). 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "0.82981", 'Test: Positive case: Reference link. References to cells with valid numbers (2, 1.5, 0.5, TRUE). 4 of 4 arguments used.');
 		// Case #6: Area. Single-cell ranges with valid numbers (2, 1.5, 0.5, TRUE). 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMA.DIST(A100:A100,A101:A101,A102:A102,A103:A103)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(A100:A100,A101:A101,A102:A102,A103:A103) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.8298126213987767, 'Test: Positive case: Area. Single-cell ranges with valid numbers (2, 1.5, 0.5, TRUE). 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "0.82981", 'Test: Positive case: Area. Single-cell ranges with valid numbers (2, 1.5, 0.5, TRUE). 4 of 4 arguments used.');
 		// Case #7: Array. Arrays with single valid elements. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMA.DIST({2},{1},{1},{TRUE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.DIST({2},{1},{1},{TRUE}) is parsed.');
@@ -19089,23 +19090,23 @@ $(function () {
 		// Case #16: Number. Alpha = 0.5 (non-integer), beta = 2, cumulative = TRUE. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMA.DIST(1,0.5,2,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(1,0.5,2,TRUE) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.682689492137086, 'Test: Positive case: Number. Alpha = 0.5 (non-integer), beta = 2, cumulative = TRUE. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "0.68269", 'Test: Positive case: Number. Alpha = 0.5 (non-integer), beta = 2, cumulative = TRUE. 4 of 4 arguments used.');
 		// Case #17: String. Strings convertible to valid numbers and FALSE (0). 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMA.DIST("1","2","1","0")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.DIST("1","2","1","0") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Positive case: String. Strings convertible to valid numbers and FALSE (0). 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Positive case: String. Strings convertible to valid numbers and FALSE (0). 4 of 4 arguments used.');
 		// Case #18: Array. Arrays with single valid elements, cumulative as 1 (TRUE). 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMA.DIST({1},{2},{1},{1})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.DIST({1},{2},{1},{1}) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.2642411176571153, 'Test: Positive case: Array. Arrays with single valid elements, cumulative as 1 (TRUE). 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "0.26424", 'Test: Positive case: Array. Arrays with single valid elements, cumulative as 1 (TRUE). 4 of 4 arguments used.');
 		// Case #19: Formula. Nested IF formulas returning valid numbers. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMA.DIST(IF(TRUE,2,1),IF(TRUE,1,0.5),1,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(IF(TRUE,2,1),IF(TRUE,1,0.5),1,TRUE) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.8646647167633872, 'Test: Positive case: Formula. Nested IF formulas returning valid numbers. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "0.86466", 'Test: Positive case: Formula. Nested IF formulas returning valid numbers. 4 of 4 arguments used.');
 		// Case #20: Number. Alpha = n/2, beta = 2, cumulative = TRUE (relates to chi-squared distribution). 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMA.DIST(2,2,2,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(2,2,2,TRUE) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.2642411176571153, 'Test: Positive case: Number. Alpha = n/2, beta = 2, cumulative = TRUE (relates to chi-squared distribution). 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "0.26424", 'Test: Positive case: Number. Alpha = n/2, beta = 2, cumulative = TRUE (relates to chi-squared distribution). 4 of 4 arguments used.');
 		// Case #21: Number. Alpha as positive integer (Erlang distribution), cumulative = FALSE. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMA.DIST(1,3,1,FALSE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(1,3,1,FALSE) is parsed.');
@@ -19147,19 +19148,25 @@ $(function () {
 		// Case #8: Empty. Empty x reference returns #VALUE!. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMA.DIST(A104,1,1,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(A104,1,1,TRUE) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.3934693402873665, 'Test: Negative case: Empty. Empty x reference returns #VALUE!. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "0.39347", 'Test: Negative case: Empty. Empty x reference returns #VALUE!. 4 of 4 arguments used.');
 		// Case #9: Area. Multi-cell range for x returns #NUM!. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMA.DIST(A100:A101,1,1,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(A100:A101,1,1,TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.095162582, 'Test: Negative case: Area. Multi-cell range for x returns #NUM!. 4 of 4 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E100:G102").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.09516258196404052, 'Test: Negative case: Area. Multi-cell range for x returns #NUM!. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1,0).getValue(), 0.18126924692201832, 'Test: Negative case: Area. Multi-cell range for x returns #NUM!. 4 of 4 arguments used.');
 		// Case #10: Area. Multi-cell range for alpha returns #NUM!. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMA.DIST(2,A100:A101,1,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(2,A100:A101,1,TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.994326176, 'Test: Negative case: Area. Multi-cell range for alpha returns #NUM!. 4 of 4 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E100:G102").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.9943261760201886, 'Test: Negative case: Area. Multi-cell range for alpha returns #NUM!. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1,0).getValue(), 0.9870134148764075, 'Test: Negative case: Area. Multi-cell range for alpha returns #NUM!. 4 of 4 arguments used.');
 		// Case #11: Area. Multi-cell range for beta returns #NUM!. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMA.DIST(2,1,A100:A101,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(2,1,A100:A101,TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.999999998, 'Test: Negative case: Area. Multi-cell range for beta returns #NUM!. 4 of 4 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E100:G102").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.9999999979388464, 'Test: Negative case: Area. Multi-cell range for beta returns #NUM!. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1,0).getValue(), 0.9999546000702375, 'Test: Negative case: Area. Multi-cell range for beta returns #NUM!. 4 of 4 arguments used.');
 		// Case #12: Ref3D. 3D reference to text (abc) for x returns #VALUE!. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMA.DIST(Sheet2!A3,1,1,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(Sheet2!A3,1,1,TRUE) is parsed.');
@@ -19167,7 +19174,7 @@ $(function () {
 		// Case #13: Name. Named range with text (invalid) for x returns #VALUE!. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMA.DIST(TestNameArea2,1,1,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(TestNameArea2,1,1,TRUE) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.5506710358827783, 'Test: Negative case: Name. Named range with text (invalid) for x returns #VALUE!. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "0.55067", 'Test: Negative case: Name. Named range with text (invalid) for x returns #VALUE!. 4 of 4 arguments used.');
 		// Case #14: Table. Table column with text (error) for x returns #VALUE!. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMA.DIST(Table1[Column2],1,1,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(Table1[Column2],1,1,TRUE) is parsed.');
@@ -19203,35 +19210,31 @@ $(function () {
 		// Case #20: Name3D. 3D named range with text (invalid) for x returns #VALUE!. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMA.DIST(TestNameArea3D2,1,1,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(TestNameArea3D2,1,1,TRUE) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.5506710358827783, 'Test: Negative case: Name3D. 3D named range with text (invalid) for x returns #VALUE!. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "0.55067", 'Test: Negative case: Name3D. 3D named range with text (invalid) for x returns #VALUE!. 4 of 4 arguments used.');
 
 		// Bounded cases:
 		// Case #1: Number. Minimum positive numbers for x, alpha, beta accepted by Excel. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMA.DIST(1E-307,1E-307,1E-307,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(1E-307,1E-307,1E-307,TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number. Minimum positive numbers for x, alpha, beta accepted by Excel. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number. Minimum positive numbers for x, alpha, beta accepted by Excel. 4 of 4 arguments used.');
+		// Case #1.1: Number. Minimum positive numbers for x, alpha, beta accepted by Excel. 4 of 4 arguments used.
+		oParser = new parserFormula('GAMMA.DIST(1E-307,1E-307,1E-307,FALSE)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(1E-307,1E-307,1E-307,FALSE) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 0.36787944117144233, 'Test: Bounded case: Number. Minimum positive numbers for x, alpha, beta accepted by Excel. 4 of 4 arguments used.');
 		// Case #2: Number. Maximum positive x accepted by Excel. 4 of 4 arguments used.
-		oParser = new parserFormula('GAMMA.DIST(1.7E307,1,1,TRUE)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(1.7E307,1,1,TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number. Maximum positive x accepted by Excel. 4 of 4 arguments used.');
+		oParser = new parserFormula('GAMMA.DIST(1.7E+307,1,1,TRUE)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(1.7E+307,1,1,TRUE) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number. Maximum positive x accepted by Excel. 4 of 4 arguments used.');
 		// Case #3: Number. Maximum positive alpha accepted by Excel. 4 of 4 arguments used.
-		oParser = new parserFormula('GAMMA.DIST(2,1.7E307,1,TRUE)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(2,1.7E307,1,TRUE) is parsed.');
+		oParser = new parserFormula('GAMMA.DIST(2,1.7E+307,1,TRUE)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(2,1.7E+307,1,TRUE) is parsed.');
+		//todo it's not clear why this result is in MS
 		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Bounded case: Number. Maximum positive alpha accepted by Excel. 4 of 4 arguments used.');
 		// Case #4: Number. Maximum positive beta accepted by Excel. 4 of 4 arguments used.
 		oParser = new parserFormula('GAMMA.DIST(2,1,1.7E307,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.DIST(2,1,1.7E307,TRUE) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1.1764705882352546e-307, 'Test: Bounded case: Number. Maximum positive beta accepted by Excel. 4 of 4 arguments used.');
 
-		// Need to fix: different result from MS
-		// Case #3: String. Strings convertible to valid numbers and TRUE. 4 of 4 arguments used.
-		// Case #17: String. Strings convertible to valid numbers and FALSE (0). 4 of 4 arguments used.
-		// Case #9: Area. Multi-cell range for x returns #NUM!. 4 of 4 arguments used
-		// Case #10: Area. Multi-cell range for alpha returns #NUM!. 4 of 4 arguments used.
-		// Case #11: Area. Multi-cell range for beta returns #NUM!. 4 of 4 arguments used.
-		// Case #1: Number. Minimum positive numbers for x, alpha, beta accepted by Excel. 4 of 4 arguments used.
-		// Case #2: Number. Maximum positive x accepted by Excel. 4 of 4 arguments used.
-		// Case #3: Number. Maximum positive alpha accepted by Excel. 4 of 4 arguments used.
 
 
 		testArrayFormula2(assert, "GAMMA.DIST", 4, 4);

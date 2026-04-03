@@ -519,14 +519,99 @@ function (window, undefined) {
 	}
 
 	function GetLowRegIGamma(fA, fX) {
-		var fLnFactor = fA * Math.log(fX) - fX - getLogGamma(fA);
-		var fFactor = Math.exp(fLnFactor);
+		let fLnFactor = fA * Math.log(fX) - fX - getLogGamma(fA);
+		let fFactor = Math.exp(fLnFactor);
 
 		if (fX > fA + 1) {
 			return 1 - fFactor * getGammaContFraction(fA, fX);
 		} else {
 			return fFactor * getGammaSeries(fA, fX);
 		}
+	}
+
+	function lowerRegularizedGamma(fA, fX) {
+		if (fX === 0) {
+			return 0;
+		}
+
+		if (fX < fA + 1) {
+			return gammaSeries(fA, fX);
+		} else {
+			return 1 - gammaCF(fA, fX);
+		}
+	}
+
+	// Series expansion: P(a,x) = e^(-x) * x^a * sum(x^n / Г(a+1+n)) ...
+	function gammaSeries(a, x) {
+		const maxIter = 200;
+		const eps = 1e-14;
+		let ap = a;
+		let sum = 1 / a;
+		let del = sum;
+
+		for (let i = 0; i < maxIter; i++) {
+			ap += 1;
+			del *= x / ap;
+			sum += del;
+			if (Math.abs(del) < Math.abs(sum) * eps) break;
+		}
+
+		return sum * Math.exp(-x + a * Math.log(x) - lgamma(a));
+	}
+
+	function gammaCF(a, x) {
+		const maxIter = 200;
+		const eps = 1e-14;
+		const tiny = 1e-30;
+
+		let b = x + 1 - a;
+		let c = 1 / tiny;
+		let d = 1 / b;
+		let h = d;
+
+		for (let i = 1; i <= maxIter; i++) {
+			const an = -i * (i - a);
+			b += 2;
+			d = an * d + b;
+			if (Math.abs(d) < tiny) d = tiny;
+			c = b + an / c;
+			if (Math.abs(c) < tiny) c = tiny;
+			d = 1 / d;
+			const delta = d * c;
+			h *= delta;
+			if (Math.abs(delta - 1) < eps) break;
+		}
+
+		return Math.exp(-x + a * Math.log(x) - lgamma(a)) * h;
+	}
+
+	// --- Log-gamma (Lanczos) ---
+	function lgamma(z) {
+		const g = 7;
+		const c = [
+			0.99999999999980993,
+			676.5203681218851,
+			-1259.1392167224028,
+			771.32342877765313,
+			-176.61502916214059,
+			12.507343278686905,
+			-0.13857109526572012,
+			9.9843695780195716e-6,
+			1.5056327351493116e-7,
+		];
+
+		if (z < 0.5) {
+			// Reflection
+			return Math.log(Math.PI / Math.sin(Math.PI * z)) - lgamma(1 - z);
+		}
+
+		z -= 1;
+		let a = c[0];
+		for (let i = 1; i < g + 2; i++) {
+			a += c[i] / (z + i);
+		}
+		const t = z + g + 0.5;
+		return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(a);
 	}
 
 	function getGammaContFraction(fA, fX) {
@@ -6710,22 +6795,27 @@ function (window, undefined) {
 	cGAMMA.prototype.isXLFN = true;
 	cGAMMA.prototype.argumentsType = [argType.number];
 	cGAMMA.prototype.Calculate = function (arg) {
-		var oArguments = this._prepareArguments(arg, arguments[1], true);
-		var argClone = oArguments.args;
+		let arg0 = arg[0];
+		if (arg0.type === cElementType.cellsRange3D && !arg0.isSingleSheet()) {
+			return new cError(cErrorType.bad_reference);
+		}
+
+		const oArguments = this._prepareArguments(arg, arguments[1], true);
+		const argClone = oArguments.args;
 
 		argClone[0] = argClone[0].tocNumber();
 
-		var argError;
+		let argError;
 		if (argError = this._checkErrorArg(argClone)) {
 			return argError;
 		}
 
-		var calcGamma = function (argArray) {
+		const calcGamma = function (argArray) {
 			if (argArray[0] <= 0 && Number.isInteger(argArray[0])) {
 				return new cError(cErrorType.not_numeric);
 			}
-			var res = getGamma(argArray[0]);
-			return null !== res && !isNaN(res) ? new cNumber(res) : new cError(cErrorType.wrong_value_type);
+			let res = getGamma(argArray[0]);
+			return null !== res && !isNaN(res) ? new cNumber(res) : new cError(cErrorType.not_numeric);
 		};
 
 		return this._findArrayInNumberArguments(oArguments, calcGamma);
@@ -6747,31 +6837,39 @@ function (window, undefined) {
 	cGAMMA_DIST.prototype.isXLFN = true;
 	cGAMMA_DIST.prototype.argumentsType = [argType.number, argType.number, argType.number, argType.logical];
 	cGAMMA_DIST.prototype.Calculate = function (arg) {
-		var oArguments = this._prepareArguments(arg, arguments[1], true);
-		var argClone = oArguments.args;
+		const oArguments = this._prepareArguments(arg, arguments[1], true);
+		const argClone = oArguments.args;
+		console.log(argClone);
+
+		let arg0 = arg[0], arg1 = arg[1], arg2 = arg[2], arg3 = arg[3];
 
 		argClone[0] = argClone[0].tocNumber();
 		argClone[1] = argClone[1].tocNumber();
 		argClone[2] = argClone[2].tocNumber();
+
+		if (argClone[3].type === cElementType.string) {
+			return new cError(cErrorType.wrong_value_type);
+		}
 		argClone[3] = argClone[3].tocNumber();
 
-		var argError;
+		let argError;
 		if (argError = this._checkErrorArg(argClone)) {
 			return argError;
 		}
 
-		var calcGamma = function (argArray) {
-			var fX = argArray[0];
-			var fAlpha = argArray[1];
-			var fBeta = argArray[2];
-			var bCumulative = argArray[3];
+		const calcGamma = function (argArray) {
+			let fX = argArray[0];
+			let fAlpha = argArray[1];
+			let fBeta = argArray[2];
+			let bCumulative = argArray[3];
 
-			var res = null;
+			let res = null;
 			if ((fX < 0) || fAlpha <= 0 || fBeta <= 0) {
 				return new cError(cErrorType.not_numeric);
 			} else {
 				if (bCumulative) {
-					res = getGammaDist(fX, fAlpha, fBeta);
+					// res = getGammaDist(fX, fAlpha, fBeta);
+					res = lowerRegularizedGamma(fAlpha, fX / fBeta);
 				} else {
 					res = getGammaDistPDF(fX, fAlpha, fBeta);
 				}
