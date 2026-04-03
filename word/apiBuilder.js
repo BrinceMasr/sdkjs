@@ -281,12 +281,12 @@
 			case 'open':
 				// пробелов нет в начале
 				if (nFirstNonSpaceChar === 0)
-					return sSyblols + sText
+					return sSyblols + sText;
 				// строка из пробелов
 				else if (nFirstNonSpaceChar === -1)
-					return sText + sSyblols
+					return sText + sSyblols;
 				// в начале строки есть пробелы
-				else if (nFirstNonSpaceChar !== -1)
+				else
 					return sText.slice(0, nFirstNonSpaceChar) + sSyblols + sText.slice(nFirstNonSpaceChar);
 			case 'close':
 				// пробелов нет в конце
@@ -296,7 +296,7 @@
 				else if (nFirstNonSpaceChar === -1)
 					return sSyblols + sText;
 				// в конце строки есть пробелы
-				else if (nSpaceCharsCountOnEnd !== 0)
+				else
 					return sText.slice(0, sText.length - nSpaceCharsCountOnEnd) + sSyblols + sText.slice(sText.length - nSpaceCharsCountOnEnd);
 			case 'wholly':
 			default:
@@ -310,7 +310,7 @@
 				else if (nFirstNonSpaceChar !== 0 && nSpaceCharsCountOnEnd === 0)
 					return sText.slice(0, nFirstNonSpaceChar) + sSyblols + sText.slice(nFirstNonSpaceChar) + sSyblols;
 				// пробелы есть в начале и есть в конце
-				else if (nFirstNonSpaceChar !== 0 && nSpaceCharsCountOnEnd !== 0)
+				else
 					return sText.slice(0, nFirstNonSpaceChar) + sSyblols + sText.slice(nFirstNonSpaceChar, sText.length - nSpaceCharsCountOnEnd) + sSyblols + sText.slice(sText.length - nSpaceCharsCountOnEnd);
 		}
 	};
@@ -2802,10 +2802,10 @@
 			return "";
 
 		// numbering и styles в конце, потому что сначала нужно обойти все параграфы
-		if (bWriteNumberings)
-			oJSON["numbering"] = oWriter.jsonWordNumberings;
 		if (bWriteStyles)
 			oJSON["styles"] = oWriter.SerWordStylesForWrite();
+		if (bWriteNumberings)
+			oJSON["numbering"] = oWriter.jsonWordNumberings;
 
 		return JSON.stringify(oJSON);
 	};
@@ -2900,8 +2900,9 @@
 	 */
 	ApiRange.prototype.GetStartPage = function()
 	{
-		let oDoc = private_GetLogicDocument();
-		let oPosXY = oDoc.private_GetXYByDocumentPosition(this.StartPos);
+		let oApiDoc = Api.GetDocument();
+		oApiDoc.ForceRecalculate();
+		let oPosXY = oApiDoc.Document.private_GetXYByDocumentPosition(this.StartPos);
 		
 		return oPosXY.Page;
 	};
@@ -2916,8 +2917,9 @@
 	 */
 	ApiRange.prototype.GetEndPage = function()
 	{
-		let oDoc = private_GetLogicDocument();
-		let oPosXY = oDoc.private_GetXYByDocumentPosition(this.EndPos);
+		let oApiDoc = Api.GetDocument();
+		oApiDoc.ForceRecalculate();
+		let oPosXY = oApiDoc.Document.private_GetXYByDocumentPosition(this.EndPos);
 		
 		return oPosXY.Page;
 	};
@@ -4064,14 +4066,26 @@
 
 	/**
 	 * The possible values for the base which the relative horizontal positioning of an object will be calculated from.
-	 * @typedef {("character" | "column" | "leftMargin" | "rightMargin" | "margin" | "page")} RelFromH
+	 * @typedef {("character" | "column" | "insideMargin" | "leftMargin" | "rightMargin" | "margin" | "outsideMargin" | "page")} RelFromH
 	 * @see office-js-api/Examples/Enumerations/RelFromH.js
 	 */
 
 	/**
 	 * The possible values for the base which the relative vertical positioning of an object will be calculated from.
-	 * @typedef {("bottomMargin" | "topMargin" | "margin" | "page" | "line" | "paragraph")} RelFromV
+	 * @typedef {("bottomMargin" | "insideMargin" | "topMargin" | "margin" | "outsideMargin" | "page" | "line" | "paragraph")} RelFromV
 	 * @see office-js-api/Examples/Enumerations/RelFromV.js
+	 */
+
+	/**
+	 * The possible values for the base which the relative horizontal size of an object will be calculated from.
+	 * @typedef {("insideMargin" | "leftMargin" | "rightMargin" | "margin" | "outsideMargin" | "page")} SizeRelFromH
+	 * @see office-js-api/Examples/Enumerations/SizeRelFromH.js
+	 */
+
+	/**
+	 * The possible values for the base which the relative vertical size of an object will be calculated from.
+	 * @typedef {("bottomMargin" | "insideMargin" | "topMargin" | "margin" | "outsideMargin" | "page")} SizeRelFromV
+	 * @see office-js-api/Examples/Enumerations/SizeRelFromV.js
 	 */
 
 	/**
@@ -5422,7 +5436,7 @@
 	 */
 	Api.Save = function()
 	{
-		this.SaveAfterMacros = true;
+		Asc.editor.SaveAfterMacros = true;
 		return true;
 	};
 
@@ -5837,7 +5851,7 @@
 	 */
 	Api.installDeveloperPlugin = Api["installDeveloperPlugin"] = function()
 	{
-		return Asc.editor.installDeveloperPlugin.apply(Asc.editor, arguments);
+		return Asc.editor["installDeveloperPlugin"].apply(Asc.editor, arguments);
 	};
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -6423,6 +6437,25 @@
 		let ref = this.Document.GetRef();
 		return ref && ref.SelectThisElement();
 	};
+	/**
+	 * Moves the cursor to the reference of this footnote/endnote in the main document. If this document content is not a footnote/endnote, does nothing.
+	 * @memberof ApiDocumentContent
+	 * @typeofeditors ["CDE"]
+	 * @since 9.4.0
+	 * @param {boolean} isBefore - Specifies whether to place the cursor before (<em>true</em>) or after (<em>false</em>) the note reference.
+	 * @returns {boolean} Returns <em>true</em> if the cursor was moved to the reference successfully.
+	 * @see office-js-api/Examples/{Editor}/ApiDocumentContent/Methods/MoveCursorToNoteReference.js
+	 */
+	ApiDocumentContent.prototype.MoveCursorToNoteReference = function(isBefore)
+	{
+		if (!this.IsFootnote() && !this.IsEndnote())
+			return false;
+		
+		isBefore = GetBoolParameter(isBefore, false);
+		
+		let ref = this.Document.GetRef();
+		return ref && ref.MoveCursorToElement(isBefore);
+	};
 
 	/**
 	 * Class representing a custom XML manager, which provides methods to manage custom XML parts in the document.
@@ -6436,8 +6469,6 @@
 			? doc.getCustomXmlManager()
 			: new AscWord.CustomXmlManager(null);
 	}
-	ApiCustomXmlParts.prototype = Object.create(ApiCustomXmlParts.prototype);
-	ApiCustomXmlParts.prototype.constructor = ApiCustomXmlParts;
 
 	/**
 	 * Adds a new custom XML part to the XML manager.
@@ -6555,8 +6586,6 @@
 		this.customXml        = customXMl;
 		this.customXmlManager = customXmlManager;
 	}
-	ApiCustomXmlPart.prototype = Object.create(ApiCustomXmlPart.prototype);
-	ApiCustomXmlPart.prototype.constructor = ApiCustomXmlPart;
 
 	/**
 	 * Returns a type of the ApiCustomXmlPart class.
@@ -6751,8 +6780,6 @@
 		this.CustomXmlPart    = xmlPart;
 		this.CustomXmlContent = xmlNode;
 	}
-	ApiCustomXmlNode.prototype = Object.create(ApiCustomXmlNode.prototype);
-	ApiCustomXmlNode.prototype.constructor = ApiCustomXmlNode;
 
 	/**
 	 * Returns a type of the ApiCustomXmlNode class.
@@ -7987,7 +8014,7 @@
 	 */
 	ApiDocument.prototype.SetTrackRevisions = function(isTrack)
 	{
-		this.Document.SetGlobalTrackRevisions(isTrack);
+		this.Document.SetGlobalTrackRevisions(isTrack, true);
 		return true;
 	};
 	
@@ -8020,7 +8047,7 @@
 			userInfo.put_Id(userId);
 			userInfo.put_FullName(assistantName);
 			
-			AscCommon.setUserColorById(userId, {r : 8, g: 145, b: 178}, {r : 8, g: 145, b: 178});
+			AscCommon.setUserColorById(userId, {r : 8, g: 145, b: 178});
 		}
 		else
 		{
@@ -8595,6 +8622,8 @@
 	 */
 	ApiDocument.prototype.ToJSON = function(bWriteDefaultTextPr, bWriteDefaultParaPr, bWriteTheme, bWriteSectionPr, bWriteNumberings, bWriteStyles)
 	{
+		this.Document.ProcessComplexFields();
+		
 		var oWriter = new AscJsonConverter.WriterToJSON();
 
 		var oResult = {
@@ -8604,8 +8633,8 @@
 			"theme":     bWriteTheme ? oWriter.SerTheme(this.Document.GetTheme()) : undefined,
 			"sectPr":    bWriteSectionPr ? oWriter.SerSectionPr(this.Document.SectPr) : undefined,
 			"content":   oWriter.SerContent(this.Document.Content, undefined, undefined, undefined, true),
-			"numbering": bWriteNumberings ? oWriter.jsonWordNumberings : undefined,
-			"styles":    bWriteStyles ? oWriter.SerWordStylesForWrite() : undefined
+			"styles":    bWriteStyles ? oWriter.SerWordStylesForWrite() : undefined,
+			"numbering": bWriteNumberings ? oWriter.jsonWordNumberings : undefined
 		}
 
 		return JSON.stringify(oResult);
@@ -8711,11 +8740,23 @@
 		let oCommManager = this.Document.GetCommentsManager();
 
 		let aComments = Object.values(oCommManager.GetAllComments());
-		let aApiComments = aComments.map(function(oComment) {
+		aComments.sort(function(c1, c2){
+			let p1 = c1.GetDocumentPosition();
+			let p2 = c2.GetDocumentPosition();
+			
+			if (!p1 && !p2)
+				return 0;
+			if (!p1)
+				return 1;
+			if (!p2)
+				return -1;
+			
+			return AscWord.CompareDocumentPositions(p1, p2);
+		});
+		
+		return aComments.map(function(oComment) {
 			return new ApiComment(oComment);
 		});
-
-		return aApiComments;
 	};
 
 	/**
@@ -8922,42 +8963,24 @@
 	};
 
 	/**
-     * Returns all the selected drawings in the current document.
-     * @memberof ApiDocument
+	 * Returns all the selected drawings in the current document.
+	 *
+	 * @memberof ApiDocument
 	 * @typeofeditors ["CDE"]
-     * @returns {ApiShape[] | ApiImage[] | ApiChart[] | ApiDrawing[]}
-     * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/GetSelectedDrawings.js
+	 *
+	 * @returns {Drawing[]}
+	 *
+	 * @since 7.2.0
+	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/GetSelectedDrawings.js
 	 */
-	ApiDocument.prototype.GetSelectedDrawings = function()
-	{
-		var aSelected = this.Document.DrawingObjects.selectedObjects;
-		var aResult = [];
-		for (var nDrawing = 0; nDrawing < aSelected.length; nDrawing++)
-		{
-			if (aSelected[nDrawing].isImage())
-				aResult.push(new ApiImage(aSelected[nDrawing]));
-			else if (aSelected[nDrawing].isChart())
-				aResult.push(new ApiChart(aSelected[nDrawing]));
-			else if (aSelected[nDrawing].isShape())
-				aResult.push(new ApiShape(aSelected[nDrawing]));
-			else
-				aResult.push(new ApiDrawing(aSelected[nDrawing]));
-		}
+	ApiDocument.prototype.GetSelectedDrawings = function () {
+		const selected = this.Document.DrawingObjects.selectedObjects;
+		const selectedInText = this.Document.GetSelectedDrawingObjectsInText()
+			.map(function (drawing) { return drawing.GraphicObj; });
 
-		var aSelectedInText = this.Document.GetSelectedDrawingObjectsInText();
-		for (nDrawing = 0; nDrawing < aSelectedInText.length; nDrawing++)
-		{
-			if (aSelectedInText[nDrawing].GraphicObj.isImage())
-				aResult.push(new ApiImage(aSelectedInText[nDrawing].GraphicObj));
-			else if (aSelectedInText[nDrawing].GraphicObj.isChart())
-				aResult.push(new ApiChart(aSelectedInText[nDrawing].GraphicObj));
-			else if (aSelectedInText[nDrawing].GraphicObj.isShape())
-				aResult.push(new ApiShape(aSelectedInText[nDrawing].GraphicObj));
-			else
-				aResult.push(new ApiDrawing(aSelected[nDrawing].GraphicObj));
-		}
-
-		return aResult;
+		const drawingObjects = selected.concat(selectedInText);
+		const apiDrawings = GetApiDrawings(drawingObjects);
+		return apiDrawings;
 	};
 
 	/**
@@ -10375,18 +10398,29 @@
 	 */
 	ApiParagraph.prototype.Delete = function()
 	{
-		var oParent = this.Paragraph.GetParent();
-		var nPosInParent = this.Paragraph.GetIndex();
+		let docContent   = this.Paragraph.GetParent();
+		let posInParent = this.Paragraph.GetIndex();
 
-		if (nPosInParent !== - 1)
+		if (-1 === posInParent)
+			return false;
+
+		let logicDocument = private_GetLogicDocument();
+		let isTrackRevisions = logicDocument.IsTrackRevisions();
+		if (isTrackRevisions)
+		{
+			let state = logicDocument.SaveDocumentState();
+			logicDocument.RemoveSelection();
+			this.Paragraph.SelectThisElement(1, false);
+			docContent.Remove(-1, false, false, false, false);
+			logicDocument.LoadDocumentState(state);
+		}
+		else
 		{
 			this.Paragraph.PreDelete();
-			oParent.Remove_FromContent(nPosInParent, 1, true);
-
-			return true;
+			docContent.Remove_FromContent(posInParent, 1, true);
 		}
-		else 
-			return false;
+		
+		return true;
 	};
 	/**
 	 * Returns the next paragraph.
@@ -11364,24 +11398,23 @@
 		if (paragraph instanceof ApiParagraph)
 		{
 			oNewPara = paragraph;
-
-			if (sPosition === "before")
-				paraParent.Internal_Content_Add(paraIndex, oNewPara.private_GetImpl());
-			else if (sPosition === "after")
-				paraParent.Internal_Content_Add(paraIndex + 1, oNewPara.private_GetImpl());
 		}
 		else if (typeof paragraph === "string")
 		{
 			oNewPara = Api.CreateParagraph();
 			oNewPara.AddText(paragraph);
-
-			if (sPosition === "before")
-				paraParent.Internal_Content_Add(paraIndex, oNewPara.private_GetImpl());
-			else if (sPosition === "after")
-				paraParent.Internal_Content_Add(paraIndex + 1, oNewPara.private_GetImpl());
 		}
-		else 
+
+		if (oNewPara === null) {
 			return null;
+		}
+
+		oNewPara.private_GetImpl().bFromDocument = this.Paragraph.bFromDocument;
+
+		if (sPosition === 'before')
+			paraParent.Internal_Content_Add(paraIndex, oNewPara.private_GetImpl());
+		else if (sPosition === 'after')
+			paraParent.Internal_Content_Add(paraIndex + 1, oNewPara.private_GetImpl());
 
 		if (beRNewPara === true)
 			return oNewPara;
@@ -11851,10 +11884,11 @@
 	{
 		var oWriter = new AscJsonConverter.WriterToJSON();
 		var oJSON = oWriter.SerParagraph(this.Paragraph);
-		if (bWriteNumberings)
-			oJSON["numbering"] = oWriter.jsonWordNumberings;
 		if (bWriteStyles)
 			oJSON["styles"] = oWriter.SerWordStylesForWrite();
+		if (bWriteNumberings)
+			oJSON["numbering"] = oWriter.jsonWordNumberings;
+		
 		return JSON.stringify(oJSON);
 	};
 
@@ -12341,6 +12375,7 @@
 	};
 	/**
 	 * Returns a Range object that represents the part of the document contained in the specified run.
+	 * The run must be attached to the document before calling this method.
 	 * @memberof ApiRun
 	 * @typeofeditors ["CDE"]
 	 * @param {Number} Start - Start position index in the current element.
@@ -12350,6 +12385,9 @@
 	 */
 	ApiRun.prototype.GetRange = function(Start, End)
 	{
+		if (!this.Run.IsUseInDocument())
+			throwException("Run must be attached to document before getting its range");
+		
 		let oRange = new ApiRange(this.Run, Start, End);
 		if (oRange.isEmpty) {
 			return null;
@@ -13490,10 +13528,11 @@
 	{
 		var oWriter = new AscJsonConverter.WriterToJSON();
 		var oJSON = oWriter.SerSectionPr(this.Section);
-		if (bWriteNumberings)
-			oJSON["numbering"] = oWriter.jsonWordNumberings;
 		if (bWriteStyles)
 			oJSON["styles"] = oWriter.SerWordStylesForWrite();
+		if (bWriteNumberings)
+			oJSON["numbering"] = oWriter.jsonWordNumberings;
+		
 		return JSON.stringify(oJSON);
 	};
 	/**
@@ -14336,10 +14375,11 @@
 	{
 		var oWriter = new AscJsonConverter.WriterToJSON();
 		var oJSON = oWriter.SerTable(this.Table);
-		if (bWriteNumberings)
-			oJSON["numbering"] = oWriter.jsonWordNumberings;
 		if (bWriteStyles)
 			oJSON["styles"] = oWriter.SerWordStylesForWrite();
+		if (bWriteNumberings)
+			oJSON["numbering"] = oWriter.jsonWordNumberings;
+		
 		return JSON.stringify(oJSON);
 	};
 
@@ -18600,7 +18640,7 @@
 	 * Sets the relative height of the object (image, shape, chart) bounding box.
 	 * @memberof ApiDrawing
 	 * @typeofeditors ["CDE"]
-	 * @param {RelFromV} [sRelativeFrom="page"] - The document element which will be taken as a countdown point for the object height.
+	 * @param {SizeRelFromV} [sRelativeFrom="page"] - The document element which will be taken as a countdown point for the object height.
 	 * @param {percentage} nPercent
 	 * @since 9.3.0
 	 * @returns {boolean}
@@ -18622,7 +18662,7 @@
 	 * Sets the relative width of the object (image, shape, chart) bounding box.
 	 * @memberof ApiDrawing
 	 * @typeofeditors ["CDE"]
-	 * @param {RelFromV} [sRelativeFrom="page"] - The document element which will be taken as a countdown point for the object width.
+	 * @param {SizeRelFromH} [sRelativeFrom="page"] - The document element which will be taken as a countdown point for the object width.
 	 * @param {percentage} nPercent
 	 * @since 9.3.0
 	 * @returns {boolean}
@@ -18770,7 +18810,7 @@
 	 * @since 9.3.0
 	 * @param {RelFromH} sRelativeFrom - The document element which will be taken as a countdown point for the object horizontal alignment.
 	 * @param {EMU|number} nDistance - The distance from the right side of the document element to the floating object. Use EMU for absolute distance or a number for percent (1 = 1%) when bPercent=true.
-	 * @param {boolean} [bPercent=false] - The option defining whether the vertical alignment offset is specified in percent.
+	 * @param {boolean} [bPercent=false] - The option defining whether the horizontal alignment offset is specified in percent.
 	 * @returns {boolean}
 	 *
 	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/SetHorPosition.js
@@ -18789,7 +18829,7 @@
 	 * @typeofeditors ["CDE"]
 	 *
 	 * @deprecated since 9.3.0 version.
-	 * @param {RelFromH} sRelativeFrom - The document element which will be taken as a countdown point for the object vertical alignment.
+	 * @param {RelFromV} sRelativeFrom - The document element which will be taken as a countdown point for the object vertical alignment.
 	 * @param {EMU} nDistance - The distance from the bottom part of the document element to the floating object measured in English measure units.
 	 * @returns {boolean}
 	 *
@@ -19365,10 +19405,11 @@
 	{
 		var oWriter = new AscJsonConverter.WriterToJSON();
 		var oJSON = oWriter.SerParaDrawing(this.getParaDrawing());
-		if (bWriteNumberings)
-			oJSON["numbering"] = oWriter.jsonWordNumberings;
 		if (bWriteStyles)
 			oJSON["styles"] = oWriter.SerWordStylesForWrite();
+		if (bWriteNumberings)
+			oJSON["numbering"] = oWriter.jsonWordNumberings;
+		
 		return JSON.stringify(oJSON);
 	};
 
@@ -23638,8 +23679,7 @@
 	ApiInlineLvlSdt.prototype.SetAppearance = function(type)
 	{
 		type = GetStringParameter(type, "boundingBox");
-		this.Sdt.SetAppearance();
-		
+
 		if (type === "hidden")
 			this.Sdt.SetAppearance(Asc.c_oAscSdtAppearance.Hidden);
 		else
@@ -26914,10 +26954,11 @@
 	{
 		var oWriter = new AscJsonConverter.WriterToJSON();
 		var oJSON = oWriter.SerBlockLvlSdt(this.Sdt);
-		if (bWriteNumberings)
-			oJSON["numbering"] = oWriter.jsonWordNumberings;
 		if (bWriteStyles)
 			oJSON["styles"] = oWriter.SerWordStylesForWrite();
+		if (bWriteNumberings)
+			oJSON["numbering"] = oWriter.jsonWordNumberings;
+		
 		return JSON.stringify(oJSON);
 	};
 
@@ -27809,6 +27850,24 @@
 	 */
 	Api.EmusToMillimeters = function EmusToMillimeters(emu) {
 		return emu * AscCommonWord.g_dKoef_emu_to_mm;
+	};
+
+	/**
+	 * Compares the current document with the specified file.
+	 * @param {object} file - An object containing the information about the document for comparison.
+	 */
+	Api.CompareDocuments = function(file)
+	{
+		AscCommonWord.CompareDocuments(file);
+	};
+
+	/**
+	 * Merges the current document with the specified file.
+	 * @param {object} file - An object containing the information about the document for merging.
+	 */
+	Api.MergeDocuments = function(file)
+	{
+		AscCommonWord.mergeDocuments(file);
 	};
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -29497,35 +29556,38 @@
 	Api["EmusToMillimeters"]               = Api.EmusToMillimeters;
 	Api["CreateCustomGeometry"]            = Api.CreateCustomGeometry;
 	Api["CreatePresetGeometry"]            = Api.CreatePresetGeometry;
+	Api["CompareDocuments"]                = Api.CompareDocuments;
+	Api["MergeDocuments"]                  = Api.MergeDocuments;
 
 	ApiUnsupported.prototype["GetClassType"]         = ApiUnsupported.prototype.GetClassType;
 	
-	ApiDocumentContent.prototype["GetClassType"]             = ApiDocumentContent.prototype.GetClassType;
-	ApiDocumentContent.prototype["GetInternalId"]            = ApiDocumentContent.prototype.GetInternalId;
-	ApiDocumentContent.prototype["GetElementsCount"]         = ApiDocumentContent.prototype.GetElementsCount;
-	ApiDocumentContent.prototype["GetElement"]               = ApiDocumentContent.prototype.GetElement;
-	ApiDocumentContent.prototype["AddElement"]               = ApiDocumentContent.prototype.AddElement;
-	ApiDocumentContent.prototype["Push"]                     = ApiDocumentContent.prototype.Push;
-	ApiDocumentContent.prototype["RemoveAllElements"]        = ApiDocumentContent.prototype.RemoveAllElements;
-	ApiDocumentContent.prototype["RemoveElement"]            = ApiDocumentContent.prototype.RemoveElement;
-	ApiDocumentContent.prototype["GetRange"]                 = ApiDocumentContent.prototype.GetRange;
-	ApiDocumentContent.prototype["ToJSON"]                   = ApiDocumentContent.prototype.ToJSON;
-	ApiDocumentContent.prototype["GetContent"]               = ApiDocumentContent.prototype.GetContent;
-	ApiDocumentContent.prototype["GetAllDrawingObjects"]     = ApiDocumentContent.prototype.GetAllDrawingObjects;
-	ApiDocumentContent.prototype["GetAllShapes"]             = ApiDocumentContent.prototype.GetAllShapes;
-	ApiDocumentContent.prototype["GetAllImages"]             = ApiDocumentContent.prototype.GetAllImages;
-	ApiDocumentContent.prototype["GetAllCharts"]             = ApiDocumentContent.prototype.GetAllCharts;
-	ApiDocumentContent.prototype["GetAllOleObjects"]         = ApiDocumentContent.prototype.GetAllOleObjects;
-	ApiDocumentContent.prototype["GetAllParagraphs"]         = ApiDocumentContent.prototype.GetAllParagraphs;
-	ApiDocumentContent.prototype["GetAllTables"]             = ApiDocumentContent.prototype.GetAllTables;
-	ApiDocumentContent.prototype["GetText"]                  = ApiDocumentContent.prototype.GetText;
-	ApiDocumentContent.prototype["GetCurrentParagraph"]      = ApiDocumentContent.prototype.GetCurrentParagraph;
-	ApiDocumentContent.prototype["GetCurrentRun"]            = ApiDocumentContent.prototype.GetCurrentRun;
-	ApiDocumentContent.prototype["GetCurrentContentControl"] = ApiDocumentContent.prototype.GetCurrentContentControl;
-	ApiDocumentContent.prototype["GetDocumentVisitor"]       = ApiDocumentContent.prototype.GetDocumentVisitor;
-	ApiDocumentContent.prototype["IsFootnote"]               = ApiDocumentContent.prototype.IsFootnote;
-	ApiDocumentContent.prototype["IsEndnote"]                = ApiDocumentContent.prototype.IsEndnote;
-	ApiDocumentContent.prototype["SelectNoteReference"]      = ApiDocumentContent.prototype.SelectNoteReference;
+	ApiDocumentContent.prototype["GetClassType"]              = ApiDocumentContent.prototype.GetClassType;
+	ApiDocumentContent.prototype["GetInternalId"]             = ApiDocumentContent.prototype.GetInternalId;
+	ApiDocumentContent.prototype["GetElementsCount"]          = ApiDocumentContent.prototype.GetElementsCount;
+	ApiDocumentContent.prototype["GetElement"]                = ApiDocumentContent.prototype.GetElement;
+	ApiDocumentContent.prototype["AddElement"]                = ApiDocumentContent.prototype.AddElement;
+	ApiDocumentContent.prototype["Push"]                      = ApiDocumentContent.prototype.Push;
+	ApiDocumentContent.prototype["RemoveAllElements"]         = ApiDocumentContent.prototype.RemoveAllElements;
+	ApiDocumentContent.prototype["RemoveElement"]             = ApiDocumentContent.prototype.RemoveElement;
+	ApiDocumentContent.prototype["GetRange"]                  = ApiDocumentContent.prototype.GetRange;
+	ApiDocumentContent.prototype["ToJSON"]                    = ApiDocumentContent.prototype.ToJSON;
+	ApiDocumentContent.prototype["GetContent"]                = ApiDocumentContent.prototype.GetContent;
+	ApiDocumentContent.prototype["GetAllDrawingObjects"]      = ApiDocumentContent.prototype.GetAllDrawingObjects;
+	ApiDocumentContent.prototype["GetAllShapes"]              = ApiDocumentContent.prototype.GetAllShapes;
+	ApiDocumentContent.prototype["GetAllImages"]              = ApiDocumentContent.prototype.GetAllImages;
+	ApiDocumentContent.prototype["GetAllCharts"]              = ApiDocumentContent.prototype.GetAllCharts;
+	ApiDocumentContent.prototype["GetAllOleObjects"]          = ApiDocumentContent.prototype.GetAllOleObjects;
+	ApiDocumentContent.prototype["GetAllParagraphs"]          = ApiDocumentContent.prototype.GetAllParagraphs;
+	ApiDocumentContent.prototype["GetAllTables"]              = ApiDocumentContent.prototype.GetAllTables;
+	ApiDocumentContent.prototype["GetText"]                   = ApiDocumentContent.prototype.GetText;
+	ApiDocumentContent.prototype["GetCurrentParagraph"]       = ApiDocumentContent.prototype.GetCurrentParagraph;
+	ApiDocumentContent.prototype["GetCurrentRun"]             = ApiDocumentContent.prototype.GetCurrentRun;
+	ApiDocumentContent.prototype["GetCurrentContentControl"]  = ApiDocumentContent.prototype.GetCurrentContentControl;
+	ApiDocumentContent.prototype["GetDocumentVisitor"]        = ApiDocumentContent.prototype.GetDocumentVisitor;
+	ApiDocumentContent.prototype["IsFootnote"]                = ApiDocumentContent.prototype.IsFootnote;
+	ApiDocumentContent.prototype["IsEndnote"]                 = ApiDocumentContent.prototype.IsEndnote;
+	ApiDocumentContent.prototype["SelectNoteReference"]       = ApiDocumentContent.prototype.SelectNoteReference;
+	ApiDocumentContent.prototype["MoveCursorToNoteReference"] = ApiDocumentContent.prototype.MoveCursorToNoteReference;
 
 	ApiRange.prototype["GetClassType"]               = ApiRange.prototype.GetClassType;
 	ApiRange.prototype["GetParagraph"]               = ApiRange.prototype.GetParagraph;
@@ -30448,6 +30510,8 @@
 	ApiBlockLvlSdt.prototype["GetBackgroundColor"]      = ApiBlockLvlSdt.prototype.GetBackgroundColor;
 	ApiBlockLvlSdt.prototype["GetDataBinding"]          = ApiBlockLvlSdt.prototype.GetDataBinding;
 	ApiBlockLvlSdt.prototype["SetDataBinding"]          = ApiBlockLvlSdt.prototype.SetDataBinding;
+	ApiBlockLvlSdt.prototype["SetPicture"]              = ApiBlockLvlSdt.prototype.SetPicture;
+	ApiBlockLvlSdt.prototype["IsPicture"]               = ApiBlockLvlSdt.prototype.IsPicture;
 	ApiBlockLvlSdt.prototype["UpdateFromXmlMapping"]    = ApiBlockLvlSdt.prototype.UpdateFromXmlMapping;
 	ApiBlockLvlSdt.prototype["GetDataForXmlMapping"]    = ApiBlockLvlSdt.prototype.GetDataForXmlMapping;
 	ApiBlockLvlSdt.prototype["SetAppearance"]           = ApiBlockLvlSdt.prototype.SetAppearance;
@@ -31267,12 +31331,16 @@
 			return Asc.c_oAscRelativeFromH.Character;
 		else if ("column" === sRel)
 			return Asc.c_oAscRelativeFromH.Column;
+		else if ("insideMargin" === sRel)
+			return Asc.c_oAscRelativeFromH.InsideMargin;
 		else if ("leftMargin" === sRel)
 			return Asc.c_oAscRelativeFromH.LeftMargin;
 		else if ("rightMargin" === sRel)
 			return Asc.c_oAscRelativeFromH.RightMargin;
 		else if ("margin" === sRel)
 			return Asc.c_oAscRelativeFromH.Margin;
+		else if ("outsideMargin" === sRel)
+			return Asc.c_oAscRelativeFromH.OutsideMargin;
 		else if ("page" === sRel)
 			return Asc.c_oAscRelativeFromH.Page;
 
@@ -31283,10 +31351,14 @@
 	{
 		if ("bottomMargin" === sRel)
 			return Asc.c_oAscRelativeFromV.BottomMargin;
+		else if ("insideMargin" === sRel)
+			return Asc.c_oAscRelativeFromV.InsideMargin;
 		else if ("topMargin" === sRel)
 			return Asc.c_oAscRelativeFromV.TopMargin;
 		else if ("margin" === sRel)
 			return Asc.c_oAscRelativeFromV.Margin;
+		else if ("outsideMargin" === sRel)
+			return Asc.c_oAscRelativeFromV.OutsideMargin;
 		else if ("page" === sRel)
 			return Asc.c_oAscRelativeFromV.Page;
 		else if ("line" === sRel)

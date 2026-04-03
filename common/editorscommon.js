@@ -11161,12 +11161,10 @@
 
 		return -1 === isDark ? res.Light : true === isDark || 1 === isDark ? res.Dark : res.Normal;
 	}
-	function setUserColorById(userId, light, dark)
+	function setUserColorById(userId, color)
 	{
-		g_oUserColorById[userId] = {
-			Light : new CColor(light.r, light.g, light.b, 255),
-			Dark : new CColor(dark.r, dark.g, dark.b, 255),
-		};
+		let nColor = typeof color === "number" ? color : ((color.r & 0xFF) << 16) | ((color.g & 0xFF) << 8) | (color.b & 0xFF);
+		g_oUserColorById[userId] = new CUserCacheColor(nColor);
 	}
 	function getUserColorById(userId, userName, isDark, isNumericValue)
 	{
@@ -15263,8 +15261,10 @@
 		let dir = 'ltr';
 		for (let iter = text.getUnicodeIterator(); iter.check(); iter.next()) {
 			let charDir = AscCommon.getCharStrongDir(iter.value());
-			if (charDir === AscBidi.DIRECTION_FLAG.RTL) {
-				dir = 'rtl';
+			if (charDir !== null) {
+				if (charDir === AscBidi.DIRECTION_FLAG.RTL) {
+					dir = 'rtl';
+				}
 				break;
 			}
 		}

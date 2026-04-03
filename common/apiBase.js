@@ -106,8 +106,10 @@
 		this.LongActionCallbacksParams = [];
 		this.IsActionRestrictionCurrent  = 0;
 		this.IsActionRestrictionPrev  = null;
-
-		this.groupActionsCounter = 0;
+		
+		this.groupActionsCounter        = 0;
+		this.groupActionsPr             = {};
+		this.groupActionsExecuteCounter = 0;
 
 		// AutoSave
 		this.autoSaveGap = 0;					// Autosave interval (0 means no autosave) in milliseconds
@@ -534,6 +536,14 @@
 	{
 		return "";
 	};
+	baseEditorsApi.prototype.isLogPluginCommands = function()
+	{
+		return window.localStorage && window.localStorage.getItem("asc_plugin_commands_log") === "true";
+	};
+	baseEditorsApi.prototype.log = function(msg)
+	{
+		console.log(msg);
+	};
 
 	// modules
 	baseEditorsApi.prototype._loadModules = function()
@@ -774,6 +784,9 @@
 	baseEditorsApi.prototype.asc_LockScrollToTarget          = function(isLock)
 	{
 		this.isLockScrollToTarget = isLock;
+	};
+	baseEditorsApi.prototype.scrollToTarget              = function()
+	{
 	};
 	baseEditorsApi.prototype.isLiveViewer                     = function()
 	{
@@ -4290,8 +4303,7 @@
 
 	baseEditorsApi.prototype.asc_Remove = function()
 	{
-		if (AscCommon.g_inputContext)
-			AscCommon.g_inputContext.emulateKeyDownApi(46);
+		AscCommon.emulateKeyDownApi(this, 46);
 	};
 
 	// System input
@@ -5775,8 +5787,18 @@
 		{
 			for (let i = 0, len = arguments.length; i < len; i++)
 			{
-				if (types && types[i] && types[i].prototype && types[i].prototype.fromCValue)
-					arguments[i] = types[i].prototype.fromCValue(arguments[i]);
+				if (types && types[i])
+				{
+					if (Array.isArray(types[i]) && Array.isArray(arguments[i]) && types[i][0].prototype && types[i][0].prototype.fromCValue)
+					{
+						for (let j = 0, lenJ = arguments[i].length; j < lenJ; j++)
+						{
+							arguments[i][j] = types[i][0].prototype.fromCValue(arguments[i][j]);
+						}
+					}
+					else if (types[i].prototype && types[i].prototype.fromCValue)
+						arguments[i] = types[i].prototype.fromCValue(arguments[i]);
+				}
 			}
 			if (!this[name])
 				console.log("Wrap unexisted function: " + name);
@@ -5832,6 +5854,12 @@
 
 		if (window.g_asc_plugins)
 			window.g_asc_plugins.onUpdateOptions();
+	};
+
+	baseEditorsApi.prototype.setPluginsDisabled = function(guids)
+	{
+		if (window.g_asc_plugins)
+			window.g_asc_plugins.setPluginsDisabled(guids);
 	};
 
 	baseEditorsApi.prototype.getCustomProperties = function() {
@@ -6055,7 +6083,7 @@
 	{
 	};
 
-	baseEditorsApi.prototype.startGroupActions = function()
+	baseEditorsApi.prototype.startGroupActions = function(pr)
 	{
 		++this.groupActionsCounter;
 
@@ -6064,6 +6092,18 @@
 		if (this.groupActionsCounter > 1)
 			return;
 		
+		this.groupActionsExecuteCounter = 0;
+		this.groupActionsPr = {};
+		this.groupActionsPr.lockScroll = !!(pr && pr["lockScroll"]);
+
+		if (this.groupActionsPr.lockScroll && !this.isLockScrollToTarget)
+			this.asc_LockScrollToTarget(true);
+		else
+			this.groupActionsPr.lockScroll = false;
+
+		if (!!(pr && pr["keepSelection"]))
+			this._saveGroupActionsState();
+
 		this._onStartGroupActions();
 
 		AscCommon.CollaborativeEditing.Set_GlobalLock(true);
@@ -6085,6 +6125,10 @@
 		if (!this.isGroupActions())
 			return;
 		
+		++this.groupActionsExecuteCounter;
+		if (this.groupActionsExecuteCounter > 1)
+			return;
+		
 		AscCommon.CollaborativeEditing.Set_GlobalLock(false);
 		AscCommon.CollaborativeEditing.Set_GlobalLockSelection(false);
 	};
@@ -6093,10 +6137,14 @@
 		if (!this.isGroupActions())
 			return;
 		
+		--this.groupActionsExecuteCounter;
+		if (this.groupActionsExecuteCounter > 0)
+			return;
+		
 		AscCommon.CollaborativeEditing.Set_GlobalLock(true);
 		AscCommon.CollaborativeEditing.Set_GlobalLockSelection(true);
 	};
-	baseEditorsApi.prototype.cancelGroupActions = function()
+	baseEditorsApi.prototype.cancelGroupActions = function(pr)
 	{
 		if (!this.isGroupActions())
 			return;
@@ -6112,8 +6160,17 @@
 		AscCommon.CollaborativeEditing.Set_GlobalLockSelection(false);
 		
 		this._onEndGroupActions(false);
+
+		if (this.groupActionsPr.selectionState)
+			this._restoreGroupActionsState();
+
+		if (this.groupActionsPr.lockScroll)
+			this.asc_LockScrollToTarget(false);
+
+		if (!pr || false !== pr["scrollToTarget"])
+			this.scrollToTarget();
 	};
-	baseEditorsApi.prototype.endGroupActions = function()
+	baseEditorsApi.prototype.endGroupActions = function(pr)
 	{
 		if (!this.isGroupActions())
 			return;
@@ -6123,11 +6180,20 @@
 
 		if (this.groupActionsCounter > 0)
 			return;
-		
+
 		AscCommon.CollaborativeEditing.Set_GlobalLock(false);
 		AscCommon.CollaborativeEditing.Set_GlobalLockSelection(false);
-		
+
 		this._onEndGroupActions(true);
+
+		if (this.groupActionsPr.selectionState)
+			this._restoreGroupActionsState();
+
+		if (this.groupActionsPr.lockScroll)
+			this.asc_LockScrollToTarget(false);
+
+		if (!pr || false !== pr["scrollToTarget"])
+			this.scrollToTarget();
 	};
 	baseEditorsApi.prototype.isGroupActions = function()
 	{
@@ -6137,6 +6203,12 @@
 	{
 	};
 	baseEditorsApi.prototype._onEndGroupActions = function(isFullEnd)
+	{
+	};
+	baseEditorsApi.prototype._saveGroupActionsState = function()
+	{
+	};
+	baseEditorsApi.prototype._restoreGroupActionsState = function()
 	{
 	};
 	
@@ -6257,6 +6329,7 @@
 	prot['asc_applyAscShortcuts'] = prot.asc_applyAscShortcuts;
 
 	prot['setPluginsOptions'] = prot.setPluginsOptions;
+	prot['setPluginsDisabled'] = prot.setPluginsDisabled;
 	prot['asc_pluginButtonDockChanged'] = prot.asc_pluginButtonDockChanged;
 
 	// passwords

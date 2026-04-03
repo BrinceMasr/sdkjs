@@ -7593,6 +7593,12 @@ Paragraph.prototype.Apply_TextPr = function(TextPr, IncFontSize)
 			if (this.Content[EndPos].IsRun())
 			{
 				this.RemoveSelection();
+				for (let i = 0; i < NewElements.length; ++i)
+				{
+					if (NewElements[i])
+						NewElements[i].RemoveSelection();
+				}
+				
 				let centerPos = this.Internal_ReplaceRun(EndPos, NewElements);
 
 				this.Selection.Use      = true;
@@ -11108,9 +11114,6 @@ Paragraph.prototype.Internal_CompileParaPr2 = function()
 
 		// Считываем свойства для текущего стиля
 		var Pr = Styles.Get_Pr(StyleId, styletype_Paragraph, TableStyle, ShapeStyle);
-
-		Pr.ParaPr.CheckBorderSpaces();
-
 		// Если в стиле была задана нумерация сохраним это в специальном поле
 		if (undefined != Pr.ParaPr.NumPr)
 			Pr.ParaPr.StyleNumPr = Pr.ParaPr.NumPr.Copy();
@@ -11192,7 +11195,8 @@ Paragraph.prototype.Internal_CompileParaPr2 = function()
 
 		// Копируем прямые настройки параграфа.
 		Pr.ParaPr.Merge(this.Pr);
-
+		Pr.ParaPr.CheckBorderSpaces();
+		
 		if (this.IsInFixedForm())
 		{
 			let oForm = this.GetInnerForm();
@@ -11261,6 +11265,40 @@ Paragraph.prototype.Internal_CompiledParaPrPresentation = function(Lvl, bNoMerge
 			Pr.ParaPr.Jc = AscCommon.align_Right;
 		else if (AscCommon.align_Right === Pr.ParaPr.Jc)
 			Pr.ParaPr.Jc = AscCommon.align_Left;
+	}
+
+	if (Pr.ParaPr.Bidi && !(logicDocument && logicDocument.IsDocumentEditor()))
+	{
+		let jcExplicit = false;
+
+		if (!(bNoMergeDefault === true) && this.Pr.Jc !== undefined)
+		{
+			jcExplicit = true;
+		}
+
+		if (!jcExplicit)
+		{
+			let sid = styleObject.lastId;
+			let visited = {};
+			while (sid && !visited[sid])
+			{
+				visited[sid] = true;
+				let style = Styles.Style[sid];
+				if (!style)
+					break;
+				if (style.ParaPr && style.ParaPr.Jc !== undefined)
+				{
+					jcExplicit = true;
+					break;
+				}
+				sid = style.BasedOn;
+			}
+		}
+
+		if (!jcExplicit)
+		{
+			Pr.ParaPr.Jc = AscCommon.align_Right;
+		}
 	}
 
 	return Pr;
@@ -14020,11 +14058,13 @@ Paragraph.prototype.Concat = function(Para, isUseConcatedStyle)
 {
 	this.DeleteCommentOnRemove = false;
 	Para.DeleteCommentOnRemove = false;
-	
+
 	let complexFields = this.GetComplexFieldsByPos(this.GetEndPos());
+	Para.GetAllComplexFields(complexFields);
+	
 	for (let iField = 0, nFields = complexFields.length; iField < nFields; ++iField)
 		complexFields[iField].StartCharsUpdate();
-
+	
 	// Если в параграфе Para были точки NearPos, за которыми нужно следить перенесем их в этот параграф
 	var NearPosCount = Para.NearPosArray.length;
 	for (var Pos = 0; Pos < NearPosCount; Pos++)
@@ -14076,11 +14116,12 @@ Paragraph.prototype.ConcatBefore = function(oPara, nSelection)
 {
 	this.DeleteCommentOnRemove = false;
 	oPara.DeleteCommentOnRemove = false;
-	
+
 	let complexFields = this.GetComplexFieldsByPos(this.GetStartPos());
+	oPara.GetAllComplexFields(complexFields);
 	for (let iField = 0, nFields = complexFields.length; iField < nFields; ++iField)
 		complexFields[iField].StartCharsUpdate();
-
+	
 	// Убираем метку конца параграфа у добавляемого параграфа
 	oPara.RemoveParaEnd();
 
@@ -18180,6 +18221,18 @@ Paragraph.prototype.GetAllFields = function(isUseSelection, arrFields)
 	}
 
 	return arrFields;
+};
+Paragraph.prototype.GetAllComplexFields = function(fields)
+{
+	let allFields = this.GetAllFields();
+	fields = fields ? fields : [];
+	for (let i = 0; i < allFields.length; ++i)
+	{
+		let f = allFields[i];
+		if ((f instanceof AscWord.ComplexField) && -1 === fields.indexOf(f))
+			fields.push(f);
+	}
+	return fields;
 };
 /**
  * Используются ли уменьшенные по ширине пробелы между словами?

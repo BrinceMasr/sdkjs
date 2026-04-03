@@ -1278,6 +1278,24 @@ ParaDrawing.prototype.Measure = function()
 			this.Height = this.GraphicObj.extY;
 		}
 	}
+	let oHR = this.getHorizontalRule();
+	if (oHR)
+	{
+		let oParagraph = this.GetParagraph();
+		if (oParagraph)
+		{
+			let hrWidth = oParagraph.XLimit - oParagraph.X;
+			let paraInd = oParagraph.Get_CompiledPr2(true).ParaPr.Ind;
+			hrWidth -= paraInd.Left + paraInd.Right;
+			hrWidth = Math.max(0, hrWidth);
+			
+			this.Width = hrWidth;
+			this.WidthVisible = hrWidth;
+			this.GraphicObj.recalcTransform();
+			this.GraphicObj.recalcBounds();
+			this.GraphicObj.recalculate();
+		}
+	}
 };
 ParaDrawing.prototype.GetScaleCoefficient = function ()
 {
@@ -1443,6 +1461,23 @@ ParaDrawing.prototype.Update_Position = function(Paragraph, ParaLayout, PageLimi
 	this.Internal_Position.Calculate_X(bInline, this.PositionH.RelativeFrom, this.PositionH.Align, this.PositionH.Value, this.PositionH.Percent);
 	this.Internal_Position.Calculate_Y(bInline, this.PositionV.RelativeFrom, this.PositionV.Align, this.PositionV.Value, this.PositionV.Percent, isInTable);
 
+	if (bInline) {
+		let oHR = this.getHorizontalRule();
+		if (oHR) {
+			let oLine = Paragraph.Lines[LineNum];
+			if (oLine) {
+				let metrics = oLine.Metrics;
+				let hrH = this.GraphicObj.extY;
+				this.Internal_Position.CalcY = this.Internal_Position.LineTop + (metrics.Ascent - hrH) - this.DrawingDocument.GetMMPerDot(1); // 1 px difference with MSWord
+			}
+			let hrExtX = this.GraphicObj.extX;
+			let hrLineW = this.WidthVisible;
+			if (oHR.align === "center")
+				this.Internal_Position.CalcX += (hrLineW - hrExtX) / 2;
+			else if (oHR.align === "right")
+				this.Internal_Position.CalcX += hrLineW - hrExtX;
+		}
+	}
 
 	let bCorrect = false;
 	if(oDocumentContent && oDocumentContent.IsTableCellContent && oDocumentContent.IsTableCellContent(false))
@@ -1838,6 +1873,14 @@ ParaDrawing.prototype.Is_Inline = function()
 ParaDrawing.prototype.IsInline = function()
 {
 	return this.Is_Inline();
+};
+ParaDrawing.prototype.isHorizontalRule = function()
+{
+	return this.GraphicObj && this.GraphicObj.isHorizontalRule && this.GraphicObj.isHorizontalRule();
+};
+ParaDrawing.prototype.getHorizontalRule = function()
+{
+	return this.GraphicObj && this.GraphicObj.getHorizontalRule && this.GraphicObj.getHorizontalRule();
 };
 ParaDrawing.prototype.MakeInline = function()
 {
@@ -3458,6 +3501,16 @@ ParaDrawing.prototype.CheckRunContent = function(fCheck)
 	{
 		this.GraphicObj.checkRunContent(fCheck);
 	}
+};
+ParaDrawing.prototype.IsChart = function()
+{
+	let type = this.GraphicObj ? this.GraphicObj.getObjectType() : AscDFH.historyitem_type_Unknown;
+	return AscDFH.historyitem_type_ChartSpace === type || AscDFH.historyitem_type_Chart === type;
+};
+ParaDrawing.prototype.IsSmartArt = function()
+{
+	let type = this.GraphicObj ? this.GraphicObj.getObjectType() : AscDFH.historyitem_type_Unknown;
+	return AscDFH.historyitem_type_SmartArt === type || AscDFH.historyitem_type_SmartArtDrawing === type;
 };
 /**
  * Класс, описывающий текущее положение параграфа при рассчете позиции автофигуры.

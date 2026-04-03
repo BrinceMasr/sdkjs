@@ -5298,6 +5298,37 @@
 		this.defaults.worksheetView.updateStyle();
 	};
 
+	WorkbookView.prototype.updateDarkMode = function (isDarkMode) {
+		if (isDarkMode) {
+			this.buffers.main.setDarkMode();
+			this.buffers.overlay.setDarkMode();
+			this.buffers.mainGraphic.setDarkMode();
+			this.buffers.overlayGraphic.setDarkMode();
+			if (this.cellEditor) {
+				this.cellEditor.updateDarkMode(isDarkMode);
+			}
+		} else {
+			this.buffers.main.isDarkMode         = false;
+			this.buffers.overlay.isDarkMode      = false;
+			this.buffers.mainGraphic.isDarkMode  = false;
+			this.buffers.overlayGraphic.isDarkMode = false;
+			this.shapeCtx.isDarkMode        = false;
+			this.shapeOverlayCtx.isDarkMode = false;
+			this.mainGraphics.isDarkMode    = false;
+			if (this.cellEditor) {
+				this.cellEditor.updateDarkMode(isDarkMode);
+			}
+		}
+		var hfEditor = window["Asc"] && window["Asc"]["g_header_footer_editor"];
+		if (hfEditor) {
+			hfEditor.updateDarkMode(isDarkMode);
+		}
+		var ws = this.getWorksheet();
+		if (ws) {
+			ws.draw();
+		}
+	};
+
 	WorkbookView.prototype.executeWithCurrentTopLeftCell = function (runFunction) {
 		var i, oWS;
 		var aTrueTopLeftCell = {};
@@ -5542,6 +5573,7 @@
 			return;
 		}
 		if (this.SearchEngine.Compare(oProps) && !oProps.isNeedRecalc && !(oProps.lastSearchElem && this.SearchEngine.modifiedDocument)) {
+			this.SearchEngine.props.activeCell = oProps.activeCell;
 			return this.SearchEngine;
 		}
 		oProps.isNeedRecalc = null;
@@ -7141,9 +7173,14 @@
 			return this.Direction ? this.CurId + 1 : this.CurId - 1;
 		} else {
 			// it's necessary because into the docbuilder "this.wb.wsActive" is "-1" and search doesn't work
-			let ws = this.wb.model.getActiveWs();
-			if (!ws) {
-				ws = this.wb && this.wb.model && this.wb.model.getActiveWs && this.wb.model.getActiveWs();
+			let ws;
+			if (this.props && this.props.wsIndex !== undefined && this.props.wsIndex !== null && this.props.wsIndex !== -1) {
+				ws = this.wb.model.getWorksheet(this.props.wsIndex) || this.wb.model.getActiveWs();
+			} else {
+				ws = this.wb.model.getActiveWs();
+				if (!ws) {
+					ws = this.wb && this.wb.model && this.wb.model.getActiveWs && this.wb.model.getActiveWs();
+				}
 			}
 			let selectionRange = (this.props && this.props.selectionRange) || (ws && ws.selectionRange) || (ws && ws.copySelection);
 

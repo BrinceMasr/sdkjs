@@ -292,7 +292,7 @@
             case AscPDF.GOTO_TYPES.xyz: // inherit zoom
                 break;
             case AscPDF.GOTO_TYPES.fit:
-            case AscPDF.GOTO_TYPES.fitB: { // fit to max of heigth/width
+            case AscPDF.GOTO_TYPES.fitB: { // fit to page
                 let nVerZoom = ((oViewer.canvas.height / (nNoZoomH * AscCommon.AscBrowser.retinaPixelRatio)) * 100 >> 0) / 100;
                 let nHorZoom = ((oViewer.canvas.width / (nNoZoomW * AscCommon.AscBrowser.retinaPixelRatio)) * 100 >> 0) / 100;
 
@@ -325,7 +325,7 @@
                     nVerZoom = (((oViewer.canvas.height - oViewer.scrollWidth) / (nRectH)) * 100 >> 0) / 100;
                 }
                 
-                this.zoom = Math.min(nHorZoom, nVerZoom);
+                this.zoom = Math.max(nHorZoom, nVerZoom);
             }
         }
 

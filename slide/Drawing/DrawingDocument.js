@@ -5516,6 +5516,10 @@ function CThumbnailsManager(editorPage)
 		if (!this.isThumbnailsShown())
 			return;
 
+		const oLogicDocument = this.m_oWordControl && this.m_oWordControl.m_oLogicDocument;
+		if (!oLogicDocument || oLogicDocument.GetAllSlides().length !== this.m_arrPages.length)
+			return;
+
 		const canvas = this.m_oWordControl.m_oThumbnailsBack.HtmlElement;
 		if (canvas == null)
 			return;
@@ -5550,6 +5554,8 @@ function CThumbnailsManager(editorPage)
 
 		const arrSlides = oLogicDocument.GetAllSlides();
 
+		if (arrSlides.length !== this.m_arrPages.length)
+			return;
 
 		for (let i = 0; i < arrSlides.length; i++) {
 			const page = this.m_arrPages[i];

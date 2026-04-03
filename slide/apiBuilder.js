@@ -647,8 +647,9 @@
     Api.CreateTheme = function(sName, oMaster, oClrScheme, oFormatScheme, oFontScheme){
         if (typeof(sName) !== "string")
             sName = "";
-        if (oMaster.GetClassType() !== "master" || oClrScheme.GetClassType() !== "themeColorScheme" ||
-        oFormatScheme.GetClassType() !== "themeFormatScheme" || oFontScheme.GetClassType() !== "themeFontScheme")
+        if (!oMaster || !oClrScheme || !oFormatScheme || !oFontScheme
+        || oMaster.GetClassType() !== "master" || oClrScheme.GetClassType() !== "themeColorScheme"
+        || oFormatScheme.GetClassType() !== "themeFormatScheme" || oFontScheme.GetClassType() !== "themeFontScheme")
             return null;
 
         var oPresentation      = private_GetPresentation();
@@ -849,10 +850,10 @@
 	 */
 	Api.CreateOleObject = function(sImageSrc, nWidth, nHeight, sData, sAppId)
 	{
-		if (typeof sImageSrc === "string" && sImageSrc.length > 0 && typeof sData === "string"
+		if (!(typeof sImageSrc === "string" && sImageSrc.length > 0 && typeof sData === "string"
 			&& typeof sAppId === "string" && sAppId.length > 0
-			&& AscFormat.isRealNumber(nWidth) && AscFormat.isRealNumber(nHeight)
-		)
+			&& AscFormat.isRealNumber(nWidth) && AscFormat.isRealNumber(nHeight)))
+			return null;
 
 		var nW = private_EMU2MM(nWidth);
 		var nH = private_EMU2MM(nHeight);
@@ -985,7 +986,7 @@
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/Save.js
 	 */
 	Api.Save = function () {
-		this.SaveAfterMacros = true;
+		Asc.editor.SaveAfterMacros = true;
 	};
 
     /**
@@ -1684,9 +1685,9 @@
         nEnd = nEnd == undefined ? this.Presentation.Slides.length - 1 : nEnd;
 
         if (nStart < 0 || nStart >= this.Presentation.Slides.length)
-            return;
+            return null;
         if (nEnd < 0 || nEnd >= this.Presentation.Slides.length)
-            return;
+            return null;
 
         let oResult = oWriter.SerSlides(nStart, nEnd, bWriteLayout, bWriteMaster, bWriteAllMasLayouts);
         if (bWriteTableStyles)
@@ -1871,7 +1872,7 @@
 		const api = this.Presentation.Api;
 		
 		let props = (api) ? api.asc_getAppProps() : null;
-		oDocInfo["Application"] = (props.asc_getApplication() || '') + (props.asc_getAppVersion() ? ' ' : '') + (props.asc_getAppVersion() || '');
+		oDocInfo["Application"] = props ? (props.asc_getApplication() || '') + (props.asc_getAppVersion() ? ' ' : '') + (props.asc_getAppVersion() || '') : '';
 		
 		let langCode = 1033; // en-US
 		let langName = 'en-us';
@@ -2111,7 +2112,7 @@
 	 */
     ApiMaster.prototype.GetLayout = function(nPos)
     {
-        if (nPos < 0 || nPos > this.Master.sldLayoutLst.length || typeof (nPos) !== 'number')
+        if (nPos < 0 || nPos >= this.Master.sldLayoutLst.length || typeof (nPos) !== 'number')
             return null;
         
         return new ApiLayout(this.Master.sldLayoutLst[nPos])
@@ -2571,9 +2572,9 @@
 	 */
     ApiLayout.prototype.SetName = function(sName)
     {
-        if (typeof(sName) !== "string")
+        if (typeof(sName) === "string")
             this.Layout.setCSldName(sName);
-        else 
+        else
             return false;
         
         return true;
@@ -2587,7 +2588,7 @@
 	 */
     ApiLayout.prototype.GetLayoutType = function()
     {
-		this.Layout.getType();
+		return AscCommonSlide.LAYOUT_TYPE_TO_STRING[this.Layout.getType()];
     };
 
     /**
@@ -2791,6 +2792,7 @@
                 return true;
             }
         }
+        return false;
     };
 
     /**
@@ -3037,6 +3039,7 @@
 
         nIdx >>= 0;
         this.Placeholder.setIdx(nIdx);
+        return true;
     };
 
     /**
@@ -4342,8 +4345,8 @@
 			const notes = AscCommonSlide.CreateNotes();
 			notes.setNotesMaster(presentation.notesMasters[0]);
 
-			notes.setSlide(this);
-			this.setNotes(notes);
+			notes.setSlide(this.Slide);
+			this.Slide.setNotes(notes);
 
 			oNotesPage = new ApiNotesPage(notes);
 		}
@@ -4579,11 +4582,6 @@
 		'effectCombHorizontal': { tag: 'p:comb', attrNames: ['dir'], attrValues: ['horz'] },
 		'effectCombVertical':   { tag: 'p:comb', attrNames: ['dir'], attrValues: ['vert'] },
 
-		// Default 'p14:conveyor' effect attribute is: dir='l'
-		// Attribute must be specified explicitly - <p14:conveyor/> without 'dir' attribute is forbidden
-		'effectConveyorLeft':  { tag: 'p14:conveyor', attrNames: ['dir'], attrValues: ['l'] },
-		'effectConveyorRight': { tag: 'p14:conveyor', attrNames: ['dir'], attrValues: ['r'] },
-
 		// Default 'p:cover' effect attribute is: dir='l'
 		'effectCoverDown':      { tag: 'p:cover', attrNames: ['dir'], attrValues: ['d'] },
 		'effectCoverLeft':      { tag: 'p:cover', attrNames: ['dir'], attrValues: ['l']},
@@ -4598,7 +4596,6 @@
 		'effectCircleOut': { tag: 'p:circle' },
 		'effectDiamondOut': { tag: 'p:diamond' },
 		'effectDissolve': { tag: 'p:dissolve' },
-		'effectFlashbulb': { tag: 'p14:flash' },
 		'effectHoneycomb': { tag: 'p14:honeycomb' },
 		'effectNewsflash': { tag: 'p:newsflash' },
 		'effectPlusOut': { tag: 'p:plus' },
@@ -4625,32 +4622,10 @@
 		'effectFlipRight': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['r'] },
 		'effectFlipUp': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['r'] },
 
-		// Default 'p14:flythrough' effect attributes are: dir='in', hasBounce='0'
-		'effectFlyThroughIn':        { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['in', '0'] },
-		'effectFlyThroughInBounce':  { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['in', '1'] },
-		'effectFlyThroughOut':       { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['out', '0'] },
-		'effectFlyThroughOutBounce': { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['out', '1'] },
-
 		// Default 'p14:gallery' effect attribute is: dir='l'
 		// Attribute must be specified explicitly - <p14:gallery/> without 'dir' attribute is forbidden
 		'effectGalleryLeft': { tag: 'p14:gallery', attrNames: ['dir'], attrValues: ['l'] },
 		'effectGalleryRight': { tag: 'p14:gallery', attrNames: ['dir'], attrValues: ['r'] },
-
-		// Default 'p14:glitter' effect attribute is: dir='l', pattern='diamond'
-		'effectGlitterDiamondDown':  { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['u', 'diamond'] },
-		'effectGlitterDiamondLeft':  { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['r', 'diamond'] },
-		'effectGlitterDiamondRight': { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['l', 'diamond'] },
-		'effectGlitterDiamondUp':    { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['d', 'diamond'] },
-		'effectGlitterHexagonDown':  { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['u', 'hexagon'] },
-		'effectGlitterHexagonLeft':  { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['r', 'hexagon'] },
-		'effectGlitterHexagonRight': { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['l', 'hexagon'] },
-		'effectGlitterHexagonUp':    { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['d', 'hexagon'] },
-
-		// Default 'p14:pan' effect attribute is: dir='l'
-		'effectPanDown':  { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['d'] },
-		'effectPanLeft':  { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['l'] },
-		'effectPanRight': { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['r'] },
-		'effectPanUp':    { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['u'] },
 
 		// Default 'p:push' effect attribute is: dir='l'
 		'effectPushDown':  { tag: 'p:push', attrNames: ['dir'], attrValues: ['d'] },
@@ -4662,24 +4637,12 @@
 		'effectRandomBarsHorizontal': { tag: 'p:randomBar', attrNames: ['dir'], attrValues: ['horz'] },
 		'effectRandomBarsVertical':   { tag: 'p:randomBar', attrNames: ['dir'], attrValues: ['vert'] },
 
-		// Default 'p14:reveal' effect attribute is: thruBlk='0', dir='l'
-		'effectRevealBlackLeft':   { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['1', 'l'] },
-		'effectRevealBlackRight':  { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['1', 'r'] },
-		'effectRevealSmoothLeft':  { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['0', 'l'] },
-		'effectRevealSmoothRight': { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['0', 'r'] },
-
 		// Default 'p14:ripple' effect attribute is: dir='center'
 		'effectRippleCenter':    { tag: 'p14:ripple', attrNames: ['dir'], attrValues: ['center'] },
 		'effectRippleLeftDown':  { tag: 'p14:ripple', attrNames: ['dir'], attrValues: ['ld'] },
 		'effectRippleLeftUp':    { tag: 'p14:ripple', attrNames: ['dir'], attrValues: ['lu'] },
 		'effectRippleRightDown': { tag: 'p14:ripple', attrNames: ['dir'], attrValues: ['rd'] },
 		'effectRippleRightUp':   { tag: 'p14:ripple', attrNames: ['dir'], attrValues: ['ru'] },
-
-		// Default 'p14:shred' effect attribute is: pattern='strip', dir='in'
-		'effectShredRectangleIn':  { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['rectangle', 'in'] },
-		'effectShredRectangleOut': { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['rectangle', 'out'] },
-		'effectShredStripsIn':     { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['strip', 'in'] },
-		'effectShredStripsOut':    { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['strip', 'out'] },
 
 		// Default 'p:split' effect attribute is: orient='horz', dir='out'
 		'effectSplitHorizontalIn':  { tag: 'p:split', attrNames: ['orient', 'dir'], attrValues: ['horz', 'in'] },
@@ -4859,7 +4822,7 @@
 
 		if (entryEffectName === 'effectNone') {
 			this.Transition.TransitionType = c_oAscSlideTransitionTypes.None;
-			this.TransitionOption = -1;
+			this.Transition.TransitionOption = -1;
 			return true;
 		}
 
@@ -7570,6 +7533,76 @@
 	};
 
 	/**
+	 * Sets the width of the specified column in the current table.
+	 *
+	 * @memberof ApiTable
+	 * @typeofeditors ["CPE"]
+	 *
+	 * @param {number} columnIndex - The zero-based column index.
+	 * @param {EMU} width - The column width measured in English measure units.
+	 * @returns {EMU | null} - Returns the actual column width set (in EMU), or null if the column index is invalid.
+	 *
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/SetColumnWidth.js
+	 */
+	ApiTable.prototype.SetColumnWidth = function (columnIndex, width) {
+		const table = this.Table;
+		if (!table || columnIndex < 0 || columnIndex >= table.TableGrid.length) {
+			return null;
+		}
+
+		const colsMinWidth = table.GetMinWidth(true);
+		const minWidth = colsMinWidth[columnIndex] || 1;
+		const widthMM = Math.max(private_EMU2MM(width), minWidth);
+
+		const newGrid = table.TableGrid.slice();
+		newGrid[columnIndex] = widthMM;
+		table.SetTableGrid(newGrid);
+
+		const rowsCount = table.GetRowsCount();
+		for (let rowIndex = 0; rowIndex < rowsCount; rowIndex++) {
+			const row = table.GetRow(rowIndex);
+			let gridColumnIndex = row.GetBefore().Grid;
+
+			const cellsCount = row.GetCellsCount();
+			for (let cellIndex = 0; cellIndex < cellsCount; cellIndex++) {
+				const cell = row.GetCell(cellIndex);
+				const gridSpan = cell.GetGridSpan();
+
+				if (gridColumnIndex <= columnIndex && columnIndex < gridColumnIndex + gridSpan) {
+					const spanWidth = table.GetSpanWidth(gridColumnIndex, gridSpan);
+					cell.SetW(new CTableMeasurement(tblwidth_Mm, spanWidth));
+				}
+
+				gridColumnIndex += gridSpan;
+			}
+		}
+
+		return private_MM2EMU(widthMM);
+	};
+
+	/**
+	 * Returns the width of the specified column (by index) of the current table.
+	 *
+	 * @memberof ApiTable
+	 * @typeofeditors ["CPE"]
+	 *
+	 * @param {number} columnIndex - The zero-based column index.
+	 * @returns {EMU | null}
+	 *
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/GetColumnWidth.js
+	 */
+	ApiTable.prototype.GetColumnWidth = function (columnIndex) {
+		const table = this.Table;
+		const isValidIndex = table && columnIndex >= 0 && columnIndex < table.TableGrid.length;
+		if (isValidIndex) {
+			return private_MM2EMU(table.TableGrid[columnIndex]);
+		}
+		return null;
+	};
+
+	/**
 	 * Converts the ApiTable object into the JSON object.
 	 * @memberof ApiTable
 	 * @typeofeditors ["CPE"]
@@ -7591,6 +7624,7 @@
     // ApiTableRow
     //
     //------------------------------------------------------------------------------------------------------------------
+
     /**
      * Returns the type of the ApiTableRow class.
      * @typeofeditors ["CPE"]
@@ -7601,6 +7635,7 @@
     {
         return "tableRow";
     };
+
     /**
      * Returns a number of cells in the current row.
      * @typeofeditors ["CPE"]
@@ -7611,6 +7646,7 @@
     {
         return this.Row.Content.length;
     };
+
     /**
      * Returns a cell by its position in the current row.
      * @typeofeditors ["CPE"]
@@ -7626,38 +7662,52 @@
         return new ApiTableCell(this.Row.Content[nPos]);
     };
 
-
-    /**
-     * Sets the height to the current table row.
-     * @typeofeditors ["CPE"]
-     * @param {EMU} [nValue] - The row height in English measure units.
-     * @see office-js-api/Examples/{Editor}/ApiTableRow/Methods/SetHeight.js
+	/**
+	 * Sets the height to the current table row.
+	 *
+	 * @memberof ApiTableRow
+	 * @typeofeditors ["CPE"]
+	 *
+	 * @param {EMU} [nValue] - The row height in English measure units.
+	 * @returns {EMU | null}
+	 * 
+	 * @since 5.1.0
+	 * @see office-js-api/Examples/{Editor}/ApiTableRow/Methods/SetHeight.js
 	 */
-    ApiTableRow.prototype.SetHeight = function(nValue)
-    {
-        var fMaxTopMargin = 0, fMaxBottomMargin = 0, fMaxTopBorder = 0, fMaxBottomBorder = 0;
+	ApiTableRow.prototype.SetHeight = function (nValue) {
+		const heightMM = Math.max(0, nValue / 36000);
+		const horizontalLineRule = Asc.linerule_AtLeast;
+		this.Row.Set_Height(heightMM, horizontalLineRule);
+		return private_MM2EMU(heightMM);
+	};
 
-        for (var i = 0;  i < this.Row.Content.length; ++i){
-            var oCell = this.Row.Content[i];
-            var oMargins = oCell.GetMargins();
-            if(oMargins.Bottom.W > fMaxBottomMargin){
-                fMaxBottomMargin = oMargins.Bottom.W;
-            }
-            if(oMargins.Top.W > fMaxTopMargin){
-                fMaxTopMargin = oMargins.Top.W;
-            }
-            var oBorders = oCell.Get_Borders();
-            if(oBorders.Top.Size > fMaxTopBorder){
-                fMaxTopBorder = oBorders.Top.Size;
-            }
-            if(oBorders.Bottom.Size > fMaxBottomBorder){
-                fMaxBottomBorder = oBorders.Bottom.Size;
-            }
-        }
-        this.Row.Set_Height(Math.max(1, nValue/36000 - fMaxTopMargin - fMaxBottomMargin - fMaxTopBorder/2 - fMaxBottomBorder/2), Asc.linerule_AtLeast);
-    };
+	/**
+	 * Returns the height of the current table row.
+	 *
+	 * @memberof ApiTableRow
+	 * @typeofeditors ["CPE"]
+	 *
+	 * @returns {EMU | null}
+	 *
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiTableRow/Methods/GetHeight.js
+	 */
+	ApiTableRow.prototype.GetHeight = function () {
+		const table = this.Row.Table;
+		if (!table || !table.Parent) {
+			return null;
+		}
 
+		table.Parent.recalculateTable();
+		table.Parent.recalculateSizes();
 
+		const rowInfo = table.RowsInfo[this.Row.Index];
+		if (!rowInfo || !rowInfo.H[0]) {
+			return null;
+		}
+
+		return private_MM2EMU(rowInfo.H[0]);
+	};
 
     //------------------------------------------------------------------------------------------------------------------
     //
@@ -8326,12 +8376,15 @@
     ApiTable.prototype["RemoveColumn"]                    = ApiTable.prototype.RemoveColumn;
     ApiTable.prototype["SetShd"]                          = ApiTable.prototype.SetShd;
 	ApiTable.prototype["SetSize"]                         = ApiTable.prototype.SetSize;
-    ApiTable.prototype["ToJSON"]    				      = ApiTable.prototype.ToJSON;
+	ApiTable.prototype["SetColumnWidth"]                  = ApiTable.prototype.SetColumnWidth;
+	ApiTable.prototype["GetColumnWidth"]                  = ApiTable.prototype.GetColumnWidth;
+	ApiTable.prototype["ToJSON"]                          = ApiTable.prototype.ToJSON;
 
     ApiTableRow.prototype["GetClassType"]                 = ApiTableRow.prototype.GetClassType;
     ApiTableRow.prototype["GetCellsCount"]                = ApiTableRow.prototype.GetCellsCount;
     ApiTableRow.prototype["GetCell"]                      = ApiTableRow.prototype.GetCell;
     ApiTableRow.prototype["SetHeight"]                    = ApiTableRow.prototype.SetHeight;
+    ApiTableRow.prototype["GetHeight"]                    = ApiTableRow.prototype.GetHeight;
 
     ApiTableCell.prototype["GetClassType"]                = ApiTableCell.prototype.GetClassType;
     ApiTableCell.prototype["GetContent"]                  = ApiTableCell.prototype.GetContent;

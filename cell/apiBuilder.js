@@ -779,6 +779,7 @@
 	 * @memberof Api
 	 * @typeofeditors ["CSE"]
 	 * @param {string} sName - The name of a new worksheet.
+	 * @returns {ApiWorksheet}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/AddSheet.js
 	 */
 	Api.AddSheet = function (sName) {
@@ -786,6 +787,7 @@
 			throwException(new Error('Worksheet with such a name already exists.'));
 		else
 			Asc.editor.asc_addWorksheet(sName);
+		return this.GetActiveSheet();
 	};
 
 	/**
@@ -813,10 +815,12 @@
 	 * @memberof Api
 	 * @typeofeditors ["CSE"]
 	 * @param {number} LCID - The locale specified.
+	 * @returns {boolean} - returns true if the locale was set successfully.
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/SetLocale.js
 	 */
 	Api.SetLocale = function (LCID) {
 		Asc.editor.asc_setLocale(LCID, null, null);
+		return true;
 	};
 
 	/**
@@ -913,10 +917,11 @@
 	 * Creates a new history point.
 	 * @memberof Api
 	 * @typeofeditors ["CSE"]
+	 * @returns {boolean} - returns true if the history point was created successfully.
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/CreateNewHistoryPoint.js
 	 */
 	Api.CreateNewHistoryPoint = function () {
-		History.Create_NewPoint();
+		return History.Create_NewPoint() !== false;
 	};
 
 	/**
@@ -1043,10 +1048,12 @@
 	 * Saves changes to the specified document.
 	 * @memberof Api
 	 * @typeofeditors ["CSE"]
+	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/Save.js
 	 */
 	Api.Save = function () {
-		this.SaveAfterMacros = true;
+		Asc.editor.SaveAfterMacros = true;
+		return true;
 	};
 
 	/**
@@ -8316,10 +8323,12 @@
 	 * @memberof ApiWorksheet
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} isVisible - Specifies if the sheet is visible or not.
+	 * @returns {boolean} - returns true if the visibility state was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/SetVisible.js
 	 */
 	ApiWorksheet.prototype.SetVisible = function (isVisible) {
 		this.worksheet.setHidden(!isVisible);
+		return true;
 	};
 	Object.defineProperty(ApiWorksheet.prototype, "Visible", {
 		get: function () {
@@ -8334,10 +8343,11 @@
 	 * Makes the current sheet active.
 	 * @memberof ApiWorksheet
 	 * @typeofeditors ["CSE"]
+	 * @returns {boolean} - returns true if the sheet was made active successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/SetActive.js
 	 */
 	ApiWorksheet.prototype.SetActive = function () {
-		this.worksheet.workbook.setActive(this.worksheet.index);
+		return this.worksheet.workbook.setActive(this.worksheet.index);
 	};
 	Object.defineProperty(ApiWorksheet.prototype, "Active", {
 		set: function () {
@@ -8656,10 +8666,16 @@
 	 * @memberof ApiWorksheet
 	 * @typeofeditors ["CSE"]
 	 * @param {string} sRange - The range of cells from the current sheet which will be formatted as a table.
+	 * @returns {boolean} - returns true if the range was formatted as a table successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/FormatAsTable.js
 	 */
 	ApiWorksheet.prototype.FormatAsTable = function (sRange) {
+		if (this.worksheet && this.worksheet.getSheetProtection()) {
+			throwException(new Error('Cannot modify protected sheet'));
+			return false;
+		}
 		this.worksheet.autoFilters.addAutoFilter('TableStyleLight9', AscCommonExcel.g_oRangeCache.getAscRange(sRange));
+		return true;
 	};
 
 	/**
@@ -8671,14 +8687,20 @@
 	 * @param {number} nColumn - The number of the column to set the width to.
 	 * @param {number} nWidth - The width of the column divided by 7 pixels.
 	 * @param {boolean} [bWithotPaddings=false] - Specifies whether nWidth will be set without standard paddings.
+	 * @returns {boolean} - returns true if the column width was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/SetColumnWidth.js
 	 */
 	ApiWorksheet.prototype.SetColumnWidth = function (nColumn, nWidth, bWithotPaddings) {
+		if (this.worksheet && this.worksheet.getSheetProtection(Asc.c_oAscSheetProtectType.formatColumns)) {
+			throwException(new Error('Cannot modify protected sheet'));
+			return false;
+		}
 		if (bWithotPaddings) {
 			let wb = this.worksheet.workbook;
 			nWidth = (nWidth * wb.maxDigitWidth - wb.paddingPlusBorder) / wb.maxDigitWidth;
 		}
 		this.worksheet.setColWidth(nWidth, nColumn, nColumn);
+		return true;
 	};
 
 	/**
@@ -8688,10 +8710,16 @@
 	 * @typeofeditors ["CSE"]
 	 * @param {number} nRow - The number of the row to set the height to.
 	 * @param {number} nHeight - The height of the row measured in points.
+	 * @returns {boolean} - returns true if the row height was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/SetRowHeight.js
 	 */
 	ApiWorksheet.prototype.SetRowHeight = function (nRow, nHeight) {
+		if (this.worksheet && this.worksheet.getSheetProtection(Asc.c_oAscSheetProtectType.formatRows)) {
+			throwException(new Error('Cannot modify protected sheet'));
+			return false;
+		}
 		this.worksheet.setRowHeight(nHeight, nRow, nRow, true);
+		return true;
 	};
 
 	/**
@@ -8699,10 +8727,12 @@
 	 * @memberof ApiWorksheet
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} isDisplayed - Specifies whether the current sheet gridlines must be displayed or not. The default value is <b>true</b>.
+	 * @returns {boolean} - returns true if the display of gridlines was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/SetDisplayGridlines.js
 	 */
 	ApiWorksheet.prototype.SetDisplayGridlines = function (isDisplayed) {
 		this.worksheet.setDisplayGridlines(!!isDisplayed);
+		return true;
 	};
 
 	/**
@@ -8710,10 +8740,12 @@
 	 * @memberof ApiWorksheet
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} isDisplayed - Specifies whether the current sheet row/column headers must be displayed or not. The default value is <b>true</b>.
+	 * @returns {boolean} - returns true if the display of headings was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/SetDisplayHeadings.js
 	 */
 	ApiWorksheet.prototype.SetDisplayHeadings = function (isDisplayed) {
 		this.worksheet.setDisplayHeadings(!!isDisplayed);
+		return true;
 	};
 
 	/**
@@ -8721,11 +8753,13 @@
 	 * @memberof ApiWorksheet
 	 * @typeofeditors ["CSE"]
 	 * @param {number} nPoints - The left margin size measured in points.
+	 * @returns {boolean} - returns true if the left margin was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/SetLeftMargin.js
 	 */
 	ApiWorksheet.prototype.SetLeftMargin = function (nPoints) {
 		nPoints = (typeof nPoints !== 'number') ? 0 : nPoints;
 		this.worksheet.PagePrintOptions.pageMargins.asc_setLeft(nPoints);
+		return true;
 	};
 	/**
 	 * Returns the left margin of the sheet.
@@ -8751,11 +8785,13 @@
 	 * @memberof ApiWorksheet
 	 * @typeofeditors ["CSE"]
 	 * @param {number} nPoints - The right margin size measured in points.
+	 * @returns {boolean} - returns true if the right margin was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/SetRightMargin.js
 	 */
 	ApiWorksheet.prototype.SetRightMargin = function (nPoints) {
 		nPoints = (typeof nPoints !== 'number') ? 0 : nPoints;
 		this.worksheet.PagePrintOptions.pageMargins.asc_setRight(nPoints);
+		return true;
 	};
 	/**
 	 * Returns the right margin of the sheet.
@@ -8781,11 +8817,13 @@
 	 * @memberof ApiWorksheet
 	 * @typeofeditors ["CSE"]
 	 * @param {number} nPoints - The top margin size measured in points.
+	 * @returns {boolean} - returns true if the top margin was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/SetTopMargin.js
 	 */
 	ApiWorksheet.prototype.SetTopMargin = function (nPoints) {
 		nPoints = (typeof nPoints !== 'number') ? 0 : nPoints;
 		this.worksheet.PagePrintOptions.pageMargins.asc_setTop(nPoints);
+		return true;
 	};
 	/**
 	 * Returns the top margin of the sheet.
@@ -8811,11 +8849,13 @@
 	 * @memberof ApiWorksheet
 	 * @typeofeditors ["CSE"]
 	 * @param {number} nPoints - The bottom margin size measured in points.
+	 * @returns {boolean} - returns true if the bottom margin was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/SetBottomMargin.js
 	 */
 	ApiWorksheet.prototype.SetBottomMargin = function (nPoints) {
 		nPoints = (typeof nPoints !== 'number') ? 0 : nPoints;
 		this.worksheet.PagePrintOptions.pageMargins.asc_setBottom(nPoints);
+		return true;
 	};
 	/**
 	 * Returns the bottom margin of the sheet.
@@ -8841,10 +8881,12 @@
 	 * @memberof ApiWorksheet
 	 * @typeofeditors ["CSE"]
 	 * @param {PageOrientation} sPageOrientation - The page orientation type.
+	 * @returns {boolean} - returns true if the page orientation was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/SetPageOrientation.js
 	 */
 	ApiWorksheet.prototype.SetPageOrientation = function (sPageOrientation) {
 		this.worksheet.PagePrintOptions.pageSetup.asc_setOrientation('xlLandscape' === sPageOrientation ? 1 : 0);
+		return true;
 	};
 
 	/**
@@ -8885,10 +8927,12 @@
 	 * @memberof ApiWorksheet
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} bPrint - Specifies whether the current sheet row/column headers must be printed or not.
+	 * @returns {boolean} - returns true if the print headings option was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/SetPrintHeadings.js
 	 */
 	ApiWorksheet.prototype.SetPrintHeadings = function (bPrint) {
 		this.worksheet.PagePrintOptions.asc_setHeadings(!!bPrint);
+		return true;
 	};
 
 	Object.defineProperty(ApiWorksheet.prototype, "PrintHeadings", {
@@ -8916,10 +8960,12 @@
 	 * @memberof ApiWorksheet
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} bPrint - Defines if cell gridlines are printed on this page or not.
+	 * @returns {boolean} - returns true if the print gridlines option was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/SetPrintGridlines.js
 	 */
 	ApiWorksheet.prototype.SetPrintGridlines = function (bPrint) {
 		this.worksheet.PagePrintOptions.asc_setGridLines(!!bPrint);
+		return true;
 	};
 
 	Object.defineProperty(ApiWorksheet.prototype, "PrintGridlines", {
@@ -9012,10 +9058,11 @@
 	 * Deletes the current worksheet.
 	 * @memberof ApiWorksheet
 	 * @typeofeditors ["CSE"]
+	 * @returns {boolean} - returns true if the sheet was deleted successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/Delete.js
 	 */
 	ApiWorksheet.prototype.Delete = function () {
-		this.worksheet.workbook.oApi.asc_deleteWorksheet([this.worksheet.getIndex()]);
+		return this.worksheet.workbook.oApi.asc_deleteWorksheet([this.worksheet.getIndex()]);
 	};
 
 	/**
@@ -9027,6 +9074,7 @@
 	 * @param {string} [subAddress] - The link subaddress to insert internal sheet hyperlinks.
 	 * @param {string} [sScreenTip] - The screen tip text.
 	 * @param {string} [sTextToDisplay] - The link text that will be displayed on the sheet.
+	 * @returns {boolean} - returns true if the hyperlink was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/SetHyperlink.js
 	 */
 	ApiWorksheet.prototype.SetHyperlink = function (sRange, sAddress, subAddress, sScreenTip, sTextToDisplay) {
@@ -9081,6 +9129,7 @@
 			}
 			this.worksheet.workbook.oApi.wb.insertHyperlink(Hyperlink, this.GetIndex());
 		}
+		return true;
 	};
 
 	/**
@@ -9253,6 +9302,7 @@
 	 * @param {string} sImageUrl - The image source where the image to be inserted should be taken from (currently only internet URL or Base64 encoded images are supported).
 	 * @param {EMU} nWidth - The image width in English measure units.
 	 * @param {EMU} nHeight - The image height in English measure units.
+	 * @returns {boolean} - returns true if the image was replaced successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/ReplaceCurrentImage.js
 	 */
 	ApiWorksheet.prototype.ReplaceCurrentImage = function (sImageUrl, nWidth, nHeight) {
@@ -9260,12 +9310,13 @@
 		if (oWorksheet && oWorksheet.objectRender && oWorksheet.objectRender.controller) {
 			if (oWorksheet.model && oWorksheet.model.getSheetProtection(Asc.c_oAscSheetProtectType.objects)) {
 				throwException(new Error('Cannot modify protected sheet'));
-				return null;
+				return false;
 			}
 			let oController = oWorksheet.objectRender.controller;
 			let dK = 1 / 36000 / AscCommon.g_dKoef_pix_to_mm;
 			oController.putImageToSelection(sImageUrl, nWidth * dK, nHeight * dK);
 		}
+		return true;
 	};
 
 	/**
@@ -9726,6 +9777,7 @@
 	 * Clears the current range.
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
+	 * @returns {boolean} - returns true if the range was cleared successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/Clear.js
 	 */
 	ApiRange.prototype.Clear = function () {
@@ -9733,12 +9785,17 @@
 			bbox = range.bbox,
 			ws = range.worksheet,
 			wsView = Asc['editor'].wb.getWorksheet(ws.getIndex());
+		if (ws.getSheetProtection(Asc.c_oAscSheetProtectType.formatCells) || (ws.getSheetProtection() && ws.isIntersectLockedRanges([bbox]))) {
+			throwException(new Error('Cannot modify protected sheet'));
+			return false;
+		}
 		range.cleanAll();
 		ws.deletePivotTables(bbox);
 		ws.removeSparklines(bbox);
 		ws.clearDataValidation([bbox], true);
 		ws.clearConditionalFormattingRulesByRanges([bbox]);
 		wsView.cellCommentator.deleteCommentsRange(bbox, null);
+		return true;
 	};
 
     /**
@@ -9752,6 +9809,10 @@
         const range = this.range;
         const bbox = range.bbox;
         const ws = range.worksheet;
+		if (!this._checkProtection(Asc.c_oAscSheetProtectType.formatCells)) {
+			throwException(new Error('Cannot modify protected sheet'));
+			return null;
+		}
 		range.cleanFormat();
         ws.clearConditionalFormattingRulesByRanges([bbox]);
     };
@@ -9767,6 +9828,10 @@
 		const range = this.range;
 		const bbox = range.bbox;
 		const ws = range.worksheet;
+		if (ws.getSheetProtection() && ws.isIntersectLockedRanges([bbox])) {
+			throwException(new Error('Cannot modify protected sheet'));
+			return null;
+		}
         this.range.cleanAll();
 		ws.deletePivotTables(bbox);
     };
@@ -9779,6 +9844,10 @@
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/ClearHyperlinks.js
      */
     ApiRange.prototype.ClearHyperlinks = function () {
+		if (!this._checkProtection(Asc.c_oAscSheetProtectType.insertHyperlinks)) {
+			throwException(new Error('Cannot modify protected sheet'));
+			return null;
+		}
         this.range.cleanHyperlinks();
     };
 
@@ -10029,10 +10098,12 @@
 	 * @typeofeditors ["CSE"]
 	 * @param {number} nRow - The row number.
 	 * @param {number} nCol - The column number.
+	 * @returns {boolean} - returns true if the offset was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/SetOffset.js
 	 */
 	ApiRange.prototype.SetOffset = function (nRow, nCol) {
 		this.range.setOffset({row: nRow, col: nCol});
+		return true;
 	};
 
 	/**
@@ -10133,7 +10204,7 @@
 	 * Returns a value of the specified range.
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
-	 * @returns {string | string[][]}
+	 * @returns {string | number | boolean | Array<Array<string | number | boolean>>}
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/GetValue.js
 	 */
 	ApiRange.prototype.GetValue = function () {
@@ -10142,14 +10213,14 @@
 		var nRow = bbox.r2 - bbox.r1 + 1;
 		var res;
 		if (this.range.isOneCell()) {
-			res = this.range.getValue();
+			res = this.range.getTypedValue();
 		} else {
 			res = [];
 			for (var i = 0; i < nRow; i++) {
 				var arr = [];
 				for (var k = 0; k < nCol; k++) {
 					var cell = this.range.worksheet.getRange3((bbox.r1 + i), (bbox.c1 + k), (bbox.r1 + i), (bbox.c1 + k));
-					arr.push(cell.getValue());
+					arr.push(cell.getTypedValue());
 				}
 				res.push(arr);
 			}
@@ -10340,13 +10411,15 @@
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
 	 * @param {ApiColor} oColor - The color object which specifies the color to be set to the text in the cell / cell range.
+	 * @returns {boolean} - returns true if the font color was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/SetFontColor.js
 	 */
 	ApiRange.prototype.SetFontColor = function (oColor) {
 		if (!this._checkProtection(Asc.c_oAscSheetProtectType.formatCells)) {
-			return null;
+			return false;
 		}
 		this.range.setFontcolor(oColor.color);
+		return true;
 	};
 	Object.defineProperty(ApiRange.prototype, "FontColor", {
 		set: function (oColor) {
@@ -10381,6 +10454,7 @@
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} isHidden - Specifies if the values in the current range are hidden or not.
+	 * @returns {boolean} - returns true if the hidden property was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/SetHidden.js
 	 */
 	ApiRange.prototype.SetHidden = function (isHidden) {
@@ -10396,6 +10470,7 @@
 				worksheet.setRowHidden(isHidden, bbox.r1, bbox.r2);
 				break;
 		}
+		return true;
 	};
 	Object.defineProperty(ApiRange.prototype, "Hidden", {
 		get: function () {
@@ -10429,6 +10504,10 @@
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/SetColumnWidth.js
 	 */
 	ApiRange.prototype.SetColumnWidth = function (nWidth) {
+		if (!this._checkProtection(Asc.c_oAscSheetProtectType.formatColumns)) {
+			throwException(new Error('Cannot modify protected sheet'));
+			return null;
+		}
 		this.range.worksheet.setColWidth(nWidth, this.range.bbox.c1, this.range.bbox.c2);
 	};
 	Object.defineProperty(ApiRange.prototype, "ColumnWidth", {
@@ -10446,7 +10525,7 @@
 			var sum = 0;
 			var width;
 			for (var i = 0; i <= max; i++) {
-				width = ws.getColWidth(i);
+				width = ws.getColWidth(this.range.bbox.c1 + i);
 				width = (width < 0) ? AscCommonExcel.oDefaultMetrics.ColWidthChars : width;
 				sum += ws.modelColWidthToColWidth(width);
 			}
@@ -10470,10 +10549,16 @@
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
 	 * @param {pt} nHeight - The row height in the current range measured in points.
+	 * @returns {boolean} - returns true if the row height was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/SetRowHeight.js
 	 */
 	ApiRange.prototype.SetRowHeight = function (nHeight) {
+		if (!this._checkProtection(Asc.c_oAscSheetProtectType.formatRows)) {
+			throwException(new Error('Cannot modify protected sheet'));
+			return false;
+		}
 		this.range.worksheet.setRowHeight(nHeight, this.range.bbox.r1, this.range.bbox.r2, true);
+		return true;
 	};
 	Object.defineProperty(ApiRange.prototype, "RowHeight", {
 		get: function () {
@@ -10488,7 +10573,7 @@
 			var max = this.range.bbox.r2 - this.range.bbox.r1;
 			var sum = 0;
 			for (var i = 0; i <= max; i++) {
-				sum += this.range.worksheet.getRowHeight(i);
+				sum += this.range.worksheet.getRowHeight(this.range.bbox.r1 + i);
 			}
 			return sum;
 		}
@@ -10499,10 +10584,16 @@
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
 	 * @param {number} nSize - The font size value measured in points.
+	 * @returns {boolean} - returns true if the font size was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/SetFontSize.js
 	 */
 	ApiRange.prototype.SetFontSize = function (nSize) {
+		if (!this._checkProtection(Asc.c_oAscSheetProtectType.formatCells)) {
+			throwException(new Error('Cannot modify protected sheet'));
+			return false;
+		}
 		this.range.setFontsize(nSize);
+		return true;
 	};
 	Object.defineProperty(ApiRange.prototype, "FontSize", {
 		set: function (nSize) {
@@ -10515,10 +10606,16 @@
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
 	 * @param {string} sName - The font family name used for the current cell range.
+	 * @returns {boolean} - returns true if the font name was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/SetFontName.js
 	 */
 	ApiRange.prototype.SetFontName = function (sName) {
+		if (!this._checkProtection(Asc.c_oAscSheetProtectType.formatCells)) {
+			throwException(new Error('Cannot modify protected sheet'));
+			return false;
+		}
 		this.range.setFontname(sName);
+		return true;
 	};
 	Object.defineProperty(ApiRange.prototype, "FontName", {
 		set: function (sName) {
@@ -10621,6 +10718,10 @@
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/SetReadingOrder.js
 	 */
 	ApiRange.prototype.SetReadingOrder = function (direction) {
+		if (!this._checkProtection(Asc.c_oAscSheetProtectType.formatCells)) {
+			throwException(new Error('Cannot modify protected sheet'));
+			return null;
+		}
 		const map = {
 			"context": Asc.c_oReadingOrderTypes.Context, // 0
 			"ltr": Asc.c_oReadingOrderTypes.LTR, // 1
@@ -10639,13 +10740,15 @@
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} isBold - Specifies that the contents of the current cell / cell range are displayed bold.
+	 * @returns {boolean} - returns true if the bold property was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/SetBold.js
 	 */
 	ApiRange.prototype.SetBold = function (isBold) {
 		if (!this._checkProtection(Asc.c_oAscSheetProtectType.formatCells)) {
-			return null;
+			return false;
 		}
 		this.range.setBold(!!isBold);
+		return true;
 	};
 	Object.defineProperty(ApiRange.prototype, "Bold", {
 		set: function (isBold) {
@@ -10658,13 +10761,15 @@
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} isItalic - Specifies that the contents of the current cell / cell range are displayed italicized.
+	 * @returns {boolean} - returns true if the italic property was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/SetItalic.js
 	 */
 	ApiRange.prototype.SetItalic = function (isItalic) {
 		if (!this._checkProtection(Asc.c_oAscSheetProtectType.formatCells)) {
-			return null;
+			return false;
 		}
 		this.range.setItalic(!!isItalic);
+		return true;
 	};
 	Object.defineProperty(ApiRange.prototype, "Italic", {
 		set: function (isItalic) {
@@ -10683,11 +10788,12 @@
 	 * <b>"singleAccounting"</b> - for a single line underlining the cell contents but not protruding beyond the cell borders;
 	 * <b>"double"</b> - for a double line underlining the cell contents;
 	 * <b>"doubleAccounting"</b> - for a double line underlining the cell contents but not protruding beyond the cell borders.
+	 * @returns {boolean} - returns true if the underline property was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/SetUnderline.js
 	 */
 	ApiRange.prototype.SetUnderline = function (undelineType) {
 		if (!this._checkProtection(Asc.c_oAscSheetProtectType.formatCells)) {
-			return null;
+			return false;
 		}
 		var val;
 		switch (undelineType) {
@@ -10709,6 +10815,7 @@
 				break;
 		}
 		this.range.setUnderline(val);
+		return true;
 	};
 	Object.defineProperty(ApiRange.prototype, "Underline", {
 		set: function (undelineType) {
@@ -10721,13 +10828,15 @@
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} isStrikeout - Specifies if the contents of the current cell / cell range are displayed struck through.
+	 * @returns {boolean} - returns true if the strikeout property was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/SetStrikeout.js
 	 */
 	ApiRange.prototype.SetStrikeout = function (isStrikeout) {
 		if (!this._checkProtection(Asc.c_oAscSheetProtectType.formatCells)) {
-			return null;
+			return false;
 		}
 		this.range.setStrikeout(!!isStrikeout);
+		return true;
 	};
 	Object.defineProperty(ApiRange.prototype, "Strikeout", {
 		set: function (isStrikeout) {
@@ -10740,13 +10849,15 @@
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} isWrap - Specifies if the words in the cell will be wrapped to fit the cell size.
+	 * @returns {boolean} - returns true if the wrap property was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/SetWrap.js
 	 */
 	ApiRange.prototype.SetWrap = function (isWrap) {
 		if (!this._checkProtection(Asc.c_oAscSheetProtectType.formatCells)) {
-			return null;
+			return false;
 		}
 		this.range.setWrap(!!isWrap);
+		return true;
 	};
 
 	/**
@@ -10774,13 +10885,15 @@
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
 	 * @param {ApiColor} oColor - The color object which specifies the color to be set to the background in the cell / cell range.
+	 * @returns {boolean} - returns true if the fill color was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/SetFillColor.js
 	 */
 	ApiRange.prototype.SetFillColor = function (oColor) {
 		if (!this._checkProtection(Asc.c_oAscSheetProtectType.formatCells)) {
-			return null;
+			return false;
 		}
 		this.range.setFillColor('No Fill' === oColor ? null : oColor.color);
+		return true;
 	};
 	/**
 	 * Returns the background color for the current cell range. Returns 'No Fill' when the color of the background in the cell / cell range is null.
@@ -10830,13 +10943,15 @@
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
 	 * @param {string} sFormat - Specifies the mask applied to the number in the cell.
+	 * @returns {boolean} - returns true if the number format was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/SetNumberFormat.js
 	 */
 	ApiRange.prototype.SetNumberFormat = function (sFormat) {
 		if (!this._checkProtection(Asc.c_oAscSheetProtectType.formatCells)) {
-			return null;
+			return false;
 		}
 		this.range.setNumFormat(sFormat);
+		return true;
 	};
 	Object.defineProperty(ApiRange.prototype, "NumberFormat", {
 		get: function () {
@@ -10854,11 +10969,12 @@
 	 * @param {BordersIndex} bordersIndex - Specifies the cell border position.
 	 * @param {LineStyle} lineStyle - Specifies the line style used to form the cell border.
 	 * @param {ApiColor} oColor - The color object which specifies the color to be set to the cell border.
+	 * @returns {boolean} - returns true if the borders were set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/SetBorders.js
 	 */
 	ApiRange.prototype.SetBorders = function (bordersIndex, lineStyle, oColor) {
 		if (!this._checkProtection(Asc.c_oAscSheetProtectType.formatCells)) {
-			return null;
+			return false;
 		}
 		var borders = new AscCommonExcel.Border();
 		borders.initDefault();
@@ -10891,6 +11007,7 @@
 				break;
 		}
 		this.range.setBorder(borders);
+		return true;
 	};
 
 	/**
@@ -10899,11 +11016,12 @@
 	 * @typeofeditors ["CSE"]
 	 * @param {boolean} isAcross - When set to <b>true</b>, the cells within the selected range will be merged along the rows,
 	 * but remain split in the columns. When set to <b>false</b>, the whole selected range of cells will be merged into a single cell.
+	 * @returns {boolean} - returns true if the range was merged successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/Merge.js
 	 */
 	ApiRange.prototype.Merge = function (isAcross) {
 		if (!this._checkProtection(Asc.c_oAscSheetProtectType.formatCells)) {
-			return null;
+			return false;
 		}
 		if (isAcross) {
 			var ws = this.range.worksheet;
@@ -10914,19 +11032,22 @@
 		} else {
 			this.range.merge(null);
 		}
+		return true;
 	};
 
 	/**
 	 * Splits the selected merged cell range into the single cells.
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
+	 * @returns {boolean} - returns true if the range was unmerged successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/UnMerge.js
 	 */
 	ApiRange.prototype.UnMerge = function () {
 		if (!this._checkProtection(Asc.c_oAscSheetProtectType.formatCells)) {
-			return null;
+			return false;
 		}
 		this.range.unmerge();
+		return true;
 	};
 
 	/**
@@ -10953,6 +11074,7 @@
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
 	 * @param {Function} fCallback - A function which will be executed for each cell.
+	 * @returns {boolean} - returns true if the callback was executed, false if the callback is not a function.
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/ForEach.js
 	 */
 	ApiRange.prototype.ForEach = function (fCallback) {
@@ -10961,7 +11083,9 @@
 			this.range._foreach(function (cell) {
 				fCallback(new ApiRange(ws.getCell3(cell.nRow, cell.nCol)));
 			});
+			return true;
 		}
+		return false;
 	};
 
 	/**
@@ -11059,6 +11183,7 @@
 	 * Selects the current range.
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
+	 * @returns {boolean} - returns true if the range was selected successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/Select.js
 	 */
 	ApiRange.prototype.Select = function () {
@@ -11073,7 +11198,9 @@
 				})
 			}
 			newSelection.Select();
+			return true;
 		}
+		return false;
 	};
 
 	/**
@@ -11119,8 +11246,8 @@
 		get: function () {
 			return this.GetOrientation();
 		},
-		set: function () {
-			return this.SetOrientation();
+		set: function (angle) {
+			this.SetOrientation(angle);
 		}
 	});
 
@@ -11266,6 +11393,11 @@
 			let cols = bbox.c2 - bbox.c1 + 1;
 			shift = (rows <= cols) ? "up" : "left";
 		}
+		const deleteProtectType = shift === "up" ? Asc.c_oAscSheetProtectType.deleteRows : Asc.c_oAscSheetProtectType.deleteColumns;
+		if (!this._checkProtection(deleteProtectType)) {
+			throwException(new Error('Cannot modify protected sheet'));
+			return null;
+		}
 		if (shift === "up") {
 			val = Asc.c_oAscDeleteOptions.DeleteCellsAndShiftTop;
 			lockRange = ws.getRange3(bbox.r1, bbox.c1, bbox.r2, AscCommon.gc_nMaxCol0);
@@ -11292,6 +11424,11 @@
 			var rows = bbox.r2 - bbox.r1 + 1;
 			var cols = bbox.c2 - bbox.c1 + 1;
 			shift = (rows <= cols) ? "down" : "right";
+		}
+		const insertProtectType = shift === "down" ? Asc.c_oAscSheetProtectType.insertRows : Asc.c_oAscSheetProtectType.insertColumns;
+		if (!this._checkProtection(insertProtectType)) {
+			throwException(new Error('Cannot modify protected sheet'));
+			return null;
 		}
 		if (shift == "down")
 			this.range.addCellsShiftBottom();
@@ -11654,19 +11791,28 @@
 			options.asc_setIsWholeCell(LookAt === 'xlWhole');
 			options.asc_setScanOnOnlySheet(Asc.c_oAscSearchBy.Range);
 			options.asc_setSpecificRange(this["Address"]);
-			options.asc_setScanByRows(SearchOrder === 'xlByRows');
+
+            // by default excel uses rows search
+            if (SearchOrder == null) {
+                options.asc_setScanByRows(true);
+            } else {
+                options.asc_setScanByRows(SearchOrder === 'xlByRows');
+            }
+
 			options.asc_setLookIn((LookIn === 'xlValues' ? 2 : 1));
 			options.asc_setNotSearchEmptyCells(!(What === "" && !options.isWholeCell));
 			let start = (After instanceof ApiRange && After.range.isOneCell() && this.range.containsRange(After.range))
 				? {row: After.range.bbox.r1, col: After.range.bbox.c1}
 				: {row: this.range.bbox.r1, col: this.range.bbox.c1};
 
-			start.row += (options.scanByRows ? (options.scanForward ? 1 : -1) : 0);
-			start.col += (!options.scanByRows ? (options.scanForward ? 1 : -1) : 0);
+			start.row += (!options.scanByRows ? (options.scanForward ? 1 : -1) : 0);
+			start.col += (options.scanByRows ? (options.scanForward ? 1 : -1) : 0);
 			options.asc_setActiveCell(start);
+			options.asc_setWsIndex(this.range.worksheet.index);
 			let engine = this.range.worksheet.workbook.oApi.wb.Search(options);
 			let id = this.range.worksheet.workbook.oApi.wb.GetSearchElementId(options.scanForward);
 			if (id != null) {
+                engine.SetCurrent(id);
 				let elem = engine.Elements[id];
 				res = new ApiRange(this.range.worksheet.getRange3(elem.row, elem.col, elem.row, elem.col));
 			}
@@ -11695,8 +11841,8 @@
 			this._searchOptions.asc_setScanForward(true);
 			if (After instanceof ApiRange && After.range.isOneCell() && this.range.containsRange(After.range)) {
 				activeCell = {row: After.range.bbox.r1, col: After.range.bbox.c1};
-				activeCell.row += (this._searchOptions.scanByRows ? 1 : 0);
-				activeCell.col += (!this._searchOptions.scanByRows ? 1 : 0);
+				activeCell.row += (!this._searchOptions.scanByRows ? 1 : 0);
+				activeCell.col += (this._searchOptions.scanByRows ? 1 : 0);
 			} else {
 				activeCell = {row: this.range.bbox.r1, col: this.range.bbox.c1};
 			}
@@ -11709,6 +11855,7 @@
 			engine = this.range.worksheet.workbook.oApi.wb.Search(this._searchOptions);
 			let id = this.range.worksheet.workbook.oApi.wb.GetSearchElementId(true);
 			if (id != null) {
+                engine.SetCurrent(id);
 				let elem = engine.Elements[id];
 				res = new ApiRange(this.range.worksheet.getRange3(elem.row, elem.col, elem.row, elem.col));
 			}
@@ -11736,8 +11883,8 @@
 			this._searchOptions.asc_setScanForward(false);
 			if (Before instanceof ApiRange && Before.range.isOneCell() && this.range.containsRange(Before.range)) {
 				activeCell = {row: Before.range.bbox.r1, col: Before.range.bbox.c1};
-				activeCell.row += (this._searchOptions.scanByRows ? -1 : 0);
-				activeCell.col += (!this._searchOptions.scanByRows ? -1 : 0);
+				activeCell.row += (!this._searchOptions.scanByRows ? -1 : 0);
+				activeCell.col += (this._searchOptions.scanByRows ? -1 : 0);
 			} else {
 				activeCell = {row: this.range.bbox.r1, col: this.range.bbox.c1};
 			}
@@ -11750,6 +11897,7 @@
 			engine = this.range.worksheet.workbook.oApi.wb.Search(this._searchOptions);
 			let id = this.range.worksheet.workbook.oApi.wb.GetSearchElementId(false);
 			if (id != null) {
+				engine.SetCurrent(id);
 				let elem = engine.Elements[id];
 				res = new ApiRange(this.range.worksheet.getRange3(elem.row, elem.col, elem.row, elem.col));
 			}
@@ -13244,6 +13392,34 @@
 		return true;
 	};
 
+	/**
+	 * Deletes the specified drawing object.
+	 *
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CSE"]
+	 * @returns {boolean} - returns false if the drawing object can not be deleted.
+	 *
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/Delete.js
+	 */
+	ApiDrawing.prototype.Delete = function () {
+		if (!this.Drawing) {
+			return false;
+		}
+
+		const controller = this.Drawing.getDrawingObjectsController();
+		if (controller) {
+			if (controller.selection.groupSelection === this.Drawing) {
+				controller.resetInternalSelection();
+			}
+			this.Drawing.deselect(controller);
+		}
+
+		this.Drawing.setBDeleted(true);
+		this.Drawing.deleteDrawingBase();
+		return true;
+	};
+
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiImage
@@ -13806,10 +13982,12 @@
 	 * Deletes the DefName object.
 	 * @memberof ApiName
 	 * @typeofeditors ["CSE"]
+	 * @returns {boolean} - returns true if the name was deleted successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiName/Methods/Delete.js
 	 */
 	ApiName.prototype.Delete = function () {
 		this.DefName.wb.delDefinesNames(this.DefName.getAscCDefName(false));
+		return true;
 	};
 
 	/**
@@ -13818,10 +13996,12 @@
 	 * @typeofeditors ["CSE"]
 	 * @param {string} sRef    - The range reference which must contain the sheet name, followed by sign ! and a range of cells.
 	 * Example: "Sheet1!$A$1:$B$2".
+	 * @returns {boolean} - returns true if the reference was set successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiName/Methods/SetRefersTo.js
 	 */
 	ApiName.prototype.SetRefersTo = function (sRef) {
 		this.DefName.setRef(sRef);
+		return true;
 	};
 
 	/**
@@ -14224,7 +14404,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiComment/Methods/RemoveReplies.js
 	 */
 	ApiComment.prototype.RemoveReplies = function (nPos, nCount, bRemoveAll) {
-		if (typeof (nPos) !== "number" || nPos < 0 || nPos > this.GetRepliesCount())
+		if (typeof (nPos) !== "number" || nPos < 0 || nPos >= this.GetRepliesCount())
 			nPos = 0;
 
 		if (typeof (nCount) !== "number" || nCount < 0)
@@ -14246,10 +14426,12 @@
 	 * Deletes the ApiComment object.
 	 * @memberof ApiComment
 	 * @typeofeditors ["CSE"]
+	 * @returns {boolean} - returns true if the comment was deleted successfully.
 	 * @see office-js-api/Examples/{Editor}/ApiComment/Methods/Delete.js
 	 */
 	ApiComment.prototype.Delete = function () {
 		this.WB.Api.asc_removeComment(this.Comment.asc_getId());
+		return true;
 	};
 
 	ApiComment.prototype.private_OnChange = function () {
@@ -27973,6 +28155,7 @@
 	ApiDrawing.prototype["Fill"]                       =  ApiDrawing.prototype.Fill;
 	ApiDrawing.prototype["SetOutLine"]                 =  ApiDrawing.prototype.SetOutLine;
 	ApiDrawing.prototype["Unselect"]                   =  ApiDrawing.prototype.Unselect;
+	ApiDrawing.prototype["Delete"]                     =  ApiDrawing.prototype.Delete;
 
 	ApiImage.prototype["GetClassType"]                 =  ApiImage.prototype.GetClassType;
 

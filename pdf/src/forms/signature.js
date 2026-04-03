@@ -113,6 +113,7 @@
     CSignatureField.prototype.Reset = function() {
     };
 	
+    CSignatureField.prototype.WriteToBinary = function(memory) {};
     function MakeColorMoreGray(rgbColor, nPower) {
         // Get color component values
         const r = rgbColor.r;

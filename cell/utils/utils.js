@@ -2998,6 +2998,7 @@
 			this.hyperlinkModel = null != obj ? obj : new AscCommonExcel.Hyperlink();
 			// Used only for output and setting back
 			this.text = null;
+			this.isFromShape = false;
 
 			return this;
 		}
@@ -3007,6 +3008,7 @@
 
 			res.hyperlinkModel = this.hyperlinkModel && this.hyperlinkModel.clone();
 			res.text = this.text;
+			res.isFromShape = this.isFromShape;
 
 			return res;
 		};
@@ -3154,6 +3156,12 @@
 		};
 		asc_CHyperlink.prototype.asc_setText = function (val) {
 			this.text = val;
+		};
+		asc_CHyperlink.prototype.asc_getIsFromShape = function () {
+			return this.isFromShape;
+		};
+		asc_CHyperlink.prototype.asc_setIsFromShape = function (val) {
+			this.isFromShape = val;
 		};
 
 		function CPagePrint() {
@@ -3575,6 +3583,7 @@
 			this.specificRange = null;
 			this.isForMacros = null;
 			this.activeCell = null;
+			this.wsIndex = -1;  // forced worksheet index for ApiRange.Find (-1 = use active)
 
 			//if starting a new search due to document change, we send the last element that
 			//the user clicked on and then try to find next/previous
@@ -3615,6 +3624,7 @@
 			result.lastSearchElem = this.lastSearchElem;
 			result.isNotSearchEmptyCells = this.isNotSearchEmptyCells;
 			result.activeCell = this.activeCell;
+			result.wsIndex = this.wsIndex;
 
 			return result;
 		};
@@ -3625,8 +3635,8 @@
 		};
 		asc_CFindOptions.prototype.isEqual2 = function (obj) {
 			return obj && this.findWhat === obj.findWhat && this.scanByRows === obj.scanByRows && this.isMatchCase === obj.isMatchCase && this.isWholeCell === obj.isWholeCell &&
-				this.lookIn === obj.lookIn && this.specificRange == obj.specificRange && this.isNotSearchEmptyCells == obj.isNotSearchEmptyCells && this.activeCell ==
-				obj.activeCell;
+				this.lookIn === obj.lookIn && this.specificRange == obj.specificRange && this.isNotSearchEmptyCells == obj.isNotSearchEmptyCells &&
+				this.wsIndex === obj.wsIndex;
 		};
 		asc_CFindOptions.prototype.clearFindAll = function () {
 			this.countFindAll = 0;
@@ -3721,6 +3731,9 @@
 		};
 		asc_CFindOptions.prototype.asc_setIsForMacros = function (val) {
 			this.isForMacros = val;
+		};
+		asc_CFindOptions.prototype.asc_setWsIndex = function (val) {
+			this.wsIndex = (val !== undefined && val !== null) ? val : -1;
 		};
 
 		/** @constructor */
@@ -4248,6 +4261,8 @@
 		prot["asc_setSheet"] = prot.asc_setSheet;
 		prot["asc_setRange"] = prot.asc_setRange;
 		prot["asc_setText"] = prot.asc_setText;
+		prot["asc_getIsFromShape"] = prot.asc_getIsFromShape;
+		prot["asc_setIsFromShape"] = prot.asc_setIsFromShape;
 
 		window["AscCommonExcel"].CPagePrint = CPagePrint;
 		window["AscCommonExcel"].CPrintPagesData = CPrintPagesData;

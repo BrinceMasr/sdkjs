@@ -1119,6 +1119,11 @@ function (window, undefined) {
 		this._generatePresetsArr();
 
 		//lock
+		if (this.api.isDarkMode) {
+			this.updateDarkMode(true);
+		}
+
+		//лочим
 		ws._isLockedHeaderFooter();
 	};
 
@@ -1213,6 +1218,10 @@ function (window, undefined) {
 
 					//temporarily replace cellEditor in wb
 					wb.cellEditor = t.cellEditor;
+
+					if (t.api.isDarkMode) {
+						t.cellEditor.updateDarkMode(true);
+					}
 
 					//remove z-index for the interface
 					t.cellEditor.canvasOuter.style.zIndex = "";
@@ -1314,6 +1323,27 @@ function (window, undefined) {
 		wb.input.disabled = false;
 
 		return true;
+	};
+
+	CHeaderFooterEditor.prototype.updateDarkMode = function (isDarkMode) {
+		for (let i = 0; i < this.canvas.length; i++) {
+			let canvasObj = this.canvas[i];
+			if (!canvasObj || !canvasObj.drawingCtx) continue;
+			if (isDarkMode) {
+				canvasObj.drawingCtx.setDarkMode();
+			} else {
+				canvasObj.drawingCtx.isDarkMode = false;
+			}
+		}
+		for (let type in this.sections) {
+			let row = this.sections[type];
+			for (let pos in row) {
+				let section = row[pos];
+				if (section) {
+					section.drawText();
+				}
+			}
+		}
 	};
 
 	CHeaderFooterEditor.prototype.destroy = function (bSave, opt_objForSave) {

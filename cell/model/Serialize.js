@@ -3250,7 +3250,7 @@
             if (null != gradientStop.position) {
                 this.bs.WriteItem(c_oSerFillTypes.GradientStopPosition, function(){oThis.memory.WriteDouble2(gradientStop.position);});
             }
-            if (null != gradientStop.color) {
+            if (null != gradientStop.color || null != gradientStop.position) {
                 this.bs.WriteItem(c_oSerFillTypes.GradientStopColor, function(){oThis.bs.WriteColorSpreadsheet(gradientStop.color);});
             }
         };
@@ -14063,7 +14063,7 @@
 					wb.dependencyFormulas.addDefNameOpen(defName.Name, defName.Ref, defName.LocalSheetId, defName.Hidden, _type);
 				}
 			});
-		}
+		};
 	}
     function CSlicerStyles()
     {
@@ -14907,7 +14907,7 @@
         if (this.oReadResult.vbaProject) {
             wb.oApi.vbaProject = this.oReadResult.vbaProject;
         }
-
+        this.PostLoadPrepareConditionalFormatting(wb);
         wb.checkCorrectTables();
     };
     InitOpenManager.prototype.PostLoadPrepareDefNames = function(wb)
@@ -14921,6 +14921,39 @@
                 wb.dependencyFormulas.addDefNameOpen(defName.Name, defName.Ref, defName.LocalSheetId, defName.Hidden, _type);
             }
         });
+    };
+
+    InitOpenManager.prototype.PostLoadPrepareConditionalFormatting = function(wb)
+    {
+        for (let i = 0; i < wb.aWorksheets.length; i++) {
+            let ws = wb.aWorksheets[i];
+            if (!ws.isConditionalFormattingRules()) {
+                continue;
+            }
+            let rules = ws.getConditionalFormattingRules();
+
+            let seenPriorities = {};
+            let duplicates = [];
+            let maxPriority = 0;
+            for (let key in rules) {
+                let rule = rules[key];
+                if (!rule || rule.priority === null) {
+                    continue;
+                }
+                if (rule.priority > maxPriority) {
+                    maxPriority = rule.priority;
+                }
+                if (seenPriorities[rule.priority]) {
+                    duplicates.push(rule);
+                } else {
+                    seenPriorities[rule.priority] = true;
+                }
+            }
+
+            for (let j = 0; j < duplicates.length; j++) {
+                duplicates[j].priority = ++maxPriority;
+            }
+        }
     };
 
     InitOpenManager.prototype.initCellAfterRead = function(tmp)
