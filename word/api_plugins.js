@@ -1139,7 +1139,11 @@
 	 * @memberof Api
 	 * @typeofeditors ["CDE"]
 	 * @alias AddAddinField
+	 * @param {Object} data - Addin field data.
+	 * @param {string} data.Value - Field value.
+	 * @param {string} data.Content - Field text content.
 	 * @param {AddinFieldData} data - Addin field data.
+	 * @returns {AddinFieldData} - An AddinFieldData object containing the data about the current added field, or null if no addin field was added.
 	 * @since 7.3.3
 	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/AddAddinField.js
 	 */
@@ -1147,9 +1151,10 @@
 	{
 		let logicDocument = this.private_GetLogicDocument();
 		if (!logicDocument)
-			return;
+			return null;
 		
-		logicDocument.AddAddinField(AscWord.CAddinFieldData.FromJson(data));
+		let field = logicDocument.AddAddinField(AscWord.CAddinFieldData.FromJson(data));
+		return field ? AscWord.CAddinFieldData.FromField(field) : null;
 	};
 	/**
 	 * Selects the specified add-in field.

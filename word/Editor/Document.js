@@ -24073,18 +24073,18 @@ CDocument.prototype.GetAllAddinFields = function(bySelection)
 CDocument.prototype.AddAddinField = function(data)
 {
 	if (!data)
-		return;
+		return null;
 	
 	let instruction = data.GetValue();
 	if (!instruction)
-		return;
+		return null;
 	
 	let innerText = data.GetContent();
 	if (!innerText)
 		innerText = "    ";
 	
 	if (this.IsSelectionLocked(AscCommon.changestype_Paragraph_Content))
-		return;
+		return null;
 	
 	this.StartAction(AscDFH.historydescription_Document_AddAddinField);
 	
@@ -24106,6 +24106,8 @@ CDocument.prototype.AddAddinField = function(data)
 	this.UpdateInterface();
 	this.UpdateSelection();
 	this.FinalizeAction();
+	
+	return field;
 };
 /**
  * Update addin fields
@@ -24205,6 +24207,7 @@ CDocument.prototype.SelectAddinField = function(fieldId)
 		return false;
 	
 	field.SelectField();
+	this.UpdateSelection();
 	return true;
 };
 /**
