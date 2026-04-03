@@ -3341,6 +3341,21 @@
 	}
 	ApiComplexForm.prototype = Object.create(ApiFormBase.prototype);
 	ApiComplexForm.prototype.constructor = ApiComplexForm;
+	
+	/**
+	 * Class representing a document picture form.
+	 * @constructor
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @extends {ApiFormBase}
+	 * @see office-js-api/Examples/{Editor}/ApiSignatureForm/Methods/constructor.js
+	 */
+	function ApiSignatureForm(sdt)
+	{
+		ApiFormBase.call(this, sdt);
+	}
+	
+	ApiSignatureForm.prototype = Object.create(ApiFormBase.prototype);
+	ApiSignatureForm.prototype.constructor = ApiSignatureForm;
 
 	/**
 	 * Sets the hyperlink address.
@@ -4267,7 +4282,7 @@
 	/**
 	 * Form type.
 	 * The available form types.
-	 * @typedef {"textForm" | "comboBoxForm" | "dropDownForm" | "checkBoxForm" | "radioButtonForm" | "pictureForm" | "complexForm" | "dateForm"} FormType
+	 * @typedef {"textForm" | "comboBoxForm" | "dropDownForm" | "checkBoxForm" | "radioButtonForm" | "pictureForm" | "complexForm" | "dateForm" | "signatureForm"} FormType
 	 * @see office-js-api/Examples/Enumerations/FormType.js
 	 */
 
@@ -4395,7 +4410,7 @@
 
 	/**
 	 * Types of all supported forms.
-	 * @typedef {ApiTextForm | ApiComboBoxForm | ApiCheckBoxForm | ApiPictureForm | ApiDateForm | ApiComplexForm} ApiForm
+	 * @typedef {ApiTextForm | ApiComboBoxForm | ApiCheckBoxForm | ApiPictureForm | ApiDateForm | ApiComplexForm | ApiSignatureForm} ApiForm
 	 * @see office-js-api/Examples/Enumerations/ApiForm.js
 	 */
 
@@ -25153,6 +25168,8 @@
 			return "radioButtonForm";
 		if (this.Sdt.IsCheckBox())
 			return "checkBoxForm";
+		if (this.Sdt.IsSignatureForm())
+			return "signatureForm";
 		if (this.Sdt.IsPictureForm())
 			return "pictureForm";
 		if (this.Sdt.IsDatePicker())
@@ -25289,7 +25306,8 @@
 	 */
 	ApiFormBase.prototype.IsFixed = function()
 	{
-		return (this.GetFormType() === "pictureForm" || this.Sdt.IsFixedForm());
+		let formType = this.GetFormType();
+		return ("pictureForm" === formType || "signatureForm" === formType || this.Sdt.IsFixedForm());
 	};
 	/**
 	 * Converts the current form to a fixed size form.
@@ -25535,6 +25553,20 @@
 	ApiFormBase.prototype.GetText = function()
 	{
 		return this.Sdt.GetInnerText();
+	};
+	/**
+	 * Clears the current form.
+	 * @memberof ApiFormBase
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @returns {boolean}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiFormBase/Methods/IsFilled.js
+	 */
+	ApiFormBase.prototype.IsFilled = function()
+	{
+		return executeNoFormLockCheck(function() {
+			return this.Sdt.IsFormFilled();
+		}, this);
 	};
 	/**
 	 * Clears the current form.
@@ -26940,6 +26972,63 @@
 			return true;
 		}, this);
 	};
+	
+	//------------------------------------------------------------------------------------------------------------------
+	//
+	// ApiSignatureForm
+	//
+	//------------------------------------------------------------------------------------------------------------------
+	
+	/**
+	 * Returns a type of the ApiSignatureForm class.
+	 * @memberof ApiSignatureForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @returns {"signatureForm"}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiSignatureForm/Methods/GetClassType.js
+	 */
+	ApiSignatureForm.prototype.GetClassType = function()
+	{
+		return "signatureForm";
+	};
+	/**
+	 * Locks the aspect ratio of the current signature form.
+	 * @memberof ApiSignatureForm
+	 * @param {boolean} [isLock=true] - Specifies if the aspect ratio of the current picture form will be locked (true) or not (false).
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @returns {boolean}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiSignatureForm/Methods/SetLockAspectRatio.js
+	 */
+	ApiSignatureForm.prototype.SetLockAspectRatio = ApiPictureForm.prototype.SetLockAspectRatio;
+	/**
+	 * Checks if the aspect ratio of the current signature form is locked or not.
+	 * @memberof ApiSignatureForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @returns {boolean}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiSignatureForm/Methods/IsLockAspectRatio.js
+	 */
+	ApiSignatureForm.prototype.IsLockAspectRatio = ApiPictureForm.prototype.IsLockAspectRatio;
+	/**
+	 * Returns an image in the base64 format from the current picture form.
+	 * @memberof ApiSignatureForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @returns {Base64Img}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiSignatureForm/Methods/GetImage.js
+	 */
+	ApiSignatureForm.prototype.GetImage = ApiPictureForm.prototype.GetImage;
+	/**
+	 * Sets an image to the current picture form.
+	 * @memberof ApiSignatureForm
+	 * @param {string} imageSrc - The image source where the image to be inserted should be taken from (currently, only internet URL or base64 encoded images are supported).
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @returns {boolean}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiSignatureForm/Methods/SetImage.js
+	 */
+	ApiSignatureForm.prototype.SetImage = ApiPictureForm.prototype.SetImage;
 	
 	/**
 	 * Converts the ApiBlockLvlSdt object into the JSON object.
@@ -30535,6 +30624,7 @@
 	ApiFormBase.prototype["SetBackgroundColor"] = ApiFormBase.prototype.SetBackgroundColor;
 	ApiFormBase.prototype["GetBackgroundColor"] = ApiFormBase.prototype.GetBackgroundColor;
 	ApiFormBase.prototype["GetText"]            = ApiFormBase.prototype.GetText;
+	ApiFormBase.prototype["IsFilled"]           = ApiFormBase.prototype.IsFilled;
 	ApiFormBase.prototype["Clear"]              = ApiFormBase.prototype.Clear;
 	ApiFormBase.prototype["GetWrapperShape"]    = ApiFormBase.prototype.GetWrapperShape;
 	ApiFormBase.prototype["SetPlaceholderText"] = ApiFormBase.prototype.SetPlaceholderText;
@@ -30549,7 +30639,7 @@
 	ApiFormBase.prototype["Delete"]             = ApiFormBase.prototype.Delete;
 	ApiFormBase.prototype["SetLock"]            = ApiFormBase.prototype.SetLock;
 	ApiFormBase.prototype["GetLock"]            = ApiFormBase.prototype.GetLock;
-	ApiFormBase.prototype["Copy"]              = ApiFormBase.prototype.Copy;
+	ApiFormBase.prototype["Copy"]               = ApiFormBase.prototype.Copy;
 
 	ApiTextForm.prototype["GetClassType"]        = ApiTextForm.prototype.GetClassType;
 	ApiTextForm.prototype["IsAutoFit"]           = ApiTextForm.prototype.IsAutoFit;
@@ -30593,6 +30683,13 @@
 	ApiComplexForm.prototype["GetSubForms"]  = ApiComplexForm.prototype.GetSubForms;
 	ApiComplexForm.prototype["ClearContent"] = ApiComplexForm.prototype.ClearContent;
 	ApiComplexForm.prototype["Copy"]         = ApiComplexForm.prototype.Copy;
+	
+	ApiSignatureForm.prototype["GetClassType"]       = ApiSignatureForm.prototype.GetClassType;
+	ApiSignatureForm.prototype["SetLockAspectRatio"] = ApiSignatureForm.prototype.SetLockAspectRatio;
+	ApiSignatureForm.prototype["IsLockAspectRatio"]  = ApiSignatureForm.prototype.IsLockAspectRatio;
+	ApiSignatureForm.prototype["GetImage"]           = ApiSignatureForm.prototype.GetImage;
+	ApiSignatureForm.prototype["SetImage"]           = ApiSignatureForm.prototype.SetImage;
+	ApiSignatureForm.prototype["Copy"]               = ApiSignatureForm.prototype.Copy;
 	
 	ApiComboBoxForm.prototype["GetClassType"]    = ApiComboBoxForm.prototype.GetClassType;
 	ApiComboBoxForm.prototype["GetListValues"]   = ApiComboBoxForm.prototype.GetListValues;
@@ -30794,6 +30891,7 @@
 	window['AscBuilder'].ApiComboBoxForm     = ApiComboBoxForm;
 	window['AscBuilder'].ApiCheckBoxForm     = ApiCheckBoxForm;
 	window['AscBuilder'].ApiComplexForm      = ApiComplexForm;
+	window['AscBuilder'].ApiSignatureForm    = ApiSignatureForm;
 	window['AscBuilder'].ApiCore             = ApiCore;
 	window['AscBuilder'].ApiCustomProperties = ApiCustomProperties;
 	window['AscBuilder'].ApiCustomXmlParts	 = ApiCustomXmlParts;
@@ -30915,6 +31013,8 @@
 			return new ApiComboBoxForm(oForm);
 		else if (oForm.IsRadioButton() || oForm.IsCheckBox())
 			return new ApiCheckBoxForm(oForm);
+		else if (oForm.IsSignatureForm())
+			return new ApiSignatureForm(oForm);
 		else if (oForm.IsPictureForm())
 			return new ApiPictureForm(oForm);
 		else if (oForm.IsDatePicker())
@@ -31043,6 +31143,8 @@
 			return new ApiComboBoxForm(oSdt);
 		else if (oSdt.IsCheckBox() || oSdt.IsRadioButton())
 			return new ApiCheckBoxForm(oSdt);
+		else if (oSdt.IsSignatureForm())
+			return new ApiSignatureForm(oSdt);
 		else if (oSdt.IsPictureForm())
 			return new ApiPictureForm(oSdt)
 		else if (oSdt.IsDatePicker())
