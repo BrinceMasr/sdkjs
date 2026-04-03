@@ -42,6 +42,28 @@
     var c_oAscSlideTransitionTypes = Asc.c_oAscSlideTransitionTypes;
     var c_oAscSlideTransitionParams = Asc.c_oAscSlideTransitionParams;
 
+    // ---- WebGL transition type lookup ----
+
+    let _WebGLTransitionTypes = {};
+    _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Vortex]         = true;
+    _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Switch]         = true;
+    _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Flip]           = true;
+    _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Ripple]         = true;
+    _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Prism]          = true;
+    _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Doors]          = true;
+    _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Window]         = true;
+    _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Ferris]         = true;
+    _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Gallery]        = true;
+    _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Honeycomb]      = true;
+    _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Blinds]         = true;
+    _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Checker]        = true;
+    _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Circle]         = true;
+    _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Diamond]        = true;
+    _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Plus]           = true;
+    _WebGLTransitionTypes[c_oAscSlideTransitionTypes.RandomBar]      = true;
+    _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Dissolve]       = true;
+    _WebGLTransitionTypes[c_oAscSlideTransitionTypes.BoxZoom]        = true;
+
     function CTransitionGL(transitionAnimation)
     {
         this.TransitionAnimation = transitionAnimation;
@@ -2951,5 +2973,6 @@
 
     window['AscCommonSlide'] = window['AscCommonSlide'] || {};
     window['AscCommonSlide'].CTransitionGL = CTransitionGL;
+    window['AscCommonSlide']._WebGLTransitionTypes = _WebGLTransitionTypes;
 
 })(window);

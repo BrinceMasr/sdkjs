@@ -140,8 +140,9 @@
 			"common/wordcopypaste.js",
 			"common/intervalTree.js",
 
-		  "cell/view/HandlerList.js",
+			"cell/view/HandlerList.js",
 			"cell/model/SheetMemory.js",
+			"cell/model/FormulaObjects/parserFormula.js",
 			"cell/model/WorkbookElems.js",
 			"cell/model/Workbook.js",
 			"cell/model/Serialize.js",
