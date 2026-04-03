@@ -989,7 +989,7 @@ function CDrawingDocument()
 
 			if (focusType === FOCUS_OBJECT_THUMBNAILS) {
 				pos.X = x * g_dKoef_mm_to_pix;
-				pos.Y = y * g_dKoef_mm_to_pix - this.m_oWordControl.Thumbnails.m_dScrollY;
+				pos.Y = y * g_dKoef_mm_to_pix;
 			} else if (focusType === FOCUS_OBJECT_NOTES) {
 				pos.X = x * g_dKoef_mm_to_pix + AscCommon.AscBrowser.convertToRetinaValue(this.m_oWordControl.m_oNotesApi.OffsetX);
 				pos.Y = y * g_dKoef_mm_to_pix - this.m_oWordControl.m_oNotesApi.Scroll;

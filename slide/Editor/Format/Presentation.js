@@ -3635,7 +3635,9 @@ CPresentation.prototype.AddToParagraph = function (ParaItem, bRecalculate, noUpd
 				oMathShape.txBody.content.MoveCursorToStartPos(false);
 			}
 		}
-		if (this.IsFocusOnNotes()) {
+		if (this.IsFocusOnOutline()) {
+			Asc.editor.WordControl.Thumbnails.outlineView.paragraphAdd(ParaItem, false);
+		} else if (this.IsFocusOnNotes()) {
 			var oCurSlide = this.GetCurrentSlide();
 			if (oCurSlide.notes) {
 				oCurSlide.notes.graphicObjects.paragraphAdd(ParaItem, false);
@@ -5365,7 +5367,7 @@ CPresentation.prototype.EnterText = function (value) {
 	if (this.StopAnimationPreview()) {
 		return false;
 	}
-	if (!this.IsFocusOnNotes() && oCurSlide.graphicObjects.selectedObjects.length === 0) {
+	if (!this.IsFocusOnNotes() && !this.IsFocusOnOutline() && oCurSlide.graphicObjects.selectedObjects.length === 0) {
 		const info = {bBadMath: false};
 		let oTitle = oCurSlide.getMatchingShape(AscFormat.phType_title, null, false, info);
 		if (oTitle && !info.bBadMath) {

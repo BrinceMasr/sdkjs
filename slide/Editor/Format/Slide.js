@@ -1523,10 +1523,7 @@ Slide.prototype.getOutlineSlide = function () {
                 result.setTitle(shape);
                 break;
             }
-            case AscFormat.phType_subTitle: {
-                result.setSubTitle(shape);
-                break;
-            }
+            case AscFormat.phType_subTitle:
             case AscFormat.phType_body:
             case AscFormat.phType_obj: {
                 result.addContent(shape);

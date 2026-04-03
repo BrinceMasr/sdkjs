@@ -34,7 +34,6 @@
 	
 	function OutlineSlide() {
 		this.title = null;
-		this.subTitle = null;
 		this.content = [];
 		this.slide = null;
 	}
@@ -43,9 +42,6 @@
 	};
 	OutlineSlide.prototype.setTitle = function (pr) {
 		this.title = pr;
-	};
-	OutlineSlide.prototype.setSubTitle = function (pr) {
-		this.subTitle = pr;
 	};
 	OutlineSlide.prototype.addContent = function (pr) {
 		this.content.push(pr);
@@ -82,7 +78,9 @@
 	OutlineView.prototype.addOutlineParagraph = function (sourceParagraph, outlineParagraph, pr) {
 		const outlineId = outlineParagraph.Get_Id();
 		this.outlineToSourceMap[outlineId] = sourceParagraph;
-		this.sourceToOutlineMap[sourceParagraph.Get_Id()] = outlineParagraph;
+		if (sourceParagraph) {
+			this.sourceToOutlineMap[sourceParagraph.Get_Id()] = outlineParagraph;
+		}
 		if (pr) {
 			this.outlineInfo[outlineId] = {};
 			if (pr.titleShapeIndex !== undefined) {
@@ -93,15 +91,13 @@
 			}
 		}
 	};
-	OutlineView.prototype.addContentToOutlineShape = function (outlineShape, slideShape, slideIndex, pr) {
+	OutlineView.prototype.addContentToOutlineShape = function (outlineShape, slideShape, pr) {
 		if (!slideShape) {
 			return;
 		}
 		const outlineContent = outlineShape.txBody.content;
 		const slideContent = slideShape.txBody.content;
 		const paragraphs = slideContent.Content;
-		const phIdx = slideShape.getPlaceholderIndex ? slideShape.getPlaceholderIndex() : null;
-		const shapeOrder = (phIdx !== null && phIdx !== undefined) ? (parseInt(phIdx, 10) || 0) : 0;
 		for (let i = 0; i < paragraphs.length; i += 1) {
 			const paragraph = paragraphs[i];
 			const copyParagraph = this.getCopyParagraph(outlineContent, paragraph, !!pr && pr.titleShapeIndex !== undefined);
@@ -109,26 +105,49 @@
 			this.addOutlineParagraph(paragraph, copyParagraph, i === 0 ? pr : null);
 		}
 	};
+	OutlineView.prototype.addMockTitleToOutlineShape = function (outlineShape, pr) {
+		AscFormat.ExecuteNoHistory(function () {
+			const outlineContent = outlineShape.txBody.content;
+			const paragraph = new AscWord.Paragraph(outlineContent, true);
+			this.applyParagraphProps(paragraph, null, true);
+			outlineContent.AddToContent(outlineContent.Content.length, paragraph);
+			this.addOutlineParagraph(null, paragraph, pr);
+		}, this, []);
+
+	};
 	OutlineView.prototype.fillOutlineShape = function (outlineShape, outlineSlides, width) {
 		for (let i = 0; i < outlineSlides.length; i += 1) {
 			const slide = outlineSlides[i];
 
-			this.addContentToOutlineShape(outlineShape, slide.title, i, {titleShapeIndex: i});
-			let startShapeIndex = 0;
-			if (slide.subTitle) {
-				startShapeIndex = 1;
-				this.addContentToOutlineShape(outlineShape, slide.subTitle, i, {contentShapeIndex: 0});
+			const titlePr = {titleShapeIndex: i};
+			if (slide.title !== null) {
+				this.addContentToOutlineShape(outlineShape, slide.title, titlePr);
+			} else {
+				this.addMockTitleToOutlineShape(outlineShape, titlePr);
 			}
+
+			let shapeCount = 0;
 			for (let j = 0; j < slide.content.length; j += 1) {
-				this.addContentToOutlineShape(outlineShape, slide.content[j], i, {contentShapeIndex: startShapeIndex + j});
+				const contentShape = slide.content[j];
+				if (!contentShape.txBody.content.IsEmpty()) {
+					this.addContentToOutlineShape(outlineShape, slide.content[j], i, slide.content.length > 1 ? {contentShapeIndex: shapeCount} : null);
+					shapeCount += 1;
+				}
 			}
 		}
 	};
-	OutlineView.prototype.getTextPr = function (isTitle) {
+	OutlineView.prototype.getTextPr = function (isTitle, isMathRun) {
 		const textPr = new CTextPr();
 		textPr.SetFontSize(10);
 		if (isTitle) {
 			textPr.SetBold(true);
+		}
+		if (isMathRun) {
+			textPr.SetFontFamily("Cambria Math");
+			textPr.RFonts.SetAll("Cambria Math");
+		} else {
+			textPr.SetFontFamily("Arial");
+			textPr.RFonts.SetAll("Arial");
 		}
 		return textPr;
 	};
@@ -148,12 +167,12 @@
 		return copyParaPr;
 	};
 	OutlineView.prototype.applyParagraphProps = function (outlineParagraph, slideParagraph, isTitle) {
-		const compiledPr = slideParagraph.getCompiledPr();
+		const compiledPr = slideParagraph ? slideParagraph.getCompiledPr() : {ParaPr: g_oDocumentDefaultParaPr};
 		const copyParaPr = this.getParaPr(compiledPr);
 		const oThis = this;
 		outlineParagraph.SetPr(copyParaPr);
 		outlineParagraph.CheckRunContent(function (run) {
-			const textPr = oThis.getTextPr(isTitle);
+			const textPr = oThis.getTextPr(isTitle, run.IsMathRun());
 			run.SetPr(textPr);
 		});
 	};
@@ -328,6 +347,70 @@
 		}
 		return null;
 	};
+	OutlineView.prototype.getTransformText = function () {
+		if (this.outlineShape) {
+			return this.outlineShape.transformText;
+		}
+		return new AscCommon.CMatrix();
+	};
+	OutlineView.prototype.getOutlineHeight = function () {
+		if (this.outlineShape) {
+			return this.outlineShape.transformText.TransformPointY(0, this.outlineShape.contentHeight);
+		}
+		return 0;
+	}
+	OutlineView.prototype.paragraphAdd = function (paraItem) {
+		const content = this.getDocContent();
+		if (!content) {
+			return;
+		}
+		const startPos = content.GetContentPosition(true, true);
+		const endPos = content.GetContentPosition(true, false);
+		if (content.IsSelectionUse()) {
+
+			console.log(startPos, endPos)
+		} else {
+			const contentPos = content.GetContentPosition(false, false);
+			console.log(contentPos)
+		}
+
+		// const paragraphs = content.GetCurrentParagraph(false, true);
+		// if (paraItem === para_TextPr) {
+		// 	let currentContent = null;
+		// 	for (let i = 0; i < paragraphs.length; i += 1) {
+		// 		const outlineParagraph = paragraphs[i];
+		// 		const sourceParagraph = this.outlineToSourceMap[outlineParagraph.Get_Id()];
+		// 		if (sourceParagraph) {
+		// 			const content = sourceParagraph.GetParent();
+		// 			if (content !== currentContent) {
+		// 				currentContent = content;
+		// 			}
+		// 			if (outlineParagraph.IsSelectionUse()) {
+		// 				const startSelectionPos = outlineParagraph.getSelectionStartPos();
+		// 				const endSelectionPos = outlineParagraph.getSelectionEndPos();
+		// 				sourceParagraph.Selection.Use = true;
+		// 				sourceParagraph.Set_SelectionContentPos(startSelectionPos, endSelectionPos);
+		// 			} else {
+		// 				const contentPos = outlineParagraph.Get_ParaContentPos();
+		// 				sourceParagraph.Set_ParaContentPos(contentPos, false, -1, -1, true);
+		// 			}
+		// 			sourceParagraph.AddToParagraph(paraItem)
+		// 		}
+		// 	}
+		// } else {
+		// 	for (let i = 0; i < paragraphs.length; i += 1) {
+		// 		const outlineParagraph = paragraphs[i];
+		// 		const sourceParagraph = this.outlineToSourceMap[outlineParagraph.Get_Id()];
+		// 		if (sourceParagraph) {
+		// 			if (sourceParagraph.IsSelectedAll()) {
+		//
+		// 			}
+		// 		} else {
+		//
+		// 		}
+		// 	}
+		// }
+	}
 
 
 	window["AscCommonSlide"] = window["AscCommonSlide"] || {};
