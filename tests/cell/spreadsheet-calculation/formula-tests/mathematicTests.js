@@ -240,7 +240,7 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-		//формируем массив значений
+		//form an array of values
 		const randomArray = [];
 		let randomStrArray = "{";
 		let maxArg = 4;
@@ -10734,8 +10734,9 @@ $(function () {
 		oParser = new parserFormula('LN(Sheet2!A1:A2)', 'A2', ws);
 		oParser.setArrayFormulaRef(ws.getRange2("E106:F110").bbox);
 		assert.ok(oParser.parse(), 'Test: LN(Sheet2!A1:A2) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), -0.6931471805599453, 'Test: Positive case: Area3D. 3D multi-cell range. 1 argument used.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(1,0).getValue(), "#VALUE!", 'Test: Positive case: Area3D. 3D multi-cell range. 1 argument used.');
+		array = oParser.calculate();
+		assert.strictEqual(array.getElementRowCol(0,0).getValue(), -0.6931471805599453, 'Test: Positive case: Area3D. 3D multi-cell range. 1 argument used.');
+		assert.strictEqual(array.getElementRowCol(1,0).getValue(), "#VALUE!", 'Test: Positive case: Area3D. 3D multi-cell range. 1 argument used.');
 		// Case #14: Table. Table structured reference. 1 argument used.
 		oParser = new parserFormula('LN(Table1[Column1])', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LN(Table1[Column1]) is parsed.');
@@ -10802,6 +10803,10 @@ $(function () {
 		oParser = new parserFormula('LN(TestName1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LN(TestName1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue().toFixed(9), "-0.693147181", 'Test: Positive case: Name. Alternative named range. 1 argument used.');
+		// Case #29: Array. Test inside another formula. 1 argument used.
+		oParser = new parserFormula('COUNT(LN({1,2,3}))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: COUNT(LN({1,2,3})) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 3, 'Test: Positive case: Array. Test inside another formula. 1 argument used.');
 
 		// Negative cases:
 		// Case #1: Number. Zero returns #NUM!. 1 argument used.
@@ -10907,7 +10912,7 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: SINGLE Area. Range with empty cells. 1 argument used.');
 
 		let res = AscCommonExcel.bIsSupportDynamicArrays ? '#NUM!' : '#VALUE!';
-		oParser = new parserFormula('LN(A107:A108)', 'A2', ws);
+		oParser = new parserFormula('LN(A107:A108)', 'A2', ws);debugger
 		assert.ok(oParser.parse(), 'Test: LN(A107:A108) is parsed.');
 		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, 'Test: Negative case: Area. Range with empty cells. 1 argument used.');
 
@@ -11113,6 +11118,19 @@ $(function () {
 		oParser = new parserFormula('LOG(1E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG(1E+307) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 307, 'Test: Positive case: Number. Large valid number. 1 argument used.');
+		// Case #21: Array, Number. Test inside another formula. 2 argument used.
+		oParser = new parserFormula('COUNT(LOG({1,2,3},12))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: COUNT(LOG({1,2,3},12)) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 3, 'Test: Positive case: Array, Number. Test inside another formula. 2 argument used.');
+		// Case #22: Array, Number. Test inside another formula. 1 argument used.
+		oParser = new parserFormula('COUNT(LOG(12,{1,2,3}))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: COUNT(LOG(12,{1,2,3})) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Positive case: Array, Number. Test inside another formula. 2 argument used.');
+		// Case #23: Array, Array. Test inside another formula. 1 argument used.
+		oParser = new parserFormula('COUNT(LOG({1,2,3},{1,2,3}))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: COUNT(LOG({1,2,3},{1,2,3})) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Positive case: Array, Array. Test inside another formula. 2 argument used.');
+
 
 		// Negative cases:
 		// Case #1: Number. Zero returns #NUM!. 1 argument used.
@@ -11366,6 +11384,11 @@ $(function () {
 		oParser = new parserFormula('LOG10(1E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG10(1E+307) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 307, 'Test: Positive case: Number. Large valid number. 1 argument used.');
+		// Case #21: Array. Test inside another formula. 1 argument used.
+		oParser = new parserFormula('COUNT(LOG10({1,2,3}))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: COUNT(LOG10({1,2,3})) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 3, 'Test: Positive case: Array. Test inside another formula. 1 argument used.');
+
 
 		// Negative cases:
 		// Case #1: Number. Zero returns #NUM!. 1 argument used.
@@ -12504,7 +12527,7 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: MMULT({1E+307,1E+307;1E+307,1E+307},{1E+307;1E+307}) is parsed.');
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '#NUM!', 'Test: Bounded case: Number. Maximum valid values in 2x2 * 2x1 arrays. 2 arguments used.');
 
-		// todo если возвращается одно единственное значение, должно ли оно оборачиваться в массив?
+		// todo If one single value is returned, should it be wrapped in an array?
 		// Need to fix: error handle, IF doesn't return an array, boolean handle
 		// Case #19: Formula. Nested IF returning valid array. 2 arguments used.
 		// Case #4: Error. Propagates #N/A error. 2 arguments used.
@@ -12835,7 +12858,7 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"MROUND\"", function (assert) {
-		var multiple;//должен равняться значению второго аргумента
+		var multiple;//must be equal to the value of the second argument
 		function mroundHelper(num) {
 			var multiplier = Math.pow(10, Math.floor(Math.log(Math.abs(num)) / Math.log(10)) - AscCommonExcel.cExcelSignificantDigits + 1);
 			var nolpiat = 0.5 * (num > 0 ? 1 : num < 0 ? -1 : 0) * multiplier;
@@ -17296,7 +17319,7 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue().toFixed(4) - 0, 2.1123);
 
-		//TODO в хроме при расчёте разница, временно убираю
+		//TODO in chrome when calculating the difference, I temporarily remove it
 		oParser = new parserFormula("ROUNDUP(2,4)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual( oParser.calculate().getValue(), 2);
@@ -18649,9 +18672,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: SERIESSUM(1,2^31-1,2^31-1,{1,2,3}) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 6, 'Test: Bounded case: Number(3), Array. Maximum integer values for n and m (Excelâ??s 32-bit integer limit). 4 of 4 arguments used.');
 
-
-		//TODO нужна другая функция для тестирования
-		//testArrayFormula2(assert, "SERIESSUM", 4, 4);
 	});
 
 	QUnit.test("Test: \"SIGN\"", function (assert) {
@@ -20331,7 +20351,7 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: SUBTOTAL(-1E+307,A100) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Bounded case: Number. Maximum negative number.');
 
-		// TODO много отрицательных кейсов по парсингу формулы, добавить ошибку при отсутсвии нужного типа reference в аргументах
+		// TODO there are many negative cases when parsing formulas, add an error if the required reference type is missing in the arguments
 		// Need to fix:
 		// Case #2: Reference link. Reference link to single cell.
 		// Case #3: Area. Range of 2 cells.
