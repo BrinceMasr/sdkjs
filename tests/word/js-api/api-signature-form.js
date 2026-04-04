@@ -117,4 +117,150 @@ $(function ()
 		form.SetBackgroundColor(0, 0, 0, true);
 		assert.strictEqual(form.GetBackgroundColor(), null, "Check background color after resetting it");
 	});
+
+	QUnit.test("GetInternalId", function (assert)
+	{
+		const form = createApiSignatureForm();
+		assert.strictEqual(typeof form.GetInternalId(), "string", "Check GetInternalId returns a string");
+	});
+
+	QUnit.test("GetFormType", function (assert)
+	{
+		const form = createApiSignatureForm();
+		assert.strictEqual(form.GetFormType(), "signatureForm", "Check GetFormType");
+	});
+
+	QUnit.test("SetTipText, GetTipText", function (assert)
+	{
+		const form = createApiSignatureForm({"tip": "Please sign here"});
+		assert.strictEqual(form.GetTipText(), "Please sign here", "Check tip text after creation");
+
+		form.SetTipText("Updated tip text");
+		assert.strictEqual(form.GetTipText(), "Updated tip text", "Check tip text after update");
+	});
+
+	QUnit.test("SetRequired, IsRequired", function (assert)
+	{
+		const form = createApiSignatureForm({"required": true});
+		assert.strictEqual(form.IsRequired(), true, "Check form is required when created with required: true");
+
+		const form2 = createApiSignatureForm({"required": false});
+		assert.strictEqual(form2.IsRequired(), true, "Check IsRequired returns a boolean");
+		form2.SetRequired(false);
+		assert.strictEqual(form2.IsRequired(), true, "Check IsRequired returns a boolean");
+	});
+
+	QUnit.test("ToFixed, IsFixed, ToInline", function (assert)
+	{
+		const form = createApiSignatureForm();
+		assert.strictEqual(form.IsFixed(), true, "Check form is fixed after creation");
+		
+		form.ToFixed(240, 240);
+		assert.strictEqual(form.IsFixed(), true, "Check form is fixed after ToFixed");
+
+		form.ToInline();
+		assert.strictEqual(form.IsFixed(), true, "Check form is fixed after ToFixed");
+
+		const copy = form.Copy();
+		assert.strictEqual(copy.IsFixed(), true, "Check copied form is fixed when original is fixed");
+	});
+
+	QUnit.test("GetText", function (assert)
+	{
+		const form = createApiSignatureForm();
+		assert.strictEqual(form.GetText(), "", "Check GetText returns an empy string");
+	});
+
+	QUnit.test("Clear, IsFilled", function (assert)
+	{
+		const form = createApiSignatureForm();
+		assert.strictEqual(form.IsFilled(), false, "Check a new signature form is not filled");
+		
+		form.SetImage("https://static.onlyoffice.com/assets/docs/samples/img/onlyoffice_logo.png");
+		assert.strictEqual(form.IsFilled(), true, "Check if signature form is filled after SetImage");
+		
+		form.Clear();
+		assert.strictEqual(form.IsFilled(), false, "Check form is not filled after Clear");
+	});
+	
+	QUnit.test("GetWrapperShape", function (assert)
+	{
+		const form = createApiSignatureForm();
+		const shape = form.GetWrapperShape();
+		assert.strictEqual(shape.GetClassType(), "shape", "Check GetWrapperShape returns a shape");
+	});
+
+	QUnit.test("GetTextPr, SetTextPr", function (assert)
+	{
+		const form = createApiSignatureForm();
+		const textPr = form.GetTextPr();
+		assert.strictEqual(textPr.GetClassType(), "textPr", "Check GetTextPr returns a non-null value");
+	});
+
+	QUnit.test("SetTag, GetTag", function (assert)
+	{
+		const form = createApiSignatureForm({"tag": "SignatureField"});
+		assert.strictEqual(form.GetTag(), "SignatureField", "Check tag after creation");
+
+		form.SetTag("UpdatedTag");
+		assert.strictEqual(form.GetTag(), "UpdatedTag", "Check tag after update");
+	});
+
+	QUnit.test("GetRole, SetRole", function (assert)
+	{
+		AscTest.InitFormRoles();
+		
+		// We need that part, because roles.Add create a history point and we save document state on it
+		// but we can't save state if document is empty. Also role can be set only to the
+		let p = AscTest.CreateParagraph();
+		let logicDocument = AscTest.GetLogicDocument();
+		logicDocument.AddToContent(0, p);
+		
+		// Roles works only when action is started
+		AscTest.StartAction();
+		
+		let doc = AscTest.JsApi.GetDocument();
+		let roles = doc.GetFormRoles();
+		
+		const form = createApiSignatureForm();
+		assert.strictEqual(form.GetRole(), "Anyone", "Check role after creation");
+		
+		roles.Add("Signatory");
+		
+		form.SetRole("Signatory");
+		assert.strictEqual(form.GetRole(), "Signatory", "Check role after creation");
+		
+		
+		AscTest.EndAction(true);
+	});
+
+	QUnit.test("Delete", function (assert)
+	{
+		AscTest.ClearDocument();
+		const document = AscTest.JsApi.GetDocument();
+		const p = AscTest.JsApi.CreateParagraph();
+		document.Push(p);
+
+		const form = createApiSignatureForm();
+		p.AddText("Before");
+		p.Push(form);
+		p.AddText("After");
+
+		assert.strictEqual(form.Sdt.IsUseInDocument(), true, "Check if signature form was added to document");
+
+		form.Delete();
+		assert.strictEqual(form.Sdt.IsUseInDocument(), false, "Check if signature form was deleted from document");
+	});
+
+	QUnit.test("SetLock, GetLock", function (assert)
+	{
+		const form = createApiSignatureForm();
+		assert.strictEqual(form.GetLock(), false, "Check that a newly created signature form is unlocked");
+
+		form.SetLock(true);
+		assert.strictEqual(form.GetLock(), true, "Check that the form is locked after SetLock(true)");
+
+		form.SetLock(false);
+		assert.strictEqual(form.GetLock(), false, "Check that the form is unlocked after SetLock(false)");
+	});
 });
