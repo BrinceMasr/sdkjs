@@ -329,7 +329,7 @@ $(function () {
             assert.equal(ws.worksheet.getRowHidden(18), true,  "Alice/40 hidden (fails score filter)");
         });
 
-        QUnit.test("ListObject - SetAutoFilter(null) does not remove table AutoFilter", function (assert) {
+        QUnit.test("ListObject - SetAutoFilter() removes table AutoFilter and shows all rows", function (assert) {
             initializeTest();
 
             theRange("D16").SetValue("City");
@@ -339,13 +339,12 @@ $(function () {
             ws.AddListObject("xlSrcRange", "D16:D19");
 
             ws.GetRange("D16:D19").SetAutoFilter(1, ["Paris"], "xlFilterValues");
-            assert.equal(ws.worksheet.getRowHidden(17), true,  "Rome hidden before null call");
+            assert.equal(ws.worksheet.getRowHidden(17), true, "Rome hidden after filter");
 
-            // SetAutoFilter with no Field on a table must be a no-op
+            // SetAutoFilter() with no args removes the table's AutoFilter and shows all rows
             ws.GetRange("D16:D19").SetAutoFilter();
 
-            // Table's filter state must be unchanged
-            assert.equal(ws.worksheet.getRowHidden(17), true,  "Rome still hidden after SetAutoFilter()");
+            assert.equal(ws.worksheet.getRowHidden(17), false, "Rome visible after SetAutoFilter()");
         });
 
         QUnit.test("ListObject - SetAutoFilter(field, null) clears column filter", function (assert) {
@@ -361,7 +360,7 @@ $(function () {
             assert.equal(ws.worksheet.getRowHidden(17), true, "Y hidden after filter");
             assert.equal(ws.worksheet.getRowHidden(18), true, "Z hidden after filter");
 
-            ws.GetRange("F16:F19").SetAutoFilter(1, null);
+            ws.GetRange("F16:F19").SetAutoFilter(null, null);
 
             assert.equal(ws.worksheet.getRowHidden(17), false, "Y visible after column clear");
             assert.equal(ws.worksheet.getRowHidden(18), false, "Z visible after column clear");

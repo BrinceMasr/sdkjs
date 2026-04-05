@@ -12539,11 +12539,10 @@
 
 		// Add/remove AutoFilter
 		if (Field == null) {
-			if (!tablePart && ws.AutoFilter) {
-				// standalone AutoFilter: remove it
-				ws.autoFilters.deleteAutoFilter(ws.AutoFilter.Ref);
+			if (tablePart || ws.AutoFilter) {
+				// deleteAutoFilter routes correctly for both table and standalone ranges
+				ws.autoFilters.deleteAutoFilter(this.range.bbox);
 			}
-			// Table AutoFilter is intrinsic to the table and cannot be removed via SetAutoFilter
 			return;
 		}
 
@@ -29558,7 +29557,7 @@
 	 * @param {ApiRange} Key - A range within the table that defines the sort column.
 	 * @param {XlSortOn} [SortOn="xlSortOnValues"] - The value used as the sort criteria.
 	 * @param {SortOrder} [Order="xlAscending"] - The sort order.
-	 * @param {*} [CustomOrder]
+	 * @param {number | string} [CustomOrder=0] - Reserved. Custom order sorting is not yet supported by the engine.
 	 * @param {XlSortDataOption} [DataOption="xlSortNormal"] - The data sort option.
 	 * @returns {ApiSortField | null}
 	 * @see office-js-api/Examples/Cell/ApiSortFields/Methods/Add.js
@@ -29588,7 +29587,7 @@
 	 * @param {ApiRange} Key - A range within the table that defines the sort column.
 	 * @param {XlSortOn} [SortOn="xlSortOnValues"] - The value used as the sort criteria.
 	 * @param {SortOrder} [Order="xlAscending"] - The sort order.
-	 * @param {*} [CustomOrder]
+	 * @param {number | string} [CustomOrder=0] - Reserved. Custom order sorting is not yet supported by the engine.
 	 * @param {XlSortDataOption} [DataOption="xlSortNormal"] - The data sort option.
 	 * @param {string} [SubField] - Subfield name for linked data types (e.g. "Population", "Volume").
 	 * @returns {ApiSortField | null}
@@ -29785,67 +29784,75 @@
 		}
 	});
 
-	/**
-	 * Returns the custom sort order for this field, or null if none is set.
-	 * @memberof ApiSortField
-	 * @typeofeditors ["CSE"]
-	 * @returns {* | null}
-	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetCustomOrder.js
-	 */
-	ApiSortField.prototype.GetCustomOrder = function () {
-		return this._fieldObj.customOrder;
-	};
+	//need support in sdk
+	// /**
+	//  * Returns the custom sort order for this field.
+	//  * Returns 0 if no custom order is set (matches MS Excel VBA behavior).
+	//  * @memberof ApiSortField
+	//  * @typeofeditors ["CSE"]
+	//  * @returns {number | string}
+	//  * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetCustomOrder.js
+	//  * @remarks Custom order sorting is not yet supported by the engine. The value is stored
+	//  * and returned correctly but has no effect when {@link ApiSort#Apply} is called.
+	//  */
+	// ApiSortField.prototype.GetCustomOrder = function () {
+	// 	return this._fieldObj.customOrder !== null ? this._fieldObj.customOrder : 0;
+	// };
+	//
+	// /**
+	//  * Sets a custom sort order for this field.
+	//  * Pass 0 or null to clear the custom order.
+	//  * @memberof ApiSortField
+	//  * @typeofeditors ["CSE"]
+	//  * @param {number | string} customOrder - 0 to reset, or a custom order string/index.
+	//  * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetCustomOrder.js
+	//  * @remarks Custom order sorting is not yet supported by the engine. The value is stored
+	//  * and returned correctly but has no effect when {@link ApiSort#Apply} is called.
+	//  */
+	// ApiSortField.prototype.SetCustomOrder = function (customOrder) {
+	// 	this._fieldObj.customOrder = (customOrder === 0 || customOrder === null) ? null : customOrder;
+	// };
+	//
+	// Object.defineProperty(ApiSortField.prototype, "CustomOrder", {
+	// 	get: function () {
+	// 		return this.GetCustomOrder();
+	// 	},
+	// 	set: function (val) {
+	// 		this.SetCustomOrder(val);
+	// 	}
+	// });
 
-	/**
-	 * Sets a custom sort order for this field.
-	 * @memberof ApiSortField
-	 * @typeofeditors ["CSE"]
-	 * @param {*} customOrder
-	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetCustomOrder.js
-	 */
-	ApiSortField.prototype.SetCustomOrder = function (customOrder) {
-		this._fieldObj.customOrder = customOrder;
-	};
-
-	Object.defineProperty(ApiSortField.prototype, "CustomOrder", {
-		get: function () {
-			return this.GetCustomOrder();
-		},
-		set: function (val) {
-			this.SetCustomOrder(val);
-		}
-	});
-
-	/**
-	 * Returns the data option: "xlSortNormal" or "xlSortTextAsNumbers".
-	 * @memberof ApiSortField
-	 * @typeofeditors ["CSE"]
-	 * @returns {XlSortDataOption}
-	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetDataOption.js
-	 */
-	ApiSortField.prototype.GetDataOption = function () {
-		return this._fieldObj.dataOption || "xlSortNormal";
-	};
-
-	/**
-	 * Sets the data option.
-	 * @memberof ApiSortField
-	 * @typeofeditors ["CSE"]
-	 * @param {XlSortDataOption} sDataOption - The data sort option.
-	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetDataOption.js
-	 */
-	ApiSortField.prototype.SetDataOption = function (sDataOption) {
-		this._fieldObj.dataOption = sDataOption === "xlSortTextAsNumbers" ? "xlSortTextAsNumbers" : "xlSortNormal";
-	};
-
-	Object.defineProperty(ApiSortField.prototype, "DataOption", {
-		get: function () {
-			return this.GetDataOption();
-		},
-		set: function (val) {
-			this.SetDataOption(val);
-		}
-	});
+	//need support in sdk
+	// /**
+	//  * Returns the data option: "xlSortNormal" or "xlSortTextAsNumbers".
+	//  * @memberof ApiSortField
+	//  * @typeofeditors ["CSE"]
+	//  * @returns {XlSortDataOption}
+	//  * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetDataOption.js
+	//  */
+	// ApiSortField.prototype.GetDataOption = function () {
+	// 	return this._fieldObj.dataOption || "xlSortNormal";
+	// };
+	//
+	// /**
+	//  * Sets the data option.
+	//  * @memberof ApiSortField
+	//  * @typeofeditors ["CSE"]
+	//  * @param {XlSortDataOption} sDataOption - The data sort option.
+	//  * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetDataOption.js
+	//  */
+	// ApiSortField.prototype.SetDataOption = function (sDataOption) {
+	// 	this._fieldObj.dataOption = sDataOption === "xlSortTextAsNumbers" ? "xlSortTextAsNumbers" : "xlSortNormal";
+	// };
+	//
+	// Object.defineProperty(ApiSortField.prototype, "DataOption", {
+	// 	get: function () {
+	// 		return this.GetDataOption();
+	// 	},
+	// 	set: function (val) {
+	// 		this.SetDataOption(val);
+	// 	}
+	// });
 
 	/**
 	 * Returns the value (color or null) by which this sort field is sorted.
@@ -29869,7 +29876,7 @@
 	 * Sets an icon for icon-based sorting.
 	 * @memberof ApiSortField
 	 * @typeofeditors ["CSE"]
-	 * @param {*} Icon
+	 * @param {XlIcon} Icon - The icon constant to sort by.
 	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetIcon.js
 	 */
 	ApiSortField.prototype.SetIcon = function (Icon) {
@@ -30146,8 +30153,8 @@
 	ApiSort.prototype["GetHeader"]      = ApiSort.prototype.GetHeader;
 	ApiSort.prototype["GetOrientation"] = ApiSort.prototype.GetOrientation;
 	ApiSort.prototype["SetOrientation"] = ApiSort.prototype.SetOrientation;
-	ApiSort.prototype["GetSortMethod"]  = ApiSort.prototype.GetSortMethod;
-	ApiSort.prototype["SetSortMethod"]  = ApiSort.prototype.SetSortMethod;
+	// ApiSort.prototype["GetSortMethod"]  = ApiSort.prototype.GetSortMethod;
+	// ApiSort.prototype["SetSortMethod"]  = ApiSort.prototype.SetSortMethod;
 	ApiSort.prototype["GetRng"]         = ApiSort.prototype.GetRng;
 	//ApiSort.prototype["SetRange"]       = ApiSort.prototype.SetRange;
 	ApiSort.prototype["Apply"]          = ApiSort.prototype.Apply;
@@ -30167,10 +30174,10 @@
 	ApiSortField.prototype["SetOrder"]        = ApiSortField.prototype.SetOrder;
 	ApiSortField.prototype["GetPriority"]     = ApiSortField.prototype.GetPriority;
 	ApiSortField.prototype["SetPriority"]     = ApiSortField.prototype.SetPriority;
-	ApiSortField.prototype["GetCustomOrder"]  = ApiSortField.prototype.GetCustomOrder;
-	ApiSortField.prototype["SetCustomOrder"]  = ApiSortField.prototype.SetCustomOrder;
-	ApiSortField.prototype["GetDataOption"]   = ApiSortField.prototype.GetDataOption;
-	ApiSortField.prototype["SetDataOption"]   = ApiSortField.prototype.SetDataOption;
+	// ApiSortField.prototype["GetCustomOrder"]  = ApiSortField.prototype.GetCustomOrder;
+	// ApiSortField.prototype["SetCustomOrder"]  = ApiSortField.prototype.SetCustomOrder;
+	// ApiSortField.prototype["GetDataOption"]   = ApiSortField.prototype.GetDataOption;
+	// ApiSortField.prototype["SetDataOption"]   = ApiSortField.prototype.SetDataOption;
 	ApiSortField.prototype["GetSortOnValue"]  = ApiSortField.prototype.GetSortOnValue;
 	ApiSortField.prototype["SetIcon"]         = ApiSortField.prototype.SetIcon;
 	ApiSortField.prototype["SetSortOnColor"]  = ApiSortField.prototype.SetSortOnColor;

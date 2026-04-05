@@ -759,7 +759,7 @@ $(function ()
 			assert.equal(fields.Count, 0, "Count is 0 after Clear");
 		});
 
-		QUnit.test("SortField - SortOn/Order/Priority/CustomOrder/DataOption writable", function (assert)
+		QUnit.test("SortField - SortOn/Order/Priority writable", function (assert)
 		{
 			initializeTest();
 
@@ -777,16 +777,6 @@ $(function ()
 			assert.equal(sf.GetOrder(), "xlDescending", "SetOrder works");
 			sf.Order = "xlAscending";
 			assert.equal(sf.Order, "xlAscending", "Order property setter works");
-
-			sf.SetCustomOrder("myList");
-			assert.equal(sf.GetCustomOrder(), "myList", "SetCustomOrder works");
-			sf.CustomOrder = null;
-			assert.strictEqual(sf.CustomOrder, null, "CustomOrder property setter works");
-
-			sf.SetDataOption("xlSortTextAsNumbers");
-			assert.equal(sf.GetDataOption(), "xlSortTextAsNumbers", "SetDataOption works");
-			sf.DataOption = "xlSortNormal";
-			assert.equal(sf.DataOption, "xlSortNormal", "DataOption property setter works");
 		});
 
 		QUnit.test("SortField - SetOrder changes actual sort result on sheet", function (assert)
