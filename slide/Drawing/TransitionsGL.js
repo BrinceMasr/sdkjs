@@ -64,6 +64,13 @@
     _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Dissolve]       = true;
     _WebGLTransitionTypes[c_oAscSlideTransitionTypes.BoxZoom]        = true;
 	_WebGLTransitionTypes[c_oAscSlideTransitionTypes.Flash]          = true;
+	_WebGLTransitionTypes[c_oAscSlideTransitionTypes.Pan]            = true;
+
+	// _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Glitter]        = true;
+	// _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Shred]          = true;
+	// _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Reveal]         = true;
+	// _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Flythrough]     = true;
+	// _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Conveyor]       = true;
 
     function CTransitionGL(transitionAnimation)
     {
@@ -516,6 +523,26 @@
 			case c_oAscSlideTransitionTypes.Flash:
 				this._prepareFlash();
 				break;
+			case c_oAscSlideTransitionTypes.Pan:
+				this._preparePan();
+				break;
+
+			// case c_oAscSlideTransitionTypes.Reveal:
+			// 	this._prepareReveal();
+			// 	break;
+			// case c_oAscSlideTransitionTypes.Glitter:
+			// 	this._prepareGlitter();
+			// 	break;
+			// case c_oAscSlideTransitionTypes.Shred:
+			// 	this._prepareShred();
+			// 	break;
+			// case c_oAscSlideTransitionTypes.Flythrough:
+			// 	this._prepareFlythrough();
+			// 	break;
+			// case c_oAscSlideTransitionTypes.Conveyor:
+			// 	this._prepareConveyor();
+			// 	break;
+
             default:
                 this._prepareCrossfade();
                 break;
@@ -593,6 +620,26 @@
 			case c_oAscSlideTransitionTypes.Flash:
 				this._renderFlash(progress);
 				break;
+			case c_oAscSlideTransitionTypes.Pan:
+				this._renderPan(progress, param);
+				break;
+
+			// case c_oAscSlideTransitionTypes.Reveal:
+			// 	this._renderReveal(progress, param);
+			// 	break;
+			// case c_oAscSlideTransitionTypes.Glitter:
+			// 	this._renderGlitter(progress, param);
+			// 	break;
+			// case c_oAscSlideTransitionTypes.Shred:
+			// 	this._renderShred(progress, param);
+			// 	break;
+			// case c_oAscSlideTransitionTypes.Flythrough:
+			// 	this._renderFlythrough(progress, param);
+			// 	break;
+			// case c_oAscSlideTransitionTypes.Conveyor:
+			// 	this._renderConveyor(progress, param);
+			// 	break;
+
             default:
                 this._renderCrossfade(progress);
                 break;
@@ -2982,47 +3029,872 @@
 	// Transition: Flash — white flash between slides
 	// ============================================================
 
-	let _FRAG_FLASH = [
-		'precision mediump float;',
-		'uniform sampler2D uTexture1;',
-		'uniform sampler2D uTexture2;',
-		'uniform float uProgress;',
-		'varying vec2 vTexCoord;',
-		'void main() {',
-		'    vec4 c1 = texture2D(uTexture1, vTexCoord);',
-		'    vec4 c2 = texture2D(uTexture2, vTexCoord);',
-		'    float flash = 1.0 - abs(uProgress - 0.5) * 2.0;',
-		'    flash = flash * flash * flash;',
-		'    vec4 slide = uProgress < 0.5 ? c1 : c2;',
-		'    gl_FragColor = mix(slide, vec4(1.0), flash);',
-		'}'
-	].join('\n');
-
 	CTransitionGL.prototype._prepareFlash = function () {
-		this.GetProgram('flash', _VERT_QUAD, _FRAG_FLASH);
+		const flashFragmentShader = [
+			'precision mediump float;',
+			'uniform sampler2D uTexture1;',
+			'uniform sampler2D uTexture2;',
+			'uniform float uProgress;',
+			'varying vec2 vTexCoord;',
+			'void main() {',
+			'    vec4 oldSlide = texture2D(uTexture1, vTexCoord);',
+			'    vec4 newSlide = texture2D(uTexture2, vTexCoord);',
+			'    float flashIntensity = 1.0 - abs(uProgress - 0.5) * 2.0;',
+			'    flashIntensity = flashIntensity * flashIntensity * flashIntensity;',
+			'    vec4 currentSlide = uProgress < 0.5 ? oldSlide : newSlide;',
+			'    gl_FragColor = mix(currentSlide, vec4(1.0), flashIntensity);',
+			'}'
+		].join('\n');
+
+		this.GetProgram('flash', _VERT_QUAD, flashFragmentShader);
 	};
 
 	CTransitionGL.prototype._renderFlash = function (progress) {
-		let gl = this.gl;
-		let prog = this.programs['flash'];
-		if (!prog) return;
+		const programInfo = this.programs['flash'];
+		if (!programInfo) {
+			return;
+		}
 
-		gl.useProgram(prog.program);
+		const gl = this.gl;
+		const uniforms = programInfo.uniforms;
+
+		gl.useProgram(programInfo.program);
 		gl.disable(gl.DEPTH_TEST);
 
 		gl.activeTexture(gl.TEXTURE0);
 		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
-		gl.uniform1i(prog.uniforms['uTexture1'], 0);
+		gl.uniform1i(uniforms['uTexture1'], 0);
 
 		gl.activeTexture(gl.TEXTURE1);
 		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
-		gl.uniform1i(prog.uniforms['uTexture2'], 1);
+		gl.uniform1i(uniforms['uTexture2'], 1);
 
-		gl.uniform1f(prog.uniforms['uProgress'], progress);
+		gl.uniform1f(uniforms['uProgress'], progress);
 
-		this._bindQuad(prog);
+		this._bindQuad(programInfo);
 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 	};
+
+	// ============================================================
+	// Transition: Pan — flat slide push (single-pass 2D)
+	// ============================================================
+
+	CTransitionGL.prototype._preparePan = function () {
+		const panFragmentShader = [
+			'precision mediump float;',
+			'uniform sampler2D uTexture1;',
+			'uniform sampler2D uTexture2;',
+			'uniform float uProgress;',
+			'uniform float uDirX;',
+			'uniform float uDirY;',
+			'varying vec2 vTexCoord;',
+			'void main() {',
+			'    vec2 slideDirection = vec2(uDirX, uDirY);',
+			'    vec2 shiftedUV = vTexCoord + slideDirection * uProgress;',
+			'    bool insideBounds = shiftedUV.x >= 0.0 && shiftedUV.x <= 1.0',
+			'                     && shiftedUV.y >= 0.0 && shiftedUV.y <= 1.0;',
+			'    if (insideBounds)',
+			'        gl_FragColor = texture2D(uTexture1, shiftedUV);',
+			'    else',
+			'        gl_FragColor = texture2D(uTexture2, shiftedUV - slideDirection);',
+			'}'
+		].join('\n');
+
+		this.GetProgram('pan', _VERT_QUAD, panFragmentShader);
+	};
+
+	CTransitionGL.prototype._renderPan = function (progress, param) {
+		const programInfo = this.programs['pan'];
+		if (!programInfo) {
+			return;
+		}
+
+		let dx = 0, dy = 0;
+		switch (param) {
+			case c_oAscSlideTransitionParams.Pan_Left:  dx = 1; break;
+			case c_oAscSlideTransitionParams.Pan_Right: dx = -1; break;
+			case c_oAscSlideTransitionParams.Pan_Up:    dy = -1; break;
+			case c_oAscSlideTransitionParams.Pan_Down:  dy = 1; break;
+		}
+
+		const gl = this.gl;
+		const uniforms = programInfo.uniforms;
+
+		gl.useProgram(programInfo.program);
+		gl.disable(gl.DEPTH_TEST);
+
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
+		gl.uniform1i(uniforms['uTexture1'], 0);
+
+		gl.activeTexture(gl.TEXTURE1);
+		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
+		gl.uniform1i(uniforms['uTexture2'], 1);
+
+		gl.uniform1f(uniforms['uProgress'], progress);
+		gl.uniform1f(uniforms['uDirX'], dx);
+		gl.uniform1f(uniforms['uDirY'], dy);
+
+		this._bindQuad(programInfo);
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+	};
+
+	// // ============================================================
+	// // Transition: Reveal — slight zoom with white flash
+	// // ============================================================
+
+	// let _FRAG_REVEAL_WHITE = [
+	// 	'precision mediump float;',
+	// 	'uniform sampler2D uTexture;',
+	// 	'uniform float uAlpha;',
+	// 	'uniform float uWhiteMix;',
+	// 	'varying vec2 vTexCoord;',
+	// 	'void main() {',
+	// 	'    vec4 color = texture2D(uTexture, vTexCoord);',
+	// 	'    color.rgb = mix(color.rgb, vec3(1.0), uWhiteMix);',
+	// 	'    gl_FragColor = vec4(color.rgb, color.a * uAlpha);',
+	// 	'}'
+	// ].join('\n');
+
+	// let _FRAG_REVEAL_BLACK = [
+	// 	'precision mediump float;',
+	// 	'uniform sampler2D uTexture;',
+	// 	'uniform float uAlpha;',
+	// 	'uniform float uWhiteMix;',
+	// 	'varying vec2 vTexCoord;',
+	// 	'void main() {',
+	// 	'    vec4 color = texture2D(uTexture, vTexCoord);',
+	// 	'    color.rgb = mix(color.rgb, vec3(0.0), uWhiteMix);',
+	// 	'    gl_FragColor = vec4(color.rgb, color.a * uAlpha);',
+	// 	'}'
+	// ].join('\n');
+
+	// CTransitionGL.prototype._prepareReveal = function () {
+	// 	this.GetProgram('revealWhite', _VERT_3D, _FRAG_REVEAL_WHITE);
+	// 	this.GetProgram('revealBlack', _VERT_3D, _FRAG_REVEAL_BLACK);
+	// 	this._initQuadBuffer3D();
+	// };
+
+	// CTransitionGL.prototype._renderReveal = function (progress, param) {
+	// 	let gl = this.gl;
+
+	// 	let isLeft = (param === c_oAscSlideTransitionParams.Reveal_SmoothLeft ||
+	// 		param === c_oAscSlideTransitionParams.Reveal_BlackLeft);
+	// 	let isBlack = (param === c_oAscSlideTransitionParams.Reveal_BlackLeft ||
+	// 		param === c_oAscSlideTransitionParams.Reveal_BlackRight);
+	// 	let dir = isLeft ? -1 : 1;
+
+	// 	let prog = isBlack ? this.programs['revealBlack'] : this.programs['revealWhite'];
+	// 	if (!prog) return;
+
+	// 	gl.useProgram(prog.program);
+	// 	gl.enable(gl.DEPTH_TEST);
+
+	// 	let aspect = this.glCanvas.width / this.glCanvas.height;
+	// 	let fov = Math.PI / 4;
+	// 	let dist = 1.0 / Math.tan(fov / 2);
+	// 	let projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
+	// 	let hw = aspect;
+
+	// 	if (isBlack) {
+	// 		gl.clearColor(0.0, 0.0, 0.0, 1.0);
+	// 	} else {
+	// 		gl.clearColor(1.0, 1.0, 1.0, 1.0);
+	// 	}
+	// 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+	// 	gl.uniformMatrix4fv(prog.uniforms['uProjection'], false, projection);
+
+	// 	if (progress <= 0.5) {
+	// 		// Phase 1: old slide zooms slightly, shifts in direction, fades to white/black
+	// 		let t = progress / 0.5;
+	// 		let scale = 1.0 + 0.05 * t;
+	// 		let shiftX = dir * 0.05 * hw * 2 * t;
+	// 		let colorMix = t * t;
+
+	// 		let mv = _Mat4.identity();
+	// 		mv = _Mat4.translate(mv, shiftX, 0, -dist);
+	// 		mv[0] *= scale; mv[5] *= scale;
+
+	// 		gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mv);
+	// 		gl.uniform1f(prog.uniforms['uAlpha'], 1.0);
+	// 		gl.uniform1f(prog.uniforms['uWhiteMix'], colorMix);
+	// 		gl.activeTexture(gl.TEXTURE0);
+	// 		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
+	// 		gl.uniform1i(prog.uniforms['uTexture'], 0);
+	// 		this._bindQuad3D(prog);
+	// 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+	// 	} else {
+	// 		// Phase 2: new slide appears from white/black, zoomed+shifted opposite, settles
+	// 		let t = (progress - 0.5) / 0.5;
+	// 		let scale = 1.05 - 0.05 * t;
+	// 		let shiftX = -dir * 0.05 * hw * 2 * (1.0 - t);
+	// 		let colorMix = (1.0 - t) * (1.0 - t);
+
+	// 		let mv = _Mat4.identity();
+	// 		mv = _Mat4.translate(mv, shiftX, 0, -dist);
+	// 		mv[0] *= scale; mv[5] *= scale;
+
+	// 		gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mv);
+	// 		gl.uniform1f(prog.uniforms['uAlpha'], 1.0);
+	// 		gl.uniform1f(prog.uniforms['uWhiteMix'], colorMix);
+	// 		gl.activeTexture(gl.TEXTURE0);
+	// 		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
+	// 		gl.uniform1i(prog.uniforms['uTexture'], 0);
+	// 		this._bindQuad3D(prog);
+	// 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+	// 	}
+	// };
+
+	// // ============================================================
+	// // Transition: Glitter — hexagonal tiles rotating in place
+	// // ============================================================
+
+	// let _VERT_GLITTER_HEX = [
+	// 	'attribute vec3 aPosition;',
+	// 	'attribute vec2 aTexCoord;',
+	// 	'attribute float aTilePhase;',
+	// 	'attribute vec2 aTileCenter;',
+	// 	'uniform mat4 uProjection;',
+	// 	'uniform mat4 uModelView;',
+	// 	'uniform float uProgress;',
+	// 	'uniform float uDirX;',
+	// 	'uniform float uDirY;',
+	// 	'uniform float uAspect;',
+	// 	'varying vec2 vTexCoord;',
+	// 	'varying float vFlipProgress;',
+	// 	'varying vec2 vTileCenterUV;',
+	// 	'',
+	// 	'void main() {',
+	// 	'    vec3 pos = aPosition;',
+	// 	'',
+	// 	'    // Sweep direction: left-to-right for Left param, etc.',
+	// 	'    float nx = (aTileCenter.x + uAspect) / (2.0 * uAspect);',
+	// 	'    float ny = (aTileCenter.y + 1.0) / 2.0;',
+	// 	'    float isHorz = step(abs(uDirY), abs(uDirX));',
+	// 	'    float hSweep = mix(1.0 - nx, nx, step(uDirX, 0.0));',
+	// 	'    float vSweep = mix(1.0 - ny, ny, step(0.0, uDirY));',
+	// 	'    float sweep = mix(vSweep, hSweep, isHorz);',
+	// 	'',
+	// 	'    // Random stagger per tile (hash from center position)',
+	// 	'    float hash = fract(sin(dot(aTileCenter, vec2(12.9898, 78.233))) * 43758.5453);',
+	// 	'',
+	// 	'    // Flip timing',
+	// 	'    float flipDuration = 0.4;',
+	// 	'    float maxDelay = 1.0 - flipDuration;',
+	// 	'    float flipStart = sweep * maxDelay * 0.7 + hash * maxDelay * 0.3;',
+	// 	'    float fp = clamp((uProgress - flipStart) / flipDuration, 0.0, 1.0);',
+	// 	'    fp = fp * fp * (3.0 - 2.0 * fp);',
+	// 	'    vFlipProgress = fp;',
+	// 	'',
+	// 	'    // Rotate hex around Y axis at its center',
+	// 	'    vec3 local = pos - vec3(aTileCenter, 0.0);',
+	// 	'    float angle = fp * 3.14159;',
+	// 	'    float ca = cos(angle);',
+	// 	'    float sa = sin(angle);',
+	// 	'    local = vec3(local.x * ca, local.y, -local.x * sa);',
+	// 	'    pos = vec3(aTileCenter, 0.0) + local;',
+	// 	'',
+	// 	'    vTexCoord = aTexCoord;',
+	// 	'    vTileCenterUV = vec2(nx, ny);',
+	// 	'    gl_Position = uProjection * uModelView * vec4(pos, 1.0);',
+	// 	'}'
+	// ].join('\n');
+
+	// let _FRAG_GLITTER_HEX = [
+	// 	'precision mediump float;',
+	// 	'uniform sampler2D uTexture1;',
+	// 	'uniform sampler2D uTexture2;',
+	// 	'varying vec2 vTexCoord;',
+	// 	'varying float vFlipProgress;',
+	// 	'varying vec2 vTileCenterUV;',
+	// 	'void main() {',
+	// 	'    vec4 color;',
+	// 	'    if (vFlipProgress < 0.5) {',
+	// 	'        color = texture2D(uTexture1, vTexCoord);',
+	// 	'    } else {',
+	// 	'        vec2 uv = vec2(2.0 * vTileCenterUV.x - vTexCoord.x, vTexCoord.y);',
+	// 	'        color = texture2D(uTexture2, uv);',
+	// 	'    }',
+	// 	'    float sparkle = sin(vFlipProgress * 3.14159);',
+	// 	'    color.rgb += vec3(sparkle * sparkle * 0.3);',
+	// 	'    gl_FragColor = color;',
+	// 	'}'
+	// ].join('\n');
+
+	// CTransitionGL.prototype._initDiamondMeshBuffer = function (name, cellSize) {
+	// 	if (this.buffers[name]) return;
+
+	// 	let gl = this.gl;
+	// 	let aspect = this.glCanvas.width / this.glCanvas.height;
+	// 	let hw = aspect, hh = 1.0;
+	// 	let r = cellSize || 0.06;
+	// 	let halfDiag = r;
+
+	// 	let colSpacing = halfDiag * 2;
+	// 	let rowSpacing = halfDiag;
+
+	// 	let cols = Math.ceil(hw * 2 / colSpacing) + 2;
+	// 	let rows = Math.ceil(hh * 2 / rowSpacing) + 2;
+
+	// 	let seed = 98765;
+	// 	let rand = function () { seed = (seed * 16807) % 2147483647; return (seed & 0x7fffffff) / 2147483647; };
+
+	// 	let diamonds = [];
+	// 	for (let row = 0; row < rows; row++) {
+	// 		let cy = -hh - halfDiag + row * rowSpacing;
+	// 		for (let col = 0; col < cols; col++) {
+	// 			let cx = -hw - halfDiag + col * colSpacing + (row % 2) * halfDiag;
+	// 			if (cx + halfDiag < -hw - 0.2 || cx - halfDiag > hw + 0.2) continue;
+	// 			if (cy + halfDiag < -hh - 0.2 || cy - halfDiag > hh + 0.2) continue;
+
+	// 			let nx = (cx + hw) / (2 * hw);
+	// 			let ny = (cy + hh) / (2 * hh);
+	// 			let phase = rand();
+	// 			diamonds.push({ cx: cx, cy: cy, phase: phase });
+	// 		}
+	// 	}
+
+	// 	// Each diamond = 4 triangles x 3 verts = 12 verts
+	// 	// Vertex: position(3) + texcoord(2) + tilePhase(1) + tileCenter(2) = 8 floats
+	// 	let vertCount = diamonds.length * 12;
+	// 	let data = new Float32Array(vertCount * 8);
+	// 	let vi = 0;
+
+	// 	for (let d = 0; d < diamonds.length; d++) {
+	// 		let dm = diamonds[d];
+	// 		let cx = dm.cx, cy = dm.cy;
+
+	// 		// Diamond corners: top, right, bottom, left
+	// 		let pts = [
+	// 			[cx, cy + halfDiag],  // top
+	// 			[cx + halfDiag, cy],  // right
+	// 			[cx, cy - halfDiag],  // bottom
+	// 			[cx - halfDiag, cy]   // left
+	// 		];
+
+	// 		for (let tri = 0; tri < 4; tri++) {
+	// 			let p0 = [cx, cy];
+	// 			let p1 = pts[tri];
+	// 			let p2 = pts[(tri + 1) % 4];
+	// 			let corners = [p0, p1, p2];
+
+	// 			for (let v = 0; v < 3; v++) {
+	// 				let px = corners[v][0], py = corners[v][1];
+	// 				let u = (px + hw) / (2 * hw);
+	// 				let vv = (py + hh) / (2 * hh);
+	// 				data[vi++] = px;
+	// 				data[vi++] = py;
+	// 				data[vi++] = 0;
+	// 				data[vi++] = u;
+	// 				data[vi++] = vv;
+	// 				data[vi++] = dm.phase;
+	// 				data[vi++] = cx;
+	// 				data[vi++] = cy;
+	// 			}
+	// 		}
+	// 	}
+
+	// 	let vbo = gl.createBuffer();
+	// 	gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+	// 	gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+	// 	this.buffers[name] = { vbo: vbo, vertCount: vertCount, stride: 32 };
+	// };
+
+	// CTransitionGL.prototype._prepareGlitter = function () {
+	// 	this.GetProgram('glitterHex', _VERT_GLITTER_HEX, _FRAG_GLITTER_HEX);
+	// 	this._initHexMeshBuffer('hexGlitter', 0.07, 1.0);
+	// 	this._initDiamondMeshBuffer('diamondGlitter', 0.06);
+	// };
+
+	// CTransitionGL.prototype._renderGlitter = function (progress, param) {
+	// 	let gl = this.gl;
+	// 	let prog = this.programs['glitterHex'];
+	// 	if (!prog) return;
+
+	// 	let aspect = this.glCanvas.width / this.glCanvas.height;
+	// 	let fov = Math.PI / 4;
+	// 	let dist = 1.0 / Math.tan(fov / 2);
+	// 	let projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
+
+	// 	// Direction and shape from param
+	// 	let dirX = 0, dirY = 0;
+	// 	let base = c_oAscSlideTransitionParams.Glitter_Left_Diamond;
+	// 	let offset = param - base;
+	// 	let dirIdx = offset % 4;
+	// 	let isDiamond = (offset < 4); // 0-3 = diamond, 4-7 = hexagon
+	// 	switch (dirIdx) {
+	// 		case 0: dirX = -1; break;
+	// 		case 1: dirX = 1; break;
+	// 		case 2: dirY = 1; break;
+	// 		case 3: dirY = -1; break;
+	// 	}
+
+	// 	let meshName = isDiamond ? 'diamondGlitter' : 'hexGlitter';
+
+	// 	let mv = _Mat4.translate(_Mat4.identity(), 0, 0, -dist);
+
+	// 	gl.enable(gl.DEPTH_TEST);
+	// 	gl.useProgram(prog.program);
+	// 	gl.uniformMatrix4fv(prog.uniforms['uProjection'], false, projection);
+	// 	gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mv);
+	// 	gl.uniform1f(prog.uniforms['uProgress'], progress);
+	// 	gl.uniform1f(prog.uniforms['uDirX'], dirX);
+	// 	gl.uniform1f(prog.uniforms['uDirY'], dirY);
+	// 	gl.uniform1f(prog.uniforms['uAspect'], aspect);
+
+	// 	gl.activeTexture(gl.TEXTURE0);
+	// 	gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
+	// 	gl.uniform1i(prog.uniforms['uTexture1'], 0);
+
+	// 	gl.activeTexture(gl.TEXTURE1);
+	// 	gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
+	// 	gl.uniform1i(prog.uniforms['uTexture2'], 1);
+
+	// 	this._bindHexMesh(meshName, prog);
+	// 	gl.drawArrays(gl.TRIANGLES, 0, this.buffers[meshName].vertCount);
+	// };
+
+	// // ============================================================
+	// // Transition: Shred — pieces scatter in 3D
+	// // ============================================================
+
+	// let _VERT_TILE_SCATTER = [
+	// 	'attribute vec3 aPosition;',
+	// 	'attribute vec2 aTexCoord;',
+	// 	'attribute vec3 aTileOffset;',
+	// 	'attribute float aTilePhase;',
+	// 	'attribute vec2 aTileCenter;',
+	// 	'uniform mat4 uProjection;',
+	// 	'uniform mat4 uModelView;',
+	// 	'uniform float uProgress;',
+	// 	'uniform float uScatterType;',
+	// 	'varying vec2 vTexCoord;',
+	// 	'varying float vAlpha;',
+	// 	'',
+	// 	'vec3 rotAx(vec3 v, vec3 ax, float a) {',
+	// 	'    float c = cos(a); float s = sin(a); float t = 1.0 - c;',
+	// 	'    vec3 n = normalize(ax);',
+	// 	'    return v * c + cross(n, v) * s + n * dot(n, v) * t;',
+	// 	'}',
+	// 	'',
+	// 	'void main() {',
+	// 	'    vec3 pos = aPosition;',
+	// 	'    float p = uProgress;',
+	// 	'    vec3 local = pos - vec3(aTileCenter, 0.0);',
+	// 	'    float t = clamp((p - aTilePhase * 0.5) / 0.5, 0.0, 1.0);',
+	// 	'    vAlpha = 1.0 - t;',
+	// 	'',
+	// 	'    // Shred: pieces scatter in random directions with rotation',
+	// 	'    vec3 rax = normalize(vec3(aTileOffset.xy, 0.5));',
+	// 	'    local = rotAx(local, rax, t * 4.0 * (aTilePhase + 0.5));',
+	// 	'    pos = vec3(aTileCenter, 0.0) + local;',
+	// 	'    pos += aTileOffset * t * 2.0;',
+	// 	'    pos.y -= t * t * 1.5;',
+	// 	'    pos.z += t * (aTileOffset.z * 1.5 + 0.3);',
+	// 	'',
+	// 	'    vTexCoord = aTexCoord;',
+	// 	'    gl_Position = uProjection * uModelView * vec4(pos, 1.0);',
+	// 	'}'
+	// ].join('\n');
+
+	// CTransitionGL.prototype._initShredStripMeshBuffer = function (name) {
+	// 	if (this.buffers[name]) return;
+
+	// 	let gl = this.gl;
+	// 	let aspect = this.glCanvas.width / this.glCanvas.height;
+	// 	let hw = aspect, hh = 1.0;
+
+	// 	// Grid: 24 columns × 8 rows, vertical strips with merged pattern
+	// 	let cols = 24, rows = 8;
+	// 	let cellW = 2.0 * hw / cols;
+	// 	let cellH = 2.0 * hh / rows;
+
+	// 	// Define tiles: repeating pattern every 6 columns
+	// 	// Some adjacent strips merge at different heights
+	// 	let tiles = [];
+	// 	let seed = 42;
+	// 	let rand = function () { seed = (seed * 16807) % 2147483647; return (seed & 0x7fffffff) / 2147483647; };
+
+	// 	for (let bc = 0; bc < cols; bc += 6) {
+	// 		let maxC = Math.min(bc + 6, cols);
+	// 		let cutA = Math.floor(rand() * (rows - 3)) + 2;
+	// 		let cutB = Math.floor(rand() * (rows - 3)) + 2;
+
+	// 		// Column 0: full strip
+	// 		tiles.push({ c: bc, r: 0, cw: 1, rh: rows });
+
+	// 		if (bc + 1 < maxC) {
+	// 			// Column 1 top part
+	// 			tiles.push({ c: bc + 1, r: 0, cw: 1, rh: cutA });
+	// 			if (bc + 2 < maxC) {
+	// 				// Column 1 bottom + Column 2 bottom merged
+	// 				tiles.push({ c: bc + 1, r: cutA, cw: 2, rh: rows - cutA });
+	// 				// Column 2 top part
+	// 				tiles.push({ c: bc + 2, r: 0, cw: 1, rh: cutA });
+	// 			} else {
+	// 				tiles.push({ c: bc + 1, r: cutA, cw: 1, rh: rows - cutA });
+	// 			}
+	// 		}
+
+	// 		if (bc + 3 < maxC) {
+	// 			// Column 3: full strip
+	// 			tiles.push({ c: bc + 3, r: 0, cw: 1, rh: rows });
+	// 		}
+
+	// 		if (bc + 4 < maxC) {
+	// 			if (bc + 5 < maxC) {
+	// 				// Column 4-5 top merged
+	// 				tiles.push({ c: bc + 4, r: 0, cw: 2, rh: cutB });
+	// 				// Column 4 bottom
+	// 				tiles.push({ c: bc + 4, r: cutB, cw: 1, rh: rows - cutB });
+	// 				// Column 5 bottom
+	// 				tiles.push({ c: bc + 5, r: cutB, cw: 1, rh: rows - cutB });
+	// 			} else {
+	// 				tiles.push({ c: bc + 4, r: 0, cw: 1, rh: rows });
+	// 			}
+	// 		}
+	// 	}
+
+	// 	// Generate mesh: each tile = 2 triangles = 6 vertices
+	// 	// position(3) + texcoord(2) + tileOffset(3) + tilePhase(1) + tileCenter(2) = 11 floats
+	// 	let vertCount = tiles.length * 6;
+	// 	let data = new Float32Array(vertCount * 11);
+	// 	let vi = 0;
+
+	// 	for (let t = 0; t < tiles.length; t++) {
+	// 		let tile = tiles[t];
+	// 		let x0 = -hw + tile.c * cellW;
+	// 		let x1 = x0 + tile.cw * cellW;
+	// 		let y0 = -hh + tile.r * cellH;
+	// 		let y1 = y0 + tile.rh * cellH;
+
+	// 		let centerX = (x0 + x1) * 0.5;
+	// 		let centerY = (y0 + y1) * 0.5;
+
+	// 		let u0 = (x0 + hw) / (2 * hw);
+	// 		let u1 = (x1 + hw) / (2 * hw);
+	// 		let v0 = (y0 + hh) / (2 * hh);
+	// 		let v1 = (y1 + hh) / (2 * hh);
+
+	// 		let offX = (rand() - 0.5) * 2.0;
+	// 		let offY = (rand() - 0.5) * 2.0;
+	// 		let offZ = rand() * 0.5 + 0.5;
+	// 		let phase = rand();
+
+	// 		let corners = [
+	// 			[x0, y0, 0, u0, v0],
+	// 			[x1, y0, 0, u1, v0],
+	// 			[x0, y1, 0, u0, v1],
+	// 			[x1, y0, 0, u1, v0],
+	// 			[x1, y1, 0, u1, v1],
+	// 			[x0, y1, 0, u0, v1]
+	// 		];
+	// 		for (let i = 0; i < 6; i++) {
+	// 			data[vi++] = corners[i][0];
+	// 			data[vi++] = corners[i][1];
+	// 			data[vi++] = corners[i][2];
+	// 			data[vi++] = corners[i][3];
+	// 			data[vi++] = corners[i][4];
+	// 			data[vi++] = offX;
+	// 			data[vi++] = offY;
+	// 			data[vi++] = offZ;
+	// 			data[vi++] = phase;
+	// 			data[vi++] = centerX;
+	// 			data[vi++] = centerY;
+	// 		}
+	// 	}
+
+	// 	let vbo = gl.createBuffer();
+	// 	gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+	// 	gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+	// 	this.buffers[name] = { vbo: vbo, vertCount: vertCount, stride: 44 };
+	// };
+
+	// CTransitionGL.prototype._prepareShred = function () {
+	// 	this.GetProgram('tileScatter', _VERT_TILE_SCATTER, _FRAG_TILE_SCATTER);
+	// 	this.GetProgram('flip3d', _VERT_3D, _FRAG_TEXTURED);
+	// 	this._initQuadBuffer3D();
+
+	// 	let isStrip = (this.currentTransition.param === c_oAscSlideTransitionParams.Shred_StripIn ||
+	// 		this.currentTransition.param === c_oAscSlideTransitionParams.Shred_StripOut);
+	// 	if (isStrip)
+	// 		this._initShredStripMeshBuffer('tilesShredStrip');
+	// 	else
+	// 		this._initTileMeshBuffer(12, 10, 'tilesShredRect');
+	// };
+
+	// CTransitionGL.prototype._renderShred = function (progress, param) {
+	// 	let gl = this.gl;
+	// 	let scatterProg = this.programs['tileScatter'];
+	// 	let flatProg = this.programs['flip3d'];
+	// 	if (!scatterProg || !flatProg) return;
+
+	// 	let aspect = this.glCanvas.width / this.glCanvas.height;
+	// 	let fov = Math.PI / 4;
+	// 	let dist = 1.0 / Math.tan(fov / 2);
+	// 	let projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
+
+	// 	let isIn = (param === c_oAscSlideTransitionParams.Shred_StripIn ||
+	// 		param === c_oAscSlideTransitionParams.Shred_RectangleIn);
+	// 	let isStrip = (param === c_oAscSlideTransitionParams.Shred_StripIn ||
+	// 		param === c_oAscSlideTransitionParams.Shred_StripOut);
+	// 	let tileName = isStrip ? 'tilesShredStrip' : 'tilesShredRect';
+
+	// 	// Perspective tilt: camera from top-left for scatter
+	// 	let tiltX = -0.12; // look from above
+	// 	let tiltY = -0.08; // look from left
+	// 	// For "Out": new slide assembles from top-right perspective
+	// 	let assembleTiltY = isIn ? tiltY : 0.08;
+
+	// 	// Phase: perspective appears, then scatter, then assemble with perspective, then settle
+	// 	let perspPhase = Math.sin(progress * Math.PI);
+
+	// 	if (isIn) {
+	// 		// Draw old slide behind
+	// 		gl.useProgram(flatProg.program);
+	// 		gl.enable(gl.DEPTH_TEST);
+	// 		let mvBack = _Mat4.identity();
+	// 		mvBack = _Mat4.translate(mvBack, 0, 0, -dist - 0.02);
+	// 		mvBack = _Mat4.rotateX(mvBack, tiltX * perspPhase);
+	// 		mvBack = _Mat4.rotateY(mvBack, assembleTiltY * perspPhase);
+	// 		gl.uniformMatrix4fv(flatProg.uniforms['uProjection'], false, projection);
+	// 		gl.uniformMatrix4fv(flatProg.uniforms['uModelView'], false, mvBack);
+	// 		gl.uniform1f(flatProg.uniforms['uAlpha'], 1.0);
+	// 		gl.activeTexture(gl.TEXTURE0);
+	// 		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
+	// 		gl.uniform1i(flatProg.uniforms['uTexture'], 0);
+	// 		this._bindQuad3D(flatProg);
+	// 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+	// 		// New slide pieces assemble
+	// 		let mv = _Mat4.identity();
+	// 		mv = _Mat4.translate(mv, 0, 0, -dist);
+	// 		mv = _Mat4.rotateX(mv, tiltX * perspPhase);
+	// 		mv = _Mat4.rotateY(mv, assembleTiltY * perspPhase);
+	// 		gl.useProgram(scatterProg.program);
+	// 		gl.uniformMatrix4fv(scatterProg.uniforms['uProjection'], false, projection);
+	// 		gl.uniformMatrix4fv(scatterProg.uniforms['uModelView'], false, mv);
+	// 		gl.uniform1f(scatterProg.uniforms['uProgress'], 1.0 - progress);
+	// 		gl.uniform1f(scatterProg.uniforms['uScatterType'], 3);
+	// 		gl.activeTexture(gl.TEXTURE0);
+	// 		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
+	// 		gl.uniform1i(scatterProg.uniforms['uTexture'], 0);
+	// 		this._bindTileMesh(tileName, scatterProg);
+	// 		gl.drawArrays(gl.TRIANGLES, 0, this.buffers[tileName].vertCount);
+	// 	}
+	// 	else {
+	// 		// New slide behind
+	// 		gl.useProgram(flatProg.program);
+	// 		gl.enable(gl.DEPTH_TEST);
+	// 		let mvBack = _Mat4.identity();
+	// 		mvBack = _Mat4.translate(mvBack, 0, 0, -dist - 0.02);
+	// 		mvBack = _Mat4.rotateX(mvBack, tiltX * perspPhase);
+	// 		mvBack = _Mat4.rotateY(mvBack, tiltY * perspPhase);
+	// 		gl.uniformMatrix4fv(flatProg.uniforms['uProjection'], false, projection);
+	// 		gl.uniformMatrix4fv(flatProg.uniforms['uModelView'], false, mvBack);
+	// 		gl.uniform1f(flatProg.uniforms['uAlpha'], 1.0);
+	// 		gl.activeTexture(gl.TEXTURE0);
+	// 		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
+	// 		gl.uniform1i(flatProg.uniforms['uTexture'], 0);
+	// 		this._bindQuad3D(flatProg);
+	// 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+	// 		// Old slide scatters
+	// 		let mv = _Mat4.identity();
+	// 		mv = _Mat4.translate(mv, 0, 0, -dist);
+	// 		mv = _Mat4.rotateX(mv, tiltX * perspPhase);
+	// 		mv = _Mat4.rotateY(mv, tiltY * perspPhase);
+	// 		gl.useProgram(scatterProg.program);
+	// 		gl.uniformMatrix4fv(scatterProg.uniforms['uProjection'], false, projection);
+	// 		gl.uniformMatrix4fv(scatterProg.uniforms['uModelView'], false, mv);
+	// 		gl.uniform1f(scatterProg.uniforms['uProgress'], progress);
+	// 		gl.uniform1f(scatterProg.uniforms['uScatterType'], 3);
+	// 		gl.activeTexture(gl.TEXTURE0);
+	// 		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
+	// 		gl.uniform1i(scatterProg.uniforms['uTexture'], 0);
+	// 		this._bindTileMesh(tileName, scatterProg);
+	// 		gl.drawArrays(gl.TRIANGLES, 0, this.buffers[tileName].vertCount);
+	// 	}
+	// };
+
+	// // ============================================================
+	// // Transition: Flythrough — scale-based zoom through
+	// // ============================================================
+
+	// CTransitionGL.prototype._prepareFlythrough = function () {
+	// 	this.GetProgram('flip3d', _VERT_3D, _FRAG_TEXTURED);
+	// 	this._initQuadBuffer3D();
+	// };
+
+	// CTransitionGL.prototype._renderFlythrough = function (progress, param) {
+	// 	let gl = this.gl;
+	// 	let prog = this.programs['flip3d'];
+	// 	if (!prog) return;
+
+	// 	gl.useProgram(prog.program);
+	// 	gl.enable(gl.DEPTH_TEST);
+
+	// 	// White background
+	// 	gl.clearColor(1.0, 1.0, 1.0, 1.0);
+	// 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+	// 	let aspect = this.glCanvas.width / this.glCanvas.height;
+	// 	let fov = Math.PI / 4;
+	// 	let dist = 1.0 / Math.tan(fov / 2);
+	// 	let projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
+
+	// 	let isOut = (param === c_oAscSlideTransitionParams.Flythrough_Out ||
+	// 		param === c_oAscSlideTransitionParams.Flythrough_Out_Bounce);
+	// 	let hasBounce = (param === c_oAscSlideTransitionParams.Flythrough_In_Bounce ||
+	// 		param === c_oAscSlideTransitionParams.Flythrough_Out_Bounce);
+
+	// 	let oldAlpha = 1.0 - progress;
+	// 	let newAlpha = progress;
+
+	// 	// Old slide scales up (grows toward camera), new starts at half size behind
+	// 	let oldScale, newScale;
+	// 	if (!isOut) {
+	// 		// In: old grows (1→2), new grows from behind (0.5→1)
+	// 		oldScale = 1.0 + progress;
+	// 		newScale = 0.5 + 0.5 * progress;
+	// 	} else {
+	// 		// Out: old shrinks (1→0.5), new shrinks from large (2→1)
+	// 		oldScale = 1.0 - 0.5 * progress;
+	// 		newScale = 2.0 - progress;
+	// 	}
+
+	// 	if (hasBounce) {
+	// 		// Multi-bounce: overshoot then settle
+	// 		let bounceT = Math.max(0, (progress - 0.65) / 0.35);
+	// 		let bounce;
+	// 		if (bounceT < 0.5) {
+	// 			bounce = Math.sin(bounceT * 2 * Math.PI) * 0.08;
+	// 		} else {
+	// 			bounce = Math.sin((bounceT - 0.5) * 2 * Math.PI) * 0.03;
+	// 		}
+	// 		newScale += isOut ? -bounce : bounce;
+	// 	}
+
+	// 	gl.uniformMatrix4fv(prog.uniforms['uProjection'], false, projection);
+
+	// 	// Draw new slide first (behind, slightly further back)
+	// 	{
+	// 		let mv = _Mat4.identity();
+	// 		mv = _Mat4.translate(mv, 0, 0, -dist - 0.01);
+	// 		mv[0] *= newScale; mv[5] *= newScale;
+	// 		gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mv);
+	// 		gl.uniform1f(prog.uniforms['uAlpha'], newAlpha);
+	// 		gl.activeTexture(gl.TEXTURE0);
+	// 		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
+	// 		gl.uniform1i(prog.uniforms['uTexture'], 0);
+	// 		this._bindQuad3D(prog);
+	// 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+	// 	}
+
+	// 	// Draw old slide (in front, scales up and fades out)
+	// 	{
+	// 		let mv = _Mat4.identity();
+	// 		mv = _Mat4.translate(mv, 0, 0, -dist);
+	// 		mv[0] *= oldScale; mv[5] *= oldScale;
+	// 		gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mv);
+	// 		gl.uniform1f(prog.uniforms['uAlpha'], oldAlpha);
+	// 		gl.activeTexture(gl.TEXTURE0);
+	// 		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
+	// 		gl.uniform1i(prog.uniforms['uTexture'], 0);
+	// 		this._bindQuad3D(prog);
+	// 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+	// 	}
+	// };
+
+	// // ============================================================
+	// // Transition: Conveyor — perspective gallery sliding
+	// // ============================================================
+
+	// CTransitionGL.prototype._prepareConveyor = function () {
+	// 	this.GetProgram('flip3d', _VERT_3D, _FRAG_TEXTURED);
+	// 	this._initQuadBuffer3D();
+	// };
+
+	// CTransitionGL.prototype._renderConveyor = function (progress, param) {
+	// 	let gl = this.gl;
+	// 	let prog = this.programs['flip3d'];
+	// 	if (!prog) return;
+
+	// 	gl.useProgram(prog.program);
+	// 	gl.enable(gl.DEPTH_TEST);
+
+	// 	let aspect = this.glCanvas.width / this.glCanvas.height;
+	// 	let fov = Math.PI / 4;
+	// 	let dist = 1.0 / Math.tan(fov / 2);
+	// 	let projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
+
+	// 	let isLeft = (param === c_oAscSlideTransitionParams.Conveyor_Left);
+	// 	let dir = isLeft ? -1 : 1;
+	// 	let hw = aspect;
+
+	// 	// Three phases: tilt in (0→0.12), slide (0.12→0.85), untilt (0.85→1.0)
+	// 	let tiltInEnd = 0.12;
+	// 	let slideEnd = 0.85;
+
+	// 	let tiltInProgress = Math.min(progress / tiltInEnd, 1.0);
+	// 	tiltInProgress = tiltInProgress * tiltInProgress * (3.0 - 2.0 * tiltInProgress);
+
+	// 	let slideStart = tiltInEnd;
+	// 	let slideDur = slideEnd - slideStart;
+	// 	let slideProgress = Math.max(0, Math.min((progress - slideStart) / slideDur, 1.0));
+
+	// 	let untwistProgress = Math.max(0, (progress - slideEnd) / (1.0 - slideEnd));
+	// 	untwistProgress = untwistProgress * untwistProgress * (3.0 - 2.0 * untwistProgress);
+
+	// 	// Y-axis rotation angle (~18 degrees), reversed direction
+	// 	let maxAngle = -dir * Math.PI / 10;
+	// 	let tiltAmount = tiltInProgress * (1.0 - untwistProgress);
+	// 	let angle = maxAngle * tiltAmount;
+
+	// 	// Horizontal slide offset with ease (smooth start/stop)
+	// 	let eased = slideProgress * slideProgress * (3.0 - 2.0 * slideProgress);
+	// 	let gap = hw * 0.06; // small gap between slides
+	// 	let totalSlide = hw * 2 + gap;
+	// 	let slideOffset = dir * eased * totalSlide;
+
+	// 	gl.clearColor(1.0, 1.0, 1.0, 1.0);
+	// 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+	// 	gl.uniformMatrix4fv(prog.uniforms['uProjection'], false, projection);
+
+	// 	// Old slide (starts centered, slides away)
+	// 	{
+	// 		let mv = _Mat4.identity();
+	// 		mv = _Mat4.translate(mv, 0, 0, -dist);
+	// 		mv = _Mat4.rotateY(mv, angle);
+	// 		mv = _Mat4.translate(mv, slideOffset, 0, 0);
+
+	// 		gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mv);
+	// 		gl.uniform1f(prog.uniforms['uAlpha'], 1.0);
+	// 		gl.activeTexture(gl.TEXTURE0);
+	// 		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
+	// 		gl.uniform1i(prog.uniforms['uTexture'], 0);
+	// 		this._bindQuad3D(prog);
+	// 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+	// 	}
+
+	// 	// New slide (starts beside old with gap, slides into position)
+	// 	{
+	// 		let mv = _Mat4.identity();
+	// 		mv = _Mat4.translate(mv, 0, 0, -dist);
+	// 		mv = _Mat4.rotateY(mv, angle);
+	// 		mv = _Mat4.translate(mv, slideOffset - dir * totalSlide, 0, 0);
+
+	// 		gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mv);
+	// 		gl.uniform1f(prog.uniforms['uAlpha'], 1.0);
+	// 		gl.activeTexture(gl.TEXTURE0);
+	// 		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
+	// 		gl.uniform1i(prog.uniforms['uTexture'], 0);
+	// 		this._bindQuad3D(prog);
+	// 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+	// 	}
+	// };
 
     window['AscCommonSlide'] = window['AscCommonSlide'] || {};
     window['AscCommonSlide'].CTransitionGL = CTransitionGL;
