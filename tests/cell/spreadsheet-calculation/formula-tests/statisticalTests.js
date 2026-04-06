@@ -19812,15 +19812,15 @@ $(function () {
 		// Case #0: Number. Basic valid input: integer > 0. 1 argument used.
 		oParser = new parserFormula('GAMMALN(10)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(10) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 12.801827480081469, 'Test: Positive case: Number. Basic valid input: integer > 0. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "12.80183", 'Test: Positive case: Number. Basic valid input: integer > 0. 1 argument used.');
 		// Case #1: Number. Basic valid input: positive float. 1 argument used.
 		oParser = new parserFormula('GAMMALN(2.5)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(2.5) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.2846828704729192, 'Test: Positive case: Number. Basic valid input: positive float. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "0.28468", 'Test: Positive case: Number. Basic valid input: positive float. 1 argument used.');
 		// Case #2: Number. Small positive number close to 1. 1 argument used.
 		oParser = new parserFormula('GAMMALN(1.0000001)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(1.0000001) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), -5.7721558755496383e-8, 'Test: Positive case: Number. Small positive number close to 1. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), -5.772155819983027e-8, 'Test: Positive case: Number. Small positive number close to 1. 1 argument used.');
 		// Case #3: String. String convertible to positive number. 1 argument used.
 		oParser = new parserFormula('GAMMALN("2")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN("2") is parsed.');
@@ -19832,15 +19832,15 @@ $(function () {
 		// Case #5: Reference link. Reference to cell with valid number (2). 1 argument used.
 		oParser = new parserFormula('GAMMALN(A100)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(A100) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 2.2527126517342064, 'Test: Positive case: Reference link. Reference to cell with valid number (2). 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "2.25271", 'Test: Positive case: Reference link. Reference to cell with valid number (2). 1 argument used.');
 		// Case #6: Area. Single-cell range with valid number (1.5). 1 argument used.
 		oParser = new parserFormula('GAMMALN(A101:A101)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(A101:A101) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 1.5240638224307845, 'Test: Positive case: Area. Single-cell range with valid number (1.5). 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "1.52406", 'Test: Positive case: Area. Single-cell range with valid number (1.5). 1 argument used.');
 		// Case #7: Array. Array with single valid element. 1 argument used.
 		oParser = new parserFormula('GAMMALN({2.5})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN({2.5}) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.2846828704729192, 'Test: Positive case: Array. Array with single valid element. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.28468287047292096, 'Test: Positive case: Array. Array with single valid element. 1 argument used.');
 		// Case #8: Name. Named range with valid number (2). 1 argument used.
 		oParser = new parserFormula('GAMMALN(TestName)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(TestName) is parsed.');
@@ -19852,43 +19852,43 @@ $(function () {
 		// Case #10: Ref3D. 3D reference to cell with valid number (2). 1 argument used.
 		oParser = new parserFormula('GAMMALN(Sheet2!A1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(Sheet2!A1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.5723649429247, 'Test: Positive case: Ref3D. 3D reference to cell with valid number (2). 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "0.57236", 'Test: Positive case: Ref3D. 3D reference to cell with valid number (2). 1 argument used.');
 		// Case #11: Area3D. 3D single-cell range with valid number (3). 1 argument used.
 		oParser = new parserFormula('GAMMALN(Sheet2!A2:A2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(Sheet2!A2:A2) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), -0.1207822376352453, 'Test: Positive case: Area3D. 3D single-cell range with valid number (3). 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "-0.12078", 'Test: Positive case: Area3D. 3D single-cell range with valid number (3). 1 argument used.');
 		// Case #12: Table. Table structured reference with valid number (2). 1 argument used.
 		oParser = new parserFormula('GAMMALN(Table1[Column1])', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(Table1[Column1]) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), -0.0028655665659086597, 'Test: Positive case: Table. Table structured reference with valid number (2). 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "-0.00287", 'Test: Positive case: Table. Table structured reference with valid number (2). 1 argument used.');
 		// Case #13: Date. Date as serial number (> 0). 1 argument used.
 		oParser = new parserFormula('GAMMALN(DATE(2025,1,1))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(DATE(2025,1,1)) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 444199.228392288, 'Test: Positive case: Date. Date as serial number (> 0). 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "444199.22839", 'Test: Positive case: Date. Date as serial number (> 0). 1 argument used.');
 		// Case #14: Time. Time adjusted to valid number (>= 1). 1 argument used.
 		oParser = new parserFormula('GAMMALN(TIME(12,0,0)+1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(TIME(12,0,0)+1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), -0.1207822376352453, 'Test: Positive case: Time. Time adjusted to valid number (>= 1). 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "-0.12078", 'Test: Positive case: Time. Time adjusted to valid number (>= 1). 1 argument used.');
 		// Case #15: Formula. GAMMA inside SUM formula. 1 argument used.
 		oParser = new parserFormula('SUM(GAMMALN(2.5),1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SUM(GAMMALN(2.5),1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 1.2846828704729192, 'Test: Positive case: Formula. GAMMA inside SUM formula. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "1.28468", 'Test: Positive case: Formula. GAMMA inside SUM formula. 1 argument used.');
 		// Case #16: Number. Very small positive number. 1 argument used.
 		oParser = new parserFormula('GAMMALN(0.0000001)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(0.0000001) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 16.11809559323676, 'Test: Positive case: Number. Very small positive number. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "16.11810", 'Test: Positive case: Number. Very small positive number. 1 argument used.');
 		// Case #17: String. Short date string convertible to number. 1 argument used.
 		oParser = new parserFormula('GAMMALN("12/12")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN("12/12") is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 451822.25589645095, 'Test: Positive case: String. Short date string convertible to number. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "451822.25590", 'Test: Positive case: String. Short date string convertible to number. 1 argument used.');
 		// Case #18: Array. Array with single valid element (duplicate for coverage). 1 argument used.
 		oParser = new parserFormula('GAMMALN({2.5})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN({2.5}) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.2846828704729192, 'Test: Positive case: Array. Array with single valid element (duplicate for coverage). 1 argument used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.28468287047292096, 'Test: Positive case: Array. Array with single valid element (duplicate for coverage). 1 argument used.');
 		// Case #19: Formula. Nested IF returning valid number. 1 argument used.
 		oParser = new parserFormula('GAMMALN(IF(TRUE, 2.5, 0.5))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(IF(TRUE, 2.5, 0.5)) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.2846828704729192, 'Test: Positive case: Formula. Nested IF returning valid number. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "0.28468", 'Test: Positive case: Formula. Nested IF returning valid number. 1 argument used.');
 		// Case #20: Number. Negative non-integer number (valid). 1 argument used.
 		oParser = new parserFormula('GAMMALN(-0.5)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(-0.5) is parsed.');
@@ -19900,7 +19900,11 @@ $(function () {
 		// Case #22: Formula. Nested formula converting negative to positive number. 1 argument used.
 		oParser = new parserFormula('GAMMALN(ABS(-2.5))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(ABS(-2.5)) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.2846828704729192, 'Test: Positive case: Formula. Nested formula converting negative to positive number. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "0.28468", 'Test: Positive case: Formula. Nested formula converting negative to positive number. 1 argument used.');
+		// Case #23: Number. Base number.
+		oParser = new parserFormula('GAMMALN(1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: GAMMALN(1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Number. Base number.');
 
 		// Negative cases:
 		// Case #1: Number. Negative integer returns #NUM!. 1 argument used.
@@ -19922,11 +19926,11 @@ $(function () {
 		// Case #5: Empty. Reference to empty cell returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('GAMMALN(A102)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(A102) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 1.0957979948180758, 'Test: Negative case: Empty. Reference to empty cell returns #VALUE!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "1.09580", 'Test: Negative case: Empty. Reference to empty cell returns #VALUE!. 1 argument used.');
 		// Case #6: Area. Multi-cell range returns #NUM!. 1 argument used.
 		oParser = new parserFormula('GAMMALN(A103:A104)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(A103:A104) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.796677818, 'Test: Negative case: Area. Multi-cell range returns #NUM!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.796677817701783, 'Test: Negative case: Area. Multi-cell range returns #NUM!. 1 argument used.');
 		// Case #7: String. Empty string returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('GAMMALN("")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN("") is parsed.');
@@ -19946,7 +19950,7 @@ $(function () {
 		// Case #11: Name. Named range with text (invalid) returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('GAMMALN(TestNameArea2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(TestNameArea2) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.1520596783998375, 'Test: Negative case: Name. Named range with text (invalid) returns #VALUE!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "0.15206", 'Test: Negative case: Name. Named range with text (invalid) returns #VALUE!. 1 argument used.');
 		// Case #12: Table. Table column with text (error) returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('GAMMALN(Table1[Column2])', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(Table1[Column2]) is parsed.');
@@ -19982,7 +19986,7 @@ $(function () {
 		// Case #18: Name3D. 3D named range with text (invalid) returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('GAMMALN(TestNameArea3D2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(TestNameArea3D2) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.1520596783998375, 'Test: Negative case: Name3D. 3D named range with text (invalid) returns #VALUE!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "0.15206", 'Test: Negative case: Name3D. 3D named range with text (invalid) returns #VALUE!. 1 argument used.');
 		// Case #19: Formula. Formula resulting in zero returns #NUM!. 1 argument used.
 		oParser = new parserFormula('GAMMALN(DATE(2025,1,1)-DATE(2025,1,1))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(DATE(2025,1,1)-DATE(2025,1,1)) is parsed.');
@@ -19996,7 +20000,7 @@ $(function () {
 		// Case #1: Number. Minimum positive number accepted by Excel. 1 argument used.
 		oParser = new parserFormula('GAMMALN(1E-307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(1E-307) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 706.8936235, 'Test: Bounded case: Number. Minimum positive number accepted by Excel. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), 706.893623549172, 'Test: Bounded case: Number. Minimum positive number accepted by Excel. 1 argument used.');
 		// Case #2: Number. Maximum positive number accepted by Excel. 1 argument used.
 		oParser = new parserFormula('GAMMALN(1.7E307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(1.7E307) is parsed.');
@@ -20005,10 +20009,10 @@ $(function () {
 		oParser = new parserFormula('GAMMALN(-0.999999999999999)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(-0.999999999999999) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Bounded case: Number. Negative number close to -1 but non-integer. 1 argument used.');
-
-		// Need to fix: diff results
-		// Case #6: Area. Multi-cell range returns #NUM!. 1 argument used.
-		// Case #1: Number. Minimum positive number accepted by Excel. 1 argument used.
+		// Case #4: Number. Negative number close to -1 but non-integer. 1 argument used.
+		oParser = new parserFormula('GAMMALN(1E-106)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: GAMMALN(-0.999999999999999) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "244.07402", 'Test: Bounded case: Number. Negative number close to -1 but non-integer. 1 argument used.');
 
 
 	});

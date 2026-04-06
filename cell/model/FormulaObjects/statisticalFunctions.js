@@ -585,7 +585,7 @@ function (window, undefined) {
 		return Math.exp(-x + a * Math.log(x) - lgamma(a)) * h;
 	}
 
-	// --- Log-gamma (Lanczos) ---
+	// --- Log-gamma (Lanczos approximation) ---
 	function lgamma(z) {
 		const g = 7;
 		const c = [
@@ -6978,35 +6978,60 @@ function (window, undefined) {
 	cGAMMALN.prototype.name = 'GAMMALN';
 	cGAMMALN.prototype.argumentsMin = 1;
 	cGAMMALN.prototype.argumentsMax = 1;
+	cGAMMALN.prototype.arrayIndexes = {0: 1};
 	cGAMMALN.prototype.argumentsType = [argType.number];
 	cGAMMALN.prototype.Calculate = function (arg) {
 
-		/*
-		 from OpenOffice Source.
-		 end
-		 */
+		let arg0 = arg[0];
+		if (arg0.type === cElementType.cell || arg0.type === cElementType.cell3D) {
+			arg0 = arg0.getValue();
+		} else if (arg0.type === cElementType.cellsRange || arg0.type === cElementType.cellsRange3D || arg0.type === cElementType.array) {
+			let resArray = new cArray();
+			let dimensions = arg0.getDimensions();
 
-		var arg0 = arg[0];
-		if (arg0 instanceof cArea || arg0 instanceof cArea3D) {
-			arg0 = arg0.cross(arguments[1]);
-		}
-		arg0 = arg0.tocNumber();
-		if (arg0 instanceof cError) {
-			return arg0;
-		} else if (arg0 instanceof cArray) {
-			arg0.foreach(function (elem, r, c) {
-				if (elem instanceof cNumber) {
-					var a = getLogGamma(elem.getValue());
-					this.array[r][c] = isNaN(a) ? new cError(cErrorType.not_numeric) : new cNumber(a);
-				} else {
-					this.array[r][c] = new cError(cErrorType.wrong_value_type);
+			for (let row = 0; row < dimensions.row; row++) {
+				resArray.addRow();
+				for (let col = 0; col < dimensions.col; col++) {
+					let elemVal = arg0.getValueByRowCol ? arg0.getValueByRowCol(row,col,true) : arg0.getElementRowCol(row,col);
+	
+					elemVal = elemVal.tocNumber();
+					if (elemVal.type === cElementType.number) {
+						elemVal = elemVal.getValue();
+						if (elemVal <= 0) {
+							resArray.addElement(new cError(cErrorType.not_numeric));
+						} else if (elemVal === 1 || elemVal === 2) {
+							// exact result to avoid cumulative rounding error in lgamma approximation
+							resArray.addElement(new cNumber(0));
+						} else {
+							let lGammaRes = lgamma(elemVal);
+							resArray.addElement(isNaN(lGammaRes) ? new cError(cErrorType.not_numeric) : new cNumber(lGammaRes));
+						}
+					} else if (elemVal.type === cElementType.error) {
+						resArray.addElement(elemVal);
+					} else {
+						resArray.addElement(new cError(cErrorType.not_numeric));
+					}
 				}
-			})
-		} else {
-			var a = getLogGamma(arg0.getValue());
-			return isNaN(a) ? new cError(cErrorType.not_numeric) : new cNumber(a);
+			}
+
+			return resArray;
 		}
-		return arg0;
+
+		arg0 = arg0.tocNumber();
+		if (arg0.type === cElementType.error) {
+			return arg0;
+		} else {
+			let arg0Val = arg0.getValue();
+			if (arg0Val <= 0) {
+				return new cError(cErrorType.not_numeric);
+			} else if (arg0Val === 1 || arg0Val === 2) {
+				// exact result to avoid cumulative rounding error in lgamma approximation
+				return new cNumber(0);
+			}
+
+			let lGammaRes = lgamma(arg0Val);
+			return isNaN(lGammaRes) ? new cError(cErrorType.not_numeric) : new cNumber(lGammaRes);
+		}
 	};
 
 	/**
