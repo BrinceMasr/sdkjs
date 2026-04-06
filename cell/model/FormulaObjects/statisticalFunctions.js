@@ -7042,31 +7042,14 @@ function (window, undefined) {
 	}
 
 	//***array-formula***
-	cGAMMALN_PRECISE.prototype = Object.create(cBaseFunction.prototype);
+	cGAMMALN_PRECISE.prototype = Object.create(cGAMMALN.prototype);
 	cGAMMALN_PRECISE.prototype.constructor = cGAMMALN_PRECISE;
 	cGAMMALN_PRECISE.prototype.name = 'GAMMALN.PRECISE';
 	cGAMMALN_PRECISE.prototype.argumentsMin = 1;
 	cGAMMALN_PRECISE.prototype.argumentsMax = 1;
 	cGAMMALN_PRECISE.prototype.isXLFN = true;
+	cGAMMALN_PRECISE.prototype.arrayIndexes = {0: 1};
 	cGAMMALN_PRECISE.prototype.argumentsType = [argType.number];
-	cGAMMALN_PRECISE.prototype.Calculate = function (arg) {
-		var oArguments = this._prepareArguments(arg, arguments[1], true);
-		var argClone = oArguments.args;
-
-		argClone[0] = argClone[0].tocNumber();
-
-		var argError;
-		if (argError = this._checkErrorArg(argClone)) {
-			return argError;
-		}
-
-		var calcGamma = function (argArray) {
-			var a = getLogGamma(argArray[0]);
-			return isNaN(a) ? new cError(cErrorType.not_numeric) : new cNumber(a);
-		};
-
-		return this._findArrayInNumberArguments(oArguments, calcGamma);
-	};
 
 	/**
 	 * @constructor
