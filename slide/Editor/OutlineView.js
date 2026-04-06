@@ -359,58 +359,156 @@
 		}
 		return 0;
 	}
-	OutlineView.prototype.paragraphAdd = function (paraItem) {
+	OutlineView.prototype.rebuildPos = function (pos, sourceContent, sourceParagraph) {
+		const newPos = pos.slice();
+		newPos[0] = {Class: sourceContent, Position: sourceParagraph.GetIndex()};
+		newPos[1] = {Class: sourceParagraph, Position: pos[1].Position};
+		return newPos;
+	}
+	OutlineView.prototype.getSelectionUseContentsInfo = function (startPos, endPos) {
+		const contents = [];
+		const startPosIndex = startPos[0].Position;
+		const endPosIndex = endPos[0].Position;
+		const content = this.getDocContent();
+		for (let i = startPosIndex; i <= endPosIndex; i += 1) {
+			const contentInfo = contents[contents.length - 1];
+			const outlineParagraph = content.Content[i];
+			const sourceParagraph = this.outlineToSourceMap[outlineParagraph.Get_Id()];
+			if (sourceParagraph) {
+				const sourceContent = sourceParagraph.GetParent();
+				if (contentInfo && contentInfo.content === sourceContent) {
+					contentInfo.endPos = endPos;
+					contentInfo.endParagraph =  sourceParagraph;
+				} else {
+					contents.push({startPos: startPos, startParagraph: sourceParagraph, endPos: endPos, endParagraph: sourceParagraph, content: sourceContent});
+				}
+			}
+		}
+		return contents;
+	}
+	OutlineView.prototype.forEachSelectedContent = function (callback) {
 		const content = this.getDocContent();
 		if (!content) {
 			return;
 		}
 		const startPos = content.GetContentPosition(true, true);
 		const endPos = content.GetContentPosition(true, false);
-		if (content.IsSelectionUse()) {
 
-			console.log(startPos, endPos)
+		if (content.IsSelectionUse()) {
+			const contents = this.getSelectionUseContentsInfo(startPos, endPos);
+				for (let i = 0; i < contents.length; i += 1) {
+					const contentInfo = contents[i];
+					const content = contentInfo.content;
+					const startPos = this.rebuildPos(contentInfo.startPos, content, contentInfo.startParagraph);
+					const endPos = this.rebuildPos(contentInfo.endPos, content, contentInfo.endParagraph);
+					content.SetContentSelection(startPos, endPos, 0, 0, 0, 0);
+					const res = callback(content);
+					content.RemoveSelection();
+					if (res) {
+						return true;
+					}
+				}
 		} else {
 			const contentPos = content.GetContentPosition(false, false);
-			console.log(contentPos)
-		}
+			const paragraph = content.Content[content.CurPos.ContentPos];
+			const sourceParagraph = this.outlineToSourceMap[paragraph.Get_Id()];
+			if (sourceParagraph) {
+				const sourceContent = sourceParagraph.GetParent();
+				const startPos = this.rebuildPos(contentPos, sourceContent, sourceParagraph);
+				sourceContent.SetContentPosition(startPos, 0, 0);
+				const res = callback(sourceContent);
+				sourceContent.RemoveSelection();
+				if (res) {
+					return true;
+				}
+			} else {
 
-		// const paragraphs = content.GetCurrentParagraph(false, true);
-		// if (paraItem === para_TextPr) {
-		// 	let currentContent = null;
-		// 	for (let i = 0; i < paragraphs.length; i += 1) {
-		// 		const outlineParagraph = paragraphs[i];
-		// 		const sourceParagraph = this.outlineToSourceMap[outlineParagraph.Get_Id()];
-		// 		if (sourceParagraph) {
-		// 			const content = sourceParagraph.GetParent();
-		// 			if (content !== currentContent) {
-		// 				currentContent = content;
-		// 			}
-		// 			if (outlineParagraph.IsSelectionUse()) {
-		// 				const startSelectionPos = outlineParagraph.getSelectionStartPos();
-		// 				const endSelectionPos = outlineParagraph.getSelectionEndPos();
-		// 				sourceParagraph.Selection.Use = true;
-		// 				sourceParagraph.Set_SelectionContentPos(startSelectionPos, endSelectionPos);
-		// 			} else {
-		// 				const contentPos = outlineParagraph.Get_ParaContentPos();
-		// 				sourceParagraph.Set_ParaContentPos(contentPos, false, -1, -1, true);
-		// 			}
-		// 			sourceParagraph.AddToParagraph(paraItem)
-		// 		}
-		// 	}
-		// } else {
-		// 	for (let i = 0; i < paragraphs.length; i += 1) {
-		// 		const outlineParagraph = paragraphs[i];
-		// 		const sourceParagraph = this.outlineToSourceMap[outlineParagraph.Get_Id()];
-		// 		if (sourceParagraph) {
-		// 			if (sourceParagraph.IsSelectedAll()) {
-		//
-		// 			}
-		// 		} else {
-		//
-		// 		}
-		// 	}
-		// }
+			}
+		}
+		return false;
 	}
+	OutlineView.prototype.paragraphAdd = function (paraItem) {
+		if (paraItem.Type === para_TextPr) {
+			this.forEachSelectedContent(function (content) {
+				content.AddToParagraph(paraItem);
+			});
+		} else {
+			this.forEachSelectedContent(function (content) {
+
+			});
+		}
+	}
+	// OutlineView.prototype.forEachSelectedParagraph = function (callback) {
+	// 	const content = this.getDocContent();
+	// 	if (content.IsSelectionUse()) {
+	// 		let StartPos = content.Selection.StartPos;
+	// 		let EndPos   = content.Selection.EndPos;
+	// 		if (EndPos < StartPos)
+	// 		{
+	// 			const Temp = StartPos;
+	// 			StartPos = EndPos;
+	// 			EndPos   = Temp;
+	// 		}
+	// 		for (let i = StartPos; i <= EndPos; i += 1) {
+	// 			if (callback(content.Content[i])) {
+	// 				return true;
+	// 			}
+	// 		}
+	// 	} else {
+	// 		if (callback(content.Content[content.CurPos.ContentPos])) {
+	// 			return true;
+	// 		}
+	// 	}
+	// 	return false;
+	// }
+
+	OutlineView.prototype.getParagraphParaPr = function () {
+		let paraPr;
+		this.forEachSelectedContent(function (content) {
+			if (content) {
+				const contentParaPr = content.GetCalculatedParaPr();
+				if (paraPr) {
+					paraPr.Compare(contentParaPr);
+				} else {
+					paraPr = contentParaPr;
+				}
+			}
+		});
+		return paraPr;
+	};
+
+	OutlineView.prototype.getParagraphTextPr = function () {
+		let textPr;
+		this.forEachSelectedContent(function (content) {
+			if (content) {
+				const contentTextPr = content.GetCalculatedTextPr();
+				if (textPr) {
+					textPr.Compare(contentTextPr);
+				} else {
+					textPr = contentTextPr;
+				}
+			}
+		});
+		return textPr;
+	};
+	// OutlineView.prototype.unlinkSourceParagraph = function (sourceParagraph) {
+	//
+	// };
+	// OutlineView.prototype.updateFromSourceParagraph = function (sourceParagraph) {
+	//
+	// };
+	// OutlineView.prototype.checkSourceParagraph = function (paragraph) {
+	// 	if (this.sourceToOutlineMap[paragraph.Get_Id()]) {
+	// 		if (paragraph.IsUseInDocument()) {
+	// 			this.updateFromSourceParagraph();
+	// 		} else {
+	// 			this.unlinkSourceParagraph(paragraph);
+	// 		}
+	// 	} else {
+	// 		const shape = paragraph.GetParentShape();
+	// 		if ()
+	// 	}
+	// };
 
 
 	window["AscCommonSlide"] = window["AscCommonSlide"] || {};

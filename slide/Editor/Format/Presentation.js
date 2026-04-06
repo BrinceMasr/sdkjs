@@ -6447,7 +6447,9 @@ CPresentation.prototype.TurnOn_InterfaceEvents = function (bUpdate) {
 		this.Document_UpdateRulersState();
 	}
 };
-
+CPresentation.prototype.GetOutlineView = function () {
+	return Asc.editor.WordControl.Thumbnails.outlineView;
+};
 CPresentation.prototype.Document_UpdateInterfaceState = function () {
 	if (this.TurnOffInterfaceEvents) {
 		return;
@@ -6467,8 +6469,16 @@ CPresentation.prototype.Document_UpdateInterfaceState = function () {
 		}
 		let oTargetDocContent = oController.getTargetDocContent(undefined, true);
 		let oDrawingPr = oController.getDrawingProps();
-		let oParaPr = oController.getParagraphParaPr();
-		let oTextPr = oController.getParagraphTextPr();
+		let oParaPr;
+		let oTextPr;
+		if (this.IsFocusOnOutline()) {
+			const outlineView = this.GetOutlineView();
+			oParaPr = outlineView.getParagraphParaPr();
+			oTextPr = outlineView.getParagraphTextPr();
+		} else {
+			oParaPr = oController.getParagraphParaPr();
+			oTextPr = oController.getParagraphTextPr();
+		}
 		this.Api.textArtPreviewManager.clear();
 		let oTheme = oController.getTheme();
 		if (oTextPr) {

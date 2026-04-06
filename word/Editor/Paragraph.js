@@ -16097,34 +16097,46 @@ Paragraph.prototype.private_UpdateTrackRevisionOnChangeParaPr = function(bUpdate
 };
 Paragraph.prototype.UpdateDocumentOutline = function()
 {
-	if (!this.bFromDocument || !this.LogicDocument || !this.Parent)
-		return;
-
-
-	var isCheck = true;
-	var oParent = this.Parent;
-	while (oParent)
+	if (!this.LogicDocument || !this.Parent)
 	{
-		if (oParent === this.LogicDocument)
-		{
-			break;
-		}
-		else if (oParent.IsBlockLevelSdtContent())
-		{
-			oParent = oParent.Parent.Parent;
-		}
-		else
-		{
-			isCheck = false;
-			break;
-		}
+		return;
 	}
 
-	if (isCheck)
+	if (this.bFromDocument)
 	{
-		var oDocumentOutline = this.LogicDocument.GetDocumentOutline();
-		if (oDocumentOutline && oDocumentOutline.IsUse())
-			oDocumentOutline.CheckParagraph(this);
+		var isCheck = true;
+		var oParent = this.Parent;
+		while (oParent)
+		{
+			if (oParent === this.LogicDocument)
+			{
+				break;
+			}
+			else if (oParent.IsBlockLevelSdtContent())
+			{
+				oParent = oParent.Parent.Parent;
+			}
+			else
+			{
+				isCheck = false;
+				break;
+			}
+		}
+
+		if (isCheck)
+		{
+			var oDocumentOutline = this.LogicDocument.GetDocumentOutline();
+			if (oDocumentOutline && oDocumentOutline.IsUse())
+				oDocumentOutline.CheckParagraph(this);
+		}
+	}
+	else
+	{
+		const outlineView = this.LogicDocument.GetOutlineView();
+		if (outlineView)
+		{
+			outlineView.checkSourceParagraph(this);
+		}
 	}
 };
 Paragraph.prototype.AcceptRevisionChanges = function(Type, bAll)
