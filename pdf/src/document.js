@@ -111,6 +111,12 @@ var CPresentation = CPresentation || function(){};
     CCalculateInfo.prototype.GetSourceField = function() {
         return this.sourceField;
     };
+    CCalculateInfo.prototype.SetCurrentField = function(oField) {
+        this.currentField = oField;
+    };
+    CCalculateInfo.prototype.GetCurrentField = function() {
+        return this.currentField;
+    };
 	
 	/**
 	 * Main class for working with PDF structure
@@ -3032,10 +3038,11 @@ var CPresentation = CPresentation || function(){};
     CPDFDoc.prototype.DoCalculateFields = function(oSourceField) {
         // when any field changes (with commit) calculate is called for all
         let oThis = this;
+		let oCalcInfo = this.GetCalculateInfo();
 
-        this.calculateInfo.SetIsInProgress(true);
-        this.calculateInfo.SetSourceField(oSourceField);
-        this.calculateInfo.ids.forEach(function(id) {
+        oCalcInfo.SetIsInProgress(true);
+        oCalcInfo.SetSourceField(oSourceField);
+        oCalcInfo.ids.forEach(function(id) {
             let oField = oThis.GetFieldByApIdx(id);
             if (!oField)
                 return;
@@ -3048,6 +3055,8 @@ var CPresentation = CPresentation || function(){};
             let oActionRunScript = oCalcTrigget ? oCalcTrigget.GetActions()[0] : null;
 
             if (oActionRunScript) {
+				oCalcInfo.SetCurrentField(oField);
+
                 oActionRunScript.RunScript();
                 if (oField.IsNeedCommit()) {
                     oField.SetNeedRecalc(true);
@@ -3055,8 +3064,10 @@ var CPresentation = CPresentation || function(){};
                 }
             }
         });
-        this.calculateInfo.SetIsInProgress(false);
-        this.calculateInfo.SetSourceField(null);
+		
+        oCalcInfo.SetIsInProgress(false);
+        oCalcInfo.SetSourceField(null);
+		oCalcInfo.SetCurrentField(null);
     };
     CPDFDoc.prototype.IsCalcFieldsLocked = function() {
         let oThis = this;
