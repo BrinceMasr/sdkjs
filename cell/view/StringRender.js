@@ -691,10 +691,11 @@
 		 * @param {Number} endPos
 		 * @return {Number}
 		 */
-		StringRender.prototype._calcLineWidth = function (startPos, endPos) {
+		StringRender.prototype._calcLineWidth = function (startPos, endPos, skipTrailingSpaces) {
 			if (startPos < 0 || startPos >= this.chars.length) {
 				return 0;
 			}
+			var shouldSkip = skipTrailingSpaces || (this.flags && (this.flags.wrapText || this.flags.wrapOnlyNL || this.flags.wrapOnlyCE));
 			var isAtEnd, j, chProp, tw;
 
 			if (endPos === undefined || endPos < 0) {
@@ -711,7 +712,7 @@
 			for (j = endPos, tw = 0, isAtEnd = true; j >= startPos; --j) {
 				if (isAtEnd) {
 					// skip space char at end of line
-					if (this.codesSpace[this.chars[j]]) {
+					if (shouldSkip && this.codesSpace[this.chars[j]]) {
 						continue;
 					}
 					isAtEnd = false;
@@ -1294,17 +1295,18 @@
 		};
 		StringRender.prototype.initStartX = function (startPos, l, x, maxWidth, initAllLines, lineAlign) {
 			let align = lineAlign != null ? lineAlign : this.getEffectiveAlign();
+			let isRtl = this.drawState.getMainDirection() === AscBidi.DIRECTION_FLAG.RTL;
 
 			if (initAllLines) {
 				if (this.lines) {
 					for (let i = 0; i < this.lines.length; ++i) {
 						let la = this._getJustifyLastLineAlign(align, i === this.lines.length - 1);
-						let lineWidth = this._calcLineWidth(this.lines[i].beg);
+						let lineWidth = this._calcLineWidth(this.lines[i].beg, undefined, isRtl);
 						this.lines[i].initStartX(lineWidth, x, maxWidth, la);
 					}
 				}
 			} else {
-				return l.initStartX(this._calcLineWidth(startPos), x, maxWidth, align);
+				return l.initStartX(this._calcLineWidth(startPos, undefined, isRtl), x, maxWidth, align);
 			}
 		};
 		StringRender.prototype._getJustifyLastLineAlign = function (align, isLastLine) {
