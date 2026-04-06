@@ -824,6 +824,12 @@ CAscSlideTransition.prototype.parseXmlParameters = function (_type, _paramNames,
                     this.TransitionOption = c_oAscSlideTransitionParams.Gallery_Right;
             }
         }
+		else if ("p14:flash" === _type)
+		{
+			typeMatched = true;
+			this.TransitionType = c_oAscSlideTransitionTypes.Flash;
+			this.TransitionOption = 0;
+		}
         else if ("p:none" !== _type)
         {
             this.TransitionType = c_oAscSlideTransitionTypes.Fade;
@@ -1315,6 +1321,11 @@ CAscSlideTransition.prototype.fillXmlParams = function (aAttrNames, aAttrValues)
             aAttrValues.push(this.TransitionOption === c_oAscSlideTransitionParams.Gallery_Right ? "r" : "l");
             break;
         }
+		case c_oAscSlideTransitionTypes.Flash:
+		{
+			sNodeName = "p14:flash";
+			break;
+		}
         default:
             break;
     }

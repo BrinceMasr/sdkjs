@@ -4610,7 +4610,7 @@
 		'effectCut':             { tag: 'p:cut', attrNames: ['thruBlk'], attrValues: ['0'] },
 		'effectCutThroughBlack': { tag: 'p:cut', attrNames: ['thruBlk'], attrValues: ['1'] },
 
-		// Default 'p:fade' effect attribute is: dir='horz'
+		// Default 'p:blinds' effect attribute is: dir='horz'
 		'effectBlindsHorizontal': { tag: 'p:blinds', attrNames: ['dir'], attrValues: ['horz'] },
 		'effectBlindsVertical':   { tag: 'p:blinds', attrNames: ['dir'], attrValues: ['vert'] },
 
@@ -4674,19 +4674,19 @@
 
 		// Default 'p14:ferris' effect attribute is: dir='l'
 		// Attribute must be specified explicitly - <p14:ferris/> without 'dir' attribute is forbidden
-		'effectFerrisWheelLeft': { tag: 'p14:ferris', attrNames: ['dir'], attrValues: ['l'] },
+		'effectFerrisWheelLeft':  { tag: 'p14:ferris', attrNames: ['dir'], attrValues: ['l'] },
 		'effectFerrisWheelRight': { tag: 'p14:ferris', attrNames: ['dir'], attrValues: ['r'] },
 
 		// Default 'p14:flip' effect attribute is: dir='l'
 		// Attribute must be specified explicitly - <p14:flip/> without 'dir' attribute is forbidden
-		'effectFlipDown': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['r'] },
-		'effectFlipLeft': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['l'] },
+		'effectFlipDown':  { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['r'] },
+		'effectFlipLeft':  { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['l'] },
 		'effectFlipRight': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['r'] },
-		'effectFlipUp': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['r'] },
+		'effectFlipUp':    { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['r'] },
 
 		// Default 'p14:gallery' effect attribute is: dir='l'
 		// Attribute must be specified explicitly - <p14:gallery/> without 'dir' attribute is forbidden
-		'effectGalleryLeft': { tag: 'p14:gallery', attrNames: ['dir'], attrValues: ['l'] },
+		'effectGalleryLeft':  { tag: 'p14:gallery', attrNames: ['dir'], attrValues: ['l'] },
 		'effectGalleryRight': { tag: 'p14:gallery', attrNames: ['dir'], attrValues: ['r'] },
 
 		// Default 'p:push' effect attribute is: dir='l'
@@ -4775,6 +4775,9 @@
 		'effectMorphByObject': { tag: 'p159:morph', attrNames: ['option'], attrValues: ['byObject'] },
 		'effectMorphByWord':   { tag: 'p159:morph', attrNames: ['option'], attrValues: ['byWord'] },
 		'effectMorphByChar':   { tag: 'p159:morph', attrNames: ['option'], attrValues: ['byChar'] },
+
+		// Tag has no attributes
+		'effectFlashbulb': { tag: 'p14:flash' },
 
 		'effectNone': {}
 

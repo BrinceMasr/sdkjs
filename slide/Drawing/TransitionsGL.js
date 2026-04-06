@@ -63,6 +63,7 @@
     _WebGLTransitionTypes[c_oAscSlideTransitionTypes.RandomBar]      = true;
     _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Dissolve]       = true;
     _WebGLTransitionTypes[c_oAscSlideTransitionTypes.BoxZoom]        = true;
+	_WebGLTransitionTypes[c_oAscSlideTransitionTypes.Flash]          = true;
 
     function CTransitionGL(transitionAnimation)
     {
@@ -512,6 +513,9 @@
             case c_oAscSlideTransitionTypes.BoxZoom:
                 this._prepareBoxZoom();
                 break;
+			case c_oAscSlideTransitionTypes.Flash:
+				this._prepareFlash();
+				break;
             default:
                 this._prepareCrossfade();
                 break;
@@ -586,6 +590,9 @@
             case c_oAscSlideTransitionTypes.BoxZoom:
                 this._renderBoxZoom(progress, param);
                 break;
+			case c_oAscSlideTransitionTypes.Flash:
+				this._renderFlash(progress);
+				break;
             default:
                 this._renderCrossfade(progress);
                 break;
@@ -2970,6 +2977,52 @@
         gl.enable(gl.BLEND);
         gl.activeTexture(gl.TEXTURE0);
     };
+
+	// ============================================================
+	// Transition: Flash — white flash between slides
+	// ============================================================
+
+	let _FRAG_FLASH = [
+		'precision mediump float;',
+		'uniform sampler2D uTexture1;',
+		'uniform sampler2D uTexture2;',
+		'uniform float uProgress;',
+		'varying vec2 vTexCoord;',
+		'void main() {',
+		'    vec4 c1 = texture2D(uTexture1, vTexCoord);',
+		'    vec4 c2 = texture2D(uTexture2, vTexCoord);',
+		'    float flash = 1.0 - abs(uProgress - 0.5) * 2.0;',
+		'    flash = flash * flash * flash;',
+		'    vec4 slide = uProgress < 0.5 ? c1 : c2;',
+		'    gl_FragColor = mix(slide, vec4(1.0), flash);',
+		'}'
+	].join('\n');
+
+	CTransitionGL.prototype._prepareFlash = function () {
+		this.GetProgram('flash', _VERT_QUAD, _FRAG_FLASH);
+	};
+
+	CTransitionGL.prototype._renderFlash = function (progress) {
+		let gl = this.gl;
+		let prog = this.programs['flash'];
+		if (!prog) return;
+
+		gl.useProgram(prog.program);
+		gl.disable(gl.DEPTH_TEST);
+
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
+		gl.uniform1i(prog.uniforms['uTexture1'], 0);
+
+		gl.activeTexture(gl.TEXTURE1);
+		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
+		gl.uniform1i(prog.uniforms['uTexture2'], 1);
+
+		gl.uniform1f(prog.uniforms['uProgress'], progress);
+
+		this._bindQuad(prog);
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+	};
 
     window['AscCommonSlide'] = window['AscCommonSlide'] || {};
     window['AscCommonSlide'].CTransitionGL = CTransitionGL;
