@@ -6839,7 +6839,6 @@ function (window, undefined) {
 	cGAMMA_DIST.prototype.Calculate = function (arg) {
 		const oArguments = this._prepareArguments(arg, arguments[1], true);
 		const argClone = oArguments.args;
-		console.log(argClone);
 
 		let arg0 = arg[0], arg1 = arg[1], arg2 = arg[2], arg3 = arg[3];
 
@@ -6910,35 +6909,35 @@ function (window, undefined) {
 	cGAMMA_INV.prototype.isXLFN = true;
 	cGAMMA_INV.prototype.argumentsType = [argType.number, argType.number, argType.number];
 	cGAMMA_INV.prototype.Calculate = function (arg) {
-		var oArguments = this._prepareArguments(arg, arguments[1], true);
-		var argClone = oArguments.args;
+		const oArguments = this._prepareArguments(arg, arguments[1], true);
+		const argClone = oArguments.args;
 
 		argClone[0] = argClone[0].tocNumber();
 		argClone[1] = argClone[1].tocNumber();
 		argClone[2] = argClone[2].tocNumber();
 
-		var argError;
+		let argError;
 		if (argError = this._checkErrorArg(argClone)) {
 			return argError;
 		}
 
-		var calcGamma = function (argArray) {
-			var fP = argArray[0];
-			var fAlpha = argArray[1];
-			var fBeta = argArray[2];
+		const calcGamma = function (argArray) {
+			let fP = argArray[0];
+			let fAlpha = argArray[1];
+			let fBeta = argArray[2];
 
 			if (fAlpha <= 0 || fBeta <= 0 || fP < 0 || fP >= 1) {
 				return new cError(cErrorType.not_numeric);
 			}
 
-			var res = null;
+			let res = null;
 			if (fP === 0) {
 				res = 0;
 			} else {
-				var aFunc = new GAMMADISTFUNCTION(fP, fAlpha, fBeta);
-				var fStart = fAlpha * fBeta;
-				var oVal = iterateInverse(aFunc, fStart * 0.5, fStart);
-				var bConvError = oVal.bError;
+				let aFunc = new GAMMADISTFUNCTION(fP, fAlpha, fBeta);
+				let fStart = fAlpha * fBeta;
+				let oVal = iterateInverse(aFunc, fStart * 0.5, fStart);
+				let bConvError = oVal.bError;
 
 				if (bConvError) {
 					return new cError(cErrorType.not_numeric);

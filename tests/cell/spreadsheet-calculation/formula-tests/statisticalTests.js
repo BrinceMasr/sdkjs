@@ -19418,15 +19418,20 @@ $(function () {
 		// Case #10: Area. Multi-cell range for probability returns #NUM!. 3 of 3 arguments used.
 		oParser = new parserFormula('GAMMAINV(A100:A101,1,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMAINV(A100:A101,1,1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.105360516, 'Test: Negative case: Area. Multi-cell range for probability returns #NUM!. 3 of 3 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E100:G102").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.10536051565782635, 'Test: Negative case: Area. Multi-cell range for probability returns #NUM!. 3 of 3 arguments used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1,0).getValue(), 0.22314355131420974, 'Test: Negative case: Area. Multi-cell range for probability returns #NUM!. 3 of 3 arguments used.');
 		// Case #11: Area. Multi-cell range for alpha returns #NUM!. 3 of 3 arguments used.
 		oParser = new parserFormula('GAMMAINV(0.5,A100:A101,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMAINV(0.5,A100:A101,1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.000593391, 'Test: Negative case: Area. Multi-cell range for alpha returns #NUM!. 3 of 3 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E100:G102").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.0005933911044602285, 'Test: Negative case: Area. Multi-cell range for alpha returns #NUM!. 3 of 3 arguments used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1,0).getValue(), 0.02074633919282482, 'Test: Negative case: Area. Multi-cell range for alpha returns #NUM!. 3 of 3 arguments used.');
 		// Case #12: Area. Multi-cell range for beta returns #NUM!. 3 of 3 arguments used.
 		oParser = new parserFormula('GAMMAINV(0.5,1,A100:A101)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMAINV(0.5,1,A100:A101) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.069314718, 'Test: Negative case: Area. Multi-cell range for beta returns #NUM!. 3 of 3 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E100:G102").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.06931471805599454, 'Test: Negative case: Area. Multi-cell range for beta returns #NUM!. 3 of 3 arguments used.');
 		// Case #13: Ref3D. 3D reference to text (abc) for probability returns #VALUE!. 3 of 3 arguments used.
 		oParser = new parserFormula('GAMMAINV(Sheet2!A3,1,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMAINV(Sheet2!A3,1,1) is parsed.');
@@ -19463,10 +19468,6 @@ $(function () {
 		oParser = new parserFormula('GAMMAINV(TestNameArea3D2,1,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMAINV(TestNameArea3D2,1,1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1.6094379124341007, 'Test: Negative case: Name3D. 3D named range with text (invalid) for probability returns #VALUE!. 3 of 3 arguments used.');
-		// Case #20: Number. Extreme values testing potential #N/A due to non-convergence. 3 of 3 arguments used.
-		oParser = new parserFormula('GAMMAINV(0.999999999999999,1.7E307,1)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: GAMMAINV(0.999999999999999,1.7E307,1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1.7005e+307, 'Test: Negative case: Number. Extreme values testing potential #N/A due to non-convergence. 3 of 3 arguments used.');
 
 		// Bounded cases:
 		// Case #1: Number. Minimum positive numbers for probability, alpha, beta accepted by Excel. 3 of 3 arguments used.
@@ -19478,20 +19479,21 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: GAMMAINV(0.999999999999999,1,1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 34.59358974358975, 'Test: Bounded case: Number. Maximum valid probability close to 1. 3 of 3 arguments used.');
 		// Case #3: Number. Maximum positive alpha accepted by Excel. 3 of 3 arguments used.
-		oParser = new parserFormula('GAMMAINV(0.5,1.7E307,1)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: GAMMAINV(0.5,1.7E307,1) is parsed.');
+		oParser = new parserFormula('GAMMAINV(0.5,1.7E+307,1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: GAMMAINV(0.5,1.7E+307,1) is parsed.');
+		// todo unspecified behavior in extreme values for alpha parameter.
+		// LO - err 523
 		//? assert.strictEqual(oParser.calculate().getValue(), 1.7005e+307, 'Test: Bounded case: Number. Maximum positive alpha accepted by Excel. 3 of 3 arguments used.');
 		// Case #4: Number. Maximum positive beta accepted by Excel. 3 of 3 arguments used.
-		oParser = new parserFormula('GAMMAINV(0.5,1,1.7E307)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: GAMMAINV(0.5,1,1.7E307) is parsed.');
+		oParser = new parserFormula('GAMMAINV(0.5,1,1.7E+307)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: GAMMAINV(0.5,1,1.7E+307) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1.178350206951907e+307, 'Test: Bounded case: Number. Maximum positive beta accepted by Excel. 3 of 3 arguments used.');
-
-		// Need to fix: area handle, diff result in boundary case
-		// Case #10: Area. Multi-cell range for probability returns #NUM!. 3 of 3 arguments used.
-		// Case #11: Area. Multi-cell range for alpha returns #NUM!. 3 of 3 arguments used.
-		// Case #12: Area. Multi-cell range for beta returns #NUM!. 3 of 3 arguments used.
-		// Case #20: Number. Extreme values testing potential #N/A due to non-convergence. 3 of 3 arguments used.
-		// Case #3: Number. Maximum positive alpha accepted by Excel. 3 of 3 arguments used.
+		// Case #5: Number. Extreme values testing potential #N/A due to non-convergence. 3 of 3 arguments used.
+		oParser = new parserFormula('GAMMAINV(0.9,1.7E+307,1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: GAMMAINV(0.9,1.7E+307,1) is parsed.');
+		// todo unspecified behavior in extreme values for alpha parameter.
+		// LO - err 523
+		//? assert.strictEqual(oParser.calculate().getValue(), 1.7005e+307, 'Test: Negative case: Number. Extreme values testing potential #N/A due to non-convergence. 3 of 3 arguments used.');
 
 	});
 
@@ -19670,18 +19672,24 @@ $(function () {
 		oParser = new parserFormula('GAMMA.INV(A103,1,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.INV(A103,1,1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0.5108256237659908, 'Test: Negative case: Empty. Empty probability reference returns #VALUE!. 3 of 3 arguments used.');
-		// Case #10: Area. Multi-cell range for probability returns #NUM!. 3 of 3 arguments used.
+		// Case #10: Area. Multi-cell range for probability returns values. 3 of 3 arguments used.
 		oParser = new parserFormula('GAMMA.INV(A100:A101,1,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.INV(A100:A101,1,1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.105360516, 'Test: Negative case: Area. Multi-cell range for probability returns #NUM!. 3 of 3 arguments used.');
-		// Case #11: Area. Multi-cell range for alpha returns #NUM!. 3 of 3 arguments used.
+		oParser.setArrayFormulaRef(ws.getRange2("E100:G102").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.10536051565782635, 'Test: Negative case: Area. Multi-cell range for probability returns values. 3 of 3 arguments used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1,0).getValue(), 0.22314355131420974, 'Test: Negative case: Area. Multi-cell range for probability returns values. 3 of 3 arguments used.');
+		// Case #11: Area. Multi-cell range for alpha returns values. 3 of 3 arguments used.
 		oParser = new parserFormula('GAMMA.INV(0.5,A100:A101,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.INV(0.5,A100:A101,1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.000593391, 'Test: Negative case: Area. Multi-cell range for alpha returns #NUM!. 3 of 3 arguments used.');
-		// Case #12: Area. Multi-cell range for beta returns #NUM!. 3 of 3 arguments used.
+		oParser.setArrayFormulaRef(ws.getRange2("E100:G102").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.0005933911044602285, 'Test: Negative case: Area. Multi-cell range for alpha returns values. 3 of 3 arguments used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1,0).getValue(), 0.02074633919282482, 'Test: Negative case: Area. Multi-cell range for alpha returns values. 3 of 3 arguments used.');
+		// Case #12: Area. Multi-cell range for beta returns values. 3 of 3 arguments used.
 		oParser = new parserFormula('GAMMA.INV(0.5,1,A100:A101)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.INV(0.5,1,A100:A101) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.069314718, 'Test: Negative case: Area. Multi-cell range for beta returns #NUM!. 3 of 3 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E100:G102").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.06931471805599454, 'Test: Negative case: Area. Multi-cell range for beta returns values. 3 of 3 arguments used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1,0).getValue(), 0.13862943611198908, 'Test: Negative case: Area. Multi-cell range for beta returns values. 3 of 3 arguments used.');
 		// Case #13: Ref3D. 3D reference to text (abc) for probability returns #VALUE!. 3 of 3 arguments used.
 		oParser = new parserFormula('GAMMA.INV(Sheet2!A3,1,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.INV(Sheet2!A3,1,1) is parsed.');
@@ -19718,10 +19726,6 @@ $(function () {
 		oParser = new parserFormula('GAMMA.INV(TestNameArea3D2,1,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMA.INV(TestNameArea3D2,1,1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1.6094379124341007, 'Test: Negative case: Name3D. 3D named range with text (invalid) for probability returns #VALUE!. 3 of 3 arguments used.');
-		// Case #20: Number. Extreme values testing potential #N/A due to non-convergence. 3 of 3 arguments used.
-		oParser = new parserFormula('GAMMA.INV(0.999999999999999,1.7E307,1)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: GAMMA.INV(0.999999999999999,1.7E307,1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1.7005e+307, 'Test: Negative case: Number. Extreme values testing potential #N/A due to non-convergence. 3 of 3 arguments used.');
 
 		// Bounded cases:
 		// Case #1: Number. Minimum positive numbers for probability, alpha, beta accepted by Excel. 3 of 3 arguments used.
@@ -19733,20 +19737,21 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: GAMMA.INV(0.999999999999999,1,1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 34.59358974358975, 'Test: Bounded case: Number. Maximum valid probability close to 1. 3 of 3 arguments used.');
 		// Case #3: Number. Maximum positive alpha accepted by Excel. 3 of 3 arguments used.
-		oParser = new parserFormula('GAMMA.INV(0.5,1.7E307,1)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: GAMMA.INV(0.5,1.7E307,1) is parsed.');
+		oParser = new parserFormula('GAMMA.INV(0.5,1.7E+307,1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: GAMMA.INV(0.5,1.7E+307,1) is parsed.');
+		// todo unspecified behavior in extreme values for alpha parameter.
+		// LO - err 523
 		//? assert.strictEqual(oParser.calculate().getValue(), 1.7005e+307, 'Test: Bounded case: Number. Maximum positive alpha accepted by Excel. 3 of 3 arguments used.');
-		// Case #4: Number. Maximum positive beta accepted by Excel. 3 of 3 arguments used.
-		oParser = new parserFormula('GAMMA.INV(0.5,1,1.7E307)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: GAMMA.INV(0.5,1,1.7E307) is parsed.');
+		// Case #4: Number. Extreme values testing potential #NUM due to non-convergence. 3 of 3 arguments used.
+		oParser = new parserFormula('GAMMA.INV(0.999999999999999,1.7E+307,1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: GAMMA.INV(0.999999999999999,1.7E+307,1) is parsed.');
+		// todo unspecified behavior in extreme values for alpha parameter.
+		// LO - err 523
+		//? assert.strictEqual(oParser.calculate().getValue(), 1.7005e+307, 'Test: Negative case: Number. Extreme values testing potential #N/A due to non-convergence. 3 of 3 arguments used.');
+		// Case #5: Number. Maximum positive beta accepted by Excel. 3 of 3 arguments used.
+		oParser = new parserFormula('GAMMA.INV(0.5,1,1.7E+307)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: GAMMA.INV(0.5,1,1.7E+307) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1.178350206951907e+307, 'Test: Bounded case: Number. Maximum positive beta accepted by Excel. 3 of 3 arguments used.');
-
-		// Need to fix: area handle, diff result in boundary case
-		// Case #10: Area. Multi-cell range for probability returns #NUM!. 3 of 3 arguments used.
-		// Case #11: Area. Multi-cell range for alpha returns #NUM!. 3 of 3 arguments used.
-		// Case #12: Area. Multi-cell range for beta returns #NUM!. 3 of 3 arguments used.
-		// Case #20: Number. Extreme values testing potential #N/A due to non-convergence. 3 of 3 arguments used.
-		// Case #3: Number. Maximum positive alpha accepted by Excel. 3 of 3 arguments used.
 
 		testArrayFormula2(assert, "GAMMA.INV", 3, 3);
 	});
