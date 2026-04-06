@@ -28006,8 +28006,29 @@
 	/**
 	 * Class representing a formatted table.
 	 * @constructor
-	 * @property {string} Name - Returns the display name of the table.
+	 * @property {boolean} Active - Indicates whether the active cell is within the table range.
+	 * @property {string} AlternativeText - Returns or sets the alternative text for the table.
+	 * @property {string} Comment - Returns or sets the comment for the table.
+	 * @property {string} Name - Returns or sets the internal name of the table.
+	 * @property {ApiWorksheet} Parent - Returns the worksheet that contains the table.
+	 * @property {string} DisplayName - Returns or sets the display name of the table.
 	 * @property {ApiRange} Range - Returns the range occupied by the table.
+	 * @property {ApiRange | null} HeaderRowRange - Returns the range of the header row; null if no header row.
+	 * @property {boolean} ShowAutoFilter - Returns or sets whether the AutoFilter arrows are shown.
+	 * @property {boolean} ShowAutoFilterDropDown - Returns or sets whether the AutoFilter drop-down is visible.
+	 * @property {boolean} ShowHeaders - Returns or sets whether the header row is shown.
+	 * @property {ApiAutoFilter | null} AutoFilter - Returns the AutoFilter object for the table, or null.
+	 * @property {ApiRange | null} DataBodyRange - Returns the range of the data rows; null if no data rows.
+	 * @property {boolean} ShowTableStyleColumnStripes - Returns or sets whether column stripes are applied.
+	 * @property {boolean} ShowTableStyleFirstColumn - Returns or sets whether the first column style is applied.
+	 * @property {boolean} ShowTableStyleLastColumn - Returns or sets whether the last column style is applied.
+	 * @property {boolean} ShowTableStyleRowStripes - Returns or sets whether row stripes are applied.
+	 * @property {boolean} ShowTotals - Returns or sets whether the totals row is displayed.
+	 * @property {XlListObjectSourceType} SourceType - Returns the data source type of the table.
+	 * @property {string} TableStyle - Returns or sets the name of the table style.
+	 * @property {ApiRange | null} TotalsRowRange - Returns the range of the totals row; null if not shown.
+	 * @property {string} Summary - Returns or sets the description of the table.
+	 * @property {ApiSort} Sort - Returns the Sort object associated with the table.
 	 */
 	function ApiListObject(tablePart, ws) {
 		this.tablePart = tablePart;
@@ -28779,8 +28800,13 @@
 	/**
 	 * Class representing a single column in a list object (table).
 	 * @constructor
-	 * @param {AscCommonExcel.TableColumn} tableColumn - The internal table column object.
-	 * @param {ApiListObject} listObject - The parent list object.
+	 * @property {ApiRange | null} DataBodyRange - Returns the data body range of the column, excluding header and totals rows.
+	 * @property {number} Index - Returns the 1-based index of the column within the table.
+	 * @property {string} Name - Returns or sets the name of the column.
+	 * @property {ApiListObject} Parent - Returns the parent list object.
+	 * @property {ApiRange | null} Range - Returns the full range of the column, including header and totals rows.
+	 * @property {XlTotalsCalculation} TotalsCalculation - Returns or sets the totals row calculation type.
+	 * @property {ApiRange | null} Total - Returns the totals row cell range for the column.
 	 */
 	function ApiListColumn(tableColumn, listObject) {
 		this.tableColumn = tableColumn;
@@ -29112,8 +29138,9 @@
 	/**
 	 * Class representing a single data row in a list object (table).
 	 * @constructor
-	 * @param {number} nIndex - The 1-based index of the row within the data body.
-	 * @param {ApiListObject} listObject - The parent list object.
+	 * @property {number} Index - Returns the 1-based index of the row within the data body.
+	 * @property {ApiListObject} Parent - Returns the parent list object.
+	 * @property {ApiRange | null} Range - Returns the range of the entire row spanning all columns.
 	 */
 	function ApiListRow(nIndex, listObject) {
 		this.index      = nIndex;
@@ -29240,7 +29267,13 @@
 	/**
 	 * Class representing the sort state of a list object (table).
 	 * @constructor
-	 * @param {ApiListObject} listObject - The parent list object.
+	 * @property {ApiSortFields} SortFields - Returns the collection of sort fields.
+	 * @property {boolean} MatchCase - Returns or sets whether the sort is case-sensitive.
+	 * @property {string} Header - Returns the header setting (always "xlYes" for a ListObject).
+	 * @property {XlSortOrientation} Orientation - Returns or sets the sort orientation.
+	 * @property {XlSortMethod} SortMethod - Returns or sets the sort method for Chinese text.
+	 * @property {ApiListObject} Parent - Returns the parent list object.
+	 * @property {ApiRange | null} Rng - Returns the data body range that the sort applies to.
 	 */
 	function ApiSort(listObject) {
 		this.listObject   = listObject;
@@ -29494,7 +29527,8 @@
 	/**
 	 * Class representing the collection of sort fields for a Sort object.
 	 * @constructor
-	 * @param {ApiSort} apiSort - The parent sort object.
+	 * @property {ApiSort} Parent - Returns the parent Sort object.
+	 * @property {number} Count - Returns the number of sort fields in the collection.
 	 */
 	function ApiSortFields(apiSort) {
 		this._sort = apiSort;
@@ -29629,8 +29663,11 @@
 	/**
 	 * Class representing a single sort field within a SortFields collection.
 	 * @constructor
-	 * @param {object} fieldObj - Internal field descriptor.
-	 * @param {ApiSort} apiSort - The parent sort object.
+	 * @property {ApiSortFields} Parent - Returns the parent SortFields collection.
+	 * @property {ApiRange | null} Key - Returns or sets the sort key range (the full table column).
+	 * @property {XlSortOn} SortOn - Returns or sets what value is used as the sort criteria.
+	 * @property {SortOrder} Order - Returns or sets the sort order.
+	 * @property {number} Priority - Returns or sets the 1-based sort priority.
 	 */
 	function ApiSortField(fieldObj, apiSort) {
 		this._fieldObj = fieldObj;
