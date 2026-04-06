@@ -125,13 +125,26 @@ $(function ()
 	QUnit.test('SetLock/GetLock', function (assert)
 	{
 		const textForm = AscTest.JsApi.CreateTextForm();
-		
+
 		assert.strictEqual(textForm.GetLock(), false, 'Check that a newly created text form is unlocked');
-		
+
 		textForm.SetLock(true);
 		assert.strictEqual(textForm.GetLock(), true, 'Check that the text form is locked after SetLock(true)');
-		
+
 		let sdt = textForm.private_GetImpl();
 		assert.strictEqual(sdt.GetContentControlLock(), c_oAscSdtLockType.SdtLocked, 'Check that the internal lock type is SdtLocked');
+	});
+
+	QUnit.test('IsFilled', function (assert)
+	{
+		const textForm = createApiTextForm();
+
+		assert.strictEqual(textForm.IsFilled(), false, 'Check that a newly created text form is not filled');
+
+		textForm.SetText("John Smith");
+		assert.strictEqual(textForm.IsFilled(), true, 'Check that the text form is filled after SetText');
+
+		textForm.Clear();
+		assert.strictEqual(textForm.IsFilled(), false, 'Check that the text form is not filled after Clear');
 	});
 });

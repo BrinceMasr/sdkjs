@@ -1543,14 +1543,14 @@
 		if (shd)
 		{
 			if (undefined !== shd["Color"])
-				ccPr.ShdColor = new Asc.asc_CColor(shd["Color"]["R"], shd["Color"]["G"], shd["Color"]["B"], shd["Color"]["A"]);
+				ccPr.ShdColor = new Asc.asc_CColor(shd["Color"]["R"], shd["Color"]["G"], shd["Color"]["B"], undefined === shd["Color"]["A"] ? 255 : shd["Color"]["A"]);
 		}
 		
 		let border = commonPr["Border"];
 		if (border)
 		{
 			if (undefined !== border["Color"])
-				ccPr.BorderColor = new Asc.asc_CColor(border["Color"]["R"], border["Color"]["G"], border["Color"]["B"], border["Color"]["A"]);
+				ccPr.BorderColor = new Asc.asc_CColor(border["Color"]["R"], border["Color"]["G"], border["Color"]["B"],  undefined === border["Color"]["A"] ? 255 : border["Color"]["A"]);
 		}
 
 		return ccPr;
