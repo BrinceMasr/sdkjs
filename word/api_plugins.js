@@ -1154,7 +1154,7 @@
 			return null;
 		
 		let field = logicDocument.AddAddinField(AscWord.CAddinFieldData.FromJson(data));
-		return field ? AscWord.CAddinFieldData.FromField(field) : null;
+		return field ? AscWord.CAddinFieldData.FromField(field).ToJson() : null;
 	};
 	/**
 	 * Selects the specified add-in field.
