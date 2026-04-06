@@ -12542,8 +12542,8 @@
 			if (tablePart || ws.AutoFilter) {
 				// deleteAutoFilter routes correctly for both table and standalone ranges
 				ws.autoFilters.deleteAutoFilter(this.range.bbox);
+				return;
 			}
-			return;
 		}
 
 		if (!ws.AutoFilter && !tablePart) {
@@ -30153,8 +30153,8 @@
 	ApiSort.prototype["GetHeader"]      = ApiSort.prototype.GetHeader;
 	ApiSort.prototype["GetOrientation"] = ApiSort.prototype.GetOrientation;
 	ApiSort.prototype["SetOrientation"] = ApiSort.prototype.SetOrientation;
-	// ApiSort.prototype["GetSortMethod"]  = ApiSort.prototype.GetSortMethod;
-	// ApiSort.prototype["SetSortMethod"]  = ApiSort.prototype.SetSortMethod;
+	ApiSort.prototype["GetSortMethod"]  = ApiSort.prototype.GetSortMethod;
+	ApiSort.prototype["SetSortMethod"]  = ApiSort.prototype.SetSortMethod;
 	ApiSort.prototype["GetRng"]         = ApiSort.prototype.GetRng;
 	//ApiSort.prototype["SetRange"]       = ApiSort.prototype.SetRange;
 	ApiSort.prototype["Apply"]          = ApiSort.prototype.Apply;
