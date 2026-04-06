@@ -541,7 +541,7 @@ function (window, undefined) {
 		}
 	}
 
-	// Series expansion: P(a,x) = e^(-x) * x^a * sum(x^n / Г(a+1+n)) ...
+	// Series expansion: P(a,x) = e^(-x) * x^a * sum(x^n / G(a+1+n))
 	function gammaSeries(a, x) {
 		const maxIter = 200;
 		const eps = 1e-14;
