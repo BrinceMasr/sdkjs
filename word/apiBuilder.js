@@ -27084,6 +27084,13 @@
 	{
 		return "signatureForm";
 	};
+	/**
+	 * Returns an image in the base64 format from the current signature form.
+	 * @memberof ApiSignatureForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @returns {Base64Img}
+	 * @see office-js-api/Examples/{Editor}/ApiSignatureForm/Methods/GetImage.js
+	 */
 	ApiSignatureForm.prototype.GetImage = ApiPictureForm.prototype.GetImage;
 	/**
 	 * Sets an image to the current picture form.
