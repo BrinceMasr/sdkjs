@@ -9152,6 +9152,22 @@
 		}
 		return true;
 	};
+	/**
+	 * Returns the highlight color of the content controls in the current document.
+	 * @memberof ApiDocument
+	 * @typeofeditors ["CDE"]
+	 * @since 9.4.0
+	 * @returns {ApiColor | null} Returns the highlight color, or <em>null</em> if the highlight is disabled.
+	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/GetControlsHighlight.js
+	 */
+	ApiDocument.prototype.GetControlsHighlight = function()
+	{
+		if (!this.Document.GetSdtGlobalShowHighlight())
+			return null;
+
+		const oColor = this.Document.GetSdtGlobalColor();
+		return Api.RGB(oColor.r, oColor.g, oColor.b);
+	};
 
 	/**
 	 * Adds a table of content to the current document.
@@ -29749,6 +29765,7 @@
 	ApiDocument.prototype["AddFootnote"]                   = ApiDocument.prototype.AddFootnote;
 	ApiDocument.prototype["AddEndnote"]                    = ApiDocument.prototype.AddEndnote;
 	ApiDocument.prototype["SetControlsHighlight"]          = ApiDocument.prototype.SetControlsHighlight;
+	ApiDocument.prototype["GetControlsHighlight"]          = ApiDocument.prototype.GetControlsHighlight;
 	ApiDocument.prototype["GetAllComments"]                = ApiDocument.prototype.GetAllComments;
 	ApiDocument.prototype["GetCommentById"]                = ApiDocument.prototype.GetCommentById;
 	ApiDocument.prototype["ShowComment"]                   = ApiDocument.prototype.ShowComment;
