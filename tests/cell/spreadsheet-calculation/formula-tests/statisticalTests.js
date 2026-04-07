@@ -12594,6 +12594,7 @@ $(function () {
 		ws.getRange2("A104").setValue("11");
 		ws.getRange2("A105").setValue("text");
 		ws.getRange2("A106").setValue("#NULL!");
+
 		// Table type. Use A601:L6**
 		getTableType(599, 0, 600, 1);
 		ws.getRange2("A601").setValue("4"); // Column1
@@ -12615,7 +12616,6 @@ $(function () {
 		let cellWithFormula = new AscCommonExcel.CCellWithFormula(ws, 0, 3); // A4
 
 		// Positive cases:
-
 		// Case #1: Number(3). Return 6.906666667
 		oParser = new parserFormula('DEVSQ(5.6,8.2,9.2)', cellWithFormula, ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(5.6,8.2,9.2) is parsed.');
@@ -12627,7 +12627,7 @@ $(function () {
 		// Case #3: Number(2),String. Return 6.906666669
 		oParser = new parserFormula('DEVSQ(5.6,8.2,"9.2")', cellWithFormula, ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(5.6,8.2,"9.2") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue().toFixed(9), '6.906666667', 'Test: Positive case: Number(2),String. Return 6.906666669');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(9), '6.906666667', 'Test: Positive case: Number(2),String. Return 6.906666669');
 		// Case #4: Area. Return 6.906666670
 		oParser = new parserFormula("DEVSQ(" + ws.getName() + "!A1:A3)", cellWithFormula, ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(' + ws.getName() + '!A1:A3) is parsed.');
@@ -12667,11 +12667,11 @@ $(function () {
 		// Case #13: String(3). String numbers converted to numbers. Returns 8.66666667
 		oParser = new parserFormula('DEVSQ("4","5","8")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ("4","5","8") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue().toFixed(9), '8.666666667', 'Test: Positive case: String(3). String numbers converted to numbers. Returns 8.66666667');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(9), '8.666666667', 'Test: Positive case: String(3). String numbers converted to numbers. Returns 8.66666667');
 		// Case #14: Number, String(2). Mix of number and string numbers. Returns 8.66666667
 		oParser = new parserFormula('DEVSQ(4,"5","8")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(4,"5","8") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue().toFixed(9), '8.666666667', 'Test: Positive case: Number, String(2). Mix of number and string numbers. Returns 8.66666667');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(9), '8.666666667', 'Test: Positive case: Number, String(2). Mix of number and string numbers. Returns 8.66666667');
 		// Case #15: Boolean(3). Booleans converted to numbers (1,1,0). Returns 0.66666667
 		oParser = new parserFormula('DEVSQ(TRUE,TRUE,FALSE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(TRUE,TRUE,FALSE) is parsed.');
@@ -12719,7 +12719,7 @@ $(function () {
 		// Case #26: Area3D. 3D range. Returns 1.2
 		oParser = new parserFormula('DEVSQ(Sheet2!A1:A5)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(Sheet2!A1:A5) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue().toFixed(1), '1.2', 'Test: Positive case: Area3D. 3D range. Returns 1.2');
+		assert.strictEqual(oParser.calculate().getValue(), 30, 'Test: Positive case: Area3D. 3D range test.');
 		// Case #27: Table(2). Table column reference. Returns calculated deviation
 		oParser = new parserFormula('DEVSQ(Table1[Column1],Table1[Column2])', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(Table1[Column1],Table1[Column2]) is parsed.');
@@ -12751,11 +12751,11 @@ $(function () {
 		// Case #34: Empty, Number(2). Empty argument treated as 0 in array/reference but ignored in direct input. Returns 16.66666667
 		oParser = new parserFormula('DEVSQ(,5,5)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(,5,5) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue()/*.toFixed(8)*/, '16.66666667', 'Test: Positive case: Empty, Number(2). Empty argument treated as 0 in array/reference but ignored in direct input. Returns 16.66666667');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(4), '16.6667', 'Test: Positive case: Empty, Number(2). Empty argument treated as 0 in array/reference but ignored in direct input. Returns 16.66666667');
 		// Case #35: Number(2), Empty. Empty at end ignored. Returns 16.66666667
 		oParser = new parserFormula('DEVSQ(5,5,)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(5,5,) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue()/*.toFixed(8)*/, '16.66666667', 'Test: Positive case: Number(2), Empty. Empty at end ignored. Returns 16.66666667');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(4), '16.6667', 'Test: Positive case: Number(2), Empty. Empty at end ignored. Returns 16.66666667');
 		// Case #36: Area. Single cell range. Returns 0
 		oParser = new parserFormula('DEVSQ(A100:A100)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(A100:A100) is parsed.');
@@ -12774,19 +12774,18 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue()/*.toFixed(1)*/, 4.5, 'Test: Positive case: Number, Reference link, Number. Reference to text in middle. Returns #VALUE!');
 
 		// Negative cases:
-
 		// Case #1: String(3). Non-numeric strings. Returns #VALUE!
 		oParser = new parserFormula('DEVSQ("abc","def","ghi")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ("abc","def","ghi") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String(3). Non-numeric strings. Returns #VALUE!');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String(3). Non-numeric strings. Returns #VALUE!');
 		// Case #2: Number, String(2). Mix of number and non-numeric strings. Returns #VALUE!
 		oParser = new parserFormula('DEVSQ(5,"text","abc")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(5,"text","abc") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Number, String(2). Mix of number and non-numeric strings. Returns #VALUE!');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Number, String(2). Mix of number and non-numeric strings. Returns #VALUE!');
 		// Case #3: Error, Number(2). Error in arguments. Returns #N/A
 		oParser = new parserFormula('DEVSQ(#N/A,5,8)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(#N/A,5,8) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Error, Number(2). Error in arguments. Returns #N/A');
+		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Error, Number(2). Error in arguments. Returns #N/A');
 		// Case #4: Number, Error, Number. Error in middle argument. Returns #VALUE!
 		oParser = new parserFormula('DEVSQ(5,#VALUE!,8)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(5,#VALUE!,8) is parsed.');
@@ -12794,54 +12793,63 @@ $(function () {
 		// Case #5: Number(2), Error. Error at end. Returns #NUM!
 		oParser = new parserFormula('DEVSQ(5,8,#NUM!)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(5,8,#NUM!) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number(2), Error. Error at end. Returns #NUM!');
+		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number(2), Error. Error at end. Returns #NUM!');
 		// Case #6: Error(3). Multiple errors, first returned. Returns #N/A
 		oParser = new parserFormula('DEVSQ(#N/A,#VALUE!,#NUM!)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(#N/A,#VALUE!,#NUM!) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Error(3). Multiple errors, first returned. Returns #N/A');
+		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Error(3). Multiple errors, first returned. Returns #N/A');
 		// Case #7: Reference link, Number(2). Reference to text cell. Returns #VALUE!
 		oParser = new parserFormula('DEVSQ(A105)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(A105) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Reference link, Number(2). Reference to text cell. Returns #VALUE!');
+		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Reference link, Number(2). Reference to text cell. Returns #VALUE!');
 		// Case #8: Reference link, Number(2). Reference to error cell. Returns #NULL!
 		oParser = new parserFormula('DEVSQ(A106,5,8)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(A106,5,8) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NULL!', 'Test: Negative case: Reference link, Number(2). Reference to error cell. Returns #NULL!');
+		assert.strictEqual(oParser.calculate().getValue(), '#NULL!', 'Test: Negative case: Reference link, Number(2). Reference to error cell. Returns #NULL!');
 		// Case #9: Number(2), Reference link. Reference to error at end. Returns #NULL!
 		oParser = new parserFormula('DEVSQ(5,8,A106)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(5,8,A106) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NULL!', 'Test: Negative case: Number(2), Reference link. Reference to error at end. Returns #NULL!');
+		assert.strictEqual(oParser.calculate().getValue(), '#NULL!', 'Test: Negative case: Number(2), Reference link. Reference to error at end. Returns #NULL!');
 		// Case #10: Formula, Number(2). Formula resulting in error. Returns #NUM!
 		oParser = new parserFormula('DEVSQ(SQRT(-1),5,8)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(SQRT(-1),5,8) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Formula, Number(2). Formula resulting in error. Returns #NUM!');
+		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Formula, Number(2). Formula resulting in error. Returns #NUM!');
 		// Case #11: Number, Formula, Number. Division by zero error. Returns #DIV/0!
 		oParser = new parserFormula('DEVSQ(5,1/0,8)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(5,1/0,8) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#DIV/0!', 'Test: Negative case: Number, Formula, Number. Division by zero error. Returns #DIV/0!');
+		assert.strictEqual(oParser.calculate().getValue(), '#DIV/0!', 'Test: Negative case: Number, Formula, Number. Division by zero error. Returns #DIV/0!');
 		// Case #12: Area. Range with text and error. Returns #VALUE!
 		oParser = new parserFormula('DEVSQ(A105:A106)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(A105:A106) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NULL!', 'Test: Negative case: Area. Range with text and error. Returns #VALUE!');
+		assert.strictEqual(oParser.calculate().getValue(), '#NULL!', 'Test: Negative case: Area. Range with text and error. Returns #VALUE!');
 		// Case #13: String. Invalid numeric format. Returns #VALUE!
 		oParser = new parserFormula('DEVSQ("5.5.5")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ("5.5.5") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String. Invalid numeric format. Returns #VALUE!');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String. Invalid numeric format. Returns #VALUE!');
 		// Case #14: String, Number(2). Empty string argument. Returns #VALUE!
 		oParser = new parserFormula('DEVSQ("",5,8)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ("",5,8) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, Number(2). Empty string argument. Returns #VALUE!');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, Number(2). Empty string argument. Returns #VALUE!');
 		// Case #15: String(2), Number. Invalid string formats. Returns #VALUE!
 		oParser = new parserFormula('DEVSQ("12/ab","5cd",8)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ("12/ab","5cd",8) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String(2), Number. Invalid string formats. Returns #VALUE!');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String(2), Number. Invalid string formats. Returns #VALUE!');
 		// Case #16: Formula. NA() function. Returns #N/A
 		oParser = new parserFormula('DEVSQ(NA())', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(NA()) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Formula. NA() function. Returns #N/A');
+		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Formula. NA() function. Returns #N/A');
+		// Case #17: Area3D. Multi sheets link.
+		let multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A1";
+		oParser = new parserFormula('DEVSQ('+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula DEVSQ('+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(2), '1.28', 'Test: Negative case: Area3D. Multi sheets link.');
+		// Case #18: Area3D. Multi sheets link area.
+		multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A1:A2";
+		oParser = new parserFormula('DEVSQ('+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula DEVSQ('+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(2), '9.64', 'Test: Negative case: Area3D. Multi sheets link.');
 
 		// Bounded cases:
-
 		// Case #1: Number(3). Maximum Excel numbers, all equal. Returns 0
 		oParser = new parserFormula('DEVSQ(1E+307,1E+307,1E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(1E+307,1E+307,1E+307) is parsed.');
@@ -12850,12 +12858,19 @@ $(function () {
 		oParser = new parserFormula('DEVSQ(-1E+307,-1E+307,-1E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(-1E+307,-1E+307,-1E+307) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Number(3). Minimum Excel numbers, all equal. Returns 0');
-		// Case #3: Area(2). Whole column and row intersection. Returns calculated deviation
-		oParser = new parserFormula('DEVSQ(A:A,100:100)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(A:A,100:100) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NULL!', 'Test: Bounded case: Area(2). Whole column and row intersection. Returns calculated deviation');
 
-		// Need to fix: empty handle, string handle, error handle, error types diff, ms result diff
+		ws.getRange2("X1").setValue("10");
+		ws.getRange2("X10").setValue("#NULL!");
+		ws.getRange2("X1000").setValue("200");
+		// Case #3: Area(2). Whole column and row intersection. Returns calculated deviation
+		oParser = new parserFormula('DEVSQ(X:X,100:100)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(A:A,100:100) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#NULL!', 'Test: Bounded case: Area(2). Whole column and row intersection. Returns calculated deviation');
+		// Case #4: Area(2). Whole column and 10000 rows intersection. Returns the first error in column
+		oParser = new parserFormula('DEVSQ(X1:X10000,100:100)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula DEVSQ(X1:X10000,100:100) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#NULL!', 'Test: Bounded case: Area(2). Whole column and 10000 rows intersection. Returns the first error in column');
+		
 
 		testArrayFormula2(assert, "DEVSQ", 1, 8, null, true);
 	});

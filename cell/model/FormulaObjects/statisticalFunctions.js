@@ -707,7 +707,7 @@ function (window, undefined) {
 				if (pMat1[i][j] && pMat2[i][j]) {
 					bEmpty = false;
 
-					//MS выдает ошибку только если первый элемент строка. LO - если любой.
+					//MS only throws an error if the first element is a string. LO - if any.
 					if (i === 0 && j === 0 && cElementType.string === pMat1[i][j].type) {
 						return new cError(cErrorType.division_by_zero);
 					}
@@ -1849,7 +1849,7 @@ function (window, undefined) {
 	}
 
 	function prepeareGrowthTrendCalculation(t, arg) {
-		//если первое значение число
+		//if the first or second value is a number
 		arg[0] = tryNumberToArray(arg[0]);
 		if (arg[1]) {
 			arg[1] = tryNumberToArray(arg[1]);
@@ -4759,14 +4759,14 @@ function (window, undefined) {
 	cCHITEST.prototype.Calculate = function (arg) {
 
 		var arg2 = [arg[0], arg[1]];
-		//если первое или второе значение строка
+		//if the first or second value is a string
 		if (cElementType.string === arg[0].type || cElementType.bool === arg[0].type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 		if (cElementType.string === arg[1].type || cElementType.bool === arg[1].type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
-		//если первое или второе значение число
+		//if the first or second value is a number
 		if (cElementType.number === arg[0].type) {
 			arg2[0] = new cArray();
 			arg2[0].addElement(arg[0]);
@@ -5334,14 +5334,14 @@ function (window, undefined) {
 	cCOVARIANCE_P.prototype.Calculate = function (arg) {
 
 		var arg2 = [arg[0], arg[1]];
-		//если первое или второе значение строка
+		//if the first or second value is a string
 		if (cElementType.string === arg[0].type || cElementType.bool === arg[0].type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 		if (cElementType.string === arg[1].type || cElementType.bool === arg[1].type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
-		//если первое или второе значение число
+		//if the first or second value is a number
 		if (cElementType.number === arg[0].type) {
 			arg2[0] = new cArray();
 			arg2[0].addElement(arg[0]);
@@ -5429,14 +5429,14 @@ function (window, undefined) {
 	cCOVARIANCE_S.prototype.Calculate = function (arg) {
 
 		var arg2 = [arg[0], arg[1]];
-		//если первое или второе значение строка
+		//if the first or second value is a string
 		if (cElementType.string === arg[0].type || cElementType.bool === arg[0].type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 		if (cElementType.string === arg[1].type || cElementType.bool === arg[1].type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
-		//если первое или второе значение число
+		//if the first or second value is a number
 		if (cElementType.number === arg[0].type) {
 			arg2[0] = new cArray();
 			arg2[0].addElement(arg[0]);
@@ -5605,14 +5605,18 @@ function (window, undefined) {
 	cDEVSQ.prototype.argumentsMin = 1;
 	cDEVSQ.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.array;
 	cDEVSQ.prototype.argumentsType = [[argType.number]];
+	/**
+	 * @param {(number|number[])} values - One or more numbers, arrays, or a mix of both.
+	 * @returns {number} The sum of squared deviations from the mean.
+	 */
 	cDEVSQ.prototype.Calculate = function (arg) {
 
 		function devsq(x) {
 
-			var s1 = 0, _x = 0, xLength = 0, i;
+			let s1 = 0, _x = 0, xLength = 0, i;
 			for (i = 0; i < x.length; i++) {
 
-				if (x[i] instanceof cNumber) {
+				if (x[i].type === cElementType.number) {
 					_x += x[i].getValue();
 					xLength++;
 				}
@@ -5622,8 +5626,7 @@ function (window, undefined) {
 			_x /= xLength;
 
 			for (i = 0; i < x.length; i++) {
-
-				if (x[i] instanceof cNumber) {
+				if (x[i].type === cElementType.number) {
 					s1 += Math.pow(x[i].getValue() - _x, 2);
 				}
 
@@ -5632,36 +5635,74 @@ function (window, undefined) {
 			return new cNumber(s1);
 		}
 
-		var arr0 = [];
+		const arr0 = [];
 
-		for (var j = 0; j < arg.length; j++) {
+		let errorByType;
+		for (let i = 0; i < arg.length; i++) {
+			if (errorByType) {
+				return new cError(errorByType);
+			}
 
-			if (arg[j] instanceof cArea || arg[j] instanceof cArea3D) {
-				arg[j].foreach2(function (elem) {
-					if (elem instanceof cNumber) {
-						arr0.push(elem);
+			if (arg[i].type === cElementType.error) {
+				return arg[i];
+			} else if (arg[i].type === cElementType.cellsRange || arg[i].type === cElementType.cellsRange3D || arg[i].type === cElementType.array) {
+
+				let isArray = arg[i].type === cElementType.array;
+
+				arg[i].foreach(function (cell) {
+					let elem;
+					if (cell) {
+						elem = isArray ? cell : checkTypeCell(cell);
+						if (elem) {
+							if (elem.type === cElementType.error) {
+								errorByType = elem.errorType;
+								return true;
+							}
+
+							elem = elem.tocNumber();
+							if (elem.type === cElementType.number) {
+								arr0.push(elem);
+							}
+						}
 					}
+
 				});
-			} else if (arg[j] instanceof cRef || arg[j] instanceof cRef3D) {
-				var a = arg[j].getValue();
-				if (a instanceof cNumber) {
-					arr0.push(a);
+			} else if (arg[i].type === cElementType.cell || arg[i].type === cElementType.cell3D) {
+				let elem = arg[i].getValue();
+
+				if (elem.type === cElementType.error) {
+					return elem;
 				}
-			} else if (arg[j] instanceof cArray) {
-				arg[j].foreach(function (elem) {
-					if (elem instanceof cNumber) {
-						arr0.push(elem);
-					}
-				});
-			} else if (arg[j] instanceof cNumber || arg[j] instanceof cBool) {
-				arr0.push(arg[j].tocNumber());
-			} else if (arg[j] instanceof cString) {
-				continue;
+
+				if (elem.type === cElementType.string) {
+					elem = elem.tocNumber();
+				}
+
+				if (elem.type === cElementType.number) {
+					arr0.push(elem); 
+				}
+			} else if (arg[i].type === cElementType.string || arg[i].type === cElementType.bool || arg[i].type === cElementType.number || arg[i].type === cElementType.empty) {
+				let elem = arg[i].tocNumber();
+
+				if (elem.type === cElementType.error) {
+					return elem;
+				}
+
+				arr0.push(elem);
 			} else {
 				return new cError(cErrorType.wrong_value_type);
 			}
 
 		}
+
+		if (errorByType) {
+			return new cError(errorByType);
+		}
+
+		if (arr0.length === 0) {
+			return new cError(cErrorType.not_numeric);
+		}
+
 		return devsq(arr0);
 
 	};
@@ -6309,7 +6350,7 @@ function (window, undefined) {
 	cFORECAST_ETS_CONFINT.prototype.argumentsType = [argType.number, argType.reference, argType.reference, argType.number, argType.number,
 		argType.number, argType.number];
 	cFORECAST_ETS_CONFINT.prototype.Calculate = function (arg) {
-		//результаты данной фукнции соответсвуют результатам LO, но отличаются от MS!!!
+		//The results of this function correspond to the results of LO, but differ from MS!!!
 
 		let oArguments = this._prepareArguments(arg, arguments[1], true,
 			[null, cElementType.array, cElementType.array]);
@@ -6401,7 +6442,7 @@ function (window, undefined) {
 	cFORECAST_ETS_SEASONALITY.prototype.argumentsType = [argType.reference, argType.reference, argType.number, argType.number];
 	cFORECAST_ETS_SEASONALITY.prototype.Calculate = function (arg) {
 
-		//результаты данной фукнции соответсвуют результатам LO, но отличаются от MS!!!
+		//The results of this function correspond to the results of LO, but differ from MS!!!
 		let oArguments = this._prepareArguments(arg, arguments[1], true, [cElementType.array, cElementType.array]);
 		let argClone = oArguments.args;
 
@@ -7652,7 +7693,7 @@ function (window, undefined) {
 		//return matrix [col][row]
 		let mat = CalculateRGPRKP(pMatY, pMatX, bConstant, bStats);
 
-		//TODO далее функцию необходимо отптимизировать и сразу формировать итоговую матрицу без промежуточного транспонирования
+		//TODO then the function must be optimized and the final matrix immediately generated without intermediate transposition
 		if (mat && mat[0] && mat[0][0] !== undefined) {
 			let tMatrix = [], res = new cArray();
 
@@ -7718,7 +7759,7 @@ function (window, undefined) {
 		//return matrix [col][row]
 		let mat = CalculateRGPRKP(pMatY, pMatX, bConstant, bStats, true);
 
-		//TODO далее функцию необходимо отптимизировать и сразу формировать итоговую матрицу без промежуточного транспонирования
+		//TODO then the function must be optimized and the final matrix immediately generated without intermediate transposition
 		if (mat && mat[0] && mat[0][0] !== undefined) {	
 			for (let i = 0; i < mat.length; i++) {
 				for (let j = 0; j < mat[i].length; j++) {
@@ -8209,7 +8250,7 @@ function (window, undefined) {
 				}
 				for (j = 0; j < arg1Matrix[i].length; ++j) {
 					if (arg0Matrix[i][j] && !AscCommonExcel.matching(arg1Matrix[i][j], matchingInfo)) {
-						//MS считает в данном случае, что значение 0 (из диапазона условий) соответсвует условию = ""
+						//MS considers in this case that value 0 (from the range of conditions) corresponds to the condition = ""
 						if (!(null === matchingInfo.op && "" === matchingInfo.val.value && 0 ===
 							arg1Matrix[i][j].value)) {
 							arg0Matrix[i][j] = null;
@@ -8322,7 +8363,7 @@ function (window, undefined) {
 				}
 				for (j = 0; j < arg1Matrix[i].length; ++j) {
 					if (arg0Matrix[i][j] && !AscCommonExcel.matching(arg1Matrix[i][j], matchingInfo)) {
-						//MS считает в данном случае, что значение 0 (из диапазона условий) соответсвует условию = ""
+						//MS considers in this case that value 0 (from the range of conditions) corresponds to the condition = ""
 						if (!(null === matchingInfo.op && "" === matchingInfo.val.value && 0 ===
 							arg1Matrix[i][j].value)) {
 							arg0Matrix[i][j] = null;
@@ -8699,7 +8740,6 @@ function (window, undefined) {
 	}
 
 	//***array-formula***
-	//TODO другое поведение для формул массива!!!
 	cMODE_MULT.prototype = Object.create(cBaseFunction.prototype);
 	cMODE_MULT.prototype.constructor = cMODE_MULT;
 	cMODE_MULT.prototype.name = 'MODE.MULT';
@@ -11157,7 +11197,7 @@ function (window, undefined) {
 			var fP = argArray[0];
 			var fDF = parseInt(argArray[1]);
 
-			//ms игнорирует услвие fP > 1. сделал как в документации
+			//ms ignores the condition fP > 1. did as in the documentation
 			if (fDF < 1.0 || fP <= 0 || fP > 1) {
 				return new cError(cErrorType.not_numeric);
 			}
@@ -11255,11 +11295,11 @@ function (window, undefined) {
 	cTRIMMEAN.prototype.Calculate = function (arg) {
 
 		var arg2 = [arg[0], arg[1]];
-		//если первое значение строка
+		//if the first value is a string
 		if (cElementType.string === arg[0].type || cElementType.bool === arg[0].type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
-		//если первое значение число
+		//if the first value is a number
 		if (cElementType.number === arg[0].type) {
 			arg2[0] = new cArray();
 			arg2[0].addElement(arg[0]);
@@ -11333,14 +11373,14 @@ function (window, undefined) {
 	cTTEST.prototype.Calculate = function (arg) {
 
 		var arg2 = [arg[0], arg[1], arg[2], arg[3]];
-		//если первое или второе значение строка
+		//if the first or second value is a string
 		if (cElementType.string === arg[0].type || cElementType.bool === arg[0].type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 		if (cElementType.string === arg[1].type || cElementType.bool === arg[1].type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
-		//если первое или второе значение число
+		//if the first or second value is a number
 		if (cElementType.number === arg[0].type) {
 			arg2[0] = new cArray();
 			arg2[0].addElement(arg[0]);
@@ -11964,11 +12004,11 @@ function (window, undefined) {
 	cZTEST.prototype.Calculate = function (arg) {
 
 		var arg2 = arg[2] ? [arg[0], arg[1], arg[2]] : [arg[0], arg[1]];
-		//если первое или второе значение строка
+		//if the first or second value is a string
 		if (cElementType.string === arg[0].type || cElementType.bool === arg[0].type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
-		//если первое или второе значение число
+		//if the first or second value is a number
 		if (cElementType.number === arg[0].type) {
 			arg2[0] = new cArray();
 			arg2[0].addElement(arg[0]);

@@ -1840,6 +1840,28 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 
 		return arr;
 	};
+	cArea3D.prototype.foreach = function (action) {
+		let _wsA = this.wsRange();
+		if (_wsA.length >= 1) {
+			let _r = this.range(_wsA);
+			let bBreak = false;
+			for (let i = 0; i < _r.length; i++) {
+				if (_r[i]) {
+					_r[i]._foreach2(function (cell, row, col) {
+						let res = action(cell, row, col);
+						if (res === true) {
+							bBreak = true;
+							return true;
+						}
+					});
+					if (bBreak) {
+						break;
+					}
+				}
+			}
+		}
+	};
+
 	cArea3D.prototype.foreach2 = function (action) {
 		var _wsA = this.wsRange();
 		if (_wsA.length >= 1) {
