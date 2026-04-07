@@ -492,8 +492,14 @@
      * @memberof Api
      * @typeofeditors ["CDE", "CSE", "CPE"]
      * @alias StartAction
-     * @param {number} type - A value which defines an action type which can take <b>0</b> if this is an *Information* action or <b>1</b> if this is a *BlockInteraction* action.
-	 * @param {string} description - A string value that specifies the description text for the start action of the operation.
+     * @param {"Information" | "Block" | "GroupActions"} type - The action type:
+     * <b>"Information"</b> - a non-blocking informational action,
+     * <b>"Block"</b> - a blocking interaction action,
+     * <b>"GroupActions"</b> - groups multiple editor operations into a single undoable step.
+     * @param {string | {lockScroll?: boolean, keepSelection?: boolean}} description - For <b>"Information"</b> and <b>"Block"</b> types: a string description displayed during the action.
+     * For <b>"GroupActions"</b> type: an optional object with the following properties:
+     * <b>lockScroll</b> - if <em>true</em>, the editor scroll position will be locked during the group operation.
+     * <b>keepSelection</b> - if <em>true</em>, the cursor position and selection will be preserved after the group operation ends.
      * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/StartAction.js
 	 */
     Api.prototype["pluginMethod_StartAction"] = function(type, description)
@@ -514,9 +520,15 @@
      * @memberof Api
      * @typeofeditors ["CDE", "CSE", "CPE"]
      * @alias EndAction
-     * @param {number} type - A value which defines an action type which can take <b>"Block"</b> if this is the *BlockInteraction* action or <b>"Information</b> if this is the *Information* action.
-     * @param {string} description - A string value that specifies the description text for the operation end action.
-	 * @param {string} status - The error status code. If no error occurs, then an empty string is passed.
+     * @param {"Information" | "Block" | "GroupActions"} type - The action type:
+     * <b>"Information"</b> - ends a non-blocking informational action,
+     * <b>"Block"</b> - ends a blocking interaction action,
+     * <b>"GroupActions"</b> - ends the grouped operations started with <em>StartAction("GroupActions")</em>.
+     * @param {string | {scrollToTarget?: boolean}} description - For <b>"Information"</b> and <b>"Block"</b> types: a string description displayed during the action.
+     * For <b>"GroupActions"</b> type: an optional object with the following properties:
+     * <b>scrollToTarget</b> - if <em>false</em>, the editor will not scroll to the target after the group operation ends. Defaults to <em>true</em>.
+     * @param {string} [status] - For <b>"GroupActions"</b> type: if a non-empty string is passed, the group operation is cancelled and rolled back instead of committed.
+     * For other types: the error status code. If no error occurs, then an empty string is passed.
      * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/EndAction.js
 	 */
     Api.prototype["pluginMethod_EndAction"] = function(type, description, status)

@@ -160,6 +160,33 @@ $(function () {
 		assert.strictEqual(AscTest.GetParagraphText(p), "1", "Check the text of the third paragraph");
 	});
 	
+	QUnit.test("Test MoveCursorToField / MoveCursorOutsideField", function(assert)
+	{
+		AscTest.ClearDocument();
+		MoveToNewParagraph();
+
+		const fieldData = PluginsApi.pluginMethod_AddAddinField({"Value": "test-field", "Content": "Inside the field"});
+		const fieldId = fieldData.FieldId;
+
+		PluginsApi.pluginMethod_MoveCursorToField(fieldId, true);
+		let currentField = PluginsApi.pluginMethod_GetCurrentAddinField();
+		assert.notStrictEqual(currentField, null, "Check cursor is inside the field after MoveCursorToField to beginning");
+		assert.strictEqual(currentField.FieldId, fieldId, "Check current field matches the expected field after moving to beginning");
+
+		PluginsApi.pluginMethod_MoveCursorToField(fieldId, false);
+		currentField = PluginsApi.pluginMethod_GetCurrentAddinField();
+		assert.notStrictEqual(currentField, null, "Check cursor is inside the field after MoveCursorToField to end");
+
+		PluginsApi.pluginMethod_MoveCursorOutsideField(fieldId, true);
+		currentField = PluginsApi.pluginMethod_GetCurrentAddinField();
+		assert.strictEqual(currentField, null, "Check cursor is outside the field after MoveCursorOutsideField before the field");
+
+		PluginsApi.pluginMethod_MoveCursorToField(fieldId, false);
+		PluginsApi.pluginMethod_MoveCursorOutsideField(fieldId, false);
+		currentField = PluginsApi.pluginMethod_GetCurrentAddinField();
+		assert.strictEqual(currentField, null, "Check cursor is outside the field after MoveCursorOutsideField after the field");
+	});
+
 	QUnit.test("Test SetEditingRestrictions", function(assert)
 	{
 		AscTest.ClearDocument();
