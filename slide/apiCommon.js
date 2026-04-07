@@ -854,21 +854,6 @@ CAscSlideTransition.prototype.parseXmlParameters = function (_type, _paramNames,
 		// 	else if (pattern === "rectangle" && dir === "in") this.TransitionOption = c_oAscSlideTransitionParams.Shred_RectangleIn;
 		// 	else if (pattern === "rectangle" && dir === "out") this.TransitionOption = c_oAscSlideTransitionParams.Shred_RectangleOut;
 		// }
-		// else if ("p14:reveal" === _type)
-		// {
-		// 	typeMatched = true;
-		// 	this.TransitionType = c_oAscSlideTransitionTypes.Reveal;
-		// 	this.TransitionOption = c_oAscSlideTransitionParams.Reveal_SmoothLeft;
-		// 	let thruBlk = false, dir = "l";
-		// 	for (let i = 0; i < _len; i++) {
-		// 		if (_paramNames[i] === "thruBlk" && _paramValues[i] === "1") thruBlk = true;
-		// 		else if (_paramNames[i] === "dir") dir = _paramValues[i];
-		// 	}
-		// 	if (!thruBlk && dir === "l") this.TransitionOption = c_oAscSlideTransitionParams.Reveal_SmoothLeft;
-		// 	else if (!thruBlk && dir === "r") this.TransitionOption = c_oAscSlideTransitionParams.Reveal_SmoothRight;
-		// 	else if (thruBlk && dir === "l") this.TransitionOption = c_oAscSlideTransitionParams.Reveal_BlackLeft;
-		// 	else if (thruBlk && dir === "r") this.TransitionOption = c_oAscSlideTransitionParams.Reveal_BlackRight;
-		// }
 		// else if ("p14:flythrough" === _type)
 		// {
 		// 	typeMatched = true;
@@ -884,15 +869,11 @@ CAscSlideTransition.prototype.parseXmlParameters = function (_type, _paramNames,
 		// 	else this.TransitionOption = c_oAscSlideTransitionParams.Flythrough_Out_Bounce;
 		// }
 
-		else if ("p14:conveyor" === _type)
+		else if ("p14:flash" === _type)
 		{
 			typeMatched = true;
-			this.TransitionType = c_oAscSlideTransitionTypes.Conveyor;
-			this.TransitionOption = c_oAscSlideTransitionParams.Conveyor_Left;
-			for (let i = 0; i < _len; i++) {
-				if (_paramNames[i] === "dir" && "r" === _paramValues[i])
-					this.TransitionOption = c_oAscSlideTransitionParams.Conveyor_Right;
-			}
+			this.TransitionType = c_oAscSlideTransitionTypes.Flash;
+			this.TransitionOption = 0;
 		}
 		else if ("p14:pan" === _type)
 		{
@@ -907,11 +888,30 @@ CAscSlideTransition.prototype.parseXmlParameters = function (_type, _paramNames,
 				}
 			}
 		}
-		else if ("p14:flash" === _type)
+		else if ("p14:conveyor" === _type)
 		{
 			typeMatched = true;
-			this.TransitionType = c_oAscSlideTransitionTypes.Flash;
-			this.TransitionOption = 0;
+			this.TransitionType = c_oAscSlideTransitionTypes.Conveyor;
+			this.TransitionOption = c_oAscSlideTransitionParams.Conveyor_Left;
+			for (let i = 0; i < _len; i++) {
+				if (_paramNames[i] === "dir" && "r" === _paramValues[i])
+					this.TransitionOption = c_oAscSlideTransitionParams.Conveyor_Right;
+			}
+		}
+		else if ("p14:reveal" === _type)
+		{
+			typeMatched = true;
+			this.TransitionType = c_oAscSlideTransitionTypes.Reveal;
+			this.TransitionOption = c_oAscSlideTransitionParams.Reveal_SmoothLeft;
+			let thruBlk = false, dir = "l";
+			for (let i = 0; i < _len; i++) {
+				if (_paramNames[i] === "thruBlk" && _paramValues[i] === "1") thruBlk = true;
+				else if (_paramNames[i] === "dir") dir = _paramValues[i];
+			}
+			if (!thruBlk && dir === "l") this.TransitionOption = c_oAscSlideTransitionParams.Reveal_SmoothLeft;
+			else if (!thruBlk && dir === "r") this.TransitionOption = c_oAscSlideTransitionParams.Reveal_SmoothRight;
+			else if (thruBlk && dir === "l") this.TransitionOption = c_oAscSlideTransitionParams.Reveal_BlackLeft;
+			else if (thruBlk && dir === "r") this.TransitionOption = c_oAscSlideTransitionParams.Reveal_BlackRight;
 		}
         else if ("p:none" !== _type)
         {
@@ -1429,17 +1429,6 @@ CAscSlideTransition.prototype.fillXmlParams = function (aAttrNames, aAttrValues)
 		// 	aAttrNames.push("dir"); aAttrValues.push(shDir);
 		// 	break;
 		// }
-		// case c_oAscSlideTransitionTypes.Reveal:
-		// {
-		// 	sNodeName = "p14:reveal";
-		// 	let revIsBlack = (this.TransitionOption === c_oAscSlideTransitionParams.Reveal_BlackLeft ||
-		// 						this.TransitionOption === c_oAscSlideTransitionParams.Reveal_BlackRight);
-		// 	let revIsRight = (this.TransitionOption === c_oAscSlideTransitionParams.Reveal_SmoothRight ||
-		// 						this.TransitionOption === c_oAscSlideTransitionParams.Reveal_BlackRight);
-		// 	aAttrNames.push("thruBlk"); aAttrValues.push(revIsBlack ? "1" : "0");
-		// 	aAttrNames.push("dir"); aAttrValues.push(revIsRight ? "r" : "l");
-		// 	break;
-		// }
 		// case c_oAscSlideTransitionTypes.Flythrough:
 		// {
 		// 	sNodeName = "p14:flythrough";
@@ -1475,6 +1464,21 @@ CAscSlideTransition.prototype.fillXmlParams = function (aAttrNames, aAttrValues)
 			sNodeName = "p14:conveyor";
 			aAttrNames.push("dir");
 			aAttrValues.push(this.TransitionOption === c_oAscSlideTransitionParams.Conveyor_Right ? "r" : "l");
+			break;
+		}
+		case c_oAscSlideTransitionTypes.Reveal:
+		{
+			sNodeName = "p14:reveal";
+			let revIsBlack = (
+				this.TransitionOption === c_oAscSlideTransitionParams.Reveal_BlackLeft ||
+				this.TransitionOption === c_oAscSlideTransitionParams.Reveal_BlackRight
+			);
+			let revIsRight = (
+				this.TransitionOption === c_oAscSlideTransitionParams.Reveal_SmoothRight ||
+				this.TransitionOption === c_oAscSlideTransitionParams.Reveal_BlackRight
+			);
+			aAttrNames.push("thruBlk"); aAttrValues.push(revIsBlack ? "1" : "0");
+			aAttrNames.push("dir"); aAttrValues.push(revIsRight ? "r" : "l");
 			break;
 		}
         default:

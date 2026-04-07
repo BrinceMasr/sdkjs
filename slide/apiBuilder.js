@@ -4792,12 +4792,6 @@
 		// 'effectShredRectangleIn':  { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['rectangle', 'in'] },
 		// 'effectShredRectangleOut': { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['rectangle', 'out'] },
 
-		// // Default 'p14:reveal' effect attributes are: thruBlk='0', dir='l'
-		// 'effectRevealSmoothLeft':  { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['0', 'l'] },
-		// 'effectRevealSmoothRight': { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['0', 'r'] },
-		// 'effectRevealBlackLeft':   { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['1', 'l'] },
-		// 'effectRevealBlackRight':  { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['1', 'r'] },
-
 		// // Default 'p14:flythrough' effect attributes are: dir='in', hasBounce='0'
 		// 'effectFlyThroughIn':        { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['in', '0'] },
 		// 'effectFlyThroughInBounce':  { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['in', '1'] },
@@ -4813,6 +4807,12 @@
 		// Default 'p14:conveyor' effect attribute is: dir='l'
 		'effectConveyorLeft':  { tag: 'p14:conveyor', attrNames: ['dir'], attrValues: ['l'] },
 		'effectConveyorRight': { tag: 'p14:conveyor', attrNames: ['dir'], attrValues: ['r'] },
+
+		// Default 'p14:reveal' effect attributes are: thruBlk='0', dir='l'
+		'effectRevealSmoothLeft':  { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['0', 'l'] },
+		'effectRevealSmoothRight': { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['0', 'r'] },
+		'effectRevealBlackLeft':   { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['1', 'l'] },
+		'effectRevealBlackRight':  { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['1', 'r'] },
 
 		// Tag has no attributes
 		'effectFlashbulb': { tag: 'p14:flash' },

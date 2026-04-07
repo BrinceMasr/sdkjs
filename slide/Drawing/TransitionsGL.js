@@ -66,10 +66,10 @@
 	_WebGLTransitionTypes[c_oAscSlideTransitionTypes.Flash]          = true;
 	_WebGLTransitionTypes[c_oAscSlideTransitionTypes.Pan]            = true;
 	_WebGLTransitionTypes[c_oAscSlideTransitionTypes.Conveyor]       = true;
+	_WebGLTransitionTypes[c_oAscSlideTransitionTypes.Reveal]         = true;
 
 	// _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Glitter]        = true;
 	// _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Shred]          = true;
-	// _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Reveal]         = true;
 	// _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Flythrough]     = true;
 
     function CTransitionGL(transitionAnimation)
@@ -529,10 +529,10 @@
 			case c_oAscSlideTransitionTypes.Conveyor:
 				this._prepareConveyor();
 				break;
+			case c_oAscSlideTransitionTypes.Reveal:
+				this._prepareReveal();
+				break;
 
-			// case c_oAscSlideTransitionTypes.Reveal:
-			// 	this._prepareReveal();
-			// 	break;
 			// case c_oAscSlideTransitionTypes.Glitter:
 			// 	this._prepareGlitter();
 			// 	break;
@@ -626,10 +626,10 @@
 			case c_oAscSlideTransitionTypes.Conveyor:
 				this._renderConveyor(progress, param);
 				break;
+			case c_oAscSlideTransitionTypes.Reveal:
+				this._renderReveal(progress, param);
+				break;
 
-			// case c_oAscSlideTransitionTypes.Reveal:
-			// 	this._renderReveal(progress, param);
-			// 	break;
 			// case c_oAscSlideTransitionTypes.Glitter:
 			// 	this._renderGlitter(progress, param);
 			// 	break;
@@ -3226,112 +3226,111 @@
 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 	};
 
-	// // ============================================================
-	// // Transition: Reveal — slight zoom with white flash
-	// // ============================================================
+	// ============================================================
+	// Transition: Reveal — slight zoom with white flash
+	// ============================================================
 
-	// let _FRAG_REVEAL_WHITE = [
-	// 	'precision mediump float;',
-	// 	'uniform sampler2D uTexture;',
-	// 	'uniform float uAlpha;',
-	// 	'uniform float uWhiteMix;',
-	// 	'varying vec2 vTexCoord;',
-	// 	'void main() {',
-	// 	'    vec4 color = texture2D(uTexture, vTexCoord);',
-	// 	'    color.rgb = mix(color.rgb, vec3(1.0), uWhiteMix);',
-	// 	'    gl_FragColor = vec4(color.rgb, color.a * uAlpha);',
-	// 	'}'
-	// ].join('\n');
+	CTransitionGL.prototype._prepareReveal = function () {
+		const revealFragmentShader = [
+			'precision mediump float;',
+			'uniform sampler2D uTexture;',
+			'uniform float uAlpha;',
+			'uniform float uSweepProgress;',
+			'uniform float uBackdropValue;',
+			'uniform float uDirection;',
+			'uniform float uEdgeWidth;',
+			'varying vec2 vTexCoord;',
+			'void main() {',
+			'    vec4 slide = texture2D(uTexture, vTexCoord);',
+			'    float coord = (uDirection > 0.0) ? vTexCoord.x : (1.0 - vTexCoord.x);',
+			'    float sweepFront = mix(-uEdgeWidth, 1.0 + uEdgeWidth, uSweepProgress);',
+			'    float backdropMix = 1.0 - smoothstep(sweepFront - uEdgeWidth, sweepFront + uEdgeWidth, coord);',
+			'    slide.rgb = mix(slide.rgb, vec3(uBackdropValue), backdropMix);',
+			'    gl_FragColor = vec4(slide.rgb, slide.a * uAlpha);',
+			'}'
+		].join('\n');
 
-	// let _FRAG_REVEAL_BLACK = [
-	// 	'precision mediump float;',
-	// 	'uniform sampler2D uTexture;',
-	// 	'uniform float uAlpha;',
-	// 	'uniform float uWhiteMix;',
-	// 	'varying vec2 vTexCoord;',
-	// 	'void main() {',
-	// 	'    vec4 color = texture2D(uTexture, vTexCoord);',
-	// 	'    color.rgb = mix(color.rgb, vec3(0.0), uWhiteMix);',
-	// 	'    gl_FragColor = vec4(color.rgb, color.a * uAlpha);',
-	// 	'}'
-	// ].join('\n');
+		this.GetProgram('reveal', _VERT_3D, revealFragmentShader);
+		this._initQuadBuffer3D();
+	};
 
-	// CTransitionGL.prototype._prepareReveal = function () {
-	// 	this.GetProgram('revealWhite', _VERT_3D, _FRAG_REVEAL_WHITE);
-	// 	this.GetProgram('revealBlack', _VERT_3D, _FRAG_REVEAL_BLACK);
-	// 	this._initQuadBuffer3D();
-	// };
+	CTransitionGL.prototype._renderReveal = function (progress, param) {
+		const programInfo = this.programs['reveal'];
+		if (!programInfo) {
+			return;
+		}
 
-	// CTransitionGL.prototype._renderReveal = function (progress, param) {
-	// 	let gl = this.gl;
+		const startsFromRight = (
+			param === c_oAscSlideTransitionParams.Reveal_SmoothLeft ||
+			param === c_oAscSlideTransitionParams.Reveal_BlackLeft
+		);
+		const useBlackBackdrop = (
+			param === c_oAscSlideTransitionParams.Reveal_BlackLeft ||
+			param === c_oAscSlideTransitionParams.Reveal_BlackRight
+		);
 
-	// 	let isLeft = (param === c_oAscSlideTransitionParams.Reveal_SmoothLeft ||
-	// 		param === c_oAscSlideTransitionParams.Reveal_BlackLeft);
-	// 	let isBlack = (param === c_oAscSlideTransitionParams.Reveal_BlackLeft ||
-	// 		param === c_oAscSlideTransitionParams.Reveal_BlackRight);
-	// 	let dir = isLeft ? -1 : 1;
+		const aspect = this.glCanvas.width / this.glCanvas.height;
+		const fov = Math.PI / 4;
+		const dist = 1.0 / Math.tan(fov / 2);
+		const projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
 
-	// 	let prog = isBlack ? this.programs['revealBlack'] : this.programs['revealWhite'];
-	// 	if (!prog) return;
+		const edgeWidth = 0.5;
+		const sweepDirection = startsFromRight ? -1.0 : 1.0;
+		const phaseSplit = 0.5;
+		const maxZoomOffset = 0.05;
+		const slideHalfWidth = aspect;
 
-	// 	gl.useProgram(prog.program);
-	// 	gl.enable(gl.DEPTH_TEST);
+		const isFirstPhase = progress <= phaseSplit;
 
-	// 	let aspect = this.glCanvas.width / this.glCanvas.height;
-	// 	let fov = Math.PI / 4;
-	// 	let dist = 1.0 / Math.tan(fov / 2);
-	// 	let projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
-	// 	let hw = aspect;
+		let localPhaseProgress;
+		let currentScale;
+		let sweepProgress;
+		let currentTexture;
 
-	// 	if (isBlack) {
-	// 		gl.clearColor(0.0, 0.0, 0.0, 1.0);
-	// 	} else {
-	// 		gl.clearColor(1.0, 1.0, 1.0, 1.0);
-	// 	}
-	// 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+		if (isFirstPhase) {
+			localPhaseProgress = progress / phaseSplit;
+			sweepProgress = localPhaseProgress;
+			currentTexture = this.textures.slide1;
+		} else {
+			localPhaseProgress = (progress - phaseSplit) / phaseSplit;
+			sweepProgress = 1.0 - localPhaseProgress;
+			currentTexture = this.textures.slide2;
+		}
 
-	// 	gl.uniformMatrix4fv(prog.uniforms['uProjection'], false, projection);
+		localPhaseProgress = localPhaseProgress * localPhaseProgress * (3.0 - 2.0 * localPhaseProgress);
+		sweepProgress = sweepProgress * sweepProgress * (3.0 - 2.0 * sweepProgress);
+		currentScale = (isFirstPhase)
+			? 1.0 + maxZoomOffset * localPhaseProgress
+			: 1.0 + maxZoomOffset * (1 - localPhaseProgress);
+		const horizontalShift = slideHalfWidth * (currentScale - 1.0) * (isFirstPhase ? -1.0 : 1.0);
 
-	// 	if (progress <= 0.5) {
-	// 		// Phase 1: old slide zooms slightly, shifts in direction, fades to white/black
-	// 		let t = progress / 0.5;
-	// 		let scale = 1.0 + 0.05 * t;
-	// 		let shiftX = dir * 0.05 * hw * 2 * t;
-	// 		let colorMix = t * t;
+		let modelView = _Mat4.identity();
+		modelView = _Mat4.translate(modelView, horizontalShift, 0, -dist);
+		modelView[0] *= currentScale;
+		modelView[5] *= currentScale;
 
-	// 		let mv = _Mat4.identity();
-	// 		mv = _Mat4.translate(mv, shiftX, 0, -dist);
-	// 		mv[0] *= scale; mv[5] *= scale;
+		const gl = this.gl;
+		const uniforms = programInfo.uniforms;
+		const clearValue = useBlackBackdrop ? 0.0 : 1.0;
 
-	// 		gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mv);
-	// 		gl.uniform1f(prog.uniforms['uAlpha'], 1.0);
-	// 		gl.uniform1f(prog.uniforms['uWhiteMix'], colorMix);
-	// 		gl.activeTexture(gl.TEXTURE0);
-	// 		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
-	// 		gl.uniform1i(prog.uniforms['uTexture'], 0);
-	// 		this._bindQuad3D(prog);
-	// 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-	// 	} else {
-	// 		// Phase 2: new slide appears from white/black, zoomed+shifted opposite, settles
-	// 		let t = (progress - 0.5) / 0.5;
-	// 		let scale = 1.05 - 0.05 * t;
-	// 		let shiftX = -dir * 0.05 * hw * 2 * (1.0 - t);
-	// 		let colorMix = (1.0 - t) * (1.0 - t);
+		gl.useProgram(programInfo.program);
+		gl.enable(gl.DEPTH_TEST);
+		gl.clearColor(clearValue, clearValue, clearValue, 1.0);
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	// 		let mv = _Mat4.identity();
-	// 		mv = _Mat4.translate(mv, shiftX, 0, -dist);
-	// 		mv[0] *= scale; mv[5] *= scale;
-
-	// 		gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mv);
-	// 		gl.uniform1f(prog.uniforms['uAlpha'], 1.0);
-	// 		gl.uniform1f(prog.uniforms['uWhiteMix'], colorMix);
-	// 		gl.activeTexture(gl.TEXTURE0);
-	// 		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
-	// 		gl.uniform1i(prog.uniforms['uTexture'], 0);
-	// 		this._bindQuad3D(prog);
-	// 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-	// 	}
-	// };
+		gl.uniformMatrix4fv(uniforms['uProjection'], false, projection);
+		gl.uniformMatrix4fv(uniforms['uModelView'], false, modelView);
+		gl.uniform1f(uniforms['uAlpha'], 1.0);
+		gl.uniform1f(uniforms['uSweepProgress'], sweepProgress);
+		gl.uniform1f(uniforms['uBackdropValue'], clearValue);
+		gl.uniform1f(uniforms['uDirection'], sweepDirection);
+		gl.uniform1f(uniforms['uEdgeWidth'], edgeWidth);
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE_2D, currentTexture);
+		gl.uniform1i(uniforms['uTexture'], 0);
+		this._bindQuad3D(programInfo);
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+	};
 
 	// // ============================================================
 	// // Transition: Glitter — hexagonal tiles rotating in place
