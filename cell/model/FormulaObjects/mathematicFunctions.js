@@ -3790,76 +3790,158 @@ function (window, undefined) {
 	cRANDARRAY.prototype.ca = true;
 	cRANDARRAY.prototype.isXLFN = true;
 	cRANDARRAY.prototype.numFormat = AscCommonExcel.cNumFormatNone;
+	cRANDARRAY.prototype.arrayIndexes = {0: 1, 1: 1, 2: 1, 3: 1, 4: 1};
 	cRANDARRAY.prototype.argumentsType = [argType.number, argType.number, argType.number, argType.number, argType.number];
+	/**
+	 * Returns an array of random numbers.
+	 *
+	 * @param {number} [rows=1] - The number of rows to fill.
+	 * @param {number} [columns=1] - The number of columns to fill.
+	 * @param {number} [min=0] - The minimum value in the range of generated numbers.
+	 * @param {number} [max=1] - The maximum value in the range of generated numbers.
+	 * @param {boolean} [wholeNumber=false] - Whether to return whole numbers (TRUE) or decimal values (FALSE).
+	 * @returns {array} An array of random numbers with the specified dimensions
+	 */
 	cRANDARRAY.prototype.Calculate = function (arg) {
-		//var oArguments = this._prepareArguments(arg, arguments[1]);
-		var argClone = arg;
+		const _getValue = function (value, row, col) {
+			if (value.isOneElement()) {
+				return value.getFirstElement ? value.getFirstElement() : value;
+			}	
 
-		//если какой-то из аргументов массив - обрабатываю здесь
-		//если обрабатывать выше и проходиться по массиву, то данная функция всегда будет возвращать массив
-		//а нам нужно только значение с индексом 0,0 у возвращаемого массива
+			const dimensions = value.getDimensions();
+			if (dimensions.row === 1) {
+				return _getValueInRange(value, 0, col);
+			}
 
-		var i, j;
-		var matrixRowCount;
-		var matrixColCount;
+			if (dimensions.col === 1) {
+				return _getValueInRange(value, row, 0);
+			}
+
+			return _getValueInRange(value, row, col);
+		};
+
+		const _getValueInRange = function (array, _row, _col) {
+			return array.getValueByRowCol ? array.getValueByRowCol(_row, _col, true) : array.getElementRowCol(_row, _col);
+		};
+
+		const randBetween = function (a, b, _wholeNumber) {
+			if (_wholeNumber) {
+				return new cNumber(Math.floor(Math.random() * (b - a + 1)) + a);
+			} else {
+				return new cNumber(Math.random() * (max - min) + min);
+			}
+		};
+
+		let argClone = arg;
+
+		// copy of base arguments by name
+		let rowsArg = arg[0] ? arg[0] : new cNumber(1), colsArg = arg[1] ? arg[1] : new cNumber(1),
+			minArg = arg[2] ? arg[2] : new cNumber(0), maxArg = arg[3] ? arg[3] : new cNumber(1),
+			integerArg = arg[4] ? arg[4] : new cNumber(0);
+
+		//if any of the arguments is an array, I process it here
+		//if you process above and iterate through the array, then this function will always return an array
+		//and we only need the value with index 0,0 of the returned array
+
+		let isInnerRangeMode = false; // if 1 of the arguments is a region or an array, then the final sizes will be calculated from their sizes (except for links A1:A1)
+		let innerArraySize = {row: 1, col: 1};
+
+		let i, j;
+		let matrixRowCount;
+		let matrixColCount;
 		for (i = 0; i < argClone.length; i++) {
+			let argI = argClone[i];
 			if (argClone[i].type === cElementType.empty && i !== 4) {
 				if (i !== 2) {
 					argClone[i] = new cNumber(1);
 				} else {
 					argClone[i] = new cNumber(0);
 				}
-			} else if (argClone[i].type === cElementType.array || cElementType.cellsRange === argClone[i].type || cElementType.cellsRange3D === argClone[i].type) {
-				argClone[i] = argClone[i].getMatrix();
-				if (cElementType.cellsRange3D === argClone[i].type) {
-					argClone[i] = argClone[i][0];
+			} else if (cElementType.array === argClone[i].type || cElementType.cellsRange === argClone[i].type || cElementType.cellsRange3D === argClone[i].type) {
+				if (cElementType.array !== argClone[i].type && argClone[i].isOneElement()) {
+					// array is not checked for single element
+					argClone[i] = argClone[i].tocNumber();
+					continue;
 				}
-				if (matrixRowCount === undefined || matrixRowCount > argClone[i].length) {
-					matrixRowCount = argClone[i].length;
-				}
-				if (matrixColCount === undefined || matrixColCount > argClone[i][0].length) {
-					matrixColCount = argClone[i][0].length;
-				}
+
+				isInnerRangeMode = true;
+
+				let argSize = argClone[i].getDimensions();
+				innerArraySize.row = Math.max(argSize.row, innerArraySize.row);
+				innerArraySize.col = Math.max(argSize.col, innerArraySize.col);
 			} else if (i !== 4) {
-				argClone[i] = argClone[i].tocNumber()
+				argClone[i] = argClone[i].tocNumber();
 			}
 		}
 
 		if (argClone[4]) {
 			if (matrixRowCount === undefined) {
-				if (argClone[4].type === cElementType.cell || argClone[4].type === cElementType.cell3D) {
-					argClone[4] = argClone[4].getValue();
-				}
-				if (argClone[4].type === cElementType.string) {
-					return new cError(cErrorType.wrong_value_type);
-				} else if (argClone[4].type === cElementType.error) {
-					return argClone[4];
-				}
+				if ((argClone[4].type === cElementType.array || cElementType.cellsRange === argClone[4].type || cElementType.cellsRange3D === argClone[4].type) /*&&
+					!argClone[4].isOneElement()*/) {
+					isInnerRangeMode = true;
+					let argSize = argClone[4].getDimensions();
+					innerArraySize.row = Math.max(argSize.row, innerArraySize.row);
+					innerArraySize.col = Math.max(argSize.col, innerArraySize.col);
+				} else {
+					if (argClone[4].type === cElementType.cell || argClone[4].type === cElementType.cell3D) {
+						argClone[4] = argClone[4].getValue();
+					}
 
-				argClone[4] = argClone[4].tocBool();
+					argClone[4] = argClone[4].tocBool();
+					
+					if (argClone[4].type === cElementType.string) {
+						return new cError(cErrorType.wrong_value_type);
+					} else if (argClone[4].type === cElementType.error) {
+						return argClone[4];
+					}
+				}
 			}
 		}
 
-		var argError;
-		if (argError = this._checkErrorArg(argClone)) {
-			return argError;
-		}
 
-		function randBetween(a, b, _wholeNumber) {
-			if (_wholeNumber) {
-				return new cNumber(Math.floor(Math.random() * (b - a + 1)) + a);
-			} else {
-				return new cNumber(Math.random() * (max - min) + min);
+		let rowCount, colCount, min, max, wholeNumber, _array;
+
+		if (isInnerRangeMode) {
+			_array = new cArray();
+
+			for (let row = 0; row < innerArraySize.row; row++) {
+				_array.addRow();
+				for (let col = 0; col < innerArraySize.col; col++) {
+					min = _getValue(argClone[2] ? argClone[2] : minArg, row, col);
+					max = _getValue(argClone[3] ? argClone[3] : maxArg, row, col);
+					wholeNumber = _getValue(argClone[4] ? argClone[4] : integerArg, row, col);
+					
+					if (min.type === cElementType.error) {
+						_array.addElement(min);
+						continue
+					}
+					if (max.type === cElementType.error) {
+						_array.addElement(max);
+						continue
+					}
+					if (wholeNumber.type === cElementType.error) {
+						_array.addElement(wholeNumber);
+						continue
+					}
+					
+					min = min.getValue();
+					max = max.getValue();
+					wholeNumber = wholeNumber.getValue();
+
+					if (min > max) {
+						_array.addElement(new cError(cErrorType.wrong_value_type));
+						continue
+					} else if (wholeNumber && (!Number.isInteger(min) || !Number.isInteger(max))) {
+						_array.addElement(new cError(cErrorType.wrong_value_type));
+						continue
+					}
+					
+					_array.addElement(randBetween(min, max, wholeNumber));
+				}
 			}
-		}
 
-		var rowCount;
-		var colCount;
-		var min;
-		var max;
-		var wholeNumber;
-		var _array;
-		if (matrixRowCount !== undefined) {
+
+		} else if (matrixRowCount !== undefined) {
 			_array = new cArray();
 			for (i = 0; i < matrixRowCount; i++) {
 				_array.addRow();
@@ -3915,6 +3997,11 @@ function (window, undefined) {
 				}
 			}
 		} else {
+			let argError;
+			if (argError = this._checkErrorArg(argClone)) {
+				return argError;
+			}
+
 			rowCount = argClone[0] ? parseInt(argClone[0].getValue()) : 1;
 			colCount = argClone[1] ? parseInt(argClone[1].getValue()) : 1;
 			min = argClone[2] ? argClone[2].getValue() : 0;
@@ -3928,7 +4015,11 @@ function (window, undefined) {
 				return new cError(cErrorType.wrong_value_type);
 			}
 
-			if (rowCount <= 0 || colCount <= 0) {
+			if (rowCount === 0 || colCount === 0) {
+				return new cError(cErrorType.array_not_calc);
+			}
+
+			if (rowCount < 0 || colCount < 0) {
 				return new cError(cErrorType.wrong_value_type);
 			}
 
