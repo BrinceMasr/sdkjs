@@ -3456,14 +3456,13 @@ $(function () {
 		ws.getRange2("A201").setValue("-0.5"); // TestName
 		ws.getRange2("A202").setValue("0.5"); // TestName1
 		ws.getRange2("A203").setValue("10.5"); // TestName2
-		ws2.getRange2("A11").setValue("-0.5"); // TestName3D
+		ws2.getRange2("A11").setValue("12.5"); // TestName3D
 		ws.getRange2("A208").setValue("0.8"); // TestNameArea2
 		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
 		// Positive cases:
-
 		// Case #1: Date, Number. Standard case: add 1 month to a valid date.
 		oParser = new parserFormula('EOMONTH(DATE(2023,1,1),1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: EOMONTH(DATE(2023,1,1),1) is parsed.');
@@ -3491,7 +3490,7 @@ $(function () {
 		// Case #7: Date, Empty. Empty months defaults to 0.
 		oParser = new parserFormula('EOMONTH(DATE(2023,5,1),)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: EOMONTH(DATE(2023,5,1),) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Positive case: Date, Empty. Empty months defaults to 0.');
+		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Positive case: Date, Empty. Empty months defaults to 0.');
 		// Case #8: Reference link, Number. Reference link to start_date value.
 		oParser = new parserFormula('EOMONTH(A100,2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: EOMONTH(A100,2) is parsed.');
@@ -3527,7 +3526,7 @@ $(function () {
 		// Case #16: Area3D, Number. Range reference across sheets.
 		oParser = new parserFormula('EOMONTH(Sheet2!A1:A2,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: EOMONTH(Sheet2!A1:A2,1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 59, 'Test: Positive case: Area3D, Number. Range reference across sheets.');
+		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Test: Positive case: Area3D, Number. Range reference across sheets.');
 		// Case #17: Date, Array. Array months argument.
 		oParser = new parserFormula('EOMONTH(DATE(2023,1,1),{1,2,3})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: EOMONTH(DATE(2023,1,1),{1,2,3}) is parsed.');
@@ -3546,7 +3545,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), 54847, 'Test: Positive case: Date, Table. Table reference for months.');
 
 		// Negative cases:
-
 		// Case #1: String, Number. Invalid date string.
 		oParser = new parserFormula('EOMONTH("notadate",1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: EOMONTH("notadate",1) is parsed.');
@@ -3560,10 +3558,9 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: EOMONTH(DATE(2023,1,1),#NUM!) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Date, Error. Error propagated from months.');
 		// Case #4: Empty, Number. Empty start_date gives #VALUE!.
-		// Different result with MS
-		//oParser = new parserFormula('EOMONTH(,1)', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: EOMONTH(,1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Empty, Number. Empty start_date gives #VALUE!.');
+		oParser = new parserFormula('EOMONTH(,1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: EOMONTH(,1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Empty, Number. Empty start_date gives #VALUE!.');
 		// Case #5: Number, String. Invalid months argument string.
 		oParser = new parserFormula('EOMONTH(45123,"abc")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: EOMONTH(45123,"abc") is parsed.');
@@ -3589,29 +3586,29 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: EOMONTH(A100:A101,"bad") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area, String. Invalid months with range.');
 		// Case #11: Number, Empty. Empty months argument leads to #VALUE!.
-		// Different result with MS
-		//oParser = new parserFormula('EOMONTH(45123,)', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: EOMONTH(45123,) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Number, Empty. Empty months argument leads to #VALUE!.');
+		oParser = new parserFormula('EOMONTH(45123,)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: EOMONTH(45123,) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Number, Empty. Empty months argument leads to #VALUE!.');
 		// Case #12: Name, String. Invalid months from name.
-		// Different result with MS
-		//oParser = new parserFormula('EOMONTH(TestName,"bad")', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: EOMONTH(TestName,"bad") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Name, String. Invalid months from name.');
+		oParser = new parserFormula('EOMONTH(TestName,"bad")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: EOMONTH(TestName,"bad") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Name, String. Invalid months from name.');
 		// Case #13: Name3D, Error. 3D name with error months.
-		// Different result with MS
-		//oParser = new parserFormula('EOMONTH(TestName3D,#REF!)', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: EOMONTH(TestName3D,#REF!) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Name3D, Error. 3D name with error months.');
+		oParser = new parserFormula('EOMONTH(TestName3D,#REF!)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: EOMONTH(TestName3D,#REF!) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Name3D, Error. 3D name with error months.');
+		// Case #13.2: Error, Name3D. 3D name with error months.
+		oParser = new parserFormula('EOMONTH(NA(),TestName3D)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: EOMONTH(NA(),TestName3D) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Name3D, Error. 3D name with error months.');
 		// Case #14: Ref3D, String. Invalid months on 3D ref.
 		oParser = new parserFormula('EOMONTH(Sheet2!A1,"invalid")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: EOMONTH(Sheet2!A1,"invalid") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Ref3D, String. Invalid months on 3D ref.');
 		// Case #15: Area3D, Error. Area3D with error months.
-		// Different result with MS
-		//oParser = new parserFormula('EOMONTH(Sheet2!A1:A2,#N/A)', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: EOMONTH(Sheet2!A1:A2,#N/A) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area3D, Error. Area3D with error months.');
+		oParser = new parserFormula('EOMONTH(Sheet2!A1:A2,#N/A)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: EOMONTH(Sheet2!A1:A2,#N/A) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area3D, Error. Area3D with error months.');
 		// Case #16: String, Number. Invalid date format.
 		oParser = new parserFormula('EOMONTH("13/13/2023",1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: EOMONTH("13/13/2023",1) is parsed.');
@@ -3629,13 +3626,21 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: EOMONTH(DATE(2023,1,1),TestNameBad) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NAME?', 'Test: Negative case: Date, Name. Invalid named months value.');
 		// Case #20: Empty, Empty. Both arguments empty.
-		// Different result with MS
-		//oParser = new parserFormula('EOMONTH(,)', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: EOMONTH(,) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Empty, Empty. Both arguments empty.');
+		oParser = new parserFormula('EOMONTH(,)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: EOMONTH(,) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Empty, Empty. Both arguments empty.');
+		// 'Sheet1:Sheet2'!A1
+		let multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A1";
+		// Case #21: Area3d,Number. 3D area used. 2 of 2 arguments used.
+		oParser = new parserFormula('EOMONTH('+multiAreaLink+',12)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: EOMONTH('+multiAreaLink+',12) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area3d,Array. 3D area used. 2 of 2 arguments used.');
+		// Case #22: Number,Area3d. 3D area used. 2 of 3 arguments used.
+		oParser = new parserFormula('EOMONTH(12,'+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: EOMONTH(12,'+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array,Area3d. 3D area used. 2 of 2 arguments used.');
 
 		// Bounded cases:
-
 		// Case #1: Date, Number. Minimum date supported by Excel.
 		oParser = new parserFormula('EOMONTH(DATE(1900,1,1),0)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: EOMONTH(DATE(1900,1,1),0) is parsed.');
@@ -3653,15 +3658,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: EOMONTH(2958465,0) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 2958465, 'Test: Bounded case: Number, Number. Excel\'s upper bound for date serial number.');
 
-		// TODO Need to fix: area handle, empty handle, error types diff, ms result diff
-
-		//  Case #7: Date, Empty. Empty months defaults to 0.
-		// Case #4: Empty, Number. Empty start_date gives #VALUE!.
-		// Case #11: Number, Empty. Empty months argument leads to #VALUE!.
-		// Case #12: Name, String. Invalid months from name.
-		// Case #13: Name3D, Error. 3D name with error months.
-		// Case #15: Area3D, Error. Area3D with error months.
-		// Case #20: Empty, Empty. Both arguments empty.
 
 		testArrayFormula2(assert, "EOMONTH", 2, 2, true, null);
 	});
