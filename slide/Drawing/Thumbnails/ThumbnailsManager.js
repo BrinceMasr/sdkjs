@@ -2916,15 +2916,7 @@
 			return false;
 		}
 		AscCommon.check_KeyboardEvent(e);
-		let oApi = this.m_oWordControl.m_oApi;
-		let oPresentation = this.m_oWordControl.m_oLogicDocument;
-		let oDrawingDocument = this.m_oWordControl.m_oDrawingDocument;
-		let oEvent = global_keyboardEvent;
-		let nShortCutAction = oApi.getShortcut(oEvent);
-		let bReturnValue = false, bPreventDefault = true;
-		let sSelectedIdx;
-		let nStartHistoryIndex = oPresentation.History.Index;
-		return false;
+		return this.outlineView.onKeyDown(global_keyboardEvent);
 	};
 
 	COutlineThumbnailsManager.prototype.SetFocusElement = function(type)
