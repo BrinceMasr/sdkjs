@@ -7507,11 +7507,11 @@
                 }
             }
         }
-        if(oNewChart) {
-            this.removeSeries(this.getSeriesArrayIdx(oSeries));
-            oPlotArea.addChart(oNewChart, null);
-            nResult = Asc.c_oAscError.ID.No;
-        }
+		if (oNewChart) {
+			oPlotArea.addChart(oNewChart, null);
+			this.removeSeries(this.getSeriesArrayIdx(oSeries));
+			nResult = Asc.c_oAscError.ID.No;
+		}
         return nResult;
     };
     CChartBase.prototype.tryChangeSeriesChartType = function(oSeries, nType) {
