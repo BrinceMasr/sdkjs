@@ -4804,15 +4804,15 @@
 		// 'effectFlyThroughOut':       { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['out', '0'] },
 		// 'effectFlyThroughOutBounce': { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['out', '1'] },
 
-		// // Default 'p14:conveyor' effect attribute is: dir='l'
-		// 'effectConveyorLeft':  { tag: 'p14:conveyor', attrNames: ['dir'], attrValues: ['l'] },
-		// 'effectConveyorRight': { tag: 'p14:conveyor', attrNames: ['dir'], attrValues: ['r'] },
-
 		// Default 'p14:pan' effect attribute is: dir='l'
 		'effectPanLeft':  { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['l'] },
 		'effectPanRight': { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['r'] },
 		'effectPanUp':    { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['u'] },
 		'effectPanDown':  { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['d'] },
+
+		// Default 'p14:conveyor' effect attribute is: dir='l'
+		'effectConveyorLeft':  { tag: 'p14:conveyor', attrNames: ['dir'], attrValues: ['l'] },
+		'effectConveyorRight': { tag: 'p14:conveyor', attrNames: ['dir'], attrValues: ['r'] },
 
 		// Tag has no attributes
 		'effectFlashbulb': { tag: 'p14:flash' },

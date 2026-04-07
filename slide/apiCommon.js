@@ -883,17 +883,17 @@ CAscSlideTransition.prototype.parseXmlParameters = function (_type, _paramNames,
 		// 	else if (dir === "out" && !hasBounce) this.TransitionOption = c_oAscSlideTransitionParams.Flythrough_Out;
 		// 	else this.TransitionOption = c_oAscSlideTransitionParams.Flythrough_Out_Bounce;
 		// }
-		// else if ("p14:conveyor" === _type)
-		// {
-		// 	typeMatched = true;
-		// 	this.TransitionType = c_oAscSlideTransitionTypes.Conveyor;
-		// 	this.TransitionOption = c_oAscSlideTransitionParams.Conveyor_Left;
-		// 	for (let i = 0; i < _len; i++) {
-		// 		if (_paramNames[i] === "dir" && "r" === _paramValues[i])
-		// 			this.TransitionOption = c_oAscSlideTransitionParams.Conveyor_Right;
-		// 	}
-		// }
 
+		else if ("p14:conveyor" === _type)
+		{
+			typeMatched = true;
+			this.TransitionType = c_oAscSlideTransitionTypes.Conveyor;
+			this.TransitionOption = c_oAscSlideTransitionParams.Conveyor_Left;
+			for (let i = 0; i < _len; i++) {
+				if (_paramNames[i] === "dir" && "r" === _paramValues[i])
+					this.TransitionOption = c_oAscSlideTransitionParams.Conveyor_Right;
+			}
+		}
 		else if ("p14:pan" === _type)
 		{
 			typeMatched = true;
@@ -1453,14 +1453,11 @@ CAscSlideTransition.prototype.fillXmlParams = function (aAttrNames, aAttrValues)
 		// 	aAttrNames.push("hasBounce"); aAttrValues.push(fVals[1]);
 		// 	break;
 		// }
-		// case c_oAscSlideTransitionTypes.Conveyor:
-		// {
-		// 	sNodeName = "p14:conveyor";
-		// 	aAttrNames.push("dir");
-		// 	aAttrValues.push(this.TransitionOption === c_oAscSlideTransitionParams.Conveyor_Right ? "r" : "l");
-		// 	break;
-		// }
-
+		case c_oAscSlideTransitionTypes.Flash:
+		{
+			sNodeName = "p14:flash";
+			break;
+		}
 		case c_oAscSlideTransitionTypes.Pan:
 		{
 			sNodeName = "p14:pan";
@@ -1473,9 +1470,11 @@ CAscSlideTransition.prototype.fillXmlParams = function (aAttrNames, aAttrValues)
 			aAttrNames.push("dir"); aAttrValues.push(panDir);
 			break;
 		}
-		case c_oAscSlideTransitionTypes.Flash:
+		case c_oAscSlideTransitionTypes.Conveyor:
 		{
-			sNodeName = "p14:flash";
+			sNodeName = "p14:conveyor";
+			aAttrNames.push("dir");
+			aAttrValues.push(this.TransitionOption === c_oAscSlideTransitionParams.Conveyor_Right ? "r" : "l");
 			break;
 		}
         default:

@@ -65,12 +65,12 @@
     _WebGLTransitionTypes[c_oAscSlideTransitionTypes.BoxZoom]        = true;
 	_WebGLTransitionTypes[c_oAscSlideTransitionTypes.Flash]          = true;
 	_WebGLTransitionTypes[c_oAscSlideTransitionTypes.Pan]            = true;
+	_WebGLTransitionTypes[c_oAscSlideTransitionTypes.Conveyor]       = true;
 
 	// _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Glitter]        = true;
 	// _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Shred]          = true;
 	// _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Reveal]         = true;
 	// _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Flythrough]     = true;
-	// _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Conveyor]       = true;
 
     function CTransitionGL(transitionAnimation)
     {
@@ -526,6 +526,9 @@
 			case c_oAscSlideTransitionTypes.Pan:
 				this._preparePan();
 				break;
+			case c_oAscSlideTransitionTypes.Conveyor:
+				this._prepareConveyor();
+				break;
 
 			// case c_oAscSlideTransitionTypes.Reveal:
 			// 	this._prepareReveal();
@@ -538,9 +541,6 @@
 			// 	break;
 			// case c_oAscSlideTransitionTypes.Flythrough:
 			// 	this._prepareFlythrough();
-			// 	break;
-			// case c_oAscSlideTransitionTypes.Conveyor:
-			// 	this._prepareConveyor();
 			// 	break;
 
             default:
@@ -623,6 +623,9 @@
 			case c_oAscSlideTransitionTypes.Pan:
 				this._renderPan(progress, param);
 				break;
+			case c_oAscSlideTransitionTypes.Conveyor:
+				this._renderConveyor(progress, param);
+				break;
 
 			// case c_oAscSlideTransitionTypes.Reveal:
 			// 	this._renderReveal(progress, param);
@@ -635,9 +638,6 @@
 			// 	break;
 			// case c_oAscSlideTransitionTypes.Flythrough:
 			// 	this._renderFlythrough(progress, param);
-			// 	break;
-			// case c_oAscSlideTransitionTypes.Conveyor:
-			// 	this._renderConveyor(progress, param);
 			// 	break;
 
             default:
@@ -3139,6 +3139,93 @@
 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 	};
 
+	// ============================================================
+	// Transition: Conveyor — perspective gallery sliding
+	// ============================================================
+
+	CTransitionGL.prototype._prepareConveyor = function () {
+		this.GetProgram('flip3d', _VERT_3D, _FRAG_TEXTURED);
+		this._initQuadBuffer3D();
+	};
+
+	CTransitionGL.prototype._renderConveyor = function (progress, param) {
+		const programInfo = this.programs['flip3d'];
+		if (!programInfo) {
+			return;
+		}
+
+		const aspect = this.glCanvas.width / this.glCanvas.height;
+		const fov = Math.PI / 4;
+		const dist = 1.0 / Math.tan(fov / 2);
+		const projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
+
+		const dir = (param === c_oAscSlideTransitionParams.Conveyor_Left) ? -1 : 1;
+		const quadHalfWidth = aspect;
+
+		const clampedProgress = Math.max(0, Math.min(progress, 1.0));
+		const linearProgress = 1.0 - Math.pow(1.0 - clampedProgress, 1.0 / 3.0);
+
+		// Three phases: move away with rotation, slide, move closer with rotation reset
+		const pullBackEnd = 1.0 / 3.0;
+		const slideEnd = 2.0 / 3.0;
+
+		let awayProgress = Math.min(linearProgress / pullBackEnd, 1.0);
+		awayProgress = awayProgress * awayProgress * (3.0 - 2.0 * awayProgress);
+
+		let slideProgress = Math.max(0, Math.min((linearProgress - pullBackEnd) / (slideEnd - pullBackEnd), 1.0));
+		slideProgress = slideProgress * slideProgress * (3.0 - 2.0 * slideProgress);
+
+		let returnProgress = Math.max(0, Math.min((linearProgress - slideEnd) / (1.0 - slideEnd), 1.0));
+		returnProgress = returnProgress * returnProgress * (3.0 - 2.0 * returnProgress);
+
+		const maxRotationAngle = -dir * Math.PI / 10;
+		const rotationAngle = maxRotationAngle * (awayProgress - returnProgress);
+
+		const maxPullBack = 0.6;
+		const zOffset = -maxPullBack * (awayProgress - returnProgress);
+
+		const gap = quadHalfWidth * 0.06;
+		const totalSlideDistance = quadHalfWidth * 2 + gap;
+		const slideOffset = dir * slideProgress * totalSlideDistance;
+
+		let oldSlideModelView = _Mat4.identity();
+		oldSlideModelView = _Mat4.translate(oldSlideModelView, 0, 0, -dist + zOffset);
+		oldSlideModelView = _Mat4.rotateY(oldSlideModelView, rotationAngle);
+		oldSlideModelView = _Mat4.translate(oldSlideModelView, slideOffset, 0, 0);
+
+		let newSlideModelView = _Mat4.identity();
+		newSlideModelView = _Mat4.translate(newSlideModelView, 0, 0, -dist + zOffset);
+		newSlideModelView = _Mat4.rotateY(newSlideModelView, rotationAngle);
+		newSlideModelView = _Mat4.translate(newSlideModelView, slideOffset - dir * totalSlideDistance, 0, 0);
+
+		const gl = this.gl;
+		const uniforms = programInfo.uniforms;
+
+		gl.useProgram(programInfo.program);
+		gl.enable(gl.DEPTH_TEST);
+
+		gl.clearColor(1.0, 1.0, 1.0, 1.0);
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+		gl.uniformMatrix4fv(uniforms['uProjection'], false, projection);
+
+		gl.uniformMatrix4fv(uniforms['uModelView'], false, oldSlideModelView);
+		gl.uniform1f(uniforms['uAlpha'], 1.0);
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
+		gl.uniform1i(uniforms['uTexture'], 0);
+		this._bindQuad3D(programInfo);
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+		gl.uniformMatrix4fv(uniforms['uModelView'], false, newSlideModelView);
+		gl.uniform1f(uniforms['uAlpha'], 1.0);
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
+		gl.uniform1i(uniforms['uTexture'], 0);
+		this._bindQuad3D(programInfo);
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+	};
+
 	// // ============================================================
 	// // Transition: Reveal — slight zoom with white flash
 	// // ============================================================
@@ -3801,95 +3888,6 @@
 	// 		gl.uniform1f(prog.uniforms['uAlpha'], oldAlpha);
 	// 		gl.activeTexture(gl.TEXTURE0);
 	// 		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
-	// 		gl.uniform1i(prog.uniforms['uTexture'], 0);
-	// 		this._bindQuad3D(prog);
-	// 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-	// 	}
-	// };
-
-	// // ============================================================
-	// // Transition: Conveyor — perspective gallery sliding
-	// // ============================================================
-
-	// CTransitionGL.prototype._prepareConveyor = function () {
-	// 	this.GetProgram('flip3d', _VERT_3D, _FRAG_TEXTURED);
-	// 	this._initQuadBuffer3D();
-	// };
-
-	// CTransitionGL.prototype._renderConveyor = function (progress, param) {
-	// 	let gl = this.gl;
-	// 	let prog = this.programs['flip3d'];
-	// 	if (!prog) return;
-
-	// 	gl.useProgram(prog.program);
-	// 	gl.enable(gl.DEPTH_TEST);
-
-	// 	let aspect = this.glCanvas.width / this.glCanvas.height;
-	// 	let fov = Math.PI / 4;
-	// 	let dist = 1.0 / Math.tan(fov / 2);
-	// 	let projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
-
-	// 	let isLeft = (param === c_oAscSlideTransitionParams.Conveyor_Left);
-	// 	let dir = isLeft ? -1 : 1;
-	// 	let hw = aspect;
-
-	// 	// Three phases: tilt in (0→0.12), slide (0.12→0.85), untilt (0.85→1.0)
-	// 	let tiltInEnd = 0.12;
-	// 	let slideEnd = 0.85;
-
-	// 	let tiltInProgress = Math.min(progress / tiltInEnd, 1.0);
-	// 	tiltInProgress = tiltInProgress * tiltInProgress * (3.0 - 2.0 * tiltInProgress);
-
-	// 	let slideStart = tiltInEnd;
-	// 	let slideDur = slideEnd - slideStart;
-	// 	let slideProgress = Math.max(0, Math.min((progress - slideStart) / slideDur, 1.0));
-
-	// 	let untwistProgress = Math.max(0, (progress - slideEnd) / (1.0 - slideEnd));
-	// 	untwistProgress = untwistProgress * untwistProgress * (3.0 - 2.0 * untwistProgress);
-
-	// 	// Y-axis rotation angle (~18 degrees), reversed direction
-	// 	let maxAngle = -dir * Math.PI / 10;
-	// 	let tiltAmount = tiltInProgress * (1.0 - untwistProgress);
-	// 	let angle = maxAngle * tiltAmount;
-
-	// 	// Horizontal slide offset with ease (smooth start/stop)
-	// 	let eased = slideProgress * slideProgress * (3.0 - 2.0 * slideProgress);
-	// 	let gap = hw * 0.06; // small gap between slides
-	// 	let totalSlide = hw * 2 + gap;
-	// 	let slideOffset = dir * eased * totalSlide;
-
-	// 	gl.clearColor(1.0, 1.0, 1.0, 1.0);
-	// 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-	// 	gl.uniformMatrix4fv(prog.uniforms['uProjection'], false, projection);
-
-	// 	// Old slide (starts centered, slides away)
-	// 	{
-	// 		let mv = _Mat4.identity();
-	// 		mv = _Mat4.translate(mv, 0, 0, -dist);
-	// 		mv = _Mat4.rotateY(mv, angle);
-	// 		mv = _Mat4.translate(mv, slideOffset, 0, 0);
-
-	// 		gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mv);
-	// 		gl.uniform1f(prog.uniforms['uAlpha'], 1.0);
-	// 		gl.activeTexture(gl.TEXTURE0);
-	// 		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
-	// 		gl.uniform1i(prog.uniforms['uTexture'], 0);
-	// 		this._bindQuad3D(prog);
-	// 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-	// 	}
-
-	// 	// New slide (starts beside old with gap, slides into position)
-	// 	{
-	// 		let mv = _Mat4.identity();
-	// 		mv = _Mat4.translate(mv, 0, 0, -dist);
-	// 		mv = _Mat4.rotateY(mv, angle);
-	// 		mv = _Mat4.translate(mv, slideOffset - dir * totalSlide, 0, 0);
-
-	// 		gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mv);
-	// 		gl.uniform1f(prog.uniforms['uAlpha'], 1.0);
-	// 		gl.activeTexture(gl.TEXTURE0);
-	// 		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
 	// 		gl.uniform1i(prog.uniforms['uTexture'], 0);
 	// 		this._bindQuad3D(prog);
 	// 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
