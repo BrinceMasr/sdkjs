@@ -1678,6 +1678,7 @@
 			AscCommonExcel.g_oFormulaRangesCache.clean();
 			AscCommonExcel.g_oCountIfCache.clean();
 			AscCommonExcel.g_oSumIfCache.clean();
+			AscCommonExcel.g_oAverageIfCache.clean();
 		},
 		notifyAllFormulasInChangedWs: function() {
 			let sheetIds = {};
@@ -3110,17 +3111,6 @@
 		}
 	};
 
-	/**
-	 * @param {string} s1
-	 * @param {string} s2
-	 * @return {number}
-	 */
-	function stringCompare(s1, s2) {
-		if (s1 === s2) {
-			return 0;
-		}
-		return s1.localeCompare(s2, AscCommon.g_oDefaultCultureInfo ? AscCommon.g_oDefaultCultureInfo.Name : "en");
-	}
 	function ForwardTransformationFormula(elem, formula, parsed) {
 		this.elem = elem;
 		this.formula = formula;
@@ -15257,7 +15247,11 @@
 		(true !== options.isWholeCell || options.findWhat.length === cellText.length);
 
 	};
-	Cell.prototype.isNullText=function(){
+	Cell.prototype.isNullText=function(opt_noCalc){
+		if (opt_noCalc) {
+			// Without _checkDirty: only check raw data, ignore formulaParsed
+			return null === this.number && null === this.text && null === this.multiText;
+		}
 		return this.isNullTextString() && !this.formulaParsed;
 	};
 	Cell.prototype.isEmptyTextString = function() {
@@ -15858,8 +15852,8 @@
 			}
 		}
 	};
-	Cell.prototype.getType=function(){
-		this._checkDirty();
+	Cell.prototype.getType=function(opt_noCalc){
+		if (!opt_noCalc) { this._checkDirty(); }
 		return this.type;
 	};
 	Cell.prototype.setCellStyle=function(val){
@@ -16223,8 +16217,8 @@
 		var aText = this._getValue2(AscCommon.gc_nMaxDigCountView, function(){return true;}, numFormat, cultureInfo, true);
 		return AscCommonExcel.getStringFromMultiText(aText);
 	};
-	Cell.prototype.getValueWithoutFormat = function() {
-		this._checkDirty();
+	Cell.prototype.getValueWithoutFormat = function(opt_noCalc) {
+		if (!opt_noCalc) { this._checkDirty(); }
 		var sResult = "";
 		if(null != this.number)
 		{
@@ -16259,8 +16253,8 @@
 			dDigitsCount = AscCommon.gc_nMaxDigCountView;
 		return this._getValue2(dDigitsCount, fIsFitMeasurer);
 	};
-	Cell.prototype.getNumberValue = function() {
-		this._checkDirty();
+	Cell.prototype.getNumberValue = function(opt_noCalc) {
+		if (!opt_noCalc) { this._checkDirty(); }
 		return this.number;
 	};
 	Cell.prototype.getBoolValue = function() {
@@ -17299,6 +17293,7 @@
 			AscCommonExcel.g_oFormulaRangesCache.remove(this);
 			AscCommonExcel.g_oCountIfCache.remove(this, DataOld, res);
 			AscCommonExcel.g_oSumIfCache.remove(this, DataOld, res);
+			AscCommonExcel.g_oAverageIfCache.remove(this, DataOld, res);
 		}
 	};
 	Cell.prototype.cleanText = function() {
@@ -21531,7 +21526,7 @@
 							if (_b && null != _b.text) {
 								var val1 = caseSensitive ? _a.text : _a.text.toUpperCase();
 								var val2 = caseSensitive ? _b.text : _b.text.toUpperCase();
-								res = stringCompare(val1, val2);
+								res = AscCommon.stringCompare(val1, val2);
 							} else if(_b && null != _b.num) {
 								res = 1;
 							} else {
@@ -26782,6 +26777,5 @@
 
 	window['AscCommonExcel'].mergeCustomFunctions = mergeCustomFunctions;
 	window['AscCommonExcel'].safeJsonParse = safeJsonParse;
-	window['AscCommonExcel'].stringCompare = stringCompare;
 
 })(window);

@@ -107,7 +107,7 @@ function (window, undefined) {
 	}
 
 	function diffDate(d1, d2, mode) {
-		var date1 = d1.getUTCDate(), month1 = d1.getUTCMonth() + 1, year1 = d1.getUTCFullYear(),
+		let date1 = d1.getUTCDate(), month1 = d1.getUTCMonth() + 1, year1 = d1.getUTCFullYear(),
 			date2 = d2.getUTCDate(), month2 = d2.getUTCMonth() + 1, year2 = d2.getUTCFullYear();
 
 		switch (mode) {
@@ -290,6 +290,7 @@ function (window, undefined) {
 	}
 
 	function getCorrectDate(val) {
+		// function with shift for dates of the first two months of 1900 (until February)
 		if (!AscCommon.bDate1904) {
 			if (val < 60) {
 				val = new cDate((val - AscCommonExcel.c_DateCorrectConst) * c_msPerDay);
@@ -1192,26 +1193,39 @@ function (window, undefined) {
 	cEOMONTH.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
 	cEOMONTH.prototype.argumentsType = [argType.any, argType.any];
 	cEOMONTH.prototype.Calculate = function (arg) {
+		// in this function it is important to check for empty before getting the value from the reference
 		let arg0 = arg[0], arg1 = arg[1];
+
+		// Arg0 check
+		if (cElementType.empty === arg0.type) {
+			return new cError(cErrorType.not_available);
+		}
+
 		if (cElementType.cellsRange === arg0.type || cElementType.cellsRange3D === arg0.type) {
-			arg0 = arg0.cross(arguments[1]);
+			return new cError(cErrorType.wrong_value_type);
 		} else if (cElementType.array === arg0.type) {
 			arg0 = arg0.getElementRowCol(0, 0);
 		} else if (cElementType.cell === arg0.type || cElementType.cell3D === arg0.type) {
 			arg0 = arg0.getValue();
 		}
 
+		if (cElementType.bool === arg0.type) {
+			return new cError(cErrorType.wrong_value_type);
+		}
+
+		// Arg1 check
+		if (cElementType.empty === arg1.type) {
+			return new cError(cErrorType.not_available);
+		}
+
 		if (cElementType.cellsRange === arg1.type || cElementType.cellsRange3D === arg1.type) {
-			arg1 = arg1.cross(arguments[1]);
+			return new cError(cErrorType.wrong_value_type);
 		} else if (cElementType.array === arg1.type) {
 			arg1 = arg1.getElementRowCol(0, 0);
 		} else if (cElementType.cell === arg1.type || cElementType.cell3D === arg1.type) {
 			arg1 = arg1.getValue();
 		}
 
-		if (cElementType.bool === arg0.type) {
-			return new cError(cErrorType.wrong_value_type);
-		}
 		if (cElementType.bool === arg1.type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
@@ -2444,6 +2458,7 @@ function (window, undefined) {
 	window['AscCommonExcel'].DayCountBasis = DayCountBasis;
 	window['AscCommonExcel'].yearFrac = yearFrac;
 	window['AscCommonExcel'].diffDate = diffDate;
+	window['AscCommonExcel'].GetDiffDate = GetDiffDate;
 	window['AscCommonExcel'].days360 = days360;
 	window['AscCommonExcel'].getCorrectDate = getCorrectDate;
 	window['AscCommonExcel'].daysInYear = daysInYear;

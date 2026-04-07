@@ -722,17 +722,66 @@ function (window, undefined) {
 	asc_ValAxisSettings.prototype.putAxisType = function (v) {
 		this.axisType = v;
 	};
+
+	asc_ValAxisSettings.prototype._parseStringValue = function (str) {
+		const num = AscCommon.g_oFormatParser.tryParseLocaleNumber(str);
+		if (num !== null) {
+			return num;
+		}
+
+		let formatType, formatCode;
+		if (this.numFmt) {
+			const typeInfo = this.numFmt.getFormatCellsInfo();
+			formatType = typeInfo.asc_getType();
+			formatCode = this.numFmt.getFormatCode();
+		}
+
+		const res = AscCommon.g_oFormatParser.parse(str, null, formatType, formatCode);
+		return res && AscFormat.isRealNumber(res.value)
+			? res.value
+			: null;
+	};
+
 	asc_ValAxisSettings.prototype.putMinValRule = function (v) {
 		this.minValRule = v;
 	};
-	asc_ValAxisSettings.prototype.putMinVal = function (v) {
-		this.minVal = v;
+	asc_ValAxisSettings.prototype.putMinVal = function (input) {
+		if (typeof input === 'number') {
+			this.minVal = input;
+			return true;
+		}
+
+		if (typeof input !== 'string' || input.length === 0) {
+			return false;
+		}
+
+		const numericValue = this._parseStringValue(input);
+		if (numericValue === null) {
+			return false;
+		}
+
+		this.minVal = numericValue;
+		return true;
 	};
 	asc_ValAxisSettings.prototype.putMaxValRule = function (v) {
 		this.maxValRule = v;
 	};
-	asc_ValAxisSettings.prototype.putMaxVal = function (v) {
-		this.maxVal = v;
+	asc_ValAxisSettings.prototype.putMaxVal = function (input) {
+		if (typeof input === 'number') {
+			this.maxVal = input;
+			return true;
+		}
+
+		if (typeof input !== 'string' || input.length === 0) {
+			return false;
+		}
+
+		const numericValue = this._parseStringValue(input);
+		if (numericValue === null) {
+			return false;
+		}
+		this.maxVal = numericValue;
+		return true;
 	};
 	asc_ValAxisSettings.prototype.putInvertValOrder = function (v) {
 		this.invertValOrder = v;
@@ -773,17 +822,32 @@ function (window, undefined) {
 	asc_ValAxisSettings.prototype.getDispUnitsRule = function () {
 		return this.dispUnitsRule;
 	};
+
+	asc_ValAxisSettings.prototype._formatNumericValue = function (value) {
+		if (value == null) {
+			return '';
+		}
+
+		if (!this.numFmt) {
+			return AscCommon.g_oFormatParser.toLocaleNumber(String(value));
+		}
+
+		const formatCode = this.numFmt.getFormatCode();
+		const numFormat = AscCommon.oNumFormatCache.get(formatCode);
+		return numFormat.formatToChart(value);
+	};
+
 	asc_ValAxisSettings.prototype.getMinValRule = function () {
 		return this.minValRule;
 	};
 	asc_ValAxisSettings.prototype.getMinVal = function () {
-		return this.minVal;
+		return this._formatNumericValue(this.minVal);
 	};
 	asc_ValAxisSettings.prototype.getMaxValRule = function () {
 		return this.maxValRule;
 	};
 	asc_ValAxisSettings.prototype.getMaxVal = function () {
-		return this.maxVal;
+		return this._formatNumericValue(this.maxVal);
 	};
 	asc_ValAxisSettings.prototype.getInvertValOrder = function () {
 		return this.invertValOrder;

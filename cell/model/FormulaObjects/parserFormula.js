@@ -1840,6 +1840,28 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 
 		return arr;
 	};
+	cArea3D.prototype.foreach = function (action) {
+		let _wsA = this.wsRange();
+		if (_wsA.length >= 1) {
+			let _r = this.range(_wsA);
+			let bBreak = false;
+			for (let i = 0; i < _r.length; i++) {
+				if (_r[i]) {
+					_r[i]._foreach2(function (cell, row, col) {
+						let res = action(cell, row, col);
+						if (res === true) {
+							bBreak = true;
+							return true;
+						}
+					});
+					if (bBreak) {
+						break;
+					}
+				}
+			}
+		}
+	};
+
 	cArea3D.prototype.foreach2 = function (action) {
 		var _wsA = this.wsRange();
 		if (_wsA.length >= 1) {
@@ -3417,13 +3439,22 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 	cUndefined.prototype = Object.create(cBaseType.prototype);
 	cUndefined.prototype.constructor = cUndefined;
 
-	function checkTypeCell(cell, opt_toLowerCase) {
-		if (cell && !cell.isNullText()) {
-			var type = cell.getType();
+	/**
+	 * Returns typed cElement for a cell value.
+	 * When opt_noCalc is true, uses NoCalc getters to avoid triggering _checkDirty —
+	 * used by cache builders to read raw cell state without premature formula recalculation.
+	 * @param {Cell} cell
+	 * @param {boolean} [opt_toLowerCase]
+	 * @param {boolean} [opt_noCalc]
+	 * @returns {cNumber|cString|cBool|cError|cEmpty}
+	 */
+	function checkTypeCell(cell, opt_toLowerCase, opt_noCalc) {
+		if (cell && !cell.isNullText(opt_noCalc)) {
+			var type = cell.getType(opt_noCalc);
 			if (CellValueType.Number === type) {
-				return new cNumber(cell.getNumberValue());
+				return new cNumber(cell.getNumberValue(opt_noCalc));
 			} else {
-				var val = cell.getValueWithoutFormat();
+				var val = cell.getValueWithoutFormat(opt_noCalc);
 				if (CellValueType.Bool === type) {
 					return new cBool(val);
 				} else if (CellValueType.Error === type) {
@@ -4139,6 +4170,24 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 				var array = new cArray();
 				array.realSize = firstArray.realSize;
 				array.missedValue = firstArray.missedValue;
+
+				//pre-compute: hoist invariant argument properties out of the per-element loop
+				var _argInfo = new Array(argumentsCount);
+				var _needBboxPerElem = (0 === argumentsCount && parserFormula.ref);
+				for (var _j = 0; _j < argumentsCount; _j++) {
+					var _ta = tempArgs[_j];
+					var _isArrayArg = checkArrayIndex(_j, cElementType.array, tempArgs);
+					var _isRange = cElementType.cellsRange === _ta.type || checkRange3d(_ta);
+					_argInfo[_j] = {
+						isArrayArg: _isArrayArg,
+						isArray: cElementType.array === _ta.type && !_isArrayArg,
+						isRange: _isRange && !_isArrayArg && !checkArrayIndex(_j, cElementType.cellsRange),
+						rows: (cElementType.array === _ta.type) ? _ta.getRowCount() : 0,
+						cols: (cElementType.array === _ta.type) ? _ta.getCountElementInRow() : 0,
+						dimensions: _isRange ? _ta.getDimensions() : null
+					};
+				}
+
 				//bbox_elem -
 				var doCalc = function (elem, r, c, _row, _col) {
 					if (!array.array[r]) {
@@ -4146,16 +4195,17 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 					}
 
 					//формируем новые аргументы(берем r/c элмент массива у каждого аргумента)
-					var newArgs = [], newArg;
+					var newArgs = new Array(argumentsCount);
+					var newArg;
 					for (var j = 0; j < argumentsCount; j++) {
 						newArg = tempArgs[j];
-						let isArrayArg = checkArrayIndex(j, cElementType.array, tempArgs);
-						if (cElementType.array === newArg.type && !isArrayArg) {
-							if (1 === newArg.getRowCount() && 1 === newArg.getCountElementInRow()) {
+						var info = _argInfo[j];
+						if (info.isArray) {
+							if (1 === info.rows && 1 === info.cols) {
 								newArg = newArg.array[0] ? newArg.array[0][0] : null;
-							} else if (1 === newArg.getRowCount()) {
+							} else if (1 === info.rows) {
 								newArg = newArg.array[0] ? newArg.array[0][c] : null;
-							} else if (1 === newArg.getCountElementInRow()) {
+							} else if (1 === info.cols) {
 								newArg = newArg.array[r] ? newArg.array[r][0] : null;
 							} else {
 								newArg = newArg.array[r] ? newArg.array[r][c] : null;
@@ -4165,13 +4215,12 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 								//пока делаю так - если не последний аргумент, то пустой элемент, если последний - undefined
 								newArg = /*j === argumentsCount - 1 ? undefined : */new cError(cErrorType.not_available);
 							}
-						} else if ((cElementType.cellsRange === newArg.type || checkRange3d(newArg)) && !isArrayArg && !checkArrayIndex(j, cElementType.cellsRange)) {
-							let dimensions = newArg.getDimensions();
-							if (1 === dimensions.row && 1 === dimensions.col) {
+						} else if (info.isRange) {
+							if (1 === info.dimensions.row && 1 === info.dimensions.col) {
 								newArg = newArg.getValueByRowCol(0, 0);
-							} else if (1 === dimensions.row) {
+							} else if (1 === info.dimensions.row) {
 								newArg = newArg.getValueByRowCol(0, c);
-							} else if (1 === dimensions.col) {
+							} else if (1 === info.dimensions.col) {
 								newArg = newArg.getValueByRowCol(r, 0);
 							} else {
 								newArg = newArg.getValueByRowCol(r, c);
@@ -4183,13 +4232,13 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 							}
 						}
 
-						newArgs.push(newArg);
+						newArgs[j] = newArg;
 					}
 
 					//для случая с 0 аргументов
 					//возможно стоит убрать проверку на количество аргументови всегда заменять bbox
 					var temp_opt_bbox = opt_bbox;
-					if (0 === argumentsCount && parserFormula.ref) {
+					if (_needBboxPerElem) {
 						temp_opt_bbox = new Asc.Range(c + parserFormula.ref.c1, r + parserFormula.ref.r1, c + parserFormula.ref.c1, r + parserFormula.ref.r1);
 					}
 					let _elem = t.Calculate(newArgs, temp_opt_bbox, opt_defName, parserFormula.ws, null, _row ? _row : r, _col ? _col : c);
@@ -5497,13 +5546,13 @@ _func[cElementType.string][cElementType.string] = function ( arg0, arg1, what ) 
 
 	let _arg0, _arg1;
 	if (what === ">") {
-		res = AscCommonExcel.stringCompare(arg0.getValue(true), arg1.getValue(true)) > 0;
+		res = AscCommon.stringCompare(arg0.getValue(true), arg1.getValue(true)) > 0;
 	} else if (what === ">=") {
-		res = AscCommonExcel.stringCompare(arg0.getValue(true), arg1.getValue(true)) >= 0;
+		res = AscCommon.stringCompare(arg0.getValue(true), arg1.getValue(true)) >= 0;
 	} else if (what === "<") {
-		res = AscCommonExcel.stringCompare(arg0.getValue(true), arg1.getValue(true)) < 0;
+		res = AscCommon.stringCompare(arg0.getValue(true), arg1.getValue(true)) < 0;
 	} else if (what === "<=") {
-		res = AscCommonExcel.stringCompare(arg0.getValue(true), arg1.getValue(true)) <= 0;
+		res = AscCommon.stringCompare(arg0.getValue(true), arg1.getValue(true)) <= 0;
 	} else if (what === "=") {
 		res = isEqualStrings(arg0.getValue(true), arg1.getValue(true));
 	} else if (what === "<>") {
@@ -12973,19 +13022,19 @@ function parserFormula( formula, parent, _ws ) {
 			switch (op) {
 				case ">":
 					return function (a, b) {
-						return AscCommonExcel.stringCompare(a, b) > 0;
+						return AscCommon.stringCompare(a, b) > 0;
 					};
 				case "<":
 					return function (a, b) {
-						return AscCommonExcel.stringCompare(a, b) < 0;
+						return AscCommon.stringCompare(a, b) < 0;
 					};
 				case ">=":
 					return function (a, b) {
-						return AscCommonExcel.stringCompare(a, b) >= 0;
+						return AscCommon.stringCompare(a, b) >= 0;
 					};
 				case "<=":
 					return function (a, b) {
-						return AscCommonExcel.stringCompare(a, b) <= 0;
+						return AscCommon.stringCompare(a, b) <= 0;
 					};
 				case "<>":
 					if (isWildcard) {
@@ -12994,7 +13043,7 @@ function parserFormula( formula, parent, _ws ) {
 						};
 					}
 					return function (a, b) {
-						return AscCommonExcel.stringCompare(a, b) !== 0;
+						return AscCommon.stringCompare(a, b) !== 0;
 					};
 				case "=":
 				default:
@@ -13004,7 +13053,7 @@ function parserFormula( formula, parent, _ws ) {
 						};
 					}
 					return function (a, b) {
-						return AscCommonExcel.stringCompare(a, b) === 0;
+						return AscCommon.stringCompare(a, b) === 0;
 					};
 			}
 		} else {

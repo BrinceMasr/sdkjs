@@ -245,7 +245,7 @@ function (window, undefined) {
 
 			let res = 0;
 			if (cElementType.string === itemA.type && cElementType.string === itemB.type) {
-				res = AscCommonExcel.stringCompare(itemA.value, itemB.value) * sortOrder;
+				res = AscCommon.stringCompare(itemA.value, itemB.value) * sortOrder;
 			} else if (cElementType.number === itemA.type && cElementType.number === itemB.type) {
 				res = (itemA.value - itemB.value) * sortOrder;
 			} else if (cElementType.string === itemA.type) {
@@ -378,7 +378,7 @@ function (window, undefined) {
 					itemB = _b.item ? _b.item : _b;
 
 				if (cElementType.string === itemA.type && cElementType.string === itemB.type) {
-					res = AscCommonExcel.stringCompare(itemA.value, itemB.value) * _sortOrder;
+					res = AscCommon.stringCompare(itemA.value, itemB.value) * _sortOrder;
 				} else if (cElementType.number === itemA.type && cElementType.number === itemB.type) {
 					res = (itemA.value - itemB.value) * _sortOrder;
 				} else if (cElementType.string === itemA.type) {
@@ -3924,6 +3924,22 @@ function (window, undefined) {
 	MatchCache.prototype = Object.create(VHLOOKUPCache.prototype);
 	MatchCache.prototype.constructor = MatchCache;
 	MatchCache.prototype.calculate = function (arg, _arg1) {
+		function normalizeMatchType (isX, val) {
+			if (isX) {
+				return val;
+			}
+
+			if (val === 0) {
+				return val;
+			} else if (val > 1) {
+				return 1;
+			} else if (val < 1) {
+				return -1;
+			} else {
+				return val;
+			}
+		}
+
 		let arg0 = arg[0], arg1 = arg[1], arg2, arg3;
 		let isXMatch = arg[4];
 
@@ -3938,9 +3954,15 @@ function (window, undefined) {
 			}
 			// default values for XMatch
 			arg2 = arg[2] ? arg[2] : new cNumber(0);
-			arg3 = arg[3] ? arg[3] : new cNumber(1);
+
+			arg3 = arg[3];
+			if (!arg[3] || arg[3].type === cElementType.empty) {
+				arg3 = new cNumber(1);
+			}
+
 		} else {
-			if (cElementType.array !== arg1.type && cElementType.cellsRange !== arg1.type && cElementType.cellsRange3D !== arg1.type) {
+			if (cElementType.array !== arg1.type && cElementType.cellsRange !== arg1.type && cElementType.cellsRange3D !== arg1.type &&
+				cElementType.cell !== arg1.type && cElementType.cell3D !== arg1.type) {
 				return new cError(cErrorType.not_available);
 			}	
 			// default values for Match
@@ -3949,7 +3971,7 @@ function (window, undefined) {
 		}
 
 		if (cElementType.cellsRange3D === arg0.type || cElementType.cellsRange === arg0.type) {
-			// TODO пересмотреть поведение функции при получении массива первым аргументом
+			// TODO review the behavior of the function when receiving an array as the first argument
 			arg0 = isXMatch ? arg0.getFullArray().getElementRowCol(0,0) : arg0.cross(_arg1);
 
 			if (cElementType.empty === arg0.type) {
@@ -3985,9 +4007,16 @@ function (window, undefined) {
 		if (cElementType.error === a2Value.type) {
 			return a2Value;
 		}
+
 		a2Value = Math.floor(a2Value.toNumber());
-		
-		if (!(-1 === a2Value || 0 === a2Value || 1 === a2Value || 2 === a2Value)) {
+		a2Value = normalizeMatchType(isXMatch, a2Value);
+
+		// -1 - Exact match or next smallest item
+		// 0 - Exact match (default)
+		// 1 - Exact match or next largest item
+		// 2 - A wildcard match where *, ?, and ~ have  special meaning.
+		// 3 - Regex match based on regex pattern, case sensitive.
+		if (!(-1 === a2Value || 0 === a2Value || 1 === a2Value || 2 === a2Value || 3 === a2Value)) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 		
@@ -4231,7 +4260,7 @@ function (window, undefined) {
 				moreEqualArr.sort(function(a, b) {
 					if (cElementType.number === a0Type) {
 						if (cElementType.string === a.v.type && cElementType.string === b.v.type) {
-							return AscCommonExcel.stringCompare(a.v.getValue(), b.v.getValue());
+							return AscCommon.stringCompare(a.v.getValue(), b.v.getValue());
 						} else if (cElementType.number === a.v.type && cElementType.number === b.v.type) {
 							return a.v.getValue() - b.v.getValue();
 						} else if (cElementType.error === a.v.type || cElementType.error === b.v.type) {
@@ -4241,7 +4270,7 @@ function (window, undefined) {
 						}
 					} else if (cElementType.string === a0Type) {
 						if (cElementType.string === a.v.type && cElementType.string === b.v.type) {
-							return AscCommonExcel.stringCompare(a.v.getValue(), b.v.getValue());
+							return AscCommon.stringCompare(a.v.getValue(), b.v.getValue());
 						} else if (cElementType.string === a.v.type || cElementType.string === b.v.type) {
 							return 1;
 						} else if (cElementType.bool === a.v.type && cElementType.bool === b.v.type) {
@@ -4336,7 +4365,7 @@ function (window, undefined) {
 							return b.v.getValue() - a.v.getValue();
 						} else if (cElementType.string === a0Type) {
 							if (cElementType.string === a.v.type && cElementType.string === b.v.type) {
-								return AscCommonExcel.stringCompare(a.v.getValue(), b.v.getValue());
+								return AscCommon.stringCompare(a.v.getValue(), b.v.getValue());
 							} else if (cElementType.string === a.v.type || cElementType.string === b.v.type) {
 								return 1;
 							} else if (cElementType.number === a.v.type && cElementType.number === b.v.type) {

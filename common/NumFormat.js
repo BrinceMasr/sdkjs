@@ -5225,6 +5225,16 @@ var g_oFormatParser = new FormatParser();
 function escapeRegExp(string) {
     return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
 }
+function makeStringCompare(lang) {
+	const locale = lang || "en";
+	return function(s1, s2) {
+		if (s1 === s2) {
+			return 0;
+		}
+		return s1.localeCompare(s2, locale);
+	};
+}
+AscCommon.stringCompare = makeStringCompare(AscCommon.g_oDefaultCultureInfo ? AscCommon.g_oDefaultCultureInfo.Name : "en");
 function setCurrentCultureInfo (LCID, decimalSeparator, groupSeparator) {
 	var res = false;
 	var cultureInfoNew = g_aCultureInfos[LCID];
@@ -5232,7 +5242,8 @@ function setCurrentCultureInfo (LCID, decimalSeparator, groupSeparator) {
 		if (LCID !== g_oLCID) {
 			g_oLCID = LCID;
 			AscCommon.g_oDefaultCultureInfo = g_oDefaultCultureInfo = JSON.parse(JSON.stringify(cultureInfoNew)); // ToDo clone
-			interfaceShortDateFormat = getShortDateFormat(g_oDefaultCultureInfo);	
+			AscCommon.stringCompare = makeStringCompare(g_oDefaultCultureInfo.Name);
+			interfaceShortDateFormat = getShortDateFormat(g_oDefaultCultureInfo);
 			res = true;
 		}
 		ParseLocalFormatSymbol(g_oDefaultCultureInfo.Name);
