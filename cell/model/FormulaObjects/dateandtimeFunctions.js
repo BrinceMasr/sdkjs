@@ -59,7 +59,7 @@ function (window, undefined) {
 
 	var GetDiffDate360 = AscCommonExcel.GetDiffDate360;
 
-	var cExcelDateTimeDigits = 8; //количество цифр после запятой в числах отвечающих за время специализация $18.17.4.2
+	var cExcelDateTimeDigits = 8; //number of decimal digits in numbers representing time, specification $18.17.4.2
 
 	var DayCountBasis = {
 		// US 30/360
@@ -502,7 +502,7 @@ function (window, undefined) {
 		dt.setUTCHours(0, 0, 0);
 		var utcFullYear = dt.getUTCFullYear();
 		if (type) {
-			//если это исключение не обработать, то будет бесконечная рекурсия
+			//if this exception is not handled, there will be infinite recursion
 			utcFullYear = Date.prototype.getUTCFullYear.call(dt);
 		}
 		var startOfYear = new cDate(Date.UTC(utcFullYear, 0, 1));
@@ -513,11 +513,11 @@ function (window, undefined) {
 		if (type) {
 			switch (wk) {
 				case 0:
-					// Возвращаем номер недели от 31 декабря предыдущего года
+					// Return the week number from December 31 of the previous year
 					startOfYear.setUTCDate(0);
 					return weekNumber(startOfYear, iso, type);
 				case 53:
-					// Если 31 декабря выпадает до четверга 1 недели следующего года
+					// If December 31 falls before Thursday of week 1 of the next year
 					if (endOfYear.getUTCDay() < 4) {
 						return new cNumber(1);
 					} else {
@@ -695,7 +695,7 @@ function (window, undefined) {
 			return new cError(cErrorType.not_numeric);
 		}
 
-		// TODO при передаче в аргументы числовых значений в единственном числе, итоговая дата различается с той что в ms на 1 день, из-за этого результаты могут различатся
+		// TODO when passing single numeric values as arguments, the resulting date differs from MS by 1 day, which may cause different results
 		val0 = cDate.prototype.getDateFromExcel(val0);
 		val1 = cDate.prototype.getDateFromExcel(val1);
 
@@ -1069,6 +1069,7 @@ function (window, undefined) {
 	cEDATE.prototype.numFormat = AscCommonExcel.cNumFormatNone;
 	cEDATE.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
 	cEDATE.prototype.argumentsType = [argType.any, argType.any];
+	cEDATE.prototype.enabledToSingle = {"0": true, "1": true};
 	cEDATE.prototype.Calculate = function (arg) {
 		let arg0 = arg[0], arg1 = arg[1];
 
@@ -1192,6 +1193,7 @@ function (window, undefined) {
 	cEOMONTH.prototype.numFormat = AscCommonExcel.cNumFormatNone;
 	cEOMONTH.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
 	cEOMONTH.prototype.argumentsType = [argType.any, argType.any];
+	cEOMONTH.prototype.enabledToSingle = {"0": true, "1": true};
 	cEOMONTH.prototype.Calculate = function (arg) {
 		// in this function it is important to check for empty before getting the value from the reference
 		let arg0 = arg[0], arg1 = arg[1];
@@ -1429,7 +1431,7 @@ function (window, undefined) {
 			if (val < 0) {
 				return new cError(cErrorType.not_numeric);
 			} else {
-				//TODO исплользую функцию parseDate. по идее необходима только первая часть этой функции
+				//TODO using parseDate function. Ideally only the first part of this function is needed
 				d = AscCommon.NumFormat.prototype.parseDate(val);
 				val = d.min;
 
@@ -1542,6 +1544,7 @@ function (window, undefined) {
 	cNETWORKDAYS.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
 	cNETWORKDAYS.prototype.arrayIndexes = {2: 1};
 	cNETWORKDAYS.prototype.argumentsType = [argType.any, argType.any, argType.any];
+	cNETWORKDAYS.prototype.enabledToSingle = {"0": true, "1": true, "2": true};
 	cNETWORKDAYS.prototype.Calculate = function (arg) {
 		let oArguments = this._prepareArguments([arg[0], arg[1]], arguments[1]);
 		let argClone = oArguments.args;
@@ -1665,8 +1668,9 @@ function (window, undefined) {
 	cNETWORKDAYS_INTL.prototype.numFormat = AscCommonExcel.cNumFormatNone;
 	cNETWORKDAYS_INTL.prototype.arrayIndexes = {2: 1, 3: 1};
 	cNETWORKDAYS_INTL.prototype.argumentsType = [argType.any, argType.any, argType.number, argType.any];
-	//TODO в данном случае есть различия с ms. при 3 и 4 аргументах - замена результата на ошибку не происходит.
+	//TODO in this case there are differences with MS. With 3 and 4 arguments, the result is not replaced with an error.
 	cNETWORKDAYS_INTL.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
+	cNETWORKDAYS_INTL.prototype.enabledToSingle = {"0": true, "1": true, "3": true};
 	cNETWORKDAYS_INTL.prototype.Calculate = function (arg) {
 		var tempArgs = arg[2] ? [arg[0], arg[1], arg[2]] : [arg[0], arg[1]];
 		var oArguments = this._prepareArguments(tempArgs, arguments[1]);
@@ -1893,7 +1897,7 @@ function (window, undefined) {
 			return second;
 		}
 
-		//LO - не округляет. ms - округляет.
+		//LO - does not round. MS - rounds.
 		hour = parseInt(hour.getValue());
 		minute = parseInt(minute.getValue());
 		second = parseInt(second.getValue());
@@ -2064,6 +2068,7 @@ function (window, undefined) {
 	cWEEKNUM.prototype.numFormat = AscCommonExcel.cNumFormatNone;
 	cWEEKNUM.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
 	cWEEKNUM.prototype.argumentsType = [argType.any, argType.any];
+	cWEEKNUM.prototype.enabledToSingle = {"0": true, "1": true};
 	cWEEKNUM.prototype.Calculate = function (arg) {
 		var arg0 = arg[0], arg1 = arg[1] ? arg[1] : new cNumber(1), type = 0;
 
@@ -2150,6 +2155,7 @@ function (window, undefined) {
 	cWORKDAY.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
 	cWORKDAY.prototype.arrayIndexes = {2: 1};
 	cWORKDAY.prototype.argumentsType = [argType.any, argType.any, argType.any];
+	cWORKDAY.prototype.enabledToSingle = {"0": true, "1": true, "2": true};
 	cWORKDAY.prototype.Calculate = function (arg) {
 		var t = this;
 		var oArguments = this._prepareArguments([arg[0], arg[1]], arguments[1], true);
@@ -2186,7 +2192,7 @@ function (window, undefined) {
 			while (daysCounter !== workdaysCount) {
 				currentDate = new cDate(currentDate.getTime() + diff * c_msPerDay);
 
-				//TODO поверить когда переходим через argVal0 = 60
+				//TODO check when crossing argVal0 = 60
 				var dayOfWeek;
 				var argVal0 = argClone && argClone[0] ? argClone[0].getValue() : null;
 				if (argVal0 !== null && argVal0 < 60) {
@@ -2233,10 +2239,11 @@ function (window, undefined) {
 	cWORKDAY_INTL.prototype.numFormat = AscCommonExcel.cNumFormatNone;
 	cWORKDAY_INTL.prototype.arrayIndexes = {0: AscCommonExcel.arrayIndexesType.range, 1: AscCommonExcel.arrayIndexesType.range, 3: 1};
 	cWORKDAY_INTL.prototype.argumentsType = [argType.any, argType.any, argType.number, argType.any];
-	//TODO в данном случае есть различия с ms. при 3 и 4 аргументах - замена результата на ошибку не происходит.
+	//TODO in this case there are differences with MS. With 3 and 4 arguments, the result is not replaced with an error.
 	// cWORKDAY_INTL.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
+	cWORKDAY_INTL.prototype.enabledToSingle = {"0": true, "1": true, "3": true};
 	cWORKDAY_INTL.prototype.Calculate = function (arg) {
-		//TODO проблема с формулами следующего типа - WORKDAY.INTL(8,60,"0000000")
+		//TODO issue with formulas of the following type - WORKDAY.INTL(8,60,"0000000")
 		let t = this;
 		let tempArgs = arg[2] ? [arg[0], arg[1], arg[2]] : [arg[0], arg[1]];
 		let oArguments = this._prepareArguments(tempArgs, arguments[1]);
@@ -2405,6 +2412,7 @@ function (window, undefined) {
 	cYEARFRAC.prototype.numFormat = AscCommonExcel.cNumFormatNone;
 	cYEARFRAC.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
 	cYEARFRAC.prototype.argumentsType = [argType.any, argType.any, argType.any];
+	cYEARFRAC.prototype.enabledToSingle = {"0": true, "1": true, "2": true};
 	cYEARFRAC.prototype.Calculate = function (arg) {
 		var arg0 = arg[0], arg1 = arg[1], arg2 = arg[2] ? arg[2] : new cNumber(0);
 		if (arg0 instanceof cArea || arg0 instanceof cArea3D) {

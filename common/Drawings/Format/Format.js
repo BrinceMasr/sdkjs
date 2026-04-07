@@ -1286,7 +1286,7 @@
  map_color_scheme["tx2"]     = 16;
  */
 
-//Типы изменений в классе CTheme
+//Types of changes in the CTheme class
 
 		function CreateFontRef(idx, color) {
 			var ret = new FontRef();
@@ -3147,7 +3147,7 @@
 			this.Mods.addMod(mod.createDuplicate());
 		};
 		CUniColor.prototype.check = function (theme, colorMap) {
-			if (this.color && this.color.check(theme, colorMap.color_map)/*возвращает был ли изменен RGBA*/) {
+			if (this.color && this.color.check(theme, colorMap.color_map)/*returns whether RGBA was changed*/) {
 				this.RGBA.R = this.color.RGBA.R;
 				this.RGBA.G = this.color.RGBA.G;
 				this.RGBA.B = this.color.RGBA.B;
@@ -5884,7 +5884,7 @@
 
 		function CGradFill() {
 			CBaseFill.call(this);
-			// пока просто front color
+			// for now just front color
 			this.colors = [];
 
 			this.lin = null;
@@ -7203,9 +7203,9 @@
 		}
 
 // LN --------------------------
-// размеры стрелок;
+// arrow sizes;
 		var lg = 500, mid = 300, sm = 200;
-//типы стрелок
+//arrow types
 		var ar_arrow = 0, ar_diamond = 1, ar_none = 2, ar_oval = 3, ar_stealth = 4, ar_triangle = 5;
 
 		var LineEndType = {
@@ -12370,7 +12370,7 @@
 
 		function CompareBullets(bullet1, bullet2) {
 
-			//TODO: пока будем сравнивать только bulletType, т. к. эта функция используется для мержа свойств при отдаче в интерфейс, а для интерфейса bulletTyp'a достаточно. Если понадобится нужно сделать полное сравнение.
+			//TODO: for now we will only compare bulletType, since this function is used for merging properties when returning to the interface, and bulletType is enough for the interface. If needed, a full comparison should be implemented.
 			//
 			if (bullet1.bulletType && bullet2.bulletType
 				&& bullet1.bulletType.type === bullet2.bulletType.type) {
@@ -16779,7 +16779,7 @@
 			return ret;
 		}
 
-// эта функция ДОЛЖНА минимизироваться
+// this function MUST be minified
 		function CreateAscStroke(ln, _canChangeArrows) {
 			if (null == ln || null == ln.Fill || ln.Fill.fill == null)
 				return new Asc.asc_CStroke();
@@ -16956,7 +16956,7 @@
 			return ret;
 		}
 
-// эта функция ДОЛЖНА минимизироваться
+// this function MUST be minified
 		function CreateAscShapeProp(shape) {
 			if (null == shape)
 				return new asc_CShapeProperty();
@@ -17102,7 +17102,7 @@
 						ret.color = new CSchemeColor();
 					}
 
-					// тут выставляется ТОЛЬКО из меню. поэтому:
+					// this is set ONLY from the menu. therefore:
 					var _index = parseInt(asc_color.value);
 					if (isNaN(_index))
 						break;
@@ -20646,7 +20646,7 @@
 		window['AscFormat'].LineEndSize = LineEndSize;
 		window['AscFormat'].LineJoinType = LineJoinType;
 
-//типы плейсхолдеров
+//placeholder types
 		window['AscFormat']["phType_body"] = window['AscFormat'].phType_body = 0;
 		window['AscFormat']["phType_chart"] = window['AscFormat'].phType_chart = 1;
 		window['AscFormat']["phType_clipArt"] = window['AscFormat'].phType_clipArt = 2;

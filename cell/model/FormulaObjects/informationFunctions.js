@@ -61,8 +61,8 @@ function (window, undefined) {
 			formatInfo = numFormat ? numFormat.getTypeInfo() : null;
 			sFormat = numFormat ? numFormat.sFormat : null;
 		});
-		//такие форматы как дата не поддерживаются
-		//TODO функция нуждается в доработке
+		//formats like date are not supported
+		//TODO function needs improvement
 		if (formatInfo) {
 			let postfix = "";
 			if (numFormat && (numFormat.oNegativeFormat && numFormat.oNegativeFormat.Color !== -1)) {
@@ -171,6 +171,7 @@ function (window, undefined) {
 	//cCell.prototype.exactTypes = {1: 1};
 	cCell.prototype.argumentsType = [argType.text, argType.reference];
 	cCell.prototype.numFormat = AscCommonExcel.cNumFormatNone;
+	cCell.prototype.enabledToSingle = {"1": true};
 	/**
 	 * The CELL function returns information about the formatting, location, or contents of a cell.
 	 * 
@@ -179,10 +180,10 @@ function (window, undefined) {
 	 * @return {text} Returns information about the formatting, location, or contents of a cell.
 	 */
 	cCell.prototype.Calculate = function (arg, opt_bbox, opt_defName, ws) {
-		//специально ввожу ограничения - минимум 2 аргумента
-		//в случае одного аргумента необходимо следить всегда за последней измененной ячейкой
-		//так же при сборке необходимо записывать данные об последней измененной ячейке
-		//нужно дли это ?
+		//intentionally enforcing a restriction - minimum 2 arguments
+		//with one argument, the last changed cell must always be tracked
+		//also, during assembly, data about the last changed cell must be recorded
+		//is this needed?
 		let arg0 = arg[0];
 		let arg1 = arg[1];
 		arg0 = arg0.tocString();
@@ -238,7 +239,7 @@ function (window, undefined) {
 				}
 				case "sheet":
 				case _cCellFunctionLocal["sheet"]: {
-					//нет в офф. документации
+					//not in official documentation
 					//ms excel returns 1?
 					res = new cNumber(1);
 					break;
@@ -261,7 +262,7 @@ function (window, undefined) {
 				}
 				case "filename":
 				case _cCellFunctionLocal["filename"]: {
-					//TODO без пути
+					//TODO without path
 					let fileName;
 					if (spreadsheetLayout && spreadsheetLayout["formulaProps"] && spreadsheetLayout["formulaProps"]["docTitle"]) {
 						fileName = spreadsheetLayout["formulaProps"]["docTitle"];
@@ -587,6 +588,7 @@ function (window, undefined) {
 	cISEVEN.prototype.argumentsMax = 1;
 	cISEVEN.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
 	cISEVEN.prototype.argumentsType = [argType.any];
+	cISEVEN.prototype.enabledToSingle = {"0": true};
 	cISEVEN.prototype.Calculate = function (arg) {
 		var arg0 = arg[0];
 		if (arg0 instanceof cArray) {
@@ -626,6 +628,7 @@ function (window, undefined) {
 	cISFORMULA.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.area_to_ref;
 	cISFORMULA.prototype.exactTypes = {0: 1};
 	cISFORMULA.prototype.argumentsType = [argType.reference];
+	cISFORMULA.prototype.enabledToSingle = {"0": true};
 	cISFORMULA.prototype.Calculate = function (arg) {
 		let arg0 = arg[0];
 		let res = false;
@@ -781,6 +784,7 @@ function (window, undefined) {
 	cISODD.prototype.argumentsMax = 1;
 	cISODD.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
 	cISODD.prototype.argumentsType = [argType.any];
+	cISODD.prototype.enabledToSingle = {"0": true};
 	cISODD.prototype.Calculate = function (arg) {
 		var arg0 = arg[0];
 		if (arg0 instanceof cArray) {
@@ -818,6 +822,7 @@ function (window, undefined) {
 	cISREF.prototype.argumentsMax = 1;
 	cISREF.prototype.arrayIndexes = {0: 1};
 	cISREF.prototype.argumentsType = [argType.any];
+	cISREF.prototype.enabledToSingle = {"0": true};
 	cISREF.prototype.Calculate = function (arg) {
 		if ((arg[0] instanceof cRef || arg[0] instanceof cArea || arg[0] instanceof cArea3D ||
 			arg[0] instanceof cRef3D) && arg[0].isValid && arg[0].isValid()) {
@@ -874,19 +879,24 @@ function (window, undefined) {
 	cN.prototype.numFormat = AscCommonExcel.cNumFormatNone;
 	cN.prototype.arrayIndexes = {0: 1};
 	cN.prototype.argumentsType = [argType.any];
+	cN.prototype.enabledToSingle = {"0": true};
 	cN.prototype.Calculate = function (arg) {
 		var arg0 = arg[0];
 		if (arg0 instanceof cArray) {
+			var res = new cArray();
 			arg0.foreach(function (elem, r, c) {
+				if (!res.array[r]) {
+					res.addRow();
+				}
 				if (elem instanceof cNumber || elem instanceof cError) {
-					this.array[r][c] = elem;
+					res.addElement(elem);
 				} else if (elem instanceof cBool) {
-					this.array[r][c] = elem.tocNumber();
+					res.addElement(elem.tocNumber());
 				} else {
-					this.array[r][c] = new cNumber(0);
+					res.addElement(new cNumber(0));
 				}
 			});
-			return arg0;
+			return res;
 		} else if (arg0 instanceof cArea || arg0 instanceof cArea3D) {
 			arg0 = arg0.cross(arguments[1]);
 		} else if (arg0 instanceof cRef || arg0 instanceof cRef3D) {
@@ -937,6 +947,7 @@ function (window, undefined) {
 	cSHEET.prototype.isXLFN = true;
 	cSHEET.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.array;
 	cSHEET.prototype.argumentsType = [argType.text];
+	cSHEET.prototype.enabledToSingle = {"0": true};
 	cSHEET.prototype.Calculate = function (arg, opt_bbox, opt_defName, ws) {
 
 		var res = null;
@@ -986,6 +997,7 @@ function (window, undefined) {
 	cSHEETS.prototype.isXLFN = true;
 	cSHEETS.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.array;
 	cSHEETS.prototype.argumentsType = [argType.reference];
+	cSHEETS.prototype.enabledToSingle = {"0": true};
 	cSHEETS.prototype.Calculate = function (arg, opt_bbox, opt_defName, ws) {
 
 		var res;
@@ -1034,9 +1046,9 @@ function (window, undefined) {
 	cTYPE.prototype.Calculate = function (arg) {
 		var arg0 = arg[0];
 		if (arg0 instanceof cArea || arg0 instanceof cArea3D) {
-			//todo пересмотреть!
-			//заглушка для формулы массива
-			//ms воспринимает данный аргумент как массив
+			//todo review!
+			//stub for array formula
+			//MS treats this argument as an array
 			if (this.bArrayFormula) {
 				arg0 = arg[0].getValue()
 			} else {

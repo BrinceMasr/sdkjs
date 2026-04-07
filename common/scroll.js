@@ -92,7 +92,7 @@ function GetClientHeight( elem ) {
 }
 
 function CArrowDrawer( settings ) {
-    // размер квадратика в пикселах
+    // square size in pixels
     this.Size = 16;
     this.SizeW = 16;
     this.SizeH = 16;
@@ -103,14 +103,14 @@ function CArrowDrawer( settings ) {
     this.ColorGradStart  = {R: _HEXTORGB_(settings.arrowColor).R, G: _HEXTORGB_(settings.arrowColor).G, B: _HEXTORGB_(settings.arrowColor).B};
 	this.InstalledColorGradStart = null;
 
-    // вот такие мега настройки для кастомизации)
+    // these are the customization settings
     this.IsDrawBorderInNoneMode = false;
     this.IsDrawBorders = true;
 
     //arrow pixel size
     this.pxCount = settings.slimScroll ? 4 : 6;
 
-    // имя - направление стрелки
+    // name - arrow direction
     this.ImageLeft = null;
     this.ImageTop = null;
     this.ImageRight = null;
@@ -158,7 +158,7 @@ CArrowDrawer.prototype.InitSize = function ( sizeW, sizeH )
 	if ( this.SizeH < this.pxCount )
 		return;
 
-	// теперь делаем нечетную длину
+	// now make the length odd
 	if ( 0 == (len & 1) )
 		len += 1;
 
@@ -172,7 +172,7 @@ CArrowDrawer.prototype.InitSize = function ( sizeW, sizeH )
 	g = this.ColorGradStart.G;
 	b = this.ColorGradStart.B;
 
-	// запоминаем цвет, чтобы перерисоваться при смене темы
+	// remember the color to redraw when theme changes
 	if (!this.InstalledColorGradStart)
 		this.InstalledColorGradStart = { R : 0, G : 0, B : 0 };
 	this.InstalledColorGradStart.R = r;
@@ -1918,7 +1918,7 @@ CArrowDrawer.prototype.InitSize = function ( sizeW, sizeH )
 		if (window.g_asc_plugins)
 			window.g_asc_plugins.disablePointerEvents();
 
-		// если сделать превент дефолт - перестанет приходить mousemove от window
+		// if preventDefault is called - mousemove events from window will stop
 		/*
 		 if (evt.preventDefault)
 		 evt.preventDefault();

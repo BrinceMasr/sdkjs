@@ -234,7 +234,7 @@
 			}
 			else
 			{
-				// TODO: пока не используется
+				// TODO: not used yet
 			}
 		}
 	};
@@ -406,7 +406,7 @@
 			{
 				if (this.Clips.length > 0)
 				{
-					// значит клипы были, и их нужно обновить
+					// means clips existed and need to be updated
 					this.Parent.RemoveClip();
 
 					for (var i = 0; i <= _ind; i++)
@@ -429,7 +429,7 @@
 
 		RemoveLastClip : function()
 		{
-			// цель - убрать примененные this.Clips
+			// goal - remove applied this.Clips
 			if (this.Clips.length === 0)
 				return;
 
@@ -455,7 +455,7 @@
 		},
 		RestoreLastClip : function()
 		{
-			// цель - вернуть примененные this.lastState.Clips
+			// goal - restore applied this.lastState.Clips
 			if (!this.lastState)
 				return;
 
@@ -490,12 +490,12 @@
 
 		StartClipPath : function()
 		{
-			// реализовать, как понадобится
+			// implement when needed
 		},
 
 		EndClipPath : function()
 		{
-			// реализовать, как понадобится
+			// implement when needed
 		},
 
 		AddClipRect : function(_r)
@@ -668,7 +668,7 @@
 		this.WriteDouble        = function(val)
 		{
 			this.CheckSize(4);
-			var lval              = ((val * 100000) >> 0) & 0xFFFFFFFF; // спасаем пять знаков после запятой.
+			var lval              = ((val * 100000) >> 0) & 0xFFFFFFFF; // preserve five decimal places.
 			this.data[this.pos++] = (lval) & 0xFF;
 			this.data[this.pos++] = (lval >>> 8) & 0xFF;
 			this.data[this.pos++] = (lval >>> 16) & 0xFF;
@@ -692,7 +692,7 @@
 		}
 		this._doubleEncodeLE754 = function(v)
 		{
-			//код взят из jspack.js на основе стандарта Little-endian N-bit IEEE 754 floating point
+			//code taken from jspack.js based on Little-endian N-bit IEEE 754 floating point standard
 			var s, e, m, i, d, c, mLen, eLen, eBias, eMax;
 			var el = {len : 8, mLen : 52, rt : 0};
 			mLen = el.mLen, eLen = el.len * 8 - el.mLen - 1, eMax = (1 << eLen) - 1, eBias = eMax >> 1;
@@ -1286,7 +1286,7 @@
 				val.toXml(this, name);
 			}
 		};
-		//пересмотреть, куча аргументов
+		//review, too many arguments
 		this.WriteXmlArray = function(val, name, opt_parentName, needWriteCount, ns, childns)
 		{
 			if (!ns) {
@@ -1337,7 +1337,7 @@
 		};
 		this.WriteXmlNullableAttributeBool2 = function(name, val)
 		{
-			//добавлюя по аналогии с x2t
+			//adding by analogy with x2t
 			if (null !== val && undefined !== val) {
 				this.WriteXmlNullableAttributeString(name, val ? "1": "0")
 			}
@@ -1599,7 +1599,7 @@
 		};
 		this.XlsbEndRecord = function() {
 		};
-		//все аргументы сохраняю как в x2t, ns - префикс пока не использую
+		//saving all arguments as in x2t, ns - prefix not used yet
 		this.WritingValNode = function(ns, name, val) {
 			this.WriteXmlNodeStart(name);
 			this.WriteXmlAttributeString("val", val);
@@ -1842,7 +1842,7 @@
 
 	function CMetafileFontPicker(manager)
 	{
-		this.Manager = manager; 	// в идеале - кэш измерятеля. тогда ни один шрифт не будет загружен заново
+		this.Manager = manager; 	// ideally - measurer cache. then no font will be loaded again
 		if (!this.Manager)
 		{
 			this.Manager = new AscFonts.CFontManager();
@@ -1853,7 +1853,7 @@
 		this.LastPickFont = null;
 		this.LastPickFontNameOrigin = "";
 		this.LastPickFontName = "";
-		this.Metafile = null; 												// класс, которому будет подменяться шрифт
+		this.Metafile = null; 												// class that will have font substituted
 
 		this.SetFont = function(setFont)
 		{
@@ -1889,7 +1889,7 @@
 
                 if (!this.LastPickFont)
 				{
-					// такого при правильном кэше быть не должно
+					// this should not happen with correct cache
 					if (window["NATIVE_EDITOR_ENJINE"] && fontId.file.Status != 0)
 					{
 						fontId.file.LoadFontNative();
@@ -1974,7 +1974,7 @@
 			Style    : -1
 		};
 
-		// чтобы выставилось в первый раз
+		// to be set for the first time
 		this.m_oPen.Color.R    = -1;
 		this.m_oBrush.Color1.R = -1;
 		this.m_oBrush.Color2.R = -1;
@@ -1991,7 +1991,7 @@
 		this.m_oTextPr  = null;
 		this.m_oGrFonts = new CGrRFonts();
 
-		// просто чтобы не создавать каждый раз
+		// just to avoid creating each time
 		this.m_oFontSlotFont    = new CFontSetup();
 		this.LastFontOriginInfo = {Name : "", Replace : null};
 		this.m_oFontTmp = { FontFamily : { Name : "arial" }, Bold : false, Italic : false };
@@ -2315,7 +2315,7 @@
 		},
 		_e                        : function()
 		{
-			// тут всегда напрямую в Memory
+			// here always directly to Memory
 			this.Memory.WriteByte(CommandType.ctPathCommandEnd);
 			this.lastPoint = null;
 		},
@@ -2808,7 +2808,7 @@
 			if (oForm.IsPlaceHolder())
 				nFlag |= (1 << 3);
 
-			// 7-ой и 8-ой биты зарезервированы для бордера
+			// 7th and 8th bits are reserved for border
 			var oBorder = oFormPr.GetBorder();
 			if (oBorder && !oBorder.IsNone())
 			{
@@ -2923,7 +2923,7 @@
 				var sValue         = oForm.GetSelectedText(true);
 				var nSelectedIndex = -1;
 
-				// Обработка "Choose an item"
+				// Processing "Choose an item"
 				var nItemsCount = oFormPr.GetItemsCount();
 				if (nItemsCount > 0 && AscCommon.translateManager.getValue("Choose an item") === oFormPr.GetItemDisplayText(0))
 				{
@@ -3434,7 +3434,7 @@
 			this.m_arrayPages[this.m_lPagesCount - 1].put_BrushGradient(gradFill, points, transparent);
 	};
 
-		// функции клиппирования
+		// clipping functions
 	CDocumentRenderer.prototype.SetClip = function(r)
 	{
 		if (0 != this.m_lPagesCount)
@@ -3788,7 +3788,7 @@
 			this.tx  = tx;
 			this.ty  = ty;
 		},
-		// трансформ
+		// transform
 		Multiply        : function(matrix, order)
 		{
 			if (MATRIX_ORDER_PREPEND == order)
@@ -3822,7 +3822,7 @@
 			}
 			return this;
 		},
-		// а теперь частные случаи трансформа (для удобного пользования)
+		// and now special cases of transform (for convenient usage)
 		Translate       : function(x, y, order)
 		{
 			var m = new CMatrix();
@@ -3929,7 +3929,7 @@
 				a += 360;
 			return a;
 		},
-		// сделать дубликата
+		// create a duplicate
 		CreateDublicate : function()
 		{
 			var m = new CMatrix();
@@ -4298,16 +4298,16 @@
 			PageNum   : 0
 		};
 		this.Table    = Table;
-		this.X        = 0; // Смещение таблицы от начала страницы до первой колонки
+		this.X        = 0; // Table offset from page start to first column
 
-		this.Cols    = []; // массив ширин колонок
-		this.Margins = []; // массив левых и правых маргинов
+		this.Cols    = []; // array of column widths
+		this.Margins = []; // array of left and right margins
 
-		this.Rows = []; // массив позиций, высот строк(для данной страницы)
+		this.Rows = []; // array of row positions and heights (for this page)
 		// Rows = [ { Y : , H :  }, ... ]
 
-		this.CurCol = 0; // текущая колонка
-		this.CurRow = 0; // текущая строка
+		this.CurCol = 0; // current column
+		this.CurRow = 0; // current row
 
 		this.TransformX = 0;
 		this.TransformY = 0;

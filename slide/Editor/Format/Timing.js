@@ -2469,7 +2469,7 @@
             nPositions = 1;
         }
 
-        // Получаем последовательности и выбранные интервалы
+        // Get sequences and selected intervals
         const aSeqs = this.getEffectsSequences();
         const aRanges = this.getSelectionRanges(aSeqs);
 
@@ -2485,7 +2485,7 @@
         const aStart = aRange[0];
         const aEnd = aRange[1];
 
-        // Вычисляем максимальное разрешенное количество перемещений
+        // Calculate the maximum allowed number of movements
         let nAllowedMovements;
         if (bEarlier) {
             let nOuterPossibleMovements = aStart[0];
@@ -2511,7 +2511,7 @@
             return null;
         }
 
-        // Вычисляем целевую последовательность и позицию в ней
+        // Calculate the target sequence and position in it
         let newStart = [].concat(aStart);
         let newEnd = [].concat(aEnd);
         if (bEarlier) {
@@ -2540,7 +2540,7 @@
         let aSeqToInsert = bEarlier ? aSeqs[newStart[0]] : aSeqs[newEnd[0]];
         let nPosToInsert = bEarlier ? newStart[1] : newEnd[1];
 
-        // Забираем из последовательностей все выбранные эффекты и складываем их в aEffectsToInsert
+        // Take all selected effects from sequences and put them into aEffectsToInsert
         let aEffectsToInsert = [];
         for (let nSeq = aStart[0]; nSeq <= aEnd[0]; nSeq++) {
             let aSeq = aSeqs[nSeq];

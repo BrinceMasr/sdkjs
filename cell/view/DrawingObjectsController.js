@@ -49,7 +49,7 @@ if(window.editor === "undefined" && window["Asc"]["editor"])
 	window.editor;
 }
 
-// ToDo убрать это отсюда!!!
+// ToDo remove this from here!!!
 AscCommon.CContentChangesElement.prototype.Refresh_BinaryData = function()
 {
     if(this.m_aPositions.length > 0){
@@ -200,7 +200,7 @@ DrawingObjectsController.prototype.recalculate = function(bAll, Point, bCheckPoi
     if(bCheckPoint !== false)
     {
         this.objectsForRecalculate = {};
-        History.Get_RecalcData(Point);//Только для таблиц
+        History.Get_RecalcData(Point);//Only for tables
     }
     this.recalculate2(bAll);
 };
@@ -247,7 +247,7 @@ DrawingObjectsController.prototype.startRecalculate = function(bCheckPoint)
 
 DrawingObjectsController.prototype.getDrawingObjects = function()
 {
-    //TODO: переделать эту функцию. Нужно где-то паралельно с массивом DrawingBas'ов хранить масси graphicObject'ов.
+    //TODO: refactor this function. Need to store array of graphicObjects somewhere parallel to DrawingBases array.
     var ret = [];
     var drawing_bases = this.drawingObjects.getDrawingObjects();
     for(var i = 0; i < drawing_bases.length; ++i)

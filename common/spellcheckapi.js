@@ -35,7 +35,7 @@
 (function (window) {
 	'use strict';
 
-	// Класс надстройка, для online и offline работы
+	// Wrapper class for online and offline work
 	var CSpellCheckApi = function () {
 		this._SpellCheckApi = new SpellCheckApi();
 		this._onlineWork = false;
@@ -107,9 +107,9 @@
 	};
 
 	/**
-	 * Event об отсоединении от сервера
-	 * @param {jQuery} e  event об отсоединении с причиной
-	 * @param {Bool} isDisconnectAtAll  окончательно ли отсоединяемся(true) или будем пробовать сделать reconnect(false) + сами отключились
+	 * Event about disconnection from server
+	 * @param {jQuery} e  event about disconnection with reason
+	 * @param {Bool} isDisconnectAtAll  whether we disconnect completely(true) or will try to reconnect(false) + we disconnected ourselves
 	 */
 	CSpellCheckApi.prototype.callback_OnDisconnect = function (e, isDisconnectAtAll, isCloseCoAuthoring) {
 		if (this.onDisconnect) {
@@ -130,13 +130,13 @@
 		this.onInit = null;
 
 		this._state = 0;
-		// Мы сами отключились от совместного редактирования
+		// We disconnected from collaborative editing ourselves
 		this.isCloseCoAuthoring = false;
 		this.isInit = false;
 
 		this.languages = null;
 
-		// Массив данных, который стоит отправить как только подключимся
+		// Array of data to send as soon as we connect
 		this.dataNeedSend = [];
 
 		this._url = "";
@@ -164,7 +164,7 @@
 	};
 
 	SpellCheckApi.prototype.disconnect = function () {
-		// Отключаемся сами
+		// We disconnect ourselves
 		this.isCloseCoAuthoring = true;
 		return this.sockjs.close();
 	};
@@ -210,8 +210,8 @@
 			return;
 		}
 
-		//ограничиваем transports WebSocket и XHR / JSONP polling, как и engine.io https://github.com/socketio/engine.io
-		//при переборе streaming transports у клиента с wirewall происходило зацикливание(не повторялось в версии sock.js 0.3.4)
+		//limit transports to WebSocket and XHR / JSONP polling, same as engine.io https://github.com/socketio/engine.io
+		//when iterating streaming transports, client with firewall was looping (not reproduced in sock.js version 0.3.4)
 		var sockjs = new (AscCommon.getSockJs())(url, null,
 			{'transports': ['websocket', 'xdr-polling', 'xhr-polling', 'iframe-xhr-polling', 'jsonp-polling']});
 
@@ -225,7 +225,7 @@
 				docsCoApi.onConnect();
 			}
 
-			// Отправляем все данные, которые пришли до соединения с сервером
+			// Send all data that arrived before connection to server
 			docsCoApi._sendAfterConnect();
 		};
 

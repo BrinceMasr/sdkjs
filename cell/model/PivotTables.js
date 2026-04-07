@@ -6311,9 +6311,6 @@ CT_pivotTableDefinition.prototype.asc_removeDataField = function(api, pivotIndex
 		pivot.removeDataFieldAndReIndex(pivotIndex, dataIndex, true);
 	});
 };
-// во всех методах asc_moveTo добавил ещё один параметр для выставления индекса в новом типе. потому что с интерфейса оно приходит как dataIndex.
-// и из-за этого есть баг, что поле всегда добавляется в конец списка и ещё один баг (например: при перемещии из поля values последнего поля в другой тип на первую позицию,
-// удаляется не то поле и получается 2 одинаковых поля). Данная правка решает эти проблемы, нужно только в интерфейсе внести правки.
 CT_pivotTableDefinition.prototype.asc_moveToPageField = function(api, pivotIndex, dataIndex, indexTo) {
 	if (st_VALUES === pivotIndex) {
 		return;
@@ -11509,6 +11506,9 @@ PivotDataManager.prototype.checkBaseFieldShowAs = function(options) {
 	const pivotFields = this.pivot.asc_getPivotFields();
 	const dataField = dataFields[options.dataIndex];
 	const pivotField = pivotFields[dataField.baseField];
+	if (!pivotField) {
+		return this.getErrorCellValue(AscCommonExcel.cErrorType.not_available);
+	}
 	const fields = pivotField.axis === c_oAscAxis.AxisRow ? this.pivot.asc_getRowFields() : this.pivot.asc_getColumnFields();
 	const arrayV = pivotField.axis === c_oAscAxis.AxisRow ? options.rowArrayV : options.colArrayV;
 	const diffIndex = this.getDiffIndex(dataField.baseField, fields);
@@ -11735,6 +11735,9 @@ PivotDataManager.prototype.getPercentOfParent = function() {
 	return function(options) {
 		const dataField = t.pivot.asc_getDataFields()[options.dataIndex];
 		const pivotField = t.pivot.asc_getPivotFields()[dataField.baseField];
+		if (!pivotField) {
+			return t.getErrorCellValue(AscCommonExcel.cErrorType.not_available);
+		}
 		const rowFields = t.pivot.asc_getRowFields();
 		const colFields = t.pivot.asc_getColumnFields();
 		const baseFieldCellValue = t.checkBaseFieldShowAs(options);
@@ -18190,10 +18193,10 @@ CT_DataField.prototype.toXml = function(writer, name, stylesForWrite) {
 	if (c_oAscShowDataAs.Normal !== this.showDataAs && this.showDataAs <= c_oAscShowDataAs.Index) {
 		writer.WriteXmlAttributeStringEncode("showDataAs", ToXml_ST_ShowDataAs(this.showDataAs));
 	}
-	if (null !== this.baseField) {
+	if (null !== this.baseField && -1 !== this.baseField) {
 		writer.WriteXmlAttributeNumber("baseField", this.baseField);
 	}
-	if (null !== this.baseItem) {
+	if (null !== this.baseItem && 1048832 !== this.baseItem) {
 		writer.WriteXmlAttributeNumber("baseItem", this.baseItem);
 	}
 	WriteNumXml(writer, this.num, stylesForWrite);

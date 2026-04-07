@@ -167,6 +167,22 @@
 	 * @see office-js-api/Examples/Plugins/{Editor}/Enumeration/OLEProperties.js
 	 */
 
+	/**
+	 * This type specifies the preset shape geometry that will be used for a shape.
+	 * @typedef {("accentBorderCallout1" | "accentBorderCallout2" | "accentBorderCallout3" | "accentCallout1" |
+	 *     "accentCallout2" | "accentCallout3" | "actionButtonBackPrevious" | "actionButtonBeginning" |
+	 *     "actionButtonBlank" | "actionButtonDocument" | "actionButtonEnd" | "actionButtonForwardNext" |
+	 *     "actionButtonHelp" | "actionButtonHome" | "actionButtonInformation" | "actionButtonMovie" |
+	 *     "actionButtonReturn" | "actionButtonSound" | "arc" | "bentArrow" | "bentConnector2" | "bentConnector3" |
+	 *     "bentConnector4" | "bentConnector5" | "bentUpArrow" | "bevel" | "blockArc" | "borderCallout1" |
+	 *     "borderCallout2" | "borderCallout3" | "bracePair" | "bracketPair" | "callout1" | "callout2" | "callout3" |
+	 *     "can" | "chartPlus" | "chartStar" | "chartX" | "chevron" | "chord" | "circularArrow" | "cloud" |
+	 *     "cloudCallout" | "corner" | "cornerTabs" | "cube" | "curvedConnector2" | "curvedConnector3" |
+	 *     "curvedConnector4" | "curvedConnector5" | "curvedDownArrow" | "curvedLeftArrow" | "curvedRightArrow" |
+	 *     "curvedUpArrow" | "decagon" | "diagStripe" | "diamond" | "dodecagon" | "donut" | "doubleWave" | "downArrow" | "downArrowCallout" | "ellipse" | "ellipseRibbon" | "ellipseRibbon2" | "flowChartAlternateProcess" | "flowChartCollate" | "flowChartConnector" | "flowChartDecision" | "flowChartDelay" | "flowChartDisplay" | "flowChartDocument" | "flowChartExtract" | "flowChartInputOutput" | "flowChartInternalStorage" | "flowChartMagneticDisk" | "flowChartMagneticDrum" | "flowChartMagneticTape" | "flowChartManualInput" | "flowChartManualOperation" | "flowChartMerge" | "flowChartMultidocument" | "flowChartOfflineStorage" | "flowChartOffpageConnector" | "flowChartOnlineStorage" | "flowChartOr" | "flowChartPredefinedProcess" | "flowChartPreparation" | "flowChartProcess" | "flowChartPunchedCard" | "flowChartPunchedTape" | "flowChartSort" | "flowChartSummingJunction" | "flowChartTerminator" | "foldedCorner" | "frame" | "funnel" | "gear6" | "gear9" | "halfFrame" | "heart" | "heptagon" | "hexagon" | "homePlate" | "horizontalScroll" | "irregularSeal1" | "irregularSeal2" | "leftArrow" | "leftArrowCallout" | "leftBrace" | "leftBracket" | "leftCircularArrow" | "leftRightArrow" | "leftRightArrowCallout" | "leftRightCircularArrow" | "leftRightRibbon" | "leftRightUpArrow" | "leftUpArrow" | "lightningBolt" | "line" | "lineInv" | "mathDivide" | "mathEqual" | "mathMinus" | "mathMultiply" | "mathNotEqual" | "mathPlus" | "moon" | "nonIsoscelesTrapezoid" | "noSmoking" | "notchedRightArrow" | "octagon" | "parallelogram" | "pentagon" | "pie" | "pieWedge" | "plaque" | "plaqueTabs" | "plus" | "quadArrow" | "quadArrowCallout" | "rect" | "ribbon" | "ribbon2" | "rightArrow" | "rightArrowCallout" | "rightBrace" | "rightBracket" | "round1Rect" | "round2DiagRect" | "round2SameRect" | "roundRect" | "rtTriangle" | "smileyFace" | "snip1Rect" | "snip2DiagRect" | "snip2SameRect" | "snipRoundRect" | "squareTabs" | "star10" | "star12" | "star16" | "star24" | "star32" | "star4" | "star5" | "star6" | "star7" | "star8" | "straightConnector1" | "stripedRightArrow" | "sun" | "swooshArrow" | "teardrop" | "trapezoid" | "triangle" | "upArrowCallout" | "upDownArrow" | "upDownArrow" | "upDownArrowCallout" | "uturnArrow" | "verticalScroll" | "wave" | "wedgeEllipseCallout" | "wedgeRectCallout" | "wedgeRoundRectCallout")} ShapeType
+	 * @see office-js-api/Examples/Plugins/{Editor}/Enumeration/ShapeType.js
+	 */
+
     /**
      * Base class
      * @global
@@ -592,7 +608,7 @@
                 }
                 if ("no_build" === obj["error"])
 				{
-					// проблемы - но такие, при которых просто не собираем файл...
+					// problems - but ones where we just don't build the file...
 					window["AscDesktopEditor"]["buildCryptedEnd"](true);
 					return;
 				}
@@ -642,7 +658,7 @@
 	 * An object containing the watermark properties.
      * @typedef {Object} watermark_on_draw
      * @property {number} transparent The watermark transparency degree.
-     * @property {string} type The {@link /docbuilder/global#ShapeType shape type} which specifies the preset shape geometry for the current watermark.
+     * @property {ShapeType} type The type which specifies the preset shape geometry for the current watermark.
 	 * @property {number} width The watermark width measured in millimeters.
 	 * @property {number} height The watermark height measured in millimeters.
 	 * @property {number} rotate The watermark rotation angle measured in degrees.
@@ -1427,9 +1443,9 @@
 		const isLocal = ( (window["AscDesktopEditor"] !== undefined) && (window.location.protocol.indexOf('file') !== -1) );
 		if (isLocal)
 		{
-			// Отдаём весь конфиг, внутри вычислим путь к deploy
-			// TODO: отслеживать возможные ошибки при +/- плагинов: из ++кода отправлять статус операции и на основе его отправлять в менеджер плагинов корректный ответ.
-			// UPD: done. Ничего не изменять в менеджере плагинов, если guid пуст
+			// Pass the entire config, the path to deploy will be calculated inside
+			// TODO: track possible errors when adding/removing plugins: send operation status from native code and based on it send correct response to plugin manager.
+			// UPD: done. Do not change anything in plugin manager if guid is empty
 
             let result = window["AscDesktopEditor"]["PluginInstall"](JSON.stringify(config));
 
@@ -1554,8 +1570,8 @@
 
 		const isLocal = ( (window["AscDesktopEditor"] !== undefined) && (window.location.protocol.indexOf('file') !== -1) );
 		if (isLocal) {
-			// В случае Desktop не работаем с localStorage и extensions, этот метод может быть вызван из интерфейса
-			// если по какой-то причине (неактуальный cache) у пользователя есть asc_plugins_installed, asc_plugins_removed, то их нужно игнорировать/удалить
+			// In case of Desktop, we don't work with localStorage and extensions, this method can be called from the interface
+			// if for some reason (outdated cache) the user has asc_plugins_installed, asc_plugins_removed, they should be ignored/deleted
 			return;
 		}
 
@@ -1595,13 +1611,13 @@
 			}
 		}
 
-		// этот метод может быть вызван из интерфейса - нужен таймаут для web-apps
+		// this method can be called from the interface - a timeout is needed for web-apps
 		if (isRemovedPresent || isInstalledPresent) {
 
 			setTimeout(function () {
 
-				// в принципе можно не удалять, так как если ничего не поменялось - то не зайдем второй раз сюда.
-				// но зачем еще раз парсить
+				// in principle, we don't need to delete, since if nothing has changed - we won't enter here again.
+				// but why parse again
 				window.g_asc_plugins.api.disableCheckInstalledPlugins = true;
 
 				if (isRemovedPresent)
@@ -1689,7 +1705,7 @@
      * @property {string} url The URL to plugin config.
      * @property {string} guid The plugin identifier. It must be of the *asc.{UUID}* type.
 	 * @property {boolean} canRemoved Specifies if the plugin can be removed (**true**) or not (**false**).
-     * @property {object} obj The {@link /plugin/config config} of the installed plugin. The version is taken from the config and compared with the current one to check for updates.
+     * @property {object} obj The {@link /docs/plugin-and-macros/structure/configuration/ config} of the installed plugin. The version is taken from the config and compared with the current one to check for updates.
      * @see office-js-api/Examples/Plugins/{Editor}/Enumeration/PluginData.js
 	 */
 
@@ -1705,20 +1721,20 @@
 	Api.prototype["pluginMethod_GetInstalledPlugins"] = function()
 	{
 		/*
-			формат объекта 
+			object format
 			{
-				url: url на конфиг (хотя по факту он не нужен, так как конфиг есть в этом объекте и внутри маркетплейса тоже),
-				guid: guid плагина,
-				canRemoved: флаг, может ли быть удалён плагин или нет (true/false),
-				obj: конфиг установленного плагина (от туда берется версия и сравнивается с текущей для проверки обновлений)
+				url: url to config (although in fact it's not needed, since the config is in this object and inside the marketplace too),
+				guid: plugin guid,
+				canRemoved: flag indicating whether the plugin can be removed or not (true/false),
+				obj: installed plugin config (the version is taken from there and compared with the current one to check for updates)
 			}
 		*/
 
 		const isLocal = ( (window["AscDesktopEditor"] !== undefined) && (window.location.protocol.indexOf('file') !== -1) );
 
-		// В случае Desktop нужно проверить какие плагины нельзя удалять. В UpdateInstallPlugins работаем с двумя типами папок.
-		// Пока проверка тут, но грамотнее будет сделать и использовать доп.свойство isSystemInstall класса CPlugin
-		// т.к. не будем лишний раз парсить папки, только при +/- плагинов.
+		// In case of Desktop, we need to check which plugins cannot be removed. In UpdateInstallPlugins we work with two types of folders.
+		// For now the check is here, but it would be better to create and use additional property isSystemInstall of CPlugin class
+		// since we won't parse folders unnecessarily, only when adding/removing plugins.
 		let protectedPlugins = [];
 
 		if (isLocal) {
@@ -1729,7 +1745,7 @@
 				protectedPlugins.push(_pluginsTmp[0]["pluginsData"][i]["guid"]);
 			}
 			
-			// Также смотрим плагины из папки пользователя, возможно там есть обновленные системные
+			// Also look at plugins from the user folder, there may be updated system plugins there
 			len = _pluginsTmp[1]["pluginsData"].length;
 			for (var i = 0; i < len; i++) {
 				if (_pluginsTmp[1]["pluginsData"][i]["canRemoved"] === false)
@@ -1761,7 +1777,7 @@
 		if (isLocal)
 			return returnArray;
 
-		// нужно послать и удаленные. так как удаленный может не быть в сторе. тогда его никак не установить обратно
+		// need to also send removed plugins. since a removed plugin may not be in the store. then there's no way to install it back
 		let currentRemovedPlugins = getLocalStorageItem("asc_plugins_removed");
 
 		if (currentRemovedPlugins)
@@ -1801,13 +1817,13 @@
 
 		if (isLocal)
 		{
-			// Вызываем только этот ++код, никаких дополнительных действий типа:
+			// We only call this native code, no additional actions like:
 			// window.g_asc_plugins.unregister(guid), window["UpdateInstallPlugins"](), this.sendEvent("asc_onPluginsReset"), window.g_asc_plugins.updateInterface()
-			// не требуется, т.к. ++код вызывает UpdateInstallPlugins, в нём идёт перестроение списка плагинов и обновление интерфейса.
-			// Просто отдаём менеджеру плагинов ответ.
-			// TODO: отслеживать возможные ошибки при +/- плагинов:
-			// из ++кода отправлять статус операции и на основе его отправлять в менеджер плагинов корректный ответ.
-			// ничего не изменять в менеджере плагинов, если guid пуст
+			// are required, because the native code calls UpdateInstallPlugins, which rebuilds the plugin list and updates the interface.
+			// We just send the response to the plugin manager.
+			// TODO: track possible errors when adding/removing plugins:
+			// send operation status from native code and based on it send correct response to plugin manager.
+			// do not change anything in plugin manager if guid is empty
 
 			let result = window["AscDesktopEditor"]["PluginUninstall"](guid, backup);
 						
@@ -1850,7 +1866,7 @@
     * Installs a plugin using the specified plugin config.
      * @memberof Api
      * @typeofeditors ["CDE", "CSE", "CPE"]
-     * @param {object} [config] - The plugin {@link https://api.onlyoffice.com/docs/plugin-and-macros/structure/configuration/ config}.
+     * @param {object} [config] - The plugin {@link /docs/plugin-and-macros/structure/configuration/ config}.
      * @alias InstallPlugin
      * @returns {object} - An object with the result information.
      * @since 7.2.0
@@ -1864,7 +1880,7 @@
     * Updates a plugin using the specified plugin config.
      * @memberof Api
      * @typeofeditors ["CDE", "CSE", "CPE"]
-     * @param {object} [config] - The plugin {@link https://api.onlyoffice.com/docs/plugin-and-macros/structure/configuration/ config}.
+     * @param {object} [config] - The plugin {@link /docs/plugin-and-macros/structure/configuration/ config}.
      * @alias UpdatePlugin
      * @returns {object} - An object with the result information.
      * @since 7.3.0
@@ -2073,7 +2089,7 @@
 	 * @property {string} text - The item text.
 	 * @property {string} [data] - The item data (this data will be sent to the click event callback).
 	 * @property {boolean} [disabled] - Specifies if the current item is disabled or not.
-	 * @property {string} [icons] - The item icons (see the plugins {@link /plugin/config config} documentation).
+	 * @property {string} [icons] - The item icons (see the plugins {@link /docs/plugin-and-macros/structure/configuration/ config} documentation).
 	 * @property {ContextMenuItem[]} items - An array containing the context menu items for the current item.
 	 * @see office-js-api/Examples/Plugins/{Editor}/Enumeration/ContextMenuItem.js
 	 */
@@ -2142,7 +2158,7 @@
 	 * @property {ToolbarMenuItemType} type - The item type.
 	 * @property {string} text - The item text.
 	 * @property {string} hint - The item hint.
-	 * @property {string} [icons] - The item icons (see the plugins {@link /plugin/config config} documentation).
+	 * @property {string} [icons] - The item icons (see the plugins {@link /docs/plugin-and-macros/structure/configuration/ config} documentation).
 	 * @property {boolean} [disabled] - Specifies if the current item is disabled or not.
 	 * @property {boolean} [enableToggle] - Specifies if an item toggle is enabled or not.
 	 * @property {boolean} [lockInViewMode] - Specifies if the current item is locked in the view mode or not.

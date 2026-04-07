@@ -270,7 +270,7 @@
         this.SetNeedRecalc(true);
     };
     CPdfSmartArt.prototype.IncreaseDecreaseIndent = function(bIncrease) {
-        // Increase_ParagraphLevel для шейпов из презентаций
+        // Increase_ParagraphLevel for shapes from presentation
         this.GetDocContent().Increase_ParagraphLevel(bIncrease);
         this.SetNeedRecalc(true);
     };
@@ -284,7 +284,7 @@
     };
     
     /**
-     * Получаем рассчитанные настройки текста (полностью заполненные)
+     * Get calculated text settings (fully filled)
      * @returns {CTextPr}
      */
     CPdfSmartArt.prototype.GetCalculatedTextPr = function() {
@@ -309,13 +309,13 @@
                 }
                 drawing_document.UpdateTargetTransform(oMatrix);
                 if (true === content.IsSelectionUse()) {
-                    // Выделение нумерации
+                    // Numbering selection
                     if (selectionflag_Numbering == content.Selection.Flag) {
                         drawing_document.TargetEnd();
                     }
-                    // Обрабатываем движение границы у таблиц
+                    // Handle table border movement
                     else if (null != content.Selection.Data && true === content.Selection.Data.TableBorder && type_Table == content.Content[content.Selection.Data.Pos].GetType()) {
-                        // Убираем курсор, если он был
+                        // Remove cursor
                         drawing_document.TargetEnd();
                     } else {
                         if (false === content.IsSelectionEmpty()) {

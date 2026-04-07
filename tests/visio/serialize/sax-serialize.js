@@ -160,8 +160,8 @@ $(function() {
 		// Maybe only theme1.xml is parsed - check it
 
 		// page[N].xml.rels - for when pages sets rels to masters
-		// в MS если page[N] ссылается на хотя бы один мастер то в рельсы страницы добавляются все мастеры.
-		// Сейчас для каждой страницы добавляются ссылки на все маcтеры без проверки
+		// In MS if page[N] references at least one master, all masters are added to the page rels.
+		// Currently, references to all masters are added for each page without checking
 
 		// recordset[N].xml - not realized
 

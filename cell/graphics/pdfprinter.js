@@ -669,7 +669,7 @@ CPdfPrinter.prototype =
         return this.DocumentRenderer.drawVerLine(align, x, y, b, penW);
     },
 
-    // мега крутые функции для таблиц
+    // special functions for tables
     drawHorLineExt : function(align, y, x, r, penW, leftMW, rightMW)
     {
         return this.DocumentRenderer.drawHorLineExt(align, y, x, r, penW, leftMW, rightMW);

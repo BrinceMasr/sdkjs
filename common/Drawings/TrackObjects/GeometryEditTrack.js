@@ -1333,7 +1333,7 @@
         var tx = this.invertTransform.TransformPointX(x, y);
         var ty = this.invertTransform.TransformPointY(x, y);
         if(gmEditPoint) {
-            // не разрешаем ломать линии в pdf
+            // do not allow breaking lines in pdf
             if (Asc.editor.isPdfEditor() == false) {
                 dxC1 = tx - gmEditPoint.g1X;
                 dyC1 = ty - gmEditPoint.g1Y;
@@ -1351,7 +1351,7 @@
             return oGeomData;
         }
 
-        // не разрешаем ломать линии в pdf
+        // do not allow breaking lines in pdf
         if (Asc.editor.isPdfEditor())
             return null;
 

@@ -233,7 +233,7 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-		//формируем массив значений
+		// Create array of values
 		const randomArray = [];
 		let randomStrArray = "{";
 		let maxArg = 4;
@@ -4688,7 +4688,7 @@ $(function () {
 		// Case #4: Area. Multi-cell range returns first cell’s value (1.1). 1 argument used.
 		// Case #12: Area3D. 3D multi-cell range, returns first cell’s value (2). 1 argument used.
 
-		//TODO нужна другая функция для тестирования
+		// TODO need a different function for testing
 		//testArrayFormula2(assert, "N", 1, 1);
 	});
 
@@ -5414,7 +5414,7 @@ $(function () {
 		// Case #6: Name3D. 3D named range with multiple cells. Returns #VALUE!.
 
 
-		//TODO нужна другая функция для тестирования
+		// TODO need a different function for testing
 		//testArrayFormula2(assert, "TYPE", 1, 1);
 	});
 
