@@ -237,7 +237,7 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-		//формируем массив значений
+		//form an array of values
 		const randomArray = [];
 		let randomStrArray = "{";
 		let maxArg = 4;
@@ -1262,7 +1262,7 @@ $(function () {
 
 		// Need to fix: diff results from ms
 
-		//функция возвращает ref
+		//function returns ref
 		//testArrayFormula2(assert, "CHOOSE", 2, 9);
 	});
 
@@ -2031,9 +2031,6 @@ $(function () {
 		// Case #5: Error. Input is an error value. Returns #N/A error.
 		// Case #7: Reference link. Invalid reference outside of range. Returns #NAME? error.
 		// Case #8: Reference link. Invalid reference outside of range. Returns #NAME? error.
-
-		//TODO нужна другая функция для тестирования
-		//testArrayFormula2(assert, "COLUMNS", 1, 1);
 	});
 
 
@@ -3801,7 +3798,7 @@ $(function () {
 
 		oParser = new parserFormula("FORMULATEXT(S100:105)", "A1", ws);
 		assert.ok(oParser.parse());
-		//"#N/A" - в ms excel
+		//"#N/A" - MS result
 		assert.strictEqual(oParser.calculate().getValue(), newFormulaParser ? "#N/A" : "#VALUE!");
 
 		oParser = new parserFormula("FORMULATEXT(S103)", "A1", ws);
@@ -5429,8 +5426,8 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "Lemons");
 
-		//данная функция возвращает area а далее уже в функции simplifyRefType находится резальтат
-		// - пересечение а ячейкой, где располагается формула
+		//this function returns area and then the result is found in the simplifyRefType function
+		// - intersection of a with the cell where the formula is located
 		oParser = new parserFormula("INDEX(A651:C655,,2)", "A2", ws);
 		assert.ok(oParser.parse());
 		var parent = AscCommonExcel.g_oRangeCache.getAscRange(oParser.parent);
@@ -6892,7 +6889,7 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), "a", 'Result of LOOKUP(3,3,"a")');
 
 		// Case #83: Empty, Formula, Area. Bug 65306 - lookup with empty value and CODE function
-		ws.getRange2("N1160").setValue("янв");
+		ws.getRange2("N1160").setValue("jan");
 		ws.getRange2("O1160").setValue("0")
 		oParser = new parserFormula("LOOKUP(,-CODE(N1160:O1160),N1160:O1160)", "A2", ws);
 		assert.ok(oParser.parse(), "LOOKUP(,-CODE(N1160:O1160),N1160:O1160)");
@@ -7426,7 +7423,7 @@ $(function () {
 		ws.getRange2("A107").setValue("10");
 		ws.getRange2("A108").setValue("9000");
 		ws.getRange2("A109").setValue("10000");
-		ws.getRange2("A109").setValue("");
+		ws.getRange2("A110").setValue("11");
 
 		ws.getRange2("B100").setValue("a");
 		ws.getRange2("B101").setValue("b");
@@ -7489,7 +7486,7 @@ $(function () {
 		// Case #6: Number, Reference link, Number. Exact match with reference link, match_type 0. 3 of 3 arguments used.
 		oParser = new parserFormula('MATCH(A100,A100,0)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MATCH(A100,A100,0) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Positive case: Number, Reference link, Number. Exact match with reference link, match_type 0. 3 of 3 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Positive case: Number, Reference link, Number. Exact match with reference link, match_type 0. 3 of 3 arguments used.');
 		// Case #7: Number, Array, Number. Exact match in numeric array, match_type 0. 3 of 3 arguments used.
 		oParser = new parserFormula('MATCH(10,{10,20,30},0)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MATCH(10,{10,20,30},0) is parsed.');
@@ -7513,11 +7510,15 @@ $(function () {
 		// Case #12: Date, Area, Number. Exact match with date as serial number, match_type 0. 3 of 3 arguments used.
 		oParser = new parserFormula('MATCH(DATE(2025,1,1),A100:A110,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MATCH(DATE(2025,1,1),A100:A110,1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 9, 'Test: Positive case: Date, Area, Number. Exact match with date as serial number, match_type 0. 3 of 3 arguments used.');
-		// Case #13: Time, Area, Number. Exact match with time as fraction, match_type 0. 3 of 3 arguments used.
+		assert.strictEqual(oParser.calculate().getValue(), 11, 'Test: Positive case: Date, Area, Number. Exact match with date as serial number, match_type 0. 3 of 3 arguments used.');
+		// Case #13: Time, Area, Number. Exact match with time as fraction, match_type -1. 3 of 3 arguments used.
 		oParser = new parserFormula('MATCH(TIME(12,0,0),A100:A110,-1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MATCH(TIME(12,0,0),A100:A110,-1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 9, 'Test: Positive case: Time, Area, Number. Exact match with time as fraction, match_type 0. 3 of 3 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 11, 'Test: Positive case: Time, Area, Number. Exact match with time as fraction, match_type 0. 3 of 3 arguments used.');
+		// Case #13.1: Time, Area, Number. Exact match with time as fraction, match_type -999 . 3 of 3 arguments used.
+		oParser = new parserFormula('MATCH(TIME(12,0,0),A100:A110,-999)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: MATCH(TIME(12,0,0),A100:A110,-999) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 11, 'Test: Positive case: Time, Area, Number. Exact match with time as fraction, match_type -999. 3 of 3 arguments used.');
 		// Case #14: Number, Ref3D, Number. Exact match with 3D reference, match_type 0. 3 of 3 arguments used.
 		oParser = new parserFormula('MATCH(10,Sheet2!A1,0)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MATCH(10,Sheet2!A1,0) is parsed.');
@@ -7552,10 +7553,10 @@ $(function () {
 		oParser = new parserFormula('MATCH(99,A100:A110,0)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MATCH(99,A100:A110,0) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Number, Area, Number. Lookup_value not in array, returns #N/A. 3 of 3 arguments used.');
-		// Case #2: Empty, Area, Number. Empty lookup_value, returns #VALUE!. 3 of 3 arguments used.
+		// Case #2: Empty, Area, Number. Empty lookup_value, returns #N/A!. 3 of 3 arguments used.
 		oParser = new parserFormula('MATCH(,A100:A110,0)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MATCH(,A100:A110,0) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 10, 'Test: Negative case: Empty, Area, Number. Empty lookup_value, returns #VALUE!. 3 of 3 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Empty, Area, Number. Empty lookup_value, returns #N/A!. 3 of 3 arguments used.');
 		// Case #3: Error, Area, Number. Error lookup_value propagates #N/A. 3 of 3 arguments used.
 		oParser = new parserFormula('MATCH(NA(),A100:A110,0)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MATCH(NA(),A100:A110,0) is parsed.');
@@ -7588,10 +7589,10 @@ $(function () {
 		oParser = new parserFormula('MATCH(FALSE,A100:A110,0)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MATCH(FALSE,A100:A110,0) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Boolean, Area, Number. Boolean lookup_value not in array, returns #N/A. 3 of 3 arguments used.');
-		// Case #11: Number, Area, Number. Invalid match_type (2), returns #N/A. 3 of 3 arguments used.
+		// Case #11: Number, Area, Number. Invalid match_type (2) should be normalized to 1. 3 of 3 arguments used.
 		oParser = new parserFormula('MATCH(10,A100:A110,2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MATCH(10,A100:A110,2) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 8, 'Test: Negative case: Number, Area, Number. Invalid match_type (2), returns #N/A. 3 of 3 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 8, 'Test: Negative case: Number, Area, Number. Invalid match_type (2) should be normalized to 1. 3 of 3 arguments used.');
 		// Case #12: Number, Ref3D, Number. Ref3D to text data, returns #VALUE!. 3 of 3 arguments used.
 		oParser = new parserFormula('MATCH(10,Sheet2!A4,0)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MATCH(10,Sheet2!A4,0) is parsed.');
@@ -7643,11 +7644,7 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: MATCH(1E-307, A105:A107, 0) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Bounded case: Number, Area, Number. Smallest positive number, exact match, match_type 0. 3 arguments used.');
 
-		// Need to fix:
-		// Case #6: Number, Reference link, Number. Exact match with reference link, match_type 0. 3 of 3 arguments used.
-		// Case #11: Number, Area, Number. Invalid match_type (2), returns #N/A. 3 of 3 arguments used.
-
-		//TODO excel по-другому работает
+		//TODO excel works differently
 		/*oParser = new parserFormula( "MATCH(123,F106:F117,1)", "A2", ws );
 		assert.ok( oParser.parse() );
 		assert.strictEqual( oParser.calculate().getValue(), 6 );*/
@@ -8271,7 +8268,7 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: ROW(XFD1048576:XFD1048576) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1048576, 'Test: Bounded case: Area. Single-cell range at maximum row. Returns 1048576. 1 argument used.');
 
-		// Need to fix: формула не должна парситься если используется тип аргумента отличный от reference
+		// Need to fix: the formula should not be parsed if an argument type other than reference is used
 
 	});
 
@@ -8522,8 +8519,6 @@ $(function () {
 		// Case #16: Formula. Formula resulting in #NUM! error, propagates error.
 		// Case #20: Formula. Formula returning a string, returns #VALUE!.
 
-		//TODO нужна другая функция для тестирования
-		//testArrayFormula2(assert, "COLUMNS", 1, 1);
 	});
 
 	QUnit.test("Test: \"SORT\"", function (assert) {
@@ -8555,7 +8550,7 @@ $(function () {
 		ws.getRange2("G13").setValue("1String");
 
 		ws.getRange2("F100").setValue("1s");
-		ws.getRange2("F101").setValue("Родион");
+		ws.getRange2("F101").setValue("Rodion");
 		ws.getRange2("F102").setValue("222Gleb222");
 		ws.getRange2("F103").setValue("20");
 		ws.getRange2("F104").setValue("1");
@@ -9222,7 +9217,7 @@ $(function () {
 		ws.getRange2("E12").setValue("1");
 
 		ws.getRange2("F10").setValue("1s");
-		ws.getRange2("F11").setValue("Родион");
+		ws.getRange2("F11").setValue("Rodion");
 		ws.getRange2("F12").setValue("222Gleb222");
 		ws.getRange2("F13").setValue("20");
 		ws.getRange2("F14").setValue("1");
@@ -9310,12 +9305,12 @@ $(function () {
 		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 20, 'Result of SORTBY(F10:F14,F10:F14)[1,0]');
 		assert.strictEqual(array.getElementRowCol(2, 0).getValue(), "1s", 'Result of SORTBY(F10:F14,F10:F14)[2,0]');
 		assert.strictEqual(array.getElementRowCol(3, 0).getValue(), "222Gleb222", 'Result of SORTBY(F10:F14,F10:F14)[3,0]');
-		assert.strictEqual(array.getElementRowCol(4, 0).getValue(), "Родион", 'Result of SORTBY(F10:F14,F10:F14)[4,0]');
+		assert.strictEqual(array.getElementRowCol(4, 0).getValue(), "Rodion", 'Result of SORTBY(F10:F14,F10:F14)[4,0]');
 
 		oParser = new parserFormula('SORTBY(F10:F14,F10:F14,-1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'SORTBY(F10:F14,F10:F14,-1)');
 		array = oParser.calculate();
-		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), "Родион", 'Result of SORTBY(F10:F14,F10:F14)[0,0]');
+		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), "Rodion", 'Result of SORTBY(F10:F14,F10:F14)[0,0]');
 		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), "222Gleb222", 'Result of SORTBY(F10:F14,F10:F14)[1,0]');
 		assert.strictEqual(array.getElementRowCol(2, 0).getValue(), "1s", 'Result of SORTBY(F10:F14,F10:F14)[2,0]');
 		assert.strictEqual(array.getElementRowCol(3, 0).getValue(), 20, 'Result of SORTBY(F10:F14,F10:F14)[3,0]');
@@ -9804,9 +9799,9 @@ $(function () {
 		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 0, 'Result of SORTBY(TRUE,FALSE,{1,2,1,-1})[0,2]');
 		assert.strictEqual(array.getElementRowCol(0, 3).getValue(), 0, 'Result of SORTBY(TRUE,FALSE,{1,2,1,-1})[0,3]');
 
-		ws.getRange2("C4").setValue("Глеб");
-		ws.getRange2("C5").setValue("Максим");
-		ws.getRange2("C6").setValue("Елена");
+		ws.getRange2("C4").setValue("Gleb");
+		ws.getRange2("C5").setValue("Maxim");
+		ws.getRange2("C6").setValue("Elena");
 		ws.getRange2("D4").setValue("52");
 		ws.getRange2("D5").setValue("19");
 		ws.getRange2("D6").setValue("18");
@@ -9815,9 +9810,9 @@ $(function () {
 		assert.ok(oParser.parse(), 'SORTBY(C4:D11,C4:D4)');
 		array = oParser.calculate();
 		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 52, 'Result of SORTBY(C4:D11,C4:D4)[0,0]');
-		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), "Глеб", 'Result of SORTBY(C4:D11,C4:D4)[0,1]');
+		assert.strictEqual(array.getElementRowCol(0, 1).getValue(), "Gleb", 'Result of SORTBY(C4:D11,C4:D4)[0,1]');
 		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 19, 'Result of SORTBY(C4:D11,C4:D4)[1,0]');
-		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), "Максим", 'Result of SORTBY(C4:D11,C4:D4)[1,1]');
+		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), "Maxim", 'Result of SORTBY(C4:D11,C4:D4)[1,1]');
 
 		// rows tests(single col)
 		ws.getRange2("A101").setValue("1");
@@ -10919,7 +10914,7 @@ $(function () {
 
 
 	QUnit.test("Test: \"TAKE\"", function (assert) {
-		//1. добавляем общие тесты
+		//1. adding general tests
 
 		ws.getRange2("A1").setValue("1");
 		ws.getRange2("A2").setValue("2");
@@ -11033,34 +11028,34 @@ $(function () {
 		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1);
 		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), 2);
 
-		//2. аргументы - разные типы. нужно пербрать все аргументы
-		//2.1 аргумент - number
+		//2. arguments are different types. you need to parse all the arguments
+		//2.1 argument - number
 		oParser = new parserFormula("TAKE(1,1)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.2 аргумент - string
+		//2.2 argument - string
 		oParser = new parserFormula("TAKE(\"test\",1)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "test");
-		//2.3 аргумент - bool
+		//2.3 argument - bool
 		oParser = new parserFormula("TAKE(true,1)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "TRUE");
-		//2.4 аргумент - error
+		//2.4 argument - error
 		oParser = new parserFormula("TAKE(#VALUE!,3)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-		//2.5 аргумент - empty
+		//2.5 argument - empty
 		oParser = new parserFormula("TAKE(,2)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-		//2.6 аргумент - cellsRange
-		//2.7 аргумент - cell
+		//2.6 argument - cellsRange
+		//2.7 argument - cell
 		oParser = new parserFormula("TAKE(B1, 1)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "q");
 
-		//2.8 аргумент - array
+		//2.8 argument - array
 		oParser = new parserFormula("TAKE({2;\"\";\"test\"},3)", "A1", ws);
 		assert.ok(oParser.parse());
 		array = oParser.calculate();
@@ -11079,25 +11074,25 @@ $(function () {
 		array = oParser.calculate();
 		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 1, "Result of TAKE({1;2;3},1,2)");
 
-		//2.2 аргумент - string
+		//2.2 argument - string
 		oParser = new parserFormula("TAKE(1,\"test\")", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-		//2.3 аргумент - bool
+		//2.3 argument - bool
 		oParser = new parserFormula("TAKE(1,true)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.4 аргумент - error
+		//2.4 argument - error
 		oParser = new parserFormula("TAKE(1, #VALUE!)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-		//2.5 аргумент - empty
+		//2.5 argument - empty
 		oParser = new parserFormula("TAKE(1,)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 1);
 
-		//2.6 аргумент - cellsRange
-		//2.7 аргумент - cell
+		//2.6 argument - cellsRange
+		//2.7 argument - cell
 		oParser = new parserFormula("TAKE(1,A1)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
@@ -11106,7 +11101,7 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
 
-		//2.8 аргумент - array
+		//2.8 argument - array
 		oParser = new parserFormula("TAKE(1,{2;\"\";\"test\"})", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
@@ -13835,7 +13830,7 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"VSTACK\"", function (assert) {
-		//1. добавляем общие тесты
+		//1. adding general tests
 		putStackData();
 		oParser = new parserFormula("VSTACK(A1:B3,B5:D5,B8:B11,B14:E18)", "A1", ws);
 		assert.ok(oParser.parse());
@@ -13899,34 +13894,34 @@ $(function () {
 		assert.strictEqual(array.getElementRowCol(12, 2).getValue(), '');
 		assert.strictEqual(array.getElementRowCol(12, 3).getValue(), 'g');
 
-		//2. аргументы - разные типы. нужно пербрать все аргументы
-		//2.1 аргумент - number
+		//2. arguments - different types. we need to iterate through all the arguments
+		//2.1 argument - number
 		oParser = new parserFormula("VSTACK(1)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.2 аргумент - string
+		//2.2 argument - string
 		oParser = new parserFormula("VSTACK(\"test\")", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "test");
-		//2.3 аргумент - bool
+		//2.3 argument - bool
 		oParser = new parserFormula("VSTACK(true)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "TRUE");
-		//2.4 аргумент - error
+		//2.4 argument - error
 		oParser = new parserFormula("VSTACK(#VALUE!)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-		//2.5 аргумент - empty
+		//2.5 argument - empty
 		oParser = new parserFormula("VSTACK(1,,1)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-		//2.6 аргумент - cellsRange
-		//2.7 аргумент - cell
+		//2.6 argument - cellsRange
+		//2.7 argument - cell
 		oParser = new parserFormula("VSTACK(B1)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "test2");
 
-		//2.8 аргумент - array
+		//2.8 argument - array
 		oParser = new parserFormula("VSTACK({1,2})", "A1", ws);
 		assert.ok(oParser.parse());
 		array = oParser.calculate();
@@ -14168,7 +14163,7 @@ $(function () {
 
 
 	QUnit.test("Test: \"HSTACK\"", function (assert) {
-		//1. добавляем общие тесты
+		//1. adding general tests
 		putStackData();
 		oParser = new parserFormula("HSTACK(A1:B3,B5:D5,B8:B11,B14:E18,A1)", "A1", ws);
 		assert.ok(oParser.parse());
@@ -14214,34 +14209,34 @@ $(function () {
 		assert.strictEqual(array.getElementRowCol(4, 9).getValue(), 'g');
 
 
-		//2. аргументы - разные типы. нужно пербрать все аргументы
-		//2.1 аргумент - number
+		//2. arguments - different types. we need to go through all the arguments
+		//2.1 argument - number
 		oParser = new parserFormula("HSTACK(1)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.2 аргумент - string
+		//2.2 argument - string
 		oParser = new parserFormula("HSTACK(\"test\")", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "test");
-		//2.3 аргумент - bool
+		//2.3 argument - bool
 		oParser = new parserFormula("HSTACK(true)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "TRUE");
-		//2.4 аргумент - error
+		//2.4 argument - error
 		oParser = new parserFormula("HSTACK(#VALUE!)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-		//2.5 аргумент - empty
+		//2.5 argument - empty
 		oParser = new parserFormula("HSTACK(1,,1)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-		//2.6 аргумент - cellsRange
-		//2.7 аргумент - cell
+		//2.6 argument - cellsRange
+		//2.7 argument - cell
 		oParser = new parserFormula("HSTACK(B1)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "test2");
 
-		//2.8 аргумент - array
+		//2.8 argument - array
 		oParser = new parserFormula("HSTACK({1,2})", "A1", ws);
 		assert.ok(oParser.parse());
 		array = oParser.calculate();
@@ -14480,7 +14475,7 @@ $(function () {
 
 
 	QUnit.test("Test: \"TOROW\"", function (assert) {
-		//1. добавляем общие тесты
+		//1. adding general tests
 
 		ws.getRange2("A1").setValue("2");
 		ws.getRange2("A2").setValue("");
@@ -14530,34 +14525,34 @@ $(function () {
 		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), 'test');
 
 
-		//2. аргументы - разные типы. нужно пербрать все аргументы
-		//2.1 аргумент - number
+		//2. different types. we need to go through all the arguments
+		//2.1 argument - number
 		oParser = new parserFormula("TOROW(1,3,FALSE)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.2 аргумент - string
+		//2.2 argument - string
 		oParser = new parserFormula("TOROW(\"test\",3,FALSE)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "test");
-		//2.3 аргумент - bool
+		//2.3 argument - bool
 		oParser = new parserFormula("TOROW(true)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "TRUE");
-		//2.4 аргумент - error
+		//2.4 argument - error
 		oParser = new parserFormula("TOROW(#VALUE!)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-		//2.5 аргумент - empty
+		//2.5 argument - empty
 		oParser = new parserFormula("TOROW(1,,1)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.6 аргумент - cellsRange
-		//2.7 аргумент - cell
+		//2.6 argument - cellsRange
+		//2.7 argument - cell
 		oParser = new parserFormula("TOROW(B1)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "test2");
 
-		//2.8 аргумент - array
+		//2.8 argument - array
 		oParser = new parserFormula("TOROW({1,2})", "A1", ws);
 		assert.ok(oParser.parse());
 		array = oParser.calculate();
@@ -14841,7 +14836,7 @@ $(function () {
 
 
 	QUnit.test("Test: \"TOCOL\"", function (assert) {
-		//1. добавляем общие тесты
+		//1. adding general tests
 
 		ws.getRange2("A1").setValue("2");
 		ws.getRange2("A2").setValue("");
@@ -14891,34 +14886,34 @@ $(function () {
 		assert.strictEqual(array.getElementRowCol(2, 0).getValue(), 'test');
 
 
-		//2. аргументы - разные типы. нужно пербрать все аргументы
-		//2.1 аргумент - number
+		//2. arguments - different types. we need to go through all the arguments
+		//2.1 argument - number
 		oParser = new parserFormula("TOCOL(1,3,FALSE)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.2 аргумент - string
+		//2.2 argument - string
 		oParser = new parserFormula("TOCOL(\"test\",3,FALSE)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "test");
-		//2.3 аргумент - bool
+		//2.3 argument - bool
 		oParser = new parserFormula("TOCOL(true)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "TRUE");
-		//2.4 аргумент - error
+		//2.4 argument - error
 		oParser = new parserFormula("TOCOL(#VALUE!)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-		//2.5 аргумент - empty
+		//2.5 argument - empty
 		oParser = new parserFormula("TOCOL(1,,1)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.6 аргумент - cellsRange
-		//2.7 аргумент - cell
+		//2.6 argument - cellsRange
+		//2.7 argument - cell
 		oParser = new parserFormula("TOCOL(B1)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "test2");
 
-		//2.8 аргумент - array
+		//2.8 argument - array
 		oParser = new parserFormula("TOCOL({1,2})", "A1", ws);
 		assert.ok(oParser.parse());
 		array = oParser.calculate();
@@ -15200,7 +15195,7 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"WRAPROWS\"", function (assert) {
-		//1. добавляем общие тесты
+		//1. adding general tests
 
 		ws.getRange2("A1").setValue("2");
 		ws.getRange2("A2").setValue("");
@@ -15239,34 +15234,34 @@ $(function () {
 
 
 
-		//2. аргументы - разные типы. нужно пербрать все аргументы
-		//2.1 аргумент - number
+		//2. arguments - different types. we need to go through all the arguments
+		//2.1 argument - number
 		oParser = new parserFormula("WRAPROWS(1,3)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.2 аргумент - string
+		//2.2 argument - string
 		oParser = new parserFormula("WRAPROWS(\"test\",3)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "test");
-		//2.3 аргумент - bool
+		//2.3 argument - bool
 		oParser = new parserFormula("WRAPROWS(true,3)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "TRUE");
-		//2.4 аргумент - error
+		//2.4 argument - error
 		oParser = new parserFormula("WRAPROWS(#VALUE!,3)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), "#VALUE!");
-		//2.5 аргумент - empty
+		//2.5 argument - empty
 		oParser = new parserFormula("WRAPROWS(,2)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), "#VALUE!");
-		//2.6 аргумент - cellsRange
-		//2.7 аргумент - cell
+		//2.6 argument - cellsRange
+		//2.7 argument - cell
 		oParser = new parserFormula("WRAPROWS(B1, 10)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "test2");
 
-		//2.8 аргумент - array
+		//2.8 argument - array
 		oParser = new parserFormula("WRAPROWS({2;\"\";\"test\"},2)", "A1", ws);
 		assert.ok(oParser.parse());
 		array = oParser.calculate();
@@ -15277,26 +15272,26 @@ $(function () {
 		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), '#N/A');
 
 
-		//2.2 аргумент - string
+		//2.2 argument - string
 		oParser = new parserFormula("WRAPROWS(1,\"test\")", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), "#VALUE!");
-		//2.3 аргумент - bool
+		//2.3 argument - bool
 		oParser = new parserFormula("WRAPROWS(1,true)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.4 аргумент - error
+		//2.4 argument - error
 		oParser = new parserFormula("WRAPROWS(1, #VALUE!)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), "#VALUE!");
-		//2.5 аргумент - empty
+		//2.5 argument - empty
 		oParser = new parserFormula("WRAPROWS(1,)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), "#NUM!");
 
 
-		//2.6 аргумент - cellsRange
-		//2.7 аргумент - cell
+		//2.6 argument - cellsRange
+		//2.7 argument - cell
 		oParser = new parserFormula("WRAPROWS(1,A1)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
@@ -15305,41 +15300,41 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
 
-		//2.8 аргумент - array
+		//2.8 argument - array
 		oParser = new parserFormula("WRAPROWS(1,{2;\"\";\"test\"})", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
 
 
-		//2. аргументы - разные типы. нужно пербрать все аргументы
-		//2.1 аргумент - number
+		//2. arguments - different types. we need to go through all the arguments
+		//2.1 argument - number
 		oParser = new parserFormula("WRAPROWS(1,3,1)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
 
 
-		//2.2 аргумент - string
+		//2.2 argument - string
 		oParser = new parserFormula("WRAPROWS(1,3,\"test\")", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.3 аргумент - bool
+		//2.3 argument - bool
 		oParser = new parserFormula("WRAPROWS(1,3,true)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.4 аргумент - error
+		//2.4 argument - error
 		oParser = new parserFormula("WRAPROWS(1,3,#VALUE!)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1);
-		//2.5 аргумент - empty
+		//2.5 argument - empty
 		oParser = new parserFormula("WRAPROWS(1,3,)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.6 аргумент - cellsRange
-		//2.7 аргумент - cell
+		//2.6 argument - cellsRange
+		//2.7 argument - cell
 		oParser = new parserFormula("WRAPROWS(1,3, B1)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.8 аргумент - array
+		//2.8 argument - array
 		oParser = new parserFormula("WRAPROWS(1,3, {1,2,3})", "A1", ws);
 		assert.ok(oParser.parse());
 		array = oParser.calculate();
@@ -15610,7 +15605,7 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"WRAPCOLS\"", function (assert) {
-		//1. добавляем общие тесты
+		//1. adding general tests
 
 		ws.getRange2("A1").setValue("2");
 		ws.getRange2("A2").setValue("");
@@ -15650,34 +15645,34 @@ $(function () {
 
 
 
-		//2. аргументы - разные типы. нужно пербрать все аргументы
-		//2.1 аргумент - number
+		//2. arguments - different types. we need to go through all the arguments
+		//2.1 argument - number
 		oParser = new parserFormula("WRAPCOLS(1,3)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.2 аргумент - string
+		//2.2 argument - string
 		oParser = new parserFormula("WRAPCOLS(\"test\",3)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "test");
-		//2.3 аргумент - bool
+		//2.3 argument - bool
 		oParser = new parserFormula("WRAPCOLS(true,3)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "TRUE");
-		//2.4 аргумент - error
+		//2.4 argument - error
 		oParser = new parserFormula("WRAPCOLS(#VALUE!,3)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), "#VALUE!");
-		//2.5 аргумент - empty
+		//2.5 argument - empty
 		oParser = new parserFormula("WRAPCOLS(,2)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), "#VALUE!");
-		//2.6 аргумент - cellsRange
-		//2.7 аргумент - cell
+		//2.6 argument - cellsRange
+		//2.7 argument - cell
 		oParser = new parserFormula("WRAPCOLS(B1, 10)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), "test2");
 
-		//2.8 аргумент - array
+		//2.8 argument - array
 		oParser = new parserFormula("WRAPCOLS({2;\"\";\"test\"},2)", "A1", ws);
 		assert.ok(oParser.parse());
 		array = oParser.calculate();
@@ -15688,26 +15683,26 @@ $(function () {
 		assert.strictEqual(array.getElementRowCol(1, 1).getValue(), '#N/A');
 
 
-		//2.2 аргумент - string
+		//2.2 argument - string
 		oParser = new parserFormula("WRAPCOLS(1,\"test\")", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), "#VALUE!");
-		//2.3 аргумент - bool
+		//2.3 argument - bool
 		oParser = new parserFormula("WRAPCOLS(1,true)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.4 аргумент - error
+		//2.4 argument - error
 		oParser = new parserFormula("WRAPCOLS(1, #VALUE!)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), "#VALUE!");
-		//2.5 аргумент - empty
+		//2.5 argument - empty
 		oParser = new parserFormula("WRAPCOLS(1,)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), "#NUM!");
 
 
-		//2.6 аргумент - cellsRange
-		//2.7 аргумент - cell
+		//2.6 argument - cellsRange
+		//2.7 argument - cell
 		oParser = new parserFormula("WRAPCOLS(1,A1)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
@@ -15716,41 +15711,41 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
 
-		//2.8 аргумент - array
+		//2.8 argument - array
 		oParser = new parserFormula("WRAPCOLS(1,{2;\"\";\"test\"})", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
 
 
-		//2. аргументы - разные типы. нужно пербрать все аргументы
-		//2.1 аргумент - number
+		//2. arguments - different types. we need to go through all the arguments
+		//2.1 argument - number
 		oParser = new parserFormula("WRAPCOLS(1,3,1)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
 
 
-		//2.2 аргумент - string
+		//2.2 argument - string
 		oParser = new parserFormula("WRAPCOLS(1,3,\"test\")", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.3 аргумент - bool
+		//2.3 argument - bool
 		oParser = new parserFormula("WRAPCOLS(1,3,true)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.4 аргумент - error
+		//2.4 argument - error
 		oParser = new parserFormula("WRAPCOLS(1,3,#VALUE!)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1);
-		//2.5 аргумент - empty
+		//2.5 argument - empty
 		oParser = new parserFormula("WRAPCOLS(1,3,)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.6 аргумент - cellsRange
-		//2.7 аргумент - cell
+		//2.6 argument - cellsRange
+		//2.7 argument - cell
 		oParser = new parserFormula("WRAPCOLS(1,3, B1)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 1);
-		//2.8 аргумент - array
+		//2.8 argument - array
 		oParser = new parserFormula("WRAPCOLS(1,3, {1,2,3})", "A1", ws);
 		assert.ok(oParser.parse());
 		array = oParser.calculate();
@@ -16023,10 +16018,11 @@ $(function () {
 
 	});
 
-    	QUnit.test("Test: \"XMATCH\"", function (assert) {
+	QUnit.test("Test: \"XMATCH\"", function (assert) {
 		let array;
 
 		ws.getRange2("A1:J220").cleanAll();
+		AscCommonExcel.g_oMatchCache.clean();
 
 		ws.getRange2("B101").setValue();
 		ws.getRange2("B102").setValue();
@@ -16254,6 +16250,7 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), "#N/A", 'Result of XMATCH(1,{2,2,2,1,2,2},-1,-2)');
 
 
+		// MATCH MODE TESTS:
 		oParser = new parserFormula("XMATCH(,,-2)", "A2", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
@@ -16302,12 +16299,12 @@ $(function () {
 		assert.ok(oParser.parse(), "XMATCH(B101,B102,2)");
 		assert.strictEqual(oParser.calculate().getValue(), 1, "Result of XMATCH(B101,B102,2)");
 
-		oParser = new parserFormula("XMATCH(B101,B102,2)", "A2", ws);
-		assert.ok(oParser.parse(), "XMATCH(B101,B102,2)");
-		assert.strictEqual(oParser.calculate().getValue(), 1, "Result of XMATCH(B101,B102,2)");
-
 		oParser = new parserFormula("XMATCH(B101,B102,3)", "A2", ws);
 		assert.ok(oParser.parse(), "XMATCH(B101,B102,3)");
+		assert.strictEqual(oParser.calculate().getValue(), 1, "Result of XMATCH(B101,B102,3)");
+
+		oParser = new parserFormula("XMATCH(B101,B102,4)", "A2", ws);
+		assert.ok(oParser.parse(), "XMATCH(B101,B102,4)");
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", "Result of XMATCH(B101,B102,3)");
 
 		oParser = new parserFormula("XMATCH(#DIV/0!,#NUM!)", "A2", ws);
@@ -16375,7 +16372,7 @@ $(function () {
 		assert.ok(oParser.parse(), "Call: XMATCH(10,B50:B59,0,-2)");
 		assert.strictEqual(oParser.calculate().getValue(), "#N/A", "Result of XMATCH(10,B50:B59,0,-2)");
 
-		// TODO excel выдает другой результат (3)
+		// TODO excel returns different result (3)
 		oParser = new parserFormula("XMATCH(10,B50:B59,1,-2)", "A2", ws); 
 		assert.ok(oParser.parse(), "Call: XMATCH(10,B50:B59,1,-2)");
 		assert.strictEqual(oParser.calculate().getValue(), 2, "Result of XMATCH(10,B50:B59,1,-2)");
@@ -16421,12 +16418,12 @@ $(function () {
 		assert.ok(oParser.parse(), "Call: XMATCH(3,C50:C59,0,2)");
 		assert.strictEqual(oParser.calculate().getValue(), 5, "Result of XMATCH(3,C50:C59,0,2)");
 
-		// TODO ms выдает другой результат (6)
+		// TODO ms gives different result (6)
 		oParser = new parserFormula("XMATCH(4,C50:C59,1,2)", "A2", ws);
 		assert.ok(oParser.parse(), "Call: XMATCH(4,C50:C59,1,2)");
 		assert.strictEqual(oParser.calculate().getValue(), 8, "Result of XMATCH(4,C50:C59,1,2)");
 
-		// TODO ms выдает другой результат (5)
+		// TODO ms gives different result (5)
 		oParser = new parserFormula("XMATCH(4,C50:C59,-1,2)", "A2", ws);
 		assert.ok(oParser.parse(), "Call: XMATCH(4,C50:C59,-1,2)");
 		assert.strictEqual(oParser.calculate().getValue(), "#N/A", "Result of XMATCH(4,C50:C59,-1,2)");
@@ -16439,7 +16436,7 @@ $(function () {
 		assert.ok(oParser.parse(), "Call: XMATCH(-4,C50:C59,1,-2)");
 		assert.strictEqual(oParser.calculate().getValue(), 8, "Result of XMATCH(-4,C50:C59,1,-2)");
 
-		// TODO ms выдает другой результат (1)
+		// TODO ms gives different result (1)
 		oParser = new parserFormula("XMATCH(4,C50:C59,-1,-2)", "A2", ws);
 		assert.ok(oParser.parse(), "Call: XMATCH(4,C50:C59,-1,-2)");
 		assert.strictEqual(oParser.calculate().getValue(), 2, "Result of XMATCH(4,C50:C59,-1,-2)");
@@ -16470,7 +16467,7 @@ $(function () {
 		assert.ok(oParser.parse(), "Call: XMATCH(E60,E50:E59, 1, 1)");
 		assert.strictEqual(oParser.calculate().getValue(), 8, "Result of XMATCH(E60,E50:E59, 1, 1)");
 
-		// TODO ms и js выдают разные результаты при подобных сравнениях строк. К примеру "_d" считается меньше чем "1d23dd" тогда как у нас в редакторе по-другому(как в js)
+		// TODO ms and js produce different results when doing similar string comparisons. For example, “_d” is considered less than “1d23dd”, whereas in our editor it’s different (like in js)
 		oParser = new parserFormula("XMATCH(E60,E50:E59,-1,1)", "A2", ws);
 		assert.ok(oParser.parse(), "Call: XMATCH(E60,E50:E59,-1,1)");
 		assert.strictEqual(oParser.calculate().getValue(), 4, "Result of XMATCH(E60,E50:E59,-1,1)");		// 10
@@ -16832,17 +16829,17 @@ $(function () {
 		assert.ok(oParser.parse(), "Call: XMATCH(I59,\"a\",0)");
 		assert.strictEqual(oParser.calculate().getValue(), 1, "Result of XMATCH(I59,\"a\",0)");
 
-		// TODO ms возвращает массив c длиной искомого значения
+		// TODO ms returns an array with the length of the desired value
 		oParser = new parserFormula("XMATCH(I50:I55,I50:I59,0)", "A2", ws);
 		assert.ok(oParser.parse(), "Call: XMATCH(I50:I55,I50:I59,0)");
 		assert.strictEqual(oParser.calculate().getValue(), 1, "Result of XMATCH(I50:I55,I50:I59,0)");
 
-		// TODO ms возвращает массив c длиной искомого значения
+		// TODO ms returns an array with the length of the desired value
 		oParser = new parserFormula("XMATCH({12,2,9},I50:I59,0)", "A2", ws);
 		assert.ok(oParser.parse(), "Call: XMATCH({12,2,9},I50:I59,0)");
 		assert.strictEqual(oParser.calculate().getValue(), 4, "Result of XMATCH({12,2,9},I50:I59,0)");
 
-		// TODO ms возвращает массив c длиной искомого значения
+		// TODO ms returns an array with the length of the desired value
 		oParser = new parserFormula("XMATCH({2,2,2},{2,2,3,4,5,2})", "A2", ws);
 		assert.ok(oParser.parse(), "Call: XMATCH({2,2,2},{2,2,3,4,5,2})");
 		assert.strictEqual(oParser.calculate().getValue(), 1, "Result of XMATCH({2,2,2},{2,2,3,4,5,2})");
@@ -16863,6 +16860,7 @@ $(function () {
 		ws.getRange2("A107").setValue("10");
 		ws.getRange2("A108").setValue("9000");
 		ws.getRange2("A109").setValue("10000");
+		ws.getRange2("A110").setValue("11");
 
 		ws.getRange2("B100").setValue("a");
 		ws.getRange2("B101").setValue("b");
@@ -16874,7 +16872,15 @@ $(function () {
 		ws.getRange2("B107").setValue("h");
 		ws.getRange2("B108").setValue("i");
 		ws.getRange2("B109").setValue("j");
-		ws.getRange2("B110").setValue("");
+		ws.getRange2("B110").setValue("0");
+		ws.getRange2("B111").setValue("sd");
+
+		ws.getRange2("C100").setValue("10");
+		ws.getRange2("C101").setValue("20");
+		ws.getRange2("C102").setValue("30");
+		ws.getRange2("C103").setValue("");
+		ws.getRange2("C104").setValue("0");
+		ws.getRange2("C105").setValue("40");
 		// Table type. Use A601:L6**
 		getTableType(599, 0, 600, 5);
 		ws.getRange2("A601").setValue("10"); // Num (Column1)
@@ -16913,7 +16919,7 @@ $(function () {
 		// Case #3: Number, Area, Number, Number. Exact or next smaller, numeric range, match_mode -1, search_mode -1. 4 of 4 arguments used.
 		oParser = new parserFormula('XMATCH(15,A100:A110,-1,-1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: XMATCH(15,A100:A110,-1,-1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 8, 'Test: Positive case: Number, Area, Number, Number. Exact or next smaller, numeric range, match_mode -1, search_mode -1. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 11, 'Test: Positive case: Number, Area, Number, Number. Exact or next smaller, numeric range, match_mode -1, search_mode -1. 4 of 4 arguments used.');
 		// Case #4: String, Area, Number, Number. Exact match, text range, match_mode 0, search_mode 1. 4 of 4 arguments used.
 		oParser = new parserFormula('XMATCH("apple",B100:B110,0,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: XMATCH("apple",B100:B110,0,1) is parsed.');
@@ -16989,17 +16995,21 @@ $(function () {
 		// Case #22: Number, Area, Number, Empty. Omitted search_mode (defaults to 1), match_mode 0. 3 of 4 arguments used.
 		oParser = new parserFormula('XMATCH(10,A100:A110,0,)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: XMATCH(10,A100:A110,0,) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 8, 'Test: Positive case: Number, Area, Number, Empty. Omitted search_mode (defaults to 1), match_mode 0. 3 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 8, 'Test: Positive case: Number, Area, Number, Empty. Omitted search_mode (defaults to 1), match_mode 0. 3 of 4 arguments used.');
+		// Case #23: Empty, Area, Number, Number. Empty lookup_value. 4 of 4 arguments used.
+		oParser = new parserFormula('XMATCH(,C100:C105,0,1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: XMATCH(,C100:C105,0,1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 4, 'Test: Positive case: Empty, Area, Number, Number. Empty lookup_value. 4 of 4 arguments used.');
 
 		// Negative cases:
 		// Case #1: Number, Area, Number, Number. Lookup_value not in array, returns #N/A. 4 of 4 arguments used.
 		oParser = new parserFormula('XMATCH(99,A100:A110,0,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: XMATCH(99,A100:A110,0,1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Number, Area, Number, Number. Lookup_value not in array, returns #N/A. 4 of 4 arguments used.');
-		// Case #2: Empty, Area, Number, Number. Empty lookup_value, returns #VALUE!. 4 of 4 arguments used.
+		// Case #2: Empty, Area, Number, Number. Empty lookup_value, returns #N/A!. 4 of 4 arguments used.
 		oParser = new parserFormula('XMATCH(,A100:A110,0,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: XMATCH(,A100:A110,0,1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 11, 'Test: Negative case: Empty, Area, Number, Number. Empty lookup_value, returns #VALUE!. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), "#N/A", 'Test: Negative case: Empty, Area, Number, Number. Empty lookup_value, returns #N/A!. 4 of 4 arguments used.');
 		// Case #3: Error, Area, Number, Number. Error lookup_value propagates #N/A. 4 of 4 arguments used.
 		oParser = new parserFormula('XMATCH(NA(),A100:A110,0,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: XMATCH(NA(),A100:A110,0,1) is parsed.');
@@ -17015,11 +17025,12 @@ $(function () {
 		// Case #6: Number, Area, Number, Number. Non-ascending text array with match_mode 1, search_mode 2, returns #N/A. 4 of 4 arguments used.
 		oParser = new parserFormula('XMATCH(10,B100:B110,1,2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: XMATCH(10,B100:B110,1,2) is parsed.');
+		// todo The algorithm for comparing values of different data types in binary search is not completely clear. The error is related to this
 		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Number, Area, Number, Number. Non-ascending text array with match_mode 1, search_mode 2, returns #N/A. 4 of 4 arguments used.');
 		// Case #7: Number, Area, Number, Number. Non-descending text array with match_mode -1, search_mode -2, returns #N/A. 4 of 4 arguments used.
 		oParser = new parserFormula('XMATCH(10,B100:B110,-1,-2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: XMATCH(10,B100:B110,-1,-2) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 11, 'Test: Negative case: Number, Area, Number, Number. Non-descending text array with match_mode -1, search_mode -2, returns #N/A. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 11, 'Test: Negative case: Number, Area, Number, Number. Non-descending text array with match_mode -1, search_mode -2, returns #N/A. 4 of 4 arguments used.');
 		// Case #8: String, Area, Number, Number. String not in array, returns #N/A. 4 of 4 arguments used.
 		oParser = new parserFormula('XMATCH("xyz",B100:B110,0,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: XMATCH("xyz",B100:B110,0,1) is parsed.');
@@ -17035,7 +17046,7 @@ $(function () {
 		// Case #11: Number, Area, Number, Number. Invalid match_mode (3), returns #N/A. 4 of 4 arguments used.
 		oParser = new parserFormula('XMATCH(10,A100:A110,3,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: XMATCH(10,A100:A110,3,1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 8, 'Test: Negative case: Number, Area, Number, Number. Invalid match_mode (3), returns #N/A. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 8, 'Test: Negative case: Number, Area, Number, Number. Invalid match_mode (3), returns #N/A. 4 of 4 arguments used.');
 		// Case #12: Number, Ref3D, Number, Number. Ref3D to text data, returns #VALUE!. 4 of 4 arguments used.
 		oParser = new parserFormula('XMATCH(10,Sheet2!A4,0,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: XMATCH(10,Sheet2!A4,0,1) is parsed.');
@@ -17051,7 +17062,7 @@ $(function () {
 		// Case #15: Number, Table, Number, Number. Table column with text, returns #VALUE!. 4 of 4 arguments used.
 		oParser = new parserFormula('XMATCH(10,Table1[Column2],0,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: XMATCH(10,Table1[Column2],0,1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Number, Table, Number, Number. Table column with text, returns #VALUE!. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Number, Table, Number, Number. Table column with text, returns #VALUE!. 4 of 4 arguments used.');
 		// Case #16: Array, Area, Number, Number. Array with boolean lookup_value, returns #N/A. 4 of 4 arguments used.
 		oParser = new parserFormula('XMATCH({TRUE},A100:A110,0,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: XMATCH({TRUE},A100:A110,0,1) is parsed.');
@@ -17086,12 +17097,6 @@ $(function () {
 		oParser = new parserFormula('XMATCH(1E-307, A100:A110, 0)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: XMATCH(1E-307, A100:A110, 0) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Bounded case: Number, Area, Number. Smallest positive number, exact match, match_type 0. 3 arguments used.');
-
-		// Need to fix: binary mode, error types diff, ms result diff
-		// Case #22: Number, Area, Number, Empty. Omitted search_mode (defaults to 1), match_mode 0. 3 of 4 arguments used.
-		// Case #6: Number, Area, Number, Number. Non-ascending text array with match_mode 1, search_mode 2, returns #N/A. 4 of 4 arguments used.
-		// Case #11: Number, Area, Number, Number. Invalid match_mode (3), returns #N/A. 4 of 4 arguments used.
-		// Case #15: Number, Table, Number, Number. Table column with text, returns #VALUE!. 4 of 4 arguments used.
 
 
 	});
