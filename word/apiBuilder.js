@@ -7133,55 +7133,55 @@
 	 * Returns a style by its name.
 	 * @memberof ApiDocument
 	 * @typeofeditors ["CDE"]
-	 * @param {string} sStyleName - The style name.
-	 * @returns {?ApiStyle}
+	 * @param {string} styleName - The style name.
+	 * @returns {ApiStyle | null} Returns the style, or <em>null</em> if no style with the specified name was found.
 	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/GetStyle.js
 	 */
-	ApiDocument.prototype.GetStyle = function(sStyleName)
+	ApiDocument.prototype.GetStyle = function(styleName)
 	{
-		var oStyles  = this.Document.Get_Styles();
-		var oStyleId = oStyles.GetStyleIdByName(sStyleName, true);
-		return new ApiStyle(oStyles.Get(oStyleId));
+		let styles = this.Document.Get_Styles();
+		var styleId = styles.GetStyleIdByName(styleName);
+		if (!styleId)
+			return null;
+
+		return new ApiStyle(styles.Get(styleId));
 	};
 	/**
-	 * Creates a new style with the specified type and name. If there is a style with the same name it will be replaced with a new one.
+	 * Creates a new style with the specified type and name. If a style with the specified name already exists, it will be returned without creating a new one.
 	 * @memberof ApiDocument
 	 * @typeofeditors ["CDE"]
-	 * @param {string} sStyleName - The name of the style which will be created.
-	 * @param {StyleType} [sType="paragraph"] - The document element which the style will be applied to.
+	 * @param {string} styleName - The name of the style which will be created.
+	 * @param {StyleType} [type="paragraph"] - The document element which the style will be applied to.
 	 * @returns {ApiStyle}
 	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/CreateStyle.js
 	 */
-	ApiDocument.prototype.CreateStyle = function(sStyleName, sType)
+	ApiDocument.prototype.CreateStyle = function(styleName, type)
 	{
-		var nStyleType = styletype_Paragraph;
-		if ("paragraph" === sType)
-			nStyleType = styletype_Paragraph;
-		else if ("table" === sType)
-			nStyleType = styletype_Table;
-		else if ("run" === sType)
-			nStyleType = styletype_Character;
-		else if ("numbering" === sType)
-			nStyleType = styletype_Numbering;
+		type = GetStringParameter(type, "paragraph");
+		
+		let styleType = styletype_Paragraph;
+		if ("paragraph" === type)
+			styleType = styletype_Paragraph;
+		else if ("table" === type)
+			styleType = styletype_Table;
+		else if ("run" === type)
+			styleType = styletype_Character;
+		else if ("numbering" === type)
+			styleType = styletype_Numbering;
+		
+		let styles  = this.Document.Get_Styles();
+		let styleId = styles.GetStyleIdByName(styleName);
+		let style   = styleId ? styles.Get(styleId) : null;
+		if (style)
+			return new ApiStyle(style);
 
-		var oStyle        = new CStyle(sStyleName, null, null, nStyleType, false);
-		oStyle.qFormat    = true;
-		oStyle.uiPriority = 1;
-		var oStyles       = this.Document.Get_Styles();
-
-		// Если у нас есть стиль с данным именем, тогда мы старый стиль удаляем, а новый добавляем со старым Id,
-		// чтобы если были ссылки на старый стиль - теперь они стали на новый.
-		var sOldId    = oStyles.GetStyleIdByName(sStyleName);
-		var oOldStyle = oStyles.Get(sOldId);
-		if (null != sOldId && oOldStyle)
-		{
-			oStyles.Remove(sOldId);
-			oStyles.RemapIdReferences(sOldId, oStyle.Get_Id());
-		}
-
-		oStyles.Add(oStyle);
-		oStyles.UpdateDefaultStyleLinks();
-		return new ApiStyle(oStyle);
+		style = new AscWord.CStyle(styleName, null, null, styleType, false);
+		style.SetQFormat(true);
+		style.SetUiPriority(1);
+		
+		styles.Add(style);
+		styles.UpdateDefaultStyleLinks();
+		return new ApiStyle(style);
 	};
 	/**
 	 * Returns the default style parameters for the specified document element.
