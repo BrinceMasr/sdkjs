@@ -27557,7 +27557,58 @@
 				}
 			}
 		}
-		else 
+		else if (Asc.editor.editorId === AscCommon.c_oEditorId.Presentation)
+		{
+			let oPresentation = Asc.editor.WordControl.m_oLogicDocument;
+			if (!oPresentation)
+				return false;
+
+			let oController = oPresentation.GetCurrentController();
+			if (!oController)
+				return false;
+
+			let oContent = oController.getTargetDocContent();
+			if (!oContent)
+				return false;
+
+			isTrackRevisions = false;
+			let docState = oPresentation.Save_DocumentStateBeforeLoadChanges();
+
+			arrSelectedParas = [];
+			let nCount = oContent.GetElementsCount();
+			for (let nIdx = 0; nIdx < nCount; nIdx++)
+			{
+				let oElement = oContent.GetElement(nIdx);
+				if (oElement && oElement.IsParagraph && oElement.IsParagraph() && oElement.Selection && oElement.Selection.Use)
+					arrSelectedParas.push(oElement);
+			}
+
+			if (arrSelectedParas.length <= 0)
+				return false;
+
+			ReplaceInParas(arrSelectedParas);
+
+			if (textStrings.length > arrSelectedParas.length)
+			{
+				let oParaParent = arrSelectedParas[0].Parent;
+				let nIndexToPaste = arrSelectedParas[arrSelectedParas.length - 1].Index + 1;
+				if (oParaParent)
+				{
+					for (let nPara = arrSelectedParas.length; nPara < textStrings.length; nPara++)
+					{
+						let oPara = new AscWord.Paragraph(oParaParent, true);
+						let oRun = new ParaRun(oPara, false);
+						oRun.AddText(textStrings[nPara]);
+						private_PushElementToParagraph(oPara, oRun);
+						oParaParent.AddToContent(nIndexToPaste, oPara);
+						nIndexToPaste++;
+					}
+				}
+			}
+
+			oPresentation.Load_DocumentStateAfterLoadChanges(docState);
+		}
+		else
 		{
 			let oDocument = this.GetDocument();
 			let logicDocument = oDocument.Document;
