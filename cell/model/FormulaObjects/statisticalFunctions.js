@@ -12633,6 +12633,40 @@ function parseStringToCElement (val, cultureInfo) {
 	// -------------------------------------------------------CountIfCache-------------------------------------------------
 
 	/**
+	 * Compile a wildcard mask (already lowercased) into a RegExp, matching
+	 * searchRegExp2 semantics: * = any sequence, ? = any one char, ~ = literal escape.
+	 * Compiled once per formula call instead of re-parsing on every cell.
+	 * @param {string} mask - already lowercased wildcard pattern
+	 * @returns {RegExp}
+	 */
+	function _buildWildcardRegex(mask) {
+		var s = '^';
+		var endsWithWildstar = false;
+		for (var i = 0; i < mask.length; i++) {
+			var c = mask[i];
+			if (c === '~' && i + 1 < mask.length) {
+				// ~ escapes the next character literally
+				s += mask[++i].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+				endsWithWildstar = false;
+			} else if (c === '*') {
+				s += '.*';
+				endsWithWildstar = true;
+			} else if (c === '?') {
+				s += '.';
+				endsWithWildstar = false;
+			} else {
+				s += c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+				endsWithWildstar = false;
+			}
+		}
+		// 'i' flag: string comparison is case-insensitive (searchValue is already lowercased,
+		// but cell values retain their original case).
+		// If mask ends with an unescaped '*', omit '$': "^prefix.*" already matches the full string
+		// from the anchor — dropping the end-anchor lets V8 use a faster prefix-check path.
+		return new RegExp(endsWithWildstar ? s : s + '$', 'i');
+	}
+
+	/**
 	 * @constructor
 	 */
 	function CountIfCache() {
@@ -12743,11 +12777,19 @@ function parseStringToCElement (val, cultureInfo) {
 		} else if (matchingInfo.op === '<>') {
 			const bbox = range.getBBox0();
 			const cellsCount = (bbox.c2 - bbox.c1 + 1) * (bbox.r2 - bbox.r1 + 1);
-			const matchingFunction = getMatchingFunction(type, '=', isWildcard);
+			// For wildcards, pre-compile the pattern once instead of re-parsing on every cell
+			const matchingFunction = (type === cElementType.string && isWildcard)
+				? (function() { var re = _buildWildcardRegex(searchValue); return function(a) { return re.test(a); }; }())
+				: getMatchingFunction(type, '=', isWildcard);
 			_count = this.typedCache.calculate(range, type, matchingFunction, searchValue);
 			_count = cellsCount - _count;
 		} else {
-			const matchingFunction = getMatchingFunction(type, matchingInfo.op, isWildcard);
+			// For wildcard = (e.g. "Asd1**"), pre-compile the pattern once per formula call.
+			// IMPORTANT: only pre-compile for '=' / null — inequality operators (<,>,<=,>=) treat
+			// * and ? as literal characters (Excel behavior), so they must use stringCompare, not regex.
+			const matchingFunction = (type === cElementType.string && isWildcard && (matchingInfo.op === '=' || matchingInfo.op === null))
+				? (function() { var re = _buildWildcardRegex(searchValue); return function(a) { return re.test(a); }; }())
+				: getMatchingFunction(type, matchingInfo.op, isWildcard);
 			_count = this.typedCache.calculate(range, type, matchingFunction, searchValue);
 		}
 		return new cNumber(_count);
@@ -13295,7 +13337,10 @@ function parseStringToCElement (val, cultureInfo) {
 				}
 			} else if (matchingInfo.op === '<>') {
 				// Complement: sum(<>) = totalSum - sum(=)
-				const equalFn = getMatchingFunction(type, '=', isWildcard);
+				// For wildcards, pre-compile the pattern once instead of re-parsing on every cell
+				const equalFn = (type === cElementType.string && isWildcard)
+					? (function() { var re = _buildWildcardRegex(searchValue); return function(a) { return re.test(a); }; }())
+					: getMatchingFunction(type, '=', isWildcard);
 				const errorResult = this.typedCache.checkErrorsForNotEqual(range, sumRange, this.sumRangeCache, type, equalFn, searchValue);
 				if (errorResult) {
 					return errorResult;
@@ -13306,7 +13351,13 @@ function parseStringToCElement (val, cultureInfo) {
 				_sum = total.sum - matchResult.sum;
 				_count = total.count - matchResult.count;
 			} else {
-				const matchingFunction = getMatchingFunction(type, matchingInfo.op, isWildcard);
+				// For wildcard = (e.g. "Asd1**"), pre-compile the pattern once per formula call.
+				// This avoids re-parsing the mask and calling toLowerCase on every of N cell comparisons.
+				// IMPORTANT: only pre-compile for '=' / null — inequality operators (<,>,<=,>=) treat
+				// * and ? as literal characters (Excel behavior), so they must use stringCompare, not regex.
+				const matchingFunction = (type === cElementType.string && isWildcard && (matchingInfo.op === '=' || matchingInfo.op === null))
+					? (function() { var re = _buildWildcardRegex(searchValue); return function(a) { return re.test(a); }; }())
+					: getMatchingFunction(type, matchingInfo.op, isWildcard);
 				const calculatingResult = this.typedCache.calculate(range, sumRange, this.sumRangeCache, type, matchingFunction, searchValue);
 				if (calculatingResult.error !== null) {
 					return calculatingResult.error;
@@ -13420,5 +13471,6 @@ function parseStringToCElement (val, cultureInfo) {
 	window['AscCommonExcel'].g_oAverageIfCache = g_oAverageIfCache;
 	window['AscCommonExcel'].CountIfTypedCache = CountIfTypedCache;
 	window['AscCommonExcel'].parseStringToCElement = parseStringToCElement;
+	window['AscCommonExcel'].buildWildcardRegex = _buildWildcardRegex;
 
 })(window);
