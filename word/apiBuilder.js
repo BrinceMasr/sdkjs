@@ -8742,6 +8742,22 @@
 
 		return true;
 	};
+	/**
+	 * Returns the highlight color of the forms in the document.
+	 * @memberof ApiDocument
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @since 9.4.0
+	 * @returns {ApiColor | null} Returns the highlight color, or <em>null</em> if the highlight is disabled.
+	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/GetFormsHighlight.js
+	 */
+	ApiDocument.prototype.GetFormsHighlight = function()
+	{
+		const oColor = this.Document.GetSpecialFormsHighlight();
+		if (!oColor || oColor.IsAuto())
+			return null;
+
+		return Api.RGB(oColor.r, oColor.g, oColor.b);
+	};	
 
 	/**
 	 * Returns all comments from the current document.
@@ -23730,8 +23746,48 @@
 		let type = this.Sdt.GetAppearance();
 		if (Asc.c_oAscSdtAppearance.Hidden === type)
 			return "hidden";
-		
+
 		return "boundingBox";
+	};
+
+	/**
+	 * Sets the tag color of the content control.
+	 * @memberof ApiInlineLvlSdt
+	 * @typeofeditors ["CDE"]
+	 * @since 9.4.0
+	 * @param {ApiColor | null} color - The tag color. Pass <em>null</em> to remove the color.
+	 * @returns {boolean}
+	 * @see office-js-api/Examples/{Editor}/ApiInlineLvlSdt/Methods/SetColor.js
+	 */
+	ApiInlineLvlSdt.prototype.SetColor = function(color)
+	{
+		if (color instanceof ApiColor)
+		{
+			const rgb = color.GetRGB();
+			this.Sdt.SetColor(new AscWord.CDocumentColor(rgb["r"], rgb["g"], rgb["b"]));
+		}
+		else
+		{
+			this.Sdt.SetColor(null);
+		}
+		return true;
+	};
+
+	/**
+	 * Returns the tag color of the content control.
+	 * @memberof ApiInlineLvlSdt
+	 * @typeofeditors ["CDE"]
+	 * @since 9.4.0
+	 * @returns {ApiColor | null} Returns the tag color, or <em>null</em> if no color is set.
+	 * @see office-js-api/Examples/{Editor}/ApiInlineLvlSdt/Methods/GetColor.js
+	 */
+	ApiInlineLvlSdt.prototype.GetColor = function()
+	{
+		const oColor = this.Sdt.GetColor();
+		if (!oColor)
+			return null;
+
+		return Api.RGB(oColor.r, oColor.g, oColor.b);
 	};
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -25135,7 +25191,28 @@
 	 * @see office-js-api/Examples/{Editor}/ApiBlockLvlSdt/Methods/GetAppearance.js
 	 */
 	ApiBlockLvlSdt.prototype.GetAppearance = ApiInlineLvlSdt.prototype.GetAppearance;
-	
+
+	/**
+	 * Sets the tag color of the content control.
+	 * @memberof ApiBlockLvlSdt
+	 * @typeofeditors ["CDE"]
+	 * @since 9.4.0
+	 * @param {ApiColor | null} color - The tag color. Pass <em>null</em> to remove the color.
+	 * @returns {boolean}
+	 * @see office-js-api/Examples/{Editor}/ApiBlockLvlSdt/Methods/SetColor.js
+	 */
+	ApiBlockLvlSdt.prototype.SetColor = ApiInlineLvlSdt.prototype.SetColor;
+
+	/**
+	 * Returns the tag color of the content control.
+	 * @memberof ApiBlockLvlSdt
+	 * @typeofeditors ["CDE"]
+	 * @since 9.4.0
+	 * @returns {ApiColor | null} Returns the tag color, or <em>null</em> if no color is set.
+	 * @see office-js-api/Examples/{Editor}/ApiBlockLvlSdt/Methods/GetColor.js
+	 */
+	ApiBlockLvlSdt.prototype.GetColor = ApiInlineLvlSdt.prototype.GetColor;
+
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiFormBase
@@ -29789,6 +29866,7 @@
 	ApiDocument.prototype["GetAllForms"]                   = ApiDocument.prototype.GetAllForms;
 	ApiDocument.prototype["ClearAllFields"]                = ApiDocument.prototype.ClearAllFields;
 	ApiDocument.prototype["SetFormsHighlight"]             = ApiDocument.prototype.SetFormsHighlight;
+	ApiDocument.prototype["GetFormsHighlight"]             = ApiDocument.prototype.GetFormsHighlight;
 	ApiDocument.prototype["GetCurrentWord"]                = ApiDocument.prototype.GetCurrentWord;
 	ApiDocument.prototype["ReplaceCurrentWord"]            = ApiDocument.prototype.ReplaceCurrentWord;
 	ApiDocument.prototype["SelectCurrentWord"]             = ApiDocument.prototype.SelectCurrentWord;
@@ -30522,6 +30600,8 @@
 	ApiInlineLvlSdt.prototype["SetPictureSize"]         = ApiInlineLvlSdt.prototype.SetPictureSize;
 	ApiInlineLvlSdt.prototype["SetAppearance"]          = ApiInlineLvlSdt.prototype.SetAppearance;
 	ApiInlineLvlSdt.prototype["GetAppearance"]          = ApiInlineLvlSdt.prototype.GetAppearance;
+	ApiInlineLvlSdt.prototype["SetColor"]               = ApiInlineLvlSdt.prototype.SetColor;
+	ApiInlineLvlSdt.prototype["GetColor"]               = ApiInlineLvlSdt.prototype.GetColor;
 
 	ApiContentControlList.prototype["GetClassType"]		= ApiContentControlList.prototype.GetClassType;
 	ApiContentControlList.prototype["GetAllItems"]		= ApiContentControlList.prototype.GetAllItems;
@@ -30595,6 +30675,8 @@
 	ApiBlockLvlSdt.prototype["GetDataForXmlMapping"]    = ApiBlockLvlSdt.prototype.GetDataForXmlMapping;
 	ApiBlockLvlSdt.prototype["SetAppearance"]           = ApiBlockLvlSdt.prototype.SetAppearance;
 	ApiBlockLvlSdt.prototype["GetAppearance"]           = ApiBlockLvlSdt.prototype.GetAppearance;
+	ApiBlockLvlSdt.prototype["SetColor"]                = ApiBlockLvlSdt.prototype.SetColor;
+	ApiBlockLvlSdt.prototype["GetColor"]                = ApiBlockLvlSdt.prototype.GetColor;
 	
 	
 	ApiFormBase.prototype["GetClassType"]       = ApiFormBase.prototype.GetClassType;

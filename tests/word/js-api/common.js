@@ -40,6 +40,7 @@ $(function()
 	AscTest.JsApi.CreateRun = AscBuilder.Word.Api.CreateRun.bind(AscTest.Editor);
 	AscTest.JsApi.CreateParagraph = AscBuilder.Word.Api.CreateParagraph.bind(AscTest.Editor);
 	AscTest.JsApi.CreateInlineLvlSdt = AscBuilder.Word.Api.CreateInlineLvlSdt.bind(AscTest.Editor);
+	AscTest.JsApi.CreateBlockLvlSdt  = AscBuilder.Word.Api.CreateBlockLvlSdt.bind(AscTest.Editor);
 	AscTest.JsApi.CreateTable = AscBuilder.Word.Api.CreateTable.bind(AscTest.Editor);
 	AscTest.JsApi.CreateShape = AscBuilder.Word.Api.CreateShape.bind(AscTest.Editor);
 	AscTest.JsApi.CreateSolidFill = AscBuilder.Word.Api.CreateSolidFill.bind(AscTest.Editor);

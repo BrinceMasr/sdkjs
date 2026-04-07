@@ -34,6 +34,23 @@ $(function ()
 {
 	QUnit.module('Test the ApiDocument methods');
 
+	QUnit.test('SetFormsHighlight, GetFormsHighlight', function (assert)
+	{
+		const doc = AscTest.JsApi.GetDocument();
+
+		assert.equalRgb(doc.GetFormsHighlight().GetRGB(), { r: 201, g: 200, b: 255 }, 'Check forms highlight returns default color');
+
+		doc.SetFormsHighlight(255, 122, 100);
+		assert.equalRgb(doc.GetFormsHighlight().GetRGB(), { r: 255, g: 122, b: 100 }, 'Check forms highlight after setting with RGB components');
+
+		const hexColor = AscTest.JsApi.HexColor('a1b2c3');
+		doc.SetFormsHighlight(hexColor);
+		assert.equalRgb(doc.GetFormsHighlight().GetRGB(), { r: 161, g: 178, b: 195 }, 'Check forms highlight after setting with ApiColor');
+
+		doc.SetFormsHighlight(0, 0, 0, true);
+		assert.strictEqual(doc.GetFormsHighlight(), null, 'Check forms highlight is null after disabling it');
+	});
+
 	QUnit.test('SetControlsHighlight, GetControlsHighlight', function (assert)
 	{
 		const doc = AscTest.JsApi.GetDocument();
