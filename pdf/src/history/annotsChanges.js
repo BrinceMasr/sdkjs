@@ -578,7 +578,7 @@ CChangesPDFAnnotRC.prototype.WriteToBinary = function(Writer)
 				nStyle |= (1 << 6);
 				Writer.WriteString2(aRC[i]["actual"]);
 			}
-			// запись флагов настроек шрифта
+			// write font style flags
 			let nEndPos = Writer.GetCurPosition();
 			Writer.Seek(nFontStylePos);
 			Writer.WriteLong(nStyle);
@@ -621,7 +621,7 @@ CChangesPDFAnnotRC.prototype.ReadFromBinary = function(Reader) {
             rcItem["alignment"] = Reader.GetByte();
             let nStyle = Reader.GetLong();
 
-            // обработка флагов стиля шрифта
+            // process font style flags
             rcItem["bold"] = !!(nStyle & (1 << 0));
             rcItem["italic"] = !!(nStyle & (1 << 1));
             rcItem["strikethrough"] = !!(nStyle & (1 << 3));
@@ -632,7 +632,7 @@ CChangesPDFAnnotRC.prototype.ReadFromBinary = function(Reader) {
             rcItem["size"] = Reader.GetDouble();
 
             rcItem["color"] = [];
-            for (let j = 0; j < 3; j++) {  // Предполагается, что цвет состоит из 3 компонентов (например, RGB)
+            for (let j = 0; j < 3; j++) {  // Assuming color consists of 3 components (e.g., RGB)
                 rcItem["color"].push(Reader.GetDouble());
             }
 
@@ -927,7 +927,7 @@ CChangesPDFAnnotActions.prototype.ReadFromBinary = function(Reader)
 	this.FromLoad = true;
 
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// long : New
@@ -1473,7 +1473,7 @@ CChangesPDFAnnotMeta.prototype.private_SetValue = function(Value)
 CChangesPDFAnnotMeta.prototype.WriteToBinary = function(Writer)
 {
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// string : New
@@ -1503,7 +1503,7 @@ CChangesPDFAnnotMeta.prototype.WriteToBinary = function(Writer)
 CChangesPDFAnnotMeta.prototype.ReadFromBinary = function(Reader)
 {
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// string : New
@@ -1691,7 +1691,7 @@ CChangesPDFLineAnnotRC.prototype.WriteToBinary = function(Writer)
 				nStyle |= (1 << 6);
 				Writer.WriteString2(aRC[i]["actual"]);
 			}
-			// запись флагов настроек шрифта
+			// write font style flags
 			let nEndPos = Writer.GetCurPosition();
 			Writer.Seek(nFontStylePos);
 			Writer.WriteLong(nStyle);
@@ -1734,7 +1734,7 @@ CChangesPDFLineAnnotRC.prototype.ReadFromBinary = function(Reader) {
             rcItem["alignment"] = Reader.GetByte();
             let nStyle = Reader.GetLong();
 
-            // обработка флагов стиля шрифта
+            // process font style flags
             rcItem["bold"] = !!(nStyle & (1 << 0));
             rcItem["italic"] = !!(nStyle & (1 << 1));
             rcItem["strikethrough"] = !!(nStyle & (1 << 3));
@@ -1745,7 +1745,7 @@ CChangesPDFLineAnnotRC.prototype.ReadFromBinary = function(Reader) {
             rcItem["size"] = Reader.GetDouble();
 
             rcItem["color"] = [];
-            for (let j = 0; j < 3; j++) {  // Предполагается, что цвет состоит из 3 компонентов (например, RGB)
+            for (let j = 0; j < 3; j++) {  // Assuming color consists of 3 components (e.g., RGB)
                 rcItem["color"].push(Reader.GetDouble());
             }
 

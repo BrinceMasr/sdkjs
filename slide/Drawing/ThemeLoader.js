@@ -106,17 +106,17 @@ function CThemeLoader()
         {
             theme_info = this.Themes.DocumentThemes[-indexTheme - 1];
             theme_load_info = this.themes_info_document[-indexTheme - 1];
-            // при загрузке документа все данные загрузились
+            // when loading a document, all data has been loaded
             this.Api.EndLoadTheme(theme_load_info);
             return;
         }
 
-        // применяется тема из стандартных.
+        // applying a theme from the standard ones.
         if (null != theme_load_info)
         {
             if (indexTheme >= 0)
             {
-                // мега схема. нужно переоткрыть бинарник, чтобы все открылось с историей
+                // mega scheme. need to reopen the binary so everything opens with history
                 this.IsReloadBinaryThemeEditorNow = true;
                 this._callback_theme_load();
                 return;
@@ -129,7 +129,7 @@ function CThemeLoader()
 
         this.Api.sync_StartAction(Asc.c_oAscAsyncActionType.BlockInteraction, Asc.c_oAscAsyncAction.LoadTheme);
 
-        // значит эта тема еще не загружалась
+        // means this theme has not been loaded yet
         var theme_src = this.ThemesUrl + "theme" + (this.CurrentLoadThemeIndex + 1) + "/theme.bin";
         this.LoadThemeJSAsync(theme_src);
 
@@ -233,22 +233,22 @@ function CThemeLoader()
                 return;
             }
 
-            // теперь объект this.themes_info_editor[this.CurrentLoadThemeIndex]
+            // now the object this.themes_info_editor[this.CurrentLoadThemeIndex]
             oThis.Api.FontLoader.ThemeLoader = oThis;
             oThis.Api.FontLoader.LoadDocumentFonts2(oThis.themes_info_editor[oThis.CurrentLoadThemeIndex].FontMap);
             return;
         }
-        // ошибка!!!
+        // error!!!
     };
 
     this.asyncFontsStartLoaded = function()
     {
-        // началась загрузка шрифтов
+        // font loading started
     };
 
     this.asyncFontsEndLoaded = function()
     {
-        // загрузка шрифтов
+        // font loading completed
         this.Api.FontLoader.ThemeLoader = null;
         this.Api.ImageLoader.ThemeLoader = this;
 
@@ -257,7 +257,7 @@ function CThemeLoader()
 
     this.asyncImagesStartLoaded = function(aImages)
     {
-        // началась загрузка картинок
+        // image loading started
     };
 
     this.asyncImagesEndLoaded = function()

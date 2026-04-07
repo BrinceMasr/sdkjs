@@ -40,7 +40,7 @@
 	// Import
 	var AscBrowser               = AscCommon.AscBrowser;
 
-	// константы для мыши
+	// mouse constants
 	var g_mouse_event_type_down  = 0;
 	var g_mouse_event_type_move  = 1;
 	var g_mouse_event_type_up    = 2;
@@ -109,26 +109,26 @@
 
 	function CMouseEventHandler()
 	{
-		this.X = 0;                            // позиция курсора X
-		this.Y = 0;                            // позиция курсора Y
+		this.X = 0;                            // cursor position X
+		this.Y = 0;                            // cursor position Y
 
-		this.Button = g_mouse_button_left;          // кнопка мыши
+		this.Button = g_mouse_button_left;          // mouse button
 		this.ButtonOverride = -1;
-		this.Type   = g_mouse_event_type_move;      // тип евента
+		this.Type   = g_mouse_event_type_move;      // event type
 
-		this.AltKey   = false;                        // нажата ли кнопка alt
-		this.CtrlKey  = false;                        // нажата ли кнопка ctrl
-		this.ShiftKey = false;                        // нажата ли кнопка shift
+		this.AltKey   = false;                        // is alt key pressed
+		this.CtrlKey  = false;                        // is ctrl key pressed
+		this.ShiftKey = false;                        // is shift key pressed
 
-		this.Sender = null;                         // от какого html элемента пришел евент
+		this.Sender = null;                         // which html element the event came from
 
-		this.LastClickTime = -1;                       // время последнего mousedown
-		this.ClickCount    = 0;                        // количество кликов
+		this.LastClickTime = -1;                       // time of the last mousedown
+		this.ClickCount    = 0;                        // number of clicks
 
 		this.WheelDelta = 0;
 
-		// координаты мышки при предыдущем mousedown (для mousemove)
-		this.IsPressed = false;                        // была ли зажата кнопка
+		// mouse coordinates at previous mousedown (for mousemove)
+		this.IsPressed = false;                        // was the button pressed
 		this.LastX     = 0;
 		this.LastY     = 0;
 
@@ -211,13 +211,13 @@
 
 	function CKeyboardEvent()
 	{
-		this.AltKey   = false;                        // нажата ли кнопка alt
-		this.CtrlKey  = false;                        // нажата ли кнопка ctrl
-		this.ShiftKey = false;                        // нажата ли кнопка shift
+		this.AltKey   = false;                        // is alt key pressed
+		this.CtrlKey  = false;                        // is ctrl key pressed
+		this.ShiftKey = false;                        // is shift key pressed
 		this.MacCmdKey = false;
 		this.AltGr    = false;
 
-		this.Sender = null;                         // от какого html элемента пришел евент
+		this.Sender = null;                         // which html element the event came from
 
 		this.CharCode = 0;
 		this.KeyCode  = 0;
@@ -297,7 +297,7 @@
 
 	function check_MouseMoveEvent(e)
 	{
-		// если мышь залочена, то евент придет от окна.
+		// if the mouse is locked, the event will come from the window.
 		if (e.IsLocked && !e.IsLockedEvent)
 			return;
 
@@ -609,10 +609,10 @@
 			{
 				if (global_mouseEvent.Sender.id != oThis.Control.HtmlElement.id)
 				{
-					// это не залоченная кнопка
+					// this is not the locked button
 					return;
 				}
-				// залоченная кнопка
+				// locked button
 				oThis.Control.HtmlElement.style.backgroundPosition = oThis.state_down;
 				return;
 			}
@@ -626,10 +626,10 @@
 			{
 				if (global_mouseEvent.Sender.id != oThis.Control.HtmlElement.id)
 				{
-					// это не залоченная кнопка
+					// this is not the locked button
 					return;
 				}
-				// залоченная кнопка
+				// locked button
 				oThis.Control.HtmlElement.style.backgroundPosition = oThis.state_over;
 				return;
 			}
@@ -647,10 +647,10 @@
 			{
 				if (global_mouseEvent.Sender.id != oThis.Control.HtmlElement.id)
 				{
-					// это не залоченная кнопка
+					// this is not the locked button
 					return;
 				}
-				// залоченная кнопка
+				// locked button
 				oThis.Control.HtmlElement.style.backgroundPosition = oThis.state_down;
 				return;
 			}
@@ -685,7 +685,7 @@
 			global_mouseEvent.buttonObject = null;
 		}
 
-		// теперь touch
+		// now touch
 		this.Control.HtmlElement.ontouchstart = function(e)
 		{
 			oThis.Control.HtmlElement.onmousedown(e.touches[0]);

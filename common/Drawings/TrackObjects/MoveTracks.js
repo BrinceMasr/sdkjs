@@ -729,7 +729,7 @@ function MoveAnnotationTrack(originalObject)
 
     this.draw = function(oDrawer)
     {
-        // рисуем на отдельном канвасе
+        // draw on a separate canvas
         let nPage = this.pageIndex;
         let oPageInfo = this.viewer.doc.GetPageInfo(this.pageIndex);
         this.objectToDraw.SetParentPage(oPageInfo);

@@ -35,7 +35,7 @@
 (function(window)
 {
 	/**
-	 * Класс для шейпинга простой текстовой строки, идущей с одном шрифте
+	 * Class for shaping simple text string using single font
 	 * @constructor
 	 */
 	function StringShaper()

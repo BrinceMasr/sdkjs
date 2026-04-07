@@ -395,6 +395,7 @@ function (window, undefined) {
 		}
 		return 1;
 	};
+	cAGGREGATE.prototype.enabledToSingle = {"allFrom": 2};
 	cAGGREGATE.prototype.Calculate = function (arg) {
 		let oArguments = this._prepareArguments([arg[0], arg[1]], arguments[1]);
 		let argClone = oArguments.args;
@@ -535,11 +536,11 @@ function (window, undefined) {
 			f.excludeNestedStAg = ignoreNestedStAg;
 
 			let newArgs = [];
-			//14 - 19 особенные функции, требующие второго аргумента
+			//14 - 19 are special functions requiring second argument
 			let doNotCheckRef = nFunc >= 14 && nFunc <= 19;
 			for (let i = 2; i < arg.length; i++) {
-				//аргумент может быть только ссылка на ячейку или диапазон ячеек
-				//в противном случае - ошибка
+				//argument can only be cell reference or cell range
+				//otherwise - error
 				if (doNotCheckRef || this.checkRef(arg[i])) {
 					newArgs.push(arg[i]);
 				} else {
@@ -632,7 +633,7 @@ function (window, undefined) {
 			return arg0;
 		}
 
-		//TODO проверить возвращение ошибок!
+		//TODO check error returns!
 		var res = to_arabic(arg0.getValue());
 		return isNaN(res) ? new cError(cErrorType.wrong_value_type) : new cNumber(res);
 	};
@@ -1405,8 +1406,8 @@ function (window, undefined) {
 	cCOTH.prototype.Calculate = function (arg) {
 		var arg0 = arg[0];
 
-		//TODO в документации к COTH написано максимальное значение - Math.pow(2, 27), но MS EXCEL в данном случае не выдает ошибку
-		//проверку на максиимальное значение убрал
+		//TODO COTH documentation says maximum value is Math.pow(2, 27), but MS EXCEL does not throw an error in this case
+		//removed the maximum value check
 		if (cElementType.cellsRange === arg0.type || cElementType.cellsRange3D === arg0.type) {
 			arg0 = arg0.cross(arguments[1]);
 		}
@@ -1509,8 +1510,8 @@ function (window, undefined) {
 	cCSCH.prototype.Calculate = function (arg) {
 		var arg0 = arg[0];
 
-		//TODO в документации к COTH написано максимальное значение - Math.pow(2, 27), но MS EXCEL в данном случае не выдает ошибку
-		//проверку на максиимальное значение убрал
+		//TODO COTH documentation says maximum value is Math.pow(2, 27), but MS EXCEL does not throw an error in this case
+		//removed the maximum value check
 		if (cElementType.cellsRange === arg0.type || cElementType.cellsRange3D === arg0.type) {
 			arg0 = arg0.cross(arguments[1]);
 		}
@@ -1664,7 +1665,7 @@ function (window, undefined) {
 	 * @constructor
 	 * @extends {cCEILING}
 	 */
-	//TODO нигде нет отписания к этой функции! работает так же как и cCEILING на всех примерах.
+	//TODO there is no description for this function anywhere! It works the same as cCEILING in all examples.
 	function cECMA_CEILING() {
 	}
 
@@ -1765,6 +1766,7 @@ function (window, undefined) {
 					this.array[r][c] = new cError(cErrorType.wrong_value_type);
 				}
 			})
+			return arg0;
 		}
 		if (!(arg0 instanceof cNumber)) {
 			return new cError(cErrorType.not_numeric);
@@ -1834,6 +1836,7 @@ function (window, undefined) {
 	cFACTDOUBLE.prototype.argumentsMax = 1;
 	cFACTDOUBLE.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
 	cFACTDOUBLE.prototype.argumentsType = [argType.any];
+	cFACTDOUBLE.prototype.enabledToSingle = {"0": true};
 	cFACTDOUBLE.prototype.Calculate = function (arg) {
 		function factDouble(n) {
 			n = Math.floor(n);
@@ -2095,6 +2098,7 @@ function (window, undefined) {
 	cGCD.prototype.argumentsMin = 1;
 	cGCD.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.array;
 	cGCD.prototype.argumentsType = [[argType.any]];
+	cGCD.prototype.enabledToSingle = {"*": true};
 	/**
 	 * GCD - Returns the greatest common divisor of two or more integers
 	 * The greatest common divisor is the largest integer that divides all numbers without a remainder
@@ -2223,18 +2227,17 @@ function (window, undefined) {
 					this.array[r][c] = new cError(cErrorType.wrong_value_type);
 				}
 			})
+			return arg0;
 		} else {
 			return new cNumber(Math.floor(arg0.getValue()))
 		}
-
-		return new cNumber(Math.floor(arg0.getValue()));
 	};
 
 	/**
 	 * @constructor
 	 * @extends {AscCommonExcel.cBaseFunction}
 	 */
-	//TODO точная копия функции CEILING.PRECISE. зачем excel две одинаковые функции?
+	//TODO exact copy of CEILING.PRECISE function. why does excel have two identical functions?
 	function cISO_CEILING() {
 	}
 
@@ -2286,6 +2289,7 @@ function (window, undefined) {
 	cLCM.prototype.argumentsMin = 1;
 	cLCM.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.array;
 	cLCM.prototype.argumentsType = [[argType.any]];
+	cLCM.prototype.enabledToSingle = {"*": true};
 	/**
 	 * The least common multiple is the smallest positive integer that is a multiple of all integer arguments number1, number2, and so on. 
 	 * Use LCM to add fractions with different denominators.
@@ -2474,6 +2478,7 @@ function (window, undefined) {
 					this.array[r][c] = new cError(cErrorType.wrong_value_type);
 				}
 			})
+			return arg0;
 		} else {
 			if (arg0.getValue() <= 0) {
 				return new cError(cErrorType.not_numeric);
@@ -2626,6 +2631,7 @@ function (window, undefined) {
 					this.array[r][c] = new cError(cErrorType.wrong_value_type);
 				}
 			})
+			return arg0;
 		} else {
 			if (arg0.getValue() <= 0) {
 				return new cError(cErrorType.not_numeric);
@@ -2651,6 +2657,7 @@ function (window, undefined) {
 	cMDETERM.prototype.numFormat = AscCommonExcel.cNumFormatNone;
 	cMDETERM.prototype.arrayIndexes = {0: 1};
 	cMDETERM.prototype.argumentsType = [argType.array];
+	cMDETERM.prototype.enabledToSingle = {"0": true};
 	cMDETERM.prototype.Calculate = function (arg) {
 
 		function determ(A) {
@@ -2741,6 +2748,7 @@ function (window, undefined) {
 	cMINVERSE.prototype.numFormat = AscCommonExcel.cNumFormatNone;
 	cMINVERSE.prototype.arrayIndexes = {0: 1};
 	cMINVERSE.prototype.argumentsType = [argType.array];
+	cMINVERSE.prototype.enabledToSingle = {"0": true};
 	cMINVERSE.prototype.Calculate = function (arg) {
 		function Determinant(A) {
 			let N = A.length, B = [], denom = 1, exchanges = 0, i, j;
@@ -2788,7 +2796,7 @@ function (window, undefined) {
 			}
 		}
 
-		function MatrixCofactor(i, j, __A) {        //Алгебраическое дополнение матрицы
+		function MatrixCofactor(i, j, __A) {        //Algebraic cofactor of matrix
 			let N = __A.length, sign = ((i + j) % 2 == 0) ? 1 : -1;
 
 			for (let m = 0; m < N; m++) {
@@ -2805,7 +2813,7 @@ function (window, undefined) {
 			return sign * Determinant(__A);
 		}
 
-		function AdjugateMatrix(_A) {             //Союзная (присоединённая) матрица к A. (матрица adj(A), составленная из алгебраических дополнений A).
+		function AdjugateMatrix(_A) {             //Adjugate (adjoint) matrix of A. (matrix adj(A), composed of algebraic cofactors of A).
 			let N = _A.length, B = [], adjA = [];
 
 			for (let i = 0; i < N; i++) {
@@ -2869,7 +2877,7 @@ function (window, undefined) {
 				return new cNumber(1 / arg0.getFirstElement());
 			}
 			arg0 = arg0.getMatrix();
-			//TODO при мерже релиза, перейти на функцию getArrayCopy/ добавить параметр getMatrix для генерации копии
+			//TODO when merging release, switch to getArrayCopy function / add getMatrix parameter for copy generation
 			arg0 = _getArrayCopy(arg0);
 		} else if (cElementType.number === arg0.type) {
 			return new cNumber(1 / arg0);
@@ -2906,6 +2914,7 @@ function (window, undefined) {
 	cMMULT.prototype.numFormat = AscCommonExcel.cNumFormatNone;
 	cMMULT.prototype.arrayIndexes = {0: 1, 1: 1};
 	cMMULT.prototype.argumentsType = [argType.array, argType.array];
+	cMMULT.prototype.enabledToSingle = {"0": true, "1": true};
 	cMMULT.prototype.Calculate = function (arg) {
 
 		function mult(A, B) {
@@ -3080,6 +3089,7 @@ function (window, undefined) {
 	cMROUND.prototype.argumentsMax = 2;
 	cMROUND.prototype.argumentsType = [argType.any, argType.any];
 	cMROUND.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
+	cMROUND.prototype.enabledToSingle = {"0": true, "1": true};
 	cMROUND.prototype.Calculate = function (arg) {
 
 		var multiple;
@@ -3183,6 +3193,7 @@ function (window, undefined) {
 	cMULTINOMIAL.prototype.argumentsMin = 1;
 	cMULTINOMIAL.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.array;
 	cMULTINOMIAL.prototype.argumentsType = [[argType.any]];
+	cMULTINOMIAL.prototype.enabledToSingle = {"*": true};
 	cMULTINOMIAL.prototype.Calculate = function (arg) {
 		var arg0 = new cNumber(0), fact = 1;
 
@@ -3567,6 +3578,7 @@ function (window, undefined) {
 	cPRODUCT.prototype.argumentsMin = 1;
 	cPRODUCT.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.array;
 	cPRODUCT.prototype.argumentsType = [[argType.number]];
+	cPRODUCT.prototype.enabledToSingle = {"*": true};
 	cPRODUCT.prototype.Calculate = function (arg) {
 
 		let element, arg0 = new cNumber(1), isFoundValue;
@@ -3653,6 +3665,7 @@ function (window, undefined) {
 	cQUOTIENT.prototype.argumentsMax = 2;
 	cQUOTIENT.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
 	cQUOTIENT.prototype.argumentsType = [argType.any, argType.any];
+	cQUOTIENT.prototype.enabledToSingle = {"0": true, "1": true};
 	cQUOTIENT.prototype.Calculate = function (arg) {
 
 		function quotient(a, b) {
@@ -3808,6 +3821,9 @@ function (window, undefined) {
 				return value.getFirstElement ? value.getFirstElement() : value;
 			}	
 
+		//if any of the arguments is an array - handle it here
+		//if handled above and iterating over the array, this function will always return an array
+		//but we only need the value at index 0,0 of the returned array
 			const dimensions = value.getDimensions();
 			if (dimensions.row === 1) {
 				return _getValueInRange(value, 0, col);
@@ -4051,6 +4067,7 @@ function (window, undefined) {
 	cRANDBETWEEN.prototype.ca = true;
 	cRANDBETWEEN.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
 	cRANDBETWEEN.prototype.argumentsType = [argType.any, argType.any];
+	cRANDBETWEEN.prototype.enabledToSingle = {"0": true, "1": true};
 	cRANDBETWEEN.prototype.Calculate = function (arg) {
 
 		function randBetween(a, b) {
@@ -4743,8 +4760,8 @@ function (window, undefined) {
 	cSECH.prototype.Calculate = function (arg) {
 		var arg0 = arg[0];
 
-		//TODO в документации к COTH написано максимальное значение - Math.pow(2, 27), но MS EXCEL в данном случае не выдает ошибку
-		//проверку на максиимальное значение убрал
+		//TODO COTH documentation says maximum value is Math.pow(2, 27), but MS EXCEL does not throw an error in this case
+		//removed the maximum value check
 		if (cElementType.cellsRange === arg0.type || cElementType.cellsRange3D === arg0.type) {
 			arg0 = arg0.cross(arguments[1]);
 		}
@@ -4783,6 +4800,7 @@ function (window, undefined) {
 	cSERIESSUM.prototype.arrayIndexes = {3: 1};
 	cSERIESSUM.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
 	cSERIESSUM.prototype.argumentsType = [argType.any, argType.any, argType.any, argType.any];
+	cSERIESSUM.prototype.enabledToSingle = {"*": true};
 	cSERIESSUM.prototype.Calculate = function (arg) {
 
 		function Seriessum_SingleVal(x, n, m, a) {
@@ -5128,6 +5146,7 @@ function (window, undefined) {
 	cSQRTPI.prototype.argumentsMax = 1;
 	cSQRTPI.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
 	cSQRTPI.prototype.argumentsType = [argType.any];
+	cSQRTPI.prototype.enabledToSingle = {"0": true};
 	cSQRTPI.prototype.Calculate = function (arg) {
 		var arg0 = arg[0];
 		if (arg0 instanceof cArea || arg0 instanceof cArea3D) {
@@ -5172,6 +5191,7 @@ function (window, undefined) {
 		}
 		return 1;
 	};
+	cSUBTOTAL.prototype.enabledToSingle = {"allFrom": 1};
 	cSUBTOTAL.prototype.Calculate = function (arg) {
 		let f, exclude = false, arg0 = arg[0];
 
@@ -5328,6 +5348,7 @@ function (window, undefined) {
 	cSUM.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.array;
 	cSUM.prototype.inheritFormat = true;
 	cSUM.prototype.argumentsType = [[argType.number]];
+	cSUM.prototype.enabledToSingle = {"*": true};
 	cSUM.prototype.Calculate = function (arg) {
 		var element, _arg, arg0 = new cNumber(0);
 		for (var i = 0; i < arg.length; i++) {
@@ -5389,6 +5410,7 @@ function (window, undefined) {
 	cSUMIF.prototype.arrayIndexes = {0: 1, 2: 1};
 	cSUMIF.prototype.exactTypes = {0: 1};
 	cSUMIF.prototype.argumentsType = [argType.reference, argType.any, argType.reference];
+	cSUMIF.prototype.enabledToSingle = {"0": true, "2": true};
 	cSUMIF.prototype.Calculate = function (arg) {
 		return AscCommonExcel.g_oSumIfCache.calculate(arg, arguments[1]);
 	};
@@ -5458,7 +5480,7 @@ function (window, undefined) {
 	function cSUMIFS() {
 	}
 
-	//TODO есть расхождение с MS - смотри в файле + arrayIndexes - нужно формировать при условии что все нечетные аргумента - массивы(начиная с 3 аргумента)
+	//TODO there is a discrepancy with MS - see file + arrayIndexes - need to form when all odd arguments are arrays (starting from 3rd argument)
 	//***array-formula***
 	cSUMIFS.prototype = Object.create(cBaseFunction.prototype);
 	cSUMIFS.prototype.constructor = cSUMIFS;
@@ -5473,6 +5495,7 @@ function (window, undefined) {
 	};
 	cSUMIFS.prototype.exactTypes = {0: 1, 1: 1};	// in this function every odd argument is should be checked for type reference
 	cSUMIFS.prototype.argumentsType = [argType.reference, [argType.reference, argType.any]];
+	cSUMIFS.prototype.enabledToSingle = {"arg0orOdd": true};
 	cSUMIFS.prototype.Calculate = function (arg) {
 		let arg0 = arg[0];
 		if (cElementType.cell !== arg0.type && cElementType.cell3D !== arg0.type && cElementType.cellsRange !== arg0.type) {
@@ -5575,7 +5598,7 @@ function (window, undefined) {
 				return new cError(cErrorType.wrong_value_type);
 			}
 
-			//в кэш кладём истинное значение для поиска, а не весь диапазон
+			//put the search value in the cache, not the entire range
 			if (cElementType.cellsRange === arg2.type || cElementType.cellsRange3D === arg2.type) {
 				arg2 = arg2.cross(arguments[1]);
 			} else if (cElementType.array === arg2.type) {
@@ -5664,6 +5687,7 @@ function (window, undefined) {
 	cSUMPRODUCT.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.array;
 	cSUMPRODUCT.prototype.argumentsType = [[argType.array]];
 	cSUMPRODUCT.prototype.numFormat = AscCommonExcel.cNumFormatNone;
+	cSUMPRODUCT.prototype.enabledToSingle = {"*": true};
 	cSUMPRODUCT.prototype.Calculate = function (arg) {
 		let arg0 = new cNumber(0), resArr = [], col = 0, row = 0, res = 1, _res = [], i;
 
@@ -5749,6 +5773,7 @@ function (window, undefined) {
 	cSUMSQ.prototype.argumentsMin = 1;
 	cSUMSQ.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.array;
 	cSUMSQ.prototype.argumentsType = [[argType.number]];
+	cSUMSQ.prototype.enabledToSingle = {"*": true};
 	cSUMSQ.prototype.Calculate = function (arg) {
 		var arg0 = new cNumber(0), _arg;
 
@@ -5805,6 +5830,7 @@ function (window, undefined) {
 	cSUMX2MY2.prototype.argumentsMax = 2;
 	cSUMX2MY2.prototype.arrayIndexes = {0: 1, 1: 1};
 	cSUMX2MY2.prototype.argumentsType = [argType.array, argType.array];
+	cSUMX2MY2.prototype.enabledToSingle = {"0": true, "1": true};
 	cSUMX2MY2.prototype.Calculate = function (arg) {
 		var func = function (a, b) {
 			return a * a - b * b;
@@ -5827,6 +5853,7 @@ function (window, undefined) {
 	cSUMX2PY2.prototype.argumentsMax = 2;
 	cSUMX2PY2.prototype.arrayIndexes = {0: 1, 1: 1};
 	cSUMX2PY2.prototype.argumentsType = [argType.array, argType.array];
+	cSUMX2PY2.prototype.enabledToSingle = {"0": true, "1": true};
 	cSUMX2PY2.prototype.Calculate = function (arg) {
 
 		var func = function (a, b) {
@@ -5850,6 +5877,7 @@ function (window, undefined) {
 	cSUMXMY2.prototype.argumentsMax = 2;
 	cSUMXMY2.prototype.arrayIndexes = {0: 1, 1: 1};
 	cSUMXMY2.prototype.argumentsType = [argType.array, argType.array];
+	cSUMXMY2.prototype.enabledToSingle = {"0": true, "1": true};
 	cSUMXMY2.prototype.Calculate = function (arg) {
 
 		var func = function (a, b) {
@@ -5954,7 +5982,7 @@ function (window, undefined) {
 		// https://0.30000000000000004.com/
 
 		function truncHelper(a, b) {
-			//TODO возможно стоит добавить ограничения для коэффициента b(ms не ограничивает; LO - максимальные значения 20/-20)
+			//TODO maybe should add limits for coefficient b (MS doesn't limit; LO - maximum values 20/-20)
 			if (b > 20) {
 				b = 20;
 			} else if (!Number.isInteger(b)) {

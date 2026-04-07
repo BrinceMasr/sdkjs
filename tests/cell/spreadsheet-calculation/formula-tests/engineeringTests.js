@@ -240,7 +240,7 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-		//формируем массив значений
+		// Create array of values
 		const randomArray = [];
 		let randomStrArray = "{";
 		let maxArg = 4;
@@ -11297,7 +11297,7 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"IMEXP\"", function (assert) {
-		//TODO в excel результат данной формулы - "1.46869393991589+2.28735528717884i"
+		// TODO in Excel the result of this formula is "1.46869393991589+2.28735528717884i"
 		oParser = new parserFormula('IMEXP("1+i")', "A2", ws);
 		assert.ok(oParser.parse(), 'IMEXP("1+i")');
 		assert.strictEqual(oParser.calculate().getValue(), "1.4686939399158851+2.2873552871788423i", 'IMEXP("1+i")');

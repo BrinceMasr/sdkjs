@@ -453,7 +453,7 @@ function (window, undefined) {
 	};
 
 	/**
-	 * Класс asc_CAscEditorPermissions для прав редакторов
+	 * Class asc_CAscEditorPermissions for editor permissions
 	 * -----------------------------------------------------------------------------
 	 *
 	 * @constructor
@@ -2114,7 +2114,7 @@ function (window, undefined) {
 
 
 	/**
-	 * Класс CColor для работы с цветами
+	 * Class CColor for working with colors
 	 * -----------------------------------------------------------------------------
 	 *
 	 * @constructor
@@ -2781,7 +2781,7 @@ function (window, undefined) {
 		if (obj) {
 			this.Value = (undefined != obj.Value) ? obj.Value : null;
 
-			// TODO: В UI пока поддерживается ровно два типа заливки Nil, Clear
+			// TODO: UI currently supports exactly two fill types: Nil, Clear
 			if (null !== this.Value && this.Value !== Asc.c_oAscShd.Nil) this.Value = Asc.c_oAscShd.Clear;
 
 			if (obj.GetSimpleColor) {
@@ -2804,8 +2804,6 @@ function (window, undefined) {
 			}
 		}
 		else {
-
-			// TODO: Пока мы не работает отдельно с Color и Fill, поэтому пишем и тот и другой
 			this.Value = Asc.c_oAscShdNil;
 			this.Color = CreateAscColorCustom(255, 255, 255);
 			this.Fill = CreateAscColorCustom(255, 255, 255);
@@ -2982,16 +2980,16 @@ function (window, undefined) {
 	function asc_CParagraphSpacing(obj) {
 
 		if (obj) {
-			this.Line = (undefined != obj.Line) ? obj.Line : null; // Расстояние между строками внутри абзаца
-			this.LineRule = (undefined != obj.LineRule) ? obj.LineRule : null; // Тип расстрояния между строками
-			this.Before = (undefined != obj.Before) ? obj.Before : null; // Дополнительное расстояние до абзаца
-			this.After = (undefined != obj.After) ? obj.After : null; // Дополнительное расстояние после абзаца
+			this.Line = (undefined != obj.Line) ? obj.Line : null;
+			this.LineRule = (undefined != obj.LineRule) ? obj.LineRule : null;
+			this.Before = (undefined != obj.Before) ? obj.Before : null;
+			this.After = (undefined != obj.After) ? obj.After : null;
 		}
 		else {
-			this.Line = undefined; // Расстояние между строками внутри абзаца
-			this.LineRule = undefined; // Тип расстрояния между строками
-			this.Before = undefined; // Дополнительное расстояние до абзаца
-			this.After = undefined; // Дополнительное расстояние после абзаца
+			this.Line = undefined;
+			this.LineRule = undefined;
+			this.Before = undefined;
+			this.After = undefined;
 		}
 	}
 
@@ -3023,14 +3021,14 @@ function (window, undefined) {
 	/** @constructor */
 	function asc_CParagraphInd(obj) {
 		if (obj) {
-			this.Left = (undefined != obj.Left) ? obj.Left : null; // Левый отступ
-			this.Right = (undefined != obj.Right) ? obj.Right : null; // Правый отступ
-			this.FirstLine = (undefined != obj.FirstLine) ? obj.FirstLine : null; // Первая строка
+			this.Left = (undefined != obj.Left) ? obj.Left : null;
+			this.Right = (undefined != obj.Right) ? obj.Right : null;
+			this.FirstLine = (undefined != obj.FirstLine) ? obj.FirstLine : null;
 		}
 		else {
-			this.Left = undefined; // Левый отступ
-			this.Right = undefined; // Правый отступ
-			this.FirstLine = undefined; // Первая строка
+			this.Left = undefined;
+			this.Right = undefined;
+			this.FirstLine = undefined;
 		}
 	}
 
@@ -3102,23 +3100,6 @@ function (window, undefined) {
 			this.CanEditInlineCC = undefined !== obj.CanEditInlineCC ? obj.CanEditInlineCC : true;
 		}
 		else {
-			//ContextualSpacing : false,            // Удалять ли интервал между параграфами одинакового стиля
-			//
-			//    Ind :
-			//    {
-			//        Left      : 0,                    // Левый отступ
-			//        Right     : 0,                    // Правый отступ
-			//        FirstLine : 0                     // Первая строка
-			//    },
-			//
-			//    Jc : align_Left,                      // Прилегание параграфа
-			//
-			//    KeepLines : false,                    // переносить параграф на новую страницу,
-			//                                          // если на текущей он целиком не убирается
-			//    KeepNext  : false,                    // переносить параграф вместе со следующим параграфом
-			//
-			//    PageBreakBefore : false,              // начинать параграф с новой страницы
-
 			this.Bidi = undefined;
 			this.ContextualSpacing = undefined;
 			this.Ind = new asc_CParagraphInd();
@@ -5012,7 +4993,7 @@ function (window, undefined) {
 	asc_CFieldRegularFormatProperty.prototype.asc_putRegExp = function (v) {
 		this.regExp = v;
 	};
-	asc_CFieldSpecialFormatProperty.prototype.compare = function (pr) {
+	asc_CFieldRegularFormatProperty.prototype.compare = function (pr) {
 		if (this.regExp !== pr.regExp) {
 			this.regExp = null;
 		}
@@ -5057,7 +5038,7 @@ function (window, undefined) {
 	asc_CFieldValidateProperty.prototype.asc_putLessThen = function (v) {
 		this.lessThen = v;
 	};
-	asc_CFieldSpecialFormatProperty.prototype.compare = function (pr) {
+	asc_CFieldValidateProperty.prototype.compare = function (pr) {
 		if (this.greaterThen !== pr.greaterThen) {
 			this.greaterThen = null;
 		}
@@ -5418,10 +5399,16 @@ function (window, undefined) {
 		this.WrappingStyle = v;
 	};
 
-	// Возвращается объект класса Asc.asc_CPaddings
+	/**
+	 * @returns {asc_CPaddings}
+	 */
 	asc_CImgProperty.prototype.asc_getPaddings = function () {
 		return this.Paddings;
-	}; // Аргумент объект класса Asc.asc_CPaddings
+	};
+	/**
+	 *
+	 * @param v {asc_CPaddings}
+	 */
 	asc_CImgProperty.prototype.asc_putPaddings = function (v) {
 		this.Paddings = v;
 	};
@@ -5430,10 +5417,16 @@ function (window, undefined) {
 	};
 	asc_CImgProperty.prototype.asc_putAllowOverlap = function (v) {
 		this.AllowOverlap = v;
-	}; // Возвращается объект класса CPosition
+	};
+	/**
+	 * @returns {Asc.CPosition}
+	 */
 	asc_CImgProperty.prototype.asc_getPosition = function () {
 		return this.Position;
-	}; // Аргумент объект класса CPosition
+	};
+	/**
+	 * @param v {Asc.CPosition}
+	 */
 	asc_CImgProperty.prototype.asc_putPosition = function (v) {
 		this.Position = v;
 	};
@@ -6033,11 +6026,11 @@ function (window, undefined) {
 		return this.prstDash;
 	};
 
-	// цвет. может быть трех типов:
-	// c_oAscColor.COLOR_TYPE_SRGB		: value - не учитывается
-	// c_oAscColor.COLOR_TYPE_PRST		: value - имя стандартного цвета (map_prst_color)
-	// c_oAscColor.COLOR_TYPE_SCHEME	: value - тип цвета в схеме
-	// c_oAscColor.COLOR_TYPE_SYS		: конвертируется в srgb
+	// color. can be one of three types:
+	// c_oAscColor.COLOR_TYPE_SRGB		: value - not used
+	// c_oAscColor.COLOR_TYPE_PRST		: value - standard color name (map_prst_color)
+	// c_oAscColor.COLOR_TYPE_SCHEME	: value - color type in scheme
+	// c_oAscColor.COLOR_TYPE_SYS		: converted to srgb
 	function CAscColorScheme() {
 		this.colors = [];
 		this.name = "";
@@ -6107,7 +6100,7 @@ function (window, undefined) {
 
 
 	//-----------------------------------------------------------------
-	// События движения мыши
+	// Mouse movement events
 	//-----------------------------------------------------------------
 	function CMouseMoveData(obj) {
 		if (obj) {
@@ -6195,7 +6188,7 @@ function (window, undefined) {
 
 
 	/**
-	 * Класс для работы с интерфейсом для гиперссылок
+	 * Class for working with hyperlinks in UI
 	 * @param obj
 	 * @constructor
 	 */
@@ -7014,7 +7007,7 @@ function (window, undefined) {
 
 				let bRemoveDocument = false;
 				if (oApi.WordControl && !oApi.WordControl.m_oLogicDocument) {
-					// TODO: Зачем это здесь вообще?
+					// TODO: Why is this here at all?
 					bRemoveDocument = true;
 					oApi.WordControl.m_oLogicDocument = new AscWord.CDocument(null, false);
 					oApi.WordControl.m_oDrawingDocument.m_oLogicDocument = oApi.WordControl.m_oLogicDocument;
@@ -7341,12 +7334,12 @@ function (window, undefined) {
 
 	// ----------------------------- plugins ------------------------------- //
 	let PluginType = {
-		System: 0,      // Системный, неотключаемый плагин.
-		Background: 1,  // Фоновый плагин. Тоже самое, что и системный, но отключаемый.
-		Window: 2,      // Окно
-		Panel: 3,       // Панель
-		Invisible : 4,  // Невидимый
-		PanelRight: 5   // Панель справа
+		System: 0,      // System, can't be disabled.
+		Background: 1,  // Background plugin. Same as system, but can be disabled.
+		Window: 2,      // Window
+		Panel: 3,       // Panel
+		Invisible : 4,  // Invisible
+		PanelRight: 5   // Right panel
 	};
 
 	PluginType["System"] = PluginType.System;
@@ -7381,7 +7374,7 @@ function (window, undefined) {
 		this.url = "";
 		this.help = "";
 		this.baseUrl = "";
-		this.index = 0;     // сверху не выставляем. оттуда в каком порядке пришли - в таком порядке и работают
+		this.index = 0;     // not set from above. they work in the order they arrived
 
 		this.descriptionLocale = undefined;
 		this.icons = ["1x", "2x"];
@@ -7391,8 +7384,8 @@ function (window, undefined) {
 
 		this.type = PluginType.Background;
 
-		this.isCustomWindow = false;	// используется только если this.type === PluginType.Window
-		this.isModal = true;     // используется только если this.type === PluginType.Window
+		this.isCustomWindow = false;	// used only if this.type === PluginType.Window
+		this.isModal = true;     // used only if this.type === PluginType.Window
 
 		this.isCanDocked = false;
 
@@ -7661,7 +7654,7 @@ function (window, undefined) {
 		this.loader = (_object["loader"] != null) ? _object["loader"] : this.loader;
 
 		if (true) {
-			// удалим этот if, как передем на просто прокидку объекта в интерфейсе
+			// remove this if when we switch to simply passing the object in the interface
 			if (_object["groupName"] || _object["groupRank"]) this.group = {};
 
 			if (_object["groupName"]) this.group.name = _object["groupName"];
@@ -8013,12 +8006,16 @@ function (window, undefined) {
 	{
 		this.WrappingStyle = v;
 	};
-	// Возвращается объект класса Asc.asc_CPaddings
+	/**
+	 * @returns {Asc.asc_CPaddings}
+	 */
 	CAscChartProp.prototype.get_Paddings      = function()
 	{
 		return this.Paddings;
 	};
-	// Аргумент объект класса Asc.asc_CPaddings
+	/**
+	 * @param v {Asc.asc_CPaddings}
+	 */
 	CAscChartProp.prototype.put_Paddings      = function(v)
 	{
 		this.Paddings = v;
@@ -8031,12 +8028,16 @@ function (window, undefined) {
 	{
 		this.AllowOverlap = v;
 	};
-	// Возвращается объект класса CPosition
+	/**
+	 * @returns {Asc.CPosition}
+	 */
 	CAscChartProp.prototype.get_Position      = function()
 	{
 		return this.Position;
 	};
-	// Аргумент объект класса CPosition
+	/**
+	 * @param v {Asc.CPosition}
+	 */
 	CAscChartProp.prototype.put_Position      = function(v)
 	{
 		this.Position = v;

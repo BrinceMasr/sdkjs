@@ -516,6 +516,30 @@ CContentControlPr.prototype.GetEventObject = function()
 		};
 	}
 	
+	if (this.BorderColor)
+	{
+		result["Border"] = {
+			"Color" : {
+				"R" : this.BorderColor.r,
+				"G" : this.BorderColor.g,
+				"B" : this.BorderColor.b,
+				"A" : this.BorderColor.a
+			}
+		};
+	}
+	
+	if (this.ShdColor)
+	{
+		result["Shd"] = {
+			"Color" : {
+				"R" : this.ShdColor.r,
+				"G" : this.ShdColor.g,
+				"B" : this.ShdColor.b,
+				"A" : this.ShdColor.a
+			}
+		};
+	}
+	
 	return result;
 };
 CContentControlPr.prototype.FillFromObject = function(oPr)

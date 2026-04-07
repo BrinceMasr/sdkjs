@@ -56,7 +56,7 @@
 		this.m_oCurrentPara = null;
 
 		this.m_oPrimaryTextColor = new AscCommonWord.CDocumentColor(0, 0, 0);
-		// для словесного текста используем цвет контрастнее
+		// use a more contrasting color for word text
 		this.m_oSecondaryTextColor = new AscCommonWord.CDocumentColor(121, 121, 121);
 		this.m_oSecondaryLineTextColor = new AscCommonWord.CDocumentColor(203, 203, 203);
 		this.m_oBackgroundColor = new AscCommonWord.CDocumentColor(255, 255, 255);
@@ -70,7 +70,7 @@
 	{
 		oTextPr.VertAlign  = undefined;
 		oTextPr.RStyle     = undefined;
-		oTextPr.Position   = undefined; // Смещение по Y
+		oTextPr.Position   = undefined; // Y offset
 
 		oTextPr.BoldCS     = undefined;
 		oTextPr.ItalicCS   = undefined;
@@ -315,7 +315,7 @@
 		let nBackTextWidth = 0;
 		if (nNumberingTextWidth !== 0)
 		{
-			nBackTextWidth = nNumberingTextWidth + 4; // 4 - чтобы линия никогда не была 'совсем рядом'
+			nBackTextWidth = nNumberingTextWidth + 4; // 4 - so that the line is never 'too close'
 			if (isRtl)
 				cleanX -= 4;
 			
@@ -331,7 +331,7 @@
 		this.cleanParagraphField(oGraphics, cleanX * AscCommon.g_dKoef_pix_to_mm, (nY - nLineHeight) * AscCommon.g_dKoef_pix_to_mm, (nBackTextWidth + 2) * AscCommon.g_dKoef_pix_to_mm, (nLineHeight + (nLineHeight >> 1)) * AscCommon.g_dKoef_pix_to_mm);
 		this.drawParagraph(oGraphics, oParagraph, nXOffset, nYOffset);
 
-		// рисуем текст вместо черты текста
+		// draw text instead of text line
 		this.drawStyleText(oGraphics, oParagraphTextOptions, isRtl ? nXOffset : nXOffset + nBackTextWidth, nY, nLineHeight, oTextPr);
 	};
 
@@ -533,7 +533,7 @@
 		else
 		{
 			const nMaxFontSize = nHeight_px * this.m_nSingleBulletFontSizeCoefficient;
-			// для буллетов решено не уменьшать их превью, как и в word
+			// for bullets, we decided not to reduce their preview, same as in Word
 			//const oFitInformation = this.getInformationWithFitFontSize(oLvl, nWidth_px * AscCommon.g_dKoef_pix_to_mm, nHeight_px * AscCommon.g_dKoef_pix_to_mm, nMaxFontSize, nMaxFontSize);
 			//const oFitTextPr = oFitInformation.textPr;
 			const oTextPr = oLvl.GetTextPr();
@@ -600,7 +600,7 @@
 			AscCommon.g_oTextMeasurer.SetFontSlot(nFontSlot, 1);
 			const oInfo = AscCommon.g_oTextMeasurer.Measure2Code(nValue);
 
-			// в ворде крайние пробелы в превью буллетов прижимаются к глифу, а не к ширине символа
+			// in Word, edge spaces in bullet preview align to the glyph, not to the character width
 			if (!bFirstGlyphSymbol)
 			{
 				if (oInfo.WidthG)
@@ -642,7 +642,7 @@
 
 	CBulletPreviewDrawer.prototype.getXYForCenterPosition = function (oLvl, nWidth, nHeight)
 	{
-		// Здесь будем считать позицию отрисовки
+		// Here we calculate the drawing position
 		const sText = oLvl.GetDrawingContent([oLvl], 0, undefined, this.m_oLang, oLvl.IsLegalStyle());
 		if (typeof sText !== 'string') return;
 		const oTextPr = oLvl.GetTextPr().Copy();
@@ -673,9 +673,9 @@
 
 		const nOffsetBase = 4;
 		const nLineWidth = 2;
-		// считаем расстояние между линиями
+		// calculate distance between lines
 		const nLineDistance = Math.floor(((nHeight_px - (nOffsetBase << 2)) - nLineWidth * nCountOfLines) / nCountOfLines);
-		// убираем погрешность в offset
+		// remove error in offset
 		const nOffset = (nHeight_px - (nLineWidth * nCountOfLines + nLineDistance * nCountOfLines)) >> 1;
 
 		const nTextBaseOffsetX = nOffset + Math.floor(2.25 * AscCommon.g_dKoef_mm_to_pix);
@@ -903,7 +903,7 @@
 			const nOffsetBase = 5;
 			const nLineWidth = 2;
 
-			// посчитаем нужные переменные для одного canvas
+			// calculate required variables for one canvas
 			let sDivId = this.m_arrId[0];
 			let oCanvas = this.getCanvas(sDivId);
 			const nHeight_px = oCanvas.clientHeight;
@@ -1046,9 +1046,9 @@
 
 		const nOffsetBase = 10;
 		const nLineWidth = 4;
-		// считаем расстояние между линиями
+		// calculate the distance between lines
 		const nLineDistance = Math.floor(((nHeight_px - (nOffsetBase << 1)) - nLineWidth * 10) / 9);
-		// убираем погрешность в offset
+		// remove rounding error in offset
 		const nOffset = (nHeight_px - (nLineWidth * 10 + nLineDistance * 9)) >> 1;
 		const nCurrentLvl = this.m_nCurrentLvl;
 
@@ -1214,7 +1214,7 @@
 		const nLeftOffset2 = nOffsetBase;
 		const nRightOffset2 = nWidth_px - nOffsetBase;
 
-		// Здесь получаем коэффициент, чтобы при открытии всегда видеть отступ текста
+		// Here we get the coefficient so that the text indent is always visible when opening
 		const nScaleCoefficient = this.getScaleCoefficientForSingleLevel(nWidth_px - nOffsetBase * 5);
 		let nNumberPosition = nOffsetBase + ((oCurrentLvl.GetNumberPosition() * AscCommon.g_dKoef_mm_to_pix * nScaleCoefficient) << 0);
 		let nIndentSize = nOffsetBase + ((oCurrentLvl.GetIndentSize() * AscCommon.g_dKoef_mm_to_pix * nScaleCoefficient) << 0);
@@ -1233,7 +1233,7 @@
 		oGraphics.p_color(this.m_oPrimaryTextColor.r, this.m_oPrimaryTextColor.g, this.m_oPrimaryTextColor.b, 255);
 		let nTextYx = nNumberPosition;
 		let nOffsetTextX;
-		// если при прилегании к правому краю левый край текста упирается в оффсет, то линии текста должны двигаться вправо(это относится ко всем типам прилегания)
+		// if when aligned to the right edge the left text edge hits the offset, then text lines should move right (applies to all alignment types)
 		if ((nTextYx - nMaxTextWidth) < nLeftOffset2)
 		{
 			nTextYx = nLeftOffset2 + nMaxTextWidth;
@@ -1244,7 +1244,7 @@
 
 			const nCurrentAlign = oCurrentLvl.Jc;
 			oCurrentLvl.Jc = AscCommon.align_Left;
-			// считаем позицию отдельно, чтобы нумерация по горизонтали начиналась с одного и того же места
+			// calculate X position separately to ensure a consistent starting point
 			if (nCurrentAlign === AscCommon.align_Right)
 			{
 				nTextYx -= nMaxTextWidth;

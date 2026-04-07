@@ -153,7 +153,7 @@
         let oDrawingObjects     = oDoc.Viewer.DrawingObjects;
         this.selectStartPage    = this.GetPage();
 
-        // координаты клика на странице в MM
+        // click coordinates on the page in MM
         var pageObject = oViewer.getPageByCoords2(x, y);
         if (!pageObject)
             return false;
@@ -177,7 +177,7 @@
     CPdfShape.prototype.getTrackGeometry = function () {
         let oGroup = this.getMainGroup();
 
-        // заглушка для трека геометрии с клауд бордером для FreeText
+        // stub for geometry track with cloud border for FreeText
         if (oGroup && oGroup.IsAnnot && oGroup.IsAnnot() && oGroup.GetTextBoxShape() == this) {
             return AscFormat.ExecuteNoHistory(
                 function () {
@@ -486,7 +486,7 @@
 
                 let aLinePoints = [];
                 let oTranform   = oAnnot.transform;
-                // считаем новые точки linePoints (в оригинальных координатах - в пикселях, без скейлов)
+                // calculate new linePoints (in original coordinates - in pixels, without scales)
                 aLinePoints.push(oTranform.TransformPointX(oPt1.X, 0) * g_dKoef_mm_to_pt);
                 aLinePoints.push(oTranform.TransformPointY(0, oPt1.Y) * g_dKoef_mm_to_pt);
                 aLinePoints.push(oTranform.TransformPointX(oPt2.X, 0) * g_dKoef_mm_to_pt);
@@ -564,13 +564,13 @@
                 }
                 drawing_document.UpdateTargetTransform(oMatrix);
                 if (true === content.IsSelectionUse()) {
-                    // Выделение нумерации
+                    // Numbering selection
                     if (selectionflag_Numbering == content.Selection.Flag) {
                         drawing_document.TargetEnd();
                     }
-                    // Обрабатываем движение границы у таблиц
+                    // Handle table border movement
                     else if (null != content.Selection.Data && true === content.Selection.Data.TableBorder && type_Table == content.Content[content.Selection.Data.Pos].GetType()) {
-                        // Убираем курсор, если он был
+                        // Remove cursor
                         drawing_document.TargetEnd();
                     } else {
                         if (false === content.IsSelectionEmpty()) {

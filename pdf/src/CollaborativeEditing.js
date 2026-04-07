@@ -179,19 +179,19 @@ CPDFCollaborativeEditing.prototype.Send_Changes = function(IsUserSave, Additiona
 	let localHistory = AscCommon.History;
 	AscCommon.History = oHistory;
 	
-	// Пересчитываем позиции
+	// Recalculate positions
 	this.Refresh_DCChanges();
 
 	
 	AscCommon.DocumentEditorApi.prototype.asc_Save.apply(this, arguments);
 	
 	
-    // Генерируем свои изменения
+    // Generate own changes
     let StartPoint = ( null === oHistory.SavedIndex ? 0 : oHistory.SavedIndex + 1 );
     let LastPoint = -1;
 
     if (this.m_nUseType <= 0) {
-        // (ненужные точки предварительно удаляем)
+        // (remove unnecessary points in advance)
         oHistory.Clear_Redo();
         LastPoint = oHistory.Points.length - 1;
     }
@@ -199,7 +199,7 @@ CPDFCollaborativeEditing.prototype.Send_Changes = function(IsUserSave, Additiona
         LastPoint = oHistory.Index;
     }
 
-    // Просчитаем сколько изменений на сервер пересылать не надо
+    // Calculate how many changes do not need to be sent to the server
     let SumIndex = 0;
     let StartPoint2 = Math.min(StartPoint, LastPoint + 1);
 
@@ -228,7 +228,7 @@ CPDFCollaborativeEditing.prototype.Send_Changes = function(IsUserSave, Additiona
 
     let UnlockCount = 0;
 
-    // Пока пользователь сидит один, мы не чистим его локи до тех пор пока не зайдет второй
+    // While the user is alone, we don't clear their locks until another user joins
     let bCollaborative = this.getCollaborativeEditing();
     if (bCollaborative)
 	{
@@ -260,31 +260,31 @@ CPDFCollaborativeEditing.prototype.Send_Changes = function(IsUserSave, Additiona
 	editor.canUnlockDocument2 = false;
 
     if (-1 === this.m_nUseType) {
-        // Чистим Undo/Redo только во время совместного редактирования
+        // Clear Undo/Redo only during collaborative editing
         oHistory.Clear();
         oHistory.SavedIndex = null;
     }
     else if (0 === this.m_nUseType) {
-        // Чистим Undo/Redo только во время совместного редактирования
+        // Clear Undo/Redo only during collaborative editing
         oHistory.Clear();
         oHistory.SavedIndex = null;
 
         this.m_nUseType = 1;
     }
     else {
-        // Обновляем точку последнего сохранения в истории
+        // Update the last save point in history
         oHistory.Reset_SavedIndex(IsUserSave);
     }
 
     if (false !== IsUpdateInterface)
         editor.WordControl.m_oLogicDocument.UpdateInterface(undefined, true);
 
-    // TODO: Пока у нас обнуляется история на сохранении нужно обновлять Undo/Redo
+    // TODO: While history is cleared on save, we need to update Undo/Redo
     editor.WordControl.m_oLogicDocument.Document_UpdateUndoRedoState();
 
-    // Свои локи не проверяем. Когда все пользователи выходят, происходит перерисовка и свои локи уже не рисуются.
+    // We don't check own locks. When all users leave, redraw happens and own locks are no longer drawn.
     if (0 !== UnlockCount || 1 !== this.m_nUseType) {
-        // Перерисовываем документ (для обновления локов)
+        // Redraw the document (to update locks)
         editor.getDocumentRenderer().paint();
     }
 
@@ -293,9 +293,9 @@ CPDFCollaborativeEditing.prototype.Send_Changes = function(IsUserSave, Additiona
 };
 CPDFCollaborativeEditing.prototype.OnEnd_Load_Objects = function()
 {
-    // Данная функция вызывается, когда загрузились внешние объекты (картинки и шрифты)
+    // This function is called when external objects (images and fonts) have loaded
 
-    // Снимаем лок
+    // Remove the lock
     AscCommon.CollaborativeEditing.Set_GlobalLock(false);
     AscCommon.CollaborativeEditing.Set_GlobalLockSelection(false);
 
@@ -330,7 +330,7 @@ CPDFCollaborativeEditing.prototype.Apply_Changes = function(fEndCallBack) {
 	let docHistory = this.GetDocument().History;
 	docHistory.StartNoHistoryMode();
 	
-	this.GetDocument().currInkInDrawingProcess = null; // останавливаем ink рисование
+	this.GetDocument().currInkInDrawingProcess = null; // stop ink drawing
 	AscCommon.CCollaborativeEditingBase.prototype.Apply_Changes.call(this, fEndCallBack);
 	
 	docHistory.EndNoHistoryMode();

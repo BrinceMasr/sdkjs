@@ -118,7 +118,7 @@ function (window, undefined) {
 			return needIndex;
 		};
 
-		//instance_num - при отрицательном вхождении поиск с конца начинается
+		//instance_num - for negative values, search starts from the end
 		let instance_num = newArgs[2] && !(newArgs[2].type === cElementType.empty) ? newArgs[2] : new cNumber(1);
 		let match_mode = newArgs[3] && !(newArgs[3].type === cElementType.empty) ? newArgs[3] : new cBool(false);
 		let match_end = newArgs[4] && !(newArgs[4].type === cElementType.empty) ? newArgs[4] : new cBool(false);
@@ -243,6 +243,7 @@ function (window, undefined) {
 	cARRAYTOTEXT.prototype.argumentsMax = 2;
 	cARRAYTOTEXT.prototype.arrayIndexes = {0: 1};
 	cARRAYTOTEXT.prototype.argumentsType = [argType.reference, argType.number];
+	cARRAYTOTEXT.prototype.enabledToSingle = {"0": true};
 	cARRAYTOTEXT.prototype.Calculate = function (arg) {
 		function arrayToTextGeneral(args, isRange) {
 			let array = args[0],
@@ -544,7 +545,7 @@ function (window, undefined) {
 	}
 
 	//***array-formula***
-	//TODO пересмотреть функцию!!!
+	//TODO review this function!!!
 	cCONCATENATE.prototype = Object.create(cBaseFunction.prototype);
 	cCONCATENATE.prototype.constructor = cCONCATENATE;
 	cCONCATENATE.prototype.name = 'CONCATENATE';
@@ -599,6 +600,7 @@ function (window, undefined) {
 	cCONCAT.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.array;
 	cCONCAT.prototype.argumentsType = [[argType.text]];
 	cCONCAT.prototype.isXLFN = true;
+	cCONCAT.prototype.enabledToSingle = {"*": true};
 	cCONCAT.prototype.Calculate = function (arg) {
 		let arg0 = new cString(""), argI;
 
@@ -814,7 +816,7 @@ function (window, undefined) {
 					let b = arg1.getElementRowCol(r, c);
 					if (a instanceof cNumber && b instanceof cNumber) {
 						let res = roundHelper(a.getValue(), b.getValue());
-						this.array[r][c] = toFix(res.toString(), arg2.toBool());
+						this.array[r][c] = new cString(toFix(String(res.getValue()), arg2.toBool()));
 					} else {
 						this.array[r][c] = new cError(cErrorType.wrong_value_type);
 					}
@@ -827,7 +829,7 @@ function (window, undefined) {
 				let b = arg1;
 				if (a instanceof cNumber && b instanceof cNumber) {
 					let res = roundHelper(a.getValue(), b.getValue());
-					this.array[r][c] = toFix(res.toString(), arg2.toBool());
+					this.array[r][c] = new cString(toFix(String(res.getValue()), arg2.toBool()));
 				} else {
 					this.array[r][c] = new cError(cErrorType.wrong_value_type);
 				}
@@ -839,7 +841,7 @@ function (window, undefined) {
 				let b = elem;
 				if (a instanceof cNumber && b instanceof cNumber) {
 					let res = roundHelper(a.getValue(), b.getValue());
-					this.array[r][c] = toFix(res.toString(), arg2.toBool());
+					this.array[r][c] = new cString(toFix(String(res.getValue()), arg2.toBool()));
 				} else {
 					this.array[r][c] = new cError(cErrorType.wrong_value_type);
 				}
@@ -1184,7 +1186,7 @@ function (window, undefined) {
 					var b = arg1.getElementRowCol(r, c);
 					if (a instanceof cNumber && b instanceof cNumber && arg2.toBool) {
 						var res = roundHelper(a.getValue(), b.getValue());
-						this.array[r][c] = toFix(res.toString(), arg2.toBool());
+						this.array[r][c] = new cString(toFix(String(res.getValue()), arg2.toBool()));
 					} else {
 						this.array[r][c] = new cError(cErrorType.wrong_value_type);
 					}
@@ -1197,7 +1199,7 @@ function (window, undefined) {
 				var b = arg1;
 				if (a instanceof cNumber && b instanceof cNumber && arg2.toBool) {
 					var res = roundHelper(a.getValue(), b.getValue());
-					this.array[r][c] = toFix(res.toString(), arg2.toBool());
+					this.array[r][c] = new cString(toFix(String(res.getValue()), arg2.toBool()));
 				} else {
 					this.array[r][c] = new cError(cErrorType.wrong_value_type);
 				}
@@ -1209,7 +1211,7 @@ function (window, undefined) {
 				var b = elem;
 				if (a instanceof cNumber && b instanceof cNumber && arg2.toBool) {
 					var res = roundHelper(a.getValue(), b.getValue());
-					this.array[r][c] = toFix(res.toString(), arg2.toBool());
+					this.array[r][c] = new cString(toFix(String(res.getValue()), arg2.toBool()));
 				} else {
 					this.array[r][c] = new cError(cErrorType.wrong_value_type);
 				}
@@ -1248,6 +1250,7 @@ function (window, undefined) {
 	cIMPORTRANGE.prototype.argumentsMax = 2;
 	cIMPORTRANGE.prototype.isXLUDF = true;
 	cIMPORTRANGE.prototype.argumentsType = [argType.text, argType.text];
+	cIMPORTRANGE.prototype.enabledToSingle = {"0": true, "1": true};
 	cIMPORTRANGE.prototype.Calculate = function (arg) {
 		//gs -> allow array(get first element), cRef, cRef3D, cName, cName3d
 		//not allow area/area3d
@@ -1382,6 +1385,7 @@ function (window, undefined) {
 	cJIS.prototype.name = 'JIS';
 	cJIS.prototype.argumentsMin = 1;
 	cJIS.prototype.argumentsMax = 1;
+	cJIS.prototype.enabledToSingle = {"0": true};
 	cJIS.prototype.Calculate = function (arg) {
 		var arg0 = arg[0];
 
@@ -1715,7 +1719,7 @@ function (window, undefined) {
 				return new cError(cErrorType.wrong_value_type)
 			}
 
-			//считаем количество вхождений cDecimalSeparator в строке
+			//count the number of occurrences of cDecimalSeparator in the string
 			var count = 0;
 			for (var i = 0; i < aInputString.length; i++) {
 				if (cDecimalSeparator === aInputString[i]) {
@@ -1792,6 +1796,7 @@ function (window, undefined) {
 	cPHONETIC.prototype = Object.create(cBaseFunction.prototype);
 	cPHONETIC.prototype.constructor = cPHONETIC;
 	cPHONETIC.prototype.name = 'PHONETIC';
+	cPHONETIC.prototype.enabledToSingle = {"0": true};
 
 	//
 
@@ -2159,17 +2164,26 @@ function (window, undefined) {
 			for (let row = 0; row < maxArray.row; row++) {
 				resArr.addRow();
 				for (let col = 0; col < maxArray.col; col++) {
-					textVal = getValue(text, row, col).tocString();
+					let _text = getValue(text, row, col);
+					let _pattern = getValue(pattern, row, col);
+					let _caseSensitivity = getValue(caseSensitivity, row, col);
+
+					if (_text === undefined || _pattern === undefined || _caseSensitivity === undefined) {
+						resArr.addElement(new cError(cErrorType.not_available));
+						continue;
+					}
+
+					textVal = _text.tocString();
 					if (textVal.type === cElementType.error) {
 						return textVal;
 					}
 
-					patternVal = getValue(pattern, row, col).tocString();
+					patternVal = _pattern.tocString();
 					if (patternVal.type === cElementType.error) {
 						return patternVal;
 					}
 
-					caseSensitivityVal = getValue(caseSensitivity, row, col).tocNumber();
+					caseSensitivityVal = _caseSensitivity.tocNumber();
 					if (caseSensitivityVal.type === cElementType.error) {
 						return caseSensitivityVal;
 					}
@@ -2394,22 +2408,32 @@ function (window, undefined) {
 			for (let row = 0; row < maxArray.row; row++) {
 				resArr.addRow();
 				for (let col = 0; col < maxArray.col; col++) {
-					textVal = getValue(text, row, col).tocString();
+					let _text = getValue(text, row, col);
+					let _pattern = getValue(pattern, row, col);
+					let _returnMode = getValue(returnMode, row, col);
+					let _caseSensitivity = getValue(caseSensitivity, row, col);
+
+					if (_text === undefined || _pattern === undefined || _returnMode === undefined || _caseSensitivity === undefined) {
+						resArr.addElement(new cError(cErrorType.not_available));
+						continue;
+					}
+
+					textVal = _text.tocString();
 					if (textVal.type === cElementType.error) {
 						return textVal;
 					}
 
-					patternVal = getValue(pattern, row, col).tocString();
+					patternVal = _pattern.tocString();
 					if (patternVal.type === cElementType.error) {
 						return patternVal;
 					}
 
-					returnModeVal = getValue(returnMode, row, col).tocNumber();
+					returnModeVal = _returnMode.tocNumber();
 					if (returnModeVal.type === cElementType.error) {
 						return returnModeVal;
 					}
 
-					caseSensitivityVal = getValue(caseSensitivity, row, col).tocNumber();
+					caseSensitivityVal = _caseSensitivity.tocNumber();
 					if (caseSensitivityVal.type === cElementType.error) {
 						return caseSensitivityVal;
 					}
@@ -2632,27 +2656,38 @@ function (window, undefined) {
 			for (let row = 0; row < maxArray.row; row++) {
 				resArr.addRow();
 				for (let col = 0; col < maxArray.col; col++) {
-					textVal = getValue(text, row, col).tocString();
+					let _text = getValue(text, row, col);
+					let _pattern = getValue(pattern, row, col);
+					let _replacement = getValue(replacement, row, col);
+					let _occurence = getValue(occurence, row, col);
+					let _caseSensitivity = getValue(caseSensitivity, row, col);
+
+					if (_text === undefined || _pattern === undefined || _replacement === undefined || _occurence === undefined || _caseSensitivity === undefined) {
+						resArr.addElement(new cError(cErrorType.not_available));
+						continue;
+					}
+
+					textVal = _text.tocString();
 					if (textVal.type === cElementType.error) {
 						return textVal;
 					}
 
-					patternVal = getValue(pattern, row, col).tocString();
+					patternVal = _pattern.tocString();
 					if (patternVal.type === cElementType.error) {
 						return patternVal;
 					}
 
-					replacementVal = getValue(replacement, row, col).tocString();
+					replacementVal = _replacement.tocString();
 					if (replacementVal.type === cElementType.error) {
 						return replacementVal;
 					}
 
-					occurenceVal = getValue(occurence, row, col).tocNumber();
+					occurenceVal = _occurence.tocNumber();
 					if (occurenceVal.type === cElementType.error) {
 						return occurenceVal;
 					}
 
-					caseSensitivityVal = getValue(caseSensitivity, row, col).tocNumber();
+					caseSensitivityVal = _caseSensitivity.tocNumber();
 					if (caseSensitivityVal.type === cElementType.error) {
 						return caseSensitivityVal;
 					}
@@ -3148,6 +3183,7 @@ function (window, undefined) {
 	cT.prototype.argumentsMax = 1;
 	cT.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.replace_only_array;
 	cT.prototype.argumentsType = [argType.any];
+	cT.prototype.enabledToSingle = {"0": true};
 	cT.prototype.Calculate = function (arg) {
 		var arg0 = arg[0];
 		if (arg0 instanceof cRef || arg0 instanceof cRef3D) {
@@ -3256,7 +3292,7 @@ function (window, undefined) {
 	cTEXTJOIN.prototype.numFormat = AscCommonExcel.cNumFormatNone;
 	cTEXTJOIN.prototype.isXLFN = true;
 	cTEXTJOIN.prototype.argumentsType = [argType.text, argType.logical, argType.text, [argType.text]];
-	//TODO все, кроме 2 аргумента - массивы
+	//TODO all arguments except the 2nd are arrays
 	cTEXTJOIN.prototype.arrayIndexes = {0: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1};
 	cTEXTJOIN.prototype.getArrayIndex = function (index) {
 		if (index === 1) {
@@ -3264,6 +3300,7 @@ function (window, undefined) {
 		}
 		return 1;
 	};
+	cTEXTJOIN.prototype.enabledToSingle = {"0": true, "allFrom": 2};
 	cTEXTJOIN.prototype.Calculate = function (arg) {
 
 		let argClone = [arg[0], arg[1]];
@@ -3605,17 +3642,17 @@ function (window, undefined) {
 	cTEXTSPLIT.prototype.isXLFN = true;
 	cTEXTSPLIT.prototype.Calculate = function (arg) {
 
-		//функция должна возвращать массив
+		//function should return an array
 		let text = arg[0];
 		if (text.type === cElementType.error) {
 			return text;
 		}
 
-		//второй/третий аргумент тоже может быть массивом, каждый из элементов каторого может быть разделителем
+		//second/third argument can also be an array, each element of which can be a delimiter
 		let col_delimiter = arg[1];
 		let row_delimiter = arg[2] ? arg[2] : null;
 
-		//если оба empty или хотя бы один из разделителей - пустая строка - ошибка
+		//if both are empty or at least one of the delimiters is an empty string - error
 		if (col_delimiter && row_delimiter && col_delimiter.type === cElementType.empty && row_delimiter.type === cElementType.empty) {
 			return new cError(cErrorType.wrong_value_type);
 		}
@@ -3658,7 +3695,7 @@ function (window, undefined) {
 		}
 		match_mode = match_mode.toBool();
 
-		//заполняющее_значение. Значение по умолчанию: #Н/Д.
+		//pad_with value. Default value: #N/A.
 		let pad_with = arg[5] ? arg[5] : new cError(cErrorType.not_available);
 		if (pad_with.type === cElementType.cell3D || pad_with.type === cElementType.cell) {
 			pad_with = pad_with.getValue();
@@ -3713,7 +3750,7 @@ function (window, undefined) {
 			return res;
 		};
 
-		//обрабатываю первый аргумент - диапазон выше, если сюда он приходит в виже диапазона, то беру первый элемент
+		//processing the first argument - if it arrives as a range, take the first element
 		var res;
 		if (cElementType.cellsRange3D === text.type || cElementType.cellsRange === text.type) {
 			text = text.getValue2(0, 0);
@@ -3735,7 +3772,7 @@ function (window, undefined) {
 		//let array = AscCommon.parseText(text, options);
 		let array = splitText(text, row_delimiter, col_delimiter);
 		if (array) {
-			//проверяем массив на пустые элементы +  дополняем массив pad_with
+			//check array for empty elements + pad array with pad_with
 
 			let rowCount = array.length;
 			let colCount = 0, i, j;

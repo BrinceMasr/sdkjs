@@ -240,7 +240,7 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-		//формируем массив значений
+		//form array of values
 		const randomArray = [];
 		let randomStrArray = "{";
 		let maxArg = 4;
@@ -3740,7 +3740,7 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: FIXED(123456789012345,-127) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '0', 'Test: Bounded case: Number. Minimum decimals (-127). 2 of 3 arguments used.');
 
-		// TODO проблема с округлением чисел
+		// TODO problem with number rounding
 		// Need to fix: error type diff, MS result diff
 		// Case #10: Array. Array with single valid number. 2 of 3 arguments used.
 		// Case #16: Date. Date as serial number with 0 decimals. 2 of 3 arguments used.

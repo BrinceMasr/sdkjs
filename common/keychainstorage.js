@@ -39,13 +39,13 @@
 
     AscCrypto.Storage = {};
 
-    // тип команды. "private" - значит доступно только для того юзера, который делает запрос
+    // command type. "private" - means accessible only to the user making the request
     AscCrypto.Storage.CommandType = {
         private : "private",
         public : "public"
     };
 
-    // ключи команды.
+    // command keys.
     AscCrypto.Storage.CommandKey = {
         keySign : "keySign",
         keyCrypt : "keyCrypt"
@@ -58,24 +58,24 @@
     }
     */
 
-    // перечень команд.
+    // list of commands.
     AscCrypto.Storage.CommandName = {
-        // добавляем к текущему юзеру запись
+        // add a record for the current user
         // { type : add, value : [{value},{value}] }
         add : "add",
-        // удаляем запись по id. пока не используем
+        // remove a record by id. not used yet
         // { type : remove, value : [id1, id2, ...] }
         remove : "remove",
-        // заменяем у текущего юзера запись по id (если записи нет - то ничего не делаем)
+        // replace a record by id for the current user (if the record does not exist - do nothing)
         // { type : remove, value : [{rec, rec}] }
         replace : "replace",
-        // для текущего юзера. отдаем все записи с указанным ключом
+        // for the current user. return all records with the specified key
         // { type : get, value : [key1, key2] }
-        // для себя - отдаем и private. для остальных- нет
+        // for self - return private as well. for others - no
         get : "get",
-        // вернуть объект юзера (данные его) по одному из значений ключа.
-        // если ничего не указано - то вернуть для текущего юзера
-        // (в принципе можно присылать еще и ключ, по которому смотреть, записей будет мало => ключ можно упустить)
+        // return the user object (their data) by one of the key values.
+        // if nothing is specified - return for the current user
+        // (in principle, you can also send the key to look up, there will be few records => the key can be omitted)
         getUserInfo : "getUserInfo"
     };
 
@@ -214,7 +214,7 @@
             }
             case AscCrypto.Storage.CommandName.getUserInfo:
             {
-                // в локальной версии юзеров нет
+                // no users in the local version
                 break;
             }
             default:
@@ -236,7 +236,7 @@
             if (localValue.hasOwnProperty(prop) && mapReturnKeys[localValue[prop]["key"]] === true)
             {
                 returnObj[prop] = localValue[prop];
-                // тут приватные не удаляем (это нужно на юзерах делать)
+                // don't remove private ones here (this should be done on users)
             }
         }
 

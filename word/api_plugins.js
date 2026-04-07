@@ -184,7 +184,7 @@
         return this.asc_GetBlockChainData();
     };
     /**
-     * Inserts the content control containing data. The data is specified by the JS code for {@link /docbuilder/basic Document Builder}, or by a link to the shared document.
+     * Inserts the content control containing data. The data is specified by the JS code for {@link /docs/office-api/usage-api/text-document-api/ Document Builder}, or by a link to the shared document.
      * @memberof Api
      * @typeofeditors ["CDE"]
      * @alias InsertAndReplaceContentControls
@@ -1146,7 +1146,11 @@
 	 * @memberof Api
 	 * @typeofeditors ["CDE"]
 	 * @alias AddAddinField
+	 * @param {Object} data - Addin field data.
+	 * @param {string} data.Value - Field value.
+	 * @param {string} data.Content - Field text content.
 	 * @param {AddinFieldData} data - Addin field data.
+	 * @returns {AddinFieldData} - An AddinFieldData object containing the data about the current added field, or null if no addin field was added.
 	 * @since 7.3.3
 	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/AddAddinField.js
 	 */
@@ -1154,9 +1158,10 @@
 	{
 		let logicDocument = this.private_GetLogicDocument();
 		if (!logicDocument)
-			return;
+			return null;
 		
-		logicDocument.AddAddinField(AscWord.CAddinFieldData.FromJson(data));
+		let field = logicDocument.AddAddinField(AscWord.CAddinFieldData.FromJson(data));
+		return field ? AscWord.CAddinFieldData.FromField(field).ToJson() : null;
 	};
 	/**
 	 * Selects the specified add-in field.
@@ -1545,14 +1550,14 @@
 		if (shd)
 		{
 			if (undefined !== shd["Color"])
-				ccPr.ShdColor = new Asc.asc_CColor(shd["Color"]["R"], shd["Color"]["G"], shd["Color"]["B"], shd["Color"]["A"]);
+				ccPr.ShdColor = new Asc.asc_CColor(shd["Color"]["R"], shd["Color"]["G"], shd["Color"]["B"], undefined === shd["Color"]["A"] ? 255 : shd["Color"]["A"]);
 		}
 		
 		let border = commonPr["Border"];
 		if (border)
 		{
 			if (undefined !== border["Color"])
-				ccPr.BorderColor = new Asc.asc_CColor(border["Color"]["R"], border["Color"]["G"], border["Color"]["B"], border["Color"]["A"]);
+				ccPr.BorderColor = new Asc.asc_CColor(border["Color"]["R"], border["Color"]["G"], border["Color"]["B"],  undefined === border["Color"]["A"] ? 255 : border["Color"]["A"]);
 		}
 
 		return ccPr;

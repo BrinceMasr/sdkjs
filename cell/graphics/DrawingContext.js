@@ -68,7 +68,7 @@
 			if (null != oThemeColorTint) {
 				for (var i = 0, length = oThemeColorTint.length; i < length; ++i) {
 					var cur = oThemeColorTint[i];
-					//0.005 установлено экспериментально
+					//0.005 was set experimentally
 					if (Math.abs(cur - tintExcel) < 0.005) {
 						bTheme = true;
 						tintPresentation = i;
@@ -384,8 +384,8 @@
 	NativeContext.prototype.getImageData = function (sx,sy,sw,sh) {};
 	NativeContext.prototype.putImageData = function (image_data,dx,dy,dirtyX,dirtyY,dirtyWidth,dirtyHeight) {};
 	
-	// В текущей реализации используется несколько разных DrawingContext, но ссылающихся на одни и те же
-	// FontManager, чтобы разрулить правильное выставление шрифта используем здесь локальные переменные
+	// In the current implementation, several different DrawingContexts are used, but they reference the same
+	// FontManager, so to handle proper font setup we use local variables here
 	let setupFontSize  = -1;
 	let setupFontName  = "";
 	let setupFontStyle = -1;
@@ -446,7 +446,7 @@
 
 		/** @type AscCommonExcel.Font */
 		this.font = undefined !== settings.font ? settings.font : null;
-		// Font должен быть передан (он общий для всех DrawingContext, т.к. может возникнуть ситуация как в баге http://bugzilla.onlyoffice.com/show_bug.cgi?id=19784)
+		// Font must be provided (it's shared across all DrawingContexts, as issues like bug http://bugzilla.onlyoffice.com/show_bug.cgi?id=19784 can occur)
 		if (null === this.font) {
 			throw "Can not set font in DrawingContext";
 		}
@@ -477,7 +477,7 @@
 
 	/**
 	 * Returns width of drawing context in current units
-	 * @param {Number} [units]  Единицы измерения (0=px, 1=pt, 2=in, 3=mm) в которых будет возвращена ширина
+	 * @param {Number} [units]  Units of measurement (0=px, 1=pt, 2=in, 3=mm) in which the width will be returned
 	 * @return {Number}
 	 */
 	DrawingContext.prototype.getWidth = function (units) {
@@ -487,7 +487,7 @@
 
 	/**
 	 * Returns height of drawing context in current units
-	 * @param {Number} [units]  Единицы измерения (0=px, 1=pt, 2=in, 3=mm) в которых будет возвращена высота
+	 * @param {Number} [units]  Units of measurement (0=px, 1=pt, 2=in, 3=mm) in which the height will be returned
 	 * @return {Number}
 	 */
 	DrawingContext.prototype.getHeight = function (units) {
@@ -896,7 +896,7 @@
 
 	DrawingContext.prototype.nativeTextDecorationTransform = function(isStart)
 	{
-		// текст рисуется с трансформом, а strikeout/underline - без (матрица применяется ДО отрисовщика)
+		// text is drawn with transform, but strikeout/underline - without (matrix is applied BEFORE the renderer)
 		if (isStart)
 			window["native"]["PD_transform"](this._im.sx, this._im.shy, this._im.shx, this._im.sy, this._im.tx, this._im.ty);
 		else
@@ -977,15 +977,15 @@
 				flag |= 0x08;
 			}
 			
-			// выставляем шрифт и отрисовщику...
+			// set font for the renderer...
 			var drawFontSize = fontSize * this.scaleFactor * 96.0 / 25.4;
 			window["native"]["PD_LoadFont"](fontInfo.Path, fontInfo.FaceIndex, drawFontSize, flag);
 			
-			// на отрисовке ячейки трансформ выставляется/сбрасывается. так что тут - только если есть angle
+			// transform is set/reset during cell rendering. so here - only if angle is present
 			if (isRotated)
 				window["native"]["PD_transform"](this._mt.sx, this._mt.shy, this._mt.shx, this._mt.sy, this._mt.tx, this._mt.ty);
 			
-			// ...и измерятелю
+			// ...and for the measurer
 			AscFonts.g_fontApplication.LoadFont(fontName, AscCommon.g_font_loader, this.fmgrGraphics[3], fontSize, fontStyle, this.ppiX, this.ppiY);
 		} else {
 			let r;
@@ -1040,7 +1040,7 @@
 			code = aCodes ? aCodes[i] : text.charCodeAt(i);
 			// Replace Non-breaking space(0xA0) with White-space(0x20)
 			tmp = fm.MeasureChar(0xA0 === code ? 0x20 : code);
-			w += asc_round(tmp.fAdvanceX); // ToDo скачет при wrap в ячейке и zoom
+			w += asc_round(tmp.fAdvanceX); // ToDo jumps during wrap in cell and zoom
 		}
 		w2 = w - tmp.fAdvanceX + tmp.oBBox.fMaxX - tmp.oBBox.fMinX + 1;
 		return this._calcTextMetrics(w * r, w2 * r, fm, r);
@@ -1079,7 +1079,7 @@
 			code = 0xA0 === code ? 0x20 : code;
 			if (window["IS_NATIVE_EDITOR"]) {
 				window["native"]["PD_FillText"](_x, _y, code);
-				// убрать это!!! все сдвиги ДОЛЖНЫ быть вщять из измерятеля/шейпера
+				// remove this!!! all offsets SHOULD be taken from the measurer/shaper
 				_x += asc_round((this.measureChar(undefined, 3, code).width) * this.scaleFactor * 96.0 / 25.4);
 			} else {
 				_x = asc_round(manager.LoadString4C(code, _x, _y));
@@ -1171,7 +1171,7 @@
 		return this;
 	};
 
-	// Отрисовка на 1px меньше
+	// Draw 1px shorter
 	DrawingContext.prototype.lineHorPrevPx = function (x1, y, x2) {
 		var isEven = (0 !== this.ctx.lineWidth % 2 ? 0.5 : 0) - 1;
 		var r1 = this._calcRect(x1, y);
@@ -1387,10 +1387,10 @@
 	};
 
 	/**
-	 * @param {Number} w         Ширина текста
-	 * @param {Number} wBB       Ширина Bound Box текста
-	 * @param {AscFonts.CFontManager} fm  Объект AscFonts.CFontManager для получения метрик шрифта
-	 * @param {Number} r         Коэффициент перевода pt -> в текущие единицы измерения (this.units)
+	 * @param {Number} w         Text width
+	 * @param {Number} wBB       Text Bound Box width
+	 * @param {AscFonts.CFontManager} fm  AscFonts.CFontManager object for getting font metrics
+	 * @param {Number} r         Conversion coefficient pt -> current units of measurement (this.units)
 	 * @return {TextMetrics}
 	 */
 	DrawingContext.prototype._calcTextMetrics = function (w, wBB, fm, r) {

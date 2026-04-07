@@ -240,7 +240,7 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-		//формируем массив значений
+		//create an array of values
 		const randomArray = [];
 		let randomStrArray = "{";
 		let maxArg = 4;
@@ -12503,7 +12503,7 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: MMULT({1E+307,1E+307;1E+307,1E+307},{1E+307;1E+307}) is parsed.');
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '#NUM!', 'Test: Bounded case: Number. Maximum valid values in 2x2 * 2x1 arrays. 2 arguments used.');
 
-		// todo если возвращается одно единственное значение, должно ли оно оборачиваться в массив?
+		// todo if a single value is returned, should it be wrapped in an array?
 		// Need to fix: error handle, IF doesn't return an array, boolean handle
 		// Case #19: Formula. Nested IF returning valid array. 2 arguments used.
 		// Case #4: Error. Propagates #N/A error. 2 arguments used.
@@ -12834,7 +12834,7 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"MROUND\"", function (assert) {
-		var multiple;//должен равняться значению второго аргумента
+		var multiple;//should equal the value of the second argument
 		function mroundHelper(num) {
 			var multiplier = Math.pow(10, Math.floor(Math.log(Math.abs(num)) / Math.log(10)) - AscCommonExcel.cExcelSignificantDigits + 1);
 			var nolpiat = 0.5 * (num > 0 ? 1 : num < 0 ? -1 : 0) * multiplier;
@@ -17319,7 +17319,7 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue().toFixed(4) - 0, 2.1123);
 
-		//TODO в хроме при расчёте разница, временно убираю
+		// TODO there is a calculation difference in Chrome, temporarily removing
 		oParser = new parserFormula("ROUNDUP(2,4)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual( oParser.calculate().getValue(), 2);
@@ -18673,7 +18673,7 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), 6, 'Test: Bounded case: Number(3), Array. Maximum integer values for n and m (Excelâ??s 32-bit integer limit). 4 of 4 arguments used.');
 
 
-		//TODO нужна другая функция для тестирования
+		// TODO need a different function for testing
 		//testArrayFormula2(assert, "SERIESSUM", 4, 4);
 	});
 
@@ -20354,7 +20354,7 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: SUBTOTAL(-1E+307,A100) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Bounded case: Number. Maximum negative number.');
 
-		// TODO много отрицательных кейсов по парсингу формулы, добавить ошибку при отсутсвии нужного типа reference в аргументах
+		// TODO many negative cases for formula parsing, add error when required reference type is missing in arguments
 		// Need to fix:
 		// Case #2: Reference link. Reference link to single cell.
 		// Case #3: Area. Range of 2 cells.

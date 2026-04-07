@@ -38,10 +38,10 @@
 
 function CBounds()
 {
-    this.L      = 0;    // левая граница
-    this.T      = 0;    // верхняя граница
-    this.R      = 0;    // правая граница (если поднят флаг isAbsR, то это расстояние справа, а не R)
-    this.B      = 0;    // верхняя граница (если поднят флаг isAbsB, то это расстояние справа, а не B)
+    this.L      = 0;    // left boundary
+    this.T      = 0;    // top boundary
+    this.R      = 0;    // right boundary (if isAbsR flag is set, this is the distance from the right, not R)
+    this.B      = 0;    // bottom boundary (if isAbsB flag is set, this is the distance from the bottom, not B)
 
     this.isAbsL = false;
     this.isAbsT = false;

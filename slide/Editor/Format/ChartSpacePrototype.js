@@ -493,7 +493,7 @@ CTable.prototype.DrawSelectionOnPage = function(CurPage)
 
                 if (0 != Cell_PageRel)
                 {
-                    // мы должны определить ряд, на котором случился перенос на новую страницу
+                    // we need to determine the row on which the page break occurred
                     var TempRowIndex = this.Pages[CurPage].FirstRow;
                     this.DrawingDocument.AddPageSelection(PageAbs, X_start, this.RowsInfo[TempRowIndex].Y[CurPage] + this.RowsInfo[TempRowIndex].TopDy[CurPage], X_end - X_start,  this.RowsInfo[TempRowIndex].H[CurPage]);
                 }

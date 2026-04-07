@@ -439,7 +439,7 @@ window["UpdateInstallPlugins"] = function()
 		var _len = _pluginsCur["pluginsData"].length;
 		for (var i = 0; i < _len; i++)
 		{
-			// TODO: здесь нужно прокинуть флаг isSystemInstall, указывающий на то, что этот плагин нельзя удалить, он не в папке пользователя
+			// TODO: here we need to pass the isSystemInstall flag, indicating that this plugin cannot be deleted as it is not in the user folder
 			//_pluginsCur["pluginsData"][i]["isSystemInstall"] = (k == 0) ? true : false;
 			_pluginsCur["pluginsData"][i]["baseUrl"] = _pluginsCur["url"] + _pluginsCur["pluginsData"][i]["guid"].substring(4) + "/";
 			_plugins["pluginsData"].push(_pluginsCur["pluginsData"][i]);
@@ -787,7 +787,7 @@ _proto.prototype["pluginMethod_OnEncryption"] = function(obj)
 AscCommon.getBinaryArray = getBinaryArray;
 // -------------------------------------------
 
-// меняем среду
+// change environment
 //AscBrowser.isSafari = false;
 //AscBrowser.isSafariMacOs = false;
 //window.USER_AGENT_SAFARI_MACOS = false;

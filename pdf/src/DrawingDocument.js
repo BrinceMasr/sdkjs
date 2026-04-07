@@ -166,13 +166,13 @@
         
                 if (this.GuiLastTextProps.Position !== undefined && this.GuiLastTextProps.Position != null && this.GuiLastTextProps.Position != 0)
                 {
-                    // TODO: нужна высота без учета Position
+                    // TODO: need height without considering Position
                     // _pxBoundsH -= (this.GuiLastTextProps.Position * g_dKoef_mm_to_pix);
                 }
         
                 if (_pxBoundsH < _hPx && _pxBoundsW < _wPx)
                 {
-                    // рисуем линию
+                    // draw line
                     var _lineY = (((_hPx + _pxBoundsH) / 2) >> 0) + 0.5;
                     var _lineW = (((_wPx - _pxBoundsW) / 4) >> 0);
         

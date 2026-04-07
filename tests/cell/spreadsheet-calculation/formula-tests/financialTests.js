@@ -239,7 +239,7 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-		//form an array of values
+		// Create array of values
 		const randomArray = [];
 		let randomStrArray = "{";
 		let maxArg = 4;

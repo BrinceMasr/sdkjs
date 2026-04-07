@@ -89,7 +89,7 @@
         this.Master      = null;
 
 
-        this.m_oContentChanges = new AscCommon.CContentChanges(); // список изменений(добавление/удаление элементов)
+        this.m_oContentChanges = new AscCommon.CContentChanges(); // list of changes (adding/removing elements)
         this.kind = AscFormat.TYPE_KIND.NOTES;
 
         this.Lock = new AscCommon.CLock();

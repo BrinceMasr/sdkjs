@@ -1391,20 +1391,22 @@
 
 	/**
 	 * Removes page by index from document
+	 * <note> You can't delete last page </note>
 	 * @memberof ApiDocument
 	 * @typeofeditors ["PDFE"]
-	 * @param {number} nPos - page position
+	 * @param {number} pos - page position
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/RemovePage.js
 	 */
-	ApiDocument.prototype.RemovePage = function(nPos) {
+	ApiDocument.prototype.RemovePage = function(pos) {
 		let oFile = this.Document.GetFile();
-		if (!oFile.pages[nPos]) {
-			return false;
+
+		pos = AscBuilder.GetNumberParameter(pos, null);
+		if (null == pos || pos < 0 || pos > oFile.pages.length - 1) {
+			AscBuilder.throwException("The pos parameter must be a valid position");
 		}
 
-		this.Document.RemovePage(nPos);
-		return true;
+		return !!this.Document.RemovePage(pos);
 	};
 
 	/**
@@ -1423,7 +1425,7 @@
 	 * Gets list of all fields in document.
 	 * @memberof ApiDocument
 	 * @typeofeditors ["PDFE"]
-	 * @returns {ApiField}
+	 * @returns {ApiField[]}
 	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/GetAllFields.js
 	 */
 	ApiDocument.prototype.GetAllFields = function() {
@@ -1650,7 +1652,7 @@
 	 * Gets page widgets
 	 * @memberof ApiPage
 	 * @typeofeditors ["PDFE"]
-	 * @returns {number}
+	 * @returns {ApiWidget[]}
 	 * @see office-js-api/Examples/{Editor}/ApiPage/Methods/GetAllWidgets.js
 	 */
 	ApiPage.prototype.GetAllWidgets = function() {
@@ -1693,7 +1695,7 @@
 	 * Gets all annots on page
 	 * @memberof ApiPage
 	 * @typeofeditors ["PDFE"]
-	 * @returns {ApiBaseAnnotation}
+	 * @returns {ApiBaseAnnotation[]}
 	 * @see office-js-api/Examples/{Editor}/ApiPage/Methods/GetAllAnnots.js
 	 */
 	ApiPage.prototype.GetAllAnnots = function() {
@@ -2013,7 +2015,7 @@
 	/**
 	 * Gets array with widgets of the current field.
 	 * @typeofeditors ["PDFE"]
-	 * @returns {?ApiWidget}
+	 * @returns {ApiWidget[]}
 	 * @see office-js-api/Examples/{Editor}/ApiBaseField/Methods/GetAllWidgets.js
 	 */
 	ApiBaseField.prototype.GetAllWidgets = function() {
@@ -5622,6 +5624,36 @@
 
 	//------------------------------------------------------------------------------------------------------------------
 	//
+	// ApiLinkAnnotation
+	//
+	//------------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Class representing a link annotation.
+	 * @constructor
+	 * @typeofeditors ["PDFE"]
+	 * @extends {ApiBaseMarkupAnnotation}
+	 */
+	function ApiLinkAnnotation(oAnnot) {
+		ApiBaseMarkupAnnotation.call(this, oAnnot);
+	}
+
+	ApiLinkAnnotation.prototype = Object.create(ApiBaseMarkupAnnotation.prototype);
+	ApiLinkAnnotation.prototype.constructor = ApiLinkAnnotation;
+
+	/**
+	 * Returns a type of the ApiLinkAnnotation class.
+	 * @memberof ApiLinkAnnotation
+	 * @typeofeditors ["PDFE"]
+	 * @returns {"linkAnnot"}
+	 * @see office-js-api/Examples/{Editor}/ApiLinkAnnotation/Methods/GetClassType.js
+	 */
+	ApiLinkAnnotation.prototype.GetClassType = function() {
+		return "linkAnnot";
+	};
+
+	//------------------------------------------------------------------------------------------------------------------
+	//
 	// ApiRichContent
 	//
 	//------------------------------------------------------------------------------------------------------------------
@@ -8107,6 +8139,9 @@
 			case AscPDF.ANNOTATIONS_TYPES.Redact: {
 				return new ApiRedactAnnotation(annot);
 			}
+			case AscPDF.ANNOTATIONS_TYPES.Link: {
+				return new ApiLinkAnnotation(annot);
+			}
 		}
 	}
 
@@ -8623,6 +8658,9 @@
 
 	// ApiRedactAnnotation
 	ApiRedactAnnotation.prototype["GetClassType"]			= ApiRedactAnnotation.prototype.GetClassType;
+	
+	// ApiLinkAnnotation
+	ApiLinkAnnotation.prototype["GetClassType"]				= ApiLinkAnnotation.prototype.GetClassType;
 
 	// ApiRichContent
 	ApiRichContent.prototype["GetClassType"]				= ApiRichContent.prototype.GetClassType;
