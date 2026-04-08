@@ -11993,6 +11993,7 @@
 			options.asc_setIsWholeCell(LookAt === 'xlWhole');
 			options.asc_setScanOnOnlySheet(Asc.c_oAscSearchBy.Range);
 			options.asc_setSpecificRange(this["Address"]);
+			options.asc_setWsIndex(this.range.worksheet.index);
 			options.asc_setScanByRows(SearchOrder === 'xlByRows');
 			options.asc_setLookIn(Asc.c_oAscFindLookIn.Formulas);
 			if (typeof ReplaceAll !== 'boolean')

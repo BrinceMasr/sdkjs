@@ -3757,7 +3757,7 @@
       this.Api.sync_StartAction(c_oAscAsyncActionType.BlockInteraction, c_oAscAsyncAction.SlowOperation);
     }
 
-    var ws = this.getWorksheet();
+    var ws = this.getWorksheet(options.wsIndex !== -1 ? options.wsIndex : undefined);
     ws.replaceCellText(options, false, this.fReplaceCallback, true);
   };
   WorkbookView.prototype._replaceCellTextCallback = function(options) {
