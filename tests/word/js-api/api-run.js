@@ -85,18 +85,18 @@ $(function ()
 		const themeColor = AscTest.JsApi.ThemeColor('accent2');
 		const autoColor = AscTest.JsApi.AutoColor();
 
-		assert.strictEqual(apiRun.GetShd(), null, 'Shading (Shd) check for a newly created run');
+		assert.equalShd(apiRun.GetTextPr().GetShd(), undefined, 'Shading check for a newly created run');
 
 		apiRun.SetShd('clear', 255, 127, 0);
-		assert.equalRgb(apiRun.GetShd(), { r: 255, g: 127, b: 0 }, 'Shading check after setting shading with RGB components');
+		assert.equalShd(apiRun.GetTextPr().GetShd(), { 'Type': 'clear', 'Color': AscTest.JsApi.RGB(255, 127, 0) }, 'Shading check after setting shading with RGB components');
 
 		apiRun.SetShd('clear', hexColor);
-		assert.equalRgba(apiRun.GetShd(), { r: 186, g: 218, b: 85, a: 255 }, 'Shading check after setting shading with ApiColor (hex)');
+		assert.equalShd(apiRun.GetTextPr().GetShd(), { 'Type': 'clear', 'Color': AscTest.JsApi.HexColor('#bada55') }, 'Shading check after setting shading with ApiColor (hex)');
 
 		apiRun.SetShd('clear', themeColor);
-		assert.strictEqual(apiRun.GetShd().IsThemeColor(), true, 'Shading check after setting shading with ApiColor (theme)');
+		assert.equalShd(apiRun.GetTextPr().GetShd(), { 'Type': 'clear', 'Color': AscTest.JsApi.ThemeColor('accent2') }, 'Shading check after setting shading with ApiColor (theme)');
 
 		apiRun.SetShd('clear', autoColor);
-		assert.strictEqual(apiRun.GetShd().IsAutoColor(), true, 'Shading check after setting shading with ApiColor (auto)');
+		assert.equalShd(apiRun.GetTextPr().GetShd(), { 'Type': 'clear', 'Color': AscTest.JsApi.AutoColor() }, 'Shading check after setting shading with ApiColor (auto)');
 	});
 });

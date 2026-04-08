@@ -4005,7 +4005,7 @@
 
 	/**
 	 * The border properties object.
-	 * @typedef {Object} BorderInfo
+	 * @typedef {Object} Border
 	 * @property {BorderType} Type - The border style.
 	 * @property {pt_8} Size - The border width measured in eighths of a point.
 	 * @property {pt} Space - The spacing offset from the text to the border measured in points.
@@ -4016,6 +4016,13 @@
 	 * A shade type which can be added to the document element.
 	 * @typedef {("nil" | "clear")} ShdType
 	 * @see office-js-api/Examples/Enumerations/ShdType.js
+	 */
+
+	/**
+	 * @typedef {Object} Shd
+	 * The shading information object.
+	 * @property {ShdType} Type - The shading type: <b>"nil"</b> - no shading, <b>"clear"</b> - solid fill.
+	 * @property {ApiColor} Color - The shading color.
 	 */
 
 	/**
@@ -16438,7 +16445,7 @@
 	 * Gets the text shading from the current text properties.
 	 * @memberof ApiTextPr
 	 * @typeofeditors ["CDE"]
-	 * @return {?ApiColor}
+	 * @return {Shd | undefined}
 	 * @since 8.1.0
 	 * @see office-js-api/Examples/{Editor}/ApiTextPr/Methods/GetShd.js
 	 */
@@ -16446,27 +16453,29 @@
 	{
 		let oShd = this.TextPr.GetShd();
 		if (!oShd)
-			return null;
+			return undefined;
 
-		const unifill = oShd.Unifill || oShd.ThemeFill;
+		const type = (oShd.Value === Asc.c_oAscShdNil) ? "nil" : "clear";
+
+		let apiColor = null;
+		const unifill      = oShd.Unifill || oShd.ThemeFill;
 		const unifillColor = unifill && unifill.fill && unifill.fill.color && unifill.fill.color.color;
-		if (unifillColor) {
+		if (unifillColor)
+		{
 			if (unifillColor instanceof AscFormat.CSchemeColor)
-				return new ApiColor('theme', unifillColor.id);
-
-			if (unifillColor instanceof AscFormat.CRGBColor)
-				return Api.RGB(unifillColor.r, unifillColor.g, unifillColor.b);
+				apiColor = new ApiColor('theme', unifillColor.id);
+			else if (unifillColor instanceof AscFormat.CRGBColor)
+				apiColor = Api.RGB(unifillColor.r, unifillColor.g, unifillColor.b);
 		}
 
-		const color = oShd.Color || oShd.Fill;
-		if (color) {
-			const isAuto = color.Auto === true;
-			return isAuto
-				? Api.AutoColor()
-				: Api.RGB(color.r, color.g, color.b);
+		if (!apiColor)
+		{
+			const color = oShd.Color || oShd.Fill;
+			if (color)
+				apiColor = (true === color.Auto) ? Api.AutoColor() : Api.RGB(color.r, color.g, color.b);
 		}
 
-		return null;
+		return { "Type": type, "Color": apiColor };
 	};
 
 	/**
@@ -17088,35 +17097,39 @@
 	 * Returns the shading applied to the contents of the paragraph.
 	 * @memberof ApiParaPr
 	 * @typeofeditors ["CDE"]
-	 * @returns {?ApiColor}
+	 * @returns {Shd | undefined}
 	 * @see office-js-api/Examples/{Editor}/ApiParaPr/Methods/GetShd.js
 	 */
 	ApiParaPr.prototype.GetShd = function()
 	{
 		const shd = this.GetEffectiveParaPr().Shd;
 		if (!shd)
-			return null;
-		
-		let unifill = shd.Unifill || shd.ThemeFill;
-		let color   = shd.Color || shd.Fill;
-		
+			return undefined;
+
+		const type = (shd.Value === Asc.c_oAscShdNil) ? "nil" : "clear";
+
+		let apiColor = null;
+		const unifill      = shd.Unifill || shd.ThemeFill;
 		const unifillColor = unifill && unifill.fill && unifill.fill.color && unifill.fill.color.color;
 		if (unifillColor)
 		{
 			if (unifillColor instanceof AscFormat.CSchemeColor)
-				return new ApiColor('theme', unifillColor.id);
-			
-			if (unifillColor instanceof AscFormat.CRGBColor)
-				return Api.RGB(unifillColor.r, unifillColor.g, unifillColor.b);
+				apiColor = new ApiColor('theme', unifillColor.id);
+			else if (unifillColor instanceof AscFormat.CRGBColor)
+				apiColor = Api.RGB(unifillColor.r, unifillColor.g, unifillColor.b);
 		}
-		
-		if (!color)
-			return null;
-		
-		if (true === color.Auto)
-			return Api.AutoColor();
-		
-		return Api.RGB(color.r, color.g, color.b);
+
+		if (!apiColor)
+		{
+			const color = shd.Color || shd.Fill;
+			if (color)
+				apiColor = (true === color.Auto) ? Api.AutoColor() : Api.RGB(color.r, color.g, color.b);
+		}
+
+		return { 
+			"Type"  : type, 
+			"Color" : apiColor 
+		};
 	};
 	/**
 	 * Specifies the border which will be displayed below a set of paragraphs which have the same paragraph border settings.
@@ -17144,7 +17157,7 @@
 	 * @memberof ApiParaPr
 	 * @typeofeditors ["CDE"]
 	 * @since 9.4.0
-	 * @returns {BorderInfo | undefined} Returns the border properties object, or <em>undefined</em> if the bottom border is not set.
+	 * @returns {Border | undefined} Returns the border properties object, or <em>undefined</em> if the bottom border is not set.
 	 * @see office-js-api/Examples/{Editor}/ApiParaPr/Methods/GetBottomBorder.js
 	 */
 	ApiParaPr.prototype.GetBottomBorder = function()
@@ -17176,7 +17189,7 @@
 	 * @memberof ApiParaPr
 	 * @typeofeditors ["CDE"]
 	 * @since 9.4.0
-	 * @returns {BorderInfo | undefined} Returns the border properties object, or <em>undefined</em> if the left border is not set.
+	 * @returns {Border | undefined} Returns the border properties object, or <em>undefined</em> if the left border is not set.
 	 * @see office-js-api/Examples/{Editor}/ApiParaPr/Methods/GetLeftBorder.js
 	 */
 	ApiParaPr.prototype.GetLeftBorder = function()
@@ -17208,7 +17221,7 @@
 	 * @memberof ApiParaPr
 	 * @typeofeditors ["CDE"]
 	 * @since 9.4.0
-	 * @returns {BorderInfo | undefined} Returns the border properties object, or <em>undefined</em> if the right border is not set.
+	 * @returns {Border | undefined} Returns the border properties object, or <em>undefined</em> if the right border is not set.
 	 * @see office-js-api/Examples/{Editor}/ApiParaPr/Methods/GetRightBorder.js
 	 */
 	ApiParaPr.prototype.GetRightBorder = function()
@@ -17241,7 +17254,7 @@
 	 * @memberof ApiParaPr
 	 * @typeofeditors ["CDE"]
 	 * @since 9.4.0
-	 * @returns {BorderInfo | undefined} Returns the border properties object, or <em>undefined</em> if the top border is not set.
+	 * @returns {Border | undefined} Returns the border properties object, or <em>undefined</em> if the top border is not set.
 	 * @see office-js-api/Examples/{Editor}/ApiParaPr/Methods/GetTopBorder.js
 	 */
 	ApiParaPr.prototype.GetTopBorder = function()
@@ -17273,7 +17286,7 @@
 	 * @memberof ApiParaPr
 	 * @typeofeditors ["CDE"]
 	 * @since 9.4.0
-	 * @returns {BorderInfo | undefined} Returns the border properties object, or <em>undefined</em> if the between border is not set.
+	 * @returns {Border | undefined} Returns the border properties object, or <em>undefined</em> if the between border is not set.
 	 * @see office-js-api/Examples/{Editor}/ApiParaPr/Methods/GetBetweenBorder.js
 	 */
 	ApiParaPr.prototype.GetBetweenBorder = function()

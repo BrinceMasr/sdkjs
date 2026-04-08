@@ -58,6 +58,62 @@ $(function()
 		let docContent = new AscWord.CDocumentContent();
 		return new AscBuilder.ApiDocumentContent(docContent);
 	};
+	
+	if (!QUnit.assert.equalShd)
+	{
+		QUnit.assert.equalBorder = function(actualColor, expectedColor, message)
+		{
+			if (expectedColor.IsThemeColor())
+			{
+				QUnit.assert.strictEqual(actualColor.IsThemeColor(), true, message + "check theme color type");
+				QUnit.assert.strictEqual(actualColor.GetThemeName(), expectedColor.GetThemeName(), message + "check theme color");
+			}
+			else if (expectedColor.IsAutoColor())
+			{
+				QUnit.assert.strictEqual(actualColor.IsAutoColor(), true, message + "check auto color");
+			}
+			else
+			{
+				let actualRGB   = actualColor.GetRGB();
+				let expectedRGB = expectedColor.GetRGB();
+				QUnit.assert.strictEqual(actualRGB["r"], expectedRGB["r"], message + "check r component");
+				QUnit.assert.strictEqual(actualRGB["g"], expectedRGB["g"], message + "check g component");
+				QUnit.assert.strictEqual(actualRGB["b"], expectedRGB["b"], message + "check b component");
+			}
+		}
+		
+		QUnit.assert.equalShd = function(actualShd, expectedShd, message)
+		{
+			if (!actualShd || !expectedShd)
+				return QUnit.assert.strictEqual(actualShd, expectedShd, message);
+			
+			message = message ? message + " - " : "";
+			QUnit.assert.strictEqual(actualShd["Type"], expectedShd["Type"], message + "check type");
+			
+			if ("nil" === actualShd["Type"] && "nil" === expectedShd["Type"])
+				return;
+			
+			QUnit.assert.equalBorder(actualShd["Color"], expectedShd["Color"], message);
+		};
+		
+		QUnit.assert.equalBorder = function(actualBrd, expectedBrd, message)
+		{
+			if (!actualBrd || !expectedBrd)
+				return QUnit.assert.strictEqual(actualBrd, expectedBrd, message);
+			
+			message = message ? message + " - " : "";
+			
+			QUnit.assert.strictEqual(actualBrd["Type"], expectedBrd["Type"], (message ? message : "") + " check type");
+			
+			if ("none" === actualBrd["Type"])
+				return;
+			
+			QUnit.assert.strictEqual(actualBrd["Size"], expectedBrd["Size"], (message ? message : "") + " check type");
+			QUnit.assert.strictEqual(actualBrd["Space"], expectedBrd["Space"], (message ? message : "") + " check type");
+			
+			QUnit.assert.equalBorder(actualBrd["Color"], expectedBrd["Color"], message);
+		};
+	}
 
 	QUnit.testStart(function()
 	{

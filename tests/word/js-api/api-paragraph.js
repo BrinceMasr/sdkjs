@@ -61,22 +61,23 @@ $(function ()
 		}), "123_t_456_nl_789\r\n", "Check GetText");
 	});
 	
-	QUnit.test('SetShd, GetShd', function (assert) {
+	QUnit.test('SetShd, GetShd', function (assert)
+	{
 		const apiParagraph = createApiParagraph();
 
-		assert.strictEqual(apiParagraph.GetShd(), null, 'Shading check for a newly created paragraph');
+		assert.equalShd(apiParagraph.GetShd(), {'Type' : 'nil', 'Color' : AscTest.JsApi.RGB(255, 255, 255)}, 'Shading check for a newly created paragraph');
 
 		apiParagraph.SetShd('clear', 255, 122, 100);
-		assert.equalRgb(apiParagraph.GetShd(), { r: 255, g: 122, b: 100 }, 'Check shd color set with RGB components');
+		assert.equalShd(apiParagraph.GetShd(), { 'Type' : 'clear', 'Color' : AscTest.JsApi.RGB(255, 122, 100) }, 'Check shd color set with RGB components');
 
 		apiParagraph.SetShd('clear', AscTest.JsApi.HexColor('55aa00'));
-		assert.equalRgb(apiParagraph.GetShd(), { r: 85, g: 170, b: 0 }, 'Check shd color set with ApiColor (hex)');
+		assert.equalShd(apiParagraph.GetShd(), { 'Type': 'clear', 'Color': AscTest.JsApi.RGB(85, 170, 0) }, 'Check shd color set with ApiColor (hex)');
 
 		apiParagraph.SetShd('clear', AscTest.JsApi.ThemeColor('accent2'));
-		assert.strictEqual(apiParagraph.GetShd().IsThemeColor(), true, 'Check shd color set with ApiColor (theme)');
+		assert.equalShd(apiParagraph.GetShd(), { 'Type': 'clear', 'Color': AscTest.JsApi.ThemeColor('accent2') }, 'Check shd color set with ApiColor (theme)');
 
 		apiParagraph.SetShd('clear', AscTest.JsApi.AutoColor());
-		assert.strictEqual(apiParagraph.GetShd().IsAutoColor(), true, 'Check shd color set with ApiColor (auto)');
+		assert.equalShd(apiParagraph.GetShd(), { 'Type': 'clear', 'Color': AscTest.JsApi.AutoColor() }, 'Check shd color set with ApiColor (auto)');
 	});
 	
 	QUnit.test('GetRange', function (assert)
