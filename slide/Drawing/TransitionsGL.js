@@ -1268,11 +1268,11 @@
         let originX = 0.5, originY = 0.5;
         switch (param)
         {
-            case c_oAscSlideTransitionParams.Ripple_LeftUp:    originX = 1.0; originY = 0.0; break;
-            case c_oAscSlideTransitionParams.Ripple_RightUp:   originX = 0.0; originY = 0.0; break;
-            case c_oAscSlideTransitionParams.Ripple_LeftDown:  originX = 1.0; originY = 1.0; break;
-            case c_oAscSlideTransitionParams.Ripple_RightDown: originX = 0.0; originY = 1.0; break;
-            case c_oAscSlideTransitionParams.Ripple_Center:    originX = 0.5; originY = 0.5; break;
+			case c_oAscSlideTransitionParams.Ripple_LeftUp: originX = 0.0; originY = 1.0; break;
+			case c_oAscSlideTransitionParams.Ripple_RightUp: originX = 1.0; originY = 1.0; break;
+			case c_oAscSlideTransitionParams.Ripple_LeftDown: originX = 0.0; originY = 0.0; break;
+			case c_oAscSlideTransitionParams.Ripple_RightDown: originX = 1.0; originY = 0.0; break;
+			case c_oAscSlideTransitionParams.Ripple_Center: originX = 0.5; originY = 0.5; break;
         }
 
         gl.activeTexture(gl.TEXTURE0);

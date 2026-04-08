@@ -740,10 +740,10 @@ CAscSlideTransition.prototype.parseXmlParameters = function (_type, _paramNames,
             this.TransitionOption = c_oAscSlideTransitionParams.Ripple_Center;
             for (let i = 0; i < _len; i++) {
                 if (_paramNames[i] === "dir") {
-                    if ("lu" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Ripple_LeftUp;
-                    else if ("ru" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Ripple_RightUp;
-                    else if ("ld" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Ripple_LeftDown;
-                    else if ("rd" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Ripple_RightDown;
+					if ("lu" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Ripple_RightDown;
+					else if ("ru" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Ripple_LeftDown;
+					else if ("ld" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Ripple_RightUp;
+					else if ("rd" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Ripple_LeftUp;
                 }
             }
         }
@@ -1248,11 +1248,11 @@ CAscSlideTransition.prototype.fillXmlParams = function (aAttrNames, aAttrValues)
         {
             sNodeName = "p14:ripple";
             const rippleDirMap = {};
-            rippleDirMap[c_oAscSlideTransitionParams.Ripple_LeftUp] = "lu";
-            rippleDirMap[c_oAscSlideTransitionParams.Ripple_RightUp] = "ru";
-            rippleDirMap[c_oAscSlideTransitionParams.Ripple_LeftDown] = "ld";
-            rippleDirMap[c_oAscSlideTransitionParams.Ripple_RightDown] = "rd";
-            rippleDirMap[c_oAscSlideTransitionParams.Ripple_Center] = "center";
+			rippleDirMap[c_oAscSlideTransitionParams.Ripple_LeftUp] = "rd";
+			rippleDirMap[c_oAscSlideTransitionParams.Ripple_RightUp] = "ld";
+			rippleDirMap[c_oAscSlideTransitionParams.Ripple_LeftDown] = "ru";
+			rippleDirMap[c_oAscSlideTransitionParams.Ripple_RightDown] = "lu";
+			rippleDirMap[c_oAscSlideTransitionParams.Ripple_Center] = "center";
             aAttrNames.push("dir");
             aAttrValues.push(rippleDirMap[this.TransitionOption] || "center");
             break;
