@@ -23838,11 +23838,8 @@ CDocument.prototype.UpdateComplexField = function(oField)
 };
 CDocument.prototype.GetCurrentComplexFields = function()
 {
-	var oParagraph = this.GetCurrentParagraph();
-	if (!oParagraph)
-		return [];
-
-	return oParagraph.GetCurrentComplexFields();
+	let paragraph = this.GetCurrentParagraph();
+	return paragraph ? paragraph.GetCurrentComplexFields() : [];
 };
 CDocument.prototype.ToggleComplexFieldCodes = function()
 {

@@ -1105,7 +1105,7 @@
 		if (!logicDocument)
 			return null;
 		
-		let fields = logicDocument.GetCurrentComplexFields();
+		let fields = logicDocument.GetAllFields(logicDocument.IsTextSelectionUse());
 		let data = null;
 		for (let i = 0; i < fields.length; ++i)
 		{
