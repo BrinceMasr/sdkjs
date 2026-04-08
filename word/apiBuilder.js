@@ -4004,6 +4004,15 @@
 	 */
 
 	/**
+	 * The border properties object.
+	 * @typedef {Object} BorderInfo
+	 * @property {BorderType} Type - The border style.
+	 * @property {pt_8} Size - The border width measured in eighths of a point.
+	 * @property {pt} Space - The spacing offset from the text to the border measured in points.
+	 * @property {ApiColor} Color - The border color.
+	 */
+
+	/**
 	 * A shade type which can be added to the document element.
 	 * @typedef {("nil" | "clear")} ShdType
 	 * @see office-js-api/Examples/Enumerations/ShdType.js
@@ -16629,23 +16638,10 @@
 	ApiParaPr.prototype.GetStyle = function()
 	{
 		var oDocument = private_GetLogicDocument();
-		var oStyles   = oDocument.GetStyles();
-
-		var styleId;
-		if (!this.Parent)
-		{
-			styleId = this.ParaPr.PStyle;
-			if (styleId)
-				return new ApiStyle(oStyles.Get(styleId));
-
-			return null;
-		}
-
-		styleId = this.Parent.private_GetImpl().Get_CompiledPr2().ParaPr.PStyle;
-		if (styleId)
-			return new ApiStyle(oStyles.Get(styleId));
-
-		return null;
+		let styles   = oDocument.GetStyles();
+		
+		let styleId = this.GetEffectiveParaPr().PStyle;
+		return styleId ? new ApiStyle(styles.Get(styleId)) : null;
 	};
 	/**
 	 * Specifies that any space before or after this paragraph set using the 
@@ -16662,6 +16658,19 @@
 		this.ParaPr.ContextualSpacing = private_GetBoolean(isContextualSpacing);
 		this.private_OnChange();
 		return true;
+	};
+	/**
+	 * Returns the contextual spacing value of the current paragraph.
+	 * @memberof ApiParaPr
+	 * @typeofeditors ["CDE"]
+	 * @since 9.4.0
+	 * @returns {boolean | undefined} Returns <em>true</em> if the contextual spacing is enabled, <em>false</em> if it is disabled,
+	 * or <em>undefined</em> if the value is not set.
+	 * @see office-js-api/Examples/{Editor}/ApiParaPr/Methods/GetContextualSpacing.js
+	 */
+	ApiParaPr.prototype.GetContextualSpacing = function()
+	{
+		return this.GetEffectiveParaPr().ContextualSpacing;
 	};
 	/**
 	 * Sets the paragraph left side indentation.
@@ -16686,13 +16695,8 @@
 	 */
 	ApiParaPr.prototype.GetIndLeft = function()
 	{
-		if (!this.Parent)
-		{
-			if (this.ParaPr.Ind.Left !== undefined)
-				return private_MM2Twips(this.ParaPr.Ind.Left);
-			return undefined;
-		}
-		return private_MM2Twips(this.Parent.private_GetImpl().Get_CompiledPr2().ParaPr.Ind.Left);
+		let leftInd = this.GetEffectiveParaPr().Ind.Left;
+		return undefined !== leftInd ? private_MM2Twips(leftInd) : undefined;
 	};
 	/**
 	 * Sets the paragraph right side indentation.
@@ -16717,14 +16721,8 @@
 	 */
 	ApiParaPr.prototype.GetIndRight = function()
 	{
-		if (!this.Parent)
-		{
-			if (this.ParaPr.Ind.Right !== undefined)
-				return private_MM2Twips(this.ParaPr.Ind.Right);
-
-			return undefined;
-		}
-		return private_MM2Twips(this.Parent.private_GetImpl().Get_CompiledPr2().ParaPr.Ind.Right);
+		let rightInd = this.GetEffectiveParaPr().Ind.Right;
+		return undefined !== rightInd ? private_MM2Twips(rightInd) : undefined;
 	};
 	/**
 	 * Sets the paragraph first line indentation.
@@ -16749,15 +16747,8 @@
 	 */
 	ApiParaPr.prototype.GetIndFirstLine = function()
 	{
-		if (!this.Parent)
-		{
-			if (this.ParaPr.Ind.FirstLine !== undefined)
-				return private_MM2Twips(this.ParaPr.Ind.FirstLine);
-
-			return undefined;
-		}
-
-		return private_MM2Twips(this.Parent.private_GetImpl().Get_CompiledPr2().ParaPr.Ind.FirstLine);
+		let firstLineInd = this.GetEffectiveParaPr().Ind.FirstLine;
+		return undefined !== firstLineInd ? private_MM2Twips(firstLineInd) : undefined;
 	};
 	/**
 	 * Sets the paragraph contents justification.
@@ -16783,14 +16774,8 @@
 	 */
 	ApiParaPr.prototype.GetJc = function()
 	{
-		if (!this.Parent) {
-			if (this.ParaPr.Jc !== undefined)
-				return private_GetStrParaAlign(this.ParaPr.Jc);
-
-			return undefined;
-		}
-
-		return private_GetStrParaAlign(this.Parent.private_GetImpl().Get_CompiledPr2().ParaPr.Jc);
+		let jc = this.GetEffectiveParaPr().Jc;
+		return undefined !== jc ? private_GetStrParaAlign(jc) : undefined;
 	};
 	/**
 	 * Specifies that when rendering the document using a page view, all lines of the current paragraph are maintained on a single page whenever possible.
@@ -16805,6 +16790,19 @@
 		this.ParaPr.KeepLines = isKeepLines;
 		this.private_OnChange();
 		return true;
+	};
+	/**
+	 * Returns the keep lines value of the current paragraph.
+	 * @memberof ApiParaPr
+	 * @typeofeditors ["CDE"]
+	 * @since 9.4.0
+	 * @returns {boolean | undefined} Returns <em>true</em> if all lines of the paragraph are kept on a single page,
+	 * <em>false</em> if they are not, or <em>undefined</em> if the value is not set.
+	 * @see office-js-api/Examples/{Editor}/ApiParaPr/Methods/GetKeepLines.js
+	 */
+	ApiParaPr.prototype.GetKeepLines = function()
+	{
+		return this.GetEffectiveParaPr().KeepLines;
 	};
 	/**
 	 * Specifies that when rendering the document using a paginated view, the contents of the current paragraph are at least
@@ -16823,6 +16821,19 @@
 		return true;
 	};
 	/**
+	 * Returns the keep next value of the current paragraph.
+	 * @memberof ApiParaPr
+	 * @typeofeditors ["CDE"]
+	 * @since 9.4.0
+	 * @returns {boolean | undefined} Returns <em>true</em> if the paragraph is kept on the same page as the following paragraph,
+	 * <em>false</em> if it is not, or <em>undefined</em> if the value is not set.
+	 * @see office-js-api/Examples/{Editor}/ApiParaPr/Methods/GetKeepNext.js
+	 */
+	ApiParaPr.prototype.GetKeepNext = function()
+	{
+		return this.GetEffectiveParaPr().KeepNext;
+	};
+	/**
 	 * Specifies that when rendering the document using a paginated view, the contents of the current paragraph are rendered at
 	 * the beginning of a new page in the document.
 	 * @memberof ApiParaPr
@@ -16837,6 +16848,19 @@
 		this.ParaPr.PageBreakBefore = isPageBreakBefore;
 		this.private_OnChange();
 		return true;
+	};
+	/**
+	 * Returns the page break before value of the current paragraph.
+	 * @memberof ApiParaPr
+	 * @typeofeditors ["CDE"]
+	 * @since 9.4.0
+	 * @returns {boolean | undefined} Returns <em>true</em> if the paragraph is rendered at the beginning of a new page,
+	 * <em>false</em> if it is not, or <em>undefined</em> if the value is not set.
+	 * @see office-js-api/Examples/{Editor}/ApiParaPr/Methods/GetPageBreakBefore.js
+	 */
+	ApiParaPr.prototype.GetPageBreakBefore = function()
+	{
+		return this.GetEffectiveParaPr().PageBreakBefore;
 	};
 	/**
 	 * Sets the paragraph line spacing. If the value of the sLineRule parameter is either 
@@ -16884,29 +16908,25 @@
 	 */
 	ApiParaPr.prototype.GetSpacingLineValue = function()
 	{
-		function GetValue(oSpacing)
+		function GetValue(spacing)
 		{
-			switch (oSpacing.LineRule)
+			if (!spacing)
+				return undefined
+			
+			switch (spacing.LineRule)
 			{
 				case Asc.linerule_Auto:
-					return oSpacing.Line * 240.0;
+					return spacing.Line * 240.0;
 				case Asc.linerule_AtLeast:
 				case Asc.linerule_Exact:
-					return private_MM2Twips(oSpacing.Line);
+					return private_MM2Twips(spacing.Line);
 			}
 
 			return undefined;
 		}
-
-		if (!this.Parent)
-		{
-			if (this.ParaPr.Spacing)
-				return GetValue(this.ParaPr.Spacing);
-
-			return undefined;
-		}
-
-		return GetValue(this.Parent.private_GetImpl().Get_CompiledPr2().ParaPr.Spacing);
+		
+		let spacing = this.GetEffectiveParaPr().Spacing;
+		return GetValue(spacing);
 	};
 	/**
 	 * Returns the paragraph line spacing rule.
@@ -16917,9 +16937,9 @@
 	 */
 	ApiParaPr.prototype.GetSpacingLineRule = function()
 	{
-		function GetRule(nLineRule)
+		function GetRule(lineRule)
 		{
-			switch (nLineRule)
+			switch (lineRule)
 			{
 				case Asc.linerule_Auto:
 					return "auto";
@@ -16929,19 +16949,11 @@
 					return "exact";
 			}
 
-			return "atLeast";
-		}
-
-		if (!this.Parent)
-		{
-			if (this.ParaPr.Spacing)
-				return GetRule(this.ParaPr.Spacing.LineRule);
-
 			return undefined;
 		}
-
-		return GetRule(this.Parent.private_GetImpl().Get_CompiledPr2().ParaPr.Spacing.LineRule);
-
+		
+		let spacing = this.GetEffectiveParaPr().Spacing;
+		return spacing ? GetRule(spacing.LineRule) : undefined;
 	};
 	/**
 	 * Sets the spacing before the current paragraph. If the value of the isBeforeAuto parameter is true, then 
@@ -16974,15 +16986,8 @@
 	 */
 	ApiParaPr.prototype.GetSpacingBefore = function()
 	{
-		if (!this.Parent)
-		{
-			if (this.ParaPr.Spacing.Before !== undefined)
-				return private_MM2Twips(this.ParaPr.Spacing.Before);
-
-			return undefined;
-		}
-
-		return private_MM2Twips(this.Parent.private_GetImpl().Get_CompiledPr2().ParaPr.Spacing.Before);
+		let before = this.GetEffectiveParaPr().Spacing.Before;
+		return undefined !== before ? private_MM2Twips(before) : undefined;
 	};
 	/**
 	 * Sets the spacing after the current paragraph. If the value of the isAfterAuto parameter is true, then 
@@ -17015,15 +17020,8 @@
 	 */
 	ApiParaPr.prototype.GetSpacingAfter = function()
 	{
-		if (!this.Parent)
-		{
-			if (this.ParaPr.Spacing.After !== undefined)
-				return private_MM2Twips(this.ParaPr.Spacing.After);
-
-			return undefined;
-		}
-
-		return private_MM2Twips(this.Parent.private_GetImpl().Get_CompiledPr2().ParaPr.Spacing.After);
+		let after = this.GetEffectiveParaPr().Spacing.After;
+		return undefined !== after ? private_MM2Twips(after) : undefined;
 	};
 
 	/**
@@ -17095,37 +17093,30 @@
 	 */
 	ApiParaPr.prototype.GetShd = function()
 	{
-		const oShd = this.ParaPr.Shd;
-		if (!oShd)
+		const shd = this.GetEffectiveParaPr().Shd;
+		if (!shd)
 			return null;
-
-		let unifill, color;
-		if (this.Parent && this.Parent.GetClassType() === 'paragraph') {
-			const compiledShd = this.Parent.private_GetImpl().Get_CompiledPr2().ParaPr.Shd;
-			unifill = compiledShd.Unifill || compiledShd.ThemeFill;
-			color = compiledShd.Color || compiledShd.Fill;
-		} else {
-			unifill = oShd.Unifill || oShd.ThemeFill;
-			color = oShd.Color || oShd.Fill;
-		}
-
+		
+		let unifill = shd.Unifill || shd.ThemeFill;
+		let color   = shd.Color || shd.Fill;
+		
 		const unifillColor = unifill && unifill.fill && unifill.fill.color && unifill.fill.color.color;
-		if (unifillColor) {
+		if (unifillColor)
+		{
 			if (unifillColor instanceof AscFormat.CSchemeColor)
 				return new ApiColor('theme', unifillColor.id);
-
+			
 			if (unifillColor instanceof AscFormat.CRGBColor)
 				return Api.RGB(unifillColor.r, unifillColor.g, unifillColor.b);
 		}
-
-		if (color) {
-			const isAuto = color.Auto === true;
-			return isAuto
-				? Api.AutoColor()
-				: Api.RGB(color.r, color.g, color.b);
-		}
-
-		return null;
+		
+		if (!color)
+			return null;
+		
+		if (true === color.Auto)
+			return Api.AutoColor();
+		
+		return Api.RGB(color.r, color.g, color.b);
 	};
 	/**
 	 * Specifies the border which will be displayed below a set of paragraphs which have the same paragraph border settings.
@@ -17149,6 +17140,19 @@
 		return true;
 	};
 	/**
+	 * Returns the bottom border of the current paragraph.
+	 * @memberof ApiParaPr
+	 * @typeofeditors ["CDE"]
+	 * @since 9.4.0
+	 * @returns {BorderInfo | undefined} Returns the border properties object, or <em>undefined</em> if the bottom border is not set.
+	 * @see office-js-api/Examples/{Editor}/ApiParaPr/Methods/GetBottomBorder.js
+	 */
+	ApiParaPr.prototype.GetBottomBorder = function()
+	{
+		const border = this.GetEffectiveParaPr().Brd.Bottom;
+		return private_ToBorderInfo(border);
+	};
+	/**
 	 * Specifies the border which will be displayed at the left side of the page around the specified paragraph.
 	 * @memberof ApiParaPr
 	 * @typeofeditors ["CDE"]
@@ -17168,6 +17172,19 @@
 		return true;
 	};
 	/**
+	 * Returns the left border of the current paragraph.
+	 * @memberof ApiParaPr
+	 * @typeofeditors ["CDE"]
+	 * @since 9.4.0
+	 * @returns {BorderInfo | undefined} Returns the border properties object, or <em>undefined</em> if the left border is not set.
+	 * @see office-js-api/Examples/{Editor}/ApiParaPr/Methods/GetLeftBorder.js
+	 */
+	ApiParaPr.prototype.GetLeftBorder = function()
+	{
+		const border = this.GetEffectiveParaPr().Brd.Left;
+		return private_ToBorderInfo(border);
+	};
+	/**
 	 * Specifies the border which will be displayed at the right side of the page around the specified paragraph.
 	 * @memberof ApiParaPr
 	 * @typeofeditors ["CDE"]
@@ -17185,6 +17202,19 @@
 		this.ParaPr.Brd.Right = private_GetTableBorder(sType, nSize, nSpace, r, g, b);
 		this.private_OnChange();
 		return true;
+	};
+	/**
+	 * Returns the right border of the current paragraph.
+	 * @memberof ApiParaPr
+	 * @typeofeditors ["CDE"]
+	 * @since 9.4.0
+	 * @returns {BorderInfo | undefined} Returns the border properties object, or <em>undefined</em> if the right border is not set.
+	 * @see office-js-api/Examples/{Editor}/ApiParaPr/Methods/GetRightBorder.js
+	 */
+	ApiParaPr.prototype.GetRightBorder = function()
+	{
+		const border = this.GetEffectiveParaPr().Brd.Right;
+		return private_ToBorderInfo(border);
 	};
 	/**
 	 * Specifies the border which will be displayed above a set of paragraphs which have the same set of paragraph border settings.
@@ -17207,6 +17237,19 @@
 		return true;
 	};
 	/**
+	 * Returns the top border of the current paragraph.
+	 * @memberof ApiParaPr
+	 * @typeofeditors ["CDE"]
+	 * @since 9.4.0
+	 * @returns {BorderInfo | undefined} Returns the border properties object, or <em>undefined</em> if the top border is not set.
+	 * @see office-js-api/Examples/{Editor}/ApiParaPr/Methods/GetTopBorder.js
+	 */
+	ApiParaPr.prototype.GetTopBorder = function()
+	{
+		const border = this.GetEffectiveParaPr().Brd.Top;
+		return private_ToBorderInfo(border);
+	};
+	/**
 	 * Specifies the border which will be displayed between each paragraph in a set of paragraphs which have the same set of paragraph border settings.
 	 * @memberof ApiParaPr
 	 * @typeofeditors ["CDE"]
@@ -17226,6 +17269,19 @@
 		return true;
 	};
 	/**
+	 * Returns the between border of the current paragraph.
+	 * @memberof ApiParaPr
+	 * @typeofeditors ["CDE"]
+	 * @since 9.4.0
+	 * @returns {BorderInfo | undefined} Returns the border properties object, or <em>undefined</em> if the between border is not set.
+	 * @see office-js-api/Examples/{Editor}/ApiParaPr/Methods/GetBetweenBorder.js
+	 */
+	ApiParaPr.prototype.GetBetweenBorder = function()
+	{
+		const border = this.GetEffectiveParaPr().Brd.Between;
+		return private_ToBorderInfo(border);
+	};
+	/**
 	 * Specifies whether a single line of the current paragraph will be displayed on a separate page from the remaining content at display time by moving the line onto the following page.
 	 * @memberof ApiParaPr
 	 * @typeofeditors ["CDE"]
@@ -17238,6 +17294,19 @@
 		this.ParaPr.WidowControl = isWidowControl;
 		this.private_OnChange();
 		return true;
+	};
+	/**
+	 * Returns the widow control value of the current paragraph.
+	 * @memberof ApiParaPr
+	 * @typeofeditors ["CDE"]
+	 * @since 9.4.0
+	 * @returns {boolean | undefined} Returns <em>true</em> if widow control is enabled, <em>false</em> if it is disabled,
+	 * or <em>undefined</em> if the value is not set.
+	 * @see office-js-api/Examples/{Editor}/ApiParaPr/Methods/GetWidowControl.js
+	 */
+	ApiParaPr.prototype.GetWidowControl = function()
+	{
+		return this.GetEffectiveParaPr().WidowControl;
 	};
 	/**
 	 * Specifies a sequence of custom tab stops which will be used for any tab characters in the current paragraph.
@@ -17266,6 +17335,60 @@
 		return true;
 	};
 	/**
+	 * Returns the custom tab stops of the current paragraph.
+	 * @memberof ApiParaPr
+	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
+	 * @since 9.4.0
+	 * @returns {{Pos: twips, Val: TabJc, Leader: string}[]} An array of tab stop objects, each with:
+	 * <b>Pos</b> - the tab stop position measured in twentieths of a point (1/1440 of an inch),
+	 * <b>Val</b> - the tab stop style,
+	 * <b>Leader</b> - the tab leader character: <b>"none"</b>, <b>"dot"</b>, <b>"heavy"</b>, <b>"hyphen"</b>, <b>"middleDot"</b>, <b>"underscore"</b>.
+	 * @see office-js-api/Examples/{Editor}/ApiParaPr/Methods/GetTabs.js
+	 */
+	ApiParaPr.prototype.GetTabs = function()
+	{
+		let paraTabs = this.GetEffectiveParaPr().Tabs;
+		if (!paraTabs)
+			return [];
+		
+		let result = [];
+		for (let tabIndex = 0, tabCount = paraTabs.GetCount(); tabIndex < tabCount; ++tabIndex)
+		{
+			let tab = paraTabs.Get(tabIndex);
+			
+			let val = "left";
+			switch (tab.GetValue())
+			{
+				case tab_Left:    val = "left";    break;
+				case tab_Right:   val = "right";   break;
+				case tab_Clear:   val = "clear";   break;
+				case tab_Num:     val = "num";     break;
+				case tab_Decimal: val = "decimal"; break;
+				case tab_Center:  val = "center";  break;
+				case tab_Bar:     val = "bar";     break;
+			}
+			
+			let leader = "none";
+			switch (tab.GetLeader())
+			{
+				case Asc.c_oAscTabLeader.Dot:        leader = "dot";        break;
+				case Asc.c_oAscTabLeader.Heavy:      leader = "heavy";      break;
+				case Asc.c_oAscTabLeader.Hyphen:     leader = "hyphen";     break;
+				case Asc.c_oAscTabLeader.MiddleDot:  leader = "middleDot";  break;
+				case Asc.c_oAscTabLeader.None:       leader = "none";       break;
+				case Asc.c_oAscTabLeader.Underscore: leader = "underscore"; break;
+			}
+
+			result.push({
+				"Pos"    : private_MM2Twips(tab.GetPos()),
+				"Val"    : val,
+				"Leader" : leader
+			});
+		}
+		
+		return result;
+	};
+	/**
 	 * Specifies that the current paragraph references a numbering definition instance in the current document.
 	 * @memberof ApiParaPr
 	 * @typeofeditors ["CDE"]
@@ -17280,7 +17403,7 @@
 	{
 		if (!(oNumPr instanceof ApiNumbering))
 			return false;
-		
+
 		let numId  = oNumPr.Num.GetId();
 		let numLvl = undefined;
 		
@@ -17290,6 +17413,27 @@
 		this.ParaPr.NumPr = new AscWord.NumPr(numId, numLvl);
 		this.private_OnChange();
 		return true;
+	};
+	/**
+	 * Returns the numbering level for the current paragraph referencing the numbering definition instance in the current document.
+	 * @memberof ApiParaPr
+	 * @typeofeditors ["CDE"]
+	 * @returns {ApiNumberingLevel | undefined}
+	 * @see office-js-api/Examples/{Editor}/ApiParaPr/Methods/GetNumPr.js
+	 */
+	ApiParaPr.prototype.GetNumPr = function()
+	{
+		let numPr = this.GetEffectiveParaPr().NumPr;
+		if (!numPr)
+			return undefined;
+
+		let logicDocument = private_GetLogicDocument();
+		let numberings    = logicDocument.GetNumbering();
+		let num           = numberings.GetNum(numPr.NumId);
+		if (!num)
+			return undefined;
+
+		return new ApiNumberingLevel(num, numPr.Lvl);
 	};
 	/**
 	 * Sets the bullet or numbering to the current paragraph.
@@ -17312,39 +17456,42 @@
 	 * Sets the outline level for the specified properties.
 	 * @memberof ApiParaPr
 	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
-	 * @param {Number?} [nLvl=undefined] - The outline level. Possible values: 1-9. The 1The desired functionality is as follows: When inserting document A into document B using the merge document API during editing, the source of document A should be visible within document B. By clicking or hovering over the inserted content of document A in document B, information about the insertion of document A should be displayed in a pop-up/floating window, preserving the boundaries of document A. Document A should be able to be inserted between any two characters in document B.
+	 * @param {Number | null | undefined} [lvl=undefined] - The outline level. Possible values: 1-9. The 1The desired functionality is as follows: When inserting document A into document B using the merge document API during editing, the source of document A should be visible within document B. By clicking or hovering over the inserted content of document A in document B, information about the insertion of document A should be displayed in a pop-up/floating window, preserving the boundaries of document A. Document A should be able to be inserted between any two characters in document B.
 	 * To set no outline level, use this method without a parameter.
 	 * @returns {boolean}
 	 * @since 8.2.0
 	 * @see office-js-api/Examples/{Editor}/ApiParaPr/Methods/SetOutlineLvl.js
 	 */
-	ApiParaPr.prototype.SetOutlineLvl = function(nLvl)
+	ApiParaPr.prototype.SetOutlineLvl = function(lvl)
 	{
-		if (typeof(nLvl) === "number") {
-			nLvl = Math.ceil(nLvl);
-			if (nLvl < 1 || nLvl > 9) {
+		if (typeof(lvl) === "number")
+		{
+			lvl = Math.ceil(lvl);
+			if (lvl < 1 || lvl > 9)
 				return false;
-			}
 		}
-		else if (nLvl != undefined) {
+		else if (undefined !== lvl && null !== lvl)
+		{
 			return false;
 		}
 
-		this.ParaPr.OutlineLvl = typeof(nLvl) === "number" ? nLvl - 1 : nLvl;
+		this.ParaPr.OutlineLvl = typeof(lvl) === "number" ? lvl - 1 : undefined;
 		this.private_OnChange();
+		return true;
 	};
 
 	/**
 	 * Returns the outline level of the specified properties.
 	 * @memberof ApiParaPr
 	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
-	 * @returns {Number?}
+	 * @returns {Number | undefined}
 	 * @since 8.2.0
 	 * @see office-js-api/Examples/{Editor}/ApiParaPr/Methods/GetOutlineLvl.js
 	 */
 	ApiParaPr.prototype.GetOutlineLvl = function()
 	{
-		return typeof(this.ParaPr.OutlineLvl) == "number" ? this.ParaPr.OutlineLvl + 1 : this.ParaPr.OutlineLvl;
+		let lvl = this.GetEffectiveParaPr().OutlineLvl;
+		return "number" === typeof(lvl) ? lvl + 1 : undefined;
 	};
 
 	/**
@@ -30289,37 +30436,49 @@
 
 	ApiParaPr.prototype["GetClassType"]              = ApiParaPr.prototype.GetClassType;
 	ApiParaPr.prototype["SetStyle"]                  = ApiParaPr.prototype.SetStyle;
-	ApiParaPr.prototype["SetContextualSpacing"]      = ApiParaPr.prototype.SetContextualSpacing;
-	ApiParaPr.prototype["SetIndLeft"]                = ApiParaPr.prototype.SetIndLeft;
-	ApiParaPr.prototype["SetIndRight"]               = ApiParaPr.prototype.SetIndRight;
-	ApiParaPr.prototype["SetIndFirstLine"]           = ApiParaPr.prototype.SetIndFirstLine;
-	ApiParaPr.prototype["SetJc"]                     = ApiParaPr.prototype.SetJc;
-	ApiParaPr.prototype["SetKeepLines"]              = ApiParaPr.prototype.SetKeepLines;
-	ApiParaPr.prototype["SetKeepNext"]               = ApiParaPr.prototype.SetKeepNext;
-	ApiParaPr.prototype["SetPageBreakBefore"]        = ApiParaPr.prototype.SetPageBreakBefore;
-	ApiParaPr.prototype["SetSpacingLine"]            = ApiParaPr.prototype.SetSpacingLine;
-	ApiParaPr.prototype["SetSpacingBefore"]          = ApiParaPr.prototype.SetSpacingBefore;
-	ApiParaPr.prototype["SetSpacingAfter"]           = ApiParaPr.prototype.SetSpacingAfter;
-	ApiParaPr.prototype["SetShd"]                    = ApiParaPr.prototype.SetShd;
-	ApiParaPr.prototype["SetBottomBorder"]           = ApiParaPr.prototype.SetBottomBorder;
-	ApiParaPr.prototype["SetLeftBorder"]             = ApiParaPr.prototype.SetLeftBorder;
-	ApiParaPr.prototype["SetRightBorder"]            = ApiParaPr.prototype.SetRightBorder;
-	ApiParaPr.prototype["SetTopBorder"]              = ApiParaPr.prototype.SetTopBorder;
-	ApiParaPr.prototype["SetBetweenBorder"]          = ApiParaPr.prototype.SetBetweenBorder;
-	ApiParaPr.prototype["SetWidowControl"]           = ApiParaPr.prototype.SetWidowControl;
-	ApiParaPr.prototype["SetTabs"]                   = ApiParaPr.prototype.SetTabs;
-	ApiParaPr.prototype["SetNumPr"]                  = ApiParaPr.prototype.SetNumPr;
-	ApiParaPr.prototype["SetBullet"]                 = ApiParaPr.prototype.SetBullet;
 	ApiParaPr.prototype["GetStyle"]                  = ApiParaPr.prototype.GetStyle;
+	ApiParaPr.prototype["SetContextualSpacing"]      = ApiParaPr.prototype.SetContextualSpacing;
+	ApiParaPr.prototype["GetContextualSpacing"]      = ApiParaPr.prototype.GetContextualSpacing;
+	ApiParaPr.prototype["SetIndLeft"]                = ApiParaPr.prototype.SetIndLeft;
+	ApiParaPr.prototype["GetIndLeft"]                = ApiParaPr.prototype.GetIndLeft;
+	ApiParaPr.prototype["SetIndRight"]               = ApiParaPr.prototype.SetIndRight;
+	ApiParaPr.prototype["GetIndRight"]               = ApiParaPr.prototype.GetIndRight;
+	ApiParaPr.prototype["SetIndFirstLine"]           = ApiParaPr.prototype.SetIndFirstLine;
+	ApiParaPr.prototype["GetIndFirstLine"]           = ApiParaPr.prototype.GetIndFirstLine;
+	ApiParaPr.prototype["SetJc"]                     = ApiParaPr.prototype.SetJc;
+	ApiParaPr.prototype["GetJc"]                     = ApiParaPr.prototype.GetJc;
+	ApiParaPr.prototype["SetKeepLines"]              = ApiParaPr.prototype.SetKeepLines;
+	ApiParaPr.prototype["GetKeepLines"]              = ApiParaPr.prototype.GetKeepLines;
+	ApiParaPr.prototype["SetKeepNext"]               = ApiParaPr.prototype.SetKeepNext;
+	ApiParaPr.prototype["GetKeepNext"]               = ApiParaPr.prototype.GetKeepNext;
+	ApiParaPr.prototype["SetPageBreakBefore"]        = ApiParaPr.prototype.SetPageBreakBefore;
+	ApiParaPr.prototype["GetPageBreakBefore"]        = ApiParaPr.prototype.GetPageBreakBefore;
+	ApiParaPr.prototype["SetSpacingLine"]            = ApiParaPr.prototype.SetSpacingLine;
 	ApiParaPr.prototype["GetSpacingLineValue"]       = ApiParaPr.prototype.GetSpacingLineValue;
 	ApiParaPr.prototype["GetSpacingLineRule"]        = ApiParaPr.prototype.GetSpacingLineRule;
+	ApiParaPr.prototype["SetSpacingBefore"]          = ApiParaPr.prototype.SetSpacingBefore;
 	ApiParaPr.prototype["GetSpacingBefore"]          = ApiParaPr.prototype.GetSpacingBefore;
+	ApiParaPr.prototype["SetSpacingAfter"]           = ApiParaPr.prototype.SetSpacingAfter;
 	ApiParaPr.prototype["GetSpacingAfter"]           = ApiParaPr.prototype.GetSpacingAfter;
+	ApiParaPr.prototype["SetShd"]                    = ApiParaPr.prototype.SetShd;
 	ApiParaPr.prototype["GetShd"]                    = ApiParaPr.prototype.GetShd;
-	ApiParaPr.prototype["GetJc"]                     = ApiParaPr.prototype.GetJc;
-	ApiParaPr.prototype["GetIndRight"]               = ApiParaPr.prototype.GetIndRight;
-	ApiParaPr.prototype["GetIndLeft"]                = ApiParaPr.prototype.GetIndLeft;
-	ApiParaPr.prototype["GetIndFirstLine"]           = ApiParaPr.prototype.GetIndFirstLine;
+	ApiParaPr.prototype["SetBottomBorder"]           = ApiParaPr.prototype.SetBottomBorder;
+	ApiParaPr.prototype["GetBottomBorder"]           = ApiParaPr.prototype.GetBottomBorder;
+	ApiParaPr.prototype["SetLeftBorder"]             = ApiParaPr.prototype.SetLeftBorder;
+	ApiParaPr.prototype["GetLeftBorder"]             = ApiParaPr.prototype.GetLeftBorder;
+	ApiParaPr.prototype["SetRightBorder"]            = ApiParaPr.prototype.SetRightBorder;
+	ApiParaPr.prototype["GetRightBorder"]            = ApiParaPr.prototype.GetRightBorder;
+	ApiParaPr.prototype["SetTopBorder"]              = ApiParaPr.prototype.SetTopBorder;
+	ApiParaPr.prototype["GetTopBorder"]              = ApiParaPr.prototype.GetTopBorder;
+	ApiParaPr.prototype["SetBetweenBorder"]          = ApiParaPr.prototype.SetBetweenBorder;
+	ApiParaPr.prototype["GetBetweenBorder"]          = ApiParaPr.prototype.GetBetweenBorder;
+	ApiParaPr.prototype["SetWidowControl"]           = ApiParaPr.prototype.SetWidowControl;
+	ApiParaPr.prototype["GetWidowControl"]           = ApiParaPr.prototype.GetWidowControl;
+	ApiParaPr.prototype["SetTabs"]                   = ApiParaPr.prototype.SetTabs;
+	ApiParaPr.prototype["GetTabs"]                   = ApiParaPr.prototype.GetTabs;
+	ApiParaPr.prototype["SetNumPr"]                  = ApiParaPr.prototype.SetNumPr;
+	ApiParaPr.prototype["GetNumPr"]                  = ApiParaPr.prototype.GetNumPr;
+	ApiParaPr.prototype["SetBullet"]                 = ApiParaPr.prototype.SetBullet;
 	ApiParaPr.prototype["SetOutlineLvl"]             = ApiParaPr.prototype.SetOutlineLvl;
 	ApiParaPr.prototype["GetOutlineLvl"]             = ApiParaPr.prototype.GetOutlineLvl;
 	ApiParaPr.prototype["ToJSON"]                    = ApiParaPr.prototype.ToJSON;
@@ -31433,6 +31592,20 @@
 
 		return oBorder;
 	}
+	
+	function private_ToBorderInfo(border)
+	{
+		if (!border)
+			return undefined;
+		
+		let color = border.Color;
+		return {
+			"Type"  : border_None === border.Value ? "none" : "single",
+			"Size"  : Math.round(private_MM2Pt(border.Size) * 8),
+			"Space" : private_MM2Pt(border.Space),
+			"Color" : color.Auto ? Api.AutoColor() : Api.RGB(color.r, color.g, color.b)
+		};
+	}
 
 	function private_GetTableMeasure(sType, nValue)
 	{
@@ -32244,6 +32417,14 @@
 	{
 		if (this.Parent)
 			this.Parent.OnChangeParaPr(this);
+	};
+	ApiParaPr.prototype.GetEffectiveParaPr = function()
+	{
+		let paragraph = this.Parent && this.Parent.private_GetImpl ? this.Parent.private_GetImpl() : null;
+		if (paragraph instanceof AscWord.Paragraph)
+			return paragraph.Get_CompiledPr2().ParaPr;
+		
+		return this.ParaPr;
 	};
 	ApiTablePr.prototype.private_OnChange = function()
 	{
