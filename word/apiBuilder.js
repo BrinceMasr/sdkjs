@@ -4303,6 +4303,13 @@
 	 */
 
 	/**
+	 * @typedef {Object} TextFormFormat
+	 * The text field format data.
+	 * @property {("none" | "digit" | "letter" | "mask" | "regExp")} type - The format type.
+	 * @property {string} [value] - The format value. Required for <b>"mask"</b> and <b>"regExp"</b> types.
+	 */
+
+	/**
 	 * 1 millimetre equals 1/10th of a centimetre.
 	 * @typedef {number} mm
 	 * @see office-js-api/Examples/Enumerations/mm.js
@@ -26301,6 +26308,69 @@
 		}, this);
 	};
 	/**
+	 * Returns the format of the current text field.
+	 * @memberof ApiTextForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @returns {TextFormFormat}
+	 * @see office-js-api/Examples/{Editor}/ApiTextForm/Methods/GetFormat.js
+	 */
+	ApiTextForm.prototype.GetFormat = function()
+	{
+		let textFormPr = this.Sdt.GetTextFormPr();
+		return textFormPr ? textFormPr.GetFormat().ToJson() : { "type" : "none" };
+	};
+	/**
+	 * Sets the format for the current text field.
+	 * @memberof ApiTextForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @param {TextFormFormat} format - The format to set.
+	 * @returns {boolean}
+	 * @see office-js-api/Examples/{Editor}/ApiTextForm/Methods/SetFormat.js
+	 */
+	ApiTextForm.prototype.SetFormat = function(format)
+	{
+		return executeNoFormLockCheck(function(){
+			if (typeof format !== "object" || !format)
+				return false;
+
+			let textFormPr = this.Sdt.GetTextFormPr().Copy();
+			textFormPr.GetFormat().FromJson(format);
+			this.Sdt.SetTextFormPr(textFormPr);
+			return true;
+		}, this);
+	};
+	/**
+	 * Returns the allowed symbols for the current text field.
+	 * @memberof ApiTextForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiTextForm/Methods/GetAllowedSymbols.js
+	 */
+	ApiTextForm.prototype.GetAllowedSymbols = function()
+	{
+		return this.Sdt.GetTextFormPr().GetFormatSymbols();
+	};
+	/**
+	 * Sets the allowed symbols for the current text field. Only the specified characters will be accepted as input.
+	 * @memberof ApiTextForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @param {string} symbols - A string of allowed characters.
+	 * @returns {boolean}
+	 * @see office-js-api/Examples/{Editor}/ApiTextForm/Methods/SetAllowedSymbols.js
+	 */
+	ApiTextForm.prototype.SetAllowedSymbols = function(symbols)
+	{
+		return executeNoFormLockCheck(function(){
+			if (typeof symbols !== "string")
+				return false;
+
+			let textFormPr = this.Sdt.GetTextFormPr().Copy();
+			textFormPr.SetFormatSymbols(symbols);
+			this.Sdt.SetTextFormPr(textFormPr);
+			return true;
+		}, this);
+	};
+	/**
 	 * Sets the text to the current text field.
 	 * @memberof ApiTextForm
 	 * @param {string} sText - The text that will be set to the current text field.
@@ -30954,6 +31024,10 @@
 	ApiTextForm.prototype["SetComb"]             = ApiTextForm.prototype.SetComb;
 	ApiTextForm.prototype["SetCellWidth"]        = ApiTextForm.prototype.SetCellWidth;
 	ApiTextForm.prototype["SetText"]             = ApiTextForm.prototype.SetText;
+	ApiTextForm.prototype["GetFormat"]           = ApiTextForm.prototype.GetFormat;
+	ApiTextForm.prototype["SetFormat"]           = ApiTextForm.prototype.SetFormat;
+	ApiTextForm.prototype["GetAllowedSymbols"]   = ApiTextForm.prototype.GetAllowedSymbols;
+	ApiTextForm.prototype["SetAllowedSymbols"]   = ApiTextForm.prototype.SetAllowedSymbols;
 	ApiTextForm.prototype["Copy"]                = ApiTextForm.prototype.Copy;
 	
 	ApiPictureForm.prototype["GetClassType"]       = ApiPictureForm.prototype.GetClassType;
