@@ -854,20 +854,6 @@ CAscSlideTransition.prototype.parseXmlParameters = function (_type, _paramNames,
 		// 	else if (pattern === "rectangle" && dir === "in") this.TransitionOption = c_oAscSlideTransitionParams.Shred_RectangleIn;
 		// 	else if (pattern === "rectangle" && dir === "out") this.TransitionOption = c_oAscSlideTransitionParams.Shred_RectangleOut;
 		// }
-		// else if ("p14:flythrough" === _type)
-		// {
-		// 	typeMatched = true;
-		// 	this.TransitionType = c_oAscSlideTransitionTypes.Flythrough;
-		// 	let dir = "in", hasBounce = false;
-		// 	for (let i = 0; i < _len; i++) {
-		// 		if (_paramNames[i] === "dir") dir = _paramValues[i];
-		// 		else if (_paramNames[i] === "hasBounce") hasBounce = (_paramValues[i] === "1" || _paramValues[i] === "true");
-		// 	}
-		// 	if (dir === "in" && !hasBounce) this.TransitionOption = c_oAscSlideTransitionParams.Flythrough_In;
-		// 	else if (dir === "in" && hasBounce) this.TransitionOption = c_oAscSlideTransitionParams.Flythrough_In_Bounce;
-		// 	else if (dir === "out" && !hasBounce) this.TransitionOption = c_oAscSlideTransitionParams.Flythrough_Out;
-		// 	else this.TransitionOption = c_oAscSlideTransitionParams.Flythrough_Out_Bounce;
-		// }
 
 		else if ("p14:flash" === _type)
 		{
@@ -912,6 +898,20 @@ CAscSlideTransition.prototype.parseXmlParameters = function (_type, _paramNames,
 			else if (!thruBlk && dir === "r") this.TransitionOption = c_oAscSlideTransitionParams.Reveal_SmoothRight;
 			else if (thruBlk && dir === "l") this.TransitionOption = c_oAscSlideTransitionParams.Reveal_BlackLeft;
 			else if (thruBlk && dir === "r") this.TransitionOption = c_oAscSlideTransitionParams.Reveal_BlackRight;
+		}
+		else if ("p14:flythrough" === _type)
+		{
+			typeMatched = true;
+			this.TransitionType = c_oAscSlideTransitionTypes.Flythrough;
+			let dir = "in", hasBounce = false;
+			for (let i = 0; i < _len; i++) {
+				if (_paramNames[i] === "dir") dir = _paramValues[i];
+				else if (_paramNames[i] === "hasBounce") hasBounce = (_paramValues[i] === "1" || _paramValues[i] === "true");
+			}
+			if (dir === "in" && !hasBounce) this.TransitionOption = c_oAscSlideTransitionParams.Flythrough_In;
+			else if (dir === "in" && hasBounce) this.TransitionOption = c_oAscSlideTransitionParams.Flythrough_In_Bounce;
+			else if (dir === "out" && !hasBounce) this.TransitionOption = c_oAscSlideTransitionParams.Flythrough_Out;
+			else this.TransitionOption = c_oAscSlideTransitionParams.Flythrough_Out_Bounce;
 		}
         else if ("p:none" !== _type)
         {
@@ -1429,19 +1429,7 @@ CAscSlideTransition.prototype.fillXmlParams = function (aAttrNames, aAttrValues)
 		// 	aAttrNames.push("dir"); aAttrValues.push(shDir);
 		// 	break;
 		// }
-		// case c_oAscSlideTransitionTypes.Flythrough:
-		// {
-		// 	sNodeName = "p14:flythrough";
-		// 	let ftAttrs = {};
-		// 	ftAttrs[c_oAscSlideTransitionParams.Flythrough_In]         = ["in", "0"];
-		// 	ftAttrs[c_oAscSlideTransitionParams.Flythrough_In_Bounce]  = ["in", "1"];
-		// 	ftAttrs[c_oAscSlideTransitionParams.Flythrough_Out]        = ["out", "0"];
-		// 	ftAttrs[c_oAscSlideTransitionParams.Flythrough_Out_Bounce] = ["out", "1"];
-		// 	let fVals = ftAttrs[this.TransitionOption] || ["in", "0"];
-		// 	aAttrNames.push("dir");       aAttrValues.push(fVals[0]);
-		// 	aAttrNames.push("hasBounce"); aAttrValues.push(fVals[1]);
-		// 	break;
-		// }
+
 		case c_oAscSlideTransitionTypes.Flash:
 		{
 			sNodeName = "p14:flash";
@@ -1479,6 +1467,21 @@ CAscSlideTransition.prototype.fillXmlParams = function (aAttrNames, aAttrValues)
 			);
 			aAttrNames.push("thruBlk"); aAttrValues.push(revIsBlack ? "1" : "0");
 			aAttrNames.push("dir"); aAttrValues.push(revIsRight ? "r" : "l");
+			break;
+		}
+		case c_oAscSlideTransitionTypes.Flythrough:
+		{
+			sNodeName = "p14:flythrough";
+			let ftAttrs = {};
+			ftAttrs[c_oAscSlideTransitionParams.Flythrough_In] = ["in", "0"];
+			ftAttrs[c_oAscSlideTransitionParams.Flythrough_In_Bounce] = ["in", "1"];
+			ftAttrs[c_oAscSlideTransitionParams.Flythrough_Out] = ["out", "0"];
+			ftAttrs[c_oAscSlideTransitionParams.Flythrough_Out_Bounce] = ["out", "1"];
+			let fVals = ftAttrs[this.TransitionOption] || ["in", "0"];
+			aAttrNames.push("dir");
+			aAttrValues.push(fVals[0]);
+			aAttrNames.push("hasBounce");
+			aAttrValues.push(fVals[1]);
 			break;
 		}
         default:

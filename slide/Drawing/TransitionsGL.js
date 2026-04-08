@@ -70,7 +70,7 @@
 
 	// _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Glitter]        = true;
 	// _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Shred]          = true;
-	// _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Flythrough]     = true;
+	_WebGLTransitionTypes[c_oAscSlideTransitionTypes.Flythrough]     = true;
 
     function CTransitionGL(transitionAnimation)
     {
@@ -532,15 +532,15 @@
 			case c_oAscSlideTransitionTypes.Reveal:
 				this._prepareReveal();
 				break;
+			case c_oAscSlideTransitionTypes.Flythrough:
+				this._prepareFlythrough();
+				break;
 
 			// case c_oAscSlideTransitionTypes.Glitter:
 			// 	this._prepareGlitter();
 			// 	break;
 			// case c_oAscSlideTransitionTypes.Shred:
 			// 	this._prepareShred();
-			// 	break;
-			// case c_oAscSlideTransitionTypes.Flythrough:
-			// 	this._prepareFlythrough();
 			// 	break;
 
             default:
@@ -629,15 +629,15 @@
 			case c_oAscSlideTransitionTypes.Reveal:
 				this._renderReveal(progress, param);
 				break;
+			case c_oAscSlideTransitionTypes.Flythrough:
+				this._renderFlythrough(progress, param);
+				break;
 
 			// case c_oAscSlideTransitionTypes.Glitter:
 			// 	this._renderGlitter(progress, param);
 			// 	break;
 			// case c_oAscSlideTransitionTypes.Shred:
 			// 	this._renderShred(progress, param);
-			// 	break;
-			// case c_oAscSlideTransitionTypes.Flythrough:
-			// 	this._renderFlythrough(progress, param);
 			// 	break;
 
             default:
@@ -3332,6 +3332,111 @@
 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 	};
 
+	// ============================================================
+	// Transition: Flythrough — scale-based zoom through
+	// ============================================================
+
+	CTransitionGL.prototype._prepareFlythrough = function () {
+		const flythroughFragShader = [
+			'precision mediump float;',
+			'uniform sampler2D uTexture;',
+			'uniform float uAlpha;',
+			'uniform float uScale;',
+			'varying vec2 vTexCoord;',
+			'void main() {',
+			'    vec2 uv = (vTexCoord - 0.5) / uScale + 0.5;',
+			'    if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {',
+			'        gl_FragColor = vec4(0.0);',
+			'        return;',
+			'    }',
+			'    vec4 color = texture2D(uTexture, uv);',
+			'    gl_FragColor = vec4(color.rgb, color.a * uAlpha);',
+			'}'
+		].join('\n');
+
+		this.GetProgram('flythrough', _VERT_QUAD, flythroughFragShader);
+	};
+
+	CTransitionGL.prototype._renderFlythrough = function (progress, param) {
+		const programInfo = this.programs['flythrough'];
+		if (!programInfo) {
+			return;
+		}
+
+		const isOut = (
+			param === c_oAscSlideTransitionParams.Flythrough_Out ||
+			param === c_oAscSlideTransitionParams.Flythrough_Out_Bounce
+		);
+		const hasBounce = (
+			param === c_oAscSlideTransitionParams.Flythrough_In_Bounce ||
+			param === c_oAscSlideTransitionParams.Flythrough_Out_Bounce
+		);
+
+		const oldSlideInitialScale = 1.0;
+		const oldSlideFinalScale = isOut ? 0.3 : 3.5;
+		const newSlideInitialScale = isOut ? 3.5 : 0.3;
+		const newSlideFinalScale = 1.0;
+
+		const scaleRange = Math.abs(newSlideFinalScale - newSlideInitialScale);
+		const scaleOvershoot = isOut ? 0.02 : 0.01;
+		const scaleReturn = isOut ? 0.01 : 0.02;
+
+		const finalPoint = 1.0;
+		const overshootPoint = finalPoint + (hasBounce ? scaleOvershoot / scaleRange : 0.0);
+		const returnPoint = finalPoint - (hasBounce ? scaleReturn / scaleRange : 0.0);
+
+		const leg1 = overshootPoint;
+		const leg2 = overshootPoint - returnPoint;
+		const leg3 = finalPoint - returnPoint;
+		const totalDistance = leg1 + leg2 + leg3;
+
+		const distanceTraveled = progress * totalDistance;
+		let cameraPosition;
+		if (distanceTraveled <= leg1) {
+			cameraPosition = overshootPoint * _smoothstep(distanceTraveled / leg1);
+		} else if (distanceTraveled <= leg1 + leg2) {
+			cameraPosition = overshootPoint - (overshootPoint - returnPoint) * _smoothstep((distanceTraveled - leg1) / leg2);
+		} else {
+			cameraPosition = returnPoint + (finalPoint - returnPoint) * _smoothstep((distanceTraveled - leg1 - leg2) / leg3);
+		}
+
+		const oldSlideScale = oldSlideInitialScale + (oldSlideFinalScale - oldSlideInitialScale) * cameraPosition;
+		const newSlideScale = newSlideInitialScale + (newSlideFinalScale - newSlideInitialScale) * cameraPosition;
+
+		const oldSlideAlpha = 1.0 - _linearFade(progress, 0.2, 0.6);
+		const newSlideAlpha = _linearFade(progress, 0.4, 0.8);
+
+		const gl = this.gl;
+		const uniforms = programInfo.uniforms;
+
+		gl.useProgram(programInfo.program);
+		gl.disable(gl.DEPTH_TEST);
+		gl.clearColor(1.0, 1.0, 1.0, 1.0);
+		gl.clear(gl.COLOR_BUFFER_BIT);
+		gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+
+		gl.uniform1f(uniforms['uScale'], newSlideScale);
+		gl.uniform1f(uniforms['uAlpha'], newSlideAlpha);
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
+		gl.uniform1i(uniforms['uTexture'], 0);
+		this._bindQuad(programInfo);
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+		gl.uniform1f(uniforms['uScale'], oldSlideScale);
+		gl.uniform1f(uniforms['uAlpha'], oldSlideAlpha);
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
+		gl.uniform1i(uniforms['uTexture'], 0);
+		this._bindQuad(programInfo);
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+	};
+
+	function _smoothstep(v) { return Math.pow(v, 2) * (3 - 2 * v); }
+	function _linearFade(v, start, end) { return Math.max(0, Math.min((v - start) / (end - start), 1)); }
+
 	// // ============================================================
 	// // Transition: Glitter — hexagonal tiles rotating in place
 	// // ============================================================
@@ -3801,95 +3906,6 @@
 	// 		gl.uniform1i(scatterProg.uniforms['uTexture'], 0);
 	// 		this._bindTileMesh(tileName, scatterProg);
 	// 		gl.drawArrays(gl.TRIANGLES, 0, this.buffers[tileName].vertCount);
-	// 	}
-	// };
-
-	// // ============================================================
-	// // Transition: Flythrough — scale-based zoom through
-	// // ============================================================
-
-	// CTransitionGL.prototype._prepareFlythrough = function () {
-	// 	this.GetProgram('flip3d', _VERT_3D, _FRAG_TEXTURED);
-	// 	this._initQuadBuffer3D();
-	// };
-
-	// CTransitionGL.prototype._renderFlythrough = function (progress, param) {
-	// 	let gl = this.gl;
-	// 	let prog = this.programs['flip3d'];
-	// 	if (!prog) return;
-
-	// 	gl.useProgram(prog.program);
-	// 	gl.enable(gl.DEPTH_TEST);
-
-	// 	// White background
-	// 	gl.clearColor(1.0, 1.0, 1.0, 1.0);
-	// 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-	// 	let aspect = this.glCanvas.width / this.glCanvas.height;
-	// 	let fov = Math.PI / 4;
-	// 	let dist = 1.0 / Math.tan(fov / 2);
-	// 	let projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
-
-	// 	let isOut = (param === c_oAscSlideTransitionParams.Flythrough_Out ||
-	// 		param === c_oAscSlideTransitionParams.Flythrough_Out_Bounce);
-	// 	let hasBounce = (param === c_oAscSlideTransitionParams.Flythrough_In_Bounce ||
-	// 		param === c_oAscSlideTransitionParams.Flythrough_Out_Bounce);
-
-	// 	let oldAlpha = 1.0 - progress;
-	// 	let newAlpha = progress;
-
-	// 	// Old slide scales up (grows toward camera), new starts at half size behind
-	// 	let oldScale, newScale;
-	// 	if (!isOut) {
-	// 		// In: old grows (1→2), new grows from behind (0.5→1)
-	// 		oldScale = 1.0 + progress;
-	// 		newScale = 0.5 + 0.5 * progress;
-	// 	} else {
-	// 		// Out: old shrinks (1→0.5), new shrinks from large (2→1)
-	// 		oldScale = 1.0 - 0.5 * progress;
-	// 		newScale = 2.0 - progress;
-	// 	}
-
-	// 	if (hasBounce) {
-	// 		// Multi-bounce: overshoot then settle
-	// 		let bounceT = Math.max(0, (progress - 0.65) / 0.35);
-	// 		let bounce;
-	// 		if (bounceT < 0.5) {
-	// 			bounce = Math.sin(bounceT * 2 * Math.PI) * 0.08;
-	// 		} else {
-	// 			bounce = Math.sin((bounceT - 0.5) * 2 * Math.PI) * 0.03;
-	// 		}
-	// 		newScale += isOut ? -bounce : bounce;
-	// 	}
-
-	// 	gl.uniformMatrix4fv(prog.uniforms['uProjection'], false, projection);
-
-	// 	// Draw new slide first (behind, slightly further back)
-	// 	{
-	// 		let mv = _Mat4.identity();
-	// 		mv = _Mat4.translate(mv, 0, 0, -dist - 0.01);
-	// 		mv[0] *= newScale; mv[5] *= newScale;
-	// 		gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mv);
-	// 		gl.uniform1f(prog.uniforms['uAlpha'], newAlpha);
-	// 		gl.activeTexture(gl.TEXTURE0);
-	// 		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
-	// 		gl.uniform1i(prog.uniforms['uTexture'], 0);
-	// 		this._bindQuad3D(prog);
-	// 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-	// 	}
-
-	// 	// Draw old slide (in front, scales up and fades out)
-	// 	{
-	// 		let mv = _Mat4.identity();
-	// 		mv = _Mat4.translate(mv, 0, 0, -dist);
-	// 		mv[0] *= oldScale; mv[5] *= oldScale;
-	// 		gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mv);
-	// 		gl.uniform1f(prog.uniforms['uAlpha'], oldAlpha);
-	// 		gl.activeTexture(gl.TEXTURE0);
-	// 		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
-	// 		gl.uniform1i(prog.uniforms['uTexture'], 0);
-	// 		this._bindQuad3D(prog);
-	// 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 	// 	}
 	// };
 
