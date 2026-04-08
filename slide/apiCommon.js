@@ -524,7 +524,7 @@ CAscSlideTransition.prototype.parseXmlParameters = function (_type, _paramNames,
 			typeMatched = true;
             this.TransitionType = c_oAscSlideTransitionTypes.Split;
 
-            var _is_vert = true;
+            var _is_vert = false;
             var _is_out = true;
 
             for (var i = 0; i < _len; i++)
