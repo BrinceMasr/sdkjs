@@ -28837,7 +28837,7 @@ function isAllowPasteLink(pastedWb) {
 			}
 
 			//hyperlink
-			if (currentObj.hyperLink || currentObj.location) {
+			if ((currentObj.hyperLink || currentObj.location) && !currentObj.doNotApplyHyperlink) {
 				pastedRangeProps.hyperLink = currentObj;
 			}
 

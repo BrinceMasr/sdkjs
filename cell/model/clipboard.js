@@ -4690,6 +4690,7 @@
 								} else {
 									oNewItem.hyperLink = null;
 									oNewItem.toolTip = null;
+									oNewItem.location = null;
 									oNewItem.doNotApplyHyperlink = true;
 								}
 							}
