@@ -8495,30 +8495,36 @@ $(function () {
 		oParser = new parserFormula('FACT(A101)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACT(A101) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 3628800, 'Test: Negative case: Reference link. Reference to cell with zero (valid but tested for edge case). 1 argument used.');
-		// Case #7: Area. Multi-cell range returns #NUM!. 1 argument used.
+		// Case #7: Area. Multi-cell range returns values. 1 argument used.
 		oParser = new parserFormula('FACT(A101:A102)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACT(A101:A102) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 3628800, 'Test: Negative case: Area. Multi-cell range returns #NUM!. 1 argument used.');
-		// Case #8: Name. Named range with area returns #VALUE!. 1 argument used.
+		oParser.setArrayFormulaRef(ws.getRange2("E100:G102").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 3628800, 'Test: Negative case: Area. Multi-cell range returns #VALUE!. 1 argument used.');
+		// Case #8: Name. Named range with area. 1 argument used.
 		oParser = new parserFormula('FACT(TestNameArea2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACT(TestNameArea2) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Name. Named range with area returns #VALUE!. 1 argument used.');
-		// Case #9: Name3D. 3D named range with area returns #VALUE!. 1 argument used.
-		oParser = new parserFormula('FACT(TestName3DArea)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FACT(TestName3DArea) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#NAME?', 'Test: Negative case: Name3D. 3D named range with area returns #VALUE!. 1 argument used.');
-		// Case #10: Ref3D. 3D reference to text returns #VALUE!. 1 argument used.
+		oParser.setArrayFormulaRef(ws.getRange2("E100:G102").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Negative case: Name. Named range with area. 1 argument used.');
+		// Case #9: Name3D. 3D named range with area. 1 argument used.
+		oParser = new parserFormula('FACT(TestNameArea3D2)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: FACT(TestNameArea3D2) is parsed.');
+		oParser.setArrayFormulaRef(ws.getRange2("E100:G102").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Negative case: Name3D. 3D named range with area. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,1).getValue(), "#NUM!", 'Test: Negative case: Name3D. 3D named range with area. 1 argument used.');
+		// Case #10: Ref3D. 3D reference to text. 1 argument used.
 		oParser = new parserFormula('FACT(Sheet2!A2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACT(Sheet2!A2) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Negative case: Ref3D. 3D reference to text returns #VALUE!. 1 argument used.');
-		// Case #11: Area3D. 3D multi-cell range returns #NUM!. 1 argument used.
+		assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Negative case: Ref3D. 3D reference to text. 1 argument used.');
+		// Case #11: Area3D. 3D multi-cell range. 1 argument used.
 		oParser = new parserFormula('FACT(Sheet2!A2:A3)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACT(Sheet2!A2:A3) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Negative case: Area3D. 3D multi-cell range returns #NUM!. 1 argument used.');
-		// Case #12: Table. Table column with text returns #VALUE!. 1 argument used.
+		oParser.setArrayFormulaRef(ws.getRange2("E100:G102").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 2, 'Test: Negative case: Area3D. 3D multi-cell range. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1,0).getValue(), "#VALUE!", 'Test: Negative case: Area3D. 3D multi-cell range. 1 argument used.');
+		// Case #12: Table. Table column with text. 1 argument used.
 		oParser = new parserFormula('FACT(Table1[Column2])', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACT(Table1[Column2]) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 3628800, 'Test: Negative case: Table. Table column with text returns #VALUE!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), 3628800, 'Test: Negative case: Table. Table column with text. 1 argument used.');
 		// Case #13: Formula. Formula returning #NUM! propagates error. 1 argument used.
 		oParser = new parserFormula('FACT(SQRT(-1))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACT(SQRT(-1)) is parsed.');
@@ -8548,9 +8554,9 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: FACT("") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String. Empty string returns #VALUE!. 1 argument used.');
 		// Case #20: Formula. Formula returning #DIV/0! propagates error. 1 argument used.
-		oParser = new parserFormula('FACT(DIVIDE(1,0))', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FACT(DIVIDE(1,0)) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#NAME?', 'Test: Negative case: Formula. Formula returning #DIV/0! propagates error. 1 argument used.');
+		oParser = new parserFormula('FACT(SIN(1/0))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: FACT(SIN(1/0)) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#DIV/0!', 'Test: Negative case: Formula. Formula returning #DIV/0! propagates error. 1 argument used.');
 
 		// Bounded cases:
 		// Case #1: Number. Minimum valid number (returns 1). 1 argument used.
@@ -8565,10 +8571,6 @@ $(function () {
 		oParser = new parserFormula('FACT(0.0001)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACT(0.0001) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number. Small decimal truncated to 0 (returns 1). 1 argument used.');
-
-		// Need to fix: area handle
-		// Case #7: Area. Multi-cell range returns #NUM!. 1 argument used.
-		// Case #11: Area3D. 3D multi-cell range returns #NUM!. 1 argument used.
 
 		testArrayFormula(assert, "FACT");
 	});
@@ -8625,7 +8627,7 @@ $(function () {
 		ws.getRange2("A201").setValue("-1.5"); // TestName
 		ws.getRange2("A202").setValue("1.5"); // TestName1
 		ws.getRange2("A203").setValue("10.5"); // TestName2
-		ws2.getRange2("A11").setValue("-1.5"); // TestName3D
+		ws2.getRange2("A11").setValue("1.5"); // TestName3D
 		ws.getRange2("A208").setValue("1.8"); // TestNameArea2
 		ws.getRange2("B208").setValue("-1.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("1.8"); // TestNameArea3D2
@@ -8652,10 +8654,10 @@ $(function () {
 		// Case #5: Reference link. Reference to cell with valid number. 1 argument used.
 		oParser = new parserFormula('FACTDOUBLE(A100)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE(A100) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Positive case: Reference link. Reference to cell with valid number. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Positive case: Reference link. Reference to cell with valid number. 1 argument used.');
 		// Case #6: Area. Single-cell range with valid number. 1 argument used.
 		oParser = new parserFormula('FACTDOUBLE(A101:A101)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: FACTDOUBLE(A101:A100) is parsed.');
+		assert.ok(oParser.parse(), 'Test: FACTDOUBLE(A101:A101) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 3840, 'Test: Positive case: Area. Single-cell range with valid number. 1 argument used.');
 		// Case #7: Array. Array with single valid element. 1 argument used.
 		oParser = new parserFormula('FACTDOUBLE({5})', 'A2', ws);
@@ -8669,7 +8671,7 @@ $(function () {
 		// Case #9: Name3D. 3D named range with valid number. 1 argument used.
 		oParser = new parserFormula('FACTDOUBLE(TestName3D)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE(TestName3D) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Positive case: Name3D. 3D named range with valid number. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Positive case: Name3D. 3D named range with valid number. 1 argument used.');
 		// Case #10: Ref3D. 3D reference to cell with valid number. 1 argument used.
 		oParser = new parserFormula('FACTDOUBLE(Sheet2!A1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE(Sheet2!A1) is parsed.');
@@ -8720,7 +8722,7 @@ $(function () {
 		// Case #1: Number. Negative number returns #NUM!. 1 argument used.
 		oParser = new parserFormula('FACTDOUBLE(-1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE(-1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Number. Negative number returns #NUM!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Number. Negative number returns #NUM!. 1 argument used.');
 		// Case #2: String. Non-numeric string returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('FACTDOUBLE("abc")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE("abc") is parsed.');
@@ -8736,7 +8738,7 @@ $(function () {
 		// Case #5: Boolean. Boolean TRUE (1) returns valid factorial but tested for completeness. 1 argument used.
 		oParser = new parserFormula('FACTDOUBLE(TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE(TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Boolean. Boolean TRUE (1) returns valid factorial but tested for completeness. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Boolean. Boolean TRUE (1) returns valid factorial but tested for completeness. 1 argument used.');
 		// Case #6: Reference link. Reference to cell with zero (valid but tested for edge case). 1 argument used.
 		oParser = new parserFormula('FACTDOUBLE(A103)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE(A103) is parsed.');
@@ -8748,11 +8750,11 @@ $(function () {
 		// Case #8: Name. Named range with area returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('FACTDOUBLE(TestNameArea2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE(TestNameArea2) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Name. Named range with area returns #VALUE!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Test: Negative case: Name. Named range with area returns #VALUE!. 1 argument used.');
 		// Case #9: Name3D. 3D named range with area returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('FACTDOUBLE(TestNameArea3D2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE(TestNameArea3D2) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Name3D. 3D named range with area returns #VALUE!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Test: Negative case: Name3D. 3D named range with area returns #VALUE!. 1 argument used.');
 		// Case #10: Ref3D. 3D reference to text returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('FACTDOUBLE(Sheet2!A2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE(Sheet2!A2) is parsed.');
@@ -8776,19 +8778,19 @@ $(function () {
 		// Case #15: String. String convertible to negative number returns #NUM!. 1 argument used.
 		oParser = new parserFormula('FACTDOUBLE("-1")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE("-1") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: String. String convertible to negative number returns #NUM!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: String. String convertible to negative number returns #NUM!. 1 argument used.');
 		// Case #16: Array. Array with boolean returns #NUM!. 1 argument used.
 		oParser = new parserFormula('FACTDOUBLE({FALSE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE({FALSE}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '#VALUE!', 'Test: Negative case: Array. Array with boolean returns #NUM!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '#VALUE!', 'Test: Negative case: Array. Array with boolean returns #NUM!. 1 argument used.');
 		// Case #17: Number. Negative decimal returns #NUM!. 1 argument used. - critical
 		oParser = new parserFormula('FACTDOUBLE(-0.5)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE(-0.5) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Number. Negative decimal returns #NUM!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Number. Negative decimal returns #NUM!. 1 argument used.');
 		// Case #18: Time. Time value (0.5, truncated to 0) returns valid factorial but tested for edge case. 1 argument used. - crit
 		oParser = new parserFormula('FACTDOUBLE(TIME(12,0,0))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE(TIME(12,0,0)) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Time. Time value (0.5, truncated to 0) returns valid factorial but tested for edge case. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Time. Time value (0.5, truncated to 0) returns valid factorial but tested for edge case. 1 argument used.');
 		// Case #19: String. Empty string returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('FACTDOUBLE("")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE("") is parsed.');
@@ -8802,15 +8804,15 @@ $(function () {
 		// Case #1: Number. Minimum valid number (returns 1). 1 argument used.
 		oParser = new parserFormula('FACTDOUBLE(0)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE(0) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number. Minimum valid number (returns 1). 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number. Minimum valid number (returns 1). 1 argument used.');
 		// Case #2: Number. Maximum valid number before overflow. 1 argument used.
 		oParser = new parserFormula('FACTDOUBLE(170)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE(170) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1.0898143681335199e+154, 'Test: Bounded case: Number. Maximum valid number before overflow. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1.0898143681335199e+154, 'Test: Bounded case: Number. Maximum valid number before overflow. 1 argument used.');
 		// Case #3: Number. Small decimal truncated to 0 (returns 1). 1 argument used. - critical
 		oParser = new parserFormula('FACTDOUBLE(0.0001)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE(0.0001) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number. Small decimal truncated to 0 (returns 1). 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number. Small decimal truncated to 0 (returns 1). 1 argument used.');
 
 		// TODO in cases with numbers less than one, the editor freezes in an endless loop
 		// Need to fix: area handle, MS result diff, negative numbers handle, critical while loop
