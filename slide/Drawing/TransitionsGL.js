@@ -754,7 +754,7 @@
         let projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
 
         let isLeft = (param === c_oAscSlideTransitionParams.Flip_Left);
-        let dir = isLeft ? -1 : 1;
+        let dir = isLeft ? 1 : -1;
         let angle = dir * progress * Math.PI; // 0 to ±180°
 
         gl.uniformMatrix4fv(prog.uniforms['uProjection'], false, projection);

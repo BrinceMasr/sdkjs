@@ -4617,10 +4617,10 @@
 
 		// Default 'p14:flip' effect attribute is: dir='l'
 		// Attribute must be specified explicitly - <p14:flip/> without 'dir' attribute is forbidden
-		'effectFlipDown': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['r'] },
+		'effectFlipDown': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['d'] },
 		'effectFlipLeft': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['l'] },
 		'effectFlipRight': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['r'] },
-		'effectFlipUp': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['r'] },
+		'effectFlipUp': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['u'] },
 
 		// Default 'p14:gallery' effect attribute is: dir='l'
 		// Attribute must be specified explicitly - <p14:gallery/> without 'dir' attribute is forbidden
