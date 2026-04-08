@@ -405,11 +405,9 @@
         this.isBlockchainSupport = false;
         var oThis = this;
 
-        if (window["AscDesktopEditor"] &&
-            window["AscDesktopEditor"]["IsLocalFile"] &&
-            window["AscDesktopEditor"]["isBlockchainSupport"])
+        if (AscCommon.CryptoProvider)
         {
-            this.isBlockchainSupport = (window["AscDesktopEditor"]["isBlockchainSupport"]() && !window["AscDesktopEditor"]["IsLocalFile"]());
+            this.isBlockchainSupport = AscCommon.CryptoProvider.isBlockchainSupport();
 
             if (this.isBlockchainSupport)
             {
@@ -420,7 +418,7 @@
                         window["crypto_images_map"][_url] = [];
                     window["crypto_images_map"][_url].push(this);
 
-                    window["AscDesktopEditor"]["PreloadCryptoImage"](_url, AscCommon.g_oDocumentUrls.getLocal(_url));
+                    AscCommon.CryptoProvider.preloadCryptoImage(_url, AscCommon.g_oDocumentUrls.getLocal(_url));
 
                     oThis.Api.sync_StartAction(Asc.c_oAscAsyncActionType.BlockInteraction, Asc.c_oAscAsyncAction.LoadImage);
                 };

@@ -966,7 +966,7 @@
 							dataContainer.data = data;
 							if (window.isCloudCryptoDownloadAs)
 							{
-								window["AscDesktopEditor"]["CryptoDownloadAs"](dataContainer.data, fileType);
+								AscCommon.CryptoProvider.cryptoDownloadAs(dataContainer.data, fileType);
 								return true;
 							}
 							t._downloadAsUsingServer(actionType, options, oAdditionalData, dataContainer, downloadType);
@@ -989,7 +989,7 @@
 
 		if (window.isCloudCryptoDownloadAs)
 		{
-			window["AscDesktopEditor"]["CryptoDownloadAs"](dataContainer.data, fileType);
+			AscCommon.CryptoProvider.cryptoDownloadAs(dataContainer.data, fileType);
 			return true;
 		}
 	};

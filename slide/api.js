@@ -8545,7 +8545,7 @@ background-repeat: no-repeat;\
 							dataContainer.data = data;
 							if (window.isCloudCryptoDownloadAs)
 							{
-								window["AscDesktopEditor"]["CryptoDownloadAs"](dataContainer.data, fileType);
+								AscCommon.CryptoProvider.cryptoDownloadAs(dataContainer.data, fileType);
 								return true;
 							}
 							t._downloadAsUsingServer(actionType, options, oAdditionalData, dataContainer, downloadType);
@@ -8568,7 +8568,7 @@ background-repeat: no-repeat;\
 
         if (window.isCloudCryptoDownloadAs)
         {
-        	window["AscDesktopEditor"]["CryptoDownloadAs"](dataContainer.data, fileType);
+        	AscCommon.CryptoProvider.cryptoDownloadAs(dataContainer.data, fileType);
 			return true;
         }
 	};

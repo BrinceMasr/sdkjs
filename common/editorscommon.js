@@ -12374,7 +12374,7 @@
 
         this.isExistDecryptedChanges = false; // whether there was at least one request to decrypt data (were there foreign changes)
 
-        this.cryptoPrefix = (window["AscDesktopEditor"] && window["AscDesktopEditor"]["GetEncryptedHeader"]) ? window["AscDesktopEditor"]["GetEncryptedHeader"]() : "ENCRYPTED;";
+        this.cryptoPrefix = AscCommon.CryptoProvider ? AscCommon.CryptoProvider.getEncryptedHeader() : "ENCRYPTED;";
         this.cryptoPrefixLen = this.cryptoPrefix.length;
 
         this.editorId = null;
@@ -12395,14 +12395,11 @@
 
         this.isNeedCrypt = function()
 		{
-			if (window.g_asc_plugins)
-			{
-                if (!window.g_asc_plugins.isRunnedEncryption())
-                    return false;
-            }
+			if (!AscCommon.CryptoProvider)
+				return false;
 
-            if (!window["AscDesktopEditor"])
-                return false;
+			if (!AscCommon.CryptoProvider.isEncryptionRunning())
+				return false;
 
             if (this.isFrameEditor)
             	return false;
@@ -12410,7 +12407,7 @@
             if (2 == this.cryptoMode)
             	return true;
 
-            if (0 === window["AscDesktopEditor"]["CryptoMode"])
+            if (0 === AscCommon.CryptoProvider.getCryptoMode())
             	return false;
 
             return true;
@@ -12424,7 +12421,7 @@
         this.addCryproImagesFromDialog = function(callback)
 		{
 			var _this = this;
-            window["AscDesktopEditor"]["OpenFilenameDialog"]("images", true, function(files) {
+            AscCommon.CryptoProvider.openFilenameDialog("images", true, function(files) {
 				if (!files)
 					return;
                 if (!Array.isArray(files)) // string detect
@@ -12438,7 +12435,7 @@
 
 				for (var i = 0; i < files.length; i++)
 				{
-                    _files.push(window["AscDesktopEditor"]["GetImageBase64"](files[i], true));
+                    _files.push(AscCommon.CryptoProvider.getImageBase64(files[i], true));
                     _options.ext.push(AscCommon.GetFileExtension(files[i]));
 				}
 
@@ -12452,7 +12449,7 @@
             _editor.sync_StartAction(Asc.c_oAscAsyncActionType.BlockInteraction, Asc.c_oAscAsyncAction.LoadImage);
 
             var _this = this;
-            window["AscDesktopEditor"]["DownloadFiles"](urls, [], function(files) {
+            AscCommon.CryptoProvider.downloadFiles(urls, [], function(files) {
 
             	_editor.sync_EndAction(Asc.c_oAscAsyncActionType.BlockInteraction, Asc.c_oAscAsyncAction.LoadImage);
 
@@ -12464,9 +12461,9 @@
 
                 for (var elem in files)
                 {
-                    _files.push(window["AscDesktopEditor"]["GetImageBase64"](files[elem], true));
-                    _options.ext.push(window["AscDesktopEditor"]["GetImageFormat"](files[elem]));
-                    window["AscDesktopEditor"]["RemoveFile"](files[elem]);
+                    _files.push(AscCommon.CryptoProvider.getImageBase64(files[elem], true));
+                    _options.ext.push(AscCommon.CryptoProvider.getImageFormat(files[elem]));
+                    AscCommon.CryptoProvider.removeFile(files[elem]);
                 }
 
                 _this.sendChanges(this, _files, AscCommon.EncryptionMessageType.Encrypt, _options);
@@ -12545,17 +12542,17 @@
             {
             	//console.log("encrypt: " + data["changes"]);
 				if (this.arrData[0].options && this.arrData[0].options.isImageCrypt)
-                    window.g_asc_plugins.sendToEncryption({ "type" : "encryptData", "data" : this.arrData[0].data });
+                    AscCommon.CryptoProvider.sendToEncryption({ "type" : "encryptData", "data" : this.arrData[0].data });
 				else
-                    window.g_asc_plugins.sendToEncryption({ "type" : "encryptData", "data" : JSON.parse(this.arrData[0].data["changes"]) });
+                    AscCommon.CryptoProvider.sendToEncryption({ "type" : "encryptData", "data" : JSON.parse(this.arrData[0].data["changes"]) });
             }
             else if (AscCommon.EncryptionMessageType.Decrypt == this.arrData[0].type)
             {
                 //console.log("decrypt: " + data["changes"]);
                 if (this.arrData[0].options && this.arrData[0].options.isImageDecrypt)
-                    window.g_asc_plugins.sendToEncryption({ "type" : "decryptData", "data" : this.arrData[0].data });
+                    AscCommon.CryptoProvider.sendToEncryption({ "type" : "decryptData", "data" : this.arrData[0].data });
                 else
-                    window.g_asc_plugins.sendToEncryption({ "type" : "decryptData", "data" : this.arrData[0].data["changes"] });
+                    AscCommon.CryptoProvider.sendToEncryption({ "type" : "decryptData", "data" : this.arrData[0].data["changes"] });
             }
         };
 
@@ -12634,7 +12631,7 @@
             {
                 if (obj.options && obj.options.isImageDecrypt)
                 {
-                	window["AscDesktopEditor"]["ResaveFile"](obj.options.src, data[0]);
+                	AscCommon.CryptoProvider.resaveFile(obj.options.src, data[0]);
                     obj.options.img["onload_crypto"](obj.options.src);
                 }
                 else
@@ -12757,14 +12754,14 @@
                 }
 			}
 
-            window.g_asc_plugins.sendToEncryption({ "type" : "decryptData", "data" : this.handleChangesCallback.changes });
+            AscCommon.CryptoProvider.sendToEncryption({ "type" : "decryptData", "data" : this.handleChangesCallback.changes });
 		};
 
         this.asc_setAdvancedOptions = function(api, idOption, option)
 		{
             if (window.isNativeOpenPassword)
             {
-                window["AscDesktopEditor"]["NativeViewerOpen"](option.asc_getPassword());
+                AscCommon.CryptoProvider.nativeViewerOpen(option.asc_getPassword());
                 return;
             }
             if (window.isCloudCryptoDownloadAs)
@@ -12777,7 +12774,7 @@
             if (window["Asc"].c_oAscAdvancedOptionsID.TXT === idOption)
             {
                 var _param = ("<m_nCsvTxtEncoding>" + option.asc_getCodePage() + "</m_nCsvTxtEncoding>");
-                window["AscDesktopEditor"]["SetAdvancedOptions"](_param);
+                AscCommon.CryptoProvider.setAdvancedOptions(_param);
             }
             else if (window["Asc"].c_oAscAdvancedOptionsID.CSV === idOption)
             {
@@ -12792,13 +12789,13 @@
                     _param += ("<m_nCsvDelimiterChar>" + delimiterChar + "</m_nCsvDelimiterChar>");
                 }
 
-                window["AscDesktopEditor"]["SetAdvancedOptions"](_param);
+                AscCommon.CryptoProvider.setAdvancedOptions(_param);
             }
             else if (window["Asc"].c_oAscAdvancedOptionsID.DRM === idOption)
             {
                 var _param = ("<m_sPassword>" + AscCommon.CopyPasteCorrectString(option.asc_getPassword()) + "</m_sPassword>");
                 api.currentPassword = option.asc_getPassword();
-                window["AscDesktopEditor"]["SetAdvancedOptions"](_param);
+                AscCommon.CryptoProvider.setAdvancedOptions(_param);
             }
             return true;
 		};
@@ -15870,7 +15867,7 @@ window["asc_initAdvancedOptions"] = function(_code, _file_hash, _docInfo, csv_da
 
     if (_code == 90 || _code == 91)
     {
-    	if (window["AscDesktopEditor"] && (0 !== window["AscDesktopEditor"]["CryptoMode"]) && !_editor.isLoadFullApi)
+    	if (AscCommon.CryptoProvider && (0 !== AscCommon.CryptoProvider.getCryptoMode()) && !_editor.isLoadFullApi)
 		{
             // waiting for initialization
             _editor.asc_initAdvancedOptions_params = [];
@@ -15883,16 +15880,16 @@ window["asc_initAdvancedOptions"] = function(_code, _file_hash, _docInfo, csv_da
     	if (AscCommon.EncryptionWorker.isNeedCrypt() && !window.checkPasswordFromPlugin)
     	{
             window.checkPasswordFromPlugin = true;
-            window.g_asc_plugins.sendToEncryption({ "type": "getPasswordByFile", "hash": _file_hash, "docinfo": _docInfo });
+            AscCommon.CryptoProvider.sendToEncryption({ "type": "getPasswordByFile", "hash": _file_hash, "docinfo": _docInfo });
             return;
         }
     }
 
     window.checkPasswordFromPlugin = false;
 	let data = undefined;
-	if (csv_data && window["AscDesktopEditor"])
+	if (csv_data && AscCommon.CryptoProvider)
 	{
-		var bufferArray = window["AscDesktopEditor"]["GetOpenedFile"](csv_data);
+		var bufferArray = AscCommon.CryptoProvider.getOpenedFile(csv_data);
 		if (bufferArray)
 			data = new Uint8Array(bufferArray);
 	}
@@ -15901,7 +15898,7 @@ window["asc_initAdvancedOptions"] = function(_code, _file_hash, _docInfo, csv_da
 
 window["asc_IsNeedBuildCryptedFile"] = function()
 {
-    if (!window["AscDesktopEditor"] || !window["AscDesktopEditor"]["CryptoMode"])
+    if (!AscCommon.CryptoProvider || !AscCommon.CryptoProvider.getCryptoMode())
         return false;
 
     var _api = window["Asc"]["editor"] ? window["Asc"]["editor"] : window.editor;
@@ -15942,13 +15939,13 @@ window["asc_IsNeedBuildCryptedFile"] = function()
         }
     }
 
-    window["AscDesktopEditor"]["execCommand"]("encrypt:isneedbuild", "" + _returnValue);
+    AscCommon.CryptoProvider.execCommand("encrypt:isneedbuild", "" + _returnValue);
     return _returnValue;
 };
 
 window["UpdateSystemPlugins"] = function()
 {
-    var _plugins = JSON.parse(window["AscDesktopEditor"]["GetInstallPlugins"]());
+    var _plugins = JSON.parse(AscCommon.CryptoProvider.getInstallPlugins());
     _plugins[0]["url"] = _plugins[0]["url"].replace(" ", "%20");
     _plugins[1]["url"] = _plugins[1]["url"].replace(" ", "%20");
 
@@ -15961,7 +15958,7 @@ window["UpdateSystemPlugins"] = function()
 		{
 			_pluginsCur["pluginsData"][i]["baseUrl"] = _pluginsCur["url"] + _pluginsCur["pluginsData"][i]["guid"].substring(4) + "/";
 
-			if (!window["AscDesktopEditor"]["IsLocalFile"]())
+			if (!AscCommon.CryptoProvider.isLocalFile())
 			{
                 _pluginsCur["pluginsData"][i]["baseUrl"] = "ascdesktop://plugin_content/" + _pluginsCur["pluginsData"][i]["baseUrl"];
             }
@@ -16019,7 +16016,7 @@ window["buildCryptoFile_Start"] = function()
     var _editor = window.Asc.editor ? window.Asc.editor : window.editor;
     _editor.sync_StartAction(Asc.c_oAscAsyncActionType.BlockInteraction, Asc.c_oAscAsyncAction.Save);
 
-    window.g_asc_plugins.sendToEncryption({ "type" : "generatePassword" });
+    AscCommon.CryptoProvider.sendToEncryption({ "type" : "generatePassword" });
 };
 
 window["buildCryptoFile_End"] = function(url, error, hash, password)
@@ -16089,7 +16086,7 @@ window["buildCryptoFile_End"] = function(url, error, hash, password)
                 _editor.sync_EndAction(Asc.c_oAscAsyncActionType.BlockInteraction, Asc.c_oAscAsyncAction.Save);
                 _editor.sendEvent("asc_onError", Asc.c_oAscError.ID.ConvertationSaveError, Asc.c_oAscError.Level.Critical);
 
-                window["AscDesktopEditor"]["buildCryptedEnd"](false);
+                AscCommon.CryptoProvider.buildCryptedEnd(false);
 
 			}, function(httpRequest) {
 				//console.log(httpRequest.responseText);
@@ -16104,14 +16101,14 @@ window["buildCryptoFile_End"] = function(url, error, hash, password)
 					};
 					_editor.currentDocumentInfoNext = undefined;
 
-					window["AscDesktopEditor"]["sendSystemMessage"](data);
-					window["AscDesktopEditor"]["CallInAllWindows"]("function(){ if (window.DesktopUpdateFile) { window.DesktopUpdateFile(undefined); } }");
+					AscCommon.CryptoProvider.sendSystemMessage(data);
+					AscCommon.CryptoProvider.callInAllWindows("function(){ if (window.DesktopUpdateFile) { window.DesktopUpdateFile(undefined); } }");
 
                     _editor.sync_EndAction(Asc.c_oAscAsyncActionType.BlockInteraction, Asc.c_oAscAsyncAction.Save);
 
 					setTimeout(function() {
 
-                        window["AscDesktopEditor"]["buildCryptedEnd"](true);
+                        AscCommon.CryptoProvider.buildCryptedEnd(true);
 
 					}, 1000);
 				}
@@ -16123,7 +16120,7 @@ window["buildCryptoFile_End"] = function(url, error, hash, password)
 
 		xhr.send(null);
 	};
-    window.g_asc_plugins.sendToEncryption({"type": "setPasswordByFile", "hash": hash, "password": password});
+    AscCommon.CryptoProvider.sendToEncryption({"type": "setPasswordByFile", "hash": hash, "password": password});
 };
 
 window["NativeFileOpen_error"] = function(error, _file_hash, _docInfo)
@@ -16134,7 +16131,7 @@ window["NativeFileOpen_error"] = function(error, _file_hash, _docInfo)
     {
         window.isNativeOpenPassword = error;
 
-        if (window["AscDesktopEditor"] && (0 !== window["AscDesktopEditor"]["CryptoMode"]) && !_api.isLoadFullApi)
+        if (AscCommon.CryptoProvider && (0 !== AscCommon.CryptoProvider.getCryptoMode()) && !_api.isLoadFullApi)
         {
             // waiting for initialization
             _api.asc_initAdvancedOptions_params = [];
@@ -16147,7 +16144,7 @@ window["NativeFileOpen_error"] = function(error, _file_hash, _docInfo)
         if (AscCommon.EncryptionWorker.isNeedCrypt() && !window.checkPasswordFromPlugin)
         {
             window.checkPasswordFromPlugin = true;
-            window.g_asc_plugins.sendToEncryption({ "type": "getPasswordByFile", "hash": _file_hash, "docinfo": _docInfo });
+            AscCommon.CryptoProvider.sendToEncryption({ "type": "getPasswordByFile", "hash": _file_hash, "docinfo": _docInfo });
             return;
         }
 

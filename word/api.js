@@ -9460,7 +9460,7 @@ background-repeat: no-repeat;\
 						if (window.isCloudCryptoDownloadAs)
 						{
 							var sParamXml = ("<m_nCsvTxtEncoding>" + oAdditionalData["codepage"] + "</m_nCsvTxtEncoding>");
-							window["AscDesktopEditor"]["CryptoDownloadAs"](dataContainer.data, fileType, sParamXml);
+							AscCommon.CryptoProvider.cryptoDownloadAs(dataContainer.data, fileType, sParamXml);
 							return true;
 						}
 						t._downloadAsUsingServer(actionType, options, oAdditionalData, dataContainer, downloadType);
@@ -9535,7 +9535,7 @@ background-repeat: no-repeat;\
         if (window.isCloudCryptoDownloadAs)
         {
             var sParamXml = ("<m_nCsvTxtEncoding>" + oAdditionalData["codepage"] + "</m_nCsvTxtEncoding>");
-            window["AscDesktopEditor"]["CryptoDownloadAs"](dataContainer.data, fileType, sParamXml);
+            AscCommon.CryptoProvider.cryptoDownloadAs(dataContainer.data, fileType, sParamXml);
 			return true;
         }
 	};

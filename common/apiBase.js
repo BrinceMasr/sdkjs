@@ -691,11 +691,11 @@
 
 		if (this.DocInfo.get_EncryptedInfo())
 		{
-			if (undefined !== window["AscDesktopEditor"])
+			if (AscCommon.CryptoProvider)
 			{
 				var obj = this.DocInfo.get_EncryptedInfo();
 				obj["userId"] = this.documentUserId;
-				window["AscDesktopEditor"]["execCommand"]("portal:cryptoinfo", JSON.stringify(obj));
+				AscCommon.CryptoProvider.execCommand("portal:cryptoinfo", JSON.stringify(obj));
 			}
 		}
 
@@ -704,9 +704,9 @@
 			window["AscDesktopEditor"]["SetDocumentName"](this.documentTitle);
 		}
 
-		if (!this.frameManager.isFrameEditor() && undefined !== window["AscDesktopEditor"] && undefined !== window["AscDesktopEditor"]["CryptoMode"])
+		if (!this.frameManager.isFrameEditor() && AscCommon.CryptoProvider)
 		{
-			this.DocInfo.put_Encrypted(0 < window["AscDesktopEditor"]["CryptoMode"]);
+			this.DocInfo.put_Encrypted(0 < AscCommon.CryptoProvider.getCryptoMode());
 		}
 
 		if (!oldInfo)
@@ -1417,10 +1417,10 @@
 			this.sync_StartAction(c_oAscAsyncActionType.BlockInteraction, c_oAscAsyncAction.Open);
 		}
 
-        if (this.DocInfo.get_Encrypted() && window["AscDesktopEditor"] && !window["AscDesktopEditor"]["IsLocalFile"](true))
+        if (this.DocInfo.get_Encrypted() && AscCommon.CryptoProvider && !AscCommon.CryptoProvider.isLocalFile(true))
         {
         	var t = this;
-            window["AscDesktopEditor"]["OpenFileCrypt"](this.DocInfo.get_Title(), this.DocInfo.get_Url(), function () {t.openFileCryptCallback.apply(t, arguments);});
+            AscCommon.CryptoProvider.openFileCrypt(this.DocInfo.get_Title(), this.DocInfo.get_Url(), function () {t.openFileCryptCallback.apply(t, arguments);});
         }
 	};
 	baseEditorsApi.prototype._openChartOrLocalDocument           = function()
@@ -2496,7 +2496,7 @@
 	};
 	baseEditorsApi.prototype.downloadAs                         = function (actionType, options)
 	{
-		var isCloudCrypto = !!(window["AscDesktopEditor"] && (0 < window["AscDesktopEditor"]["CryptoMode"]));
+		var isCloudCrypto = !!(AscCommon.CryptoProvider && (0 < AscCommon.CryptoProvider.getCryptoMode()));
 		if (isCloudCrypto)
 		{
 			window.isCloudCryptoDownloadAs = true;

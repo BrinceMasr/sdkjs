@@ -1931,7 +1931,7 @@
 	{
 		if (window["AscDesktopEditor"])
 		{
-			if ((undefined !== window["AscDesktopEditor"]["CryptoMode"]) && (0 < window["AscDesktopEditor"]["CryptoMode"]))
+			if (AscCommon.CryptoProvider && (0 < AscCommon.CryptoProvider.getCryptoMode()))
 				return false;
 
 			if (window["AscDesktopEditor"]["IsLocalFile"] && window["AscDesktopEditor"]["IsFilePrinting"])
