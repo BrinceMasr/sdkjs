@@ -704,12 +704,12 @@ CAscSlideTransition.prototype.parseXmlParameters = function (_type, _paramNames,
         {
             typeMatched = true;
             this.TransitionType = c_oAscSlideTransitionTypes.Vortex;
-            this.TransitionOption = c_oAscSlideTransitionParams.Vortex_Left;
+			this.TransitionOption = c_oAscSlideTransitionParams.Vortex_Right;
             for (let i = 0; i < _len; i++) {
                 if (_paramNames[i] === "dir") {
-                    if ("r" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Vortex_Right;
-                    else if ("u" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Vortex_Up;
-                    else if ("d" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Vortex_Down;
+					if ("r" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Vortex_Left;
+					else if ("u" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Vortex_Down;
+					else if ("d" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Vortex_Up;
                 }
             }
         }
@@ -1222,10 +1222,10 @@ CAscSlideTransition.prototype.fillXmlParams = function (aAttrNames, aAttrValues)
         {
             sNodeName = "p14:vortex";
             const vortexDirMap = {};
-            vortexDirMap[c_oAscSlideTransitionParams.Vortex_Left] = "l";
-            vortexDirMap[c_oAscSlideTransitionParams.Vortex_Right] = "r";
-            vortexDirMap[c_oAscSlideTransitionParams.Vortex_Up] = "u";
-            vortexDirMap[c_oAscSlideTransitionParams.Vortex_Down] = "d";
+			vortexDirMap[c_oAscSlideTransitionParams.Vortex_Left] = "r";
+			vortexDirMap[c_oAscSlideTransitionParams.Vortex_Right] = "l";
+			vortexDirMap[c_oAscSlideTransitionParams.Vortex_Up] = "d";
+			vortexDirMap[c_oAscSlideTransitionParams.Vortex_Down] = "u";
             aAttrNames.push("dir");
             aAttrValues.push(vortexDirMap[this.TransitionOption] || "l");
             break;

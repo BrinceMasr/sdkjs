@@ -1707,10 +1707,10 @@
         let projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
         let mv = _Mat4.translate(_Mat4.identity(), 0, 0, -dist);
 
-        let dir = 0;
-        if (param === c_oAscSlideTransitionParams.Vortex_Right) dir = 1;
-        else if (param === c_oAscSlideTransitionParams.Vortex_Up) dir = 2;
-        else if (param === c_oAscSlideTransitionParams.Vortex_Down) dir = 3;
+		let dir = 1;
+		if (param === c_oAscSlideTransitionParams.Vortex_Right) dir = 0;
+		else if (param === c_oAscSlideTransitionParams.Vortex_Up) dir = 3;
+		else if (param === c_oAscSlideTransitionParams.Vortex_Down) dir = 2;
 
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
