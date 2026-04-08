@@ -524,7 +524,7 @@ CAscSlideTransition.prototype.parseXmlParameters = function (_type, _paramNames,
 			typeMatched = true;
             this.TransitionType = c_oAscSlideTransitionTypes.Split;
 
-            var _is_vert = true;
+            var _is_vert = false;
             var _is_out = true;
 
             for (var i = 0; i < _len; i++)
@@ -704,12 +704,12 @@ CAscSlideTransition.prototype.parseXmlParameters = function (_type, _paramNames,
         {
             typeMatched = true;
             this.TransitionType = c_oAscSlideTransitionTypes.Vortex;
-            this.TransitionOption = c_oAscSlideTransitionParams.Vortex_Left;
+			this.TransitionOption = c_oAscSlideTransitionParams.Vortex_Right;
             for (let i = 0; i < _len; i++) {
                 if (_paramNames[i] === "dir") {
-                    if ("r" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Vortex_Right;
-                    else if ("u" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Vortex_Up;
-                    else if ("d" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Vortex_Down;
+					if ("r" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Vortex_Left;
+					else if ("u" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Vortex_Down;
+					else if ("d" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Vortex_Up;
                 }
             }
         }
@@ -740,10 +740,10 @@ CAscSlideTransition.prototype.parseXmlParameters = function (_type, _paramNames,
             this.TransitionOption = c_oAscSlideTransitionParams.Ripple_Center;
             for (let i = 0; i < _len; i++) {
                 if (_paramNames[i] === "dir") {
-                    if ("lu" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Ripple_LeftUp;
-                    else if ("ru" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Ripple_RightUp;
-                    else if ("ld" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Ripple_LeftDown;
-                    else if ("rd" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Ripple_RightDown;
+					if ("lu" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Ripple_RightDown;
+					else if ("ru" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Ripple_LeftDown;
+					else if ("ld" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Ripple_RightUp;
+					else if ("rd" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Ripple_LeftUp;
                 }
             }
         }
@@ -753,37 +753,38 @@ CAscSlideTransition.prototype.parseXmlParameters = function (_type, _paramNames,
             this.TransitionType = c_oAscSlideTransitionTypes.Honeycomb;
             this.TransitionOption = c_oAscSlideTransitionParams.Honeycomb_Default;
         }
-        else if ("p14:prism" === _type)
-        {
-            typeMatched = true;
-            this.TransitionType = c_oAscSlideTransitionTypes.Prism;
-            let dir = "l", isContent = false, isInverted = false;
-            for (let i = 0; i < _len; i++) {
-                if (_paramNames[i] === "dir") dir = _paramValues[i];
-                else if (_paramNames[i] === "isContent") isContent = (_paramValues[i] === "1" || _paramValues[i] === "true");
-                else if (_paramNames[i] === "isInverted") isInverted = (_paramValues[i] === "1" || _paramValues[i] === "true");
-            }
-            const prismMap = {
-                "l_0_0": c_oAscSlideTransitionParams.Prism_Left,
-                "r_0_0": c_oAscSlideTransitionParams.Prism_Right,
-                "u_0_0": c_oAscSlideTransitionParams.Prism_Up,
-                "d_0_0": c_oAscSlideTransitionParams.Prism_Down,
-                "l_0_1": c_oAscSlideTransitionParams.Prism_Left_Inverted,
-                "r_0_1": c_oAscSlideTransitionParams.Prism_Right_Inverted,
-                "u_0_1": c_oAscSlideTransitionParams.Prism_Up_Inverted,
-                "d_0_1": c_oAscSlideTransitionParams.Prism_Down_Inverted,
-                "l_1_0": c_oAscSlideTransitionParams.Prism_Left_Content,
-                "r_1_0": c_oAscSlideTransitionParams.Prism_Right_Content,
-                "u_1_0": c_oAscSlideTransitionParams.Prism_Up_Content,
-                "d_1_0": c_oAscSlideTransitionParams.Prism_Down_Content,
-                "l_1_1": c_oAscSlideTransitionParams.Prism_Left_ContentInv,
-                "r_1_1": c_oAscSlideTransitionParams.Prism_Right_ContentInv,
-                "u_1_1": c_oAscSlideTransitionParams.Prism_Up_ContentInv,
-                "d_1_1": c_oAscSlideTransitionParams.Prism_Down_ContentInv
-            };
-            const key = dir + "_" + (isContent ? "1" : "0") + "_" + (isInverted ? "1" : "0");
-            this.TransitionOption = prismMap[key] !== undefined ? prismMap[key] : c_oAscSlideTransitionParams.Prism_Left;
-        }
+		else if ("p14:prism" === _type) {
+			typeMatched = true;
+			this.TransitionType = c_oAscSlideTransitionTypes.Prism;
+			this.TransitionOption = c_oAscSlideTransitionParams.Prism_Right;
+			let dir = "l", isContent = false, isInverted = false;
+			for (let i = 0; i < _len; i++) {
+				if (_paramNames[i] === "dir") dir = _paramValues[i];
+				else if (_paramNames[i] === "isContent") isContent = (_paramValues[i] === "1" || _paramValues[i] === "true");
+				else if (_paramNames[i] === "isInverted") isInverted = (_paramValues[i] === "1" || _paramValues[i] === "true");
+			}
+			const prismMap = {
+				"l_0_0": c_oAscSlideTransitionParams.Prism_Right,
+				"r_0_0": c_oAscSlideTransitionParams.Prism_Left,
+				"u_0_0": c_oAscSlideTransitionParams.Prism_Down,
+				"d_0_0": c_oAscSlideTransitionParams.Prism_Up,
+				"l_0_1": c_oAscSlideTransitionParams.Prism_Right_Inverted,
+				"r_0_1": c_oAscSlideTransitionParams.Prism_Left_Inverted,
+				"u_0_1": c_oAscSlideTransitionParams.Prism_Down_Inverted,
+				"d_0_1": c_oAscSlideTransitionParams.Prism_Up_Inverted,
+				"l_1_0": c_oAscSlideTransitionParams.Prism_Right_Content,
+				"r_1_0": c_oAscSlideTransitionParams.Prism_Left_Content,
+				"u_1_0": c_oAscSlideTransitionParams.Prism_Down_Content,
+				"d_1_0": c_oAscSlideTransitionParams.Prism_Up_Content,
+				"l_1_1": c_oAscSlideTransitionParams.Prism_Right_ContentInv,
+				"r_1_1": c_oAscSlideTransitionParams.Prism_Left_ContentInv,
+				"u_1_1": c_oAscSlideTransitionParams.Prism_Down_ContentInv,
+				"d_1_1": c_oAscSlideTransitionParams.Prism_Up_ContentInv
+			};
+			const key = dir + "_" + (isContent ? "1" : "0") + "_" + (isInverted ? "1" : "0");
+			if (prismMap[key] !== undefined)
+				this.TransitionOption = prismMap[key];
+		}
         else if ("p14:doors" === _type)
         {
             typeMatched = true;
@@ -1221,10 +1222,10 @@ CAscSlideTransition.prototype.fillXmlParams = function (aAttrNames, aAttrValues)
         {
             sNodeName = "p14:vortex";
             const vortexDirMap = {};
-            vortexDirMap[c_oAscSlideTransitionParams.Vortex_Left] = "l";
-            vortexDirMap[c_oAscSlideTransitionParams.Vortex_Right] = "r";
-            vortexDirMap[c_oAscSlideTransitionParams.Vortex_Up] = "u";
-            vortexDirMap[c_oAscSlideTransitionParams.Vortex_Down] = "d";
+			vortexDirMap[c_oAscSlideTransitionParams.Vortex_Left] = "r";
+			vortexDirMap[c_oAscSlideTransitionParams.Vortex_Right] = "l";
+			vortexDirMap[c_oAscSlideTransitionParams.Vortex_Up] = "d";
+			vortexDirMap[c_oAscSlideTransitionParams.Vortex_Down] = "u";
             aAttrNames.push("dir");
             aAttrValues.push(vortexDirMap[this.TransitionOption] || "l");
             break;
@@ -1247,11 +1248,11 @@ CAscSlideTransition.prototype.fillXmlParams = function (aAttrNames, aAttrValues)
         {
             sNodeName = "p14:ripple";
             const rippleDirMap = {};
-            rippleDirMap[c_oAscSlideTransitionParams.Ripple_LeftUp] = "lu";
-            rippleDirMap[c_oAscSlideTransitionParams.Ripple_RightUp] = "ru";
-            rippleDirMap[c_oAscSlideTransitionParams.Ripple_LeftDown] = "ld";
-            rippleDirMap[c_oAscSlideTransitionParams.Ripple_RightDown] = "rd";
-            rippleDirMap[c_oAscSlideTransitionParams.Ripple_Center] = "center";
+			rippleDirMap[c_oAscSlideTransitionParams.Ripple_LeftUp] = "rd";
+			rippleDirMap[c_oAscSlideTransitionParams.Ripple_RightUp] = "ld";
+			rippleDirMap[c_oAscSlideTransitionParams.Ripple_LeftDown] = "ru";
+			rippleDirMap[c_oAscSlideTransitionParams.Ripple_RightDown] = "lu";
+			rippleDirMap[c_oAscSlideTransitionParams.Ripple_Center] = "center";
             aAttrNames.push("dir");
             aAttrValues.push(rippleDirMap[this.TransitionOption] || "center");
             break;
@@ -1261,32 +1262,32 @@ CAscSlideTransition.prototype.fillXmlParams = function (aAttrNames, aAttrValues)
             sNodeName = "p14:honeycomb";
             break;
         }
-        case c_oAscSlideTransitionTypes.Prism:
-        {
-            sNodeName = "p14:prism";
-            const prismAttrs = {};
-            prismAttrs[c_oAscSlideTransitionParams.Prism_Left]           = ["l", "0", "0"];
-            prismAttrs[c_oAscSlideTransitionParams.Prism_Right]          = ["r", "0", "0"];
-            prismAttrs[c_oAscSlideTransitionParams.Prism_Up]             = ["u", "0", "0"];
-            prismAttrs[c_oAscSlideTransitionParams.Prism_Down]           = ["d", "0", "0"];
-            prismAttrs[c_oAscSlideTransitionParams.Prism_Left_Inverted]  = ["l", "0", "1"];
-            prismAttrs[c_oAscSlideTransitionParams.Prism_Right_Inverted] = ["r", "0", "1"];
-            prismAttrs[c_oAscSlideTransitionParams.Prism_Up_Inverted]    = ["u", "0", "1"];
-            prismAttrs[c_oAscSlideTransitionParams.Prism_Down_Inverted]  = ["d", "0", "1"];
-            prismAttrs[c_oAscSlideTransitionParams.Prism_Left_Content]   = ["l", "1", "0"];
-            prismAttrs[c_oAscSlideTransitionParams.Prism_Right_Content]  = ["r", "1", "0"];
-            prismAttrs[c_oAscSlideTransitionParams.Prism_Up_Content]     = ["u", "1", "0"];
-            prismAttrs[c_oAscSlideTransitionParams.Prism_Down_Content]   = ["d", "1", "0"];
-            prismAttrs[c_oAscSlideTransitionParams.Prism_Left_ContentInv]  = ["l", "1", "1"];
-            prismAttrs[c_oAscSlideTransitionParams.Prism_Right_ContentInv] = ["r", "1", "1"];
-            prismAttrs[c_oAscSlideTransitionParams.Prism_Up_ContentInv]    = ["u", "1", "1"];
-            prismAttrs[c_oAscSlideTransitionParams.Prism_Down_ContentInv]  = ["d", "1", "1"];
-            const pVals = prismAttrs[this.TransitionOption] || ["l", "0", "0"];
-            aAttrNames.push("dir");        aAttrValues.push(pVals[0]);
-            aAttrNames.push("isContent");  aAttrValues.push(pVals[1]);
-            aAttrNames.push("isInverted"); aAttrValues.push(pVals[2]);
-            break;
-        }
+		case c_oAscSlideTransitionTypes.Prism:
+		{
+			sNodeName = "p14:prism";
+			const prismAttrs = {};
+			prismAttrs[c_oAscSlideTransitionParams.Prism_Left]             = ["r", "0", "0"];
+			prismAttrs[c_oAscSlideTransitionParams.Prism_Right]            = ["l", "0", "0"];
+			prismAttrs[c_oAscSlideTransitionParams.Prism_Up]               = ["d", "0", "0"];
+			prismAttrs[c_oAscSlideTransitionParams.Prism_Down]             = ["u", "0", "0"];
+			prismAttrs[c_oAscSlideTransitionParams.Prism_Left_Inverted]    = ["r", "0", "1"];
+			prismAttrs[c_oAscSlideTransitionParams.Prism_Right_Inverted]   = ["l", "0", "1"];
+			prismAttrs[c_oAscSlideTransitionParams.Prism_Up_Inverted]      = ["d", "0", "1"];
+			prismAttrs[c_oAscSlideTransitionParams.Prism_Down_Inverted]    = ["u", "0", "1"];
+			prismAttrs[c_oAscSlideTransitionParams.Prism_Left_Content]     = ["r", "1", "0"];
+			prismAttrs[c_oAscSlideTransitionParams.Prism_Right_Content]    = ["l", "1", "0"];
+			prismAttrs[c_oAscSlideTransitionParams.Prism_Up_Content]       = ["d", "1", "0"];
+			prismAttrs[c_oAscSlideTransitionParams.Prism_Down_Content]     = ["u", "1", "0"];
+			prismAttrs[c_oAscSlideTransitionParams.Prism_Left_ContentInv]  = ["r", "1", "1"];
+			prismAttrs[c_oAscSlideTransitionParams.Prism_Right_ContentInv] = ["l", "1", "1"];
+			prismAttrs[c_oAscSlideTransitionParams.Prism_Up_ContentInv]    = ["d", "1", "1"];
+			prismAttrs[c_oAscSlideTransitionParams.Prism_Down_ContentInv]  = ["u", "1", "1"];
+			const pVals = prismAttrs[this.TransitionOption] || ["l", "0", "0"];
+			aAttrNames.push("dir");        aAttrValues.push(pVals[0]);
+			aAttrNames.push("isContent");  aAttrValues.push(pVals[1]);
+			aAttrNames.push("isInverted"); aAttrValues.push(pVals[2]);
+			break;
+		}
         case c_oAscSlideTransitionTypes.Doors:
         {
             sNodeName = "p14:doors";

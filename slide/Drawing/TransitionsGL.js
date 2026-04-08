@@ -754,7 +754,7 @@
         let projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
 
         let isLeft = (param === c_oAscSlideTransitionParams.Flip_Left);
-        let dir = isLeft ? -1 : 1;
+        let dir = isLeft ? 1 : -1;
         let angle = dir * progress * Math.PI; // 0 to ±180°
 
         gl.uniformMatrix4fv(prog.uniforms['uProjection'], false, projection);
@@ -1268,11 +1268,11 @@
         let originX = 0.5, originY = 0.5;
         switch (param)
         {
-            case c_oAscSlideTransitionParams.Ripple_LeftUp:    originX = 1.0; originY = 0.0; break;
-            case c_oAscSlideTransitionParams.Ripple_RightUp:   originX = 0.0; originY = 0.0; break;
-            case c_oAscSlideTransitionParams.Ripple_LeftDown:  originX = 1.0; originY = 1.0; break;
-            case c_oAscSlideTransitionParams.Ripple_RightDown: originX = 0.0; originY = 1.0; break;
-            case c_oAscSlideTransitionParams.Ripple_Center:    originX = 0.5; originY = 0.5; break;
+			case c_oAscSlideTransitionParams.Ripple_LeftUp: originX = 0.0; originY = 1.0; break;
+			case c_oAscSlideTransitionParams.Ripple_RightUp: originX = 1.0; originY = 1.0; break;
+			case c_oAscSlideTransitionParams.Ripple_LeftDown: originX = 0.0; originY = 0.0; break;
+			case c_oAscSlideTransitionParams.Ripple_RightDown: originX = 1.0; originY = 0.0; break;
+			case c_oAscSlideTransitionParams.Ripple_Center: originX = 0.5; originY = 0.5; break;
         }
 
         gl.activeTexture(gl.TEXTURE0);
@@ -1410,7 +1410,8 @@
         let prismR = (dirIdx <= 1) ? aspect : 1.0;
 
         let isVertical = (dirIdx <= 1); // left/right rotate around Y
-        let dirSign = (dirIdx === 0 || dirIdx === 2) ? 1 : -1;
+		let dirSign = (dirIdx === 0 || dirIdx === 2) ? -1 : 1;
+		if (isInverted) dirSign = -dirSign;
 
         // isInverted=0 (default): faces on OUTSIDE (convex cube, axis behind faces)
         // isInverted=1: faces on INSIDE (concave, axis in front of faces)
@@ -1706,10 +1707,10 @@
         let projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
         let mv = _Mat4.translate(_Mat4.identity(), 0, 0, -dist);
 
-        let dir = 0;
-        if (param === c_oAscSlideTransitionParams.Vortex_Right) dir = 1;
-        else if (param === c_oAscSlideTransitionParams.Vortex_Up) dir = 2;
-        else if (param === c_oAscSlideTransitionParams.Vortex_Down) dir = 3;
+		let dir = 1;
+		if (param === c_oAscSlideTransitionParams.Vortex_Right) dir = 0;
+		else if (param === c_oAscSlideTransitionParams.Vortex_Up) dir = 3;
+		else if (param === c_oAscSlideTransitionParams.Vortex_Down) dir = 2;
 
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
