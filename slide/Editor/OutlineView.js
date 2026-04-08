@@ -200,7 +200,8 @@
 			run.SetPr(textPr);
 		});
 		const parTextPr = this.getTextPr();
-		outlineParagraph.Apply_TextPr(parTextPr);
+		outlineParagraph.TextPr.Value = parTextPr;
+		outlineParagraph.TextPr.CalcValue = parTextPr;
 	};
 	OutlineView.prototype.createOutlineShape = function (outlineSlides, width) {
 		this.reset();
@@ -418,16 +419,28 @@
 		}
 		return contents;
 	}
+	OutlineView.prototype.getContentPos = function (callback) {
+		let res;
+		if (content.IsSelectionUse()) {
+			const startPos = content.GetContentPosition(true, true);
+			const endPos = content.GetContentPosition(true, false);
+			res = callback(true, startPos, endPos);
+		} else {
+			const contentPos = content.GetContentPosition(false, false);
+			res = callback(false, contentPos);
+		}
+		return res;
+	};
 	OutlineView.prototype.forEachSelectedContent = function (callback) {
 		this.update();
 		const content = this.getDocContent();
 		if (!content) {
 			return;
 		}
-		const startPos = content.GetContentPosition(true, true);
-		const endPos = content.GetContentPosition(true, false);
 
 		if (content.IsSelectionUse()) {
+			const startPos = content.GetContentPosition(true, true);
+			const endPos = content.GetContentPosition(true, false);
 			const contents = this.getSelectionUseContentsInfo(startPos, endPos);
 			for (let i = 0; i < contents.length; i += 1) {
 				const contentInfo = contents[i];
@@ -435,7 +448,7 @@
 				const startPos = this.rebuildPos(contentInfo.startPos, content, contentInfo.startParagraph);
 				const endPos = this.rebuildPos(contentInfo.endPos, content, contentInfo.endParagraph);
 				content.SetContentSelection(startPos, endPos, 0, 0, 0, 0);
-				const res = callback(content);
+				const res = callback(content, i, contents.length);
 				content.RemoveSelection();
 				if (res) {
 					return true;
@@ -449,7 +462,7 @@
 				const sourceContent = sourceParagraph.GetParent();
 				const startPos = this.rebuildPos(contentPos, sourceContent, sourceParagraph);
 				sourceContent.SetContentPosition(startPos, 0, 0);
-				const res = callback(sourceContent);
+				const res = callback(sourceContent, 0, false);
 				sourceContent.RemoveSelection();
 				if (res) {
 					return true;
@@ -460,40 +473,30 @@
 		}
 		return false;
 	}
+	OutlineView.prototype.remove = function () {
+		this.forEachSelectedContent(function (content, idx, contentCount) {
+			if (contentCount > 1) {
+
+			} else {
+				content.Remove();
+			}
+		});
+	};
 	OutlineView.prototype.paragraphAdd = function (paraItem) {
 		if (paraItem.Type === para_TextPr) {
 			this.forEachSelectedContent(function (content) {
 				content.AddToParagraph(paraItem);
 			});
 		} else {
-			this.forEachSelectedContent(function (content) {
+			this.forEachSelectedContent(function (content, idx, contentCount) {
+				if (contentCount > 1) {
 
+				} else {
+					content.AddToParagraph(paraItem);
+				}
 			});
 		}
 	}
-	// OutlineView.prototype.forEachSelectedParagraph = function (callback) {
-	// 	const content = this.getDocContent();
-	// 	if (content.IsSelectionUse()) {
-	// 		let StartPos = content.Selection.StartPos;
-	// 		let EndPos   = content.Selection.EndPos;
-	// 		if (EndPos < StartPos)
-	// 		{
-	// 			const Temp = StartPos;
-	// 			StartPos = EndPos;
-	// 			EndPos   = Temp;
-	// 		}
-	// 		for (let i = StartPos; i <= EndPos; i += 1) {
-	// 			if (callback(content.Content[i])) {
-	// 				return true;
-	// 			}
-	// 		}
-	// 	} else {
-	// 		if (callback(content.Content[content.CurPos.ContentPos])) {
-	// 			return true;
-	// 		}
-	// 	}
-	// 	return false;
-	// }
 
 	OutlineView.prototype.getParagraphParaPr = function () {
 		let paraPr;
@@ -578,7 +581,13 @@
 		}
 	};
 	OutlineView.prototype.checkSourceParagraph = function (paragraph) {
-		this.mapToCheckParagraphs[paragraph.GetId()] = paragraph;
+		const shape = paragraph.GetParentShape();
+		if (shape.getObjectType() === AscDFH.historyitem_type_Shape) {
+			if (shape.parent && shape.parent.getObjectType() === AscDFH.historyitem_type_Slide) {
+				this.mapToCheckParagraphs[paragraph.GetId()] = paragraph;
+			}
+		}
+
 	};
 	OutlineView.prototype.getApi = function () {
 		return Asc.editor;
@@ -737,6 +746,109 @@
 				}
 				break;
 			}
+		}
+	};
+	OutlineView.prototype.getDrawingDocument = function () {
+		const presentation = this.getPresentation();
+		return presentation.GetDrawingDocument();
+	};
+	OutlineView.prototype.isFocusOnOutline = function () {
+		const presentation = this.getPresentation();
+		return presentation.IsFocusOnOutline();
+	};
+	OutlineView.prototype.getSelectedSlidesRange = function () {
+		const selectedArray = this.getSelectedSlideArray();
+		if (selectedArray.length) {
+			return {Min: selectedArray[0], Max: selectedArray[selectedArray.length - 1]};
+		}
+		return {Min: -1, Max: -1};
+	};
+	OutlineView.prototype.getSlideIndex = function (outlineParagraph) {
+		const outlineId = outlineParagraph.Get_Id();
+		const sourceParagraph = this.outlineToSourceMap[outlineId];
+		if (sourceParagraph) {
+			const parentShape = sourceParagraph.GetParentShape();
+			if (parentShape && parentShape.parent) {
+				return parentShape.parent.num;
+			}
+		} else if (this.outlineInfo[outlineId] && this.outlineInfo[outlineId].titleShapeIndex !== undefined) {
+			return this.outlineInfo[outlineId].titleShapeIndex;
+		}
+		return -1;
+	};
+	OutlineView.prototype.getSelectedSlideArrayFromSelection = function (startPos, endPos) {
+		const startParagraph = startPos[1].Class;
+		const endParagraph = endPos[1].Class;
+		let startSlideIndex = this.getSlideIndex(startParagraph);
+		let endSlideIndex = this.getSlideIndex(endParagraph);
+		if (startSlideIndex !== -1 && endSlideIndex !== -1) {
+			if (startSlideIndex > endSlideIndex) {
+				const temp = startSlideIndex;
+				startSlideIndex = endSlideIndex;
+				endSlideIndex = temp;
+			}
+			const selectedSlides = [];
+			for (let i = startSlideIndex; i <= endSlideIndex; i += 1) {
+				selectedSlides.push(i);
+			}
+			return selectedSlides;
+		} else if (startSlideIndex !== -1) {
+			return [startSlideIndex];
+		} else if (endSlideIndex !== -1) {
+			return [endSlideIndex];
+		}
+		return [];
+	};
+	OutlineView.prototype.getSelectedSlideArrayFromCurPos = function (curPos) {
+		const startParagraph = curPos[1].Class;
+		const startSlideIndex = this.getSlideIndex(startParagraph);
+		if (startSlideIndex !== -1) {
+			return  [startSlideIndex];
+		}
+		return [];
+	};
+
+	OutlineView.prototype.getSelectedSlideArray = function () {
+		if (this.isFocusOnOutline()) {
+			const oThis = this;
+			return this.getContentPos(function (isSelectionUse, startPos, endPos) {
+				if (isSelectionUse) {
+					return oThis.getSelectedSlideArrayFromSelection(startPos, endPos);
+				} else {
+					return oThis.getSelectedSlideArrayFromCurPos(startPos);
+				}
+			});
+		} else {
+			const drawingDocument = this.getDrawingDocument();
+			if (drawingDocument.SlideCurrent >= 0) {
+				return [drawingDocument.SlideCurrent];
+			}
+		}
+		return [];
+	};
+	OutlineView.prototype.isSelectedPage = function (pageNum) {
+		const selectedPages = this.getSelectedSlideArray();
+		return selectedPages.indexOf(pageNum) !== -1;
+	};
+	OutlineView.prototype.getTitleSlideParagraph = function (pageNum) {
+		const docContent = this.getDocContent();
+		if (docContent) {
+			for (let i = 0; i < docContent.Content.length; i += 1) {
+				const paragraph = docContent.Content[i];
+				const info = this.outlineInfo[paragraph.Get_Id()];
+				if (info && info.titleShapeIndex === pageNum) {
+					return paragraph;
+				}
+			}
+		}
+	};
+	OutlineView.prototype.selectPage = function (pageNum) {
+		const docContent = this.getDocContent();
+		if (docContent) {
+			const paragraph = this.getTitleSlideParagraph(pageNum);
+			paragraph.MoveCursorToStartPos();
+			paragraph.SetThisElementCurrent();
+			this.updateSelectionState();
 		}
 	};
 
