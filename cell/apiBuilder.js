@@ -515,6 +515,10 @@
 		/** @type {CT_PivotField} */
 		this.pivotField = pivotField;
 	}
+	ApiPivotField.prototype._getAxis = function () {
+		return this.pivotField ? this.pivotField.axis
+			: (this.table.pivot.dataOnRows ? Asc.c_oAscAxis.AxisRow : Asc.c_oAscAxis.AxisCol);
+	};
 
 	/**
 	 * Class representing a pivot table data field.
@@ -16852,8 +16856,9 @@
 	ApiPivotTable.prototype.GetColumnFields = function (field) {
 		const pivotFields = this.pivot.asc_getPivotFields();
 		const colFields = this.pivot.asc_getColumnFields();
+		if (!colFields) return [];
 		const t = this;
-		return colFields.map(function(colField, i) {
+		return colFields.map(function(colField) {
 			const index = colField.asc_getIndex();
 			return new ApiPivotField(t, index, pivotFields[index]);
 		});
@@ -16876,6 +16881,7 @@
 	 */
 	ApiPivotTable.prototype.GetDataFields = function (field) {
 		const dataFields = this.pivot.asc_getDataFields();
+		if (!dataFields) return field != null ? null : [];
 		if (field != null) {
 			let dataIndex = -1;
 			if (typeof field === 'number') {
@@ -16967,6 +16973,7 @@
 	ApiPivotTable.prototype.GetPageFields = function (field) {
 		const pivotFields = this.pivot.asc_getPivotFields();
 		const pageFields = this.pivot.asc_getPageFields();
+		if (!pageFields) return [];
 		const t = this;
 		return pageFields.map(function(pageField, i) {
 			const index = pageField.asc_getIndex();
@@ -16991,8 +16998,9 @@
 	ApiPivotTable.prototype.GetRowFields = function (field) {
 		const pivotFields = this.pivot.asc_getPivotFields();
 		const rowFields = this.pivot.asc_getRowFields();
+		if (!rowFields) return [];
 		const t = this;
-		return rowFields.map(function(rowField, i) {
+		return rowFields.map(function(rowField) {
 			const index = rowField.asc_getIndex();
 			return new ApiPivotField(t, index, pivotFields[index]);
 		});
@@ -17769,12 +17777,16 @@
 	ApiPivotDataField.prototype.Move = function (type, index) {
 		function getIndexTo(type, indexFrom, fields) {
 			switch (type) {
+				case "xlUp":
 				case "Up":
 					return (indexFrom > 0) ? indexFrom - 1 : indexFrom;
+				case "xlDown":
 				case "Down":
 					return (indexFrom < fields.length - 1) ? indexFrom + 1 : fields.length - 1;
+				case "xlBegin":
 				case "Begin":
 					return 0;
+				case "xlEnd":
 				case "End":
 					return fields.length - 1;
 				default:
@@ -17782,15 +17794,19 @@
 			}
 		}
 		switch (type) {
+			case "xlRowField":
 			case "Rows":
 				this.table.pivot.asc_moveToRowField(this.table.api, this.index, this.dataIndex, index);
 				break;
+			case "xlColumnField":
 			case "Columns":
 				this.table.pivot.asc_moveToColField(this.table.api, this.index, this.dataIndex, index);
 				break;
+			case "xlPageField":
 			case "Filters":
 				this.table.pivot.asc_moveToPageField(this.table.api, this.index, this.dataIndex, index);
 				break;
+			case "xlDataField":
 			case "Values":
 				this.SetPosition(index);
 				break;
@@ -17826,36 +17842,47 @@
 	ApiPivotDataField.prototype.SetFunction = function (func) {
 		const field = new Asc.CT_DataField();
 		switch (func) {
+			case "xlAverage":
 			case "Average":
 				field.asc_setSubtotal(Asc.c_oAscDataConsolidateFunction.Average);
 				break;
+			case "xlCount":
 			case "Count":
 				field.asc_setSubtotal(Asc.c_oAscDataConsolidateFunction.Count);
 				break;
+			case "xlCountNumbers":
 			case "CountNumbers":
 				field.asc_setSubtotal(Asc.c_oAscDataConsolidateFunction.CountNums);
 				break;
+			case "xlMax":
 			case "Max":
 				field.asc_setSubtotal(Asc.c_oAscDataConsolidateFunction.Max);
 				break;
+			case "xlMin":
 			case "Min":
 				field.asc_setSubtotal(Asc.c_oAscDataConsolidateFunction.Min);
 				break;
+			case "xlProduct":
 			case "Product":
 				field.asc_setSubtotal(Asc.c_oAscDataConsolidateFunction.Product);
 				break;
+			case "xlStdDev":
 			case "StdDev":
 				field.asc_setSubtotal(Asc.c_oAscDataConsolidateFunction.StdDev);
 				break;
+			case "xlStdDevP":
 			case "StdDevP":
 				field.asc_setSubtotal(Asc.c_oAscDataConsolidateFunction.StdDevp);
 				break;
+			case "xlSum":
 			case "Sum":
 				field.asc_setSubtotal(Asc.c_oAscDataConsolidateFunction.Sum);
 				break;
+			case "xlVar":
 			case "Var":
 				field.asc_setSubtotal(Asc.c_oAscDataConsolidateFunction.Var);
 				break;
+			case "xlVarP":
 			case "VarP":
 				field.asc_setSubtotal(Asc.c_oAscDataConsolidateFunction.Varp);
 				break;
@@ -18191,6 +18218,9 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetPivotItems.js
 	 */
 	ApiPivotField.prototype.GetPivotItems = function (index) {
+		if (this.index === AscCommonExcel.st_VALUES) {
+			return [];
+		}
 		const pivotFields = this.table.pivot.asc_getPivotFields();
 		const pivotField = pivotFields[this.index];
 		if (index != null) {
@@ -18228,12 +18258,16 @@
 	ApiPivotField.prototype.Move = function (type, index) {
 		function getIndexTo(type, indexFrom, fields) {
 			switch (type) {
+				case "xlUp":
 				case "Up":
 					return (indexFrom > 0) ? indexFrom - 1 : indexFrom;
+				case "xlDown":
 				case "Down":
 					return (indexFrom < fields.length - 1) ? indexFrom + 1 : fields.length - 1;
+				case "xlBegin":
 				case "Begin":
 					return 0;
+				case "xlEnd":
 				case "End":
 					return fields.length - 1;
 				default:
@@ -18244,35 +18278,43 @@
 			index = 0;
 		}
 		switch (type) {
-			case "Rows":
-				if (this.pivotField.axis !== Asc.c_oAscAxis.AxisRow) {
+			case "xlRowField":
+			case "Rows": {
+				if (this._getAxis() !== Asc.c_oAscAxis.AxisRow) {
 					this.table.pivot.asc_moveToRowField(this.table.api, this.index, undefined, index - 1);
 				} else {
-					this.SetPosition(index)
+					this.SetPosition(index);
 				}
 				break;
-			case "Columns":
-				if (this.pivotField.axis !== Asc.c_oAscAxis.AxisCol) {
+			}
+			case "xlColumnField":
+			case "Columns": {
+				if (this._getAxis() !== Asc.c_oAscAxis.AxisCol) {
 					this.table.pivot.asc_moveToColField(this.table.api, this.index, undefined, index - 1);
 				} else {
-					this.SetPosition(index)
+					this.SetPosition(index);
 				}
 				break;
-			case "Filters":
-				if (this.pivotField.axis !== Asc.c_oAscAxis.AxisPage) {
+			}
+			case "xlPageField":
+			case "Filters": {
+				if (this._getAxis() !== Asc.c_oAscAxis.AxisPage) {
 					this.table.pivot.asc_moveToPageField(this.table.api, this.index, undefined, index - 1);
 				} else {
-					this.SetPosition(index)
+					this.SetPosition(index);
 				}
 				break;
+			}
+			case "xlDataField":
 			case "Values":
 				this.table.pivot.asc_moveToDataField(this.table.api, this.index, undefined, index - 1);
 				break;
+			case "xlHidden":
 			case "Hidden":
 				this.Remove();
 				break;
-			default:
-				const fields = this.table.pivot.getAxisFields(this.pivotField.axis);
+			default: {
+				const fields = this.table.pivot.getAxisFields(this._getAxis());
 				if (fields) {
 					let indexFrom = null;
 					for (let i = 0; i < fields.length; i += 1) {
@@ -18291,6 +18333,7 @@
 					private_MakeError("Field is hidden.");
 				}
 				break;
+			}
 		}
 	};
 	/**
@@ -18316,7 +18359,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetPosition.js
 	 */
 	ApiPivotField.prototype.GetPosition = function () {
-		const fields = this.table.pivot.getAxisFields(this.pivotField.axis);
+		const fields = this.table.pivot.getAxisFields(this._getAxis());
 		if (fields) {
 			for (let i = 0; i < fields.length; i += 1) {
 				if (fields[i].asc_getIndex() === this.index) {
@@ -18341,14 +18384,15 @@
 	 */
 	ApiPivotField.prototype.SetPosition = function (position) {
 		if (typeof position == "number") {
-			if (this.pivotField.axis === null) {
+			const axis = this._getAxis();
+			if (axis === null) {
 				private_MakeError('The field is hidden.\n' +
 					'If you need to set the position of the data field then use ApiPivotDataField.SetPosition.\n' +
 					'See ApiPivotTable.GetDataFields or ApiPivotTable.GetPivotFields with dataField identifier to get ' +
 					'ApiPivotDataField object');
 				return;
 			}
-			if (!this.table.pivot.moveFieldInAxis(this.table.api, this.index, this.pivotField.axis, position - 1)) {
+			if (!this.table.pivot.moveFieldInAxis(this.table.api, this.index, axis, position - 1)) {
 				private_MakeError('Invalid position (out of range or the same).')
 			}
 		} else {
@@ -18375,6 +18419,9 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetOrientation.js
 	 */
 	ApiPivotField.prototype.GetOrientation = function () {
+		if (!this.pivotField) {
+			return this.table.pivot.dataOnRows ? "Rows" : "Columns";
+		}
 		if (this.pivotField.axis === Asc.c_oAscAxis.AxisRow) {
 			return "Rows";
 		} else if (this.pivotField.axis === Asc.c_oAscAxis.AxisCol) {
@@ -18400,29 +18447,32 @@
 	ApiPivotField.prototype.SetOrientation = function (type) {
 		switch (type) {
 			case "xlRowField":
-			case "Rows":
-				if (this.pivotField.axis !== Asc.c_oAscAxis.AxisRow) {
+			case "Rows": {
+				if (this._getAxis() !== Asc.c_oAscAxis.AxisRow) {
 					this.table.pivot.asc_moveToRowField(this.table.api, this.index);
 				} else {
-					private_MakeError('The field already has that orientation.')
+					private_MakeError('The field already has that orientation.');
 				}
 				break;
+			}
 			case "xlColumnField":
-			case "Columns":
-				if (this.pivotField.axis !== Asc.c_oAscAxis.AxisCol) {
+			case "Columns": {
+				if (this._getAxis() !== Asc.c_oAscAxis.AxisCol) {
 					this.table.pivot.asc_moveToColField(this.table.api, this.index);
 				} else {
-					private_MakeError('The field already has that orientation.')
+					private_MakeError('The field already has that orientation.');
 				}
 				break;
+			}
 			case "xlPageField":
-			case "Filters":
-				if (this.pivotField.axis !== Asc.c_oAscAxis.AxisPage) {
+			case "Filters": {
+				if (this._getAxis() !== Asc.c_oAscAxis.AxisPage) {
 					this.table.pivot.asc_moveToPageField(this.table.api, this.index);
 				} else {
-					private_MakeError('The field already has that orientation.')
+					private_MakeError('The field already has that orientation.');
 				}
 				break;
+			}
 			case "xlDataField":
 			case "Values":
 				this.table.pivot.asc_moveToDataField(this.table.api, this.index);
@@ -18518,6 +18568,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetName.js
 	 */
 	ApiPivotField.prototype.GetName = function () {
+		if (!this.pivotField) return AscCommonExcel.DATA_CAPTION;
 		return this.pivotField.asc_getName() || this.GetSourceName();
 	};
 
@@ -18530,6 +18581,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetName.js
 	 */
 	ApiPivotField.prototype.SetName = function (name) {
+		if (!this.pivotField) return;
 		if (typeof name === 'string' && name.length > 0) {
 			const field = new Asc.CT_PivotField();
 			field.asc_setName(name);
@@ -18630,6 +18682,7 @@
 	 */
 	ApiPivotField.prototype.GetLayoutCompactRow = function () {
 		const pivField = this.table.pivot.asc_getPivotFields()[this.index];
+		if (!pivField) return null;
 		return (pivField.asc_getOutline() && pivField.asc_getCompact());
 	};
 
@@ -18642,9 +18695,10 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetLayoutCompactRow.js
 	 */
 	ApiPivotField.prototype.SetLayoutCompactRow = function (compact) {
+		const pivField = this.table.pivot.asc_getPivotFields()[this.index];
+		if (!pivField) return;
 		if (typeof compact == "boolean") {
 			const field = new Asc.CT_PivotField();
-			const pivField = this.table.pivot.asc_getPivotFields()[this.index];
 			field.asc_setCompact( (pivField.asc_getOutline() && compact) );
 			pivField.asc_set(this.table.api, this.table.pivot, this.index, field);
 		} else {
@@ -18675,6 +18729,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetLayoutForm.js
 	 */
 	ApiPivotField.prototype.GetLayoutForm = function () {
+		if (!this.pivotField) return null;
 		return this.pivotField.asc_getOutline() ? "Outline" : "Tabular";
 	};
 
@@ -18687,6 +18742,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetLayoutForm.js
 	 */
 	ApiPivotField.prototype.SetLayoutForm = function (type) {
+		if (!this.pivotField) return;
 		if (type === "Tabular" || type === "Outline") {
 			const newField = new Asc.CT_PivotField();
 			newField.asc_setOutline(type === "Outline");
@@ -18714,6 +18770,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetLayoutPageBreak.js
 	 */
 	ApiPivotField.prototype.GetLayoutPageBreak = function () {
+		if (!this.pivotField) return null;
 		return this.pivotField.insertPageBreak;
 	};
 
@@ -18726,6 +18783,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetLayoutPageBreak.js
 	 */
 	ApiPivotField.prototype.SetLayoutPageBreak = function (insert) {
+		if (!this.pivotField) return;
 		if ( typeof insert == "boolean") {
 			this.pivotField.insertPageBreak = insert;
 		} else {
@@ -18751,6 +18809,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetShowingInAxis.js
 	 */
 	ApiPivotField.prototype.GetShowingInAxis = function () {
+		if (!this.pivotField) return true;
 		return this.pivotField.showingInAxis();
 	};
 
@@ -18769,6 +18828,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetRepeatLabels.js
 	 */
 	ApiPivotField.prototype.GetRepeatLabels = function () {
+		if (!this.pivotField) return null;
 		return this.pivotField.asc_getFillDownLabelsDefault();
 	};
 
@@ -18781,6 +18841,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetRepeatLabels.js
 	 */
 	ApiPivotField.prototype.SetRepeatLabels = function (repeat) {
+		if (!this.pivotField) return;
 		if (typeof repeat == "boolean") {
 			const field = new Asc.CT_PivotField();
 			field.asc_setFillDownLabelsDefault(repeat);
@@ -18808,6 +18869,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetLayoutBlankLine.js
 	 */
 	ApiPivotField.prototype.GetLayoutBlankLine = function () {
+		if (!this.pivotField) return null;
 		return this.pivotField.asc_getInsertBlankRow();
 	};
 
@@ -18820,6 +18882,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetLayoutBlankLine.js
 	 */
 	ApiPivotField.prototype.SetLayoutBlankLine = function (insert) {
+		if (!this.pivotField) return;
 		if (typeof insert == "boolean") {
 			const field = new Asc.CT_PivotField();
 			field.asc_setInsertBlankRow(insert);
@@ -18847,6 +18910,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetShowAllItems.js
 	 */
 	ApiPivotField.prototype.GetShowAllItems = function () {
+		if (!this.pivotField) return null;
 		return this.pivotField.asc_getShowAll();
 	};
 
@@ -18859,6 +18923,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetShowAllItems.js
 	 */
 	ApiPivotField.prototype.SetShowAllItems = function (show) {
+		if (!this.pivotField) return;
 		if (typeof show == "boolean") {
 			const field = new Asc.CT_PivotField();
 			field.asc_setShowAll(show);
@@ -18886,6 +18951,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetLayoutSubtotals.js
 	 */
 	ApiPivotField.prototype.GetLayoutSubtotals = function () {
+		if (!this.pivotField) return null;
 		return this.pivotField.asc_getDefaultSubtotal();
 	};
 
@@ -18898,6 +18964,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetLayoutSubtotals.js
 	 */
 	ApiPivotField.prototype.SetLayoutSubtotals = function (show) {
+		if (!this.pivotField) return;
 		if (typeof show == "boolean") {
 			const field = new Asc.CT_PivotField();
 			field.asc_setDefaultSubtotal(show);
@@ -18930,6 +18997,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetLayoutSubtotalLocation.js
 	 */
 	ApiPivotField.prototype.GetLayoutSubtotalLocation = function () {
+		if (!this.pivotField) return null;
 		return ( this.pivotField.asc_getSubtotalTop() ? "Top" : "Bottom" );
 	};
 
@@ -18942,6 +19010,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetLayoutSubtotalLocation.js
 	 */
 	ApiPivotField.prototype.SetLayoutSubtotalLocation = function (type) {
+		if (!this.pivotField) return;
 		if (typeof type == "string" && ( type == "Top" || type == "Bottom")) {
 			const field = new Asc.CT_PivotField();
 			field.asc_setSubtotalTop( (type == "Top") );
@@ -18969,6 +19038,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetSubtotalName.js
 	 */
 	ApiPivotField.prototype.GetSubtotalName = function () {
+		if (!this.pivotField) return null;
 		return (this.pivotField.subtotalCaption);
 	};
 
@@ -18981,6 +19051,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetSubtotalName.js
 	 */
 	ApiPivotField.prototype.SetSubtotalName = function (caption) {
+		if (!this.pivotField) return;
 		if ( typeof caption == "string") {
 			const field = new Asc.CT_PivotField();
 			field.subtotalCaption = caption.trim();
@@ -19024,6 +19095,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetSubtotals.js
 	 */
 	ApiPivotField.prototype.GetSubtotals = function () {
+		if (!this.pivotField) return null;
 		const res = {
 			'Sum': false,
 			'Count': false,
@@ -19089,6 +19161,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetSubtotals.js
 	 */
 	ApiPivotField.prototype.SetSubtotals = function (subtotals) {
+			if (!this.pivotField) return;
 			if (typeof subtotals == "object") {
 				const field = new Asc.CT_PivotField();
 				const arr = [];
@@ -19154,6 +19227,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetDragToColumn.js
 	 */
 	ApiPivotField.prototype.GetDragToColumn = function () {
+		if (!this.pivotField) return true;
 		return this.pivotField.dragToCol;
 	};
 
@@ -19166,6 +19240,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetDragToColumn.js
 	 */
 	ApiPivotField.prototype.SetDragToColumn = function (flag) {
+		if (!this.pivotField) return;
 		if (typeof flag == "boolean") {
 			this.pivotField.dragToCol = flag;
 		} else {
@@ -19191,6 +19266,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetDragToRow.js
 	 */
 	ApiPivotField.prototype.GetDragToRow = function () {
+		if (!this.pivotField) return true;
 		return this.pivotField.dragToRow;
 	};
 
@@ -19203,6 +19279,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetDragToRow.js
 	 */
 	ApiPivotField.prototype.SetDragToRow = function (flag) {
+		if (!this.pivotField) return;
 		if (typeof flag == "boolean") {
 			this.pivotField.dragToRow = flag;
 		} else {
@@ -19228,6 +19305,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetDragToData.js
 	 */
 	ApiPivotField.prototype.GetDragToData = function () {
+		if (!this.pivotField) return null;
 		return this.pivotField.dragToData;
 	};
 
@@ -19240,6 +19318,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetDragToData.js
 	 */
 	ApiPivotField.prototype.SetDragToData = function (flag) {
+		if (!this.pivotField) return;
 		if (typeof flag == "boolean") {
 			this.pivotField.dragToData = flag;
 		} else {
@@ -19265,6 +19344,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetDragToPage.js
 	 */
 	ApiPivotField.prototype.GetDragToPage = function () {
+		if (!this.pivotField) return false;
 		return this.pivotField.dragToPage;
 	};
 
@@ -19277,6 +19357,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetDragToPage.js
 	 */
 	ApiPivotField.prototype.SetDragToPage = function (flag) {
+		if (!this.pivotField) return;
 		if (typeof flag == "boolean") {
 			this.pivotField.dragToPage = flag;
 		} else {
@@ -19302,6 +19383,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetCurrentPage.js
 	 */
 	ApiPivotField.prototype.GetCurrentPage = function () {
+		if (!this.pivotField) return null;
 		const pageFields = this.table.pivot.asc_getPageFields();
 		const t = this;
 		const pageIndex = pageFields.findIndex(function(pageField) {

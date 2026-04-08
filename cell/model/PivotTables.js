@@ -14734,6 +14734,9 @@ CT_WorksheetSource.prototype.onFormulaEvent = function (type, eventData) {
 	} else if (AscCommon.c_oNotifyParentType.ProcessNotify === type) {
 		var data = eventData.notifyData;
 		if (AscCommon.c_oNotifyType.ChangeDefName === data.type && !data.to) {
+			if (this.formula && !this.formula.isParsed) {
+				this.formula.parse();
+			}
 			if (this.formula && 1 === this.formula.getOutStackSize()) {
 				var elem = this.formula.getOutStackElem(0);
 				if (elem.type === AscCommonExcel.cElementType.table) {
@@ -14819,6 +14822,9 @@ CT_WorksheetSource.prototype.toXml = function(writer, name) {
 	writer.WriteXmlAttributesEnd(true);
 };
 CT_WorksheetSource.prototype.getDataLocation = function() {
+	if (this.formula && !this.formula.isParsed) {
+		this.formula.parse();
+	}
 	if (this.formula && 1 === this.formula.getOutStackSize()) {
 		var elem = this.formula.getOutStackElem(0);
 		var headings;
@@ -14884,6 +14890,9 @@ CT_WorksheetSource.prototype.fromWorksheetSource = function(worksheetSource, add
 	}
 };
 CT_WorksheetSource.prototype._updateAttributes = function() {
+	if (this.formula && !this.formula.isParsed) {
+		this.formula.parse();
+	}
 	if (this.formula && 1 === this.formula.getOutStackSize()) {
 		var elem = this.formula.getOutStackElem(0);
 		if (elem) {
