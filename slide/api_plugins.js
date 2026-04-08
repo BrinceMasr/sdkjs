@@ -288,6 +288,50 @@
 		}
 	};
 
+	/**
+	 * Returns the list of available editor themes.
+	 * @memberof Api
+	 * @typeofeditors ["CPE"]
+	 * @alias GetEditorThemes
+	 * @returns {object[]} Array of theme objects with "index" and "name" properties.
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/GetEditorThemes.js
+	 */
+	Api.prototype["pluginMethod_GetEditorThemes"] = function() {
+		let themes = this.ThemeLoader.Themes.EditorThemes;
+		let result = [];
+		for (let i = 0; i < themes.length; i++) {
+			result.push({"index": themes[i].Index, "name": themes[i].get_Name()});
+		}
+		return result;
+	};
+
+	/**
+	 * Applies a theme to the presentation by index or name.
+	 * @memberof Api
+	 * @typeofeditors ["CPE"]
+	 * @alias ApplyTheme
+	 * @param {number | string} themeIndex - The theme index (number) or theme name (string, case-insensitive).
+	 * @returns {boolean} Returns false if the theme was not found.
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/ApplyTheme.js
+	 */
+	Api.prototype["pluginMethod_ApplyTheme"] = function(themeIndex) {
+		if (typeof themeIndex === "string") {
+			let themes = this.ThemeLoader.Themes.EditorThemes;
+			let nameLower = themeIndex.toLowerCase();
+			for (let i = 0; i < themes.length; i++) {
+				if (themes[i].get_Name().toLowerCase() === nameLower) {
+					themeIndex = themes[i].Index;
+					break;
+				}
+			}
+			if (typeof themeIndex === "string") return false;
+		}
+		this.ChangeTheme(themeIndex);
+		return true;
+	};
+
 })(window);
 
 
