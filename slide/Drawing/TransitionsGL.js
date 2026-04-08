@@ -1410,7 +1410,8 @@
         let prismR = (dirIdx <= 1) ? aspect : 1.0;
 
         let isVertical = (dirIdx <= 1); // left/right rotate around Y
-        let dirSign = (dirIdx === 0 || dirIdx === 2) ? 1 : -1;
+		let dirSign = (dirIdx === 0 || dirIdx === 2) ? -1 : 1;
+		if (isInverted) dirSign = -dirSign;
 
         // isInverted=0 (default): faces on OUTSIDE (convex cube, axis behind faces)
         // isInverted=1: faces on INSIDE (concave, axis in front of faces)
