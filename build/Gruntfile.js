@@ -210,8 +210,6 @@ module.exports = function(grunt) {
 			src: [
 				'Drawings/Format/path-boolean-min.js',
 				'Charts/ChartStyles.js',
-				'SmartArts/SmartArtData/*',
-				'SmartArts/SmartArtDrawing/*',
 				'Images/*',
 				'Images/placeholders/*',
 				'Images/content_controls/*',
