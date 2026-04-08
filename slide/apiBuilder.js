@@ -4548,7 +4548,7 @@
 		'effectCut':             { tag: 'p:cut', attrNames: ['thruBlk'], attrValues: ['0'] },
 		'effectCutThroughBlack': { tag: 'p:cut', attrNames: ['thruBlk'], attrValues: ['1'] },
 
-		// Default 'p:fade' effect attribute is: dir='horz'
+		// Default 'p:blinds' effect attribute is: dir='horz'
 		'effectBlindsHorizontal': { tag: 'p:blinds', attrNames: ['dir'], attrValues: ['horz'] },
 		'effectBlindsVertical':   { tag: 'p:blinds', attrNames: ['dir'], attrValues: ['vert'] },
 
@@ -4584,7 +4584,7 @@
 
 		// Default 'p:cover' effect attribute is: dir='l'
 		'effectCoverDown':      { tag: 'p:cover', attrNames: ['dir'], attrValues: ['d'] },
-		'effectCoverLeft':      { tag: 'p:cover', attrNames: ['dir'], attrValues: ['l']},
+		'effectCoverLeft':      { tag: 'p:cover', attrNames: ['dir'], attrValues: ['l'] },
 		'effectCoverLeftDown':  { tag: 'p:cover', attrNames: ['dir'], attrValues: ['ld'] },
 		'effectCoverLeftUp':    { tag: 'p:cover', attrNames: ['dir'], attrValues: ['lu'] },
 		'effectCoverRight':     { tag: 'p:cover', attrNames: ['dir'], attrValues: ['r'] },
@@ -4662,10 +4662,10 @@
 
 		// Default 'p14:switch' effect attribute is: dir='l'
 		// Attribute must be specified explicitly - <p14:switch/> without 'dir' attribute is forbidden
-		'effectSwitchDown':  { tag: 'p14:switch', attrNames: ['dir'], attrValues: ['r'] },
+		'effectSwitchDown':  { tag: 'p14:switch', attrNames: ['dir'], attrValues: ['d'] },
 		'effectSwitchLeft':  { tag: 'p14:switch', attrNames: ['dir'], attrValues: ['l'] },
 		'effectSwitchRight': { tag: 'p14:switch', attrNames: ['dir'], attrValues: ['r'] },
-		'effectSwitchUp':    { tag: 'p14:switch', attrNames: ['dir'], attrValues: ['r'] },
+		'effectSwitchUp':    { tag: 'p14:switch', attrNames: ['dir'], attrValues: ['u'] },
 
 		// Default 'p:pull' effect attribute is: dir='l'
 		'effectUncoverDown':      { tag: 'p:pull', attrNames: ['dir'], attrValues: ['d'] },
