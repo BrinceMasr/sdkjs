@@ -53,6 +53,7 @@
 		var c_oSpecialPasteProps = Asc.c_oSpecialPasteProps;
 
 		var c_MaxStringLength = 536870888;
+		var c_MaxCopyCells = 10000000;
 		var notSupportExternalReferenceFileFormat = {"csv": 1};
 
 		function number2color(n) {
@@ -354,6 +355,18 @@
 					selectionRange = ws.model.selectionRange.getLast();
 				}
 
+				// Limit selection to avoid freezing on large ranges
+				var originalRanges = null;
+				var _cols = selectionRange.c2 - selectionRange.c1 + 1;
+				var _rows = selectionRange.r2 - selectionRange.r1 + 1;
+				if (_cols * _rows > c_MaxCopyCells) {
+					var limitedR2 = selectionRange.r1 + Math.floor(c_MaxCopyCells / _cols) - 1;
+					var limitedRange = new Asc.Range(selectionRange.c1, selectionRange.r1, selectionRange.c2, limitedR2);
+					originalRanges = ws.model.selectionRange.ranges;
+					ws.model.selectionRange.ranges = [limitedRange];
+					selectionRange = limitedRange;
+					activeRange = ws.model.getRange3(limitedRange.r1, limitedRange.c1, limitedRange.r2, limitedRange.c2);
+				}
 
 				//TODO we need to ignore both formulas and hidden rows if the selection includes them + standard conditions in bIsExcludeHiddenRows
 				if (ws.model.autoFilters.bIsExcludeHiddenRows(selectionRange, activeCell, true)) {
@@ -401,6 +414,10 @@
 					if (null !== _data) {
 						_clipboard.pushData(AscCommon.c_oAscClipboardDataFormat.Internal, _data);
 					}
+				}
+
+				if (originalRanges) {
+					ws.model.selectionRange.ranges = originalRanges;
 				}
 
 				ws.model.excludeHiddenRows(false);
