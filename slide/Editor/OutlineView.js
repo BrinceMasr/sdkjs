@@ -532,10 +532,7 @@
 		const index = outlineParagraph.Index;
 		this.removeParagraph(outlineParagraph, index);
 	};
-	OutlineView.prototype.updateFromSourceParagraph = function (sourceParagraph) {
-		const outlineParagraph = this.sourceToOutlineMap[sourceParagraph.Get_Id()];
-		const index = outlineParagraph.Index;
-		this.removeParagraph(outlineParagraph, index);
+	OutlineView.prototype.getPropertiesFromSourceShape = function (sourceParagraph) {
 		let pr = null;
 		if (sourceParagraph.Index === 0) {
 			const parentShape = sourceParagraph.GetParentShape();
@@ -543,9 +540,30 @@
 			if (parentShape.getPlaceholderType() === AscFormat.phType_ctrTitle || parentShape.getPlaceholderType() === AscFormat.phType_title) {
 				pr.titleShapeIndex = parentShape.parent.num;
 			} else {
-				pr.contentShapeIndex = parentShape.parent.num;
+				pr.contentShapeIndex = this.getShapeContentIndex(parentShape.parent, parentShape);
 			}
 		}
+		return pr;
+	};
+	OutlineView.prototype.getShapeContentIndex = function (slide, shape) {
+		let countOfLowerShapes = 0;
+		const mainIndex = parseInt(shape.getPlaceholderIndex(), 10) || 0;
+		for (let i = 0; i < slide.cSld.spTree.length; i += 1) {
+			const shape = slide.cSld.spTree[i];
+			if (shape.isOutlineContentPlaceholder()) {
+				const shapeIndex = parseInt(shape.getPlaceholderIndex(), 10) || 0;
+				if (mainIndex > shapeIndex) {
+					countOfLowerShapes += 1;
+				}
+			}
+		}
+		return countOfLowerShapes;
+	}
+	OutlineView.prototype.updateFromSourceParagraph = function (sourceParagraph) {
+		const outlineParagraph = this.sourceToOutlineMap[sourceParagraph.Get_Id()];
+		const index = outlineParagraph.Index;
+		this.removeParagraph(outlineParagraph, index);
+		const pr = this.getPropertiesFromSourceShape(sourceParagraph);
 		this.addCopyParagraph(sourceParagraph, index, sourceParagraph.Index === 0, pr);
 
 	};
@@ -582,7 +600,7 @@
 	};
 	OutlineView.prototype.checkSourceParagraph = function (paragraph) {
 		const shape = paragraph.GetParentShape();
-		if (shape.getObjectType() === AscDFH.historyitem_type_Shape) {
+		if (shape && shape.isOutlinePlaceholder()) {
 			if (shape.parent && shape.parent.getObjectType() === AscDFH.historyitem_type_Slide) {
 				this.mapToCheckParagraphs[paragraph.GetId()] = paragraph;
 			}

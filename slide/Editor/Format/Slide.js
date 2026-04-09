@@ -1516,24 +1516,17 @@ Slide.prototype.getOutlineSlide = function () {
         if (shape.getObjectType() !== AscDFH.historyitem_type_Shape) {
             continue;
         }
-        const placeholderType = shape.getPlaceholderType();
-        switch (placeholderType) {
-            case AscFormat.phType_ctrTitle:
-            case AscFormat.phType_title: {
-                result.setTitle(shape);
-                break;
-            }
-            case AscFormat.phType_subTitle:
-            case AscFormat.phType_body:
-            case AscFormat.phType_obj: {
-                result.addContent(shape);
-                break;
-            }
-            default: {
-                break;
-            }
+        if (shape.isOutlineTitlePlaceholder()) {
+            result.setTitle(shape);
+        } else if (shape.isOutlineContentPlaceholder()) {
+            result.addContent(shape);
         }
     }
+    result.content.sort(function (aShape, bShape) {
+        const aPhIndex = aShape.getPlaceholderIndex() || "0";
+        const bPhIndex = bShape.getPlaceholderIndex() || "0";
+        return parseInt(aPhIndex, 10) - parseInt(bPhIndex, 10);
+    });
     return result;
 };
 

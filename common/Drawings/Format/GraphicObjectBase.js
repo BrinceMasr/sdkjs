@@ -4056,6 +4056,15 @@
 		return false;
 	};
 	CGraphicObjectBase.prototype.collectRedrawSlides = function (redrawSlides, force) {};
+	CGraphicObjectBase.prototype.isOutlineContentPlaceholder = function () {
+		return false;
+	};
+	CGraphicObjectBase.prototype.isOutlineTitlePlaceholder = function () {
+		return false;
+	};
+	CGraphicObjectBase.prototype.isOutlinePlaceholder = function () {
+		return false;
+	};
 
 	var ANIM_LABEL_WIDTH_PIX = 22;
 	var ANIM_LABEL_HEIGHT_PIX = 17;

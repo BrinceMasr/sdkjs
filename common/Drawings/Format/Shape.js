@@ -7550,6 +7550,32 @@
 		CShape.prototype.isSlideNoteShape = function() {
 			return false;
 		};
+		CShape.prototype.isOutlineContentPlaceholder = function () {
+			switch (this.getPlaceholderType()) {
+				case AscFormat.phType_subTitle:
+				case AscFormat.phType_body:
+				case AscFormat.phType_obj: {
+					return true;
+				}
+				default: {
+					return false;
+				}
+			}
+		};
+		CShape.prototype.isOutlineTitlePlaceholder = function () {
+			switch (this.getPlaceholderType()) {
+				case AscFormat.phType_ctrTitle:
+				case AscFormat.phType_title: {
+					return true;
+				}
+				default: {
+					return false;
+				}
+			}
+		};
+		CShape.prototype.isOutlinePlaceholder = function () {
+			return this.isOutlineContentPlaceholder() || this.isOutlineTitlePlaceholder();
+		};
 
 		function CreateBinaryReader(szSrc, offset, srcLen) {
 			var memoryData = AscCommon.Base64.decode(szSrc, true, srcLen, offset);
