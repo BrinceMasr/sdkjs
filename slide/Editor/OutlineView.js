@@ -299,19 +299,42 @@
 		return this.getOutlineParagraphs();
 	};
 	OutlineView.prototype.getParagraphY = function (paragraph) {
+		return this.getTransformY(paragraph.Y);
+	};
+	OutlineView.prototype.getTransformY = function (y) {
 		if (this.outlineShape) {
-			return this.outlineShape.transformText.TransformPointY(0, paragraph.Y);
+			return this.outlineShape.transformText.TransformPointY(0, y);
 		}
 		return null;
-	}
-	OutlineView.prototype.drawDecorations = function (graphics, currentSlideIndex) {
+	};
+	OutlineView.prototype.getTransformX = function (x) {
+		if (this.outlineShape) {
+			return this.outlineShape.transformText.TransformPointX(x, 0);
+		}
+		return null;
+	};
+	OutlineView.prototype.getInvertTransformY = function (y) {
+		if (this.outlineShape) {
+			return this.outlineShape.invertTransformText.TransformPointY(0, y);
+		}
+		return null;
+	};
+	OutlineView.prototype.getInvertTransformX = function (x) {
+		if (this.outlineShape) {
+			return this.outlineShape.invertTransformText.TransformPointX(x, 0);
+		}
+		return null;
+	};
+	OutlineView.prototype.drawDecorations = function (graphics, currentSlideIndex, focusSlideIndex) {
 		if (!this.outlineShape || !this.isHaveParagraphs()) return;
 
 		const rectX = 2;
 		const rectW = 6;
 		const backgroundRGB = this.getRGBFromHex(AscCommon.GlobalSkin.BackgroundColorThumbnails);
 
-		const numberPenRGB = this.getRGBFromHex(AscCommon.GlobalSkin.ThumbnailsPageOutline);
+		const normalSlideRGB = this.getRGBFromHex(AscCommon.GlobalSkin.ThumbnailsPageOutline);
+		const activeSlideRGB = this.getRGBFromHex(AscCommon.GlobalSkin.ThumbnailsPageOutlineActive);
+		const hoverSlideRGB = this.getRGBFromHex(AscCommon.GlobalSkin.ThumbnailsPageOutlineHover);
 		const numberWShape = rectW * (3 / 5);
 
 		g_oTextMeasurer.SetTextPr(this.getTextPr(), null);
@@ -325,11 +348,18 @@
 			if (info) {
 				const topY = this.getParagraphY(paragraph);
 				if (info.titleShapeIndex !== undefined) {
-					const penRGB = this.getRGBFromHex(info.titleShapeIndex === currentSlideIndex ? AscCommon.GlobalSkin.ThumbnailsPageOutlineActive : AscCommon.GlobalSkin.ThumbnailsPageOutline);
+					let penRGB;
+					if (info.titleShapeIndex === currentSlideIndex) {
+						penRGB = activeSlideRGB;
+					} else if (info.titleShapeIndex === focusSlideIndex) {
+						penRGB = hoverSlideRGB;
+					} else {
+						penRGB = normalSlideRGB;
+					}
 					const barShape = this.createDecorShape(backgroundRGB, penRGB, rectW, height, "roundRect", 20000);
 					this.drawDecorShape(graphics, barShape, rectX, topY);
 				} else if (info.contentShapeIndex !== undefined) {
-					const badgeShape = this.createDecorShape(backgroundRGB, numberPenRGB, numberWShape, height, "rect", 0, String(info.contentShapeIndex + 1));
+					const badgeShape = this.createDecorShape(backgroundRGB, normalSlideRGB, numberWShape, height, "rect", 0, String(info.contentShapeIndex + 1));
 					this.drawDecorShape(graphics, badgeShape, rectX + rectW - numberWShape, topY);
 				}
 			}
@@ -904,6 +934,24 @@
 			this.updateSelectionState();
 		}
 	};
+
+	OutlineView.prototype.getNearestPage = function (x, y) {
+		const docContent = this.getDocContent();
+		if (docContent) {
+			const tx = this.getInvertTransformX(x);
+			const ty = this.getInvertTransformY(y);
+			const nearestPos = docContent.Get_NearestPos(0, tx, ty);
+			return this.getSlideIndex(nearestPos.Paragraph);
+		}
+		return -1;
+	};
+	OutlineView.prototype.hitInTextRect = function (x, y) {
+		if (this.outlineShape) {
+			return AscFormat.HitToRect(x, y, this.outlineShape.invertTransformText, 0, 0, this.outlineShape.contentWidth, 20000);
+		}
+		return false;
+	};
+
 
 
 	window["AscCommonSlide"] = window["AscCommonSlide"] || {};

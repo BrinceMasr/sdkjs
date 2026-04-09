@@ -2423,7 +2423,7 @@
 
 		this.SelectPageEnabled = true;
 
-		this.MouseDownTrack = new AscCommon.CMouseDownTrack(this);
+		this.MouseDownTrack = new AscCommon.COutlineMouseDownTrack(this);
 
 		this.MouseTrackCommonImage = null;
 
@@ -2593,11 +2593,9 @@
 		const pos = this.ConvertCoords(global_mouseEvent.X, global_mouseEvent.Y);
 		this.MouseDownTrack.Start(pos.Page, global_mouseEvent.X, global_mouseEvent.Y);
 		if (global_mouseEvent.Button == 0 && this.outlineView) {
-			const pR = AscCommon.AscBrowser.retinaPixelRatio;
-
 			const outlineXMm = pos.X * g_dKoef_pix_to_mm;
 			const outlineYMm = pos.Y * g_dKoef_pix_to_mm;
-			this.outlineView.selectionSetStart(global_mouseEvent, outlineXMm / pR, outlineYMm / pR, 0);
+			this.outlineView.selectionSetStart(global_mouseEvent, outlineXMm, outlineYMm, 0);
 			const selectedPage = this.outlineView.getSelectedSlide();
 			if (selectedPage !== null) {
 				this.SelectPageEnabled = false;
@@ -2653,25 +2651,21 @@
 			return;
 		}
 
+
+		const pos = this.ConvertCoords(global_mouseEvent.X, global_mouseEvent.Y);
+		const oldFocusPage = this.MouseDownTrack.FocusPage;
+		this.MouseDownTrack.SetFocusPage(pos.Page);
+		this.MouseDownTrack.SetIsHitInTextRect(pos.IsHitInTextRect);
+		const isChangedFocus = oldFocusPage !== this.MouseDownTrack.FocusPage;
 		if (this.MouseDownTrack.IsStarted())
 		{
 			if (this.MouseDownTrack.IsSimple() && !this.m_oWordControl.m_oApi.isViewMode)
 			{
-				if (Math.abs(this.MouseDownTrack.GetX() - global_mouseEvent.X) > 10 || Math.abs(this.MouseDownTrack.GetY() - global_mouseEvent.Y) > 10)
-					this.MouseDownTrack.ResetSimple(this.ConvertCoords2(global_mouseEvent.X, global_mouseEvent.Y));
+				if (this.MouseDownTrack.IsMoved(global_mouseEvent.X, global_mouseEvent.Y))
+					this.MouseDownTrack.ResetSimple();
 			}
-			else
-			{
-				if (!this.MouseDownTrack.IsSimple())
-				{
-					this.MouseDownTrack.SetPosition(this.ConvertCoords2(global_mouseEvent.X, global_mouseEvent.Y));
-				}
-			}
-
-
 			this.OnUpdateOverlay();
 
-			// теперь нужно посмотреть, нужно ли проскроллить
 			if (this.m_bIsScrollVisible) {
 				const _X = global_mouseEvent.X - this.m_oWordControl.X;
 				const _Y = global_mouseEvent.Y - this.m_oWordControl.Y;
@@ -2692,44 +2686,16 @@
 
 				this.CheckNeedAnimateScrolls(_check_type);
 			}
-
-			if (!this.MouseDownTrack.IsSimple())
-			{
-				var cursor_dragged = "default";
-				if (AscCommon.AscBrowser.isWebkit)
-					cursor_dragged = "-webkit-grabbing";
-				else if (AscCommon.AscBrowser.isMozilla)
-					cursor_dragged = "-moz-grabbing";
-
-				this.m_oWordControl.m_oThumbnails.HtmlElement.style.cursor = cursor_dragged;
-			}
-
 			return;
 		}
-
-		var pos = this.ConvertCoords(global_mouseEvent.X, global_mouseEvent.Y);
-
-		var _is_old_focused = false;
-
-		var pages_count = this.m_arrPages.length;
-		for (var i = 0; i < pages_count; i++)
-		{
-			if (this.m_arrPages[i].IsFocused)
-			{
-				_is_old_focused = true;
-				this.m_arrPages[i].IsFocused = false;
-			}
-		}
-
 		var cursor_moved = "default";
-
-		if (pos.Page != -1)
+		if (this.MouseDownTrack.IsHitInTextRect) {
+			cursor_moved = "text";
+		} else if (this.MouseDownTrack.FocusPage != -1)
 		{
-			this.m_arrPages[pos.Page].IsFocused = true;
 			this.OnUpdateOverlay();
-
 			cursor_moved = "pointer";
-		} else if (_is_old_focused)
+		} else if (isChangedFocus)
 		{
 			this.OnUpdateOverlay();
 		}
@@ -2770,31 +2736,10 @@
 		if (!this.MouseDownTrack.IsStarted())
 			return;
 
-		// теперь смотрим, просто ли это селект, или же это трек
 		if (this.MouseDownTrack.IsSimple())
 		{
 			if (this.MouseDownTrack.IsMoved(global_mouseEvent.X, global_mouseEvent.Y))
-				this.MouseDownTrack.ResetSimple(this.ConvertCoords2(global_mouseEvent.X, global_mouseEvent.Y));
-		}
-
-		if (this.MouseDownTrack.IsSimple())
-		{
-
-
-			// послали уже на mouseDown
-			//this.SelectPageEnabled = false;
-			//this.m_oWordControl.GoToPage(this.MouseDownTrack.GetPage());
-			//this.SelectPageEnabled = true;
-		} else
-		{
-			// это трек
-			this.MouseDownTrack.SetPosition(this.ConvertCoords2(global_mouseEvent.X, global_mouseEvent.Y));
-
-			if (-1 !== this.MouseDownTrack.GetPosition() && (!this.MouseDownTrack.IsSamePos() || AscCommon.global_mouseEvent.CtrlKey))
-			{
-
-			}
-
+				this.MouseDownTrack.ResetSimple();
 		}
 		this.OnUpdateOverlay(true);
 		this.MouseDownTrack.Reset();
@@ -2804,6 +2749,7 @@
 
 	COutlineThumbnailsManager.prototype.onMouseLeave = function(e)
 	{
+		this.MouseDownTrack.SetFocusPage(-1);
 		this.OnUpdateOverlay();
 	};
 
@@ -2920,10 +2866,10 @@
 		this.outlineView.updateOutlineShapeTransform(this.outlineLeftMarginMM, -scrollYMm + this.outlineTopMarginMM);
 		this.m_oWordControl.m_oApi.clearEyedropperImgData();
 		this.outlineView.draw(graphics);
-		this.outlineView.drawDecorations(graphics, currentSlideIndex, scrollYMm, this.outlineLeftMarginMM);
 		this.m_oWordControl.m_oDrawingDocument.TargetStart();
 		this.m_oWordControl.m_oDrawingDocument.TargetShow();
 		this.m_oWordControl.m_oDrawingDocument.UpdateTargetNoAttack();
+		this.OnUpdateOverlay();
 	};
 
 	COutlineThumbnailsManager.prototype.onCheckUpdate = function()
@@ -2952,21 +2898,18 @@
 		if (this.m_oWordControl)
 			this.m_oWordControl.m_oApi.checkLastWork();
 
-		// const context = canvas.getContext("2d");
-		// this.getOutlineGraphics(canvas);
-
+		const currentSlideIndex = this.m_oWordControl.m_oDrawingDocument.SlideCurrent;
+		this.outlineView.drawDecorations(this.getOutlineGraphics(canvas.getContext("2d")), currentSlideIndex, this.MouseDownTrack.FocusPage);
 		const shape = this.outlineView.outlineShape;
 		if (shape) {
 			this.m_oWordControl.m_oDrawingDocument.UpdateTargetTransform(this.outlineView.getTransformText());
 			if (checkSelectionEnd || this.MouseDownTrack.IsDragged()) {
 				const pos = this.ConvertCoords(global_mouseEvent.X, global_mouseEvent.Y);
-				shape.selectionSetEnd(global_mouseEvent, pos.X * g_dKoef_pix_to_mm / AscCommon.AscBrowser.retinaPixelRatio, pos.Y * g_dKoef_pix_to_mm / AscCommon.AscBrowser.retinaPixelRatio, 0);
+				shape.selectionSetEnd(global_mouseEvent, pos.X * g_dKoef_pix_to_mm, pos.Y * g_dKoef_pix_to_mm, 0);
 				shape.updateSelectionState(this.m_oWordControl.m_oDrawingDocument);
 				this.m_oWordControl.OnUpdateOverlay();
 			} else {
 				this.m_oWordControl.m_oDrawingDocument.UpdateTargetNoAttack();
-				//todo
-				// shape.updateSelectionState(this.m_oWordControl.m_oDrawingDocument);
 			}
 		}
 	};
@@ -3021,89 +2964,16 @@
 				posX = posY = 0; // just in case
 				break;
 		}
-
-		const convertedX = AscCommon.AscBrowser.convertToRetinaValue(posX, true);
-		const convertedY = AscCommon.AscBrowser.convertToRetinaValue(posY, true);
-		const pageIndex = this.m_arrPages.findIndex(function (page) {
-			return page.Hit(convertedX, convertedY);
-		});
-
+		const mmPosX = posX * AscCommon.g_dKoef_pix_to_mm;
+		const mmPosY = posY * AscCommon.g_dKoef_pix_to_mm;
+		const pageIndex = this.outlineView.getNearestPage(mmPosX, mmPosY);
+		const hitInTextRect = this.outlineView.hitInTextRect(mmPosX, mmPosY);
 		return {
-			X: convertedX,
-			Y: convertedY,
-			Page: pageIndex
+			X: posX,
+			Y: posY,
+			Page: pageIndex,
+			IsHitInTextRect: hitInTextRect
 		};
-	};
-	COutlineThumbnailsManager.prototype.ConvertCoords2 = function (x, y) {
-		if (this.m_arrPages.length == 0)
-			return -1;
-
-		let posX, posY;
-		switch (Asc.editor.getThumbnailsPosition()) {
-			case thumbnailsPositionMap.left:
-				posX = x - this.m_oWordControl.X;
-				posY = y - this.m_oWordControl.Y;
-				break;
-
-			case thumbnailsPositionMap.right:
-				posX = x - this.m_oWordControl.X - this.m_oWordControl.Width + this.m_oWordControl.splitters[0].position * g_dKoef_mm_to_pix;
-				posY = y - this.m_oWordControl.Y;
-				break;
-
-			case thumbnailsPositionMap.bottom:
-				posX = x - this.m_oWordControl.X;
-				posY = y - this.m_oWordControl.Y - this.m_oWordControl.Height + this.m_oWordControl.splitters[0].position * g_dKoef_mm_to_pix;
-				break;
-
-			default:
-				posX = posY = 0; // just in case
-				break;
-		}
-
-		const convertedX = AscCommon.AscBrowser.convertToRetinaValue(posX, true);
-		const convertedY = AscCommon.AscBrowser.convertToRetinaValue(posY, true);
-
-		const absolutePosition = this.m_oWordControl.m_oThumbnails.AbsolutePosition;
-		const thControlWidth = (absolutePosition.R - absolutePosition.L) * g_dKoef_mm_to_pix * AscCommon.AscBrowser.retinaPixelRatio;
-		const thControlHeight = (absolutePosition.B - absolutePosition.T) * g_dKoef_mm_to_pix * AscCommon.AscBrowser.retinaPixelRatio;
-
-		if (convertedX < 0 || convertedX > thControlWidth || convertedY < 0 || convertedY > thControlHeight)
-			return -1;
-
-		const isHorizontalThumbnails = Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.bottom;
-		const isRightToLeft = Asc.editor.isRtlInterface;
-
-		let minDistance = Infinity;
-		let minPositionPage = 0;
-
-		for (let i = 0; i < this.m_arrPages.length; i++) {
-			const page = this.m_arrPages[i];
-
-			let distanceToStart, distanceToEnd;
-			if (isHorizontalThumbnails) {
-				if (isRightToLeft) {
-					distanceToStart = Math.abs(convertedX - page.right);
-					distanceToEnd = Math.abs(convertedX - page.left);
-				} else {
-					distanceToStart = Math.abs(convertedX - page.left);
-					distanceToEnd = Math.abs(convertedX - page.right);
-				}
-			} else {
-				distanceToStart = Math.abs(convertedY - page.top);
-				distanceToEnd = Math.abs(convertedY - page.bottom);
-			}
-
-			if (distanceToStart < minDistance) {
-				minDistance = distanceToStart;
-				minPositionPage = i;
-			}
-			if (distanceToEnd < minDistance) {
-				minDistance = distanceToEnd;
-				minPositionPage = i + 1;
-			}
-		}
-
-		return minPositionPage;
 	};
 	COutlineThumbnailsManager.prototype.CalculatePlaces = function () {
 		if (!this.isThumbnailsShown())
