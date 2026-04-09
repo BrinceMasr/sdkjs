@@ -4808,11 +4808,11 @@
 		'effectGlitterHexagonUp':    { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['u', 'hexagon'] },
 		'effectGlitterHexagonDown':  { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['d', 'hexagon'] },
 
-		// // Default 'p14:shred' effect attributes are: pattern='strip', dir='in'
-		// 'effectShredStripIn':      { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['strip', 'in'] },
-		// 'effectShredStripOut':     { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['strip', 'out'] },
-		// 'effectShredRectangleIn':  { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['rectangle', 'in'] },
-		// 'effectShredRectangleOut': { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['rectangle', 'out'] },
+		// Default 'p14:shred' effect attributes are: pattern='strip', dir='in'
+		'effectShredStripIn':      { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['strip', 'in'] },
+		'effectShredStripOut':     { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['strip', 'out'] },
+		'effectShredRectangleIn':  { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['rectangle', 'in'] },
+		'effectShredRectangleOut': { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['rectangle', 'out'] },
 
 		// Tag has no attributes
 		'effectFlashbulb': { tag: 'p14:flash' },
