@@ -2693,9 +2693,9 @@
 			cursor_moved = "text";
 		} else if (this.MouseDownTrack.FocusPage != -1)
 		{
-			this.OnUpdateOverlay();
 			cursor_moved = "pointer";
-		} else if (isChangedFocus)
+		}
+		if (isChangedFocus)
 		{
 			this.OnUpdateOverlay();
 		}
