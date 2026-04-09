@@ -10475,7 +10475,7 @@
 			return false;
 
 		let logicDocument = private_GetLogicDocument();
-		let isTrackRevisions = logicDocument.IsTrackRevisions();
+		let isTrackRevisions = logicDocument && logicDocument.IsDocumentEditor() ? logicDocument.IsTrackRevisions() : false;
 		if (isTrackRevisions)
 		{
 			let state = logicDocument.SaveDocumentState();
