@@ -394,6 +394,11 @@
 	}
 	OutlineView.prototype.getSelectionUseContentsInfo = function (startPos, endPos) {
 		const contents = [];
+		if (startPos[0].Position > endPos[0].Position) {
+			const temp = startPos;
+			startPos = endPos;
+			endPos = temp;
+		}
 		const startPosIndex = startPos[0].Position;
 		const endPosIndex = endPos[0].Position;
 		const content = this.getDocContent();
@@ -421,6 +426,7 @@
 	}
 	OutlineView.prototype.getContentPos = function (callback) {
 		let res;
+		const content = this.getDocContent();
 		if (content.IsSelectionUse()) {
 			const startPos = content.GetContentPosition(true, true);
 			const endPos = content.GetContentPosition(true, false);
@@ -442,15 +448,44 @@
 			const startPos = content.GetContentPosition(true, true);
 			const endPos = content.GetContentPosition(true, false);
 			const contents = this.getSelectionUseContentsInfo(startPos, endPos);
-			for (let i = 0; i < contents.length; i += 1) {
-				const contentInfo = contents[i];
+			if (contents.length === 1) {
+				const contentInfo = contents[0];
 				const content = contentInfo.content;
 				const startPos = this.rebuildPos(contentInfo.startPos, content, contentInfo.startParagraph);
 				const endPos = this.rebuildPos(contentInfo.endPos, content, contentInfo.endParagraph);
 				content.SetContentSelection(startPos, endPos, 0, 0, 0, 0);
-				const res = callback(content, i, contents.length);
+				const res = callback(content, 0, 1);
 				content.RemoveSelection();
-				if (res) {
+				return res;
+			} else if (contents.length > 1) {
+				const startContentInfo = contents[0];
+				const startContent = startContentInfo.content;
+				const startPos = this.rebuildPos(startContentInfo.startPos, startContent, startContentInfo.startParagraph);
+				startContent.SetContentPosition(startPos, 0, 0);
+				startContent.MoveCursorToEndPos(true);
+				const startRes = callback(startContent, 0, startContent.length);
+				startContent.RemoveSelection();
+				if (startRes) {
+					return true;
+				}
+				for (let i = 1; i < contents.length - 1; i += 1) {
+					const contentInfo = contents[i];
+					const content = contentInfo.content;
+					content.SelectAll();
+					const res = callback(content, i, contents.length);
+					content.RemoveSelection();
+					if (res) {
+						return true;
+					}
+				}
+				const endContentInfo = contents[contents.length - 1];
+				const endContent = endContentInfo.content;
+				const endPos = this.rebuildPos(endContentInfo.endPos, endContent, endContentInfo.endParagraph);
+				endContent.SetContentPosition(endPos, 0, 0);
+				endContent.MoveCursorToStartPos(true);
+				const endRes = callback(endContent, contents.length - 1, contents.length);
+				content.RemoveSelection();
+				if (endRes) {
 					return true;
 				}
 			}
