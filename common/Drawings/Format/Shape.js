@@ -1929,7 +1929,7 @@
 			if (point) {
 				return AscFormat.phType_pic;
 			}
-			return this.superclass.prototype.getPlaceholderType.call(this);
+			return AscFormat.CGraphicObjectBase.prototype.getPlaceholderType.call(this);
 		};
 
 
