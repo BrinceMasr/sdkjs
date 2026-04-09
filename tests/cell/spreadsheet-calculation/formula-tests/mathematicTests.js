@@ -8557,6 +8557,11 @@ $(function () {
 		oParser = new parserFormula('FACT(SIN(1/0))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACT(SIN(1/0)) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#DIV/0!', 'Test: Negative case: Formula. Formula returning #DIV/0! propagates error. 1 argument used.');
+		let multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A1";
+		// Case #21: Area3D. Area3D returning #REF!. 1 argument used.
+		oParser = new parserFormula('FACT('+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: FACT('+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 	"#REF!", 'Test: Negative case: Area3D. Area3D returning #REF!. 1 argument used.');
 
 		// Bounded cases:
 		// Case #1: Number. Minimum valid number (returns 1). 1 argument used.
@@ -8799,6 +8804,11 @@ $(function () {
 		oParser = new parserFormula('FACTDOUBLE(SUM(1,2,3))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE(SUM(1,2,3)) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 48, 'Test: Negative case: Formula. Formula returning #DIV/0! propagates error. 1 argument used.');
+		let multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A1";
+		// Case #21: Area3D. Formula returning #VALUE!. 1 argument used.
+		oParser = new parserFormula('FACTDOUBLE('+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: FACTDOUBLE('+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 48, 'Test: Negative case: Area3D. Formula returning #VALUE!. 1 argument used.');
 
 		// Bounded cases:
 		// Case #1: Number. Minimum valid number (returns 1). 1 argument used.
@@ -8813,20 +8823,6 @@ $(function () {
 		oParser = new parserFormula('FACTDOUBLE(0.0001)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE(0.0001) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number. Small decimal truncated to 0 (returns 1). 1 argument used.');
-
-		// TODO in cases with numbers less than one, the editor freezes in an endless loop
-		// Need to fix: area handle, MS result diff, negative numbers handle, critical while loop
-		// Case #5: Reference link. Reference to cell with valid number. 1 argument used.
-		// Case #9: Name3D. 3D named range with valid number. 1 argument used.
-		// Case #1: Number. Negative number returns #NUM!. 1 argument used.
-		// Case #5: Boolean. Boolean TRUE (1) returns valid factorial but tested for completeness. 1 argument used.
-		// Case #15: String. String convertible to negative number returns #NUM!. 1 argument used.
-		// Case #16: Array. Array with boolean returns #NUM!. 1 argument used.
-		// Case #17: Number. Negative decimal returns #NUM!. 1 argument used. - critical
-		// Case #18: Time. Time value (0.5, truncated to 0) returns valid factorial but tested for edge case. 1 argument used. - crit
-		// Case #1: Number. Minimum valid number (returns 1). 1 argument used.
-		// Case #2: Number. Maximum valid number before overflow. 1 argument used.
-		// Case #3: Number. Small decimal truncated to 0 (returns 1). 1 argument used. - critical
 
 
 		testArrayFormula(assert, "FACTDOUBLE", true);
