@@ -27772,7 +27772,7 @@
 
 					resultText        = '';
 					tempRange         = oWorksheet.GetRangeByNumber(nRow, nCol);
-					nCountLinesInCell = tempRange.GetValue().split('\n').length;
+					nCountLinesInCell = ("" + tempRange.GetValue()).split('\n').length;
 
 					for (var nText = nTextToReplace; nText < nTextToReplace + nCountLinesInCell; nText++) 
 					{
