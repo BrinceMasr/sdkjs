@@ -8808,7 +8808,7 @@ $(function () {
 		// Case #21: Area3D. Formula returning #VALUE!. 1 argument used.
 		oParser = new parserFormula('FACTDOUBLE('+multiAreaLink+')', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: FACTDOUBLE('+multiAreaLink+') is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 48, 'Test: Negative case: Area3D. Formula returning #VALUE!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Test: Negative case: Area3D. Formula returning #VALUE!. 1 argument used.');
 
 		// Bounded cases:
 		// Case #1: Number. Minimum valid number (returns 1). 1 argument used.

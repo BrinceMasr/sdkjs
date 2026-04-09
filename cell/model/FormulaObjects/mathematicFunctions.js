@@ -1910,7 +1910,9 @@ function (window, undefined) {
 		let arg0 = arg[0];
 		if (arg0.type === cElementType.cell || arg0.type === cElementType.cell3D) {
 			arg0 = arg0.getValue();
-		} else if ((arg0.type === cElementType.cellsRange || arg0.type === cElementType.cellsRange3D) && (!arg0.isOneElement() || !arg0.isSingleSheet())) {
+		} else if ((arg0.type === cElementType.cellsRange || arg0.type === cElementType.cellsRange3D) && !arg0.isOneElement()) {
+			return new cError(cErrorType.wrong_value_type);
+		} else if (arg0.type === cElementType.cellsRange3D && (!arg0.isOneElement() || !arg0.isSingleSheet())) {
 			return new cError(cErrorType.wrong_value_type);
 		} else if (arg0.type === cElementType.array) {
 			let resArr = new cArray();
