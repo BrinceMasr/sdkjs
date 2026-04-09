@@ -886,22 +886,8 @@
 		
 		bClearText = (bClearText === true);
 		
-		let oDoc		= this.getPDFDoc();
-		let oTxObject	= oDoc.getTextController();
-		let textObj		= {Text : ""};
-		
-		if (oTxObject) {
-			let oContent = oTxObject.GetDocContent();
-			textObj.Text = oContent ? (oContent.GetSelectedText(bClearText, select_Pr) || "") : "";
-		}
-		else {
-			this.DocumentRenderer.Copy(textObj);
-		}
-		
-		if (!textObj.Text || textObj.Text.trim() === "")
-			return "";
-		
-		return textObj.Text;
+		let oDoc = this.getPDFDoc();
+		return oDoc.GetSelectedText(bClearText, select_Pr);
 	};
 	PDFEditorApi.prototype.asc_AddMath2 = function(Type) {
 		let oDoc	= this.getPDFDoc();
