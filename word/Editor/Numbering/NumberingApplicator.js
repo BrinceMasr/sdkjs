@@ -83,7 +83,7 @@
 			result = this.ApplyMultilevel();
 
 		if (result)
-			this.UpdateDocumentOutline();
+			this.UpdateOutline();
 
 		return result;
 	};
@@ -727,7 +727,7 @@
 	{
 		for (let index = 0, count = this.Paragraphs.length; index < count; ++index)
 		{
-			this.Paragraphs[index].UpdateDocumentOutline();
+			this.Paragraphs[index].UpdateOutline();
 		}
 	};
 	CNumberingApplicator.prototype.MergePrToLvl = function(oldLvl, newLvl)

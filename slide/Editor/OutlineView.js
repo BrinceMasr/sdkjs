@@ -47,9 +47,10 @@
 	OutlineSlide.prototype.addContent = function (pr) {
 		this.content.push(pr);
 	};
-	const OUTLINE_TITLE_SPACING = 2;
-	const OUTLINE_CONTENT_SPACING = 1;
-
+	function SavedPosition(startPos, endPos) {
+		this.startPos = startPos || null;
+		this.endPos = endPos || null;
+	}
 	function OutlineView() {
 		this.outlineShape = null;
 		this.reset();
@@ -59,7 +60,8 @@
 		this.outlineToSourceMap = {};
 		this.sourceToOutlineMap = {};
 		this.outlineInfo = {};
-		this.mapToCheckParagraphs = {};
+		this.resetMapToCheckParagraphs();
+		this.resetPosition();
 	};
 	OutlineView.prototype.getPresentation = function () {
 		return Asc.editor.private_GetLogicDocument();
@@ -514,7 +516,7 @@
 				endContent.SetContentPosition(endPos, 0, 0);
 				endContent.MoveCursorToStartPos(true);
 				const endRes = callback(endContent, contents.length - 1, contents.length);
-				content.RemoveSelection();
+				endContent.RemoveSelection();
 				if (endRes) {
 					return true;
 				}
@@ -547,10 +549,91 @@
 			}
 		});
 	};
+	OutlineView.prototype.savePositionAfterEdit = function (content, idx, count) {
+		if (count === 1) {
+			if (content.IsSelectionUse()) {
+				const startPos = content.GetContentPosition(true, true);
+				const endPos = content.GetContentPosition(true, false);
+				this.setSavedPosition(new SavedPosition(startPos, endPos));
+			} else {
+				this.setSavedPosition(new SavedPosition(content.GetContentPosition(false, false)));
+			}
+		} else {
+			if (idx === 0) {
+					const savedPosition = this.getSavedPosition();
+					if (content.IsSelectionUse()) {
+						if (content.Selection.StartPos > content.Selection.EndPos) {
+							savedPosition.startPos = content.GetContentPosition(true, false);
+						} else {
+							savedPosition.startPos = content.GetContentPosition(true, true);
+						}
+					} else {
+						savedPosition.startPos = content.GetContentPosition(false, false);
+					}
+
+			} else if (idx === count - 1) {
+					const savedPosition = this.getSavedPosition();
+					if (content.IsSelectionUse()) {
+						if (content.Selection.StartPos > content.Selection.EndPos) {
+							savedPosition.endPos = content.GetContentPosition(true, true);
+						} else {
+							savedPosition.endPos = content.GetContentPosition(true, false);
+						}
+					} else {
+						savedPosition.startPos = content.GetContentPosition(false, false);
+					}
+
+			}
+		}
+	};
+	OutlineView.prototype.rebuildSavedPositionPos = function (pos) {
+		const docContent = this.getDocContent();
+		if (docContent) {
+			const newPos = pos.slice();
+			const sourceParagraph = newPos[1].Class;
+			const outlineParagraph = this.sourceToOutlineMap[sourceParagraph.GetId()];
+			if (outlineParagraph) {
+				newPos[0] = {Class: docContent, Position: outlineParagraph.Index};
+				newPos[1] = {Class: outlineParagraph, Position: pos[1].Position};
+				return newPos;
+			}
+		}
+		return null;
+	};
+	OutlineView.prototype.applySavedPositionToOutline = function () {
+		const docContent = this.getDocContent();
+		if (docContent) {
+			const savedPostion = this.getSavedPosition();
+			if (savedPostion.startPos) {
+				if (savedPostion.endPos) {
+					const startPos = this.rebuildSavedPositionPos(savedPostion.startPos);
+					const endPos = this.rebuildSavedPositionPos(savedPostion.endPos);
+					docContent.SetContentSelection(startPos, endPos, 0, 0, 0);
+				} else {
+					docContent.SetContentPosition(this.rebuildSavedPositionPos(savedPostion.startPos), 0, 0);
+				}
+				this.updateSelectionState();
+			}
+		}
+	}
+	OutlineView.prototype.setSavedPosition = function (position) {
+		this.savedPosition = position;
+	};
+	OutlineView.prototype.getSavedPosition = function () {
+		return this.savedPosition;
+	};
+	OutlineView.prototype.resetPosition = function () {
+		this.setSavedPosition(new SavedPosition());
+	};
+	OutlineView.prototype.resetMapToCheckParagraphs = function () {
+		this.mapToCheckParagraphs = {};
+	};
 	OutlineView.prototype.paragraphAdd = function (paraItem) {
+		const oThis = this;
 		if (paraItem.Type === para_TextPr) {
-			this.forEachSelectedContent(function (content) {
+			this.forEachSelectedContent(function (content, idx, contentCount) {
 				content.AddToParagraph(paraItem);
+				oThis.savePositionAfterEdit(content, idx, contentCount);
 			});
 		} else {
 			this.forEachSelectedContent(function (content, idx, contentCount) {
@@ -559,6 +642,7 @@
 				} else {
 					content.AddToParagraph(paraItem);
 				}
+				oThis.savePositionAfterEdit(content, idx, contentCount);
 			});
 		}
 	}
@@ -636,7 +720,12 @@
 		const sourceParagraphs = [];
 		for (let id in this.mapToCheckParagraphs) {
 			const paragraph = this.mapToCheckParagraphs[id];
-			sourceParagraphs.push(paragraph);
+			const shape = paragraph.GetParentShape();
+			if (shape && shape.isOutlinePlaceholder()) {
+				if (shape.parent && shape.parent.getObjectType() === AscDFH.historyitem_type_Slide) {
+					sourceParagraphs.push(paragraph);
+				}
+			}
 		}
 
 		const oThis = this;
@@ -660,17 +749,15 @@
 				}
 			}
 			this.outlineShape && this.outlineShape.recalculateContent();
-			this.mapToCheckParagraphs = {};
+			this.applySavedPositionToOutline();
+			this.resetMapToCheckParagraphs();
+			this.resetPosition();
 		}
 	};
 	OutlineView.prototype.checkSourceParagraph = function (paragraph) {
-		const shape = paragraph.GetParentShape();
-		if (shape && shape.isOutlinePlaceholder()) {
-			if (shape.parent && shape.parent.getObjectType() === AscDFH.historyitem_type_Slide) {
-				this.mapToCheckParagraphs[paragraph.GetId()] = paragraph;
-			}
+		if (AscCommon.History.IsOn()) {
+			this.mapToCheckParagraphs[paragraph.GetId()] = paragraph;
 		}
-
 	};
 	OutlineView.prototype.getApi = function () {
 		return Asc.editor;

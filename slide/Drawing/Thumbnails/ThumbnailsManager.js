@@ -2898,8 +2898,11 @@
 		if (this.m_oWordControl)
 			this.m_oWordControl.m_oApi.checkLastWork();
 
+		const context = AscCommon.AscBrowser.getContext2D(canvas);
+		context.clearRect(0, 0, AscCommon.AscBrowser.convertToRetinaValue(this.outlineLeftMarginMM * AscCommon.g_dKoef_mm_to_pix, true), canvas.height);
+
 		const currentSlideIndex = this.m_oWordControl.m_oDrawingDocument.SlideCurrent;
-		this.outlineView.drawDecorations(this.getOutlineGraphics(canvas.getContext("2d")), currentSlideIndex, this.MouseDownTrack.FocusPage);
+		this.outlineView.drawDecorations(this.getOutlineGraphics(context), currentSlideIndex, this.MouseDownTrack.FocusPage);
 		const shape = this.outlineView.outlineShape;
 		if (shape) {
 			this.m_oWordControl.m_oDrawingDocument.UpdateTargetTransform(this.outlineView.getTransformText());

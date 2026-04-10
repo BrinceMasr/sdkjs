@@ -6714,9 +6714,13 @@ CPresentation.prototype.Document_UpdateSelectionState = function () {
 	if (this.TurnOffInterfaceEvents) {
 		return;
 	}
-	let oController = this.GetCurrentController();
-	if (oController) {
-		oController.updateSelectionState();
+	if (this.IsFocusOnOutline()) {
+		this.GetOutlineView().updateSelectionState();
+	} else {
+		let oController = this.GetCurrentController();
+		if (oController) {
+			oController.updateSelectionState();
+		}
 	}
 };
 CPresentation.prototype.Document_UpdateUndoRedoState = function () {

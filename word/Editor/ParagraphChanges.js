@@ -440,7 +440,7 @@ CChangesParagraphAddItem.prototype.Load = function(Color)
 	oParagraph.private_ResetSelection();
 	oParagraph.updateTrackRevisions();
 	oParagraph.private_CheckUpdateBookmarks(this.Items);
-	oParagraph.UpdateDocumentOutline();
+	oParagraph.UpdateOutline();
 
 	private_ParagraphChangesOnSetValue(this.Class);
 };
@@ -545,7 +545,7 @@ CChangesParagraphRemoveItem.prototype.Load = function(Color)
 	oParagraph.private_ResetSelection();
 	oParagraph.updateTrackRevisions();
 	oParagraph.private_CheckUpdateBookmarks(this.Items);
-	oParagraph.UpdateDocumentOutline();
+	oParagraph.UpdateOutline();
 	private_ParagraphChangesOnSetValue(this.Class);
 };
 CChangesParagraphRemoveItem.prototype.IsRelated = function(oChanges)
@@ -1253,7 +1253,7 @@ CChangesParagraphPStyle.prototype.private_SetValue = function(Value)
 	oParagraph.RecalcCompiledPr(true);
 	oParagraph.private_UpdateTrackRevisionOnChangeParaPr(false);
 	oParagraph.Recalc_RunsCompiledPr();
-	oParagraph.UpdateDocumentOutline();
+	oParagraph.UpdateOutline();
 	oParagraph.private_RefreshNumbering();
 	private_ParagraphChangesOnSetValue(this.Class);
 };
@@ -1413,7 +1413,7 @@ CChangesParagraphPr.prototype.private_SetValue = function(Value)
 
 	oParagraph.RecalcCompiledPr(true);
 	oParagraph.private_UpdateTrackRevisionOnChangeParaPr(false);
-	oParagraph.UpdateDocumentOutline();
+	oParagraph.UpdateOutline();
 	private_ParagraphChangesOnSetValue(this.Class);
 
 	if (!oNumPr || !oParagraph.Pr.NumPr || oNumPr.NumId !== oParagraph.Pr.NumPr.NumId || oNumPr.Lvl !== oParagraph.Pr.NumPr.Lvl)
