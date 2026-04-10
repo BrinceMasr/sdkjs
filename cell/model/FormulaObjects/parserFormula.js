@@ -6622,25 +6622,98 @@ function parserFormula( formula, parent, _ws ) {
 		return !!sFunctionName && (sFunctionName.includes("IF") || aCondFormulas.includes(sFunctionName)) &&
 			!aExcludeCondFormulas.includes(sFunctionName);
 	};
-	parserFormula.prototype.notify = function(data) {
-		var eventData = {notifyData: data, assemble: null, formula: this};
-		let sFunctionName = this.getFunctionName();
-
-		if (this._isConditionalFormula(sFunctionName) && data.areaData && g_cCalcRecursion.getIsCellEdited()) {
-			let oCell = null;
-			if (this.parent && null != this.parent.nRow && null != this.parent.nCol) {
-				this.ws._getCell(this.parent.nRow, this.parent.nCol, function (oElem) {
-					oCell = oElem;
-				});
+	/**
+	 * Rechecks formula whether it is recursive.
+	 * Using for mutable cells.
+	 * @param {AscCommonExcel.CCellWithFormula} oParent
+	 * @returns {boolean}
+	 * @private
+	 */
+	parserFormula.prototype._recheckRecursiveFormula = function (oParent) {
+		const aRefElements = this.getRefElements();
+		let bRecursive = false;
+		g_cCalcRecursion.clearCheckedCells();
+		AscCommonExcel.foreachRefElements(function (oRange) {
+			if (!oRange || bRecursive) {
+				return bRecursive;
 			}
-			if (oCell && oCell.containInFormula()) {
-				this.ca = this.isRecursiveCondFormula(sFunctionName);
+			oRange._foreachNoEmpty(function (oCell) {
+				if (!bRecursive) {
+					bRecursive = oCell.checkRecursiveFormula(oParent, {}, true);
+				}
+				if (bRecursive) {
+					return true; // break loop
+				}
+			});
+			if (bRecursive) {
+				return true; // break loop
+			}
+		}, aRefElements);
+		return bRecursive;
+	};
+	/**
+	 * Checks if the formula contains a default volatile function (RAND, TODAY, NOW, etc.)
+	 * These functions have ca=true on their prototype and should not be rechecked.
+	 * @memberof parserFormula
+	 * @returns {boolean}
+	 * @private
+	 */
+	parserFormula.prototype._hasDefaultVolatileFunction = function () {
+		const aOutStack = this.outStack;
+		for (let i = 0; i < aOutStack.length; i++) {
+			if (aOutStack[i].type === cElementType.func && aOutStack[i].ca === true) {
+				return true;
 			}
 		}
+		return false;
+	};
+	parserFormula.prototype.notify = function(data) {
+		const eventData = {notifyData: data, assemble: null, formula: this};
+
 		if (AscCommon.c_oNotifyType.Dirty === data.type) {
-				if (this.parent && this.parent.onFormulaEvent) {
-					this.parent.onFormulaEvent(AscCommon.c_oNotifyParentType.Change, eventData);
+			const sFunctionName = this.getFunctionName();
+			if (this._isConditionalFormula(sFunctionName) && g_cCalcRecursion.getIsCellEdited() && !g_cCalcRecursion.isWorkbookRecalc()) {
+				let oCell = null;
+				if (this.parent && null != this.parent.nRow && null != this.parent.nCol) {
+					this.ws._getCell(this.parent.nRow, this.parent.nCol, function (oElem) {
+						oCell = oElem;
+					});
 				}
+				if (oCell && oCell.containInFormula()) {
+					const sCellKey = oCell.ws.getId() + '_' + oCell.nRow + '_' + oCell.nCol;
+					let bRecursive;
+					if (g_cCalcRecursion.isCellChecked(sCellKey)) {
+						bRecursive = g_cCalcRecursion.getCheckedCell(sCellKey);
+					} else {
+						bRecursive = this.isRecursiveCondFormula(sFunctionName);
+						g_cCalcRecursion.addCheckedCell(sCellKey, bRecursive);
+					}
+					const flagCa = bRecursive ? bRecursive : null;
+					if (this.ca !== flagCa) {
+						this.ca = flagCa;
+						!bRecursive && this.wb.dependencyFormulas.endListeningVolatile(this);
+					}
+				}
+			} else if (this.ca && data.areaData && g_cCalcRecursion.getIsCellEdited() && !this._hasDefaultVolatileFunction() &&
+				!g_cCalcRecursion.isWorkbookRecalc()) {
+				if (this.parent && this.parent.nRow != null && this.parent.nCol != null && !g_cCalcRecursion.needRecheckFormulaAfterCalc()) {
+					const sCellKey = this.parent.ws.getId() + '_' + this.parent.nRow + '_' + this.parent.nCol;
+					let bRecursive;
+					if (g_cCalcRecursion.isCellChecked(sCellKey)) {
+						bRecursive = g_cCalcRecursion.getCheckedCell(sCellKey);
+					} else {
+						bRecursive = this._recheckRecursiveFormula(this.parent);
+						g_cCalcRecursion.addCheckedCell(sCellKey, bRecursive);
+					}
+					if (this.ca && !bRecursive) {
+						this.ca = null;
+						this.wb.dependencyFormulas.endListeningVolatile(this);
+					}
+				}
+			}
+			if (this.parent && this.parent.onFormulaEvent) {
+				this.parent.onFormulaEvent(AscCommon.c_oNotifyParentType.Change, eventData);
+			}
 		} else if (this.shared && this.parent && this.parent.onFormulaEvent &&
 			this.parent.onFormulaEvent(AscCommon.c_oNotifyParentType.Shared, eventData)) {
 			;
@@ -7242,13 +7315,19 @@ function parserFormula( formula, parent, _ws ) {
 	 * @private
 	 */
 	parserFormula.prototype._findRecursionRef = function (aRef) {
+		const FUNC_INDEX = 0;
+
 		if (g_cCalcRecursion.checkRecursionCounter()) {
 			g_cCalcRecursion.resetRecursionCounter();
 			return false;
 		}
+		if (aRef[FUNC_INDEX].type === cElementType.func && aExcludeRecursiveFormulas.includes(aRef[FUNC_INDEX].name)) {
+			return false;
+		}
 
+		const ARG_INDEX = 2;
 		const oThis = this;
-		const aArg = aRef[2];
+		const aArg = aRef[ARG_INDEX];
 		let bRecursiveCell = false;
 
 		for (let i = 0, len = aArg.length; i < len; i++) {
@@ -11397,6 +11476,7 @@ function parserFormula( formula, parent, _ws ) {
 		this.bRecheckFormula = false;
 		this.oRecheckingFormula = null;
 		this.oCalculatedArgs = null;
+		this.bRecalculateWorkbook = false;
 	}
 
 	/**
@@ -11693,7 +11773,7 @@ function parserFormula( formula, parent, _ws ) {
 	 * @param {Cell} oCell
 	 */
 	CalcRecursion.prototype.initGroupChangedCells = function (oCell) {
-		const sCellWsName = oCell.ws.getName().toLowerCase();
+		const sCellWsName = oCell.ws.getName();
 		let oGroupChangedCell = {};
 		oGroupChangedCell[sCellWsName] = {};
 		this.setGroupChangedCells(oGroupChangedCell);
@@ -11706,7 +11786,7 @@ function parserFormula( formula, parent, _ws ) {
 	 */
 	CalcRecursion.prototype.getRecursiveCells = function (oCell) {
 		const oGroupChangedCell = this.getGroupChangedCells();
-		const sCellWsName = oCell.ws.getName().toLowerCase();
+		const sCellWsName = oCell.ws.getName();
 		const nCellIndex = AscCommonExcel.getCellIndex(oCell.nRow, oCell.nCol);
 
 		if (oGroupChangedCell == null) {
@@ -11786,7 +11866,7 @@ function parserFormula( formula, parent, _ws ) {
 	 * @param {{cellId: number, wsName: string}[]} aRecursiveCells
 	 */
 	CalcRecursion.prototype.addRecursiveCells = function (oCell, aRecursiveCells) {
-		const sCellWsName = oCell.ws.getName().toLowerCase();
+		const sCellWsName = oCell.ws.getName();
 		const nCellIndex = AscCommonExcel.getCellIndex(oCell.nRow, oCell.nCol);
 		let oGroupChangedCell = this.getGroupChangedCells();
 
@@ -11819,7 +11899,7 @@ function parserFormula( formula, parent, _ws ) {
 	 */
 	CalcRecursion.prototype.removeRecursionCell = function (oCell) {
 		const oGroupChangedCell = this.getGroupChangedCells();
-		const sCellWsName = oCell.ws.getName().toLowerCase();
+		const sCellWsName = oCell.ws.getName();
 		const nCellIndex = AscCommonExcel.getCellIndex(oCell.nRow, oCell.nCol);
 		if (!oGroupChangedCell[sCellWsName] || !oGroupChangedCell[sCellWsName][nCellIndex]) {
 			return;
@@ -11833,7 +11913,7 @@ function parserFormula( formula, parent, _ws ) {
 	 */
 	CalcRecursion.prototype.setPrevIterResult = function (oCell) {
 		const nCellIndex = AscCommonExcel.getCellIndex(oCell.nRow, oCell.nCol);
-		const sWsName = oCell.ws.getName().toLowerCase();
+		const sWsName = oCell.ws.getName();
 
 		if (this.oPrevIterResult == null) {
 			this.oPrevIterResult = {};
@@ -11851,7 +11931,7 @@ function parserFormula( formula, parent, _ws ) {
 	 */
 	CalcRecursion.prototype.getPrevIterResult = function (oCell) {
 		const nCellIndex = AscCommonExcel.getCellIndex(oCell.nRow, oCell.nCol);
-		const sWsName = oCell.ws.getName().toLowerCase();
+		const sWsName = oCell.ws.getName();
 		const oPrevIterResult = this.oPrevIterResult;
 
 		if (oPrevIterResult == null) {
@@ -11878,7 +11958,7 @@ function parserFormula( formula, parent, _ws ) {
 	 */
 	CalcRecursion.prototype.setDiffBetweenIter = function (oCell, nResult) {
 		const nCellIndex = AscCommonExcel.getCellIndex(oCell.nRow, oCell.nCol);
-		const sWsName = oCell.ws.getName().toLowerCase();
+		const sWsName = oCell.ws.getName();
 
 		if (this.oDiffBetweenIter == null) {
 			this.oDiffBetweenIter = {};
@@ -11911,7 +11991,7 @@ function parserFormula( formula, parent, _ws ) {
 	 */
 	CalcRecursion.prototype.getDiffBetweenIter = function (oCell) {
 		const nCellIndex = AscCommonExcel.getCellIndex(oCell.nRow, oCell.nCol);
-		const sWsName = oCell.ws.getName().toLowerCase();
+		const sWsName = oCell.ws.getName();
 		const oDiffBetweenIter = this.oDiffBetweenIter;
 
 		if (oDiffBetweenIter == null) {
@@ -12194,7 +12274,7 @@ function parserFormula( formula, parent, _ws ) {
 	};
 	/**
 	 * Method clears the oCheckedCells attribute.
-	 * @memberof CalcResursion
+	 * @memberof CalcRecursion
 	 */
 	CalcRecursion.prototype.clearCheckedCells = function () {
 		if (this.oCheckedCells) {
@@ -12240,7 +12320,9 @@ function parserFormula( formula, parent, _ws ) {
 	 * @memberof CalcRecursion
 	 */
 	CalcRecursion.prototype.resetRecheckFormula = function () {
-		this.bRecheckFormula = false;
+		if (this.bRecheckFormula) {
+			this.bRecheckFormula = false;
+		}
 	}
 	/**
 	 * Method initializes the object and adds formula data which need to recheck after being calculated.
@@ -12305,6 +12387,22 @@ function parserFormula( formula, parent, _ws ) {
 	 */
 	CalcRecursion.prototype.clearCalculatedArguments = function () {
 		this.oCalculatedArgs = null;
+	};
+	/**
+	 * Returns a flag that checks whether the workbook is recalculating via Calculation.
+	 * @memberof CalcRecursion
+	 * @return {boolean}
+	 */
+	CalcRecursion.prototype.isWorkbookRecalc = function () {
+		return this.bRecalculateWorkbook;
+	};
+	/**
+	 * Sets a flag that checks whether the workbook is recalculating via Calculation.
+	 * @memberof CalcRecursion
+	 * @param {boolean} bRecalculateWorkbook
+	 */
+	CalcRecursion.prototype.setIsWorkbookRecalc = function (bRecalculateWorkbook) {
+		this.bRecalculateWorkbook = bRecalculateWorkbook;
 	};
 
 	const g_cCalcRecursion = new CalcRecursion();

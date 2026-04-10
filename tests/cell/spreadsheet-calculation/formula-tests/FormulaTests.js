@@ -412,8 +412,9 @@ $(function () {
 			const oSelectedCell = selectCell(sRange, oWs);
 			const oSelectedCellFormula = oSelectedCell.getFormulaParsed();
 
-			return oSelectedCellFormula.ca;
+			return !!oSelectedCellFormula.ca;
 		};
+
 		// -- Check recursion formula with iteration limit
 		// - Case: Sequence chain - A1000: A1000+B1000 -> B1000: B1000+C1000 -> C1: 1
 		// Fill cells
@@ -456,7 +457,7 @@ $(function () {
 		bCaFromSelectedCell = getCaFromSelectedCell("D1001", ws2);
 		assert.strictEqual(bCaFromSelectedCell, true, "Test: 3D Loop chain - D1001: Sheet2!A1000/E1001 <-> Sheet2!A1000: Sheet1!D1001+Sheet1!E1001. isFormulaRecursion test. Sheet2!A1000 - flag ca: true");
 		bCaFromSelectedCell = null;
-		// -  Case: Loop cell - A1001: A1001+1
+		// - Case: Loop cell - A1001: A1001+1
 		ws.getRange2("A1001").setValue("=A1001+1");
 		assert.strictEqual(ws.getRange2("A1001").getValue(), "10", "Test: Loop cell - A1001: A1001+1. A1001 - 10");
 		// Check work isFormulaRecursive function
@@ -2063,9 +2064,10 @@ $(function () {
 		bCaFromSelectedCell = getCaFromSelectedCell("A1", ws2);
 		assert.strictEqual(bCaFromSelectedCell, false, "Test: Formula VLOOKUP changing exist chain to non-recursive cell with disabled setting. Bug-79238. Sheet2!A1 - flag ca: false");
 		bCaFromSelectedCell = null;
-		/*bCaFromSelectedCell = getCaFromSelectedCell("C601");
+		// Checking the actualizing flag ca for the linked cell
+		bCaFromSelectedCell = getCaFromSelectedCell("C601");
 		assert.strictEqual(bCaFromSelectedCell, false, "Test: Formula VLOOKUP changing exist chain to non-recursive cell with disabled setting. Bug-79238. C601 - flag ca: false");
-		bCaFromSelectedCell = null;*/
+		bCaFromSelectedCell = null;
 		// - Case: Formula VLOOKUP isn't a recursive cell with a disabled setting. index_num is a formula. Bug-79238
 		ws2.getRange2("A1").setValue("=VLOOKUP(B1;Table1;IF(B1>0;2;1);FALSE)");
 		assert.strictEqual(ws2.getRange2("A1").getValue(), "321", "Test: Formula VLOOKUP isn't recursive cell with disabled setting. index_num is formula. Bug-79238. Sheet2!A1 - 321");
@@ -2152,6 +2154,7 @@ $(function () {
 		bCaFromSelectedCell = getCaFromSelectedCell("A1142");
 		assert.strictEqual(bCaFromSelectedCell, true, "Test: Formula LOOKUP recursive formula with disabled setting. 2 args A1142 - flag ca: true");
 		bCaFromSelectedCell = null;
+
 		// -- Test changeLinkedCell method.
 		oCell = selectCell("A1000");
 		let oCellNeedEnableRecalc = selectCell("B1000");
@@ -2163,6 +2166,17 @@ $(function () {
 		}, true);
 		oCellNeedEnableRecalc = selectCell("B1000");
 		assert.strictEqual(oCellNeedEnableRecalc.getIsDirty(), true, "Test: changeLinkedCell. After: Cell B1000 isDirty - true");
+
+		// -- Test: Actualize flag ca via Calculate
+		// - Case: Check for fixing sequence chain A2000 -> B2000 with an incorrect ca flag
+		ws.getRange2("A2000").setValue("5");
+		ws.getRange2("B2000").setValue("=A2000*2");
+		assert.strictEqual(getCaFromSelectedCell("B2000"), false, "Test: Check for fixing sequence chain A2000 -> B2000 with incorrect ca flag. B2030 ca false initially");
+		selectCell("B2000").getFormulaParsed().ca = true;
+		assert.strictEqual(getCaFromSelectedCell("B2000"), true, "Test: Check for fixing sequence chain A2000 -> B2000 with incorrect ca flag. B2030 ca corrupted - true");
+		wb.calculate(Asc.c_oAscCalculateType.All);
+		assert.strictEqual(getCaFromSelectedCell("B2000"), false, "Check for fixing sequence chain A2000 -> B2000 with incorrect ca flag. B2030 ca after calculate(All) - false");
+
 		// -- Test initStartCellForIterCalc method
 		// - Case: Sequence chain A1000 -> B1000 -> C1000
 		nExpectedCellIndex = AscCommonExcel.getCellIndex(999, 0);
