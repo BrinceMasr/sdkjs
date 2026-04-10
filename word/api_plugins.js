@@ -1105,7 +1105,7 @@
 		if (!logicDocument)
 			return null;
 		
-		let fields = logicDocument.GetAllFields(logicDocument.IsTextSelectionUse());
+		let fields = logicDocument.GetAllFields(true);
 		let data = null;
 		for (let i = 0; i < fields.length; ++i)
 		{
@@ -1225,7 +1225,7 @@
 	 * @typeofeditors ["CDE"]
 	 * @alias MoveCursorToField
 	 * @param {string} [fieldId=undefined] - Field ID. If it is not specified, the current field is used.
-	 * @param {boolean} [isBegin=true] - Defines whether the cursor is moved to the beginning (<b>true</b>) or end (<b>false</b>) of the field.
+	 * @param {boolean} [isBegin=false] - Defines whether the cursor is moved to the beginning (<b>true</b>) or end (<b>false</b>) of the field.
 	 * @since 9.4.0
 	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/MoveCursorToField.js
 	 */
