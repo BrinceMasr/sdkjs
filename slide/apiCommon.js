@@ -423,54 +423,63 @@ CAscSlideTransition.prototype.parseXmlParameters = function (_type, _paramNames,
                 this.TransitionOption = c_oAscSlideTransitionParams.Fade_Through_Black;
             }
         }
-        else if ("p:push" === _type)
-        {
+		else if ("p:push" === _type)
+		{
 			typeMatched = true;
-            this.TransitionType = c_oAscSlideTransitionTypes.Push;
-            this.TransitionOption = c_oAscSlideTransitionParams.Param_Bottom;
+			this.TransitionType = c_oAscSlideTransitionTypes.Push;
+			this.TransitionOption = c_oAscSlideTransitionParams.Param_Right;
 
-            if (1 === _len && _paramNames[0] === "dir")
-            {
-                if ("l" === _paramValues[0])
-                    this.TransitionOption = c_oAscSlideTransitionParams.Param_Right;
-                if ("r" === _paramValues[0])
-                    this.TransitionOption = c_oAscSlideTransitionParams.Param_Left;
-                if ("d" === _paramValues[0])
-                    this.TransitionOption = c_oAscSlideTransitionParams.Param_Top;
-            }
-        }
-        else if ("p:wipe" === _type)
-        {
+			for (var i = 0; i < _len; i++) {
+				if (_paramNames[i] === "dir") {
+					if ("l" === _paramValues[i])
+						this.TransitionOption = c_oAscSlideTransitionParams.Param_Right;
+					else if ("u" === _paramValues[i])
+						this.TransitionOption = c_oAscSlideTransitionParams.Param_Bottom;
+					else if ("r" === _paramValues[i])
+						this.TransitionOption = c_oAscSlideTransitionParams.Param_Left;
+					else if ("d" === _paramValues[i])
+						this.TransitionOption = c_oAscSlideTransitionParams.Param_Top;
+				}
+			}
+		}
+		else if ("p:wipe" === _type)
+		{
 			typeMatched = true;
-            this.TransitionType = c_oAscSlideTransitionTypes.Wipe;
-            this.TransitionOption = c_oAscSlideTransitionParams.Param_Right;
+			this.TransitionType = c_oAscSlideTransitionTypes.Wipe;
+			this.TransitionOption = c_oAscSlideTransitionParams.Param_Right;
 
-            if (1 === _len && _paramNames[0] === "dir")
-            {
-                if ("u" === _paramValues[0])
-                    this.TransitionOption = c_oAscSlideTransitionParams.Param_Bottom;
-                if ("r" === _paramValues[0])
-                    this.TransitionOption = c_oAscSlideTransitionParams.Param_Left;
-                if ("d" === _paramValues[0])
-                    this.TransitionOption = c_oAscSlideTransitionParams.Param_Top;
-            }
-        }
-        else if ("p:strips" === _type)
-        {
+			for (var i = 0; i < _len; i++) {
+				if (_paramNames[i] === "dir") {
+					if ("l" === _paramValues[i])
+						this.TransitionOption = c_oAscSlideTransitionParams.Param_Right;
+					else if ("u" === _paramValues[i])
+						this.TransitionOption = c_oAscSlideTransitionParams.Param_Bottom;
+					else if ("r" === _paramValues[i])
+						this.TransitionOption = c_oAscSlideTransitionParams.Param_Left;
+					else if ("d" === _paramValues[i])
+						this.TransitionOption = c_oAscSlideTransitionParams.Param_Top;
+				}
+			}
+		}
+		else if ("p:strips" === _type)
+		{
 			typeMatched = true;
-            this.TransitionType = c_oAscSlideTransitionTypes.Wipe;
-            this.TransitionOption = c_oAscSlideTransitionParams.Param_TopRight;
+			this.TransitionType = c_oAscSlideTransitionTypes.Wipe;
+			this.TransitionOption = c_oAscSlideTransitionParams.Param_BottomRight;
 
-            if (1 === _len && _paramNames[0] === "dir")
-            {
-                if ("rd" === _paramValues[0])
-                    this.TransitionOption = c_oAscSlideTransitionParams.Param_TopLeft;
-                if ("ru" === _paramValues[0])
-                    this.TransitionOption = c_oAscSlideTransitionParams.Param_BottomLeft;
-                if ("lu" === _paramValues[0])
-                    this.TransitionOption = c_oAscSlideTransitionParams.Param_BottomRight;
-            }
-        }
+			for (var i = 0; i < _len; i++) {
+				if (_paramNames[i] === "dir") {
+					if ("lu" === _paramValues[i])
+						this.TransitionOption = c_oAscSlideTransitionParams.Param_BottomRight;
+					else if ("ru" === _paramValues[i])
+						this.TransitionOption = c_oAscSlideTransitionParams.Param_BottomLeft;
+					else if ("rd" === _paramValues[i])
+						this.TransitionOption = c_oAscSlideTransitionParams.Param_TopLeft;
+					else if ("ld" === _paramValues[i])
+						this.TransitionOption = c_oAscSlideTransitionParams.Param_TopRight;
+				}
+			}
+		}
         else if ("p:cover" === _type)
         {
 			typeMatched = true;
