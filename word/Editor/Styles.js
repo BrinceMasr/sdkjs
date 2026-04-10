@@ -10703,7 +10703,11 @@ CDocumentBorder.prototype =
 };
 CDocumentBorder.prototype.IsNone = function()
 {
-	return (this.Value === border_None);
+	return (this.Value === AscWord.BorderType.none);
+};
+CDocumentBorder.prototype.IsNoBorder = function()
+{
+	return (AscWord.BorderType.none === this.Value || AscWord.BorderType.nil === this.Value);
 };
 CDocumentBorder.prototype.SetNone = function()
 {
@@ -10778,6 +10782,18 @@ CDocumentBorder.prototype.IsEqual = function(oBorder)
 		&& IsEqualStyleObjects(this.Unifill, oBorder.Unifill)
 		&& this.Space === oBorder.Space
 		&& this.Size === oBorder.Size);
+};
+/**
+ * Difference from IsEqual is that nil/none/undefined are considered the same borders
+ * @param {?CDocumentBorder} border
+ * @returns {boolean}
+ */
+CDocumentBorder.prototype.IsEqualWeak = function(border)
+{
+	if (this.IsNoBorder() && (!border || border.IsNoBorder()))
+		return true;
+	
+	return this.IsEqual(border);
 };
 CDocumentBorder.prototype.WriteToBinary = function(oWriter)
 {

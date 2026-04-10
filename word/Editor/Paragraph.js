@@ -11327,6 +11327,47 @@ Paragraph.prototype.getCompiledPrFromStyle = function()
 	
 	return styleManager.Get_Pr(styleId, styletype_Paragraph, tableStyle, shapeStyle);
 };
+Paragraph.prototype.GetParaPrForWrite = function(paraPr)
+{
+	paraPr = paraPr.Copy();
+	let inheritedPr = this.GetCompiledInheritedPr().ParaPr;
+	
+	// TODO: Check other properties
+	
+	if (paraPr.Brd)
+	{
+		if (paraPr.Brd.Top && inheritedPr.Brd.Top.IsEqualWeak(paraPr.Brd.Top))
+			paraPr.Brd.Top = undefined;
+		
+		if (paraPr.Brd.Left && inheritedPr.Brd.Left.IsEqualWeak(paraPr.Brd.Left))
+			paraPr.Brd.Left = undefined;
+		
+		if (paraPr.Brd.Right && inheritedPr.Brd.Right.IsEqualWeak(paraPr.Brd.Right))
+			paraPr.Brd.Right = undefined;
+		
+		if (paraPr.Brd.Bottom && inheritedPr.Brd.Bottom.IsEqualWeak(paraPr.Brd.Bottom))
+			paraPr.Brd.Bottom = undefined;
+		
+		if (paraPr.Brd.Between && inheritedPr.Brd.Between.IsEqualWeak(paraPr.Brd.Between))
+			paraPr.Brd.Between = undefined;
+		
+		
+		let isEmpty = true;
+		for (let b in paraPr.Brd)
+		{
+			if (paraPr.Brd[b])
+			{
+				isEmpty = false;
+				break;
+			}
+		}
+		
+		if (isEmpty)
+			paraPr.Brd = undefined;
+	}
+	
+	return paraPr;
+};
 /**
  * Сообщаем параграфу, что ему надо будет пересчитать скомпилированный стиль
  * (Такое может случится, если у данного параграфа есть нумерация или задан стиль,
