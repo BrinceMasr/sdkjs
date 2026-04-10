@@ -10510,7 +10510,7 @@ CDocumentBorder.prototype =
         if ( undefined === this.Color )
             Border.Color = undefined;
         else
-            Border.Color.Set(this.Color.r, this.Color.g, this.Color.b);
+            Border.Color.Set(this.Color.r, this.Color.g, this.Color.b, this.Color.Auto);
 
         if(undefined === this.Unifill)
             Border.Unifill = undefined;
