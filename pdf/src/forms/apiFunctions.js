@@ -785,7 +785,7 @@
     }
 
     let AFTime_FormatEx = AFDate_FormatEx;
-    let AFTime_KeystrokeEx = AFTime_Keystroke;
+    let AFTime_KeystrokeEx = AFDate_KeystrokeEx;
 
     /**
      * Convert field value to specific special format.
