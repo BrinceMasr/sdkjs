@@ -261,7 +261,6 @@ function CreateCheckBoxCC(nPos, isInline)
 	cc.ApplyCheckBoxPr(checkboxPr);
 	return cc;
 }
-// combo box
 function CreateComboBox(nPos, isInline)
 {
 	let cc = CreateFilledContentControl(nPos, isInline);
@@ -269,7 +268,6 @@ function CreateComboBox(nPos, isInline)
 	cc.ApplyComboBoxPr(comboBoxPr, true);
 	return cc;
 }
-// dropdown list
 function CreateDropDown(nPos, isInline)
 {
 	let cc = CreateFilledContentControl(nPos, isInline);

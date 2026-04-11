@@ -255,8 +255,8 @@ $(function ()
 		);
 
 		///////////////// 3 //////////////
-		// TODO: This test does not work correctly when track changes is disabled
-		// TODO: With track changes enabled the diff is returned oddly, possibly a problem with text input
+		// TODO: This test does not work correctly when track changes is off
+		// TODO: When track changes is on, the difference is returned in a strange way, possibly a problem with filling up with text
 		p = fillDocument([
 			{text: "text removed by first user and ", pr: {Bold: true}, reviewType: reviewtype_Remove},
 			{text: "common text and ", pr: {Italic: true}},

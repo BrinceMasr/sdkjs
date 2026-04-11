@@ -78,7 +78,7 @@ $(function () {
 
 		assert.strictEqual(complexForm.IsPlaceHolder(), true, "Is placeholder in complexForm");
 
-		// Fill our form: 111<textForm>222<textForm>333
+		// Fill form: 111<textForm>222<textForm>333
 
 		let tempRun1 = new AscWord.CRun();
 		tempRun1.AddText("111");
@@ -133,7 +133,7 @@ $(function () {
 		textForm2.MoveCursorToStartPos();
 		assert.strictEqual(textForm2.IsThisElementCurrent() && textForm2.IsCursorAtBegin(), true, "Move cursor at the start of textForm2");
 
-		// Make two shifts because after a single one we could end up in the empty run between tempRun2 and textForm2
+		// Make two moves because after a single one we end up in the empty run between tempRun2 and textForm2
 		// the same check applies everywhere below
 		AscTest.MoveCursorLeft();
 		AscTest.MoveCursorLeft();
@@ -201,7 +201,7 @@ $(function () {
 		assert.strictEqual(textForm2.IsThisElementCurrent() && textForm2.IsCursorAtEnd(), true, "Check cursor position after moving cursor right");
 
 
-		// Check typing inside forms
+		// Check text input into forms
 		textForm1.ClearContentControlExt();
 		textForm2.ClearContentControlExt();
 
@@ -272,7 +272,7 @@ $(function () {
 		complexForm.SetThisElementCurrent();
 		complexForm.MoveCursorToStartPos();
 
-		// Fill our form: 111<textForm>222<textForm>333
+		// Fill form: 111<textForm>222<textForm>333
 		let tempRun1 = new AscWord.CRun();
 		tempRun1.AddText("111");
 		complexForm.Add(tempRun1);
@@ -409,7 +409,7 @@ $(function () {
 		complexForm.SetThisElementCurrent();
 		complexForm.MoveCursorToStartPos();
 
-		// Fill our form: 111<textForm>222<textForm>333
+		// Fill form: 111<textForm>222<textForm>333
 		let tempRun1 = new AscWord.CRun();
 		tempRun1.AddText("111");
 		complexForm.Add(tempRun1);
@@ -490,7 +490,7 @@ $(function () {
 		complexForm.SetThisElementCurrent();
 		complexForm.MoveCursorToStartPos();
 
-		// Fill our form: 111<textForm>222<textForm>333
+		// Fill form: 111<textForm>222<textForm>333
 		let tempRun1 = new AscWord.CRun();
 		tempRun1.AddText("111");
 		complexForm.Add(tempRun1);
@@ -574,7 +574,7 @@ $(function () {
 	{
 		AscTest.ClearDocument();
 
-		// Fill our form: 111<textForm>222<comboForm>333
+		// Fill form: 111<textForm>222<comboForm>333
 
 		let paragraph = new AscWord.Paragraph();
 		logicDocument.AddToContent(logicDocument.GetElementsCount(), paragraph);

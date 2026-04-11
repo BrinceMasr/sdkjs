@@ -36,7 +36,7 @@ const AscHyphenation = {};
 
 (function(window)
 {
-	// These are test functions that should be replaced with proper ones
+	// These are test functions that should be replaced with regular ones
 	let BUFFER_STRING = "";
 	
 	AscHyphenation.addCodePoint = function(codePoint)

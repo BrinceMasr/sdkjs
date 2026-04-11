@@ -274,7 +274,7 @@ $(function () {
 			["Abc", "ෑඒ", "efg"]
 		);
 
-		// Check that if a run consists only of Script_Common characters, the CS parameter is picked up from the next input
+		// Check that if a run consists only of Script_Common characters, CS parameter is setting up on the next input
 		CheckTextEnter(
 			["1abc"],
 			[false],
@@ -298,7 +298,7 @@ $(function () {
 	});
 	QUnit.test("Test EnterText/CorrectEnterText/CompositeInput in Shape", function (assert)
 	{
-		// Test scenario for bug 67336 to verify correct input into an autoshape
+		// Follow steps from bug 67336 to verify correct input into an autoshape
 		AscTest.ClearDocument();
 		
 		let p = new AscWord.Paragraph();

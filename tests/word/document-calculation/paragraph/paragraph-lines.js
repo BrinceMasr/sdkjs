@@ -265,7 +265,7 @@ $(function () {
 		assert.strictEqual(para.GetLinesCount(), 1, "Lines count 1");
 		assert.strictEqual(para.GetTextOnLine(0), "xyz", "Text on line 0 'xyz ");
 
-		// Combined characters MUST NOT be moved to a new line individually
+		// Combined characters MUST NOT be split across lines or line ranges
 		recalculate(charWidth * 2.5);
 
 		assert.strictEqual(text_x.GetCodePointType(), AscWord.CODEPOINT_TYPE.BASE, "Check x code point type");

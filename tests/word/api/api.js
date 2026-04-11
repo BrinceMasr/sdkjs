@@ -375,7 +375,7 @@ $(function () {
 		AscTest.MoveCursorRight(true, false, 5);
 		assert.strictEqual(logicDocument.GetSelectedText(), "quick", "Select word 'quick'");
 		
-		// TODO: Refactor formula filling properly
+		// TODO: Need to refactor filling the equation
 		let math = AscTest.CreateMath();
 		p.AddToContentToEnd(math);
 		math.SetThisElementCurrent();
@@ -386,7 +386,7 @@ $(function () {
 		}
 		
 		AscTest.MoveCursorToParagraph(p, false);
-		AscTest.MoveCursorLeft(false, false, 4); // 1 shift to enter the formula
+		AscTest.MoveCursorLeft(false, false, 4); // Move left to enter the equation
 		AscTest.MoveCursorRight(true, false, 2);
 		assert.strictEqual(logicDocument.GetSelectedText(), "bc", "Add math with text 'abcd' and partially select the text");
 		

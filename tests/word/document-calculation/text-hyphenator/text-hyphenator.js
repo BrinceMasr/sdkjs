@@ -195,14 +195,14 @@ $(function ()
 			"cd aaa-",
 			"bbb"
 		]);
-		// The hyphenation dash is not removed
+		// The hyphen doesn't fit on the line
 		checkLines(assert, true, charWidth * 7.5, [
 			"abcd ",
 			"abcd ",
 			"aaabbb"
 		]);
 		
-		// Hyphenation at the first letter
+		// Hyphenation after the first letter
 		setText("abbb");
 		checkLines(assert, false, charWidth * 3.5, [
 			"abb",
@@ -247,8 +247,8 @@ $(function ()
 			"½www bbbb"
 		]);
 
-		// The hyphen comes after the second z character, and the next character is narrower than
-		// the width of the hyphen we draw during hyphenation
+		// The auto-hyphen after the second z character, and the next character is narrower than
+		// the width of the auto-hyphen we use
 		setText("zz½www");
 		checkLines(assert, false, charWidth * 2.75, [
 			"zz½",
@@ -271,8 +271,7 @@ $(function ()
 			"ww"
 		]);
 		
-		// Special case when during left justification the hyphen is not removed, but during justification
-		// by width the hyphen starts to be removed
+		// Special case where auto-hyphen doesn't fit a line when the paragraph is left- alignment, but it fits a line when paragraph is justified
 		setCondensedSpaces(true);
 		setText("a b c d aabbb");
 		checkLines(assert, true, charWidth * 10.5, [
@@ -284,8 +283,7 @@ $(function ()
 		// TODO: Handle the case when word hyphenation occurs at two (or more) places and the next hyphenation point
 		//       should be calculated from the last hyphenation point, not from the beginning of the word
 
-		// TODO: Case when a single long word split by hyphens moves entirely to the next page
-		//       because of this
+		// TODO: Case when a long word is broken up by hyphens and must be carried to the next page beacause of that
 	});
 	
 	QUnit.test("Test: \"Test DoNotHyphenateCaps parameter\"", function (assert)

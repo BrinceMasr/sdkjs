@@ -272,7 +272,7 @@ $(function ()
 		CheckParagraph(6, "2.1.1.");
 		CheckParagraph(7, "2.1.1.1.");
 		
-		// Apply numbering with Heading via selection (should apply to all paragraphs, even unselected ones)
+		// Apply numbering with Heading by selection (should apply to all paragraphs, even unselected ones)
 		AscTest.SelectDocumentRange(0, 3);
 		logicDocument.SetParagraphNumbering(AscWord.GetNumberingObjectByDeprecatedTypes(2, 6));
 		
@@ -285,7 +285,7 @@ $(function ()
 		CheckParagraph(6, "1.");
 		CheckParagraph(7, "a)");
 		
-		// Apply numbering without Heading via selection (should apply only to selected paragraphs)
+		// Apply numbering without Heading by selection (should apply only to selected paragraphs)
 		AscTest.SelectDocumentRange(0, 3);
 		logicDocument.SetParagraphNumbering(AscWord.GetNumberingObjectByDeprecatedTypes(2, 2));
 		

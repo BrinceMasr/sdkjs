@@ -43,7 +43,7 @@
 	const FontAscent  = 15;
 	const FontDescent = 5;
 
-	// TODO: Currently fontSize=10 because that is the editor default, it should be set here instead
+	// TODO: FontSize=10 because this is the deafault value for document editor, we should set this value here instead
 
 	const GraphemeNormal       = 20;
 	const GraphemeLigature_ffi = 25;

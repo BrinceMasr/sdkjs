@@ -427,7 +427,7 @@ $(function () {
 		assert.strictEqual(textForm.GetInnerText(), "AB", "Check entered text to a text form");
 		assert.strictEqual(formsManager.IsAllRequiredFormsFilled(), true, "Fill text form and check");
 
-		// Fields filled incorrectly according to format are also counted in the IsAllRequiredFormsFilled function
+		// We also take into account fields filled in incorrectly (not by format) in the IsAllRequiredFormsFilled function.
 		// It may be worth making two separate checks and one combined one: "form is filled" where both checks run
 
 		let textForm2Pr = textForm2.GetTextFormPr();

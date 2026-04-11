@@ -123,7 +123,7 @@ $(function ()
 		assert.strictEqual(table.IsEmptyPage(0), true, "First page should be empty");
 		assert.strictEqual(table.IsEmptyPage(1), false, "Check second page");
 		
-		// Case when the table splits on the header row itself
+		// Case when the table splits on the header row
 		paragraph.SetParagraphSpacing({Before: 225});
 		AscTest.Recalculate();
 		assert.strictEqual(table.GetPagesCount(), 2, "The case when the table is split by the row the header row (but row it's self can be split across multiple pages) (2015 compatibility)");
