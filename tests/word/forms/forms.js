@@ -427,8 +427,8 @@ $(function () {
 		assert.strictEqual(textForm.GetInnerText(), "AB", "Check entered text to a text form");
 		assert.strictEqual(formsManager.IsAllRequiredFormsFilled(), true, "Fill text form and check");
 
-		// Поля заполненные неправильно по формату мы тоже учитываем в функции IsAllRequiredFormsFilled
-		// Возможно стоит сделать две отдельные проверки и одну общую: что форма заполнена, в которой обе проверки будут запускаться
+		// Fields filled incorrectly according to format are also counted in the IsAllRequiredFormsFilled function
+		// It may be worth making two separate checks and one combined one: "form is filled" where both checks run
 
 		let textForm2Pr = textForm2.GetTextFormPr();
 		textForm2Pr.SetMaskFormat("999-aaa");

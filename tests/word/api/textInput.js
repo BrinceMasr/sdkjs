@@ -120,7 +120,7 @@ $(function () {
 		AscTest.CorrectEnterText("yz", "x");
 		assert.strictEqual(GetParagraphText(p), "xx", "Test special case, when added symbols collect to a single grapheme with previous symbols");
 		
-		// Вводим на сингальском 1ෑඒ (1-e-e-t)
+		// Type in Sinhala 1ෑඒ (1-e-e-t)
 		p = new AscWord.Paragraph();
 		logicDocument.PushToContent(p);
 		AscTest.MoveCursorToParagraph(p);
@@ -179,7 +179,7 @@ $(function () {
 		AscTest.CorrectEnterText("QQ", "RS");
 		assert.strictEqual(GetParagraphText(p), "AB123QRSC", "Add text '111' and correct it with '123' in collaboration (no sync between actions)");
 		
-		// Вводим на сингальском 1ෑඒ (1-e-e-t)
+		// Type in Sinhala 1ෑඒ (1-e-e-t)
 		p = new AscWord.Paragraph();
 		logicDocument.PushToContent(p);
 		AscTest.MoveCursorToParagraph(p);
@@ -259,7 +259,7 @@ $(function () {
 			["Abc1", "ෑඒ", "abc"]
 		);
 
-		// Композитный ввод всегда добавляет новый ран
+		// Composite input always adds a new run
 		CheckTextEnter(
 			["Abc", "ෑඒ"],
 			[false, true],
@@ -274,7 +274,7 @@ $(function () {
 			["Abc", "ෑඒ", "efg"]
 		);
 
-		// Проверяем, что если ран состоит только из Script_Common, то мы параметр CS подхватывается из следующего ввода
+		// Check that if a run consists only of Script_Common characters, the CS parameter is picked up from the next input
 		CheckTextEnter(
 			["1abc"],
 			[false],
@@ -298,7 +298,7 @@ $(function () {
 	});
 	QUnit.test("Test EnterText/CorrectEnterText/CompositeInput in Shape", function (assert)
 	{
-		// Делаем тест по сценарию бага 67336 для прокерки корректности ввода в автофигуру
+		// Test scenario for bug 67336 to verify correct input into an autoshape
 		AscTest.ClearDocument();
 		
 		let p = new AscWord.Paragraph();

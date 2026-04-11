@@ -33,7 +33,7 @@
 $(function () {
 	
 	let logicDocument = AscTest.CreateLogicDocument();
-	// Выставим стандартные настройки для параграфа
+	// Set standard settings for the paragraph
 	logicDocument.GetStyles().Set_DefaultParaPr(AscWord.CParaPr.fromObject({
 		Spacing : {
 			After : 10 * g_dKoef_pt_to_mm,
@@ -175,7 +175,7 @@ $(function () {
 		assert.deepEqual(numPr1, numPr2, "Check paragraphs have the same paragraph 2 numbering");
 		assert.strictEqual(numPr2.Lvl, 0, "Check numbering lvl of paragraph 2");
 		
-		// При двойном Enter на нулевом уровне в пустом параграфе нумерация должна убираться
+		// When pressing Enter twice at level zero in an empty paragraph, numbering should be removed
 		assert.strictEqual(p2.IsEmpty(), true, "Check if paragraph 2 is empty");
 		
 		AscTest.MoveCursorToParagraph(p2, true);
@@ -192,7 +192,7 @@ $(function () {
 		AscTest.SetParagraphNumberingLvl(p2, 1);
 		assert.deepEqual(p2.GetNumPr().Lvl, 1, "Check level of second paragraph");
 		
-		// При двойном Enter на ненулевом уровне в пустом параграфе уровень нумераации должен уменьшаться
+		// When pressing Enter twice at a non-zero level in an empty paragraph, the numbering level should decrease
 		AscTest.MoveCursorToParagraph(p2, true);
 		AscTest.PressKey(AscTest.Key.enter);
 		
@@ -375,7 +375,7 @@ $(function () {
 		AscTest.MoveCursorRight(true, false, 5);
 		assert.strictEqual(logicDocument.GetSelectedText(), "quick", "Select word 'quick'");
 		
-		// TODO: Переделать заполнение формулы по-нормальному
+		// TODO: Refactor formula filling properly
 		let math = AscTest.CreateMath();
 		p.AddToContentToEnd(math);
 		math.SetThisElementCurrent();
@@ -386,7 +386,7 @@ $(function () {
 		}
 		
 		AscTest.MoveCursorToParagraph(p, false);
-		AscTest.MoveCursorLeft(false, false, 4); // 1 сдвиг для захода в формулу
+		AscTest.MoveCursorLeft(false, false, 4); // 1 shift to enter the formula
 		AscTest.MoveCursorRight(true, false, 2);
 		assert.strictEqual(logicDocument.GetSelectedText(), "bc", "Add math with text 'abcd' and partially select the text");
 		

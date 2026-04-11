@@ -190,6 +190,6 @@
 	window.editor = editor;
 	Asc['editor'] = Asc.editor = editor;
 
-	// TODO: Заменить на вызов onEndLoadSdk
+	// TODO: Replace with a call to onEndLoadSdk
 	editor.initCollaborativeEditing();
 })(window);

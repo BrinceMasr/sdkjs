@@ -228,9 +228,9 @@ $(function () {
 	
 	QUnit.test("Combination of spaces and text", function(assert)
 	{
-		// Если есть хоть 1 текстовый элемент в выделении, то используем его стиль.
-		// В противном случае используем первый попавшийся стиль
-		// Если стиля нет, то используем уже стиль параграфа
+		// If there is at least 1 text element in the selection, use its style.
+		// Otherwise use the first available style
+		// If there is no style, use the paragraph style
 		
 		let word1 = "Word!";
 		let space1 = "   ";

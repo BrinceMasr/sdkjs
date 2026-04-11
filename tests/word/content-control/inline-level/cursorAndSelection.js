@@ -111,7 +111,7 @@ $(function ()
 			assert.strictEqual(AscTest.GetParagraphText(p), "", "Check text of the paragraph after removing content control");
 		}
 		
-		// Тестируем удаление контрола, заполненного плейсхолдером, через тройное нажатие на backspace/delete
+		// Test deletion of a control filled with a placeholder via triple backspace/delete press
 		TestDeletionEmptyContentControl(true);
 		TestDeletionEmptyContentControl(false);
 	});
@@ -141,7 +141,7 @@ $(function ()
 			assert.strictEqual(AscTest.GetParagraphText(p), "", "Check text of the paragraph after removing content control");
 		}
 		
-		// Тестируем удаление чекбокса, через двойное нажатие на backspace/delete
+		// Test deletion of a checkbox via double backspace/delete press
 		TestCheckBoxDeletion(true);
 		TestCheckBoxDeletion(false);
 		

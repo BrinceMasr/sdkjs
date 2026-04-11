@@ -85,7 +85,7 @@ $(function ()
 		let p3 = AddParagraph(style, "Third");
 		
 		//--------------------------------------------------------------------------------------------------------------
-		// Нет нумерации
+		// No numbering
 		//--------------------------------------------------------------------------------------------------------------
 		AscTest.Recalculate();
 		CheckParagraph(0, "");
@@ -93,7 +93,7 @@ $(function ()
 		CheckParagraph(2, "");
 		
 		//--------------------------------------------------------------------------------------------------------------
-		// Нумерация указана в стиле, и в стиле сразу заданы правильные уровни
+		// Numbering is specified in the style, and the correct levels are set directly in the style
 		//--------------------------------------------------------------------------------------------------------------
 		let num = CreateNum();
 		num.GetLvl(0).SetPStyle(style.GetId());
@@ -104,7 +104,7 @@ $(function ()
 		CheckParagraph(1, "2.");
 		CheckParagraph(2, "3.");
 		//--------------------------------------------------------------------------------------------------------------
-		// Перемещаем курсор во второй параграф и меняем нумерацию на a) b) c)
+		// Move the cursor to the second paragraph and change the numbering to a) b) c)
 		//--------------------------------------------------------------------------------------------------------------
 		AscTest.MoveCursorToParagraph(p2, true);
 		logicDocument.SetParagraphNumbering(AscWord.GetNumberingObjectByDeprecatedTypes(1, 5));
@@ -272,7 +272,7 @@ $(function ()
 		CheckParagraph(6, "2.1.1.");
 		CheckParagraph(7, "2.1.1.1.");
 		
-		// Применяем нумерацию с Heading по селекту (должно примениться ко всем параграфам, даже не выделенным)
+		// Apply numbering with Heading via selection (should apply to all paragraphs, even unselected ones)
 		AscTest.SelectDocumentRange(0, 3);
 		logicDocument.SetParagraphNumbering(AscWord.GetNumberingObjectByDeprecatedTypes(2, 6));
 		
@@ -285,7 +285,7 @@ $(function ()
 		CheckParagraph(6, "1.");
 		CheckParagraph(7, "a)");
 		
-		// Применяем нумерацию буз Heading по селекту (должно примениться только к выделенным параграфам)
+		// Apply numbering without Heading via selection (should apply only to selected paragraphs)
 		AscTest.SelectDocumentRange(0, 3);
 		logicDocument.SetParagraphNumbering(AscWord.GetNumberingObjectByDeprecatedTypes(2, 2));
 		

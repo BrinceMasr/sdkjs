@@ -113,8 +113,8 @@ $(function () {
 		TestParagraph(p1, 10, 10, 20, AscCommon.align_Center);
 		TestParagraph(p2, 15, 0, 5, AscCommon.align_Left);
 		
-		// Обновление стиля в интерфейсе сейчас работает, как получение текущего по выделению, дальше ему проставляется точно такое же имя
-		// и мы его заново выставляем в документ
+		// Updating a style in the UI currently works by getting the current style from the selection, then assigning it exactly the same name
+		// and then applying it back to the document
 		let uiStyle = logicDocument.GetStyleFromFormatting();
 		uiStyle.put_Name(style.GetName());
 		AscTest.MoveCursorToParagraph(p1, true);

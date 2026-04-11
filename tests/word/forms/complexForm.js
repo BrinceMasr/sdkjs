@@ -78,7 +78,7 @@ $(function () {
 
 		assert.strictEqual(complexForm.IsPlaceHolder(), true, "Is placeholder in complexForm");
 
-		// Наполняем нашу форму: 111<textForm>222<textForm>333
+		// Fill our form: 111<textForm>222<textForm>333
 
 		let tempRun1 = new AscWord.CRun();
 		tempRun1.AddText("111");
@@ -133,8 +133,8 @@ $(function () {
 		textForm2.MoveCursorToStartPos();
 		assert.strictEqual(textForm2.IsThisElementCurrent() && textForm2.IsCursorAtBegin(), true, "Move cursor at the start of textForm2");
 
-		// Делаем два смещения, потому что после одинарного мы могли попасть в пустой ран между tempRun2 и textForm2
-		// везде далее проверяем также
+		// Make two shifts because after a single one we could end up in the empty run between tempRun2 and textForm2
+		// the same check applies everywhere below
 		AscTest.MoveCursorLeft();
 		AscTest.MoveCursorLeft();
 		assert.strictEqual(tempRun2.IsThisElementCurrent(), true, "Cursor must be in run2");
@@ -164,7 +164,7 @@ $(function () {
 		AscTest.MoveCursorRight();
 		assert.strictEqual(textForm2.IsThisElementCurrent() && textForm2.IsCursorAtEnd(), true, "Cursor must be at the end of text form2");
 
-		// Проверяем перемещение из текстовых форм с плейсхолдером
+		// Check movement from text forms with a placeholder
 
 		textForm1.ClearContentControlExt();
 		assert.strictEqual(textForm1.IsPlaceHolder(), true, "Is placeholder in text form 1 after clearing form");
@@ -201,7 +201,7 @@ $(function () {
 		assert.strictEqual(textForm2.IsThisElementCurrent() && textForm2.IsCursorAtEnd(), true, "Check cursor position after moving cursor right");
 
 
-		// Проверяем набор внутри форм
+		// Check typing inside forms
 		textForm1.ClearContentControlExt();
 		textForm2.ClearContentControlExt();
 
@@ -272,7 +272,7 @@ $(function () {
 		complexForm.SetThisElementCurrent();
 		complexForm.MoveCursorToStartPos();
 
-		// Наполняем нашу форму: 111<textForm>222<textForm>333
+		// Fill our form: 111<textForm>222<textForm>333
 		let tempRun1 = new AscWord.CRun();
 		tempRun1.AddText("111");
 		complexForm.Add(tempRun1);
@@ -388,9 +388,9 @@ $(function () {
 	{
 		AscTest.SetFillingFormMode();
 		
-		// Внутри составной формы тройной клик должен выделять всю составную форму целиком, где бы мы не кликали
-		// Двойной клик внутри простой подформы выделяет целиком подформу, а двойно клик вне простой подфоры выделяет
-		// слово (по обычному) в рамках составной формы
+		// Inside a complex form, a triple click should select the entire complex form regardless of where we click
+		// A double click inside a simple subform selects the entire subform, while a double click outside a simple subform selects
+		// a word (as usual) within the complex form
 
 		logicDocument.RemoveFromContent(0, logicDocument.GetElementsCount(), false);
 
@@ -409,7 +409,7 @@ $(function () {
 		complexForm.SetThisElementCurrent();
 		complexForm.MoveCursorToStartPos();
 
-		// Наполняем нашу форму: 111<textForm>222<textForm>333
+		// Fill our form: 111<textForm>222<textForm>333
 		let tempRun1 = new AscWord.CRun();
 		tempRun1.AddText("111");
 		complexForm.Add(tempRun1);
@@ -476,7 +476,7 @@ $(function () {
 
 	QUnit.test("Check is all required form filled", function (assert)
 	{
-		// Составная формы заполнена, если все её подформы заполнены
+		// A complex form is filled if all its subforms are filled
 
 		logicDocument.RemoveFromContent(0, logicDocument.GetElementsCount(), false);
 
@@ -490,7 +490,7 @@ $(function () {
 		complexForm.SetThisElementCurrent();
 		complexForm.MoveCursorToStartPos();
 
-		// Наполняем нашу форму: 111<textForm>222<textForm>333
+		// Fill our form: 111<textForm>222<textForm>333
 		let tempRun1 = new AscWord.CRun();
 		tempRun1.AddText("111");
 		complexForm.Add(tempRun1);
@@ -574,7 +574,7 @@ $(function () {
 	{
 		AscTest.ClearDocument();
 
-		// Наполняем нашу форму: 111<textForm>222<comboForm>333
+		// Fill our form: 111<textForm>222<comboForm>333
 
 		let paragraph = new AscWord.Paragraph();
 		logicDocument.AddToContent(logicDocument.GetElementsCount(), paragraph);
