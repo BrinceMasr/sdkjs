@@ -312,7 +312,7 @@
 	 * @typeofeditors ["CPE"]
 	 * @alias ApplyTheme
 	 * @param {number | string} themeIndex - The theme index (number) or theme name (string, case-insensitive).
-	 * @returns {boolean} Returns false if the theme was not found.
+	 * @returns {boolean} Returns false if the theme was not found. Returns asynchronously when the theme is fully applied.
 	 * @since 9.4.0
 	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/ApplyTheme.js
 	 */
@@ -326,10 +326,15 @@
 					break;
 				}
 			}
-			if (typeof themeIndex === "string") return false;
+			if (typeof themeIndex === "string") {
+				window.g_asc_plugins.onPluginMethodReturn(false);
+				return;
+			}
 		}
+		this._pluginApplyThemeCallback = function() {
+			window.g_asc_plugins.onPluginMethodReturn(true);
+		};
 		this.ChangeTheme(themeIndex);
-		return true;
 	};
 
 })(window);
