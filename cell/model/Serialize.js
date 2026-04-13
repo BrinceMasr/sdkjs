@@ -10009,7 +10009,7 @@
 
         this.ReadRichValueFallback = function (type, length, poResult)
         {
-            let res = c_oSerConstants.ReadOk;
+            let res = c_oSerConstants.ReadUnknown;
             return res;
         };
 
@@ -10025,7 +10025,8 @@
                 pValue.arrV.push(s);
             }
             else if (c_oSer_RichValue.Fallback === type) {
-                pValue.fb = {};
+                //TODO don't x2t read
+                //pValue.fb = {};
                 let oThis = this;
                 res = this.bcr.Read1(length, function (t, l) {
                     return oThis.ReadRichValueFallback(t, l, pValue.fb);
