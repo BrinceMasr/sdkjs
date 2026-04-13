@@ -493,9 +493,9 @@
 				const startContentInfo = contents[0];
 				const startContent = startContentInfo.content;
 				const startPos = this.rebuildPos(startContentInfo.startPos, startContent, startContentInfo.startParagraph);
-				startContent.SetContentPosition(startPos, 0, 0);
+				startContent.SetContentSelection(startPos, startPos, 0, 0, 0);
 				startContent.MoveCursorToEndPos(true);
-				const startRes = callback(startContent, 0, startContent.length);
+				const startRes = callback(startContent, 0, contents.length);
 				startContent.RemoveSelection();
 				if (startRes) {
 					return true;
@@ -513,7 +513,7 @@
 				const endContentInfo = contents[contents.length - 1];
 				const endContent = endContentInfo.content;
 				const endPos = this.rebuildPos(endContentInfo.endPos, endContent, endContentInfo.endParagraph);
-				endContent.SetContentPosition(endPos, 0, 0);
+				endContent.SetContentSelection(endPos, endPos, 0, 0, 0);
 				endContent.MoveCursorToStartPos(true);
 				const endRes = callback(endContent, contents.length - 1, contents.length);
 				endContent.RemoveSelection();
@@ -540,14 +540,41 @@
 		}
 		return false;
 	}
-	OutlineView.prototype.remove = function () {
-		this.forEachSelectedContent(function (content, idx, contentCount) {
-			if (contentCount > 1) {
-
-			} else {
-				content.Remove();
+	OutlineView.prototype.getSelectedParagraphs = function () {
+		const docContent = this.getDocContent();
+		const selectedParagraphs = [];
+		if (docContent) {
+			docContent.GetCurrentParagraph(false, selectedParagraphs);
+		}
+		return selectedParagraphs;
+	};
+	OutlineView.prototype.remove = function (bOnAddText) {
+		const checkSlidesForRemove = {};
+		this.forEachSelectedContent(function (content, idx, count) {
+			if (content.IsSelectedAll()) {
+				const shape = content.Is_DrawingShape(true);
+				const slide = shape.parent;
+				const slideNum = slide.num;
+				checkSlidesForRemove[slideNum] = slide;
+				shape.deleteDrawingBase();
+			} else if (count === 1) {
+				content.Remove(1, true, false, bOnAddText);
 			}
 		});
+		const slideNumbers = Object.keys(checkSlidesForRemove).map(function (num) {
+			return parseInt(num, 10);
+		}).sort(function (a, b) {
+			return b - a;
+		});
+		const presentation = this.getPresentation();
+		for (let i = 0; i < slideNumbers.length; i++) {
+			const slideNum = slideNumbers[i];
+			const slide = checkSlidesForRemove[slideNum];
+			if (!slide.isHaveOutlineShapes()) {
+				presentation.removeSlideByObject(slide, true, slideNum);
+				presentation.DrawingDocument.m_oWordControl.GoToPage(presentation.GetSlidesCount() - 1, undefined, undefined, true);
+			}
+		}
 	};
 	OutlineView.prototype.savePositionAfterEdit = function (content, idx, count) {
 		if (count === 1) {
@@ -714,7 +741,6 @@
 		this.removeParagraph(outlineParagraph, index);
 		const pr = this.getPropertiesFromSourceShape(sourceParagraph);
 		this.addCopyParagraph(sourceParagraph, index, sourceParagraph.Index === 0, pr);
-
 	};
 	OutlineView.prototype.update = function () {
 		const sourceParagraphs = [];
@@ -757,6 +783,21 @@
 	OutlineView.prototype.checkSourceParagraph = function (paragraph) {
 		if (AscCommon.History.IsOn()) {
 			this.mapToCheckParagraphs[paragraph.GetId()] = paragraph;
+		}
+	};
+	OutlineView.prototype.checkSourceSlide = function (slide) {
+		for (let i = 0; i < slide.cSld.spTree.length; i += 1) {
+			const shape = slide.cSld.spTree[i];
+			this.checkSourceShape(shape);
+		}
+	};
+	OutlineView.prototype.checkSourceShape = function (shape) {
+		if (shape.isOutlinePlaceholder()) {
+			const content = shape.getDocContent();
+			for (let i = 0; i < content.Content.length; i += 1) {
+				const paragraph = content.Content[i];
+				this.checkSourceParagraph(paragraph);
+			}
 		}
 	};
 	OutlineView.prototype.getApi = function () {
@@ -873,6 +914,7 @@
 	};
 	OutlineView.prototype.executeHotKey = function (e) {
 		const isMacOs = AscCommon.AscBrowser.isMacOs;
+		const presentation = this.getPresentation();
 		switch (e.KeyCode) {
 			case Asc.c_oAscKeyCodes.ArrowLeft: {
 				if (isMacOs && e.CtrlKey) {
@@ -914,6 +956,14 @@
 				} else {
 					this.moveCursorToEndOfLine(e.ShiftKey);
 				}
+				break;
+			}
+			case Asc.c_oAscKeyCodes.Backspace: {
+				presentation.StartAction();
+				this.remove();
+				presentation.FinalizeAction();
+				this.updateInterfaceState()
+				this.updateSelectionState();
 				break;
 			}
 		}

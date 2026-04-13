@@ -552,6 +552,10 @@
 				}
 			}
 			this.shapeRemove(pos, 1);
+			const presentation = Asc.editor.WordControl.m_oLogicDocument;
+			if (this.isSlide() && presentation) {
+				presentation.checkShapeOutlineView(oSp);
+			}
 			if (this.timing && !AscCommon.IsChangingDrawingZIndex) {
 				this.checkNeedCopyTimingBeforeEdit();
 				this.timing.onRemoveObject(oSp.Get_Id());

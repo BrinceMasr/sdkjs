@@ -8787,6 +8787,14 @@ CPresentation.prototype.removeSlide = function (pos, bNoCheck) {
 	let oSlide = this.GetSlide(pos);
 	return this.removeSlideByObject(oSlide, bNoCheck, pos);
 };
+CPresentation.prototype.checkSlideOutlineView = function (slide) {
+	const outlineView = this.GetOutlineView();
+	outlineView.checkSourceSlide(slide);
+};
+CPresentation.prototype.checkShapeOutlineView = function (shape) {
+	const outlineView = this.GetOutlineView();
+	outlineView.checkSourceShape(shape);
+};
 CPresentation.prototype.removeSlideByObject = function (oSlide, bNoCheck, pos) {
 	if(!oSlide) return;
 	let nType = oSlide.getObjectType();
@@ -8803,6 +8811,7 @@ CPresentation.prototype.removeSlideByObject = function (oSlide, bNoCheck, pos) {
 				}
 			}
 			this.Slides.splice(pos, 1);
+			this.checkSlideOutlineView(oSlide);
 			break;
 		}
 		case AscDFH.historyitem_type_SlideLayout: {
