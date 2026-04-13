@@ -3158,19 +3158,18 @@
 		const quadHalfWidth = aspect;
 
 		const clampedProgress = Math.max(0, Math.min(progress, 1.0));
-		const linearProgress = 1.0 - Math.pow(1.0 - clampedProgress, 1.0 / 3.0);
 
 		// Three phases: move away with rotation, slide, move closer with rotation reset
-		const pullBackEnd = 1.0 / 3.0;
-		const slideEnd = 2.0 / 3.0;
+		const pullBackEnd = 19.0 / 27.0; // ease-out(1/3)
+		const slideEnd = 26.0 / 27.0; // ease-out(2/3)
 
-		let awayProgress = Math.min(linearProgress / pullBackEnd, 1.0);
+		let awayProgress = Math.min(clampedProgress / pullBackEnd, 1.0);
 		awayProgress = awayProgress * awayProgress * (3.0 - 2.0 * awayProgress);
 
-		let slideProgress = Math.max(0, Math.min((linearProgress - pullBackEnd) / (slideEnd - pullBackEnd), 1.0));
+		let slideProgress = Math.max(0, Math.min((clampedProgress - pullBackEnd) / (slideEnd - pullBackEnd), 1.0));
 		slideProgress = slideProgress * slideProgress * (3.0 - 2.0 * slideProgress);
 
-		let returnProgress = Math.max(0, Math.min((linearProgress - slideEnd) / (1.0 - slideEnd), 1.0));
+		let returnProgress = Math.max(0, Math.min((clampedProgress - slideEnd) / (1.0 - slideEnd), 1.0));
 		returnProgress = returnProgress * returnProgress * (3.0 - 2.0 * returnProgress);
 
 		const maxRotationAngle = -dir * Math.PI / 10;
@@ -3833,7 +3832,7 @@
 
 		boundaries.push(_makeConstantBoundary(halfW, rowCount + 1));
 
-		// Build quads: each strip × each row = one axis-aligned rectangle
+		// Build quads: each strip x each row = one axis-aligned rectangle
 		const stripCount = boundaries.length - 1;
 		const vertCount = stripCount * rowCount * 6;
 		const data = new Float32Array(vertCount * 6);
