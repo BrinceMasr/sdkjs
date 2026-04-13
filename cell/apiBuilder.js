@@ -20874,7 +20874,7 @@
 	 * The conditional formatting type.
 	 * @typedef {("xlCellValue" | "xlExpression" | "xlTop10" | "xlAboveAverageCondition" |
 	 * "xlUniqueValues" | "xlTextString" | "xlBlanksCondition" | "xlTimePeriod" | "xlErrorsCondition" |
-	 * "xlNoErrorsCondition" | "xlColorScale" | "xlDatabar" | "xlIconSets")} XlFormatConditionType
+	 * "xlNoErrorsCondition" | "xlColorScale" | "xlDataBar" | "xlIconSet")} XlFormatConditionType
 	 */
 
 	/**
@@ -20951,9 +20951,11 @@
 			case "xlColorScale":
 				nType = Asc.ECfType.colorScale;
 				break;
+			case "xlDataBar":
 			case "xlDatabar":
 				nType = Asc.ECfType.dataBar;
 				break;
+			case "xlIconSet":
 			case "xlIconSets":
 				nType = Asc.ECfType.iconSet;
 				break;
@@ -21001,10 +21003,10 @@
 				sType = "xlColorScale";
 				break;
 			case Asc.ECfType.dataBar:
-				sType = "xlDatabar";
+				sType = "xlDataBar";
 				break;
 			case Asc.ECfType.iconSet:
-				sType = "xlIconSets";
+				sType = "xlIconSet";
 				break;
 		}
 		return sType;
@@ -25119,7 +25121,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/GetType.js
 	 */
 	ApiDatabar.prototype.GetType = function() {
-		return "xlDatabar";
+		return "xlDataBar";
 	};
 
 	Object.defineProperty(ApiDatabar.prototype, "Type", {
@@ -25923,7 +25925,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiIconSetCondition/Methods/GetType.js
 	 */
 	ApiIconSetCondition.prototype.GetType = function() {
-		return "xlIconSets";
+		return "xlIconSet";
 	};
 
 	Object.defineProperty(ApiIconSetCondition.prototype, "Type", {

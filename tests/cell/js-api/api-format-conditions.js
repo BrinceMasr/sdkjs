@@ -270,7 +270,7 @@ $(function () {
             var fc = r.GetFormatConditions();
             var db = fc.AddDatabar();
             assert.ok(db, "Data bar created");
-            assert.strictEqual(db.GetType(), "xlDatabar", "Type is xlDatabar");
+            assert.strictEqual(db.GetType(), "xlDataBar", "Type is xlDataBar");
 
             db.SetAxisPosition("xlDataBarAxisMidpoint");
             assert.strictEqual(
