@@ -3106,6 +3106,19 @@
         if (oApiColorScheme && oApiColorScheme.GetClassType && oApiColorScheme.GetClassType() === "themeColorScheme")
         {
             this.ThemeInfo.Theme.setColorScheme(oApiColorScheme.ColorScheme);
+            var oPresentation = private_GetPresentation();
+            if (oPresentation) {
+                var oThemeObjects = oPresentation.GetSlideObjectsWithTheme(this.ThemeInfo.Theme);
+                for (var i = 0; i < oThemeObjects.masters.length; i++) {
+                    oThemeObjects.masters[i].checkSlideColorScheme();
+                }
+                for (var i = 0; i < oThemeObjects.layouts.length; i++) {
+                    oThemeObjects.layouts[i].checkSlideColorScheme();
+                }
+                for (var i = 0; i < oThemeObjects.slides.length; i++) {
+                    oThemeObjects.slides[i].checkSlideColorScheme();
+                }
+            }
             return true;
         }
 
