@@ -10366,12 +10366,24 @@
 			return this.GetValue2();
 	};
 
+	/**
+	 * Sets a formula or value to the current cell or cell range.
+	 * @memberof ApiRange
+	 * @typeofeditors ["CSE"]
+	 * @param {string | number | boolean | Array<string | number | boolean> | Array<Array<string | number | boolean>>} data - The formula or value for the cell or cell range.
+	 * @returns {boolean} - returns false if such a range does not exist.
+	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/SetFormula.js
+	 */
+	ApiRange.prototype.SetFormula = function (data) {
+		return this.SetValue(data);
+	};
+
 	Object.defineProperty(ApiRange.prototype, "Formula", {
 		get: function () {
 			return this.GetFormula();
 		},
 		set: function (value) {
-			this.SetValue(value);
+			this.SetFormula(value);
 		}
 	});
 
@@ -30324,6 +30336,7 @@
 	ApiRange.prototype["GetValue"] = ApiRange.prototype.GetValue;
 	ApiRange.prototype["SetValue"] = ApiRange.prototype.SetValue;
 	ApiRange.prototype["GetFormula"] = ApiRange.prototype.GetFormula;
+	ApiRange.prototype["SetFormula"] = ApiRange.prototype.SetFormula;
 	ApiRange.prototype["GetValue2"] = ApiRange.prototype.GetValue2;
 	ApiRange.prototype["GetText"] = ApiRange.prototype.GetText;
 	ApiRange.prototype["SetFontColor"] = ApiRange.prototype.SetFontColor;
