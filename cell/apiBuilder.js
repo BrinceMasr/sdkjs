@@ -11968,7 +11968,7 @@
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
 	 * @param {ReplaceData} oReplaceData - The data used to make search and replace.
-	 * @returns {ApiRange | null} - Returns null if the current range does not contain such text.
+	 * @returns {boolean} - Returns true if at least one match was found and replacement was initiated, false otherwise.
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/Replace.js
 	 */
 	ApiRange.prototype.Replace = function (oReplaceData) {
@@ -11984,7 +11984,7 @@
 				MatchCase = oReplaceData['MatchCase'];
 				ReplaceAll = oReplaceData['ReplaceAll'];
 			} else {
-				return null;
+				return false;
 			}
 		} else {
 			What = arguments[0];
@@ -12016,9 +12016,11 @@
 			let engine = this.range.worksheet.workbook.oApi.wb.Search(options);
 			engine.Reset();
 			engine = this.range.worksheet.workbook.oApi.wb.Search(options);
-			let id = this.range.worksheet.workbook.oApi.wb.GetSearchElementId(SearchDirection != 'xlPrevious');
-			options.asc_setIsForMacros(true);
-			if (id != null) {
+			// True if matches found; replaceCellText is async so write completion cannot be confirmed.
+			let hasMatches = engine.GetCount() > 0;
+			if (hasMatches) {
+				let id = this.range.worksheet.workbook.oApi.wb.GetSearchElementId(SearchDirection != 'xlPrevious');
+				options.asc_setIsForMacros(true);
 				if (ReplaceAll)
 					engine.SetCurrent(id);
 				else
@@ -12026,6 +12028,7 @@
 
 				this.range.worksheet.workbook.oApi.wb.replaceCellText(options);
 			}
+			return hasMatches;
 		} else {
 			throwException(new Error('Invalid type of parametr "What" or "Replacement".'));
 		}
@@ -20873,7 +20876,7 @@
 	/**
 	 * The conditional formatting type.
 	 * @typedef {("xlCellValue" | "xlExpression" | "xlTop10" | "xlAboveAverageCondition" |
-	 * "xlUniqueValues" | "xlTextString" | "xlBlanksCondition" | "xlTimePeriod" | "xlErrorsCondition" |
+	 * "xlUniqueValues" | "xlTextString" | "xlBlanksCondition" | "xlNoBlanksCondition" | "xlTimePeriod" | "xlErrorsCondition" |
 	 * "xlNoErrorsCondition" | "xlColorScale" | "xlDataBar" | "xlIconSet")} XlFormatConditionType
 	 */
 
@@ -20939,6 +20942,9 @@
 			case "xlBlanksCondition":
 				nType = Asc.ECfType.containsBlanks;
 				break;
+			case "xlNoBlanksCondition":
+				nType = Asc.ECfType.notContainsBlanks;
+				break;
 			case "xlTimePeriod":
 				nType = Asc.ECfType.timePeriod;
 				break;
@@ -20989,6 +20995,9 @@
 				break;
 			case Asc.ECfType.containsBlanks:
 				sType = "xlBlanksCondition";
+				break;
+			case Asc.ECfType.notContainsBlanks:
+				sType = "xlNoBlanksCondition";
 				break;
 			case Asc.ECfType.timePeriod:
 				sType = "xlTimePeriod";
@@ -21302,6 +21311,7 @@
 
 			case Asc.ECfType.duplicateValues:
 			case Asc.ECfType.containsBlanks:
+			case Asc.ECfType.notContainsBlanks:
 
 				if (Operator !== undefined) {
 					let specificType = FromXlFormatConditionOperatorTo(Operator);
@@ -21375,7 +21385,7 @@
 		}
 
 		if (internalType === Asc.ECfType.containsText || internalType === Asc.ECfType.containsBlanks ||
-			internalType === Asc.ECfType.duplicateValues || internalType === Asc.ECfType.timePeriod ||
+			internalType === Asc.ECfType.notContainsBlanks || internalType === Asc.ECfType.duplicateValues || internalType === Asc.ECfType.timePeriod ||
 			internalType === Asc.ECfType.aboveAverage || internalType === Asc.ECfType.top10 ||
 			internalType === Asc.ECfType.cellIs || internalType === Asc.ECfType.expression) {
 			props.dxf = new window['AscCommonExcel'].CellXfs();
