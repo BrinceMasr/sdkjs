@@ -26924,7 +26924,7 @@
 	/**
 	 * Replaces each paragraph (or text in cell) in the select with the corresponding text from an array of strings.
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @typeofeditors ["CDE", "CFE", "CSE", "CPE"]
 	 * @param {string[]} textStrings - An array of replacement strings.
 	 * @param {string} [tab="\t"] - A character which is used to specify the tab in the source text.
 	 * @param {string} [newLine="\r\n"] - A character which is used to specify the line break character in the source text.
@@ -27418,7 +27418,7 @@
 	/**
 	 * Converts a document to Markdown or HTML text.
 	 * @memberof Api
-	 * @typeofeditors ["CDE"]
+	 * @typeofeditors ["CDE", "CFE"]
 	 * @param {"markdown" | "html"} [convertType="markdown"] - Conversion type.
 	 * @param {boolean} [htmlHeadings=false] - Defines if the HTML headings and IDs will be generated when the Markdown renderer of your target platform does not handle Markdown-style IDs.
 	 * @param {boolean} [base64img=false] - Defines if the images will be created in the base64 format.
