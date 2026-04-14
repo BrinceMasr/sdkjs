@@ -17747,6 +17747,108 @@
 			builder_SetObjectFontSize(oChartSpace.chart.plotArea.getVerticalAxis(), nFontSize, oChartSpace.getDrawingDocument());
 		}
 
+		function builder_MergeObjectDefaultTextPr(object, textPr, drawingDocument) {
+			if (!object || !textPr) {
+				return false;
+			}
+
+			if (!object.txPr) {
+				object.setTxPr(new AscFormat.CTextBody());
+			}
+			if (!object.txPr.bodyPr) {
+				object.txPr.setBodyPr(new AscFormat.CBodyPr());
+			}
+			if (!object.txPr.content) {
+				object.txPr.setContent(new AscFormat.CDrawingDocContent(object.txPr, drawingDocument, 0, 0, 100, 500, false, false, true));
+			}
+
+			const propCopy = object.txPr.content.Content[0].Pr.Copy();
+			if (!propCopy.DefaultRunPr) {
+				propCopy.DefaultRunPr = new AscCommonWord.CTextPr();
+			}
+
+			propCopy.DefaultRunPr.Merge(textPr);
+			object.txPr.content.Content[0].Set_Pr(propCopy);
+			return true;
+		}
+
+		function builder_SetDataLabelsTextPr(chartSpace, textPr) {
+			const chart = (
+				chartSpace &&
+				chartSpace.chart &&
+				chartSpace.chart.plotArea &&
+				chartSpace.chart.plotArea.charts[0]
+			);
+
+			if (!chart) {
+				return false;
+			}
+
+			if (!chart.dLbls) {
+				chart.setDLbls(new AscFormat.CDLbls());
+			}
+
+			const drawingDocument = chartSpace.getDrawingDocument();
+			for (let i = 0; i < chart.series.length; ++i) {
+				const ser = chart.series[i];
+				if (!ser.dLbls) {
+					ser.setDLbls(new AscFormat.CDLbls());
+				}
+				builder_MergeObjectDefaultTextPr(ser.dLbls, textPr, drawingDocument);
+
+				const labelArray = ser.dLbls.dLbl;
+				for (let j = 0; j < labelArray.length; ++j) {
+					const dLbl = labelArray[j];
+					if (dLbl) {
+						if (ser.dLbls.txPr && !dLbl.txPr) {
+							dLbl.setTxPr(ser.dLbls.txPr.createDuplicate());
+						}
+						builder_MergeObjectDefaultTextPr(dLbl, textPr, drawingDocument);
+					}
+				}
+			}
+
+			chartSpace.handleUpdateDataLabels();
+			return true;
+		}
+
+		function builder_SetPointDataLabelTextPr(chartSpace, seriesIndex, pointIndex, textPr) {
+			const chart = (
+				chartSpace &&
+				chartSpace.chart &&
+				chartSpace.chart.plotArea &&
+				chartSpace.chart.plotArea.charts[0]
+			);
+			if (!chart) {
+				return false;
+			}
+
+			const ser = chart.series[seriesIndex];
+			if (!ser) {
+				return false;
+			}
+
+			if (!ser.dLbls) {
+				const newDLbls = chart.dLbls ? chart.dLbls.createDuplicate() : new AscFormat.CDLbls();
+				ser.setDLbls(newDLbls);
+			}
+
+			let dLbl = ser.dLbls.findDLblByIdx(pointIndex);
+			if (!dLbl) {
+				dLbl = new AscFormat.CDLbl();
+				dLbl.setIdx(pointIndex);
+				if (ser.dLbls.txPr) {
+					dLbl.merge(ser.dLbls);
+				}
+				ser.dLbls.addDLbl(dLbl);
+			}
+
+			const result = builder_MergeObjectDefaultTextPr(dLbl, textPr, chartSpace.getDrawingDocument());
+			if (result) {
+				chartSpace.handleUpdateDataLabels();
+			}
+			return result;
+		}
 
 		function builder_SetShowPointDataLabel(oChartSpace, nSeriesIndex, nPointIndex, bShowSerName, bShowCatName, bShowVal, bShowPerecent) {
 			if (oChartSpace && oChartSpace.chart && oChartSpace.chart.plotArea && oChartSpace.chart.plotArea.charts[0]) {
@@ -20629,6 +20731,8 @@
 		window['AscFormat'].builder_SetHorAxisFontSize = builder_SetHorAxisFontSize;
 		window['AscFormat'].builder_SetVerAxisFontSize = builder_SetVerAxisFontSize;
 		window['AscFormat'].builder_SetShowPointDataLabel = builder_SetShowPointDataLabel;
+		window['AscFormat'].builder_SetDataLabelsTextPr = builder_SetDataLabelsTextPr;
+		window['AscFormat'].builder_SetPointDataLabelTextPr = builder_SetPointDataLabelTextPr;
 
 
 		window['AscFormat'].Ax_Counter = Ax_Counter;

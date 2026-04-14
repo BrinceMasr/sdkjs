@@ -21065,6 +21065,46 @@
 	};
 
 	/**
+	 * Sets the text properties to the chart data labels.
+	 *
+	 * @memberof ApiChart
+	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
+	 *
+	 * @param {ApiTextPr} textPr - The text properties to apply to the data labels.
+	 * @returns {boolean}
+	 *
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiChart/Methods/SetDataLabelsTextPr.js
+	 */
+	ApiChart.prototype.SetDataLabelsTextPr = function (textPr) {
+		if (textPr && textPr.TextPr) {
+			return AscFormat.builder_SetDataLabelsTextPr(this.Chart, textPr.TextPr);
+		}
+		return false;
+	};
+
+	/**
+	 * Sets the text properties to the chart point data label.
+	 *
+	 * @memberof ApiChart
+	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
+	 *
+	 * @param {number} seriesIndex - The series index from the array of the data used to build the chart from.
+	 * @param {number} pointIndex - The point index from this series.
+	 * @param {ApiTextPr} textPr - The text properties to apply to the data label.
+	 * @returns {boolean}
+	 *
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiChart/Methods/SetPointDataLabelTextPr.js
+	 */
+	ApiChart.prototype.SetPointDataLabelTextPr = function (seriesIndex, pointIndex, textPr) {
+		if (textPr && textPr.TextPr) {
+			return AscFormat.builder_SetPointDataLabelTextPr(this.Chart, seriesIndex, pointIndex, textPr.TextPr);
+		}
+		return false;
+	};
+
+	/**
 	 * Spicifies tick labels position for the vertical axis.
 	 * @memberof ApiChart
 	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
@@ -30565,6 +30605,8 @@
 	ApiChart.prototype["SetLegendFontSize"]            = ApiChart.prototype.SetLegendFontSize;
 	ApiChart.prototype["SetShowDataLabels"]            = ApiChart.prototype.SetShowDataLabels;
 	ApiChart.prototype["SetShowPointDataLabel"]        = ApiChart.prototype.SetShowPointDataLabel;
+	ApiChart.prototype["SetDataLabelsTextPr"]          = ApiChart.prototype.SetDataLabelsTextPr;
+	ApiChart.prototype["SetPointDataLabelTextPr"]      = ApiChart.prototype.SetPointDataLabelTextPr;
 	ApiChart.prototype["SetVertAxisTickLabelPosition"] = ApiChart.prototype.SetVertAxisTickLabelPosition;
 	ApiChart.prototype["SetHorAxisTickLabelPosition"]  = ApiChart.prototype.SetHorAxisTickLabelPosition;
 

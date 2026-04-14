@@ -8927,6 +8927,8 @@
 	ApiChart.prototype["SetLegendFontSize"]					= ApiChart.prototype.SetLegendFontSize = AscBuilder.ApiChart.prototype.SetLegendFontSize;
 	ApiChart.prototype["SetShowDataLabels"]					= ApiChart.prototype.SetShowDataLabels = AscBuilder.ApiChart.prototype.SetShowDataLabels;
 	ApiChart.prototype["SetShowPointDataLabel"]				= ApiChart.prototype.SetShowPointDataLabel = AscBuilder.ApiChart.prototype.SetShowPointDataLabel;
+	ApiChart.prototype["SetDataLabelsTextPr"]				= ApiChart.prototype.SetDataLabelsTextPr = AscBuilder.ApiChart.prototype.SetDataLabelsTextPr;
+	ApiChart.prototype["SetPointDataLabelTextPr"]			= ApiChart.prototype.SetPointDataLabelTextPr = AscBuilder.ApiChart.prototype.SetPointDataLabelTextPr;
 	ApiChart.prototype["SetVertAxisTickLabelPosition"]		= ApiChart.prototype.SetVertAxisTickLabelPosition = AscBuilder.ApiChart.prototype.SetVertAxisTickLabelPosition;
 	ApiChart.prototype["SetHorAxisTickLabelPosition"]		= ApiChart.prototype.SetHorAxisTickLabelPosition = AscBuilder.ApiChart.prototype.SetHorAxisTickLabelPosition;
 	ApiChart.prototype["SetHorAxisMajorTickMark"]			= ApiChart.prototype.SetHorAxisMajorTickMark = AscBuilder.ApiChart.prototype.SetHorAxisMajorTickMark;
