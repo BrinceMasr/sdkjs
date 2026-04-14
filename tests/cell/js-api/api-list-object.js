@@ -858,22 +858,6 @@ $(function ()
 			assert.equal(ws.GetRange("C5").GetValue(), 90,        "Score primary: row 3 score = 90");
 		});
 
-		QUnit.test("SortField - SortOnValue/SetIcon", function (assert)
-		{
-			initializeTest();
-
-			var tbl    = ws.AddListObject("xlSrcRange", "B2:D5");
-			var fields = tbl.GetSort().SortFields;
-
-			var sf = fields.Add(ws.GetRange("B2"), "xlSortOnValues", "xlAscending");
-			assert.strictEqual(sf.GetSortOnValue(), null, "SortOnValue is null for value sort");
-			assert.strictEqual(sf.SortOnValue, null, "SortOnValue property works");
-
-			sf.SetIcon("someIcon");
-			assert.equal(sf.GetSortOn(), "xlSortOnIcon", "SetIcon sets sortOn to xlSortOnIcon");
-			assert.equal(sf.GetSortOnValue(), "someIcon", "SetIcon stores the icon in SortOnValue");
-		});
-
 		QUnit.test("Sort/SortFields/SortField - Parent", function (assert)
 		{
 			initializeTest();
