@@ -2289,6 +2289,21 @@ function CDrawingDocument()
 		}
 	};
 
+	this.IsTargetOnScreen = function()
+	{
+		var wScreen = AscCommon.AscBrowser.convertToRetinaValue(this.m_oWordControl.m_oEditor.HtmlElement.width, false);
+		var hScreen = AscCommon.AscBrowser.convertToRetinaValue(this.m_oWordControl.m_oEditor.HtmlElement.height, false);
+		var targetSizePx = (this.m_dTargetSize * this.m_oWordControl.m_nZoomValue * g_dKoef_mm_to_pix / 100) >> 0;
+
+		if (this.TargetHtmlElementLeft < 0 || this.TargetHtmlElementLeft > wScreen)
+			return false;
+
+		if ((this.TargetHtmlElementTop + targetSizePx) < 0 || this.TargetHtmlElementTop > hScreen)
+			return false;
+
+		return true;
+	};
+
 	this.UpdateTarget = function (x, y, pageIndex)
 	{
 		if (this.m_oWordControl)
