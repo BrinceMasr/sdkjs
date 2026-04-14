@@ -1529,7 +1529,7 @@
 				posY = 0;
 			}
 			else if (posY > this.scrollMaxY) {
-				posY = this.this.scrollMaxY;
+				posY = this.scrollMaxY;
 			}
 			
 			if (posX < 0) {
