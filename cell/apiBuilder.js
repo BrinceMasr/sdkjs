@@ -13168,18 +13168,6 @@
 		if (name === "" || name === null || name === undefined)
 			return false
 
-		let worksheet = this.Drawing.getWorksheet();
-		let drawings = GetApiDrawings(worksheet.Drawings.map(function(drawingBase) { return drawingBase.graphicObject }));
-
-		for (let nCount = 0; nCount < drawings.length; nCount++)
-		{
-			let drawing = drawings[nCount];
-			if (drawing.Drawing.getOwnName() === name)
-			{
-				drawing.Drawing.setName("");
-				break;
-			}
-		}
 		this.Drawing.setName(name);
 		return true;
 	}
