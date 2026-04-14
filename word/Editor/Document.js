@@ -1467,6 +1467,7 @@ function CDocument(DrawingDocument, isMainLogicDocument)
 	this.PreventPreDelete          = false; // Заглушка на случай, когда удаляемые объекты, не удаляются, а переносятся
 	this.ClearNotesOnPreDelete     = true;  // Очищать ли сноски при удалении (выключаем, при сплите параграфа) // TODO: Объединить с PreventPreDelete
 	this.ForceScrollToSelectionEnd = false; // При некоторых действиях (переход стрелками), нужно переместиться к концу селекта, даже если часть селекта видна
+	this.UpdateTargetOnRecalculate = true;
 
 	this.DrawTableMode = {
 		Start  : false,
@@ -14516,6 +14517,15 @@ CDocument.prototype.Viewer_OnChangePosition = function()
 	this.TrackRevisionsManager.UpdateSelectedChangesPosition(this.Api);
 	this.MathTrackHandler.OnChangePosition();
 };
+CDocument.prototype.OnUserScroll = function()
+{
+	if (this.Api.isGroupActions())
+	{
+		this.NeedUpdateTarget = false;
+		this.UpdateTargetOnRecalculate = false;
+		this.Api.groupActionsPr.userScroll = true;
+	}
+};
 //----------------------------------------------------------------------------------------------------------------------
 // Функции для работы с секциями
 //----------------------------------------------------------------------------------------------------------------------
@@ -15045,7 +15055,7 @@ CDocument.prototype._isSelectionVisible = function()
 };
 CDocument.prototype.UpdateCursorOnRecalculate = function()
 {
-	let isLockScroll = false;
+	let isLockScroll = !this.UpdateTargetOnRecalculate;
 	if ((this.FullRecalc.Id && !this.FullRecalc.ScrollToTarget) || this.ViewPosition)
 		isLockScroll = true;
 	

@@ -14843,6 +14843,9 @@ background-repeat: no-repeat;\
 
 		if (isFullEnd)
 		{
+			logicDocument.FullRecalc.ScrollToTarget = false;
+			logicDocument.UpdateTargetOnRecalculate = true;
+			
 			logicDocument.UpdateInterface();
 			logicDocument.UpdateSelection();
 			logicDocument.GetSpellCheckManager().TurnOn();

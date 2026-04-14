@@ -6095,6 +6095,7 @@
 		this.groupActionsExecuteCounter = 0;
 		this.groupActionsPr = {};
 		this.groupActionsPr.lockScroll = !!(pr && pr["lockScroll"]);
+		this.groupActionsPr.forceLockScroll = false;
 
 		if (this.groupActionsPr.lockScroll && !this.isLockScrollToTarget)
 			this.asc_LockScrollToTarget(true);
@@ -6192,7 +6193,7 @@
 		if (this.groupActionsPr.lockScroll)
 			this.asc_LockScrollToTarget(false);
 
-		if (!pr || false !== pr["scrollToTarget"])
+		if (!pr || (false !== pr["scrollToTarget"] && true !== this.groupActionsPr.userScroll))
 			this.scrollToTarget();
 	};
 	baseEditorsApi.prototype.isGroupActions = function()

@@ -1407,7 +1407,7 @@ function CEditorPage(api)
 	{
 		if (false === oThis.m_oApi.bInit_word_control)
 			return;
-
+		
 		var oWordControl                       = oThis;
 		oWordControl.m_dScrollY                = Math.max(0, Math.min(scrollPositionY, maxY));
 		oWordControl.m_dScrollY_max            = maxY;
@@ -1472,6 +1472,12 @@ function CEditorPage(api)
 			res.Pos = this.m_dScrollY_max;
 
 		return res;
+	};
+	this.onUserScroll = function()
+	{
+		let logicDocument = this.m_oLogicDocument;
+		if (logicDocument && logicDocument.IsDocumentEditor())
+			logicDocument.OnUserScroll();
 	};
 
 	this.horizontalScroll = function(sender, scrollPositionX, maxX, isAtLeft, isAtRight)
@@ -1594,6 +1600,8 @@ function CEditorPage(api)
 			this.m_oScrollVer_.bind("scrollvertical", function(evt)
 			{
 				oThis.verticalScroll(this, evt.scrollD, evt.maxScrollY);
+				if (evt.userScroll)
+					oThis.onUserScroll();
 			});
 			this.m_oScrollVer_.bind("correctVerticalScroll", function(yPos)
 			{
@@ -2413,6 +2421,8 @@ function CEditorPage(api)
 			_ctrl = e.ctrlKey || e.metaKey;
 		else
 			_ctrl = e.ctrlKey;
+		
+		e.userScroll = true;
 
 		if (true === _ctrl)
 		{
@@ -2431,9 +2441,9 @@ function CEditorPage(api)
 		});
 
 		if (0 !== values.x)
-			oThis.m_oScrollHorApi.scrollBy(values.x, 0, false);
+			oThis.m_oScrollHorApi.scrollBy(values.x, 0, false, e);
 		if (0 !== values.y)
-			oThis.m_oScrollVerApi.scrollBy(0, values.y, false);
+			oThis.m_oScrollVerApi.scrollBy(0, values.y, false, e);
 
 		// здесь - имитируем моус мув ---------------------------
 		var _e   = {};
