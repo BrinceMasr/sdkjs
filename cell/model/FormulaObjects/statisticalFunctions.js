@@ -1486,6 +1486,12 @@ function (window, undefined) {
 					if (!_pMatY[j]) {
 						_pMatY[j] = [];
 					}
+
+					if (pMatY[i][j].type !== cElementType.number) {
+						error.push(new cError(cErrorType.wrong_value_type));
+						return false;
+					}
+
 					_pMatY[j][i] = pMatY[i][j].getValue();
 				}
 			}
@@ -1501,6 +1507,7 @@ function (window, undefined) {
 					let fVal = pMatY[i][j];
 					if (fVal <= 0.0) {
 						//PushIllegalArgument();
+						error.push(new cError(cErrorType.not_numeric));
 						return false;
 					} else {
 						if (!pNewY[j]) {
@@ -1858,34 +1865,39 @@ function (window, undefined) {
 			arg[2] = tryNumberToArray(arg[2]);
 		}
 
-		var types = [cElementType.array];
+		let types = [cElementType.array];
 		if (arg[1] && arg[1].type !== cElementType.empty) {
 			types.push(cElementType.array);
 		}
 		if (arg[2] && arg[2].type !== cElementType.empty) {
 			types.push(cElementType.array);
 		}
-		var oArguments = t._prepareArguments(arg, arguments[1], true, types);
-		var argClone = oArguments.args;
 
-		var argError;
+		let oArguments = t._prepareArguments(arg, arguments[1], true, types);
+		let argClone = oArguments.args;
+		let argError;
 		if (argError = t._checkErrorArg(argClone)) {
 			return argError;
 		}
 
-		var pMatY = argClone[0];
-		var pMatX = argClone[1];
+		let pMatY = argClone[0];
+		let pMatX = argClone[1];
 		if (pMatX && !pMatX.length && pMatX.type === cElementType.empty) {
 			pMatX = undefined;
 		}
-		var pMatNewX = argClone[2];
+		let pMatNewX = argClone[2];
 		if (pMatNewX && pMatNewX.length) {
-			var _pMatNewX = [];
-			for (var i = 0; i < pMatNewX.length; i++) {
-				for (var j = 0; j < pMatNewX[i].length; j++) {
+			let _pMatNewX = [];
+			for (let i = 0; i < pMatNewX.length; i++) {
+				for (let j = 0; j < pMatNewX[i].length; j++) {
 					if (!_pMatNewX[j]) {
 						_pMatNewX[j] = [];
 					}
+
+					if (pMatNewX[i][j] && pMatNewX[i][j].type !== cElementType.number) {
+						return new cError(cErrorType.wrong_value_type);
+					} 
+
 					_pMatNewX[j][i] = pMatNewX[i][j];
 				}
 			}
@@ -1894,8 +1906,13 @@ function (window, undefined) {
 			pMatNewX = undefined;
 		}
 
-		var bConstant = undefined !== argClone[3] ? argClone[3].tocBool().toBool() : true;
+		let arg3Temp = argClone[3] ? argClone[3].tocBool() : new cBool(true);
+		if (arg3Temp.type !== cElementType.bool) {
+			return new cError(cErrorType.wrong_value_type);
+		}
 
+		let bConstant = arg3Temp.toBool();
+		
 		return {pMatY: pMatY, pMatX: pMatX, pMatNewX: pMatNewX, bConstant: bConstant};
 	}
 

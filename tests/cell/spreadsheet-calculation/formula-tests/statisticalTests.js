@@ -20951,27 +20951,27 @@ $(function () {
 		// Case #7: Reference link. Single-cell reference for known_y\'s (array formula). 1 argument used.
 		oParser = new parserFormula('GROWTH(A100)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH(A100) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 11, 'Test: Positive case: Reference link. Single-cell reference for known_y\'s (array formula). 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(), '11', 'Test: Positive case: Reference link. Single-cell reference for known_y\'s (array formula). 1 argument used.');
 		// Case #8: Reference link, Reference link. Single-cell references for known_y\'s and known_x\'s. 2 arguments used.
 		oParser = new parserFormula('GROWTH(A100,A101)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH(A100,A101) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 11, 'Test: Positive case: Reference link, Reference link. Single-cell references for known_y\'s and known_x\'s. 2 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(), '11', 'Test: Positive case: Reference link, Reference link. Single-cell references for known_y\'s and known_x\'s. 2 arguments used.');
 		// Case #9: Name. Named range for known_y\'s. 1 argument used.
 		oParser = new parserFormula('GROWTH(TestName)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH(TestName) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Positive case: Name. Named range for known_y\'s. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Positive case: Name. Named range for known_y\'s. 1 argument used.');
 		// Case #10: Name, Name. Named ranges for known_y\'s and known_x\'s. 2 arguments used.
 		oParser = new parserFormula('GROWTH(TestName,TestName)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH(TestName,TestName) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Positive case: Name, Name. Named ranges for known_y\'s and known_x\'s. 2 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Positive case: Name, Name. Named ranges for known_y\'s and known_x\'s. 2 arguments used.');
 		// Case #11: Name3D. 3D named range for known_y\'s. 1 argument used.
 		oParser = new parserFormula('GROWTH(TestName3D)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH(TestName3D) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Positive case: Name3D. 3D named range for known_y\'s. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Positive case: Name3D. 3D named range for known_y\'s. 1 argument used.');
 		// Case #12: Name3D, Name3D. 3D named ranges for known_y\'s and known_x\'s. 2 arguments used.
 		oParser = new parserFormula('GROWTH(TestName3D,TestNameArea3D2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH(TestName3D,TestNameArea3D2) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Positive case: Name3D, Name3D. 3D named ranges for known_y\'s and known_x\'s. 2 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Positive case: Name3D, Name3D. 3D named ranges for known_y\'s and known_x\'s. 2 arguments used.');
 		// Case #13: Ref3D. 3D reference range for known_y\'s. 1 argument used.
 		oParser = new parserFormula('GROWTH(Sheet2!A1:A2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH(Sheet2!A1:A2) is parsed.');
@@ -20991,7 +20991,7 @@ $(function () {
 		// Case #17: Table. Table structured reference for known_y\'s. 1 argument used.
 		oParser = new parserFormula('GROWTH(Table1[Column1])', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH(Table1[Column1]) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 123, 'Test: Positive case: Table. Table structured reference for known_y\'s. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1.005, 'Test: Positive case: Table. Table structured reference for known_y\'s. 1 argument used.');
 		// Case #18: Table, Table. Table references for known_y\'s and known_x\'s. 2 arguments used.
 		oParser = new parserFormula('GROWTH(Table1[Column1],Table1[Column2])', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH(Table1[Column1],Table1[Column2]) is parsed.');
@@ -20999,7 +20999,7 @@ $(function () {
 		// Case #19: Formula. Nested formula in array for known_y\'s. 1 argument used.
 		oParser = new parserFormula('GROWTH(EXP(1),EXP(2))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH(EXP(1),EXP(2)) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 2.718281828, 'Test: Positive case: Formula. Nested formula in array for known_y\'s. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "2.71828", 'Test: Positive case: Formula. Nested formula in array for known_y\'s. 1 argument used.');
 		// Case #20: Formula, Formula. Nested formulas in arrays for known_y\'s and known_x\'s. 2 arguments used.
 		oParser = new parserFormula('GROWTH({2.7;7.3},{0.7;1.3})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH({2.7;7.3},{0.7;1.3}) is parsed.');
@@ -21015,11 +21015,11 @@ $(function () {
 		// Case #23: String. String array convertible to numbers for known_y\'s. 1 argument used.
 		oParser = new parserFormula('GROWTH({"2";"4"})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH({"2";"4"}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '#VALUE!', 'Test: Positive case: String. String array convertible to numbers for known_y\'s. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Positive case: String. String array convertible to numbers for known_y\'s. 1 argument used.');
 		// Case #24: Date. Date serial numbers for known_y\'s. 1 argument used.
 		oParser = new parserFormula('GROWTH(DATE(2025,1,1),DATE(2025,1,2))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH(DATE(2025,1,1),DATE(2025,1,2)) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 45658, 'Test: Positive case: Date. Date serial numbers for known_y\'s. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(), '45658', 'Test: Positive case: Date. Date serial numbers for known_y\'s. 1 argument used.');
 		// Case #25: Time. Time serial numbers for known_y\'s. 1 argument used.
 		oParser = new parserFormula('GROWTH({0.5;0.55})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH({0.5;0.55}) is parsed.');
@@ -21029,15 +21029,15 @@ $(function () {
 		// Case #1: Array. Non-positive known_y\'s returns #NUM!. 1 argument used.
 		oParser = new parserFormula('GROWTH({0;4})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH({0;4}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Array. Non-positive known_y\'s returns #NUM!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Array. Non-positive known_y\'s returns #NUM!. 1 argument used.');
 		// Case #2: Array. Single data point for known_y\'s returns #NUM!. 1 argument used.
 		oParser = new parserFormula('GROWTH({2})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH({2}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Negative case: Array. Single data point for known_y\'s returns #NUM!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Negative case: Array. Single data point for known_y\'s returns #NUM!. 1 argument used.');
 		// Case #3: String. Non-numeric string array returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('GROWTH({"abc";"def"})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH({"abc";"def"}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '#VALUE!', 'Test: Negative case: String. Non-numeric string array returns #VALUE!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String. Non-numeric string array returns #VALUE!. 1 argument used.');
 		// Case #4: Error. Error in known_y\'s propagates #N/A. 1 argument used.
 		oParser = new parserFormula('GROWTH(NA(),2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH(NA(),2) is parsed.');
@@ -21045,7 +21045,7 @@ $(function () {
 		// Case #5: Empty. Empty reference for known_y\'s returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('GROWTH(A102)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH(A102) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 13, 'Test: Negative case: Empty. Empty reference for known_y\'s returns #VALUE!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), 13, 'Test: Negative case: Empty. Empty reference for known_y\'s returns #VALUE!. 1 argument used.');
 		// Case #6: Area. Valid range but non-positive values in F1:F2 return #NUM!. 1 argument used.
 		oParser = new parserFormula('GROWTH(A100:A101)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH(A100:A101) is parsed.');
@@ -21053,15 +21053,15 @@ $(function () {
 		// Case #7: Array, Array. Mismatched array sizes for known_y\'s and known_x\'s returns #NUM!. 2 arguments used.
 		oParser = new parserFormula('GROWTH({2;4},{1})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH({2;4},{1}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Array, Array. Mismatched array sizes for known_y\'s and known_x\'s returns #NUM!. 2 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Array, Array. Mismatched array sizes for known_y\'s and known_x\'s returns #NUM!. 2 arguments used.');
 		// Case #8: Reference link. Empty single-cell reference returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('GROWTH(A102)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH(A102) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 13, 'Test: Negative case: Reference link. Empty single-cell reference returns #VALUE!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), 13, 'Test: Negative case: Reference link. Empty single-cell reference returns #VALUE!. 1 argument used.');
 		// Case #9: Area, Area. Mismatched range sizes returns #NUM!. 2 arguments used.
 		oParser = new parserFormula('GROWTH(A100:A101,A102:A102)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH(A100:A101,A102:A102) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area, Area. Mismatched range sizes returns #NUM!. 2 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area, Area. Mismatched range sizes returns #NUM!. 2 arguments used.');
 		// Case #10: Name. Named range with text returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('GROWTH(TestNameArea2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH(TestNameArea2) is parsed.');
@@ -21077,7 +21077,7 @@ $(function () {
 		// Case #13: Table. Table column with text returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('GROWTH(Table1[Column3])', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH(Table1[Column3]) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '#VALUE!', 'Test: Negative case: Table. Table column with text returns #VALUE!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Table. Table column with text returns #VALUE!. 1 argument used.');
 		// Case #14: Formula. Formula resulting in #NUM! error in known_y\'s. 1 argument used.
 		oParser = new parserFormula('GROWTH(SQRT(-1),2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH(SQRT(-1),2) is parsed.');
@@ -21089,19 +21089,19 @@ $(function () {
 		// Case #16: Array, Array, Array. Non-numeric string in new_x\'s returns #VALUE!. 3 arguments used.
 		oParser = new parserFormula('GROWTH({2;4},{1;2},{"abc"})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH({2;4},{1;2},{"abc"}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '#VALUE!', 'Test: Negative case: Array, Array, Array. Non-numeric string in new_x\'s returns #VALUE!. 3 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array, Array, Array. Non-numeric string in new_x\'s returns #VALUE!. 3 arguments used.');
 		// Case #17: Array, Array, Array, String. Non-boolean string for const returns #VALUE!. 4 arguments used.
 		oParser = new parserFormula('GROWTH({2;4},{1;2},{3;4},"abc")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH({2;4},{1;2},{3;4},"abc") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array, Array, Array, String. Non-boolean string for const returns #VALUE!. 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array, Array, Array, String. Non-boolean string for const returns #VALUE!. 4 arguments used.');
 		// Case #18: Array. Negative known_y\'s returns #NUM!. 1 argument used.
 		oParser = new parserFormula('GROWTH({-2;4})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH({-2;4}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Array. Negative known_y\'s returns #NUM!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Array. Negative known_y\'s returns #NUM!. 1 argument used.');
 		// Case #19: Array, Empty. Empty reference for known_x\'s returns #VALUE!. 2 arguments used.
 		oParser = new parserFormula('GROWTH({2;4},A102)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH({2;4},A102) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Array, Empty. Empty reference for known_x\'s returns #VALUE!. 2 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Array, Empty. Empty reference for known_x\'s returns #VALUE!. 2 arguments used.');
 		// Case #20: Array, Array, Empty. Empty reference for new_x\'s returns #VALUE!. 3 arguments used.
 		oParser = new parserFormula('GROWTH({2;4},{1;2},A102)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH({2;4},{1;2},A102) is parsed.');
@@ -21111,10 +21111,12 @@ $(function () {
 		// Case #1: Array. Smallest positive number in known_y\'s. 1 argument used.
 		oParser = new parserFormula('GROWTH({1E-307;2})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH({1E-307;2}) is parsed.');
+		// todo the algorithm produces incorrect results when calculating numbers in an array less than 1E-152
 		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0, 'Test: Bounded case: Array. Smallest positive number in known_y\'s. 1 argument used.');
 		// Case #2: Array, Array. Maximum valid Excel number in known_y\'s. 2 arguments used.
 		oParser = new parserFormula('GROWTH({1.7976931348623157E+307;2},{1;2})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH({1.7976931348623157E+307;2},{1;2}) is parsed.');
+		// todo the algorithm produces incorrect results when calculating numbers in an array less than 1E-152
 		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '#NUM!', 'Test: Bounded case: Array, Array. Maximum valid Excel number in known_y\'s. 2 arguments used.');
 		// Case #3: Array, Array, Array. Maximum valid Excel number in new_x\'s. 3 arguments used.
 		oParser = new parserFormula('GROWTH({2;4},{1;2},{1.7976931348623157E+307;2})', 'A2', ws);
@@ -21123,30 +21125,14 @@ $(function () {
 		// Case #4: Array, Array. Smallest positive numbers in known_y\'s and known_x\'s. 2 arguments used.
 		oParser = new parserFormula('GROWTH({1E-307;2},{1E-307;2})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH({1E-307;2},{1E-307;2}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1e-307, 'Test: Bounded case: Array, Array. Smallest positive numbers in known_y\'s and known_x\'s. 2 arguments used.');
-
-		// TODO many problems in this formula (critical in tests but can be done in app)
-		// Need to fix: error types difference, arguments types handle, boundary case problem, ms result diff
-		// Case #7: Reference link. Single-cell reference for known_y\'s (array formula). 1 argument used.
-		// Case #8: Reference link, Reference link. Single-cell references for known_y\'s and known_x\'s. 2 arguments used.
-		// Case #9: Name. Named range for known_y\'s. 1 argument used.
-		// Case #10: Name, Name. Named ranges for known_y\'s and known_x\'s. 2 arguments used.
-		// Case #12: Name3D, Name3D. 3D named ranges for known_y\'s and known_x\'s. 2 arguments used.
-		// Case #17: Table. Table structured reference for known_y\'s. 1 argument used.
-		// Case #19: Formula. Nested formula in array for known_y\'s. 1 argument used.
-		// Case #23: String. String array convertible to numbers for known_y\'s. 1 argument used.
-		// Case #24: Date. Date serial numbers for known_y\'s. 1 argument used.
-		// Case #1: Array. Non-positive known_y\'s returns #NUM!. 1 argument used.
-		// Case #2: Array. Single data point for known_y\'s returns #NUM!. 1 argument used.
-		// Case #3: String. Non-numeric string array returns #VALUE!. 1 argument used.
-		// Case #5: Empty. Empty reference for known_y\'s returns #VALUE!. 1 argument used.
-		// Case #7: Array, Array. Mismatched array sizes for known_y\'s and known_x\'s returns #NUM!. 2 arguments used.
-		// Case #9: Area, Area. Mismatched range sizes returns #NUM!. 2 arguments used.
-		// Case #8: Reference link. Empty single-cell reference returns #VALUE!. 1 argument used.
-		// Case #16: Array, Array, Array. Non-numeric string in new_x\'s returns #VALUE!. 3 arguments used.
-		// !Case #17: Array, Array, Array, String. Non-boolean string for const returns #VALUE!. 4 arguments used. - critical in tests
-		// Case #18: Array. Negative known_y\'s returns #NUM!. 1 argument used.
-		// Case #19: Array, Empty. Empty reference for known_x\'s returns #VALUE!. 2 arguments used.
+		// js precision problem
+		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1.0120E-307, 'Test: Bounded case: Array, Array. Smallest positive numbers in known_y\'s and known_x\'s. 2 arguments used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1,0).getValue().toFixed(), "2", 'Test: Bounded case: Array, Array. Smallest positive numbers in known_y\'s and known_x\'s. 2 arguments used.');
+		// Case #5: Array. Small positive numbers in known_y\'s. 1 arguments used.
+		oParser = new parserFormula('GROWTH({1E-30;2})', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: GROWTH({1E-30;2}) is parsed.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1.0000000000000024e-30, 'Test: Bounded case: Array. Small positive numbers in known_y\'s. 1 arguments used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1,0).getValue().toFixed(), '2', 'Test: Bounded case: Array. Small positive numbers in known_y\'s. 1 arguments used.');
 
 
 		ws.getRange2("A200").setValue("1");
