@@ -318,7 +318,6 @@ function CTransitionAnimation(htmlpage)
         {
             if (this.CheckWebGLSupport() && typeof AscCommonSlide.CTransitionGL !== "undefined")
             {
-                console.log('[Transition] WebGL path for type=' + nType);
                 this._startGL(nType);
                 return;
             }
@@ -361,18 +360,11 @@ function CTransitionAnimation(htmlpage)
             case c_oAscSlideTransitionTypes.Cut:
                 this._startCut();
                 break;
-            case c_oAscSlideTransitionTypes.Blinds:
-                this._startBlinds();
-                break;
-            case c_oAscSlideTransitionTypes.Checker:
-                this._startChecker();
-                break;
             case c_oAscSlideTransitionTypes.Comb:
                 this._startComb();
                 break;
-            // Circle, Diamond, Plus, RandomBar, Dissolve, Pan, Glitter,
-            // Flythrough, Flash, Shred, Reveal, Honeycomb
-            // are now handled by WebGL (routed before this switch)
+			// Other transitions (like Glitter and Conveyor)
+			// are now handled by WebGL (routed before this switch)
             default:
                 this.End(true);
                 break;
@@ -2831,7 +2823,7 @@ function CTransitionAnimation(htmlpage)
             }
 
             oThis.SetBaseTransform();
-            let _part = oThis._getPart();
+            let _part = oThis._getLinearPart();
 
             oThis.GLTransition.Render(_savedType, _savedParam, _part);
 
@@ -2962,57 +2954,6 @@ function CTransitionAnimation(htmlpage)
     };
 
     // ============================================================
-    // 2D transitions: Blinds
-    // ============================================================
-    this._startBlinds = function()
-    {
-        oThis.CurrentTime = new Date().getTime();
-        if (oThis.CurrentTime >= oThis.EndTime) { oThis.End(false); return; }
-        oThis.SetBaseTransform();
-
-        if (oThis.TimerId === null)
-        {
-            oThis.Params = { count: 12 };
-            oThis._initFirstFrame2D();
-        }
-
-        let _ctx2 = oThis._getOverlayCtx();
-        let _xDst = oThis.Rect.x, _yDst = oThis.Rect.y, _wDst = oThis.Rect.w, _hDst = oThis.Rect.h;
-        let _part = oThis._getPart();
-        let n = oThis.Params.count;
-
-        _ctx2.save();
-        _ctx2.beginPath();
-
-        if (oThis.Param === c_oAscSlideTransitionParams.Blinds_Vertical)
-        {
-            let stripW = _wDst / n;
-            for (let i = 0; i < n; i++)
-            {
-                let openW = stripW * _part;
-                _ctx2.rect(_xDst + i * stripW, _yDst, openW, _hDst);
-            }
-        }
-        else
-        {
-            let stripH = _hDst / n;
-            for (let i = 0; i < n; i++)
-            {
-                let openH = stripH * _part;
-                _ctx2.rect(_xDst, _yDst + i * stripH, _wDst, openH);
-            }
-        }
-
-        _ctx2.clip();
-        if (null != oThis.CacheImage2.Image)
-            _ctx2.drawImage(oThis.CacheImage2.Image, _xDst, _yDst, _wDst, _hDst);
-        _ctx2.restore();
-
-        oThis.TimerId = __nextFrame(oThis._startBlinds);
-        oThis.OnAfterAnimationDraw();
-    };
-
-    // ============================================================
     // 2D transitions: Comb
     // ============================================================
     this._startComb = function()
@@ -3078,148 +3019,16 @@ function CTransitionAnimation(htmlpage)
         oThis.OnAfterAnimationDraw();
     };
 
-    // ============================================================
-    // 2D transitions: Checker
-    // ============================================================
-    this._startChecker = function()
-    {
-        oThis.CurrentTime = new Date().getTime();
-        if (oThis.CurrentTime >= oThis.EndTime) { oThis.End(false); return; }
-        oThis.SetBaseTransform();
+	this._getLinearPart = function () {
+		const part = (oThis.CurrentTime - oThis.StartTime) / oThis.Duration;
+		return oThis.IsBackward ? 1 - part : part;
+	};
 
-        if (oThis.TimerId === null)
-        {
-            oThis.Params = { cols: 10, rows: 8 };
-            oThis._initFirstFrame2D();
-        }
-
-        let _ctx2 = oThis._getOverlayCtx();
-        let _xDst = oThis.Rect.x, _yDst = oThis.Rect.y, _wDst = oThis.Rect.w, _hDst = oThis.Rect.h;
-        let _part = oThis._getPart();
-        let cols = oThis.Params.cols, rows = oThis.Params.rows;
-        let cellW = _wDst / cols, cellH = _hDst / rows;
-        let isVert = (oThis.Param === c_oAscSlideTransitionParams.Checker_Vertical);
-
-        _ctx2.save();
-        _ctx2.beginPath();
-
-        for (let r = 0; r < rows; r++)
-        {
-            for (let c = 0; c < cols; c++)
-            {
-                let even = ((r + c) % 2 === 0);
-                let cx = _xDst + c * cellW;
-                let cy = _yDst + r * cellH;
-                if (isVert)
-                {
-                    let openH = cellH * _part;
-                    let startY = even ? cy : cy + cellH - openH;
-                    _ctx2.rect(cx, startY, cellW + 1, openH + 1);
-                }
-                else
-                {
-                    let openW = cellW * _part;
-                    let startX = even ? cx : cx + cellW - openW;
-                    _ctx2.rect(startX, cy, openW + 1, cellH + 1);
-                }
-            }
-        }
-
-        _ctx2.clip();
-        if (null != oThis.CacheImage2.Image)
-            _ctx2.drawImage(oThis.CacheImage2.Image, _xDst, _yDst, _wDst, _hDst);
-        _ctx2.restore();
-
-        oThis.TimerId = __nextFrame(oThis._startChecker);
-        oThis.OnAfterAnimationDraw();
-    };
-
-    // ============================================================
-    // 2D transitions: Honeycomb
-    // ============================================================
-    this._startHoneycomb = function()
-    {
-        oThis.CurrentTime = new Date().getTime();
-        if (oThis.CurrentTime >= oThis.EndTime) { oThis.End(false); return; }
-        oThis.SetBaseTransform();
-
-        if (oThis.TimerId === null)
-        {
-            // Generate hexagonal grid
-            let hexR = 40; // hex radius in pixels
-            let hexW = hexR * Math.sqrt(3);
-            let hexH = hexR * 2;
-            let _wDst = oThis.Rect.w, _hDst = oThis.Rect.h;
-            let cols = Math.ceil(_wDst / hexW) + 2;
-            let rows = Math.ceil(_hDst / (hexH * 0.75)) + 2;
-            let hexes = [];
-            for (let r = 0; r < rows; r++)
-            {
-                for (let c = 0; c < cols; c++)
-                {
-                    let cx = c * hexW + (r % 2) * hexW / 2;
-                    let cy = r * hexH * 0.75;
-                    hexes.push({ cx: cx, cy: cy });
-                }
-            }
-            // Random order
-            for (let i = hexes.length - 1; i > 0; i--)
-            {
-                let j = (Math.random() * (i + 1)) >> 0;
-                let tmp = hexes[i]; hexes[i] = hexes[j]; hexes[j] = tmp;
-            }
-            oThis.Params = { hexes: hexes, hexR: hexR };
-            oThis._initFirstFrame2D();
-        }
-
-        let _ctx2 = oThis._getOverlayCtx();
-        let _xDst = oThis.Rect.x, _yDst = oThis.Rect.y, _wDst = oThis.Rect.w, _hDst = oThis.Rect.h;
-        let _part = oThis._getPart();
-
-        let hexes = oThis.Params.hexes;
-        let hexR = oThis.Params.hexR;
-        let revealCount = Math.min(hexes.length, Math.ceil(_part * hexes.length));
-
-        _ctx2.save();
-        _ctx2.beginPath();
-        for (let k = 0; k < revealCount; k++)
-        {
-            let h = hexes[k];
-            let cx = _xDst + h.cx, cy = _yDst + h.cy;
-            // Draw hexagon path
-            for (let a = 0; a < 6; a++)
-            {
-                let angle = Math.PI / 3 * a - Math.PI / 6;
-                let px = cx + hexR * Math.cos(angle);
-                let py = cy + hexR * Math.sin(angle);
-                if (a === 0) _ctx2.moveTo(px, py);
-                else _ctx2.lineTo(px, py);
-            }
-            _ctx2.closePath();
-        }
-        _ctx2.clip();
-        if (null != oThis.CacheImage2.Image)
-            _ctx2.drawImage(oThis.CacheImage2.Image, _xDst, _yDst, _wDst, _hDst);
-        _ctx2.restore();
-
-        oThis.TimerId = __nextFrame(oThis._startHoneycomb);
-        oThis.OnAfterAnimationDraw();
-    };
-
-    this._easeFunction = function(t)
-    {
-        let dT = (1 - t);
-        return 1 - dT*dT*dT;
-    };
-
-    this._getPart = function()
-    {
-        let _part = (oThis.CurrentTime - oThis.StartTime) / oThis.Duration;
-        _part = oThis._easeFunction(_part);
-        if (oThis.IsBackward)
-            _part = 1 - _part;
-        return _part;
-    };
+	this._getPart = function () {
+		const part = (oThis.CurrentTime - oThis.StartTime) / oThis.Duration;
+		const easedPart = easeOutCubic(part);
+		return oThis.IsBackward ? 1 - easedPart : easedPart;
+	};
 }
 
 function CGIFTimer(demoManager)
@@ -5149,3 +4958,10 @@ function CDemonstrationManager(htmlpage)
 		}
     };
 }
+
+function easeOutCubic(t) {
+	return 1 - Math.pow(1 - t, 3);
+}
+
+window['AscCommonSlide'] = window['AscCommonSlide'] || {};
+window['AscCommonSlide'].easeOutCubic = easeOutCubic;

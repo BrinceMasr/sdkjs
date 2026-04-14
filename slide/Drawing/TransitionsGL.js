@@ -41,6 +41,7 @@
 
     var c_oAscSlideTransitionTypes = Asc.c_oAscSlideTransitionTypes;
     var c_oAscSlideTransitionParams = Asc.c_oAscSlideTransitionParams;
+	const easeOutCubic = AscCommonSlide.easeOutCubic;
 
     // ---- WebGL transition type lookup ----
 
@@ -714,6 +715,7 @@
 
     CTransitionGL.prototype._renderCrossfade = function(progress)
     {
+		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['crossfade'];
         if (!prog) return;
@@ -790,6 +792,7 @@
 
     CTransitionGL.prototype._renderFlip = function(progress, param)
     {
+		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['flip3d'];
         if (!prog) return;
@@ -931,6 +934,7 @@
 
     CTransitionGL.prototype._renderDoors = function(progress, param, isWindow)
     {
+		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['flip3d'];
         if (!prog) return;
@@ -1055,6 +1059,7 @@
 
     CTransitionGL.prototype._renderSwitch = function(progress, param)
     {
+		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['flip3d'];
         if (!prog) return;
@@ -1185,6 +1190,7 @@
 
     CTransitionGL.prototype._renderGallery = function(progress, param)
     {
+		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['flip3d'];
         let reflProg = this.programs['galleryRefl'];
@@ -1306,6 +1312,7 @@
 
     CTransitionGL.prototype._renderRipple = function(progress, param)
     {
+		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['ripple'];
         if (!prog) return;
@@ -1348,6 +1355,7 @@
 
     CTransitionGL.prototype._renderFerris = function(progress, param)
     {
+		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['flip3d'];
         if (!prog) return;
@@ -1435,6 +1443,7 @@
 
     CTransitionGL.prototype._renderPrism = function(progress, param)
     {
+		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['flip3d'];
         if (!prog) return;
@@ -1742,6 +1751,7 @@
 
     CTransitionGL.prototype._renderVortex = function(progress, param)
     {
+		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['vortexScatter'];
         if (!prog) return;
@@ -1865,6 +1875,7 @@
 
     CTransitionGL.prototype._renderCircle = function(progress)
     {
+		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['circle'];
         if (!prog) return;
@@ -1916,6 +1927,7 @@
 
     CTransitionGL.prototype._renderDiamond = function(progress)
     {
+		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['diamond'];
         if (!prog) return;
@@ -1967,6 +1979,7 @@
 
     CTransitionGL.prototype._renderPlus = function(progress)
     {
+		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['plus'];
         if (!prog) return;
@@ -2025,6 +2038,7 @@
 
     CTransitionGL.prototype._renderBoxZoom = function(progress, param)
     {
+		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['boxzoom'];
         if (!prog) return;
@@ -2087,6 +2101,7 @@
 
     CTransitionGL.prototype._renderRandomBar = function(progress, param)
     {
+		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['randombar'];
         if (!prog) return;
@@ -2140,6 +2155,7 @@
 
     CTransitionGL.prototype._renderDissolve = function(progress)
     {
+		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['dissolve'];
         if (!prog) return;
@@ -2358,6 +2374,7 @@
 
     CTransitionGL.prototype._renderHoneycomb = function(progress)
     {
+		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['honeycomb'];
         let flatProg = this.programs['flip3d'];
@@ -2708,6 +2725,7 @@
 
     CTransitionGL.prototype._renderBlinds = function(progress, param)
     {
+		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['blindsPrism'];
         if (!prog) return;
@@ -2976,6 +2994,7 @@
 
     CTransitionGL.prototype._renderChecker = function(progress, param)
     {
+		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['checkerPlate'];
         if (!prog) return;
@@ -3045,6 +3064,8 @@
 	};
 
 	CTransitionGL.prototype._renderFlash = function (progress) {
+		progress = easeOutCubic(progress);
+
 		const programInfo = this.programs['flash'];
 		if (!programInfo) {
 			return;
@@ -3099,6 +3120,8 @@
 	};
 
 	CTransitionGL.prototype._renderPan = function (progress, param) {
+		progress = easeOutCubic(progress);
+
 		const programInfo = this.programs['pan'];
 		if (!programInfo) {
 			return;
@@ -3160,8 +3183,8 @@
 		const clampedProgress = Math.max(0, Math.min(progress, 1.0));
 
 		// Three phases: move away with rotation, slide, move closer with rotation reset
-		const pullBackEnd = 19.0 / 27.0; // ease-out(1/3)
-		const slideEnd = 26.0 / 27.0; // ease-out(2/3)
+		const pullBackEnd = 1 / 3;
+		const slideEnd = 2 / 3;
 
 		let awayProgress = Math.min(clampedProgress / pullBackEnd, 1.0);
 		awayProgress = awayProgress * awayProgress * (3.0 - 2.0 * awayProgress);
@@ -3249,6 +3272,8 @@
 	};
 
 	CTransitionGL.prototype._renderReveal = function (progress, param) {
+		progress = easeOutCubic(progress);
+
 		const programInfo = this.programs['reveal'];
 		if (!programInfo) {
 			return;
@@ -3352,6 +3377,8 @@
 	};
 
 	CTransitionGL.prototype._renderFlythrough = function (progress, param) {
+		progress = easeOutCubic(progress);
+
 		const programInfo = this.programs['flythrough'];
 		if (!programInfo) {
 			return;
@@ -3605,8 +3632,12 @@
 	};
 
 	CTransitionGL.prototype._renderGlitter = function (progress, param) {
+		progress = easeOutCubic(progress);
+
 		const programInfo = this.programs['glitter'];
-		if (!programInfo) return;
+		if (!programInfo) {
+			return;
+		}
 
 		const isDiamond = (
 			param === c_oAscSlideTransitionParams.Glitter_Left_Diamond ||
@@ -3909,6 +3940,8 @@
 	};
 
 	CTransitionGL.prototype._renderShred = function (progress, param) {
+		progress = easeOutCubic(progress);
+
 		const programInfo = this.programs['shred'];
 		if (!programInfo) {
 			return;
