@@ -10361,7 +10361,7 @@
 	 */
 	ApiRange.prototype.GetFormula = function () {
 		if (this.range.isFormula())
-			return "= " + this.range.getFormula();
+			return "=" + this.range.getFormula();
 		else
 			return this.GetValue2();
 	};
