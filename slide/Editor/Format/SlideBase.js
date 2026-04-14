@@ -104,18 +104,6 @@
 	SlideBase.prototype.convertPixToMM = function(pix) {
 		return editor.WordControl.m_oDrawingDocument.GetMMPerDot(pix);
 	};
-	//todo
-	SlideBase.prototype.shapeAdd = function(pos, item) {
-		let pos_ = pos;
-		if (!AscFormat.isRealNumber(pos)) {
-			pos_ = this.cSld.spTree.length;
-		}
-		this.checkDrawingUniNvPr(item);
-		AscCommon.History.Add(new AscDFH.CChangesDrawingsContent(this, AscDFH.historyitem_SlideLayoutAddToSpTree, pos_, [item], true));
-		this.cSld.spTree.splice(pos_, 0, item);
-		item.setParent2(this);
-		this.recalcInfo.recalculateSpTree = true;
-	};
 
 	//todo check slides methods
 	SlideBase.prototype.changeSize = function(width, height) {

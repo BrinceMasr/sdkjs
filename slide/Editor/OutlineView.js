@@ -47,6 +47,22 @@
 	OutlineSlide.prototype.addContent = function (pr) {
 		this.content.push(pr);
 	};
+	OutlineSlide.prototype.forEachShape = function (callback) {
+		let res = null;
+		if (this.title) {
+			res = callback(this.title);
+			if (res) {
+				return res;
+			}
+		}
+		for (let i = 0; i < this.content.length; i += 1) {
+			res = callback(this.content[i]);
+			if (res) {
+				return res;
+			}
+		}
+		return res;
+	};
 	function SavedPosition(startPos, endPos) {
 		this.startPos = startPos || null;
 		this.endPos = endPos || null;
@@ -548,8 +564,55 @@
 		}
 		return selectedParagraphs;
 	};
+	OutlineView.prototype.checkRemoveEdgeContents = function (firstContent, lastContent) {
+		if (firstContent && lastContent) {
+			const firstShape = firstContent.Is_DrawingShape(true);
+			const lastShape = lastContent.Is_DrawingShape(true);
+			const firstSlide = firstShape.parent;
+			const lastSlide = lastShape.parent;
+
+			const firstContentParagraph = firstContent.Content[firstContent.Content.length - 1];
+			firstContentParagraph.Concat(lastContent.Content[0]);
+			let isSaveLastShape = true;
+			if (firstShape.isOutlineTitlePlaceholder()) {
+				if (lastContent.Content.length === 1) {
+					isSaveLastShape = false;
+				} else {
+					lastContent.Remove_FromContent(0, 1);
+				}
+			} else {
+				for (let i = 1; i < lastContent.Content.length; i += 1) {
+					firstContent.Add_ToContent(firstContent.Content.length, lastContent.Content[i].Copy(firstContent));
+				}
+				isSaveLastShape = false;
+			}
+
+
+			if (firstSlide !== lastSlide) {
+				const outlineSlide = lastSlide.getOutlineSlide();
+				let isLastShapeChecked = false;
+				outlineSlide.forEachShape(function (shape) {
+					if (isLastShapeChecked) {
+						const copyShape = shape.copy();
+						copyShape.setBDeleted(false);
+						copyShape.setParent(firstSlide);
+						copyShape.addToDrawingObjects(firstSlide.cSld.spTree.length);
+						shape.deleteDrawingBase();
+					} else {
+						isLastShapeChecked = shape === lastShape;
+					}
+				});
+				if (!isSaveLastShape) {
+					lastShape.deleteDrawingBase();
+				}
+			}
+		}
+	};
 	OutlineView.prototype.remove = function (bOnAddText) {
 		const checkSlidesForRemove = {};
+		let firstContent = null;
+		let lastContent = null;
+		const oThis = this;
 		this.forEachSelectedContent(function (content, idx, count) {
 			if (content.IsSelectedAll()) {
 				const shape = content.Is_DrawingShape(true);
@@ -557,10 +620,19 @@
 				const slideNum = slide.num;
 				checkSlidesForRemove[slideNum] = slide;
 				shape.deleteDrawingBase();
-			} else if (count === 1) {
+				content.RemoveSelection();
+			} else {
 				content.Remove(1, true, false, bOnAddText);
+				if (idx === 0) {
+					firstContent = content;
+				} else if (idx === count - 1) {
+					lastContent = content;
+				}
 			}
+			// oThis.savePositionAfterEdit(content, idx, count);
 		});
+		this.getDocContent().RemoveSelection()
+		this.checkRemoveEdgeContents(firstContent, lastContent);
 		const slideNumbers = Object.keys(checkSlidesForRemove).map(function (num) {
 			return parseInt(num, 10);
 		}).sort(function (a, b) {
@@ -572,9 +644,10 @@
 			const slide = checkSlidesForRemove[slideNum];
 			if (!slide.isHaveOutlineShapes()) {
 				presentation.removeSlideByObject(slide, true, slideNum);
-				presentation.DrawingDocument.m_oWordControl.GoToPage(presentation.GetSlidesCount() - 1, undefined, undefined, true);
 			}
 		}
+		const minSlideIndex = slideNumbers[slideNumbers.length - 1] || 0;
+		presentation.DrawingDocument.m_oWordControl.GoToPage(Math.min(presentation.GetSlidesCount() - 1, minSlideIndex), undefined, undefined, true);
 	};
 	OutlineView.prototype.savePositionAfterEdit = function (content, idx, count) {
 		if (count === 1) {
@@ -594,7 +667,7 @@
 						} else {
 							savedPosition.startPos = content.GetContentPosition(true, true);
 						}
-					} else {
+					} else if (!savedPosition.startPos) {
 						savedPosition.startPos = content.GetContentPosition(false, false);
 					}
 
@@ -606,7 +679,7 @@
 						} else {
 							savedPosition.endPos = content.GetContentPosition(true, false);
 						}
-					} else {
+					} else if (!savedPosition.startPos) {
 						savedPosition.startPos = content.GetContentPosition(false, false);
 					}
 
@@ -1066,8 +1139,11 @@
 		const docContent = this.getDocContent();
 		if (docContent) {
 			const paragraph = this.getTitleSlideParagraph(pageNum);
-			paragraph.MoveCursorToStartPos();
-			paragraph.SetThisElementCurrent();
+			if (paragraph) {
+				paragraph.MoveCursorToStartPos();
+				paragraph.SetThisElementCurrent();
+			}
+
 			this.updateSelectionState();
 		}
 	};
