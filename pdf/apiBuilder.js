@@ -2622,6 +2622,7 @@
 	/**
 	 * Class representing a text field widget.
 	 * @constructor
+	 * @extends {ApiBaseWidget}
 	 * @typeofeditors ["PDFE"]
 	 */
 	function ApiTextWidget(oField) {
@@ -3307,6 +3308,7 @@
 	/**
 	 * Class representing a checkbox field widget.
 	 * @constructor
+	 * @extends {ApiBaseWidget}
 	 * @typeofeditors ["PDFE"]
 	 */
 	function ApiCheckboxWidget(oField) {
@@ -6721,6 +6723,7 @@
 	/**
 	 * Class representing a shape.
 	 * @constructor
+	 * @extends {ApiDrawing}
 	 */
 	function ApiShape(oShape) {
 		ApiDrawing.call(this, oShape);
@@ -6906,6 +6909,7 @@
 	/**
 	 * Class representing an image.
 	 * @constructor
+	 * @extends {ApiDrawing}
 	 */
 	function ApiImage(oImage) {
 		ApiDrawing.call(this, oImage);
@@ -6933,6 +6937,7 @@
 	 * Class representing a table.
 	 * @param oGraphicFrame
 	 * @constructor
+	 * @extends {ApiDrawing}
 	 */
 	function ApiTable(oGraphicFrame) {
 		this.Table = oGraphicFrame.graphicObject;
@@ -7639,6 +7644,11 @@
 	//
 	//------------------------------------------------------------------------------------------------------------------
 
+	/**
+	 * Class representing a chart.
+	 * @constructor
+	 * @extends {ApiDrawing}
+	 */
 	function ApiChart(Chart) {
 		ApiDrawing.call(this, Chart);
 		this.Chart = Chart;
@@ -7655,6 +7665,7 @@
 	/**
 	 * Class representing a group of drawings.
 	 * @constructor
+	 * @extends {ApiDrawing}
 	 */
 	function ApiGroup(oGroup) {
 		ApiDrawing.call(this, oGroup);
@@ -7682,6 +7693,7 @@
 	/**
 	 * Class representing a group of drawings.
 	 * @constructor
+	 * @extends {ApiDrawing}
 	 */
 	function ApiSmartArt(oGroup) {
 		ApiDrawing.call(this, oGroup);

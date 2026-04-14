@@ -175,6 +175,7 @@
 	/**
 	 * Class representing a shape.
 	 * @constructor
+	 * @extends ApiDrawing
 	 */
 	function ApiShape(oShape) {
 		ApiDrawing.call(this, oShape);
@@ -187,6 +188,7 @@
 	/**
 	 * Class representing an image.
 	 * @constructor
+	 * @extends ApiDrawing
 	 */
 	function ApiImage(oImage) {
 		ApiDrawing.call(this, oImage);
@@ -198,6 +200,7 @@
 	/**
 	 * Class representing an OLE object.
 	 * @constructor
+	 * @extends ApiDrawing
 	 */
 	function ApiOleObject(OleObject) {
 		ApiDrawing.call(this, OleObject);
@@ -13270,6 +13273,7 @@
 	/**
 	 * Class representing a group of drawings.
 	 * @constructor
+	 * @extends ApiDrawing
 	 */
 	function ApiGroup(oGroup) {
 		ApiDrawing.call(this, oGroup);
@@ -13297,6 +13301,7 @@
 	/**
 	 * Class representing a smart art.
 	 * @constructor
+	 * @extends ApiDrawing
 	 */
 	function ApiSmartArt(oGroup){
 		ApiDrawing.call(this, oGroup);
@@ -13560,6 +13565,7 @@
 	/**
 	 * Class representing a chart.
 	 * @constructor
+	 * @extends ApiDrawing
 	 */
 	function ApiChart(Chart) {
 		ApiDrawing.call(this, Chart);

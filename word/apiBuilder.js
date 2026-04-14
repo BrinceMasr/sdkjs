@@ -3663,6 +3663,7 @@
 	/**
 	 * Class representing an image.
 	 * @constructor
+	 * @extends {ApiDrawing}
 	 */
 	function ApiImage(Image)
 	{
@@ -3675,6 +3676,7 @@
 	/**
 	 * Class representing an Ole object.
 	 * @constructor
+	 * @extends {ApiDrawing}
 	 */
 	function ApiOleObject(OleObject)
 	{
@@ -3687,6 +3689,7 @@
 	/**
 	 * Class representing a shape.
 	 * @constructor
+	 * @extends {ApiDrawing}
 	 */
 	function ApiShape(Shape)
 	{
@@ -3699,6 +3702,7 @@
 	/**
 	 * Class representing a chart.
 	 * @constructor
+	 * @extends {ApiDrawing}
 	 *
 	 */
 	function ApiChart(Chart)
@@ -3712,6 +3716,7 @@
 	/**
 	 * Class representing a group of drawings.
 	 * @constructor
+	 * @extends {ApiDrawing}
 	 */
 	function ApiGroup(oGroup){
 		ApiDrawing.call(this, oGroup);
@@ -3767,6 +3772,7 @@
 	/**
 	 * Class representing an RGB Color.
 	 * @constructor
+	 * @extends {ApiUniColor}
 	 */
 	function ApiRGBColor(r, g, b)
 	{
@@ -3778,6 +3784,7 @@
 	/**
 	 * Class representing a Scheme Color.
 	 * @constructor
+	 * @extends {ApiUniColor}
 	 */
 	function ApiSchemeColor(sColorId)
 	{
@@ -3809,6 +3816,7 @@
 	/**
 	 * Class representing a Preset Color.
 	 * @constructor
+	 * @extends {ApiUniColor}
 	 */
 	function ApiPresetColor(sPresetColor)
 	{
@@ -21682,6 +21690,7 @@
 	/**
 	 * Class representing a smart art.
 	 * @constructor
+	 * @extends {ApiDrawing}
 	 */
 	function ApiSmartArt(oGroup){
 		ApiDrawing.call(this, oGroup);
@@ -30807,6 +30816,7 @@
 	 * @param oApiRange
 	 * @param oTextPr
 	 * @constructor
+	 * @extends {ApiTextPr}
 	 */
 	function ApiRangeTextPr(oApiRange, oTextPr)
 	{
