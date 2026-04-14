@@ -1326,6 +1326,88 @@ $(function ()
 			assert.equal(tbl.GetListRows().length, 3, "Table has 3 data rows after append");
 		});
 
+		QUnit.test("AddListRow - bAlwaysInsert=false", function (assert)
+		{
+			var tbl;
+
+			// 1) empty below, no totals → expand without shift
+			initializeTest();
+			ws.GetRange("A1:A10").ClearContents();
+			ws.GetRange("A1").SetValue("Name");
+			ws.GetRange("A2").SetValue("Alice");
+			ws.GetRange("A3").SetValue("Bob");
+			ws.GetRange("A5").SetValue("sentinel");
+			tbl = ws.AddListObject("xlSrcRange", "A1:A3");
+
+			tbl.AddListRow(undefined, false);
+			assert.equal(tbl.GetListRows().length, 3, "empty below: 3 data rows");
+			assert.equal(tbl.GetRange().GetAddress(true, true), "$A$1:$A$4", "empty below: table expanded to A1:A4");
+			assert.equal(ws.GetRange("A5").GetValue(), "sentinel", "empty below: sentinel stayed at A5");
+
+			// 2) data below → fallback to shift
+			initializeTest();
+			ws.GetRange("A1:A10").ClearContents();
+			ws.GetRange("A1").SetValue("Name");
+			ws.GetRange("A2").SetValue("Alice");
+			ws.GetRange("A3").SetValue("Bob");
+			ws.GetRange("A4").SetValue("blocker");
+			tbl = ws.AddListObject("xlSrcRange", "A1:A3");
+
+			tbl.AddListRow(undefined, false);
+			assert.equal(tbl.GetListRows().length, 3, "data below: 3 data rows");
+			assert.equal(tbl.GetRange().GetAddress(true, true), "$A$1:$A$4", "data below: table expanded to A1:A4");
+			assert.equal(ws.GetRange("A5").GetValue(), "blocker", "data below: blocker shifted to A5");
+
+			// 3) with totals, empty below → expand without shift
+			initializeTest();
+			ws.GetRange("A1:A10").ClearContents();
+			ws.GetRange("A1").SetValue("Name");
+			ws.GetRange("A2").SetValue("Alice");
+			ws.GetRange("A3").SetValue("Bob");
+			tbl = ws.AddListObject("xlSrcRange", "A1:A3");
+			tbl.SetShowTotals(true);
+			ws.GetRange("A6").SetValue("sentinel");
+
+			tbl.AddListRow(undefined, false);
+			assert.equal(tbl.GetListRows().length, 3, "totals + empty below: 3 data rows");
+			assert.equal(tbl.GetRange().GetAddress(true, true), "$A$1:$A$5", "totals + empty below: table expanded to A1:A5");
+			assert.equal(tbl.GetTotalsRowRange().GetAddress(true, true), "$A$5", "totals + empty below: totals moved to A5");
+			assert.equal(ws.GetRange("A6").GetValue(), "sentinel", "totals + empty below: sentinel stayed at A6");
+
+			// 4) with totals, data below → fallback to shift
+			initializeTest();
+			ws.GetRange("A1:A10").ClearContents();
+			ws.GetRange("A1").SetValue("Name");
+			ws.GetRange("A2").SetValue("Alice");
+			ws.GetRange("A3").SetValue("Bob");
+			tbl = ws.AddListObject("xlSrcRange", "A1:A3");
+			tbl.SetShowTotals(true);
+			ws.GetRange("A5").SetValue("blocker");
+
+			tbl.AddListRow(undefined, false);
+			assert.equal(tbl.GetListRows().length, 3, "totals + data below: 3 data rows");
+			assert.equal(tbl.GetTotalsRowRange().GetAddress(true, true), "$A$5", "totals + data below: totals moved to A5");
+			assert.equal(ws.GetRange("A6").GetValue(), "blocker", "totals + data below: blocker shifted to A6");
+
+			// 5) insert in middle, empty below → internal shift only
+			initializeTest();
+			ws.GetRange("A1:A10").ClearContents();
+			ws.GetRange("A1").SetValue("Name");
+			ws.GetRange("A2").SetValue("Alice");
+			ws.GetRange("A3").SetValue("Bob");
+			ws.GetRange("A4").SetValue("Carol");
+			ws.GetRange("A6").SetValue("sentinel");
+			tbl = ws.AddListObject("xlSrcRange", "A1:A4");
+
+			tbl.AddListRow(2, false);
+			assert.equal(tbl.GetListRows().length, 4, "middle + empty below: 4 data rows");
+			assert.equal(tbl.GetRange().GetAddress(true, true), "$A$1:$A$5", "middle + empty below: table expanded to A1:A5");
+			assert.equal(ws.GetRange("A2").GetValue(), "Alice", "middle + empty below: Alice stays at A2");
+			assert.equal(ws.GetRange("A4").GetValue(), "Bob", "middle + empty below: Bob shifted to A4");
+			assert.equal(ws.GetRange("A5").GetValue(), "Carol", "middle + empty below: Carol shifted to A5");
+			assert.equal(ws.GetRange("A6").GetValue(), "sentinel", "middle + empty below: sentinel stayed at A6");
+		});
+
 		QUnit.test("Resize - accepts ApiRange", function (assert)
 		{
 			initializeTest();

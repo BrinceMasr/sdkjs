@@ -1423,14 +1423,14 @@ $(function () {
         // formula string
         assert.strictEqual(ws.GetRange("A1").SetFormula("=1+2"), true, "SetFormula(formula) returns true");
         assert.strictEqual(ws.GetRange("A1").GetValue(), 3, "formula =1+2: GetValue returns 3");
-        assert.strictEqual(ws.GetRange("A1").GetFormula(), "= 1+2", "formula =1+2: GetFormula returns formula text");
+        assert.strictEqual(ws.GetRange("A1").GetFormula(), "=1+2", "formula =1+2: GetFormula returns formula text");
 
         // formula referencing other cells
         ws.GetRange("B1").SetValue(10);
         ws.GetRange("B2").SetValue(20);
         ws.GetRange("A1").SetFormula("=SUM(B1:B2)");
         assert.strictEqual(ws.GetRange("A1").GetValue(), 30, "=SUM(B1:B2): GetValue returns 30");
-        assert.strictEqual(ws.GetRange("A1").GetFormula(), "= SUM(B1:B2)", "=SUM(B1:B2): GetFormula returns formula text");
+        assert.strictEqual(ws.GetRange("A1").GetFormula(), "=SUM(B1:B2)", "=SUM(B1:B2): GetFormula returns formula text");
 
         // overwrite formula with plain value clears formula
         ws.GetRange("A1").SetFormula("=10+5");
@@ -1442,7 +1442,7 @@ $(function () {
         // Formula property getter / setter
         ws.GetRange("A1").Formula = "=2*3";
         assert.strictEqual(ws.GetRange("A1").GetValue(), 6, "Formula setter: evaluates =2*3 to 6");
-        assert.strictEqual(ws.GetRange("A1").Formula, "= 2*3", "Formula getter: returns formula text");
+        assert.strictEqual(ws.GetRange("A1").Formula, "=2*3", "Formula getter: returns formula text");
         ws.GetRange("A1").Formula = 7;
         assert.strictEqual(ws.GetRange("A1").Formula, "7", "Formula getter: falls back to string value when no formula");
     });

@@ -29210,11 +29210,12 @@
 	 * If no position is provided, the row is appended at the end.
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
-	 * @param {number} [nPosition] - The 1-based position within the data body at which to insert the row.
+	 * @param {number} [nPosition] - The 1-based position within the data body at which to insert the row. If omitted, the row is appended at the end.
+	 * @param {boolean} [bAlwaysInsert=true] - Specifies whether cells outside the table are shifted when a row is added.
 	 * @returns {ApiListRow | null}
 	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/AddListRow.js
 	 */
-	ApiListObject.prototype.AddListRow = function (nPosition) {
+	ApiListObject.prototype.AddListRow = function (nPosition, bAlwaysInsert) {
 		var tablePart = this.tablePart;
 		var ws = this.ws.worksheet;
 		var ref = tablePart.Ref;
@@ -29224,19 +29225,39 @@
 		var startRow = ref.r1 + (tablePart.isHeaderRow() ? 1 : 0);
 		var endRow   = ref.r2 - (tablePart.isTotalsRow() ? 1 : 0);
 		var count    = endRow - startRow + 1;
-		var range, displayName;
+
 		if (nPosition === undefined || nPosition === null || nPosition > count) {
-			// Append at end: insert below the last data row (or push the totals row down)
-			var hasTotals = tablePart.isTotalsRow();
+			nPosition = count + 1;
+		}
+
+		if (bAlwaysInsert === false) {
+			if (ws.autoFilters._isEmptyCellsUnderRange(ref)) {
+				var rowIndex = startRow + (nPosition - 1);
+				var oldRefR2 = ref.r2;
+				var activeRange = ws.getRange3(oldRefR2 + 1, ref.c1, oldRefR2 + 1, ref.c2);
+				var redrawTablesArr = ws.autoFilters.insertLastTableRow(tablePart.DisplayName, activeRange.bbox);
+				ws.autoFilters.redrawStylesTables(redrawTablesArr);
+				if (rowIndex <= oldRefR2) {
+					ws._moveRange(
+						ws.getRange3(rowIndex, ref.c1, oldRefR2, ref.c2).bbox,
+						new Asc.Range(ref.c1, rowIndex + 1, ref.c2, oldRefR2 + 1),
+						null, null, false
+					);
+				}
+				return new ApiListRow(nPosition, this);
+			}
+		}
+
+		var range, displayName;
+		var hasTotals = tablePart.isTotalsRow();
+		if (nPosition > count) {
 			var insertRow = hasTotals ? ref.r2 : ref.r2 + 1;
 			range       = ws.getRange3(insertRow, ref.c1, insertRow, ref.c2);
 			displayName = hasTotals ? undefined : tablePart.DisplayName;
-			nPosition   = count + 1;
 		} else {
-			// Insert above the row at nPosition
-			var rowIndex = startRow + (nPosition - 1);
-			range       = ws.getRange3(rowIndex, ref.c1, rowIndex, ref.c2);
-			displayName = undefined;
+			var insertRowIdx = startRow + (nPosition - 1);
+			range            = ws.getRange3(insertRowIdx, ref.c1, insertRowIdx, ref.c2);
+			displayName      = undefined;
 		}
 		range.addCellsShiftBottom(displayName);
 		return new ApiListRow(nPosition, this);
