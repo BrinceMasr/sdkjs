@@ -1866,11 +1866,28 @@ function (window, undefined) {
 		}
 
 		let types = [cElementType.array];
-		if (arg[1] && arg[1].type !== cElementType.empty) {
-			types.push(cElementType.array);
+		if (arg[0].type === cElementType.string || arg[0].type === cElementType.bool) {
+			return new cError(cErrorType.wrong_value_type);
 		}
-		if (arg[2] && arg[2].type !== cElementType.empty) {
-			types.push(cElementType.array);
+
+		if (arg[1]) {
+			if (arg[1].type === cElementType.string || arg[1].type === cElementType.bool) {
+				return new cError(cErrorType.bad_reference);
+			}
+			
+			if (arg[1].type !== cElementType.empty) {
+				types.push(cElementType.array);
+			}
+		}
+
+		if (arg[2]) {
+			if (arg[2].type === cElementType.string || arg[2].type === cElementType.bool) {
+				return new cError(cErrorType.wrong_value_type);
+			}
+			
+			if (arg[2].type !== cElementType.empty) {
+				types.push(cElementType.array);
+			}
 		}
 
 		let oArguments = t._prepareArguments(arg, arguments[1], true, types);
@@ -11362,6 +11379,8 @@ function (window, undefined) {
 			return res;
 		} else if (mat && mat.type && mat.type === cElementType.error) {
 			return mat;
+		} else if (!mat && pMatY.length === 1 && pMatY[0].length === 1 && !pMatNewX) {
+			return pMatY[0][0];
 		}  else {
 			return new cError(cErrorType.wrong_value_type);
 		}

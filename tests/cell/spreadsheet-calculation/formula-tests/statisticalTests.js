@@ -21106,6 +21106,24 @@ $(function () {
 		oParser = new parserFormula('GROWTH({2;4},{1;2},A102)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GROWTH({2;4},{1;2},A102) is parsed.');
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue().toFixed(), '8192', 'Test: Negative case: Array, Array, Empty. Empty reference for new_x\'s returns #VALUE!. 3 arguments used.');
+		// Case #21: Area3D. Multi sheets link.
+		let multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A1";
+		oParser = new parserFormula('GROWTH('+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula GROWTH('+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area3D. Multi sheets link.');
+		// Case #22: Area3D. Multi sheets link second arguments.
+		oParser = new parserFormula('GROWTH(123,'+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula GROWTH(123,'+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area3D. Multi sheets link second arguments.');
+		// Case #23: Area3D. Multi sheets link third arguments.
+		oParser = new parserFormula('GROWTH(123,123,'+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula GROWTH(123,123,'+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area3D. Multi sheets link third arguments.');
+		// Case #24: Area3D. Multi sheets link fourth arguments.
+		oParser = new parserFormula('GROWTH(123,123,123,'+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula GROWTH(123,123,123,'+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area3D. Multi sheets link fourth arguments.');
+
 
 		// Bounded cases:
 		// Case #1: Array. Smallest positive number in known_y\'s. 1 argument used.
@@ -40156,7 +40174,7 @@ $(function () {
 		// Case #3: Reference link,Reference link. Single-cell references for known_y\'s and known_x\'s. 2 of 4 arguments used.
 		oParser = new parserFormula('TREND(A100,A101)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND(A100,A101) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.5, 'Test: Positive case: Reference link,Reference link. Single-cell references for known_y\'s and known_x\'s. 2 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 0.5, 'Test: Positive case: Reference link,Reference link. Single-cell references for known_y\'s and known_x\'s. 2 of 4 arguments used.');
 		// Case #4: Area,Area. Two-cell ranges for known_y\'s and known_x\'s. 2 of 4 arguments used.
 		oParser = new parserFormula('TREND(A100:A101,A102:A103)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND(A100:A101,A102:A103) is parsed.');
@@ -40168,7 +40186,7 @@ $(function () {
 		// Case #6: Formula,Formula. Nested formulas evaluating to numbers. 2 of 4 arguments used.
 		oParser = new parserFormula('TREND(SUM(1,1),SUM(2,2))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND(SUM(1,1),SUM(2,2)) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Positive case: Formula,Formula. Nested formulas evaluating to numbers. 2 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Positive case: Formula,Formula. Nested formulas evaluating to numbers. 2 of 4 arguments used.');
 		// Case #7: Formula,Formula,Formula. Nested IF formulas returning valid arrays. 3 of 4 arguments used.
 		oParser = new parserFormula('TREND(IF(TRUE, {1,2}, {3,4}),IF(TRUE, {1,2}, {3,4}),{3})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND(IF(TRUE, {1,2}, {3,4}),IF(TRUE, {1,2}, {3,4}),{3}) is parsed.');
@@ -40188,15 +40206,15 @@ $(function () {
 		// Case #11: Name,Name. Named ranges with valid numbers. 2 of 4 arguments used.
 		oParser = new parserFormula('TREND(TestName,TestName1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND(TestName,TestName1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), -0.5, 'Test: Positive case: Name,Name. Named ranges with valid numbers. 2 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), -0.5, 'Test: Positive case: Name,Name. Named ranges with valid numbers. 2 of 4 arguments used.');
 		// Case #12: Name3D,Name3D. 3D named ranges with valid numbers. 2 of 4 arguments used.
 		oParser = new parserFormula('TREND(TestName3D,TestName3D)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND(TestName3D,TestName3D) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), -0.5, 'Test: Positive case: Name3D,Name3D. 3D named ranges with valid numbers. 2 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), -0.5, 'Test: Positive case: Name3D,Name3D. 3D named ranges with valid numbers. 2 of 4 arguments used.');
 		// Case #13: Ref3D,Ref3D. 3D references to cells with valid numbers. 2 of 4 arguments used.
 		oParser = new parserFormula('TREND(Sheet2!A1,Sheet2!A2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND(Sheet2!A1,Sheet2!A2) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Positive case: Ref3D,Ref3D. 3D references to cells with valid numbers. 2 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Positive case: Ref3D,Ref3D. 3D references to cells with valid numbers. 2 of 4 arguments used.');
 		// Case #14: Area3D,Area3D. 3D two-cell ranges. 2 of 4 arguments used.
 		oParser = new parserFormula('TREND(Sheet2!A1:A2,Sheet2!A3:A4)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND(Sheet2!A1:A2,Sheet2!A3:A4) is parsed.');
@@ -40204,7 +40222,7 @@ $(function () {
 		// Case #15: Table,Table. Table structured references with valid numbers. 2 of 4 arguments used.
 		oParser = new parserFormula('TREND(Table1[Column1],Table1[Column1])', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND(Table1[Column1],Table1[Column1]) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Positive case: Table,Table. Table structured references with valid numbers. 2 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Positive case: Table,Table. Table structured references with valid numbers. 2 of 4 arguments used.');
 		// Case #16: Number,Number,Number. Float numbers in arrays. 3 of 4 arguments used.
 		oParser = new parserFormula('TREND({1.5,2.5},{1,2},{3})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND({1.5,2.5},{1,2},{3}) is parsed.');
@@ -40242,11 +40260,11 @@ $(function () {
 		// Case #1: String. Non-numeric string returns #VALUE!. 1 of 4 arguments used.
 		oParser = new parserFormula('TREND("abc")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND("abc") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String. Non-numeric string returns #VALUE!. 1 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String. Non-numeric string returns #VALUE!. 1 of 4 arguments used.');
 		// Case #2: Number. Single number (not array/range) returns #NUM!. 1 of 4 arguments used.
 		oParser = new parserFormula('TREND(1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND(1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Number. Single number (not array/range) returns #NUM!. 1 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Number. Single number (not array/range) returns #NUM!. 1 of 4 arguments used.');
 		// Case #3: Empty. Empty reference returns #NUM!. 1 of 4 arguments used.
 		oParser = new parserFormula('TREND(A103)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND(A103) is parsed.');
@@ -40262,7 +40280,7 @@ $(function () {
 		// Case #6: Number,Number. Collinear points return #NUM!. 2 of 4 arguments used.
 		oParser = new parserFormula('TREND({1,1},{1,1})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND({1,1},{1,1}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Number,Number. Collinear points return #NUM!. 2 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Number,Number. Collinear points return #NUM!. 2 of 4 arguments used.');
 		// Case #7: Area. Multi-cell range with invalid data returns #VALUE!. 1 of 4 arguments used.
 		oParser = new parserFormula('TREND(A100:A102)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND(A100:A102) is parsed.');
@@ -40270,7 +40288,7 @@ $(function () {
 		// Case #8: Boolean. Boolean FALSE (0) returns #NUM!. 1 of 4 arguments used.
 		oParser = new parserFormula('TREND(FALSE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND(FALSE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Boolean. Boolean FALSE (0) returns #NUM!. 1 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Boolean. Boolean FALSE (0) returns #NUM!. 1 of 4 arguments used.');
 		// Case #9: Ref3D. 3D ref to text returns #VALUE!. 1 of 4 arguments used.
 		oParser = new parserFormula('TREND(Sheet2!A3)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND(Sheet2!A3) is parsed.');
@@ -40302,7 +40320,7 @@ $(function () {
 		// Case #16: String. Empty string returns #VALUE!. 1 of 4 arguments used.
 		oParser = new parserFormula('TREND("")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND("") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String. Empty string returns #VALUE!. 1 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String. Empty string returns #VALUE!. 1 of 4 arguments used.');
 		// Case #17: Formula,Number,Number,Number. Invalid const (number) returns #VALUE!. 4 of 4 arguments used.
 		oParser = new parserFormula('TREND({1,2},{1,2},{3},1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND({1,2},{1,2},{3},1) is parsed.');
@@ -40310,7 +40328,7 @@ $(function () {
 		// Case #18: Array,Array. Mismatched array sizes return #NUM!. 2 of 4 arguments used.
 		oParser = new parserFormula('TREND({1},{1,2})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND({1},{1,2}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Array,Array. Mismatched array sizes return #NUM!. 2 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Array,Array. Mismatched array sizes return #NUM!. 2 of 4 arguments used.');
 		// Case #19: Name3D. 3D named range with text returns #VALUE!. 1 of 4 arguments used.
 		oParser = new parserFormula('TREND(TestNameArea3D2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND(TestNameArea3D2) is parsed.');
@@ -40322,21 +40340,39 @@ $(function () {
 		// Case #21: Formula,Number. Formula resulting in #DIV/0! propagates error. 2 of 4 arguments used.
 		oParser = new parserFormula('TREND(MMULT(1,0),1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND(MMULT(1,0),1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Negative case: Formula,Number. Formula resulting in #DIV/0! propagates error. 2 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Negative case: Formula,Number. Formula resulting in #DIV/0! propagates error. 2 of 4 arguments used.');
 		// Case #22: Number,Number,Empty. Empty new_x\'s reference returns #NUM!. 3 of 4 arguments used.
 		oParser = new parserFormula('TREND({1,2},{1,2},A103)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND({1,2},{1,2},A103) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '#VALUE!', 'Test: Negative case: Number,Number,Empty. Empty new_x\'s reference returns #NUM!. 3 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Number,Number,Empty. Empty new_x\'s reference returns #NUM!. 3 of 4 arguments used.');
 		// Case #23: Number,Number,String. Non-numeric new_x\'s returns #VALUE!. 3 of 4 arguments used.
 		oParser = new parserFormula('TREND({1,2},{1,2},"abc")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND({1,2},{1,2},"abc") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Number,Number,String. Non-numeric new_x\'s returns #VALUE!. 3 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Number,Number,String. Non-numeric new_x\'s returns #VALUE!. 3 of 4 arguments used.');
 		// Case #24: Area3D,Area3D. 3D ranges with mismatched sizes return #NUM!. 2 of 4 arguments used.
 		oParser = new parserFormula('TREND(Sheet2!A1:A3,Sheet2!A4:A6)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND(Sheet2!A1:A3,Sheet2!A4:A6) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area3D,Area3D. 3D ranges with mismatched sizes return #NUM!. 2 of 4 arguments used.');
+		// Case #25: Area3D. Multi sheets link.
+		let multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A1";
+		oParser = new parserFormula('TREND('+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula TREND('+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area3D. Multi sheets link.');
+		// Case #26: Area3D. Multi sheets link second arguments.
+		oParser = new parserFormula('TREND(123,'+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula TREND(123,'+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area3D. Multi sheets link second arguments.');
+		// Case #27: Area3D. Multi sheets link third arguments.
+		oParser = new parserFormula('TREND(123,123,'+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula TREND(123,123,'+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area3D. Multi sheets link third arguments.');
+		// Case #28: Area3D. Multi sheets link fourth arguments.
+		oParser = new parserFormula('TREND(123,123,123,'+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula TREND(123,123,123,'+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area3D. Multi sheets link fourth arguments.');
 
 		// Bounded cases:
+		// todo bounded cases almost correct but the difference occur when we use the numbers lower than 1E-152. Maybe js precision problem happen.
 		// Case #1: Number,Number. Max valid Excel number for known_y\'s. 2 of 4 arguments used.
 		oParser = new parserFormula('TREND({9.99999999999999E+307},{1})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TREND({9.99999999999999E+307},{1}) is parsed.');
@@ -40354,20 +40390,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: TREND({1,2},{1,2},{2.2250738585072014E-308},FALSE) is parsed.');
 		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0, 'Test: Bounded case: Number,Number,Number,Boolean. Min positive new_x\'s value with const=FALSE. 4 of 4 arguments used.');
 
-		// Need to fix: many different results from ms, error types diff and args handle
-		// Case #3: Reference link,Reference link. Single-cell references for known_y\'s and known_x\'s. 2 of 4 arguments used.
-		// Case #6: Formula,Formula. Nested formulas evaluating to numbers. 2 of 4 arguments used.
-		// Case #11: Name,Name. Named ranges with valid numbers. 2 of 4 arguments used.
-		// Case #12: Name3D,Name3D. 3D named ranges with valid numbers. 2 of 4 arguments used.
-		// Case #13: Ref3D,Ref3D. 3D references to cells with valid numbers. 2 of 4 arguments used.
-		// Case #15: Table,Table. Table structured references with valid numbers. 2 of 4 arguments used.
-		// Case #1: String. Non-numeric string returns #VALUE!. 1 of 4 arguments used.
-		// Case #2: Number. Single number (not array/range) returns #NUM!. 1 of 4 arguments used.
-		// Case #6: Number,Number. Collinear points return #NUM!. 2 of 4 arguments used.
-		// Case #8: Boolean. Boolean FALSE (0) returns #NUM!. 1 of 4 arguments used.
-		// Case #16: String. Empty string returns #VALUE!. 1 of 4 arguments used.
-		// Case #18: Array,Array. Mismatched array sizes return #NUM!. 2 of 4 arguments used.
-		// Case #21: Formula,Number. Formula resulting in #DIV/0! propagates error. 2 of 4 arguments used.
 
 	});
 
