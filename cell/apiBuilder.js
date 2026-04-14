@@ -30037,17 +30037,17 @@
 		}
 	});
 
-	/**
-	 * Sets an icon for icon-based sorting.
-	 * @memberof ApiSortField
-	 * @typeofeditors ["CSE"]
-	 * @param {XlIcon} Icon - The icon constant to sort by.
-	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetIcon.js
-	 */
-	ApiSortField.prototype.SetIcon = function (Icon) {
-		this._fieldObj.sortOn      = "xlSortOnIcon";
-		this._fieldObj.sortOnValue = Icon;
-	};
+	// /**
+	//  * Sets an icon for icon-based sorting.
+	//  * @memberof ApiSortField
+	//  * @typeofeditors ["CSE"]
+	//  * @param {XlIcon} Icon - The icon constant to sort by.
+	//  * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetIcon.js
+	//  */
+	// ApiSortField.prototype.SetIcon = function (Icon) {
+	// 	this._fieldObj.sortOn      = "xlSortOnIcon";
+	// 	this._fieldObj.sortOnValue = Icon;
+	// };
 
 	/**
 	 * Sets the color for color-based sorting.
@@ -30344,7 +30344,7 @@
 	// ApiSortField.prototype["GetDataOption"]   = ApiSortField.prototype.GetDataOption;
 	// ApiSortField.prototype["SetDataOption"]   = ApiSortField.prototype.SetDataOption;
 	ApiSortField.prototype["GetSortOnValue"]  = ApiSortField.prototype.GetSortOnValue;
-	ApiSortField.prototype["SetIcon"]         = ApiSortField.prototype.SetIcon;
+	//ApiSortField.prototype["SetIcon"]         = ApiSortField.prototype.SetIcon;
 	ApiSortField.prototype["SetSortOnColor"]  = ApiSortField.prototype.SetSortOnColor;
 	ApiSortField.prototype["ModifyKey"]       = ApiSortField.prototype.ModifyKey;
 	ApiSortField.prototype["Delete"]          = ApiSortField.prototype.Delete;
