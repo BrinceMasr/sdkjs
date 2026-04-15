@@ -10912,7 +10912,7 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: SINGLE Area. Range with empty cells. 1 argument used.');
 
 		let res = AscCommonExcel.bIsSupportDynamicArrays ? '#NUM!' : '#VALUE!';
-		oParser = new parserFormula('LN(A107:A108)', 'A2', ws);debugger
+		oParser = new parserFormula('LN(A107:A108)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LN(A107:A108) is parsed.');
 		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, 'Test: Negative case: Area. Range with empty cells. 1 argument used.');
 
@@ -10944,6 +10944,12 @@ $(function () {
 		oParser = new parserFormula('LN("31/12/1899")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LN("31/12/1899") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Date. Invalid date string format. 1 argument used.');
+		let multiAreaLink = "'" + ws.getName() + ":" + ws2.getName() + "'!A1";
+		// Case #31: Area3d. 3D area used. 1 argument used.
+		oParser = new parserFormula('LN('+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: LN('+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area3d. 3D area used. 1 argument used.');
+
 
 		// Bounded cases:
 		// Case #1: Number. Min valid positive value. 1 argument used.
@@ -11489,6 +11495,12 @@ $(function () {
 		oParser = new parserFormula('LOG10(TestNameArea3D)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: LOG10(TestNameArea3D) is parsed.');
 		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, 'Test: Negative case: Name3D. 3D named range with text returns #VALUE!.');
+
+		let multiAreaLink = "'" + ws.getName() + ":" + ws2.getName() + "'!A1";
+		// Case #21: Area3d. 3D area used. 1 argument used.
+		oParser = new parserFormula('LOG10('+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: LOG10('+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area3d. 3D area used. 1 argument used.');
 
 		// Bounded cases:
 		// Case #1: Number. Min valid value (1). 1 argument used.

@@ -2450,15 +2450,20 @@ function (window, undefined) {
 	cLN.prototype.name = 'LN';
 	cLN.prototype.argumentsMin = 1;
 	cLN.prototype.argumentsMax = 1;
-	cLN.prototype.arrayIndexes = {0: 1};
 	cLN.prototype.argumentsType = [argType.number];
 	cLN.prototype.Calculate = function (arg) {
 		let arg0 = arg[0];
+		if (arg0.type === cElementType.cellsRange3D && !arg0.isSingleSheet()) {
+			return new cError(cErrorType.bad_reference);
+		}
+
 		if (arg0.type === cElementType.cell || arg0.type === cElementType.cell3D) {
 			arg0 = arg0.getValue();
 		}
 
-		if (arg0.type === cElementType.cellsRange || arg0.type === cElementType.cellsRange3D || arg0.type === cElementType.array) {
+		if (arg0.type === cElementType.cellsRange || arg0.type === cElementType.cellsRange3D) {
+			arg0 = arg0.cross(arguments[1]);
+		} else if (arg0.type === cElementType.array) {
 			let resArray = new cArray();
 			let dimensions = arg0.getDimensions();
 
@@ -2645,15 +2650,20 @@ function (window, undefined) {
 	cLOG10.prototype.name = 'LOG10';
 	cLOG10.prototype.argumentsMin = 1;
 	cLOG10.prototype.argumentsMax = 1;
-	cLOG10.prototype.arrayIndexes = {0: 1};
 	cLOG10.prototype.argumentsType = [argType.number];
 	cLOG10.prototype.Calculate = function (arg) {
 		let arg0 = arg[0];
+		if (arg0.type === cElementType.cellsRange3D && !arg0.isSingleSheet()) {
+			return new cError(cErrorType.bad_reference);
+		}
+
 		if (arg0.type === cElementType.cell || arg0.type === cElementType.cell3D) {
 			arg0 = arg0.getValue();
 		}
 
-		if (arg0.type === cElementType.cellsRange || arg0.type === cElementType.cellsRange3D || arg0.type === cElementType.array) {
+		if (arg0.type === cElementType.cellsRange || arg0.type === cElementType.cellsRange3D) {
+			arg0 = arg0.cross(arguments[1]);
+		} else if (arg0.type === cElementType.array) {
 			let resArray = new cArray();
 			let dimensions = arg0.getDimensions();
 
