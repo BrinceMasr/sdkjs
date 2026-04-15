@@ -8149,6 +8149,7 @@
     ApiPresentation.prototype["SetLoopUntilStopped"]      = ApiPresentation.prototype.SetLoopUntilStopped;
     ApiPresentation.prototype["GetSlideCount"]              = ApiPresentation.prototype.GetSlideCount;
     ApiPresentation.prototype["RemoveSlide"]                = ApiPresentation.prototype.RemoveSlide;
+    ApiPresentation.prototype["DeleteSlide"]                = ApiPresentation.prototype.DeleteSlide = ApiPresentation.prototype.RemoveSlide;
 
     ApiMaster.prototype["GetClassType"]                   = ApiMaster.prototype.GetClassType;
     ApiMaster.prototype["GetInternalId"]                  = ApiMaster.prototype.GetInternalId;
