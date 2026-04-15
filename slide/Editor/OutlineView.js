@@ -697,15 +697,14 @@
 
 			const firstContentParagraph = firstContent.Content[firstContent.Content.length - 1];
 			firstContentParagraph.Concat(lastContent.Content[0]);
+			lastContent.Remove_FromContent(0, 1);
 			let isSaveLastShape = true;
 			if (firstShape.isOutlineTitlePlaceholder()) {
 				if (lastContent.Content.length === 1) {
 					isSaveLastShape = false;
-				} else {
-					lastContent.Remove_FromContent(0, 1);
 				}
 			} else {
-				for (let i = 1; i < lastContent.Content.length; i += 1) {
+				for (let i = 0; i < lastContent.Content.length; i += 1) {
 					firstContent.Add_ToContent(firstContent.Content.length, lastContent.Content[i].Copy(firstContent));
 				}
 				isSaveLastShape = false;
@@ -726,9 +725,9 @@
 						isLastShapeChecked = shape === lastShape;
 					}
 				});
-				if (!isSaveLastShape) {
-					lastShape.deleteDrawingBase();
-				}
+			}
+			if (!isSaveLastShape) {
+				lastShape.deleteDrawingBase();
 			}
 		}
 	};
@@ -960,7 +959,7 @@
 		}
 
 
-		const isNeedRecalculate = !!existingParagraphs.length;
+		const isNeedRecalculate = !!existingParagraphs.length || !!newParagraphs.length;
 		if (isNeedRecalculate) {
 			this.updateExistingParagraphs(existingParagraphs);
 			this.updateNewParagraphs(newParagraphs);
