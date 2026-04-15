@@ -38,7 +38,7 @@
     */
     function CAnnotationBase(sName, nType, aOrigRect, oDoc)
     {
-        // если аннотация не shape based
+        // if the annotation is not shape based
         if (this.Id == undefined) {
             this.Id = AscCommon.g_oIdCounter.Get_NewId();
             if ((AscCommon.g_oIdCounter.m_bLoad || AscCommon.History.CanAddChanges())) {
@@ -55,7 +55,7 @@
         this._contents              = undefined;
         this._creationDate          = undefined;
         this._modDate               = undefined;
-        this._delay                 = false; // пока не используется
+        this._delay                 = false; // not used yet
         this._doc                   = undefined;
         this._inReplyTo             = undefined;
         this._intent                = undefined;
@@ -79,10 +79,10 @@
         this._rectDiff              = undefined;
         this._popupIdx              = undefined;
         this._meta                  = {};
-        this._replies               = []; // тут будут храниться ответы (text аннотации)
+        this._replies               = []; // replies will be stored here (text annotations)
 
         // internal
-        this._bDrawFromStream   = false; // нужно ли рисовать из стрима
+        this._bDrawFromStream   = false; // whether to draw from stream
         this._originView = {
             normal:     null,
             mouseDown:  null,
@@ -945,7 +945,7 @@
         }
         else {
             this._needRecalc = true;
-            // note: movingCopy флаг означает, что объект был скопирован для отрисовки на overlay
+            // note: movingCopy flag means the object was copied for drawing on overlay
             if (bSkipAddToRedraw != true && this.movingCopy != true)
                 this.AddToRedraw();
         }
@@ -1805,7 +1805,7 @@
     CAnnotationBase.prototype.WriteToBinaryBase2 = function(memory) {
         let nType = this.GetType();
         if ((nType < 18 && nType != 1 && nType != 15) || nType == 25) {
-            // запишем флаги в конце
+            // write flags at the end
             memory.annotFlags   = 0;
             memory.posForFlags  = memory.GetCurPosition();
             memory.Skip(4);
@@ -1868,7 +1868,7 @@
                     if (aRC[i]["rtl"]) {
                         nStyle |= (1 << 7);
                     }
-                    // запись флагов настроек шрифта
+                    // write font settings flags
                     let nEndPos = memory.GetCurPosition();
                     memory.Seek(nFontStylePos);
                     memory.WriteLong(nStyle);
@@ -1908,7 +1908,7 @@
     CAnnotationBase.prototype.ReadFromBinaryBase2 = function(memory) {
         let nType = this.GetType();
         if ((nType < 18 && nType != 1 && nType != 15) || nType == 25) {
-            // Чтение флагов
+            // Reading flags
             memory.annotFlags = memory.GetLong();
     
             let nPopupIdx = null;
@@ -1989,20 +1989,20 @@
         }
     };
     CAnnotationBase.prototype.WriteRenderToBinary = function(memory) {
-        // пока только для основанных на фигурах
+        // for now only for shape-based
         if (false == this.IsShapeBased() || this.IsNeedDrawFromStream() || !memory.docRenderer || (memory.isForSplit || memory.isCopyPaste)) {
             return;
         }
 
-        // тут будет длина комманд
+        // here will be the commands length
         let nStartPos = memory.GetCurPosition();
         memory.Skip(4);
 
         memory.docRenderer.ClearCacheProps();
-        this.draw(memory.docRenderer); // для каждой страницы инициализируется свой renderer
+        this.draw(memory.docRenderer); // a separate renderer is initialized for each page
         memory.docRenderer.ClearCacheProps();
 
-        // запись длины комманд
+        // write commands length
         let nEndPos = memory.GetCurPosition();
         memory.Seek(nStartPos);
         memory.WriteLong(nEndPos - nStartPos);
@@ -2017,14 +2017,14 @@
     }
 
     function ParsePDFDate(sDate) {
-        // Регулярное выражение для извлечения компонентов даты
+        // Regular expression to extract date components
         let regex = /D:(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})([Z\+\-]?)(\d{2})?'?(\d{2})?/;
 
-        // Используем регулярное выражение для извлечения компонентов даты
+        // Use regular expression to extract date components
         let match = sDate.match(regex);
 
         if (match) {
-            // Извлекаем компоненты даты из совпадения
+            // Extract date components from the match
             let year = parseInt(match[1]);
             let month = parseInt(match[2]);
             let day = parseInt(match[3]);
@@ -2035,12 +2035,12 @@
             let timeZoneOffsetHours = parseInt(match[8]);
             let timeZoneOffsetMinutes = parseInt(match[9]);
 
-            // Создаем объект Date с извлеченными компонентами даты
+            // Create Date object with extracted date components
             let date = new Date(Date.UTC(year, month - 1, day, hour, minute, second));
 
-            // Учитываем смещение времени
+            // Account for time offset
             if (timeZoneSign === 'Z') {
-                // Если указано "Z", это означает UTC
+                // If "Z" is specified, it means UTC
             } else if (timeZoneSign === '+') {
                 date.setHours(date.getHours() - timeZoneOffsetHours);
                 date.setMinutes(date.getMinutes() - timeZoneOffsetMinutes);
@@ -2055,7 +2055,7 @@
         return null;
     }
 
-    // переопределение методов cshape
+    // overriding cshape methods
     CAnnotationBase.prototype.canRotate = function() {
         return false;
     };

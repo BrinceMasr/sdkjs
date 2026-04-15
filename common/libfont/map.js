@@ -47,14 +47,14 @@
 			FontStyleStrikeout:  8
 		};
 
-	// создаем стрим по обычной base64 строке
+	// create stream from regular base64 string
 	function CreateFontData2(input, len)
 	{
 		var memoryData = AscCommon.Base64.decode(input, false, len);
 		return new AscFonts.FontStream(memoryData, memoryData.length);
 	}
 
-	// создаем стрим по обычной строке
+	// create stream from regular string
 	function CreateFontData3(szSrc)
 	{
 		var srcLen = szSrc.length;
@@ -72,7 +72,7 @@
 		return stream;
 	}
 
-	// создаем стрим по base64 строке, в начале которой идет префикс с информацией о длине стрима
+	// create stream from base64 string that has a prefix at the beginning with stream length information
 	function CreateFontData4(input)
 	{
 		var memoryData = AscCommon.Base64.decode(input, true);
@@ -111,7 +111,7 @@
 		this.FONTS_DICT_ASCII_FONTS_COUNT = 0;
 		this.FD_Ascii_Files = [];
 
-		// шрифты в массиве this.FD_Ascii_Font_Like_Names - в порядке важности.
+		// fonts in the array this.FD_Ascii_Font_Like_Names - in order of importance.
 		this.FD_Ascii_Font_Like_Names = [
 			["Cambria Math", "Asana Math", "XITS Math", "Latin Modern"],
 			["OpenSymbol"],
@@ -510,7 +510,7 @@
 			if (null == pFont)
 				return false;
 
-			// может исходный шрифт (pFont) - не содержит такого имени - тогда допишем
+			// maybe the source font (pFont) doesn't contain such a name - then we'll add it
 			if (oFormat.wsName !== pFont.m_wsFontName && !oFormat.wsAltName)
 				oFormat.wsAltName = oFormat.wsName;
 			oFormat.wsName = pFont.m_wsFontName;
@@ -545,8 +545,8 @@
 		{
 			this.CorrectParamsFromDictionary(oSelect);
 
-			var nMinIndex   = 0; // Номер шрифта в списке с минимальным весом
-			var nMinPenalty = 0; // Минимальный вес
+			var nMinIndex   = 0; // Index of the font in the list with minimum weight
+			var nMinPenalty = 0; // Minimum weight
 
 			var bIsFoundName0 = false;
 
@@ -562,8 +562,8 @@
 
 				if (isName0 === true && 0 === CurPenalty.NamePenalty && !bIsFoundName0)
 				{
-					// встретился первый шрифт с точно таким именем - и запрос с флагом isName0 -
-					// ставим его в минимальный и теперь будем смотреть ТОЛЬКО с NamePenalty === 0
+					// first font with exactly this name encountered - and request with isName0 flag -
+					// set it as minimum and now we will only look at fonts with NamePenalty === 0
 					bIsFoundName0 = true;
 					nMinIndex = nIndex;
 					nMinPenalty = CurPenalty.Penalty;
@@ -588,7 +588,7 @@
 					nMinPenalty = CurPenalty.Penalty;
 				}
 
-				// Нашелся шрифт, удовлетворяющий всем параметрам, дальше искать нет смысла
+				// Found a font that satisfies all parameters, no point in searching further
 				if (0 === CurPenalty.Penalty)
 					break;
 			}
@@ -612,7 +612,7 @@
 			var _len = _arr.length;
 			for (var i = 0; i < _len; i++)
 			{
-				// здесь точное равенство!
+				// exact equality here!
 				if (_arr[i] == sFontName)
 					return true;
 			}
@@ -658,7 +658,7 @@
 		this.shCapHeight    = undefined;
 	}
 
-	// класс для подбора шрифтов
+	// class for font selection
 	function CFontSelect()
 	{
 		this.m_wsFontName   = "";
@@ -779,7 +779,7 @@
 
 				if (undefined === window["AscDesktopEditor"])
 				{
-					// удаляем все, кроме имени файла
+					// remove everything except the file name
 					var _found1 = this.m_wsFontPath.lastIndexOf("/");
 					var _found2 = this.m_wsFontPath.lastIndexOf("\\");
 					var _found = Math.max(_found1, _found2);
@@ -931,7 +931,7 @@
 			if (undefined !== oSelect.shCapHeight)
 				nCurPenalty += this.GetCapHeightPenalty(oSelect.shCapHeight);
 
-			// для математики - важнее наличие символов и похожих метрик, чем параметры
+			// for math - the presence of symbols and similar metrics is more important than parameters
 			if (oSelect.wsName === "Cambria Math" && nNamePenalty < 1500)
 				nCurPenalty = nNamePenalty;
 
@@ -970,8 +970,8 @@
 		{
 			var dPenalty = 0;
 
-			// Для начала просматриваем сколько вообще различных пространств надо.
-			// Исходя из их общего количества, находим вес 1 пропущеного пространства.
+			// First, we look at how many different ranges are needed in total.
+			// Based on their total count, we find the weight of 1 missing range.
 			var arrCandidate = ((typeof(Int8Array) != 'undefined' && !window.opera)) ? new Uint8Array(192) : new Array(192);
 			var arrRequest = ((typeof(Int8Array) != 'undefined' && !window.opera)) ? new Uint8Array(192) : new Array(192);
 
@@ -981,8 +981,8 @@
 				arrRequest[i] = 0;
 			}
 
-			var nRangesCount = 0; // Количество необходимых пространств
-			var nAddCount    = 0; // количество дополнительных(ненужных) пространств у кандидата
+			var nRangesCount = 0; // Number of required ranges
+			var nAddCount    = 0; // number of additional (unnecessary) ranges in the candidate
 
 			var ulCandRanges = [this.m_ulUnicodeRange1, this.m_ulUnicodeRange2, this.m_ulUnicodeRange3, this.m_ulUnicodeRange4,
 				this.m_ulCodePageRange1, this.m_ulCodePageRange2];
@@ -1037,8 +1037,8 @@
 		{
 			var nPenalty = 0;
 
-			// Если запрашивается моноширинный, а кандидат не моноширинный, то вес 15000
-			// Если запрашивается не моноширинный, а кандидат моноширинный, то вес 350
+			// If monospace is requested but candidate is not monospace, then weight is 15000
+			// If non-monospace is requested but candidate is monospace, then weight is 350
 			if ( bReqFixed && !this.m_bIsFixed )
 				nPenalty = 15000;
 			if ( !bReqFixed && this.m_bIsFixed )
@@ -1049,10 +1049,10 @@
 
 		GetFaceNamePenalty_private : function(sReqName, sMyName)
 		{
-			// На MSDN написано, что если имена не совпадают, то вес 10000.
-			// Мы будем сравнивать сколько совпало символов у запрашиваемого
-			// имени и с именем кандидата, без учета решистра, пробелов, запятых
-			// и тире.
+			// MSDN says that if names don't match, then weight is 10000.
+			// We will compare how many characters match between the requested
+			// name and the candidate name, ignoring case, spaces, commas,
+			// and dashes.
 
 			/*
 			 TODO:
@@ -1088,12 +1088,12 @@
 
 			if (g_fontApplication.g_fontDictionary.CheckLikeFonts(sMyName, sReqName))
 			{
-				// заменяемые шрифты считаем ближе, чем те, что содержат имена в себе
+				// replacement fonts are considered closer than those that contain the name within them
 				return 999;
 			}
 
 			// TODO:
-			// MS не так подбирает. На стандартных шрифтах работает. на всех - нет
+			// MS doesn't select this way. Works on standard fonts, but not on all
 			if (0 === cand1.indexOf(cand2))
 			{
 				return 2000 + 10 * Math.abs(cand1.length - cand2.length);
@@ -1190,7 +1190,7 @@
 
 		GetCharsetPenalty : function(unReqCharset)
 		{
-			// Penalty = 65000 (это самый весомый параметр)
+			// Penalty = 65000 (this is the most significant parameter)
 			if ( FD_UNKNOWN_CHARSET == unReqCharset )
 				return 0;
 
@@ -1261,7 +1261,7 @@
 		GetCodePageByCharset : function(unCharset)
 		{
 			var ret = { ulBit : 0, unLongIndex : 4 };
-			// Соответсвие CodePage -> ulCodePageRange1 : http://www.microsoft.com/Typography/otspec/os2.htm#cpr
+			// CodePage to ulCodePageRange1 mapping: http://www.microsoft.com/Typography/otspec/os2.htm#cpr
 
 			if ( unCharset == 1 )
 				unCharset = this.GetDefaultCharset();
@@ -1440,7 +1440,7 @@
 					var _fs = new CFontSelect();
 					_fs.fromStream(_file_stream);
 
-					// корректируем плохие популярные шрифты
+					// fix bad popular fonts
 					if (_fs.m_wsFontName == "Droid Sans Fallback")
 					{
 						if ((_fs.m_ulCodePageRange1 & (1 << 19)) == (1 << 19))
@@ -1552,7 +1552,7 @@
 			 }
 			 */
 
-			// добавляем ASCW3
+			// add ASCW3
 			var _fs = new CFontSelect();
 			_fs.m_wsFontName = "ASCW3";
 			this.List.push(_fs);
@@ -1571,7 +1571,7 @@
 
 		isMultiLanguageSymbol : function(_code)
 		{
-			// здесь те символы, которые не влияют на язык
+			// here are the symbols that don't affect the language
 
 			switch (_code)
 			{
@@ -1706,7 +1706,7 @@
 			}
 			if (null == _lang)
 			{
-				// такого быть не должно
+				// this should not happen
 				return _ret_obj;
 			}
 
@@ -1974,7 +1974,7 @@
 
 		initRanges : function()
 		{
-			// пока не используем
+			// not used for now
 			/*
 			function memset(p, start, val, count)
 			{
@@ -1983,14 +1983,14 @@
 					_data[i + start] = val;
 			}
 
-			 // пока только 2 байта
+			 // only 2 bytes for now
 			 this.m_pRanges      = g_memory.Alloc(0xFFFF);
 			 this.m_pRangesNums  = g_memory.Alloc(0xFFFF);
 
 			 memset(this.m_pRanges, 0, 0xFF, 0xFFFF);
 			 memset(this.m_pRangesNums, 0, 0xFF, 0xFFFF);
 
-			 // теперь просто по порядку заполняем все рэнджи
+			 // now just fill all ranges in order
 			 var nStart = 0;
 			 var nCount = 0;
 
@@ -2438,7 +2438,7 @@
 			 memset(this.m_pRanges, nStart, 24, nCount);
 			 memset(this.m_pRangesNums, nStart, 1, nCount);
 
-			 //case 25: sUCRName = "Non-Plane 0"; break; /: U+D800-U+DB7F :/ /: U+DB80-U+DBFF :/ /: U+DC00-U+DFFF :/ // Не юникодные символы
+			 //case 25: sUCRName = "Non-Plane 0"; break; /: U+D800-U+DB7F :/ /: U+DB80-U+DBFF :/ /: U+DC00-U+DFFF :/ // Non-Unicode characters
 			 nStart = 0xD800;
 			 nCount = 0xDB7F - nStart + 1;
 			 memset(this.m_pRanges, nStart, 25, nCount);
@@ -2487,7 +2487,7 @@
 			 memset(this.m_pRanges, nStart, 27, nCount);
 			 memset(this.m_pRangesNums, nStart, 1, nCount);
 
-			 //case 28: sUCRName = "Private Use Area (plane 0)"; break; /: U+E000-U+F8FF :/ // Не юникодные символы
+			 //case 28: sUCRName = "Private Use Area (plane 0)"; break; /: U+E000-U+F8FF :/ // Non-Unicode characters
 			 nStart = 0xE000;
 			 nCount = 0xF8FF - nStart + 1;
 			 memset(this.m_pRanges, nStart, 28, nCount);
@@ -2688,7 +2688,7 @@
 			 //case 23: sUCRName = "Deseret"; break; /:U+10400-U+1044F:/
 			 //case 24: sUCRName = "Byzantine Musical Symbols"; break; /:U+1D000-U+1D0FF:/ /:U+1D100-U+1D1FF:/ /:U+1D200-U+1D24F:/
 			 //case 25: sUCRName = "Mathematical Alphanumeric Symbols"; break; /:U+1D400-U+1D7FF:/
-			 //case 26: sUCRName = "Private Use (plane 15)"; break; /:U+F0000-U+FFFFD:/ /:U+100000-U+10FFFD:/ // Не юникодные символы
+			 //case 26: sUCRName = "Private Use (plane 15)"; break; /:U+F0000-U+FFFFD:/ /:U+100000-U+10FFFD:/ // Non-Unicode characters
 
 			 //case 27: sUCRName = "Variation Selectors"; break; /: U+FE00-U+FE0F :/ /:U+E0100-U+E01EF:/
 			 nStart = 0xFE00;
@@ -2852,8 +2852,8 @@
 				objDst.Replace = this.CheckReplaceGlyphsMap(name, objDst);
 			}
 
-			// используем стиль, пришедший извне, а не стиль _font
-			// так как подвираем вез стиля в Web версии
+			// use the style passed from outside, not the _font style
+			// since we pick fonts without style in the Web version
 			return AscFonts.g_font_infos[font_name_index].LoadFont(AscCommon.g_font_loader, fontManager, fEmSize, /*_font.GetStyle()*/lStyle, dHorDpi, dVerDpi, transform);
 		};
 		this.LoadFont = this.LoadFontWithoutEmbed;
@@ -2875,8 +2875,8 @@
 
 		this.GetReplaceGlyph = function(src, objDst)
 		{
-			// если исходный шрифт символьный (и все глифы там 0xF000+) - то вычетаем, так как
-			// если подобранный шрифт символьный - прибавится на CacheGlyph. а если нет - то надо вычитать.
+			// if the source font is a symbol font (and all glyphs there are 0xF000+) - then subtract, since
+			// if the selected font is a symbol font - it will be added in CacheGlyph. If not - then we need to subtract.
 			if (objDst.IsSymbolDst)
 				return (0xF000 < src) ? (src - 0xF000) : src;
 
@@ -2924,7 +2924,7 @@
 
 		this.GetFontFileWeb = function(name, lStyle)
 		{
-			// здесь не учитываем стиль. Иначе будет проблемой загрузка шрифтов,
+			// don't consider style here. Otherwise font loading will be a problem,
 			if (undefined !== this.FontPickerMap[name])
 			{
 				return this.FontPickerMap[name];

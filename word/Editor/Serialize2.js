@@ -2401,6 +2401,10 @@ function Binary_pPrWriter(memory, oNumIdMap, oBinaryHeaderFooterTableWriter, sav
     this.Write_pPr = function(pPr, pPr_rPr, EndRun, paragraph, oDocument)
     {
         var oThis = this;
+		
+		if (paragraph)
+			pPr = paragraph.GetParaPrForWrite(pPr);
+		
         //Стили надо писать первыми, потому что применение стиля при открытии уничтажаются настройки параграфа
         if(null != pPr.PStyle)
         {

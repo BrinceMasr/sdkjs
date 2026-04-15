@@ -69,8 +69,8 @@
         if (this.IsHidden() && !Asc.editor.IsEditFieldsMode())
             return;
 
-        // когда выравнивание посередине или справа, то после того
-        // как ширина параграфа будет больше чем размер формы, выравнивание становится слева, пока текста вновь не станет меньше чем размер формы
+        // when alignment is center or right, then after
+        // paragraph width becomes larger than form size, alignment becomes left, until text is smaller than form size again
         this.CheckAlignInternal();
         
         this.Recalculate();
@@ -252,7 +252,7 @@
     CListBoxField.prototype.UpdateTopIndex = function() {
         let oParaBounds     = this.content.GetElement(0).GetPageBounds(0);
         let nHeightPerPara  = oParaBounds.Bottom - oParaBounds.Top;
-        let nTopIndex       = Math.round(-this._curShiftView.y / nHeightPerPara); // количество смещений в параграфах
+        let nTopIndex       = Math.round(-this._curShiftView.y / nHeightPerPara); // number of offsets in paragraphs
         
         AscCommon.History.Add(new CChangesPDFListTopIndex(this, this.GetTopIndex(), nTopIndex));
         this._topIdx = nTopIndex;
@@ -261,7 +261,7 @@
         return this._topIdx;
     };
     CListBoxField.prototype.SetTopIndex = function(nTopIndex) {
-        // Обновляем _topIdx и добавляем изменение в историю
+        // Update _topIdx and add change to history
         AscCommon.History.Add(new CChangesPDFListTopIndex(this, this.GetTopIndex(), nTopIndex));
         this._topIdx = nTopIndex;
 
@@ -695,7 +695,7 @@
         }
 
         let oOnFocus = this.GetTrigger(AscPDF.PDF_TRIGGERS_TYPES.OnFocus);
-        // вызываем выставление курсора после onFocus. Если уже в фокусе, тогда сразу.
+        // call cursor positioning after onFocus. If already in focus, then immediately.
         if (false == isInFocus && oOnFocus && oOnFocus.Actions.length > 0)
             oActionsQueue.callbackAfterFocus = callbackAfterFocus.bind(this, x, y, e);
         else
@@ -950,7 +950,7 @@
                     docElem:        oScrollDocElm,
                     baseYPos:       parseInt(oScrollDocElm.style.top),
                     oldZoom:        oViewer.zoom,
-                    scrollCoeff:    nScrollCoeff, // проскроленная часть
+                    scrollCoeff:    nScrollCoeff, // scrolled portion
                     rot:            nRotAngle 
                 });
             }
@@ -973,7 +973,7 @@
 
         let oParaBounds     = this.content.GetElement(0).GetPageBounds(0);
         let nHeightPerPara  = oParaBounds.Bottom - oParaBounds.Top;
-        let nShiftCount     = this._curShiftView.y / nHeightPerPara; // количество смещений в длинах параграфов
+        let nShiftCount     = this._curShiftView.y / nHeightPerPara; // number of offsets in paragraph heights
         if (Math.abs(Math.round(nShiftCount) - nShiftCount) <= 0.001)
             return;
 
@@ -1001,7 +1001,7 @@
             let oParaBounds = this.content.GetElement(0).GetPageBounds(0);
             let nHeightPerPara = oParaBounds.Bottom - oParaBounds.Top;
             
-            // Устанавливаем _curShiftView.y по заданному nTopIndex
+            // Set _curShiftView.y by given nTopIndex
             this._curShiftView.y = -this.GetTopIndex() * nHeightPerPara;
 
             this.content.ResetShiftView();
@@ -1032,7 +1032,7 @@
         
         let oParagraph  = this.content.GetElement(nFirstSelectedPara);
 
-        // размеры всего контента
+        // dimensions of all content
         let oPageBounds     = this.content.GetContentBounds(0);
         let oCurParaHeight  = oParagraph.Lines[0].Bottom - oParagraph.Lines[0].Top;
 
@@ -1134,7 +1134,7 @@
             AscCommon.History.Add(new CChangesPDFListFormCurIdxs(this, this.GetParentCurIdxs(), aIdxs));
 
             AscCommon.History.StartNoHistoryMode();
-            // сначала снимаем выделение с текущих
+            // first remove selection from current ones
             let aCurIdxs = this.GetCurIdxs();
             for (let i = 0; i < aCurIdxs.length; i++) {
                 this.UnselectOption(aCurIdxs[i]);
@@ -1176,8 +1176,8 @@
         return false;
     };
     CListBoxField.prototype.CheckAlignInternal = function() {
-        // когда выравнивание посередине или справа, то после того
-        // как ширина параграфа будет больше чем размер формы, выравнивание становится слева, пока текста вновь не станет меньше чем размер формы
+        // when alignment is center or right, then after
+        // paragraph width becomes larger than form size, alignment becomes left, until text is smaller than form size again
 
         let isRTL = this.IsRTL();
         let nCurAlign = this.GetAlign();
@@ -1206,7 +1206,7 @@
     CListBoxField.prototype.WriteToBinary = function(memory) {
         memory.WriteByte(AscCommon.CommandType.ctAnnotField);
 
-        // длина комманд
+        // command length
         let nStartPos = memory.GetCurPosition();
         memory.Skip(4);
 
@@ -1219,7 +1219,7 @@
             memory.WriteString(value);
         }
 
-        // элементы списка выбора
+        // selection list elements
         let aOptions = this.GetOptions(memory.isCopyPaste);
         if (aOptions && aOptions.length !== 0) {
             memory.fieldDataFlags |= (1 << 10);
@@ -1231,7 +1231,7 @@
         }
 
         if (value != null && Array.isArray(value) == true) {
-            // флаг что значение - это массив
+            // flag that value is an array
             memory.fieldDataFlags |= (1 << 13);
             memory.WriteLong(value.length);
             for (let i = 0; i < value.length; i++) {
@@ -1239,7 +1239,7 @@
             }
         }
 
-        // массив I (выделенные значения списка)
+        // I array (selected list values)
         let curIdxs;
         if ([AscPDF.FIELD_TYPES.combobox, AscPDF.FIELD_TYPES.listbox].includes(this.GetType())) {
             curIdxs = this.GetParentCurIdxs(memory.isCopyPaste);
@@ -1272,13 +1272,13 @@
 
         let nEndPos = memory.GetCurPosition();
 
-        // запись флагов
+        // write flags
         memory.Seek(memory.posForWidgetFlags);
         memory.WriteLong(memory.widgetFlags);
         memory.Seek(memory.posForFieldDataFlags);
         memory.WriteLong(memory.fieldDataFlags);
 
-        // запись длины комманд
+        // write command length
         memory.Seek(nStartPos);
         memory.WriteLong(nEndPos - nStartPos);
         memory.Seek(nEndPos);

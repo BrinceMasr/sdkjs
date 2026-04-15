@@ -33,7 +33,7 @@
 "use strict";
 (function(window, undefined){
 
-//зависимости
+//dependencies
 //stream
 //memory
 //c_oAscChartType
@@ -192,7 +192,7 @@ BinaryCommonWriter.prototype.WriteItemWithLength = function(fWrite)
 };
 BinaryCommonWriter.prototype.WriteItemWithLengthStart = function()
 {
-    //Запоминаем позицию чтобы в конце записать туда длину
+    //Remember position to write length at end
     var nStart = this.memory.GetCurPosition();
     this.memory.Skip(4);
     return nStart;
@@ -469,7 +469,7 @@ Binary_CommonReader.prototype.ReadTable = function(fReadContent)
     if(c_oSerConstants.ReadOk != res)
         return res;
     var stLen = this.stream.GetULongLE();
-    //Смотрим есть ли данные под всю таблицу в дальнейшем спокойно пользуемся get функциями
+    //Check whether whole table has enough data, then safely use get functions
     res = this.stream.EnterFrame(stLen);
     if(c_oSerConstants.ReadOk != res)
         return res;
@@ -1048,7 +1048,7 @@ var g_oCellAddressUtils = new CellAddressUtils();
 		this.col = Math.max(0, Math.min(this.col - 1, gc_nMaxCol0));
 	};
 	CellBase.prototype.toRefA1 = function (row, col) {
-		//TODO функция неверно работает, если кол-во столбцов превышает 26
+		//TODO function works incorrectly if column count exceeds 26
 		var res = '';
 		do {
 			res += String.fromCharCode(col % 26 + 65);
@@ -1073,20 +1073,20 @@ function CellAddress(){
 	this.bIsRow = false;
 	this.colLetter = null;
 	if(1 == argc){
-		//Сразу пришло ID вида "A1"
+		//ID in "A1" format passed directly
 		this.id = arguments[0].toUpperCase();
 		this._invalidCoord = true;
 		this._checkId();
 	}
 	else if(2 == argc){
-		//адрес вида (1,1) = "A1". Внутренний формат начинается с 1
+		//address in format (1,1) = "A1". Internal format starts at 1
 		this.row = arguments[0];
 		this.col = arguments[1];
 		this._checkCoord();
 		this._invalidId = true;
 	}
 	else if(3 == argc){
-		//тоже самое что и 2 аргумента, только 0-based
+		//same as 2 arguments, but 0-based
 		this.row = arguments[0] + 1;
 		this.col = arguments[1] + 1;
 		this._checkCoord();
@@ -1118,10 +1118,10 @@ CellAddress.prototype._recalculate=function(bCoord, bId){
 	if(bCoord && this._invalidCoord){
 		this._invalidCoord = false;
 		var sId = this.id;
-		this.row = this.col = 0;//выставляем невалидные значения, чтобы не присваивать их при каждом else
+		this.row = this.col = 0;//set invalid values to avoid assignment in every else branch
 		var indexes = {}, i = -1, indexesCount = 0;
 		while ((i = sId.indexOf("$", i + 1)) != -1) {
-		    indexes[i - indexesCount++] = 1;//отнимаем количество, чтобы индексы указывали на следующий после них символ после удаления $
+		    indexes[i - indexesCount++] = 1;//subtract count so indexes point to next character after $ removal
 		}
 		if (indexesCount <= 2) {
 		    if (indexesCount > 0)

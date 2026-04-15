@@ -146,7 +146,7 @@ $(function () {
 		assert.strictEqual(array.getElementRowCol(0, 2).getValue(), getValue(-3), description + 'Number.');
 	}
 
-	//returnOnlyValue - те функции, на вход которых всегда должны подаваться массивы и которые возвращают единственное значение
+	// returnOnlyValue - functions that always require arrays as input and return a single value
 	function testArrayFormula2(assert, func, minArgCount, maxArgCount, dNotSupportAreaArg, returnOnlyValue) {
 
 		var getValue = function (ref, countArg) {
@@ -173,7 +173,7 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-		//формируем массив значений
+		// Create array of values
 		var randomArray = [];
 		var randomStrArray = "{";
 		var maxArg = 4;
@@ -5906,7 +5906,7 @@ $(function () {
 			});
 		};
 
-		// Функция расчета стоимости доставки
+		// Shipping cost calculation function
 		const GetShippingCost = function() {
 			return new Promise((resolve) => {
 				setTimeout(() => {
@@ -5918,7 +5918,7 @@ $(function () {
 		const GetDiscountValue = function() {
 			return new Promise((resolve) => {
 				setTimeout(() => {
-					resolve(40); // Значение скидки
+					resolve(40); // Discount value
 				}, 1);
 			});
 		};

@@ -998,7 +998,7 @@
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/Save.js
 	 */
 	Api.Save = function () {
-		this.SaveAfterMacros = true;
+		Asc.editor.SaveAfterMacros = true;
 	};
 
     /**
@@ -4610,7 +4610,7 @@
 		'effectCut':             { tag: 'p:cut', attrNames: ['thruBlk'], attrValues: ['0'] },
 		'effectCutThroughBlack': { tag: 'p:cut', attrNames: ['thruBlk'], attrValues: ['1'] },
 
-		// Default 'p:fade' effect attribute is: dir='horz'
+		// Default 'p:blinds' effect attribute is: dir='horz'
 		'effectBlindsHorizontal': { tag: 'p:blinds', attrNames: ['dir'], attrValues: ['horz'] },
 		'effectBlindsVertical':   { tag: 'p:blinds', attrNames: ['dir'], attrValues: ['vert'] },
 
@@ -4644,11 +4644,6 @@
 		'effectCombHorizontal': { tag: 'p:comb', attrNames: ['dir'], attrValues: ['horz'] },
 		'effectCombVertical':   { tag: 'p:comb', attrNames: ['dir'], attrValues: ['vert'] },
 
-		// Default 'p14:conveyor' effect attribute is: dir='l'
-		// Attribute must be specified explicitly - <p14:conveyor/> without 'dir' attribute is forbidden
-		'effectConveyorLeft':  { tag: 'p14:conveyor', attrNames: ['dir'], attrValues: ['l'] },
-		'effectConveyorRight': { tag: 'p14:conveyor', attrNames: ['dir'], attrValues: ['r'] },
-
 		// Default 'p:cover' effect attribute is: dir='l'
 		'effectCoverDown':      { tag: 'p:cover', attrNames: ['dir'], attrValues: ['d'] },
 		'effectCoverLeft':      { tag: 'p:cover', attrNames: ['dir'], attrValues: ['l']},
@@ -4663,7 +4658,6 @@
 		'effectCircleOut': { tag: 'p:circle' },
 		'effectDiamondOut': { tag: 'p:diamond' },
 		'effectDissolve': { tag: 'p:dissolve' },
-		'effectFlashbulb': { tag: 'p14:flash' },
 		'effectHoneycomb': { tag: 'p14:honeycomb' },
 		'effectNewsflash': { tag: 'p:newsflash' },
 		'effectPlusOut': { tag: 'p:plus' },
@@ -4680,42 +4674,20 @@
 
 		// Default 'p14:ferris' effect attribute is: dir='l'
 		// Attribute must be specified explicitly - <p14:ferris/> without 'dir' attribute is forbidden
-		'effectFerrisWheelLeft': { tag: 'p14:ferris', attrNames: ['dir'], attrValues: ['l'] },
+		'effectFerrisWheelLeft':  { tag: 'p14:ferris', attrNames: ['dir'], attrValues: ['l'] },
 		'effectFerrisWheelRight': { tag: 'p14:ferris', attrNames: ['dir'], attrValues: ['r'] },
 
 		// Default 'p14:flip' effect attribute is: dir='l'
 		// Attribute must be specified explicitly - <p14:flip/> without 'dir' attribute is forbidden
-		'effectFlipDown': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['r'] },
-		'effectFlipLeft': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['l'] },
+		'effectFlipDown':  { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['r'] },
+		'effectFlipLeft':  { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['l'] },
 		'effectFlipRight': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['r'] },
-		'effectFlipUp': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['r'] },
-
-		// Default 'p14:flythrough' effect attributes are: dir='in', hasBounce='0'
-		'effectFlyThroughIn':        { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['in', '0'] },
-		'effectFlyThroughInBounce':  { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['in', '1'] },
-		'effectFlyThroughOut':       { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['out', '0'] },
-		'effectFlyThroughOutBounce': { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['out', '1'] },
+		'effectFlipUp':    { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['r'] },
 
 		// Default 'p14:gallery' effect attribute is: dir='l'
 		// Attribute must be specified explicitly - <p14:gallery/> without 'dir' attribute is forbidden
-		'effectGalleryLeft': { tag: 'p14:gallery', attrNames: ['dir'], attrValues: ['l'] },
+		'effectGalleryLeft':  { tag: 'p14:gallery', attrNames: ['dir'], attrValues: ['l'] },
 		'effectGalleryRight': { tag: 'p14:gallery', attrNames: ['dir'], attrValues: ['r'] },
-
-		// Default 'p14:glitter' effect attribute is: dir='l', pattern='diamond'
-		'effectGlitterDiamondDown':  { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['u', 'diamond'] },
-		'effectGlitterDiamondLeft':  { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['r', 'diamond'] },
-		'effectGlitterDiamondRight': { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['l', 'diamond'] },
-		'effectGlitterDiamondUp':    { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['d', 'diamond'] },
-		'effectGlitterHexagonDown':  { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['u', 'hexagon'] },
-		'effectGlitterHexagonLeft':  { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['r', 'hexagon'] },
-		'effectGlitterHexagonRight': { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['l', 'hexagon'] },
-		'effectGlitterHexagonUp':    { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['d', 'hexagon'] },
-
-		// Default 'p14:pan' effect attribute is: dir='l'
-		'effectPanDown':  { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['d'] },
-		'effectPanLeft':  { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['l'] },
-		'effectPanRight': { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['r'] },
-		'effectPanUp':    { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['u'] },
 
 		// Default 'p:push' effect attribute is: dir='l'
 		'effectPushDown':  { tag: 'p:push', attrNames: ['dir'], attrValues: ['d'] },
@@ -4727,24 +4699,12 @@
 		'effectRandomBarsHorizontal': { tag: 'p:randomBar', attrNames: ['dir'], attrValues: ['horz'] },
 		'effectRandomBarsVertical':   { tag: 'p:randomBar', attrNames: ['dir'], attrValues: ['vert'] },
 
-		// Default 'p14:reveal' effect attribute is: thruBlk='0', dir='l'
-		'effectRevealBlackLeft':   { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['1', 'l'] },
-		'effectRevealBlackRight':  { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['1', 'r'] },
-		'effectRevealSmoothLeft':  { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['0', 'l'] },
-		'effectRevealSmoothRight': { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['0', 'r'] },
-
 		// Default 'p14:ripple' effect attribute is: dir='center'
 		'effectRippleCenter':    { tag: 'p14:ripple', attrNames: ['dir'], attrValues: ['center'] },
 		'effectRippleLeftDown':  { tag: 'p14:ripple', attrNames: ['dir'], attrValues: ['ld'] },
 		'effectRippleLeftUp':    { tag: 'p14:ripple', attrNames: ['dir'], attrValues: ['lu'] },
 		'effectRippleRightDown': { tag: 'p14:ripple', attrNames: ['dir'], attrValues: ['rd'] },
 		'effectRippleRightUp':   { tag: 'p14:ripple', attrNames: ['dir'], attrValues: ['ru'] },
-
-		// Default 'p14:shred' effect attribute is: pattern='strip', dir='in'
-		'effectShredRectangleIn':  { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['rectangle', 'in'] },
-		'effectShredRectangleOut': { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['rectangle', 'out'] },
-		'effectShredStripsIn':     { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['strip', 'in'] },
-		'effectShredStripsOut':    { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['strip', 'out'] },
 
 		// Default 'p:split' effect attribute is: orient='horz', dir='out'
 		'effectSplitHorizontalIn':  { tag: 'p:split', attrNames: ['orient', 'dir'], attrValues: ['horz', 'in'] },
@@ -4815,6 +4775,47 @@
 		'effectMorphByObject': { tag: 'p159:morph', attrNames: ['option'], attrValues: ['byObject'] },
 		'effectMorphByWord':   { tag: 'p159:morph', attrNames: ['option'], attrValues: ['byWord'] },
 		'effectMorphByChar':   { tag: 'p159:morph', attrNames: ['option'], attrValues: ['byChar'] },
+
+		// Default 'p14:pan' effect attribute is: dir='l'
+		'effectPanLeft':  { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['l'] },
+		'effectPanRight': { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['r'] },
+		'effectPanUp':    { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['u'] },
+		'effectPanDown':  { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['d'] },
+
+		// Default 'p14:conveyor' effect attribute is: dir='l'
+		'effectConveyorLeft':  { tag: 'p14:conveyor', attrNames: ['dir'], attrValues: ['l'] },
+		'effectConveyorRight': { tag: 'p14:conveyor', attrNames: ['dir'], attrValues: ['r'] },
+
+		// Default 'p14:reveal' effect attributes are: thruBlk='0', dir='l'
+		'effectRevealSmoothLeft':  { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['0', 'l'] },
+		'effectRevealSmoothRight': { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['0', 'r'] },
+		'effectRevealBlackLeft':   { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['1', 'l'] },
+		'effectRevealBlackRight':  { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['1', 'r'] },
+
+		// Default 'p14:flythrough' effect attributes are: dir='in', hasBounce='0'
+		'effectFlyThroughIn':        { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['in', '0'] },
+		'effectFlyThroughInBounce':  { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['in', '1'] },
+		'effectFlyThroughOut':       { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['out', '0'] },
+		'effectFlyThroughOutBounce': { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['out', '1'] },
+
+		// Default 'p14:glitter' effect attributes are: dir='l', pattern='diamond'
+		'effectGlitterDiamondLeft':  { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['l', 'diamond'] },
+		'effectGlitterDiamondRight': { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['r', 'diamond'] },
+		'effectGlitterDiamondUp':    { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['u', 'diamond'] },
+		'effectGlitterDiamondDown':  { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['d', 'diamond'] },
+		'effectGlitterHexagonLeft':  { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['l', 'hexagon'] },
+		'effectGlitterHexagonRight': { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['r', 'hexagon'] },
+		'effectGlitterHexagonUp':    { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['u', 'hexagon'] },
+		'effectGlitterHexagonDown':  { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['d', 'hexagon'] },
+
+		// Default 'p14:shred' effect attributes are: pattern='strip', dir='in'
+		'effectShredStripIn':      { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['strip', 'in'] },
+		'effectShredStripOut':     { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['strip', 'out'] },
+		'effectShredRectangleIn':  { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['rectangle', 'in'] },
+		'effectShredRectangleOut': { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['rectangle', 'out'] },
+
+		// Tag has no attributes
+		'effectFlashbulb': { tag: 'p14:flash' },
 
 		'effectNone': {}
 
@@ -7677,7 +7678,7 @@
 	 * @param {EMU} width - The column width measured in English measure units.
 	 * @returns {EMU | null} - Returns the actual column width set (in EMU), or null if the column index is invalid.
 	 *
-	 * @since 9.5.0
+	 * @since 9.4.0
 	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/SetColumnWidth.js
 	 */
 	ApiTable.prototype.SetColumnWidth = function (columnIndex, width) {
@@ -7725,7 +7726,7 @@
 	 * @param {number} columnIndex - The zero-based column index.
 	 * @returns {EMU | null}
 	 *
-	 * @since 9.5.0
+	 * @since 9.4.0
 	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/GetColumnWidth.js
 	 */
 	ApiTable.prototype.GetColumnWidth = function (columnIndex) {
@@ -7824,7 +7825,7 @@
 	 *
 	 * @returns {EMU | null}
 	 *
-	 * @since 9.5.0
+	 * @since 9.4.0
 	 * @see office-js-api/Examples/{Editor}/ApiTableRow/Methods/GetHeight.js
 	 */
 	ApiTableRow.prototype.GetHeight = function () {
@@ -8444,6 +8445,8 @@
 	ApiChart.prototype["SetLegendFontSize"] = ApiChart.prototype.SetLegendFontSize = AscBuilder.ApiChart.prototype.SetLegendFontSize;
 	ApiChart.prototype["SetShowDataLabels"] = ApiChart.prototype.SetShowDataLabels = AscBuilder.ApiChart.prototype.SetShowDataLabels;
 	ApiChart.prototype["SetShowPointDataLabel"] = ApiChart.prototype.SetShowPointDataLabel = AscBuilder.ApiChart.prototype.SetShowPointDataLabel;
+	ApiChart.prototype["SetDataLabelsTextPr"] = ApiChart.prototype.SetDataLabelsTextPr = AscBuilder.ApiChart.prototype.SetDataLabelsTextPr;
+	ApiChart.prototype["SetPointDataLabelTextPr"] = ApiChart.prototype.SetPointDataLabelTextPr = AscBuilder.ApiChart.prototype.SetPointDataLabelTextPr;
 	ApiChart.prototype["SetVertAxisTickLabelPosition"] = ApiChart.prototype.SetVertAxisTickLabelPosition = AscBuilder.ApiChart.prototype.SetVertAxisTickLabelPosition;
 	ApiChart.prototype["SetHorAxisTickLabelPosition"] = ApiChart.prototype.SetHorAxisTickLabelPosition = AscBuilder.ApiChart.prototype.SetHorAxisTickLabelPosition;
 	ApiChart.prototype["SetHorAxisMajorTickMark"] = ApiChart.prototype.SetHorAxisMajorTickMark = AscBuilder.ApiChart.prototype.SetHorAxisMajorTickMark;

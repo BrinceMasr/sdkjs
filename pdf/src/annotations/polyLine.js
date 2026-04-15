@@ -270,8 +270,8 @@
             return [x_min, y_min, x_max, y_max];
         }
 
-        // находим ректы исходных точек. Стартовой линии учитывая lineStart фигуру, и такую же для конца
-        // далее нахоим объединения всех прямоугольников для получения результирующего
+        // find rects of original points. For start line considering lineStart shape, and same for end
+        // then find union of all rectangles to get the resulting one
         let aSourceRect     = findBoundingRectangle(aVertices);
         let aStartLineRect  = calculateBoundingRectangle(oStartLine, shapeSizeAtStart, {width: 0, height: 0});
         let aEndLineRect    = calculateBoundingRectangle(oEndLine, {width: 0, height: 0} , shapeSizeAtEnd);

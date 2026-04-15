@@ -356,6 +356,24 @@
 	 * @property {Quad[]} [pageIndex] - the key is the index of a page
 	 */
 
+	/**
+	 * @typedef {Object} DocSelection
+	 * @property {PagePoint} start - selection start
+	 * @property {PagePoint} end - selection end
+	 */
+
+	/**
+	 * @typedef {Object} PagePoint
+	 * @property {number} page - index of a page
+	 * @property {Point} point - point of a page
+	 */
+
+	/**
+	 * @typedef {Object} PageSelection
+	 * @property {Point} start - start selection point
+	 * @property {Point} end - end selection point
+	 */
+
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// Api
@@ -1391,20 +1409,22 @@
 
 	/**
 	 * Removes page by index from document
+	 * <note> You can't delete last page </note>
 	 * @memberof ApiDocument
 	 * @typeofeditors ["PDFE"]
-	 * @param {number} nPos - page position
+	 * @param {number} pos - page position
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/RemovePage.js
 	 */
-	ApiDocument.prototype.RemovePage = function(nPos) {
+	ApiDocument.prototype.RemovePage = function(pos) {
 		let oFile = this.Document.GetFile();
-		if (!oFile.pages[nPos]) {
-			return false;
+
+		pos = AscBuilder.GetNumberParameter(pos, null);
+		if (null == pos || pos < 0 || pos > oFile.pages.length - 1) {
+			AscBuilder.throwException("The pos parameter must be a valid position");
 		}
 
-		this.Document.RemovePage(nPos);
-		return true;
+		return !!this.Document.RemovePage(pos);
 	};
 
 	/**
@@ -1423,7 +1443,7 @@
 	 * Gets list of all fields in document.
 	 * @memberof ApiDocument
 	 * @typeofeditors ["PDFE"]
-	 * @returns {ApiField}
+	 * @returns {ApiField[]}
 	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/GetAllFields.js
 	 */
 	ApiDocument.prototype.GetAllFields = function() {
@@ -1521,39 +1541,73 @@
 	};
 
 	/**
+	 * Gets document selection info
+	 * @typeofeditors ["PDFE"]
+	 * @returns {?DocSelection}
+	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/GetSelection.js
+	 */
+	ApiDocument.prototype.GetSelection = function() {
+		let oDoc = private_GetLogicDocument();
+		let oSelCoords = oDoc.GetFile().getSelectionCoords();
+		if (!oSelCoords) {
+			return null;
+		}
+
+		let oResult = {
+			"start": {
+				"page": oSelCoords.start.page,
+				"point": {
+					"x": oSelCoords.start.x * g_dKoef_mm_to_pt,
+					"y": oSelCoords.start.y * g_dKoef_mm_to_pt,
+				}
+			},
+			"end": {
+				"page": oSelCoords.end.page,
+				"point": {
+					"x": oSelCoords.end.x * g_dKoef_mm_to_pt,
+					"y": oSelCoords.end.y * g_dKoef_mm_to_pt,
+				}
+			}
+		};
+
+		return oResult;
+	};
+
+	/**
 	 * Sets document selection
 	 * @typeofeditors ["PDFE"]
-	 * @param {number} startPage
-	 * @param {Point} startPoint
-	 * @param {number} endPage
-	 * @param {Point} endPoint
+	 * @param {DocSelection} selection
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/SetSelection.js
 	 */
-	ApiDocument.prototype.SetSelection = function(startPage, startPoint, endPage, endPoint) {
-		private_CheckPoint(startPoint);
-		private_CheckPoint(endPoint);
+	ApiDocument.prototype.SetSelection = function(selection) {
+		if (!selection) {
+			AscBuilder.throwException("The selection must be an object");
+		}
 
-		if (!this.GetPage(startPage)) {
+		private_CheckPagePoint(selection['start']);
+		private_CheckPagePoint(selection['end']);
+
+		if (!this.GetPage(selection['start']['page'])) {
 			AscBuilder.throwException("Invalid start page index");
 		}
-		if (!this.GetPage(endPage)) {
+		if (!this.GetPage(selection['end']['page'])) {
 			AscBuilder.throwException("Invalid end page index");
 		}
 
 		let oFile = this.Document.GetFile();
 		this.Document.BlurActiveObject();
 
-		let startNearestPos = oFile.getNearestPos(startPage, startPoint['x'], startPoint['y']);
-		let endNearestPos = oFile.getNearestPos(endPage, endPoint['x'], endPoint['y']);
+		let startNearestPos = oFile.getNearestPos(selection['start']['page'], selection['start']['point']['x'] * g_dKoef_pt_to_mm, selection['start']['point']['y'] * g_dKoef_pt_to_mm);
+		let endNearestPos = oFile.getNearestPos(selection['end']['page'], selection['end']['point']['x'] * g_dKoef_pt_to_mm, selection['end']['point']['y'] * g_dKoef_pt_to_mm);
 
 		oFile.Selection.IsSelection = true;
 
-		oFile.Selection.Page1  = startPage;
+		oFile.Selection.Page1  = selection['start']['page'];
 		oFile.Selection.Line1  = startNearestPos.Line;
 		oFile.Selection.Glyph1 = startNearestPos.Glyph;
 
-		oFile.Selection.Page2  = endPage;
+		oFile.Selection.Page2  = selection['end']['page'];
 		oFile.Selection.Line2  = endNearestPos.Line;
 		oFile.Selection.Glyph2 = endNearestPos.Glyph;
 
@@ -1572,12 +1626,22 @@
 		let oDoc = private_GetLogicDocument();
 		let aDocQuads = oDoc.GetFile().getSelectionQuads();
 
-		let aResult = {};
+		let oResult = {};
 		aDocQuads.forEach(function(pageQuads) {
-			aResult[pageQuads["page"]] = pageQuads["quads"];
+			oResult[pageQuads["page"]] = pageQuads["quads"];
 		});
 
-		return aResult;
+		return oResult;
+	};
+
+	/**
+	 * Gets selected text in document
+	 * @typeofeditors ["PDFE"]
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/GetSelectedText.js
+	 */
+	ApiDocument.prototype.GetSelectedText = function() {
+		return this.Document.GetSelectedText();
 	};
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -1650,7 +1714,7 @@
 	 * Gets page widgets
 	 * @memberof ApiPage
 	 * @typeofeditors ["PDFE"]
-	 * @returns {number}
+	 * @returns {ApiWidget[]}
 	 * @see office-js-api/Examples/{Editor}/ApiPage/Methods/GetAllWidgets.js
 	 */
 	ApiPage.prototype.GetAllWidgets = function() {
@@ -1693,7 +1757,7 @@
 	 * Gets all annots on page
 	 * @memberof ApiPage
 	 * @typeofeditors ["PDFE"]
-	 * @returns {ApiBaseAnnotation}
+	 * @returns {ApiBaseAnnotation[]}
 	 * @see office-js-api/Examples/{Editor}/ApiPage/Methods/GetAllAnnots.js
 	 */
 	ApiPage.prototype.GetAllAnnots = function() {
@@ -1754,16 +1818,58 @@
 	};
 
 	/**
+	 * Gets page selection.
+	 * @typeofeditors ["PDFE"]
+	 * @returns {?PageSelection}
+	 * @see office-js-api/Examples/{Editor}/ApiPage/Methods/GetSelection.js
+	 */
+	ApiPage.prototype.GetSelection = function() {
+		let oDoc = private_GetLogicDocument();
+		let oFile = oDoc.GetFile();
+		let nPageIdx = this.GetIndex();
+
+		if (!oFile.isSelectionUse()) {
+			return null;
+		}
+
+		let sel = oFile.sortSelection();
+
+		if (nPageIdx < sel.Page1 || nPageIdx > sel.Page2) {
+			return null;
+		}
+
+		let startLine  = nPageIdx === sel.Page1 ? sel.Line1  : 0;
+		let startGlyph = nPageIdx === sel.Page1 ? sel.Glyph1 : -2;
+		let endLine    = nPageIdx === sel.Page2 ? sel.Line2  : oFile.getPageLastLine(nPageIdx);
+		let endGlyph   = nPageIdx === sel.Page2 ? sel.Glyph2 : -1;
+
+		let startCoord = oFile.getGlyphCoord(nPageIdx, startLine, startGlyph);
+		let endCoord   = oFile.getGlyphCoord(nPageIdx, endLine, endGlyph);
+
+		if (!startCoord || !endCoord) {
+			return null;
+		}
+
+		return {
+			"start": { "x": startCoord.x * g_dKoef_mm_to_pt, "y": startCoord.y * g_dKoef_mm_to_pt },
+			"end": { "x": endCoord.x * g_dKoef_mm_to_pt, "y": endCoord.y * g_dKoef_mm_to_pt }
+		};
+	};
+
+	/**
 	 * Sets page selection.
 	 * @typeofeditors ["PDFE"]
-	 * @param {Point} startPoint
-	 * @param {Point} endPoint
+	 * @param {PageSelection} selection
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiPage/Methods/SetSelection.js
 	 */
-	ApiPage.prototype.SetSelection = function(startPoint, endPoint) {
-		private_CheckPoint(startPoint);
-		private_CheckPoint(endPoint);
+	ApiPage.prototype.SetSelection = function(selection) {
+		if (!selection) {
+			AscBuilder.throwException("The selection must be an object");
+		}
+
+		private_CheckPoint(selection['start']);
+		private_CheckPoint(selection['end']);
 
 		let oDoc = private_GetLogicDocument();
 		let oFile = oDoc.GetFile();
@@ -1771,8 +1877,8 @@
 
 		oDoc.BlurActiveObject();
 
-		let startNearestPos = oFile.getNearestPos(nPageIdx, startPoint['x'] * g_dKoef_pt_to_mm, startPoint['y'] * g_dKoef_pt_to_mm);
-		let endNearestPos = oFile.getNearestPos(nPageIdx, endPoint['x'] * g_dKoef_pt_to_mm, endPoint['y'] * g_dKoef_pt_to_mm);
+		let startNearestPos = oFile.getNearestPos(nPageIdx, selection['start']['x'] * g_dKoef_pt_to_mm, selection['start']['y'] * g_dKoef_pt_to_mm);
+		let endNearestPos   = oFile.getNearestPos(nPageIdx, selection['end']['x'] * g_dKoef_pt_to_mm, selection['end']['y'] * g_dKoef_pt_to_mm);
 
 		oFile.Selection.IsSelection = true;
 
@@ -2013,7 +2119,7 @@
 	/**
 	 * Gets array with widgets of the current field.
 	 * @typeofeditors ["PDFE"]
-	 * @returns {?ApiWidget}
+	 * @returns {ApiWidget[]}
 	 * @see office-js-api/Examples/{Editor}/ApiBaseField/Methods/GetAllWidgets.js
 	 */
 	ApiBaseField.prototype.GetAllWidgets = function() {
@@ -5622,6 +5728,36 @@
 
 	//------------------------------------------------------------------------------------------------------------------
 	//
+	// ApiLinkAnnotation
+	//
+	//------------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Class representing a link annotation.
+	 * @constructor
+	 * @typeofeditors ["PDFE"]
+	 * @extends {ApiBaseMarkupAnnotation}
+	 */
+	function ApiLinkAnnotation(oAnnot) {
+		ApiBaseMarkupAnnotation.call(this, oAnnot);
+	}
+
+	ApiLinkAnnotation.prototype = Object.create(ApiBaseMarkupAnnotation.prototype);
+	ApiLinkAnnotation.prototype.constructor = ApiLinkAnnotation;
+
+	/**
+	 * Returns a type of the ApiLinkAnnotation class.
+	 * @memberof ApiLinkAnnotation
+	 * @typeofeditors ["PDFE"]
+	 * @returns {"linkAnnot"}
+	 * @see office-js-api/Examples/{Editor}/ApiLinkAnnotation/Methods/GetClassType.js
+	 */
+	ApiLinkAnnotation.prototype.GetClassType = function() {
+		return "linkAnnot";
+	};
+
+	//------------------------------------------------------------------------------------------------------------------
+	//
 	// ApiRichContent
 	//
 	//------------------------------------------------------------------------------------------------------------------
@@ -8107,6 +8243,9 @@
 			case AscPDF.ANNOTATIONS_TYPES.Redact: {
 				return new ApiRedactAnnotation(annot);
 			}
+			case AscPDF.ANNOTATIONS_TYPES.Link: {
+				return new ApiLinkAnnotation(annot);
+			}
 		}
 	}
 
@@ -8126,6 +8265,19 @@
 			value.length === 4 &&
 			value.every(Number.isFinite)
 		);
+	}
+
+	function private_CheckPagePoint(pagePoint) {
+		if (!pagePoint) {
+			AscBuilder.throwException("The pagePoint must be an object");
+		}
+
+		let page = AscBuilder.GetNumberParameter(pagePoint['page'], null);
+		if (page === null) {
+			AscBuilder.throwException("The page property a pagePoint must be a number");
+		}
+
+		private_CheckPoint(pagePoint['point']);
 	}
 
 	function private_CheckPoint(point) {
@@ -8346,8 +8498,10 @@
 	ApiDocument.prototype["GetFieldByName"]					= ApiDocument.prototype.GetFieldByName;
 	ApiDocument.prototype["SearchAndRedact"]				= ApiDocument.prototype.SearchAndRedact;
 	ApiDocument.prototype["ApplyRedact"]					= ApiDocument.prototype.ApplyRedact;
+	ApiDocument.prototype["GetSelection"]					= ApiDocument.prototype.GetSelection;
 	ApiDocument.prototype["SetSelection"]					= ApiDocument.prototype.SetSelection;
 	ApiDocument.prototype["GetSelectionQuads"]				= ApiDocument.prototype.GetSelectionQuads;
+	ApiDocument.prototype["GetSelectedText"]				= ApiDocument.prototype.GetSelectedText;
 
 	// ApiPage
 	ApiPage.prototype["GetClassType"]						= ApiPage.prototype.GetClassType;
@@ -8358,6 +8512,7 @@
 	ApiPage.prototype["AddObject"]							= ApiPage.prototype.AddObject;
 	ApiPage.prototype["GetAllAnnots"]						= ApiPage.prototype.GetAllAnnots;
 	ApiPage.prototype["Search"]								= ApiPage.prototype.Search;
+	ApiPage.prototype["GetSelection"]						= ApiPage.prototype.GetSelection;
 	ApiPage.prototype["SetSelection"]						= ApiPage.prototype.SetSelection;
 	ApiPage.prototype["GetSelectionQuads"]					= ApiPage.prototype.GetSelectionQuads;
 	ApiPage.prototype["GetSelectedText"]					= ApiPage.prototype.GetSelectedText;
@@ -8623,6 +8778,9 @@
 
 	// ApiRedactAnnotation
 	ApiRedactAnnotation.prototype["GetClassType"]			= ApiRedactAnnotation.prototype.GetClassType;
+	
+	// ApiLinkAnnotation
+	ApiLinkAnnotation.prototype["GetClassType"]				= ApiLinkAnnotation.prototype.GetClassType;
 
 	// ApiRichContent
 	ApiRichContent.prototype["GetClassType"]				= ApiRichContent.prototype.GetClassType;

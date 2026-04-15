@@ -98,7 +98,7 @@ function (window, undefined) {
 		return new RegExp(vFS + "$", flags ? flags : "i");
 	}
 
-	// TODO переделать поиск: добиться такого же результата как в ms
+	// TODO rework search: achieve the same result as in MS
 	function XBinarySearch (target, array, match_mode, isReverse) {
 		let mid, item;
 		let index = -1;
@@ -604,6 +604,7 @@ function (window, undefined) {
 	cAREAS.prototype.argumentsMax = 1;
 	cAREAS.prototype.argumentsType = [argType.reference];
 	cAREAS.prototype.arrayIndexes = {0: 1};
+	cAREAS.prototype.enabledToSingle = {"0": true};
 	cAREAS.prototype.Calculate = function (arg) {
 		let arg0 = arg[0];
 		if (arg0.type !== AscCommonExcel.cElementType.cell && arg0.type !== AscCommonExcel.cElementType.cell3D && 
@@ -632,6 +633,7 @@ function (window, undefined) {
 	// todo add arrayIndex to all n-arguments (in array)
 	cCHOOSE.prototype.arrayIndexes = {0: 1, 1: 1, 2: 1, 3: 1, 4: 1};
 	cCHOOSE.prototype.argumentsType = [argType.number, [argType.any]];
+	cCHOOSE.prototype.enabledToSingle = {"allFrom": 1};
 	cCHOOSE.prototype.Calculate = function (arg) {
 		const args = arguments;
 		let arg0 = arg[0];
@@ -868,6 +870,7 @@ function (window, undefined) {
 	cCHOOSECOLS.prototype.argumentsType = [argType.reference, [argType.number]];
 	cCHOOSECOLS.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.array;
 	cCHOOSECOLS.prototype.isXLFN = true;
+	cCHOOSECOLS.prototype.enabledToSingle = {"0": true};
 	cCHOOSECOLS.prototype.Calculate = function (arg) {
 		return chooseRowsCols(arg, arguments[1], true);
 	};
@@ -888,6 +891,7 @@ function (window, undefined) {
 	cCHOOSEROWS.prototype.argumentsType = [argType.reference, [argType.number]];
 	cCHOOSEROWS.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.array;
 	cCHOOSEROWS.prototype.isXLFN = true;
+	cCHOOSEROWS.prototype.enabledToSingle = {"0": true};
 	cCHOOSEROWS.prototype.Calculate = function (arg) {
 		return chooseRowsCols(arg, arguments[1]);
 	};
@@ -906,6 +910,7 @@ function (window, undefined) {
 	cCOLUMN.prototype.argumentsMax = 1;
 	cCOLUMN.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.setArrayRefAsArg;
 	cCOLUMN.prototype.argumentsType = [argType.reference];
+	cCOLUMN.prototype.enabledToSingle = {"0": true};
 	cCOLUMN.prototype.Calculate = function (arg) {
 		var bbox;
 		var res;
@@ -953,6 +958,7 @@ function (window, undefined) {
 	cCOLUMNS.prototype.argumentsMax = 1;
 	cCOLUMNS.prototype.arrayIndexes = {0: 1};
 	cCOLUMNS.prototype.argumentsType = [argType.reference];
+	cCOLUMNS.prototype.enabledToSingle = {"0": true};
 	cCOLUMNS.prototype.Calculate = function (arg) {
 		var arg0 = arg[0];
 		var range;
@@ -982,6 +988,7 @@ function (window, undefined) {
 	cEXPAND.prototype.argumentsMax = 4;
 	cEXPAND.prototype.arrayIndexes = {0: 1, 3: 1};
 	cEXPAND.prototype.argumentsType = [argType.reference, argType.number, argType.number, argType.any];
+	cEXPAND.prototype.enabledToSingle = {"0": true};
 	cEXPAND.prototype.Calculate = function (arg) {
 		const MAX_ARRAY_SIZE = 1048576;
 		let array,
@@ -1035,7 +1042,7 @@ function (window, undefined) {
 		} else if(cElementType.array === rows.type) {
 			rows = rows.getElementRowCol(0, 0);
 		} else if(cElementType.cellsRange === rows.type || cElementType.cellsRange3D === rows.type) {
-			// TODO не получилось точно выяснить поведение функции при передаче в нее cellsRange вторым или третьим аргументом, поэтому пока возвращаем ошибку 
+			// TODO couldn't determine exactly how the function behaves when cellsRange is passed as second or third argument, so returning an error for now
 			rows = new cError(cErrorType.wrong_value_type);
 		};
 		rows = rows.tocNumber();
@@ -1052,7 +1059,7 @@ function (window, undefined) {
 		} else if(cElementType.array === columns.type) {
 			columns = columns.getElementRowCol(0, 0);
 		} else if(cElementType.cellsRange === columns.type || cElementType.cellsRange3D === columns.type) {
-			// TODO не получилось точно выяснить поведение функции при передаче в нее cellsRange вторым или третьим аргументом, поэтому пока возвращаем ошибку
+			// TODO couldn't determine exactly how the function behaves when cellsRange is passed as second or third argument, so returning an error for now
 			columns = new cError(cErrorType.wrong_value_type);
 		}
 		columns = columns.tocNumber();
@@ -1097,6 +1104,7 @@ function (window, undefined) {
 	cFILTER.prototype.isXLWS = true;
 	cFILTER.prototype.arrayIndexes = {0: 1, 1: 1};
 	cFILTER.prototype.argumentsType = [argType.reference, argType.reference, argType.any];
+	cFILTER.prototype.enabledToSingle = {"0": true, "1": true};
 	cFILTER.prototype.Calculate = function (arg) {
 		function rangeModeLoop (rows, columns, isColumnMode) {
 			let resArr = new cArray();
@@ -1229,6 +1237,7 @@ function (window, undefined) {
 	cFORMULATEXT.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.area_to_ref;
 	cFORMULATEXT.prototype.argumentsType = [argType.reference];
 	cFORMULATEXT.prototype.arrayIndexes = {0: 1};
+	cFORMULATEXT.prototype.enabledToSingle = {"0": true};
 	cFORMULATEXT.prototype.Calculate = function (arg) {
 
 		var arg0 = arg[0];
@@ -1266,6 +1275,7 @@ function (window, undefined) {
 	cGETPIVOTDATA.prototype.arrayIndexes = {0: 1, 1: 1};
 	cGETPIVOTDATA.prototype.argumentsType = [argType.text, argType.text, [argType.text, argType.any]];
 	cGETPIVOTDATA.prototype.numFormat = AscCommonExcel.cNumFormatNone;
+	cGETPIVOTDATA.prototype.enabledToSingle = {"0": true, "1": true};
 	cGETPIVOTDATA.prototype.Calculate = function (arg) {
 		// arg0 - data_field - pivot table name
 		//The name can be entered exactly like the existing field name or only the root of the name, for example, if you enter "second" in the argument, a field named "Sum of second", "Count of second", etc. will be returned.
@@ -1382,6 +1392,7 @@ function (window, undefined) {
 	cHLOOKUP.prototype.argumentsMax = 4;
 	cHLOOKUP.prototype.arrayIndexes = {0: 1, 1: 1, 2: 1};
 	cHLOOKUP.prototype.argumentsType = [argType.any, argType.number, argType.number, argType.logical];
+	cHLOOKUP.prototype.enabledToSingle = {"1": true};
 	cHLOOKUP.prototype.Calculate = function (arg) {
 		let retArr = new cArray();
 		let error = false;
@@ -1495,6 +1506,7 @@ function (window, undefined) {
 	cINDEX.prototype.numFormat = AscCommonExcel.cNumFormatNone;
 	cINDEX.prototype.arrayIndexes = {0: 1};
 	cINDEX.prototype.argumentsType = [argType.reference, argType.number, argType.number];
+	cINDEX.prototype.enabledToSingle = {"0": true};
 	cINDEX.prototype.Calculate = function (arg) {
 		let arg0 = arg[0], arg1 = arg[1] && (cElementType.empty !== arg[1].type) ? arg[1] : new cNumber(0),
 			arg2 = arg[2] && (cElementType.empty !== arg[2].type) ? arg[2] : new cNumber(0),
@@ -1523,7 +1535,7 @@ function (window, undefined) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 
-		//TODO в дальнейшем необходимо продумать преобразования аргументов на основе argumentsType!!!
+		//TODO in the future, need to think through argument conversions based on argumentsType!!!
 		if (cElementType.array === arg1.type) {
 			arg1 = arg1.getElementRowCol(0,0);
 			if (cElementType.error === arg1.type) {
@@ -1680,7 +1692,7 @@ function (window, undefined) {
 	function cINDIRECT() {
 	}
 
-	//TODO есть разница с MS - в тестовом файле E6
+	//TODO there is a difference with MS - in test file E6
 	//***array-formula***
 	cINDIRECT.prototype = Object.create(cBaseFunction.prototype);
 	cINDIRECT.prototype.constructor = cINDIRECT;
@@ -1792,6 +1804,7 @@ function (window, undefined) {
 	cLOOKUP.prototype.argumentsMax = 3;
 	cLOOKUP.prototype.arrayIndexes = {1: 1, 2: 1};
 	cLOOKUP.prototype.argumentsType = [argType.any, argType.reference, argType.reference];
+	cLOOKUP.prototype.enabledToSingle = {"1": true, "2": true};
 	cLOOKUP.prototype.Calculate = function (arg) {
 
 		if (!AscCommonExcel.bIsSupportDynamicArrays && arg[0].type === cElementType.cellsRange || arg[0].type === cElementType.cellsRange3D) {
@@ -1828,6 +1841,7 @@ function (window, undefined) {
 	cMATCH.prototype.argumentsMax = 3;
 	cMATCH.prototype.arrayIndexes = {1: 1};
 	cMATCH.prototype.argumentsType = [argType.any, argType.number, argType.number];
+	cMATCH.prototype.enabledToSingle = {"1": true, "2": true};
 	cMATCH.prototype.Calculate = function (arg) {
 		return g_oMatchCache.calculate(arg, arguments[1]);
 	};
@@ -1848,6 +1862,7 @@ function (window, undefined) {
 	cOFFSET.prototype.ca = true;
 	cOFFSET.prototype.arrayIndexes = {0: 1};
 	cOFFSET.prototype.argumentsType = [argType.reference, argType.number, argType.number, argType.number, argType.number];
+	cOFFSET.prototype.enabledToSingle = {"0": true};
 	cOFFSET.prototype.Calculate = function (arg) {
 
 		function validBBOX(bbox) {
@@ -1880,9 +1895,9 @@ function (window, undefined) {
 			if (box) {
 				box = box.clone(true);
 
-				//в документации написано, что в отрицательных значений в 4 и 5 аргументах быть не может
-				//но на деле ms рассчитывает такие формулы
-				//сделал аналогично
+				//documentation says that negative values in 4th and 5th arguments are not allowed
+				//but in practice MS calculates such formulas
+				//implemented the same way
 
 				box.c1 = box.c1 + arg2;
 				box.r1 = box.r1 + arg1;
@@ -1962,6 +1977,7 @@ function (window, undefined) {
 	cROW.prototype.argumentsMax = 1;
 	cROW.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.setArrayRefAsArg;
 	cROW.prototype.argumentsType = [argType.reference];
+	cROW.prototype.enabledToSingle = {"0": true};
 	cROW.prototype.Calculate = function (arg) {
 		var bbox;
 		var res;
@@ -2011,6 +2027,7 @@ function (window, undefined) {
 	cROWS.prototype.argumentsMax = 1;
 	cROWS.prototype.arrayIndexes = {0: 1};
 	cROWS.prototype.argumentsType = [argType.reference];
+	cROWS.prototype.enabledToSingle = {"0": true};
 	cROWS.prototype.Calculate = function (arg) {
 		var arg0 = arg[0];
 		var range;
@@ -2052,6 +2069,7 @@ function (window, undefined) {
 	cSORT.prototype.isXLWS = true;
 	cSORT.prototype.arrayIndexes = {0: 1, 1: 1, 2: 1, 3: 1};
 	cSORT.prototype.argumentsType = [argType.reference, argType.number, argType.number, argType.logical];
+	cSORT.prototype.enabledToSingle = {"0": true, "1": true, "2": true};
 	cSORT.prototype.Calculate = function (arg) {
 
 		function arrayHelper (byColArray) {
@@ -2283,6 +2301,7 @@ function (window, undefined) {
 		return 1;
 	};
 	cSORTBY.prototype.argumentsType = [argType.array, argType.array, argType.number, [argType.array, argType.number]];
+	cSORTBY.prototype.enabledToSingle = {"arg0orOdd": true};
 
 	cSORTBY.prototype.Calculate = function (arg) {
 		function arrayHelper (arr, args) {
@@ -2575,7 +2594,7 @@ function (window, undefined) {
 
 		var arg0 = arg[0];
 		if (cElementType.cellsRange === arg0.type) {
-			//TODO возможно стоит на вход функции Calculate в случае применения как формулы массива сразу передавать преобразованный range в array
+			//TODO perhaps when used as array formula, the converted range should be passed as array directly to Calculate function input
 			if(!this.bArrayFormula) {
 				arg0 = arg0.cross(arguments[1]);
 				return arg0;
@@ -2583,7 +2602,7 @@ function (window, undefined) {
 				arg0 = arg0.getMatrix();
 			}
 		} else if(cElementType.cellsRange3D === arg0.type) {
-			//TODO возможно стоит на вход функции в случае применения как формулы массива сразу передавать преобразованный range в array
+			//TODO perhaps when used as array formula, the converted range should be passed as array directly to function input
 			arg0 = arg0.getMatrix()[0];
 		} else if(cElementType.array === arg0.type) {
 			arg0 = arg0.getMatrix();
@@ -2738,6 +2757,7 @@ function (window, undefined) {
 	cTAKE.prototype.isXLFN = true;
 	cTAKE.prototype.argumentsType = [argType.reference, argType.number, argType.number];
 	cTAKE.prototype.arrayIndexes = {0: 1};
+	cTAKE.prototype.enabledToSingle = {"0": true};
 	cTAKE.prototype.Calculate = function (arg) {
 		return takeDrop(arg, arguments[1]);
 	};
@@ -2760,6 +2780,7 @@ function (window, undefined) {
 	cDROP.prototype.isXLFN = true;
 	cDROP.prototype.argumentsType = [argType.reference, argType.number, argType.number];
 	cDROP.prototype.arrayIndexes = {0: 1};
+	cDROP.prototype.enabledToSingle = {"0": true};
 	cDROP.prototype.Calculate = function (arg) {
 		return takeDrop(arg, arguments[1], true);
 	};
@@ -2781,6 +2802,7 @@ function (window, undefined) {
 	cUNIQUE.prototype.arrayIndexes = {0: 1};
 	cUNIQUE.prototype.argumentsType = [argType.reference, argType.logical, argType.logical];
 	cUNIQUE.prototype.isXLFN = true;
+	cUNIQUE.prototype.enabledToSingle = {"0": true};
 	cUNIQUE.prototype.numFormat = AscCommonExcel.cNumFormatNone;
 	cUNIQUE.prototype.Calculate = function (arg) {
 
@@ -3924,6 +3946,22 @@ function (window, undefined) {
 	MatchCache.prototype = Object.create(VHLOOKUPCache.prototype);
 	MatchCache.prototype.constructor = MatchCache;
 	MatchCache.prototype.calculate = function (arg, _arg1) {
+		function normalizeMatchType (isX, val) {
+			if (isX) {
+				return val;
+			}
+
+			if (val === 0) {
+				return val;
+			} else if (val > 1) {
+				return 1;
+			} else if (val < 1) {
+				return -1;
+			} else {
+				return val;
+			}
+		}
+
 		let arg0 = arg[0], arg1 = arg[1], arg2, arg3;
 		let isXMatch = arg[4];
 
@@ -3938,9 +3976,15 @@ function (window, undefined) {
 			}
 			// default values for XMatch
 			arg2 = arg[2] ? arg[2] : new cNumber(0);
-			arg3 = arg[3] ? arg[3] : new cNumber(1);
+
+			arg3 = arg[3];
+			if (!arg[3] || arg[3].type === cElementType.empty) {
+				arg3 = new cNumber(1);
+			}
+
 		} else {
-			if (cElementType.array !== arg1.type && cElementType.cellsRange !== arg1.type && cElementType.cellsRange3D !== arg1.type) {
+			if (cElementType.array !== arg1.type && cElementType.cellsRange !== arg1.type && cElementType.cellsRange3D !== arg1.type &&
+				cElementType.cell !== arg1.type && cElementType.cell3D !== arg1.type) {
 				return new cError(cErrorType.not_available);
 			}	
 			// default values for Match
@@ -3949,7 +3993,7 @@ function (window, undefined) {
 		}
 
 		if (cElementType.cellsRange3D === arg0.type || cElementType.cellsRange === arg0.type) {
-			// TODO пересмотреть поведение функции при получении массива первым аргументом
+			// TODO review function behavior when array is received as first argument
 			arg0 = isXMatch ? arg0.getFullArray().getElementRowCol(0,0) : arg0.cross(_arg1);
 
 			if (cElementType.empty === arg0.type) {
@@ -3985,9 +4029,16 @@ function (window, undefined) {
 		if (cElementType.error === a2Value.type) {
 			return a2Value;
 		}
+
 		a2Value = Math.floor(a2Value.toNumber());
-		
-		if (!(-1 === a2Value || 0 === a2Value || 1 === a2Value || 2 === a2Value)) {
+		a2Value = normalizeMatchType(isXMatch, a2Value);
+
+		// -1 - Exact match or next smallest item
+		// 0 - Exact match (default)
+		// 1 - Exact match or next largest item
+		// 2 - A wildcard match where *, ?, and ~ have  special meaning.
+		// 3 - Regex match based on regex pattern, case sensitive.
+		if (!(-1 === a2Value || 0 === a2Value || 1 === a2Value || 2 === a2Value || 3 === a2Value)) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 		
@@ -4701,6 +4752,7 @@ function (window, undefined) {
 	cVLOOKUP.prototype.numFormat = AscCommonExcel.cNumFormatNone;
 	// cVLOOKUP.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
 	cVLOOKUP.prototype.argumentsType = [argType.any, argType.number, argType.number, argType.logical];
+	cVLOOKUP.prototype.enabledToSingle = {"1": true};
 	cVLOOKUP.prototype.Calculate = function (arg) {
 		let retArr = new cArray();
 		let error = false;
@@ -4759,6 +4811,7 @@ function (window, undefined) {
 	cXLOOKUP.prototype.argumentsType = [argType.any, argType.reference, argType.reference, argType.any, argType.number, argType.number];
 	cXLOOKUP.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.value_replace_area;
 	cXLOOKUP.prototype.isXLFN = true;
+	cXLOOKUP.prototype.enabledToSingle = {"1": true, "2": true, "3": true};
 	cXLOOKUP.prototype.Calculate = function (arg) {
 
 		let arg0 = arg[0], arg1 = arg[1], arg2 = arg[2];
@@ -4791,16 +4844,21 @@ function (window, undefined) {
 			arg3 = new cError(cErrorType.not_available);
 		}
 
-		//arg4/arg5 - только число
+		//arg4/arg5 - number only
 		//[match_mode]
 		//0 - If none found, return #N/A. This is the default.
 		//-1 - If none found, return the next smaller item.
 		//1 - If none found, return the next larger item.
 		//2 - A wildcard match where *, ?, and ~
-		//TODO если аргумент массив/area - результат становится размером с этот массив
-		//TODO либо обрабатывать выше и вызывать эту функцию для каждого элемента массива, либо здесь вычислять этот массив
+		//TODO if argument is array/area - result becomes the size of this array
+		//TODO either handle above and call this function for each array element, or calculate this array here
 		if (!arg4) {
 			arg4 = new cNumber(0);
+		}
+		if (cElementType.cellsRange === arg4.type || cElementType.cellsRange3D === arg4.type) {
+			arg4 = arg4.cross(arguments[1]);
+		} else if (cElementType.array === arg4.type) {
+			arg4 = arg4.getElementRowCol(0, 0);
 		}
 		arg4 = arg4.tocNumber();
 		if (cElementType.error === arg4.type) {
@@ -4812,8 +4870,8 @@ function (window, undefined) {
 			}
 		}
 
-		//TODO если аргумент массив/area - результат становится размером с этот массив
-		//TODO либо обрабатывать выше и вызывать эту функцию для каждого элемента массива, либо здесь вычислять этот массив
+		//TODO if argument is array/area - result becomes the size of this array
+		//TODO either handle above and call this function for each array element, or calculate this array here
 		//[search_mode]
 		//1 - Perform a search starting at the first item. This is the default.
 		//-1 - Perform a reverse search starting at the last item.
@@ -4821,6 +4879,11 @@ function (window, undefined) {
 		//-2 - Perform a binary search that relies on lookup_array being sorted in descending order. If not sorted, invalid results will be returned.
 		if (!arg5) {
 			arg5 = new cNumber(1);
+		}
+		if (cElementType.cellsRange === arg5.type || cElementType.cellsRange3D === arg5.type) {
+			arg5 = arg5.cross(arguments[1]);
+		} else if (cElementType.array === arg5.type) {
+			arg5 = arg5.getElementRowCol(0, 0);
 		}
 		arg5 = arg5.tocNumber();
 		if (cElementType.error === arg5.type) {
@@ -4832,7 +4895,7 @@ function (window, undefined) {
 			}
 		}
 
-		//массив arg1 должен содержать 1 строку или 1 столбец
+		//array arg1 must contain 1 row or 1 column
 		let dimensions1 = arg1.getDimensions();
 		let dimensions2 = arg2.getDimensions();
 		let bVertical = null;
@@ -4867,7 +4930,7 @@ function (window, undefined) {
 						res += arrayOffset;
 					}
 				}
-				//возвращаем из arg2 строку или столбец
+				//return row or column from arg2
 				let _startRange = 0;
 				if (dimensions2.bbox) {
 					_startRange = bVertical ? dimensions2.bbox.r1 : dimensions2.bbox.c1;
@@ -4931,6 +4994,7 @@ function (window, undefined) {
 	cVSTACK.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.array;
 	cVSTACK.prototype.argumentsType = [[argType.reference]];
 	cVSTACK.prototype.isXLFN = true;
+	cVSTACK.prototype.enabledToSingle = {"*": true};
 	cVSTACK.prototype.Calculate = function (arg) {
 		let unionArray;
 		for (let i = 0; i < arg.length; i++) {
@@ -4951,7 +5015,7 @@ function (window, undefined) {
 				matrix = [[arg[i]]];
 			}
 
-			//добавляем по строкам
+			//append by rows
 			for (let j = 0; j < matrix.length; j++) {
 				if (matrix[j]) {
 					if (!unionArray) {
@@ -4988,6 +5052,7 @@ function (window, undefined) {
 	cHSTACK.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.array;
 	cHSTACK.prototype.argumentsType = [[argType.reference]];
 	cHSTACK.prototype.isXLFN = true;
+	cHSTACK.prototype.enabledToSingle = {"*": true};
 	cHSTACK.prototype.Calculate = function (arg) {
 		let unionArray;
 		let startCol = 0;
@@ -5045,9 +5110,9 @@ function (window, undefined) {
 			return argError;
 		}
 
-		//из документации:
+		//from documentation:
 		//Excel returns a #VALUE! when an array constant contains one or more numbers that are not a whole number.
-		//не повторил в мс
+		//could not reproduce in MS
 
 		let arg1 = arg[0];
 		if (arg1.type === arg1.empty) {
@@ -5092,6 +5157,9 @@ function (window, undefined) {
 		arg3 = arg3.tocBool();
 		if (arg3.type === cElementType.error) {
 			return arg3;
+		}
+		if (arg3.type !== cElementType.bool) {
+			return new cError(cErrorType.wrong_value_type);
 		}
 		arg3 = arg3.toBool();
 
@@ -5151,6 +5219,7 @@ function (window, undefined) {
 	cTOROW.prototype.arrayIndexes = {0: 1};
 	cTOROW.prototype.argumentsType = [argType.reference, argType.number, argType.bool];
 	cTOROW.prototype.isXLFN = true;
+	cTOROW.prototype.enabledToSingle = {"0": true};
 	cTOROW.prototype.Calculate = function (arg) {
 		return toRowCol(arg, arguments[1]);
 	};
@@ -5172,6 +5241,7 @@ function (window, undefined) {
 	cTOCOL.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.array;
 	cTOCOL.prototype.argumentsType = [argType.reference, argType.number, argType.bool];
 	cTOCOL.prototype.isXLFN = true;
+	cTOCOL.prototype.enabledToSingle = {"0": true};
 	cTOCOL.prototype.Calculate = function (arg) {
 		return toRowCol(arg, arguments[1], true);
 	};
@@ -5299,6 +5369,7 @@ function (window, undefined) {
 	cWRAPROWS.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.array;
 	cWRAPROWS.prototype.argumentsType = [argType.any/*vector*/, argType.number, argType.any];
 	cWRAPROWS.prototype.isXLFN = true;
+	cWRAPROWS.prototype.enabledToSingle = {"0": true};
 	cWRAPROWS.prototype.Calculate = function (arg) {
 		return wrapRowsCols(arg, arguments[1]);
 	};
@@ -5320,6 +5391,7 @@ function (window, undefined) {
 	cWRAPCOLS.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.array;
 	cWRAPCOLS.prototype.argumentsType = [argType.any/*vector*/, argType.number, argType.any];
 	cWRAPCOLS.prototype.isXLFN = true;
+	cWRAPCOLS.prototype.enabledToSingle = {"0": true};
 	cWRAPCOLS.prototype.Calculate = function (arg) {
 		return wrapRowsCols(arg, arguments[1], true);
 	};
@@ -5340,6 +5412,7 @@ function (window, undefined) {
 	cXMATCH.prototype.arrayIndexes = {1: 1};
 	cXMATCH.prototype.argumentsType = [argType.any, argType.reference, argType.number, argType.number];
 	cXMATCH.prototype.isXLFN = true;
+	cXMATCH.prototype.enabledToSingle = {"1": true};
 	cXMATCH.prototype.Calculate = function (arg) {
 		arg[4] = true;
 		return g_oMatchCache.calculate(arg, arguments[1]);

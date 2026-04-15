@@ -87,7 +87,7 @@
         this.notesLst = [];
 
 
-        this.m_oContentChanges = new AscCommon.CContentChanges(); // список изменений(добавление/удаление элементов)
+        this.m_oContentChanges = new AscCommon.CContentChanges(); // list of changes (adding/removing elements)
     }
     AscFormat.InitClass(CNotesMaster, AscFormat.CBaseFormatObject, AscDFH.historyitem_type_NotesMaster);
 

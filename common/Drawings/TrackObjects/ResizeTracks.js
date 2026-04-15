@@ -165,7 +165,7 @@ SHAPE_EXT["flowChartDelay"] = 612648/36000;
 SHAPE_EXT["flowChartMagneticTape"] = 612648/36000;
 SHAPE_EXT["actionButtonHome"] = 1042416/36000;
 
-var MIN_SHAPE_SIZE = 1.27;//размер меньше которого нельзя уменшить автофигуру или картинку по горизонтали или вертикали
+var MIN_SHAPE_SIZE = 1.27;//minimum size below which the autoshape or image cannot be reduced horizontally or vertically
 
 function CreatePenBrushForChartTrack()
 {
@@ -527,26 +527,26 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
             }
         };
         this.correctKDForPdfFreeText = function(kd1, kd2) {
-            // точка коннектора соединённая с перпендикулярной линией должна двигаться только по одной из осей
-            // этот метод обрабатывает данный случай и корректирует координаты
+            // connector point connected to a perpendicular line should move only along one axis
+            // this method handles this case and adjusts the coordinates
 
             let oFreeText               = this.originalObject.group;
             let oFreeTextRect           = oFreeText.GetTextBoxRect().map(function(measure) {
                 return measure * g_dKoef_pt_to_mm;
             });
             let aCallout                = oFreeText.GetCallout();
-            let oExitPoint              = undefined; // перпендикулярная линия выходящая из freetext аннотации
-            let oCalloutArrowPt         = undefined; // x2, y2 точка линии (точка начала стрелки)
-            let oCalloutArrowEndPt      = undefined; // x1, y1 точка линии (точка конца стрелки)
+            let oExitPoint              = undefined; // perpendicular line exiting from freetext annotation
+            let oCalloutArrowPt         = undefined; // x2, y2 line point (arrow start point)
+            let oCalloutArrowEndPt      = undefined; // x1, y1 line point (arrow end point)
 
             if (aCallout && aCallout.length == 6) {
-                // точка выхода callout из аннотации
+                // callout exit point from annotation
                 oExitPoint = {
                     x: (aCallout[2 * 2]) * g_dKoef_pt_to_mm,
                     y: (aCallout[2 * 2 + 1]) * g_dKoef_pt_to_mm
                 };
 
-                // x2, y2 линии
+                // x2, y2 of line
                 oCalloutArrowPt = {
                     x: aCallout[1 * 2] * g_dKoef_pt_to_mm,
                     y: (aCallout[1 * 2 + 1]) * g_dKoef_pt_to_mm
@@ -562,7 +562,7 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
             }
 
             if (this.numberHandle == 4) {
-                // если x начала стрелки находится в пределах ректа аннотации то фиксируем x
+                // if arrow start x is within annotation rect bounds then fix x
                 if (oCalloutArrowPt.x < oFreeTextRect[0] || oCalloutArrowPt.x > oFreeTextRect[2]) {
                     kd2 = 1;
                 }
@@ -583,9 +583,9 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
             if (!aCalloutMM)
                 return {x: x, y: y};
 
-            // x1, y1 линии callout
+            // x1, y1 of callout line
             if (this.numberHandle == 0) {
-                // если конец стрелки внутри textbox то поднимаем выше/ниже
+                // if arrow end is inside textbox then move it up/down
                 if (x >= aTextBoxRectMM[0] && x <= aTextBoxRectMM[2] && y >= aTextBoxRectMM[1] && y <= aTextBoxRectMM[3]) {
                     if (y <= aTextBoxRectMM[1] + (aTextBoxRectMM[3] - aTextBoxRectMM[1]) / 2) {
                         y = aTextBoxRectMM[1] - 10;
@@ -595,9 +595,9 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
                     }
                 }
             }
-            // x2, y2 линии
+            // x2, y2 of line
             else if (this.numberHandle == 4) {
-                // фиксируем x или y в зависимости от положения стрелки
+                // fix x or y depending on arrow position
                 switch (nExitPos) {
                     case AscPDF.CALLOUT_EXIT_POS.left:
                     case AscPDF.CALLOUT_EXIT_POS.right:
@@ -1445,6 +1445,9 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
                                         let nColIdx = oParagraph.ColumnNum || 0;
                                         let contentWidth = oSectPr.GetColumnWidth(nColIdx);
                                         let newPct = (this.resizedExtX / scale_coefficients.cx) / contentWidth * 1000;
+                                        if (newPct > 1000) {
+                                            newPct = 1000;
+                                        }
                                         let oGeom = this.originalObject.getGeometry();
                                         if (oGeom) {
                                             let oNewHR = oHR.createDuplicate();

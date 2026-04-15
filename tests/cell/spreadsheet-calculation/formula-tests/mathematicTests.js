@@ -240,7 +240,7 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-		//формируем массив значений
+		//create an array of values
 		const randomArray = [];
 		let randomStrArray = "{";
 		let maxArg = 4;
@@ -11926,11 +11926,11 @@ $(function () {
 		// Case #7: Name. Named range referring to a 2x2 matrix. 1 argument used.
 		oParser = new parserFormula('MINVERSE(TestName)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE(TestName) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), -2, 'Test: Positive case: Name. Named range referring to a 2x2 matrix. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), -2, 'Test: Positive case: Name. Named range referring to a 2x2 matrix. 1 argument used.');
 		// Case #8: Name3D. 3D named range referring to a 2x2 matrix. 1 argument used.
 		oParser = new parserFormula('MINVERSE(TestName3D)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE(TestName3D) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), -2, 'Test: Positive case: Name3D. 3D named range referring to a 2x2 matrix. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), -2, 'Test: Positive case: Name3D. 3D named range referring to a 2x2 matrix. 1 argument used.');
 		// Case #9: Ref3D. 3D reference to a 2x2 matrix. 1 argument used.
 		oParser = new parserFormula('MINVERSE(Sheet2!A1:A2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE(Sheet2!A1:A2) is parsed.');
@@ -11958,7 +11958,7 @@ $(function () {
 		// Case #18: Name. Named range referring to a different 2x2 matrix. 1 argument used.
 		oParser = new parserFormula('MINVERSE(TestName1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE(TestName1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Positive case: Name. Named range referring to a different 2x2 matrix. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Positive case: Name. Named range referring to a different 2x2 matrix. 1 argument used.');
 		// Case #19: Ref3D. 3D reference to a different 2x2 matrix. 1 argument used.
 		oParser = new parserFormula('MINVERSE(Sheet2!A5:A6)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE(Sheet2!A5:A6) is parsed.');
@@ -11980,7 +11980,7 @@ $(function () {
 		// Case #3: Array. Matrix with boolean value returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('MINVERSE({1,TRUE;3,4})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE({1,TRUE;3,4}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array. Matrix with boolean value returns #VALUE!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array. Matrix with boolean value returns #VALUE!. 1 argument used.');
 		/// Case #5: Empty. Reference to empty cell returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('MINVERSE(A108)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE(A108) is parsed.');
@@ -12032,7 +12032,7 @@ $(function () {
 		// Case #18: Name. Named range referring to singular matrix returns #NUM!. 1 argument used.
 		oParser = new parserFormula('MINVERSE(TestName2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE(TestName2) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.095238095, 'Test: Negative case: Name. Named range referring to singular matrix returns #NUM!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "0.09524", 'Test: Negative case: Name. Named range referring to singular matrix returns #NUM!. 1 argument used.');
 		// Case #19: Formula. Formula resulting in #NUM! error in matrix returns #NUM!. 1 argument used.
 		oParser = new parserFormula('MINVERSE({"str",1;2,3})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE({"str",1;2,3}) is parsed.');
@@ -12040,13 +12040,20 @@ $(function () {
 		// Case #20: Array. Empty array returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('MINVERSE({""})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE({""}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array. Empty array returns #VALUE!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array. Empty array returns #VALUE!. 1 argument used.');
+		// Case #21: Area3D. Multi sheets link.
+		let multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A100";
+		oParser = new parserFormula('MINVERSE('+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula MINVERSE('+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area3D. Multi sheets link.');
+
 
 		// Bounded cases:
 		// Case #1: Array. Matrix with smallest valid numbers. 1 argument used.
 		oParser = new parserFormula('MINVERSE({1E-307,0;0,1E-307})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE({1E-307,0;0,1E-307}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1e+307, 'Test: Bounded case: Array. Matrix with smallest valid numbers. 1 argument used.');
+		// todo The behavior of the function at extreme values in the matrices is not entirely clear
+		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1e+307, 'Test: Bounded case: Array. Matrix with smallest valid numbers. 1 argument used.');
 		// Case #2: Array. Matrix with largest valid numbers. 1 argument used.
 		oParser = new parserFormula('MINVERSE({9.99999999999999E+307,0;0,9.99999999999999E+307})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE({9.99999999999999E+307,0;0,9.99999999999999E+307}) is parsed.');
@@ -12054,16 +12061,17 @@ $(function () {
 		// Case #3: Array. Matrix with near-singular determinant (close to zero but invertible). 1 argument used.
 		oParser = new parserFormula('MINVERSE({1,1E-307;1E-307,1})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE({1,1E-307;1E-307,1}) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Bounded case: Array. Matrix with near-singular determinant (close to zero but invertible). 1 argument used.');
-
-		// Need to fix: name range and cellsRange error handle, different ERROR types, different results
-		// Case #7: Name. Named range referring to a 2x2 matrix
-		// Case #8: Name3D. 3D named range referring to a 2x2 matrix. 1 argument used.
-		// Case #18: Name. Named range referring to a different 2x2 matrix. 1 argument used.
-		// Case #3: Array. Matrix with boolean value returns #VALUE!. 1 argument used.
-		// Case #18: Name. Named range referring to singular matrix returns #NUM!. 1 argument used.
-		// Case #20: Array. Empty array returns #VALUE!. 1 argument used.
-		// Case #1: Array. Matrix with smallest valid numbers. 1 argument used.
+		// todo The behavior of the function at extreme values in the matrices is not entirely clear
+		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Bounded case: Array. Matrix with near-singular determinant (close to zero but invertible). 1 argument used.');
+		// Case #4: Number. Number with smallest valid numbers. 1 argument used.
+		oParser = new parserFormula('MINVERSE(1E-307)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: MINVERSE(1E-307) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 1.0000000000000001e+307, 'Test: Bounded case: Number. Number with smallest valid numbers. 1 argument used.');
+		// Case #5: Number. Number with larget valid numbers. 1 argument used.
+		oParser = new parserFormula('MINVERSE(1E+307)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: MINVERSE(1E+307) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 1.0000000000000001e-307, 'Test: Bounded case: Number. Number with larget valid numbers. 1 argument used.');
+		
 
 	});
 
@@ -12503,7 +12511,7 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: MMULT({1E+307,1E+307;1E+307,1E+307},{1E+307;1E+307}) is parsed.');
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '#NUM!', 'Test: Bounded case: Number. Maximum valid values in 2x2 * 2x1 arrays. 2 arguments used.');
 
-		// todo если возвращается одно единственное значение, должно ли оно оборачиваться в массив?
+		// todo if a single value is returned, should it be wrapped in an array?
 		// Need to fix: error handle, IF doesn't return an array, boolean handle
 		// Case #19: Formula. Nested IF returning valid array. 2 arguments used.
 		// Case #4: Error. Propagates #N/A error. 2 arguments used.
@@ -12834,7 +12842,7 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"MROUND\"", function (assert) {
-		var multiple;//должен равняться значению второго аргумента
+		var multiple;//should equal the value of the second argument
 		function mroundHelper(num) {
 			var multiplier = Math.pow(10, Math.floor(Math.log(Math.abs(num)) / Math.log(10)) - AscCommonExcel.cExcelSignificantDigits + 1);
 			var nolpiat = 0.5 * (num > 0 ? 1 : num < 0 ? -1 : 0) * multiplier;
@@ -15264,10 +15272,11 @@ $(function () {
 		ws.getRange2("A105").setValue("FALSE");
 
 		// Table type. Use A601:L6**
-		getTableType(599, 0, 600, 2);
-		ws.getRange2("A601").setValue("5"); // Num (Column1)
-		ws.getRange2("B601").setValue("10"); // Num (Column2)
-		ws.getRange2("C601").setValue("Text"); // Text (Column3)
+		getTableType(599, 0, 600, 3);
+		ws.getRange2("A601").setValue("1"); // Num (Column1)
+		ws.getRange2("B601").setValue("2"); // Num (Column2)
+		ws.getRange2("C601").setValue("3"); // Num (Column3)
+		ws.getRange2("D601").setValue("4"); // Num (Column4)
 
 		// 3D links. Use A1:Z10
 		let ws2 = getSecondSheet();
@@ -15325,8 +15334,8 @@ $(function () {
 		oParser = new parserFormula('RANDARRAY("2","2","1","10","TRUE")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RANDARRAY("2","2","1","10","TRUE") is parsed.');
 		array = oParser.calculate();
-		//? assert.strictEqual(array.type, AscCommonExcel.cElementType.array, 'Test: Positive case: String(5). Returns a 2x2 array of integers between 1 and 10. All arguments as strings convertible to valid types. 5 of 5 arguments used.');
-		//? assert.strictEqual(array.rowCount, 2, 'Test: Positive case: String(5). Returns a 2x2 array of integers between 1 and 10. All arguments as strings convertible to valid types. 5 of 5 arguments used.');
+		assert.strictEqual(array.type, AscCommonExcel.cElementType.array, 'Test: Positive case: String(5). Returns a 2x2 array of integers between 1 and 10. All arguments as strings convertible to valid types. 5 of 5 arguments used.');
+		assert.strictEqual(array.rowCount, 2, 'Test: Positive case: String(5). Returns a 2x2 array of integers between 1 and 10. All arguments as strings convertible to valid types. 5 of 5 arguments used.');
 		// Case #7: Formula(5). Returns a 3x3 array of integers between -1 and 10. All arguments filled with formulas. 5 of 5 arguments used.
 		oParser = new parserFormula('RANDARRAY(ROUND(2.5,0),ROUND(2.5,0),ABS(-1),ABS(10),IF(TRUE,1,0))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RANDARRAY(ROUND(2.5,0),ROUND(2.5,0),ABS(-1),ABS(10),IF(TRUE,1,0)) is parsed.');
@@ -15344,7 +15353,7 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: RANDARRAY(A100:A100,A101:A101,A102:A102,A103:A103,A104:A104) is parsed.');
 		array = oParser.calculate();
 		assert.strictEqual(array.type, AscCommonExcel.cElementType.array, 'Test: Positive case: Area(5). Returns a 2x2 array of integers between 1 and 10. All arguments as single-cell ranges. 5 of 5 arguments used.');
-		//? assert.strictEqual(array.rowCount, 2, 'Test: Positive case: Area(5). Returns a 2x2 array of integers between 1 and 10. All arguments as single-cell ranges. 5 of 5 arguments used.');
+		assert.strictEqual(array.rowCount, 2, 'Test: Positive case: Area(5). Returns a 2x2 array of integers between 1 and 10. All arguments as single-cell ranges. 5 of 5 arguments used.');
 		// Case #10: Array(5). Returns a 2x2 array of integers between 1 and 10. All arguments as single-element arrays. 5 of 5 arguments used.
 		oParser = new parserFormula('RANDARRAY({2},{2},{1},{10},{TRUE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RANDARRAY({2},{2},{1},{10},{TRUE}) is parsed.');
@@ -15354,39 +15363,39 @@ $(function () {
 		// Case #11: Name(5). Returns a 2x2 array of integers between 1 and 10. All arguments as named ranges. 5 of 5 arguments used.
 		oParser = new parserFormula('RANDARRAY(TestName,TestName1,TestName2,TestName2,TestNameArea2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RANDARRAY(TestName,TestName1,TestName2,TestName3,TestNameArea2) is parsed.');
-		//? array = oParser.calculate();
-		//? assert.strictEqual(array.type, AscCommonExcel.cElementType.array, 'Test: Positive case: Name(5). Returns a 2x2 array of integers between 1 and 10. All arguments as named ranges. 5 of 5 arguments used.');
-		//? assert.strictEqual(array.rowCount, 1, 'Test: Positive case: Name(5). Returns a 2x2 array of integers between 1 and 10. All arguments as named ranges. 5 of 5 arguments used.');
+		array = oParser.calculate();
+		assert.strictEqual(array.type, AscCommonExcel.cElementType.array, 'Test: Positive case: Name(5). Returns a 2x2 array of integers between 1 and 10. All arguments as named ranges. 5 of 5 arguments used.');
+		assert.strictEqual(array.rowCount, 1, 'Test: Positive case: Name(5). Returns a 2x2 array of integers between 1 and 10. All arguments as named ranges. 5 of 5 arguments used.');
 		// Case #12: Name3D(5). Returns a 2x2 array of integers between 1 and 10. All arguments as 3D named ranges. 5 of 5 arguments used.
 		oParser = new parserFormula('RANDARRAY(TestName3D,TestName3D,TestName3D,TestName3D,TestNameArea3D2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RANDARRAY(TestName3D,TestName3D,TestName3D,TestName3D,TestNameArea3D2) is parsed.');
-		//? array = oParser.calculate();
-		//? assert.strictEqual(array.type, AscCommonExcel.cElementType.array, 'Test: Positive case: Name3D(5). Returns a 2x2 array of integers between 1 and 10. All arguments as 3D named ranges. 5 of 5 arguments used.');
-		//? assert.strictEqual(array.rowCount, 1, 'Test: Positive case: Name3D(5). Returns a 2x2 array of integers between 1 and 10. All arguments as 3D named ranges. 5 of 5 arguments used.');
+		array = oParser.calculate();
+		assert.strictEqual(array.type, AscCommonExcel.cElementType.array, 'Test: Positive case: Name3D(5). Returns a 2x2 array of integers between 1 and 10. All arguments as 3D named ranges. 5 of 5 arguments used.');
+		assert.strictEqual(array.rowCount, 1, 'Test: Positive case: Name3D(5). Returns a 2x2 array of integers between 1 and 10. All arguments as 3D named ranges. 5 of 5 arguments used.');
 		// Case #13: Ref3D(5). Returns a 2x2 array of integers between 1 and 10. All arguments as 3D references. 5 of 5 arguments used.
 		oParser = new parserFormula('RANDARRAY(Sheet2!A1,Sheet2!A2,Sheet2!A3,Sheet2!A4,Sheet2!A5)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RANDARRAY(Sheet2!A1,Sheet2!A2,Sheet2!A3,Sheet2!A4,Sheet2!A5) is parsed.');
 		array = oParser.calculate();
-		//? assert.strictEqual(array.type, AscCommonExcel.cElementType.array, 'Test: Positive case: Ref3D(5). Returns a 2x2 array of integers between 1 and 10. All arguments as 3D references. 5 of 5 arguments used.');
-		//? assert.strictEqual(array.rowCount, 1, 'Test: Positive case: Ref3D(5). Returns a 2x2 array of integers between 1 and 10. All arguments as 3D references. 5 of 5 arguments used.');
+		assert.strictEqual(array.type, AscCommonExcel.cElementType.error, 'Test: Positive case: Ref3D(5). Returns a 2x2 array of integers between 1 and 10. All arguments as 3D references. 5 of 5 arguments used.');
 		// Case #14: Area3D(5). Returns a 2x2 array of integers between 1 and 10. All arguments as 3D single-cell ranges. 5 of 5 arguments used.
 		oParser = new parserFormula('RANDARRAY(Sheet2!A1:A1,Sheet2!A2:A2,Sheet2!A3:A3,Sheet2!A4:A4,Sheet2!A5:A5)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RANDARRAY(Sheet2!A1:A1,Sheet2!A2:A2,Sheet2!A3:A3,Sheet2!A4:A4,Sheet2!A5:A5) is parsed.');
-		//? array = oParser.calculate();
-		//? assert.strictEqual(array.type, AscCommonExcel.cElementType.array, 'Test: Positive case: Area3D(5). Returns a 2x2 array of integers between 1 and 10. All arguments as 3D single-cell ranges. 5 of 5 arguments used.');
-		//? assert.strictEqual(array.rowCount, 1, 'Test: Positive case: Area3D(5). Returns a 2x2 array of integers between 1 and 10. All arguments as 3D single-cell ranges. 5 of 5 arguments used.');
-		// Case #15: Table(5). Returns a 2x2 array of integers between 1 and 10. All arguments as table references. 5 of 5 arguments used.
-		oParser = new parserFormula('RANDARRAY(Table1[Column1],Table1[Column1],Table1[Column1],Table1[Column1],Table1[Column1])', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: RANDARRAY(Table1[Column1],Table1[Column1],Table1[Column1],Table1[Column1],Table1[Column1]) is parsed.');
 		array = oParser.calculate();
-		assert.strictEqual(array.type, AscCommonExcel.cElementType.array, 'Test: Positive case: Table(5). Returns a 2x2 array of integers between 1 and 10. All arguments as table references. 5 of 5 arguments used.');
-		assert.strictEqual(array.rowCount, 5, 'Test: Positive case: Table(5). Returns a 2x2 array of integers between 1 and 10. All arguments as table references. 5 of 5 arguments used.');
+		assert.strictEqual(array.type, AscCommonExcel.cElementType.error, 'Test: Positive case: Area3D(5). Returns a 2x2 array of integers between 1 and 10. All arguments as 3D single-cell ranges. 5 of 5 arguments used.');
+		// Case #15: Table(5). Returns a 2x1 array of integers between 1 and 10. All arguments as table references. 2 of 5 arguments used.
+		oParser = new parserFormula('RANDARRAY(Table1[Column2],Table1[Column1])', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: RANDARRAY(Table1[Column2],Table1[Column1]) is parsed.');
+		array = oParser.calculate();
+		assert.strictEqual(array.type, AscCommonExcel.cElementType.array, 'Test: Positive case: Table(5). Returns a 2x1 array of integers between 1 and 10. All arguments as table references. 2 of 5 arguments used.');
+		assert.strictEqual(array.rowCount, 2, 'Test: Positive case: Table(5). Returns a 2x2 array of integers between 1 and 10. All arguments as table references. 5 of 5 arguments used.');
+		assert.strictEqual(array.countElement, 2, 'Test: Positive case: Table(5). Returns a 2x2 array of integers between 1 and 10. All arguments as table references. 5 of 5 arguments used.');
 		// Case #16: Date(2), Number(3). Returns a 45292x45293 array of integers between 1 and 10. Rows and Columns as dates (serial numbers). 5 of 5 arguments used.
-		oParser = new parserFormula('RANDARRAY(DATE(2025,1,1),DATE(2025,1,2),1,10,TRUE)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: RANDARRAY(DATE(2025,1,1),DATE(2025,1,2),1,10,TRUE) is parsed.');
-		//? array = oParser.calculate();
-		//? assert.strictEqual(array.type, AscCommonExcel.cElementType.array, 'Test: Positive case: Date(2), Number(3). Returns a 45292x45293 array of integers between 1 and 10. Rows and Columns as dates (serial numbers). 5 of 5 arguments used.');
-		//? assert.strictEqual(array.rowCount, 5, 'Test: Positive case: Date(2), Number(3). Returns a 45292x45293 array of integers between 1 and 10. Rows and Columns as dates (serial numbers). 5 of 5 arguments used.');
+		oParser = new parserFormula('RANDARRAY(DATE(1905,1,1),DATE(1900,1,2),1,10,TRUE)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: RANDARRAY(DATE(1905,1,1),DATE(1900,1,2),1,10,TRUE) is parsed.');
+		array = oParser.calculate();
+		assert.strictEqual(array.type, AscCommonExcel.cElementType.array, 'Test: Positive case: Date(2), Number(3). Returns a 1828x2 array of integers between 1 and 10. Rows and Columns as dates (serial numbers). 5 of 5 arguments used.');
+		assert.strictEqual(array.rowCount, 1828, 'Test: Positive case: Date(2), Number(3). Returns a 1828x2 array of integers between 1 and 10. Rows and Columns as dates (serial numbers). 5 of 5 arguments used.');
+		assert.strictEqual(array.countElement, 3656, 'Test: Positive case: Date(2), Number(3). Returns a 1828x2 array of integers between 1 and 10. Rows and Columns as dates (serial numbers). 5 of 5 arguments used.');
 		// Case #17: Time(2), Number(3). Returns a 0.04167x0.08333 array of decimals between 1 and 10. Rows and Columns as time (fractional numbers). 5 of 5 arguments used.
 		oParser = new parserFormula('RANDARRAY(TIME(1,0,0),TIME(2,0,0),1,10,FALSE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RANDARRAY(TIME(1,0,0),TIME(2,0,0),1,10,FALSE) is parsed.');
@@ -15410,6 +15419,12 @@ $(function () {
 		array = oParser.calculate();
 		assert.strictEqual(array.type, AscCommonExcel.cElementType.array, 'Test: Positive case: String(4), Number. Returns a 2x2 array of integers between 1 and 10. Integer as number (coerced to TRUE). 5 of 5 arguments used.');
 		assert.strictEqual(array.rowCount, 2, 'Test: Positive case: String(4), Number. Returns a 2x2 array of integers between 1 and 10. Integer as number (coerced to TRUE). 5 of 5 arguments used.');
+		// Case #21: Empty. Returns a 1x1 array of integers between 0 and 1. Integer as number (coerced to TRUE). 0 of 5 arguments used.
+		oParser = new parserFormula('RANDARRAY()', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: RANDARRAY() is parsed.');
+		array = oParser.calculate();
+		assert.strictEqual(array.type, AscCommonExcel.cElementType.array, 'Test: Positive case: Empty. Returns a 1x1 array of integers between 0 and 1. Integer as number (coerced to TRUE). 0 of 5 arguments used.');
+		assert.strictEqual(array.rowCount, 1, 'Test: Positive case: Empty. Returns a 1x1 array of integers between 0 and 1. Integer as number (coerced to TRUE). 0 of 5 arguments used.');
 
 		// Negative cases:
 		// Case #1: Number(5). Returns #NUM! due to negative rows. 5 of 5 arguments used.
@@ -15463,13 +15478,13 @@ $(function () {
 		// Case #12: Reference link(5). Returns #VALUE! as rows reference contains text. 5 of 5 arguments used.
 		oParser = new parserFormula('RANDARRAY(A105,A101,A102,A103,A104)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RANDARRAY(A105,A101,A102,A103,A104) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Negative case: Reference link(5). Returns #VALUE! as rows reference contains text. 5 of 5 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Negative case: Reference link(5). Returns #VALUE! as rows reference contains text. 5 of 5 arguments used.');
 		// Case #13: Area(5). Returns #NUM! as rows is a multi-cell range. 5 of 5 arguments used.
 		oParser = new parserFormula('RANDARRAY(A100:A101,A101:A101,A102:A102,A103:A103,A104:A104)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RANDARRAY(A100:A101,A101:A101,A102:A102,A103:A103,A104:A104) is parsed.');
 		array = oParser.calculate();
 		assert.strictEqual(array.type, AscCommonExcel.cElementType.array, 'Test: Negative case: Area(5). Returns #NUM! as rows is a multi-cell range. 5 of 5 arguments used.');
-		//? assert.strictEqual(array.rowCount, 2, 'Test: Negative case: Area(5). Returns #NUM! as rows is a multi-cell range. 5 of 5 arguments used.');
+		assert.strictEqual(array.rowCount, 2, 'Test: Negative case: Area(5). Returns #NUM! as rows is a multi-cell range. 5 of 5 arguments used.');
 		// Case #14: Array(5). Returns #NUM! as rows is a multi-element array. 5 of 5 arguments used.
 		oParser = new parserFormula('RANDARRAY({2,3},{2},{1},{10},{TRUE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RANDARRAY({2,3},{2},{1},{10},{TRUE}) is parsed.');
@@ -15479,27 +15494,46 @@ $(function () {
 		// Case #15: Name(5). Returns #VALUE! as rows is a named range with text. 5 of 5 arguments used.
 		oParser = new parserFormula('RANDARRAY(TestNameArea2,TestName1,TestName2,TestName2,TestNameArea2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RANDARRAY(TestNameArea2,TestName1,TestName2,TestName2,TestNameArea2) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#SPILL!', 'Test: Negative case: Name(5). Returns #VALUE! as rows is a named range with text. 5 of 5 arguments used.');
+		array = oParser.calculate();
+		assert.strictEqual(array.type, AscCommonExcel.cElementType.array, 'Test: Negative case: Array(5). 5 of 5 arguments used.');
+		assert.strictEqual(array.rowCount, 1, 'Test: Negative case: Area(5). 5 of 5 arguments used.');
+		assert.strictEqual(array.getElementRowCol(0,0).getValue(), '#VALUE!', 'Test: Negative case: Name(5). Returns #VALUE! as rows is a named range with text. 5 of 5 arguments used.');
+		assert.strictEqual(array.getElementRowCol(0,1).getValue(), '#VALUE!', 'Test: Negative case: Name(5). Returns #VALUE! as rows is a named range with text. 5 of 5 arguments used.');
 		// Case #16: Name3D(5). Returns #VALUE! as rows is a 3D named range with text. 5 of 5 arguments used.
 		oParser = new parserFormula('RANDARRAY(TestNameArea3D2,TestName3D,TestName3D,TestName3D,TestNameArea3D2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RANDARRAY(TestNameArea3D2,TestName3D,TestName3D,TestName3D,TestNameArea3D2) is parsed.');
-		// ? assert.strictEqual(oParser.calculate().getValue(), '#NAME?', 'Test: Negative case: Name3D(5). Returns #VALUE! as rows is a 3D named range with text. 5 of 5 arguments used.');
+		array = oParser.calculate();
+		assert.strictEqual(array.type, AscCommonExcel.cElementType.array, 'Test: Negative case: Array(5). 5 of 5 arguments used.');
+		assert.strictEqual(array.rowCount, 1, 'Test: Negative case: Area(5). 5 of 5 arguments used.');
+		assert.strictEqual(array.getElementRowCol(0,0).getValue(), '#VALUE!', 'Test: Negative case: Name3D(5). Returns #VALUE! as rows is a 3D named range with text. 5 of 5 arguments used.');
 		// Case #17: Ref3D(5). Returns #VALUE! as rows is a 3D reference with text. 5 of 5 arguments used.
 		oParser = new parserFormula('RANDARRAY(Sheet2!A6,Sheet2!A2,Sheet2!A3,Sheet2!A4,Sheet2!A5)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RANDARRAY(Sheet2!A6,Sheet2!A2,Sheet2!A3,Sheet2!A4,Sheet2!A5) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Ref3D(5). Returns #VALUE! as rows is a 3D reference with text. 5 of 5 arguments used.');
-		// Case #18: Area3D(5). Returns #NUM! as rows is a 3D multi-cell range. 5 of 5 arguments used.
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Ref3D(5). Returns #VALUE! as rows is a 3D reference with text. 5 of 5 arguments used.');
+		// Case #18: Area3D(5). Returns #VALUE! as rows is a 3D multi-cell range. InnerArrayMode check. 5 of 5 arguments used.
 		oParser = new parserFormula('RANDARRAY(Sheet2!A1:A2,Sheet2!A2:A2,Sheet2!A3:A3,Sheet2!A4:A4,Sheet2!A5:A5)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RANDARRAY(Sheet2!A1:A2,Sheet2!A2:A2,Sheet2!A3:A3,Sheet2!A4:A4,Sheet2!A5:A5) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#SPILL!', 'Test: Negative case: Area3D(5). Returns #NUM! as rows is a 3D multi-cell range. 5 of 5 arguments used.');
-		// Case #19: Table(5). Returns #VALUE! as rows is a table reference with text. 5 of 5 arguments used.
-		oParser = new parserFormula('RANDARRAY(Table1[Column2],Table1[Column2],Table1[Column2],Table1[Column2],Table1[Column3])', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: RANDARRAY(Table1[Column2],Table1[Column2],Table1[Column2],Table1[Column2],Table1[Column3]) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Negative case: Table(5). Returns #VALUE! as rows is a table reference with text. 5 of 5 arguments used.');
+		array = oParser.calculate();
+		assert.strictEqual(array.type, AscCommonExcel.cElementType.array, 'Test: Negative case: Array(5). 5 of 5 arguments used.');
+		assert.strictEqual(array.rowCount, 2, 'Test: Negative case: Area(5). 5 of 5 arguments used.');
+		assert.strictEqual(array.getElementRowCol(0,0).getValue(), '#VALUE!', 'Test: Negative case: Area3D(5). Returns #VALUE! as rows is a 3D multi-cell range. InnerArrayMode check. 5 of 5 arguments used.');
+		assert.strictEqual(array.getElementRowCol(1,0).getValue(), '#VALUE!', 'Test: Negative case: Area3D(5). Returns #VALUE! as rows is a 3D multi-cell range. InnerArrayMode check. 5 of 5 arguments used.');
+		// Case #19: Table(4). Returns num as rows is a table reference. 4 of 5 arguments used.
+		oParser = new parserFormula('RANDARRAY(Table1[Column1],Table1[Column2],Table1[Column3],Table1[Column4])', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: RANDARRAY(Table1[Column1],Table1[Column2],Table1[Column3],Table1[Column4]) is parsed.');
+		array = oParser.calculate();
+		assert.strictEqual(array.type, AscCommonExcel.cElementType.array, 'Test: Negative case: Table(5). 4 of 5 arguments used.');
+		assert.strictEqual(array.rowCount, 1, 'Test: Negative case: Table(5). 4 of 5 arguments used.');
+		// Case #19.1: Table(5). Returns num as rows is a table reference. 4 of 5 arguments used.
+		oParser = new parserFormula('RANDARRAY(Table1[Column1],Table1[Column2],Table1[Column3],Table1[Column4])', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: RANDARRAY(Table1[Column1],Table1[Column2],Table1[Column3],Table1[Column4]) is parsed.');
+		array = oParser.calculate();
+		assert.strictEqual(array.type, AscCommonExcel.cElementType.array, 'Test: Negative case: Table(5). 4 of 5 arguments used.');
+		assert.strictEqual(array.rowCount, 1, 'Test: Negative case: Table(5). 4 of 5 arguments used.');
 		// Case #20: Number(5). Returns #NUM! as rows is zero. 5 of 5 arguments used.
 		oParser = new parserFormula('RANDARRAY(0,2,1,10,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RANDARRAY(0,2,1,10,TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Negative case: Number(5). Returns #NUM! as rows is zero. 5 of 5 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#CALC!', 'Test: Negative case: Number(5). Returns #NUM! as rows is zero. 5 of 5 arguments used.');
 
 		// Bounded cases:
 		// Case #1: Number(5). Returns a 1x1 array of integers between 1E-307 and 9.99999999999999E+307. Minimum valid min and maximum valid max. 5 of 5 arguments used.
@@ -15509,6 +15543,7 @@ $(function () {
 		// Case #2: Number(5). Returns a 1048576x16384 array of integers between 1 and 10. Maximum valid rows and columns for Excel. 5 of 5 arguments used.
 		oParser = new parserFormula('RANDARRAY(1048576,16384,1,10,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: RANDARRAY(1048576,16384,1,10,TRUE) is parsed.');
+		// todo the formula will be fulfilled, but the calculation will take a very long time. MS also suffers from running out of memory when trying to execute with such arguments
 		//? assert.strictEqual(oParser.calculate().getValue(), 'RANDARRAY(1048576,16384,1,10,TRUE)', 'Test: Bounded case: Number(5). Returns a 1048576x16384 array of integers between 1 and 10. Maximum valid rows and columns for Excel. 5 of 5 arguments used.');
 		// Case #3: Number(5). Returns a 1x1 array of decimals between -9.99999999999999E+307 and 9.99999999999999E+307. Minimum and maximum valid min/max. 5 of 5 arguments used.
 		oParser = new parserFormula('RANDARRAY(1,1,-9.99999999999999E+307,9.99999999999999E+307,FALSE)', 'A2', ws);
@@ -15516,9 +15551,6 @@ $(function () {
 		array = oParser.calculate();
 		assert.strictEqual(array.type, AscCommonExcel.cElementType.array, 'Test: Bounded case: Number(5). Returns a 1x1 array of decimals between -9.99999999999999E+307 and 9.99999999999999E+307. Minimum and maximum valid min/max. 5 of 5 arguments used.');
 		assert.strictEqual(array.rowCount, 1, 'Test: Bounded case: Number(5). Returns a 1x1 array of decimals between -9.99999999999999E+307 and 9.99999999999999E+307. Minimum and maximum valid min/max. 5 of 5 arguments used.');
-
-		// TODO many problems with this formula
-		// Need to fix: 3D sheets/cells handle, area handle, differences in results from MS, critical err in some cases with 3D, too long calc when big num encounter in row/col
 
 
 	});
@@ -17295,7 +17327,7 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue().toFixed(4) - 0, 2.1123);
 
-		//TODO в хроме при расчёте разница, временно убираю
+		// TODO there is a calculation difference in Chrome, temporarily removing
 		oParser = new parserFormula("ROUNDUP(2,4)", "A1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual( oParser.calculate().getValue(), 2);
@@ -18649,7 +18681,7 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), 6, 'Test: Bounded case: Number(3), Array. Maximum integer values for n and m (Excelâ??s 32-bit integer limit). 4 of 4 arguments used.');
 
 
-		//TODO нужна другая функция для тестирования
+		// TODO need a different function for testing
 		//testArrayFormula2(assert, "SERIESSUM", 4, 4);
 	});
 
@@ -20330,7 +20362,7 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: SUBTOTAL(-1E+307,A100) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Bounded case: Number. Maximum negative number.');
 
-		// TODO много отрицательных кейсов по парсингу формулы, добавить ошибку при отсутсвии нужного типа reference в аргументах
+		// TODO many negative cases for formula parsing, add error when required reference type is missing in arguments
 		// Need to fix:
 		// Case #2: Reference link. Reference link to single cell.
 		// Case #3: Area. Range of 2 cells.

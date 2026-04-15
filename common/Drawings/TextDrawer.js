@@ -1572,12 +1572,12 @@
 		this.m_oFill = null;
 
 
-		// чтобы выставилось в первый раз
+		// to be set for the first time
 		this.m_oPen.Color.R = -1;
 		this.m_oBrush.Color1.R = -1;
 		this.m_oBrush.Color2.R = -1;
 
-		// просто чтобы не создавать каждый раз
+		// just to avoid creating each time
 		this.m_oFontSlotFont = new AscCommon.CFontSetup();
 		this.LastFontOriginInfo = {Name: "", Replace: null};
 

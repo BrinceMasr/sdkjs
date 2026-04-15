@@ -3781,7 +3781,7 @@
 			};
 		}, {});
 
-		// Сортировка путей по площади
+		// Sort paths by area
 		const sorted = paths.slice().sort(function (a, b) {
 			return Math.abs(b.getArea()) - Math.abs(a.getArea());
 		});
@@ -4486,7 +4486,6 @@
 			const index = (start > 0 && end === count + (this._closed ? 1 : 0)) ? start - 1 : start;
 			const removedCurves = curves.splice(index, amount);
 			for (let i = removedCurves.length - 1; i >= 0; i--) {
-				// Есть баг с файлом "shapesMerge - remove curves _path bug" (загрузил к себе в личные документы на nct)
 				// removedCurves[i]._path = null;
 			}
 			if (_includeCurves) {

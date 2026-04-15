@@ -153,7 +153,7 @@
 			TooManyCells		        : -204,
 			UnequalCellsNumber			: -205,
 
-			/* для формул */
+			/* for formulas */
 			FrmlMaxReference            : -297,
 			FrmlMaxLength               : -298,
 			FrmlMaxTextLength           : -299,

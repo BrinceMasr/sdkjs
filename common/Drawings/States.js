@@ -52,7 +52,7 @@ function StartAddNewShape(drawingObjects, preset, nPlaceholderType, bVertical)
     this.preset = preset;
 
     this.bStart = false;
-    this.bMoved = false;//отошли ли мы от начальной точки
+    this.bMoved = false;//whether we moved away from the starting point
 
     this.startX = null;
     this.startY = null;

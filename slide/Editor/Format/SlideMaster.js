@@ -123,7 +123,7 @@ function MasterSlide(presentation, theme)
     this.Height = 190.5;
     this.recalcInfo = {};
     this.DrawingDocument = editor.WordControl.m_oDrawingDocument;
-    this.m_oContentChanges = new AscCommon.CContentChanges(); // список изменений(добавление/удаление элементов)
+    this.m_oContentChanges = new AscCommon.CContentChanges(); // list of changes (adding/removing elements)
 
     this.bounds = new AscFormat.CGraphicBounds(0, 0, this.Width, this.Height);
 

@@ -2050,7 +2050,7 @@
 		if (!oTiming) { return }
 
 		const aAllSeqs = oTiming.getRootSequences();
-		let oLastSeqView = null; // Зачем нужна эта переменная?
+		let oLastSeqView = null; // Why is this variable needed?
 		for (var nSeq = 0; nSeq < aAllSeqs.length; ++nSeq) {
 			const oSeqView = new CAnimSequence(this, aAllSeqs[nSeq]);
 			this.addControl(oSeqView);
@@ -2189,7 +2189,7 @@
 		)
 	};
 	CSeqList.prototype.forEachAnimItem = function (callback) {
-		// У счетчиков сквозная нумерация
+		// Counters have continuous numbering
 		let seqCounter = 0;
 		let groupCounter = 0;
 		let itemCounter = 0;

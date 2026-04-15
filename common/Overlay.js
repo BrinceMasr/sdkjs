@@ -175,7 +175,7 @@
             if (bIsSimpleAdd !== true)
             {
                 this.Clear();
-                if (this.m_bIsAlwaysUpdateOverlay || true/*мало ли что есть на оверлее*/)
+                if (this.m_bIsAlwaysUpdateOverlay || true/*who knows what's on the overlay*/)
                 {
                     if (!editor.WordControl.OnUpdateOverlay())
                     {
@@ -292,7 +292,7 @@
             if (bIsSimpleAdd !== true)
             {
                 this.Clear();
-                if (this.m_bIsAlwaysUpdateOverlay || true/*мало ли что есть на оверлее*/)
+                if (this.m_bIsAlwaysUpdateOverlay || true/*who knows what's on the overlay*/)
                 {
                     if (!editor.WordControl.OnUpdateOverlay())
                     {
@@ -1054,8 +1054,8 @@
             }
         }
 
-        // с самого начала нужно понять, есть ли поворот. Потому что если его нет, то можно
-        // (и нужно!) рисовать все по-умному
+        // from the very beginning we need to understand if there is rotation. Because if not, then we can
+        // (and should!) draw everything smartly
         var overlay = this.m_oOverlay;
         overlay.Show();
 
@@ -1208,7 +1208,7 @@
         var bIsRectsTrackX = (_len_x >= epsForCenter) ? true : false;
         var bIsRectsTrackY = (_len_y >= epsForCenter) ? true : false;
 
-        // для stamp аннотации не рисуем
+        // don't draw for stamp annotation
         if (type == AscFormat.TYPE_TRACK.ANNOT_STAMP) {
             bIsRectsTrackY = false;
             bIsRectsTrackX = false;
@@ -2627,7 +2627,7 @@
         var _support_native_dash = (undefined !== ctx.setLineDash);
         var rPR = AscCommon.AscBrowser.retinaPixelRatio;
         var indent = 0.5 * Math.round(rPR);
-        // здесь расчитано на толщину линии в один пиксел!
+        // this is calculated for line thickness of one pixel!
         w_dot *= Math.round(rPR);
         w_dist *= Math.round(rPR);
         var _x = x + indent;

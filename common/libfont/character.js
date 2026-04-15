@@ -138,7 +138,7 @@
 					return this.LastRange.Name;
 			}
 
-			// ищем среди уже найденных
+			// search among already found
 			var _range = this.getRangeBySymbol(_char, this.UsedRanges);
 			if (_range != null)
 			{

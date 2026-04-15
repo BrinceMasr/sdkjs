@@ -57,17 +57,17 @@ AscInterface.updateStructure = function(structure)
         level = item.level;
         if (currentLevel == level)
         {
-            // такой же уровень - общий родитель
+            // same level - common parent
             parent = currentElement.parent;
         }
         else if ((currentLevel + 1) == level)
         {
-            // следующий уровень
+            // next level
             parent = currentElement;
         }
         else
         {
-            // возврат на нужный уровень
+            // return to required level
             parent = currentElement;
             while (level < parent.level)
                 parent = parent.parent;
@@ -84,7 +84,7 @@ AscInterface.updateStructure = function(structure)
     var treeElem = new Tree(elem, { navigate: true });
     treeElem.json(jsonStructure.children);
 
-    // подписываемся после
+    // subscribe afterwards
     treeElem.on('select', function(node) {
         window.Viewer.navigate(parseInt(node.getAttribute("nodeId")));
     });

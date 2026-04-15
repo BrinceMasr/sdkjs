@@ -3341,6 +3341,21 @@
 	}
 	ApiComplexForm.prototype = Object.create(ApiFormBase.prototype);
 	ApiComplexForm.prototype.constructor = ApiComplexForm;
+	
+	/**
+	 * Class representing a document picture form.
+	 * @constructor
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @extends {ApiFormBase}
+	 * @see office-js-api/Examples/{Editor}/ApiSignatureForm/Methods/constructor.js
+	 */
+	function ApiSignatureForm(sdt)
+	{
+		ApiFormBase.call(this, sdt);
+	}
+	
+	ApiSignatureForm.prototype = Object.create(ApiFormBase.prototype);
+	ApiSignatureForm.prototype.constructor = ApiSignatureForm;
 
 	/**
 	 * Sets the hyperlink address.
@@ -4069,14 +4084,26 @@
 
 	/**
 	 * The possible values for the base which the relative horizontal positioning of an object will be calculated from.
-	 * @typedef {("character" | "column" | "leftMargin" | "rightMargin" | "margin" | "page")} RelFromH
+	 * @typedef {("character" | "column" | "insideMargin" | "leftMargin" | "rightMargin" | "margin" | "outsideMargin" | "page")} RelFromH
 	 * @see office-js-api/Examples/Enumerations/RelFromH.js
 	 */
 
 	/**
 	 * The possible values for the base which the relative vertical positioning of an object will be calculated from.
-	 * @typedef {("bottomMargin" | "topMargin" | "margin" | "page" | "line" | "paragraph")} RelFromV
+	 * @typedef {("bottomMargin" | "insideMargin" | "topMargin" | "margin" | "outsideMargin" | "page" | "line" | "paragraph")} RelFromV
 	 * @see office-js-api/Examples/Enumerations/RelFromV.js
+	 */
+
+	/**
+	 * The possible values for the base which the relative horizontal size of an object will be calculated from.
+	 * @typedef {("insideMargin" | "leftMargin" | "rightMargin" | "margin" | "outsideMargin" | "page")} SizeRelFromH
+	 * @see office-js-api/Examples/Enumerations/SizeRelFromH.js
+	 */
+
+	/**
+	 * The possible values for the base which the relative vertical size of an object will be calculated from.
+	 * @typedef {("bottomMargin" | "insideMargin" | "topMargin" | "margin" | "outsideMargin" | "page")} SizeRelFromV
+	 * @see office-js-api/Examples/Enumerations/SizeRelFromV.js
 	 */
 
 	/**
@@ -4268,7 +4295,7 @@
 	/**
 	 * Form type.
 	 * The available form types.
-	 * @typedef {"textForm" | "comboBoxForm" | "dropDownForm" | "checkBoxForm" | "radioButtonForm" | "pictureForm" | "complexForm" | "dateForm"} FormType
+	 * @typedef {"textForm" | "comboBoxForm" | "dropDownForm" | "checkBoxForm" | "radioButtonForm" | "pictureForm" | "complexForm" | "dateForm" | "signatureForm"} FormType
 	 * @see office-js-api/Examples/Enumerations/FormType.js
 	 */
 
@@ -4396,7 +4423,7 @@
 
 	/**
 	 * Types of all supported forms.
-	 * @typedef {ApiTextForm | ApiComboBoxForm | ApiCheckBoxForm | ApiPictureForm | ApiDateForm | ApiComplexForm} ApiForm
+	 * @typedef {ApiTextForm | ApiComboBoxForm | ApiCheckBoxForm | ApiPictureForm | ApiDateForm | ApiComplexForm | ApiSignatureForm} ApiForm
 	 * @see office-js-api/Examples/Enumerations/ApiForm.js
 	 */
 
@@ -5437,7 +5464,7 @@
 	 */
 	Api.Save = function()
 	{
-		this.SaveAfterMacros = true;
+		Asc.editor.SaveAfterMacros = true;
 		return true;
 	};
 
@@ -5852,7 +5879,7 @@
 	 */
 	Api.installDeveloperPlugin = Api["installDeveloperPlugin"] = function()
 	{
-		return Asc.editor.installDeveloperPlugin.apply(Asc.editor, arguments);
+		return Asc.editor["installDeveloperPlugin"].apply(Asc.editor, arguments);
 	};
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -8796,11 +8823,23 @@
 		let oCommManager = this.Document.GetCommentsManager();
 
 		let aComments = Object.values(oCommManager.GetAllComments());
-		let aApiComments = aComments.map(function(oComment) {
+		aComments.sort(function(c1, c2){
+			let p1 = c1.GetDocumentPosition();
+			let p2 = c2.GetDocumentPosition();
+			
+			if (!p1 && !p2)
+				return 0;
+			if (!p1)
+				return 1;
+			if (!p2)
+				return -1;
+			
+			return AscWord.CompareDocumentPositions(p1, p2);
+		});
+		
+		return aComments.map(function(oComment) {
 			return new ApiComment(oComment);
 		});
-
-		return aApiComments;
 	};
 
 	/**
@@ -9007,42 +9046,24 @@
 	};
 
 	/**
-     * Returns all the selected drawings in the current document.
-     * @memberof ApiDocument
+	 * Returns all the selected drawings in the current document.
+	 *
+	 * @memberof ApiDocument
 	 * @typeofeditors ["CDE"]
-     * @returns {ApiShape[] | ApiImage[] | ApiChart[] | ApiDrawing[]}
-     * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/GetSelectedDrawings.js
+	 *
+	 * @returns {Drawing[]}
+	 *
+	 * @since 7.2.0
+	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/GetSelectedDrawings.js
 	 */
-	ApiDocument.prototype.GetSelectedDrawings = function()
-	{
-		var aSelected = this.Document.DrawingObjects.selectedObjects;
-		var aResult = [];
-		for (var nDrawing = 0; nDrawing < aSelected.length; nDrawing++)
-		{
-			if (aSelected[nDrawing].isImage())
-				aResult.push(new ApiImage(aSelected[nDrawing]));
-			else if (aSelected[nDrawing].isChart())
-				aResult.push(new ApiChart(aSelected[nDrawing]));
-			else if (aSelected[nDrawing].isShape())
-				aResult.push(new ApiShape(aSelected[nDrawing]));
-			else
-				aResult.push(new ApiDrawing(aSelected[nDrawing]));
-		}
+	ApiDocument.prototype.GetSelectedDrawings = function () {
+		const selected = this.Document.DrawingObjects.selectedObjects;
+		const selectedInText = this.Document.GetSelectedDrawingObjectsInText()
+			.map(function (drawing) { return drawing.GraphicObj; });
 
-		var aSelectedInText = this.Document.GetSelectedDrawingObjectsInText();
-		for (nDrawing = 0; nDrawing < aSelectedInText.length; nDrawing++)
-		{
-			if (aSelectedInText[nDrawing].GraphicObj.isImage())
-				aResult.push(new ApiImage(aSelectedInText[nDrawing].GraphicObj));
-			else if (aSelectedInText[nDrawing].GraphicObj.isChart())
-				aResult.push(new ApiChart(aSelectedInText[nDrawing].GraphicObj));
-			else if (aSelectedInText[nDrawing].GraphicObj.isShape())
-				aResult.push(new ApiShape(aSelectedInText[nDrawing].GraphicObj));
-			else
-				aResult.push(new ApiDrawing(aSelected[nDrawing].GraphicObj));
-		}
-
-		return aResult;
+		const drawingObjects = selected.concat(selectedInText);
+		const apiDrawings = GetApiDrawings(drawingObjects);
+		return apiDrawings;
 	};
 
 	/**
@@ -18702,7 +18723,7 @@
 	 * Sets the relative height of the object (image, shape, chart) bounding box.
 	 * @memberof ApiDrawing
 	 * @typeofeditors ["CDE"]
-	 * @param {RelFromV} [sRelativeFrom="page"] - The document element which will be taken as a countdown point for the object height.
+	 * @param {SizeRelFromV} [sRelativeFrom="page"] - The document element which will be taken as a countdown point for the object height.
 	 * @param {percentage} nPercent
 	 * @since 9.3.0
 	 * @returns {boolean}
@@ -18724,7 +18745,7 @@
 	 * Sets the relative width of the object (image, shape, chart) bounding box.
 	 * @memberof ApiDrawing
 	 * @typeofeditors ["CDE"]
-	 * @param {RelFromV} [sRelativeFrom="page"] - The document element which will be taken as a countdown point for the object width.
+	 * @param {SizeRelFromH} [sRelativeFrom="page"] - The document element which will be taken as a countdown point for the object width.
 	 * @param {percentage} nPercent
 	 * @since 9.3.0
 	 * @returns {boolean}
@@ -18872,7 +18893,7 @@
 	 * @since 9.3.0
 	 * @param {RelFromH} sRelativeFrom - The document element which will be taken as a countdown point for the object horizontal alignment.
 	 * @param {EMU|number} nDistance - The distance from the right side of the document element to the floating object. Use EMU for absolute distance or a number for percent (1 = 1%) when bPercent=true.
-	 * @param {boolean} [bPercent=false] - The option defining whether the vertical alignment offset is specified in percent.
+	 * @param {boolean} [bPercent=false] - The option defining whether the horizontal alignment offset is specified in percent.
 	 * @returns {boolean}
 	 *
 	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/SetHorPosition.js
@@ -18891,7 +18912,7 @@
 	 * @typeofeditors ["CDE"]
 	 *
 	 * @deprecated since 9.3.0 version.
-	 * @param {RelFromH} sRelativeFrom - The document element which will be taken as a countdown point for the object vertical alignment.
+	 * @param {RelFromV} sRelativeFrom - The document element which will be taken as a countdown point for the object vertical alignment.
 	 * @param {EMU} nDistance - The distance from the bottom part of the document element to the floating object measured in English measure units.
 	 * @returns {boolean}
 	 *
@@ -21041,6 +21062,46 @@
 	{
 		AscFormat.builder_SetShowPointDataLabel(this.Chart, nSeriesIndex, nPointIndex, bShowSerName, bShowCatName, bShowVal, bShowPercent);
 		return true;
+	};
+
+	/**
+	 * Sets the text properties to the chart data labels.
+	 *
+	 * @memberof ApiChart
+	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 *
+	 * @param {ApiTextPr} textPr - The text properties to apply to the data labels.
+	 * @returns {boolean} - Returns true if the text properties were applied successfully, false otherwise.
+	 *
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiChart/Methods/SetDataLabelsTextPr.js
+	 */
+	ApiChart.prototype.SetDataLabelsTextPr = function (textPr) {
+		if (textPr && textPr.TextPr) {
+			return AscFormat.builder_SetDataLabelsTextPr(this.Chart, textPr.TextPr);
+		}
+		return false;
+	};
+
+	/**
+	 * Sets the text properties to the chart point data label.
+	 *
+	 * @memberof ApiChart
+	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 *
+	 * @param {number} seriesIndex - The series index from the array of the data used to build the chart from.
+	 * @param {number} pointIndex - The point index from this series.
+	 * @param {ApiTextPr} textPr - The text properties to apply to the data label.
+	 * @returns {boolean} - Returns true if the text properties were applied successfully, false otherwise.
+	 *
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiChart/Methods/SetPointDataLabelTextPr.js
+	 */
+	ApiChart.prototype.SetPointDataLabelTextPr = function (seriesIndex, pointIndex, textPr) {
+		if (textPr && textPr.TextPr) {
+			return AscFormat.builder_SetPointDataLabelTextPr(this.Chart, seriesIndex, pointIndex, textPr.TextPr);
+		}
+		return false;
 	};
 
 	/**
@@ -25353,6 +25414,8 @@
 			return "radioButtonForm";
 		if (this.Sdt.IsCheckBox())
 			return "checkBoxForm";
+		if (this.Sdt.IsSignatureForm())
+			return "signatureForm";
 		if (this.Sdt.IsPictureForm())
 			return "pictureForm";
 		if (this.Sdt.IsDatePicker())
@@ -25489,7 +25552,8 @@
 	 */
 	ApiFormBase.prototype.IsFixed = function()
 	{
-		return (this.GetFormType() === "pictureForm" || this.Sdt.IsFixedForm());
+		let formType = this.GetFormType();
+		return ("pictureForm" === formType || "signatureForm" === formType || this.Sdt.IsFixedForm());
 	};
 	/**
 	 * Converts the current form to a fixed size form.
@@ -25735,6 +25799,20 @@
 	ApiFormBase.prototype.GetText = function()
 	{
 		return this.Sdt.GetInnerText();
+	};
+	/**
+	 * Clears the current form.
+	 * @memberof ApiFormBase
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @returns {boolean}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiFormBase/Methods/IsFilled.js
+	 */
+	ApiFormBase.prototype.IsFilled = function()
+	{
+		return executeNoFormLockCheck(function() {
+			return this.Sdt.IsFormFilled();
+		}, this);
 	};
 	/**
 	 * Clears the current form.
@@ -27141,6 +27219,36 @@
 		}, this);
 	};
 	
+	//------------------------------------------------------------------------------------------------------------------
+	//
+	// ApiSignatureForm
+	//
+	//------------------------------------------------------------------------------------------------------------------
+	
+	/**
+	 * Returns a type of the ApiSignatureForm class.
+	 * @memberof ApiSignatureForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @returns {"signatureForm"}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiSignatureForm/Methods/GetClassType.js
+	 */
+	ApiSignatureForm.prototype.GetClassType = function()
+	{
+		return "signatureForm";
+	};
+	ApiSignatureForm.prototype.GetImage = ApiPictureForm.prototype.GetImage;
+	/**
+	 * Sets an image to the current picture form.
+	 * @memberof ApiSignatureForm
+	 * @param {string} imageSrc - The image source where the image to be inserted should be taken from (currently, only internet URL or base64 encoded images are supported).
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @returns {boolean}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiSignatureForm/Methods/SetImage.js
+	 */
+	ApiSignatureForm.prototype.SetImage = ApiPictureForm.prototype.SetImage;
+	
 	/**
 	 * Converts the ApiBlockLvlSdt object into the JSON object.
 	 * @memberof ApiBlockLvlSdt
@@ -28050,6 +28158,24 @@
 	 */
 	Api.EmusToMillimeters = function EmusToMillimeters(emu) {
 		return emu * AscCommonWord.g_dKoef_emu_to_mm;
+	};
+
+	/**
+	 * Compares the current document with the specified file.
+	 * @param {object} file - An object containing the information about the document for comparison.
+	 */
+	Api.CompareDocuments = function(file)
+	{
+		AscCommonWord.CompareDocuments(file);
+	};
+
+	/**
+	 * Merges the current document with the specified file.
+	 * @param {object} file - An object containing the information about the document for merging.
+	 */
+	Api.MergeDocuments = function(file)
+	{
+		AscCommonWord.mergeDocuments(file);
 	};
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -29742,6 +29868,8 @@
 	Api["EmusToMillimeters"]               = Api.EmusToMillimeters;
 	Api["CreateCustomGeometry"]            = Api.CreateCustomGeometry;
 	Api["CreatePresetGeometry"]            = Api.CreatePresetGeometry;
+	Api["CompareDocuments"]                = Api.CompareDocuments;
+	Api["MergeDocuments"]                  = Api.MergeDocuments;
 
 	ApiUnsupported.prototype["GetClassType"]         = ApiUnsupported.prototype.GetClassType;
 	
@@ -30477,6 +30605,8 @@
 	ApiChart.prototype["SetLegendFontSize"]            = ApiChart.prototype.SetLegendFontSize;
 	ApiChart.prototype["SetShowDataLabels"]            = ApiChart.prototype.SetShowDataLabels;
 	ApiChart.prototype["SetShowPointDataLabel"]        = ApiChart.prototype.SetShowPointDataLabel;
+	ApiChart.prototype["SetDataLabelsTextPr"]          = ApiChart.prototype.SetDataLabelsTextPr;
+	ApiChart.prototype["SetPointDataLabelTextPr"]      = ApiChart.prototype.SetPointDataLabelTextPr;
 	ApiChart.prototype["SetVertAxisTickLabelPosition"] = ApiChart.prototype.SetVertAxisTickLabelPosition;
 	ApiChart.prototype["SetHorAxisTickLabelPosition"]  = ApiChart.prototype.SetHorAxisTickLabelPosition;
 
@@ -30723,6 +30853,7 @@
 	ApiFormBase.prototype["SetBackgroundColor"] = ApiFormBase.prototype.SetBackgroundColor;
 	ApiFormBase.prototype["GetBackgroundColor"] = ApiFormBase.prototype.GetBackgroundColor;
 	ApiFormBase.prototype["GetText"]            = ApiFormBase.prototype.GetText;
+	ApiFormBase.prototype["IsFilled"]           = ApiFormBase.prototype.IsFilled;
 	ApiFormBase.prototype["Clear"]              = ApiFormBase.prototype.Clear;
 	ApiFormBase.prototype["GetWrapperShape"]    = ApiFormBase.prototype.GetWrapperShape;
 	ApiFormBase.prototype["SetPlaceholderText"] = ApiFormBase.prototype.SetPlaceholderText;
@@ -30737,7 +30868,7 @@
 	ApiFormBase.prototype["Delete"]             = ApiFormBase.prototype.Delete;
 	ApiFormBase.prototype["SetLock"]            = ApiFormBase.prototype.SetLock;
 	ApiFormBase.prototype["GetLock"]            = ApiFormBase.prototype.GetLock;
-	ApiFormBase.prototype["Copy"]              = ApiFormBase.prototype.Copy;
+	ApiFormBase.prototype["Copy"]               = ApiFormBase.prototype.Copy;
 
 	ApiTextForm.prototype["GetClassType"]        = ApiTextForm.prototype.GetClassType;
 	ApiTextForm.prototype["IsAutoFit"]           = ApiTextForm.prototype.IsAutoFit;
@@ -30781,6 +30912,11 @@
 	ApiComplexForm.prototype["GetSubForms"]  = ApiComplexForm.prototype.GetSubForms;
 	ApiComplexForm.prototype["ClearContent"] = ApiComplexForm.prototype.ClearContent;
 	ApiComplexForm.prototype["Copy"]         = ApiComplexForm.prototype.Copy;
+	
+	ApiSignatureForm.prototype["GetClassType"] = ApiSignatureForm.prototype.GetClassType;
+	ApiSignatureForm.prototype["GetImage"]     = ApiSignatureForm.prototype.GetImage;
+	ApiSignatureForm.prototype["SetImage"]     = ApiSignatureForm.prototype.SetImage;
+	ApiSignatureForm.prototype["Copy"]         = ApiSignatureForm.prototype.Copy;
 	
 	ApiComboBoxForm.prototype["GetClassType"]    = ApiComboBoxForm.prototype.GetClassType;
 	ApiComboBoxForm.prototype["GetListValues"]   = ApiComboBoxForm.prototype.GetListValues;
@@ -30982,6 +31118,7 @@
 	window['AscBuilder'].ApiComboBoxForm     = ApiComboBoxForm;
 	window['AscBuilder'].ApiCheckBoxForm     = ApiCheckBoxForm;
 	window['AscBuilder'].ApiComplexForm      = ApiComplexForm;
+	window['AscBuilder'].ApiSignatureForm    = ApiSignatureForm;
 	window['AscBuilder'].ApiCore             = ApiCore;
 	window['AscBuilder'].ApiCustomProperties = ApiCustomProperties;
 	window['AscBuilder'].ApiCustomXmlParts	 = ApiCustomXmlParts;
@@ -31103,6 +31240,8 @@
 			return new ApiComboBoxForm(oForm);
 		else if (oForm.IsRadioButton() || oForm.IsCheckBox())
 			return new ApiCheckBoxForm(oForm);
+		else if (oForm.IsSignatureForm())
+			return new ApiSignatureForm(oForm);
 		else if (oForm.IsPictureForm())
 			return new ApiPictureForm(oForm);
 		else if (oForm.IsDatePicker())
@@ -31231,6 +31370,8 @@
 			return new ApiComboBoxForm(oSdt);
 		else if (oSdt.IsCheckBox() || oSdt.IsRadioButton())
 			return new ApiCheckBoxForm(oSdt);
+		else if (oSdt.IsSignatureForm())
+			return new ApiSignatureForm(oSdt);
 		else if (oSdt.IsPictureForm())
 			return new ApiPictureForm(oSdt)
 		else if (oSdt.IsDatePicker())
@@ -31519,12 +31660,16 @@
 			return Asc.c_oAscRelativeFromH.Character;
 		else if ("column" === sRel)
 			return Asc.c_oAscRelativeFromH.Column;
+		else if ("insideMargin" === sRel)
+			return Asc.c_oAscRelativeFromH.InsideMargin;
 		else if ("leftMargin" === sRel)
 			return Asc.c_oAscRelativeFromH.LeftMargin;
 		else if ("rightMargin" === sRel)
 			return Asc.c_oAscRelativeFromH.RightMargin;
 		else if ("margin" === sRel)
 			return Asc.c_oAscRelativeFromH.Margin;
+		else if ("outsideMargin" === sRel)
+			return Asc.c_oAscRelativeFromH.OutsideMargin;
 		else if ("page" === sRel)
 			return Asc.c_oAscRelativeFromH.Page;
 
@@ -31535,10 +31680,14 @@
 	{
 		if ("bottomMargin" === sRel)
 			return Asc.c_oAscRelativeFromV.BottomMargin;
+		else if ("insideMargin" === sRel)
+			return Asc.c_oAscRelativeFromV.InsideMargin;
 		else if ("topMargin" === sRel)
 			return Asc.c_oAscRelativeFromV.TopMargin;
 		else if ("margin" === sRel)
 			return Asc.c_oAscRelativeFromV.Margin;
+		else if ("outsideMargin" === sRel)
+			return Asc.c_oAscRelativeFromV.OutsideMargin;
 		else if ("page" === sRel)
 			return Asc.c_oAscRelativeFromV.Page;
 		else if ("line" === sRel)
