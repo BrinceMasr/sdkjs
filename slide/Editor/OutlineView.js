@@ -566,13 +566,15 @@
 	}
 	OutlineView.prototype.getSelectionUseContentsInfo = function (startPos, endPos) {
 		const contents = [];
-		if (startPos[0].Position > endPos[0].Position) {
-			const temp = startPos;
-			startPos = endPos;
-			endPos = temp;
+		let direction = AscWord.Direction.FORWARD;
+		let startPosIndex = startPos[0].Position;
+		let endPosIndex = endPos[0].Position;
+		if (startPosIndex > endPosIndex) {
+			const temp = startPosIndex;
+			startPosIndex = endPosIndex;
+			endPosIndex = temp;
+			direction = AscWord.Direction.BACKWARD;
 		}
-		const startPosIndex = startPos[0].Position;
-		const endPosIndex = endPos[0].Position;
 		const content = this.getDocContent();
 		for (let i = startPosIndex; i <= endPosIndex; i += 1) {
 			const contentInfo = contents[contents.length - 1];
@@ -581,15 +583,21 @@
 			if (sourceParagraph) {
 				const sourceContent = sourceParagraph.GetParent();
 				if (contentInfo && contentInfo.content === sourceContent) {
-					contentInfo.endPos = endPos;
-					contentInfo.endParagraph = sourceParagraph;
+					if (direction === AscWord.Direction.FORWARD) {
+						contentInfo.endPos = endPos;
+						contentInfo.endParagraph = sourceParagraph;
+					} else {
+						contentInfo.startPos = startPos;
+						contentInfo.startParagraph = sourceParagraph;
+					}
 				} else {
 					contents.push({
 						startPos: startPos,
 						startParagraph: sourceParagraph,
 						endPos: endPos,
 						endParagraph: sourceParagraph,
-						content: sourceContent
+						content: sourceContent,
+						direction: direction
 					});
 				}
 			}
@@ -632,9 +640,15 @@
 			} else if (contents.length > 1) {
 				const startContentInfo = contents[0];
 				const startContent = startContentInfo.content;
-				const startPos = this.rebuildPos(startContentInfo.startPos, startContent, startContentInfo.startParagraph);
-				startContent.SetContentSelection(startPos, startPos, 0, 0, 0);
-				startContent.MoveCursorToEndPos(true);
+				startContent.MoveCursorToEndPos(false, true);
+				const targetStartPos = startContent.GetContentPosition(true, true);
+				if (startContentInfo.direction === AscWord.Direction.FORWARD) {
+					const startPos = this.rebuildPos(startContentInfo.startPos, startContent, startContentInfo.startParagraph);
+					startContent.SetContentSelection(startPos, targetStartPos, 0, 0, 0);
+				} else {
+					const startPos = this.rebuildPos(startContentInfo.endPos, startContent, startContentInfo.endParagraph);
+					startContent.SetContentSelection(targetStartPos, startPos, 0, 0, 0);
+				}
 				const startRes = callback(startContent, 0, contents.length);
 				startContent.RemoveSelection();
 				if (startRes) {
@@ -643,7 +657,7 @@
 				for (let i = 1; i < contents.length - 1; i += 1) {
 					const contentInfo = contents[i];
 					const content = contentInfo.content;
-					content.SelectAll();
+					content.SelectAll(contentInfo.direction);
 					const res = callback(content, i, contents.length);
 					content.RemoveSelection();
 					if (res) {
@@ -652,9 +666,15 @@
 				}
 				const endContentInfo = contents[contents.length - 1];
 				const endContent = endContentInfo.content;
-				const endPos = this.rebuildPos(endContentInfo.endPos, endContent, endContentInfo.endParagraph);
-				endContent.SetContentSelection(endPos, endPos, 0, 0, 0);
-				endContent.MoveCursorToStartPos(true);
+				endContent.MoveCursorToStartPos();
+				const endTargetPos = endContent.GetContentPosition(true, true);
+				if (endContentInfo.direction === AscWord.Direction.FORWARD) {
+					const endPos = this.rebuildPos(endContentInfo.endPos, endContent, endContentInfo.endParagraph);
+					endContent.SetContentSelection(endTargetPos, endPos, 0, 0, 0);
+				} else {
+					const endPos = this.rebuildPos(endContentInfo.startPos, endContent, endContentInfo.startParagraph);
+					endContent.SetContentSelection(endPos, endTargetPos, 0, 0, 0);
+				}
 				const endRes = callback(endContent, contents.length - 1, contents.length);
 				endContent.RemoveSelection();
 				if (endRes) {
