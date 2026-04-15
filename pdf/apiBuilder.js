@@ -1240,6 +1240,7 @@
 	Api.CreateShape = function(sType, nWidth, nHeight, oFill, oStroke) {
 		let oDoc = private_GetLogicDocument();
 		sType = sType || "rect";
+		if (!AscFormat.isValidShapeType(sType)) sType = "rect";
 		nWidth = nWidth || 72;
 		nHeight = nHeight || 72;
 		oFill = oFill || Api.CreateNoFill();

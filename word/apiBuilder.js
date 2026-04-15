@@ -4759,6 +4759,7 @@
 		var oLogicDocument = private_GetLogicDocument();
 		var oDrawingDocuemnt = private_GetDrawingDocument();
 		shapeType = shapeType || "rect";
+		if (!AscFormat.isValidShapeType(shapeType)) shapeType = "rect";
 		width     = width || 914400;
 		height    = height || 914400;
 		fill      = fill || Api.CreateNoFill();

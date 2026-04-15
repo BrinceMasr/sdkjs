@@ -879,6 +879,7 @@
         let curSlide = private_GetCurrentSlide();
 		let presentation = private_GetPresentation();
         sType   = sType   || "rect";
+        if (!AscFormat.isValidShapeType(sType)) sType = "rect";
         nWidth  = nWidth  || 914400;
 	    nHeight = nHeight || 914400;
 	    oFill   = oFill   || Api.CreateNoFill();
@@ -1082,6 +1083,47 @@
 	 */
 	Api.CreateSlideShowTransition = function () {
 		return new ApiSlideShowTransition(new Asc.CAscSlideTransition());
+	};
+
+	/**
+	 * Returns a slide by its position in the presentation.
+	 * @memberof Api
+	 * @typeofeditors ["CPE"]
+	 * @param {number} nIndex - The slide index (position) in the presentation.
+	 * @returns {?ApiSlide}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/Api/Methods/GetSlideByIndex.js
+	 */
+	Api.GetSlideByIndex = function(nIndex)
+	{
+		return Api.GetPresentation().GetSlideByIndex(nIndex);
+	};
+
+	/**
+	 * Returns the first slide of the presentation.
+	 * @memberof Api
+	 * @typeofeditors ["CPE"]
+	 * @returns {?ApiSlide}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/Api/Methods/GetFirstSlide.js
+	 */
+	Api.GetFirstSlide = function()
+	{
+		return Api.GetPresentation().GetSlideByIndex(0);
+	};
+
+	/**
+	 * Returns the last slide of the presentation.
+	 * @memberof Api
+	 * @typeofeditors ["CPE"]
+	 * @returns {?ApiSlide}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/Api/Methods/GetLastSlide.js
+	 */
+	Api.GetLastSlide = function()
+	{
+		let presentation = Api.GetPresentation();
+		return presentation.GetSlideByIndex(presentation.GetSlidesCount() - 1);
 	};
 
     /**
@@ -1459,6 +1501,19 @@
     };
 
 	/**
+	 * Returns a number of slides.
+	 * @memberof ApiPresentation
+	 * @typeofeditors ["CPE"]
+	 * @returns {number}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiPresentation/Methods/GetSlideCount.js
+	 */
+	ApiPresentation.prototype.GetSlideCount = function()
+	{
+		return this.GetSlidesCount();
+	};
+
+	/**
 	 * Returns an array of all slides from the current presentation.
 	 * @typeofeditors ["CPE"]
 	 * @returns {ApiSlide[]}
@@ -1622,6 +1677,20 @@
         }
 
         return false;
+	};
+
+	/**
+	 * Removes a slide at the specified position from the presentation.
+	 * @memberof ApiPresentation
+	 * @typeofeditors ["CPE"]
+	 * @param {number} nIndex - The zero-based slide index.
+	 * @returns {boolean}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiPresentation/Methods/RemoveSlide.js
+	 */
+	ApiPresentation.prototype.RemoveSlide = function(nIndex)
+	{
+		return this.RemoveSlides(nIndex, 1);
 	};
 
     /**
@@ -8036,6 +8105,9 @@
 	Api["FromJSON"]                             = Api.FromJSON;
 	Api["GetSelection"]                         = Api.GetSelection;
 	Api["GetByInternalId"]                      = Api.GetByInternalId;
+	Api["GetSlideByIndex"]                      = Api.GetSlideByIndex;
+	Api["GetFirstSlide"]                        = Api.GetFirstSlide;
+	Api["GetLastSlide"]                         = Api.GetLastSlide;
 
 
     ApiPresentation.prototype["GetClassType"]             = ApiPresentation.prototype.GetClassType;
@@ -8075,6 +8147,8 @@
     ApiPresentation.prototype["GetCustomXmlParts"]        = ApiPresentation.prototype.GetCustomXmlParts;
     ApiPresentation.prototype["GetLoopUntilStopped"]      = ApiPresentation.prototype.GetLoopUntilStopped;
     ApiPresentation.prototype["SetLoopUntilStopped"]      = ApiPresentation.prototype.SetLoopUntilStopped;
+    ApiPresentation.prototype["GetSlideCount"]              = ApiPresentation.prototype.GetSlideCount;
+    ApiPresentation.prototype["RemoveSlide"]                = ApiPresentation.prototype.RemoveSlide;
 
     ApiMaster.prototype["GetClassType"]                   = ApiMaster.prototype.GetClassType;
     ApiMaster.prototype["GetInternalId"]                  = ApiMaster.prototype.GetInternalId;
