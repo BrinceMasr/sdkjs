@@ -5943,7 +5943,8 @@
 					}
 				},
 
-				selectAll: function () {
+				selectAll: function (direction) {
+					direction = typeof direction === "number" ? direction : AscWord.Direction.FORWARD;
 					var i;
 					var target_text_object = getTargetTextObject(this);
 					if (target_text_object) {
@@ -5952,7 +5953,7 @@
 						} else {
 							var content = this.getTargetDocContent();
 							if (content) {
-								content.SelectAll();
+								content.SelectAll(direction);
 							}
 						}
 					} else if (!this.document) {
