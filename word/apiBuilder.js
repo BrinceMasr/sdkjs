@@ -4759,6 +4759,7 @@
 		var oLogicDocument = private_GetLogicDocument();
 		var oDrawingDocuemnt = private_GetDrawingDocument();
 		shapeType = shapeType || "rect";
+		if (!AscFormat.isValidShapeType(shapeType)) shapeType = "rect";
 		width     = width || 914400;
 		height    = height || 914400;
 		fill      = fill || Api.CreateNoFill();
@@ -19534,6 +19535,37 @@
 		this.Drawing.spPr.setFill(oFill.UniFill);
 		return true;
 	};
+	ApiDrawing.prototype.SetBackgroundColor = function(r, g, b)
+	{
+		if (r && r.GetClassType && r.GetClassType() === "fill")
+			return this.Fill(r);
+
+		let oColor;
+		if (typeof r === "string")
+		{
+			let hex = r.replace("#", "");
+			if (hex.length === 3)
+				hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+			if (hex.length !== 6)
+				return false;
+			let nR = parseInt(hex.substring(0, 2), 16);
+			let nG = parseInt(hex.substring(2, 4), 16);
+			let nB = parseInt(hex.substring(4, 6), 16);
+			if (isNaN(nR) || isNaN(nG) || isNaN(nB))
+				return false;
+			oColor = Api.RGB(nR, nG, nB);
+		}
+		else if (typeof r === "number" && typeof g === "number" && typeof b === "number")
+		{
+			oColor = Api.RGB(r, g, b);
+		}
+		else
+		{
+			return false;
+		}
+
+		return this.Fill(Api.CreateSolidFill(oColor));
+	};
 	/**
 	 * Sets the outline properties to the specified graphic object.
 	 * @memberof ApiDrawing
@@ -30642,6 +30674,8 @@
 	ApiDrawing.prototype["ScaleHeight"]              = ApiDrawing.prototype.ScaleHeight;
 	ApiDrawing.prototype["ScaleWidth"]               = ApiDrawing.prototype.ScaleWidth;
 	ApiDrawing.prototype["Fill"]                     = ApiDrawing.prototype.Fill;
+	ApiDrawing.prototype["SetBackgroundColor"]       = ApiDrawing.prototype.SetBackgroundColor;
+	ApiDrawing.prototype["SetBgColor"]               = ApiDrawing.prototype.SetBgColor = ApiDrawing.prototype.SetBackgroundColor;
 	ApiDrawing.prototype["SetOutLine"]               = ApiDrawing.prototype.SetOutLine;
 	ApiDrawing.prototype["GetNextDrawing"]           = ApiDrawing.prototype.GetNextDrawing;
 	ApiDrawing.prototype["GetPrevDrawing"]           = ApiDrawing.prototype.GetPrevDrawing;

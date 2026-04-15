@@ -9242,6 +9242,8 @@
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/AddShape.js
 	 */
 	ApiWorksheet.prototype.AddShape = function (sType, nWidth, nHeight, oFill, oStroke, nFromCol, nColOffset, nFromRow, nRowOffset) {
+		sType = sType || "rect";
+		if (!AscFormat.isValidShapeType(sType)) sType = "rect";
 		var oShape = AscFormat.builder_CreateShape(sType, nWidth / 36000, nHeight / 36000, oFill.UniFill, oStroke.Ln, null, this.worksheet.workbook.theme, this.worksheet.getDrawingDocument(), false, this.worksheet);
 		private_SetCoords(oShape, this.worksheet, nWidth, nHeight, nFromCol, nColOffset, nFromRow, nRowOffset);
 		return new ApiShape(oShape);
@@ -13436,6 +13438,7 @@
 		this.Drawing.spPr.setFill(oFill.UniFill);
 		return true;
 	};
+	ApiDrawing.prototype.SetBackgroundColor = AscBuilder.ApiDrawing.prototype.SetBackgroundColor;
 
 	/**
 	 * Sets the outline properties to the specified graphic object.
@@ -30441,6 +30444,8 @@
 	ApiDrawing.prototype["SetFlipV"]                   =  ApiDrawing.prototype.SetFlipV;
 	ApiDrawing.prototype["Select"]                     =  ApiDrawing.prototype.Select;
 	ApiDrawing.prototype["Fill"]                       =  ApiDrawing.prototype.Fill;
+	ApiDrawing.prototype["SetBackgroundColor"]         =  ApiDrawing.prototype.SetBackgroundColor;
+	ApiDrawing.prototype["SetBgColor"]                 =  ApiDrawing.prototype.SetBgColor = ApiDrawing.prototype.SetBackgroundColor;
 	ApiDrawing.prototype["SetOutLine"]                 =  ApiDrawing.prototype.SetOutLine;
 	ApiDrawing.prototype["Unselect"]                   =  ApiDrawing.prototype.Unselect;
 	ApiDrawing.prototype["Delete"]                     =  ApiDrawing.prototype.Delete;
