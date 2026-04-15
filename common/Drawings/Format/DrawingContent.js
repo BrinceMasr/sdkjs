@@ -522,7 +522,7 @@
                     var ColumnStartPos = Column.Pos;
                     var ColumnEndPos   = Column.EndPos;
 
-                    // Плавающие объекты не должны попадать в клип колонок
+                    // Floating objects should not be included in column clipping
                     var FlowElements = [];
 
                     if (ColumnsCount > 1)
@@ -648,7 +648,7 @@
     {
         if (undefined === PageNum || null === PageNum)
             PageNum = this.CurPage;
-        // Теперь проверим пустые параграфы с окончанием секций
+        // Now let's check empty paragraphs with section endings
         var SectCount = this.Pages[PageNum].EndSectionParas.length;
         if(this.Pages[PageNum].Sections.length === 0){
             return CDocumentContent.prototype.Internal_GetContentPosByXY.call(this, X, Y, PageNum);
@@ -662,7 +662,7 @@
                 return Item.Index;
         }
 
-        // Сначала мы определим секцию и колонку, в которую попали
+        // First we will determine the section and column that we hit
         var Page = this.Pages[PageNum];
 
         var SectionIndex = 0;
@@ -681,7 +681,7 @@
                 break;
         }
 
-        // TODO: Разобраться с ситуацией, когда пустые колонки стоят не только в конце
+        // TODO: Handle the situation when empty columns are not only at the end
         while (ColumnIndex > 0 && true === PageSection.Columns[ColumnIndex].Empty)
             ColumnIndex--;
 
@@ -716,7 +716,7 @@
     {
         var DC = new CDrawingDocContent(Parent, DrawingDocument ? DrawingDocument : this.DrawingDocument, 0, 0, 0, 0, this.Split, this.TurnOffInnerWrap, this.bPresentation);
 
-        // Копируем содержимое
+        // Copy the content
         DC.Internal_Content_RemoveAll();
 
         var Count = this.Content.length;
@@ -727,11 +727,11 @@
 
         return DC;
     };
-    CDrawingDocContent.prototype.Copy3           = function(Parent)//для заголовков диаграмм
+    CDrawingDocContent.prototype.Copy3           = function(Parent)//for chart titles
     {
         var DC = new CDrawingDocContent(Parent, this.DrawingDocument, 0, 0, 0, 0, this.Split, this.TurnOffInnerWrap, true);
 
-        // Копируем содержимое
+        // Copy the content
         DC.Internal_Content_RemoveAll();
 
         var Count = this.Content.length;
@@ -914,7 +914,7 @@
 			});
 			return nContentLength;
 		};
-    // TODO: сделать по-нормальному!!!
+    // TODO: do this properly!!!
     function CDocument_prototype_private_GetElementPageIndexByXY(ElementPos, X, Y, PageIndex)
     {
         var Element = this.Content[ElementPos];
@@ -957,7 +957,7 @@
     		EndColumn   = Math.min(ElementPagesCount - ElementStartColumn + (PageIndex - ElementStartPage) * ColumnsCount, ColumnsCount - 1);
     	}
 
-    	// TODO: Разобраться с ситуацией, когда пустые колонки стоят не только в конце
+    	// TODO: Handle the situation when empty columns are not only at the end
     	while (true === PageSection.Columns[EndColumn].Empty && EndColumn > StartColumn)
     		EndColumn--;
 

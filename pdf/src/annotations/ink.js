@@ -182,7 +182,7 @@
         let xMax = aMinRect[2];
         let yMax = aMinRect[3];
 
-        // считаем относительное положение точек внутри фигуры
+        // calculate relative position of points inside the shape
         for (let nPath = 0; nPath < aShapePaths.length; nPath++) {
             let aPoints         = aShapePaths[nPath]
             let aTmpRelPoints   = [];

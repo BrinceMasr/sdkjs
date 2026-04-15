@@ -404,7 +404,7 @@ function getCurrentTime() {
     return currDate.getTime();
 }
 
-function roundPlus(x, n) { //x - число, n - количество знаков
+function roundPlus(x, n) { //x - number, n - number of decimal places
     if ( isNaN(x) || isNaN(n) ) return false;
     var m = Math.pow(10,n);
     return Math.round(x * m) / m;
@@ -496,7 +496,7 @@ asc_CChartBinary.prototype = {
     {
         const binary = this["binary"];
         const stream = AscFormat.CreateBinaryReader(binary, 0, binary.length);
-        //надо сбросить то, что остался после открытия документа
+        //need to reset what remained after opening the document
         AscCommon.pptx_content_loader.Clear();
         const oNewChartSpace = Asc.editor.isPdfEditor() ? new AscPDF.CPdfChartSpace() : new AscFormat.CChartSpace();
         const oBinaryChartReader = new AscCommon.BinaryChartReader(stream);
@@ -513,7 +513,7 @@ asc_CChartBinary.prototype = {
 		const binary = this["binary"];
 		const isChartEx = this["IsChartEx"];
 		const stream = AscFormat.CreateBinaryReader(binary, 0, binary.length);
-		//надо сбросить то, что остался после открытия документа
+		//need to reset what remained after opening the document
 		AscCommon.pptx_content_loader.Clear();
 		const oNewChart = new AscFormat.CChart();
 		const oBinaryChartReader = new AscCommon.BinaryChartReader(stream);
@@ -535,7 +535,7 @@ asc_CChartBinary.prototype = {
 		}
 
 		const stream = AscFormat.CreateBinaryReader(binary, 0, binary.length);
-		//надо сбросить то, что остался после открытия документа
+		//need to reset what remained after opening the document
 		AscCommon.pptx_content_loader.Clear();
 		const oChartData = new AscFormat.CChartData();
 		const oBinaryChartReader = new AscCommon.BinaryChartReader(stream);
@@ -1472,7 +1472,7 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
         return metrics;
     };
 
-    // Считаем From/To исходя из graphicObject
+    // Calculate From/To based on graphicObject
 
 
     DrawingBase.prototype._getGraphicObjectCoords = function()
@@ -1681,33 +1681,33 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
         }
     };
 
-    // Реальное смещение по высоте
+    // Actual height offset
     DrawingBase.prototype.getRealTopOffset = function() {
         var _t = this;
         var val = _t.worksheet._getRowTop(_t.from.row) + this.mmToPx(_t.from.rowOff);
         return window["Asc"].round(val);
     };
 
-    // Реальное смещение по ширине
+    // Actual width offset
     DrawingBase.prototype.getRealLeftOffset = function() {
         var _t = this;
         var val = _t.worksheet._getColLeft(_t.from.col) + this.mmToPx(_t.from.colOff);
         return window["Asc"].round(val);
     };
 
-    // Ширина по координатам
+    // Width by coordinates
     DrawingBase.prototype.getWidthFromTo = function() {
         return (this.worksheet._getColLeft(this.to.col) + this.mmToPx(this.to.colOff) -
             this.worksheet._getColLeft(this.from.col) - this.mmToPx(this.from.colOff));
     };
 
-    // Высота по координатам
+    // Height by coordinates
     DrawingBase.prototype.getHeightFromTo = function() {
         return this.worksheet._getRowTop(this.to.row) + this.mmToPx(this.to.rowOff) -
             this.worksheet._getRowTop(this.from.row) - this.mmToPx(this.from.rowOff);
     };
 
-    // Видимое смещение объекта от первой видимой строки
+    // Visible offset of object from first visible row
     DrawingBase.prototype.getVisibleTopOffset = function(withHeader) {
         var _t = this;
         var headerRowOff = _t.worksheet._getRowTop(0);
@@ -1717,7 +1717,7 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
         return withHeader ? headerRowOff + off : off;
     };
 
-    // Видимое смещение объекта от первой видимой колонки
+    // Visible offset of object from first visible column
     DrawingBase.prototype.getVisibleLeftOffset = function(withHeader) {
         var _t = this;
         var headerColOff = _t.worksheet._getColLeft(0);
@@ -2537,7 +2537,7 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
 
 
     _this.calculateObjectMetrics = function (object, width, height, opt_checkRtl) {
-        // Обработка картинок большого разрешения
+        // Processing high resolution images
         var bCorrect = false;
         var metricCoeff = 1;
 
@@ -2545,7 +2545,7 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
         var realTopOffset = coordsFrom.y;
         var realLeftOffset = coordsFrom.x;
 
-        var areaWidth = worksheet._getColLeft(worksheet.getLastVisibleCol()) - worksheet._getColLeft(worksheet.getFirstVisibleCol(true)); 	// по ширине
+        var areaWidth = worksheet._getColLeft(worksheet.getLastVisibleCol()) - worksheet._getColLeft(worksheet.getFirstVisibleCol(true)); 	// by width
         if (areaWidth < width) {
             metricCoeff = width / areaWidth;
 
@@ -2554,7 +2554,7 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
             bCorrect = true;
         }
 
-        var areaHeight = worksheet._getRowTop(worksheet.getLastVisibleRow()) - worksheet._getRowTop(worksheet.getFirstVisibleRow(true)); 	// по высоте
+        var areaHeight = worksheet._getRowTop(worksheet.getLastVisibleRow()) - worksheet._getRowTop(worksheet.getFirstVisibleRow(true)); 	// by height
         if (areaHeight < height) {
             metricCoeff = height / areaHeight;
 
@@ -3847,15 +3847,15 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
 
     _this.checkGraphicObjectPosition = function(x, y, w, h) {
 
-        /*	Принцип:
-         true - если перемещение в области или требуется увеличить лист вправо/вниз
-         false - наезд на хидеры
+        /*	Principle:
+         true - if movement is within area or requires extending sheet right/down
+         false - overlapping headers
          */
 
         var response = { result: true, x: 0, y: 0 };
 
 
-        // выход за границу слева или сверху
+        // going beyond boundary on left or top
         if ( y < 0 ) {
             response.result = false;
             response.y = Math.abs(y);
@@ -3901,7 +3901,7 @@ CSparklineView.prototype.setMinMaxValAx = function(minVal, maxVal, oSparklineGro
     };
 
     _this.convertMetric = function(val, from, to) {
-        /* Параметры конвертирования (from/to)
+        /* Conversion parameters (from/to)
          0 - px, 1 - pt, 2 - in, 3 - mm
          */
         return val * ascCvtRatio(from, to);

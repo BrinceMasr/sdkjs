@@ -159,7 +159,7 @@ CChangesPDFFormParentValue.prototype.private_SetValue = function(Value)
 CChangesPDFFormValue.prototype.WriteToBinary = function(Writer)
 {
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// string : New
@@ -192,7 +192,7 @@ CChangesPDFFormValue.prototype.WriteToBinary = function(Writer)
 CChangesPDFFormValue.prototype.ReadFromBinary = function(Reader)
 {
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// string : New
@@ -658,7 +658,7 @@ CChangesPDFFormActions.prototype.ReadFromBinary = function(Reader)
 	this.FromLoad = true;
 
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// long : New
@@ -726,7 +726,7 @@ CChangesPDFFormMeta.prototype.private_SetValue = function(Value)
 CChangesPDFFormMeta.prototype.WriteToBinary = function(Writer)
 {
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// string : New
@@ -756,7 +756,7 @@ CChangesPDFFormMeta.prototype.WriteToBinary = function(Writer)
 CChangesPDFFormMeta.prototype.ReadFromBinary = function(Reader)
 {
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// string : New
@@ -1168,7 +1168,7 @@ CChangesPDFListFormCurIdxs.prototype.private_SetValue = function(Value)
 CChangesPDFListFormCurIdxs.prototype.WriteToBinary = function(Writer)
 {
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// string : New
@@ -1198,7 +1198,7 @@ CChangesPDFListFormCurIdxs.prototype.WriteToBinary = function(Writer)
 CChangesPDFListFormCurIdxs.prototype.ReadFromBinary = function(Reader)
 {
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// string : New
@@ -1242,7 +1242,7 @@ CChangesPDFListFormParentCurIdxs.prototype.private_SetValue = function(Value)
 CChangesPDFListFormParentCurIdxs.prototype.WriteToBinary = function(Writer)
 {
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// string : New
@@ -1272,7 +1272,7 @@ CChangesPDFListFormParentCurIdxs.prototype.WriteToBinary = function(Writer)
 CChangesPDFListFormParentCurIdxs.prototype.ReadFromBinary = function(Reader)
 {
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// string : New
@@ -1670,7 +1670,7 @@ CChangesPDFPushbuttonImage.prototype.ReadFromBinary = function(Reader)
 	this.FromLoad = true;
 
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// long : New
@@ -1856,7 +1856,7 @@ CChangesPDFPushbuttonCaption.prototype.ReadFromBinary = function(Reader)
 	this.FromLoad = true;
 
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// long : New

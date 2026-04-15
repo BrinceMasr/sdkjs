@@ -60,10 +60,10 @@
 			};
 			this.memory = binaryFileWriter
 
-			const nTableCount = 128;//Специально ставим большое число, чтобы не увеличивать его при добавлении очередной таблицы.
+			const nTableCount = 128;//Intentionally set a large number so we don't need to increase it when adding new tables.
 			this.nRealTableCount = 0;
 			this.nStart = this.memory.GetCurPosition();
-			//вычисляем с какой позиции можно писать таблицы
+			//calculate the position from which we can write tables
 			const nmtItemSize = 5;//5 byte
 			this.nLastFilePos = this.nStart + nTableCount * nmtItemSize;
 			//Write mtLen
@@ -90,11 +90,11 @@
 					binaryFileWriter.WriteRecordPPTY(0, document);
 				}});
 
-			//Пишем количество таблиц
+			//Write the number of tables
 			this.memory.Seek(this.nStart);
 			this.memory.WriteUChar(this.nRealTableCount);
 
-			//seek в конец, потому что GetBase64Memory заканчивает запись на текущей позиции.
+			//seek to the end, because GetBase64Memory finishes writing at the current position.
 			this.memory.Seek(this.nLastFilePos);
 		}
 		//todo remove coping
@@ -113,17 +113,17 @@
 			this.memory.WriteULong(this.nLastFilePos);
 
 			//Write table
-			//Запоминаем позицию в MainTable
+			//Remember the position in MainTable
 			const nCurPos = this.memory.GetCurPosition();
-			//Seek в свободную область
+			//Seek to free area
 			this.memory.Seek(this.nLastFilePos);
 			return nCurPos;
 		}
 		this.WriteTableEnd = function(nCurPos)
 		{
-			//сдвигаем позицию куда можно следующую таблицу
+			//shift position to where the next table can be written
 			this.nLastFilePos = this.memory.GetCurPosition();
-			//Seek вобратно в MainTable
+			//Seek back to MainTable
 			this.memory.Seek(nCurPos);
 
 			this.nRealTableCount++;

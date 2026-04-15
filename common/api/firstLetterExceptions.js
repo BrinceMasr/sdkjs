@@ -134,7 +134,7 @@
 	
 	
 	/**
-	 * Класс для работы с исключениями автозамены первого символа в предложении
+	 * Class for handling first letter autocorrect exceptions in sentences
 	 * @constructor
 	 */
 	function CFirstLetterExceptions()

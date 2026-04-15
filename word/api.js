@@ -3094,10 +3094,6 @@ background-repeat: no-repeat;\
 		if (this.WordControl.m_oLogicDocument)
 			this.WordControl.m_oLogicDocument.Statistics_Stop();
 	};
-	asc_docs_api.prototype.sync_DocInfoCallback         = function(obj)
-	{
-		this.sendEvent("asc_onDocInfo", new CDocInfoProp(obj));
-	};
 	asc_docs_api.prototype.sync_GetDocInfoStartCallback = function()
 	{
 		this.sendEvent("asc_onGetDocInfoStart");
@@ -3146,66 +3142,6 @@ background-repeat: no-repeat;\
 		//this.WordControl.m_oLogicDocument.TurnOn_InterfaceEvents();
 	};
 
-	function CDocInfoProp(obj)
-	{
-		if (obj)
-		{
-			this.PageCount      = obj.PageCount;
-			this.WordsCount     = obj.WordsCount;
-			this.ParagraphCount = obj.ParagraphCount;
-			this.SymbolsCount   = obj.SymbolsCount;
-			this.SymbolsWSCount = obj.SymbolsWSCount;
-		}
-		else
-		{
-			this.PageCount      = -1;
-			this.WordsCount     = -1;
-			this.ParagraphCount = -1;
-			this.SymbolsCount   = -1;
-			this.SymbolsWSCount = -1;
-		}
-	}
-
-	CDocInfoProp.prototype.get_PageCount      = function()
-	{
-		return this.PageCount;
-	};
-	CDocInfoProp.prototype.put_PageCount      = function(v)
-	{
-		this.PageCount = v;
-	};
-	CDocInfoProp.prototype.get_WordsCount     = function()
-	{
-		return this.WordsCount;
-	};
-	CDocInfoProp.prototype.put_WordsCount     = function(v)
-	{
-		this.WordsCount = v;
-	};
-	CDocInfoProp.prototype.get_ParagraphCount = function()
-	{
-		return this.ParagraphCount;
-	};
-	CDocInfoProp.prototype.put_ParagraphCount = function(v)
-	{
-		this.ParagraphCount = v;
-	};
-	CDocInfoProp.prototype.get_SymbolsCount   = function()
-	{
-		return this.SymbolsCount;
-	};
-	CDocInfoProp.prototype.put_SymbolsCount   = function(v)
-	{
-		this.SymbolsCount = v;
-	};
-	CDocInfoProp.prototype.get_SymbolsWSCount = function()
-	{
-		return this.SymbolsWSCount;
-	};
-	CDocInfoProp.prototype.put_SymbolsWSCount = function(v)
-	{
-		this.SymbolsWSCount = v;
-	};
 
 	/*callbacks*/
 	/*asc_docs_api.prototype.sync_CursorLockCallBack = function(isLock){
@@ -4302,7 +4238,7 @@ background-repeat: no-repeat;\
 			return;
 
 		logicDocument.StartAction(AscDFH.historydescription_Document_SetParagraphAlign, undefined, undefined, value);
-		logicDocument.SetParagraphAlign(value);
+		logicDocument.SetParagraphAlign(value, {checkHR : true});
 		logicDocument.UpdateInterface();
 		logicDocument.Recalculate();
 		logicDocument.FinalizeAction();
@@ -4987,19 +4923,21 @@ background-repeat: no-repeat;\
 			oLogicDocument.FinalizeAction();
         }
     };
-
-    asc_docs_api.prototype.asc_addHorizontalRule = function() {
-        let oLogicDocument = this.WordControl.m_oLogicDocument;
-        if (!oLogicDocument)
-            return;
-
-        if (false === oLogicDocument.Document_Is_SelectionLocked(AscCommon.changestype_Document_Content_Add))
-        {
-            oLogicDocument.StartAction(AscDFH.historydescription_Document_InsertHorizontalRule);
-            oLogicDocument.AddHorizontalRule();
-            oLogicDocument.FinalizeAction();
-        }
-    };
+	
+	asc_docs_api.prototype.asc_addHorizontalRule = function()
+	{
+		let logicDocument = this.private_GetLogicDocument();
+		if (!logicDocument)
+			return false;
+		
+		if (logicDocument.IsSelectionLocked(AscCommon.changestype_Paragraph_Content))
+			return false;
+		
+		logicDocument.StartAction(AscDFH.historydescription_Document_InsertHorizontalRule);
+		let result = logicDocument.AddHorizontalRule();
+		logicDocument.FinalizeAction();
+		return result;
+	};
 
     asc_docs_api.prototype.asc_getAllSignatures = function(){
     	if (!this.WordControl.m_oLogicDocument)
@@ -10411,9 +10349,8 @@ background-repeat: no-repeat;\
 					oLogicDocument.UpdateSelection();
 
 					oResult = oContentControl.GetContentControlPr();
+					oLogicDocument.AddMacroData(AscDFH.historydescription_Document_AddBlockLevelContentControl, oResult.GetPlaceholderText());
 				}
-
-				oLogicDocument.AddMacroData(AscDFH.historydescription_Document_AddBlockLevelContentControl, oResult.PlaceholderText);
 				oLogicDocument.FinalizeAction();
 			}
 		}
@@ -10434,9 +10371,8 @@ background-repeat: no-repeat;\
 					oLogicDocument.UpdateSelection();
 
 					oResult = oContentControl.GetContentControlPr();
+					oLogicDocument.AddMacroData(AscDFH.historydescription_Document_AddInlineLevelContentControl, oResult.GetPlaceholderText());
 				}
-
-				oLogicDocument.AddMacroData(AscDFH.historydescription_Document_AddInlineLevelContentControl, oResult.PlaceholderText);
 				oLogicDocument.FinalizeAction();
 			}
 		}
@@ -13318,7 +13254,7 @@ background-repeat: no-repeat;\
 		const oThis = this;
 		this._ConvertDocuments([document], !!document.url, function (stream, imageMap) {
 			oThis.insertDocumentUrlsData.imageMap = imageMap;
-			AscCommonWord.CompareBinary(oThis, stream, oOptions);
+			AscCommonWord.CompareBinary(stream, oOptions);
 		});
 	};
 
@@ -13326,7 +13262,7 @@ background-repeat: no-repeat;\
 		const oThis = this;
 		this._ConvertDocuments([document], !!document.url, function (stream, imageMap) {
 			oThis.insertDocumentUrlsData.imageMap = imageMap;
-			AscCommonWord.mergeBinary(oThis, stream, oOptions);
+			AscCommonWord.mergeBinary(stream, oOptions);
 		});
 	};
 	
@@ -13344,7 +13280,7 @@ background-repeat: no-repeat;\
 		file["GetBinary"] = function() { return AscCommon.getBinaryArray(file_content, file_content_len); };
 		file["GetImageMap"] = function() { return image_map; };
 
-		AscCommonWord["CompareDocuments"](api, file);
+		AscCommonWord["CompareDocuments"](file);
 	};
 
 	window["onDocumentMerge"] = function(folder, file_content, file_content_len, image_map, options) {
@@ -13360,7 +13296,7 @@ background-repeat: no-repeat;\
 		file["GetBinary"] = function() { return AscCommon.getBinaryArray(file_content, file_content_len); };
 		file["GetImageMap"] = function() { return image_map; };
 
-		AscCommonWord["mergeDocuments"](api, file);
+		AscCommonWord["mergeDocuments"](file);
 	};
 
 	window["asc_docs_api"]                                      = asc_docs_api;
@@ -15865,16 +15801,6 @@ background-repeat: no-repeat;\
 	asc_docs_api.prototype['getJsApi'] = asc_docs_api.prototype.getJsApi;
 	asc_docs_api.prototype['scrollToTarget'] = asc_docs_api.prototype.scrollToTarget;
 	
-	CDocInfoProp.prototype['get_PageCount']             = CDocInfoProp.prototype.get_PageCount;
-	CDocInfoProp.prototype['put_PageCount']             = CDocInfoProp.prototype.put_PageCount;
-	CDocInfoProp.prototype['get_WordsCount']            = CDocInfoProp.prototype.get_WordsCount;
-	CDocInfoProp.prototype['put_WordsCount']            = CDocInfoProp.prototype.put_WordsCount;
-	CDocInfoProp.prototype['get_ParagraphCount']        = CDocInfoProp.prototype.get_ParagraphCount;
-	CDocInfoProp.prototype['put_ParagraphCount']        = CDocInfoProp.prototype.put_ParagraphCount;
-	CDocInfoProp.prototype['get_SymbolsCount']          = CDocInfoProp.prototype.get_SymbolsCount;
-	CDocInfoProp.prototype['put_SymbolsCount']          = CDocInfoProp.prototype.put_SymbolsCount;
-	CDocInfoProp.prototype['get_SymbolsWSCount']        = CDocInfoProp.prototype.get_SymbolsWSCount;
-	CDocInfoProp.prototype['put_SymbolsWSCount']        = CDocInfoProp.prototype.put_SymbolsWSCount;
 	CContextMenuData.prototype['get_Type']    = CContextMenuData.prototype.get_Type;
 	CContextMenuData.prototype['get_X']       = CContextMenuData.prototype.get_X;
 	CContextMenuData.prototype['get_Y']       = CContextMenuData.prototype.get_Y;

@@ -119,11 +119,11 @@
 		return AscPDF.ALIGN_TYPE.left;
 	};
 	CTextBoxContent.prototype.IsUseInDocument = function() {
-		// TODO: Временно, потом надо будет запрашивать у родительского класса
+		// TODO: Temporary, later will need to request from parent class
 		return true;
 	};
 	CTextBoxContent.prototype.OnContentReDraw = function() {
-		// TODO: Реализовать
+		// TODO: Implement
 	};
 	CTextBoxContent.prototype.GetStyles = function() {
 		return STYLES;

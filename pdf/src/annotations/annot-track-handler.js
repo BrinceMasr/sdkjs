@@ -34,9 +34,9 @@
 
 (function(window) {
 	/**
-	 * Класс контролирует события работы трека формулы. Вызывать у этого класса события обновления можно
-	 * сколько угодно раз, а этот класс уже отрисовщику и в интерфейс посылает события, только когда реально что-то
-	 * изменилось
+	 * Class controls annotation select track events. You can call update events on this class as many times
+	 * as you want, and this class only sends events to the renderer and interface when something
+	 * has actually changed
 	 *
 	 * @constructor
 	 */

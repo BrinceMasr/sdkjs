@@ -1188,7 +1188,7 @@
                 return this.handleMoveHit(object, e, x, y, group, false, pageIndex, bWord);
             }
     
-            // Обработка выбора объекта (для одиночного объекта или группы)
+            // Handle object selection (for single object or group)
             if (!group) {
                 if (this.selection.textSelection !== object) {
                     this.resetSelection(true);
@@ -1209,7 +1209,7 @@
                 }
             }
     
-            // Вызываем начало выделения без проверки isSlideShow
+            // Start selection without checking isSlideShow
             object.selectionSetStart(e, x, y, pageIndex);
             this.changeCurrentState(new AscFormat.TextAddState(this, object, x, y, e.Button));
             return true;
@@ -1222,7 +1222,7 @@
                 tx = invert_transform_text.TransformPointX(x, y);
                 ty = invert_transform_text.TransformPointY(x, y);
     
-                // Отрисовка контролов для Document Editor
+                // Render controls for Document Editor
                 if (this.document.IsDocumentEditor() && object instanceof AscFormat.CShape && object.isForm()) {
                     var oForm = object.getInnerForm();
                     if (oForm)
@@ -1903,6 +1903,10 @@
         if (bRedraw) {
             function redraw(oContent) {
                 let oObject = oContent.GetParent();
+				if (!oObject) {
+					return;
+				}
+				
                 while (!oObject.AddToRedraw) {
                     if (oObject.GetParent) {
                         oObject = oObject.GetParent();

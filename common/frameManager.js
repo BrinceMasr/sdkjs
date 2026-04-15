@@ -392,7 +392,7 @@
 		const oApi = this.api;
 		const oThis = this;
 		oApi.sync_StartAction(Asc.c_oAscAsyncActionType.BlockInteraction, Asc.c_oAscAsyncAction.Open);
-		// на случай, если изображение поставили на загрузку, закрыли редактор, и потом опять открыли
+		// in case the image was set to load, the editor was closed, and then opened again
 		oApi.sync_EndAction(Asc.c_oAscAsyncActionType.BlockInteraction, Asc.c_oAscAsyncAction.LoadImage);
 
 		this.sendFromFrameToGeneralEditor({
@@ -416,7 +416,7 @@
 				}, oThis, []);
 			}
 			oThis.api.wb.scrollToOleSize();
-			// добавляем первый поинт после загрузки, чтобы в локальную историю добавился либо стандартный oleSize, либо заданный пользователем
+			// add first point after loading, so that either standard oleSize or user-defined one is added to local history
 			const oleSize = oApi.wb.getOleSize();
 			oleSize.addPointToLocalHistory();
 

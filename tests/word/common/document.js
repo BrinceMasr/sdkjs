@@ -570,6 +570,19 @@
 		SelectTableCells(table, startCell, startRow, endCell, endRow);
 		table.MergeTableCells(true);
 	}
+	function StartAction()
+	{
+		let logicDocument = CreateLogicDocument();
+		logicDocument.StartAction();
+	}
+	function EndAction(clearHistory)
+	{
+		let logicDocument = CreateLogicDocument();
+		logicDocument.FinalizeAction();
+		
+		if (clearHistory)
+			AscCommon.History.Clear();
+	}
 	
 	//--------------------------------------------------------export----------------------------------------------------
 	AscTest.CreateLogicDocument              = CreateLogicDocument;
@@ -627,6 +640,8 @@
 	AscTest.StopTextSpeaker                  = StopTextSpeaker;
 	AscTest.SelectTableCells                 = SelectTableCells;
 	AscTest.MergeTableCells                  = MergeTableCells;
+	AscTest.StartAction                      = StartAction;
+	AscTest.EndAction                        = EndAction;
 
 })(window);
 

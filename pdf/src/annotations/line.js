@@ -446,7 +446,7 @@
         function calculateBoundingRectangle(line, figure1, figure2) {
             let x1 = line.x1, y1 = line.y1, x2 = line.x2, y2 = line.y2;
         
-            // Расчет угла поворота в радианах
+            // Calculate rotation angle in radians
             let angle = Math.atan2(y2 - y1, x2 - x1);
         
             function rotatePoint(cx, cy, angle, px, py) {
@@ -492,7 +492,7 @@
                 maxY = Math.max(maxY, point.y);
             }
         
-            // Возвращаем координаты прямоугольника
+            // Return rectangle coordinates
             return [minX, minY, maxX, maxY];
         }
 

@@ -62,7 +62,7 @@
         let bFromOpt = false;
         let sExportValue;
         
-        // если есть массив опт, то value в 99% случаев - это индекс в массиве opt (export values)
+        // if there's opt array, then value is 99% of the time an index in opt array (export values)
         if (aOptions && aOptions[value]) {
             sExportValue = aOptions[value];
             bFromOpt = true;
@@ -84,7 +84,7 @@
         else {
             let oFirstField = null;
             aFields.forEach(function(field, index) {
-                // выставляем по индексу из Opt
+                // set by index from Opt
                 if (bFromOpt) {
                     if (index == value) {
                         field.SetChecked(true);
@@ -94,7 +94,7 @@
                     }
                 }
                 else {
-                    // оставляем отмеченным только первую если не по индексу из Opt
+                    // keep only first one checked if not by index from Opt
                     if (oFirstField == null && field.GetExportValue() == sExportValue) {
                         field.SetChecked(true);
                         oFirstField = field;

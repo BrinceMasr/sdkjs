@@ -67,9 +67,9 @@
 		var kArrayL = "array";
 
 		var recalcType = {
-			recalc: 0, // без пересчета
-			full: 1, // пересчитываем все
-			newLines: 2  // пересчитываем новые строки
+			recalc: 0, // without recalculation
+			full: 1, // recalculate everything
+			newLines: 2  // recalculate new lines
 
 		};
 
@@ -147,10 +147,10 @@
 		}
 
 		function incDecFonSize(bIncrease, oValue) {
-			// Закон изменения размеров :
-			// Результатом должно быть ближайшее из отрезка [8,72] по следующим числам 8,9,10,11,12,14,16,18,20,22,24,26,28,36,48,72
-			// Если значение меньше или равно 8 и мы уменьшаем, то ничего не меняется
-			// Если значение больше или равно 72 и мы увеличиваем, то ничего не меняется
+			// Size change rule:
+			// The result should be the nearest from the range [8,72] among the following numbers: 8,9,10,11,12,14,16,18,20,22,24,26,28,36,48,72
+			// If the value is less than or equal to 8 and we decrease, nothing changes
+			// If the value is greater than or equal to 72 and we increase, nothing changes
 
 			var aSizes = [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
 			var nLength = aSizes.length;
@@ -184,12 +184,12 @@
 
 		function convertPxToPt(value) {
 			value = value * sizePxinPt;
-			//пункты округляем до сотых
+			//round points to hundredths
 			value = Asc.ceil(value / AscBrowser.retinaPixelRatio * 100) / 100;
 			return value;
 		}
 
-		// Определяет времени работы функции
+		// Determines function execution time
 		function profileTime(fn/*[, arguments]*/) {
 			var start, end, arg = [], i;
 			if (arguments.length) {
@@ -298,8 +298,8 @@
 		}
 
 		function getFindRegExp(value, options, checkEmptyVal) {
-			var findFlags = "g"; // Заменяем все вхождения
-			// Не чувствителен к регистру
+			var findFlags = "g"; // Replace all occurrences
+			// Case insensitive
 			if (true !== options.isMatchCase) {
 				findFlags += "i";
 			}
@@ -1217,7 +1217,7 @@
 			if (3 == arguments.length) {
 				var range = arguments[0];
 				Range.call(this, range.c1, range.r1, range.c2, range.r2);
-				// ToDo стоит пересмотреть конструкторы.
+				// ToDo should reconsider constructors.
 				this.refType1 = range.refType1;
 				this.refType2 = range.refType2;
 
@@ -1448,20 +1448,20 @@
 				if (mc) {
 					incompleate = !curRange.containsRange(mc);
 					if (dc > 0 && (incompleate || this.activeCell.col > mc.c1 || this.activeCell.row !== mc.r1)) {
-						// Движение слева направо
+						// Movement left to right
 						this.activeCell.col = mc.c2 + 1;
 						done = false;
 					} else if (dc < 0 && (incompleate || this.activeCell.col < mc.c2 || this.activeCell.row !== mc.r1)) {
-						// Движение справа налево
+						// Movement right to left
 						this.activeCell.col = mc.c1 - 1;
 						done = false;
 					}
 					if (dr > 0 && (incompleate || this.activeCell.row > mc.r1 || this.activeCell.col !== mc.c1)) {
-						// Движение сверху вниз
+						// Movement top to bottom
 						this.activeCell.row = mc.r2 + 1;
 						done = false;
 					} else if (dr < 0 && (incompleate || this.activeCell.row < mc.r2 || this.activeCell.col !== mc.c1)) {
-						// Движение снизу вверх
+						// Movement bottom to top
 						this.activeCell.row = mc.r1 - 1;
 						done = false;
 					}
@@ -1521,8 +1521,8 @@
 			return 1 === this.ranges.length;
 		};
 		SelectionRange.prototype.update = function () {
-			//меняем выделеную ячейку, если она не входит в диапазон
-			//возможно, в будующем придется пределать логику, пока нет примеров, когда это работает плохо
+			//change selected cell if it's not within the range
+			//possibly in the future the logic will need to be reworked, for now there are no examples when this works poorly
 			var range = this.ranges[this.activeCellId];
 			if (!range || !range.contains(this.activeCell.col, this.activeCell.row)) {
 				range = this.getLast();
@@ -1597,15 +1597,15 @@
 			if (1 == arguments.length) {
 				var range = arguments[0];
 				Range.call(this, range.c1, range.r1, range.c2, range.r2);
-				// ToDo стоит пересмотреть конструкторы.
+				// ToDo should reconsider constructors.
 				this.refType1 = range.refType1;
 				this.refType2 = range.refType2;
 			} else if (arguments.length > 1)
 				Range.apply(this, arguments);
 			else
 				Range.call(this, 0, 0, 0, 0);
-			this.startCol = 0; // Активная ячейка в выделении
-			this.startRow = 0; // Активная ячейка в выделении
+			this.startCol = 0; // Active cell in selection
+			this.startRow = 0; // Active cell in selection
 			this._updateAdditionalData();
 		}
 
@@ -1695,8 +1695,8 @@
 			return this;
 		};
 		ActiveRange.prototype._updateAdditionalData = function () {
-			//меняем выделеную ячейку, если она не входит в диапазон
-			//возможно, в будующем придется пределать логику, пока нет примеров, когда это работает плохо
+			//change selected cell if it's not within the range
+			//possibly in the future the logic will need to be reworked, for now there are no examples when this works poorly
 			if (!this.contains(this.startCol, this.startRow)) {
 				this.startCol = this.c1;
 				this.startRow = this.r1;
@@ -1847,7 +1847,7 @@
 				return a - b;
 			});
 
-			//объединяем
+			//merge
 			var unionRanges = [];
 			var start = null;
 			var end = null;
@@ -2051,7 +2051,7 @@
 					oFirstAddr = oLastAddr = g_oCellAddressUtils.getCellAddress(sRange);
 				}
 				oCacheVal = {first: null, last: null, ascRange: null, formulaRange: null, activeRange: null};
-				//последнее условие, чтобы не распознавалось "A", "1"(должно быть "A:A", "1:1")
+				//last condition so that "A", "1" is not recognized (should be "A:A", "1:1")
 				if (oFirstAddr.isValid() && oLastAddr.isValid() &&
 					(!bIsSingle || (!oFirstAddr.getIsRow() && !oFirstAddr.getIsCol()))) {
 					oCacheVal.first = oFirstAddr;
@@ -2236,11 +2236,11 @@
 
 		function dropDecimalAutofit(f) {
 			var s = getFragmentsText(f);
-			// Проверка scientific format
+			// Check for scientific format
 			if (s.search(/E/i) >= 0) {
 				return f;
 			}
-			// Поиск десятичной точки
+			// Search for decimal point
 			var pos = s.indexOf(AscCommon.g_oDefaultCultureInfo.NumberDecimalSeparator);
 			if (-1 !== pos) {
 				f = [f[0].clone()];
@@ -2416,7 +2416,7 @@
 					}
 					name = displayName = oStyle.Name;
 					if (type === AscCommon.c_oAscStyleImage.Default) {
-						// ToDo Возможно стоит переписать немного, чтобы не пробегать каждый раз по массиву custom-стилей (нужно генерировать AllStyles)
+						// ToDo Perhaps it's worth rewriting a bit to avoid iterating through the custom styles array every time (need to generate AllStyles)
 						oStyle = cellStyles.getCustomStyleByBuiltinId(oStyle.BuiltinId) || oStyle;
 						displayName = AscCommon.translateManager.getValue(name);
 					} else if (null !== oStyle.BuiltinId) {
@@ -2494,13 +2494,13 @@
 
 			// Draw text
 			var format = oStyle.getFont().clone();
-			// Для размера шрифта делаем ограничение для превью в 16pt (у Excel 18pt, но и высота превью больше 22px)
+			// For font size, we limit preview to 16pt (Excel uses 18pt, but their preview height is greater than 22px)
 			var nSize = format.getSize();
 			if (16 < format.getSize()) {
 				nSize = 16;
 			}
 
-			// рисуем в пикселях
+			// draw in pixels
 			if (window["IS_NATIVE_EDITOR"]) {
 				nSize *= AscCommon.AscBrowser.retinaPixelRatio;
 			}
@@ -2527,7 +2527,7 @@
 				width_padding = Asc.round(width - tm.width - width_padding);
 			}
 
-			// Текст будем рисовать по центру (в Excel чуть по другому реализовано, у них постоянный отступ снизу)
+			// We'll draw text centered (in Excel it's implemented slightly differently, they have constant padding at the bottom)
 			var textY = Asc.round(0.5 * (height - tm.height));
 			if (!opt_cf_preview) {
 				let oldCtx = sr.drawingCtx;
@@ -2782,7 +2782,7 @@
 			return canvas;
 		}
 
-		//TODO рассмотреть объединение с generateXfsStyle
+		//TODO consider merging with generateXfsStyle
 		function generateXfsStyle2(id, wb, xfs, text) {
 			var canvas = createAndPutCanvas(id);
 			if (!canvas) {
@@ -2915,7 +2915,7 @@
 		}
 
 		//-----------------------------------------------------------------
-		// События движения мыши
+		// Mouse movement events
 		//-----------------------------------------------------------------
 		/** @constructor */
 		function asc_CMouseMoveData(obj) {
@@ -2926,14 +2926,14 @@
 			if (obj) {
 				this.type = obj.type;
 				this.x = obj.x;
-				this.reverseX = obj.reverseX;	// Отображать комментарий слева от ячейки
+				this.reverseX = obj.reverseX;	// Display comment to the left of the cell
 				this.y = obj.y;
 				this.hyperlink = obj.hyperlink;
 				this.aCommentIndexes = obj.aCommentIndexes;
 				this.userId = obj.userId;
 				this.lockedObjectType = obj.lockedObjectType;
 
-				// Для resize
+				// For resize
 				this.sizeCCOrPt = obj.sizeCCOrPt;
 				this.sizePx = obj.sizePx;
 
@@ -2997,12 +2997,12 @@
 			}
 		};
 
-		// Гиперссылка
+		// Hyperlink
 		/** @constructor */
 		function asc_CHyperlink(obj) {
-			// Класс Hyperlink из модели
+			// Hyperlink class from model
 			this.hyperlinkModel = null != obj ? obj : new AscCommonExcel.Hyperlink();
-			// Используется только для выдачи наружу и выставлении обратно
+			// Used only for output and setting back
 			this.text = null;
 			this.isFromShape = false;
 
@@ -3135,7 +3135,7 @@
 		};
 
 		asc_CHyperlink.prototype.asc_setType = function (val) {
-			// В принципе эта функция избыточна
+			// In principle this function is redundant
 			switch (val) {
 				case Asc.c_oAscHyperlinkType.WebLink:
 					this.hyperlinkModel.setLocation(null);
@@ -3251,14 +3251,14 @@
 
 		/** @constructor */
 		function asc_CAdjustPrint() {
-			// Вид печати
+			// Print type
 			this.printType = Asc.c_oAscPrintType.ActiveSheets;
 			this.pageOptionsMap = null;
 			this.ignorePrintArea = null;
 
 			this.isOnlyFirstPage = null;
 			this.nativeOptions = undefined;
-			this.activeSheetsArray = null;//массив с индексами листов, которые необходимо напечатать
+			this.activeSheetsArray = null;//array with sheet indices that need to be printed
 
 			this.startPageIndex = null;
 			this.endPageIndex = null;
@@ -3334,12 +3334,12 @@
 
 		/** @constructor */
 		function asc_CSheetViewSettings() {
-			// Показывать ли сетку
+			// Whether to show grid
 			this.showGridLines = null;
-			// Показывать обозначения строк и столбцов
+			// Show row and column headers
 			this.showRowColHeaders = null;
 
-			// Закрепление области
+			// Freeze panes
 			this.pane = null;
 
 			//current view zoom
@@ -3425,7 +3425,7 @@
 			this.topLeftCell = null;
 			this.xSplit = 0;
 			this.ySplit = 0;
-			// CellAddress для удобства
+			// CellAddress for convenience
 			this.topLeftFrozenCell = null;
 
 			return this;
@@ -3445,7 +3445,7 @@
 			return res;
 		};
 		asc_CPane.prototype.init = function () {
-			// ToDo Обрабатываем пока только frozen и frozenSplit
+			// ToDo Currently only handling frozen and frozenSplit
 			if ((AscCommonExcel.c_oAscPaneState.Frozen === this.state || AscCommonExcel.c_oAscPaneState.FrozenSplit === this.state) &&
 				(0 < this.xSplit || 0 < this.ySplit)) {
 				this.topLeftFrozenCell = new AscCommon.CellAddress(this.ySplit, this.xSplit, 0);
@@ -3521,7 +3521,7 @@
 			return res;
 		};
 
-		// Математическая информация о выделении
+		// Mathematical information about selection
 		/** @constructor */
 		function asc_CSelectionMathInfo() {
 			this.count = 0;
@@ -3556,22 +3556,22 @@
 
 		/** @constructor */
 		function asc_CFindOptions() {
-			this.findWhat = "";							// текст, который ищем
-			this.wordsIndex = 0;                         // индекс текущего слова
-			this.scanByRows = true;						// просмотр по строкам/столбцам
-			this.scanForward = true;					// поиск вперед/назад
-			this.isMatchCase = false;					// учитывать регистр
+			this.findWhat = "";							// text to search for
+			this.wordsIndex = 0;                         // index of current word
+			this.scanByRows = true;						// scan by rows/columns
+			this.scanForward = true;					// search forward/backward
+			this.isMatchCase = false;					// case sensitive
 			this.isWholeCell = false;
 			this.isWholeWord = false;
-			this.isSpellCheck = false;		    // изменение вызванное в проверке орфографии
-			this.scanOnOnlySheet = Asc.c_oAscSearchBy.Sheet;				// искать только на листе/в книге c_oAscSearchBy
-			this.lookIn = Asc.c_oAscFindLookIn.Formulas;	// искать в формулах/значениях/примечаниях
+			this.isSpellCheck = false;		    // change triggered by spell check
+			this.scanOnOnlySheet = Asc.c_oAscSearchBy.Sheet;				// search only on sheet/in workbook c_oAscSearchBy
+			this.lookIn = Asc.c_oAscFindLookIn.Formulas;	// search in formulas/values/comments
 
 			this.findRegExp = null;
-			this.replaceWith = "";						// текст, на который заменяем (если у нас замена)
-			this.isReplaceAll = false;					// заменить все (если у нас замена)
+			this.replaceWith = "";						// text to replace with (if replacing)
+			this.isReplaceAll = false;					// replace all (if replacing)
 
-			// внутренние переменные
+			// internal variables
 			this.findInSelection = false;
 			this.selectionRange = null;
 			this.findRange = null;
@@ -3589,9 +3589,10 @@
 			this.specificRange = null;
 			this.isForMacros = null;
 			this.activeCell = null;
+			this.wsIndex = -1;  // forced worksheet index for ApiRange.Find (-1 = use active)
 
-			//если запускаем новый поиск из-за измененного документа, то присылаем последний элемент, на который
-			//кликнул пользователь и далее пытаемся найти следующий/предыдущий
+			//if starting a new search due to document change, we send the last element that
+			//the user clicked on and then try to find next/previous
 			this.lastSearchElem = null;
 
 			this.isNotSearchEmptyCells = null;
@@ -3629,6 +3630,7 @@
 			result.lastSearchElem = this.lastSearchElem;
 			result.isNotSearchEmptyCells = this.isNotSearchEmptyCells;
 			result.activeCell = this.activeCell;
+			result.wsIndex = this.wsIndex;
 
 			return result;
 		};
@@ -3639,8 +3641,8 @@
 		};
 		asc_CFindOptions.prototype.isEqual2 = function (obj) {
 			return obj && this.findWhat === obj.findWhat && this.scanByRows === obj.scanByRows && this.isMatchCase === obj.isMatchCase && this.isWholeCell === obj.isWholeCell &&
-				this.lookIn === obj.lookIn && this.specificRange == obj.specificRange && this.isNotSearchEmptyCells == obj.isNotSearchEmptyCells && this.activeCell ==
-				obj.activeCell;
+				this.lookIn === obj.lookIn && this.specificRange == obj.specificRange && this.isNotSearchEmptyCells == obj.isNotSearchEmptyCells &&
+				this.wsIndex === obj.wsIndex;
 		};
 		asc_CFindOptions.prototype.clearFindAll = function () {
 			this.countFindAll = 0;
@@ -3686,7 +3688,7 @@
 			this.isChangeSingleWord = val;
 		};
 		asc_CFindOptions.prototype.asc_setScanOnOnlySheet = function (val) {
-			//TODO не стал менять native.js, поставил условие для scanOnOnlySheet
+			//TODO didn't change native.js, added condition for scanOnOnlySheet
 			if (val === true) {
 				this.scanOnOnlySheet = Asc.c_oAscSearchBy.Sheet;
 			} else if (val === false) {
@@ -3735,6 +3737,9 @@
 		};
 		asc_CFindOptions.prototype.asc_setIsForMacros = function (val) {
 			this.isForMacros = val;
+		};
+		asc_CFindOptions.prototype.asc_setWsIndex = function (val) {
+			this.wsIndex = (val !== undefined && val !== null) ? val : -1;
 		};
 
 		/** @constructor */
@@ -3901,7 +3906,7 @@
 		var g_oCacheMeasureEmpty = new CCacheMeasureEmpty();
 
 		/**
-		 * передаём в меню для того, чтобы показать иконку опций авторавертывания таблиц
+		 * passed to menu to show table auto-expand options icon
 		 * @constructor
 		 */
 		function asc_CAutoCorrectOptions() {

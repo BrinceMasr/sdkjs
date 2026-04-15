@@ -412,7 +412,7 @@ function FrozenPlace(ws, type) {
 	};
 	
 	_this.isObjectInside = function(object) {
-		// TODO Нужно учитывать collOff, rowOff
+		// TODO Need to account for collOff, rowOff
 
         var boundsFromTo = object.boundsFromTo;
 		var objectRange = new asc_Range(boundsFromTo.from.col, boundsFromTo.from.row, boundsFromTo.to.col, boundsFromTo.to.row);
@@ -518,13 +518,13 @@ function FrozenPlace(ws, type) {
 		canvas.m_oContext.beginPath();
 		canvas.m_oContext.rect(rect.x, rect.y, rect.w, rect.h);
 		canvas.m_oContext.clip();
-        // этот сэйв нужен для восстановления сложных вложенных клипов
+        // this save is needed to restore complex nested clips
         canvas.m_oContext.save();
 	};
 	
 	_this.restore = function(canvas) {
 		canvas.m_oContext.restore();
-		// этот рестор нужен для восстановления сложных вложенных клипов
+		// this restore is needed to restore complex nested clips
         canvas.m_oContext.restore();
 	};
 	_this.getUpdateRect = function (oRect) {

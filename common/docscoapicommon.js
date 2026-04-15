@@ -38,20 +38,20 @@
  */
   function(window, undefined) {
   /**
-   * Класс user для совместного редактирования/просмотра документа
+   * User class for collaborative document editing/viewing
    * -----------------------------------------------------------------------------
    *
    * @constructor
    * @memberOf Asc
    */
   function asc_CUser(val) {
-    this.id = null;					// уникальный id - пользователя
-    this.idOriginal = null;	// уникальный id - пользователя
-    this.userName = null;		// имя пользователя
-    this.state = undefined;	// состояние (true - подключен, false - отключился)
-    this.indexUser = -1;		// Индекс пользователя (фактически равно числу заходов в документ на сервере)
-    this.color = null;			// цвет пользователя
-    this.view = false;			// просмотр(true), редактор(false)
+    this.id = null;					// unique user id
+    this.idOriginal = null;	// unique user id
+    this.userName = null;		// user name
+    this.state = undefined;	// state (true - connected, false - disconnected)
+    this.indexUser = -1;		// User index - effectively number of document joins on server
+    this.color = null;			// user color
+    this.view = false;			// view(true), editor(false)
     //todo type: edit, review, fill forms, live viewer...
     this.live = false;			// live viewer(true), offline viewer(false)
 

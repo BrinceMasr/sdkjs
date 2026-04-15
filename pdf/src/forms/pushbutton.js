@@ -79,7 +79,7 @@
             mouseDown:  "",
             rollover:   "",
 
-            // регистрируем что картинки изменились, нужно при записи, чтобы не писать исходные картинки снова
+            // register that images have changed, needed when saving to not write original images again
             changedInfo: {
                 normal:     false,
                 mouseDown:  false,
@@ -317,8 +317,8 @@
         const dDrawingH = dCH * dImgH;
         const nScaleHow = this.GetScaleHow();
 
-        // Мы всегда создаем drawing с максимальной доступными размерами и делаем crop картинки (если скейл пропорциональный или скейла нет вовсе).
-        // В это свойство пишем фактический размер картинки (не исходный размер), тот, который реально рисуется.
+        // We always create drawing with maximum available dimensions and crop the image (if scale is proportional or there's no scale at all).
+        // This property stores the actual image size (not the original size), the one that is actually drawn.
         this.relImgSize = {
             W: 0,
             H: 0
@@ -450,7 +450,7 @@
 
             let oFirstRun = this.content.GetElement(0).GetElement(0);
             let oRunElm = oFirstRun.GetElement(oFirstRun.GetElementsCount() - 1);
-            // удаляем таб
+            // remove tab
             if (oRunElm && true ==  oRunElm.IsTab()) {
                 oFirstRun.RemoveFromContent(oFirstRun.GetElementsCount() - 1, 1);
             }
@@ -523,7 +523,7 @@
             oPara2.CompiledPr.NeedRecalc = true;
         }
         
-        // положение текста с картинкой в одном параграфе
+        // text position with image in the same paragraph
         if (oDrawing) {
             let oRun = oPara1.GetElement(0);
 
@@ -568,7 +568,7 @@
             return;
         }
         
-        // центрируем текст если картинки нет
+        // center text if there's no image
         let oCaptionRun = this.GetCaptionRun();
         if (oCaptionRun) {
             oCaptionRun.Pr.Position = 0;
@@ -973,7 +973,7 @@
         return oFill;
     };
     CPushButtonField.prototype.DrawRollover = function() {
-        // rollover состояние может быть только в push
+        // rollover state can only be in push
         if (this.GetHighlight() != AscPDF.BUTTON_HIGHLIGHT_TYPES.push) {
             return;
         }
@@ -995,7 +995,7 @@
             AscCommon.History.StartNoHistoryMode();
             
             let oCaptionRun = this.GetCaptionRun();
-            // сначала добавляем текст, т.к. учитывается его размер при добавлении картинки
+            // first add text, since its size is taken into account when adding image
             if (oCaptionRun && sRolloverCaption) {
                 oCaptionRun.ClearContent();
                 oCaptionRun.AddText(sRolloverCaption);
@@ -1007,7 +1007,7 @@
         }
     };
     CPushButtonField.prototype.OnEndRollover = function() {
-        // rollover состояние может быть только в push
+        // rollover state can only be in push
         if (this.GetHighlight() != AscPDF.BUTTON_HIGHLIGHT_TYPES.push) {
             return;
         }
@@ -1070,7 +1070,7 @@
         }
     };
     CPushButtonField.prototype.CheckImageOnce = function() {
-        // на открытии не заполняли контент формы, но если внешнего вида нет, тогда рисуем сами, нужно заполнить форму контентом
+        // on open we didn't fill form content, but if there's no appearance, then we draw ourselves, need to fill form with content
         let oDrawing = this.GetDrawing();
         if (!oDrawing && !this.IsNeedDrawFromStream() && !this.imageChecked) {
             this.DoInitialRecalc();
@@ -1472,7 +1472,7 @@
         this.DrawPressed();
         
         let oOnFocus = this.GetTrigger(AscPDF.PDF_TRIGGERS_TYPES.OnFocus);
-        // вызываем выставление курсора после onFocus. Если уже в фокусе, тогда сразу.
+        // call cursor positioning after onFocus. If already in focus, then immediately.
         if (false == isInFocus && oOnFocus && oOnFocus.Actions.length > 0)
             oActionsQueue.callbackAfterFocus = callbackAfterFocus.bind(this);
         else
@@ -1486,7 +1486,7 @@
         }
     };
     CPushButtonField.prototype.onMouseUp = function() {
-        this.SetPressed(false); // флаг что нужно рисовать нажатие
+        this.SetPressed(false); // flag that press needs to be drawn
 
         if (this.GetHighlight() != AscPDF.BUTTON_HIGHLIGHT_TYPES.none) {
             this.DrawUnpressed();
@@ -1657,8 +1657,8 @@
             let nDrawingW = oDrawing.Extent.W;
             let nDrawingH = oDrawing.Extent.H;
 
-            // выставляем положение картинки только в случае, когда скейл пропорциональный или его нет вовсе или когда размеры картинки больше чем размеры drawing под эту картинку,
-            // т.к. в ином случае картинка будет растянута по размерам формы
+            // set image position only when scale is proportional or there's no scale at all or when image dimensions are larger than drawing dimensions for this image,
+            // since otherwise the image will be stretched to form dimensions
             if (nScaleHow === scaleHow["proportional"] || nScaleWhen == scaleWhen["never"] || (nScaleWhen == scaleWhen["tooSmall"] && (this.relImgSize.W > nDrawingW || this.relImgSize.H > nDrawingH))) {
                 let shape = oDrawing.GraphicObj;
 				let nW = nDrawingW;
@@ -2111,14 +2111,14 @@
 	CPushButtonField.prototype.WriteToBinary = function(memory) {
         memory.WriteByte(AscCommon.CommandType.ctAnnotField);
 
-        // длина комманд
+        // command length
         let nStartPos = memory.GetCurPosition();
         memory.Skip(4);
 
         this.WriteToBinaryBase(memory);
         this.WriteToBinaryBase2(memory);
 
-        // флаги кнопки
+        // button flags
         let nPosForButtonFlags  = memory.GetCurPosition();
         let nButtonFlags        = 0;
         memory.Skip(4);
@@ -2239,7 +2239,7 @@
 
         let nEndPos = memory.GetCurPosition();
 
-        // запись флагов
+        // write flags
         memory.Seek(nPosForButtonFlags);
         memory.WriteLong(nButtonFlags);
         memory.Seek(memory.posForWidgetFlags);
@@ -2247,23 +2247,23 @@
         memory.Seek(memory.posForFieldDataFlags);
         memory.WriteLong(memory.fieldDataFlags);
 
-        // запись длины комманд
+        // write command length
         memory.Seek(nStartPos);
         memory.WriteLong(nEndPos - nStartPos);
         memory.Seek(nEndPos);
     };
     function MakeColorMoreGray(rgbColor, nPower) {
-        // Получаем значения компонентов цвета
+        // Get color component values
         const r = rgbColor.r;
         const g = rgbColor.g;
         const b = rgbColor.b;
       
-        // Вычисляем новые значения компонентов с учетом затемнения (уменьшения интенсивности)
+        // Calculate new component values with darkening (reducing intensity)
         const grayR = Math.max(0, r - nPower);
         const grayG = Math.max(0, g - nPower);
         const grayB = Math.max(0, b - nPower);
       
-        // Возвращаем новый серый цвет
+        // Return new gray color
         return {
             r: grayR,
             g: grayG,
