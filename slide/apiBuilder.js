@@ -6349,23 +6349,6 @@
 		if (name === "" || name === null || name === undefined)
 			return false;
 
-        let drawings = [];
-		let oPresentation = Api.GetPresentation();
-        oPresentation.GetAllSlides().forEach(function (oSource) {
-			oSource.GetAllDrawings().forEach(function (oObject) {
-				drawings.push(oObject);
-			});
-		})
-
-		for (let nCount = 0; nCount < drawings.length; nCount++)
-		{
-			let drawing = drawings[nCount];
-			if (drawing.Drawing.getOwnName() === name)
-			{
-				drawing.Drawing.setName("");
-				break;
-			}
-		}
 		this.Drawing.setName(name);
 		return true;
 	};
