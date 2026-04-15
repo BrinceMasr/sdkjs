@@ -13036,9 +13036,24 @@ Paragraph.prototype.CollectSelectedReviewChanges = function(oTrackManager)
  */
 Paragraph.prototype.PreDelete = function()
 {
+	let logicDocument = this.GetLogicDocument();
+	if (logicDocument)
+	{
+		if (logicDocument.IsDocumentEditor())
+		{
+			this.DocumentPreDelete();
+		}
+		else
+		{
+			this.PresentationPreDelete();
+		}
+	}
+};
+Paragraph.prototype.DocumentPreDelete = function ()
+{
 	if (this.isPreventedPreDelete())
 		return;
-	
+
 	// Поскольку данный элемент удаляется, поэтому надо удалить все записи о
 	// inline объектах в родительском классе, используемых в данном параграфе.
 	// Кроме этого, если тут начинались или заканчивались комметарии, то их тоже
@@ -13051,7 +13066,7 @@ Paragraph.prototype.PreDelete = function()
 
 		if (Item.PreDelete)
 			Item.PreDelete(true);
-		
+
 		if (logicDocument && logicDocument.IsDocumentEditor())
 		{
 			if (para_Comment === Item.Type && true === logicDocument.RemoveCommentsOnPreDelete)
@@ -13063,7 +13078,7 @@ Paragraph.prototype.PreDelete = function()
 
 	this.RemoveSelection();
 
-	this.UpdateOutline();
+	this.UpdateDocumentOutline();
 	this.private_RefreshNumbering();
 
 	if (undefined !== this.Get_SectionPr() && this.LogicDocument)
@@ -13072,6 +13087,10 @@ Paragraph.prototype.PreDelete = function()
 		// пересчитывалось на Undo/Redo.
 		this.Set_SectionPr(undefined);
 	}
+};
+Paragraph.prototype.PresentationPreDelete = function ()
+{
+	this.UpdatePresentationOutline();
 };
 //----------------------------------------------------------------------------------------------------------------------
 // Дополнительные функции
