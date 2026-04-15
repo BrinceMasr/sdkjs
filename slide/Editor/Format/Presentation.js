@@ -8865,6 +8865,7 @@ CPresentation.prototype.insertSlide = function (pos, slide) {
 	if (slide.notes) {
 		this.addNote(pos, slide.notes);
 	}
+	this.checkSlideOutlineView(slide);
 };
 CPresentation.prototype.insertSlideObjectToPos = function (pos, slide) {
 	const view = this.getViewManager();

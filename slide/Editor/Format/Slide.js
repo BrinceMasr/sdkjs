@@ -572,6 +572,10 @@ AscFormat.InitClass(Slide, AscCommonSlide.SlideBase, AscDFH.historyitem_type_Sli
         if(this.collaborativeMarks) {
             this.collaborativeMarks.Update_OnAdd(_pos);
         }
+        const presentation = Asc.editor.WordControl.m_oLogicDocument;
+        if (this.isSlide() && presentation) {
+            presentation.checkShapeOutlineView(item);
+        }
     };
 
     Slide.prototype.shapeRemove = function (pos, count) {
