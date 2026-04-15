@@ -13438,6 +13438,7 @@
 		this.Drawing.spPr.setFill(oFill.UniFill);
 		return true;
 	};
+	ApiDrawing.prototype.SetBackgroundColor = AscBuilder.ApiDrawing.prototype.SetBackgroundColor;
 
 	/**
 	 * Sets the outline properties to the specified graphic object.
@@ -30443,6 +30444,8 @@
 	ApiDrawing.prototype["SetFlipV"]                   =  ApiDrawing.prototype.SetFlipV;
 	ApiDrawing.prototype["Select"]                     =  ApiDrawing.prototype.Select;
 	ApiDrawing.prototype["Fill"]                       =  ApiDrawing.prototype.Fill;
+	ApiDrawing.prototype["SetBackgroundColor"]         =  ApiDrawing.prototype.SetBackgroundColor;
+	ApiDrawing.prototype["SetBgColor"]                 =  ApiDrawing.prototype.SetBgColor = ApiDrawing.prototype.SetBackgroundColor;
 	ApiDrawing.prototype["SetOutLine"]                 =  ApiDrawing.prototype.SetOutLine;
 	ApiDrawing.prototype["Unselect"]                   =  ApiDrawing.prototype.Unselect;
 	ApiDrawing.prototype["Delete"]                     =  ApiDrawing.prototype.Delete;

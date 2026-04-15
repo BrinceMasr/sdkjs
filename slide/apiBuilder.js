@@ -6857,6 +6857,8 @@
 		return true;
 	};
 
+	ApiDrawing.prototype.SetBackgroundColor = AscBuilder.ApiDrawing.prototype.SetBackgroundColor;
+
 	/**
 	 * Sets the outline properties to the specified graphic object.
 	 * @memberof ApiDrawing
@@ -8362,6 +8364,8 @@
 
     ApiDrawing.prototype["ToJSON"]                        = ApiDrawing.prototype.ToJSON;
     ApiDrawing.prototype["Fill"]                          = ApiDrawing.prototype.Fill;
+    ApiDrawing.prototype["SetBackgroundColor"]            = ApiDrawing.prototype.SetBackgroundColor;
+    ApiDrawing.prototype["SetBgColor"]                    = ApiDrawing.prototype.SetBgColor = ApiDrawing.prototype.SetBackgroundColor;
     ApiDrawing.prototype["SetOutLine"]                    = ApiDrawing.prototype.SetOutLine;
 
 
