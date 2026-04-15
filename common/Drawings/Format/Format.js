@@ -17747,75 +17747,230 @@
 			builder_SetObjectFontSize(oChartSpace.chart.plotArea.getVerticalAxis(), nFontSize, oChartSpace.getDrawingDocument());
 		}
 
+		function builder_MergeObjectDefaultTextPr(object, textPr, drawingDocument) {
+			if (!object || !textPr) {
+				return false;
+			}
 
-		function builder_SetShowPointDataLabel(oChartSpace, nSeriesIndex, nPointIndex, bShowSerName, bShowCatName, bShowVal, bShowPerecent) {
-			if (oChartSpace && oChartSpace.chart && oChartSpace.chart.plotArea && oChartSpace.chart.plotArea.charts[0]) {
-				var oChart = oChartSpace.chart.plotArea.charts[0];
-				var bPieChart = oChart.getObjectType() === AscDFH.historyitem_type_PieChart || oChart.getObjectType() === AscDFH.historyitem_type_DoughnutChart;
-				var ser = oChart.series[nSeriesIndex];
-				if (ser) {
-					{
-						if (!ser.dLbls) {
-							if (oChart.dLbls) {
-								ser.setDLbls(oChart.dLbls.createDuplicate());
-							} else {
-								ser.setDLbls(new AscFormat.CDLbls());
-								ser.dLbls.setSeparator(",");
-								ser.dLbls.setShowSerName(false);
-								ser.dLbls.setShowCatName(false);
-								ser.dLbls.setShowVal(false);
-								ser.dLbls.setShowLegendKey(false);
-								if (bPieChart) {
-									ser.dLbls.setShowPercent(false);
-								}
-								ser.dLbls.setShowBubbleSize(false);
-							}
+			if (!object.txPr) {
+				object.setTxPr(new AscFormat.CTextBody());
+			}
+			if (!object.txPr.bodyPr) {
+				object.txPr.setBodyPr(new AscFormat.CBodyPr());
+			}
+			if (!object.txPr.content) {
+				object.txPr.setContent(new AscFormat.CDrawingDocContent(object.txPr, drawingDocument, 0, 0, 100, 500, false, false, true));
+			}
+
+			const propCopy = object.txPr.content.Content[0].Pr.Copy();
+			if (!propCopy.DefaultRunPr) {
+				propCopy.DefaultRunPr = new AscCommonWord.CTextPr();
+			}
+
+			propCopy.DefaultRunPr.Merge(textPr);
+			object.txPr.content.Content[0].Set_Pr(propCopy);
+			return true;
+		}
+
+		function builder_SetDataLabelsTextPr(chartSpace, textPr) {
+			const chart = (
+				chartSpace &&
+				chartSpace.chart &&
+				chartSpace.chart.plotArea &&
+				chartSpace.chart.plotArea.charts[0]
+			);
+
+			if (!chart) {
+				return false;
+			}
+
+			if (!chart.dLbls) {
+				chart.setDLbls(new AscFormat.CDLbls());
+			}
+
+			const drawingDocument = chartSpace.getDrawingDocument();
+			for (let i = 0; i < chart.series.length; ++i) {
+				const ser = chart.series[i];
+				if (!ser.dLbls) {
+					ser.setDLbls(new AscFormat.CDLbls());
+				}
+				builder_MergeObjectDefaultTextPr(ser.dLbls, textPr, drawingDocument);
+
+				const labelArray = ser.dLbls.dLbl;
+				for (let j = 0; j < labelArray.length; ++j) {
+					const dLbl = labelArray[j];
+					if (dLbl) {
+						if (ser.dLbls.txPr && !dLbl.txPr) {
+							dLbl.setTxPr(ser.dLbls.txPr.createDuplicate());
 						}
-						var dLbl = ser.dLbls && ser.dLbls.findDLblByIdx(nPointIndex);
-						if (!dLbl) {
-							dLbl = new AscFormat.CDLbl();
-							dLbl.setIdx(nPointIndex);
-							if (ser.dLbls.txPr) {
-								dLbl.merge(ser.dLbls);
-							}
-							ser.dLbls.addDLbl(dLbl);
-						}
-						dLbl.setSeparator(",");
-						dLbl.setShowSerName(true == bShowSerName);
-						dLbl.setShowCatName(true == bShowCatName);
-						dLbl.setShowVal(true == bShowVal);
-						dLbl.setShowLegendKey(false);
-						if (bPieChart) {
-							dLbl.setShowPercent(true === bShowPerecent);
-						}
-						dLbl.setShowBubbleSize(false);
+						builder_MergeObjectDefaultTextPr(dLbl, textPr, drawingDocument);
 					}
 				}
 			}
+
+			chartSpace.handleUpdateDataLabels();
+			return true;
 		}
 
-		function builder_SetShowDataLabels(oChartSpace, bShowSerName, bShowCatName, bShowVal, bShowPerecent) {
-			if (oChartSpace && oChartSpace.chart && oChartSpace.chart.plotArea && oChartSpace.chart.plotArea.charts[0]) {
-				var oChart = oChartSpace.chart.plotArea.charts[0];
-				var bPieChart = oChart.getObjectType() === AscDFH.historyitem_type_PieChart || oChart.getObjectType() === AscDFH.historyitem_type_DoughnutChart;
-				if (false == bShowSerName && false == bShowCatName && false == bShowVal && (bPieChart && bShowPerecent === false)) {
-					if (oChart.dLbls) {
-						oChart.setDLbls(null);
+		function builder_SetPointDataLabelTextPr(chartSpace, seriesIndex, pointIndex, textPr) {
+			const chart = (
+				chartSpace &&
+				chartSpace.chart &&
+				chartSpace.chart.plotArea &&
+				chartSpace.chart.plotArea.charts[0]
+			);
+			if (!chart) {
+				return false;
+			}
+
+			const ser = chart.series[seriesIndex];
+			if (!ser) {
+				return false;
+			}
+
+			if (!ser.dLbls) {
+				const newDLbls = chart.dLbls ? chart.dLbls.createDuplicate() : new AscFormat.CDLbls();
+				ser.setDLbls(newDLbls);
+			}
+
+			let dLbl = ser.dLbls.findDLblByIdx(pointIndex);
+			if (!dLbl) {
+				dLbl = new AscFormat.CDLbl();
+				dLbl.setIdx(pointIndex);
+				if (ser.dLbls.txPr) {
+					dLbl.merge(ser.dLbls);
+				}
+				ser.dLbls.addDLbl(dLbl);
+			}
+
+			const result = builder_MergeObjectDefaultTextPr(dLbl, textPr, chartSpace.getDrawingDocument());
+			if (result) {
+				chartSpace.handleUpdateDataLabels();
+			}
+			return result;
+		}
+
+		function builder_SetShowPointDataLabel(oChartSpace, nSeriesIndex, nPointIndex, bShowSerName, bShowCatName, bShowVal, bShowPercent) {
+			const chart = (
+				oChartSpace &&
+				oChartSpace.chart &&
+				oChartSpace.chart.plotArea &&
+				oChartSpace.chart.plotArea.charts[0]
+			);
+			if (!chart) {
+				return;
+			}
+
+			const objectType = chart.getObjectType();
+			const isCircleChart = (
+				objectType === AscDFH.historyitem_type_PieChart ||
+				objectType === AscDFH.historyitem_type_DoughnutChart
+			);
+
+			const ser = chart.series[nSeriesIndex];
+			if (!ser) {
+				return;
+			}
+
+			if (!ser.dLbls) {
+				if (chart.dLbls) {
+					ser.setDLbls(chart.dLbls.createDuplicate());
+				} else {
+					ser.setDLbls(new AscFormat.CDLbls());
+					ser.dLbls.setSeparator(",");
+					ser.dLbls.setShowSerName(false);
+					ser.dLbls.setShowCatName(false);
+					ser.dLbls.setShowVal(false);
+					ser.dLbls.setShowLegendKey(false);
+					if (isCircleChart) {
+						ser.dLbls.setShowPercent(false);
+					}
+					ser.dLbls.setShowBubbleSize(false);
+				}
+			}
+
+			let dLbl = ser.dLbls && ser.dLbls.findDLblByIdx(nPointIndex);
+			if (!dLbl) {
+				dLbl = new AscFormat.CDLbl();
+				dLbl.setIdx(nPointIndex);
+				if (ser.dLbls.txPr) {
+					dLbl.merge(ser.dLbls);
+				}
+				ser.dLbls.addDLbl(dLbl);
+			}
+
+			dLbl.setSeparator(",");
+			dLbl.setShowSerName(true === bShowSerName);
+			dLbl.setShowCatName(true === bShowCatName);
+			dLbl.setShowVal(true === bShowVal);
+			dLbl.setShowLegendKey(false);
+			if (isCircleChart) {
+				dLbl.setShowPercent(true === bShowPercent);
+			}
+			dLbl.setShowBubbleSize(false);
+		}
+
+		function builder_SetShowDataLabels(chartSpace, bShowSerName, bShowCatName, bShowVal, bShowPercent) {
+			const chart = (
+				chartSpace &&
+				chartSpace.chart &&
+				chartSpace.chart.plotArea &&
+				chartSpace.chart.plotArea.charts[0]
+			);
+			if (!chart) {
+				return;
+			}
+
+			const objectType = chart.getObjectType();
+			const isCircleChart = (
+				objectType === AscDFH.historyitem_type_PieChart ||
+				objectType === AscDFH.historyitem_type_DoughnutChart
+			);
+
+			const clearDataLabels = (
+				bShowSerName === false &&
+				bShowCatName === false &&
+				bShowVal === false &&
+				(!isCircleChart || bShowPercent === false)
+			);
+			if (clearDataLabels) {
+				if (chart.dLbls) {
+					chart.setDLbls(null);
+				}
+				for (let i = 0; i < chart.series.length; ++i) {
+					if (chart.series[i].dLbls) {
+						chart.series[i].setDLbls(null);
 					}
 				}
-				if (!oChart.dLbls) {
-					oChart.setDLbls(new AscFormat.CDLbls());
-				}
-				oChart.dLbls.setSeparator(",");
-				oChart.dLbls.setShowSerName(true == bShowSerName);
-				oChart.dLbls.setShowCatName(true == bShowCatName);
-				oChart.dLbls.setShowVal(true == bShowVal);
-				oChart.dLbls.setShowLegendKey(false);
-				if (bPieChart) {
-					oChart.dLbls.setShowPercent(true === bShowPerecent);
-				}
+				return;
+			}
 
-				oChart.dLbls.setShowBubbleSize(false);
+			if (!chart.dLbls) {
+				chart.setDLbls(new AscFormat.CDLbls());
+			}
+
+			chart.dLbls.setSeparator(',');
+			chart.dLbls.setShowSerName(true === bShowSerName);
+			chart.dLbls.setShowCatName(true === bShowCatName);
+			chart.dLbls.setShowVal(true === bShowVal);
+			chart.dLbls.setShowLegendKey(false);
+			if (isCircleChart) {
+				chart.dLbls.setShowPercent(true === bShowPercent);
+			}
+			chart.dLbls.setShowBubbleSize(false);
+
+			for (let i = 0; i < chart.series.length; ++i) {
+				const ser = chart.series[i];
+				if (ser.dLbls) {
+					ser.dLbls.setShowSerName(true === bShowSerName);
+					ser.dLbls.setShowCatName(true === bShowCatName);
+					ser.dLbls.setShowVal(true === bShowVal);
+					ser.dLbls.setShowLegendKey(false);
+					if (isCircleChart) {
+						ser.dLbls.setShowPercent(true === bShowPercent);
+					}
+					ser.dLbls.setShowBubbleSize(false);
+				}
 			}
 		}
 
@@ -20629,6 +20784,8 @@
 		window['AscFormat'].builder_SetHorAxisFontSize = builder_SetHorAxisFontSize;
 		window['AscFormat'].builder_SetVerAxisFontSize = builder_SetVerAxisFontSize;
 		window['AscFormat'].builder_SetShowPointDataLabel = builder_SetShowPointDataLabel;
+		window['AscFormat'].builder_SetDataLabelsTextPr = builder_SetDataLabelsTextPr;
+		window['AscFormat'].builder_SetPointDataLabelTextPr = builder_SetPointDataLabelTextPr;
 
 
 		window['AscFormat'].Ax_Counter = Ax_Counter;

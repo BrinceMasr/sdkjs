@@ -5325,17 +5325,16 @@ $(function () {
 		ws2.getRange2("C1").setValue("1");
 		ws2.getRange2("A3:B4").setValue("Text");
 		// DefNames.
-		ws.getRange2("A201").setValue("-0.5"); // TestName
-		ws.getRange2("A202").setValue("0.5"); // TestName1
+		ws.getRange2("A201").setValue("1"); // TestName
+		ws.getRange2("A202").setValue("2"); // TestName1
 		ws.getRange2("A203").setValue("10.5"); // TestName2
-		ws2.getRange2("A11").setValue("-0.5"); // TestName3D
+		ws2.getRange2("A11").setValue("0.5"); // TestName3D
 		ws.getRange2("A208").setValue("0.8"); // TestNameArea2
-		ws.getRange2("B208").setValue("-0.8"); // TestNameArea2
+		ws.getRange2("B208").setValue("0.8"); // TestNameArea2
 		ws2.getRange2("A18").setValue("0.8"); // TestNameArea3D2
-		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
+		ws2.getRange2("B18").setValue("0.8"); // TestNameArea3D2
 
 		// Positive cases:
-
 		// Case #1: Date. Basic valid input: dates using DATE formula. 2 of 3 arguments used.
 		oParser = new parserFormula('NETWORKDAYS(DATE(2025,1,1),DATE(2025,1,10))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS(DATE(2025,1,1),DATE(2025,1,10)) is parsed.');
@@ -5353,15 +5352,13 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS(IF(TRUE,DATE(2025,1,1),DATE(2024,1,1)),DATE(2025,1,10)) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 8, 'Test: Positive case: Formula,Date. Start_date filled via IF formula. 2 of 3 arguments used.');
 		// Case #5: Reference link. All arguments as Reference link. 2 of 3 arguments used.
-		// Different result with MS
-		//oParser = new parserFormula('NETWORKDAYS(A100,A101)', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: NETWORKDAYS(A100,A101) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Reference link. All arguments as Reference link. 2 of 3 arguments used.');
-		// Case #6: Area. All arguments are single-cell ranges. 2 of 3 arguments used.
-		// Different result with MS
-		//oParser = new parserFormula('NETWORKDAYS(A102:A102,A103:A103)', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: NETWORKDAYS(A102:A102,A103:A103) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Area. All arguments are single-cell ranges. 2 of 3 arguments used.');
+		oParser = new parserFormula('NETWORKDAYS(A100,A101)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS(A100,A101) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Positive case: Reference link. All arguments as Reference link. 2 of 3 arguments used.');
+		// Case #6: Area. Arguments are single-cell ranges. 2 of 3 arguments used.
+		oParser = new parserFormula('NETWORKDAYS(A102:A102,A103:A103)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS(A102:A102,A103:A103) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), -2, 'Test: Positive case: Area. All arguments are single-cell ranges. 2 of 3 arguments used.');
 		// Case #7: Array. All arguments are arrays with single element. 2 of 3 arguments used.
 		oParser = new parserFormula('NETWORKDAYS({44927},{44936})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS({44927},{44936}) is parsed.');
@@ -5369,11 +5366,11 @@ $(function () {
 		// Case #8: Name. All arguments as Name type. 2 of 3 arguments used.
 		oParser = new parserFormula('NETWORKDAYS(TestName,TestName1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS(TestName,TestName1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Positive case: Name. All arguments as Name type. 2 of 3 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Positive case: Name. All arguments as Name type. 2 of 3 arguments used.');
 		// Case #9: Name3D. All arguments as Name3D type. 2 of 3 arguments used.
 		oParser = new parserFormula('NETWORKDAYS(TestName3D,TestName3D)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS(TestName3D,TestName3D) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Positive case: Name3D. All arguments as Name3D type. 2 of 3 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Name3D. All arguments as Name3D type. 2 of 3 arguments used.');
 		// Case #10: Ref3D. All arguments as Ref3D type. 2 of 3 arguments used.
 		oParser = new parserFormula('NETWORKDAYS(Sheet2!A1,Sheet2!A2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS(Sheet2!A1,Sheet2!A2) is parsed.');
@@ -5420,7 +5417,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), 7, 'Test: Positive case: Formula. All arguments filled with DATE formula. 3 of 3 arguments used.');
 
 		// Negative cases:
-
 		// Case #1: Number. Start_date is zero (invalid date). Returns #NUM!. 2 of 3 arguments used.
 		oParser = new parserFormula('NETWORKDAYS(0,44936)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS(0,44936) is parsed.');
@@ -5450,29 +5446,25 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS(44927,FALSE) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Boolean. End_date as boolean. Returns #VALUE!. 2 of 3 arguments used.');
 		// Case #8: Empty. Start_date is empty. Returns #VALUE!. 2 of 3 arguments used.
-		// Different result with MS
-		//oParser = new parserFormula('NETWORKDAYS(,44936)', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: NETWORKDAYS(,44936) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Empty. Start_date is empty. Returns #VALUE!. 2 of 3 arguments used.');
+		oParser = new parserFormula('NETWORKDAYS(,44936)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS(,44936) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Empty. Start_date is empty. Returns #VALUE!. 2 of 3 arguments used.');
 		// Case #9: Empty. End_date is empty. Returns #VALUE!. 2 of 3 arguments used.
-		// Different result with MS
-		//oParser = new parserFormula('NETWORKDAYS(44927,)', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: NETWORKDAYS(44927,) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Empty. End_date is empty. Returns #VALUE!. 2 of 3 arguments used.');
+		oParser = new parserFormula('NETWORKDAYS(44927,)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS(44927,) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Empty. End_date is empty. Returns #VALUE!. 2 of 3 arguments used.');
 		// Case #10: Error. Start_date as error value. Returns #N/A. 2 of 3 arguments used.
 		oParser = new parserFormula('NETWORKDAYS(NA(),44936)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS(NA(),44936) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Error. Start_date as error value. Returns #N/A. 2 of 3 arguments used.');
 		// Case #11: Date,String. Holidays as non-date string. Returns #VALUE!. 3 of 3 arguments used.
-		// Different result with MS
-		//oParser = new parserFormula('NETWORKDAYS(DATE(2025,1,1),DATE(2025,1,10),"abc")', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: NETWORKDAYS(DATE(2025,1,1),DATE(2025,1,10),"abc") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Date,String. Holidays as non-date string. Returns #VALUE!. 3 of 3 arguments used.');
+		oParser = new parserFormula('NETWORKDAYS(DATE(2025,1,1),DATE(2025,1,10),"abc")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS(DATE(2025,1,1),DATE(2025,1,10),"abc") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Date,String. Holidays as non-date string. Returns #VALUE!. 3 of 3 arguments used.');
 		// Case #12: Date,Array. Holidays as array with non-date value. Returns #VALUE!. 3 of 3 arguments used.
-		// Different result with MS
-		//oParser = new parserFormula('NETWORKDAYS(DATE(2025,1,1),DATE(2025,1,10),{TRUE})', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: NETWORKDAYS(DATE(2025,1,1),DATE(2025,1,10),{TRUE}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Date,Array. Holidays as array with non-date value. Returns #VALUE!. 3 of 3 arguments used.');
+		oParser = new parserFormula('NETWORKDAYS(DATE(2025,1,1),DATE(2025,1,10),{TRUE})', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS(DATE(2025,1,1),DATE(2025,1,10),{TRUE}) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Date,Array. Holidays as array with non-date value. Returns #VALUE!. 3 of 3 arguments used.');
 		// Case #13: Area. Start_date as multi-cell range. Returns #VALUE!. 2 of 3 arguments used.
 		oParser = new parserFormula('NETWORKDAYS(A106:A107,A101)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS(A106:A107,A101) is parsed.');
@@ -5502,10 +5494,27 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS(A100,TestNameArea) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Name. End_date as Name with area. Returns #VALUE!. 2 of 3 arguments used.');
 		// Case #20: Name3D. Start_date as Name3D with area. Returns #VALUE!. 2 of 3 arguments used.
-		// Different result with MS
-		//oParser = new parserFormula('NETWORKDAYS(TestNameArea3D2,A101)', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: NETWORKDAYS(TestNameArea3D2,A101) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Negative case: Name3D. Start_date as Name3D with area. Returns #VALUE!. 2 of 3 arguments used.');
+		oParser = new parserFormula('NETWORKDAYS(TestNameArea3D2,A101)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS(TestNameArea3D2,A101) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Test: Negative case: Name3D. Start_date as Name3D with area. Returns #VALUE!. 2 of 3 arguments used.');
+		// Case #21: Number, Name3D. End date as Name3D with area. Returns #VALUE!. 2 of 3 arguments used.
+		oParser = new parserFormula('NETWORKDAYS(10,TestNameArea3D2)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS(TestNameArea3D2) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Test: Negative case: Number, Name3D. End date as Name3D with area. Returns #VALUE!. 2 of 3 arguments used.');
+
+		// Case #22: Area3D. Multi sheets link start_date.
+		let multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A100";
+		oParser = new parserFormula('NETWORKDAYS('+multiAreaLink+',100,200)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula NETWORKDAYS('+multiAreaLink+',100,200) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area3D. Multi sheets link start_date.');
+		// Case #23: Area3D. Multi sheets link end_date.
+		oParser = new parserFormula('NETWORKDAYS(1,'+multiAreaLink+',200)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula NETWORKDAYS(1,'+multiAreaLink+',200) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area3D. Multi sheets link end_date.');
+		// Case #24: Area3D. Multi sheets link holidays.
+		oParser = new parserFormula('NETWORKDAYS(1,200,'+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula NETWORKDAYS(1,200,'+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area3D. Multi sheets link holidays.');
 
 		// Bounded cases:
 		// Case #1: Number. Minimum valid date serial numbers. 2 of 3 arguments used.
@@ -5517,16 +5526,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS(DATE(9999,12,30),DATE(9999,12,31)) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Bounded case: Date. Maximum valid Excel dates. 2 of 3 arguments used.');
 
-		// TODO Need to fix: strange return with dates, ms diff results, different error types
-		// Case #5: Reference link. All arguments as Reference link. 2 of 3 arguments used.
-		// Case #6: Area. All arguments are single-cell ranges. 2 of 3 arguments used.
-		// Case #8: Name. All arguments as Name type. 2 of 3 arguments used.
-		// Case #9: Name3D. All arguments as Name3D type. 2 of 3 arguments used.
-		// Case #8: Empty. Start_date is empty. Returns #VALUE!. 2 of 3 arguments used.
-		// Case #9: Empty. End_date is empty. Returns #VALUE!. 2 of 3 arguments used.
-		// Case #11: Date,String. Holidays as non-date string. Returns #VALUE!. 3 of 3 arguments used. - what is with return?
-		// Case #12: Date,Array. Holidays as array with non-date value. Returns #VALUE!. 3 of 3 arguments used.
-		// Case #20: Name3D. Start_date as Name3D with area. Returns #VALUE!. 2 of 3 arguments used.
 
 		testArrayFormula2(assert, "NETWORKDAYS", 2, 3, true, null);
 	});
@@ -5603,10 +5602,7 @@ $(function () {
 		assert.ok(oParser.parse(), formulaStr);
 		assert.strictEqual(oParser.calculate().getValue(), 7075, 'Result of ' + formulaStr);
 
-		//TODO Need to check why it's calculate incorrect
-		// The problem repeats with new and old realizations of NETWORKDAYS.INTL.
-
-		/*formulaStr = 'NETWORKDAYS.INTL(100.123,10003.556,5)';
+		formulaStr = 'NETWORKDAYS.INTL(100.123,10003.556,5)';
 		oParser = new parserFormula( formulaStr, "A2", ws );
 		assert.ok( oParser.parse(), formulaStr );
 		assert.strictEqual( oParser.calculate().getValue(), 7074, formulaStr );
@@ -5614,7 +5610,7 @@ $(function () {
 		formulaStr = 'NETWORKDAYS.INTL(100.123,10003.556,5,{123,1000})';
 		oParser = new parserFormula( formulaStr, "A2", ws );
 		assert.ok( oParser.parse(), formulaStr );
-		assert.strictEqual( oParser.calculate().getValue(), 7073, formulaStr );*/
+		assert.strictEqual( oParser.calculate().getValue(), 7073, formulaStr );
 
 		// Data for reference link. Use A100-A111
 		ws.getRange2("A100").setValue("1");
@@ -5634,10 +5630,14 @@ $(function () {
 		let ws2 = getSecondSheet();
 		ws2.getRange2("A1").setValue("1");
 		ws2.getRange2("A2").setValue("2");
+		ws2.getRange2("A3").setValue("3");
+		ws2.getRange2("A4").setValue("");
+		ws2.getRange2("A5").setValue("");
+
 		ws2.getRange2("B1").setValue("3");
 		ws2.getRange2("B2").setValue("4");
 		ws2.getRange2("C1").setValue("1");
-		ws2.getRange2("A3:B4").setValue("Text");
+
 		// DefNames.
 		ws.getRange2("A201").setValue("-0.5"); // TestName
 		ws.getRange2("A202").setValue("0.5"); // TestName1
@@ -5672,15 +5672,15 @@ $(function () {
 		// Case #6: Area. Single-cell ranges for all arguments. 4 of 4 arguments used.
 		oParser = new parserFormula('NETWORKDAYS.INTL(A100,A101,2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(A100,A101,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Positive case: Area. Single-cell ranges for all arguments. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Area. Single-cell ranges for all arguments. 4 of 4 arguments used.');
 		// Case #7: Array. Arrays with single valid elements for all arguments. 4 of 4 arguments used.
 		oParser = new parserFormula('NETWORKDAYS.INTL(A100:A100,A101:A101,1,A102:A102)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(A100:A100,A101:A101,1,A102:A102) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Array. Arrays with single valid elements for all arguments. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Positive case: Array. Arrays with single valid elements for all arguments. 4 of 4 arguments used.');
 		// Case #8: Name. Named ranges with valid values. 4 of 4 arguments used.
 		oParser = new parserFormula('NETWORKDAYS.INTL({44927},{44936},1,{44932})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL({44927},{44936},1,{44932}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 6, 'Test: Positive case: Name. Named ranges with valid values. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 6, 'Test: Positive case: Name. Named ranges with valid values. 4 of 4 arguments used.');
 		// Case #9: Name3D. 3D named ranges with valid values. 4 of 4 arguments used.
 		oParser = new parserFormula('NETWORKDAYS.INTL(TestName,TestName1,1,TestName2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(TestName,TestName1,1,TestName2) is parsed.');
@@ -5690,20 +5690,18 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(TestName3D,TestName3D,1,TestName3D) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Positive case: Ref3D. 3D references to cells with valid values. 4 of 4 arguments used.');
 		// Case #11: Area3D. 3D single-cell ranges for all arguments. 4 of 4 arguments used.
-		// Different result with MS
-		//oParser = new parserFormula('NETWORKDAYS.INTL(Sheet2!A1,Sheet2!A2,1,Sheet2!A3)', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(Sheet2!A1,Sheet2!A2,1,Sheet2!A3) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Positive case: Area3D. 3D single-cell ranges for all arguments. 4 of 4 arguments used.');
+		oParser = new parserFormula('NETWORKDAYS.INTL(Sheet2!A1,Sheet2!A2,Sheet2!A1,Sheet2!A3)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(Sheet2!A1,Sheet2!A2,Sheet2!A1,Sheet2!A3) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Positive case: Area3D. 3D single-cell ranges for all arguments. 4 of 4 arguments used.');
 		// Case #12: Table. Table structured references with valid values. 4 of 4 arguments used.
-		// Different result with MS
-		//oParser = new parserFormula('NETWORKDAYS.INTL(Sheet2!A1:A1,Sheet2!A2:A2,1,Sheet2!A3:A3)', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(Sheet2!A1:A1,Sheet2!A2:A2,1,Sheet2!A3:A3) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Positive case: Table. Table structured references with valid values. 4 of 4 arguments used.');
+		oParser = new parserFormula('NETWORKDAYS.INTL(Sheet2!A1:A1,Sheet2!A2:A2,Sheet2!A1:A1,Sheet2!A3:A3)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(Sheet2!A1:A1,Sheet2!A2:A2,Sheet2!A1:A1,Sheet2!A3:A3) is parsed.');
+		oParser.setArrayFormulaRef(ws.getRange2("F106:I109").bbox); 
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Positive case: Table. Table structured references with valid values. 4 of 4 arguments used.');
 		// Case #13: Date,Array. Holidays as array with multiple valid dates. 4 of 4 arguments used.
-		// Different result with MS
-		//oParser = new parserFormula('NETWORKDAYS.INTL(Table1[Column1],Table1[Column1],1,Table1[Column1])', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(Table1[Column1],Table1[Column1],1,Table1[Column1]) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Date,Array. Holidays as array with multiple valid dates. 4 of 4 arguments used.');
+		oParser = new parserFormula('NETWORKDAYS.INTL(Table1[Column1],Table1[Column1],1,Table1[Column1])', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(Table1[Column1],Table1[Column1],1,Table1[Column1]) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Date,Array. Holidays as array with multiple valid dates. 4 of 4 arguments used.');
 		// Case #14: Time,Number. Dates adjusted with TIME formula, weekend as number, holidays omitted. 3 of 4 arguments used.
 		oParser = new parserFormula('SUM(NETWORKDAYS.INTL(DATE(2025,1,1),DATE(2025,1,10),1),5)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SUM(NETWORKDAYS.INTL(DATE(2025,1,1),DATE(2025,1,10),1),5) is parsed.');
@@ -5726,18 +5724,18 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), 530, 'Test: Positive case: Formula,String. Weekend as string, holidays as single-cell range. 4 of 4 arguments used.');
 		// Case #19: Number,String. Weekend as string, holidays as reference link. 4 of 4 arguments used.
 		// Different result with MS
-		//oParser = new parserFormula('NETWORKDAYS.INTL({44927,44928},{44936,44937},1)', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL({44927,44928},{44936,44937},1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 7, 'Test: Positive case: Number,String. Weekend as string, holidays as reference link. 4 of 4 arguments used.');
+		oParser = new parserFormula('NETWORKDAYS.INTL({44927,44928},{44936,44937},1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL({44927,44928},{44936,44937},1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 7, 'Test: Positive case: Number,String. Weekend as string, holidays as reference link. 4 of 4 arguments used.');
 		// Case #20: Number. Weekend as number (17 = Friday only), holidays omitted. 3 of 4 arguments used.
 		oParser = new parserFormula('NETWORKDAYS.INTL(DATE(2025,1,1),DATE(2025,1,10),"1",A103:A104)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(DATE(2025,1,1),DATE(2025,1,10),"1",A103:A104) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Positive case: Number. Weekend as number (17 = Friday only), holidays omitted. 3 of 4 arguments used.');
 		// Case #21: Formula,Array. Holidays as array with multiple dates. 4 of 4 arguments used.
 		// Different result with MS
-		//oParser = new parserFormula('NETWORKDAYS.INTL(44927,44936,,A100)', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(44927,44936,,A100) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 7, 'Test: Positive case: Formula,Array. Holidays as array with multiple dates. 4 of 4 arguments used.');
+		oParser = new parserFormula('NETWORKDAYS.INTL(44927,44936,,A100)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(44927,44936,,A100) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 7, 'Test: Positive case: Formula,Array. Holidays as array with multiple dates. 4 of 4 arguments used.');
 		// Case #22: Number,Empty. Weekend omitted (defaults to 1), holidays omitted. 2 of 4 arguments used.
 		oParser = new parserFormula('NETWORKDAYS.INTL(44936,44927,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(44936,44927,1) is parsed.');
@@ -5753,19 +5751,21 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(NA(),DATE(2025,1,10)) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: String. Invalid start_date string returns #VALUE!. 3 of 4 arguments used.');
 		// Case #3: String. Invalid end_date string returns #VALUE!. 3 of 4 arguments used.
-		// Different result with MS
-		//oParser = new parserFormula('NETWORKDAYS.INTL(FALSE,DATE(2025,1,10))', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(FALSE,DATE(2025,1,10)) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String. Invalid end_date string returns #VALUE!. 3 of 4 arguments used.');
-		// Case #4: Number,String. Invalid weekend string returns #VALUE!. 3 of 4 arguments used.
+		oParser = new parserFormula('NETWORKDAYS.INTL(FALSE,DATE(2025,1,10))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(FALSE,DATE(2025,1,10)) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String. Invalid end_date string returns #VALUE!. 3 of 4 arguments used.');
+		// Case #4: Area,Ref,Number. Area used as start date. 3 of 4 arguments used.
 		oParser = new parserFormula('NETWORKDAYS.INTL(A100:A101,A101,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(A100:A101,A101,1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Number,String. Invalid weekend string returns #VALUE!. 3 of 4 arguments used.');
-		// Case #5: Number,Array. Holidays with invalid date (0) returns #NUM!. 4 of 4 arguments used.
-		// Different result with MS
-		//oParser = new parserFormula('NETWORKDAYS.INTL(A102,DATE(2025,1,10))', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(A102,DATE(2025,1,10)) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 32620, 'Test: Negative case: Number,Array. Holidays with invalid date (0) returns #NUM!. 4 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area,Ref,Number. Area used as start date. 3 of 4 arguments used.');
+		// Case #4.1: Ref,Area,Number. Area used as end date. 3 of 4 arguments used.
+		oParser = new parserFormula('NETWORKDAYS.INTL(A101,A100:A101,1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(A101,A100:A101,1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area used as end date. 3 of 4 arguments used.');
+		// Case #5: Number,Formula. Empty weekends and holidays and low start date. 2 of 4 arguments used.
+		oParser = new parserFormula('NETWORKDAYS.INTL(A102,DATE(2025,1,10))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(A102,DATE(2025,1,10)) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 32619, 'Test: Negative case: Number,Formula. Empty weekends and holidays and low start date. 2 of 4 arguments used.');
 		// Case #6: Error. Start_date as #N/A propagates error. 3 of 4 arguments used.
 		oParser = new parserFormula('NETWORKDAYS.INTL("01/01/2025","01/10/2025","abc")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL("01/01/2025","01/10/2025","abc") is parsed.');
@@ -5774,16 +5774,18 @@ $(function () {
 		oParser = new parserFormula('NETWORKDAYS.INTL(44927,44936,8)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(44927,44936,8) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number,Error. End_date as #N/A propagates error. 3 of 4 arguments used.');
-		// Case #8: Number. Invalid weekend number (0) returns #NUM!. 3 of 4 arguments used.
-		// Different result with MS
-		//oParser = new parserFormula('NETWORKDAYS.INTL(Sheet2!A4,Sheet2!A5,1)', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(Sheet2!A4,Sheet2!A5,1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Negative case: Number. Invalid weekend number (0) returns #NUM!. 3 of 4 arguments used.');
-		// Case #9: 3 of 4 arguments used.
-		// Different result with MS
-		//oParser = new parserFormula('NETWORKDAYS.INTL(TestNameArea2,TestName1,1)', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(TestNameArea2,TestName1,1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Negative case. 3 of 4 arguments used.');
+		// Case #8: Ref3D, Ref3D, Number. Reference with empty values as dates. 3 of 4 arguments used.
+		oParser = new parserFormula('NETWORKDAYS.INTL(Sheet2!A4,Sheet2!A5,1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(Sheet2!A4,Sheet2!A5,1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Negative case: Ref3D, Ref3D, Number. Reference with empty values as dates. 3 of 4 arguments used.');
+		// Case #9: Empty, Empty, Number. Empty values as dates. 3 of 4 arguments used.
+		oParser = new parserFormula('NETWORKDAYS.INTL(,,1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: TWORKDAYS.INTL(,,1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), "#N/A", 'Test: Negative case: Empty, Empty, Number. Empty values as dates. 3 of 4 arguments used.');
+		// Case #10: 3 of 4 arguments used.
+		oParser = new parserFormula('NETWORKDAYS.INTL(TestNameArea2,TestName1,1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(TestNameArea2,TestName1,1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", 'Test: Negative case. 3 of 4 arguments used.');
 		// Case #11: Boolean. Start_date as boolean (FALSE) returns #NUM!. 3 of 4 arguments used.
 		oParser = new parserFormula('NETWORKDAYS.INTL(SQRT(-1),DATE(2025,1,10))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(SQRT(-1),DATE(2025,1,10)) is parsed.');
@@ -5792,11 +5794,17 @@ $(function () {
 		oParser = new parserFormula('NETWORKDAYS.INTL(0,44936,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(0,44936,1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 32097, 'Test: Negative case: Number,Boolean. End_date as boolean (TRUE) returns #NUM!. 3 of 4 arguments used.');
-		// Case #13: Number,Boolean. Weekend as boolean (FALSE) returns #VALUE!. 3 of 4 arguments used.
-		// Different result with MS
-		//oParser = new parserFormula('NETWORKDAYS.INTL({FALSE},{44936},1)', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL({FALSE},{44936},1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Number,Boolean. Weekend as boolean (FALSE) returns #VALUE!. 3 of 4 arguments used.');
+		// Case #13: Array,Array,Number. Weekend as boolean (FALSE) returns #VALUE!. 3 of 4 arguments used.
+		oParser = new parserFormula('NETWORKDAYS.INTL({FALSE},{44936},1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL({FALSE},{44936},1) is parsed.');
+		oParser.setArrayFormulaRef(ws.getRange2("F106:I109").bbox); 
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '#VALUE!', 'Test: Negative case: Number,Boolean. Weekend as boolean (FALSE) returns #VALUE!. 3 of 4 arguments used.');
+		// Case #13.1: Array,Array,Number. Boolean and number in the start date. 3 of 4 arguments used.
+		oParser = new parserFormula('NETWORKDAYS.INTL({FALSE,1},{44936},1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL({FALSE,1},{44936},1) is parsed.');
+		oParser.setArrayFormulaRef(ws.getRange2("F106:I109").bbox); 
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '#VALUE!', 'Test: Negative case: Array,Array,Number. Boolean and number in the start date. 3 of 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,1).getValue(), 32097, 'Test: Negative case: Array,Array,Number. Boolean and number in the start date. 3 of 4 arguments used.');
 		// Case #14: Area. Multi-cell range for start_date returns #VALUE!. 3 of 4 arguments used.
 		oParser = new parserFormula('NETWORKDAYS.INTL(44927,44936,-1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(44927,44936,-1) is parsed.');
@@ -5813,20 +5821,39 @@ $(function () {
 		oParser = new parserFormula('NETWORKDAYS.INTL("-01/01/2025","01/10/2025")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL("-01/01/2025","01/10/2025") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Name. Named range with invalid start_date (area) returns #VALUE!. 3 of 4 arguments used.');
-		// Case #18: Table. Table column with invalid weekend string returns #VALUE!. 3 of 4 arguments used.
-		// Different result with MS
-		//oParser = new parserFormula('NETWORKDAYS.INTL(A103,A101,1)', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(A103,A101,1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Negative case: Table. Table column with invalid weekend string returns #VALUE!. 3 of 4 arguments used.');
+		// Case #18: Ref,Ref,Number. Empty ref and regular link plus number. 3 of 4 arguments used.
+		oParser = new parserFormula('NETWORKDAYS.INTL(A103,A101,1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(A103,A101,1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Table. Table column with invalid weekend string returns #VALUE!. 3 of 4 arguments used.');
+		// Case #18.1: Empty,Ref,Number. Empty val and regular link plus number. 3 of 4 arguments used.
+		oParser = new parserFormula('NETWORKDAYS.INTL(,A101,1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(,A101,1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), "#N/A", 'Test: Negative case: Empty,Ref,Number. Empty val and regular link plus number. 3 of 4 arguments used.');
 		// Case #19: Formula. Start_date > end_date via DATE formula returns #NUM!. 3 of 4 arguments used.
 		oParser = new parserFormula('NETWORKDAYS.INTL(DATE(2025,1,10),DATE(2025,1,1),1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(DATE(2025,1,10),DATE(2025,1,1),1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), -8, 'Test: Negative case: Formula. Start_date > end_date via DATE formula returns #NUM!. 3 of 4 arguments used.');
 		// Case #20: String. Empty start_date string returns #VALUE!. 3 of 4 arguments used.
-		// Different result with MS
-		//oParser = new parserFormula('NETWORKDAYS.INTL(1,2,1)', 'A2', ws);
-		//assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(1,2,1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: String. Empty start_date string returns #VALUE!. 3 of 4 arguments used.');
+		oParser = new parserFormula('NETWORKDAYS.INTL(1,2,1)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(1,2,1) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: String. Empty start_date string returns #VALUE!. 3 of 4 arguments used.');
+		// Case #21: Area3D. Multi sheets link start_date.
+		let multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A100";
+		oParser = new parserFormula('NETWORKDAYS.INTL('+multiAreaLink+',100,200)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula NETWORKDAYS.INTL('+multiAreaLink+',100,200) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area3D. Multi sheets link start_date.');
+		// Case #23: Area3D. Multi sheets link end_date.
+		oParser = new parserFormula('NETWORKDAYS.INTL(1,'+multiAreaLink+',200)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula NETWORKDAYS.INTL(1,'+multiAreaLink+',200) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area3D. Multi sheets link end_date.');
+		// Case #24: Area3D. Multi sheets link weekends.
+		oParser = new parserFormula('NETWORKDAYS.INTL(1,200,'+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula NETWORKDAYS.INTL(1,200,'+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area3D. Multi sheets link holidays.');
+		// Case #25: Area3D. Multi sheets link holidays.
+		oParser = new parserFormula('NETWORKDAYS.INTL(1,200,1,'+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula NETWORKDAYS.INTL(1,200,1,'+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area3D. Multi sheets link holidays.');
 
 		// Bounded cases:
 		// Case #1: Number. Minimum valid date (01/01/1900 to 01/02/1900), weekend as number, holidays omitted. 3 of 4 arguments used.
@@ -5846,21 +5873,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: NETWORKDAYS.INTL(2958464,2958465,1,{2958465}) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number,Array. Maximum valid date and holiday (12/31/9999), weekend as number. 4 of 4 arguments used.');
 
-		// TODO Need to fix: many results diff from ms, array handle, text handle, 3D error same as in NETWORKDAYS
-		// Case #7: Array. Arrays with single valid elements for all arguments. 4 of 4 arguments used.
-		// Case #8: Name. Named ranges with valid values. 4 of 4 arguments used.
-		// Case #11: Area3D. 3D single-cell ranges for all arguments. 4 of 4 arguments used.
-		// Case #3: String. Invalid end_date string returns #VALUE!. 3 of 4 arguments used.
-		// Case #5: Number,Array. Holidays with invalid date (0) returns #NUM!. 4 of 4 arguments used.
-		// Case #8: Number. Invalid weekend number (0) returns #NUM!. 3 of 4 arguments used.
-		// Case #9: 3 of 4 arguments used.
-		// Case #13: Number,Boolean. Weekend as boolean (FALSE) returns #VALUE!. 3 of 4 arguments used.
-		// Case #12: Table. Table structured references with valid values. 4 of 4 arguments used.
-		// Case #13: Date,Array. Holidays as array with multiple valid dates. 4 of 4 arguments used.
-		// Case #19: Number,String. Weekend as string, holidays as reference link. 4 of 4 arguments used.
-		// Case #21: Formula,Array. Holidays as array with multiple dates. 4 of 4 arguments used.
-		// Case #18: Table. Table column with invalid weekend string returns #VALUE!. 3 of 4 arguments used.
-		// Case #20: String. Empty start_date string returns #VALUE!. 3 of 4 arguments used.
 	});
 
 	QUnit.test('Test: "SECOND"', function (assert) {

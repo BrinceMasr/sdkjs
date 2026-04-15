@@ -2837,7 +2837,7 @@ var CPresentation = CPresentation || function(){};
         }
 
         if (false == fileMouseUpRes) {
-            // если было нажатие - то отжимаем
+            // if there was a press, then release it
             if (oViewer.wasMouseDown && (!this.GetActiveObject() || Asc.editor.IsLinkTool() || Asc.editor.IsRedactTool())) {
                 oViewer.file.onMouseUp(pageObjectMM.index, pageObjectMM.x, pageObjectMM.y);
             }
@@ -5597,6 +5597,7 @@ var CPresentation = CPresentation || function(){};
     CPDFDoc.prototype.GetSelectedText = function(bClearText, oPr) {
         let oForm       = this.activeForm;
         let oController = this.GetController();
+		let oTxObject	= this.getTextController();
 
         if (oForm) {
             let oContent = oForm.GetDocContent();
@@ -5604,8 +5605,14 @@ var CPresentation = CPresentation || function(){};
                 return oContent.GetSelectedText(bClearText, oPr);
             }
         }
+		else if (oTxObject) {
+			return oController.GetSelectedText(bClearText, oPr);
+		}
         else {
-            return oController.GetSelectedText(bClearText, oPr);
+            let textObj = {Text : ""};
+			this.Viewer.Copy(textObj);
+
+			return textObj.Text;
         }
     };
     

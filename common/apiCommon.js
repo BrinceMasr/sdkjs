@@ -2511,7 +2511,7 @@ function (window, undefined) {
 				this.Color = obj.Color;
 			}
 			else {
-				this.Color = (undefined != obj.Color && null != obj.Color) ? CreateAscColorCustom(obj.Color.r, obj.Color.g, obj.Color.b) : null;
+				this.Color = (undefined != obj.Color && null != obj.Color) ? CreateAscColorCustom(obj.Color.r, obj.Color.g, obj.Color.b, !!obj.Color.Auto) : null;
 			}
 			this.Size = (undefined != obj.Size) ? obj.Size : null;
 			this.Value = (undefined != obj.Value) ? obj.Value : null;

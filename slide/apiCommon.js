@@ -824,6 +824,93 @@ CAscSlideTransition.prototype.parseXmlParameters = function (_type, _paramNames,
                     this.TransitionOption = c_oAscSlideTransitionParams.Gallery_Right;
             }
         }
+		else if ("p14:flash" === _type)
+		{
+			typeMatched = true;
+			this.TransitionType = c_oAscSlideTransitionTypes.Flash;
+			this.TransitionOption = 0;
+		}
+		else if ("p14:pan" === _type)
+		{
+			typeMatched = true;
+			this.TransitionType = c_oAscSlideTransitionTypes.Pan;
+			this.TransitionOption = c_oAscSlideTransitionParams.Pan_Left;
+			for (let i = 0; i < _len; i++) {
+				if (_paramNames[i] === "dir") {
+					if ("r" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Pan_Right;
+					else if ("u" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Pan_Up;
+					else if ("d" === _paramValues[i]) this.TransitionOption = c_oAscSlideTransitionParams.Pan_Down;
+				}
+			}
+		}
+		else if ("p14:conveyor" === _type)
+		{
+			typeMatched = true;
+			this.TransitionType = c_oAscSlideTransitionTypes.Conveyor;
+			this.TransitionOption = c_oAscSlideTransitionParams.Conveyor_Left;
+			for (let i = 0; i < _len; i++) {
+				if (_paramNames[i] === "dir" && "r" === _paramValues[i])
+					this.TransitionOption = c_oAscSlideTransitionParams.Conveyor_Right;
+			}
+		}
+		else if ("p14:reveal" === _type)
+		{
+			typeMatched = true;
+			this.TransitionType = c_oAscSlideTransitionTypes.Reveal;
+			this.TransitionOption = c_oAscSlideTransitionParams.Reveal_SmoothLeft;
+			let thruBlk = false, dir = "l";
+			for (let i = 0; i < _len; i++) {
+				if (_paramNames[i] === "thruBlk" && _paramValues[i] === "1") thruBlk = true;
+				else if (_paramNames[i] === "dir") dir = _paramValues[i];
+			}
+			if (!thruBlk && dir === "l") this.TransitionOption = c_oAscSlideTransitionParams.Reveal_SmoothLeft;
+			else if (!thruBlk && dir === "r") this.TransitionOption = c_oAscSlideTransitionParams.Reveal_SmoothRight;
+			else if (thruBlk && dir === "l") this.TransitionOption = c_oAscSlideTransitionParams.Reveal_BlackLeft;
+			else if (thruBlk && dir === "r") this.TransitionOption = c_oAscSlideTransitionParams.Reveal_BlackRight;
+		}
+		else if ("p14:flythrough" === _type)
+		{
+			typeMatched = true;
+			this.TransitionType = c_oAscSlideTransitionTypes.Flythrough;
+			let dir = "in", hasBounce = false;
+			for (let i = 0; i < _len; i++) {
+				if (_paramNames[i] === "dir") dir = _paramValues[i];
+				else if (_paramNames[i] === "hasBounce") hasBounce = (_paramValues[i] === "1" || _paramValues[i] === "true");
+			}
+			if (dir === "in" && !hasBounce) this.TransitionOption = c_oAscSlideTransitionParams.Flythrough_In;
+			else if (dir === "in" && hasBounce) this.TransitionOption = c_oAscSlideTransitionParams.Flythrough_In_Bounce;
+			else if (dir === "out" && !hasBounce) this.TransitionOption = c_oAscSlideTransitionParams.Flythrough_Out;
+			else this.TransitionOption = c_oAscSlideTransitionParams.Flythrough_Out_Bounce;
+		}
+		else if ("p14:glitter" === _type)
+		{
+			typeMatched = true;
+			this.TransitionType = c_oAscSlideTransitionTypes.Glitter;
+			this.TransitionOption = c_oAscSlideTransitionParams.Glitter_Left_Diamond;
+			let dir = "l", pattern = "diamond";
+			for (let i = 0; i < _len; i++) {
+				if (_paramNames[i] === "dir") dir = _paramValues[i];
+				else if (_paramNames[i] === "pattern") pattern = _paramValues[i];
+			}
+			let dirIdx = (dir === "l") ? 0 : (dir === "r") ? 1 : (dir === "u") ? 2 : 3;
+			let patternOff = (pattern === "hexagon") ? 4 : 0;
+			this.TransitionOption = c_oAscSlideTransitionParams.Glitter_Left_Diamond + dirIdx + patternOff;
+		}
+		else if ("p14:shred" === _type)
+		{
+			typeMatched = true;
+			this.TransitionType = c_oAscSlideTransitionTypes.Shred;
+			this.TransitionOption = c_oAscSlideTransitionParams.Shred_StripIn;
+			let pattern = "strip", dir = "in";
+			for (let i = 0; i < _len; i++) {
+				if (_paramNames[i] === "pattern") pattern = _paramValues[i];
+				else if (_paramNames[i] === "dir") dir = _paramValues[i];
+			}
+			if (pattern === "strip" && dir === "in") this.TransitionOption = c_oAscSlideTransitionParams.Shred_StripIn;
+			else if (pattern === "strip" && dir === "out") this.TransitionOption = c_oAscSlideTransitionParams.Shred_StripOut;
+			else if (pattern === "rectangle" && dir === "in") this.TransitionOption = c_oAscSlideTransitionParams.Shred_RectangleIn;
+			else if (pattern === "rectangle" && dir === "out") this.TransitionOption = c_oAscSlideTransitionParams.Shred_RectangleOut;
+		}
         else if ("p:none" !== _type)
         {
             this.TransitionType = c_oAscSlideTransitionTypes.Fade;
@@ -1315,6 +1402,84 @@ CAscSlideTransition.prototype.fillXmlParams = function (aAttrNames, aAttrValues)
             aAttrValues.push(this.TransitionOption === c_oAscSlideTransitionParams.Gallery_Right ? "r" : "l");
             break;
         }
+		case c_oAscSlideTransitionTypes.Flash:
+		{
+			sNodeName = "p14:flash";
+			break;
+		}
+		case c_oAscSlideTransitionTypes.Pan:
+		{
+			sNodeName = "p14:pan";
+			let panDir = "l";
+			switch (this.TransitionOption) {
+				case c_oAscSlideTransitionParams.Pan_Right: panDir = "r"; break;
+				case c_oAscSlideTransitionParams.Pan_Up:    panDir = "u"; break;
+				case c_oAscSlideTransitionParams.Pan_Down:  panDir = "d"; break;
+			}
+			aAttrNames.push("dir"); aAttrValues.push(panDir);
+			break;
+		}
+		case c_oAscSlideTransitionTypes.Conveyor:
+		{
+			sNodeName = "p14:conveyor";
+			aAttrNames.push("dir");
+			aAttrValues.push(this.TransitionOption === c_oAscSlideTransitionParams.Conveyor_Right ? "r" : "l");
+			break;
+		}
+		case c_oAscSlideTransitionTypes.Reveal:
+		{
+			sNodeName = "p14:reveal";
+			let revIsBlack = (
+				this.TransitionOption === c_oAscSlideTransitionParams.Reveal_BlackLeft ||
+				this.TransitionOption === c_oAscSlideTransitionParams.Reveal_BlackRight
+			);
+			let revIsRight = (
+				this.TransitionOption === c_oAscSlideTransitionParams.Reveal_SmoothRight ||
+				this.TransitionOption === c_oAscSlideTransitionParams.Reveal_BlackRight
+			);
+			aAttrNames.push("thruBlk"); aAttrValues.push(revIsBlack ? "1" : "0");
+			aAttrNames.push("dir"); aAttrValues.push(revIsRight ? "r" : "l");
+			break;
+		}
+		case c_oAscSlideTransitionTypes.Flythrough:
+		{
+			sNodeName = "p14:flythrough";
+			let ftAttrs = {};
+			ftAttrs[c_oAscSlideTransitionParams.Flythrough_In] = ["in", "0"];
+			ftAttrs[c_oAscSlideTransitionParams.Flythrough_In_Bounce] = ["in", "1"];
+			ftAttrs[c_oAscSlideTransitionParams.Flythrough_Out] = ["out", "0"];
+			ftAttrs[c_oAscSlideTransitionParams.Flythrough_Out_Bounce] = ["out", "1"];
+			let fVals = ftAttrs[this.TransitionOption] || ["in", "0"];
+			aAttrNames.push("dir");
+			aAttrValues.push(fVals[0]);
+			aAttrNames.push("hasBounce");
+			aAttrValues.push(fVals[1]);
+			break;
+		}
+		case c_oAscSlideTransitionTypes.Glitter:
+		{
+			sNodeName = "p14:glitter";
+			let glBase = this.TransitionOption - c_oAscSlideTransitionParams.Glitter_Left_Diamond;
+			let glDirIdx = glBase % 4;
+			let glIsHex = glBase >= 4;
+			let glDir = ["l", "r", "u", "d"][glDirIdx] || "l";
+			aAttrNames.push("dir"); aAttrValues.push(glDir);
+			aAttrNames.push("pattern"); aAttrValues.push(glIsHex ? "hexagon" : "diamond");
+			break;
+		}
+		case c_oAscSlideTransitionTypes.Shred:
+		{
+			sNodeName = "p14:shred";
+			let shPattern = "strip", shDir = "in";
+			switch (this.TransitionOption) {
+				case c_oAscSlideTransitionParams.Shred_StripOut: shDir = "out"; break;
+				case c_oAscSlideTransitionParams.Shred_RectangleIn: shPattern = "rectangle"; break;
+				case c_oAscSlideTransitionParams.Shred_RectangleOut: shPattern = "rectangle"; shDir = "out"; break;
+			}
+			aAttrNames.push("pattern"); aAttrValues.push(shPattern);
+			aAttrNames.push("dir"); aAttrValues.push(shDir);
+			break;
+		}
         default:
             break;
     }

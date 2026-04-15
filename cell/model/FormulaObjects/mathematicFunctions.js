@@ -2851,7 +2851,7 @@ function (window, undefined) {
 					B[maxN] = temp;
 					++exchanges;
 				} else {
-					if (maxValue == 0) {
+					if (maxValue === 0) {
 						return maxValue;
 					}
 				}
@@ -2912,7 +2912,7 @@ function (window, undefined) {
 			let i, j;
 			for (i = 0; i < A.length; i++) {
 				for (j = 0; j < A[i].length; j++) {
-					if (cElementType.empty === A[i][j].type || cElementType.string === A[i][j].type) {
+					if (cElementType.number !== A[i][j].type) {
 						return new cError(cErrorType.wrong_value_type);
 					} else {
 						A[i][j] = A[i][j].getValue();
@@ -2922,7 +2922,7 @@ function (window, undefined) {
 
 			let detA = Determinant(A), invertA, res;
 
-			if (detA != 0) {
+			if (detA !== 0) {
 				invertA = AdjugateMatrix(A);
 				let datA = 1 / detA;
 				for (i = 0; i < invertA.length; i++) {
@@ -2940,24 +2940,31 @@ function (window, undefined) {
 		}
 
 		function _getArrayCopy(arr) {
-			var newArray = [];
-			for (var i = 0; i < arr.length; i++) {
+			let newArray = [];
+			for (let i = 0; i < arr.length; i++) {
 				newArray[i] = arr[i].slice();
 			}
-			return newArray
+			return newArray;
 		}
 
 		let arg0 = arg[0];
 		if (cElementType.cellsRange === arg0.type || cElementType.cellsRange3D === arg0.type || cElementType.array === arg0.type) {
-			if (arg0.isOneElement()) {
-				return new cNumber(1 / arg0.getFirstElement());
+			if (cElementType.cellsRange3D === arg0.type && !arg0.isSingleSheet()) {
+				return new cError(cErrorType.bad_reference);
 			}
-			arg0 = arg0.getMatrix();
-			//TODO when merging release, switch to getArrayCopy function / add getMatrix parameter for copy generation
-			arg0 = _getArrayCopy(arg0);
+
+			if (arg0.isOneElement()) {
+				arg0 = arg0.getFirstElement();
+				if (cElementType.number === arg0.type) {
+					return new cNumber(1 / arg0.getValue());
+				}
+				return new cError(cErrorType.wrong_value_type);
+			}
+			// arg0 = arg0.getMatrix();
+			arg0 = _getArrayCopy(arg0.getMatrix());
 		} else if (cElementType.number === arg0.type) {
-			return new cNumber(1 / arg0);
-		} else if (cElementType.cell === arg0.type) {
+			return new cNumber(1 / arg0.getValue());
+		} else if (cElementType.cell === arg0.type || cElementType.cell3D === arg0.type) {
 			let arg0Val = arg0.getValue();
 			if (cElementType.number === arg0Val.type) {
 				return new cNumber(1 / arg0Val);
@@ -2968,7 +2975,7 @@ function (window, undefined) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 
-		if (arg0[0].length != arg0.length) {
+		if (arg0[0].length !== arg0.length) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 

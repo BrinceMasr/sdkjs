@@ -17541,41 +17541,16 @@ function isAllowPasteLink(pastedWb) {
 
 		var checkDeleteCellsFilteringMode = function () {
 			if (!window['AscCommonExcel'].filteringMode) {
-				if (val === c_oAscDeleteOptions.DeleteCellsAndShiftLeft || val === c_oAscDeleteOptions.DeleteColumns) {
-					//prohibit deleting columns in this mode
+				var checkRangeForFilter;
+				if (val === c_oAscDeleteOptions.DeleteColumns) {
+					checkRangeForFilter = new asc_Range(arn.c1, 0, arn.c2, gc_nMaxRow0);
+				} else if (val === c_oAscDeleteOptions.DeleteRows) {
+					checkRangeForFilter = new asc_Range(0, checkRange.r1, gc_nMaxCol0, checkRange.r2);
+				} else {
+					checkRangeForFilter = arn;
+				}
+				if (t.model.autoFilters.isRangeIntersectionTableOrFilter(checkRangeForFilter)) {
 					return false;
-				} else if (val === c_oAscDeleteOptions.DeleteCellsAndShiftTop ||
-					val === c_oAscDeleteOptions.DeleteRows) {
-
-					var tempRange = arn;
-					if (val === c_oAscDeleteOptions.DeleteRows) {
-						tempRange = new asc_Range(0, checkRange.r1, gc_nMaxCol0, checkRange.r2);
-					}
-
-					//prohibit deleting the last row of the filter and its header + prohibit deleting formatted tables
-					var autoFilter = t.model.AutoFilter;
-					if (autoFilter && autoFilter.Ref) {
-						var ref = autoFilter.Ref;
-						//cannot delete autofilter entirely
-						if (tempRange.containsRange(ref)) {
-							return false;
-						} else if (tempRange.containsRange(new asc_Range(ref.c1, ref.r1, ref.c2, ref.r1))) {
-							//cannot delete the first row of the autofilter
-							return false;
-						} /*else if (ref.r2 === ref.r1 + 1) {
-							//cannot delete the last row of the autofilter body
-							if (tempRange.containsRange(new asc_Range(ref.c1, ref.r1 + 1, ref.c2, ref.r1 + 1))) {
-								return false;
-							}
-						}*/
-					}
-					//cannot delete formatted table entirely
-					var tableParts = t.model.TableParts;
-					for (var i = 0; i < tableParts.length; i++) {
-						if (tempRange.containsRange(tableParts[i].Ref)) {
-							return false;
-						}
-					}
 				}
 			}
 
@@ -17796,12 +17771,6 @@ function isAllowPasteLink(pastedWb) {
 				this._isLockedAll(onChangeWorksheetCallback);
 				break;
 			case "insCell":
-				if (!window['AscCommonExcel'].filteringMode) {
-					if (val === c_oAscInsertOptions.InsertCellsAndShiftRight || val === c_oAscInsertOptions.InsertColumns) {
-						return;
-					}
-				}
-
 				t.model.workbook.handlers.trigger("cleanCutData", true, true);
 				t.model.workbook.handlers.trigger("cleanCopyData", true);
 
@@ -17888,6 +17857,11 @@ function isAllowPasteLink(pastedWb) {
 							return;
 						}
 						lockRange = new asc_Range(arn.c1, 0, arn.c2, gc_nMaxRow0);
+						if (!window['AscCommonExcel'].filteringMode) {
+							if (t.model.autoFilters.isRangeIntersectionTableOrFilter(lockRange)) {
+								return;
+							}
+						}
 						count = arn.c2 - arn.c1 + 1;
 						if (this.model.checkShiftPivotTable(lockRange, new AscCommon.CellBase(0, count))) {
 							this.model.workbook.handlers.trigger("asc_onError", c_oAscError.ID.LockedCellPivot,
@@ -17934,6 +17908,11 @@ function isAllowPasteLink(pastedWb) {
 							return;
 						}
 						lockRange = new asc_Range(0, arn.r1, gc_nMaxCol0, arn.r2);
+						if (!window['AscCommonExcel'].filteringMode) {
+							if (t.model.autoFilters.isRangeIntersectionTableOrFilter(lockRange)) {
+								return;
+							}
+						}
 						count = arn.r2 - arn.r1 + 1;
 						if (this.model.checkShiftPivotTable(lockRange, new AscCommon.CellBase(count, 0))) {
 							this.model.workbook.handlers.trigger("asc_onError", c_oAscError.ID.LockedCellPivot,
@@ -22363,14 +22342,6 @@ function isAllowPasteLink(pastedWb) {
 		var res = true;
 		var filterError;
 
-		if (!window['AscCommonExcel'].filteringMode) {
-			if (val === c_oAscInsertOptions.InsertCellsAndShiftRight || val === c_oAscInsertOptions.InsertColumns) {
-				return false;
-			} else if (val === c_oAscDeleteOptions.DeleteCellsAndShiftLeft || val === c_oAscDeleteOptions.DeleteColumns) {
-				return false;
-			}
-		}
-
 		var intersectionTableParts = ws.autoFilters.getTablesIntersectionRange(activeRange);
 		var isPartTablePartsUnderRange = ws.autoFilters._isPartTablePartsUnderRange(activeRange);
 		var isPartTablePartsRightRange = ws.autoFilters.isPartTablePartsRightRange(activeRange);
@@ -22388,6 +22359,16 @@ function isAllowPasteLink(pastedWb) {
 					allTablesInside = false;
 					break;
 				}
+			}
+		}
+
+		if (!window['AscCommonExcel'].filteringMode &&
+			(val === c_oAscInsertOptions.InsertCellsAndShiftRight ||
+			 val === c_oAscInsertOptions.InsertCellsAndShiftDown ||
+			 val === c_oAscDeleteOptions.DeleteCellsAndShiftLeft ||
+			 val === c_oAscDeleteOptions.DeleteCellsAndShiftTop)) {
+			if (ws.autoFilters.isRangeIntersectionTableOrFilter(activeRange)) {
+				return false;
 			}
 		}
 

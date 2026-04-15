@@ -3724,16 +3724,24 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 				if (cElementType.cellsRange === arg.type || cElementType.array === arg.type) {
 					newArgs[i] = arg.getMatrix(excludeHiddenRows, excludeErrorsVal, excludeNestedStAg);
 				} else if (cElementType.cellsRange3D === arg.type) {
-					newArgs[i] = arg.getMatrix(excludeHiddenRows, excludeErrorsVal, excludeNestedStAg)[0];
+					if (!arg.isSingleSheet()) {
+						newArgs[i] = new cError(cErrorType.bad_reference);
+					} else {
+						newArgs[i] = arg.getMatrix(excludeHiddenRows, excludeErrorsVal, excludeNestedStAg)[0];
+					}
 				} else if (cElementType.error === arg.type) {
 					newArgs[i] = arg;
 				} else {
 					newArgs[i] = new cError(notArrayError ? notArrayError : cErrorType.division_by_zero);
 				}
 			} else if (cElementType.cellsRange === arg.type || cElementType.cellsRange3D === arg.type) {
-				newArgs[i] = bFirstRangeElem ? arg.getValueByRowCol(0,0) : arg.cross(arg1);
-				if (newArgs[i] == null) {
-					newArgs[i] = arg.cross(arg1);
+				if (cElementType.cellsRange3D === arg.type && !arg.isSingleSheet()) {
+					newArgs[i] = new cError(cErrorType.bad_reference);
+				} else {
+					newArgs[i] = bFirstRangeElem ? arg.getValueByRowCol(0,0) : arg.cross(arg1);
+					if (newArgs[i] === null) {
+						newArgs[i] = arg.cross(arg1);
+					}
 				}
 			} else if (cElementType.array === arg.type) {
 				if (bAddFirstArrElem) {

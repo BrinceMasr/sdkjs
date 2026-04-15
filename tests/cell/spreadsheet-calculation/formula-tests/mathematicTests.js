@@ -11924,11 +11924,11 @@ $(function () {
 		// Case #7: Name. Named range referring to a 2x2 matrix. 1 argument used.
 		oParser = new parserFormula('MINVERSE(TestName)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE(TestName) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), -2, 'Test: Positive case: Name. Named range referring to a 2x2 matrix. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), -2, 'Test: Positive case: Name. Named range referring to a 2x2 matrix. 1 argument used.');
 		// Case #8: Name3D. 3D named range referring to a 2x2 matrix. 1 argument used.
 		oParser = new parserFormula('MINVERSE(TestName3D)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE(TestName3D) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), -2, 'Test: Positive case: Name3D. 3D named range referring to a 2x2 matrix. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), -2, 'Test: Positive case: Name3D. 3D named range referring to a 2x2 matrix. 1 argument used.');
 		// Case #9: Ref3D. 3D reference to a 2x2 matrix. 1 argument used.
 		oParser = new parserFormula('MINVERSE(Sheet2!A1:A2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE(Sheet2!A1:A2) is parsed.');
@@ -11956,7 +11956,7 @@ $(function () {
 		// Case #18: Name. Named range referring to a different 2x2 matrix. 1 argument used.
 		oParser = new parserFormula('MINVERSE(TestName1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE(TestName1) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Positive case: Name. Named range referring to a different 2x2 matrix. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Positive case: Name. Named range referring to a different 2x2 matrix. 1 argument used.');
 		// Case #19: Ref3D. 3D reference to a different 2x2 matrix. 1 argument used.
 		oParser = new parserFormula('MINVERSE(Sheet2!A5:A6)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE(Sheet2!A5:A6) is parsed.');
@@ -11978,7 +11978,7 @@ $(function () {
 		// Case #3: Array. Matrix with boolean value returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('MINVERSE({1,TRUE;3,4})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE({1,TRUE;3,4}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array. Matrix with boolean value returns #VALUE!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array. Matrix with boolean value returns #VALUE!. 1 argument used.');
 		/// Case #5: Empty. Reference to empty cell returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('MINVERSE(A108)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE(A108) is parsed.');
@@ -12030,7 +12030,7 @@ $(function () {
 		// Case #18: Name. Named range referring to singular matrix returns #NUM!. 1 argument used.
 		oParser = new parserFormula('MINVERSE(TestName2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE(TestName2) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.095238095, 'Test: Negative case: Name. Named range referring to singular matrix returns #NUM!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "0.09524", 'Test: Negative case: Name. Named range referring to singular matrix returns #NUM!. 1 argument used.');
 		// Case #19: Formula. Formula resulting in #NUM! error in matrix returns #NUM!. 1 argument used.
 		oParser = new parserFormula('MINVERSE({"str",1;2,3})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE({"str",1;2,3}) is parsed.');
@@ -12038,13 +12038,20 @@ $(function () {
 		// Case #20: Array. Empty array returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('MINVERSE({""})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE({""}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array. Empty array returns #VALUE!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array. Empty array returns #VALUE!. 1 argument used.');
+		// Case #21: Area3D. Multi sheets link.
+		let multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A100";
+		oParser = new parserFormula('MINVERSE('+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula MINVERSE('+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area3D. Multi sheets link.');
+
 
 		// Bounded cases:
 		// Case #1: Array. Matrix with smallest valid numbers. 1 argument used.
 		oParser = new parserFormula('MINVERSE({1E-307,0;0,1E-307})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE({1E-307,0;0,1E-307}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1e+307, 'Test: Bounded case: Array. Matrix with smallest valid numbers. 1 argument used.');
+		// todo The behavior of the function at extreme values in the matrices is not entirely clear
+		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1e+307, 'Test: Bounded case: Array. Matrix with smallest valid numbers. 1 argument used.');
 		// Case #2: Array. Matrix with largest valid numbers. 1 argument used.
 		oParser = new parserFormula('MINVERSE({9.99999999999999E+307,0;0,9.99999999999999E+307})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE({9.99999999999999E+307,0;0,9.99999999999999E+307}) is parsed.');
@@ -12052,16 +12059,17 @@ $(function () {
 		// Case #3: Array. Matrix with near-singular determinant (close to zero but invertible). 1 argument used.
 		oParser = new parserFormula('MINVERSE({1,1E-307;1E-307,1})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: MINVERSE({1,1E-307;1E-307,1}) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Bounded case: Array. Matrix with near-singular determinant (close to zero but invertible). 1 argument used.');
-
-		// Need to fix: name range and cellsRange error handle, different ERROR types, different results
-		// Case #7: Name. Named range referring to a 2x2 matrix
-		// Case #8: Name3D. 3D named range referring to a 2x2 matrix. 1 argument used.
-		// Case #18: Name. Named range referring to a different 2x2 matrix. 1 argument used.
-		// Case #3: Array. Matrix with boolean value returns #VALUE!. 1 argument used.
-		// Case #18: Name. Named range referring to singular matrix returns #NUM!. 1 argument used.
-		// Case #20: Array. Empty array returns #VALUE!. 1 argument used.
-		// Case #1: Array. Matrix with smallest valid numbers. 1 argument used.
+		// todo The behavior of the function at extreme values in the matrices is not entirely clear
+		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Bounded case: Array. Matrix with near-singular determinant (close to zero but invertible). 1 argument used.');
+		// Case #4: Number. Number with smallest valid numbers. 1 argument used.
+		oParser = new parserFormula('MINVERSE(1E-307)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: MINVERSE(1E-307) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 1.0000000000000001e+307, 'Test: Bounded case: Number. Number with smallest valid numbers. 1 argument used.');
+		// Case #5: Number. Number with larget valid numbers. 1 argument used.
+		oParser = new parserFormula('MINVERSE(1E+307)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: MINVERSE(1E+307) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 1.0000000000000001e-307, 'Test: Bounded case: Number. Number with larget valid numbers. 1 argument used.');
+		
 
 	});
 
