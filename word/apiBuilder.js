@@ -21068,10 +21068,10 @@
 	 * Sets the text properties to the chart data labels.
 	 *
 	 * @memberof ApiChart
-	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
+	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 *
 	 * @param {ApiTextPr} textPr - The text properties to apply to the data labels.
-	 * @returns {boolean}
+	 * @returns {boolean} - Returns true if the text properties were applied successfully, false otherwise.
 	 *
 	 * @since 9.5.0
 	 * @see office-js-api/Examples/{Editor}/ApiChart/Methods/SetDataLabelsTextPr.js
@@ -21087,12 +21087,12 @@
 	 * Sets the text properties to the chart point data label.
 	 *
 	 * @memberof ApiChart
-	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
+	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 *
 	 * @param {number} seriesIndex - The series index from the array of the data used to build the chart from.
 	 * @param {number} pointIndex - The point index from this series.
 	 * @param {ApiTextPr} textPr - The text properties to apply to the data label.
-	 * @returns {boolean}
+	 * @returns {boolean} - Returns true if the text properties were applied successfully, false otherwise.
 	 *
 	 * @since 9.5.0
 	 * @see office-js-api/Examples/{Editor}/ApiChart/Methods/SetPointDataLabelTextPr.js
