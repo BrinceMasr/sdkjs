@@ -25804,7 +25804,7 @@
 		return this.Sdt.GetInnerText();
 	};
 	/**
-	 * Clears the current form.
+	 * Checks if the current form is filled.
 	 * @memberof ApiFormBase
 	 * @typeofeditors ["CDE", "CFE"]
 	 * @returns {boolean}
