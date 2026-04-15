@@ -1790,14 +1790,19 @@ function (window, undefined) {
 	cFACT.prototype.argumentsMin = 1;
 	cFACT.prototype.argumentsMax = 1;
 	cFACT.prototype.argumentsType = [argType.number];
-	// cFACT.prototype.enabledToSingle = {"0": true};
 	cFACT.prototype.Calculate = function (arg) {
 		let arg0 = arg[0];
 		if (arg0.type === cElementType.cell || arg0.type === cElementType.cell3D) {
 			arg0 = arg0.getValue();
 		}
  
-		if (arg0.type === cElementType.array || arg0.type === cElementType.cellsRange || arg0.type === cElementType.cellsRange3D) {
+		if (arg0.type === cElementType.cellsRange3D && !arg0.isSingleSheet()) {
+			return new cError(cErrorType.bad_reference);
+		} else if (arg0.type === cElementType.cellsRange || arg0.type === cElementType.cellsRange3D) {
+			arg0 = arg0.cross(arguments[1]);
+		}
+
+		if (arg0.type === cElementType.array /* || arg0.type === cElementType.cellsRange || arg0.type === cElementType.cellsRange3D*/) {
 			if (arg0.type === cElementType.cellsRange3D && !arg0.isSingleSheet()) {
 				return new cError(cErrorType.bad_reference);
 			}
