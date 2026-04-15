@@ -8166,7 +8166,7 @@ $(function () {
 		fragment[0].setFragmentText("=GAMMALN(D1:E1)");
 		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
 
-		resCell = getCell(ws.getRange2("G1"));
+		resCell = getCell(ws.getRange2("G1"));debugger
 		assert.strictEqual(getNormalizedFormula(resCell), "GAMMALN(D1:E1)", "GAMMALN range: formula correctly parsed");
 		assert.strictEqual(Number(ws.getRange2("G1").getValue()), 0, "GAMMALN range: G1 = GAMMALN(D1) = GAMMALN(1) = 0");
 		assert.strictEqual(Number(ws.getRange2("H1").getValue()), 0, "GAMMALN range: H1 = GAMMALN(E1) = GAMMALN(2) = 0");

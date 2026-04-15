@@ -19930,6 +19930,7 @@ $(function () {
 		// Case #6: Area. Multi-cell range returns #NUM!. 1 argument used.
 		oParser = new parserFormula('GAMMALN(A103:A104)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(A103:A104) is parsed.');
+		oParser.setArrayFormulaRef(ws.getRange2("E100:F102").bbox);
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.796677817701783, 'Test: Negative case: Area. Multi-cell range returns #NUM!. 1 argument used.');
 		// Case #7: String. Empty string returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('GAMMALN("")', 'A2', ws);
@@ -19995,6 +19996,13 @@ $(function () {
 		oParser = new parserFormula('GAMMALN(-1000000)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN(-1000000) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. Large negative integer returns #NUM!. 1 argument used.');
+
+		let multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A1";
+		// Case #21: Area3D. Multi areas link. 1 argument used.
+		oParser = new parserFormula('GAMMALN('+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: GAMMALN('+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area3D. Multi areas link. 1 argument used.');
+
 
 		// Bounded cases:
 		// Case #1: Number. Minimum positive number accepted by Excel. 1 argument used.
@@ -20183,7 +20191,8 @@ $(function () {
 		// Case #6: Area. Multi-cell range returns #NUM!. 1 argument used.
 		oParser = new parserFormula('GAMMALN.PRECISE(A103:A104)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN.PRECISE(A103:A104) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.796677817701783, 'Test: Negative case: Area. Multi-cell range returns #NUM!. 1 argument used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E100:F102").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.796677817701783, 'Test: Negative case: Area. Multi-cell range returns #NUM!. 1 argument used.');
 		// Case #7: String. Empty string returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('GAMMALN.PRECISE("")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN.PRECISE("") is parsed.');
@@ -20248,6 +20257,11 @@ $(function () {
 		oParser = new parserFormula('GAMMALN.PRECISE(-1000000)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GAMMALN.PRECISE(-1000000) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. Large negative integer returns #NUM!. 1 argument used.');
+		let multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A1";
+		// Case #21: Area3D. Multi areas link. 1 argument used.
+		oParser = new parserFormula('GAMMALN.PRECISE('+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: GAMMALN.PRECISE('+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area3D. Multi areas link. 1 argument used.');
 
 		// Bounded cases:
 		// Case #1: Number. Minimum positive number accepted by Excel. 1 argument used.

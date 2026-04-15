@@ -6978,14 +6978,17 @@ function (window, undefined) {
 	cGAMMALN.prototype.name = 'GAMMALN';
 	cGAMMALN.prototype.argumentsMin = 1;
 	cGAMMALN.prototype.argumentsMax = 1;
-	cGAMMALN.prototype.arrayIndexes = {0: 1};
 	cGAMMALN.prototype.argumentsType = [argType.number];
 	cGAMMALN.prototype.Calculate = function (arg) {
 
 		let arg0 = arg[0];
+		if (arg0.type === cElementType.cellsRange3D && !arg0.isSingleSheet()) {
+			return new cError(cErrorType.bad_reference);
+		}
+
 		if (arg0.type === cElementType.cell || arg0.type === cElementType.cell3D) {
 			arg0 = arg0.getValue();
-		} else if (arg0.type === cElementType.cellsRange || arg0.type === cElementType.cellsRange3D || arg0.type === cElementType.array) {
+		} else if (arg0.type === cElementType.array) {
 			let resArray = new cArray();
 			let dimensions = arg0.getDimensions();
 
@@ -7015,6 +7018,8 @@ function (window, undefined) {
 			}
 
 			return resArray;
+		} else if (arg0.type === cElementType.cellsRange || arg0.type === cElementType.cellsRange3D) {
+			arg0 = arg0.cross(arguments[1]);
 		}
 
 		arg0 = arg0.tocNumber();
@@ -7048,7 +7053,6 @@ function (window, undefined) {
 	cGAMMALN_PRECISE.prototype.argumentsMin = 1;
 	cGAMMALN_PRECISE.prototype.argumentsMax = 1;
 	cGAMMALN_PRECISE.prototype.isXLFN = true;
-	cGAMMALN_PRECISE.prototype.arrayIndexes = {0: 1};
 	cGAMMALN_PRECISE.prototype.argumentsType = [argType.number];
 
 	/**
