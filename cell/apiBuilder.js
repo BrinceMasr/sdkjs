@@ -12920,7 +12920,7 @@
 	/**
 	 * Returns the width of the current drawing.
 	 * @memberof ApiDrawing
-	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @returns {EMU}
 	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetWidth.js
 	 */
@@ -12930,7 +12930,7 @@
 	/**
 	 * Returns the height of the current drawing.
 	 * @memberof ApiDrawing
-	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @returns {EMU}
 	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetHeight.js
 	 */
@@ -13256,7 +13256,7 @@
 	/**
 	 * Returns a type of the ApiImage class.
 	 * @memberof ApiImage
-	 * @typeofeditors ["CDE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @returns {"image"}
 	 * @see office-js-api/Examples/{Editor}/ApiImage/Methods/GetClassType.js
 	 */
@@ -13667,7 +13667,7 @@
 	/**
 	 * Returns a type of the ApiOleObject class.
 	 * @memberof ApiOleObject
-	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @returns {"oleObject"}
 	 * @see office-js-api/Examples/{Editor}/ApiOleObject/Methods/GetClassType.js
 	 */
@@ -13678,7 +13678,7 @@
 	/**
 	 * Sets the data to the current OLE object.
 	 * @memberof ApiOleObject
-	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @param {string} sData - The OLE object string data.
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiOleObject/Methods/SetData.js
@@ -13694,7 +13694,7 @@
 	/**
 	 * Returns the string data from the current OLE object.
 	 * @memberof ApiOleObject
-	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @returns {string}
 	 * @see office-js-api/Examples/{Editor}/ApiOleObject/Methods/GetData.js
 	 */
@@ -13708,7 +13708,7 @@
 	/**
 	 * Sets the application ID to the current OLE object.
 	 * @memberof ApiOleObject
-	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @param {string} sAppId - The application ID associated with the current OLE object.
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiOleObject/Methods/SetApplicationId.js
@@ -13724,7 +13724,7 @@
 	/**
 	 * Returns the application ID from the current OLE object.
 	 * @memberof ApiOleObject
-	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @returns {string}
 	 * @see office-js-api/Examples/{Editor}/ApiOleObject/Methods/GetApplicationId.js
 	 */
