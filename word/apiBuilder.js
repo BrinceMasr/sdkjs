@@ -30815,6 +30815,7 @@
 	/**
 	 * @param oApiRange
 	 * @param oTextPr
+	 * @typeofeditors ["CDE"]
 	 * @constructor
 	 * @extends {ApiTextPr}
 	 */
