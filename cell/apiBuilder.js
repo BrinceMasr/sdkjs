@@ -11245,27 +11245,25 @@
 	 */
 	ApiRange.prototype.Select = function () {
 		if (this.range.worksheet.getId() === this.range.worksheet.workbook.getActiveWs().getId()) {
-			var bbox = this.range.bbox;
+			var newSelection = new AscCommonExcel.SelectionRange(this.range.worksheet);
+			let bbox = this.range.bbox;
+			newSelection.assign2(bbox);
+			if (this.areas) {
+				this.areas.forEach(function (el) {
+					if (!bbox.isEqual(el.bbox))
+						newSelection.ranges.push(el.bbox);
+				})
+			}
 			var wsView = this.range.worksheet.workbook.oApi && this.range.worksheet.workbook.oApi.wb &&
 				this.range.worksheet.workbook.oApi.wb.getWorksheet(this.range.worksheet.getIndex());
 			if (wsView) {
-				var ranges = [AscCommonExcel.Range.prototype.createFromBBox(wsView.model, bbox)];
-				if (this.areas) {
-					this.areas.forEach(function (el) {
-						if (!bbox.isEqual(el.bbox))
-							ranges.push(AscCommonExcel.Range.prototype.createFromBBox(wsView.model, el.bbox));
-					});
+				wsView.cleanSelection();
+				newSelection.Select(true);
+				wsView.updateSelection();
+				if (wsView.drawingCtx) {
+					wsView._scrollToRange(bbox);
 				}
-				wsView.setSelection(ranges);
 			} else {
-				var newSelection = new AscCommonExcel.SelectionRange(this.range.worksheet);
-				newSelection.assign2(bbox);
-				if (this.areas) {
-					this.areas.forEach(function (el) {
-						if (!bbox.isEqual(el.bbox))
-							newSelection.ranges.push(el.bbox);
-					});
-				}
 				newSelection.Select();
 			}
 			return true;
