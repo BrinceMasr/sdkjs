@@ -13098,6 +13098,140 @@
 		}
 	});
 
+
+	/**
+	 * Copies the contents and formatting of the top row of the range into the remaining rows.
+	 * If the range has only one row, the method succeeds but makes no changes.
+	 * @memberof ApiRange
+	 * @typeofeditors ["CSE"]
+	 * @returns {boolean} - returns false if the operation was blocked by sheet protection or an incompatible merged cell structure.
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/FillDown.js
+	 */
+	ApiRange.prototype.FillDown = function () {
+		let bbox = this.range.bbox;
+		if (bbox.r1 === bbox.r2) {
+			return true;
+		}
+		let ws = this.range.worksheet;
+		if (ws.getSheetProtection() && ws.isIntersectLockedRanges([bbox])) {
+			return false;
+		}
+		let nIndex = bbox.r2 - bbox.r1;
+		let sourceRange = ws.getRange3(bbox.r1, bbox.c1, bbox.r1, bbox.c2);
+		let oCanPromote = sourceRange.canPromote(true, true, nIndex);
+		if (!oCanPromote) {
+			return false;
+		}
+		let oldFillType = ws.getActiveFillType();
+		ws.setActiveFillType(Asc.c_oAscFillType.fillDown);
+		AscCommonExcel.executeInR1C1Mode(false, function () {
+			sourceRange.promote(true, true, nIndex, oCanPromote);
+		});
+		ws.setActiveFillType(oldFillType);
+		return true;
+	};
+
+	/**
+	 * Copies the contents and formatting of the bottom row of the range into the remaining rows.
+	 * If the range has only one row, the method succeeds but makes no changes.
+	 * @memberof ApiRange
+	 * @typeofeditors ["CSE"]
+	 * @returns {boolean} - returns false if the operation was blocked by sheet protection or an incompatible merged cell structure.
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/FillUp.js
+	 */
+	ApiRange.prototype.FillUp = function () {
+		let bbox = this.range.bbox;
+		if (bbox.r1 === bbox.r2) {
+			return true;
+		}
+		let ws = this.range.worksheet;
+		if (ws.getSheetProtection() && ws.isIntersectLockedRanges([bbox])) {
+			return false;
+		}
+		let nIndex = -(bbox.r2 - bbox.r1);
+		let sourceRange = ws.getRange3(bbox.r2, bbox.c1, bbox.r2, bbox.c2);
+		let oCanPromote = sourceRange.canPromote(true, true, nIndex);
+		if (!oCanPromote) {
+			return false;
+		}
+		let oldFillType = ws.getActiveFillType();
+		ws.setActiveFillType(Asc.c_oAscFillType.fillUp);
+		AscCommonExcel.executeInR1C1Mode(false, function () {
+			sourceRange.promote(true, true, nIndex, oCanPromote);
+		});
+		ws.setActiveFillType(oldFillType);
+		return true;
+	};
+
+	/**
+	 * Copies the contents and formatting of the leftmost column of the range into the remaining columns.
+	 * If the range has only one column, the method succeeds but makes no changes.
+	 * @memberof ApiRange
+	 * @typeofeditors ["CSE"]
+	 * @returns {boolean} - returns false if the operation was blocked by sheet protection or an incompatible merged cell structure.
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/FillRight.js
+	 */
+	ApiRange.prototype.FillRight = function () {
+		let bbox = this.range.bbox;
+		if (bbox.c1 === bbox.c2) {
+			return true;
+		}
+		let ws = this.range.worksheet;
+		if (ws.getSheetProtection() && ws.isIntersectLockedRanges([bbox])) {
+			return false;
+		}
+		let nIndex = bbox.c2 - bbox.c1;
+		let sourceRange = ws.getRange3(bbox.r1, bbox.c1, bbox.r2, bbox.c1);
+		let oCanPromote = sourceRange.canPromote(true, false, nIndex);
+		if (!oCanPromote) {
+			return false;
+		}
+		let oldFillType = ws.getActiveFillType();
+		ws.setActiveFillType(Asc.c_oAscFillType.fillRight);
+		AscCommonExcel.executeInR1C1Mode(false, function () {
+			sourceRange.promote(true, false, nIndex, oCanPromote);
+		});
+		ws.setActiveFillType(oldFillType);
+		return true;
+	};
+
+	/**
+	 * Copies the contents and formatting of the rightmost column of the range into the remaining columns.
+	 * If the range has only one column, the method succeeds but makes no changes.
+	 * @memberof ApiRange
+	 * @typeofeditors ["CSE"]
+	 * @returns {boolean} - returns false if the operation was blocked by sheet protection or an incompatible merged cell structure.
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/FillLeft.js
+	 */
+	ApiRange.prototype.FillLeft = function () {
+		let bbox = this.range.bbox;
+		if (bbox.c1 === bbox.c2) {
+			return true;
+		}
+		let ws = this.range.worksheet;
+		if (ws.getSheetProtection() && ws.isIntersectLockedRanges([bbox])) {
+			return false;
+		}
+		let nIndex = -(bbox.c2 - bbox.c1);
+		let sourceRange = ws.getRange3(bbox.r1, bbox.c2, bbox.r2, bbox.c2);
+		let oCanPromote = sourceRange.canPromote(true, false, nIndex);
+		if (!oCanPromote) {
+			return false;
+		}
+		let oldFillType = ws.getActiveFillType();
+		ws.setActiveFillType(Asc.c_oAscFillType.fillLeft);
+		AscCommonExcel.executeInR1C1Mode(false, function () {
+			sourceRange.promote(true, false, nIndex, oCanPromote);
+		});
+		ws.setActiveFillType(oldFillType);
+		return true;
+	};
+
+
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiDrawing
@@ -30473,6 +30607,10 @@
 	ApiRange.prototype["GetValidation"] = ApiRange.prototype.GetValidation;
 	ApiRange.prototype["GetCurrentRegion"] = ApiRange.prototype.GetCurrentRegion;
 	ApiRange.prototype["GetFormatConditions"] = ApiRange.prototype.GetFormatConditions;
+	ApiRange.prototype["FillDown"] = ApiRange.prototype.FillDown;
+	ApiRange.prototype["FillUp"] = ApiRange.prototype.FillUp;
+	ApiRange.prototype["FillRight"] = ApiRange.prototype.FillRight;
+	ApiRange.prototype["FillLeft"] = ApiRange.prototype.FillLeft;
 
 
 
