@@ -11505,6 +11505,24 @@
 	};
 
 	/**
+	 * @undocumented
+	 * @memberof ApiRange
+	 * @typeofeditors ["CSE"]
+	 */
+	ApiRange.prototype.InsertRows = function () {
+		return this.Insert("down");
+	};
+
+	/**
+	 * @undocumented
+	 * @memberof ApiRange
+	 * @typeofeditors ["CSE"]
+	 */
+	ApiRange.prototype.InsertColumns = function () {
+		return this.Insert("right");
+	};
+
+	/**
 	 * Changes the width of the columns or the height of the rows in the range to achieve the best fit.
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
@@ -30428,6 +30446,9 @@
 	ApiRange.prototype["Sort"] = ApiRange.prototype.SetSort;
 	ApiRange.prototype["Delete"] = ApiRange.prototype.Delete;
 	ApiRange.prototype["Insert"] = ApiRange.prototype.Insert;
+	ApiRange.prototype["InsertRows"] = ApiRange.prototype.InsertRows;
+	ApiRange.prototype["InsertColumns"] = ApiRange.prototype.InsertColumns;
+	ApiRange.prototype["InsertCols"] = ApiRange.prototype.InsertColumns;
 	ApiRange.prototype["AutoFit"] = ApiRange.prototype.AutoFit;
 	ApiRange.prototype["GetAreas"] = ApiRange.prototype.GetAreas;
 	ApiRange.prototype["Copy"] = ApiRange.prototype.Copy;
