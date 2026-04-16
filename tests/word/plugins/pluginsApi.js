@@ -322,6 +322,29 @@ $(function () {
 		
 		
 	})
-	
-	
+
+
+	QUnit.test("Test SetParagraphHtml", function(assert)
+	{
+		AscTest.ClearDocument();
+		const p = MoveToNewParagraph();
+		AscTest.EnterText("original text");
+
+		PluginsApi.pluginMethod_SetParagraphHtml("<p>new text</p>");
+		assert.strictEqual(AscTest.GetParagraphText(p), "new text", "Check paragraph text is replaced by SetParagraphHtml");
+
+		PluginsApi.pluginMethod_SetParagraphHtml("<p><b>bold</b> and normal</p>");
+		assert.strictEqual(AscTest.GetParagraphText(p), "bold and normal", "Check paragraph text after setting HTML with inline formatting");
+
+		AscTest.ClearDocument();
+		const p2 = MoveToNewParagraph();
+		AscTest.EnterText("to be replaced");
+		const paraId = p2.GetParaId();
+
+		MoveToNewParagraph();
+		PluginsApi.pluginMethod_SetParagraphHtml("<p>replaced by id</p>", paraId);
+		assert.strictEqual(AscTest.GetParagraphText(p2), "replaced by id", "Check paragraph text is replaced when paraId is specified");
+	});
+
+
 });

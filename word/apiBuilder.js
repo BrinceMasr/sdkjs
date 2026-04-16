@@ -1699,12 +1699,43 @@
 	};
 
 	/**
+	 * Converts the range to HTML.
+	 * @memberof ApiRange
+	 * @typeofeditors ["CDE"]
+	 * @since 9.4.0
+	 * @param {ToHtmlOptions} [options={}] - The HTML conversion options.
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/ToHtml.js
+	 */
+	ApiRange.prototype.ToHtml = function(options)
+	{
+		private_RefreshRangesPosition();
+
+		let logicDocument = private_GetLogicDocument();
+		let docState      = logicDocument.SaveDocumentState();
+
+		this.Select(true);
+
+		let config = {
+			convertType    : "html",
+			htmlHeadings   : GetBoolParameter(options && options["HtmlHeadings"],   false),
+			base64img      : GetBoolParameter(options && options["Base64img"],      false),
+			demoteHeadings : GetBoolParameter(options && options["DemoteHeadings"], false),
+			renderHTMLTags : GetBoolParameter(options && options["RenderHTMLTags"], false)
+		};
+
+		let converter = new CMarkdownConverter(config);
+		let result = converter.DoHtml();
+		logicDocument.LoadDocumentState(docState);
+		return result;
+	};
+	/**
 	 * Returns a collection of paragraphs that represents all the paragraphs in the specified range.
 	 * @memberof ApiRange
 	 * @typeofeditors ["CDE"]
 	 * @return {ApiParagraph[]}
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/GetAllParagraphs.js
-	 */	
+	 */
 	ApiRange.prototype.GetAllParagraphs = function()
 	{
 		private_RefreshRangesPosition();
@@ -4023,6 +4054,15 @@
 	 * The shading information object.
 	 * @property {ShdType} Type - The shading type: <b>"nil"</b> - no shading, <b>"clear"</b> - solid fill.
 	 * @property {ApiColor} Color - The shading color.
+	 */
+
+	/**
+	 * @typedef {Object} ToHtmlOptions
+	 * Options for converting document content to an HTML string.
+	 * @property {boolean} [HtmlHeadings=false] - Defines if the HTML headings and IDs will be generated when the Markdown renderer of your target platform does not handle Markdown-style IDs.
+	 * @property {boolean} [Base64img=false] - Defines if the images will be created in the base64 format.
+	 * @property {boolean} [DemoteHeadings=false] - Defines if all heading levels will be demoted to conform with the following standard: single H1 as title, H2 as top-level heading in the text body.
+	 * @property {boolean} [RenderHTMLTags=false] - Defines if HTML tags will be preserved. By default, the opening angle brackets will be replaced with the special characters.
 	 */
 
 	/**
@@ -11382,10 +11422,34 @@
 		});
 	};
 	/**
+	 * Converts the paragraph to HTML.
+	 * @memberof ApiParagraph
+	 * @typeofeditors ["CDE"]
+	 * @since 9.4.0
+	 * @param {ToHtmlOptions} [options={}] - The HTML conversion options.
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiParagraph/Methods/ToHtml.js
+	 */
+	ApiParagraph.prototype.ToHtml = function(options)
+	{
+		let config = {
+			convertType    : "html",
+			htmlHeadings   : GetBoolParameter(options && options["HtmlHeadings"],   false),
+			base64img      : GetBoolParameter(options && options["Base64img"],      false),
+			demoteHeadings : GetBoolParameter(options && options["DemoteHeadings"], false),
+			renderHTMLTags : GetBoolParameter(options && options["RenderHTMLTags"], false)
+		};
+		let converter = new CMarkdownConverter(config);
+		let result = converter.HandleChildElement(this, 'html');
+		if (!config.renderHTMLTags)
+			result = private_EscapeHtml(result);
+		return result;
+	};
+	/**
 	 * Returns the text properties for a paragraph end mark.
 	 * @memberof ApiParagraph
 	 * @typeofeditors ["CDE"]
-	 * @return {ApiTextPr}  
+	 * @return {ApiTextPr}
 	 * @see office-js-api/Examples/{Editor}/ApiParagraph/Methods/GetTextPr.js
 	 */
 	ApiParagraph.prototype.GetTextPr = function()
@@ -30059,6 +30123,7 @@
 	ApiRange.prototype["AddBookmark"]                = ApiRange.prototype.AddBookmark;
 	ApiRange.prototype["AddHyperlink"]               = ApiRange.prototype.AddHyperlink;
 	ApiRange.prototype["GetText"]                    = ApiRange.prototype.GetText;
+	ApiRange.prototype["ToHtml"]                     = ApiRange.prototype.ToHtml;
 	ApiRange.prototype["GetAllParagraphs"]           = ApiRange.prototype.GetAllParagraphs;
 	ApiRange.prototype["Select"]                     = ApiRange.prototype.Select;
 	ApiRange.prototype["ExpandTo"]                   = ApiRange.prototype.ExpandTo;
@@ -30267,6 +30332,7 @@
 	ApiParagraph.prototype["GetParentTable"]         = ApiParagraph.prototype.GetParentTable;
 	ApiParagraph.prototype["GetParentTableCell"]     = ApiParagraph.prototype.GetParentTableCell;
 	ApiParagraph.prototype["GetText"]                = ApiParagraph.prototype.GetText;
+	ApiParagraph.prototype["ToHtml"]                 = ApiParagraph.prototype.ToHtml;
 	ApiParagraph.prototype["GetTextPr"]              = ApiParagraph.prototype.GetTextPr;
 	ApiParagraph.prototype["SetTextPr"]              = ApiParagraph.prototype.SetTextPr;
 	ApiParagraph.prototype["InsertInContentControl"] = ApiParagraph.prototype.InsertInContentControl;

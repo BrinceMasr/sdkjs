@@ -1695,9 +1695,83 @@
 		return logicDocument.IsEditingOFormMode();
 	};
 
+	/**
+	 * Replaces all content of the specified paragraph with the content parsed from the given HTML string.
+	 * If the HTML contains multiple block-level elements, their inline content is merged into the target paragraph.
+	 * @memberof Api
+	 * @typeofeditors ["CDE"]
+	 * @alias SetParagraphHtml
+	 * @param {string} html - The HTML string to parse and apply.
+	 * @param {number} [paraId] - The paragraph ID. If not specified, the current paragraph is used.
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/pluginMethod_SetParagraphHtml.js
+	 */
+	Api.prototype["pluginMethod_SetParagraphHtml"] = function(html, paraId)
+	{
+		let logicDocument = this.private_GetLogicDocument();
+		if (!logicDocument)
+			return false;
+
+		let targetPara = null;
+		if (!paraId)
+			targetPara = logicDocument.GetCurrentParagraph();
+		else
+			targetPara = AscCommon.g_oTableId.GetById(paraId);
+		
+		if (!targetPara || !(targetPara instanceof AscWord.Paragraph))
+			return false;
+		
+		window.g_asc_plugins && window.g_asc_plugins.setPluginMethodReturnAsync();
+		
+		function returnAsync(success)
+		{
+			if (window.g_asc_plugins)
+				window.g_asc_plugins.onPluginMethodReturn(success);
+			
+			return success;
+		}
+		
+		AscCommon.GetContentFromHtml(this, html, function(selectedContent)
+		{
+			if (!selectedContent || !selectedContent.Elements || !selectedContent.Elements.length)
+				return returnAsync(false);
+			
+			if (logicDocument.IsSelectionLocked(AscCommon.changestype_None, {
+				Type : AscCommon.changestype_2_ElementsArray_and_Type,
+				Elements : [targetPara],
+				CheckType : AscCommon.changestype_Paragraph_Content
+			}))
+				return returnAsync(false);
+			
+			logicDocument.StartAction(AscDFH.historydescription_Document_SetParagraphHtml);
+			
+			targetPara.RemoveFromContent(0, targetPara.GetElementsCount());
+			targetPara.CorrectContent();
+			
+			let elements = selectedContent.Elements;
+			for (let i = 0; i < elements.length; ++i)
+			{
+				let elem = elements[i].Element;
+				if (!(elem instanceof AscWord.Paragraph))
+					continue;
+				
+				for (let j = 0, count = elem.GetElementsCount(); j < count; ++j)
+					targetPara.AddToContentToEnd(elem.GetElement(j).Copy())
+			}
+			targetPara.CorrectContent();
+			
+			logicDocument.Recalculate();
+			logicDocument.UpdateSelection();
+			logicDocument.UpdateInterface();
+			logicDocument.FinalizeAction();
+			
+			return returnAsync(true);
+		});
+	};
+
 	window["AscCommon"] = window["AscCommon"] || {};
 	window["AscCommon"].readContentControlCommonPr = readContentControlCommonPr;
-	
+
 })(window);
 
 

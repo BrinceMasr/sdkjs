@@ -167,4 +167,15 @@ $(function ()
 		apiRun = apiParagraph.GetElement(0);
 		assert.strictEqual(apiRun.GetColor().IsAutoColor(), true, 'Color check after setting color with ApiColor (auto)');
 	});
+
+	QUnit.test('ToHtml', function (assert)
+	{
+		const paragraph = AscTest.JsApi.CreateParagraph();
+		paragraph.AddText('Hello World');
+		paragraph.AddText('Bold').SetBold(true);
+		paragraph.AddText('Italic').SetItalic(true);
+
+		const html = paragraph.ToHtml({ RenderHTMLTags : true });
+		assert.strictEqual(html, '<p>Hello World<strong>Bold</strong><em><strong>Italic</strong></em></p>\n\n', 'ToHtml output contains the paragraph text');
+	});
 });
