@@ -7013,6 +7013,7 @@ CPresentation.prototype.Save_DocumentStateBeforeLoadChanges = function () {
 	oDocState.StartPos = [];
 	oDocState.EndPos = [];
 	oDocState.CurPage = this.CurPage;
+	//todo
 	oDocState.FocusOnNotes = this.FocusOnNotes;
 	var oController = this.GetCurrentController();
 	if (oController) {

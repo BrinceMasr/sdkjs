@@ -151,7 +151,7 @@
 			const sourceOutlineParagraph = outlineView.outlineToSourceMap[outlineParagraph.Get_Id()];
 			if (!sourceOutlineParagraph) {
 				const slideInfo = outlineView.outlineInfo[outlineParagraph.Get_Id()];
-				const slideIndex = slideInfo.titleShapeIndex;
+				const slideIndex = slideInfo.slide.num;
 				const sourceSlideIndex = this.getSlideIndex(sourceParagraph);
 				if (slideIndex < sourceSlideIndex) {
 					return i;
@@ -191,6 +191,341 @@
 		// return leftPointer;
 	};
 
+	function ForEachSelectManager(outlineView) {
+		this.outlineView = outlineView;
+	}
+	ForEachSelectManager.prototype.getSelectionUseContentsInfo = function () {
+		const content = this.getDocContent();
+		const startPos = content.GetContentPosition(true, true);
+		const endPos = content.GetContentPosition(true, false);
+
+		const contents = [];
+		let direction = AscWord.Direction.FORWARD;
+		let startPosIndex = startPos[0].Position;
+		let endPosIndex = endPos[0].Position;
+		if (startPosIndex > endPosIndex) {
+			const temp = startPosIndex;
+			startPosIndex = endPosIndex;
+			endPosIndex = temp;
+			direction = AscWord.Direction.BACKWARD;
+		}
+		for (let i = startPosIndex; i <= endPosIndex; i += 1) {
+			const contentInfo = contents[contents.length - 1];
+			const outlineParagraph = content.Content[i];
+			const sourceParagraph = this.getSourceParagraph(outlineParagraph);
+			if (sourceParagraph) {
+				const sourceContent = sourceParagraph.GetParent();
+				if (contentInfo && contentInfo.content === sourceContent) {
+					if (direction === AscWord.Direction.FORWARD) {
+						contentInfo.endPos = endPos;
+						contentInfo.endParagraph = sourceParagraph;
+					} else {
+						contentInfo.startPos = startPos;
+						contentInfo.startParagraph = sourceParagraph;
+					}
+				} else {
+					contents.push({
+						startPos: startPos,
+						startParagraph: sourceParagraph,
+						endPos: endPos,
+						endParagraph: sourceParagraph,
+						content: sourceContent,
+						direction: direction
+					});
+				}
+			} else {
+				contents.push({
+					content: null,
+					outlineParagraph: outlineParagraph
+				});
+			}
+		}
+		return contents;
+	};
+	ForEachSelectManager.prototype.getSourceParagraph = function (outlineParagraph) {
+		return this.outlineView.outlineToSourceMap[outlineParagraph.Get_Id()]
+	};
+	ForEachSelectManager.prototype.getDocContent = function () {
+		return this.outlineView.getDocContent();
+	};
+	ForEachSelectManager.prototype.processNullableContent = function (contentInfo, callback) {
+		return callback(contentInfo);
+	};
+	ForEachSelectManager.prototype.processSingleSelectedContent = function (contentInfo, callback) {
+		if (contentInfo.content) {
+			return this.processSingleSelectedNotNullableContent(contentInfo, callback);
+		}
+		return this.processNullableContent(contentInfo, callback);
+
+	};
+	ForEachSelectManager.prototype.processSingleSelectedNotNullableContent = function (contentInfo, callback) {
+		if (contentInfo.content !== null) {
+			const content = contentInfo.content;
+			const startPos = this.rebuildPos(contentInfo.startPos, content, contentInfo.startParagraph);
+			const endPos = this.rebuildPos(contentInfo.endPos, content, contentInfo.endParagraph);
+			content.SetContentSelection(startPos, endPos, 0, 0, 0, 0);
+			const res = callback({content: content, index: 0, count: 1});
+			content.RemoveSelection();
+			return res;
+		}
+	};
+	ForEachSelectManager.prototype.processStartContent = function (contentInfo, count, callback) {
+		const content = contentInfo.content;
+		if (!content) {
+			return this.processNullableContent(contentInfo, callback);
+		}
+
+		content.MoveCursorToEndPos(false, true);
+		const targetPos = content.GetContentPosition(true, true);
+		if (contentInfo.direction === AscWord.Direction.FORWARD) {
+			const startPos = this.rebuildPos(contentInfo.startPos, content, contentInfo.startParagraph);
+			content.SetContentSelection(startPos, targetPos, 0, 0, 0);
+		} else {
+			const startPos = this.rebuildPos(contentInfo.endPos, content, contentInfo.endParagraph);
+			content.SetContentSelection(targetPos, startPos, 0, 0, 0);
+		}
+		const res = callback({content: content, index: 0, count: count});
+		content.RemoveSelection();
+		return res;
+	};
+	ForEachSelectManager.prototype.processCenterContents = function (contents, callback) {
+		for (let i = 1; i < contents.length - 1; i += 1) {
+			const contentInfo = contents[i];
+			const content = contentInfo.content;
+			if (!content) {
+				const nullableRes = this.processNullableContent(contentInfo, callback);
+				if (nullableRes) {
+					return nullableRes;
+				}
+			} else {
+				content.SelectAll(contentInfo.direction);
+				const res = callback({content: content, index: i, count: contents.length});
+				content.RemoveSelection();
+				if (res) {
+					return true;
+				}
+			}
+		}
+	};
+	ForEachSelectManager.prototype.processEndContent = function (contentInfo, count, callback) {
+		const content = contentInfo.content;
+		if (!content) {
+			return this.processNullableContent(contentInfo, callback);
+		}
+		content.MoveCursorToStartPos();
+		const targetPos = content.GetContentPosition(true, true);
+		if (contentInfo.direction === AscWord.Direction.FORWARD) {
+			const endPos = this.rebuildPos(contentInfo.endPos, content, contentInfo.endParagraph);
+			content.SetContentSelection(targetPos, endPos, 0, 0, 0);
+		} else {
+			const endPos = this.rebuildPos(contentInfo.startPos, content, contentInfo.startParagraph);
+			content.SetContentSelection(endPos, targetPos, 0, 0, 0);
+		}
+		const res = callback({content: content, index: count - 1, count: count});
+		content.RemoveSelection();
+		return res;
+	};
+	ForEachSelectManager.prototype.processMultipleSelectedContent = function (contents, callback) {
+		const contentLength = contents.length;
+		let res;
+		res = this.processStartContent(contents[0], contentLength, callback);
+		if (res) {
+			return res;
+		}
+		res = this.processCenterContents(contents, callback);
+		if (res) {
+			return res;
+		}
+		return this.processEndContent(contents[contents.length - 1], contentLength, callback);
+	};
+	ForEachSelectManager.prototype.processSelectedContent = function (callback) {
+		const contents = this.getSelectionUseContentsInfo();
+		if (contents.length === 1) {
+			const contentInfo = contents[0];
+			return this.processSingleSelectedContent(contentInfo, callback);
+		}
+		if (contents.length > 1) {
+			return this.processMultipleSelectedContent(contents, callback);
+		}
+	};
+	ForEachSelectManager.prototype.processCursorContent = function (callback) {
+		const content = this.getDocContent();
+		const contentPos = content.GetContentPosition(false, false);
+		const paragraph = content.Content[content.CurPos.ContentPos];
+		const sourceParagraph = this.getSourceParagraph(paragraph);
+		if (sourceParagraph) {
+			return this.processRealCursorContent(sourceParagraph, contentPos, callback);
+		}
+		return this.processNullableContent({outlineParagraph: paragraph}, callback);
+	};
+	ForEachSelectManager.prototype.processRealCursorContent = function (sourceParagraph, contentPos, callback) {
+		const sourceContent = sourceParagraph.GetParent();
+		const startPos = this.rebuildPos(contentPos, sourceContent, sourceParagraph);
+		sourceContent.SetContentPosition(startPos, 0, 0);
+		const res = callback({content: sourceContent, index: 0, count: 1});
+		sourceContent.RemoveSelection();
+		return res;
+	};
+	ForEachSelectManager.prototype.rebuildPos = function (pos, sourceContent, sourceParagraph) {
+		const newPos = pos.slice();
+		newPos[0] = {Class: sourceContent, Position: sourceParagraph.GetIndex()};
+		newPos[1] = {Class: sourceParagraph, Position: pos[1].Position};
+		return newPos;
+	};
+	ForEachSelectManager.prototype.forEachSelectedContent = function (callback) {
+		const content = this.getDocContent();
+		if (!content) {
+			return;
+		}
+		if (content.IsSelectionUse()) {
+			return this.processSelectedContent(callback);
+		}
+		return this.processCursorContent(callback);
+	};
+
+	function RemoveOutlineParagraphsManager(outlineView) {
+		this.outlineView = outlineView;
+		this.checkSlidesForRemove = {};
+	}
+	RemoveOutlineParagraphsManager.prototype.getDocContent = function () {
+		return this.outlineView.getDocContent();
+	};
+	RemoveOutlineParagraphsManager.prototype.getSourceParagraph = function (outlineParagraph) {
+		return this.outlineView.outlineToSourceMap[outlineParagraph.Get_Id()];
+	};
+	RemoveOutlineParagraphsManager.prototype.getOutlineParagraph = function (sourceParagraph) {
+		return this.outlineView.sourceToOutlineMap[sourceParagraph.Get_Id()];
+	};
+	RemoveOutlineParagraphsManager.prototype.getContentPosParagraph = function (docContent) {
+		return docContent.Content[docContent.CurPos.ContentPos];
+	};
+
+	RemoveOutlineParagraphsManager.prototype.processCursorAtBegin = function () {
+		const docContent = this.getDocContent();
+		const contentPos = docContent.GetContentPosition(false, true);
+		const outlineParagraph = contentPos[1].Class;
+		const sourceParagraph = this.getSourceParagraph(outlineParagraph);
+		if (sourceParagraph) {
+			this.processRealCursorAtBegin(outlineParagraph);
+		} else {
+			this.processNullableContent(outlineParagraph);
+		}
+	};
+	RemoveOutlineParagraphsManager.prototype.processRealCursorAtBegin = function (outlineParagraph) {
+		const docContent = this.getDocContent();
+		const sourceParagraph = this.getSourceParagraph(outlineParagraph);
+		const currentParagraphContent = sourceParagraph.GetParent();
+		if (outlineParagraph.Index !== 0) {
+			const previousOutlineParagraph = docContent.Content[outlineParagraph.Index - 1];
+			const previousSourceParagraph = this.getSourceParagraph(previousOutlineParagraph);
+			if (previousSourceParagraph) {
+				const previousParagraphContent = previousSourceParagraph.GetParent();
+				this.checkRemoveEdgeContents(previousParagraphContent, currentParagraphContent);
+			} else {
+				this.processNullableContent(previousOutlineParagraph);
+			}
+		}
+	};
+	RemoveOutlineParagraphsManager.prototype.isNeedProcessCursorAtBegin = function () {
+		const docContent = this.getDocContent();
+		if (!docContent.IsSelectionUse()) {
+			const paragraph = this.getContentPosParagraph(docContent);
+			return paragraph.IsCursorAtBegin();
+		}
+		return false;
+	};
+	RemoveOutlineParagraphsManager.prototype.remove = function (bOnAddText) {
+		const outlineView = this.outlineView;
+		let firstContent = null;
+		let lastContent = null;
+		const oThis = this;
+		if (this.isNeedProcessCursorAtBegin()) {
+			this.processCursorAtBegin();
+		}
+
+		outlineView.forEachSelectedContent(function (selectProps) {
+			if (selectProps.outlineParagraph) {
+				const outlineParagraph = selectProps.outlineParagraph;
+				oThis.processNullableContent(outlineParagraph);
+			} else {
+				const content = selectProps.content;
+				const idx = selectProps.index;
+				const count = selectProps.count;
+
+				if (content.IsCursorAtBegin() && !content.IsSelectionUse()) {
+
+				} else if (content.IsSelectedAll() || content.IsEmpty()) {
+					const shape = content.Is_DrawingShape(true);
+					const slide = shape.parent;
+					const slideNum = slide.num;
+					oThis.checkSlidesForRemove[slideNum] = slide;
+					shape.deleteDrawingBase();
+					content.RemoveSelection();
+				} else {
+					content.Remove(1, true, false, bOnAddText);
+					if (idx === 0) {
+						firstContent = content;
+					} else if (idx === count - 1) {
+						lastContent = content;
+					}
+				}
+			}
+		});
+		outlineView.getDocContent().RemoveSelection()
+		this.checkRemoveEdgeContents(firstContent, lastContent);
+
+		outlineView.removeSlides(oThis.checkSlidesForRemove);
+	};
+	RemoveOutlineParagraphsManager.prototype.processNullableContent = function (outlineParagraph) {
+		const slide = outlineView.outlineInfo[outlineParagraph.Get_Id()];
+		if (slide) {
+			oThis.checkSlidesForRemove[slide.num] = slide;
+		}
+	};
+	RemoveOutlineParagraphsManager.prototype.checkRemoveEdgeContents = function (firstContent, lastContent) {
+		if (firstContent && lastContent) {
+			const firstShape = firstContent.Is_DrawingShape(true);
+			const lastShape = lastContent.Is_DrawingShape(true);
+			const firstSlide = firstShape.parent;
+			const lastSlide = lastShape.parent;
+
+			const firstContentParagraph = firstContent.Content[firstContent.Content.length - 1];
+			firstContentParagraph.Concat(lastContent.Content[0]);
+			lastContent.Remove_FromContent(0, 1);
+			let isSaveLastShape = true;
+			if (firstShape.isOutlineTitlePlaceholder()) {
+				if (lastContent.Content.length === 1) {
+					isSaveLastShape = false;
+				}
+			} else {
+				for (let i = 0; i < lastContent.Content.length; i += 1) {
+					firstContent.Add_ToContent(firstContent.Content.length, lastContent.Content[i].Copy(firstContent));
+				}
+				isSaveLastShape = false;
+			}
+
+
+			if (firstSlide !== lastSlide) {
+				const outlineSlide = lastSlide.getOutlineSlide();
+				let isLastShapeChecked = false;
+				outlineSlide.forEachShape(function (shape) {
+					if (isLastShapeChecked) {
+						const copyShape = shape.copy();
+						copyShape.setBDeleted(false);
+						copyShape.setParent(firstSlide);
+						copyShape.addToDrawingObjects(firstSlide.cSld.spTree.length);
+						shape.deleteDrawingBase();
+					} else {
+						isLastShapeChecked = shape === lastShape;
+					}
+				});
+			}
+			if (!isSaveLastShape) {
+				lastShape.deleteDrawingBase();
+			}
+		}
+	};
+
 	function OutlineView() {
 		this.outlineShape = null;
 		this.reset();
@@ -227,8 +562,8 @@
 		}
 		if (pr) {
 			this.outlineInfo[outlineId] = {};
-			if (pr.titleShapeIndex !== undefined) {
-				this.outlineInfo[outlineId] = {titleShapeIndex: pr.titleShapeIndex};
+			if (pr.slide !== undefined) {
+				this.outlineInfo[outlineId] = {slide: pr.slide};
 			}
 			if (pr.contentShapeIndex !== undefined) {
 				this.outlineInfo[outlineId] = {contentShapeIndex: pr.contentShapeIndex};
@@ -247,7 +582,7 @@
 	OutlineView.prototype.addCopyParagraph = function (paragraph, pos, isFirstParagraph, pr) {
 		AscFormat.ExecuteNoHistory(function () {
 			const outlineContent = this.getDocContent();
-			const copyParagraph = this.getCopyParagraph(outlineContent, paragraph, !!pr && pr.titleShapeIndex !== undefined);
+			const copyParagraph = this.getCopyParagraph(outlineContent, paragraph, !!(pr && pr.slide));
 			outlineContent.AddToContent(pos, copyParagraph);
 			this.addOutlineParagraph(paragraph, copyParagraph, isFirstParagraph ? pr : null);
 		}, this, []);
@@ -285,7 +620,7 @@
 		for (let i = 0; i < outlineSlides.length; i += 1) {
 			const slide = outlineSlides[i];
 
-			const titlePr = {titleShapeIndex: i};
+			const titlePr = {slide: slide.slide};
 			if (slide.title !== null) {
 				this.addContentToOutlineShape(outlineShape, slide.title, titlePr);
 			} else {
@@ -489,11 +824,11 @@
 			const info = this.outlineInfo[paragraph.Get_Id()];
 			if (info) {
 				const topY = this.getParagraphY(paragraph);
-				if (info.titleShapeIndex !== undefined) {
+				if (info.slide !== undefined) {
 					let penRGB;
-					if (info.titleShapeIndex === currentSlideIndex) {
+					if (info.slide.num === currentSlideIndex) {
 						penRGB = activeSlideRGB;
-					} else if (info.titleShapeIndex === focusSlideIndex) {
+					} else if (info.slide.num === focusSlideIndex) {
 						penRGB = hoverSlideRGB;
 					} else {
 						penRGB = normalSlideRGB;
@@ -539,8 +874,8 @@
 			for (let i = currentParagraph.Index; i >= 0; i -= 1) {
 				const paragraph = outlineParagraphs[i];
 				const info = this.outlineInfo[paragraph.Get_Id()];
-				if (info && info.titleShapeIndex !== undefined) {
-					return info.titleShapeIndex;
+				if (info && info.slide !== undefined) {
+					return info.slide.num;
 				}
 			}
 		}
@@ -558,52 +893,6 @@
 		}
 		return 0;
 	}
-	OutlineView.prototype.rebuildPos = function (pos, sourceContent, sourceParagraph) {
-		const newPos = pos.slice();
-		newPos[0] = {Class: sourceContent, Position: sourceParagraph.GetIndex()};
-		newPos[1] = {Class: sourceParagraph, Position: pos[1].Position};
-		return newPos;
-	}
-	OutlineView.prototype.getSelectionUseContentsInfo = function (startPos, endPos) {
-		const contents = [];
-		let direction = AscWord.Direction.FORWARD;
-		let startPosIndex = startPos[0].Position;
-		let endPosIndex = endPos[0].Position;
-		if (startPosIndex > endPosIndex) {
-			const temp = startPosIndex;
-			startPosIndex = endPosIndex;
-			endPosIndex = temp;
-			direction = AscWord.Direction.BACKWARD;
-		}
-		const content = this.getDocContent();
-		for (let i = startPosIndex; i <= endPosIndex; i += 1) {
-			const contentInfo = contents[contents.length - 1];
-			const outlineParagraph = content.Content[i];
-			const sourceParagraph = this.outlineToSourceMap[outlineParagraph.Get_Id()];
-			if (sourceParagraph) {
-				const sourceContent = sourceParagraph.GetParent();
-				if (contentInfo && contentInfo.content === sourceContent) {
-					if (direction === AscWord.Direction.FORWARD) {
-						contentInfo.endPos = endPos;
-						contentInfo.endParagraph = sourceParagraph;
-					} else {
-						contentInfo.startPos = startPos;
-						contentInfo.startParagraph = sourceParagraph;
-					}
-				} else {
-					contents.push({
-						startPos: startPos,
-						startParagraph: sourceParagraph,
-						endPos: endPos,
-						endParagraph: sourceParagraph,
-						content: sourceContent,
-						direction: direction
-					});
-				}
-			}
-		}
-		return contents;
-	}
 	OutlineView.prototype.getContentPos = function (callback) {
 		let res;
 		const content = this.getDocContent();
@@ -619,178 +908,45 @@
 	};
 	OutlineView.prototype.forEachSelectedContent = function (callback) {
 		this.update();
-		const content = this.getDocContent();
-		if (!content) {
-			return;
-		}
-
-		if (content.IsSelectionUse()) {
-			const startPos = content.GetContentPosition(true, true);
-			const endPos = content.GetContentPosition(true, false);
-			const contents = this.getSelectionUseContentsInfo(startPos, endPos);
-			if (contents.length === 1) {
-				const contentInfo = contents[0];
-				const content = contentInfo.content;
-				const startPos = this.rebuildPos(contentInfo.startPos, content, contentInfo.startParagraph);
-				const endPos = this.rebuildPos(contentInfo.endPos, content, contentInfo.endParagraph);
-				content.SetContentSelection(startPos, endPos, 0, 0, 0, 0);
-				const res = callback(content, 0, 1);
-				content.RemoveSelection();
-				return res;
-			} else if (contents.length > 1) {
-				const startContentInfo = contents[0];
-				const startContent = startContentInfo.content;
-				startContent.MoveCursorToEndPos(false, true);
-				const targetStartPos = startContent.GetContentPosition(true, true);
-				if (startContentInfo.direction === AscWord.Direction.FORWARD) {
-					const startPos = this.rebuildPos(startContentInfo.startPos, startContent, startContentInfo.startParagraph);
-					startContent.SetContentSelection(startPos, targetStartPos, 0, 0, 0);
-				} else {
-					const startPos = this.rebuildPos(startContentInfo.endPos, startContent, startContentInfo.endParagraph);
-					startContent.SetContentSelection(targetStartPos, startPos, 0, 0, 0);
-				}
-				const startRes = callback(startContent, 0, contents.length);
-				startContent.RemoveSelection();
-				if (startRes) {
-					return true;
-				}
-				for (let i = 1; i < contents.length - 1; i += 1) {
-					const contentInfo = contents[i];
-					const content = contentInfo.content;
-					content.SelectAll(contentInfo.direction);
-					const res = callback(content, i, contents.length);
-					content.RemoveSelection();
-					if (res) {
-						return true;
-					}
-				}
-				const endContentInfo = contents[contents.length - 1];
-				const endContent = endContentInfo.content;
-				endContent.MoveCursorToStartPos();
-				const endTargetPos = endContent.GetContentPosition(true, true);
-				if (endContentInfo.direction === AscWord.Direction.FORWARD) {
-					const endPos = this.rebuildPos(endContentInfo.endPos, endContent, endContentInfo.endParagraph);
-					endContent.SetContentSelection(endTargetPos, endPos, 0, 0, 0);
-				} else {
-					const endPos = this.rebuildPos(endContentInfo.startPos, endContent, endContentInfo.startParagraph);
-					endContent.SetContentSelection(endPos, endTargetPos, 0, 0, 0);
-				}
-				const endRes = callback(endContent, contents.length - 1, contents.length);
-				endContent.RemoveSelection();
-				if (endRes) {
-					return true;
-				}
-			}
-		} else {
-			const contentPos = content.GetContentPosition(false, false);
-			const paragraph = content.Content[content.CurPos.ContentPos];
-			const sourceParagraph = this.outlineToSourceMap[paragraph.Get_Id()];
-			if (sourceParagraph) {
-				const sourceContent = sourceParagraph.GetParent();
-				const startPos = this.rebuildPos(contentPos, sourceContent, sourceParagraph);
-				sourceContent.SetContentPosition(startPos, 0, 0);
-				const res = callback(sourceContent, 0, false);
-				sourceContent.RemoveSelection();
-				if (res) {
-					return true;
-				}
-			} else {
-
-			}
-		}
-		return false;
+		const manager = new ForEachSelectManager(this);
+		return manager.forEachSelectedContent(callback);
 	}
-	OutlineView.prototype.getSelectedParagraphs = function () {
-		const docContent = this.getDocContent();
-		const selectedParagraphs = [];
-		if (docContent) {
-			docContent.GetCurrentParagraph(false, selectedParagraphs);
-		}
-		return selectedParagraphs;
-	};
-	OutlineView.prototype.checkRemoveEdgeContents = function (firstContent, lastContent) {
-		if (firstContent && lastContent) {
-			const firstShape = firstContent.Is_DrawingShape(true);
-			const lastShape = lastContent.Is_DrawingShape(true);
-			const firstSlide = firstShape.parent;
-			const lastSlide = lastShape.parent;
 
-			const firstContentParagraph = firstContent.Content[firstContent.Content.length - 1];
-			firstContentParagraph.Concat(lastContent.Content[0]);
-			lastContent.Remove_FromContent(0, 1);
-			let isSaveLastShape = true;
-			if (firstShape.isOutlineTitlePlaceholder()) {
-				if (lastContent.Content.length === 1) {
-					isSaveLastShape = false;
-				}
-			} else {
-				for (let i = 0; i < lastContent.Content.length; i += 1) {
-					firstContent.Add_ToContent(firstContent.Content.length, lastContent.Content[i].Copy(firstContent));
-				}
-				isSaveLastShape = false;
-			}
-
-
-			if (firstSlide !== lastSlide) {
-				const outlineSlide = lastSlide.getOutlineSlide();
-				let isLastShapeChecked = false;
-				outlineSlide.forEachShape(function (shape) {
-					if (isLastShapeChecked) {
-						const copyShape = shape.copy();
-						copyShape.setBDeleted(false);
-						copyShape.setParent(firstSlide);
-						copyShape.addToDrawingObjects(firstSlide.cSld.spTree.length);
-						shape.deleteDrawingBase();
-					} else {
-						isLastShapeChecked = shape === lastShape;
-					}
-				});
-			}
-			if (!isSaveLastShape) {
-				lastShape.deleteDrawingBase();
-			}
-		}
-	};
 	OutlineView.prototype.remove = function (bOnAddText) {
-		const checkSlidesForRemove = {};
-		let firstContent = null;
-		let lastContent = null;
-		const oThis = this;
-		this.forEachSelectedContent(function (content, idx, count) {
-			if (content.IsSelectedAll()) {
-				const shape = content.Is_DrawingShape(true);
-				const slide = shape.parent;
-				const slideNum = slide.num;
-				checkSlidesForRemove[slideNum] = slide;
-				shape.deleteDrawingBase();
-				content.RemoveSelection();
-			} else {
-				content.Remove(1, true, false, bOnAddText);
-				if (idx === 0) {
-					firstContent = content;
-				} else if (idx === count - 1) {
-					lastContent = content;
-				}
-			}
-			// oThis.savePositionAfterEdit(content, idx, count);
-		});
-		this.getDocContent().RemoveSelection()
-		this.checkRemoveEdgeContents(firstContent, lastContent);
-		const slideNumbers = Object.keys(checkSlidesForRemove).map(function (num) {
-			return parseInt(num, 10);
-		}).sort(function (a, b) {
-			return b - a;
-		});
-		const presentation = this.getPresentation();
-		for (let i = 0; i < slideNumbers.length; i++) {
-			const slideNum = slideNumbers[i];
-			const slide = checkSlidesForRemove[slideNum];
+		const manager = new RemoveOutlineParagraphsManager(this);
+		manager.remove(bOnAddText);
+	};
+	OutlineView.prototype.removeSlides = function (slideForRemoveMap) {
+		const slides = [];
+		const slideNumbers = Object.keys(slideForRemoveMap);
+		for (let i = 0 ; i < slideNumbers.length; i += 1) {
+			const num = slideNumbers[i];
+			const slide = slideForRemoveMap[num];
 			if (!slide.isHaveOutlineShapes()) {
-				presentation.removeSlideByObject(slide, true, slideNum);
+				slides.push(slideForRemoveMap[num]);
 			}
 		}
-		const minSlideIndex = slideNumbers[slideNumbers.length - 1] || 0;
+		const presentation = this.getPresentation();
+		let minSlideIndex = presentation.GetSlidesCount() - 1;
+		for (let i = 0; i < slides.length; i++) {
+			const index = presentation.GetSlideIndex(slides[i]);
+			if (minSlideIndex > index) {
+				minSlideIndex = index;
+			}
+		}
+
+		const unpreserveInfo = presentation.getUnpreserveLayoutsAndMasters(slides);
+		const checkArray = [].concat(unpreserveInfo.layouts, unpreserveInfo.masters, slides);
+		for (let i = 0; i < checkArray.length; i += 1) {
+			const slide = checkArray[i];
+			if (!slide.isHaveOutlineShapes()) {
+				presentation.removeSlideByObject(slide);
+			}
+		}
+		presentation.updateSlideIndexes();
+		presentation.DrawingDocument.UpdateThumbnailsAttack();
 		presentation.DrawingDocument.m_oWordControl.GoToPage(Math.min(presentation.GetSlidesCount() - 1, minSlideIndex), undefined, undefined, true);
+		presentation.Api.sync_HideComment();
 	};
 	OutlineView.prototype.savePositionAfterEdit = function (content, idx, count) {
 		if (count === 1) {
@@ -874,26 +1030,37 @@
 	OutlineView.prototype.paragraphAdd = function (paraItem) {
 		const oThis = this;
 		if (paraItem.Type === para_TextPr) {
-			this.forEachSelectedContent(function (content, idx, contentCount) {
-				content.AddToParagraph(paraItem);
-				oThis.savePositionAfterEdit(content, idx, contentCount);
+			this.forEachSelectedContent(function (selectProps) {
+				if (selectProps.content) {
+					const content = selectProps.content;
+					const idx = selectProps.index;
+					const contentCount = selectProps.count;
+					content.AddToParagraph(paraItem);
+					oThis.savePositionAfterEdit(content, idx, contentCount);
+				}
 			});
 		} else {
-			this.forEachSelectedContent(function (content, idx, contentCount) {
-				if (contentCount > 1) {
+			this.forEachSelectedContent(function (selectProps) {
+				if (selectProps.content) {
+					const content = selectProps.content;
+					const idx = selectProps.index;
+					const contentCount = selectProps.count;
+					if (contentCount > 1) {
 
-				} else {
-					content.AddToParagraph(paraItem);
+					} else {
+						content.AddToParagraph(paraItem);
+					}
+					oThis.savePositionAfterEdit(content, idx, contentCount);
 				}
-				oThis.savePositionAfterEdit(content, idx, contentCount);
 			});
 		}
 	}
 
 	OutlineView.prototype.getParagraphParaPr = function () {
 		let paraPr;
-		this.forEachSelectedContent(function (content) {
-			if (content) {
+		this.forEachSelectedContent(function (selectProps) {
+			if (selectProps.content) {
+				const content = selectProps.content;
 				const contentParaPr = content.GetCalculatedParaPr();
 				if (paraPr) {
 					paraPr.Compare(contentParaPr);
@@ -901,14 +1068,16 @@
 					paraPr = contentParaPr;
 				}
 			}
+
 		});
 		return paraPr;
 	};
 
 	OutlineView.prototype.getParagraphTextPr = function () {
 		let textPr;
-		this.forEachSelectedContent(function (content) {
-			if (content) {
+		this.forEachSelectedContent(function (selectProps) {
+			if (selectProps.content) {
+				const content = selectProps.content;
 				const contentTextPr = content.GetCalculatedTextPr();
 				if (textPr) {
 					textPr.Compare(contentTextPr);
@@ -930,7 +1099,7 @@
 			const parentShape = sourceParagraph.GetParentShape();
 			pr = {};
 			if (parentShape.getPlaceholderType() === AscFormat.phType_ctrTitle || parentShape.getPlaceholderType() === AscFormat.phType_title) {
-				pr.titleShapeIndex = parentShape.parent.num;
+				pr.slide = parentShape.parent;
 			} else {
 				pr.contentShapeIndex = this.getShapeContentIndex(parentShape.parent, parentShape);
 			}
@@ -1221,8 +1390,8 @@
 			if (parentShape && parentShape.parent) {
 				return parentShape.parent.num;
 			}
-		} else if (this.outlineInfo[outlineId] && this.outlineInfo[outlineId].titleShapeIndex !== undefined) {
-			return this.outlineInfo[outlineId].titleShapeIndex;
+		} else if (this.outlineInfo[outlineId] && this.outlineInfo[outlineId].slide !== undefined) {
+			return this.outlineInfo[outlineId].slide.num;
 		}
 		return -1;
 	};
@@ -1286,7 +1455,7 @@
 			for (let i = 0; i < docContent.Content.length; i += 1) {
 				const paragraph = docContent.Content[i];
 				const info = this.outlineInfo[paragraph.Get_Id()];
-				if (info && info.titleShapeIndex === pageNum) {
+				if (info && info.slide && info.slide.num === pageNum) {
 					return paragraph;
 				}
 			}
