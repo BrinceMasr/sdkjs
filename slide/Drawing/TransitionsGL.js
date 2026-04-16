@@ -1291,88 +1291,76 @@
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     };
 
-    CTransitionGL.prototype._prepareFerris = function()
-    {
-        this.GetProgram('flip3d', _VERT_3D, _FRAG_TEXTURED);
-        this._initQuadBuffer3D();
-    };
+	// ============================================================
+	// Transition: Ferris Wheel
+	// ============================================================
 
-    CTransitionGL.prototype._renderFerris = function(progress, param)
-    {
-        let gl = this.gl;
-        let prog = this.programs['flip3d'];
-        if (!prog) return;
+	CTransitionGL.prototype._prepareFerris = function () {
+		this.GetProgram('flip3d', _VERT_3D, _FRAG_TEXTURED);
+		this._initQuadBuffer3D();
+	};
 
-        gl.useProgram(prog.program);
-        gl.enable(gl.DEPTH_TEST);
+	CTransitionGL.prototype._renderFerris = function (progress, param) {
+		const prog = this.programs['flip3d'];
+		if (!prog) {
+			return;
+		}
 
-        let aspect = this.glCanvas.width / this.glCanvas.height;
-        let fov = Math.PI / 4;
-        let dist = 1.0 / Math.tan(fov / 2);
-        let projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
+		const aspect = this.glCanvas.width / this.glCanvas.height;
+		const halfWidth = aspect;
 
-        let isLeft = (param === c_oAscSlideTransitionParams.Ferris_Left);
-        let dir = isLeft ? 1 : -1;
-        let arcRadius = 2.0;
-        let arcAngle = progress * Math.PI / 2;
+		const axisGap = halfWidth * 0.8;
+		const arm = halfWidth + axisGap;
+		const fov = Math.PI / 6;
+		const dist = 1 / Math.tan(fov / 2);
+		const projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
 
-        // Old slide rotates away on arc
-        {
-            let x = dir * Math.sin(arcAngle) * arcRadius;
-            let y = -(1.0 - Math.cos(arcAngle)) * arcRadius;
-            let tilt = dir * arcAngle;
+		const srcAngle = progress * Math.PI / 2;
+		const newAngle = -(1.0 - progress) * Math.PI / 2;
+		const yShiftDelta = -3;
 
-            let mv = _Mat4.identity();
-            mv = _Mat4.translate(mv, x, y, -dist);
-            mv = _Mat4.rotateY(mv, 0);
-            // Tilt the slide as it goes around the wheel
-            mv[0] = Math.cos(tilt);  mv[4] = -Math.sin(tilt);
-            mv[1] = Math.sin(tilt);  mv[5] = Math.cos(tilt);
+		const isLeft = (param === c_oAscSlideTransitionParams.Ferris_Left);
+		const axisDir = isLeft ? 1 : -1;
 
-            let mvFull = _Mat4.identity();
-            mvFull = _Mat4.translate(mvFull, x, y, -dist);
-            // Apply Z-rotation for ferris wheel tilt
-            let cosT = Math.cos(tilt), sinT = Math.sin(tilt);
-            let rotZ = _Mat4.identity();
-            rotZ[0] = cosT; rotZ[4] = -sinT;
-            rotZ[1] = sinT; rotZ[5] = cosT;
-            mvFull = _Mat4.multiply(mvFull, rotZ);
+		const gl = this.gl;
+		gl.useProgram(prog.program);
+		gl.enable(gl.DEPTH_TEST);
 
-            gl.uniformMatrix4fv(prog.uniforms['uProjection'], false, projection);
-            gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mvFull);
-            gl.uniform1f(prog.uniforms['uAlpha'], 1.0 - progress);
-            gl.activeTexture(gl.TEXTURE0);
-            gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
-            gl.uniform1i(prog.uniforms['uTexture'], 0);
-            this._bindQuad3D(prog);
-            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-        }
+		gl.uniform1f(prog.uniforms['uAlpha'], 1.0);
+		gl.uniformMatrix4fv(prog.uniforms['uProjection'], false, projection);
 
-        // New slide rotates in from opposite side
-        {
-            let revAngle = (1.0 - progress) * Math.PI / 2;
-            let x = -dir * Math.sin(revAngle) * arcRadius;
-            let y = -(1.0 - Math.cos(revAngle)) * arcRadius;
-            let tilt = -dir * revAngle;
+		let mv;
 
-            let mvFull = _Mat4.identity();
-            mvFull = _Mat4.translate(mvFull, x, y, -dist);
-            let cosT = Math.cos(tilt), sinT = Math.sin(tilt);
-            let rotZ = _Mat4.identity();
-            rotZ[0] = cosT; rotZ[4] = -sinT;
-            rotZ[1] = sinT; rotZ[5] = cosT;
-            mvFull = _Mat4.multiply(mvFull, rotZ);
+		mv = _Mat4.identity();
+		mv = _Mat4.translate(mv, 0, 0, -dist);
+		mv = _Mat4.translate(mv, -arm * axisDir, 0, 0);
+		mv = _Mat4.translate(mv, 0, yShiftDelta * Math.sin(newAngle), 0);
+		mv = _Mat4.rotateY(mv, axisDir * newAngle);
+		mv = _Mat4.rotateX(mv, -newAngle);
+		mv = _Mat4.translate(mv, arm * axisDir, 0, 0);
 
-            gl.uniformMatrix4fv(prog.uniforms['uProjection'], false, projection);
-            gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mvFull);
-            gl.uniform1f(prog.uniforms['uAlpha'], progress);
-            gl.activeTexture(gl.TEXTURE0);
-            gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
-            gl.uniform1i(prog.uniforms['uTexture'], 0);
-            this._bindQuad3D(prog);
-            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-        }
-    };
+		gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mv);
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
+		gl.uniform1i(prog.uniforms['uTexture'], 0);
+		this._bindQuad3D(prog);
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+		mv = _Mat4.identity();
+		mv = _Mat4.translate(mv, 0, 0, -dist);
+		mv = _Mat4.translate(mv, -arm * axisDir, 0, 0);
+		mv = _Mat4.translate(mv, 0, yShiftDelta * Math.sin(srcAngle), 0);
+		mv = _Mat4.rotateY(mv, axisDir * srcAngle);
+		mv = _Mat4.rotateX(mv, -srcAngle);
+		mv = _Mat4.translate(mv, arm * axisDir, 0, 0);
+
+		gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mv);
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
+		gl.uniform1i(prog.uniforms['uTexture'], 0);
+		this._bindQuad3D(prog);
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+	};
 
     // ============================================================
     // Transition: Prism — rectangular prism (cube) rotation, 90°
