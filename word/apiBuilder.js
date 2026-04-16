@@ -6577,7 +6577,7 @@
 		let lastElement = this.GetElement(this.GetElementsCount() - 1);
 		if (lastElement && !(lastElement instanceof ApiTable))
 		{
-			let p = lastElement.GetLastParagraph();
+			let p = lastElement.private_GetImpl().GetLastParagraph();
 			if (p)
 				return (new ApiParagraph(p)).AddText(text);
 		}
@@ -15654,7 +15654,7 @@
 	 */
 	ApiTableCell.prototype.AddText = function(text)
 	{
-		return this.Content().AddText(text);
+		return this.GetContent().AddText(text);
 	};
 
 	//------------------------------------------------------------------------------------------------------------------
