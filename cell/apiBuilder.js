@@ -16068,10 +16068,15 @@
 	ApiFreezePanes.prototype.FreezeColumns = function (count) {
 		let api = this.ws.workbook.oApi;
 		if (count == undefined) count = 0;
+		let wsView = api.wb.getWorksheetById(this.ws.getId());
 		if (typeof count === 'number' && count > 0 && count <= AscCommon.gc_nMaxCol0) {
-			api.asc_freezePane(null, count, 0);
-		} else if (!!api.wb.getWorksheet().topLeftFrozenCell && count === 0) {
-			api.asc_freezePane(undefined);
+			if (api.canEdit() && wsView) {
+				wsView.freezePane(null, count, 0);
+			}
+		} else if (wsView && wsView.topLeftFrozenCell && count === 0) {
+			if (api.canEdit()) {
+				wsView.freezePane(undefined);
+			}
 		} else {
 			throwException(new Error('Invalid parametr "count".'));
 		}
@@ -16088,10 +16093,15 @@
 	ApiFreezePanes.prototype.FreezeRows = function (count) {
 		let api = this.ws.workbook.oApi;
 		if (count == undefined) count = 0;
+		let wsView = api.wb.getWorksheetById(this.ws.getId());
 		if (typeof count === 'number' && count > 0 && count <= AscCommon.gc_nMaxRow0) {
-			api.asc_freezePane(null, 0, count);
-		} else if (!!api.wb.getWorksheet().topLeftFrozenCell && count === 0) {
-			api.asc_freezePane(undefined);
+			if (api.canEdit && wsView) {
+				wsView.freezePane(null, 0, count);
+			}
+		} else if (wsView && wsView.topLeftFrozenCell && count === 0) {
+			if (api.canEdit()) {
+				wsView.freezePane(undefined);
+			}
 		} else {
 			throwException(new Error('Invalid parametr "count".'));
 		}
@@ -16108,7 +16118,8 @@
 	ApiFreezePanes.prototype.GetLocation = function () {
 		let result = null;
 		let api = this.ws.workbook.oApi;
-		let cell = api.wb.getWorksheet().topLeftFrozenCell;
+		let wsView = api.wb.getWorksheetById(this.ws.getId());
+		let cell = wsView && wsView.topLeftFrozenCell;
 		if (cell) {
 			let c = cell.getCol0();
 			let r = cell.getRow0();
@@ -30181,6 +30192,7 @@
 	ApiWorksheet.prototype["GetCells"] = ApiWorksheet.prototype.GetCells;
     ApiWorksheet.prototype["GetAutoFilter"] = ApiWorksheet.prototype.GetAutoFilter;
 	ApiWorksheet.prototype["GetCols"] = ApiWorksheet.prototype.GetCols;
+	ApiWorksheet.prototype["GetColumns"] = ApiWorksheet.prototype.GetCols;
 	ApiWorksheet.prototype["GetRows"] = ApiWorksheet.prototype.GetRows;
 	ApiWorksheet.prototype["GetUsedRange"] = ApiWorksheet.prototype.GetUsedRange;
 	ApiWorksheet.prototype["GetName"] = ApiWorksheet.prototype.GetName;
@@ -30363,6 +30375,7 @@
     ApiRange.prototype["ClearHyperlinks"] = ApiRange.prototype.ClearHyperlinks;
 	ApiRange.prototype["GetRows"] = ApiRange.prototype.GetRows;
 	ApiRange.prototype["GetCols"] = ApiRange.prototype.GetCols;
+	ApiRange.prototype["GetColumns"] = ApiRange.prototype.GetCols;
 	ApiRange.prototype["End"] = ApiRange.prototype.End;
 	ApiRange.prototype["GetCells"] = ApiRange.prototype.GetCells;
 	ApiRange.prototype["SetOffset"] = ApiRange.prototype.SetOffset;
@@ -30372,6 +30385,7 @@
 	ApiRange.prototype["SetValue"] = ApiRange.prototype.SetValue;
 	ApiRange.prototype["GetFormula"] = ApiRange.prototype.GetFormula;
 	ApiRange.prototype["SetFormula"] = ApiRange.prototype.SetFormula;
+	ApiRange.prototype["SetFormulaString"] = ApiRange.prototype.SetFormula;
 	ApiRange.prototype["GetValue2"] = ApiRange.prototype.GetValue2;
 	ApiRange.prototype["GetText"] = ApiRange.prototype.GetText;
 	ApiRange.prototype["SetFontColor"] = ApiRange.prototype.SetFontColor;
@@ -30383,6 +30397,7 @@
 	ApiRange.prototype["SetRowHeight"] = ApiRange.prototype.SetRowHeight;
 	ApiRange.prototype["SetFontSize"] = ApiRange.prototype.SetFontSize;
 	ApiRange.prototype["SetFontName"] = ApiRange.prototype.SetFontName;
+	ApiRange.prototype["SetFontFamily"] = ApiRange.prototype.SetFontName;
 	ApiRange.prototype["SetAlignVertical"] = ApiRange.prototype.SetAlignVertical;
 	ApiRange.prototype["SetAlignHorizontal"] = ApiRange.prototype.SetAlignHorizontal;
 	ApiRange.prototype["SetReadingOrder"] = ApiRange.prototype.SetReadingOrder;
@@ -30394,6 +30409,7 @@
 	ApiRange.prototype["SetWrapText"] = ApiRange.prototype.SetWrap;
 	ApiRange.prototype["GetWrapText"] = ApiRange.prototype.GetWrapText;
 	ApiRange.prototype["SetFillColor"] = ApiRange.prototype.SetFillColor;
+	ApiRange.prototype["SetBgColor"] = ApiRange.prototype.SetFillColor;
 	ApiRange.prototype["GetFillColor"] = ApiRange.prototype.GetFillColor;
 	ApiRange.prototype["GetNumberFormat"] = ApiRange.prototype.GetNumberFormat;
 	ApiRange.prototype["SetNumberFormat"] = ApiRange.prototype.SetNumberFormat;
@@ -30409,6 +30425,7 @@
 	ApiRange.prototype["SetOrientation"] = ApiRange.prototype.SetOrientation;
 	ApiRange.prototype["GetOrientation"] = ApiRange.prototype.GetOrientation;
 	ApiRange.prototype["SetSort"] = ApiRange.prototype.SetSort;
+	ApiRange.prototype["Sort"] = ApiRange.prototype.SetSort;
 	ApiRange.prototype["Delete"] = ApiRange.prototype.Delete;
 	ApiRange.prototype["Insert"] = ApiRange.prototype.Insert;
 	ApiRange.prototype["AutoFit"] = ApiRange.prototype.AutoFit;
@@ -30424,6 +30441,7 @@
 	ApiRange.prototype["PasteSpecial"] = ApiRange.prototype.PasteSpecial;
 	ApiRange.prototype["GetPivotTable"] = ApiRange.prototype.GetPivotTable;
 	ApiRange.prototype["SetAutoFilter"] = ApiRange.prototype.SetAutoFilter;
+	ApiRange.prototype["AutoFilter"] = ApiRange.prototype.SetAutoFilter;
 	ApiRange.prototype["SetFormulaArray"] = ApiRange.prototype.SetFormulaArray;
 	ApiRange.prototype["GetFormulaArray"] = ApiRange.prototype.GetFormulaArray;
 	ApiRange.prototype["Offset"] = ApiRange.prototype.Offset;
