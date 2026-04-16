@@ -4728,6 +4728,20 @@
 		return new ApiTable(oTable);
 	};
 	/**
+	 * Creates an abstract multilevel numbering with a specified type.
+	 * @memberof Api
+	 * @typeofeditors ["CDE"]
+	 * @param {("bullet" | "numbered")} [sType="bullet"] - The type of the numbering which will be created.
+	 * @returns {ApiNumbering}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/Api/Methods/CreateNumbering.js
+	 */
+	Api.CreateNumbering = function(sType)
+	{
+		var doc = Api.GetDocument();
+		return doc ? doc.CreateNumbering(sType) : null;
+	};
+	/**
 	 * Creates a new smaller text block to be inserted to the current paragraph or table.
 	 * @memberof Api
 	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
@@ -6529,11 +6543,46 @@
 	{
 		if (!this.IsFootnote() && !this.IsEndnote())
 			return false;
-		
+
 		isBefore = GetBoolParameter(isBefore, false);
-		
+
 		let ref = this.Document.GetRef();
 		return ref && ref.MoveCursorToElement(isBefore);
+	};
+	/**
+	 * Creates a new paragraph and appends it to the end of the document content.
+	 * @memberof ApiDocumentContent
+	 * @typeofeditors ["CDE"]
+	 * @returns {ApiParagraph}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiDocumentContent/Methods/AddParagraph.js
+	 */
+	ApiDocumentContent.prototype.AddParagraph = function()
+	{
+		let para = Api.CreateParagraph();
+		this.Push(para);
+		return para;
+	};
+	/**
+	 * Appends the specified text to the end of the document content.
+	 * @memberof ApiDocumentContent
+	 * @typeofeditors ["CDE"]
+	 * @param {string} text - The text to add.
+	 * @returns {ApiRun}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiDocumentContent/Methods/AddText.js
+	 */
+	ApiDocumentContent.prototype.AddText = function(text)
+	{
+		let lastElement = this.GetElement(this.GetElementsCount() - 1);
+		if (lastElement && !(lastElement instanceof ApiTable))
+		{
+			let p = lastElement.GetLastParagraph();
+			if (p)
+				return (new ApiParagraph(p)).AddText(text);
+		}
+		
+		return this.AddParagraph().AddText(text);
 	};
 
 	/**
@@ -10214,6 +10263,32 @@
 		let docContent = para.GetParent().IsFootnote(true);
 		return docContent ? new ApiDocumentContent(docContent) : null;
 	};
+	/**
+	 * Creates a new table with a specified number of rows and columns.
+	 * @memberof ApiDocument
+	 * @typeofeditors ["CDE"]
+	 * @param {number} cols - Number of columns.
+	 * @param {number} rows - Number of rows.
+	 * @returns {ApiTable}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/CreateTable.js
+	 */
+	ApiDocument.prototype.CreateTable = function(cols, rows)
+	{
+		return Api.CreateTable(cols, rows);
+	};
+	/**
+	 * Creates a new empty paragraph.
+	 * @memberof ApiDocument
+	 * @typeofeditors ["CDE"]
+	 * @returns {ApiParagraph}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/CreateParagraph.js
+	 */
+	ApiDocument.prototype.CreateParagraph = function()
+	{
+		return Api.CreateParagraph();
+	};
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiParagraph
@@ -12223,6 +12298,19 @@
 	{
 		return this.Paragraph.GetId();
 	};
+	/**
+	 * Forces a page break before the paragraph.
+	 * @memberof ApiParagraph
+	 * @typeofeditors ["CDE"]
+	 * @returns {ApiParagraph} - this
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiParagraph/Methods/AddPageBreakBefore.js
+	 */
+	ApiParagraph.prototype.AddPageBreakBefore = function()
+	{
+		this.SetPageBreakBefore(true);
+		return this;
+	};
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiRun
@@ -13351,16 +13439,16 @@
 	 * Specifies the page margins for all the pages in this section.
 	 * @memberof ApiSection
 	 * @typeofeditors ["CDE"]
-	 * @param {twips} nLeft - The left margin width measured in twentieths of a point (1/1440 of an inch).
-	 * @param {twips} nTop - The top margin height measured in twentieths of a point (1/1440 of an inch).
-	 * @param {twips} nRight - The right margin width measured in twentieths of a point (1/1440 of an inch).
-	 * @param {twips} nBottom - The bottom margin height measured in twentieths of a point (1/1440 of an inch).
+	 * @param {twips} left - The left margin width measured in twentieths of a point (1/1440 of an inch).
+	 * @param {twips} top - The top margin height measured in twentieths of a point (1/1440 of an inch).
+	 * @param {twips} right - The right margin width measured in twentieths of a point (1/1440 of an inch).
+	 * @param {twips} bottom - The bottom margin height measured in twentieths of a point (1/1440 of an inch).
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiSection/Methods/SetPageMargins.js
 	 */
-	ApiSection.prototype.SetPageMargins = function(nLeft, nTop, nRight, nBottom)
+	ApiSection.prototype.SetPageMargins = function(left, top, right, bottom)
 	{
-		this.Section.SetPageMargins(private_Twips2MM(nLeft), private_Twips2MM(nTop), private_Twips2MM(nRight), private_Twips2MM(nBottom));
+		this.Section.SetPageMargins(private_Twips2MM(left), private_Twips2MM(top), private_Twips2MM(right), private_Twips2MM(bottom));
 		return true;
 	};
 	/**
@@ -13701,6 +13789,22 @@
 	ApiSection.prototype.GetStartPageNumber = function()
 	{
 		return this.Section.GetPageNumStart();
+	};
+	/**
+	 * Specifies the page margins for all the pages in this section. Alias for {@link ApiSection#SetPageMargins}.
+	 * @memberof ApiSection
+	 * @typeofeditors ["CDE"]
+	 * @param {twips} left - The left margin width measured in twentieths of a point (1/1440 of an inch).
+	 * @param {twips} top - The top margin height measured in twentieths of a point (1/1440 of an inch).
+	 * @param {twips} right - The right margin width measured in twentieths of a point (1/1440 of an inch).
+	 * @param {twips} bottom - The bottom margin height measured in twentieths of a point (1/1440 of an inch).
+	 * @returns {boolean}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiSection/Methods/SetMargins.js
+	 */
+	ApiSection.prototype.SetMargins = function(left, top, right, bottom)
+	{
+		return this.SetPageMargins(left, top, right, bottom);
 	};
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -14691,6 +14795,25 @@
 		oDoc.AddCaption(oCapPr);
 		return true;
 	};
+	/**
+	 * Returns a collection of all cells in the table.
+	 * @memberof ApiTable
+	 * @typeofeditors ["CDE"]
+	 * @returns {ApiTableCell[]}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/GetAllCells.js
+	 */
+	ApiTable.prototype.GetAllCells = function()
+	{
+		let cells = [];
+		for (let r = 0; r < this.GetRowsCount(); ++r)
+		{
+			let row = this.GetRow(r);
+			for (let c = 0; c < row.GetCellsCount(); ++c)
+				cells.push(row.GetCell(c));
+		}
+		return cells;
+	};
 
 	//------------------------------------------------------------------------------------------------------------------
 	//
@@ -15520,7 +15643,20 @@
 
 		return allCellsUpdated;
 	};
-	
+	/**
+	 * Appends text to the first paragraph of the cell content.
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 * @param {string} text - The text to append.
+	 * @returns {ApiRun}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/AddText.js
+	 */
+	ApiTableCell.prototype.AddText = function(text)
+	{
+		return this.Content().AddText(text);
+	};
+
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiStyle
@@ -30116,6 +30252,8 @@
 	ApiDocumentContent.prototype["IsEndnote"]                 = ApiDocumentContent.prototype.IsEndnote;
 	ApiDocumentContent.prototype["SelectNoteReference"]       = ApiDocumentContent.prototype.SelectNoteReference;
 	ApiDocumentContent.prototype["MoveCursorToNoteReference"] = ApiDocumentContent.prototype.MoveCursorToNoteReference;
+	ApiDocumentContent.prototype["AddParagraph"]              = ApiDocumentContent.prototype.AddParagraph;
+	ApiDocumentContent.prototype["AddText"]                   = ApiDocumentContent.prototype.AddText;
 
 	ApiRange.prototype["GetClassType"]               = ApiRange.prototype.GetClassType;
 	ApiRange.prototype["GetParagraph"]               = ApiRange.prototype.GetParagraph;
@@ -30271,6 +30409,8 @@
 	ApiDocument.prototype["MoveCursorDown"]                = ApiDocument.prototype.MoveCursorDown;
 	ApiDocument.prototype["GetCurrentFootEndnote"]         = ApiDocument.prototype.GetCurrentFootEndnote;
 	ApiDocument.prototype["GetDrawingsByName"]             = ApiDocument.prototype.GetDrawingsByName;
+	ApiDocument.prototype["CreateTable"]                   = ApiDocument.prototype.CreateTable;
+	ApiDocument.prototype["CreateParagraph"]               = ApiDocument.prototype.CreateParagraph;
 	
 	
 	ApiParagraph.prototype["GetClassType"]           = ApiParagraph.prototype.GetClassType;
@@ -30353,6 +30493,7 @@
 	ApiParagraph.prototype["GetSection"]             = ApiParagraph.prototype.GetSection;
 	ApiParagraph.prototype["GetInternalId"]          = ApiParagraph.prototype.GetInternalId;
 	ApiParagraph.prototype["ToJSON"]                 = ApiParagraph.prototype.ToJSON;
+	ApiParagraph.prototype["AddPageBreakBefore"]     = ApiParagraph.prototype.AddPageBreakBefore;
 
 
 	ApiRun.prototype["GetClassType"]                 = ApiRun.prototype.GetClassType;
@@ -30444,6 +30585,7 @@
 	ApiSection.prototype["ToJSON"]                   = ApiSection.prototype.ToJSON;
 	ApiSection.prototype["SetStartPageNumber"]       = ApiSection.prototype.SetStartPageNumber;
 	ApiSection.prototype["GetStartPageNumber"]       = ApiSection.prototype.GetStartPageNumber;
+	ApiSection.prototype["SetMargins"]               = ApiSection.prototype.SetMargins;
 	
 	ApiTable.prototype["GetClassType"]               = ApiTable.prototype.GetClassType;
 	ApiTable.prototype["GetInternalId"]              = ApiTable.prototype.GetInternalId;
@@ -30486,6 +30628,7 @@
 	ApiTable.prototype["ReplaceByElement"]           = ApiTable.prototype.ReplaceByElement;
 	ApiTable.prototype["AddComment"]                 = ApiTable.prototype.AddComment;
 	ApiTable.prototype["AddCaption"]                 = ApiTable.prototype.AddCaption;
+	ApiTable.prototype["GetAllCells"]                = ApiTable.prototype.GetAllCells;
 
 	ApiTableRow.prototype["GetClassType"]            = ApiTableRow.prototype.GetClassType;
 	ApiTableRow.prototype["GetInternalId"]           = ApiTableRow.prototype.GetInternalId;
@@ -30525,6 +30668,7 @@
 	ApiTableCell.prototype["SetBackgroundColor"]       = ApiTableCell.prototype.SetBackgroundColor;
 	ApiTableCell.prototype["GetBackgroundColor"]       = ApiTableCell.prototype.GetBackgroundColor;
 	ApiTableCell.prototype["SetColumnBackgroundColor"] = ApiTableCell.prototype.SetColumnBackgroundColor;
+	ApiTableCell.prototype["AddText"]                  = ApiTableCell.prototype.AddText;
 
 	ApiStyle.prototype["GetClassType"]               = ApiStyle.prototype.GetClassType;
 	ApiStyle.prototype["GetName"]                    = ApiStyle.prototype.GetName;
