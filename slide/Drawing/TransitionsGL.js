@@ -1319,6 +1319,9 @@
 		const newAngle = -(1.0 - progress) * Math.PI / 2;
 		const yShiftDelta = -3;
 
+		const isLeft = (param === c_oAscSlideTransitionParams.Ferris_Left);
+		const axisDir = isLeft ? 1 : -1;
+
 		const gl = this.gl;
 		gl.useProgram(prog.program);
 		gl.enable(gl.DEPTH_TEST);
@@ -1330,11 +1333,11 @@
 
 		mv = _Mat4.identity();
 		mv = _Mat4.translate(mv, 0, 0, -dist);
-		mv = _Mat4.translate(mv, -arm, 0, 0);
+		mv = _Mat4.translate(mv, -arm * axisDir, 0, 0);
 		mv = _Mat4.translate(mv, 0, yShiftDelta * Math.sin(newAngle), 0);
-		mv = _Mat4.rotateY(mv, newAngle);
+		mv = _Mat4.rotateY(mv, axisDir * newAngle);
 		mv = _Mat4.rotateX(mv, -newAngle);
-		mv = _Mat4.translate(mv, arm, 0, 0);
+		mv = _Mat4.translate(mv, arm * axisDir, 0, 0);
 
 		gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mv);
 		gl.activeTexture(gl.TEXTURE0);
@@ -1345,11 +1348,11 @@
 
 		mv = _Mat4.identity();
 		mv = _Mat4.translate(mv, 0, 0, -dist);
-		mv = _Mat4.translate(mv, -arm, 0, 0);
+		mv = _Mat4.translate(mv, -arm * axisDir, 0, 0);
 		mv = _Mat4.translate(mv, 0, yShiftDelta * Math.sin(srcAngle), 0);
-		mv = _Mat4.rotateY(mv, srcAngle);
+		mv = _Mat4.rotateY(mv, axisDir * srcAngle);
 		mv = _Mat4.rotateX(mv, -srcAngle);
-		mv = _Mat4.translate(mv, arm, 0, 0);
+		mv = _Mat4.translate(mv, arm * axisDir, 0, 0);
 
 		gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mv);
 		gl.activeTexture(gl.TEXTURE0);
