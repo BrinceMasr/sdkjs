@@ -76,6 +76,9 @@
     	this.logging = true;
         this.type = -1;
         this.fontsGidsMaps = {};
+        this._renderWorker = null;
+        this._renderCallbacks = {};  // msgId -> callback
+        this._renderMsgId = 0;
 
     	this.Selection = {
             Page1 : 0,
@@ -99,9 +102,111 @@
             this.maxCanvasSize = 4096;
     }
 
-    // interface
-    CFile.prototype.close = function() 
+    // --- Render Worker -------------------------------------------------------
+
+    CFile.prototype.initRenderWorker = function(pdfData)
     {
+        if (!window.Worker) return;
+
+        var workerUrl = window["AscViewer"]["baseEngineUrl"] + "drawingfile.worker.js";
+        var worker = new Worker(workerUrl);
+        var _self = this;
+
+        worker.onmessage = function(e) {
+            var data = e.data;
+
+            if (data.type === "render") {
+                var cb = _self._renderCallbacks[data.id];
+                if (cb) {
+                    delete _self._renderCallbacks[data.id];
+                    cb(data.buffer ? data : null);
+                }
+                return;
+            }
+
+            if (data.type === "needFont") {
+                var font = AscFonts.pickFont(data.name, data.style);
+                var sendFont = function(f) {
+                    var streamIndex = f.GetStreamIndex();
+                    var stream = AscFonts.getFontStream(streamIndex);
+                    if (!stream) { worker.postMessage({ type: "fontReady", key: data.key }); return; }
+                    // Slice so the ArrayBuffer is transferable without detaching the original
+                    var fontBuf = stream.data.buffer.slice(
+                        stream.data.byteOffset,
+                        stream.data.byteOffset + stream.data.byteLength
+                    );
+                    worker.postMessage({ type: "fontReady", key: data.key, fontData: fontBuf }, [fontBuf]);
+                };
+                if (font.GetStatus() === 0) {
+                    sendFont(font);
+                } else {
+                    var _prev = font.externalCallback;
+                    font.externalCallback = function(f) {
+                        if (_prev) _prev(f);
+                        sendFont(f);
+                    };
+                }
+                return;
+            }
+
+            if (data.type === "repaintPages") {
+                _self.onRepaintPages && _self.onRepaintPages(data.pages);
+                return;
+            }
+            if (data.type === "repaintAnnotations") {
+                _self.onRepaintAnnotations && _self.onRepaintAnnotations(data.pages);
+                return;
+            }
+            if (data.type === "repaintForms") {
+                _self.onRepaintForms && _self.onRepaintForms(data.pages);
+                return;
+            }
+        };
+
+        worker.onerror = function(e) {
+            console.warn("PDF render worker error:", e.message);
+            worker.terminate();
+            _self._renderWorker = null;
+        };
+
+        // Transfer a copy of the PDF buffer so the Worker can open its own instance.
+        var bufCopy = pdfData instanceof ArrayBuffer ? pdfData.slice(0)
+                    : pdfData.buffer.slice(pdfData.byteOffset, pdfData.byteOffset + pdfData.byteLength);
+        worker.postMessage({ type: "open", id: 0, buffer: bufCopy }, [bufCopy]);
+
+        this._renderWorker = worker;
+    };
+
+    CFile.prototype._pixelsToCanvasFromBuffer = function(renderResult, isNoUseCacheManager)
+    {
+        var width  = renderResult.width;
+        var height = renderResult.height;
+        var canvas;
+        if (this.cacheManager && isNoUseCacheManager !== true)
+            canvas = this.cacheManager.lock(width, height);
+        else {
+            canvas = document.createElement("canvas");
+            canvas.width  = width;
+            canvas.height = height;
+        }
+        var ctx       = canvas.getContext("2d");
+        var clamped   = new Uint8ClampedArray(renderResult.buffer);
+        var imageData = supportImageDataConstructor
+            ? new ImageData(clamped, width, height)
+            : (function() { var id = ctx.createImageData(width, height); id.data.set(clamped, 0); return id; }());
+        ctx.putImageData(imageData, 0, 0);
+        return canvas;
+    };
+
+    // --- end Render Worker ---------------------------------------------------
+
+    // interface
+    CFile.prototype.close = function()
+    {
+        if (this._renderWorker) {
+            this._renderWorker.terminate();
+            this._renderWorker = null;
+        }
         if (this.nativeFile)
         {
             this.nativeFile["close"]();
@@ -151,7 +256,9 @@
         return this.fontsGidsMaps[fontName];
     };
 
-    CFile.prototype.getPage = function(pageIndex, width, height, isNoUseCacheManager, backgroundColor)
+    // callback(image) — optional; when provided and a render Worker is active,
+    // the render is dispatched asynchronously and this method returns null.
+    CFile.prototype.getPage = function(pageIndex, width, height, isNoUseCacheManager, backgroundColor, callback)
     {
         if (!this.nativeFile)
             return null;
@@ -176,6 +283,29 @@
                 if (height > this.maxCanvasSize) height = this.maxCanvasSize;
             }
         }
+
+        // --- Worker async path ---
+        if (this._renderWorker && callback) {
+            var _self  = this;
+            var msgId  = ++this._renderMsgId;
+            this._renderCallbacks[msgId] = function(result) {
+                if (!result) { callback(null); return; }
+                var image = _self._pixelsToCanvasFromBuffer(result, isNoUseCacheManager);
+                image.requestWidth  = requestW;
+                image.requestHeight = requestH;
+                callback(image);
+            };
+            this._renderWorker.postMessage({
+                type            : "render",
+                id              : msgId,
+                pageIndex       : pageIndex,
+                width           : width,
+                height          : height,
+                backgroundColor : backgroundColor
+            });
+            return null;  // caller must use callback
+        }
+        // --- end Worker async path ---
 
         var t0 = performance.now();
         var pixels = this.nativeFile["getPagePixmap"](pageIndex, width, height, backgroundColor);
@@ -2116,7 +2246,13 @@ void main() {\n\
             file.originalPagesCount = file.pages.length;
 
             //file.cacheManager = new AscCommon.CCacheManager();
-            return file;   
+
+            // Spin up a dedicated render Worker if the browser supports it.
+            // The Worker gets its own copy of the PDF buffer for independent rendering.
+            if (window.Worker && window["AscViewer"]["useWorkerRenderer"] !== false)
+                file.initRenderWorker(data);
+
+            return file;
         }
         else if (4 === error)
         {

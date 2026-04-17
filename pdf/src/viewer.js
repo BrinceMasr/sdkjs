@@ -2730,10 +2730,6 @@
 			ctx.strokeStyle = AscCommon.GlobalSkin.PageOutline;
 			ctx.lineWidth = lineW;
 
-			let isStretchPaint = this.isStretchPaint();
-			if (this.isClearPages)
-				isStretchPaint = false;
-
 			for (let i = this.startVisiblePage; i <= this.endVisiblePage; i++)
 			{
 				// render the page
@@ -2748,29 +2744,31 @@
 
 				let needNewPage = this.isClearPages || !page.Image || (page.Image && ((page.Image.requestWidth !== w) || (page.Image.requestHeight !== h)));
 
-				if (!isStretchPaint)
+				let isClearAttack = this.isClearPages;
+
+				if (!this.file.cacheManager)
 				{
-					let isClearAttack = this.isClearPages;
-					if (page.Image && page.createdInStretchMode === true)
+					if (isClearAttack || (page.Image && ((page.Image.requestWidth !== w) || (page.Image.requestHeight !== h))))
 					{
-						isClearAttack = true;
-						delete page.createdInStretchMode;
+						if (!isClearAttack && this.file._renderWorker && page.Image)
+							page._prevImage = page.Image;
+						else
+							delete page._prevImage;
+						delete page.Image;
 					}
-
-					if (!this.file.cacheManager)
+				}
+				else
+				{
+					if (isClearAttack || (page.Image && ((page.Image.requestWidth < w) || (page.Image.requestHeight < h))))
 					{
-						if (isClearAttack || (page.Image && ((page.Image.requestWidth !== w) || (page.Image.requestHeight !== h))))
-							delete page.Image;
-					}
-					else
-					{
-						if (isClearAttack || (page.Image && ((page.Image.requestWidth < w) || (page.Image.requestHeight < h))))
-						{
-							if (this.file.cacheManager)
-								this.file.cacheManager.unlock(page.Image);
+						if (this.file.cacheManager)
+							this.file.cacheManager.unlock(page.Image);
 
-							delete page.Image;
-						}
+						if (!isClearAttack && this.file._renderWorker && page.Image)
+							page._prevImage = page.Image;
+						else
+							delete page._prevImage;
+						delete page.Image;
 					}
 				}
 
@@ -2778,10 +2776,28 @@
 				let oImageToDraw = null;
 				let bRedrawAnnotsOnMainLayer = false;
 				if (!this.file.pages[i].isRecognized) {
-					if (!page.Image && !isStretchPaint)
+					if (!page.Image)
 					{
-						page.Image = this.file.getPage(i, w, h, undefined, (pageColor.R << 16) | (pageColor.G << 8) | pageColor.B);
-						if (this.bCachedMarkupAnnnots) {
+						if (this.file._renderWorker && !page._imagePending) {
+							// Async Worker path: fire-and-forget; repaint when image arrives.
+							page._imagePending = true;
+							var _paintSelf = this;
+							var _paintPageIdx = i;
+							this.file.getPage(i, w, h, undefined, (pageColor.R << 16) | (pageColor.G << 8) | pageColor.B, function(image) {
+								var pg = _paintSelf.drawingPages[_paintPageIdx];
+								if (pg) {
+									pg._imagePending = false;
+									delete pg._prevImage;
+									if (image) {
+										pg.Image = image;
+										_paintSelf.scheduleRepaint();
+									}
+								}
+							});
+						} else if (!this.file._renderWorker) {
+							page.Image = this.file.getPage(i, w, h, undefined, (pageColor.R << 16) | (pageColor.G << 8) | pageColor.B);
+						}
+						if (page.Image && this.bCachedMarkupAnnnots) {
 							bRedrawAnnotsOnMainLayer = true;
 						}
 
@@ -2798,11 +2814,13 @@
 					page.Image.requestWidth = w;
 					page.Image.requestHeight = h;
 					let tmpPageCtx = page.Image.getContext('2d');
-					tmpPageCtx.fillStyle = "rgba(" + pageColor.R + "," + pageColor.G + "," + pageColor.B + ",1)";
-					tmpPageCtx.fillRect(0, 0, w, h);
 
-					if (isStretchPaint)
-						page.createdInStretchMode = true;
+					if (page._prevImage && page._imagePending) {
+						tmpPageCtx.drawImage(page._prevImage, 0, 0, w, h);
+					} else {
+						tmpPageCtx.fillStyle = "rgba(" + pageColor.R + "," + pageColor.G + "," + pageColor.B + ",1)";
+						tmpPageCtx.fillRect(0, 0, w, h);
+					}
 				}
 
 				if (bRedrawAnnotsOnMainLayer) {
@@ -2832,7 +2850,7 @@
 							page.TmpImage = tmpPageImage;
 						}
 
-						if (pageInfo.needRedrawDrawings || pageInfo.needRedrawMarkups || (needNewPage && !isStretchPaint)) {
+						if (pageInfo.needRedrawDrawings || pageInfo.needRedrawMarkups || needNewPage) {
 							if (page.Image) {
 								tmpPageImage.width = page.Image.width;
 								tmpPageImage.height = page.Image.height;
