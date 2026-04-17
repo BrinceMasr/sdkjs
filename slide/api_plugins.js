@@ -331,6 +331,7 @@
 				return;
 			}
 		}
+		window.g_asc_plugins.setPluginMethodReturnAsync();
 		this._pluginApplyThemeCallback = function() {
 			window.g_asc_plugins.onPluginMethodReturn(true);
 		};
