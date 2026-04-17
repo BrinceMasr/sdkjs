@@ -1993,7 +1993,7 @@
 	 * Returns a type of the ApiBaseWidget class.
 	 * @memberof ApiBaseWidget
 	 * @typeofeditors ["PDFE"]
-	 * @returns {"page"}
+	 * @returns {"baseWidget"}
 	 * @see office-js-api/Examples/{Editor}/ApiBaseWidget/Methods/GetClassType.js
 	 */
 	ApiBaseWidget.prototype.GetClassType = function() {
@@ -2636,7 +2636,7 @@
 	 * Returns a type of the ApiTextWidget class.
 	 * @memberof ApiTextWidget
 	 * @typeofeditors ["PDFE"]
-	 * @returns {"page"}
+	 * @returns {"textWidget"}
 	 * @see office-js-api/Examples/{Editor}/ApiTextWidget/Methods/GetClassType.js
 	 */
 	ApiTextWidget.prototype.GetClassType = function() {
@@ -3322,7 +3322,7 @@
 	 * Returns a type of the ApiCheckboxWidget class.
 	 * @memberof ApiCheckboxWidget
 	 * @typeofeditors ["PDFE"]
-	 * @returns {"page"}
+	 * @returns {"checkboxWidget"}
 	 * @see office-js-api/Examples/{Editor}/ApiCheckboxWidget/Methods/GetClassType.js
 	 */
 	ApiCheckboxWidget.prototype.GetClassType = function() {
@@ -3488,7 +3488,7 @@
 	 * Returns a type of the ApiButtonWidget class.
 	 * @memberof ApiButtonWidget
 	 * @typeofeditors ["PDFE"]
-	 * @returns {"page"}
+	 * @returns {"buttonWidget"}
 	 * @see office-js-api/Examples/{Editor}/ApiButtonWidget/Methods/GetClassType.js
 	 */
 	ApiButtonWidget.prototype.GetClassType = function() {
@@ -6171,7 +6171,7 @@
 	 * Returns a type of the ApiRichTextPr class.
 	 * @memberof ApiRichTextPr
 	 * @typeofeditors ["PDFE"]
-	 * @returns {"textPr"}
+	 * @returns {"richTextPr"}
 	 * @see office-js-api/Examples/{Editor}/ApiRichTextPr/Methods/GetClassType.js
 	 */
 	ApiRichTextPr.prototype.GetClassType = function() {
@@ -7705,7 +7705,7 @@
 	 * Returns a type of the ApiSmartArt class.
 	 * @memberof ApiSmartArt
 	 * @typeofeditors ["PDFE"]
-	 * @returns {"group"}
+	 * @returns {"smartArt"}
 	 * @see office-js-api/Examples/{Editor}/ApiSmartArt/Methods/GetClassType.js
 	 */
 	ApiSmartArt.prototype.GetClassType = function() {
