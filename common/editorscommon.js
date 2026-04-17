@@ -15945,7 +15945,7 @@ window["asc_IsNeedBuildCryptedFile"] = function()
 
 window["UpdateSystemPlugins"] = function()
 {
-    var _plugins = JSON.parse(AscCommon.CryptoProvider.getInstallPlugins());
+    var _plugins = JSON.parse(window["AscDesktopEditor"]["GetInstallPlugins"]());
     _plugins[0]["url"] = _plugins[0]["url"].replace(" ", "%20");
     _plugins[1]["url"] = _plugins[1]["url"].replace(" ", "%20");
 
@@ -16102,7 +16102,7 @@ window["buildCryptoFile_End"] = function(url, error, hash, password)
 					_editor.currentDocumentInfoNext = undefined;
 
 					AscCommon.CryptoProvider.sendSystemMessage(data);
-					AscCommon.CryptoProvider.callInAllWindows("function(){ if (window.DesktopUpdateFile) { window.DesktopUpdateFile(undefined); } }");
+					AscCommon.CryptoProvider.onUpdateFileAfterBuild();
 
                     _editor.sync_EndAction(Asc.c_oAscAsyncActionType.BlockInteraction, Asc.c_oAscAsyncAction.Save);
 
