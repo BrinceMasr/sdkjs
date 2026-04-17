@@ -178,4 +178,34 @@ $(function ()
 		const html = paragraph.ToHtml({ RenderHTMLTags : true });
 		assert.strictEqual(html, '<p>Hello World<strong>Bold</strong><em><strong>Italic</strong></em></p>\n\n', 'ToHtml output contains the paragraph text');
 	});
+
+	QUnit.test('MoveCursorToStart, MoveCursorToEnd', function (assert)
+	{
+		const doc = AscTest.JsApi.GetDocument();
+		doc.Push(AscTest.JsApi.CreateParagraph());
+		doc.Push(AscTest.JsApi.CreateParagraph());
+		
+		const paragraph = AscTest.JsApi.CreateParagraph();
+		paragraph.AddText('AB');
+		doc.Push(paragraph);
+
+		doc.MoveCursorToStart();
+		
+		assert.strictEqual(paragraph.MoveCursorToStart(), true, 'MoveCursorToStart returns true');
+		AscTest.EnterText('X');
+		assert.strictEqual(paragraph.GetText(), 'XAB\r\n', 'Text inserted at the start after MoveCursorToStart');
+
+		assert.strictEqual(paragraph.MoveCursorToEnd(), true, 'MoveCursorToEnd returns true');
+		AscTest.EnterText('Y');
+		assert.strictEqual(paragraph.GetText(), 'XABY\r\n', 'Text inserted at the end after MoveCursorToEnd');
+		
+		doc.MoveCursorToStart();
+		const logicDocument = AscTest.GetLogicDocument();
+		paragraph.MoveCursorToStart();
+		assert.strictEqual(logicDocument.GetCurrentParagraph(), paragraph.Paragraph, 'Current paragraph is the target paragraph after MoveCursorToStart');
+		
+		doc.MoveCursorToStart();
+		paragraph.MoveCursorToEnd();
+		assert.strictEqual(logicDocument.GetCurrentParagraph(), paragraph.Paragraph, 'Current paragraph is the target paragraph after MoveCursorToEnd');
+	});
 });

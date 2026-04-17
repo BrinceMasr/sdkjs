@@ -12311,6 +12311,42 @@
 		this.SetPageBreakBefore(true);
 		return this;
 	};
+	/**
+	 * Moves the cursor to the start of the paragraph.
+	 * @memberof ApiParagraph
+	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
+	 * @returns {boolean}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiParagraph/Methods/MoveCursorToStart.js
+	 */
+	ApiParagraph.prototype.MoveCursorToStart = function()
+	{
+		let logicDocument = private_GetLogicDocument();
+		if (logicDocument)
+			logicDocument.RemoveSelection();
+		
+		this.Paragraph.Document_SetThisElementCurrent(false);
+		this.Paragraph.MoveCursorToStartPos(false);
+		return true;
+	};
+	/**
+	 * Moves the cursor to the end of the paragraph.
+	 * @memberof ApiParagraph
+	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
+	 * @returns {boolean}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiParagraph/Methods/MoveCursorToEnd.js
+	 */
+	ApiParagraph.prototype.MoveCursorToEnd = function()
+	{
+		let logicDocument = private_GetLogicDocument();
+		if (logicDocument)
+			logicDocument.RemoveSelection();
+
+		this.Paragraph.Document_SetThisElementCurrent(false);
+		this.Paragraph.MoveCursorToEndPos(false);
+		return true;
+	};
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiRun
@@ -30494,6 +30530,8 @@
 	ApiParagraph.prototype["GetInternalId"]          = ApiParagraph.prototype.GetInternalId;
 	ApiParagraph.prototype["ToJSON"]                 = ApiParagraph.prototype.ToJSON;
 	ApiParagraph.prototype["AddPageBreakBefore"]     = ApiParagraph.prototype.AddPageBreakBefore;
+	ApiParagraph.prototype["MoveCursorToStart"]      = ApiParagraph.prototype.MoveCursorToStart;
+	ApiParagraph.prototype["MoveCursorToEnd"]        = ApiParagraph.prototype.MoveCursorToEnd;
 
 
 	ApiRun.prototype["GetClassType"]                 = ApiRun.prototype.GetClassType;
