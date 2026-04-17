@@ -12980,6 +12980,7 @@
 	}
 	/**
 	 * Returns the lock value for the specified lock type of the current drawing.
+	 * @memberof ApiDrawing
 	 * @typeofeditors ["CSE"]
 	 * @param {DrawingLockType} sType - Lock type in the string format.
 	 * @returns {boolean}
@@ -12999,6 +13000,7 @@
 
 	/**
 	 * Sets the lock value to the specified lock type of the current drawing.
+	 * @memberof ApiDrawing
 	 * @typeofeditors ["CSE"]
 	 * @param {DrawingLockType} sType - Lock type in the string format.
 	 * @param {boolean} bValue - Specifies if the specified lock is applied to the current drawing.
@@ -13022,6 +13024,7 @@
 
 	/**
 	 * Returns the parent sheet of the current drawing.
+	 * @memberof ApiDrawing
 	 * @typeofeditors ["CSE"]
 	 * @returns {?ApiWorksheet}
 	 * @since 8.3.0

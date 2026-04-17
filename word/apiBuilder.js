@@ -1486,6 +1486,7 @@
 
 	/**
 	 * Returns a paragraph from all the paragraphs that are in the range.
+	 * @memberof ApiRange
 	 * @typeofeditors ["CDE"]
 	 * @param {Number} nPos - The paragraph position in the range.
 	 * @return {ApiParagraph | null} - returns null if position is invalid.
@@ -2860,6 +2861,7 @@
 
 	/**
      * Returns a Range object that represents the document part contained in the specified range.
+	 * @memberof ApiRange
      * @typeofeditors ["CDE"]
      * @param {Number} [Start=0] - Start position index in the current range.
      * @param {Number} [End=-1] - End position index in the current range (if <= 0, then the range is taken to the end).
@@ -3342,6 +3344,7 @@
 
 	/**
 	 * Sets the hyperlink address.
+	 * @memberof ApiHyperlink
 	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
 	 * @param {string} sLink - The hyperlink address.
 	 * @returns {boolean}
@@ -3374,6 +3377,7 @@
 	};
 	/**
 	 * Sets the hyperlink display text.
+	 * @memberof ApiHyperlink
 	 * @typeofeditors ["CDE"]
 	 * @param {string} sDisplay - The text to display the hyperlink.
 	 * @returns {boolean}
@@ -3411,6 +3415,7 @@
 	};
 	/**
 	 * Sets the screen tip text of the hyperlink.
+	 * @memberof ApiHyperlink
 	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
 	 * @param {string} sScreenTipText - The screen tip text of the hyperlink.
 	 * @returns {boolean}
@@ -3427,6 +3432,7 @@
 	};
 	/**
 	 * Returns the hyperlink address.
+	 * @memberof ApiHyperlink
 	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
 	 * @returns {string} 
 	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/GetLinkedText.js
@@ -3437,6 +3443,7 @@
 	};
 	/**
 	 * Returns the hyperlink display text.
+	 * @memberof ApiHyperlink
 	 * @typeofeditors ["CDE"]
 	 * @returns {string} 
 	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/GetDisplayedText.js
@@ -3454,6 +3461,7 @@
 	};
 	/**
 	 * Returns the screen tip text of the hyperlink.
+	 * @memberof ApiHyperlink
 	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
 	 * @returns {string} 
 	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/GetScreenTipText.js
@@ -3464,6 +3472,7 @@
 	};
 	/**
 	 * Returns the hyperlink element using the position specified.
+	 * @memberof ApiHyperlink
 	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
 	 * @param {number} nPos - The position where the element which content we want to get must be located.
 	 * @returns {?ParagraphContent}
@@ -3481,6 +3490,7 @@
 	};
 	/**
 	 * Returns a number of elements in the current hyperlink.
+	 * @memberof ApiHyperlink
 	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
 	 * @returns {number}
 	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/GetElementsCount.js
@@ -3491,6 +3501,7 @@
 	};
 	/**
 	 * Sets the default hyperlink style.
+	 * @memberof ApiHyperlink
 	 * @typeofeditors ["CDE"]
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/SetDefaultStyle.js
@@ -3516,6 +3527,7 @@
 	};
 	/**
 	 * Returns a Range object that represents the document part contained in the specified hyperlink.
+	 * @memberof ApiHyperlink
 	 * @typeofeditors ["CDE"]
 	 * @param {Number} Start - Start position index in the current element.
 	 * @param {Number} End - End position index in the current element.
@@ -5856,6 +5868,7 @@
 
 	/**
 	 * Returns a type of the ApiUnsupported class.
+	 * @memberof ApiUnsupported
 	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
 	 * @returns {"unsupported"}
 	 * @see office-js-api/Examples/{Editor}/ApiUnsupported/Methods/GetClassType.js
@@ -14021,6 +14034,7 @@
 	};
 	/**
      * Sets the vertical alignment to the table.
+	 * @memberof ApiTable
      * @typeofeditors ["CDE"]
      * @param {String} sType - Vertical alignment type: may be "top" or "center" or "bottom".
      * @returns {boolean} - returns false if param is invalid.
@@ -18888,6 +18902,7 @@
 	};
 	/**
 	 * Returns a parent table cell that contains the graphic object.
+	 * @memberof ApiDrawing
 	 * @typeofeditors ["CDE"]
 	 * @return {ApiTableCell | null} - returns null if parent cell doesn't exist.
 	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetParentTableCell.js
@@ -18902,6 +18917,7 @@
 	};
 	/**
 	 * Deletes the current graphic object. 
+	 * @memberof ApiDrawing
 	 * @typeofeditors ["CDE"]
 	 * @return {boolean} - returns false if drawing object haven't parent.
 	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/Delete.js
@@ -19445,6 +19461,7 @@
 	};
 	/**
      * Returns the lock value for the specified lock type of the current drawing.
+	 * @memberof ApiDrawing
      * @typeofeditors ["CDE"]
 	 * @param {DrawingLockType} sType - Lock type in the string format.
      * @returns {boolean}
@@ -19465,6 +19482,7 @@
 
 	/**
      * Sets the lock value to the specified lock type of the current drawing.
+	 * @memberof ApiDrawing
      * @typeofeditors ["CDE"]
 	 * @param {DrawingLockType} sType - Lock type in the string format.
      * @param {boolean} bValue - Specifies if the specified lock is applied to the current drawing.

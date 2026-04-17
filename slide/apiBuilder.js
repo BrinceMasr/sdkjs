@@ -1303,6 +1303,7 @@
 
     /**
      * Returns a type of the ApiPresentation class.
+     * @memberof ApiPresentation
      * @typeofeditors ["CPE"]
      * @returns {"presentation"}
      * @see office-js-api/Examples/{Editor}/ApiPresentation/Methods/GetClassType.js
@@ -1454,6 +1455,7 @@
     };
     /**
      * Returns a number of slides.
+     * @memberof ApiPresentation
      * @typeofeditors ["CPE"]
      * @returns {number}
      * @see office-js-api/Examples/{Editor}/ApiPresentation/Methods/GetSlidesCount.js
@@ -1465,6 +1467,7 @@
 
 	/**
 	 * Returns an array of all slides from the current presentation.
+	 * @memberof ApiPresentation
 	 * @typeofeditors ["CPE"]
 	 * @returns {ApiSlide[]}
      * @since 8.3.0
@@ -1483,6 +1486,7 @@
 
     /**
      * Returns a number of slide masters.
+     * @memberof ApiPresentation
      * @typeofeditors ["CPE"]
      * @returns {number}
      * @see office-js-api/Examples/{Editor}/ApiPresentation/Methods/GetMastersCount.js
@@ -1494,6 +1498,7 @@
 
     /**
      * Returns an array of all slide masters from the current presentation.
+     * @memberof ApiPresentation
      * @typeofeditors ["CPE"]
      * @returns {ApiMaster[]}
      * @since 8.3.0
@@ -1511,6 +1516,7 @@
 
     /**
      * Returns a slide master by its position in the presentation.
+     * @memberof ApiPresentation
      * @typeofeditors ["CPE"]
      * @param {number} nPos - Slide master position in the presentation
      * @returns {ApiMaster | null} - returns null if position is invalid.
@@ -1526,6 +1532,7 @@
 
     /**
      * Adds the slide master to the presentation slide masters collection.
+     * @memberof ApiPresentation
      * @typeofeditors ["CPE"]
      * @param {number} [nPos    = ApiPresentation.GetMastersCount()]
      * @param {ApiMaster} oApiMaster - The slide master to be added.
@@ -1550,6 +1557,7 @@
 
     /**
      * Applies a theme to all the slides in the presentation.
+     * @memberof ApiPresentation
      * @typeofeditors ["CPE"]
      * @param {ApiTheme} oApiTheme - The presentation theme.
      * @returns {boolean} - returns false if param isn't theme or presentation doesn't exist.
@@ -2078,6 +2086,7 @@
 
     /**
      * Returns the type of the ApiMaster class.
+     * @memberof ApiMaster
      * @typeofeditors ["CPE"]
      * @returns {"master"}
      * @see office-js-api/Examples/{Editor}/ApiMaster/Methods/GetClassType.js
@@ -2094,6 +2103,7 @@
 
 	/**
 	 * Returns all layouts from the slide master.
+	 * @memberof ApiMaster
 	 * @typeofeditors ["CPE"]
 	 * @returns {ApiLayout[]} - Returns an empty array if the slide master doesn't have layouts.
      * @since 9.0.0
@@ -2110,6 +2120,7 @@
 
     /**
      * Returns a layout of the specified slide master by its position.
+     * @memberof ApiMaster
      * @typeofeditors ["CPE"]
      * @param {number} nPos - Layout position.
      * @returns {ApiLayout | null} - returns null if position is invalid.
@@ -2125,6 +2136,7 @@
 
     /**
      * Returns the layout corresponding to the specified layout type of the slide master.
+     * @memberof ApiMaster
      * @typeofeditors ["CPE"]
      * @param {LayoutType} sType - The layout type.
      * @returns {ApiLayout | null} - The layout at the specified position, or null if the position is invalid.
@@ -2140,6 +2152,7 @@
 
     /**
      * Adds a layout to the specified slide master.
+     * @memberof ApiMaster
      * @typeofeditors ["CPE"]
      * @param {number} [nPos = ApiMaster.GetLayoutsCount()] - Position where a layout will be added.
      * @param {ApiLayout} oLayout - A layout to be added.
@@ -2161,6 +2174,7 @@
 
     /**
      * Removes the layouts from the current slide master.
+     * @memberof ApiMaster
      * @typeofeditors ["CPE"]
      * @param {number} nPos - Position from which a layout will be deleted.
      * @param {number} [nCount = 1] - Number of layouts to delete.
@@ -2186,6 +2200,7 @@
 
     /**
      * Returns a number of layout objects.
+     * @memberof ApiMaster
      * @typeofeditors ["CPE"]
      * @returns {number}
      * @see office-js-api/Examples/{Editor}/ApiMaster/Methods/GetLayoutsCount.js
@@ -2249,6 +2264,7 @@
 
     /**
      * Sets the background to the current slide master.
+     * @memberof ApiMaster
      * @memberOf ApiMaster
      * @typeofeditors ["CPE"]
      * @param {ApiFill} oApiFill - The color or pattern used to fill the presentation slide master background.
@@ -2268,6 +2284,7 @@
 
     /**
      * Clears the slide master background.
+     * @memberof ApiMaster
      * @typeofeditors ["CPE"]
      * @returns {boolean} - return false if slide master doesn't exist.
      * @see office-js-api/Examples/{Editor}/ApiMaster/Methods/ClearBackground.js
@@ -2287,6 +2304,7 @@
 
     /**
      * Creates a copy of the specified slide master object.
+     * @memberof ApiMaster
      * @typeofeditors ["CPE"]
      * @returns {ApiMaster | null} - returns new ApiMaster object that represents the copy of slide master. 
      * Returns null if slide doesn't exist.
@@ -2302,6 +2320,7 @@
 
     /**
      * Creates a duplicate of the specified slide master object, adds the new slide master to the slide masters collection.
+     * @memberof ApiMaster
      * @typeofeditors ["CPE"]
      * @param {number} [nPos    = ApiPresentation.GetMastersCount()] - Position where the new slide master will be added.
      * @returns {ApiMaster | null} - returns new ApiMaster object that represents the copy of slide master. 
@@ -2352,6 +2371,7 @@
 
     /**
      * Returns a theme of the slide master.
+     * @memberof ApiMaster
      * @typeofeditors ["CPE"]
      * @returns {ApiTheme | null} - returns null if theme doesn't exist.
      * @see office-js-api/Examples/{Editor}/ApiMaster/Methods/GetTheme.js
@@ -2373,6 +2393,7 @@
     /**
      * Sets a theme to the slide master.
      * Sets a copy of the theme object.
+     * @memberof ApiMaster
      * @typeofeditors ["CPE"]
      * @param {ApiTheme} oTheme - Presentation theme.
      * @returns {boolean} - return false if oTheme isn't a theme or slide master doesn't exist.
@@ -2391,6 +2412,7 @@
     
     /**
      * Returns an array with all the drawing objects from the slide master.
+     * @memberof ApiMaster
      * @typeofeditors ["CPE"]
      * @returns {Drawing[]}
      * @see office-js-api/Examples/{Editor}/ApiMaster/Methods/GetAllDrawings.js
@@ -2406,6 +2428,7 @@
 
     /**
      * Returns an array with all the shape objects from the slide master.
+     * @memberof ApiMaster
      * @typeofeditors ["CPE"]
      * @returns {ApiShape[]}
      * @see office-js-api/Examples/{Editor}/ApiMaster/Methods/GetAllShapes.js
@@ -2421,6 +2444,7 @@
 
     /**
      * Returns an array with all the image objects from the slide master.
+     * @memberof ApiMaster
      * @typeofeditors ["CPE"]
      * @returns {ApiImage[]}
      * @see office-js-api/Examples/{Editor}/ApiMaster/Methods/GetAllImages.js
@@ -2433,6 +2457,7 @@
 
     /**
      * Returns an array with all the chart objects from the slide master.
+     * @memberof ApiMaster
      * @typeofeditors ["CPE"]
      * @returns {ApiChart[]}
      * @see office-js-api/Examples/{Editor}/ApiMaster/Methods/GetAllCharts.js
@@ -2445,6 +2470,7 @@
 
     /**
      * Returns an array with all the OLE objects from the slide master.
+     * @memberof ApiMaster
      * @typeofeditors ["CPE"]
      * @returns {ApiOleObject[]}
      * @see office-js-api/Examples/{Editor}/ApiMaster/Methods/GetAllOleObjects.js
@@ -2458,6 +2484,7 @@
 	/**
 	 * Returns an array with all tables from the slide master.
 	 *
+	 * @memberof ApiMaster
 	 * @typeofeditors ["CPE"]
 	 * @returns {ApiTable[]} An array with all tables from the slide master.
      * @since 9.1.0
@@ -2559,6 +2586,7 @@
 
     /**
      * Returns the type of the ApiLayout class.
+     * @memberof ApiLayout
      * @typeofeditors ["CPE"]
      * @returns {"layout"}
      * @see office-js-api/Examples/{Editor}/ApiLayout/Methods/GetClassType.js
@@ -2570,6 +2598,7 @@
 
     /**
      * Sets a name to the current layout.
+     * @memberof ApiLayout
      * @typeofeditors ["CPE"]
      * @param {string} sName - Layout name to be set.
      * @returns {boolean}
@@ -2587,6 +2616,7 @@
 
     /**
      * Returns the type of the current layout.
+     * @memberof ApiLayout
      * @typeofeditors ["CPE"]
      * @returns {LayoutType} The layout type.
      * @see office-js-api/Examples/{Editor}/ApiLayout/Methods/GetLayoutType.js
@@ -2598,6 +2628,7 @@
 
     /**
      * Returns a name of the current layout.
+     * @memberof ApiLayout
      * @typeofeditors ["CPE"]
      * @returns {string}
      * @since 8.3.0
@@ -2661,6 +2692,7 @@
 
     /**
      * Sets the background to the current slide layout.
+     * @memberof ApiLayout
      * @memberOf ApiLayout
      * @typeofeditors ["CPE"]
      * @param {ApiFill} oApiFill - The color or pattern used to fill the presentation slide layout background.\
@@ -2680,6 +2712,7 @@
 
     /**
      * Clears the slide layout background.
+     * @memberof ApiLayout
      * @typeofeditors ["CPE"]
      * @returns {boolean} - return false if slide layout doesn't exist.
      * @see office-js-api/Examples/{Editor}/ApiLayout/Methods/ClearBackground.js
@@ -2699,6 +2732,7 @@
 
     /**
      * Sets the master background as the background of the layout.
+     * @memberof ApiLayout
      * @typeofeditors ["CPE"]
      * @returns {boolean} - returns false if master is null or master hasn't background.
      * @see office-js-api/Examples/{Editor}/ApiLayout/Methods/FollowMasterBackground.js
@@ -2721,6 +2755,7 @@
     /**
      * Creates a copy of the specified slide layout object.
      * Copies without master slide.
+     * @memberof ApiLayout
      * @typeofeditors ["CPE"]
      * @returns {ApiLayout | null} - returns new ApiLayout object that represents the copy of slide layout. 
      * Returns null if slide layout doesn't exist.
@@ -2736,6 +2771,7 @@
 
     /**
      * Deletes the specified object from the parent slide master if it exists.
+     * @memberof ApiLayout
      * @typeofeditors ["CPE"]
      * @returns {boolean} - return false if parent slide master doesn't exist.
      * @see office-js-api/Examples/{Editor}/ApiLayout/Methods/Delete.js
@@ -2757,6 +2793,7 @@
 
     /**
      * Creates a duplicate of the specified slide layout object, adds the new slide layout to the slide layout collection.
+     * @memberof ApiLayout
      * @typeofeditors ["CPE"]
      * @param {number} [nPos = ApiMaster.GetLayoutsCount()] - Position where the new slide layout will be added.
      * @returns {ApiLayout | null} - returns new ApiLayout object that represents the copy of slide layout. 
@@ -2778,6 +2815,7 @@
 
     /**
      * Moves the specified layout to a specific location within the same collection.
+     * @memberof ApiLayout
      * @typeofeditors ["CPE"]
      * @param {number} nPos - Position where the specified slide layout will be moved to.
      * @returns {boolean} - returns false if layout or parent slide master doesn't exist or position is invalid.
@@ -2801,6 +2839,7 @@
 
     /**
      * Returns an array with all the drawing objects from the slide layout.
+     * @memberof ApiLayout
      * @typeofeditors ["CPE"]
      * @returns {Drawing[]}
      * @see office-js-api/Examples/{Editor}/ApiLayout/Methods/GetAllDrawings.js
@@ -2816,6 +2855,7 @@
 
     /**
      * Returns an array with all the shape objects from the slide layout.
+     * @memberof ApiLayout
      * @typeofeditors ["CPE"]
      * @returns {ApiShape[]}
      * @see office-js-api/Examples/{Editor}/ApiLayout/Methods/GetAllShapes.js
@@ -2830,6 +2870,7 @@
 
     /**
      * Returns an array with all the image objects from the slide layout.
+     * @memberof ApiLayout
      * @typeofeditors ["CPE"]
      * @returns {ApiImage[]}
      * @see office-js-api/Examples/{Editor}/ApiLayout/Methods/GetAllImages.js
@@ -2844,6 +2885,7 @@
 
     /**
      * Returns an array with all the chart objects from the slide layout.
+     * @memberof ApiLayout
      * @typeofeditors ["CPE"]
      * @returns {ApiChart[]}
      * @see office-js-api/Examples/{Editor}/ApiLayout/Methods/GetAllCharts.js
@@ -2858,6 +2900,7 @@
 
     /**
      * Returns an array with all the OLE objects from the slide layout.
+     * @memberof ApiLayout
      * @typeofeditors ["CPE"]
      * @returns {ApiOleObject[]}
      * @see office-js-api/Examples/{Editor}/ApiLayout/Methods/GetAllOleObjects.js
@@ -2871,6 +2914,7 @@
 	/**
 	 * Returns an array with all tables from the current slide layout.
 	 *
+	 * @memberof ApiLayout
 	 * @typeofeditors ["CPE"]
 	 * @returns {ApiTable[]} An array with all tables from the current slide layout.
      * @sine 9.1.0
@@ -2889,6 +2933,7 @@
 
     /**
      * Returns the parent slide master of the current layout.
+     * @memberof ApiLayout
      * @typeofeditors ["CPE"]
      * @returns {?ApiMaster} - returns null if parent slide master doesn't exist.
      * @see office-js-api/Examples/{Editor}/ApiLayout/Methods/GetMaster.js
@@ -2985,6 +3030,7 @@
 
     /**
      * Returns the type of the ApiPlaceholder class.
+     * @memberof ApiPlaceholder
      * @typeofeditors ["CPE"]
      * @returns {"placeholder"}
      * @see office-js-api/Examples/{Editor}/ApiPlaceholder/Methods/GetClassType.js
@@ -2996,6 +3042,7 @@
 
     /**
      * Sets the placeholder type.
+     * @memberof ApiPlaceholder
      * @typeofeditors ["CPE"]
      * @param {PlaceholderType} sType - Placeholder type
      * @returns {boolean} - returns false if placeholder type doesn't exist.
@@ -3008,6 +3055,7 @@
 
     /**
      * Returns the placeholder type.
+     * @memberof ApiPlaceholder
      * @typeofeditors ["CPE"]
      * @returns {PlaceholderType} - Returns the placeholder type.
      * @since 8.2.0
@@ -3029,6 +3077,7 @@
 
     /**
      * Sets the placeholder index.
+     * @memberof ApiPlaceholder
      * @typeofeditors ["CPE"]
      * @param {number} nIdx - The placeholder index.
      * @returns {boolean} - Returns false if the placeholder index wasn't set.
@@ -3047,6 +3096,7 @@
 
     /**
      * Retuns the placeholder index.
+     * @memberof ApiPlaceholder
      * @typeofeditors ["CPE"]
      * @returns {number | undefined} - Returns the placeholder index.
      * @since 8.2.0
@@ -3074,6 +3124,7 @@
 
     /**
      * Returns the type of the ApiTheme class.
+     * @memberof ApiTheme
      * @typeofeditors ["CPE"]
      * @returns {"theme"}
      * @see office-js-api/Examples/{Editor}/ApiTheme/Methods/GetClassType.js
@@ -3085,6 +3136,7 @@
 
     /**
      * Returns the slide master of the current theme.
+     * @memberof ApiTheme
      * @typeofeditors ["CPE"]
      * @returns {ApiMaster | null} - returns null if slide master doesn't exist.
      * @see office-js-api/Examples/{Editor}/ApiTheme/Methods/GetMaster.js
@@ -3099,6 +3151,7 @@
 
     /**
      * Sets the color scheme to the current presentation theme.
+     * @memberof ApiTheme
      * @typeofeditors ["CPE"]
      * @param {ApiThemeColorScheme} oApiColorScheme - Theme color scheme.
      * @returns {boolean} - return false if color scheme doesn't exist.
@@ -3117,6 +3170,7 @@
 
     /**
      * Returns the color scheme of the current theme.
+     * @memberof ApiTheme
      * @typeofeditors ["CPE"]
      * @returns {?ApiThemeColorScheme}
      * @see office-js-api/Examples/{Editor}/ApiTheme/Methods/GetColorScheme.js
@@ -3133,6 +3187,7 @@
 
     /**
      * Sets the format scheme to the current presentation theme.
+     * @memberof ApiTheme
      * @typeofeditors ["CPE"]
      * @param {ApiThemeFormatScheme} oApiFormatScheme - Theme format scheme.
      * @returns {boolean} - return false if format scheme doesn't exist.
@@ -3151,6 +3206,7 @@
 
     /**
      * Returns the format scheme of the current theme.
+     * @memberof ApiTheme
      * @typeofeditors ["CPE"]
      * @returns {?ApiThemeFormatScheme}
      * @see office-js-api/Examples/{Editor}/ApiTheme/Methods/GetFormatScheme.js
@@ -3167,6 +3223,7 @@
 
     /**
      * Sets the font scheme to the current presentation theme.
+     * @memberof ApiTheme
      * @typeofeditors ["CPE"]
      * @param {ApiThemeFontScheme} oApiFontScheme - Theme font scheme.
      * @returns {boolean} - return false if font scheme doesn't exist.
@@ -3185,6 +3242,7 @@
 
     /**
      * Returns the font scheme of the current theme.
+     * @memberof ApiTheme
      * @typeofeditors ["CPE"]
      * @returns {?ApiThemeFontScheme}
      * @see office-js-api/Examples/{Editor}/ApiTheme/Methods/GetFontScheme.js
@@ -3224,6 +3282,7 @@
 
     /**
      * Returns the type of the ApiThemeColorScheme class.
+     * @memberof ApiThemeColorScheme
      * @typeofeditors ["CPE"]
      * @returns {"themeColorScheme"}
      * @see office-js-api/Examples/{Editor}/ApiThemeColorScheme/Methods/GetClassType.js
@@ -3235,6 +3294,7 @@
 
     /**
      * Sets a name to the current theme color scheme.
+     * @memberof ApiThemeColorScheme
      * @typeofeditors ["CPE"]
      * @param {string} sName - Theme color scheme name.
      * @returns {boolean}
@@ -3253,6 +3313,7 @@
 
     /**
      * Changes a color in the theme color scheme.
+     * @memberof ApiThemeColorScheme
      * @typeofeditors ["CPE"]
      * @param {number} nPos - Color position in the color scheme which will be changed.
      * @param {ApiUniColor | ApiRGBColor} oColor - New color of the theme color scheme.
@@ -3276,6 +3337,7 @@
 
     /**
      * Creates a copy of the current theme color scheme.
+     * @memberof ApiThemeColorScheme
      * @typeofeditors ["CPE"]
      * @returns {ApiThemeColorScheme}
      * @see office-js-api/Examples/{Editor}/ApiThemeColorScheme/Methods/Copy.js
@@ -3321,6 +3383,7 @@
 
     /**
      * Returns the type of the ApiThemeFormatScheme class.
+     * @memberof ApiThemeFormatScheme
      * @typeofeditors ["CPE"]
      * @returns {"themeFormatScheme"}
      * @see office-js-api/Examples/{Editor}/ApiThemeFormatScheme/Methods/GetClassType.js
@@ -3332,6 +3395,7 @@
 
     /**
      * Sets a name to the current theme format scheme.
+     * @memberof ApiThemeFormatScheme
      * @typeofeditors ["CPE"]
      * @param {string} sName - Theme format scheme name.
      * @returns {boolean}
@@ -3350,6 +3414,7 @@
 
     /**
      * Sets the fill styles to the current theme format scheme.
+     * @memberof ApiThemeFormatScheme
      * @typeofeditors ["CPE"]
      * @param {ApiFill[]} arrFill - The array of fill styles must contain 3 elements - subtle, moderate and intense fills.
      * If an array is empty or NoFill elements are in the array, it will be filled with the Api.CreateNoFill() elements.
@@ -3375,6 +3440,7 @@
 
     /**
      * Sets the background fill styles to the current theme format scheme.
+     * @memberof ApiThemeFormatScheme
      * @typeofeditors ["CPE"]
      * @param {ApiFill[]} arrBgFill - The array of background fill styles must contain 3 elements - subtle, moderate and intense fills.
      * If an array is empty or NoFill elements are in the array, it will be filled with the Api.CreateNoFill() elements.
@@ -3401,6 +3467,7 @@
 
     /**
      * Sets the line styles to the current theme format scheme.
+     * @memberof ApiThemeFormatScheme
      * @typeofeditors ["CPE"]
      * @param {ApiStroke[]} arrLine - The array of line styles must contain 3 elements - subtle, moderate and intense fills.
      * If an array is empty or ApiStroke elements are with no fill, it will be filled with the Api.CreateStroke(0, Api.CreateNoFill()) elements.
@@ -3454,6 +3521,7 @@
 
     /**
      * Creates a copy of the current theme format scheme.
+     * @memberof ApiThemeFormatScheme
      * @typeofeditors ["CPE"]
      * @returns {ApiThemeFormatScheme}
      * @see office-js-api/Examples/{Editor}/ApiThemeFormatScheme/Methods/Copy.js
@@ -3500,6 +3568,7 @@
 
     /**
      * Returns the type of the ApiThemeFontScheme class.
+     * @memberof ApiThemeFontScheme
      * @typeofeditors ["CPE"]
      * @returns {"themeFontScheme"}
      * @see office-js-api/Examples/{Editor}/ApiThemeFontScheme/Methods/GetClassType.js
@@ -3511,6 +3580,7 @@
     
     /**
      * Sets a name to the current theme font scheme.
+     * @memberof ApiThemeFontScheme
      * @typeofeditors ["CPE"]
      * @param {string} sName - Theme font scheme name.
      * @returns {boolean} - returns false if font scheme doesn't exist.
@@ -3570,6 +3640,7 @@
 
     /**
      * Creates a copy of the current theme font scheme.
+     * @memberof ApiThemeFontScheme
      * @typeofeditors ["CPE"]
      * @returns {ApiThemeFontScheme}
      * @see office-js-api/Examples/{Editor}/ApiThemeFontScheme/Methods/Copy.js
@@ -3599,6 +3670,7 @@
 
     /**
      * Returns the type of the ApiSlide class.
+     * @memberof ApiSlide
      * @typeofeditors ["CPE"]
      * @returns {"slide"}
      * @see office-js-api/Examples/{Editor}/ApiSlide/Methods/GetClassType.js
@@ -3727,6 +3799,7 @@
 
     /**
      * Sets the background to the current presentation slide.
+     * @memberof ApiSlide
      * @memberOf ApiSlide
      * @typeofeditors ["CPE"]
      * @param {ApiFill} oApiFill - The color or pattern used to fill the presentation slide background.
@@ -3748,6 +3821,7 @@
 
     /**
      * Returns the visibility of the current presentation slide.
+     * @memberof ApiSlide
      * @memberOf ApiSlide
      * @typeofeditors ["CPE"]
      * @returns {boolean}
@@ -3762,6 +3836,7 @@
 
     /**
      * Sets the visibility to the current presentation slide.
+     * @memberof ApiSlide
      * @memberOf ApiSlide
      * @typeofeditors ["CPE"]
      * @param {boolean} value - Slide visibility.
@@ -3778,6 +3853,7 @@
 
     /**
      * Returns the slide width in English measure units.
+     * @memberof ApiSlide
      * @typeofeditors ["CPE"]
      * @returns {EMU}
      * @see office-js-api/Examples/{Editor}/ApiSlide/Methods/GetWidth.js
@@ -3791,6 +3867,7 @@
 
     /**
      * Returns the slide height in English measure units.
+     * @memberof ApiSlide
      * @typeofeditors ["CPE"]
      * @returns {EMU}
      * @see office-js-api/Examples/{Editor}/ApiSlide/Methods/GetHeight.js
@@ -3805,6 +3882,7 @@
     /**
      * Applies the specified layout to the current slide.
      * The layout must be in slide master.
+     * @memberof ApiSlide
      * @typeofeditors ["CPE"]
      * @param {ApiLayout} oLayout - Layout to be applied.
      * @returns {boolean} - returns false if slide doesn't exist.
@@ -3820,6 +3898,7 @@
 
     /**
      * Deletes the current slide from the presentation.
+     * @memberof ApiSlide
      * @typeofeditors ["CPE"]
      * @returns {boolean} - returns false if slide doesn't exist or is not in the presentation.
      * @see office-js-api/Examples/{Editor}/ApiSlide/Methods/Delete.js
@@ -3842,6 +3921,7 @@
 
     /**
      * Creates a copy of the current slide object.
+     * @memberof ApiSlide
      * @typeofeditors ["CPE"]
      * @returns {ApiSlide | null} - returns new ApiSlide object that represents the duplicate slide. 
      * Returns null if slide doesn't exist.
@@ -3857,6 +3937,7 @@
 
     /**
      * Creates a duplicate of the specified slide object, adds the new slide to the slides collection.
+     * @memberof ApiSlide
      * @typeofeditors ["CPE"]
      * @param {number} [nPos    = ApiPresentation.GetSlidesCount()] - Position where the new slide will be added.
      * @returns {ApiSlide | null} - returns new ApiSlide object that represents the duplicate slide. 
@@ -3877,6 +3958,7 @@
 
     /**
      * Moves the current slide to a specific location within the same collection.
+     * @memberof ApiSlide
      * @typeofeditors ["CPE"]
      * @param {number} nPos - Position where the current slide will be moved to.
      * @returns {boolean} - returns false if slide doesn't exist or position is invalid or slide is not in the presentation.
@@ -3902,6 +3984,7 @@
 
     /**
      * Returns a position of the current slide in the presentation.
+     * @memberof ApiSlide
      * @typeofeditors ["CPE"]
      * @returns {number} - returns -1 if slide doesn't exist or is not in the presentation.
      * @see office-js-api/Examples/{Editor}/ApiSlide/Methods/GetSlideIndex.js
@@ -3925,6 +4008,7 @@
 
     /**
      * Clears the slide background.
+     * @memberof ApiSlide
      * @typeofeditors ["CPE"]
      * @returns {boolean} - return false if slide doesn't exist.
      * @see office-js-api/Examples/{Editor}/ApiSlide/Methods/ClearBackground.js
@@ -3945,6 +4029,7 @@
 
     /**
      * Sets the layout background as the background of the slide.
+     * @memberof ApiSlide
      * @typeofeditors ["CPE"]
      * @returns {boolean} - returns false if layout is null or layout hasn't background or slide doesn't exist.
      * @see office-js-api/Examples/{Editor}/ApiSlide/Methods/FollowLayoutBackground.js
@@ -3967,6 +4052,7 @@
 
     /**
      * Sets the master background as the background of the slide.
+     * @memberof ApiSlide
      * @typeofeditors ["CPE"]
      * @returns {boolean} - returns false if master is null or master hasn't background or slide doesn't exist.
      * @see office-js-api/Examples/{Editor}/ApiSlide/Methods/FollowMasterBackground.js
@@ -3988,6 +4074,7 @@
 
     /**
      * Applies the specified theme to the current slide.
+     * @memberof ApiSlide
      * @typeofeditors ["CPE"]
      * @param {ApiTheme} oApiTheme - Presentation theme.
      * @returns {boolean} - returns false if master is null or master hasn't background.
@@ -4098,6 +4185,7 @@
 
     /**
      * Returns a layout of the current slide.
+     * @memberof ApiSlide
      * @typeofeditors ["CPE"]
      * @returns {ApiLayout | null} - returns null if slide or layout doesn't exist. 
      * @see office-js-api/Examples/{Editor}/ApiSlide/Methods/GetLayout.js
@@ -4111,6 +4199,7 @@
 
     /**
      * Returns a theme of the current slide.
+     * @memberof ApiSlide
      * @typeofeditors ["CPE"]
      * @returns {ApiTheme} - returns null if slide or layout or master or theme doesn't exist.
      * @see office-js-api/Examples/{Editor}/ApiSlide/Methods/GetTheme.js
@@ -4131,6 +4220,7 @@
 
     /**
      * Returns an array with all the drawing objects from the slide.
+     * @memberof ApiSlide
      * @typeofeditors ["CPE"]
      * @returns {Drawing[]} 
      * @see office-js-api/Examples/{Editor}/ApiSlide/Methods/GetAllDrawings.js
@@ -4146,6 +4236,7 @@
 
     /**
      * Returns an array with all the shape objects from the slide.
+     * @memberof ApiSlide
      * @typeofeditors ["CPE"]
      * @returns {ApiShape[]} 
      * @see office-js-api/Examples/{Editor}/ApiSlide/Methods/GetAllShapes.js
@@ -4161,6 +4252,7 @@
 
     /**
      * Returns an array with all the image objects from the slide.
+     * @memberof ApiSlide
      * @typeofeditors ["CPE"]
      * @returns {ApiImage[]} 
      * @see office-js-api/Examples/{Editor}/ApiSlide/Methods/GetAllImages.js
@@ -4175,6 +4267,7 @@
 
     /**
      * Returns an array with all the chart objects from the slide.
+     * @memberof ApiSlide
      * @typeofeditors ["CPE"]
      * @returns {ApiChart[]} 
      * @see office-js-api/Examples/{Editor}/ApiSlide/Methods/GetAllCharts.js
@@ -4189,6 +4282,7 @@
 
     /**
      * Returns an array with all the OLE objects from the slide.
+     * @memberof ApiSlide
      * @typeofeditors ["CPE"]
      * @returns {ApiOleObject[]} 
      * @see office-js-api/Examples/{Editor}/ApiSlide/Methods/GetAllOleObjects.js
@@ -4202,6 +4296,7 @@
 	/**
 	 * Returns an array with all tables from the current slide.
 	 *
+	 * @memberof ApiSlide
 	 * @typeofeditors ["CPE"]
 	 * @returns {ApiTable[]} An array with all tables from the current slide.
      * @since 9.1.0
@@ -4436,6 +4531,7 @@
 	/**
 	 * Returns the type of the ApiNotesPage class.
 	 *
+	 * @memberof ApiNotesPage
 	 * @typeofeditors ["CPE"]
 	 * @returns {"notesPage"}
      * @since 9.0.0
@@ -6074,6 +6170,7 @@
 
     /**
      * Returns the type of the ApiDrawing class.
+     * @memberof ApiDrawing
      * @typeofeditors ["CPE"]
      * @returns {"drawing"}
      * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetClassType.js
@@ -6084,6 +6181,7 @@
     };
     /**
      * Sets the size of the object (image, shape, chart) bounding box.
+     * @memberof ApiDrawing
      * @typeofeditors ["CPE"]
      * @param {EMU} nWidth - The object width measured in English measure units.
      * @param {EMU} nHeight - The object height measured in English measure units.
@@ -6105,6 +6203,7 @@
 
     /**
      * Sets the position of the drawing on the slide.
+     * @memberof ApiDrawing
      * @typeofeditors ["CPE"]
      * @param {EMU} nPosX - The distance from the left side of the slide to the left side of the drawing measured in English measure units.
      * @param {EMU} nPosY - The distance from the top side of the slide to the upper side of the drawing measured in English measure units.
@@ -6123,6 +6222,7 @@
 
     /**
      * Returns the drawing parent object.
+     * @memberof ApiDrawing
      * @typeofeditors ["CPE"]
      * @returns {ApiSlide | ApiLayout | ApiMaster | null}
      * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetParent.js
@@ -6147,6 +6247,7 @@
     
     /**
      * Returns the drawing parent slide.
+     * @memberof ApiDrawing
      * @typeofeditors ["CPE"]
      * @returns {ApiSlide | null} - return null if parent ins't a slide.
      * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetParentSlide.js
@@ -6163,6 +6264,7 @@
 
     /**
      * Returns the drawing parent slide layout.
+     * @memberof ApiDrawing
      * @typeofeditors ["CPE"]
      * @returns {ApiLayout | null} - return null if parent ins't a slide layout.
      * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetParentLayout.js
@@ -6179,6 +6281,7 @@
 
     /**
      * Returns the drawing parent slide master.
+     * @memberof ApiDrawing
      * @typeofeditors ["CPE"]
      * @returns {ApiMaster | null} - return null if parent ins't a slide master.
      * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetParentMaster.js
@@ -6195,6 +6298,7 @@
 
     /**
      * Creates a copy of the specified drawing object.
+     * @memberof ApiDrawing
      * @typeofeditors ["CPE"]
      * @returns {ApiDrawing} - return null if drawing doesn't exist.
      * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/Copy.js
@@ -6209,6 +6313,7 @@
 
     /**
      * Deletes the specified drawing object from the parent.
+     * @memberof ApiDrawing
      * @typeofeditors ["CPE"]
      * @returns {boolean} - false if drawing doesn't exist or drawing hasn't a parent.
      * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/Delete.js
@@ -6234,6 +6339,7 @@
 
     /**
      * Sets the specified placeholder to the current drawing object.
+     * @memberof ApiDrawing
      * @typeofeditors ["CPE"]
      * @param {ApiPlaceholder} oPlaceholder - Placeholder object.
      * @returns {boolean} - returns false if parameter isn't a placeholder.
@@ -6293,6 +6399,7 @@
 
     /**
      * Returns a placeholder from the current drawing object.
+     * @memberof ApiDrawing
      * @typeofeditors ["CPE"]
      * @returns {ApiPlaceholder | null} - returns null if placeholder doesn't exist.
      * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetPlaceholder.js
@@ -6401,6 +6508,7 @@
 	};
     /**
      * Returns the lock value for the specified lock type of the current drawing.
+     * @memberof ApiDrawing
      * @typeofeditors ["CPE"]
 	 * @param {DrawingLockType} sType - Lock type in the string format.
      * @returns {boolean}
@@ -6421,6 +6529,7 @@
 
 	/**
      * Sets the lock value to the specified lock type of the current drawing.
+	 * @memberof ApiDrawing
      * @typeofeditors ["CPE"]
 	 * @param {DrawingLockType} sType - Lock type in the string format.
      * @param {boolean} bValue - Specifies if the specified lock is applied to the current drawing.
@@ -6627,6 +6736,7 @@
 
 	/**
 	 * Gets the x position of the drawing on the slide.
+	 * @memberof ApiDrawing
 	 * @typeofeditors ["CPE"]
 	 * @returns {EMU}
 	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetPosX.js
@@ -6637,6 +6747,7 @@
 
     /**
 	 * Gets the y position of the drawing on the slide.
+     * @memberof ApiDrawing
 	 * @typeofeditors ["CPE"]
 	 * @returns {EMU}
 	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetPosY.js
@@ -6647,6 +6758,7 @@
 
 	/**
 	 * Sets the x position of the drawing on the slide.
+	 * @memberof ApiDrawing
 	 * @typeofeditors ["CPE"]
 	 * @param {EMU} posX - The distance from the left side of the slide to the left side of the drawing measured in English measure units.
 	 * @returns {boolean}
@@ -6662,6 +6774,7 @@
 
 	/**
 	 * Sets the y position of the drawing on the slide.
+	 * @memberof ApiDrawing
 	 * @typeofeditors ["CPE"]
 	 * @param {EMU} posY - The distance from the top side of the slide to the upper side of the drawing measured in English measure units.
 	 * @returns {boolean}
@@ -6677,6 +6790,7 @@
 
 	/**
 	 * Replaces the placeholder by a drawing on the slide.
+	 * @memberof ApiDrawing
 	 * @typeofeditors ["CPE"]
 	 * @param {Drawing} oDrawing
 	 * @returns {boolean}
@@ -6720,6 +6834,7 @@
 
 	/**
 	 * Returns an internal ID of the current drawing object.
+	 * @memberof ApiDrawing
 	 * @typeofeditors ["CPE"]
 	 * @returns {string}
 	 * @see office-js-api/Examples/{Editor}/ApiDocumentContent/Methods/GetInternalId.js
@@ -6941,6 +7056,7 @@
 
     /**
      * Returns the type of the ApiImage class.
+     * @memberof ApiImage
      * @typeofeditors ["CPE"]
      * @returns {"image"}
      * @see office-js-api/Examples/{Editor}/ApiImage/Methods/GetClassType.js
@@ -6958,6 +7074,7 @@
 
     /**
      * Returns the type of the ApiShape class.
+     * @memberof ApiShape
      * @typeofeditors ["CPE"]
      * @returns {"shape"}
      * @see office-js-api/Examples/{Editor}/ApiShape/Methods/GetClassType.js
@@ -6971,6 +7088,7 @@
     /**
      * Deprecated in 6.2.
      * Returns the shape inner contents where a paragraph or text runs can be inserted.
+     * @memberof ApiShape
      * @typeofeditors ["CPE"]
      * @returns {?ApiDocumentContent}
      * @see office-js-api/Examples/{Editor}/ApiShape/Methods/GetDocContent.js
@@ -6982,6 +7100,7 @@
     
     /**
      * Returns the shape inner contents where a paragraph or text runs can be inserted.
+     * @memberof ApiShape
      * @typeofeditors ["CPE"]
      * @returns {?ApiDocumentContent}
      * @see office-js-api/Examples/{Editor}/ApiShape/Methods/GetContent.js
@@ -7003,6 +7122,7 @@
 
     /**
      * Sets the vertical alignment to the shape content where a paragraph or text runs can be inserted.
+     * @memberof ApiShape
      * @typeofeditors ["CPE"]
      * @param {VerticalTextAlign} VerticalAlign - The type of the vertical alignment for the shape inner contents.
      * @see office-js-api/Examples/{Editor}/ApiShape/Methods/SetVerticalTextAlign.js
@@ -7290,6 +7410,7 @@
     //------------------------------------------------------------------------------------------------------------------
     /**
      * Returns the type of the ApiTable object.
+     * @memberof ApiTable
      * @typeofeditors ["CPE"]
      * @returns {"table"}
      * @see office-js-api/Examples/{Editor}/ApiTable/Methods/GetClassType.js
@@ -7301,6 +7422,7 @@
 
     /**
      * Returns a row by its index.
+     * @memberof ApiTable
      * @typeofeditors ["CPE"]
      * @param nIndex {number} - The row index (position) in the table.
      * @returns {?ApiTableRow}
@@ -7320,6 +7442,7 @@
     /**
      * Merges an array of cells. If merge is successful, it will return merged cell, otherwise "null".
      * <b>Warning</b>: The number of cells in any row and the number of rows in the current table may be changed.
+     * @memberof ApiTable
      * @typeofeditors ["CPE"]
      * @param {ApiTableCell[]} aCells - The array of cells.
      * @returns {?ApiTableCell}
@@ -7391,6 +7514,7 @@
      *
      * The default setting is to apply the row and column banding formatting, but not the first row, last row, first
      * column, or last column formatting.
+     * @memberof ApiTable
      * @typeofeditors ["CPE"]
      * @param {boolean} isFirstColumn - Specifies that the first column conditional formatting shall be applied to the
      *     table.
@@ -7416,6 +7540,7 @@
     };
     /**
      * Adds a new row to the current table.
+     * @memberof ApiTable
      * @typeofeditors ["CPE"]
      * @param {ApiTableCell} [oCell] - If not specified, a new row will be added to the end of the table.
      * @param {boolean} [isBefore=false] - Adds a new row before or after the specified cell. If no cell is specified,
@@ -7448,6 +7573,7 @@
     };
     /**
      * Adds a new column to the end of the current table.
+     * @memberof ApiTable
      * @typeofeditors ["CPE"]
      * @param {ApiTableCell} [oCell] - If not specified, a new column will be added to the end of the table.
      * @param {boolean} [isBefore=false] - Add a new column before or after the specified cell. If no cell is specified,
@@ -7475,6 +7601,7 @@
     };
     /**
      * Removes a table row with the specified cell.
+     * @memberof ApiTable
      * @typeofeditors ["CPE"]
      * @param {ApiTableCell} oCell - The table cell from the row which will be removed.
      * @returns {boolean} - defines if the table is empty after removing or not.
@@ -7491,6 +7618,7 @@
     };
     /**
      * Removes a table column with the specified cell.
+     * @memberof ApiTable
      * @typeofeditors ["CPE"]
      * @param {ApiTableCell} oCell - The table cell from the column which will be removed.
      * @returns {boolean} - defines if the table is empty after removing or not.
@@ -7508,6 +7636,7 @@
 
     /**
      * Specifies the shading which shall be applied to the extents of the current table.
+     * @memberof ApiTable
      * @typeofeditors ["CPE"]
 	 * @param {ShdType | ApiFill} sType - The shading type applied to the contents of the current table. Can be ShdType or ApiFill.
 	 * @param {byte} r - Red color component value.
@@ -7600,6 +7729,7 @@
     //------------------------------------------------------------------------------------------------------------------
     /**
      * Returns the type of the ApiTableRow class.
+     * @memberof ApiTableRow
      * @typeofeditors ["CPE"]
      * @returns {"tableRow"}
      * @see office-js-api/Examples/{Editor}/ApiTableRow/Methods/GetClassType.js
@@ -7610,6 +7740,7 @@
     };
     /**
      * Returns a number of cells in the current row.
+     * @memberof ApiTableRow
      * @typeofeditors ["CPE"]
      * @returns {number}
      * @see office-js-api/Examples/{Editor}/ApiTableRow/Methods/GetCellsCount.js
@@ -7620,6 +7751,7 @@
     };
     /**
      * Returns a cell by its position in the current row.
+     * @memberof ApiTableRow
      * @typeofeditors ["CPE"]
      * @param {number} nPos - The cell position in the table row.
      * @returns {ApiTableCell}
@@ -7636,6 +7768,7 @@
 
     /**
      * Sets the height to the current table row.
+     * @memberof ApiTableRow
      * @typeofeditors ["CPE"]
      * @param {EMU} [nValue] - The row height in English measure units.
      * @see office-js-api/Examples/{Editor}/ApiTableRow/Methods/SetHeight.js
@@ -7674,6 +7807,7 @@
 
     /**
      * Returns the type of the ApiTableCell class.
+     * @memberof ApiTableCell
      * @typeofeditors ["CPE"]
      * @returns {"tableCell"}
      * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/GetClassType.js
@@ -7685,6 +7819,7 @@
 
     /**
      * Returns the current cell content.
+     * @memberof ApiTableCell
      * @typeofeditors ["CPE"]
      * @returns {ApiDocumentContent}
      * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/GetContent.js
@@ -7696,6 +7831,7 @@
 
     /**
      * Specifies the shading which shall be applied to the extents of the current table cell.
+     * @memberof ApiTableCell
      * @typeofeditors ["CPE"]
 	 * @param {ShdType | ApiFill} sType - The shading type applied to the contents of the current table. Can be ShdType or ApiFill.
 	 * @param {byte} r - Red color component value.
@@ -7748,6 +7884,7 @@
     /**
      * Specifies an amount of space which shall be left between the bottom extent of the cell contents and the border
      * of a specific individual table cell within a table.
+     * @memberof ApiTableCell
      * @typeofeditors ["CPE"]
      * @param {?twips} nValue - If this value is <code>null</code>, then default table cell bottom margin shall be used,
      * otherwise override the table cell bottom margin with specified value for the current cell.
@@ -7776,6 +7913,7 @@
     /**
      * Specifies an amount of space which shall be left between the left extent of the current cell contents and the
      * left edge border of a specific individual table cell within a table.
+     * @memberof ApiTableCell
      * @typeofeditors ["CPE"]
      * @param {?twips} nValue - If this value is <code>null</code>, then default table cell left margin shall be used,
      * otherwise override the table cell left margin with specified value for the current cell.
@@ -7804,6 +7942,7 @@
     /**
      * Specifies an amount of space which shall be left between the right extent of the current cell contents and the
      * right edge border of a specific individual table cell within a table.
+     * @memberof ApiTableCell
      * @typeofeditors ["CPE"]
      * @param {?twips} nValue - If this value is <code>null</code>, then default table cell right margin shall be used,
      * otherwise override the table cell right margin with specified value for the current cell.
@@ -7832,6 +7971,7 @@
     /**
      * Specifies an amount of space which shall be left between the top extent of the current cell contents and the
      * top edge border of a specific individual table cell within a table.
+     * @memberof ApiTableCell
      * @typeofeditors ["CPE"]
      * @param {?twips} nValue - If this value is <code>null</code>, then default table cell top margin shall be used,
      * otherwise override the table cell top margin with specified value for the current cell.
@@ -7859,6 +7999,7 @@
     };
     /**
      * Sets the border which shall be displayed at the bottom of the current table cell.
+     * @memberof ApiTableCell
      * @typeofeditors ["CPE"]
      * @param {mm} fSize - The width of the current border.
      * @param {ApiFill} oApiFill - The color or pattern used to fill the current border.
@@ -7878,6 +8019,7 @@
 
     /**
      * Sets the border which shall be displayed at the left of the current table cell.
+     * @memberof ApiTableCell
      * @typeofeditors ["CPE"]
      * @param {mm} fSize - The width of the current border.
      * @param {ApiFill} oApiFill - The color or pattern used to fill the current border.
@@ -7897,6 +8039,7 @@
 
     /**
      * Sets the border which shall be displayed at the right of the current table cell.
+     * @memberof ApiTableCell
      * @typeofeditors ["CPE"]
      * @param {mm} fSize - The width of the current border.
      * @param {ApiFill} oApiFill - The color or pattern used to fill the current border.
@@ -7916,6 +8059,7 @@
 
     /**
      * Sets the border which shall be displayed at the top of the current table cell.
+     * @memberof ApiTableCell
      * @typeofeditors ["CPE"]
      * @param {mm} fSize - The width of the current border.
      * @param {ApiFill} oApiFill - The color or pattern used to fill the current border.
@@ -7935,6 +8079,7 @@
 
     /**
      * Specifies the vertical alignment for text within the current table cell.
+     * @memberof ApiTableCell
      * @typeofeditors ["CPE"]
      * @param {VerticalTextAlign} sType - The type of the vertical alignment.
      * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/SetVerticalAlign.js
@@ -7952,6 +8097,7 @@
     };
     /**
      * Specifies the direction of the text flow for the current table cell.
+     * @memberof ApiTableCell
      * @typeofeditors ["CPE"]
      * @param {TextFlowDirection} sType - The type of the text flow direction. 
      * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/SetTextDirection.js
