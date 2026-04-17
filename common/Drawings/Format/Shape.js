@@ -7576,6 +7576,13 @@
 		CShape.prototype.isOutlinePlaceholder = function () {
 			return this.isOutlineContentPlaceholder() || this.isOutlineTitlePlaceholder();
 		};
+		CShape.prototype.isOutlinePlaceholderWithContent = function () {
+			if (this.isOutlinePlaceholder()) {
+				const docContent = this.getDocContent();
+				return !!(docContent && !docContent.Is_Empty());
+			}
+			return false;
+		};
 
 		function CreateBinaryReader(szSrc, offset, srcLen) {
 			var memoryData = AscCommon.Base64.decode(szSrc, true, srcLen, offset);

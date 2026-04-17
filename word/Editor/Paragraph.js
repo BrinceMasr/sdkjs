@@ -16160,7 +16160,7 @@ Paragraph.prototype.UpdatePresentationOutline = function () {
 	const outlineView = this.LogicDocument.GetOutlineView();
 	if (outlineView)
 	{
-		outlineView.checkSourceParagraph(this);
+		outlineView.checkParagraph(this);
 	}
 };
 Paragraph.prototype.AcceptRevisionChanges = function(Type, bAll)
@@ -16349,26 +16349,37 @@ Paragraph.prototype.IsSelectedAll = function()
 };
 Paragraph.prototype.GetContentPosition = function(bSelection, bStart, PosArray)
 {
-    if (!PosArray)
-        PosArray = [];
-
-    var Index = PosArray.length;
-
     var ParaContentPos = this.Get_ParaContentPos(bSelection, bStart);
+    return this.UpdatePosArrayByContentPos(PosArray, ParaContentPos);
+};
+Paragraph.prototype.GetEndContentPosition = function(PosArray, BehindPos)
+{
+	var ParaContentPos = this.Get_EndPos(BehindPos);
+	return this.UpdatePosArrayByContentPos(PosArray, ParaContentPos);
+};
+Paragraph.prototype.GetStartContentPosition = function(PosArray)
+{
+	var ParaContentPos = this.Get_StartPos();
+	return this.UpdatePosArrayByContentPos(PosArray, ParaContentPos);
+};
+Paragraph.prototype.UpdatePosArrayByContentPos = function (PosArray, ParaContentPos) {
+	if (!PosArray)
+		PosArray = [];
 
-    var Depth = ParaContentPos.GetDepth();
-    while (Depth > 0)
-    {
-        var Pos = ParaContentPos.Get(Depth);
-        ParaContentPos.DecreaseDepth(1);
-        var Class = this.Get_ElementByPos(ParaContentPos);
-        Depth--;
+	var Index = PosArray.length;
+	var Depth = ParaContentPos.GetDepth();
+	while (Depth > 0)
+	{
+		var Pos = ParaContentPos.Get(Depth);
+		ParaContentPos.DecreaseDepth(1);
+		var Class = this.Get_ElementByPos(ParaContentPos);
+		Depth--;
 
-        PosArray.splice(Index, 0, {Class : Class, Position : Pos});
-    }
+		PosArray.splice(Index, 0, {Class : Class, Position : Pos});
+	}
 
-    PosArray.splice(Index, 0, {Class : this, Position : ParaContentPos.Get(0)});
-    return PosArray;
+	PosArray.splice(Index, 0, {Class : this, Position : ParaContentPos.Get(0)});
+	return PosArray;
 };
 Paragraph.prototype.SetContentSelection = function(StartDocPos, EndDocPos, Depth, StartFlag, EndFlag)
 {

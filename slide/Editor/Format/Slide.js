@@ -1487,11 +1487,35 @@ Slide.prototype.getOutlineSlide = function () {
 Slide.prototype.isHaveOutlineShapes = function () {
     for (let i = 0; i < this.cSld.spTree.length; i += 1) {
         const shape = this.cSld.spTree[i];
-        if (shape.isOutlineTitlePlaceholder() || shape.isOutlineContentPlaceholder()) {
+        if (shape.isOutlineTitlePlaceholder()) {
             return true;
         }
     }
     return false;
+};
+Slide.prototype.createTitle = function () {
+    const titleSp = this.getMatchingShape(AscFormat.phType_title, null, false, {});
+    if (titleSp) {
+        return null;
+    }
+    let matchingShape = null;
+    const layout = this.Layout;
+    const master = this.Layout.Master;
+    if (layout) {
+        matchingShape = layout.getMatchingShape(AscFormat.phType_title, null, false, {});
+        if (!matchingShape && master) {
+            matchingShape = master.getMatchingShape(AscFormat.phType_title, null, false, {});
+        }
+    }
+    let copySp;
+    if (matchingShape) {
+        copySp = matchingShape.copy();
+    } else {
+        copySp = AscCommonSlide.CreatePlaceholder(AscFormat.phType_title);
+    }
+    this.shapeAdd(this.cSld.spTree.length, copySp);
+
+    return copySp;
 };
 
 function fLoadComments(oObject, authors)
