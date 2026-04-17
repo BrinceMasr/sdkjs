@@ -3424,6 +3424,12 @@
 					return false;
 				}
 
+				// Prevent conflicts with existing tables or named ranges (case-insensitive)
+				if (newName && newName.toLowerCase() !== tableName.toLowerCase() &&
+					worksheet.workbook.dependencyFormulas.getDefNameByName(newName, null)) {
+					return false;
+				}
+
 				var oldFilter = tablePart.clone(null);
 				History.Create_NewPoint();
 				History.StartTransaction();
@@ -3609,7 +3615,7 @@
 				} else if (worksheet.TableParts &&
 					worksheet.TableParts.length) {
 					for (var i = 0; i < worksheet.TableParts.length; i++) {
-						if (worksheet.TableParts[i].DisplayName === displayName) {
+						if (worksheet.TableParts[i].DisplayName.toLowerCase() === displayName.toLowerCase()) {
 							res = worksheet.TableParts[i];
 							break;
 						}

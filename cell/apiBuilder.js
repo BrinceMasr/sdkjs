@@ -28454,10 +28454,11 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @param {string} sName
+	 * @returns {boolean} - Returns false if the name is invalid or already used by another table.
 	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetName.js
 	 */
 	ApiListObject.prototype.SetName = function (sName) {
-		this.ws.worksheet.autoFilters.changeDisplayNameTable(this.tablePart.DisplayName, sName);
+		return this.ws.worksheet.autoFilters.changeDisplayNameTable(this.tablePart.DisplayName, sName);
 	};
 
 	Object.defineProperty(ApiListObject.prototype, "Name", {
@@ -28502,10 +28503,11 @@
 	 * @memberof ApiListObject
 	 * @typeofeditors ["CSE"]
 	 * @param {string} sDisplayName - The new display name for the table.
+	 * @returns {boolean} - Returns false if the name is invalid or already used by another table.
 	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetDisplayName.js
 	 */
 	ApiListObject.prototype.SetDisplayName = function (sDisplayName) {
-		this.ws.worksheet.autoFilters.changeDisplayNameTable(this.tablePart.DisplayName, sDisplayName);
+		return this.ws.worksheet.autoFilters.changeDisplayNameTable(this.tablePart.DisplayName, sDisplayName);
 	};
 
 	Object.defineProperty(ApiListObject.prototype, "DisplayName", {
