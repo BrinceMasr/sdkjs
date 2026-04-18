@@ -357,13 +357,22 @@
 			}
 		} else if (this.editorId === AscCommon.c_oEditorId.Spreadsheet) {
 			let props = this.asc_getCellInfo();
-			
-			if (props && props.font) {
-				if (undefined != props.font.size)
-					_elem.style.fontSize = props.font.size + "pt";
+			let xfs = props && props.asc_getXfs ? props.asc_getXfs() : null;
+
+			if (xfs) {
+				const fontSize = xfs.asc_getFontSize();
+				if (undefined != fontSize)
+					_elem.style.fontSize = fontSize + "pt";
 				
-				_elem.style.fontWeight = (true === props.font.bold) ? "bold" : "normal";
-				_elem.style.fontStyle = (true === props.font.italic) ? "italic" : "normal";
+				_elem.style.fontWeight = (true === xfs.asc_getFontBold()) ? "bold" : "normal";
+				_elem.style.fontStyle = (true === xfs.asc_getFontItalic()) ? "italic" : "normal";
+
+				const color = xfs.asc_getFontColor();
+				if (color && !color.asc_getAuto()) {
+					_elem.style.color = "rgb(" + color.asc_getR() + "," + color.asc_getG() + "," + color.asc_getB() + ")";
+				} else {
+					_elem.style.color = "rgb(0,0,0)";
+				}
 			}
 		}
 		
