@@ -10200,6 +10200,18 @@ $(function () {
         assert.ok(oParser.parse(), "COUNTIFS with number range");
         assert.strictEqual(oParser.calculate().getValue(), 2, "COUNTIFS with number range");
 
+        // P0 regression: COUNTIFS(range, "<") / COUNTIFS(range, ">=") crashed before the fix.
+        // _parseCriteria sets matchingFn = null for empty-string criteria; the guard
+        // `if (typedData && matchFn)` in _applyEqualsOneCriteria prevents the null call.
+        // Excel: empty-string + any ordering operator always returns 0.
+        oParser = new parserFormula("COUNTIFS(F2:F7, \"<\")", "A1", ws);
+        assert.ok(oParser.parse());
+        assert.strictEqual(oParser.calculate().getValue(), 0, "COUNTIFS(range,\"<\") = 0 (Excel-verified; pre-fix: TypeError crash)");
+
+        oParser = new parserFormula("COUNTIFS(F2:F7, \">=\")", "A1", ws);
+        assert.ok(oParser.parse());
+        assert.strictEqual(oParser.calculate().getValue(), 0, "COUNTIFS(range,\">=\") = 0 (Excel-verified; pre-fix: TypeError crash)");
+
         // Cleanup
         ws.getRange2("F4").setValue("Green"); // Restore original value
     });
