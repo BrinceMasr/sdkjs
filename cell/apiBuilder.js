@@ -175,6 +175,7 @@
 	/**
 	 * Class representing a shape.
 	 * @constructor
+	 * @extends ApiDrawing
 	 */
 	function ApiShape(oShape) {
 		ApiDrawing.call(this, oShape);
@@ -187,6 +188,7 @@
 	/**
 	 * Class representing an image.
 	 * @constructor
+	 * @extends ApiDrawing
 	 */
 	function ApiImage(oImage) {
 		ApiDrawing.call(this, oImage);
@@ -198,6 +200,7 @@
 	/**
 	 * Class representing an OLE object.
 	 * @constructor
+	 * @extends ApiDrawing
 	 */
 	function ApiOleObject(OleObject) {
 		ApiDrawing.call(this, OleObject);
@@ -13305,7 +13308,7 @@
 	/**
 	 * Returns the width of the current drawing.
 	 * @memberof ApiDrawing
-	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @returns {EMU}
 	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetWidth.js
 	 */
@@ -13315,7 +13318,7 @@
 	/**
 	 * Returns the height of the current drawing.
 	 * @memberof ApiDrawing
-	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @returns {EMU}
 	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetHeight.js
 	 */
@@ -13353,6 +13356,7 @@
 	}
 	/**
 	 * Returns the lock value for the specified lock type of the current drawing.
+	 * @memberof ApiDrawing
 	 * @typeofeditors ["CSE"]
 	 * @param {DrawingLockType} sType - Lock type in the string format.
 	 * @returns {boolean}
@@ -13372,6 +13376,7 @@
 
 	/**
 	 * Sets the lock value to the specified lock type of the current drawing.
+	 * @memberof ApiDrawing
 	 * @typeofeditors ["CSE"]
 	 * @param {DrawingLockType} sType - Lock type in the string format.
 	 * @param {boolean} bValue - Specifies if the specified lock is applied to the current drawing.
@@ -13395,6 +13400,7 @@
 
 	/**
 	 * Returns the parent sheet of the current drawing.
+	 * @memberof ApiDrawing
 	 * @typeofeditors ["CSE"]
 	 * @returns {?ApiWorksheet}
 	 * @since 8.3.0
@@ -13658,7 +13664,7 @@
 	/**
 	 * Returns a type of the ApiImage class.
 	 * @memberof ApiImage
-	 * @typeofeditors ["CDE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @returns {"image"}
 	 * @see office-js-api/Examples/{Editor}/ApiImage/Methods/GetClassType.js
 	 */
@@ -13675,6 +13681,7 @@
 	/**
 	 * Class representing a group of drawings.
 	 * @constructor
+	 * @extends ApiDrawing
 	 */
 	function ApiGroup(oGroup) {
 		ApiDrawing.call(this, oGroup);
@@ -13702,6 +13709,7 @@
 	/**
 	 * Class representing a smart art.
 	 * @constructor
+	 * @extends ApiDrawing
 	 */
 	function ApiSmartArt(oGroup){
 		ApiDrawing.call(this, oGroup);
@@ -13965,6 +13973,7 @@
 	/**
 	 * Class representing a chart.
 	 * @constructor
+	 * @extends ApiDrawing
 	 */
 	function ApiChart(Chart) {
 		ApiDrawing.call(this, Chart);
@@ -14066,7 +14075,7 @@
 	/**
 	 * Returns a type of the ApiOleObject class.
 	 * @memberof ApiOleObject
-	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @returns {"oleObject"}
 	 * @see office-js-api/Examples/{Editor}/ApiOleObject/Methods/GetClassType.js
 	 */
@@ -14077,7 +14086,7 @@
 	/**
 	 * Sets the data to the current OLE object.
 	 * @memberof ApiOleObject
-	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @param {string} sData - The OLE object string data.
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiOleObject/Methods/SetData.js
@@ -14093,7 +14102,7 @@
 	/**
 	 * Returns the string data from the current OLE object.
 	 * @memberof ApiOleObject
-	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @returns {string}
 	 * @see office-js-api/Examples/{Editor}/ApiOleObject/Methods/GetData.js
 	 */
@@ -14107,7 +14116,7 @@
 	/**
 	 * Sets the application ID to the current OLE object.
 	 * @memberof ApiOleObject
-	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @param {string} sAppId - The application ID associated with the current OLE object.
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiOleObject/Methods/SetApplicationId.js
@@ -14123,7 +14132,7 @@
 	/**
 	 * Returns the application ID from the current OLE object.
 	 * @memberof ApiOleObject
-	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @returns {string}
 	 * @see office-js-api/Examples/{Editor}/ApiOleObject/Methods/GetApplicationId.js
 	 */
