@@ -281,6 +281,13 @@
 	 */
 
 	/**
+	 * The available text vertical alignment (used to align text in a shape with a placement for text inside it).
+	 * @typedef {("top" | "center" | "bottom")} VerticalTextAlign
+	 * @see office-js-api/Examples/Enumerations/VerticalTextAlign.js
+	 */
+
+
+	/**
 	 * Standard numeric format.
 	 * @typedef {("General" | "0" | "0.00" | "#,##0" | "#,##0.00" | "0%" | "0.00%" |
 	 * "0.00E+00" | "# ?/?" | "# ??/??" | "m/d/yyyy" | "d-mmm-yy" | "d-mmm" | "mmm-yy" | "h:mm AM/PM" |
@@ -13374,13 +13381,13 @@
 	 * Sets the vertical alignment to the shape content where a paragraph or text runs can be inserted.
 	 * @memberof ApiShape
 	 * @typeofeditors ["CSE"]
-	 * @param {"top" | "center" | "bottom" } sVerticalAlign - The vertical alignment type for the shape inner contents.
+	 * @param {VerticalTextAlign} verticalAlign - The vertical alignment type for the shape inner contents.
 	 * @returns {boolean} - returns false if shape or aligment doesn't exist.
 	 * @see office-js-api/Examples/{Editor}/ApiShape/Methods/SetVerticalTextAlign.js
 	 */
-	ApiShape.prototype.SetVerticalTextAlign = function (sVerticalAlign) {
+	ApiShape.prototype.SetVerticalTextAlign = function (verticalAlign) {
 		if (this.Shape) {
-			switch (sVerticalAlign) {
+			switch (verticalAlign) {
 				case "top": {
 					this.Shape.setVerticalAlign(4);
 					break;

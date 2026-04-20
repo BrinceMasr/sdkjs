@@ -7124,14 +7124,14 @@
      * Sets the vertical alignment to the shape content where a paragraph or text runs can be inserted.
      * @memberof ApiShape
      * @typeofeditors ["CPE"]
-     * @param {VerticalTextAlign} VerticalAlign - The type of the vertical alignment for the shape inner contents.
+     * @param {VerticalTextAlign} verticalAlign - The type of the vertical alignment for the shape inner contents.
      * @see office-js-api/Examples/{Editor}/ApiShape/Methods/SetVerticalTextAlign.js
 	 */
-    ApiShape.prototype.SetVerticalTextAlign = function(VerticalAlign)
+    ApiShape.prototype.SetVerticalTextAlign = function(verticalAlign)
     {
         if(this.Shape)
         {
-            switch(VerticalAlign)
+            switch(verticalAlign)
             {
                 case "top":
                 {
