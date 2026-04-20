@@ -235,6 +235,8 @@
 						this.formula = null;
 						this.val = null;
 						this.formatTable = null;
+						this.comment = null;
+						this.hyperlink = null;
 						break;
 					}
 					case c_oSpecialPasteProps.transpose: {
