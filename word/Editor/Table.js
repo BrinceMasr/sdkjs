@@ -960,6 +960,7 @@ CTable.prototype.Set_Props = function(Props)
 	if (undefined !== Props.TableStyle)
 	{
 		this.Set_TableStyle(Props.TableStyle);
+		Asc.editor.addMacroStepData("SetTableStyle", {data: Props.TableStyle, tableId: this.Id});
 		bRecalc_All = true;
 	}
 
@@ -1041,6 +1042,7 @@ CTable.prototype.Set_Props = function(Props)
 				arrNewGrid[Index] = this.TableGridCalc[Index] + GridKoeff[Index] * Diff;
 			}
 			this.SetTableGrid(arrNewGrid);
+			Asc.editor.addMacroStepData("SetTableCellSpacing", {data: Props.TableSpacing, tableId: this.Id});
 		}
 	}
 
@@ -1050,6 +1052,7 @@ CTable.prototype.Set_Props = function(Props)
 	// TableDefaultMargins (отступы в ячейках по умолчанию)
 	if ("undefined" != typeof(Props.TableDefaultMargins))
 	{
+		Asc.editor.addMacroStepData("SetTableDefaultMargin", {data: Props.TableDefaultMargins, tableId: this.Id});
 		var UsingDefaultMar = false;
 		for (var Index = 0; Index < this.Content.length; Index++)
 		{
@@ -1091,6 +1094,7 @@ CTable.prototype.Set_Props = function(Props)
 	// CellMargins (отступы в ячейках)
 	if ("undefined" != typeof(Props.CellMargins) && null != Props.CellMargins)
 	{
+		Asc.editor.addMacroStepData("SetCellMargins", {data: Props.CellMargins, tableId: this.Id});
 		var NeedChange = false;
 
 		switch (Props.CellMargins.Flag)
@@ -1377,6 +1381,7 @@ CTable.prototype.Set_Props = function(Props)
 	// TableIndent (отступ слева)
 	if ("undefined" != typeof(Props.TableIndent) && true === this.Is_Inline() && align_Left === _Jc)
 	{
+		Asc.editor.addMacroStepData("SetTableInd", {data: Props.TableIndent, tableId: this.Id});
 		if (Props.TableIndent != TablePr.TableInd)
 		{
 			this.Set_TableInd(Props.TableIndent);
@@ -1387,6 +1392,7 @@ CTable.prototype.Set_Props = function(Props)
 	// Position
 	if (undefined != Props.Position)
 	{
+		Asc.editor.addMacroStepData("SetTablePos", {data: Props.Position, tableId: this.Id});
 		this.PositionH.RelativeFrom = c_oAscHAnchor.Page;
 		this.PositionH.Align        = true;
 		this.PositionV.RelativeFrom = c_oAscVAnchor.Page;
@@ -1433,6 +1439,8 @@ CTable.prototype.Set_Props = function(Props)
 	// TableBorders(границы таблицы)
 	if ("undefined" != typeof(Props.TableBorders) && null != Props.TableBorders)
 	{
+		if (Props.CellSelect === false)
+			Asc.editor.addMacroStepData("SetTableBorders", {data: Props.TableBorders, tableId: this.Id});
 		if (false === this.Internal_CheckNullBorder(Props.TableBorders.Top) && false === this.Internal_CompareBorders3(Props.TableBorders.Top, TablePr.TableBorders.Top))
 		{
 			this.Set_TableBorder_Top(Props.TableBorders.Top);
@@ -1547,6 +1555,8 @@ CTable.prototype.Set_Props = function(Props)
 	if ("undefined" != typeof(Props.CellBorders) && null != Props.CellBorders)
 	{
 		var Cells_array = null;
+		if (Props.CellSelect === true)
+			Asc.editor.addMacroStepData("SetCellBorders", {data: Props.CellBorders, tableId: this.Id});
 
 		// Переделаем идеальный вариант, на новый
 		if (true === bSpacing)
@@ -1955,6 +1965,7 @@ CTable.prototype.Set_Props = function(Props)
 	{
 		if (Props.TableBackground.Value != TablePr.Shd.Value || Props.TableBackground.Color.r != TablePr.Shd.Color.r || Props.TableBackground.Color.g != TablePr.Shd.Color.g || Props.TableBackground.Color.b != TablePr.Shd.Color.b)
 		{
+			Asc.editor.addMacroStepData("SetTableBackground", {data: Props.TableBackground, tableId: this.Id});
 			this.Set_TableShd(Props.TableBackground.Value, Props.TableBackground.Color.r, Props.TableBackground.Color.g, Props.TableBackground.Color.b);
 
 			for (var nCurRow = 0, nRowsCount = this.GetRowsCount(); nCurRow < nRowsCount; ++nCurRow)
@@ -1986,6 +1997,7 @@ CTable.prototype.Set_Props = function(Props)
 	// CellsBackground (заливка ячеек)
 	if ("undefined" != typeof(Props.CellsBackground) && null != Props.CellsBackground)
 	{
+		Asc.editor.addMacroStepData(this.IsSelectedAll() ? "SetTableBackground" : "SetCellBackground", {data: Props.CellsBackground, tableId: this.Id});
 		if (false === Props.CellSelect && true === bSpacing)
 		{
 			for (var CurRow = 0; CurRow < this.Content.length; CurRow++)
@@ -2153,6 +2165,7 @@ CTable.prototype.Set_Props = function(Props)
 	// CellsNoWrap
 	if (undefined !== Props.CellsNoWrap && null !== Props.CellsNoWrap)
 	{
+		Asc.editor.addMacroStepData("SetCellWrap", {data: Props.CellsNoWrap, tableId: this.Id});
 		if (this.Selection.Use === true && table_Selection_Cell === this.Selection.Type)
 		{
 			var Count = this.Selection.Data.length;
@@ -2172,6 +2185,7 @@ CTable.prototype.Set_Props = function(Props)
 	// CellsWidth
 	if (undefined !== Props.CellsWidth)
 	{
+		Asc.editor.addMacroStepData("SetCellWidth", {data: Props.CellsWidth, tableId: this.Id});
 		var CellsWidth = Props.CellsWidth;
 		if (null !== CellsWidth && Math.abs(CellsWidth) < 0.001)
 			CellsWidth = null;
@@ -2216,11 +2230,16 @@ CTable.prototype.Set_Props = function(Props)
 	}
 
 	if (undefined !== Props.RowHeight)
+	{
 		this.SetRowHeight(Props.RowHeight);
+		Asc.editor.addMacroStepData("SetRowHeightTable", {data: Props.RowHeight, tableId: this.Id});
+	}
 
 	if (undefined !== Props.ColumnWidth)
+	{
 		this.SetColumnWidth(Props.ColumnWidth);
-
+		Asc.editor.addMacroStepData("SetCellWidth", {data: Props.ColumnWidth, tableId: this.Id});
+	}
 	return true;
 };
 CTable.prototype.Get_Styles = function(Lvl)
@@ -3915,6 +3934,7 @@ CTable.prototype.Document_SetThisElementCurrent = function(bUpdateStates)
 {
 	this.Parent.Update_ContentIndexing();
 	this.Parent.Set_CurrentElement(this.Index, bUpdateStates);
+	Asc.editor.addMacroStepData("SelectTable", {id: this.Id});
 };
 CTable.prototype.Can_CopyCut = function()
 {
@@ -3925,6 +3945,7 @@ CTable.prototype.Can_CopyCut = function()
 };
 CTable.prototype.Set_Inline = function(Value)
 {
+	Asc.editor.addMacroStepData("SetTableWrappingStyle", {data: Value, tableId: this.Id});
 	AscCommon.History.Add(new CChangesTableInline(this, this.Inline, Value));
 	this.Inline = Value;
 };
@@ -3999,6 +4020,7 @@ CTable.prototype.RemoveInnerTable = function()
 };
 CTable.prototype.SelectTable = function(Type)
 {
+	Asc.editor.addMacroStepData("SelectTable", {id: this.Id, type: Type});
 	if (true === this.IsInnerTable())
 	{
 		this.CurCell.Content.SelectTable(Type);
@@ -8785,6 +8807,10 @@ CTable.prototype.Set_PositionH = function(RelativeFrom, Align, Value)
 	this.PositionH.RelativeFrom = RelativeFrom;
 	this.PositionH.Align        = Align;
 	this.PositionH.Value        = Value;
+	if (Align)
+		Asc.editor.addMacroStepData("SetTableHAlign", {data: {relative: RelativeFrom, align: Align, value: Value}, tableId: this.Id});
+	else
+		Asc.editor.addMacroStepData("SetTableHPosition", {data: {relative: RelativeFrom, align: Align, value: Value}, tableId: this.Id});
 };
 CTable.prototype.SetPositionH = function(relativeFrom, align, value)
 {
@@ -8822,6 +8848,11 @@ CTable.prototype.Set_PositionV = function(RelativeFrom, Align, Value)
 	this.PositionV.RelativeFrom = RelativeFrom;
 	this.PositionV.Align        = Align;
 	this.PositionV.Value        = Value;
+
+	if (Align)
+		Asc.editor.addMacroStepData("SetTableVAlign", {data: {relative: RelativeFrom, align: Align, value: Value}, tableId: this.Id});
+	else
+		Asc.editor.addMacroStepData("SetTableVPosition", {data: {relative: RelativeFrom, align: Align, value: Value}, tableId: this.Id});
 };
 CTable.prototype.SetPositionV = function(relativeFrom, align, value)
 {
@@ -8927,7 +8958,8 @@ CTable.prototype.Set_TableW = function(Type, W)
 		this.Pr.TableW = TableW;
 		this.Recalc_CompiledPr();
 		this.private_UpdateTableGrid();
-	}
+		Asc.editor.addMacroStepData("SetTableWidth", {data: {type: Type, width: W}, tableId: this.Id});
+	} 
 	else if (Type != this.Pr.TableW.Type || Math.abs(this.Pr.TableW.W - W) > 0.001)
 	{
 		this.private_AddPrChange();
@@ -8936,6 +8968,7 @@ CTable.prototype.Set_TableW = function(Type, W)
 		this.Pr.TableW = TableW;
 		this.Recalc_CompiledPr();
 		this.private_UpdateTableGrid();
+		Asc.editor.addMacroStepData("SetTableWidth", {data: {type: Type, width: W}, tableId: this.Id});
 	}
 };
 CTable.prototype.Get_TableW = function()
@@ -8969,6 +9002,7 @@ CTable.prototype.SetTableLayout = function(Value)
 	AscCommon.History.Add(new CChangesTableTableLayout(this, this.Pr.TableLayout, Value));
 	this.Pr.TableLayout = Value;
 	this.Recalc_CompiledPr();
+	Asc.editor.addMacroStepData("SetTableLayout", {data: Value, tableId: this.Id});
 };
 CTable.prototype.GetTableLayout = function()
 {
@@ -9025,6 +9059,7 @@ CTable.prototype.Set_TableAlign = function(Align)
 		AscCommon.History.Add(new CChangesTableTableAlign(this, this.Pr.Jc, undefined));
 		this.Pr.Jc = undefined;
 		this.Recalc_CompiledPr();
+		Asc.editor.addMacroStepData("SetTableAlign", {data: Align, tableId: this.Id});
 	}
 	else if (undefined === this.Pr.Jc)
 	{
@@ -9032,6 +9067,7 @@ CTable.prototype.Set_TableAlign = function(Align)
 		AscCommon.History.Add(new CChangesTableTableAlign(this, undefined, Align));
 		this.Pr.Jc = Align;
 		this.Recalc_CompiledPr();
+		Asc.editor.addMacroStepData("SetTableAlign", {data: Align, tableId: this.Id});
 	}
 	else if (Align != this.Pr.Jc)
 	{
@@ -9039,6 +9075,7 @@ CTable.prototype.Set_TableAlign = function(Align)
 		AscCommon.History.Add(new CChangesTableTableAlign(this, this.Pr.Jc, Align));
 		this.Pr.Jc = Align;
 		this.Recalc_CompiledPr();
+		Asc.editor.addMacroStepData("SetTableAlign", {data: Align, tableId: this.Id});
 	}
 };
 CTable.prototype.Get_TableAlign = function()
@@ -18448,6 +18485,7 @@ CTable.prototype.Resize = function(nWidth, nHeight)
 				this.SetTableW(tblwidth_Auto, 0);
 		}
 	}
+	Asc.editor.addMacroStepData("SetTableResize", {tableGrid: this.TableGrid, tableId: this.Id, width: nWidth, height: nHeight});
 };
 /**
  * Изменяем размер тширину и высоту таблицы в документе (создается точка в истории и запускается пересчет)

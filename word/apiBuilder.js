@@ -8957,6 +8957,23 @@
 	};
 
 	/**
+	 * Return current table from the current document.
+	 * @memberof ApiDocument
+	 * @typeofeditors ["CDE"]
+	 * @returns {ApiTable|null}
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/GetEndNotesFirstParagraphs.js
+	 */
+	ApiDocument.prototype.GetSelectedTable = function()
+	{
+		let table = this.Document.GetCurrentTable();
+		if (table)
+			return new ApiTable(table);
+
+		return null;
+	};
+
+	/**
 	 * Returns all caption paragraphs of the specified type from the current document.
 	 * @memberof ApiDocument
 	 * @typeofeditors ["CDE"]
@@ -14544,7 +14561,84 @@
 		oDocument.UpdateSelection();
 		return new ApiComment(comment)
 	};
+	/**
+	 * Returns the currently selected cells in the table.
+	 * @memberof ApiTable
+	 * @typeofeditors ["CDE"]
+	 * @returns {ApiTableCell[]} - An array of the currently selected table cells.
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/GetSelectedCells.js
+	 */
+	ApiTable.prototype.GetSelectedCells = function(){
+		let cells = [];
+		let positions = this.Table.GetSelectionArray();
+		for (let nPos = 0; nPos < positions.length; nPos++)
+		{
+			let pos = positions[nPos];
+			cells.push(this.GetCell(pos.Row, pos.Cell));
+		}
+		return cells
+	};
+	/**
+	 * Returns all cells from the columns that contain the currently selected cells.
+	 * This method identifies which columns contain selected cells and then returns all cells 
+	 * in those columns, not just the selected cells themselves.
+	 * @memberof ApiTable
+	 * @typeofeditors ["CDE"]
+	 * @returns {ApiTableCell[]} - An array of all cells from the columns that contain selected cells.
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/GetSelectedColumnsCells.js
+	 */
+	ApiTable.prototype.GetSelectedColumnsCells = function () {
+		let colsNum = [];
+		let cols = [];
 
+		let cells = this.Table.GetSelectionArray();
+		for (let index = 0; index < cells.length; index++) {
+			let element = cells[index];
+			if (!colsNum.includes(element.Cell))
+				colsNum.push(element.Cell);
+		}
+
+		for (let i = 0; i < colsNum.length; i++)
+		{
+			let num = colsNum[i];
+			let cells = this.Table.GetColumn(num,0);
+			cells.forEach(function(cell) {
+				cols.push( new ApiTableCell(cell) )
+			})
+
+		}
+		return cols
+	};
+	/**
+	 * Returns all rows that contain the currently selected cells.
+	 * This method identifies which rows contain selected cells and returns those complete row objects.
+	 * @memberof ApiTable
+	 * @typeofeditors ["CDE"]
+	 * @returns {ApiTableRow[]} - An array of table row objects that contain at least one selected cell.
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/GetSelectedRows.js
+	 */
+	ApiTable.prototype.GetSelectedRows = function()
+	{
+		let rowsNum = [];
+		let rows = [];
+
+		let cells = this.Table.GetSelectionArray();
+		for (let index = 0; index < cells.length; index++) {
+			let element = cells[index];
+			if (!rowsNum.includes(element.Row))
+				rowsNum.push(element.Row)
+		}
+
+		for (let i = 0; i < rowsNum.length; i++)
+		{
+			let num = rowsNum[i];
+			rows.push(this.GetRow(num));
+		}
+		return rows
+	};
 	/**
      * Adds a caption paragraph after (or before) the current table.
 	 * <note>Please note that the current table must be in the document (not in the footer/header).
@@ -14639,6 +14733,108 @@
 		oDoc.AddCaption(oCapPr);
 		return true;
 	};
+	/**
+	 * Sets the table horizontal position.
+	 * @memberof ApiTable
+	 * @typeofeditors ["CDE"]
+	 * @param {string} sRelativeFrom - The anchor type (e.g., "margin", "character", "page").
+	 * @param {boolean} align - Specifies whether the nDistance parameter is used or the table will be aligned relatively to sRelativeFrom.
+	 * @param {EMU} nDistance - The distance from the right side of the page edge in English measure units.
+	 * @returns {boolean}
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/SetHorPosition.js
+	 */
+	ApiTable.prototype.SetHorPosition = function(sRelativeFrom, align, nDistance)
+	{
+		let nValue = private_Twips2MM(nDistance);
+		let nRelativeFrom;
+
+		if (sRelativeFrom === "margin" )
+			nRelativeFrom = c_oAscHAnchor.Margin
+		else if (sRelativeFrom === "character")
+			nRelativeFrom = c_oAscHAnchor.Text
+		else
+			nRelativeFrom = c_oAscHAnchor.Page;
+
+		this.Table.Set_PositionH(nRelativeFrom, align, align ? nDistance : nValue);
+		return true;
+	};
+	/**
+	 * Sets the table vertical position.
+	 * @memberof ApiTable
+	 * @typeofeditors ["CDE"]
+	 * @param {string} sRelativeFrom
+	 * @param {boolean} align - Specifies whether the nDistance parameter is used or the table will be aligned relatively to sRelativeFrom.
+	 * @param {EMU} nDistance - The distance from the top side of the page edge in English measure units.
+	 * @returns {boolean}
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/SetVerPosition.js
+	 */
+	ApiTable.prototype.SetVerPosition = function(sRelativeFrom, align, nDistance)
+	{
+		let nValue = private_Twips2MM(nDistance);
+		let nRelativeFrom;
+
+		if (sRelativeFrom === "margin" )
+			nRelativeFrom = c_oAscVAnchor.Margin
+		else if (sRelativeFrom === "character")
+			nRelativeFrom = c_oAscVAnchor.Text
+		else
+			nRelativeFrom = c_oAscVAnchor.Page;
+
+		this.Table.Set_PositionV(nRelativeFrom, align, align ? nDistance : nValue);
+		return true;
+	};
+	/**
+	 * Sets the table horizontal alignment.
+	 * @memberof ApiTable
+	 * @typeofeditors ["CDE"]
+	 * @param {string} sRelativeFrom
+	 * @param {string} sAlign - The horizontal alignment type ("left", "center", "right").
+	 * @returns {boolean}
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/SetHorAlign.js
+	 */
+	ApiTable.prototype.SetHorAlign = function(sRelativeFrom, sAlign)
+	{
+		let nAlign = private_GetAlignH(sAlign);
+		let nRelativeFrom;
+		if (sRelativeFrom === "margin" )
+			nRelativeFrom = c_oAscHAnchor.Margin
+		else if (sRelativeFrom === "character")
+			nRelativeFrom = c_oAscHAnchor.Text
+		else
+			nRelativeFrom = c_oAscHAnchor.Page;
+
+
+		this.Table.Set_PositionH(nRelativeFrom, true, nAlign);
+		return true;
+	};
+	/**
+	 * Sets the table vertical alignment.
+	 * @memberof ApiTable
+	 * @typeofeditors ["CDE"]
+	 * @param {string} sRelativeFrom
+	 * @param {string} sAlign - The vertical alignment type ("top", "center", "bottom").
+	 * @returns {boolean}
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/SetVerAlign.js
+	 */
+	ApiTable.prototype.SetVerAlign = function(sRelativeFrom, sAlign)
+	{
+		let nAlign = private_GetAlignV(sAlign);
+		let nRelativeFrom;
+
+		if (sRelativeFrom === "margin" )
+			nRelativeFrom = c_oAscVAnchor.Margin
+		else if (sRelativeFrom === "character")
+			nRelativeFrom = c_oAscVAnchor.Text
+		else
+			nRelativeFrom = c_oAscVAnchor.Page;
+
+		this.Table.Set_PositionV(nRelativeFrom, true, nAlign);
+		return true;
+	};
 
 	//------------------------------------------------------------------------------------------------------------------
 	//
@@ -14720,6 +14916,25 @@
 			return null;
 
 		return new ApiTable(Table);
+	};
+	/**
+	 * Sets the properties to the current table row.
+	 * @memberof ApiTableRow
+	 * @typeofeditors ["CDE"]
+	 * @param {ApiTableRowPr} oApiTableRowPr - The table row properties.
+	 * @returns {boolean}
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiTableRow/Methods/SetRowPr.js
+	 */
+	ApiTableRow.prototype.SetRowPr = function(oApiTableRowPr)
+	{
+		if (!oApiTableRowPr || !oApiTableRowPr.GetClassType || oApiTableRowPr.GetClassType() !== "tableRowPr")
+			return false;
+
+		this.RowPr.Merge(oApiTableRowPr.RowPr);
+		this.private_OnChange();
+
+		return true;
 	};
 	/**
 	 * Returns the next row if exists.

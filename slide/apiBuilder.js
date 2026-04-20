@@ -189,20 +189,45 @@
 	ApiChart.prototype.constructor = ApiChart;
 
 	/**
+	 * Class representing the table properties.
+	 * @constructor
+	 */
+	function ApiTablePr(Parent, TablePr)
+	{
+		this.Parent  = Parent;
+		this.TablePr = TablePr;
+	}
+	/**
      * Class representing a table.
      * @param oGraphicFrame
      * @constructor
      */
 	function ApiTable(oGraphicFrame){
-	    this.Table = oGraphicFrame.graphicObject;
-	    ApiDrawing.call(this, oGraphicFrame);
+		this.Table = oGraphicFrame.graphicObject;
+		ApiDrawing.call(this, oGraphicFrame);
+		ApiTablePr.call(this, this, this.Table.Pr.Copy());
     }
-
-    ApiTable.prototype = Object.create(ApiDrawing.prototype);
+    ApiTable.prototype = Object.create(ApiTablePr.prototype);
     ApiTable.prototype.constructor = ApiTable;
 
+	/**
+	 * Class representing the table row properties.
+	 * @constructor
+	 */
+	function ApiTableRowPr(Parent, RowPr)
+	{
+		this.Parent = Parent;
+		this.RowPr  = RowPr;
+	}
 
-
+	/**
+	 * Class representing a style.
+	 * @constructor
+	 */
+	function ApiStyle(Style)
+	{
+		this.Style = Style;
+	}
 
     /**
      * Class representing a table row.
@@ -210,19 +235,49 @@
      * @constructor
      */
 
-    function ApiTableRow(oTableRow){
-        this.Row = oTableRow;
+    function ApiTableRow(Row){
+		ApiTableRowPr.call(this, this, Row.Pr.Copy());
+        this.Row = Row;
     }
+	ApiTableRow.prototype = Object.create(ApiTableRowPr.prototype);
+	ApiTableRow.prototype.constructor = ApiTableRow;
 
+	/**
+	 * Class representing the table cell properties.
+	 * @constructor
+	 */
+	function ApiTableCellPr(Parent, CellPr)
+	{
+		this.Parent = Parent;
+		this.CellPr = CellPr;
+	}
 
-    /**
-     * Class representing a table cell.
-     * @param oCell
+	/**
+	 * Class representing a set of formatting properties which shall be conditionally applied to the parts of a table
+	 * which match the requirement specified on the <code>Type</code>.
+	 * @constructor
+	 */
+	function ApiTableStylePr(Type, Parent, TableStylePr)
+	{
+		this.Type         = Type;
+		this.Parent       = Parent;
+		this.TableStylePr = TableStylePr;
+	}
+
+	/**
+	 * Class representing a table cell.
+	 * @constructor
+	 * @extends {ApiTableCellPr}
+	 * @param oCell
      * @constructor
-     */
-    function ApiTableCell(oCell){
-        this.Cell = oCell;
-    }
+	 */
+	function ApiTableCell(oCell)
+	{
+		ApiTableCellPr.call(this, this, oCell.Pr.Copy());
+		this.Cell = oCell;
+	}
+	ApiTableCell.prototype = Object.create(ApiTableCellPr.prototype);
+	ApiTableCell.prototype.constructor = ApiTableCell;
 
 	/**
 	 * Class representing a slide show transition.
@@ -2058,6 +2113,13 @@
 		return this.Presentation.isLoopShowMode();
 	};
 
+	ApiPresentation.prototype.GetCurrentTable = function() {
+		let oPresentation = private_GetPresentation();
+		if (!oPresentation) return null;
+		let oGraphicFrame = oPresentation.GetCurrentTable();
+		return oGraphicFrame ? new ApiTable(oGraphicFrame) : null;
+	};
+
 	/**
 	 * Sets whether the presentation loops continuously until the user stops it.
 	 *
@@ -2075,6 +2137,13 @@
 			return true;
 		}
 		return false;
+	};
+
+	ApiPresentation.prototype.GetStyle = function(sStyleName)
+	{
+		var oStyles  = this.Presentation.globalTableStyles;
+		var oStyleId = oStyles.GetStyleIdByName(sStyleName, true);
+		return new ApiStyle(oStyles.Get(oStyleId))
 	};
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -6502,8 +6571,85 @@
 
 		return false;
 	};
+	/**
+	 * Sets the title of the current drawing.
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CPE"]
+	 * @since 9.5.0
+	 * @param {string} title - The title to set for the current drawing.
+	 * @returns {boolean} Returns true if the operation is successful, false otherwise.
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/SetTitle.js
+	 */
+	ApiDrawing.prototype.SetTitle = function(title)
+	{
+		if (!title)
+			return false;
 
-    /**
+		let oDrawing = this.Drawing;
+		if (oDrawing)
+		{
+			oDrawing.setTitle(title);
+			return true;
+		}
+		return false;
+	};
+	/**
+	 * Gets the title of the current drawing.
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CPE"]
+	 * @since 9.5.0
+	 * @returns {string | null} - The title of the current drawing, or null if not set.
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetTitle.js
+	 */
+	ApiDrawing.prototype.GetTitle = function()
+	{
+		let oDrawing = this.Drawing;
+		let title = oDrawing.getTitle();
+		if (title)
+			return title;
+
+		return null;
+	};
+	/**
+	 * Sets the description of the current drawing.
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CPE"]
+	 * @since 9.5.0
+	 * @param {string} description - The description to set for the current drawing.
+	 * @returns {boolean} Returns true if the operation is successful, false otherwise.
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/SetDescription.js
+	 */
+	ApiDrawing.prototype.SetDescription = function(description)
+	{
+		if (!description)
+			return false;
+
+		let oDrawing = this.Drawing;
+		if (oDrawing)
+		{
+			oDrawing.setDescription(description);
+			return true;
+		}
+		return false;
+	};
+	/**
+	 * Gets the description of the current drawing.
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CPE"]
+	 * @since 9.5.0
+	 * @returns {string | null} - The description of the current drawing, or null if not set.
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetDescription.js
+	 */
+	ApiDrawing.prototype.GetDescription = function()
+	{
+		let oDrawing = this.Drawing;
+		let description = oDrawing.getDescription();
+		if (description)
+			return description;
+
+		return null;
+	};
+	/**
 	 * Converts the ApiDrawing object into the JSON object.
 	 * @memberof ApiDrawing
 	 * @typeofeditors ["CPE"]
@@ -6566,6 +6712,10 @@
 		if (!oController)
 			return false;
 		oController.deselectObject(oDrawing);
+
+		//todo
+		let presentation = Asc.editor.getLogicDocument();
+		presentation.RemoveSelection();
 		oController.updateSelectionState();
 		oController.updateOverlay();
 		return true;
@@ -6683,6 +6833,37 @@
 		}
 
 		return false;
+	};
+
+	/**
+	 * Sets whether the aspect ratio of the drawing is locked.
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CPE"]
+	 * @param {boolean} bAspect - Specifies whether the aspect ratio of this drawing is locked.
+	 * @returns {boolean} Returns `true` if the lock aspect was successfully set, otherwise returns `false`.
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/SetLockAspect.js
+	 */
+	ApiDrawing.prototype.SetLockAspect = function(bAspect)
+	{
+		if (bAspect !== false && bAspect !== true)
+			return false;
+
+		this.Drawing.setNoChangeAspect(bAspect);
+		return true;
+	};
+
+	/**
+	 * Returns whether the aspect ratio of the drawing is locked.
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CPE"]
+	 * @returns {boolean}
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetLockAspect.js
+	 */
+	ApiDrawing.prototype.GetLockAspect = function()
+	{
+		return this.Drawing.getNoChangeAspect();
 	};
 
 	/**
@@ -7389,9 +7570,50 @@
     ApiTable.prototype.GetClassType = function(){
         return "table";
     };
+	/**
+	 * Returns an internal ID of the current table.
+	 * @memberof ApiTable
+	 * @typeofeditors ["CDE"]
+	 * @returns {string}
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/GetInternalId.js
+	 */
+	ApiTable.prototype.GetInternalId = function()
+	{
+		return this.Table.GetId();
+	};
+	/**
+	 * Returns a number of rows in the current table.
+	 * @memberof ApiTable
+	 * @typeofeditors ["CDE"]
+	 * @returns {number}
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/GetRowsCount.js
+	 */
+	ApiTable.prototype.GetRowsCount = function()
+	{
+		return this.Table.Content.length;
+	};
+	/**
+	 * Returns a cell by its position.
+	 * @memberof ApiTable
+	 * @typeofeditors ["CDE"]
+	 * @param {number} nRow - The row position in the current table where the specified cell is placed.
+	 * @param {number} nCell - The cell position in the current table.
+	 * @returns {ApiTableCell | null} - returns null if params are invalid.
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/GetCell.js
+	 */
+	ApiTable.prototype.GetCell = function(nRow, nCell)
+	{
+		var Row = this.Table.GetRow(nRow);
 
-
-    /**
+		if (Row && nCell >= 0 && nCell < Row.Content.length)
+		{
+			return new ApiTableCell(Row.GetCell(nCell));
+		}
+		else
+			return null;
+	};
+	/**
      * Returns a row by its index.
      * @typeofeditors ["CPE"]
      * @param nIndex {number} - The row index (position) in the table.
@@ -7464,6 +7686,23 @@
 
         return null;
     };
+	/**
+	 * Sets a style to the current table.
+	 * @memberof ApiTable
+	 * @typeofeditors ["CDE"]
+	 * @param {ApiStyle} oStyle - The style which will be applied to the current table.
+	 * @returns {boolean} - returns false if param is invalid.
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/SetStyle.js
+	 */
+	ApiTable.prototype.SetStyle = function(oStyle)
+	{
+		if (!oStyle || !(oStyle instanceof ApiStyle) || styletype_Table !== oStyle.Style.Get_Type())
+			return false;
+
+		this.Table.Set_TableStyle(oStyle.Style.Get_Id(), true);
+
+		return true;
+	};
 
     ApiTable.prototype.OnChangeTablePr = function(oApiTablePr)
     {
@@ -7538,6 +7777,27 @@
 
         return new ApiTableRow(this.Table.Content[nRowIndex]);
     };
+	/**
+	 * Adds the new rows to the current table.
+	 * @memberof ApiTable
+	 * @typeofeditors ["CDE"]
+	 * @param {ApiTableCell} [oCell] - The cell after which the new rows will be added. If not specified, the new rows will
+	 * be added at the end of the table.
+	 * @param {Number} nCount - Count of rows to be added.
+	 * @param {boolean} [isBefore=false] - Adds the new rows before (false) or after (true) the specified cell. If no cell is specified, then
+	 * this parameter will be ignored.
+	 * @returns {ApiTable}
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/AddRows.js
+	 */
+	ApiTable.prototype.AddRows = function(oCell, nCount, isBefore)
+	{
+		for (var Index = 0; Index < nCount; Index++)
+		{
+			this.AddRow(oCell, isBefore);
+		}
+
+		return this;
+	};
     /**
      * Adds a new column to the end of the current table.
      * @typeofeditors ["CPE"]
@@ -7565,6 +7825,55 @@
         this.Table.CurCell = _oCell;
         this.Table.AddTableColumn(_isBefore);
     };
+	/**
+	 * Adds the new columns to the current table.
+	 * @memberof ApiTable
+	 * @typeofeditors ["CDE"]
+	 * @param {ApiTableCell} [oCell] - The cell after which the new columns will be added. If not specified, the new columns will be added at the end of the table.
+	 * @param {Number} nCount - Count of columns to be added.
+	 * @param {boolean} [isBefore=false] - Adds the new columns before (false) or after (true) the specified cell. If no cell is specified,
+	 * then this parameter will be ignored.
+	 * @returns {ApiTable}
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/AddColumns.js
+	 */
+	ApiTable.prototype.AddColumns = function(oCell, nCount, isBefore)
+	{
+		for (var Index = 0; Index < nCount; Index++)
+		{
+			this.AddColumn(oCell, isBefore);
+		}
+
+		return this;
+	};
+	/**
+	 * Adds a paragraph using its position in the cell.
+	 * @memberof ApiTable
+	 * @typeofeditors ["CDE"]
+	 * @param {ApiTableCell} oCell - The cell where the specified element will be added.
+	 * @param {number} nPos - The position in the cell where the specified element will be added.
+	 * @param {DocumentElement} oElement - The document element which will be added at the current position.
+	 * @returns {boolean}
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/AddElement.js
+	 */
+	ApiTable.prototype.AddElement = function(oCell, nPos, oElement)
+	{
+		if (!(oCell instanceof ApiTableCell) || this.Table !== oCell.Cell.Row.Table)
+			return false;
+
+		var apiCellContent = oCell.GetContent();
+
+		if (oElement instanceof ApiParagraph)
+		{
+			var oElm = oElement.private_GetImpl();
+			if (oElm.IsUseInDocument())
+				return false;
+			apiCellContent.Document.Internal_Content_Add(nPos, oElm);
+
+			return true;
+		}
+
+		return false;
+	};
     /**
      * Removes a table row with the specified cell.
      * @typeofeditors ["CPE"]
@@ -7597,8 +7906,50 @@
         this.Table.CurCell = oCell.Cell;
         return !(this.Table.RemoveTableColumn());
     };
+	/**
+	 * Creates a copy of the current table.
+	 * @memberof ApiTable
+	 * @typeofeditors ["CDE"]
+	 * @returns {ApiTable}
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/Copy.js
+	 */
+	ApiTable.prototype.Copy = function()
+	{
+		let oPresentation = private_GetPresentation();
+		let frame = oPresentation.Create_TableGraphicFrame(null, null, null, oPresentation.DefaultTableStyleId);
+		let oTable = this.Table.Copy(this.Drawing, private_GetDrawingDocument());
+		frame.setGraphicObject(oTable)
+		return new ApiTable(frame);
+	};
 
-    /**
+	// ApiTable.prototype.Select = ApiDrawing.prototype.Select;
+	// ApiTable.prototype.Unselect = ApiDrawing.prototype.Unselect;
+	// ApiTable.prototype.Delete = function()
+	// {
+	// 	//TODO
+	// }
+	/**
+	 * Clears the content from the table.
+	 * @memberof ApiTable
+	 * @typeofeditors ["CDE"]
+	 * @return {boolean} - returns true.
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/Clear.js
+	 */
+	ApiTable.prototype.Clear = function()
+	{
+		for (var curRow = 0, rowsCount = this.Table.GetRowsCount(); curRow < rowsCount; curRow++)
+		{
+			var Row = this.Table.GetRow(curRow);
+			for (var curCell = 0, cellsCount = Row.GetCellsCount(); curCell < cellsCount; curCell++)
+			{
+				Row.GetCell(curCell).GetContent().Clear_Content();
+			}
+		}
+
+		return true;
+	};
+
+	/**
      * Specifies the shading which shall be applied to the extents of the current table.
      * @typeofeditors ["CPE"]
 	 * @param {ShdType | ApiFill} sType - The shading type applied to the contents of the current table. Can be ShdType or ApiFill.
@@ -7607,7 +7958,105 @@
 	 * @param {byte} b - Blue color component value.
 	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/SetShd.js
 	 */
-    ApiTable.prototype.SetShd = function(sType, r, g, b)
+
+    /**
+     * Specifies the shading which shall be applied to the extents of the current table.
+     * @typeofeditors ["CPE"]
+	 * @deprecated since 9.5.0. Use {@link ApiTablePr#SetShd} instead.
+	 * @param {ShdType | ApiFill} sType - The shading type applied to the contents of the current table. Can be ShdType or ApiFill.
+	 * @param {byte} r - Red color component value.
+	 * @param {byte} g - Green color component value.
+	 * @param {byte} b - Blue color component value.
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/SetShd.js
+	 */
+	/**
+	 * Sets the background color to all cells in the current table.
+	 *
+	 * @memberof ApiTable
+	 * @typeofeditors ["CDE"]
+	 *
+	 * @since 9.5.0
+	 * @param {ApiColor} [color] - If not passed, the background color will be cleared.
+	 * @return {boolean}
+	 *
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/SetBackgroundColor.js
+	 */
+	ApiTable.prototype.SetBackgroundColor = function (color) {
+		let allRowsUpdated = true;
+
+		for (let nRow = 0, nCount = this.GetRowsCount(); nRow < nCount; nRow++) {
+			const oRow = this.GetRow(nRow);
+			const rowUpdated = oRow.SetBackgroundColor.apply(oRow, arguments);
+			if (!rowUpdated) allRowsUpdated = false;
+		}
+
+		return allRowsUpdated;
+	};
+
+	ApiTable.prototype.GetSelectedCells = function(){
+		let cells = [];
+		let positions = this.Table.GetSelectionArray();
+		for (let nPos = 0; nPos < positions.length; nPos++)
+		{
+			let pos = positions[nPos];
+			cells.push(this.GetCell(pos.Row, pos.Cell));
+		}
+		return cells
+	};
+
+	ApiTable.prototype.GetSelectedColumnsCells = function () {
+		let colsNum = [];
+		let cols = [];
+
+		let cells = this.Table.GetSelectionArray();
+		for (let index = 0; index < cells.length; index++) {
+			let element = cells[index];
+			if (!colsNum.includes(element.Cell))
+				colsNum.push(element.Cell);
+		}
+
+		for (let i = 0; i < colsNum.length; i++)
+		{
+			let num = colsNum[i];
+			let cells = this.Table.GetColumn(num,0);
+			cells.forEach(function(cell) {
+				cols.push( new ApiTableCell(cell) )
+			})
+
+		}
+		return cols
+	};
+
+	ApiTable.prototype.GetSelectedRows = function()
+	{
+		let rowsNum = [];
+		let rows = [];
+
+		let cells = this.Table.GetSelectionArray();
+		for (let index = 0; index < cells.length; index++) {
+			let element = cells[index];
+			if (!rowsNum.includes(element.Row))
+				rowsNum.push(element.Row)
+		}
+
+		for (let i = 0; i < rowsNum.length; i++)
+		{
+			let num = rowsNum[i];
+			rows.push(this.GetRow(num));
+		}
+		return rows
+	};
+
+	ApiTable.prototype.GetCurCell = function()
+	{
+		let cell = this.Table.GetCurCell();
+		if (cell)
+			return new ApiTableCell(cell);
+
+		return null;
+	}
+
+	ApiTable.prototype.SetShd = function(sType, r, g, b)
     {
         var oPr    = this.Table.Pr.Copy();
         var color  = new Asc.asc_CColor({r : r, g: g, b: b, Auto : false});
@@ -7755,7 +8204,7 @@
 		return JSON.stringify(oResult);
 	};
 
-    //------------------------------------------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------------------------------------------
     //
     // ApiTableRow
     //
@@ -7767,7 +8216,7 @@
      * @returns {"tableRow"}
      * @see office-js-api/Examples/{Editor}/ApiTableRow/Methods/GetClassType.js
 	 */
-    ApiTableRow.prototype.GetClassType = function()
+	ApiTableRow.prototype.GetClassType = function()
     {
         return "tableRow";
     };
@@ -7844,7 +8293,28 @@
 
 		return private_MM2EMU(rowInfo.H[0]);
 	};
+	ApiTableRow.prototype.SetRowPr = function(oApiTableRowPr)
+	{
+		if (!oApiTableRowPr || !oApiTableRowPr.GetClassType || oApiTableRowPr.GetClassType() !== "tableRowPr")
+			return false;
 
+		this.RowPr.Merge(oApiTableRowPr.RowPr);
+		this.private_OnChange();
+
+		return true;
+	};
+
+	//------------------------------------------------------------------------------------------------------------------
+    //
+    // ApiTablePr
+    //
+    //------------------------------------------------------------------------------------------------------------------
+
+	ApiTablePr.prototype.private_OnChange = function()
+	{
+		if (this.Parent)
+			this.Parent.OnChangeTablePr(this);
+	};
     //------------------------------------------------------------------------------------------------------------------
     //
     // ApiTableCell
@@ -7861,7 +8331,432 @@
     {
         return "tableCell";
     };
+	/**
+	 * Returns an internal id of the current table cell.
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 * @since 9.2.0
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/GetInternalId.js
+	 */
+	ApiTableCell.prototype.GetInternalId = function()
+	{
+		return this.Cell.GetId();
+	};
+	/**
+	 * Returns the current cell index.
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 * @returns {Number}
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/GetIndex.js
+	 */
+	ApiTableCell.prototype.GetIndex = function()
+	{
+		return this.Cell.GetIndex();
+	};
+	/**
+	 * Returns an index of the parent row.
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 * @returns {number}
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/GetRowIndex.js
+	 */
+	ApiTableCell.prototype.GetRowIndex = function()
+	{
+		var Row = this.Cell.GetRow();
+		if(!Row)
+			return -1;
 
+		return Row.GetIndex();
+	};
+	/**
+	 * Returns a parent row of the current cell.
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 * @returns {ApiTableRow | null} - returns null if parent row doesn't exist.
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/GetParentRow.js
+	 */
+	ApiTableCell.prototype.GetParentRow = function()
+	{
+		var Row = this.Cell.GetRow();
+		if(!Row)
+			return null;
+
+		return new ApiTableRow(Row);
+	};
+	/**
+	 * Returns a parent table of the current cell.
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 * @returns {ApiTable | null} - returns null if parent table doesn't exist.
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/GetParentTable.js
+	 */
+	ApiTableCell.prototype.GetParentTable = function()
+	{
+		var oTable = this.Cell.GetTable();
+		if(!oTable)
+			return null;
+
+		let oPresentation = private_GetPresentation();
+		let frame = oPresentation.Create_TableGraphicFrame(null, null, null, oPresentation.DefaultTableStyleId);
+		frame.setGraphicObject(oTable);
+
+		return new ApiTable(frame);
+	};
+	/**
+	 * Adds the new rows to the current table.
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 * @param {Number} nCount - Count of rows to be added.
+	 * @param {boolean} [isBefore=false] - Specifies if the new rows will be added before or after the current cell. 
+	 * @returns {ApiTable | null} - returns null if parent table doesn't exist.
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/AddRows.js
+	 */
+	ApiTableCell.prototype.AddRows = function(nCount, isBefore)
+	{
+		var oTable = this.GetParentTable();
+		if(!oTable)
+			return null;
+
+		oTable.AddRows(this, nCount, isBefore);
+
+		return oTable;
+	};
+	/**
+	 * Adds the new columns to the current table.
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 * @param {Number} nCount - Count of columns to be added.
+	 * @param {boolean} [isBefore=false] - Specifies if the new columns will be added before or after the current cell. 
+	 * @returns {ApiTable | null} - returns null if parent table doesn't exist.
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/AddColumns.js
+	 */
+	ApiTableCell.prototype.AddColumns = function(nCount, isBefore)
+	{
+		var oTable = this.GetParentTable();
+		if(!oTable)
+			return null;
+			
+		oTable.AddColumns(this, nCount, isBefore);
+
+		return oTable;
+	};
+	/**
+	 * Removes a column containing the current cell.
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 * @returns {boolean} - returns false if table doen't exist
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/RemoveColumn.js
+	 */
+	ApiTableCell.prototype.RemoveColumn = function()
+	{
+		var oTable = this.GetParentTable();
+		if (!oTable)
+			return false;
+
+		return oTable.RemoveColumn(this);
+	};
+	/**
+	 * Removes a row containing the current cell.
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 * @returns {boolean} Is the table empty after removing.
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/RemoveRow.js
+	 */
+	ApiTableCell.prototype.RemoveRow = function()
+	{
+		var oTable = this.GetParentTable();
+		if (!oTable)
+			return false;
+
+		return oTable.RemoveRow(this);
+	};
+	/**
+	 * Returns the next cell if exists.
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 * @returns {ApiTableCell | null} - returns null if cell is last.
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/GetNext.js
+	 */
+	ApiTableCell.prototype.GetNext = function()
+	{
+		var nextCell = this.Cell.Next;
+		if(!nextCell)
+			return null;
+		
+		return new ApiTableCell(nextCell);
+	};
+	/**
+	 * Returns the previous cell if exists.
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 * @returns {ApiTableCell | null} - returns null is cell is first. 
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/GetPrevious.js
+	 */
+	ApiTableCell.prototype.GetPrevious = function()
+	{
+		var prevCell = this.Cell.Prev;
+		if(!prevCell)
+			return null;
+		
+		return new ApiTableCell(prevCell);
+	};
+	/**
+	 * Sets the cell properties to the current cell.
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 * @param {ApiTableCellPr} oApiTableCellPr - The properties that will be set to the current table cell.
+	 * @returns {boolean} - returns false if param is invalid.
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/SetCellPr.js
+	 */
+	ApiTableCell.prototype.SetCellPr = function(oApiTableCellPr)
+	{
+		if (!oApiTableCellPr || !oApiTableCellPr.GetClassType || oApiTableCellPr.GetClassType() !== "tableCellPr")
+			return false;
+
+		this.CellPr.Merge(oApiTableCellPr.CellPr);
+		this.private_OnChange();
+
+		return true;
+	};
+	/**
+	 * Applies the text settings to the entire contents of the current cell.
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 * @param {ApiTextPr} oTextPr - The properties that will be set to the current table cell text.
+	 * @return {boolean} - returns false if param is invalid.
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/SetTextPr.js
+	 */
+	ApiTableCell.prototype.SetTextPr = function(oTextPr)
+	{
+		if (!oTextPr || !oTextPr.GetClassType || oTextPr.GetClassType() !== "textPr")
+			return false;
+
+		var cellContent		= this.Cell.GetContent();
+		var allParagraphs	= [];
+
+		cellContent.GetAllParagraphs({All : true}, allParagraphs);
+		for (var curPara = 0; curPara < allParagraphs.length; curPara++)
+		{
+			allParagraphs[curPara].SetApplyToAll(true);
+			allParagraphs[curPara].Add(new AscCommonWord.ParaTextPr(oTextPr.TextPr));
+			allParagraphs[curPara].SetApplyToAll(false);
+		}
+		
+		return true;
+	};
+	/**
+	 * Clears the content from the current cell.
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 * @return {boolean} - returns false if parent row is invalid.
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/Clear.js
+	 */
+	ApiTableCell.prototype.Clear = function()
+	{
+		var oRow = this.GetParentRow();
+		if (!oRow)
+			return false;
+
+		for (var curCell = 0, cellsCount = oRow.GetCellsCount(); curCell < cellsCount; curCell++)
+		{
+			oRow.Row.GetCell(curCell).GetContent().Clear_Content();
+		}
+
+		return true;
+	};
+	/**
+	 * Returns the background color of the current table cell.
+	 *
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 * @return {?ApiColor}
+	 * @since 9.1.0
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/GetBackgroundColor.js
+	 */
+	ApiTableCell.prototype.GetBackgroundColor = function () {
+		const shd = this.Cell.Get_Shd();
+		if (!shd || shd.Value === Asc.c_oAscShd.Nil)
+			return null;
+
+		const unifill = shd.ThemeFill;
+		const unifillColor = unifill && unifill.fill && unifill.fill.color && unifill.fill.color.color;
+		if (unifillColor) {
+			if (unifillColor instanceof AscFormat.CSchemeColor)
+				return new ApiColor('theme', unifillColor.id);
+
+			if (unifillColor instanceof AscFormat.CRGBColor)
+				return Api.RGB(unifillColor.r, unifillColor.g, unifillColor.b);
+		}
+
+		const color = shd.Fill;
+		if (color) {
+			const isAuto = color.Auto === true;
+			return isAuto
+				? Api.AutoColor()
+				: Api.RGB(color.r, color.g, color.b);
+		}
+
+		return null;
+	};
+
+	function private_GetTableBorder(sType, nSize, oApiColor)
+	{
+		var oBorder = new CDocumentBorder();
+
+		if ("none" === sType)
+		{
+			oBorder.Value = border_None;
+			oBorder.Size  = 0;
+			oBorder.Space = 0;
+			oBorder.Color.Set(0, 0, 0, true);
+
+			//oBorder.Unifill = oApiColor.UniFill
+		}
+		else
+		{
+			if ("single" === sType)
+				oBorder.Value = border_Single;
+
+			oBorder.Size  = nSize;
+			oBorder.Space = 0;
+			oBorder.Unifill = oApiColor.UniFill;
+		}
+
+		return oBorder;
+	}
+
+	/**
+	 * Sets the background color to the current table cell.
+	 *
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 *
+	 * @deprecated since 9.1.0 version.
+	 * @param {byte} r - Red color component value.
+	 * @param {byte} g - Green color component value.
+	 * @param {byte} b - Blue color component value.
+	 * @param {boolean} bNone - Defines that background color will not be set.
+	 * @returns {boolean}
+	 *
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/SetBackgroundColor.js
+	 */
+	/**
+	 * Sets the background color to the current table cell.
+	 *
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 *
+	 * @since 9.1.0
+	 * @param {ApiColor} [color] - If not passed, the background color will be cleared.
+	 * @return {boolean}
+	 *
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/SetBackgroundColor.js
+	 */
+	ApiTableCell.prototype.SetBackgroundColor = function (color)
+	{
+		let r, g, b;
+		let bNone;
+		let isAuto, isTheme;
+
+		if (color instanceof AscBuilder.ApiColor) {
+			const rgb = color.GetRGB();
+			r = rgb['r'];
+			g = rgb['g'];
+			b = rgb['b'];
+			bNone = false;
+			isAuto = color.IsAutoColor();
+			isTheme = color.IsThemeColor();
+		} else {
+			r = GetIntParameter(arguments[0], 0);
+			g = GetIntParameter(arguments[1], 0);
+			b = GetIntParameter(arguments[2], 0);
+			bNone = GetBoolParameter(arguments[3], false);
+			isAuto = false;
+			isTheme = false;
+		}
+
+		if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255)
+			return false;
+
+		const oUnifill = isTheme
+			? color.private_createUnifill()
+			: Api.RGB(r, g, b).private_createUnifill();
+
+		const oNewShd = {
+			Value: bNone ? Asc.c_oAscShd.Nil : Asc.c_oAscShd.Clear,
+			Fill: { r: r, g: g, b: b, Auto: isAuto },
+			// Color: { r: r, g: g, b: b, Auto: isAuto },
+			ThemeFill: isTheme ? oUnifill : undefined,
+			// Unifill: oUnifill.createDuplicate(),
+		};
+
+		this.Cell.Set_Shd(oNewShd);
+		return true;
+	};
+	/**
+	 * Sets the background color to all cells in the column containing the current cell.
+	 *
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 *
+	 * @deprecated since 9.1.0 version.
+	 * @param {byte} r - Red color component value.
+	 * @param {byte} g - Green color component value.
+	 * @param {byte} b - Blue color component value.
+	 * @param {boolean} bNone - Defines that background color will not be set.
+	 * @returns {boolean}
+	 *
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/SetColumnBackgroundColor.js
+	 */
+	/**
+	 * Sets the background color to all cells in the column containing the current cell.
+	 *
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 *
+	 * @since 9.1.0
+	 * @param {ApiColor} [color] - If not passed, the background color will be cleared.
+	 * @return {boolean}
+	 *
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/SetColumnBackgroundColor.js
+	 */
+	ApiTableCell.prototype.SetColumnBackgroundColor = function(color)
+	{
+		const oTable = this.GetParentTable();
+		const aColumnCells = oTable.Table.GetColumn(this.GetIndex(), this.GetParentRow().GetIndex());
+		if (aColumnCells.length === 0)
+			return false;
+
+		let allCellsUpdated = true;
+
+		const aCellsToFill = aColumnCells.map(function (cell) {
+			return new ApiTableCell(cell);
+		});
+
+		for (let nCell = 0; nCell < aCellsToFill.length; nCell++) {
+			const apiCell = aCellsToFill[nCell];
+			const cellUpdated = apiCell.SetBackgroundColor.apply(apiCell, arguments);
+			if (!cellUpdated) allCellsUpdated = false;
+		}
+
+		return allCellsUpdated;
+	};
+	function GetIntParameter(parameter, defaultValue)
+	{
+		let result = parseInt(parameter);
+		if (isNaN(result) || ("" + result) !== ("" + parameter))
+			return defaultValue;
+		
+		return result;
+	}
+	function GetBoolParameter(parameter, defaultValue)
+	{
+		if (undefined !== parameter && typeof(parameter) === "boolean")
+			return parameter;
+
+		return defaultValue;
+	}
     /**
      * Returns the current cell content.
      * @typeofeditors ["CPE"]
@@ -8043,14 +8938,10 @@
      * @param {ApiFill} oApiFill - The color or pattern used to fill the current border.
      * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/SetCellBorderBottom.js
 	 */
-    ApiTableCell.prototype.SetCellBorderBottom = function(fSize, oApiFill)
+    ApiTableCell.prototype.SetCellBorderBottom = function(sType, fSize, oApiFill)
     {
-        var oBorder = new CDocumentBorder();
-        oBorder.Value = border_Single;
-        oBorder.Size  = fSize;
-        oBorder.Space = 0;
-        oBorder.Unifill = oApiFill.UniFill;
-        var oPr = this.Cell.Pr.Copy();
+        var oBorder = private_GetTableBorder(sType, fSize, oApiFill);
+		var oPr = this.Cell.Pr.Copy();
         oPr.TableCellBorders.Bottom = oBorder;
         this.Cell.Set_Pr(oPr);
     };
@@ -8062,13 +8953,9 @@
      * @param {ApiFill} oApiFill - The color or pattern used to fill the current border.
      * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/SetCellBorderLeft.js
 	 */
-    ApiTableCell.prototype.SetCellBorderLeft = function(fSize, oApiFill)
+    ApiTableCell.prototype.SetCellBorderLeft = function(sType, fSize, oApiFill)
     {
-        var oBorder = new CDocumentBorder();
-        oBorder.Value = border_Single;
-        oBorder.Size  = fSize;
-        oBorder.Space = 0;
-        oBorder.Unifill = oApiFill.UniFill;
+		var oBorder = private_GetTableBorder(sType, fSize, oApiFill);
         var oPr = this.Cell.Pr.Copy();
         oPr.TableCellBorders.Left = oBorder;
         this.Cell.Set_Pr(oPr);
@@ -8081,13 +8968,9 @@
      * @param {ApiFill} oApiFill - The color or pattern used to fill the current border.
      * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/SetCellBorderRight.js
 	 */
-    ApiTableCell.prototype.SetCellBorderRight = function(fSize, oApiFill)
+    ApiTableCell.prototype.SetCellBorderRight = function(sType, fSize, oApiFill)
     {
-        var oBorder = new CDocumentBorder();
-        oBorder.Value = border_Single;
-        oBorder.Size  = fSize;
-        oBorder.Space = 0;
-        oBorder.Unifill = oApiFill.UniFill;
+        var oBorder = private_GetTableBorder(sType, fSize, oApiFill);
         var oPr = this.Cell.Pr.Copy();
         oPr.TableCellBorders.Right = oBorder;
         this.Cell.Set_Pr(oPr);
@@ -8100,13 +8983,9 @@
      * @param {ApiFill} oApiFill - The color or pattern used to fill the current border.
      * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/SetCellBorderTop.js
 	 */
-    ApiTableCell.prototype.SetCellBorderTop = function(fSize, oApiFill)
+    ApiTableCell.prototype.SetCellBorderTop = function(sType, fSize, oApiFill)
     {
-        var oBorder = new CDocumentBorder();
-        oBorder.Value = border_Single;
-        oBorder.Size  = fSize;
-        oBorder.Space = 0;
-        oBorder.Unifill = oApiFill.UniFill;
+        var oBorder = private_GetTableBorder(sType, fSize, oApiFill);
         var oPr = this.Cell.Pr.Copy();
         oPr.TableCellBorders.Top = oBorder;
         this.Cell.Set_Pr(oPr);
@@ -8146,6 +9025,213 @@
             oPr.TextDirection = textdirection_BTLR;
         this.Cell.Set_Pr(oPr);
     };
+
+	//------------------------------------------------------------------------------------------------------------------
+	//
+	// ApiTableCellPr
+	//
+	//------------------------------------------------------------------------------------------------------------------
+
+	ApiTableCell.prototype.OnChangeTableCellPr = function(oApiTableCellPr)
+	{
+		this.Cell.Set_Pr(oApiTableCellPr.CellPr);
+		this.CellPr = this.Cell.Pr.Copy();
+		oApiTableCellPr.CellPr = this.Cell.Pr.Copy();
+	};
+
+	//------------------------------------------------------------------------------------------------------------------
+	//
+	// ApiTableStylePr
+	//
+	//------------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Returns a type of the ApiTableStylePr class.
+	 * @memberof ApiTableStylePr
+	 * @typeofeditors ["CPE"]
+	 * @returns {"tableStylePr"}
+	 */
+	ApiTableStylePr.prototype.GetClassType = function()
+	{
+		return "tableStylePr";
+	};
+	/**
+	 * Returns a type of the current table conditional style.
+	 * @memberof ApiTableStylePr
+	 * @typeofeditors ["CPE"]
+	 * @returns {TableStyleOverrideType}
+	 */
+	ApiTableStylePr.prototype.GetType = function()
+	{
+		return this.Type;
+	};
+	/**
+	 * Returns a set of the table properties which will be applied to all the regions within a table which match the conditional formatting type.
+	 * @memberof ApiTableStylePr
+	 * @typeofeditors ["CPE"]
+	 * @returns {ApiTablePr}
+	 */
+	ApiTableStylePr.prototype.GetTablePr = function()
+	{
+		return new ApiTablePr(this, this.TableStylePr.TablePr);
+	};
+	/**
+	 * Sets the table properties to the current table style properties.
+	 * @memberof ApiTableStylePr
+	 * @typeofeditors ["CPE"]
+	 * @param {ApiTablePr} oTablePr - The table properties that will be set.
+	 * @returns {ApiTableStylePr} - this
+	 */
+	ApiTableStylePr.prototype.SetTablePr = function(oTablePr)
+	{
+		this.OnChangeTablePr(oTablePr);
+		return this;
+	};
+	/**
+	 * Returns a set of the table cell properties which will be applied to all the cells within a table which match the conditional formatting type.
+	 * @memberof ApiTableStylePr
+	 * @typeofeditors ["CPE"]
+	 * @returns {ApiTableCellPr}
+	 */
+	ApiTableStylePr.prototype.GetTableCellPr = function()
+	{
+		return new ApiTableCellPr(this, this.TableStylePr.TableCellPr);
+	};
+	/**
+	 * Sets the table cell properties to the current table style properties.
+	 * @memberof ApiTableStylePr
+	 * @typeofeditors ["CPE"]
+	 * @param {ApiTableCellPr} oTableCellPr - The table cell properties that will be set.
+	 * @returns {ApiTableStylePr} - this
+	 */
+	ApiTableStylePr.prototype.SetTableCellPr = function(oTableCellPr)
+	{
+		this.OnChangeTableCellPr(oTableCellPr);
+		return this;
+	};
+	/**
+	 * Converts the ApiTableStylePr object into the JSON object.
+	 * @memberof ApiTableStylePr
+	 * @typeofeditors ["CPE"]
+	 * @returns {JSON}
+	 */
+	ApiTableStylePr.prototype.ToJSON = function()
+	{
+		var oWriter = new AscJsonConverter.WriterToJSON();
+		return JSON.stringify(oWriter.SerTableStylePart(this.TableStylePr));
+	};
+	ApiTableStylePr.prototype.private_OnChange = function()
+	{
+		if (this.Parent)
+			this.Parent.OnChangeTableStylePr(this);
+	};
+	ApiTableStylePr.prototype.OnChangeTablePr = function(oApiTablePr)
+	{
+		this.TableStylePr = this.TableStylePr.Copy();
+		this.TableStylePr.TablePr = oApiTablePr.TablePr;
+
+		oApiTablePr.TablePr = this.TableStylePr.TablePr.Copy();
+
+		this.private_OnChange();
+	};
+	ApiTableStylePr.prototype.OnChangeTableCellPr = function(oApiTableCellPr)
+	{
+		this.TableStylePr = this.TableStylePr.Copy();
+		this.TableStylePr.TableCellPr = oApiTableCellPr.CellPr;
+
+		oApiTableCellPr.CellPr = this.TableStylePr.TableCellPr.Copy();
+
+		this.private_OnChange();
+	};
+	ApiTableStylePr.prototype.OnChangeTablePr = function(oApiTablePr)
+	{
+		this.TableStylePr = this.TableStylePr.Copy();
+		this.TableStylePr.TablePr = oApiTablePr.TablePr;
+
+		oApiTablePr.TablePr = this.TableStylePr.TablePr.Copy();
+
+		this.private_OnChange();
+	};
+	ApiTableStylePr.prototype.OnChangeTableRowPr = function(oApiTableRowPr)
+	{
+		this.TableStylePr = this.TableStylePr.Copy();
+		this.TableStylePr.TableRowPr = oApiTableRowPr.RowPr;
+
+		oApiTableRowPr.RowPr = this.TableStylePr.TableRowPr.Copy();
+
+		this.private_OnChange();
+	};
+	ApiTableStylePr.prototype.private_OnChange = function()
+	{
+		if (this.Parent)
+			this.Parent.OnChangeTableStylePr(this);
+	};
+	ApiTableStylePr.prototype.OnChangeTextPr = function(oApiTextPr)
+	{
+		this.TableStylePr = this.TableStylePr.Copy();
+		this.TableStylePr.TextPr = oApiTextPr.TextPr;
+
+		oApiTextPr.TextPr = this.TableStylePr.TextPr.Copy();
+
+		this.private_OnChange();
+	};
+	ApiTableStylePr.prototype.OnChangeParaPr = function(oApiParaPr)
+	{
+		this.TableStylePr = this.TableStylePr.Copy();
+		this.TableStylePr.ParaPr = oApiParaPr.ParaPr;
+
+		oApiParaPr.ParaPr = this.TableStylePr.ParaPr.Copy();
+
+		this.private_OnChange();
+	};
+	ApiTableStylePr.prototype.OnChangeTablePr = function(oApiTablePr)
+	{
+		this.TableStylePr = this.TableStylePr.Copy();
+		this.TableStylePr.TablePr = oApiTablePr.TablePr;
+
+		oApiTablePr.TablePr = this.TableStylePr.TablePr.Copy();
+
+		this.private_OnChange();
+	};
+	ApiTableStylePr.prototype.OnChangeTableRowPr = function(oApiTableRowPr)
+	{
+		this.TableStylePr = this.TableStylePr.Copy();
+		this.TableStylePr.TableRowPr = oApiTableRowPr.RowPr;
+
+		oApiTableRowPr.RowPr = this.TableStylePr.TableRowPr.Copy();
+
+		this.private_OnChange();
+	};
+	ApiTableStylePr.prototype.OnChangeTableCellPr = function(oApiTableCellPr)
+	{
+		this.TableStylePr = this.TableStylePr.Copy();
+		this.TableStylePr.TableCellPr = oApiTableCellPr.CellPr;
+
+		oApiTableCellPr.CellPr = this.TableStylePr.TableCellPr.Copy();
+
+		this.private_OnChange();
+	};
+
+	ApiTableRow.prototype.OnChangeTableRowPr = function(oApiTableRowPr)
+	{
+		this.Row.Set_Pr(oApiTableRowPr.RowPr);
+		this.RowPr = this.Row.Pr.Copy();
+		oApiTableRowPr.RowPr = this.Row.Pr.Copy();
+	};
+
+
+
+	// Other
+	ApiTableRowPr.prototype.private_OnChange = function()
+	{
+		if (this.Parent)
+			this.Parent.OnChangeTableRowPr(this);
+	};
+	ApiTableCellPr.prototype.private_OnChange = function()
+	{
+		if (this.Parent)
+			this.Parent.OnChangeTableCellPr(this);
+	};
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Export
@@ -8415,6 +9501,8 @@
     ApiDrawing.prototype["GetFlipV"]                      = ApiDrawing.prototype.GetFlipV;
     ApiDrawing.prototype["SetFlipH"]                      = ApiDrawing.prototype.SetFlipH;
     ApiDrawing.prototype["SetFlipV"]                      = ApiDrawing.prototype.SetFlipV;
+    ApiDrawing.prototype["SetLockAspect"]                 = ApiDrawing.prototype.SetLockAspect;
+    ApiDrawing.prototype["GetLockAspect"]                 = ApiDrawing.prototype.GetLockAspect;
     ApiDrawing.prototype["GetPosX"]                       = ApiDrawing.prototype.GetPosX;
     ApiDrawing.prototype["GetPosY"]                       = ApiDrawing.prototype.GetPosY;
     ApiDrawing.prototype["SetPosX"]                       = ApiDrawing.prototype.SetPosX;
@@ -8508,39 +9596,166 @@
 	ApiOleObject.prototype["SetApplicationId"]            = ApiOleObject.prototype.SetApplicationId;
 	ApiOleObject.prototype["GetApplicationId"]            = ApiOleObject.prototype.GetApplicationId;
 
-    ApiTable.prototype["GetClassType"]                    = ApiTable.prototype.GetClassType;
-    ApiTable.prototype["GetRow"]                          = ApiTable.prototype.GetRow;
-    ApiTable.prototype["MergeCells"]                      = ApiTable.prototype.MergeCells;
-    ApiTable.prototype["SetTableLook"]                    = ApiTable.prototype.SetTableLook;
-    ApiTable.prototype["AddRow"]                          = ApiTable.prototype.AddRow;
-    ApiTable.prototype["AddColumn"]                       = ApiTable.prototype.AddColumn;
-    ApiTable.prototype["RemoveRow"]                       = ApiTable.prototype.RemoveRow;
-    ApiTable.prototype["RemoveColumn"]                    = ApiTable.prototype.RemoveColumn;
-    ApiTable.prototype["SetShd"]                          = ApiTable.prototype.SetShd;
-	ApiTable.prototype["SetSize"]                         = ApiTable.prototype.SetSize;
-	ApiTable.prototype["SetColumnWidth"]                  = ApiTable.prototype.SetColumnWidth;
-	ApiTable.prototype["GetColumnWidth"]                  = ApiTable.prototype.GetColumnWidth;
-	ApiTable.prototype["ToJSON"]                          = ApiTable.prototype.ToJSON;
+	ApiTable.prototype["GetClassType"]					= ApiTable.prototype.GetClassType;
+	ApiTable.prototype["GetInternalId"]					= ApiTable.prototype.GetInternalId;
+	ApiTable.prototype["GetRowsCount"]					= ApiTable.prototype.GetRowsCount;
+	ApiTable.prototype["GetRow"]						= ApiTable.prototype.GetRow;
+	ApiTable.prototype["GetCell"]						= ApiTable.prototype.GetCell;
+	ApiTable.prototype["MergeCells"]					= ApiTable.prototype.MergeCells;
+	ApiTable.prototype["SetStyle"]						= ApiTable.prototype.SetStyle;
+	ApiTable.prototype["SetTableLook"]					= ApiTable.prototype.SetTableLook;
+    ApiTable.prototype["AddRow"]						= ApiTable.prototype.AddRow;
+    ApiTable.prototype["AddRows"]						= ApiTable.prototype.AddRows;
+    ApiTable.prototype["AddColumn"]						= ApiTable.prototype.AddColumn;
+    ApiTable.prototype["AddColumns"]					= ApiTable.prototype.AddColumns;
+	ApiTable.prototype["SetColumnWidth"]				= ApiTable.prototype.SetColumnWidth;
+	ApiTable.prototype["GetColumnWidth"]				= ApiTable.prototype.GetColumnWidth;
+	ApiTable.prototype["AddElement"]					= ApiTable.prototype.AddElement;
+    ApiTable.prototype["RemoveRow"]						= ApiTable.prototype.RemoveRow;
+    ApiTable.prototype["RemoveColumn"]					= ApiTable.prototype.RemoveColumn;
+	ApiTable.prototype["Copy"]							= ApiTable.prototype.Copy;
+	ApiTable.prototype["Select"]						= ApiTable.prototype.Select;
+	ApiTable.prototype["Delete"]						= ApiTable.prototype.Delete;
+	ApiTable.prototype["Clear"]							= ApiTable.prototype.Clear;
+	ApiTable.prototype["GetRange"]						= ApiTable.prototype.GetRange;
+    ApiTable.prototype["SetShd"]						= ApiTable.prototype.SetShd;
+	ApiTable.prototype["SetSize"]						= ApiTable.prototype.SetSize;
+    ApiTable.prototype["ToJSON"]						= ApiTable.prototype.ToJSON;
+    ApiTable.prototype["SetTableBorderTop"]				= ApiTable.prototype.SetTableBorderTop;
+    ApiTable.prototype["SetTableBorderBottom"]			= ApiTable.prototype.SetTableBorderBottom;
+    ApiTable.prototype["SetTableBorderLeft"]			= ApiTable.prototype.SetTableBorderLeft;
+    ApiTable.prototype["SetTableBorderRight"]			= ApiTable.prototype.SetTableBorderRight;
+    ApiTable.prototype["SetTableBorderInsideH"]			= ApiTable.prototype.SetTableBorderInsideH;
+    ApiTable.prototype["SetTableBorderInsideV"]			= ApiTable.prototype.SetTableBorderInsideV;
+    ApiTable.prototype["SetBackgroundColor"]			= ApiTable.prototype.SetBackgroundColor;
+    ApiTable.prototype["SetTableCellMarginBottom"]		= ApiTable.prototype.SetTableCellMarginBottom;
+    ApiTable.prototype["SetTableCellMarginLeft"]		= ApiTable.prototype.SetTableCellMarginLeft;
+    ApiTable.prototype["SetTableCellMarginRight"]		= ApiTable.prototype.SetTableCellMarginRight;
+    ApiTable.prototype["SetTableCellMarginTop"]			= ApiTable.prototype.SetTableCellMarginTop;
+    ApiTable.prototype["SetCellSpacing"]				= ApiTable.prototype.SetCellSpacing;
+    ApiTable.prototype["GetSelectedCells"]				= ApiTable.prototype.GetSelectedCells;
+    ApiTable.prototype["GetSelectedRows"]				= ApiTable.prototype.GetSelectedRows;
+    ApiTable.prototype["GetSelectedColumnsCells"]		= ApiTable.prototype.GetSelectedColumnsCells;
 
-    ApiTableRow.prototype["GetClassType"]                 = ApiTableRow.prototype.GetClassType;
-    ApiTableRow.prototype["GetCellsCount"]                = ApiTableRow.prototype.GetCellsCount;
-    ApiTableRow.prototype["GetCell"]                      = ApiTableRow.prototype.GetCell;
-    ApiTableRow.prototype["SetHeight"]                    = ApiTableRow.prototype.SetHeight;
-    ApiTableRow.prototype["GetHeight"]                    = ApiTableRow.prototype.GetHeight;
+	ApiTablePr.prototype["GetClassType"]            = ApiTablePr.prototype.GetClassType            = AscBuilder.ApiTablePr.prototype.GetClassType;
+	ApiTablePr.prototype["SetStyleColBandSize"]     = ApiTablePr.prototype.SetStyleColBandSize     = AscBuilder.ApiTablePr.prototype.SetStyleColBandSize;
+	ApiTablePr.prototype["SetStyleRowBandSize"]     = ApiTablePr.prototype.SetStyleRowBandSize     = AscBuilder.ApiTablePr.prototype.SetStyleRowBandSize;
+	ApiTablePr.prototype["SetJc"]                   = ApiTablePr.prototype.SetJc                   = AscBuilder.ApiTablePr.prototype.SetJc;
+	ApiTablePr.prototype["SetShd"]                  = ApiTablePr.prototype.SetShd                  = AscBuilder.ApiTablePr.prototype.SetShd;
+	ApiTablePr.prototype["SetTableBorderTop"]       = ApiTablePr.prototype.SetTableBorderTop       = AscBuilder.ApiTablePr.prototype.SetTableBorderTop;
+	ApiTablePr.prototype["SetTableBorderBottom"]    = ApiTablePr.prototype.SetTableBorderBottom    = AscBuilder.ApiTablePr.prototype.SetTableBorderBottom;
+	ApiTablePr.prototype["SetTableBorderLeft"]      = ApiTablePr.prototype.SetTableBorderLeft      = AscBuilder.ApiTablePr.prototype.SetTableBorderLeft;
+	ApiTablePr.prototype["SetTableBorderRight"]     = ApiTablePr.prototype.SetTableBorderRight     = AscBuilder.ApiTablePr.prototype.SetTableBorderRight;
+	ApiTablePr.prototype["SetTableBorderInsideH"]   = ApiTablePr.prototype.SetTableBorderInsideH   = AscBuilder.ApiTablePr.prototype.SetTableBorderInsideH;
+	ApiTablePr.prototype["SetTableBorderInsideV"]   = ApiTablePr.prototype.SetTableBorderInsideV   = AscBuilder.ApiTablePr.prototype.SetTableBorderInsideV;
+	ApiTablePr.prototype["SetTableBorderAll"]       = ApiTablePr.prototype.SetTableBorderAll       = AscBuilder.ApiTablePr.prototype.SetTableBorderAll;
+	ApiTablePr.prototype["SetTableCellMarginBottom"]= ApiTablePr.prototype.SetTableCellMarginBottom= AscBuilder.ApiTablePr.prototype.SetTableCellMarginBottom;
+	ApiTablePr.prototype["SetTableCellMarginLeft"]  = ApiTablePr.prototype.SetTableCellMarginLeft  = AscBuilder.ApiTablePr.prototype.SetTableCellMarginLeft;
+	ApiTablePr.prototype["SetTableCellMarginRight"] = ApiTablePr.prototype.SetTableCellMarginRight = AscBuilder.ApiTablePr.prototype.SetTableCellMarginRight;
+	ApiTablePr.prototype["SetTableCellMarginTop"]   = ApiTablePr.prototype.SetTableCellMarginTop   = AscBuilder.ApiTablePr.prototype.SetTableCellMarginTop;
+	ApiTablePr.prototype["SetCellSpacing"]          = ApiTablePr.prototype.SetCellSpacing          = AscBuilder.ApiTablePr.prototype.SetCellSpacing;
+	ApiTablePr.prototype["SetTableInd"]             = ApiTablePr.prototype.SetTableInd             = AscBuilder.ApiTablePr.prototype.SetTableInd;
+	ApiTablePr.prototype["SetWidth"]                = ApiTablePr.prototype.SetWidth                = AscBuilder.ApiTablePr.prototype.SetWidth;
+	ApiTablePr.prototype["SetTableLayout"]          = ApiTablePr.prototype.SetTableLayout          = AscBuilder.ApiTablePr.prototype.SetTableLayout;
+	ApiTablePr.prototype["SetTableTitle"]           = ApiTablePr.prototype.SetTableTitle           = AscBuilder.ApiTablePr.prototype.SetTableTitle;
+	ApiTablePr.prototype["GetTableTitle"]           = ApiTablePr.prototype.GetTableTitle           = AscBuilder.ApiTablePr.prototype.GetTableTitle;
+	ApiTablePr.prototype["SetTableDescription"]     = ApiTablePr.prototype.SetTableDescription     = AscBuilder.ApiTablePr.prototype.SetTableDescription;
+	ApiTablePr.prototype["GetTableDescription"]     = ApiTablePr.prototype.GetTableDescription     = AscBuilder.ApiTablePr.prototype.GetTableDescription;
+	ApiTablePr.prototype["ToJSON"]                  = ApiTablePr.prototype.ToJSON                  = AscBuilder.ApiTablePr.prototype.ToJSON;
 
-    ApiTableCell.prototype["GetClassType"]                = ApiTableCell.prototype.GetClassType;
-    ApiTableCell.prototype["GetContent"]                  = ApiTableCell.prototype.GetContent;
-    ApiTableCell.prototype["SetShd"]                      = ApiTableCell.prototype.SetShd;
-    ApiTableCell.prototype["SetCellMarginBottom"]         = ApiTableCell.prototype.SetCellMarginBottom;
-    ApiTableCell.prototype["SetCellMarginLeft"]           = ApiTableCell.prototype.SetCellMarginLeft;
-    ApiTableCell.prototype["SetCellMarginRight"]          = ApiTableCell.prototype.SetCellMarginRight;
-    ApiTableCell.prototype["SetCellMarginTop"]            = ApiTableCell.prototype.SetCellMarginTop;
-    ApiTableCell.prototype["SetCellBorderBottom"]         = ApiTableCell.prototype.SetCellBorderBottom;
-    ApiTableCell.prototype["SetCellBorderLeft"]           = ApiTableCell.prototype.SetCellBorderLeft;
-    ApiTableCell.prototype["SetCellBorderRight"]          = ApiTableCell.prototype.SetCellBorderRight;
-    ApiTableCell.prototype["SetCellBorderTop"]            = ApiTableCell.prototype.SetCellBorderTop;
-    ApiTableCell.prototype["SetVerticalAlign"]            = ApiTableCell.prototype.SetVerticalAlign;
-    ApiTableCell.prototype["SetTextDirection"]            = ApiTableCell.prototype.SetTextDirection;
+	Object.assign(ApiTable.prototype, {
+		SetSize: ApiDrawing.prototype.SetSize,
+		SetPosition: ApiDrawing.prototype.SetPosition,
+		GetParent: ApiDrawing.prototype.GetParent,
+		GetParentSlide: ApiDrawing.prototype.GetParentSlide,
+		GetParentLayout: ApiDrawing.prototype.GetParentLayout,
+		GetParentMaster: ApiDrawing.prototype.GetParentMaster,
+		SetPlaceholder: ApiDrawing.prototype.SetPlaceholder,
+		GetPlaceholder: ApiDrawing.prototype.GetPlaceholder
+	});
+
+    ApiTableRow.prototype["GetClassType"]				= ApiTableRow.prototype.GetClassType;
+    ApiTableRow.prototype["GetInternalId"]				= ApiTableRow.prototype.GetInternalId;
+    ApiTableRow.prototype["GetCellsCount"]				= ApiTableRow.prototype.GetCellsCount;
+    ApiTableRow.prototype["GetCell"]					= ApiTableRow.prototype.GetCell;
+    ApiTableRow.prototype["SetHeight"]					= ApiTableRow.prototype.SetHeight;
+	ApiTableRow.prototype["GetHeight"]                   = ApiTableRow.prototype.GetHeight;
+    ApiTableRow.prototype["GetIndex"]					= ApiTableRow.prototype.GetIndex;
+    ApiTableRow.prototype["Select"]						= ApiTableRow.prototype.Select;
+    ApiTableRow.prototype["GetNext"]					= ApiTableRow.prototype.GetNext;
+    ApiTableRow.prototype["GetPrevious"]				= ApiTableRow.prototype.GetPrevious;
+    ApiTableRow.prototype["AddRows"]					= ApiTableRow.prototype.AddRows;
+    ApiTableRow.prototype["MergeCells"]					= ApiTableRow.prototype.MergeCells;
+    ApiTableRow.prototype["Clear"]						= ApiTableRow.prototype.Clear;
+    ApiTableRow.prototype["Remove"]						= ApiTableRow.prototype.Remove;
+    ApiTableRow.prototype["SetTextPr"]					= ApiTableRow.prototype.SetTextPr;
+    ApiTableRow.prototype["SetBackgroundColor"]			= ApiTableRow.prototype.SetBackgroundColor;
+    ApiTableRow.prototype["SetRowPr"]					= ApiTableRow.prototype.SetRowPr;
+
+	ApiTableRowPr.prototype["GetClassType"]    = ApiTableRowPr.prototype.GetClassType    = AscBuilder.ApiTableRowPr.prototype.GetClassType;
+	ApiTableRowPr.prototype["SetHeight"]       = ApiTableRowPr.prototype.SetHeight       = AscBuilder.ApiTableRowPr.prototype.SetHeight;
+	ApiTableRowPr.prototype["SetTableHeader"]  = ApiTableRowPr.prototype.SetTableHeader  = AscBuilder.ApiTableRowPr.prototype.SetTableHeader;
+	ApiTableRowPr.prototype["ToJSON"]          = ApiTableRowPr.prototype.ToJSON          = AscBuilder.ApiTableRowPr.prototype.ToJSON;
+
+    ApiTableCell.prototype["GetClassType"]				= ApiTableCell.prototype.GetClassType;
+    ApiTableCell.prototype["GetInternalId"]				= ApiTableCell.prototype.GetInternalId;
+    ApiTableCell.prototype["GetIndex"]					= ApiTableCell.prototype.GetIndex;
+    ApiTableCell.prototype["GetRowIndex"]				= ApiTableCell.prototype.GetRowIndex;
+    ApiTableCell.prototype["GetParentRow"]				= ApiTableCell.prototype.GetParentRow;
+    ApiTableCell.prototype["GetParentTable"]			= ApiTableCell.prototype.GetParentTable;
+    ApiTableCell.prototype["AddRows"]					= ApiTableCell.prototype.AddRows;
+    ApiTableCell.prototype["AddColumns"]				= ApiTableCell.prototype.AddColumns;
+    ApiTableCell.prototype["RemoveColumn"]				= ApiTableCell.prototype.RemoveColumn;
+    ApiTableCell.prototype["RemoveRow"]					= ApiTableCell.prototype.RemoveRow;
+    ApiTableCell.prototype["GetNext"]					= ApiTableCell.prototype.GetNext;
+    ApiTableCell.prototype["GetPrevious"]				= ApiTableCell.prototype.GetPrevious;
+    ApiTableCell.prototype["SetCellPr"]					= ApiTableCell.prototype.SetCellPr;
+    ApiTableCell.prototype["SetTextPr"]					= ApiTableCell.prototype.SetTextPr;
+    ApiTableCell.prototype["Clear"]						= ApiTableCell.prototype.Clear;
+    ApiTableCell.prototype["GetBackgroundColor"]		= ApiTableCell.prototype.GetBackgroundColor;
+    ApiTableCell.prototype["GetContent"]				= ApiTableCell.prototype.GetContent;
+    ApiTableCell.prototype["SetShd"]					= ApiTableCell.prototype.SetShd;
+    ApiTableCell.prototype["SetCellMarginBottom"]		= ApiTableCell.prototype.SetCellMarginBottom;
+    ApiTableCell.prototype["SetCellMarginLeft"]			= ApiTableCell.prototype.SetCellMarginLeft;
+    ApiTableCell.prototype["SetCellMarginRight"]		= ApiTableCell.prototype.SetCellMarginRight;
+    ApiTableCell.prototype["SetCellMarginTop"]			= ApiTableCell.prototype.SetCellMarginTop;
+    ApiTableCell.prototype["SetCellBorderBottom"]		= ApiTableCell.prototype.SetCellBorderBottom;
+    ApiTableCell.prototype["SetCellBorderLeft"]			= ApiTableCell.prototype.SetCellBorderLeft;
+    ApiTableCell.prototype["SetCellBorderRight"]		= ApiTableCell.prototype.SetCellBorderRight;
+    ApiTableCell.prototype["SetCellBorderTop"]			= ApiTableCell.prototype.SetCellBorderTop;
+    ApiTableCell.prototype["SetBackgroundColor"]		= ApiTableCell.prototype.SetBackgroundColor;
+    ApiTableCell.prototype["SetVerticalAlign"]			= ApiTableCell.prototype.SetVerticalAlign;
+    ApiTableCell.prototype["SetTextDirection"]			= ApiTableCell.prototype.SetTextDirection;
+    ApiTableCell.prototype["SetColumnBackgroundColor"]	= ApiTableCell.prototype.SetColumnBackgroundColor;
+
+	ApiTableCellPr.prototype["GetClassType"]         = ApiTableCellPr.prototype.GetClassType         = AscBuilder.ApiTableCellPr.prototype.GetClassType;
+	ApiTableCellPr.prototype["SetShd"]               = ApiTableCellPr.prototype.SetShd               = AscBuilder.ApiTableCellPr.prototype.SetShd;
+	ApiTableCellPr.prototype["SetCellMarginBottom"]  = ApiTableCellPr.prototype.SetCellMarginBottom  = AscBuilder.ApiTableCellPr.prototype.SetCellMarginBottom;
+	ApiTableCellPr.prototype["SetCellMarginLeft"]    = ApiTableCellPr.prototype.SetCellMarginLeft    = AscBuilder.ApiTableCellPr.prototype.SetCellMarginLeft;
+	ApiTableCellPr.prototype["SetCellMarginRight"]   = ApiTableCellPr.prototype.SetCellMarginRight   = AscBuilder.ApiTableCellPr.prototype.SetCellMarginRight;
+	ApiTableCellPr.prototype["SetCellMarginTop"]     = ApiTableCellPr.prototype.SetCellMarginTop     = AscBuilder.ApiTableCellPr.prototype.SetCellMarginTop;
+	ApiTableCellPr.prototype["SetCellBorderBottom"]  = ApiTableCellPr.prototype.SetCellBorderBottom  = AscBuilder.ApiTableCellPr.prototype.SetCellBorderBottom;
+	ApiTableCellPr.prototype["SetCellBorderLeft"]    = ApiTableCellPr.prototype.SetCellBorderLeft    = AscBuilder.ApiTableCellPr.prototype.SetCellBorderLeft;
+	ApiTableCellPr.prototype["SetCellBorderRight"]   = ApiTableCellPr.prototype.SetCellBorderRight   = AscBuilder.ApiTableCellPr.prototype.SetCellBorderRight;
+	ApiTableCellPr.prototype["SetCellBorderTop"]     = ApiTableCellPr.prototype.SetCellBorderTop     = AscBuilder.ApiTableCellPr.prototype.SetCellBorderTop;
+	ApiTableCellPr.prototype["SetWidth"]             = ApiTableCellPr.prototype.SetWidth             = AscBuilder.ApiTableCellPr.prototype.SetWidth;
+	ApiTableCellPr.prototype["SetVerticalAlign"]     = ApiTableCellPr.prototype.SetVerticalAlign     = AscBuilder.ApiTableCellPr.prototype.SetVerticalAlign;
+	ApiTableCellPr.prototype["SetTextDirection"]     = ApiTableCellPr.prototype.SetTextDirection     = AscBuilder.ApiTableCellPr.prototype.SetTextDirection;
+	ApiTableCellPr.prototype["SetNoWrap"]            = ApiTableCellPr.prototype.SetNoWrap            = AscBuilder.ApiTableCellPr.prototype.SetNoWrap;
+	ApiTableCellPr.prototype["ToJSON"]               = ApiTableCellPr.prototype.ToJSON               = AscBuilder.ApiTableCellPr.prototype.ToJSON;
+
+	ApiTableStylePr.prototype["GetClassType"]    = ApiTableStylePr.prototype.GetClassType;
+	ApiTableStylePr.prototype["GetType"]         = ApiTableStylePr.prototype.GetType;
+	ApiTableStylePr.prototype["GetTablePr"]      = ApiTableStylePr.prototype.GetTablePr;
+	ApiTableStylePr.prototype["SetTablePr"]      = ApiTableStylePr.prototype.SetTablePr;
+	ApiTableStylePr.prototype["GetTableCellPr"]  = ApiTableStylePr.prototype.GetTableCellPr;
+	ApiTableStylePr.prototype["SetTableCellPr"]  = ApiTableStylePr.prototype.SetTableCellPr;
+	ApiTableStylePr.prototype["ToJSON"]          = ApiTableStylePr.prototype.ToJSON;
+
+	ApiStyle.prototype["GetClassType"]               = ApiStyle.prototype.GetClassType = AscBuilder.ApiStyle.prototype.GetClassType;
+	ApiStyle.prototype["GetName"]                    = ApiStyle.prototype.GetName = AscBuilder.ApiStyle.prototype.GetName;
+	ApiStyle.prototype["SetName"]                    = ApiStyle.prototype.SetName = AscBuilder.ApiStyle.prototype.SetName;
+	ApiStyle.prototype["GetType"]                    = ApiStyle.prototype.GetType = AscBuilder.ApiStyle.prototype.GetType;
 
     Api.private_CreateApiSlide = function(oSlide){
         return new ApiSlide(oSlide);
@@ -8554,6 +9769,9 @@
     Api.private_CreateApiPresentation = function(oPresentation){
         return new ApiPresentation(oPresentation);
     };
+	Api.private_CreateApiTableStylePr = function(sType, oTableStylePr){
+		return new ApiTableStylePr(sType, null, oTableStylePr);
+	};
 
 	/**
 	 * Class representing the selection in the presentation.
