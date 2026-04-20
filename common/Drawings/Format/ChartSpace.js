@@ -7755,13 +7755,20 @@ function(window, undefined) {
 		return unionMarker;
 	};
 
-	CChartSpace.prototype._buildWaterfallUnionMarker = function (ser, ptIdx, parents) {
+	CChartSpace.prototype._buildWaterfallUnionMarker = function (ser, ptIdx, categoryIdx, parents) {
 		const unionMarker = new AscFormat.CUnionMarker();
 		unionMarker.marker = AscFormat.CreateMarkerGeometryByType(AscFormat.SYMBOL_SQUARE);
 
 		if (ptIdx !== -1) {
 			unionMarker.marker.pen = ser.getPtPen(ptIdx);
 			unionMarker.marker.brush = ser.getPtBrush(ptIdx);
+		} else if (this.chartStyle && this.chartColors) {
+			const colors = this.chartColors.generateColors(3);
+			const style = this.getSpPrFormStyleEntry(this.chartStyle.dataPoint, colors, categoryIdx);
+			unionMarker.marker.pen = ser.compiledSeriesPen;
+			unionMarker.marker.brush = style && style.Fill
+				? style.Fill.createDuplicate()
+				: ser.compiledSeriesBrush;
 		} else {
 			unionMarker.marker.pen = ser.compiledSeriesPen;
 			unionMarker.marker.brush = ser.compiledSeriesBrush;
@@ -7976,7 +7983,7 @@ function(window, undefined) {
 				);
 				calcEntries.push(calcEntry);
 
-				calcEntry.calcMarkerUnion = this._buildWaterfallUnionMarker(ser, labels[i].ptIdx, parents);
+				calcEntry.calcMarkerUnion = this._buildWaterfallUnionMarker(ser, labels[i].ptIdx, i, parents);
 			}
 		}
 
@@ -9519,6 +9526,59 @@ function(window, undefined) {
 			}
 		}
 	};
+	CChartSpace.prototype._applyWaterfallPointColors = function (ser, parents, RGBA) {
+		if (!this.chartStyle || !this.chartColors) {
+			return;
+		}
+
+		const subtotals = (ser.layoutPr && ser.layoutPr.subtotals) ? ser.layoutPr.subtotals.idx : [];
+		const subtotalsSet = {};
+		for (let i = 0; i < subtotals.length; i++) {
+			subtotalsSet[subtotals[i]] = true;
+		}
+
+		const colors = this.chartColors.generateColors(3);
+		const categoryStyles = [
+			this.getSpPrFormStyleEntry(this.chartStyle.dataPoint, colors, 0),
+			this.getSpPrFormStyleEntry(this.chartStyle.dataPoint, colors, 1),
+			this.getSpPrFormStyleEntry(this.chartStyle.dataPoint, colors, 2)
+		];
+
+		const hasExplicitDPt = function (ser, idx) {
+			if (Array.isArray(ser.dPt)) {
+				for (let i = 0; i < ser.dPt.length; i++) {
+					if (ser.dPt[i].idx === idx && ser.dPt[i].spPr) {
+						return true;
+					}
+				}
+			}
+			return false;
+		};
+
+		const pts = ser.getNumPts ? ser.getNumPts() : [];
+		for (let i = 0; i < pts.length; i++) {
+			const pt = pts[i];
+
+			if (hasExplicitDPt(ser, pt.idx)) {
+				continue;
+			}
+
+			let category;
+			if (subtotalsSet[pt.idx]) {
+				category = 2;
+			} else if (pt.val < 0) {
+				category = 1;
+			} else {
+				category = 0;
+			}
+
+			const style = categoryStyles[category];
+			if (style && style.Fill) {
+				pt.brush = style.Fill.createDuplicate();
+				pt.brush.calculate(parents.theme, parents.slide, parents.layout, parents.master, RGBA, this.clrMapOvr);
+			}
+		}
+	};
 	CChartSpace.prototype.recalculateSeriesColors = function () {
 		this.removeCachedCanvas();
 		this.ptsCount = 0;
@@ -9658,6 +9718,11 @@ function(window, undefined) {
 				let oPlotAreaRegion = this.chart.plotArea.plotAreaRegion;
 				if(oPlotAreaRegion) {
 					defaultCalculateSeriesColors(oPlotAreaRegion.series);
+					for (let nSer = 0; nSer < oPlotAreaRegion.series.length; ++nSer) {
+						if (oPlotAreaRegion.series[nSer].layoutId === AscFormat.SERIES_LAYOUT_WATERFALL) {
+							this._applyWaterfallPointColors(oPlotAreaRegion.series[nSer], parents, RGBA);
+						}
+					}
 				}
 			}
 			else {
