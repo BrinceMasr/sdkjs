@@ -239,7 +239,7 @@
 		c_oAscDefaultShortcuts[Asc.c_oAscDocumentShortcutType.NonBreakingSpace].push(new AscShortcut(Asc.c_oAscDocumentShortcutType.NonBreakingSpace, keyCodes.Space, false, true, false, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscDocumentShortcutType.NonBreakingHyphen].push(new AscShortcut(Asc.c_oAscDocumentShortcutType.NonBreakingHyphen, keyCodes.KeyMinus, false, true, false, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscDocumentShortcutType.EditUndo].push(new AscShortcut(Asc.c_oAscDocumentShortcutType.EditUndo, keyCodes.KeyZ, false, false, false, true));
-		c_oAscDefaultShortcuts[Asc.c_oAscDocumentShortcutType.EditRedo].push(new AscShortcut(Asc.c_oAscDocumentShortcutType.EditRedo, keyCodes.KeyY, false, false, false, true));
+		c_oAscDefaultShortcuts[Asc.c_oAscDocumentShortcutType.EditRedo].push(new AscShortcut(Asc.c_oAscDocumentShortcutType.EditRedo, keyCodes.KeyY, false, false, false, true), new AscShortcut(Asc.c_oAscDocumentShortcutType.EditRedo, keyCodes.KeyZ, false, true, false, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscDocumentShortcutType.CopyFormat].push(new AscShortcut(Asc.c_oAscDocumentShortcutType.CopyFormat, keyCodes.KeyC, false, false, true, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscDocumentShortcutType.PasteFormat].push(new AscShortcut(Asc.c_oAscDocumentShortcutType.PasteFormat, keyCodes.KeyV, false, false, true, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscDocumentShortcutType.InsertHyperlink].push(new AscShortcut(Asc.c_oAscDocumentShortcutType.InsertHyperlink, keyCodes.KeyK, false, false, false, true));
