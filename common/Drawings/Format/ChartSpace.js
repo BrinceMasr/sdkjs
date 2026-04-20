@@ -7755,6 +7755,24 @@ function(window, undefined) {
 		return unionMarker;
 	};
 
+	CChartSpace.prototype._buildWaterfallUnionMarker = function (ser, ptIdx, parents) {
+		const unionMarker = new AscFormat.CUnionMarker();
+		unionMarker.marker = AscFormat.CreateMarkerGeometryByType(AscFormat.SYMBOL_SQUARE);
+
+		if (ptIdx !== -1) {
+			unionMarker.marker.pen = ser.getPtPen(ptIdx);
+			unionMarker.marker.brush = ser.getPtBrush(ptIdx);
+		} else {
+			unionMarker.marker.pen = ser.compiledSeriesPen;
+			unionMarker.marker.brush = ser.compiledSeriesBrush;
+		}
+
+		const RGBA = { R: 0, G: 0, B: 0, A: 255 };
+		unionMarker.marker.pen && unionMarker.marker.pen.calculate(parents.theme, parents.slide, parents.layout, parents.master, RGBA, this.clrMapOvr);
+		unionMarker.marker.brush && unionMarker.marker.brush.calculate(parents.theme, parents.slide, parents.layout, parents.master, RGBA, this.clrMapOvr);
+		return unionMarker;
+	};
+
 	CChartSpace.prototype._buildSeriesLegendEntries = function (series, isSurfaceChart) {
 		const legend = this.chart.legend;
 		const parents = this.getParentObjects();
@@ -7898,6 +7916,73 @@ function(window, undefined) {
 		};
 	};
 
+	CChartSpace.prototype._buildWaterfallLegendEntries = function (series) {
+		const legend = this.chart.legend;
+		const parents = this.getParentObjects();
+
+		const calcEntries = [];
+		this.legendLength = 0;
+
+		const ser = series[0];
+		if (ser) {
+			const subtotals = (ser.layoutPr && ser.layoutPr.subtotals) ? ser.layoutPr.subtotals.idx : [];
+			const subtotalsSet = {};
+			for (let i = 0; i < subtotals.length; i++) {
+				subtotalsSet[subtotals[i]] = true;
+			}
+
+			let increaseIdx = -1;
+			let decreaseIdx = -1;
+			const totalIdx = subtotals.length > 0 ? subtotals[0] : -1;
+
+			const pts = ser.getValPts();
+			for (let i = 0; i < pts.length; i++) {
+				const pt = pts[i];
+
+				if (subtotalsSet[pt.idx]) {
+					continue;
+				}
+
+				if (pt.val >= 0 && increaseIdx === -1) {
+					increaseIdx = pt.idx;
+				} else if (pt.val < 0 && decreaseIdx === -1) {
+					decreaseIdx = pt.idx;
+				}
+
+				if (increaseIdx !== -1 && decreaseIdx !== -1) {
+					break;
+				}
+			}
+
+			const labels = [
+				{ text: AscCommon.translateManager.getValue('Increase'), ptIdx: increaseIdx },
+				{ text: AscCommon.translateManager.getValue('Decrease'), ptIdx: decreaseIdx },
+				{ text: AscCommon.translateManager.getValue('Total'), ptIdx: totalIdx }
+			];
+
+			this.legendLength = labels.length;
+
+			for (let i = 0; i < labels.length; i++) {
+				const entry = legend.findLegendEntryByIndex(i);
+				if (entry && entry.bDelete) {
+					continue;
+				}
+
+				const calcEntry = new AscFormat.CalcLegendEntry(legend, this, i);
+				calcEntry.txBody = AscFormat.CreateTextBodyFromString(
+					labels[i].text,
+					this.getDrawingDocument(),
+					calcEntry
+				);
+				calcEntries.push(calcEntry);
+
+				calcEntry.calcMarkerUnion = this._buildWaterfallUnionMarker(ser, labels[i].ptIdx, parents);
+			}
+		}
+
+		return { calcEntries: calcEntries, hasLineSeries: false };
+	};
+
 	CChartSpace.prototype.recalculateLegend = function () {
 		const legend = this.chart && this.chart.legend;
 		if (!legend) {
@@ -7959,18 +8044,31 @@ function(window, undefined) {
 			isSeriesLegend = !hasCustomDPt && !firstChart.varyColors;
 		}
 
-		// Build legend entries (calcEntries) and assign markers to each.
-		// Each entry gets a text label and a CUnionMarker.
-		const entriesInfo = isSeriesLegend
-			? this._buildSeriesLegendEntries(series, isSurfaceChart)
-			: this._buildPointLegendEntries(series);
+		const isWaterfallChartEx = (
+			this.isChartEx() &&
+			series.length > 0 &&
+			series[0].layoutId === AscFormat.SERIES_LAYOUT_WATERFALL
+		);
+
+		let entriesInfo;
+		if (isWaterfallChartEx) {
+			entriesInfo = this._buildWaterfallLegendEntries(series);
+		} else if (isSeriesLegend) {
+			entriesInfo = this._buildSeriesLegendEntries(series, isSurfaceChart);
+		} else {
+			entriesInfo = this._buildPointLegendEntries(series);
+		}
+
 		let calcEntries = legend.calcEntryes = entriesInfo.calcEntries;
 		const hasLineSeries = entriesInfo.hasLineSeries;
 		const maxFontSize = calcEntries.reduce(function (max, entry) {
+			entry.txBody.getRectWidth(2000);
 			const fontSize = entry.txBody.content.Content[0].CompiledPr.Pr.TextPr.FontSize;
 			return fontSize > max ? fontSize : max;
 		}, 0);
 
+		// Calculate physical marker sizes and the gap between marker and text label.
+		// Line series use fixed sizes; other types scale with the font size.
 		let markerSize;
 		let distanceToText;
 		let lineMarkerWidth;
