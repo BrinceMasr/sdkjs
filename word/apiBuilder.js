@@ -32671,6 +32671,17 @@
 	ApiStyle.prototype.OnChangeTextPr = function(oApiTextPr)
 	{
 		this.Style.Set_TextPr(oApiTextPr.TextPr);
+		
+		let linkedStyleId = this.Style.GetLink();
+		if (linkedStyleId)
+		{
+			let logicDocument = private_GetLogicDocument();
+			let styles = logicDocument && logicDocument.IsDocumentEditor() ? logicDocument.GetStyles() : null;
+			let linkedStyle = styles ? styles.Get(linkedStyleId) : null;
+			if (linkedStyle)
+				linkedStyle.Set_TextPr(oApiTextPr.TextPr);
+		}
+		
 		oApiTextPr.TextPr = this.Style.TextPr.Copy();
 	};
 	ApiStyle.prototype.OnChangeParaPr = function(oApiParaPr)
