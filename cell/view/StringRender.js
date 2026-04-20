@@ -172,7 +172,10 @@
 				let isNL = stringRenderer.codesHypNL[char];
 				let isSP = !isNL ? stringRenderer.codesHypSp[char] : false;
 
-				if (isNL || isSP) {
+				if (isNL) {
+					this.FlushWord();
+					this.private_HandleItem({idx: beginIndex + i, char: char}, AscFonts.NO_GRAPHEME, 0);
+				} else if (isSP) {
 					this.FlushWord();
 					this.AppendToString({idx: beginIndex + i, char: char});
 				} else {
