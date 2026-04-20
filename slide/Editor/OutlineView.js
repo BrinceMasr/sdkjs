@@ -611,18 +611,20 @@
 		const slide = info && info.slide;
 		if (slide) {
 			const createdSp = slide.createTitle();
+			createdSp.clearContent();
 			const docContent = createdSp.getDocContent();
-			docContent.ClearContent(false);
-			const sourceParagraph = outlineParagraph.Copy(docContent);
-			docContent.Add_ToContent(0, sourceParagraph);
+			docContent.Update_ContentIndexing();
+			const sourceParagraph = docContent.Content[0];
 			this.outlineView.removeOutlineParagraph(outlineParagraph);
 			this.outlineView.addOutlineParagraph(sourceParagraph, outlineParagraph, info);
+			const newOutlineParagraph = this.outlineView.updateFromSourceParagraph(sourceParagraph);
+			newOutlineParagraph.Index = outlineParagraph.Index;
+			newOutlineParagraph.MoveCursorToStartPos();
 			const oThis = this;
-			this.forEachSelectedContent(function (selectProps) {
-				if (selectProps.content) {
-					oThis.processSourceContentAdd(selectProps.content, selectProps.index, selectProps.count, paraItem);
-				}
-			});
+			docContent.MoveCursorToStartPos();
+			if (docContent) {
+				oThis.processSourceContentAdd(docContent, 0, 1, paraItem);
+			}
 		}
 	};
 	ParagraphAddManager.prototype.processSourceContentAdd = function (content, idx, contentCount, paraItem) {
@@ -724,11 +726,12 @@
 		}
 	};
 	OutlineView.prototype.addCopyParagraph = function (paragraph, pos, isFirstParagraph, pr) {
-		AscFormat.ExecuteNoHistory(function () {
+		return AscFormat.ExecuteNoHistory(function () {
 			const outlineContent = this.getDocContent();
 			const copyParagraph = this.getCopyParagraph(outlineContent, paragraph, !!(pr && pr.slide));
 			outlineContent.AddToContent(pos, copyParagraph);
 			this.addOutlineParagraph(paragraph, copyParagraph, isFirstParagraph ? pr : null);
+			return copyParagraph;
 		}, this, []);
 	}
 	OutlineView.prototype.removeParagraph = function (outlineParagraph, pos) {
@@ -1250,11 +1253,11 @@
 		const outlineParagraph = this.sourceToOutlineMap[sourceParagraph.Get_Id()];
 		const index = outlineParagraph.Index;
 		this.removeParagraph(outlineParagraph, index);
-		this.addUpdatedParagraph(sourceParagraph, index);
+		return this.addUpdatedParagraph(sourceParagraph, index);
 	};
 	OutlineView.prototype.addUpdatedParagraph = function (sourceParagraph, index) {
 		const pr = this.getPropertiesFromSourceShape(sourceParagraph);
-		this.addCopyParagraph(sourceParagraph, index, sourceParagraph.Index === 0, pr);
+		return this.addCopyParagraph(sourceParagraph, index, sourceParagraph.Index === 0, pr);
 	};
 
 	function UpdateData() {
@@ -1301,9 +1304,7 @@
 	OutlineView.prototype.updateExistingParagraphs = function (existingOutlineParagraphs) {
 		const oThis = this;
 		existingOutlineParagraphs.sort(function (aParagraph, bParagraph) {
-			const aOutlineParagraph = aParagraph;
-			const bOutlineParagraph = bParagraph;
-			return bOutlineParagraph.Index - aOutlineParagraph.Index;
+			return bParagraph.Index - aParagraph.Index;
 		});
 		for (let i = 0; i < existingOutlineParagraphs.length; i += 1) {
 			const outlineParagraph = existingOutlineParagraphs[i];
