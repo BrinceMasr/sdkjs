@@ -4092,6 +4092,14 @@
 	 */
 
 	/**
+	 * @typedef {Object} TabStop
+	 * A paragraph tab stop.
+	 * @property {twips} Pos - The tab stop position measured in twentieths of a point (1/1440 of an inch).
+	 * @property {TabJc} Val - The tab stop alignment style.
+	 * @property {("none" | "dot" | "heavy" | "hyphen" | "middleDot" | "underscore")} Leader - The tab leader character.
+	 */
+
+	/**
 	 * Eighths of a point (24 eighths of a point = 3 points).
 	 * @typedef {number} pt_8
 	 * @see office-js-api/Examples/Enumerations/pt_8.js
@@ -17618,10 +17626,7 @@
 	 * @memberof ApiParaPr
 	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
 	 * @since 9.4.0
-	 * @returns {{Pos: twips, Val: TabJc, Leader: string}[]} An array of tab stop objects, each with:
-	 * <b>Pos</b> - the tab stop position measured in twentieths of a point (1/1440 of an inch),
-	 * <b>Val</b> - the tab stop style,
-	 * <b>Leader</b> - the tab leader character: <b>"none"</b>, <b>"dot"</b>, <b>"heavy"</b>, <b>"hyphen"</b>, <b>"middleDot"</b>, <b>"underscore"</b>.
+	 * @returns {TabStop[]}
 	 * @see office-js-api/Examples/{Editor}/ApiParaPr/Methods/GetTabs.js
 	 */
 	ApiParaPr.prototype.GetTabs = function()
