@@ -4290,7 +4290,7 @@
 	 * Available dash type for line.
 	 * @typedef {"dash" | "dashDot" | "dot" | "lgDash" | "lgDashDot" | "lgDashDotDot" |
 	 * "solid" | "sysDash" | "sysDashDot" | "sysDashDotDot" | "sysDot"} DashType
-	 * @see office-js-api/Examples/Enumerations/LineDash.js
+	 * @see office-js-api/Examples/Enumerations/DashType.js
 	 */
 
 	//------------------------------------------------------------------------------------------------------------------
