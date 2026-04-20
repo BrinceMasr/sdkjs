@@ -2568,7 +2568,8 @@
 			oWordControl.m_bIsScroll = false;
 			oWordControl.OnPaint();
 
-			if (isThUpdateSync !== undefined) {
+			const oLogicDocument = oWordControl.m_oLogicDocument;
+			if (isThUpdateSync !== undefined || oLogicDocument && oLogicDocument.IsFocusOnOutline()) {
 				oWordControl.Thumbnails.onCheckUpdate();
 			}
 		}
@@ -2611,7 +2612,8 @@
 			oWordControl.m_bIsScroll = false;
 			oWordControl.OnPaint();
 
-			if (isThUpdateSync !== undefined) {
+			const oLogicDocument = oWordControl.m_oLogicDocument;
+			if (isThUpdateSync !== undefined || oLogicDocument && oLogicDocument.IsFocusOnOutline()) {
 				oWordControl.Thumbnails.onCheckUpdate();
 			}
 			if (null != oWordControl.m_oLogicDocument && oWordControl.m_oApi.bInit_word_control)
