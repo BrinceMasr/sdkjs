@@ -263,6 +263,7 @@
 			const content = contentInfo.content;
 			const startPos = this.rebuildPos(contentInfo.startPos, content, contentInfo.startParagraph);
 			const endPos = this.rebuildPos(contentInfo.endPos, content, contentInfo.endParagraph);
+			content.SetContentPosition(startPos, 0, 0);
 			content.SetContentSelection(startPos, endPos, 0, 0, 0, 0);
 			const res = callback({content: content, index: 0, count: 1});
 			content.RemoveSelection();
@@ -404,15 +405,15 @@
 		}
 	};
 	RemoveOutlineParagraphsManager.prototype.processCommonPosContent = function () {
-		const docContent = this.getDocContent();
-		const contentPos = docContent.GetContentPosition(false, true);
-		const outlineParagraph = contentPos[1].Class;
-		const sourceParagraph = this.getSourceParagraph(outlineParagraph);
-		if (sourceParagraph) {
-			const content = sourceParagraph.GetParent();
-			content.Remove(-1, true, false, false);
-			this.saveContentPosSourceParagraph(content);
-		}
+		const oThis = this;
+		const outlineView = this.outlineView;
+		outlineView.forEachSelectedContent(function (selectProps) {
+			const content = selectProps.content;
+			if (content) {
+				content.Remove(-1, true, false, false);
+				oThis.saveContentPosSourceParagraph(content);
+			}
+		});
 	};
 	RemoveOutlineParagraphsManager.prototype.processCursorAtBegin = function () {
 		const docContent = this.getDocContent();
@@ -1150,6 +1151,7 @@
 		if (docContent) {
 			const savedPostion = this.getSavedPosition();
 			if (savedPostion.startPos) {
+				docContent.RemoveSelection();
 				if (savedPostion.endPos) {
 					const startPos = this.rebuildSavedPositionPos(savedPostion.startPos);
 					const endPos = this.rebuildSavedPositionPos(savedPostion.endPos);
