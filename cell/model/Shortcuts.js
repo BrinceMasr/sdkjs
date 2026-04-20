@@ -269,7 +269,7 @@
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.SelectBeginningWorksheet].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.SelectBeginningWorksheet, keyCodes.Home, false, true, false, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.SelectLastUsedCell].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.SelectLastUsedCell, keyCodes.End, false, true, false, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.EditUndo].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.EditUndo, keyCodes.KeyZ, false, false, false, true));
-		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.EditRedo].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.EditRedo, keyCodes.KeyY, false, false, false, true));
+		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.EditRedo].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.EditRedo, keyCodes.KeyY, false, false, false, true), new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.EditRedo, keyCodes.KeyZ, false, true, false, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.InsertHyperlink].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.InsertHyperlink, keyCodes.KeyK, false, false, false, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.Bold].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.Bold, keyCodes.KeyB, false, false, false, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.Underline].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.Underline, keyCodes.KeyU, false, false, false, true));
