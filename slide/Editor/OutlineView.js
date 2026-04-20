@@ -800,6 +800,9 @@
 		const copyParaPr = new CParaPr();
 		if (compiledParaPr.ParaPr.Bullet) {
 			copyParaPr.Bullet = compiledParaPr.ParaPr.Bullet.createDuplicate();
+			copyParaPr.Bullet.bulletColor = new AscFormat.CBulletColor();
+			copyParaPr.Bullet.bulletColor.type = AscFormat.BULLET_TYPE_COLOR_CLR;
+			copyParaPr.Bullet.bulletColor.UniColor = AscFormat.CreateUniColorFromRGB(0, 0, 0);
 			copyParaPr.Lvl = compiledParaPr.ParaPr.Lvl;
 		}
 		copyParaPr.Ind = compiledParaPr.ParaPr.Ind.Copy();
