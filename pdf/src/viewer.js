@@ -2097,25 +2097,36 @@
 				}
 			}
 
+			function pluginOnClick() {
+				if (AscCommon.check_MouseClickOnUp()) {
+					if (window.g_asc_plugins)
+						window.g_asc_plugins.onPluginEvent("onClick", oThis.file.isSelectionUse());
+				}
+			}
+
 			oDoc.OnMouseUp(AscCommon.global_mouseEvent.X, AscCommon.global_mouseEvent.Y, AscCommon.global_mouseEvent);
 
 			if (oThis.canSelectPageText() && !oThis.MouseHandObject && !oDoc.mouseDownAnnot && !oDoc.mouseDownField)
 			{
 				let pageObjectLogic = oThis.getPageByCoords2(oThis.mouseDownCoords.X, oThis.mouseDownCoords.Y);
 				if (!pageObjectLogic) {
+					pluginOnClick();
 					return false;
 				}
 				
 				if (global_mouseEvent.ClickCount == 2) {
 					oThis.file.selectWholeWord(pageObjectLogic.index, pageObjectLogic.x, pageObjectLogic.y);
+					pluginOnClick();
 					return;
 				}
 				else if (global_mouseEvent.ClickCount == 3) {
 					oThis.file.selectWholeRow(pageObjectLogic.index, pageObjectLogic.x, pageObjectLogic.y);
+					pluginOnClick();
 					return;
 				}
 				else if (global_mouseEvent.ClickCount == 4) {
 					oThis.file.selectWholePage(pageObjectLogic.index);
+					pluginOnClick();
 					return;
 				}
 			}
@@ -2141,6 +2152,8 @@
 				clearInterval(oThis.timerScrollSelect);
 				oThis.timerScrollSelect = -1;
 			}
+
+			pluginOnClick();
 		};
 
 		this.onMouseMove = function(e)

@@ -36,7 +36,6 @@
  * Event: onClick
  * @event Plugin#onClick
  * @memberof Plugin
- * @typeofeditors ["CDE", "CFE", "CSE", "CPE"]
  * @alias onClick
  * @description The function called when the user clicks the element.
  * @param {boolean} isSelectionUse - Defines if the selection is used or not.
