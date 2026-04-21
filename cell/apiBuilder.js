@@ -9593,6 +9593,15 @@
 		}
 	});
 
+	ApiWorksheet.prototype.FreezeActiveRange = function () {
+		var api = this.worksheet.workbook.oApi;
+		var wsView = api.wb.getWorksheetById(this.worksheet.getId());
+		if (api.canEdit() && wsView) {
+			var activeCell = wsView.model.selectionRange.activeCell;
+			api.asc_freezePane(null, activeCell.col, activeCell.row);
+		}
+	};
+
 	/**
 	 * Creates a protected range of the specified type from the selected data range of the current sheet.
 	 * @memberof ApiWorksheet
@@ -30408,6 +30417,7 @@
 	ApiWorksheet.prototype["GetSelectedDrawings"] = ApiWorksheet.prototype.GetSelectedDrawings;
 	ApiWorksheet.prototype["Move"] = ApiWorksheet.prototype.Move;
 	ApiWorksheet.prototype["GetFreezePanes"] = ApiWorksheet.prototype.GetFreezePanes;
+	ApiWorksheet.prototype["FreezeActiveRange"] = ApiWorksheet.prototype.FreezeActiveRange;
 	ApiWorksheet.prototype["AddProtectedRange"] = ApiWorksheet.prototype.AddProtectedRange;
 	ApiWorksheet.prototype["GetProtectedRange"] = ApiWorksheet.prototype.GetProtectedRange;
 	ApiWorksheet.prototype["GetAllProtectedRanges"] = ApiWorksheet.prototype.GetAllProtectedRanges;
