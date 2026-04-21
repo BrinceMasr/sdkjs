@@ -515,7 +515,10 @@ CShape.prototype.recalculateText = function()
         {
             if (this.recalcInfo.recalculateTxBoxContent)
             {
+                let oldCheckAutoFitFlag = this.bCheckAutoFitFlag;
+                this.bCheckAutoFitFlag = true;
                 this.recalcInfo.oContentMetrics = this.recalculateTxBoxContent();
+                this.bCheckAutoFitFlag = oldCheckAutoFitFlag;
                 this.recalcInfo.recalculateTxBoxContent = false;
                 this.recalcInfo.AllDrawings = [];
                 var oContent = this.getDocContent();
