@@ -4274,23 +4274,7 @@
 	 * The available fill types.
 	 * @typedef {("solid" | "gradient" | "pattern" | "blip" | "nofill")} FillType
 	 */
-
-	/**
-	 * The available line dash types.
-	 * <b>"dash"</b> - 0: Dashed line.
-	 * <b>"dashDot"</b> - 1: Alternating dashes and dots.
-	 * <b>"dot"</b> - 2: Dotted line.
-	 * <b>"lgDash"</b> - 3: Long dashes.
-	 * <b>"lgDashDot"</b> - 4: Alternating long dashes and dots.
-	 * <b>"lgDashDotDot"</b> - 5: Alternating long dashes and double dots.
-	 * <b>"solid"</b> - 6: Solid line (no dashes).
-	 * <b>"sysDash"</b> - 7: System dash style.
-	 * <b>"sysDashDot"</b> - 8: System dash-dot style.
-	 * <b>"sysDashDotDot"</b> - 9: System dash-dot-dot style.
-	 * <b>"sysDot"</b> - 10: System dot style.
-	 * @typedef {("dash" | "dashDot" | "dot" | "lgDash" | "lgDashDot" | "lgDashDotDot" | "solid" | "sysDash" | "sysDashDot" | "sysDashDotDot" | "sysDot")} LineDashType
-	 */
-
+	
 	/**
 	* The available color scheme identifiers.
 	 * @typedef {("accent1" | "accent2" | "accent3" | "accent4" | "accent5" | "accent6" | "bg1" | "bg2" | "dk1" | "dk2"
@@ -4406,7 +4390,7 @@
 	 * Available dash type for line.
 	 * @typedef {"dash" | "dashDot" | "dot" | "lgDash" | "lgDashDot" | "lgDashDotDot" |
 	 * "solid" | "sysDash" | "sysDashDot" | "sysDashDotDot" | "sysDot"} DashType
-	 * @see office-js-api/Examples/Enumerations/LineDash.js
+	 * @see office-js-api/Examples/Enumerations/DashType.js
 	 */
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -20274,15 +20258,15 @@
 	 * Sets the vertical alignment to the shape content where a paragraph or text runs can be inserted.
 	 * @memberof ApiShape
 	 * @typeofeditors ["CDE"]
-	 * @param {VerticalTextAlign} VerticalAlign - The type of the vertical alignment for the shape inner contents.
+	 * @param {VerticalTextAlign} verticalAlign - The type of the vertical alignment for the shape inner contents.
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiShape/Methods/SetVerticalTextAlign.js
 	 */
-	ApiShape.prototype.SetVerticalTextAlign = function(VerticalAlign)
+	ApiShape.prototype.SetVerticalTextAlign = function(verticalAlign)
 	{
 		if(this.Shape)
 		{
-			switch(VerticalAlign)
+			switch(verticalAlign)
 			{
 				case "top":
 				{
@@ -22377,7 +22361,7 @@
 	 * Gets the dash type of the stroke.
 	 * @memberof ApiStroke
 	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
-	 * @returns {LineDashType | null} - returns dash type ("solid", "dash", etc.) or null.
+	 * @returns {DashType | null} - returns dash type ("solid", "dash", etc.) or null.
 	 * @see office-js-api/Examples/{Editor}/ApiStroke/Methods/GetDashType.js
 	 */
 	ApiStroke.prototype.GetDashType = function()

@@ -47,7 +47,6 @@
  * Event: onTargetPositionChanged
  * @event Plugin#onTargetPositionChanged
  * @memberof Plugin
- * @typeofeditors ["CDE", "CFE", "CSE", "CPE"]
  * @alias onTargetPositionChanged
  * @description The function called when the target position in the editor is changed.
  * @see office-js-api/Examples/Plugins/{Editor}/Plugin/Events/onTargetPositionChanged.js
@@ -57,7 +56,6 @@
  * Event: onDocumentContentReady
  * @event Plugin#onDocumentContentReady
  * @memberof Plugin
- * @typeofeditors ["CDE", "CFE", "CSE", "CPE"]
  * @alias onDocumentContentReady
  * @description The function called when the document is completely loaded.
  * @see office-js-api/Examples/Plugins/{Editor}/Plugin/Events/onDocumentContentReady.js
@@ -67,7 +65,6 @@
  * Event: onEnableMouseEvent
  * @event Plugin#onEnableMouseEvent
  * @memberof Plugin
- * @typeofeditors ["CDE", "CFE", "CSE", "CPE"]
  * @alias onEnableMouseEvent
  * @description The function called to turn the mouse or touchpad events on/off.
  * @param {boolean} isEnabled - Indicates whether the mouse or touchpad is enabled (**true**) or not (**false**).
@@ -78,7 +75,6 @@
  * Event: onExternalMouseUp
  * @event Plugin#onExternalMouseUp
  * @memberof Plugin
- * @typeofeditors ["CDE", "CFE", "CSE", "CPE"]
  * @alias onExternalMouseUp
  * @description The function called when the mouse button is released outside the plugin iframe.
  * @see office-js-api/Examples/Plugins/{Editor}/Plugin/Events/onExternalMouseUp.js
@@ -88,7 +84,6 @@
  * Event: onChangeRestrictions
  * @event Plugin#onChangeRestrictions
  * @memberof Plugin
- * @typeofeditors ["CDE", "CFE", "CSE", "CPE"]
  * @alias onChangeRestrictions
  * @description The function called when the restrictions in the editor are changed.
  * @param {number} value - The restrictions value.
