@@ -4723,12 +4723,12 @@
 	 * Creates a new table with a specified number of rows and columns.
 	 * @memberof Api
 	 * @typeofeditors ["CDE"]
-	 * @param {number} cols - Number of columns.
 	 * @param {number} rows - Number of rows.
+	 * @param {number} cols - Number of columns.
 	 * @returns {ApiTable}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/CreateTable.js
 	 */
-	Api.CreateTable = function(cols, rows)
+	Api.CreateTable = function(rows, cols)
 	{
 		if (!rows || rows <= 0 || !cols || cols <= 0)
 			return null;
@@ -10280,15 +10280,15 @@
 	 * Creates a new table with a specified number of rows and columns.
 	 * @memberof ApiDocument
 	 * @typeofeditors ["CDE"]
-	 * @param {number} cols - Number of columns.
 	 * @param {number} rows - Number of rows.
+	 * @param {number} cols - Number of columns.
 	 * @returns {ApiTable}
 	 * @since 9.4.0
 	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/CreateTable.js
 	 */
-	ApiDocument.prototype.CreateTable = function(cols, rows)
+	ApiDocument.prototype.CreateTable = function(rows, cols)
 	{
-		return Api.CreateTable(cols, rows);
+		return Api.CreateTable(rows, cols);
 	};
 	/**
 	 * Creates a new empty paragraph.
