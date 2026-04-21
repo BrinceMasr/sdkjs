@@ -159,6 +159,8 @@ $(function()
 	AscTest.JsApi.GetLocale = AscBuilder.Cell.Api.GetLocale.bind(AscTest.JsApi);
 	AscTest.JsApi.CreateNewHistoryPoint = AscBuilder.Cell.Api.CreateNewHistoryPoint.bind(AscTest.JsApi);
 	AscTest.JsApi.Save = AscBuilder.Cell.Api.Save.bind(AscTest.JsApi);
+
+	AscTest.JsApi.GetDefNames = AscBuilder.Cell.Api.GetDefNames.bind(AscTest.JsApi);
 	
 	AscTest.Workbook = AscTest.Editor.wbModel;
 	AscTest.WorkbookView = AscTest.Editor.wb;
