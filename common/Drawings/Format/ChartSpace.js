@@ -8049,7 +8049,8 @@ function(window, undefined) {
 			return;
 		}
 
-		const charts = this.isChartEx() ? [this.chart.plotArea.plotAreaRegion] : this.chart.plotArea.charts;
+		const isChartEx = this.isChartEx();
+		const charts = isChartEx ? [this.chart.plotArea.plotAreaRegion] : this.chart.plotArea.charts;
 		if (charts.length === 0) {
 			return;
 		}
@@ -8083,6 +8084,18 @@ function(window, undefined) {
 			);
 		}
 
+		const isWaterfallChartEx = (
+			isChartEx &&
+			series.length > 0 &&
+			series[0].layoutId === AscFormat.SERIES_LAYOUT_WATERFALL
+		);
+
+		const isFunnelChartEx = (
+			isChartEx &&
+			series.length > 0 &&
+			series[0].layoutId === AscFormat.SERIES_LAYOUT_FUNNEL
+		);
+
 		// isSeriesLegend=true - one entry per series.
 		// isSeriesLegend=false - one entry per data point.
 		let isSeriesLegend;
@@ -8095,7 +8108,7 @@ function(window, undefined) {
 		} else if (series.length !== 1) {
 			isSeriesLegend = true;
 
-		} else if (isSurfaceChart || isRadarChart) {
+		} else if (isSurfaceChart || isRadarChart || isFunnelChartEx) {
 			isSeriesLegend = true;
 
 		} else {
@@ -8103,12 +8116,6 @@ function(window, undefined) {
 			const hasCustomDPt = dataPoints.some(function (dPt) { return dPt.spPr; });
 			isSeriesLegend = !hasCustomDPt && !firstChart.varyColors;
 		}
-
-		const isWaterfallChartEx = (
-			this.isChartEx() &&
-			series.length > 0 &&
-			series[0].layoutId === AscFormat.SERIES_LAYOUT_WATERFALL
-		);
 
 		let entriesInfo;
 		if (isWaterfallChartEx) {
