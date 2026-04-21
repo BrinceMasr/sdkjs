@@ -6064,7 +6064,7 @@ $(function () {
 		// Case #12: Table, Number. Text from table structured reference. 2 of 2 arguments used.
 		oParser = new parserFormula('REPT(Table1[Column1],2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: REPT(Table1[Column1],2) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '11', 'Test: Positive case: Table, Number. Text from table structured reference. 2 of 2 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '11', 'Test: Positive case: Table, Number. Text from table structured reference. 2 of 2 arguments used.');
 		// Case #13: String, Number. Special Unicode character in text. 2 of 2 arguments used.
 		oParser = new parserFormula('REPT("?",2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: REPT("?",2) is parsed.');
@@ -6130,19 +6130,23 @@ $(function () {
 		// Case #7: Area, Number. Multi-cell range as text, returns #VALUE!. 2 of 2 arguments used.
 		oParser = new parserFormula('REPT(A105:A106,2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: REPT(A105:A106,2) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '11', 'Test: Negative case: Area, Number. Multi-cell range as text, returns #VALUE!. 2 of 2 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("K4:K10").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '11', 'Test: Negative case: Area, Number. Multi-cell range as text, returns #VALUE!. 2 of 2 arguments used.');
 		// Case #8: Area3D, Number. 3D multi-cell range as text, returns #VALUE!. 2 of 2 arguments used.
 		oParser = new parserFormula('REPT(Sheet2!A3:A4,2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: REPT(Sheet2!A3:A4,2) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 'TextText', 'Test: Negative case: Area3D, Number. 3D multi-cell range as text, returns #VALUE!. 2 of 2 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("K4:K10").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'TextText', 'Test: Negative case: Area3D, Number. 3D multi-cell range as text, returns #VALUE!. 2 of 2 arguments used.');
 		// Case #9: Name, Number. Named range with area, returns #VALUE!. 2 of 2 arguments used.
-		oParser = new parserFormula('REPT(TestNameArea,2)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: REPT(TestNameArea,2) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '11', 'Test: Negative case: Name, Number. Named range with area, returns #VALUE!. 2 of 2 arguments used.');
+		oParser = new parserFormula('REPT(TestNameArea2,2)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: REPT(TestNameArea2,2) is parsed.');
+		oParser.setArrayFormulaRef(ws.getRange2("K4:K10").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '0.80.8', 'Test: Negative case: Name, Number. Named range with area, returns #VALUE!. 2 of 2 arguments used.');
 		// Case #10: Name3D, Number. 3D named range with area, returns #VALUE!. 2 of 2 arguments used.
 		oParser = new parserFormula('REPT(TestNameArea3D2,2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: REPT(TestNameArea3D2,2) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '0.80.8', 'Test: Negative case: Name3D, Number. 3D named range with area, returns #VALUE!. 2 of 2 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("K4:K10").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '0.80.8', 'Test: Negative case: Name3D, Number. 3D named range with area, returns #VALUE!. 2 of 2 arguments used.');
 		// Case #11: Ref3D, Number. 3D reference to non-text value, returns #VALUE!. 2 of 2 arguments used.
 		oParser = new parserFormula('REPT(Sheet2!A5+"?",2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: REPT(Sheet2!A5+"?",2) is parsed.');
@@ -6150,7 +6154,7 @@ $(function () {
 		// Case #12: Table, Number. Table column with non-text value, returns #VALUE!. 2 of 2 arguments used.
 		oParser = new parserFormula('REPT(Table1[Column2],2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: REPT(Table1[Column2],2) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 'TextText', 'Test: Negative case: Table, Number. Table column with non-text value, returns #VALUE!. 2 of 2 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TextText', 'Test: Negative case: Table, Number. Table column with non-text value, returns #VALUE!. 2 of 2 arguments used.');
 		// Case #13: String, Number. Empty string as text, returns empty string but valid. 2 of 2 arguments used.
 		oParser = new parserFormula('REPT("-",2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: REPT("-",2) is parsed.');
@@ -6174,7 +6178,7 @@ $(function () {
 		// Case #18: String, Number. Excessively large number_times, returns #VALUE!. 2 of 2 arguments used.
 		oParser = new parserFormula('REPT("a",9.99999999999999E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: REPT("a",9.99999999999999E+307) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, Number. Excessively large number_times, returns #VALUE!. 2 of 2 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, Number. Excessively large number_times, returns #VALUE!. 2 of 2 arguments used.');
 		// Case #19: Name, Number. Named range with non-text value, returns #VALUE!. 2 of 2 arguments used.
 		oParser = new parserFormula('REPT(TestName1,2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: REPT(TestName1,2) is parsed.');
@@ -6199,15 +6203,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: REPT("?",16383) is parsed.');
 		str = "?";
 		assert.strictEqual(oParser.calculate().getValue(), str.repeat(16383), 'Test: 16383 of "?" Repeat');
-
-		// TODO: critical problem repeat number should be equal or less than 2^28
-		// Need to fix: ms results diff
-		// Case #12: Table, Number. Text from table structured reference. 2 of 2 arguments used.
-		// Case #7: Area, Number. Multi-cell range as text, returns #VALUE!. 2 of 2 arguments used.
-		// Case #8: Area3D, Number. 3D multi-cell range as text, returns #VALUE!. 2 of 2 arguments used.
-		// Case #9: Name, Number. Named range with area, returns #VALUE!. 2 of 2 arguments used.
-		// Case #12: Table, Number. Table column with non-text value, returns #VALUE!. 2 of 2 arguments used.
-		// Case #18: String, Number. Excessively large number_times, returns #VALUE!. 2 of 2 arguments used.
 
 
 		testArrayFormula2(assert, "REPT", 2, 2);
@@ -9820,11 +9815,11 @@ $(function () {
 		// Case #4: Reference link, Boolean, String. Reference link to cell with string, dash delimiter, ignore_empty TRUE. 3 arguments used.
 		oParser = new parserFormula('TEXTJOIN("-",TRUE,A100,"Test")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTJOIN("-",TRUE,A100,"Test") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 'Test', 'Test: Positive case: Reference link, Boolean, String. Reference link to cell with string, dash delimiter, ignore_empty TRUE. 3 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '0.5-Test', 'Test: Positive case: Reference link, Boolean, String. Reference link to cell with string, dash delimiter, ignore_empty TRUE. 3 arguments used.');
 		// Case #5: Area, Boolean, String. Single-cell range, comma delimiter, ignore_empty TRUE. 3 arguments used.
 		oParser = new parserFormula('TEXTJOIN(",",TRUE,A101:A101,"Data")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTJOIN(",",TRUE,A101:A101,"Data") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 'Data', 'Test: Positive case: Area, Boolean, String. Single-cell range, comma delimiter, ignore_empty TRUE. 3 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '1.5,Data', 'Test: Positive case: Area, Boolean, String. Single-cell range, comma delimiter, ignore_empty TRUE. 3 arguments used.');
 		// Case #6: Array, Boolean, String. Array with multiple strings, colon delimiter, ignore_empty TRUE. 3 arguments used.
 		oParser = new parserFormula('TEXTJOIN(":",TRUE,{"A","B"},"C")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTJOIN(":",TRUE,{"A","B"},"C") is parsed.');
@@ -9834,9 +9829,9 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: TEXTJOIN(",",TRUE,TestName,"Name") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '-0.5,Name', 'Test: Positive case: Name, Boolean, String. Named range with string, comma delimiter, ignore_empty TRUE. 3 arguments used.');
 		// Case #8: Name3D, Boolean, String. 3D named range, semicolon delimiter, ignore_empty TRUE. 3 arguments used.
-		oParser = new parserFormula('TEXTJOIN(";",TRUE,TestName3D2,"3D")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: TEXTJOIN(";",TRUE,TestName3D2,"3D") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '0.8;3D', 'Test: Positive case: Name3D, Boolean, String. 3D named range, semicolon delimiter, ignore_empty TRUE. 3 arguments used.');
+		oParser = new parserFormula('TEXTJOIN(";",TRUE,TestName3D,"3D")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: TEXTJOIN(";",TRUE,TestName3D,"3D") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '-0.5;3D', 'Test: Positive case: Name3D, Boolean, String. 3D named range, semicolon delimiter, ignore_empty TRUE. 3 arguments used.');
 		// Case #9: Ref3D, Boolean, String. 3D reference to cell with string, space delimiter, ignore_empty TRUE. 3 arguments used.
 		oParser = new parserFormula('TEXTJOIN(" ",TRUE,Sheet2!A1,"Ref")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTJOIN(" ",TRUE,Sheet2!A1,"Ref") is parsed.');
@@ -9884,7 +9879,7 @@ $(function () {
 		// Case #20: String, Boolean, Reference link. String and reference link, colon delimiter, ignore_empty TRUE. 3 arguments used.
 		oParser = new parserFormula('TEXTJOIN(":",TRUE,"Prefix",A102)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTJOIN(":",TRUE,"Prefix",A102) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 'Prefix', 'Test: Positive case: String, Boolean, Reference link. String and reference link, colon delimiter, ignore_empty TRUE. 3 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 'Prefix:0.5', 'Test: Positive case: String, Boolean, Reference link. String and reference link, colon delimiter, ignore_empty TRUE. 3 arguments used.');
 
 		// Negative cases:
 		// Case #1: Error, Boolean, String. Error input (NA) propagates #N/A error. 3 arguments used.
@@ -9910,7 +9905,7 @@ $(function () {
 		// Case #6: String, String, String. Non-boolean string for ignore_empty returns #VALUE!. 3 arguments used.
 		oParser = new parserFormula('TEXTJOIN(",","Invalid","Test")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTJOIN(",","Invalid","Test") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, String, String. Non-boolean string for ignore_empty returns #VALUE!. 3 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, String, String. Non-boolean string for ignore_empty returns #VALUE!. 3 arguments used.');
 		// Case #8: Area3D, Boolean, String. 3D multi-cell range returns #VALUE!. 3 arguments used.
 		oParser = new parserFormula('TEXTJOIN(",",TRUE,Sheet2!A3:A4)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTJOIN(",",TRUE,Sheet2!A3:A4) is parsed.');
@@ -9918,7 +9913,7 @@ $(function () {
 		// Case #9: Name, Boolean, String. Named range with area returns #VALUE!. 3 arguments used.
 		oParser = new parserFormula('TEXTJOIN(",",TRUE,TestNameArea2,"Test")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTJOIN(",",TRUE,TestNameArea2,"Test") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '1,2,Test', 'Test: Negative case: Name, Boolean, String. Named range with area returns #VALUE!. 3 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '0.8,-0.8,Test', 'Test: Negative case: Name, Boolean, String. Named range with area returns #VALUE!. 3 arguments used.');
 		// Case #10: Name3D, Boolean, String. 3D named range with area returns #VALUE!. 3 arguments used.
 		oParser = new parserFormula('TEXTJOIN(",",TRUE,TestNameArea3D2,"Test")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTJOIN(",",TRUE,TestNameArea3D2,"Test") is parsed.');
@@ -9963,6 +9958,15 @@ $(function () {
 		oParser = new parserFormula('TEXTJOIN({"-"},TRUE,"Test")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTJOIN({"-"},TRUE,"Test") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 'Test', 'Test: Negative case: Array, Boolean, String. Array as delimiter returns #VALUE!. 3 arguments used.');
+		// Case #21: Area3D, Bool, String. Multi sheets link.
+		let multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A1";
+		oParser = new parserFormula('TEXTJOIN('+multiAreaLink+',TRUE,"STR")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula TEXTJOIN('+multiAreaLink+',TRUE,"STR") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'STR', 'Test: Negative case: Area3D, Bool, String. Multi sheets link.');
+		// Case #22: Empty, Area3D, String. Multi sheets link.
+		oParser = new parserFormula('TEXTJOIN(,'+multiAreaLink+',"STR")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula TEXTJOIN(,'+multiAreaLink+',"STR") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Empty, Area3D, String. Multi sheets link.');
 
 		// Bounded cases:
 		let longStr = "";
@@ -9980,15 +9984,6 @@ $(function () {
 		oParser = new parserFormula('TEXTJOIN(",",TRUE,1E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTJOIN(",",TRUE,1E+307) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '1e+307', 'Test: Bounded case: Number, Boolean, Number. Maximum numeric value converted to text. 3 arguments used.');
-
-		// TODO critical Case #6: String, String, String. Non-boolean string for ignore_empty returns #VALUE!. 3 arguments used
-		// Need to fix: ms result difference, critical problem in case 6
-		// Case #4: Reference link, Boolean, String. Reference link to cell with string, dash delimiter, ignore_empty TRUE. 3 arguments used.
-		// Case #5: Area, Boolean, String. Single-cell range, comma delimiter, ignore_empty TRUE. 3 arguments used.
-		// Case #8: Name3D, Boolean, String. 3D named range, semicolon delimiter, ignore_empty TRUE. 3 arguments used.
-		// Case #20: String, Boolean, Reference link. String and reference link, colon delimiter, ignore_empty TRUE. 3 arguments used.
-		// Case #6: String, String, String. Non-boolean string for ignore_empty returns #VALUE!. 3 arguments used. - critical
-		// Case #9: Name, Boolean, String. Named range with area returns #VALUE!. 3 arguments used.
 
 
 	});
@@ -10241,6 +10236,8 @@ $(function () {
 		ws2.getRange2("A1").setValue("1");
 		ws2.getRange2("A2").setValue("2");
 		ws2.getRange2("A3").setValue("Text");
+		ws2.getRange2("A5").setValue("");
+		ws2.getRange2("A6").setValue("");
 		ws2.getRange2("B1").setValue("3");
 		ws2.getRange2("B2").setValue("4");
 		ws2.getRange2("C1").setValue("1");
@@ -10300,7 +10297,8 @@ $(function () {
 		// Case #11: Array,String. Array constant returns array {a;c}
 		oParser = new parserFormula('TEXTBEFORE({"a,b","c,d"},",")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTBEFORE({"a,b","c,d"},",") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 'a', 'Test: Positive case: Array,String. Array constant returns array {a;c}');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), 'a', 'Test: Positive case: Array,String. Array constant returns array {a;c}');
 		// Case #12: Reference link,String. Reference link test
 		oParser = new parserFormula('TEXTBEFORE(A100,",")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTBEFORE(A100,",") is parsed.');
@@ -10320,7 +10318,7 @@ $(function () {
 		// Case #16: Name3D,String. Name3D test
 		oParser = new parserFormula('TEXTBEFORE(TestName3D,".")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTBEFORE(TestName3D,".") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Name3D,String. Name3D test');
+		assert.strictEqual(oParser.calculate().getValue(), "-0", 'Test: Positive case: Name3D,String. Name3D test');
 		// Case #17: Ref3D,String. Ref3D reference test
 		oParser = new parserFormula('TEXTBEFORE(Sheet2!A1,",")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTBEFORE(Sheet2!A1,",") is parsed.');
@@ -10374,7 +10372,7 @@ $(function () {
 		// Case #13: Table,String. Table column no delimiter
 		oParser = new parserFormula('TEXTBEFORE(Table1[Column1],"z")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTBEFORE(Table1[Column1],"z") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Table,String. Table column no delimiter');
+		assert.strictEqual(oParser.calculate().getValue(), "#N/A", 'Test: Negative case: Table,String. Table column no delimiter');
 		// Case #14: Name,String. Name ref no delimiter
 		oParser = new parserFormula('TEXTBEFORE(TestName,"z")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTBEFORE(TestName,"z") is parsed.');
@@ -10390,7 +10388,7 @@ $(function () {
 		// Case #17: Area3D,String. Area3D no delimiter
 		oParser = new parserFormula('TEXTBEFORE(Sheet2!A5:A6,"z")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTBEFORE(Sheet2!A5:A6,"z") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Area3D,String. Area3D no delimiter');
+		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Area3D,String. Area3D no delimiter');
 		// Case #20: String,String,Number. Delimiter overlapping returns empty or error
 		oParser = new parserFormula('TEXTBEFORE("text","t",2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTBEFORE("text","t",2) is parsed.');
@@ -10457,12 +10455,6 @@ $(function () {
 		oParser = new parserFormula('TEXTBEFORE("tab\there","\t")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTBEFORE("tab\there","\t") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 'tab', 'Test: Bounded case: String,String. Tab character delimiter');
-
-		// Need to fix: array to string problem
-		// Case #11: Array,String. Array constant returns array {a;c}
-		// Case #16: Name3D,String. Name3D test
-		// Case #13: Table,String. Table column no delimiter
-		// Case #17: Area3D,String. Area3D no delimiter
 
 	});
 
@@ -10748,10 +10740,11 @@ $(function () {
 		oParser = new parserFormula('TEXTAFTER(Sheet2!A1,",")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTAFTER(Sheet2!A1,",") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Positive case: Ref3D,String. Using 3D reference from Sheet2');
-		// Case #20: Array,String. Array constant input ? returns {\'ne\',\'wo\'}
+		// Case #20: Array,String. Array constant input ? returns {\'ne\',\'\'}
 		oParser = new parserFormula('TEXTAFTER({"one","two"},"o")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTAFTER({"one","two"},"o") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 'ne', 'Test: Positive case: Array,String. Array constant input ? returns {\'ne\',\'wo\'}');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), 'ne', 'Test: Positive case: Array,String. Array constant input ? returns {\'ne\',\'wo\'}');
 
 		// Negative cases:
 		// Case #1: String,Number. Invalid delimiter type (number) ? #VALUE!
@@ -10781,11 +10774,11 @@ $(function () {
 		// Case #7: String,String,Number,Number. Invalid match_mode argument ? #VALUE!
 		oParser = new parserFormula('TEXTAFTER("apple,banana",",",1,2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTAFTER("apple,banana",",",1,2) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String,String,Number,Number. Invalid match_mode argument ? #VALUE!');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String,String,Number,Number. Invalid match_mode argument ? #VALUE!');
 		// Case #8: String,String,Number,Number,Number. Invalid match_end argument ? #VALUE!
 		oParser = new parserFormula('TEXTAFTER("apple,banana",",",1,0,2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTAFTER("apple,banana",",",1,0,2) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String,String,Number,Number,Number. Invalid match_end argument ? #VALUE!');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String,String,Number,Number,Number. Invalid match_end argument ? #VALUE!');
 		// Case #9: String,String. Delimiter not found ? #N/A
 		oParser = new parserFormula('TEXTAFTER("apple banana","z")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTAFTER("apple banana","z") is parsed.');
@@ -10879,11 +10872,11 @@ $(function () {
 		// Case #16: String,String. Bounded variation edge test
 		oParser = new parserFormula('TEXTAFTER(1E+307,"E")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTAFTER(1E+307,"E") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '+307', 'Test: Bounded case: String,String. Bounded variation edge test');
+		assert.strictEqual(oParser.calculate().getValue(), '+307', 'Test: Bounded case: String,String. Bounded variation edge test');
 		// Case #17: String,String. Bounded variation edge test
 		oParser = new parserFormula('TEXTAFTER(1E-307,"E")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTAFTER(1E-307,"E") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '-307', 'Test: Bounded case: String,String. Bounded variation edge test');
+		assert.strictEqual(oParser.calculate().getValue(), '-307', 'Test: Bounded case: String,String. Bounded variation edge test');
 		// Case #18: String,String. Bounded variation edge test
 		oParser = new parserFormula('TEXTAFTER(1E+307,"0")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTAFTER(1E+307,"0") is parsed.');
@@ -10892,14 +10885,6 @@ $(function () {
 		oParser = new parserFormula('TEXTAFTER(1E-307,"0")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTAFTER(1E-307,"0") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '7', 'Test: Bounded case: String,String. Bounded variation edge test');
-
-		// TODO problems with array
-		// Need to fix: results diff form ms, boundary cases diff
-		// Case #20: Array,String. Array constant input ? returns {\'ne\',\'wo\'}
-		// Case #7: String,String,Number,Number. Invalid match_mode argument ? #VALUE!
-		// Case #8: String,String,Number,Number,Number. Invalid match_end argument ? #VALUE!
-		// Case #16: String,String. Bounded variation edge test
-		// Case #17: String,String. Bounded variation edge test
 
 
 	});
@@ -11300,6 +11285,7 @@ $(function () {
 		ws2.getRange2("A1").setValue("1");
 		ws2.getRange2("A2").setValue("2");
 		ws2.getRange2("A3").setValue("Text");
+		ws2.getRange2("A4").setValue("");
 		ws2.getRange2("B1").setValue("3");
 		ws2.getRange2("B2").setValue("4");
 		ws2.getRange2("C1").setValue("1");
@@ -11331,11 +11317,11 @@ $(function () {
 		// Case #4: Reference link, String, String, Boolean. Reference link to cell with string, comma column delimiter, semicolon row delimiter, ignore_empty TRUE. 4 arguments used.
 		oParser = new parserFormula('TEXTSPLIT(A100,",",";",TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTSPLIT(A100,",",";",TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '#VALUE!', 'Test: Positive case: Reference link, String, String, Boolean. Reference link to cell with string, comma column delimiter, semicolon row delimiter, ignore_empty TRUE. 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '0.5', 'Test: Positive case: Reference link, String, String, Boolean. Reference link to cell with string, comma column delimiter, semicolon row delimiter, ignore_empty TRUE. 4 arguments used.');
 		// Case #5: Area, String, String, Boolean. Single-cell range, comma column delimiter, semicolon row delimiter, ignore_empty TRUE. 4 arguments used.
 		oParser = new parserFormula('TEXTSPLIT(A101:A101,",",";",TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTSPLIT(A101:A101,",",";",TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '#VALUE!', 'Test: Positive case: Area, String, String, Boolean. Single-cell range, comma column delimiter, semicolon row delimiter, ignore_empty TRUE. 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), "1.5", 'Test: Positive case: Area, String, String, Boolean. Single-cell range, comma column delimiter, semicolon row delimiter, ignore_empty TRUE. 4 arguments used.');
 		// Case #6: Array, String, String, Boolean. Array input, comma column delimiter, semicolon row delimiter, ignore_empty TRUE. 4 arguments used.
 		oParser = new parserFormula('TEXTSPLIT({"A,B","C,D"},",",";",TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTSPLIT({"A,B","C,D"},",",";",TRUE) is parsed.');
@@ -11355,7 +11341,8 @@ $(function () {
 		// Case #10: Area3D, String, String, Boolean. 3D single-cell range, comma column delimiter, semicolon row delimiter, ignore_empty TRUE. 4 arguments used.
 		oParser = new parserFormula('TEXTSPLIT(Sheet2!A2:A2,",",";",TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTSPLIT(Sheet2!A2:A2,",",";",TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Positive case: Area3D, String, String, Boolean. 3D single-cell range, comma column delimiter, semicolon row delimiter, ignore_empty TRUE. 4 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), '2', 'Test: Positive case: Area3D, String, String, Boolean. 3D single-cell range, comma column delimiter, semicolon row delimiter, ignore_empty TRUE. 4 arguments used.');
 		// Case #11: Table, String, String, Boolean. Table structured reference with string, comma column delimiter, semicolon row delimiter, ignore_empty TRUE. 4 arguments used.
 		oParser = new parserFormula('TEXTSPLIT(Table1[Column1],",",";",TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTSPLIT(Table1[Column1],",",";",TRUE) is parsed.');
@@ -11395,7 +11382,7 @@ $(function () {
 		// Case #20: Reference link, String, String, Boolean, Number, String. Reference link, comma column delimiter, semicolon row delimiter, ignore_empty TRUE, case-sensitive, empty pad_with. 6 arguments used.
 		oParser = new parserFormula('TEXTSPLIT(A102,",",";",TRUE,0,"")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTSPLIT(A102,",",";",TRUE,0,"") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '#VALUE!', 'Test: Positive case: Reference link, String, String, Boolean, Number, String. Reference link, comma column delimiter, semicolon row delimiter, ignore_empty TRUE, case-sensitive, empty pad_with. 6 arguments used.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), "0.5", 'Test: Positive case: Reference link, String, String, Boolean, Number, String. Reference link, comma column delimiter, semicolon row delimiter, ignore_empty TRUE, case-sensitive, empty pad_with. 6 arguments used.');
 
 		// Negative cases:
 		// Case #1: Error, String, String, Boolean. Error input (NA) propagates #N/A error. 4 arguments used.
@@ -11405,7 +11392,7 @@ $(function () {
 		// Case #2: Empty, String, String, Boolean. Empty text input returns #VALUE!. 4 arguments used.
 		oParser = new parserFormula('TEXTSPLIT(,",",";",TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTSPLIT(,",",";",TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Empty, String, String, Boolean. Empty text input returns #VALUE!. 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Empty, String, String, Boolean. Empty text input returns #VALUE!. 4 arguments used.');
 		// Case #3: Boolean, String, String, Boolean. Boolean text input returns #VALUE!. 4 arguments used.
 		oParser = new parserFormula('TEXTSPLIT(TRUE,",",";",TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTSPLIT(TRUE,",",";",TRUE) is parsed.');
@@ -11429,19 +11416,22 @@ $(function () {
 		// Case #8: Area3D, String, String, Boolean. 3D multi-cell range returns #VALUE!. 4 arguments used.
 		oParser = new parserFormula('TEXTSPLIT(Sheet2!A3:A4,",",";",TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTSPLIT(Sheet2!A3:A4,",",";",TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '?', 'Test: Negative case: Area3D, String, String, Boolean. 3D multi-cell range returns #VALUE!. 4 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 'Text', 'Test: Negative case: Area3D, String, String, Boolean. 3D multi-cell range returns #VALUE!. 4 arguments used.');
 		// Case #9: Name, String, String, Boolean. Named range with area returns #VALUE!. 4 arguments used.
 		oParser = new parserFormula('TEXTSPLIT(TestNameArea2,",",";",TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTSPLIT(TestNameArea2,",",";",TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '0.8', 'Test: Negative case: Name, String, String, Boolean. Named range with area returns #VALUE!. 4 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '0.8', 'Test: Negative case: Name, String, String, Boolean. Named range with area returns #VALUE!. 4 arguments used.');
 		// Case #10: Name3D, String, String, Boolean. 3D named range with area returns #VALUE!. 4 arguments used.
 		oParser = new parserFormula('TEXTSPLIT(TestNameArea3D2,",",";",TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTSPLIT(TestNameArea3D2,",",";",TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '0.8', 'Test: Negative case: Name3D, String, String, Boolean. 3D named range with area returns #VALUE!. 4 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '0.8', 'Test: Negative case: Name3D, String, String, Boolean. 3D named range with area returns #VALUE!. 4 arguments used.');
 		// Case #11: Ref3D, String, String, Boolean. 3D reference to cell with non-string value returns #VALUE!. 4 arguments used.
 		oParser = new parserFormula('TEXTSPLIT(Sheet2!A5,",",";",TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTSPLIT(Sheet2!A5,",",";",TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Ref3D, String, String, Boolean. 3D reference to cell with non-string value returns #VALUE!. 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Ref3D, String, String, Boolean. 3D reference to cell with non-string value returns #VALUE!. 4 arguments used.');
 		// Case #12: Table, String, String, Boolean. Table column with non-string data returns #VALUE!. 4 arguments used.
 		oParser = new parserFormula('TEXTSPLIT(Table1[Column2],",",";",TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTSPLIT(Table1[Column2],",",";",TRUE) is parsed.');
@@ -11465,11 +11455,11 @@ $(function () {
 		// Case #17: String, String, String, String. Non-boolean ignore_empty returns #VALUE!. 4 arguments used.
 		oParser = new parserFormula('TEXTSPLIT("A,B,C",",",";","Invalid")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTSPLIT("A,B,C",",",";","Invalid") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, String, String, String. Non-boolean ignore_empty returns #VALUE!. 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, String, String, String. Non-boolean ignore_empty returns #VALUE!. 4 arguments used.');
 		// Case #18: String, String, String, Boolean, String. Non-numeric match_mode returns #VALUE!. 5 arguments used.
 		oParser = new parserFormula('TEXTSPLIT("A,B,C",",",";",TRUE,"Invalid")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTSPLIT("A,B,C",",",";",TRUE,"Invalid") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, String, String, Boolean, String. Non-numeric match_mode returns #VALUE!. 5 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, String, String, Boolean, String. Non-numeric match_mode returns #VALUE!. 5 arguments used.');
 		// Case #19: Reference link, String, String, Boolean. Reference link to cell with number returns #VALUE!. 4 arguments used.
 		oParser = new parserFormula('TEXTSPLIT(A106,",",";",TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTSPLIT(A106,",",";",TRUE) is parsed.');
@@ -11483,21 +11473,12 @@ $(function () {
 		// Case #1: String, String, String, Boolean. Maximum string length for splitting (32,767 characters, split into ~16,384 elements), comma column delimiter, semicolon row delimiter, ignore_empty TRUE. 4 arguments used.
 		oParser = new parserFormula('TEXTSPLIT(REPT("A,",16384),",",";",TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTSPLIT(REPT("A,",16384),",",";",TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '#VALUE!', 'Test: Bounded case: String, String, String, Boolean. Maximum string length for splitting (32,767 characters, split into ~16,384 elements), comma column delimiter, semicolon row delimiter, ignore_empty TRUE. 4 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Bounded case: String, String, String, Boolean. Maximum string length for splitting (32,767 characters, split into ~16,384 elements), comma column delimiter, semicolon row delimiter, ignore_empty TRUE. 4 arguments used.');
 		// Case #3: Number, String, String, Boolean, Number. Maximum numeric value converted to text, comma column delimiter, semicolon row delimiter, ignore_empty TRUE, case-sensitive match. 5 arguments used.
 		oParser = new parserFormula('TEXTSPLIT(1E+307,",",";",TRUE,0)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TEXTSPLIT(1E+307,",",";",TRUE,0) is parsed.');
-		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), '1e+307', 'Test: Bounded case: Number, String, String, Boolean, Number. Maximum numeric value converted to text, comma column delimiter, semicolon row delimiter, ignore_empty TRUE, case-sensitive match. 5 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '1E+307', 'Test: Bounded case: Number, String, String, Boolean, Number. Maximum numeric value converted to text, comma column delimiter, semicolon row delimiter, ignore_empty TRUE, case-sensitive match. 5 arguments used.');
 
-		// Need to fix:
-		// Case #17: String, String, String, String. Non-boolean ignore_empty returns #VALUE!. 4 arguments used.
-		// Case #18: String, String, String, Boolean, String. Non-numeric match_mode returns #VALUE!. 5 arguments used.
-		// Case #4: Reference link, String, String, Boolean. Reference link to cell with string, comma column delimiter, semicolon row delimiter, ignore_empty TRUE. 4 arguments used.
-		// Case #5: Area, String, String, Boolean. Single-cell range, comma column delimiter, semicolon row delimiter, ignore_empty TRUE. 4 arguments used.
-		// Case #10: Area3D, String, String, Boolean. 3D single-cell range, comma column delimiter, semicolon row delimiter, ignore_empty TRUE. 4 arguments used.
-		// Case #20: Reference link, String, String, Boolean, Number, String. Reference link, comma column delimiter, semicolon row delimiter, ignore_empty TRUE, case-sensitive, empty pad_with. 6 arguments used.
-		// Case #2: Empty, String, String, Boolean. Empty text input returns #VALUE!. 4 arguments used.
-		// Case #11: Ref3D, String, String, Boolean. 3D reference to cell with non-string value returns #VALUE!. 4 arguments used.
 
 	});
 

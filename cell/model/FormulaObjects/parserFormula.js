@@ -602,8 +602,6 @@ let cElementTypeWeight =  new Map();
 	cElementTypeWeight.set(cElementType.error, 3);
 
 
-
-
 Math.fmod = function ( a, b ) {
 	return Number( (a - (this.floor( a / b ) * b)).toPrecision( cExcelSignificantDigits ) );
 };
@@ -747,8 +745,14 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 	cNumber.prototype.constructor = cNumber;
 	cNumber.prototype.type = cElementType.number;
 	cNumber.prototype.tocString = function () {
-		return new cString(("" + this.value).replace(FormulaSeparators.digitSeparatorDef,
-			FormulaSeparators.digitSeparator));
+		// scientific number should be transformed to Upper case string
+		// 1e+307 -> '1E+307'
+		var s = ("" + this.value).replace('e', 'E');
+		var sep = FormulaSeparators.digitSeparator;
+		if (sep !== '.') {
+			s = s.replace('.', sep);
+		}
+		return new cString(s);
 	};
 	cNumber.prototype.tocNumber = function () {
 		return this;

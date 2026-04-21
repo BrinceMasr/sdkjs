@@ -105,7 +105,7 @@ function (window, undefined) {
 			delimiter = [delimiter.toString()];
 		}
 
-		let doSearch = function (_text, aDelimiters) {
+		const doSearch = function (_text, aDelimiters) {
 			let needIndex = -1;
 			for (let j = 0; j < aDelimiters.length; j++) {
 				let nextDelimiter = match_mode ? aDelimiters[j].toLowerCase() : aDelimiters[j];
@@ -117,11 +117,29 @@ function (window, undefined) {
 			}
 			return needIndex;
 		};
+		
+		const normalizeMatchNumber = function (match) {
+			let res = match;
+			if (match.type === cElementType.number) {
+				let numberValue = match.getValue();
+				if (numberValue <= -1 || numberValue >= 2) {
+					return new cError(cErrorType.wrong_value_type);
+				}
+
+				numberValue = Math.floor(Math.abs(numberValue));
+				res = new cNumber(numberValue);
+			}
+			return res;
+		}
 
 		//instance_num - for negative values, search starts from the end
 		let instance_num = newArgs[2] && !(newArgs[2].type === cElementType.empty) ? newArgs[2] : new cNumber(1);
 		let match_mode = newArgs[3] && !(newArgs[3].type === cElementType.empty) ? newArgs[3] : new cBool(false);
 		let match_end = newArgs[4] && !(newArgs[4].type === cElementType.empty) ? newArgs[4] : new cBool(false);
+
+		// normalize match modes if we have a number as argument
+		match_mode = normalizeMatchNumber(match_mode);
+		match_end = normalizeMatchNumber(match_end);
 
 		match_mode = match_mode.tocBool();
 		match_end = match_end.tocBool();
@@ -3310,7 +3328,12 @@ function (window, undefined) {
 			return argError;
 		}
 		
-		let ignore_empty = argClone[1].tocBool();
+		let ignore_empty = argClone[1];
+		if (ignore_empty.type === cElementType.cellsRange3D && !ignore_empty.isSingleSheet()) {
+			return new cError(cErrorType.bad_reference);
+		}
+
+		ignore_empty = ignore_empty.tocBool();
 		if (ignore_empty.type !== cElementType.bool) {
 			return new cError(cErrorType.wrong_value_type);
 		}
@@ -3682,7 +3705,10 @@ function (window, undefined) {
 		}
 		if (ignore_empty.type === cElementType.error) {
 			return ignore_empty;
+		} else if (ignore_empty.type !== cElementType.bool) {
+			return new cError(cErrorType.wrong_value_type);
 		}
+
 		ignore_empty = ignore_empty.toBool();
 
 		let match_mode = arg[4] ? arg[4].tocBool() : new cBool(false);
@@ -3692,7 +3718,10 @@ function (window, undefined) {
 		}
 		if (match_mode.type === cElementType.error) {
 			return match_mode;
+		} else if (match_mode.type !== cElementType.bool) {
+			return new cError(cErrorType.wrong_value_type);
 		}
+
 		match_mode = match_mode.toBool();
 
 		//pad_with value. Default value: #N/A.
@@ -3704,7 +3733,7 @@ function (window, undefined) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 
-		let getRexExpFromArray = function (_array, _match_mode) {
+		const getRexExpFromArray = function (_array, _match_mode) {
 			let sRegExp = "";
 			if (Array.isArray(_array)) {
 				for (let row = 0; row < _array.length; row++) {
@@ -3723,8 +3752,8 @@ function (window, undefined) {
 			return _match_mode ? new RegExp(sRegExp, "i") : new RegExp(sRegExp);
 		};
 
-		let splitText = function (_text, _rowDelimiter, _colDelimiter) {
-			var res;
+		const splitText = function (_text, _rowDelimiter, _colDelimiter) {
+			let res;
 
 			if (_rowDelimiter == null || _rowDelimiter === "" || _rowDelimiter && _rowDelimiter[0] === "" || _rowDelimiter && _rowDelimiter[0] && _rowDelimiter[0][0] === "") {
 				_rowDelimiter = null;
@@ -3737,7 +3766,7 @@ function (window, undefined) {
 				_colDelimiter = getRexExpFromArray(_colDelimiter, match_mode);
 			}
 
-			var _array = _text.split(_rowDelimiter);
+			let _array = _text.split(_rowDelimiter);
 			if (_array) {
 				for (let i = 0; i < _array.length; i++) {
 					if (!res) {
@@ -3751,7 +3780,7 @@ function (window, undefined) {
 		};
 
 		//processing the first argument - if it arrives as a range, take the first element
-		var res;
+		let res;
 		if (cElementType.cellsRange3D === text.type || cElementType.cellsRange === text.type) {
 			text = text.getValue2(0, 0);
 		} else if (cElementType.array === text.type) {
@@ -3764,7 +3793,13 @@ function (window, undefined) {
 		if (text.type === cElementType.error) {
 			return text;
 		}
+
 		text = text.toString();
+		// empty string without symbols - special case
+		if (text.length === 0) {
+			return new cError(cErrorType.wrong_value_type);
+		}
+
 		if (match_mode) {
 			text = text.toLowerCase();
 		}
