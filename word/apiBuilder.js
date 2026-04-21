@@ -13900,36 +13900,61 @@
 	 * Returns a table row by its position in the table.
 	 * @memberof ApiTable
 	 * @typeofeditors ["CDE"]
-	 * @param {number} nPos - The row position within the table.
-	 * @returns {ApiTableRow | null} - returns null if param is invalid.
+	 * @param {number} rowIndex - The row index within the table.
+	 * @returns {ApiTableRow}
 	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/GetRow.js
 	 */
-	ApiTable.prototype.GetRow = function(nPos)
+	ApiTable.prototype.GetRow = function(rowIndex)
 	{
-		if (typeof(nPos) !== "number" || nPos < 0 || nPos >= this.Table.Content.length)
-			return null;
+		rowIndex = GetIntParameter(rowIndex, null);
+		if (null === rowIndex)
+			throwException(new Error("Row index must be a number"));
 
-		return new ApiTableRow(this.Table.Content[nPos]);
+		if (rowIndex < 0 || rowIndex >= this.Table.GetRowsCount())
+			throwException(new Error("Row index " + rowIndex + " is out of bounds [0, " + (this.Table.GetRowsCount() - 1) + "]"));
+
+		return new ApiTableRow(this.Table.Content[rowIndex]);
 	};
+	/**
+	 * Returns all rows of the table as an array.
+	 * @memberof ApiTable
+	 * @typeofeditors ["CDE"]
+	 * @type {ApiTableRow[]}
+	 * @since 9.4.0
+	 */
+	Object.defineProperty(ApiTable.prototype, "Rows", {
+		get: function()
+		{
+			return this.Table.Content.map(function(row) { return new ApiTableRow(row); });
+		}
+	});
 	/**
 	 * Returns a cell by its position.
 	 * @memberof ApiTable
 	 * @typeofeditors ["CDE"]
-	 * @param {number} nRow - The row position in the current table where the specified cell is placed.
-	 * @param {number} nCell - The cell position in the current table.
-	 * @returns {ApiTableCell | null} - returns null if params are invalid.
+	 * @param {number} rowIndex - The row index in the current table.
+	 * @param {number} cellIndex - The cell index in the specified row.
+	 * @returns {ApiTableCell}
 	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/GetCell.js
 	 */
-	ApiTable.prototype.GetCell = function(nRow, nCell)
+	ApiTable.prototype.GetCell = function(rowIndex, cellIndex)
 	{
-		var Row = this.Table.GetRow(nRow);
+		rowIndex = GetIntParameter(rowIndex, null);
+		if (null === rowIndex)
+			throwException(new Error("Row index must be a number"));
 
-		if (Row && nCell >= 0 && nCell < Row.Content.length)
-		{
-			return new ApiTableCell(Row.GetCell(nCell));
-		}
-		else 
-			return null;
+		cellIndex = GetIntParameter(cellIndex, null);
+		if (null === cellIndex)
+			throwException(new Error("Cell index must be a number"));
+
+		let row = this.Table.GetRow(rowIndex);
+		if (!row || rowIndex < 0 || rowIndex >= this.Table.Content.length)
+			throwException(new Error("Row index " + rowIndex + " is out of bounds [0, " + (this.Table.GetRowsCount() - 1) + "]"));
+
+		if (cellIndex < 0 || cellIndex >= row.Content.length)
+			throwException(new Error("Cell index " + cellIndex + " is out of bounds [0, " + (row.Content.length - 1) + "]"));
+
+		return new ApiTableCell(row.GetCell(cellIndex));
 	};
 	/**
 	 * Merges an array of cells. If the merge is done successfully, it will return the resulting merged cell, otherwise the result will be "null".
@@ -14909,16 +14934,16 @@
 	 * Returns a cell by its position.
 	 * @memberof ApiTableRow
 	 * @typeofeditors ["CDE"]
-	 * @param {number} nPos - The cell position in the current row.
+	 * @param {number} nIndex - The cell index in the current row.
 	 * @returns {ApiTableCell}
 	 * @see office-js-api/Examples/{Editor}/ApiTableRow/Methods/GetCell.js
 	 */
-	ApiTableRow.prototype.GetCell = function(nPos)
+	ApiTableRow.prototype.GetCell = function(nIndex)
 	{
-		if (nPos < 0 || nPos >= this.Row.Content.length)
+		if (nIndex < 0 || nIndex >= this.Row.Content.length)
 			return null;
 
-		return new ApiTableCell(this.Row.Content[nPos]);
+		return new ApiTableCell(this.Row.Content[nIndex]);
 	};
 	/**
 	 * Returns the current row index.
