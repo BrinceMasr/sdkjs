@@ -2386,9 +2386,10 @@ $(function () {
 		};
 
 		const teardown = function () {
+			let oldFilteringMode = window['AscCommonExcel'].filteringMode;
 			api.asc_setFilteringMode(true);
 			clearData(0, 0, 20, 20);
-			api.asc_setFilteringMode(false);
+			api.asc_setFilteringMode(oldFilteringMode);
 		};
 
 		const select = function (c1, r1, c2, r2) {

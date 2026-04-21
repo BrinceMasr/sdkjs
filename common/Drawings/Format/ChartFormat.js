@@ -16845,7 +16845,8 @@
     CalcLegendEntry.prototype.isEmptyPlaceholder = function() {
         return false;
     };
-    CalcLegendEntry.prototype.checkWidhtContent = function() {
+	CalcLegendEntry.prototype.checkWidthContent =
+	CalcLegendEntry.prototype.checkWidhtContent = function () {
         var par = this.txBody.content.Content[0];
         var max_width = 0;
         for(var j = 0; j < par.Lines.length; ++j) {

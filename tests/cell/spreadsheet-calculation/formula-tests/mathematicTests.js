@@ -591,7 +591,6 @@ $(function () {
 		ws2.getRange2("B18").setValue("-0.8"); // TestNameArea3D2
 
 		// Positive cases:
-
 		// Case #0: Number. Basic valid input. Negative number. Argument in [-1,1] range.
 		oParser = new parserFormula('ACOS(-0.5)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: ACOS(-0.5) is parsed.');
@@ -676,17 +675,17 @@ $(function () {
 		oParser = new parserFormula('ACOS("0.5"*"0.5")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: ACOS("0.5"*"0.5") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue().toFixed(9) - 0, 1.318116072, 'Test: Positive case: Formula. Formula: Numbers in string operand multiply.');
-		// TODO Need to fix. Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs - Row #4
-		// Different result with MS
 		// Case #21: Area. Multi-cell range.
-		/*oParser = new parserFormula('ACOS(A102:A103)', 'A2', ws);
+		oParser = new parserFormula('ACOS(A102:A103)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: ACOS(A102:A103) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue()/!*.toFixed(9) - 0*!/, 1.047197551, 'Test: Positive case: Area. Multi-cell range.');*/
-		// Different result with MS
+		oParser.setArrayFormulaRef(ws.getRange2("A1:C2").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue().toFixed(4), "1.0472", 'Test: Positive case: Area. Multi-cell range.');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1,0).getValue(), "#VALUE!", 'Test: Positive case: Area. Multi-cell range.');
 		// Case #22: Area3D. Multi-cell  range to another sheet.
-		/*oParser = new parserFormula('ACOS(Sheet2!B1:C1)', 'A2', ws);
+		oParser = new parserFormula('ACOS(Sheet2!B1:C1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: ACOS(Sheet2!B1:C1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue()/!*.toFixed(9) - 0*!/, 3.141592654, 'Test: Positive case: Area3D. Multi-cell  range to another sheet.');*/
+		oParser.setArrayFormulaRef(ws.getRange2("A1:C2").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue().toFixed(4), "3.1416", 'Test: Positive case: Area3D. Multi-cell  range to another sheet.');
 		// Case #23: Name. Name reference, number
 		oParser = new parserFormula('ACOS(TestName)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: ACOS(TestName) is parsed.');
@@ -709,7 +708,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue().toFixed(9) - 0, 0.643501109, 'Test: Positive case: Name3D. Name with area to another sheet');
 
 		// Negative cases:
-
 		// Case #1: Number. Value above valid range.
 		oParser = new parserFormula('ACOS(1.1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: ACOS(1.1) is parsed.');
@@ -770,9 +768,13 @@ $(function () {
 		oParser = new parserFormula('ACOS("12/12")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: ACOS("12/12") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: String. Short date in string');
+		// Case #16: Area3D. Multi sheets link.
+		let multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A100";
+		oParser = new parserFormula('ACOS('+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula ACOS('+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area3D. Multi sheets link.');
 
 		// Bounded cases:
-
 		// Case #1: Number. Minimum valid value (-1).
 		oParser = new parserFormula('ACOS(-1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: ACOS(-1) is parsed.');
@@ -844,7 +846,6 @@ $(function () {
 		ws2.getRange2("A17").setValue(""); // TestNameArea3D
 
 		// Positive cases:
-
 		// Case #0: Number. Basic valid input: integer >1. 1 argument used.
 		oParser = new parserFormula('ACOSH(10)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ACOSH(10) is parsed.');
@@ -935,7 +936,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Area3D. 3D multi-cell range.');
 
 		// Negative cases:
-
 		// Case #1: Number. Number <1 returns #NUM!. 1 argument used.
 		oParser = new parserFormula('ACOSH(0.5)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ACOSH(0.5) is parsed.');
@@ -1012,9 +1012,13 @@ $(function () {
 		oParser = new parserFormula('ACOSH(TIME(12,0,0))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ACOSH(TIME(12,0,0)) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Time. Time value (0.5) returns #NUM!.');
+		// Case #20: Area3D. Multi sheets link.
+		let multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A100";
+		oParser = new parserFormula('ACOSH('+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula ACOSH('+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area3D. Multi sheets link.');
 
 		// Bounded cases:
-
 		// Case #1: Number. Min valid value (1). 1 argument used.
 		oParser = new parserFormula('ACOSH(1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ACOSH(1) is parsed.');
@@ -1063,7 +1067,6 @@ $(function () {
 		ws2.getRange2("A17").setValue(""); // TestNameArea3D
 
 		// Positive cases:
-
 		// Case #1: Number. Basic valid input: int number. 1 argument used.
 		oParser = new parserFormula('ACOT(2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ACOT(2) is parsed.');
@@ -1141,10 +1144,9 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula ACOT(-0.000000000000001) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue().toFixed(9) - 0, 1.570796327, 'Test: Positive case: Number. Value close to 0 (negative). 1 argument used.');
 		// Case #20: Number. Large positive number. 1 argument used.
-		// Different result with MS
-		/*oParser = new parserFormula('ACOT(1000000000000000)', 'A2', ws);
+		oParser = new parserFormula('ACOT(1000000000000000)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ACOT(1000000000000000) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 1e-15, 'Test: Positive case: Number. Large positive number. 1 argument used.');*/
+		assert.strictEqual(oParser.calculate().getValue(), 1e-15, 'Test: Positive case: Number. Large positive number. 1 argument used.');
 		// Case #21: Number. Large negative number. 1 argument used.
 		oParser = new parserFormula('ACOT(-1000000000000000)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ACOT(-1000000000000000) is parsed.');
@@ -1171,7 +1173,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue().toFixed(9) - 0, 0.785398163, 'Test: Positive case: Name. Name with multi-cell range. 1 argument used.');
 
 		// Negative cases:
-
 		// Case #1: String. Non-numeric string. 1 argument used.
 		oParser = new parserFormula('ACOT("abc")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ACOT("abc") is parsed.');
@@ -1241,9 +1242,13 @@ $(function () {
 		oParser = new parserFormula('ACOT(TestNameArea3D)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ACOT(TestNameArea3D) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Name3D. 3D name with multi-cell range. Returns #VALUE!. 1 argument used.');
+		// Case #18: Area3D. Multi sheets link.
+		let multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A100";
+		oParser = new parserFormula('ACOT('+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula ACOT('+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area3D. Multi sheets link.');
 
 		// Bounded cases:
-
 		// Case #1: Number. Min valid value (0). 1 argument used.
 		oParser = new parserFormula('ACOT(0)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ACOT(0) is parsed.');
@@ -1257,10 +1262,9 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula ACOT(-1E-307) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue().toFixed(9) - 0, 1.570796327, 'Test: Bounded case: Number. Smallest negative value. 1 argument used.');
 		// Case #4: Number. Max positive number. 1 argument used.
-		// Different result with MS
-		/*oParser = new parserFormula('ACOT(1E+307)', 'A2', ws);
+		oParser = new parserFormula('ACOT(1E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ACOT(1E+307) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 1e-307, 'Test: Bounded case: Number. Max positive number. 1 argument used.');*/
+		assert.strictEqual(oParser.calculate().getValue(), 1.0000000000000001e-307, 'Test: Bounded case: Number. Max positive number. 1 argument used.');
 		// Case #5: Number. Max negative number. 1 argument used.
 		oParser = new parserFormula('ACOT(-1E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ACOT(-1E+307) is parsed.');
@@ -1296,7 +1300,6 @@ $(function () {
 		ws2.getRange2("B18").setValue("1"); // TestNameArea3D2
 
 		// Positive cases:
-
 		// Case #1: Number. Basic valid input: int number > 1.
 		oParser = new parserFormula('ACOTH(6)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ACOTH(6) is parsed.');
@@ -1395,7 +1398,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue().toFixed(9) - 0, 0.804718956, 'Test: Positive case: Area3D. Area with value > 1.');
 
 		// Negative cases:
-
 		// Case #1: Number. 1 value returns #NUM!. 1 argument used.
 		oParser = new parserFormula('ACOTH(1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ACOTH(1) is parsed.');
@@ -1496,9 +1498,14 @@ $(function () {
 		oParser = new parserFormula('ACOTH(TestNameArea3D2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ACOTH(TestNameArea3D2) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Name3D. Multi-cell range value 1 returns #NUM! error.');
+		// Case #26: Area3D. Multi sheets link.
+		let multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A100";
+		oParser = new parserFormula('ACOTH('+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula ACOTH('+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area3D. Multi sheets link.');
+
 
 		// Bounded cases:
-
 		// Case #1: Number. Smallest  value above 1. 1 argument used.
 		oParser = new parserFormula('ACOTH(1.00000000000001)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ACOTH(1.00000000000001) is parsed.');
@@ -1515,6 +1522,15 @@ $(function () {
 		oParser = new parserFormula('ACOTH(-9E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ACOTH(-9E+307) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Number. Min valid Excel number. 1 argument used.');
+		// Case #5: Number. Min positive number. 1 argument used.
+		oParser = new parserFormula('ACOTH(1E-307)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula ACOTH(1E-307) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), "#NUM!", 'Test: Bounded case: Number. Min positive number. 1 argument used.');
+		// Case #6: Number. Max negative value. 1 argument used.
+		oParser = new parserFormula('ACOTH(-1E-307)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula ACOTH(-1E-307) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), "#NUM!", 'Test: Bounded case: Number. Max negative value. 1 argument used.');
+		
 
 		testArrayFormula(assert, "ACOTH");
 	});
@@ -2440,9 +2456,14 @@ $(function () {
 		oParser = new parserFormula('ASIN(-1-1E-10)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ASIN(-1-1E-10) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Formula. Number slightly less than -1 returns #NUM! error.');
+		// Case #17: Area3D. Multi sheets link.
+		let multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A100";
+		oParser = new parserFormula('ASIN('+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula ASIN('+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area3D. Multi sheets link.');
+
 
 		// Bounded cases:
-
 		// Case #1: Number. Minimum valid value (-1).
 		oParser = new parserFormula('ASIN(-1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ASIN(-1) is parsed.');
@@ -2491,7 +2512,6 @@ $(function () {
 		ws2.getRange2("B18").setValue("Text"); // TestNameArea3D2
 
 		// Positive cases:
-
 		// Case #1: Number. Example from documentation. Number is -2.5
 		oParser = new parserFormula('ASINH(-2.5)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ASINH(-2.5) is parsed.');
@@ -2609,10 +2629,9 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula ASINH(1E+100) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue().toFixed(7) - 0, 230.9516565, 'Test: Positive case: Number. Very large positive number.');
 		// Case #30: Number. Very large negative number.
-		// Different result with MS TODO: Need to fix: Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row#35
-		/*oParser = new parserFormula('ASINH(-1E+100)', 'A2', ws);
+		oParser = new parserFormula('ASINH(-1E+100)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ASINH(-1E+100) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue()/!*.toFixed(7) - 0*!/, -230.9516565, 'Test: Positive case: Number. Very large negative number.');*/
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "-230.95166", 'Test: Positive case: Number. Very large negative number.');
 		// Case #31: Boolean. Boolean TRUE (1).
 		oParser = new parserFormula('ASINH(TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ASINH(TRUE) is parsed.');
@@ -2623,7 +2642,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Boolean. Boolean FALSE (0).');
 
 		// Negative cases:
-
 		// Case #1: String. Non-numeric string returns #VALUE!.
 		oParser = new parserFormula('ASINH("abc")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ASINH("abc") is parsed.');
@@ -2724,14 +2742,17 @@ $(function () {
 		oParser = new parserFormula('ASINH(Sheet2!A3:B3)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ASINH(Sheet2!A3:B3) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Area3D. 3D multi-cell range.');
+		// Case #26: Area3D. Multi sheets link.
+		let multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A100";
+		oParser = new parserFormula('ASINH('+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula ASINH('+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area3D. Multi sheets link.');
 
 		// Bounded cases:
-
 		// Case #1: Number. Near minimum valid Excel number.
-		// Different result with MS TODO: Need to fix: Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row#35
-		/*oParser = new parserFormula('ASINH(-9.99999999999999E+153)', 'A2', ws);
+		oParser = new parserFormula('ASINH(-9.99999999999999E+153)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ASINH(-9.99999999999999E+153) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), -355.2912515, 'Test: Bounded case: Number. Near minimum valid Excel number.');*/
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), "-355.29125", 'Test: Bounded case: Number. Near minimum valid Excel number.');
 		// Case #2: Number. Near maximum valid Excel number.
 		oParser = new parserFormula('ASINH(9.99999999999999E+153)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ASINH(9.99999999999999E+153) is parsed.');
