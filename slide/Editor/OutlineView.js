@@ -1415,8 +1415,9 @@
 				outlineView.updateFromSourceParagraph(sourceParagraph);
 			} else {
 				if (this.isNeedAddMockParagraph(sourceParagraph)) {
+					const info = outlineView.outlineInfo[outlineParagraph.GetId()];
 					outlineView.unlinkOutlineParagraph(outlineParagraph);
-					outlineView.addMockTitle(outlineParagraph.Index, outlineView.outlineInfo[outlineParagraph.GetId()])
+					outlineView.addMockTitle(outlineParagraph.Index, info)
 				} else {
 					outlineView.unlinkOutlineParagraph(outlineParagraph);
 				}
@@ -1424,18 +1425,8 @@
 		}
 	}
 	OutlineView.prototype.updateExistingParagraphs = function (existingOutlineParagraphs) {
-		existingOutlineParagraphs.sort(function (aParagraph, bParagraph) {
-			return bParagraph.Index - aParagraph.Index;
-		});
-		for (let i = 0; i < existingOutlineParagraphs.length; i += 1) {
-			const outlineParagraph = existingOutlineParagraphs[i];
-			const sourceParagraph = this.outlineToSourceMap[outlineParagraph.Get_Id()];
-			if (sourceParagraph && sourceParagraph.IsUseInDocument()) {
-				this.updateFromSourceParagraph(sourceParagraph);
-			} else {
-				this.unlinkOutlineParagraph(outlineParagraph, sourceParagraph);
-			}
-		}
+		const manager = new UpdateExistingParagraphManager(this, new UseInDocumentManager());
+		manager.update(existingOutlineParagraphs);
 	}
 
 	OutlineView.prototype.updateNewParagraphs = function (newParagraphs) {
