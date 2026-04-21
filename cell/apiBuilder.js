@@ -29092,22 +29092,37 @@
 			return null;
 		}
 		var count = tablePart.TableColumns ? tablePart.TableColumns.length : 0;
-		var range, displayName;
+		var range, displayName, bFirstColumn = false;
 		if (nPosition === undefined || nPosition === null || nPosition > count) {
 			range = ws.getRange3(ref.r1, ref.c2 + 1, ref.r2, ref.c2 + 1);
 			displayName = tablePart.DisplayName;
 			nPosition = count + 1;
+		} else if (nPosition === 1) {
+			range = ws.getRange3(ref.r1, ref.c1, ref.r2, ref.c1);
+			displayName = undefined;
+			bFirstColumn = true;
 		} else {
 			var colIndex = ref.c1 + (nPosition - 1);
 			range = ws.getRange3(ref.r1, colIndex, ref.r2, colIndex);
 			displayName = undefined;
 		}
 		range.addCellsShiftRight(displayName);
+		if (bFirstColumn) {
+			var redrawArr = ws.autoFilters.insertFirstTableColumn(tablePart.DisplayName, range.bbox);
+			ws.autoFilters.redrawStylesTables(redrawArr);
+		}
 		var columns = tablePart.TableColumns;
 		if (!columns || !columns[nPosition - 1]) {
 			return null;
 		}
-		return new ApiListColumn(columns[nPosition - 1], this);
+		var newColumn = columns[nPosition - 1];
+		if (tablePart.isHeaderRow()) {
+			var headerBBox = newColumn.getRange(tablePart, true, false);
+			if (headerBBox) {
+				ws.getRange3(headerBBox.r1, headerBBox.c1, headerBBox.r1, headerBBox.c1).setValue(newColumn.getTableColumnName());
+			}
+		}
+		return new ApiListColumn(newColumn, this);
 	};
 
 	// -------------------------------------------------------------------------

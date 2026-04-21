@@ -2281,6 +2281,41 @@
 				return redrawTablesArr;
 			},
 
+			insertFirstTableColumn: function (displayNameFormatTable, activeRange) {
+				var worksheet = this.worksheet;
+				var t = this;
+				var bUndoChanges = worksheet.workbook.bUndoChanges;
+				var bRedoChanges = worksheet.workbook.bRedoChanges;
+
+				var redrawTablesArr = [];
+
+				var changeFilter = function (filter) {
+					var oldFilter = filter.clone(null);
+					filter.addTableFirstColumn(t);
+					filter.changeRef(-1, null, true);
+
+					//History
+					if (!bUndoChanges && !bRedoChanges && oldFilter) {
+						var changeElement = {
+							oldFilter: oldFilter, newFilterRef: filter.Ref.clone()
+						};
+						t.deferredHistoryAction = t._getHistoryObj(changeElement, AscCH.historyitem_AutoFilter_Change,
+							{displayName: displayNameFormatTable, activeCells: activeRange, type: true}, false,
+							oldFilter.Ref, null, activeRange);
+					}
+
+					redrawTablesArr.push({oldfilterRef: oldFilter.Ref, newFilter: filter});
+				};
+
+				var tablePart = t._getFilterByDisplayName(displayNameFormatTable);
+
+				if (tablePart) {
+					changeFilter(tablePart);
+				}
+
+				return redrawTablesArr;
+			},
+
 			insertRows: function (type, activeRange, insertType, displayNameFormatTable) {
 				var worksheet = this.worksheet;
 				var t = this;
