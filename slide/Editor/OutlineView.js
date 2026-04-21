@@ -1342,14 +1342,27 @@
 	UseInDocumentManager.prototype.getPresentation = function () {
 		return Asc.editor.WordControl.m_oLogicDocument;
 	};
+	UseInDocumentManager.prototype.isForceUseInDocumentParagraph = function (paragraph) {
+		if (paragraph.Index === -1) {
+			return false;
+		}
+		const shape = paragraph.GetParentShape();
+		const isUseInDocumentShape = this.isUseInDocumentShape(shape);
+		if (!isUseInDocumentShape) {
+			return false;
+		}
+		const content = shape.getDocContent();
+		if (content.Content[paragraph.Index] !== paragraph) {
+			return false;
+		}
+		return true;
+	};
 	UseInDocumentManager.prototype.isUseInDocumentParagraph = function (paragraph) {
 		if (!paragraph) {
 			return false;
 		}
 		if (this.useInDocumentParagraphs[paragraph.GetId()] === undefined) {
-			this.useInDocumentParagraphs = {};
-			const shape = paragraph.GetParentShape();
-			this.useInDocumentParagraphs[paragraph.GetId()] = !!(shape && this.isUseInDocumentShape(shape));
+			this.useInDocumentParagraphs[paragraph.GetId()] = this.isForceUseInDocumentParagraph(paragraph);
 		}
 		return this.useInDocumentParagraphs[paragraph.GetId()]
 	};

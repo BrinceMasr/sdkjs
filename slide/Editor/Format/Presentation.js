@@ -690,6 +690,7 @@ function CPresentation(DrawingDocument) {
 	this.cachedGridSpacing = null;
 
 	this.cachedAnimationLabelText = {};
+	this.ConcatParagraphsOnRemove  = true;
 }
 
 AscFormat.InitClass(CPresentation, AscFormat.CBaseFormatObject, AscDFH.historyitem_type_Presentation);
