@@ -47,6 +47,24 @@
 	 * @property {string[]} content - An array with XML shapes to be replaced.
 	 */
 
+	/**
+	 * A point.
+	 * @typedef {number} pt
+	 */
+
+	/**
+	 * Axis-aligned rectangle represented as a tuple.
+	 *
+	 * Invariants:
+	 *  - rect[0] < rect[2] (x1 < x2)
+	 *  - rect[1] < rect[3] (y1 < y2)
+	 *
+	 * @typedef {pt[]} Rect
+	 * @property {pt} 0 - x1 (left)
+	 * @property {pt} 1 - y1 (top)
+	 * @property {pt} 2 - x2 (right)
+	 * @property {pt} 3 - y2 (bottom)
+	 */
 
     /**
      * Base class.
@@ -209,6 +227,47 @@
 		}
 
 		return arrResult;
+	};
+	/**
+	 * Moves to specified page.
+	 * @memberof Api
+	 * @typeofeditors ["PDFE"]
+	 * @alias GoToPage
+	 * @param {number} pageIndex
+	 * @param {?Rect} [rect=undefined] - if specified only x1, y1 (ex. [10, 10]) - then moves to them with inherited zoom, if specified whole rect (ex. [10, 10, 100, 100]) then zoom to rect
+	 * @returns {boolean} 
+	 * @see office-js-api/Examples/Plugins/PDF/Api/Methods/GoToPage.js
+	 */
+	Api.prototype["pluginMethod_GoToPage"] = function(pageIndex, rect) {
+		let oDoc = this.getPDFDoc();
+		if (!oDoc)
+			return false;
+
+		let oPageInfo = oDoc.GetPageInfo(pageIndex);
+		if (!oPageInfo) {
+			return false;
+		}
+
+		if (rect != null && !Array.isArray(rect)) {
+			return false;
+		}
+
+		let nGoToType = AscPDF.GOTO_TYPES.xyz;
+		if (Array.isArray(rect) && rect.length == 4) {
+			nGoToType = AscPDF.GOTO_TYPES.fitR;
+		}
+
+		let oAction = new AscPDF.CActionGoTo(oPageInfo.GetId(), nGoToType, undefined, {
+			left: rect[0],
+			top: rect[1],
+			right: rect[2],
+			bottom: rect[3]
+		});
+		
+		oAction.Do();
+
+		oDoc.Viewer.paint();
+		return true;
 	};
 })(window);
 
