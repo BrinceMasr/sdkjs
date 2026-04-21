@@ -117,7 +117,6 @@ function CChartsDrawer()
 	this.trendline = new CTrendline(this);
 	this.upDownBars = new CUpDownBars(this);
 
-
 	this.changeAxisMap = null;
 
 	this.calcShapesHelper = new calcShapesHelper(this);
@@ -187,7 +186,6 @@ CChartsDrawer.prototype =
 			}
 
 		}
-
 		//CHARTS
 		if (!chartSpace.bEmptySeries) {
 			for(var i in this.charts) {
@@ -960,7 +958,6 @@ CChartsDrawer.prototype =
 	//****calculate margins****
 	_calculateMarginsChart: function (chartSpace, dNotPutResult) {
 		this.calcProp.chartGutter = {};
-
 		if (this._isSwitchCurrent3DChart(chartSpace)) {
 			standartMarginForCharts = 16;
 		}
@@ -970,7 +967,9 @@ CChartsDrawer.prototype =
 
 		var pxToMM = this.calcProp.pxToMM;
 		var plotArea = chartSpace.chart.plotArea;
+		var charts = plotArea.charts;
 		const isChartEx = chartSpace ? chartSpace.isChartEx() : false;
+		let dataTableExtY = 0;
 
 		//if points are calculated - set margin based on them
 		var marginOnPoints = this._calculateMarginOnPoints(chartSpace/*, isHBar*/);
@@ -978,7 +977,10 @@ CChartsDrawer.prototype =
 
 		//calculate axis labels extending beyond bounds
 		var labelsMargin = this._calculateMarginLabels(chartSpace);
-		var left = labelsMargin.left, right = labelsMargin.right, top = labelsMargin.top, bottom = labelsMargin.bottom;
+		let left = labelsMargin.left;
+		let right = labelsMargin.right;
+		let top = 0;
+		let bottom = 0;
 
 
 		var leftTextLabels = 0;
@@ -1092,7 +1094,6 @@ CChartsDrawer.prototype =
 		//exception - when there is a pie chart among the charts
 		let isCircleShape = null;
 		var radarChart = null;
-		var charts = plotArea.charts;
 
 		// check whether chart is of type pie, doughnut or sunburst
 		if (isChartEx) {
@@ -1164,6 +1165,7 @@ CChartsDrawer.prototype =
 			// barChart, hBarChart, lineChart, scatterChart, areaChart,
 			const info = this._calculateMarginsChartOrdinaryDiagrams(
 				topMainTitle,
+				dataTableExtY,
 				{left: axisSettings[0].isExist, right: axisSettings[1].isExist, top: axisSettings[2].isExist, bottom: axisSettings[3].isExist},
 				{left: leftTextLabels, right: rightTextLabels, top: topTextLabels, bottom: bottomTextLabels},
 				{left: leftKey, right: rightKey, top: topKey, bottom: bottomKey},
@@ -1202,6 +1204,10 @@ CChartsDrawer.prototype =
 			}
 		}
 
+		if (plotArea.dTable && !this._isSwitchCurrent3DChart(chartSpace) &&
+				!(chartSpace.isLayoutSizes && chartSpace.isLayoutSizes()) && pxLeft < standartMarginForCharts * 1.5) {
+			pxLeft = standartMarginForCharts * 1.5;
+		}
 		if (dNotPutResult) {
 			return {left: pxLeft, right: pxRight, top: pxTop, bottom: pxBottom};
 		} else {
@@ -1217,7 +1223,40 @@ CChartsDrawer.prototype =
 	// margin is combination of outward things + inward things
 	// outward things are: title and legend labels
 	// inward things are: axis titles, axes themselves and standard margin.
-	_calculateMarginsChartOrdinaryDiagrams: function (chartTitle, axes, axesTitles, legendTexts) {
+	_calculateMarginsChartOrdinaryDiagrams: function (chartTitle, dataTableExtY, axes, axesTitles, legendTexts) {
+		if (true) {
+			return this._calculateMarginsChartOrdinaryDiagramsOld(chartTitle, axes, axesTitles, legendTexts);
+		}
+
+		const normalizedMargin = standartMarginForCharts / this.calcProp.pxToMM;
+		const marginWithOffsetApplied1 = normalizedMargin / 2;
+		const marginWithOffsetApplied2 = normalizedMargin / 2;
+		const marginWithOffsetApplied3 = normalizedMargin / 3;
+		const marginWithOffsetApplied4 = normalizedMargin + (normalizedMargin * 2 / 3);
+
+		const titleBasedMargin = chartTitle ? chartTitle + marginWithOffsetApplied1 : 0;
+
+		const labelBasedMarginTop = legendTexts && legendTexts.top ? legendTexts.top + marginWithOffsetApplied2 : 0;
+		const labelBasedMarginLeft = legendTexts && legendTexts.left ? legendTexts.left + marginWithOffsetApplied2 : 0;
+		const labelBasedMarginRight = legendTexts && legendTexts.right ? legendTexts.right + marginWithOffsetApplied2 : 0;
+		const labelBasedMarginBottom = legendTexts && legendTexts.bottom ? legendTexts.bottom + marginWithOffsetApplied2 : 0;
+
+		const decider = function (dataTableExtY, dataTableMargin, axisTitle, axisTitleMargin, axis, axisMargin, defaultMarginEffect) {
+			const dataTableEffect = dataTableExtY ? dataTableExtY + dataTableMargin : 0;
+			const axisTitleEffect = axisTitle ? axisTitle + axisTitleMargin : 0;
+			const axisEffect = axis ? axisMargin : 0;
+			return dataTableEffect || axisTitleEffect || axisEffect || defaultMarginEffect;
+		}
+
+		const left = labelBasedMarginLeft + decider(0, marginWithOffsetApplied4, axesTitles.left, normalizedMargin, axes.left, marginWithOffsetApplied1, normalizedMargin);
+		const bottom = labelBasedMarginBottom + decider(dataTableExtY, marginWithOffsetApplied2, axesTitles.bottom, normalizedMargin, axes.bottom || axes.left || axes.right, marginWithOffsetApplied2, normalizedMargin);
+		const right = labelBasedMarginRight + decider(0, 0, axesTitles.right, normalizedMargin, axes.right, marginWithOffsetApplied2, normalizedMargin);
+		const top = titleBasedMargin + labelBasedMarginTop + decider(0, 0, axesTitles.top, normalizedMargin, axes.top || axes.left || axes.right, (titleBasedMargin || axes.top) ? marginWithOffsetApplied1 : marginWithOffsetApplied3, (labelBasedMarginTop && labelBasedMarginRight) ? marginWithOffsetApplied1 : normalizedMargin);
+
+		return {left: left, right: right, top: top, bottom: bottom};
+	},
+
+	_calculateMarginsChartOrdinaryDiagramsOld: function (chartTitle, axes, axesTitles, legendTexts) {
 		const normalizedMargin = standartMarginForCharts / this.calcProp.pxToMM;
 		const marginWithOffsetApplied1 = normalizedMargin * 1 / 2;
 		const marginWithOffsetApplied2 = normalizedMargin * 2 / 3;
@@ -3031,7 +3070,7 @@ CChartsDrawer.prototype =
 			this._calculateMarginsChart(chartSpace);
 		}
 
-		if (!this.calcProp.chartGutter.left && !this.calcProp.chartGutter.right && !this.calcProp.chartGutter._bottom && !this.calcProp.chartGutter.top) {
+		if (!this.calcProp.chartGutter._left && !this.calcProp.chartGutter._right && !this.calcProp.chartGutter._bottom && !this.calcProp.chartGutter._top) {
 			this._calculateMarginsChart(chartSpace);
 		}
 
@@ -4776,7 +4815,7 @@ CChartsDrawer.prototype =
 			path.lnTo(constP * pathW, (p1 - l) * pathH);
 		} else {
 			path.moveTo(p1 * pathW, constP * pathH);
-			path.lnTo(p1 + l * pathW, constP * pathH);
+			path.lnTo((p1 + l) * pathW, constP * pathH);
 		}
 
 		return pathId;
@@ -9301,6 +9340,10 @@ drawLineChart.prototype = {
 			return;
 		}
 
+		if (!point.compiledDlb) {
+			return;
+		}
+
 		var oPath = this.cChartSpace.GetPath(path);
 		var oCommand0 = oPath.getCommandByIndex(commandIndex);
 		var x = oCommand0.X;
@@ -10823,6 +10866,10 @@ drawAreaChart.prototype = {
 
 		var constMargin = 5 / pxToMm;
 
+		if (!point.compiledDlb) {
+			return;
+		}
+
 		var width = point.compiledDlb.extX;
 		var height = point.compiledDlb.extY;
 
@@ -11644,6 +11691,10 @@ drawHBarChart.prototype = {
 		var w = oCommand2.X - oCommand1.X;
 
 		var pxToMm = this.chartProp.pxToMM;
+
+		if (!point.compiledDlb) {
+			return;
+		}
 
 		var width = point.compiledDlb.extX;
 		var height = point.compiledDlb.extY;
@@ -14802,6 +14853,10 @@ drawRadarChart.prototype = {
 
 		var pxToMm = this.chartProp.pxToMM;
 		var constMargin = 5 / pxToMm;
+
+		if (!point.compiledDlb) {
+			return;
+		}
 
 		var width = point.compiledDlb.extX;
 		var height = point.compiledDlb.extY;
@@ -21033,4 +21088,5 @@ CErrBarsDraw.prototype = {
 	window["AscFormat"].c_oChartTypes = c_oChartTypes;
 	window["AscCommon"]._roundValue = _roundValue;
 	window["AscFormat"].CachedClusteredColumn = CCachedClusteredColumn;
+	window["AscFormat"].CGeometry2 = CGeometry2;
 })(window);

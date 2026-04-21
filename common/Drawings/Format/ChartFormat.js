@@ -10426,6 +10426,20 @@
         this.showVertBorder = null;
         this.spPr = null;
         this.txPr = null;
+
+        this.paths = [];
+        this.extX = 0;
+        this.extY = 0;
+        this.x = 0;
+        this.y = 0;
+        this.rows = 0;
+        this.cols = 0;
+        this.rowNameLabels = [];
+        this.colNameLabels = [];
+        this.ptLabels = [];
+        this.firstColumnWidth = 0;
+        this.colWidth = 0;
+        this.rowHeight = 0;
     }
 
     InitClass(CDTable, CBaseChartObject, AscDFH.historyitem_type_DTable);
@@ -10476,6 +10490,427 @@
             return;
         }
         this.applyStyleEntry(oChartStyle.chartArea, oColors.generateColors(1), 0, bReset);
+    };
+    CDTable.prototype.draw = function (cChartSpace, graphics) {
+        this._drawRect(cChartSpace, graphics);
+        this._drawText(cChartSpace, graphics);
+    };
+    CDTable.prototype._drawRect = function (cChartSpace, graphics) {
+        const hasAnyPaths = this.outlinePaths.length || this.horzBorderPaths.length || this.vertBorderPaths.length;
+        if (!hasAnyPaths) {
+            return;
+        }
+
+        const blackPen = AscFormat.builder_CreateLine(12700, { UniFill: AscFormat.CreateUnfilFromRGB(0, 0, 0) });
+        const pen = this.spPr && this.spPr.ln ? this.spPr.ln : blackPen;
+        const cShapeDrawer = new AscCommon.CShapeDrawer();
+        cShapeDrawer.Graphics = graphics;
+
+        const drawPaths = function (paths) {
+            for (let i = 0; i < paths.length; i++) {
+                const pathId = paths[i];
+                if (pathId == null) {
+                    continue;
+                }
+                const oPath = cChartSpace.GetPath(pathId);
+                if (!oPath) {
+                    continue;
+                }
+                oPath.stroke = true;
+                const cGeometry = new AscFormat.CGeometry2();
+                cGeometry.AddPath(oPath);
+                cShapeDrawer.Clear();
+                cShapeDrawer.fromShape2(new AscFormat.CColorObj(pen, null, cGeometry), cShapeDrawer.Graphics, cGeometry);
+                cShapeDrawer.draw(cGeometry);
+            }
+        };
+
+        if (this.showOutline !== false) {
+            drawPaths(this.outlinePaths);
+        }
+        if (this.showHorzBorder !== false) {
+            drawPaths(this.horzBorderPaths);
+        }
+        if (this.showVertBorder !== false) {
+            drawPaths(this.vertBorderPaths);
+        }
+
+        cShapeDrawer.Graphics.RestoreGrState();
+    };
+    CDTable.prototype._drawMarkerUnion = function (unionMarker, x, y, markerSize, areaWidth, graphics) {
+        const positionAndDraw = function (m, mx, my, mw, mh) {
+            if (!m || !m.spPr || !m.spPr.geometry) {
+                return;
+            }
+            m.spPr.geometry.Recalculate(mw, mh);
+            m.extX = mw;
+            m.extY = mh;
+            m.localTransform.Reset();
+            global_MatrixTransformer.TranslateAppend(m.localTransform, mx, my);
+            m.transform = m.localTransform.CreateDublicate();
+            m.invertTransform = global_MatrixTransformer.Invert(m.transform);
+            m.draw(graphics);
+        };
+        if (unionMarker.lineMarker) {
+            const lineH = markerSize * 0.4; // recalculateLegend: line height = 1, marker_size = 2.5 → ratio 0.4
+            positionAndDraw(unionMarker.lineMarker, x, y + (markerSize - lineH) / 2, areaWidth, lineH);
+            if (unionMarker.marker) {
+                positionAndDraw(unionMarker.marker, x + (areaWidth - markerSize) / 2, y, markerSize, markerSize);
+            }
+        } else if (unionMarker.marker) {
+            positionAndDraw(unionMarker.marker, x, y, markerSize, markerSize);
+        }
+    };
+    CDTable.prototype._drawText = function (cChartSpace, graphics) {
+        const offsetX = cChartSpace.transform.tx;
+        const offsetY = cChartSpace.transform.ty;
+        const bDrawKeys = this.showKeys && this._markerSize > 0;
+        for (let i = 0; i < this.rowNameLabels.length; ++i) {
+            const rowNameLabel = this.rowNameLabels[i];
+            const y = offsetY + this.y + (i + 1) * this.rowHeight;
+            let labelX = offsetX + this.x;
+            if (bDrawKeys && this.rowNameMarkers[i]) {
+                const markerX = labelX + this._markerLeftPad;
+                const markerY = y + (this.rowHeight - this._markerSize) / 2;
+                this._drawMarkerUnion(this.rowNameMarkers[i], markerX, markerY, this._markerSize, this._markerAreaWidth, graphics);
+                labelX += this._markerLeftPad + this._markerAreaWidth + this._markerGap;
+            }
+            rowNameLabel.setPosition(labelX, y);
+            rowNameLabel.draw(graphics);
+        }
+        for (let i = 0; i < this.colNameLabels.length; ++i) {
+            const colNameLabel = this.colNameLabels[i];
+            const centerOffset = (this.colWidth - colNameLabel.extX) / 2;
+            const x = offsetX + this.x + i * this.colWidth + this.firstColumnWidth + centerOffset;
+            const y = offsetY + this.y;
+            colNameLabel.setPosition(x, y);
+            colNameLabel.draw(graphics);
+        }
+        for (let i = 0; i < this.ptLabels.length; ++i) {
+            for (let j = 0; j < this.ptLabels[i].length; ++j) {
+                const ptLabel = this.ptLabels[i][j];
+                const centerOffsetX = (this.colWidth - ptLabel.extX) / 2;
+                const centerOffsetY = (this.rowHeight - ptLabel.extY) / 2;
+                const x = offsetX + this.x + ptLabel.idx * this.colWidth + this.firstColumnWidth + centerOffsetX;
+                const y = offsetY + this.y + (i + 1) * this.rowHeight + centerOffsetY;
+                ptLabel.setPosition(x, y);
+                ptLabel.draw(graphics);
+            }
+        }
+    };
+    CDTable.prototype._clean = function () {
+        this.outlinePaths = [];
+        this.horzBorderPaths = [];
+        this.vertBorderPaths = [];
+        this.extX = 0;
+        this.extY = 0;
+        this.x = 0;
+        this.y = 0;
+        this.rows = 0;
+        this.cols = 0;
+        this.rowNameLabels = [];
+        this.rowNameMarkers = [];
+        this.colNameLabels = [];
+        this.ptLabels = [];
+        this.firstColumnWidth = 0;
+        this.colWidth = 0;
+        this.rowHeight = 0;
+        this._valAxWidth = 0;
+        this._markerSize = 0;
+        this._markerAreaWidth = 0;
+        this._markerGap = 0;
+        this._markerLeftPad = 0;
+        this._bLineSeries = false;
+    };
+    CDTable.prototype.precalculateData = function(cChartSpace, oRect) {
+        // if (this.rowNameLabels.length || this.colNameLabels.length) {
+        //     return;
+        // }
+        this._clean();
+        this._fillInfo(cChartSpace);
+        this._correctParentRect(oRect, cChartSpace);
+        this._recalculateRect(cChartSpace, oRect);
+    }
+    CDTable.prototype._fillInfo = function (cChartSpace) {
+        const charts = cChartSpace.chart.plotArea.charts
+        if (!charts){
+            return;
+        }
+        let firstSeria = null;
+        let seriesCount = 0, ptsCount = 0;
+        if (charts) {
+            for (let id in charts) {
+                if (!charts.hasOwnProperty(id)) continue;
+                let ch = charts[id];
+                if (ch && Array.isArray(ch.series) && ch.series.length > 0) {
+                    seriesCount = ch.series.length;
+                    for (let i = 0; i < ch.series.length; i++) {
+
+                        const seria = ch.series[i];
+                        if (!firstSeria) {
+                            firstSeria = seria;
+                        }
+
+                        const nSerType = seria.getObjectType();
+                        if (nSerType === AscDFH.historyitem_type_LineSeries ||
+                            nSerType === AscDFH.historyitem_type_ScatterSer ||
+                            nSerType === AscDFH.historyitem_type_RadarSeries) {
+                            this._bLineSeries = true;
+                        }
+                        this._buildRowNameLabel(cChartSpace, seria);
+                        this._buildRowNameMarker(cChartSpace, seria);
+                        let numCache = cChartSpace.chartObj ? cChartSpace.chartObj.getNumCache(seria.val) : null;
+                        if (numCache && Array.isArray(numCache.pts)) {
+                            ptsCount = Math.max(ptsCount, numCache.ptCount, numCache.pts.length);
+                            const row = [];
+                            for (let j = 0; j < numCache.pts.length; j++) {
+                                this._buildPtLabel(row, cChartSpace, seria, numCache.pts[j]);
+                            }
+                            this.ptLabels.push(row);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (firstSeria && this.colNameLabels.length === 0){
+            // fill column names only for the first series, because they should be the same for all series in one chart
+            for (let j = 0; j < ptsCount; j++) {
+                this._buildColNameLabel(cChartSpace, firstSeria, {idx : j});
+            }
+        }
+
+        this.rows = seriesCount + 1;
+        this.cols = ptsCount + 1;
+        this.rowHeight = this.rowNameLabels.length ? this.rowNameLabels[0].extY : this.colNameLabels.length ? this.colNameLabels[0].extY : 0;
+        this.firstColumnWidth = this.rowNameLabels.length ? this.rowNameLabels[0].extX : 0;
+        if (this.showKeys && this.rowNameMarkers.length > 0 && this.rowHeight > 0) {
+            let markerSize, distanceToText;
+            if (this._bLineSeries) {
+                // recalculateLegend: marker_size = 2.5, distance_to_text = 0.5
+                markerSize = 2.5;
+                distanceToText = 0.5;
+            } else {
+                let maxFontSize = 0;
+                for (let k = 0; k < this.rowNameLabels.length; k++) {
+                    const lbl = this.rowNameLabels[k];
+                    const fs = lbl.txBody && lbl.txBody.content.Content[0].CompiledPr.Pr.TextPr.FontSize;
+                    if (AscFormat.isRealNumber(fs) && fs > maxFontSize) {
+                        maxFontSize = fs;
+                    }
+                }
+                // recalculateLegend: marker_size = 0.2 * max_font_size, distance_to_text = marker_size * 0.7
+                markerSize = maxFontSize > 0 ? 0.2 * maxFontSize : this.rowHeight * 0.43;
+                distanceToText = markerSize * 0.7;
+            }
+            this._markerSize = markerSize;
+            this._markerGap = distanceToText;
+            if (this.rowHeight < markerSize * 1.4) {
+                this.rowHeight = markerSize * 1.4;
+            }
+            // recalculateLegend: line_marker_width = 7.7, marker_size = 2.5 → ratio 3.08
+            this._markerAreaWidth = this._bLineSeries ? markerSize * 3.08 : markerSize;
+            this._markerLeftPad = distanceToText;
+            this.firstColumnWidth += distanceToText + this._markerAreaWidth + distanceToText;
+        }
+        this.extY = this.rowHeight * this.rows;
+    }
+    CDTable.prototype._correctParentRect = function (oRect, cChartSpace) {
+        oRect.h = oRect.h - this.extY;
+        let valAxWidth = 0;
+        const axId = cChartSpace.chart.plotArea.axId;
+        for (let i = 0; i < axId.length; i++) {
+            const axis = axId[i];
+            if (axis.axPos === AscFormat.AX_POS_L && !axis.bDelete) {
+                valAxWidth = (axis.labels && axis.labels.extX) || 0;
+                break;
+            }
+        }
+        this._valAxWidth = valAxWidth;
+        const extraX = Math.max(0, this.firstColumnWidth - valAxWidth);
+        oRect.x = oRect.x + extraX;
+        oRect.w = oRect.w - extraX;
+    }
+    CDTable.prototype._buildBasicLabel = function (cChartSpace, seria) {
+        if (!cChartSpace || !seria) {
+            return null;
+        }
+
+        const lbl = new AscFormat.CDLbl();
+        lbl.initDefault();
+
+        lbl.chart = cChartSpace;
+        lbl.series = seria;
+
+        lbl.setParent(this);
+
+        lbl.pt = null;
+
+        if (this.txPr) {
+            lbl.setTxPr(this.txPr);
+        }
+
+        return lbl;
+    };
+    CDTable.prototype._buildRowNameLabel = function (cChartSpace, seria) {
+        const lbl = this._buildBasicLabel(cChartSpace, seria);
+        if (!lbl) {
+            return;
+        }
+
+        lbl.setShowSerName(true);
+        lbl.setIdx(seria.idx);
+        lbl.recalculate();
+        this.rowNameLabels.push(lbl);
+    };
+    CDTable.prototype._buildRowNameMarker = function (cChartSpace, seria) {
+        if (!seria) {
+            this.rowNameMarkers.push(null);
+            return;
+        }
+        const union_marker = new AscFormat.CUnionMarker();
+        const nSerType = seria.getObjectType();
+        if (nSerType === AscDFH.historyitem_type_LineSeries ||
+            nSerType === AscDFH.historyitem_type_ScatterSer ||
+            nSerType === AscDFH.historyitem_type_RadarSeries) {
+            if (seria.compiledSeriesMarker) {
+                const pts = seria.getNumPts();
+                union_marker.marker = AscFormat.CreateMarkerGeometryByType(seria.compiledSeriesMarker.symbol);
+                if (pts[0] && pts[0].compiledMarker) {
+                    union_marker.marker.brush = pts[0].compiledMarker.brush;
+                    union_marker.marker.pen = pts[0].compiledMarker.pen;
+                }
+            }
+            if (seria.compiledSeriesPen) {
+                union_marker.lineMarker = AscFormat.CreateMarkerGeometryByType(AscFormat.SYMBOL_DASH);
+                union_marker.lineMarker.pen = seria.compiledSeriesPen.createDuplicate();
+            }
+        } else {
+            union_marker.marker = AscFormat.CreateMarkerGeometryByType(SYMBOL_SQUARE);
+            union_marker.marker.pen = seria.compiledSeriesPen;
+            union_marker.marker.brush = seria.compiledSeriesBrush;
+        }
+        this.rowNameMarkers.push(union_marker);
+    };
+    CDTable.prototype._buildColNameLabel = function (cChartSpace, seria, pt) {
+        if (!pt) {
+            return;
+        }
+
+        const lbl = this._buildBasicLabel(cChartSpace, seria);
+        if (!lbl) {
+            return;
+        }
+
+        lbl.setShowCatName(true);
+        lbl.pt = pt;
+        lbl.setIdx(pt.idx);
+        lbl.recalculate();
+        this.colNameLabels.push(lbl);
+    };
+    CDTable.prototype._buildPtLabel = function (arr, cChartSpace, seria, pt) {
+        if (!pt) {
+            return;
+        }
+
+        const lbl = this._buildBasicLabel(cChartSpace, seria);
+        if (!lbl) {
+            return;
+        }
+
+        lbl.setShowVal(true);
+        lbl.pt = pt;
+        lbl.setIdx(pt.idx);
+        lbl.recalculate();
+        arr.push(lbl);
+    };
+    CDTable.prototype._recalculateRect = function (cChartSpace, oRect) {
+        const outerRect = cChartSpace.outerPlotAreaRect;
+        const plotRect = cChartSpace.plotAreaRect;
+        const bInnerLayout = cChartSpace.isLayoutSizes() &&
+            cChartSpace.chart.plotArea.layout &&
+            cChartSpace.chart.plotArea.layout.layoutTarget === AscFormat.LAYOUT_TARGET_INNER;
+
+        // for non-3D, non-manual-layout: pin data table left edge at standartMarginForCharts (14px)
+        const bIs3D = cChartSpace.chartObj && cChartSpace.chartObj.nDimensionCount === 3;
+        const fixedLeft = (!bInnerLayout && !bIs3D && cChartSpace.chartObj)
+            ? cChartSpace.chartObj.getStandartMargin() * 1.5
+            : null;
+        const chartLeft = (fixedLeft !== null && outerRect) ? fixedLeft : (outerRect ? outerRect.x : oRect.x);
+        const chartWidth = (plotRect && outerRect)
+            ? (plotRect.x + plotRect.w - chartLeft)
+            : (outerRect ? outerRect.w : oRect.w);
+        const chartBottom = (bInnerLayout && plotRect)
+            ? (plotRect.y + plotRect.h + this.extY)
+            : (outerRect ? (outerRect.y + outerRect.h) : (oRect.y + oRect.h + this.extY));
+
+        const effectiveFirstColWidth = (plotRect && outerRect)
+            ? Math.max(this.firstColumnWidth, plotRect.x - chartLeft)
+            : this.firstColumnWidth;
+        this.firstColumnWidth = effectiveFirstColWidth;
+
+        const availableWidth = Math.max(0, chartWidth - effectiveFirstColWidth);
+        const colWidth = this.cols > 1 ? (availableWidth / (this.cols - 1)) : availableWidth;
+        const rowHeight = this.rowHeight;
+        const dTableHeight = rowHeight * this.rows;
+
+        let step = 0;
+        let offsetX = 0;
+        for (let r = 0; r <= this.rows; r++) {
+            if (r === this.rows) {
+                offsetX = effectiveFirstColWidth;
+            }
+            const line = this._calculateLine(cChartSpace, chartLeft + offsetX, chartWidth - offsetX, chartBottom - step, false);
+            if (r === 0 || r === this.rows - 1 || r === this.rows) {
+                this.outlinePaths.push(line);
+            } else {
+                this.horzBorderPaths.push(line);
+            }
+            step += rowHeight;
+        }
+
+        step = 0;
+        for (let c = 0; c <= this.cols; c++) {
+            const line = this._calculateLine(cChartSpace, chartBottom, c === 0 ? dTableHeight - rowHeight : dTableHeight, chartLeft + step, true);
+            if (c === 0 || c === 1 || c === this.cols) {
+                this.outlinePaths.push(line);
+            } else {
+                this.vertBorderPaths.push(line);
+            }
+            step += (c === 0 ? effectiveFirstColWidth : colWidth);
+        }
+
+        this.x = chartLeft;
+        this.y = chartBottom - dTableHeight;
+        this.extX = chartWidth;
+        this.colWidth = colWidth;
+    };
+    CDTable.prototype._calculateLine = function (cChartSpace, p1, l, constP, isVertical) {
+        if (!cChartSpace) {
+            return null;
+        }
+
+        const calcProp = cChartSpace.chartObj ? cChartSpace.chartObj.calcProp : null;
+
+        if (!calcProp) {
+            return null;
+        }
+
+        const pathId = cChartSpace.AllocPath();
+        const path = cChartSpace.GetPath(pathId);
+
+        const pathH = 1000000000;
+        const pathW = 1000000000;
+
+        if (isVertical) {
+            path.moveTo(constP * pathW, p1 * pathH);
+            path.lnTo(constP * pathW, (p1 - l) * pathH);
+        } else {
+            path.moveTo(p1 * pathW, constP * pathH);
+            path.lnTo((p1 + l) * pathW, constP * pathH);
+        }
+
+        return pathId;
     };
 
     var UNIT_MULTIPLIERS = [];

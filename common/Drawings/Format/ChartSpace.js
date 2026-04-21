@@ -3087,7 +3087,10 @@ function(window, undefined) {
 				}
 			} else if (this.selection.axisLbls) {
 				var oLabels = this.selection.axisLbls.labels;
-				oLabels.drawSelect(drawingDocument, isDrawHandles);
+				const isHorizontal = this.selection.axisLbls ? this.selection.axisLbls.isHorizontal() : false;
+				if (!(this.chart.plotArea.dTable && isHorizontal)) {
+					oLabels.drawSelect(drawingDocument, isDrawHandles);
+				}
 			} else if (this.selection.hiLowLines) {
 				if (this.chartObj) {
 					var oDrawChart = this.chartObj.charts[this.selection.chart];
@@ -6549,6 +6552,7 @@ function(window, undefined) {
 		let fVertPadding = 0.0;
 		let fHorInterval = null;
 		let oCalcMap = {};
+		const isCDtableExist = this.chart.plotArea.dTable;
 
 		if (isLayoutSizes && oPlotArea) {
 			oPlotArea.extX = oRect.w;
@@ -6832,6 +6836,7 @@ function(window, undefined) {
 				}
 			}
 			if(oLabelsBox) {
+				const isHoriz = oCurAxis ? oCurAxis.isHorizontal() : false;
 				if(oLabelsBox.x < fL) {
 					fL = oLabelsBox.x;
 				}
@@ -6839,15 +6844,29 @@ function(window, undefined) {
 				if(oLabelsBox.x + oLabelsBox.extX > fR) {
 					fR = oLabelsBox.x + oLabelsBox.extX;
 				}
-				if(oLabelsBox.y < fT) {
+				// if cDTableExists and isVertical axis then labels should not affect left
+				if(!(isCDtableExist && isHoriz) && oLabelsBox.y < fT) {
 					fT = oLabelsBox.y;
 				}
-				if(oLabelsBox.y + oLabelsBox.extY > fB) {
+				// if cDTableExists and isHorizontal axis then labels should not affect bottom,
+				// except for 3D non-right-angle charts where labels are shown and must shift the axis
+				const bIs3DNonRightAngle = isCDtableExist && this.chartObj &&
+					this.chartObj._isSwitchCurrent3DChart(this) &&
+					this.chart.getView3d() && !this.chart.getView3d().getRAngAx();
+				if((!isCDtableExist || bIs3DNonRightAngle) && oLabelsBox.y + oLabelsBox.extY > fB) {
 					fB = oLabelsBox.y + oLabelsBox.extY;
 				}
 				if (oCurAxis.axPos === AscFormat.AX_POS_R && oldFR === fR) {
 					fR = oLabelsBox.extX + fR;
 				}
+			}
+		}
+
+		// effect of data table on left side of diagram
+		if (isCDtableExist && this.chartObj.dataTable) {
+			const leftX = oRect.x - this.chartObj.dataTable.firstColumnWidth;
+			if (leftX < fL) {
+				fL = leftX;
 			}
 		}
 		if(nIndex < 2) {
@@ -6984,6 +7003,7 @@ function(window, undefined) {
 	CChartSpace.prototype.recalculateAxes = function () {
 		this.removeCachedCanvas();
 		this.plotAreaRect = null;
+		this.outerPlotAreaRect = null;
 		this.bEmptySeries = this.checkEmptySeries();
 		const isChartEx = this.isChartEx();
 
@@ -7007,13 +7027,42 @@ function(window, undefined) {
 			if (this.bEmptySeries) {
 				return;
 			}
+
 			let oSize = this.getChartSizes();
 			let oRect = new CRect(oSize.startX, oSize.startY, oSize.w, oSize.h);
 			if (!this.chartObj) {
 				this.chartObj = new AscFormat.CChartsDrawer()
 			}
+			const bInnerLayout = this.isLayoutSizes() &&
+				this.chart.plotArea.layout &&
+				this.chart.plotArea.layout.layoutTarget === AscFormat.LAYOUT_TARGET_INNER;
+			const aCharts = oPlotArea.charts;
+			const bRadarChart = aCharts && aCharts.length > 0 &&
+				aCharts[0].getObjectType() === AscDFH.historyitem_type_RadarChart;
+			if (oPlotArea.dTable && !bRadarChart) {
+				oPlotArea.dTable._clean();
+				oPlotArea.dTable._fillInfo(this);
+				if (bInnerLayout) {
+					const outerSize = this.chartObj.calculateSizePlotArea(this, false);
+					this.outerPlotAreaRect = new CRect(outerSize.startX, outerSize.startY, outerSize.w, outerSize.h);
+				} else {
+					this.outerPlotAreaRect = oRect.copy();
+					const bIs3D = this.chartObj._isSwitchCurrent3DChart &&
+						this.chartObj._isSwitchCurrent3DChart(this);
+					if (!bIs3D && this.chartObj.getStandartMargin) {
+						const fixedLeft = this.chartObj.getStandartMargin() * 1.5;
+						if (AscFormat.isRealNumber(fixedLeft) && fixedLeft < this.outerPlotAreaRect.x) {
+							this.outerPlotAreaRect.x = fixedLeft;
+						}
+					}
+					oRect.h -= oPlotArea.dTable.extY;
+					this.chartObj.dataTable = oPlotArea.dTable;
+				}
+			} else {
+				this.chartObj.dataTable = null;
+			}
 			var i, j;
-			var aCharts = oPlotArea.charts, oChart;
+			var oChart;
 			var oCurAxis, oCurAxis2, aCurAxesSet;
 			//temporary add axes to charts with deleted axes
 			var oChartsToAxesCount = {};
@@ -7042,6 +7091,7 @@ function(window, undefined) {
 					}
 				}
 			}
+
 			this.chartObj.preCalculateData(this, false, oRect);
 			for (i in oChartsToAxesCount) {
 				if (oChartsToAxesCount.hasOwnProperty(i)) {
@@ -7196,6 +7246,9 @@ function(window, undefined) {
 				if (aRects[0]) {
 					this.plotAreaRect = aRects[0].copy();
 				}
+			}
+			if (oPlotArea.dTable && !bRadarChart) {
+				oPlotArea.dTable._recalculateRect(this, this.plotAreaRect || oRect);
 			}
 			aAxes = oPlotArea.axId;
 			var oHorAxis;
@@ -8690,6 +8743,19 @@ function(window, undefined) {
 					}
 				}
 
+				if (this.chart.plotArea.dTable) {
+					var oDTable = this.chart.plotArea.dTable;
+					if (oDTable.spPr) {
+						if (oDTable.spPr.Fill) {
+							oDTable.spPr.Fill.calculate(parents.theme, parents.slide, parents.layout, parents.master, RGBA, this.clrMapOvr);
+						}
+						if (oDTable.spPr.ln) {
+							oDTable.spPr.ln.calculate(parents.theme, parents.slide, parents.layout, parents.master, RGBA, this.clrMapOvr);
+							checkBlackUnifill(oDTable.spPr.ln.Fill, true);
+						}
+					}
+				}
+
 				for (t = 0; t < this.chart.plotArea.charts.length; ++t) {
 					var oChart = this.chart.plotArea.charts[t];
 					var series = oChart.series;
@@ -8705,7 +8771,6 @@ function(window, undefined) {
 									oCalcObjects[pt.brush.calcId] = pt.brush;
 									pt.brush.calculate(parents.theme, parents.slide, parents.layout, parents.master, RGBA, this.clrMapOvr);
 								}
-
 							}
 							if (pt.pen) {
 								if (!oCalcObjects[pt.pen.calcId]) {
@@ -10613,6 +10678,13 @@ function(window, undefined) {
 		if (this.chartObj) {
 			this.chartObj.draw(this, graphics);
 		}
+		if (this.chart.plotArea && this.chart.plotArea.dTable) {
+			const oFirstChart = this.chart.plotArea.charts && this.chart.plotArea.charts[0];
+			if (!oFirstChart || oFirstChart.getObjectType() !== AscDFH.historyitem_type_RadarChart) {
+				const t = this;
+				this.chart.plotArea.dTable.draw(t, graphics);
+			}
+		}
 		const isChartEx = this.isChartEx();
 
 		// TODO after new succefull implementation of new type remove option here
@@ -10660,7 +10732,14 @@ function(window, undefined) {
 					if (oAxis.title) {
 						oAxis.title.draw(graphics);
 					}
-					if (oAxis.labels) {
+					// horizontal axis labels are hidden when data table exists,
+					// except for 3D non-right-angle charts where the 3D projection
+					// positions them inside the chart area (above the data table)
+					const isHorizontal = oAxis && oAxis.isHorizontal();
+					const oView3d = this.chart.getView3d();
+					const bIs3DNonRightAngle = this.chartObj && this.chartObj.nDimensionCount === 3
+						&& oView3d && !oView3d.getRAngAx();
+					if (oAxis.labels && (!isHorizontal || !this.chart.plotArea.dTable || bIs3DNonRightAngle)) {
 						oAxis.labels.draw(graphics);
 					}
 				}
@@ -10729,7 +10808,7 @@ function(window, undefined) {
 			this.recalcInfo.axisLabels.push(dLbl);
 	};
 	CChartSpace.prototype.recalculateChart = function () {
-		this.pathMemory.curPos = -1;
+		//this.pathMemory.curPos = -1;
 		if (this.chartObj == null)
 			this.chartObj = new AscFormat.CChartsDrawer();
 		this.chartObj.recalculate(this);
