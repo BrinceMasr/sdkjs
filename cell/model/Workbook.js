@@ -4344,6 +4344,15 @@
 	Workbook.prototype.getDefinedNamesWS = function (sheetId) {
 		return this.dependencyFormulas.getDefinedNamesWS(sheetId);
 	};
+	Workbook.prototype.getAllDefinedNames = function (skipTables) {
+		var names = [];
+		this.dependencyFormulas._foreachDefName(function (defName) {
+			if (defName.ref && !(skipTables && defName.type === Asc.c_oAscDefNameType.table)) {
+				names.push(defName);
+			}
+		});
+		return names;
+	};
 	Workbook.prototype.addDefName = function (name, ref, sheetId, hidden, isTable) {
 		return this.dependencyFormulas.addDefName(name, ref, sheetId, hidden, isTable);
 	};

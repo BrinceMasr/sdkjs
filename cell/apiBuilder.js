@@ -1059,6 +1059,26 @@
     };
 
 	/**
+	 * Returns an array of all ApiName objects defined in the workbook, across all scopes (workbook-level and sheet-level).
+	 * @memberof Api
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiName[]} - Returns an empty array if no defined names are found.
+	 * @see office-js-api/Examples/{Editor}/Api/Methods/GetDefNames.js
+	 */
+	Api.GetDefNames = function () {
+		var wbModel = Asc.editor && Asc.editor.wbModel;
+		if (!wbModel) {
+			return [];
+		}
+		var rawNames = wbModel.getAllDefinedNames(true);
+		var result = [];
+		for (var i = 0; i < rawNames.length; i++) {
+			result.push(new ApiName(rawNames[i]));
+		}
+		return result;
+	};
+
+	/**
 	 * Saves changes to the specified document.
 	 * @memberof Api
 	 * @typeofeditors ["CSE"]
@@ -30317,6 +30337,7 @@
 	Api["GetSelection"]          = Api.GetSelection;
 	Api["AddDefName"]            = Api.AddDefName;
 	Api["GetDefName"]            = Api.GetDefName;
+	Api["GetDefNames"]           = Api.GetDefNames;
 	Api["Save"]                  = Api.Save;
 	Api["GetMailMergeData"]      = Api.GetMailMergeData;
 	
