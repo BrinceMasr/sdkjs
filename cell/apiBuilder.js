@@ -29213,6 +29213,16 @@
 	 */
 	ApiListColumn.prototype.SetName = function (sName) {
 		this.tableColumn.setTableColumnName(sName);
+		var tablePart = this.listObject.tablePart;
+		if (!tablePart.isHeaderRow()) {
+			return;
+		}
+		var bbox = this.tableColumn.getRange(tablePart, true, false);
+		if (!bbox) {
+			return;
+		}
+		var ws = this.listObject.ws.worksheet;
+		ws.getRange3(bbox.r1, bbox.c1, bbox.r1, bbox.c1).setValue(sName);
 	};
 
 	Object.defineProperty(ApiListColumn.prototype, "Name", {
