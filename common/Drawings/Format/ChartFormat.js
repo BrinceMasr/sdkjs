@@ -6326,22 +6326,51 @@
         }
         return (this.getAllSeries().length === AscFormat.MIN_STOCK_COUNT);
     };
+
+	CPlotArea.prototype.changeChartExType = function (type) {
+		const chartSpace = this.getChartSpace();
+		if (!chartSpace) {
+			return;
+		}
+
+		const oldChart = chartSpace.chart;
+
+		const settings = AscFormat.DrawingObjectsController.prototype.getPropsFromChart(chartSpace);
+		settings.type = type;
+
+		const series = AscFormat.getChartSeries(settings);
+		const useCache = true;
+		const newChartSpace = AscFormat.DrawingObjectsController.prototype._getChartSpace.call(this, series, settings, useCache);
+		if (!newChartSpace) {
+			return;
+		}
+
+		const newChart = newChartSpace.chart.createDuplicate();
+
+		if (oldChart) {
+			if (oldChart.title) {
+				newChart.setTitle(oldChart.title.createDuplicate());
+			}
+
+			if (oldChart.legend) {
+				newChart.setLegend(oldChart.legend.createDuplicate());
+			} else {
+				newChart.setLegend(null);
+			}
+		}
+
+		chartSpace.setChart(newChart);
+	};
     CPlotArea.prototype.changeChartType = function(nType) {
         if(!this.parent) {
             return;
         }
-        if(this.isChartEx()) {
-            let oChartSpace = this.getChartSpace();
-            if(!oChartSpace) return;
-            let settings = AscFormat.DrawingObjectsController.prototype.getPropsFromChart(oChartSpace);
-            settings.type = nType;
-            let aSeries = AscFormat.getChartSeries(settings);
-            let oNewChartSpace =  AscFormat.DrawingObjectsController.prototype._getChartSpace.call(this, aSeries, settings, true);
-            if(oNewChartSpace) {
-                oChartSpace.setChart(oNewChartSpace.chart.createDuplicate());
-            }
-            return;
-        }
+
+		if (this.isChartEx()) {
+			this.changeChartExType(nType);
+			return;
+		}
+
         if(this.charts.length < 1) {
             return;
         }
