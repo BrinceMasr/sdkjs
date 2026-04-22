@@ -270,7 +270,15 @@
 	 */
 	Api.prototype["pluginMethod_GoToSlideInSlideShow"] = function(nSlideIndex)
 	{
-		this.DemonstrationGoToSlide(nSlideIndex - 1);
+		if (!AscFormat.isRealNumber(nSlideIndex) || nSlideIndex <= 0) {
+			return;
+		}
+		let nTargetIdx = nSlideIndex - 1;
+		let oDemo = this.getDemoManager();
+		if (oDemo && oDemo.SlideNum === nTargetIdx) {
+			return;
+		}
+		this.DemonstrationGoToSlide(nTargetIdx);
 	};
 
 	/**
@@ -283,9 +291,14 @@
 	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/GoToSlide.js
 	 */
 	Api.prototype["pluginMethod_GoToSlide"] = function (slideNumber) {
-		if (AscFormat.isRealNumber(slideNumber) || slideNumber > 0) {
-			this.goToPage(slideNumber - 1);
+		if (!AscFormat.isRealNumber(slideNumber) || slideNumber <= 0) {
+			return;
 		}
+		let nTargetIdx = slideNumber - 1;
+		if (this.getCurrentPage() === nTargetIdx) {
+			return;
+		}
+		this.goToPage(nTargetIdx);
 	};
 
 	/**
