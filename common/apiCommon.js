@@ -1536,6 +1536,12 @@ function (window, undefined) {
 	asc_ChartSettings.prototype.getTrendlineType = function () {
 		return this.trendlineType;
 	};
+	asc_ChartSettings.prototype.getForecastForward = function () {
+		return this.forecastForward;
+	};
+	asc_ChartSettings.prototype.getForecastBackward = function () {
+		return this.forecastBackward;
+	};
 	asc_ChartSettings.prototype.getType = function () {
 		if (this.chartSpace) {
 			return this.chartSpace.getChartType();
@@ -8438,6 +8444,8 @@ function (window, undefined) {
 	prot["getDataLabelsPos"] = prot.getDataLabelsPos;
 	prot["getErrorBarsValueType"] = prot.getErrorBarsValueType;
 	prot["getTrendlineType"] = prot.getTrendlineType;
+	prot["getForecastForward"] = prot.getForecastForward;
+	prot["getForecastBackward"] = prot.getForecastBackward;
 	prot["getHorGridLines"] = prot.getHorGridLines;
 	prot["putHorGridLines"] = prot.putHorGridLines;
 	prot["getVertGridLines"] = prot.getVertGridLines;

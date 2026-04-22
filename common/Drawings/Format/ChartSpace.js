@@ -2690,10 +2690,24 @@ function(window, undefined) {
 				return lastTrendline.trendlineType;
 			}
 		};
+		const getForecastForward = function (series) {
+			const lastTrendline = series.getLastTrendline && series.getLastTrendline();
+			if (lastTrendline && AscFormat.isRealNumber(lastTrendline.forward)) {
+				return lastTrendline.forward;
+			}
+		};
+		const getForecastBackward = function (series) {
+			const lastTrendline = series.getLastTrendline && series.getLastTrendline();
+			if (lastTrendline && AscFormat.isRealNumber(lastTrendline.backward)) {
+				return lastTrendline.backward;
+			}
+		};
 
 		const seriesToCheck = selectedSeries ? [selectedSeries] : aSeries;
 		ret.errorBarsValueType = this._getCommonSeriesValue(seriesToCheck, getErrBarType);
 		ret.trendlineType = this._getCommonSeriesValue(seriesToCheck, getTrendlineType);
+		ret.forecastForward = this._getCommonSeriesValue(seriesToCheck, getForecastForward);
+		ret.forecastBackward = this._getCommonSeriesValue(seriesToCheck, getForecastBackward);
 
 		ret.putView3d(this.getView3d());
 		return ret;
