@@ -1663,11 +1663,7 @@ function CDrawingDocument()
 	this.OnRecalculateSlide = function(index)
 	{
 
-		let thpages = this.m_oWordControl.Thumbnails.m_arrPages;
-		if (thpages.length > index)
-		{
-			thpages[index].IsRecalc = true;
-		}
+		this.m_oWordControl.Thumbnails.OnRecalculateSlide(index);
 
 
 		if (this.m_oWordControl && this.m_oWordControl.MobileTouchManager)

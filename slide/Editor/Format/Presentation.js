@@ -1595,7 +1595,7 @@ CPresentation.prototype.GetSlideIndex = function (oSlide) {
 CPresentation.prototype.GetThumbnailsCount = function() {
 
 	if (this.Api.WordControl.Thumbnails) {
-		return this.Api.WordControl.Thumbnails.m_arrPages.length;
+		return this.Api.WordControl.Thumbnails.GetThumbnailsCount();
 	}
 	return this.GetSlidesCount();
 };

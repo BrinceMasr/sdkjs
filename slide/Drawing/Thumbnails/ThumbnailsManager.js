@@ -292,6 +292,12 @@
 		AscCommon.g_specialPasteHelper.SpecialPasteButton_Update_Position();
 		this.m_bIsUpdate = true;
 	};
+	CThumbnailsManagerBase.prototype.GetThumbnailsCount = function () {
+		return 0;
+	};
+	CThumbnailsManagerBase.prototype.OnRecalculateSlide = function (index) {
+
+	}
 
 	function CThumbnailsManager(editorPage) {
 		CThumbnailsManagerBase.call(this, editorPage);
@@ -2375,6 +2381,16 @@
 	{
 		return this.thumbnails.GetCurSld();
 	};
+	CThumbnailsManager.prototype.GetThumbnailsCount = function () {
+		return this.m_arrPages.length;
+	};
+	CThumbnailsManager.prototype.OnRecalculateSlide = function (index) {
+		let thpages = this.m_oWordControl.Thumbnails.m_arrPages;
+		if (thpages.length > index)
+		{
+			thpages[index].IsRecalc = true;
+		}
+	};
 
 
 	function COutlineThumbnailsManager(editorPage) {
@@ -3113,6 +3129,13 @@
 	COutlineThumbnailsManager.prototype.isOutline = function()
 	{
 		return true;
+	};
+	COutlineThumbnailsManager.prototype.GetThumbnailsCount = function () {
+		const presentation = this.m_oWordControl.m_oLogicDocument;
+		return presentation.GetSlidesCount();
+	};
+	COutlineThumbnailsManager.prototype.OnRecalculateSlide = function (index) {
+		this.m_bIsUpdate = true;
 	};
 
 
