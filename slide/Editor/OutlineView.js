@@ -636,7 +636,7 @@
 		return this.outlineView.savePositionAfterEdit(content, idx, contentCount);
 	};
 	ParagraphAddManager.prototype.processMockParagraphAdd = function (outlineParagraph, paraItem) {
-		const info = this.outlineView.outlineInfo[outlineParagraph.Get_Id()];
+		const info = this.outlineView.outlineInfo.getSlideInfoByParagraph(outlineParagraph);
 		const slide = info && info.slide;
 		if (slide) {
 			const createdSp = slide.createTitle();
