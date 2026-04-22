@@ -4721,6 +4721,11 @@
 	};
 	/**
 	 * Creates a new table with a specified number of rows and columns.
+	 *
+	 * :::danger[Breaking Change]
+	 * Starting from version 9.4.0, the parameter order has been changed from `Api.CreateTable(cols, rows)` to `Api.CreateTable(rows, cols)`.
+	 * :::
+	 *
 	 * @memberof Api
 	 * @typeofeditors ["CDE"]
 	 * @param {number} rows - Number of rows.
