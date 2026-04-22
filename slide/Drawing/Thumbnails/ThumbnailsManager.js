@@ -2408,12 +2408,6 @@
 
 		//regular mode
 		this.thumbnails = new AscCommon.CSlidesThumbnails();
-
-		this.m_nCurrentPage = -1;
-		this.m_arrPages = [];
-		this.m_lDrawingFirst = -1;
-		this.m_lDrawingEnd = -1;
-
 		this.bIsEmptyDrawed = false;
 
 		this.m_oCacheManager = new CCacheManager(true);
@@ -2433,8 +2427,6 @@
 		this.ScrollerHeight = 0;
 		this.ScrollerWidth = 0;
 
-		this.outlineTopMarginMM = 3;
-		this.outlineLeftMarginMM = 10;
 		this.outlineView = new AscCommonSlide.OutlineView();
 
 		this.m_oOverlayApi = new AscCommon.COverlay();
@@ -2853,17 +2845,20 @@
 		context.clearRect(0, 0, canvas.width, canvas.height);
 		const graphics = this.getOutlineGraphics(context);
 
-		const widthMM = canvas.width / AscCommon.AscBrowser.retinaPixelRatio * g_dKoef_pix_to_mm;
-		const heightMM = canvas.height / AscCommon.AscBrowser.retinaPixelRatio * g_dKoef_pix_to_mm;
-
+		const scaleFactor = g_dKoef_pix_to_mm / AscCommon.AscBrowser.retinaPixelRatio;
+		const widthMM = canvas.width * scaleFactor;
+		const heightMM = canvas.height * scaleFactor;
+		const outlineTopMarginMM = this.const_offset_y * scaleFactor;
+		const outlineLeftMarginMM = this.const_offset_x * scaleFactor;
 		const currentSlideIndex = this.m_oWordControl.m_oDrawingDocument.SlideCurrent;
 		const scrollYMm = this.m_dScrollY * g_dKoef_pix_to_mm;
 
 		if (!this.outlineView.outlineShape) {
-			const outlineWidth = widthMM - this.outlineLeftMarginMM;
+			const outlineWidth = widthMM - outlineLeftMarginMM;
 			this.outlineView.updateAll(outlineWidth, heightMM, currentSlideIndex);
 		}
-		this.outlineView.updateOutlineShapeTransform(this.outlineLeftMarginMM, -scrollYMm + this.outlineTopMarginMM);
+
+		this.outlineView.updateOutlineShapeTransform(outlineLeftMarginMM, -scrollYMm + outlineTopMarginMM);
 		this.m_oWordControl.m_oApi.clearEyedropperImgData();
 		this.outlineView.draw(graphics);
 		this.m_oWordControl.m_oDrawingDocument.TargetStart();
@@ -2899,7 +2894,7 @@
 			this.m_oWordControl.m_oApi.checkLastWork();
 
 		const context = AscCommon.AscBrowser.getContext2D(canvas);
-		context.clearRect(0, 0, AscCommon.AscBrowser.convertToRetinaValue(this.outlineLeftMarginMM * AscCommon.g_dKoef_mm_to_pix, true), canvas.height);
+		context.clearRect(0, 0, this.const_offset_x, canvas.height);
 
 		const currentSlideIndex = this.m_oWordControl.m_oDrawingDocument.SlideCurrent;
 		this.outlineView.drawDecorations(this.getOutlineGraphics(context), currentSlideIndex, this.MouseDownTrack.FocusPage);
@@ -2989,194 +2984,36 @@
 		const thumbnailsCanvas = thumbnails.HtmlElement;
 		if (!thumbnailsCanvas)
 			return;
-
-		const canvasWidth = thumbnailsCanvas.width;
-		const canvasHeight = thumbnailsCanvas.height;
-
-		const thumbnailsWidthMm = thumbnails.AbsolutePosition.R - thumbnails.AbsolutePosition.L;
-		const thumbnailsHeightMm = thumbnails.AbsolutePosition.B - thumbnails.AbsolutePosition.T;
-
-		const pixelRatio = AscCommon.AscBrowser.retinaPixelRatio * g_dKoef_mm_to_pix;
-		const isVerticalThumbnails = Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.right
-			|| Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.left;
-		const isRightToLeft = Asc.editor.isRtlInterface;
-
-		let thSlideWidthPx, thSlideHeightPx;
-		let startOffset, supplement;
-		if (isVerticalThumbnails) {
-			thSlideWidthPx = (thumbnailsWidthMm * pixelRatio >> 0) - this.const_offset_x - this.const_offset_r;
-			thSlideHeightPx = (thSlideWidthPx * this.SlideHeight / this.SlideWidth) >> 0;
-			startOffset = this.const_offset_y;
-		} else {
-			thSlideHeightPx = (thumbnailsHeightMm * pixelRatio >> 0) - this.const_offset_y - this.const_offset_b;
-			thSlideWidthPx = (thSlideHeightPx * this.SlideWidth / this.SlideHeight) >> 0;
-			startOffset = this.const_offset_x;
-		}
-
 		if (this.m_bIsScrollVisible) {
 			const scrollApi = editor.WordControl.m_oScrollThumbApi;
 			if (scrollApi) {
-				this.m_dScrollY_max = isVerticalThumbnails ? scrollApi.getMaxScrolledY() : scrollApi.getMaxScrolledX();
-				this.m_dScrollY = isVerticalThumbnails ? scrollApi.getCurScrolledY() : scrollApi.getCurScrolledX();
+				this.m_dScrollY_max = scrollApi.getMaxScrolledY();
+				this.m_dScrollY = scrollApi.getCurScrolledY();
 			}
-		}
-
-		const currentScrollPx = isRightToLeft && !isVerticalThumbnails
-			? this.m_dScrollY_max - this.m_dScrollY >> 0
-			: this.m_dScrollY >> 0;
-
-		let isFirstSlideFound = false;
-		let isLastSlideFound = false;
-
-		const totalSlidesCount = this.GetSlidesCount();
-		for (let slideIndex = 0; slideIndex < totalSlidesCount; slideIndex++) {
-			if (this.m_oWordControl.m_oLogicDocument.IsVisioEditor()) {
-				const sizes = this.m_oWordControl.m_oLogicDocument.GetSizesMM(slideIndex);
-				let visioSlideWidthMm = sizes.width;
-				let visioSlideHeightMm = sizes.height;
-				if (isVerticalThumbnails) {
-					thSlideHeightPx = (thSlideWidthPx * visioSlideHeightMm / visioSlideWidthMm) >> 0;
-				} else {
-					thSlideWidthPx = (thSlideHeightPx * visioSlideWidthMm / visioSlideHeightMm) >> 0;
-				}
-			}
-
-			if (slideIndex >= this.m_arrPages.length) {
-				this.m_arrPages[slideIndex] = new CThPage();
-				if (slideIndex === 0)
-					this.m_arrPages[0].IsSelected = true;
-			}
-
-			const slideData = this.m_oWordControl.m_oLogicDocument.GetSlide(slideIndex);
-			const slideRect = this.m_arrPages[slideIndex];
-			slideRect.pageIndex = slideIndex;
-
-			if (isVerticalThumbnails) {
-				slideRect.left = isRightToLeft ? this.const_offset_r : this.const_offset_x;
-				slideRect.top = startOffset - currentScrollPx;
-				slideRect.right = slideRect.left + thSlideWidthPx;
-				slideRect.bottom = slideRect.top + thSlideHeightPx;
-
-				if (!isFirstSlideFound) {
-					if ((startOffset + thSlideHeightPx) > currentScrollPx) {
-						this.m_lDrawingFirst = slideIndex;
-						isFirstSlideFound = true;
-					}
-				}
-
-				if (!isLastSlideFound) {
-					if (slideRect.top > canvasHeight) {
-						this.m_lDrawingEnd = slideIndex - 1;
-						isLastSlideFound = true;
-					}
-				}
-
-				supplement = (thSlideHeightPx + 3 * this.const_border_w);
-			} else {
-				slideRect.top = this.const_offset_y;
-				slideRect.bottom = slideRect.top + thSlideHeightPx;
-
-				if (isRightToLeft) {
-					slideRect.right = canvasWidth - startOffset + currentScrollPx;
-					slideRect.left = slideRect.right - thSlideWidthPx;
-				} else {
-					slideRect.left = startOffset - currentScrollPx;
-					slideRect.right = slideRect.left + thSlideWidthPx;
-				}
-
-				if (!isFirstSlideFound) {
-					if ((startOffset + thSlideWidthPx) > currentScrollPx) {
-						this.m_lDrawingFirst = slideIndex;
-						isFirstSlideFound = true;
-					}
-				}
-
-				if (!isLastSlideFound) {
-					const isHidden = isRightToLeft
-						? slideRect.right < 0
-						: slideRect.left > canvasWidth;
-					if (isHidden) {
-						this.m_lDrawingEnd = slideIndex - 1;
-						isLastSlideFound = true;
-					}
-				}
-
-				supplement = (thSlideWidthPx + 3 * this.const_border_w);
-			}
-
-			if (slideData.getObjectType() === AscDFH.historyitem_type_SlideLayout) {
-				const scaledWidth = (slideRect.right - slideRect.left) * AscCommonSlide.SlideLayout.LAYOUT_THUMBNAIL_SCALE;
-				const scaledHeight = (slideRect.bottom - slideRect.top) * AscCommonSlide.SlideLayout.LAYOUT_THUMBNAIL_SCALE;
-
-				if (isVerticalThumbnails) {
-					slideRect.bottom = (slideRect.top + scaledHeight) + 0.5 >> 0;
-					isRightToLeft
-						? slideRect.right = (slideRect.left + scaledWidth) + 0.5 >> 0
-						: slideRect.left = (slideRect.right - scaledWidth) + 0.5 >> 0;
-					supplement = scaledHeight + 3 * this.const_border_w;
-				} else {
-					slideRect.top = (slideRect.bottom - scaledHeight) + 0.5 >> 0;
-					isRightToLeft
-						? slideRect.left = (slideRect.right - scaledWidth) + 0.5 >> 0
-						: slideRect.right = (slideRect.left + scaledWidth) + 0.5 >> 0;
-					supplement = scaledWidth + 3 * this.const_border_w;
-				}
-			}
-
-			startOffset += supplement >> 0;
-		}
-
-		if (this.m_arrPages.length > totalSlidesCount)
-			this.m_arrPages.splice(totalSlidesCount, this.m_arrPages.length - totalSlidesCount);
-
-		if (!isLastSlideFound) {
-			this.m_lDrawingEnd = totalSlidesCount - 1;
 		}
 	};
 
-	COutlineThumbnailsManager.prototype.GetThumbnailPagePosition = function (pageIndex) {
-		if (pageIndex < 0 || pageIndex >= this.m_arrPages.length)
-			return null;
-
-		const drawRect = this.m_arrPages[pageIndex];
-		return {
-			X: AscCommon.AscBrowser.convertToRetinaValue(drawRect.left),
-			Y: AscCommon.AscBrowser.convertToRetinaValue(drawRect.top),
-			W: AscCommon.AscBrowser.convertToRetinaValue(drawRect.right - drawRect.left),
-			H: AscCommon.AscBrowser.convertToRetinaValue(drawRect.bottom - drawRect.top)
-		};
-	};
 	COutlineThumbnailsManager.prototype.getSpecialPasteButtonCoords = function (sSlideId) {
 		if (!sSlideId) return null;
 
 		const oPresentation = this.m_oWordControl.m_oLogicDocument;
 		const aSlides = oPresentation.GetAllSlides();
 
-		const nSlideIdx = aSlides.findIndex(function (slide) {
+		aSlides.findIndex(function (slide) {
 			return slide.Get_Id() === sSlideId;
 		});
 		if (nSlideIdx === -1) return null;
 
-		const oRect = this.GetThumbnailPagePosition(nSlideIdx);
-		if (!oRect) return null;
+		// todo
 
 		const oThContainer = editor.WordControl.m_oThumbnailsContainer;
-		const isHidden = oThContainer.HtmlElement.style.display === "none";
-		const isHorizontalThumbnails = Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.bottom;
-
 		const offsetX = oThContainer.AbsolutePosition.L * g_dKoef_mm_to_pix;
 		const offsetY = oThContainer.AbsolutePosition.T * g_dKoef_mm_to_pix;
 
-		const coordX = isHidden
-			? 0
-			: oRect.X + oRect.W - AscCommon.specialPasteElemWidth;
-		const coordY = isHorizontalThumbnails
-			? oRect.Y - AscCommon.specialPasteElemHeight
-			: oRect.Y + oRect.H;
 
 		return {
-			X: offsetX + coordX,
-			Y: offsetY + coordY
+			X: offsetX/* + coordX*/,
+			Y: offsetY/* + coordY*/
 		};
 	};
 
@@ -3251,18 +3088,19 @@
 		this.ClearCacheAttack();
 	};
 
+	COutlineThumbnailsManager.prototype.getSlideXOffset = function () {
+		const scaleFactor = AscCommon.AscBrowser.retinaPixelRatio * AscCommon.g_dKoef_mm_to_pix;
+		return 10 * scaleFactor;
+	};
 	COutlineThumbnailsManager.prototype.calculateThumbnailsOffsets = function () {
-		const isHorizontalOrientation = Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.bottom;
-		if (isHorizontalOrientation) {
-			this.const_offset_y = 25 + Math.round(9 * AscCommon.AscBrowser.retinaPixelRatio)
-		} else {
-			const _tmpDig = this.DigitWidths.length > 5 ? this.DigitWidths[5] : 0;
-			const dKoefToPix = AscCommon.AscBrowser.retinaPixelRatio * g_dKoef_mm_to_pix;
-			const slidesCount = this.GetSlidesCount();
-			const firstSlideNumber = this.m_oWordControl.m_oLogicDocument.getFirstSlideNumber();
-			const totalSlidesLength = String(slidesCount + firstSlideNumber).length;
-			this.const_offset_x = Math.max((_tmpDig * dKoefToPix * totalSlidesLength >> 0), 25) + Math.round(9 * AscCommon.AscBrowser.retinaPixelRatio);
-		}
+		const mmToPX = AscCommon.g_dKoef_mm_to_pix;
+		const scaleFactor = AscCommon.AscBrowser.retinaPixelRatio * mmToPX;
+		this.const_offset_x = this.getSlideXOffset();
+		this.const_offset_y = 3 * scaleFactor;
+		this.const_offset_r = 4;
+		this.const_offset_b = 0;
+		this.const_border_w = 4;
+		this.const_offset_x += this.outlineView.getSlideNumbersWidth() * scaleFactor >> 0;
 	};
 	COutlineThumbnailsManager.prototype.calculateTotalThumbnailsLength = function (containerWidth, containerHeight) {
 		return this.outlineView.getOutlineHeight() * AscCommon.AscBrowser.retinaPixelRatio * g_dKoef_mm_to_pix;

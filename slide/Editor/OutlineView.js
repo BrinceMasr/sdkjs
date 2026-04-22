@@ -32,6 +32,22 @@
 
 (function (undefined) {
 
+	function getOutlineTextPr(isTitle, isMathRun) {
+		const textPr = new CTextPr();
+		textPr.SetFontSize(10);
+		if (isTitle) {
+			textPr.SetBold(true);
+		}
+		if (isMathRun) {
+			textPr.SetFontFamily("Cambria Math");
+			textPr.RFonts.SetAll("Cambria Math");
+		} else {
+			textPr.SetFontFamily("Arial");
+			textPr.RFonts.SetAll("Arial");
+		}
+		return textPr;
+	}
+
 	function OutlineSlide() {
 		this.title = null;
 		this.content = [];
@@ -755,8 +771,142 @@
 		return this.contentShapeInfoMap;
 	};
 
+	function DecorCacheManager() {
+		this.titleShape = null;
+		this.contentShape = null;
+		this.slideNumberShape = null;
+		this.measureInfo = null;
+		this.resetColors();
+	}
+	DecorCacheManager.prototype.resetColors = function () {
+		this.brushes = {};
+		this.pens = {};
+	};
+	DecorCacheManager.prototype.getBrush = function (hex) {
+		if (!hex) {
+			return null;
+		}
+		if (!this.brushes[hex]) {
+			const rgb = this.getRGBFromHex(hex);
+			this.brushes[hex] = AscFormat.CreateSolidFillRGBA(rgb.R, rgb.G, rgb.B, 255);
+		}
+		return this.brushes[hex];
+	};
+	DecorCacheManager.prototype.getPen = function (hex, penW) {
+		if (!hex) {
+			return null;
+		}
+		if (!this.pens[hex]) {
+			const brush = this.getBrush(hex);
+			var pen = new AscFormat.CLn();
+			pen.Fill = brush;
+			this.pens[hex] = pen;
+		}
+		this.pens[hex].w = penW;
+		return this.pens[hex];
+	};
+	DecorCacheManager.prototype.getTitleShape = function (brushHex, penHex, width, height) {
+		if (this.titleShape === null) {
+			this.titleShape = this.createDecorShape(width, height, "roundRect");
+		}
+		this.recalculateShape(this.titleShape, brushHex, penHex, 20000, width, height)
+		return this.titleShape;
+	};
+	DecorCacheManager.prototype.getContentShape = function (brushHex, penHex, width, height, strContent) {
+		if (this.contentShape === null) {
+			this.contentShape = this.createDecorShape(width, height, "rect");
+		}
+		this.recalculateShape(this.contentShape, brushHex, penHex, 0, width, height);
+		this.recalculateStrContent(this.contentShape, strContent);
+		return this.contentShape;
+	};
+	DecorCacheManager.prototype.getSlideNumberShape = function (width, height, strContent) {
+		if (this.slideNumberShape === null) {
+			this.slideNumberShape = this.createDecorShape(width, height, "rect", AscCommon.align_Left);
+		}
+		this.recalculateShape(this.slideNumberShape, null, null, 0, width, height);
+		this.recalculateStrContent(this.slideNumberShape, strContent);
+		return this.slideNumberShape;
+	};
+
+	DecorCacheManager.prototype.getRGBFromHex = function (color) {
+		const prepareColor = parseInt(color.slice(1), 16);
+		return {R: (prepareColor >> 16) & 0xff, G: (prepareColor >> 8) & 0xff, B: prepareColor & 0xff};
+	};
+	DecorCacheManager.prototype.checkShapeSizes = function (shape, width, height) {
+		if (!(AscFormat.fApproxEqual(shape.extX, width) && AscFormat.fApproxEqual(shape.extY, height))) {
+			this.recalculateShapeSizes(shape, width, height);
+		}
+	};
+	DecorCacheManager.prototype.recalculateShapeSizes = function (shape, width, height) {
+		shape.extX = width;
+		shape.extY = height;
+
+		if (shape.calcGeometry) {
+			shape.calcGeometry.Recalculate(width, height);
+		}
+	};
+	DecorCacheManager.prototype.recalculateShape = function (shape, brushHex, penHex, penW, width, height) {
+		this.checkShapeSizes(shape, width, height);
+		shape.brush = this.getBrush(brushHex);
+		shape.pen = this.getPen(penHex, penW);
+	};
+	DecorCacheManager.prototype.recalculateStrContent = function (shape, label) {
+		AscFormat.ExecuteNoHistory(function () {
+			const docContent = shape.getDocContent();
+			const para = docContent.Content[0];
+			var run = new ParaRun(para, false);
+			var textPr = getOutlineTextPr();
+			run.Set_Pr(textPr);
+			run.AddText(label);
+			para.Content[0] = run;
+			para.OnContentChange();
+			shape.recalculateContent();
+		}, this, []);
+	};
+	DecorCacheManager.prototype.createDecorShape = function (width, height, geometryType, paraAlign) {
+		paraAlign = typeof paraAlign === "number" ? paraAlign : AscCommon.align_Center;
+		return AscFormat.ExecuteNoHistory(function () {
+			var shape = new AscFormat.CShape();
+			shape.setBDeleted(false);
+			shape.extX = width;
+			shape.extY = height;
+
+			geometryType = geometryType || "rect";
+			shape.calcGeometry = AscFormat.CreateGeometry(geometryType);
+			shape.calcGeometry.Recalculate(width, height);
+
+			var txBody = shape.createTextBody();
+			txBody.bodyPr.setAnchor(AscFormat.VERTICAL_ANCHOR_TYPE_CENTER);
+			txBody.bodyPr.setInsets(0, 0, 0, 0);
+
+			var para = txBody.content.Content[0];
+			var paraPr = new CParaPr();
+			paraPr.Jc = paraAlign;
+			para.SetPr(paraPr);
+			return shape;
+		}, this, []);
+	};
+	DecorCacheManager.prototype.getMeasureInfo = function () {
+		if (this.measureInfo === null) {
+			g_oTextMeasurer.SetTextPr(getOutlineTextPr(), null);
+			g_oTextMeasurer.SetFontSlot(AscWord.fontslot_ASCII);
+			const height = g_oTextMeasurer.GetHeight();
+			let maxWidth = 0
+			for (let i = 0; i <= 9; i += 1) {
+				const measureInfo = g_oTextMeasurer.MeasureCode(48 + i);
+				if (maxWidth < measureInfo.Width) {
+					maxWidth = measureInfo.Width;
+				}
+			}
+			this.measureInfo = {height: height, charWidth: maxWidth};
+		}
+		return this.measureInfo;
+	};
+
 	function OutlineView() {
 		this.outlineShape = null;
+		this.decorCacheManager = new DecorCacheManager();
 		this.reset();
 	}
 
@@ -873,21 +1023,6 @@
 			}
 		}
 	};
-	OutlineView.prototype.getTextPr = function (isTitle, isMathRun) {
-		const textPr = new CTextPr();
-		textPr.SetFontSize(10);
-		if (isTitle) {
-			textPr.SetBold(true);
-		}
-		if (isMathRun) {
-			textPr.SetFontFamily("Cambria Math");
-			textPr.RFonts.SetAll("Cambria Math");
-		} else {
-			textPr.SetFontFamily("Arial");
-			textPr.RFonts.SetAll("Arial");
-		}
-		return textPr;
-	};
 	OutlineView.prototype.getParaPr = function (compiledParaPr, isTitle) {
 		const copyParaPr = new CParaPr();
 		if (compiledParaPr.ParaPr.Bullet) {
@@ -912,10 +1047,10 @@
 		const oThis = this;
 		outlineParagraph.SetPr(copyParaPr);
 		outlineParagraph.CheckRunContent(function (run) {
-			const textPr = oThis.getTextPr(isTitle, run.IsMathRun());
+			const textPr = getOutlineTextPr(isTitle, run.IsMathRun());
 			run.SetPr(textPr);
 		});
-		const parTextPr = this.getTextPr();
+		const parTextPr = getOutlineTextPr();
 		outlineParagraph.TextPr.Value = parTextPr;
 		outlineParagraph.TextPr.CalcValue = parTextPr;
 	};
@@ -951,58 +1086,11 @@
 		}
 	};
 
-	OutlineView.prototype.createDecorShape = function (brushRGB, penRGB, w, h, geometryType, penW, label) {
-		return AscFormat.ExecuteNoHistory(function () {
-			var shape = new AscFormat.CShape();
-			shape.setBDeleted(false);
-			shape.extX = w;
-			shape.extY = h;
-
-			shape.brush = AscFormat.CreateSolidFillRGBA(brushRGB.R, brushRGB.G, brushRGB.B, 255);
-
-			var pen = new AscFormat.CLn();
-			pen.Fill = AscFormat.CreateSolidFillRGBA(penRGB.R, penRGB.G, penRGB.B, 255);
-			pen.w = penW;
-			shape.pen = pen;
-
-			geometryType = geometryType || "rect";
-			shape.calcGeometry = AscFormat.CreateGeometry(geometryType);
-			shape.calcGeometry.Recalculate(w, h);
-
-			if (label !== null && label !== undefined) {
-				var txBody = shape.createTextBody();
-				txBody.bodyPr.setAnchor(AscFormat.VERTICAL_ANCHOR_TYPE_CENTER);
-				txBody.bodyPr.setInsets(0, 0, 0, 0);
-
-				var para = txBody.content.Content[0];
-				var paraPr = new CParaPr();
-				paraPr.Jc = AscCommon.align_Center;
-				para.SetPr(paraPr);
-
-				var run = new ParaRun(para, false);
-				var textPr = this.getTextPr();
-				run.Set_Pr(textPr);
-				run.AddText(label);
-				para.AddToContent(0, run);
-
-
-				shape.recalculateContent();
-			}
-
-			return shape;
-		}, this, []);
-	};
-
 	OutlineView.prototype.drawDecorShape = function (graphics, shape, x, y) {
 		var t = new AscCommon.CMatrix();
 		t.tx = x;
 		t.ty = y;
 		shape.draw(graphics, t, t);
-	};
-
-	OutlineView.prototype.getRGBFromHex = function (color) {
-		const prepareColor = parseInt(color.slice(1), 16);
-		return {R: (prepareColor >> 16) & 0xff, G: (prepareColor >> 8) & 0xff, B: prepareColor & 0xff};
 	};
 	OutlineView.prototype.getOutlineParagraphs = function () {
 		const content = this.getDocContent();
@@ -1041,21 +1129,31 @@
 		}
 		return null;
 	};
-	OutlineView.prototype.drawDecorations = function (graphics, currentSlideIndex, focusSlideIndex) {
+	OutlineView.prototype.getSlideNumbersWidth = function () {
+		const measureInfo = this.decorCacheManager.getMeasureInfo();
+		const presentation = this.getPresentation();
+		const slidesCount = presentation.GetSlidesCount();
+		const firstSlideNumber = presentation.getFirstSlideNumber();
+		const totalSlidesLength = String(slidesCount + firstSlideNumber).length;
+		return measureInfo.charWidth * totalSlidesLength;
+	}
+	OutlineView.prototype.drawDecorations = function (graphics, selectedSlideIndex, focusSlideIndex) {
 		if (!this.outlineShape || !this.isHaveParagraphs()) return;
+		this.decorCacheManager.resetColors();
 
-		const rectX = 2;
-		const rectW = 6;
-		const backgroundRGB = this.getRGBFromHex(AscCommon.GlobalSkin.BackgroundColorThumbnails);
+		const slideNumberWidth = this.getSlideNumbersWidth();
+		const leftOffsetX = 2;
+		const slideWidth = 6;
+		const slideX = leftOffsetX + slideNumberWidth;
 
-		const normalSlideRGB = this.getRGBFromHex(AscCommon.GlobalSkin.ThumbnailsPageOutline);
-		const activeSlideRGB = this.getRGBFromHex(AscCommon.GlobalSkin.ThumbnailsPageOutlineActive);
-		const hoverSlideRGB = this.getRGBFromHex(AscCommon.GlobalSkin.ThumbnailsPageOutlineHover);
-		const numberWShape = rectW * (3 / 5);
+		const backgroundHex = AscCommon.GlobalSkin.BackgroundColorThumbnails;
+		const normalSlideHex = AscCommon.GlobalSkin.ThumbnailsPageOutline;
+		const activeSlideHex = AscCommon.GlobalSkin.ThumbnailsPageOutlineActive;
+		const hoverSlideHex = AscCommon.GlobalSkin.ThumbnailsPageOutlineHover;
 
-		g_oTextMeasurer.SetTextPr(this.getTextPr(), null);
-		g_oTextMeasurer.SetFontSlot(AscWord.fontslot_ASCII);
-		const height = g_oTextMeasurer.GetHeight();
+		const measureInfo = this.decorCacheManager.getMeasureInfo();
+		const height = measureInfo.height;
+		const charWidth = measureInfo.charWidth;
 
 		const paragraphMap = this.outlineInfo.getOutlineParagraphToInfoMap();
 		for (let outlineId in paragraphMap) {
@@ -1063,23 +1161,32 @@
 			const paragraph = info.outlineParagraph;
 			const slide = info.slide;
 			const slideTopY = this.getParagraphY(paragraph);
-			let penRGB;
-			if (slide.num === currentSlideIndex) {
-				penRGB = activeSlideRGB;
-			} else if (slide.num === focusSlideIndex) {
-				penRGB = hoverSlideRGB;
+
+			const currentSlideIndex = slide.num;
+			const currentSlideLabel = String(currentSlideIndex + 1);
+			const slideNumberShape = this.decorCacheManager.getSlideNumberShape(slideNumberWidth, height, currentSlideLabel);
+			this.drawDecorShape(graphics, slideNumberShape, slideX - (currentSlideLabel.length * charWidth + 1), slideTopY);
+
+			let penHex;
+			if (currentSlideIndex === selectedSlideIndex) {
+				penHex = activeSlideHex;
+			} else if (currentSlideIndex === focusSlideIndex) {
+				penHex = hoverSlideHex;
 			} else {
-				penRGB = normalSlideRGB;
+				penHex = normalSlideHex;
 			}
-			const barShape = this.createDecorShape(backgroundRGB, penRGB, rectW, height, "roundRect", 20000);
-			this.drawDecorShape(graphics, barShape, rectX, slideTopY);
+			const barShape = this.decorCacheManager.getTitleShape(backgroundHex, penHex, slideWidth, height);
+			this.drawDecorShape(graphics, barShape, slideX, slideTopY);
+
 			const contentShapeInfoMap = info.getContentShapeInfoMap(this);
 			for (let contentShapeInfoId in contentShapeInfoMap) {
 				const contentShapeInfo = contentShapeInfoMap[contentShapeInfoId];
 				const outlineParagraph = contentShapeInfo.getOutlineParagraph(this);
 				const contentY = this.getParagraphY(outlineParagraph);
-				const badgeShape = this.createDecorShape(backgroundRGB, normalSlideRGB, numberWShape, height, "rect", 0, String(contentShapeInfo.index + 1));
-				this.drawDecorShape(graphics, badgeShape, rectX + rectW - numberWShape, contentY);
+				const label = String(contentShapeInfo.index + 1);
+				const numberWShape = charWidth * label.length + 1;
+				const badgeShape = this.decorCacheManager.getContentShape(backgroundHex, normalSlideHex, numberWShape, height, label);
+				this.drawDecorShape(graphics, badgeShape, slideX + slideWidth - numberWShape, contentY);
 			}
 		}
 	};
