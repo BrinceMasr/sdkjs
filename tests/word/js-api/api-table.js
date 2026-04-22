@@ -87,4 +87,16 @@ $(function ()
 			'GetCell throws on out-of-bounds cell index'
 		);
 	});
+
+	QUnit.test('Cells', function (assert)
+	{
+		const table = AscTest.JsApi.CreateTable(3, 4);
+		const cells = table.Cells;
+
+		assert.strictEqual(cells.length, 3, 'Cells outer array length matches row count');
+		assert.strictEqual(cells[0].length, 4, 'Cells inner array length matches column count');
+		assert.strictEqual(cells[0][0].GetClassType(), 'tableCell', 'cells[0][0] is an ApiTableCell');
+		assert.strictEqual(cells[2][3].GetClassType(), 'tableCell', 'cells[2][3] (last cell) is an ApiTableCell');
+		assert.strictEqual(cells[1][2].GetClassType(), 'tableCell', 'cells[1][2] (middle cell) is an ApiTableCell');
+	});
 });

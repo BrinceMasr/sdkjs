@@ -13914,7 +13914,7 @@
 			throwException(new Error("Row index " + rowIndex + " is out of bounds [0, " + (this.Table.GetRowsCount() - 1) + "]"));
 
 		return new ApiTableRow(this.Table.Content[rowIndex]);
-	};
+	};	
 	/**
 	 * Returns all rows of the table as an array.
 	 * @memberof ApiTable
@@ -13925,7 +13925,32 @@
 	Object.defineProperty(ApiTable.prototype, "Rows", {
 		get: function()
 		{
-			return this.Table.Content.map(function(row) { return new ApiTableRow(row); });
+			return private_GuardedArray(
+				this.Table.Content.map(function(row) { return new ApiTableRow(row); }),
+				"Row"
+			);
+		}
+	});
+	/**
+	 * Returns all cells of the table as a two-dimensional array indexed by [row][cell].
+	 * @memberof ApiTable
+	 * @typeofeditors ["CDE"]
+	 * @type {ApiTableCell[][]}
+	 * @since 9.4.0
+	 */
+	Object.defineProperty(ApiTable.prototype, "Cells", {
+		get: function()
+		{
+			return private_GuardedArray(
+				this.Table.Content.map(function(row)
+				{
+					return private_GuardedArray(
+						row.Content.map(function(cell) { return new ApiTableCell(cell); }),
+						"Cell"
+					);
+				}),
+				"Row"
+			);
 		}
 	});
 	/**
@@ -14928,22 +14953,26 @@
 	 */
 	ApiTableRow.prototype.GetCellsCount = function()
 	{
-		return this.Row.Content.length;
+		return this.Row.GetCellsCount();
 	};
 	/**
 	 * Returns a cell by its position.
 	 * @memberof ApiTableRow
 	 * @typeofeditors ["CDE"]
-	 * @param {number} nIndex - The cell index in the current row.
+	 * @param {number} cellIndex - The cell index in the current row.
 	 * @returns {ApiTableCell}
 	 * @see office-js-api/Examples/{Editor}/ApiTableRow/Methods/GetCell.js
 	 */
-	ApiTableRow.prototype.GetCell = function(nIndex)
+	ApiTableRow.prototype.GetCell = function(cellIndex)
 	{
-		if (nIndex < 0 || nIndex >= this.Row.Content.length)
-			return null;
+		cellIndex = GetIntParameter(cellIndex, null);
+		if (null === cellIndex)
+			throwException(new Error("Cell index must be a number"));
 
-		return new ApiTableCell(this.Row.Content[nIndex]);
+		if (cellIndex < 0 || cellIndex >= this.Row.GetCellsCount())
+			throwException(new Error("Cell index " + cellIndex + " is out of bounds [0, " + (this.Row.GetCellsCount() - 1) + "]"));
+
+		return new ApiTableCell(this.Row.GetCell(cellIndex));
 	};
 	/**
 	 * Returns the current row index.
@@ -15234,6 +15263,22 @@
 
 		return allCellsUpdated;
 	};
+	/**
+	 * Returns all cells of the row as an array.
+	 * @memberof ApiTableRow
+	 * @typeofeditors ["CDE"]
+	 * @type {ApiTableCell[]}
+	 * @since 9.4.0
+	 */
+	Object.defineProperty(ApiTableRow.prototype, "Cells", {
+		get: function()
+		{
+			return private_GuardedArray(
+				this.Row.Content.map(function(cell) { return new ApiTableCell(cell); }),
+				"Cell"
+			);
+		}
+	});
 
 	//------------------------------------------------------------------------------------------------------------------
 	//
@@ -32550,6 +32595,26 @@
 				.replace(/>/g, '&gt;')
 				.replace(/"/g, '&quot;')
 				.replace(/'/g, '&#39;');
+	}
+	
+	function private_GuardedArray(arr, label)
+	{
+		return new Proxy(arr, {
+			get: function(target, prop)
+			{
+				if (typeof prop === "string" && /^-?\d+$/.test(prop))
+				{
+					var index = parseInt(prop, 10);
+					if (index < 0 || index >= target.length)
+						throwException(new Error(label + " index " + index + " is out of bounds [0, " + (target.length - 1) + "]"));
+				}
+				else if (typeof prop === "string" && /^-?\d/.test(prop))
+				{
+					throwException(new Error(label + " index must be an integer, got: " + prop));
+				}
+				return target[prop];
+			}
+		});
 	}
 
 	ApiDocument.prototype.OnChangeParaPr = function(oApiParaPr)
