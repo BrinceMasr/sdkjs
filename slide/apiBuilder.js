@@ -954,16 +954,16 @@
      * Creates a table.
      * @memberof Api
      * @typeofeditors ["CPE"]
-     * @param nCols - Number of columns.
-     * @param nRows - Number of rows.
+     * @param rows - Number of rows.
+     * @param cols - Number of columns.
      * @returns {?ApiTable}
      * @see office-js-api/Examples/{Editor}/Api/Methods/CreateTable.js
 	 */
-    Api.CreateTable = function(nCols, nRows){
+    Api.CreateTable = function(rows, cols){
         var oPresentation = private_GetPresentation();
         var oSlide = private_GetCurrentSlide();
         if(oPresentation && oSlide){
-            var oGraphicFrame = oPresentation.Create_TableGraphicFrame(nCols, nRows, oSlide, oPresentation.DefaultTableStyleId);
+            var oGraphicFrame = oPresentation.Create_TableGraphicFrame(cols, rows, oSlide, oPresentation.DefaultTableStyleId);
             var content = oGraphicFrame.graphicObject.Content, i;
             for(i = 0; i < content.length; ++i)
             {

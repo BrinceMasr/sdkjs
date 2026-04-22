@@ -1270,19 +1270,19 @@
 	 * Creates a table.
 	 * @memberof Api
 	 * @typeofeditors ["PDFE"]
-	 * @param nCols - Number of columns.
-	 * @param nRows - Number of rows.
+	 * @param rows - Number of rows.
+	 * @param cols - Number of columns.
 	 * @returns {ApiTable}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/CreateTable.js
 	 */
-	Api.CreateTable = function(nCols, nRows) {
+	Api.CreateTable = function(rows, cols) {
 		let oDoc = private_GetLogicDocument();
 		let nPage = oDoc.GetCurPage();
 		if (nPage == -1) {
 			nPage = 0;
 		}
 
-		let oGraphicFrame = oDoc.private_Create_TableGraphicFrame(nCols, nRows, oDoc.DefaultTableStyleId, undefined, undefined, undefined, undefined, nPage);
+		let oGraphicFrame = oDoc.private_Create_TableGraphicFrame(cols, rows, oDoc.DefaultTableStyleId, undefined, undefined, undefined, undefined, nPage);
 		
 		let content = oGraphicFrame.graphicObject.Content;
 		for (let i = 0; i < content.length; ++i) {
