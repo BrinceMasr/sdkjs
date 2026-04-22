@@ -87,8 +87,11 @@
 		// Notes offset for slides
 		this.TargetOffsetY = 0;
 
-		this.HtmlAreaOffset = 50; // height in pix
+		this.isUseLeftOffset = (AscBrowser.isAppleDevices || AscBrowser.isAndroid) ? true : false; // new browsers remove autoscroll textarea
+		this.HtmlAreaOffset = (AscBrowser.isAppleDevices || AscBrowser.isAndroid) ? 50 : 0; // height in pix
 		this.HtmlAreaWidth = 200;
+
+		this.lastFontSize = 0; // in pixels
 		// ---------------------------------------------------------------
 
 		// current text state information -------------------------
@@ -136,6 +139,9 @@
 			x : 0,
 			y : 0
 		};
+
+		this.oldBrowserZoom = 1;
+		this.oldParentForResize = "";
 	}
 
 	var CTextInputPrototype = CTextInput2.prototype;
@@ -947,13 +953,17 @@
 		var _style = "";
 		if (!TEXT_INPUT_DEBUG)
 		{
-			_style = ("left:-" + (this.HtmlAreaWidth >> 1) + "px;top:" + (-this.HtmlAreaOffset) + "px;");
+			let _left = this.isUseLeftOffset ? (this.HtmlAreaWidth >> 1) : 0;
+			_style = ("left:-" +_left + "px;top:" + (-this.HtmlAreaOffset) + "px;");
 			_style += "color:transparent;caret-color:transparent;background:transparent;";
 
 			if (this.Api.isUseOldMobileVersion())
 				_style += (AscCommon.AscBrowser.isAppleDevices && !AscCommon.AscBrowser.isTelegramWebView && (AscCommon.AscBrowser.maxTouchPoints > 0)) ? "font-size:0px;" : "font-size:8px;";
 			else
-				_style += "font-size:8px;";
+			{
+				this.lastFontSize = 8;
+				_style += ("font-size:" + this.lastFontSize + "px;");
+			}
 		}
 		else
 		{
@@ -1059,6 +1069,9 @@
 		if (!_elem || !_elemSrc)
 			return;
 
+		this.oldBrowserZoom = AscCommon.AscBrowser.zoom;
+		this.oldParentForResize = editorContainerId;
+
 		if (AscCommon.AscBrowser.isChrome)
 		{
 			var rectObject = AscCommon.UI.getBoundingClientRect(_elemSrc);
@@ -1157,12 +1170,35 @@
 		if (this.Api.isUseOldMobileVersion())
 			return;
 
+		if (this.oldParentForResize)
+		{
+			if (Math.abs(AscCommon.AscBrowser.zoom - this.oldBrowserZoom) > 0.1)
+				this.onResize(this.oldParentForResize);
+		}
+
 		var oTarget = document.getElementById(this.TargetId);
 		if (!oTarget)
 			return;
 
+		let targetSize = parseInt(oTarget.style.height);
 		var xPos = x ? x : parseInt(oTarget.style.left);
-		var yPos = (y ? y : parseInt(oTarget.style.top)) + parseInt(oTarget.style.height);
+		var yPos = (y ? y : parseInt(oTarget.style.top));
+
+		if (this.isUseLeftOffset)
+			yPos += targetSize;
+
+		let addOffset = 0;
+		if (!this.isUseLeftOffset)
+		{
+			addOffset = 5;
+			if (targetSize > 30)
+				targetSize = 30;
+			if (Math.abs(this.lastFontSize - targetSize) > 2)
+			{
+				this.lastFontSize = targetSize;
+				this.HtmlArea.style.fontSize = ((2 * addOffset) + this.lastFontSize) + "px";
+			}
+		}
 
 		if (AscCommon.AscBrowser.isSafari && AscCommon.AscBrowser.isMobile)
 			xPos = -100;
@@ -1175,7 +1211,7 @@
 		}
 
 		this.HtmlDiv.style.left = xPos + this.FixedPosCheckElementX + "px";
-		this.HtmlDiv.style.top  = yPos + this.FixedPosCheckElementY + this.TargetOffsetY + this.HtmlAreaOffset + "px";
+		this.HtmlDiv.style.top  = yPos - addOffset + this.FixedPosCheckElementY + this.TargetOffsetY + this.HtmlAreaOffset + "px";
 
 		this.HtmlArea.scrollTop = this.HtmlArea.scrollHeight;
 		//this.log("" + this.HtmlArea.scrollTop + ", " + this.HtmlArea.scrollHeight);

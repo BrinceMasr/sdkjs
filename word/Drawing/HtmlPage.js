@@ -3422,10 +3422,12 @@ function CEditorPage(api)
 		let areaParent = "id_main_view";
 		if (this.m_oApi.isUseNativeViewer)
 		{
-			areaParent = "id_main";
 			var oViewer = this.m_oDrawingDocument.m_oDocumentRenderer;
 			if (oViewer)
+			{
+				areaParent = "id_main";
 				oViewer.resize();
+			}
 		}
 
 		if (AscCommon.g_inputContext)
