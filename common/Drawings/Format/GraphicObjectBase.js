@@ -4065,6 +4065,9 @@
 	CGraphicObjectBase.prototype.isOutlinePlaceholder = function () {
 		return false;
 	};
+	CGraphicObjectBase.prototype.isOutlinePlaceholderWithContent = function () {
+		return false;
+	};
 
 	var ANIM_LABEL_WIDTH_PIX = 22;
 	var ANIM_LABEL_HEIGHT_PIX = 17;
