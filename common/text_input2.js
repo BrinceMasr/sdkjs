@@ -142,6 +142,9 @@
 
 		this.oldBrowserZoom = 1;
 		this.oldParentForResize = "";
+
+		this.TextAreaHeightMin = 50;
+		this.TextAreaHeight = this.TextAreaHeightMin;
 	}
 
 	var CTextInputPrototype = CTextInput2.prototype;
@@ -929,7 +932,7 @@
 			this.HtmlDiv.style.position   = "absolute";
 		this.HtmlDiv.style.zIndex     = 10;
 		this.HtmlDiv.style.width      = TEXT_INPUT_DEBUG ? "200px" : "20px";
-		this.HtmlDiv.style.height     = "50px";
+		this.HtmlDiv.style.height     = this.TextAreaHeight + "px";
 		this.HtmlDiv.style.overflow   = "hidden";
 
 		this.HtmlDiv.style.boxSizing 		= "content-box";
@@ -969,8 +972,17 @@
 		{
 			_style = "left:0px;top:0px;color:black;caret-color:black;font-size:16px;background:transparent;";
 		}
-		_style += ("border:none;position:absolute;text-shadow:0 0 0 #000;outline:none;width:" + this.HtmlAreaWidth + "px;height:50px;");
-		_style += "overflow:hidden;padding:0px;margin:0px;font-family:arial;resize:none;font-weight:normal;box-sizing:content-box;-moz-box-sizing:content-box;-webkit-box-sizing:content-box;";
+
+		_style += "margin:0px;";
+		let textAreaWidth = this.HtmlAreaWidth;
+		if (window.CSS && CSS.supports && CSS.supports("transform", "scaleX(0.2)")) {
+			textAreaWidth *= 5;
+			_style += "transform:scaleX(0.2);";
+			_style += "margin-right:-" + (textAreaWidth * 0.8) + "px;";
+		}
+
+		_style += ("border:none;position:absolute;text-shadow:0 0 0 #000;outline:none;width:" + textAreaWidth + "px;height:100%;");
+		_style += "overflow:hidden;padding:0px;font-family:arial;resize:none;font-weight:normal;box-sizing:content-box;-moz-box-sizing:content-box;-webkit-box-sizing:content-box;";
 		_style += "touch-action: none;-webkit-touch-callout: none;";
 
 		this.HtmlArea.setAttribute("style", _style);
@@ -1050,7 +1062,7 @@
 		// need another parent. so that it scrolls, not oHtmlParent
 		var oHtmlDivScrollable = document.createElement("div");
 		oHtmlDivScrollable.id = "area_id_main";
-		let styleZIndex = TEXT_INPUT_DEBUG ? "z-index:50;" : "z-index:0;";
+		let styleZIndex = TEXT_INPUT_DEBUG ? "z-index:50;" : "z-index:-1;";
 		oHtmlDivScrollable.setAttribute("style", "background:transparent;border:none;position:absolute;padding:0px;margin:0px;pointer-events:none;" + styleZIndex);
 		var parentStyle = getComputedStyle(oHtmlParent);
 		oHtmlDivScrollable.style.left = parentStyle.left;
@@ -1191,8 +1203,19 @@
 		if (!this.isUseLeftOffset)
 		{
 			addOffset = 5;
-			if (targetSize > 30)
-				targetSize = 30;
+			if (targetSize > 100)
+				targetSize = 100;
+
+			let areaH = targetSize + 2 * addOffset;
+			if (areaH < this.TextAreaHeightMin)
+				areaH = this.TextAreaHeightMin;
+
+			if (areaH != this.TextAreaHeight)
+			{
+				this.TextAreaHeight = areaH;
+				this.HtmlDiv.style.height = this.TextAreaHeight + "px";
+			}
+
 			if (Math.abs(this.lastFontSize - targetSize) > 2)
 			{
 				this.lastFontSize = targetSize;
