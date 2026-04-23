@@ -907,7 +907,7 @@ function CDrawingDocument()
 				this.m_oWordControl.m_oNotesContainer.HtmlElement.appendChild(this.TargetHtmlElement);
 				this.TargetHtmlElement.style.zIndex = isReporter ? 0 : 9;
 
-				AscCommon.g_inputContext.TargetOffsetY = (this.m_oWordControl.m_oNotesContainer.AbsolutePosition.T * AscCommon.g_dKoef_mm_to_pix) >> 0;
+				AscCommon.g_inputContext.TargetOffsetY = ((this.m_oWordControl.m_oBottomPanesContainer.AbsolutePosition.T + this.m_oWordControl.m_oNotesContainer.AbsolutePosition.T) * AscCommon.g_dKoef_mm_to_pix) >> 0;
 			}
 			else
 			{
@@ -922,7 +922,7 @@ function CDrawingDocument()
 		}
 		else if (!this.TargetHtmlElementOnSlide)
 		{
-			AscCommon.g_inputContext.TargetOffsetY = (this.m_oWordControl.m_oNotesContainer.AbsolutePosition.T * AscCommon.g_dKoef_mm_to_pix) >> 0;
+			AscCommon.g_inputContext.TargetOffsetY = ((this.m_oWordControl.m_oBottomPanesContainer.AbsolutePosition.T + this.m_oWordControl.m_oNotesContainer.AbsolutePosition.T) * AscCommon.g_dKoef_mm_to_pix) >> 0;
 		}
 
 		var targetZoom = isFocusOnSlide ? this.m_oWordControl.m_nZoomValue : 100;
