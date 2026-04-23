@@ -18507,7 +18507,7 @@
 		var res = false;
 
 		var oldExcludeVal = worksheet.bExcludeHiddenRows;
-		worksheet.bExcludeHiddenRows = false;
+		worksheet.excludeHiddenRows(false);
 		if(bbox.r1 < bbox.r2) {
 			var rowFirst = worksheet.getRange3(bbox.r1, bbox.c1, bbox.r1, bbox.c2);
 			var rowSecond = worksheet.getRange3(bbox.r1 + 1, bbox.c1, bbox.r1 + 1, bbox.c2);
@@ -18543,7 +18543,7 @@
 				}
 			}
 		}
-		worksheet.bExcludeHiddenRows = oldExcludeVal;
+		worksheet.excludeHiddenRows(oldExcludeVal);
 
 		return res;
 	}

@@ -358,9 +358,18 @@
 
 
 				//TODO we need to ignore both formulas and hidden rows if the selection includes them + standard conditions in bIsExcludeHiddenRows
+				var origSelectionRanges = null;
 				if (ws.model.autoFilters.bIsExcludeHiddenRows(selectionRange, activeCell, true)) {
-					ws.model.excludeHiddenRows(true);
-					ws.model.ignoreWriteFormulas(true);
+					// split into multiselect: one range per group of consecutive visible rows (like MS Excel)
+					var noHiddenRows = ws.model._getNoHiddenRowsArr(selectionRange.r1, selectionRange.r2);
+					if (noHiddenRows.length > 1) {
+						origSelectionRanges = ws.model.selectionRange.ranges;
+						var visibleRanges = [];
+						for (var i = 0; i < noHiddenRows.length; i++) {
+							visibleRanges.push(new Asc.Range(selectionRange.c1, noHiddenRows[i].start, selectionRange.c2, noHiddenRows[i].stop));
+						}
+						ws.model.selectionRange.ranges = visibleRanges;
+					}
 				}
 
 
@@ -407,6 +416,9 @@
 
 				ws.model.excludeHiddenRows(false);
 				ws.model.ignoreWriteFormulas(false);
+				if (origSelectionRanges) {
+					ws.model.selectionRange.ranges = origSelectionRanges;
+				}
 				wb.model.checkProtectedValue = false;
 			}
 
@@ -2009,6 +2021,7 @@
 					//TODO if paste multiselect into multiselect - we must show error
 					let pastedWorksheet = tempWorkbook.aWorksheets && tempWorkbook.aWorksheets[0];
 					let _ranges = pastedWorksheet && pastedWorksheet.selectionRange && pastedWorksheet.selectionRange.ranges;
+					t.bIsMultiselectPaste = !!(_ranges && _ranges.length > 1);
 					if (_ranges && _ranges.length > 1) {
 						//paste - should only be with an equal number of rows/columns
 						//there should be only rows/columns between the ranges, then -> delete the extra rows/columns

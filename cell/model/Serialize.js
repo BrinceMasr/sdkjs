@@ -6286,7 +6286,7 @@
                 if(!this.isCopyPaste || (this.isCopyPaste && elem && elem.bbox && this.isCopyPaste.isIntersect(elem.bbox))) {
                     if(this.isCopyPaste && ws.bExcludeHiddenRows && elem.data && elem.data.Ref && elem.data.Ref.bbox) {
                         let isHidden = false;
-                        ws.bExcludeHiddenRows = false;
+                        ws.excludeHiddenRows(false);
                         let _range = ws.getRange3(this.isCopyPaste.r1, this.isCopyPaste.c1, elem.bbox.r2, elem.bbox.c2)
                         let newRef = elem.data.Ref.bbox;
                         let beforeOffset = 0;
@@ -6316,7 +6316,7 @@
                         if (newRef.r2 < newRef.r1) {
                             isHidden = true;
                         }
-                        ws.bExcludeHiddenRows = true;
+                        ws.excludeHiddenRows(true);
 
                         if (!isHidden) {
                             if (!newRef.isEqual(elem.data.Ref.bbox)) {

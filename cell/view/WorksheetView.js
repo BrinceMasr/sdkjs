@@ -28287,6 +28287,10 @@ function isAllowPasteLink(pastedWb) {
 
 		let isPasteOptions = window['AscCommon'].g_specialPasteHelper.isPasteOptions;
 
+		if (!specialPasteHelper.specialPasteStart && AscCommonExcel.g_clipboardExcel.pasteProcessor.bIsMultiselectPaste) {
+			specialPasteProps.formula = null;
+		}
+
 		if (val.props && val.props.onlyImages === true) {
 			if (!specialPasteHelper.specialPasteStart) {
 				ws.handlers.trigger("showSpecialPasteOptions", [Asc.c_oSpecialPasteProps.picture]);
