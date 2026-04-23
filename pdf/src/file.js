@@ -1539,6 +1539,35 @@ void main() {\n\
         }
         return ret;
     };
+    CFile.prototype.copyPageText = function(pageIndex)
+    {
+        let stream = this.getPageTextStream(pageIndex);
+        if (!stream)
+            return "";
+
+        let ret = "";
+
+        while (stream.pos < stream.size)
+        {
+            stream.Skip(8);
+            if (stream.GetChar())
+                stream.Skip(8);
+            stream.Skip(12);
+
+            let nChars = stream.GetLong();
+            for (let i = 0; i < nChars; ++i)
+            {
+                if (i)
+                    stream.Skip(4);
+                let nChar = stream.GetLong();
+                stream.Skip(4);
+
+                ret += nChar === 0xFFFF ? ' ' : String.fromCodePoint(nChar);
+            }
+            ret += "\n";
+        }
+        return ret;
+    };
     CFile.prototype.copy = function(_text_format)
     {
         let sel = this.Selection;

@@ -251,7 +251,7 @@
         oAnnot.SetParentPage(this);
 
         AscCommon.History.Add(new CChangesPDFDocumentAnnotsContent(this, nPos, [oAnnot], true));
-		this.RedrawAnnots();
+		this.RedrawAnnots(oAnnot.IsTextMarkup());
 
 		let oDoc = Asc.editor.getPDFDoc();
 		oDoc.CheckComment(oAnnot);
