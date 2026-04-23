@@ -87,8 +87,8 @@
 		// Notes offset for slides
 		this.TargetOffsetY = 0;
 
-		this.isUseLeftOffset = (AscBrowser.isAppleDevices || AscBrowser.isAndroid) ? true : false; // new browsers remove autoscroll textarea
-		this.HtmlAreaOffset = (AscBrowser.isAppleDevices || AscBrowser.isAndroid) ? 50 : 0; // height in pix
+		this.isUseLeftOffset = (AscCommon.AscBrowser.isAppleDevices || AscCommon.AscBrowser.isAndroid) ? true : false; // new browsers remove autoscroll textarea
+		this.HtmlAreaOffset = (AscCommon.AscBrowser.isAppleDevices || AscCommon.AscBrowser.isAndroid) ? 50 : 0; // height in pix
 		this.HtmlAreaWidth = 200;
 
 		this.lastFontSize = 0; // in pixels
