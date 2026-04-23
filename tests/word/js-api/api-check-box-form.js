@@ -54,4 +54,31 @@ $(function ()
 		form.Value = false;
 		assert.strictEqual(form.GetValue(), false, "Check Value setter updates the checkbox state");
 	});
+
+	QUnit.test("SetGroupValue, GetGroupValue, GroupValue", function (assert)
+	{
+		AscTest.ClearDocument();
+		const document = AscTest.JsApi.GetDocument();
+		const p = AscTest.JsApi.CreateParagraph();
+		document.Push(p);
+
+		const radio1 = createApiCheckBoxForm({"radio": true});
+		radio1.SetRadioGroup("Gender");
+		radio1.SetChoiceName("Male");
+		p.Push(radio1);
+
+		const radio2 = createApiCheckBoxForm({"radio": true});
+		radio2.SetRadioGroup("Gender");
+		radio2.SetChoiceName("Female");
+		p.Push(radio2);
+
+		assert.strictEqual(radio1.GetGroupValue(), "", "Check GetGroupValue returns empty string when nothing is selected");
+
+		radio1.SetGroupValue("Male");
+		assert.strictEqual(radio1.GetGroupValue(), "Male", "Check GetGroupValue returns the selected choice name");
+		assert.strictEqual(radio1.GroupValue, "Male", "Check GroupValue getter returns the current selection");
+
+		radio1.GroupValue = "Female";
+		assert.strictEqual(radio1.GetGroupValue(), "Female", "Check GroupValue setter updates the selection");
+	});
 });

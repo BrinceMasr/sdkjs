@@ -27516,6 +27516,57 @@
 		get: function() { return this.GetValue(); },
 		set: function(value) { this.SetValue(value); }
 	});
+	/**
+	 * Returns the choice name of the currently selected radio button in the group.
+	 * Returns an empty string if the current form is not a radio button or nothing is selected.
+	 * @memberof ApiCheckBoxForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @returns {string}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiCheckBoxForm/Methods/GetGroupValue.js
+	 */
+	ApiCheckBoxForm.prototype.GetGroupValue = function()
+	{
+		if (!this.Sdt.IsRadioButton())
+			return "";
+		let groupKey = this.Sdt.GetRadioButtonGroupKey();
+		if (!groupKey)
+			return "";
+		return this.Sdt.GetLogicDocument().GetFormsManager().GetRadioGroupValue(groupKey);
+	};
+	/**
+	 * Selects the radio button with the specified choice name in the group.
+	 * @memberof ApiCheckBoxForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @param {string} value - The choice name of the radio button to select.
+	 * @returns {boolean}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiCheckBoxForm/Methods/SetGroupValue.js
+	 */
+	ApiCheckBoxForm.prototype.SetGroupValue = function(value)
+	{
+		return executeNoFormLockCheck(function(){
+			if (!this.Sdt.IsRadioButton())
+				return false;
+			let groupKey = this.Sdt.GetRadioButtonGroupKey();
+			if (!groupKey)
+				return false;
+			this.Sdt.GetLogicDocument().GetFormsManager().SetRadioGroupValue(groupKey, value);
+			this.OnChangeValue();
+			return true;
+		}, this);
+	};
+	/**
+	 * Gets or sets the choice name of the currently selected radio button in the group.
+	 * @memberof ApiCheckBoxForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @type {string}
+	 * @since 9.4.0
+	 */
+	Object.defineProperty(ApiCheckBoxForm.prototype, "GroupValue", {
+		get: function() { return this.GetGroupValue(); },
+		set: function(value) { this.SetGroupValue(value); }
+	});
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiDateForm
@@ -31723,6 +31774,8 @@
 	ApiCheckBoxForm.prototype["SetLabel"]      = ApiCheckBoxForm.prototype.SetLabel;
 	ApiCheckBoxForm.prototype["GetValue"]      = ApiCheckBoxForm.prototype.GetValue;
 	ApiCheckBoxForm.prototype["SetValue"]      = ApiCheckBoxForm.prototype.SetValue;
+	ApiCheckBoxForm.prototype["GetGroupValue"] = ApiCheckBoxForm.prototype.GetGroupValue;
+	ApiCheckBoxForm.prototype["SetGroupValue"] = ApiCheckBoxForm.prototype.SetGroupValue;
 	ApiCheckBoxForm.prototype["Copy"]          = ApiCheckBoxForm.prototype.Copy;
 
 	ApiComment.prototype["GetClassType"]	= ApiComment.prototype.GetClassType;
