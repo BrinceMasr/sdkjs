@@ -1579,6 +1579,95 @@
 	TokenText.prototype = Object.create(LexerLiterals.prototype)
 	TokenText.prototype.constructor = TokenText;
 
+	function TokenOpScript()
+	{
+		this.id = 36;
+		this.Unicode = {
+			"'" : 1,
+			"′" : 1,
+			"″" : 1,
+			"⁗" : 1,
+			"!" : 1,
+			"‼" : 1,
+			"₀" : 1,
+			"₁" : 1,
+			"₂" : 1,
+			"₃" : 1,
+			"₄" : 1,
+			"₅" : 1,
+			"₆" : 1,
+			"₇" : 1,
+			"₈" : 1,
+			"₉" : 1,
+			"₊" : 1,
+			"₋" : 1,
+			"₌" : 1,
+			"₍" : 1,
+			"₎" : 1,
+			"ₐ" : 1,
+			"ₑ" : 1,
+			"ₕ" : 1,
+			"ᵢ" : 1,
+			"ⱼ" : 1,
+			"ₖ" : 1,
+			"ₗ" : 1,
+			"ₘ" : 1,
+			"ₙ" : 1,
+			"ₒ" : 1,
+			"ₚ" : 1,
+			"ᵣ" : 1,
+			"ₛ" : 1,
+			"ₜ" : 1,
+			"ᵤ" : 1,
+			"ᵥ" : 1,
+			"ₓ" : 1,
+			"⁰" : 1,
+			"¹" : 1,
+			"²" : 1,
+			"³" : 1,
+			"⁴" : 1,
+			"⁵" : 1,
+			"⁶" : 1,
+			"⁷" : 1,
+			"⁸" : 1,
+			"⁹" : 1,
+			"ᵃ" : 1,
+			"ᵇ" : 1,
+			"ᶜ" : 1,
+			"ᵈ" : 1,
+			"ᵉ" : 1,
+			"ᶠ" : 1,
+			"ᵍ" : 1,
+			"ʰ" : 1,
+			"ⁱ" : 1,
+			"ʲ" : 1,
+			"ᵏ" : 1,
+			"ˡ" : 1,
+			"ᵐ" : 1,
+			"ⁿ" : 1,
+			"ᵒ" : 1,
+			"ᵖ" : 1,
+			"ʳ" : 1,
+			"ˢ" : 1,
+			"ᵗ" : 1,
+			"ᵘ" : 1,
+			"ᵛ" : 1,
+			"ʷ" : 1,
+			"ˣ" : 1,
+			"ʸ" : 1,
+			"ᶻ" : 1,
+			"⁺" : 1,
+			"⁻" : 1,
+			"⁼" : 1,
+			"⁽" : 1,
+			"⁾" : 1
+		};
+		this.LaTeX = {};
+		this.LaTeXSpecial = {};
+	}
+	TokenOpScript.prototype = Object.create(LexerLiterals.prototype)
+	TokenOpScript.prototype.constructor = TokenOpScript;
+
 	//---------------------------------------Initialize data for Tokenizer----------------------------------------------
 
 	// List of tokens types for parsers processing
@@ -1598,6 +1687,7 @@
 		rBrackets: 		new TokenCloseBrackets(),
 		lBrackets: 		new TokenOpenBrackets(),
 		operand:		new TokenOperand(),
+		opScript:		new TokenOpScript(),
 		operator:		new TokenOperators(),
 		space: 			new TokenSpace(),
 		accent: 		new TokenAccent(),
@@ -2602,6 +2692,9 @@
 					{
 						let isSubSup = ((Array.isArray(oTokens.up) && oTokens.up.length > 0) || (!Array.isArray(oTokens.up) && oTokens.up !== undefined)) &&
 							((Array.isArray(oTokens.down) && oTokens.down.length > 0) || (!Array.isArray(oTokens.down) && oTokens.down !== undefined))
+
+						if (!oTokens.style)
+							return;
 
 						let oCurrentStyle = oTokens.style.subStyle ? oTokens.style.subStyle : oTokens.style.supStyle;
 						let Pr = {};
@@ -5846,6 +5939,7 @@
 		MathLiterals.special,
 		MathLiterals.subSup,
 		MathLiterals.of,
+		MathLiterals.opScript
 	];
 	const TokenSearch_NotBrackets = [
 		MathLiterals.operator,
@@ -6184,7 +6278,8 @@
 			|| MathLiterals.of.id			=== nId
 			|| MathLiterals.specialBrac.id	=== nId
 			|| MathLiterals.hbrack.id		=== nId
-			|| MathLiterals.invisible.id	=== nId;
+			|| MathLiterals.invisible.id	=== nId
+			|| MathLiterals.opScript.id		=== nId;
 	};
 	/**
 	 * Check is given id is brackets id
@@ -6543,6 +6638,12 @@
 		if (MathLiterals.divide.id === this.oAbsoluteLastId && true === this.ProceedBeforeDivide(oRuleLast))
 		{
 			return true;
+		}
+
+		if (oRuleLast && oRuleLast.type === MathLiterals.opScript.id && this.IsTrigger(this.oAbsoluteLastId))
+		{
+			this.BIFunctionProcessing(oRuleLast);
+			return true
 		}
 
 		//при написании оператора нужно конвертировать всю формулу до оператора (или до первой открывающей скобки)
