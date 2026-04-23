@@ -3119,7 +3119,7 @@
 		this.const_offset_x += this.outlineView.getSlideNumbersWidth() * scaleFactor >> 0;
 	};
 	COutlineThumbnailsManager.prototype.calculateTotalThumbnailsLength = function (containerWidth, containerHeight) {
-		return this.outlineView.getOutlineHeight() * AscCommon.AscBrowser.retinaPixelRatio * g_dKoef_mm_to_pix;
+		return this.outlineView.getOutlineHeight() * AscCommon.AscBrowser.retinaPixelRatio * g_dKoef_mm_to_pix + this.const_offset_y;
 	};
 
 	COutlineThumbnailsManager.prototype.GetCurSld = function()

@@ -1171,13 +1171,12 @@ function CDrawingDocument()
 			if (boxB < 0)
 				boxB = _hh;
 
-			yPos += targetSizeAscent;
-
 			var nValueScrollVer = 0;
 			if (yPos < boxY)
 			{
 				nValueScrollVer = (this.m_oWordControl.m_oNotesApi.Scroll + yPos - boxY) >> 0;
 			}
+			yPos += targetSizeAscent;
 			if (yPos > boxB)
 			{
 				nValueScrollVer = (this.m_oWordControl.m_oNotesApi.Scroll + yPos - boxB) >> 0;
@@ -1192,8 +1191,7 @@ function CDrawingDocument()
 				return;
 			}
 		} else if (focusType === FOCUS_OBJECT_THUMBNAILS && this.m_oWordControl.Thumbnails) {
-			const scrollValue = this.m_oWordControl.Thumbnails.m_dScrollY;
-			var yPos = _y * g_dKoef_mm_to_pix - scrollValue;
+			var yPos = _y * g_dKoef_mm_to_pix;
 			var _hh = this.m_oWordControl.m_oThumbnails.HtmlElement.height;
 			_hh /= AscCommon.AscBrowser.retinaPixelRatio;
 
@@ -1204,23 +1202,22 @@ function CDrawingDocument()
 			if (boxB < 0)
 				boxB = _hh;
 
-			yPos += targetSizeAscent;
-
 			var nValueScrollVer = 0;
 			if (yPos < boxY)
 			{
-				nValueScrollVer = (scrollValue + yPos - boxY) >> 0;
+				nValueScrollVer = (yPos - boxY) >> 0;
 			}
+			yPos += targetSizeAscent;
 			if (yPos > boxB)
 			{
-				nValueScrollVer = (scrollValue + yPos - boxB) >> 0;
+				nValueScrollVer = (yPos - boxB) >> 0;
 			}
 
 			/// check scroll
 			if (0 != nValueScrollVer)
 			{
 				this.m_oWordControl.m_bIsUpdateTargetNoAttack = true;
-				this.m_oWordControl.m_oScrollThumbApi.scrollToY(nValueScrollVer);
+				this.m_oWordControl.m_oScrollThumbApi.scrollByY(nValueScrollVer);
 				this.m_oWordControl.OnScroll();
 				return;
 			}

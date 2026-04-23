@@ -1237,7 +1237,9 @@
 	};
 	OutlineView.prototype.getOutlineHeight = function () {
 		if (this.outlineShape) {
-			return this.outlineShape.transformText.TransformPointY(0, this.outlineShape.contentHeight);
+			const top = this.outlineShape.transformText.TransformPointY(0, 0);
+			const bottom = this.outlineShape.transformText.TransformPointY(0, this.outlineShape.contentHeight);
+			return bottom - top;
 		}
 		return 0;
 	}
