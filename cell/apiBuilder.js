@@ -28918,7 +28918,20 @@
 		if (!ref) {
 			return;
 		}
-		this.ws.worksheet.autoFilters.isEmptyAutoFilters(ref);
+
+		let bbox = ref,
+			ws = this.ws.worksheet;
+		if (ws.getSheetProtection(Asc.c_oAscSheetProtectType.formatCells) || (ws.getSheetProtection() && ws.isIntersectLockedRanges([bbox]))) {
+			throwException(new Error('Cannot modify protected sheet'));
+			return false;
+		}
+		ws.autoFilters.isEmptyAutoFilters(ref);
+		let range = ws.getRange3(ref.r1, ref.c1, ref.r2, ref.c2);
+		range.cleanAll();
+		ws.removeSparklines(bbox);
+		ws.clearDataValidation([bbox], true);
+		ws.clearConditionalFormattingRulesByRanges([bbox]);
+		return true;
 	};
 
 	/**
