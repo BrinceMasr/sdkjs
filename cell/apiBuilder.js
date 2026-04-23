@@ -28933,7 +28933,7 @@
 		if (!ref) {
 			return;
 		}
-		this.ws.worksheet.autoFilters.isEmptyAutoFilters(ref, null, null, true);
+		this.ws.worksheet.autoFilters.convertTableToRange(this.tablePart.DisplayName);
 	};
 
 	/**
