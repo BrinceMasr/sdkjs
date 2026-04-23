@@ -192,4 +192,14 @@
 
 	// TODO: Replace with onEndLoadSdk
 	editor.initCollaborativeEditing();
+
+	AscCommon.g_clipboardBase.Init(editor);
+
+	AscFonts.g_fontApplication.GetFontFileWeb = function(name, style)
+	{
+		return {
+			m_wsFontName : name
+		}
+	};
+	
 })(window);

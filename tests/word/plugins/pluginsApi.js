@@ -339,7 +339,7 @@ $(function () {
 		AscTest.ClearDocument();
 		const p2 = MoveToNewParagraph();
 		AscTest.EnterText("to be replaced");
-		const paraId = p2.GetParaId();
+		const paraId = p2.GetId();
 
 		MoveToNewParagraph();
 		PluginsApi.pluginMethod_SetParagraphHtml("<p>replaced by id</p>", paraId);
