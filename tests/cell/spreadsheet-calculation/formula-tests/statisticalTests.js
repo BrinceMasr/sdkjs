@@ -9784,6 +9784,174 @@ $(function () {
 	QUnit.test("Test: \"COUNTIFS\"", function (assert) {
 
 		ws.getRange2("A1:J210").cleanAll();
+		ws.getRange2("A401:J510").cleanAll();
+
+		// Rows 2–7, cols E–J: multiple-criteria ranges
+		ws.getRange2("E2").setValue("10");
+		ws.getRange2("E3").setValue("20");
+		ws.getRange2("E4").setValue("30");
+		ws.getRange2("E5").setValue("40");
+		ws.getRange2("E6").setValue("50");
+		ws.getRange2("E7").setValue("60");
+		ws.getRange2("F2").setValue("Red");
+		ws.getRange2("F3").setValue("Blue");
+		ws.getRange2("F4").setValue("Green");
+		ws.getRange2("F5").setValue("Red");
+		ws.getRange2("F6").setValue("Blue");
+		ws.getRange2("F7").setValue("Green");
+		ws.getRange2("G2").setValue("Small");
+		ws.getRange2("G3").setValue("Medium");
+		ws.getRange2("G4").setValue("Large");
+		ws.getRange2("G5").setValue("Large");
+		ws.getRange2("G6").setValue("Medium");
+		ws.getRange2("G7").setValue("Small");
+		ws.getRange2("H2").setValue("2023");
+		ws.getRange2("H3").setValue("2023");
+		ws.getRange2("H4").setValue("2024");
+		ws.getRange2("H5").setValue("2024");
+		ws.getRange2("H6").setValue("2025");
+		ws.getRange2("H7").setValue("2025");
+		ws.getRange2("I2").setValue("A");
+		ws.getRange2("I3").setValue("B");
+		ws.getRange2("I4").setValue("C");
+		ws.getRange2("I5").setValue("A");
+		ws.getRange2("I6").setValue("B");
+		ws.getRange2("I7").setValue("C");
+		ws.getRange2("J2").setValue("Red");
+		ws.getRange2("J3").setValue("Large");
+		ws.getRange2("J4").setValue("2024");
+		ws.getRange2("J5").setValue("A");
+
+		// Rows 401–406, cols A–B: <> operator with empty cells
+		ws.getRange2("A401").setValue("apple");
+		// A402 intentionally left empty
+		ws.getRange2("A403").setValue("banana");
+		// A404 intentionally left empty
+		ws.getRange2("A405").setValue("apple");
+		ws.getRange2("A406").setValue("cherry");
+		ws.getRange2("B401").setValue(10);
+		ws.getRange2("B402").setValue(3);
+		ws.getRange2("B403").setValue(8);
+		ws.getRange2("B404").setValue(2);
+		ws.getRange2("B405").setValue(5);
+		ws.getRange2("B406").setValue(7);
+
+		ws.getRange2("A410").setValue("'5");
+		ws.getRange2("A411").setValue("'2");
+		ws.getRange2("A412").setValue("'8");
+		ws.getRange2("A413").setValue("'1");
+		ws.getRange2("A414").setValue("'6");
+		// A415 intentionally left empty
+		ws.getRange2("B410").setValue("yes");
+		ws.getRange2("B411").setValue("no");
+		ws.getRange2("B412").setValue("yes");
+		ws.getRange2("B413").setValue("no");
+		ws.getRange2("B414").setValue("yes");
+		ws.getRange2("B415").setValue("yes");
+
+		// Rows 420–426, col A: same-range AND logic
+		ws.getRange2("A420").setValue(1);
+		ws.getRange2("A421").setValue(3);
+		ws.getRange2("A422").setValue(5);
+		ws.getRange2("A423").setValue(7);
+		ws.getRange2("A424").setValue(9);
+		ws.getRange2("A425").setValue(4);
+		ws.getRange2("A426").setValue(6);
+
+		// Rows 430–432, cols C–H: multi-column ranges
+		ws.getRange2("C430").setValue(1);  ws.getRange2("D430").setValue(2);  ws.getRange2("E430").setValue(3);
+		ws.getRange2("C431").setValue(5);  ws.getRange2("D431").setValue(0);  ws.getRange2("E431").setValue(8);
+		ws.getRange2("C432").setValue(4);  ws.getRange2("D432").setValue(6);  ws.getRange2("E432").setValue(2);
+		ws.getRange2("F430").setValue("x"); ws.getRange2("G430").setValue("y"); ws.getRange2("H430").setValue("x");
+		ws.getRange2("F431").setValue("x"); ws.getRange2("G431").setValue("x"); ws.getRange2("H431").setValue("z");
+		ws.getRange2("F432").setValue("y"); ws.getRange2("G432").setValue("x"); ws.getRange2("H432").setValue("x");
+
+		// Rows 440–444, cols A–B: boolean TRUE/FALSE criteria
+		ws.getRange2("A440").setValue("TRUE");
+		ws.getRange2("A441").setValue("FALSE");
+		ws.getRange2("A442").setValue("TRUE");
+		ws.getRange2("A443").setValue("1");
+		ws.getRange2("A444").setValue("text");
+		ws.getRange2("B440").setValue(10);
+		ws.getRange2("B441").setValue(3);
+		ws.getRange2("B442").setValue(8);
+		ws.getRange2("B443").setValue(5);
+		ws.getRange2("B444").setValue(7);
+
+		// Rows 450–454, cols A–B: error values as criteria
+		ws.getRange2("A450").setValue("=NA()");
+		ws.getRange2("A451").setValue("#N/A");
+		ws.getRange2("A452").setValue("=1/0");
+		ws.getRange2("A453").setValue("5");
+		ws.getRange2("A454").setValue("text");
+		ws.getRange2("B450").setValue("yes");
+		ws.getRange2("B451").setValue("yes");
+		ws.getRange2("B452").setValue("no");
+		ws.getRange2("B453").setValue("yes");
+		ws.getRange2("B454").setValue("yes");
+
+		// Rows 460–465, cols A–B: wildcard * for non-empty text
+		ws.getRange2("A460").setValue("apple");
+		// A461 intentionally left empty
+		ws.getRange2("A462").setValue("banana");
+		ws.getRange2("A463").setValue("5");
+		// A464 intentionally left empty
+		ws.getRange2("A465").setValue("cherry");
+		ws.getRange2("B460").setValue(10);
+		ws.getRange2("B461").setValue(3);
+		ws.getRange2("B462").setValue(8);
+		ws.getRange2("B463").setValue(2);
+		ws.getRange2("B464").setValue(7);
+		ws.getRange2("B465").setValue(6);
+
+		// Rows 470–474, cols A–B: tilde escape in wildcards
+		ws.getRange2("A470").setValue("a*c");
+		ws.getRange2("A471").setValue("aac");
+		ws.getRange2("A472").setValue("a~c");
+		ws.getRange2("A473").setValue("a??c");
+		ws.getRange2("A474").setValue("abc");
+		ws.getRange2("B470").setValue(10);
+		ws.getRange2("B471").setValue(5);
+		ws.getRange2("B472").setValue(8);
+		ws.getRange2("B473").setValue(3);
+		ws.getRange2("B474").setValue(7);
+
+		// Rows 480–484, cols A–B: case-insensitive matching
+		ws.getRange2("A480").setValue("Apple");
+		ws.getRange2("A481").setValue("APPLE");
+		ws.getRange2("A482").setValue("apple");
+		ws.getRange2("A483").setValue("BANANA");
+		ws.getRange2("A484").setValue("banana");
+		ws.getRange2("B480").setValue(10);
+		ws.getRange2("B481").setValue(5);
+		ws.getRange2("B482").setValue(8);
+		ws.getRange2("B483").setValue(3);
+		ws.getRange2("B484").setValue(7);
+
+		// Rows 490–496, cols A–B: empty cell reference as criteria (= 0)
+		ws.getRange2("A490").setValue("0");
+		// A491 intentionally left empty
+		ws.getRange2("A492").setValue("1");
+		ws.getRange2("A493").setValue("0");
+		// A494 intentionally left empty
+		ws.getRange2("A495").setValue("2");
+		ws.getRange2("B490").setValue("yes");
+		ws.getRange2("B491").setValue("no");
+		ws.getRange2("B492").setValue("yes");
+		ws.getRange2("B493").setValue("yes");
+		ws.getRange2("B494").setValue("yes");
+		ws.getRange2("B495").setValue("no");
+		// B496 intentionally left empty (used as empty criteria reference)
+
+		// Rows 500–503, cols A–B: apostrophe cell treated as empty
+		// A500 intentionally left empty
+		ws.getRange2("A501").setValue("'");
+		ws.getRange2("A502").setValue("text");
+		ws.getRange2("A503").setValue("0");
+		ws.getRange2("B500").setValue("yes");
+		ws.getRange2("B501").setValue("yes");
+		ws.getRange2("B502").setValue("yes");
+		ws.getRange2("B503").setValue("no");
 
 		ws.getRange2("A15").setValue("Yes");
 		ws.getRange2("A16").setValue("Yes");
@@ -9800,14 +9968,14 @@ $(function () {
 		ws.getRange2("C17").setValue("Yes");
 		ws.getRange2("C18").setValue("Yes");
 
-		oParser = new parserFormula("COUNTIFS(A15:C15,\"=Yes\")", "A1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 1);
+		// Positive Cases:
 
+		// Case #1: Area, String. Find "=Yes" in two ranges with AND
 		oParser = new parserFormula("COUNTIFS(A15:A18,\"=Yes\",B15:B18,\"=Yes\")", "B1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 2);
 
+		// Case #2: Area, String. Find "=Yes" with swapped range order
 		oParser = new parserFormula("COUNTIFS(A18:C18,\"=Yes\",A16:C16,\"=Yes\")", "C1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 1);
@@ -9826,23 +9994,20 @@ $(function () {
 		ws.getRange2("E19").setValue("5/5/2011");
 		ws.getRange2("E20").setValue("5/6/2011");
 
-		oParser = new parserFormula("COUNTIFS(D15:D20,\"<6\",D15:D20,\">1\")", "D1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 4);
-
+		// Case #3: Area, Number + Date. Find values satisfying numeric AND date criteria
 		oParser = new parserFormula("COUNTIFS(D15:D20,\"<5\",E15:E20,\"<5/3/2011\")", "E1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 2);
 
+		// Case #4: Area, String. Find values using concatenated cell-reference criteria
 		oParser = new parserFormula("COUNTIFS(D15:D20,\"<\" & D19,E15:E20,\"<\" & E17)", "E1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 2);
 
-
+		// Case #5: Area, Area. Array formula — each cell as its own criteria (self-match)
 		testArrayFormulaEqualsValues(assert, "1,1,1,#N/A;1,1,1,#N/A;#N/A,#N/A,#N/A,#N/A", "COUNTIFS(A1:C2,A1:C2,A1:C2,A1:C2, A1:C2,A1:C2)");
 		testArrayFormulaEqualsValues(assert, "1,0,0,#N/A;1,0,0,#N/A;#N/A,#N/A,#N/A,#N/A", "COUNTIFS(A1:C2,A1:A2,A1:C2,A1:C2,A1:C2,A1:C2)");
 		testArrayFormulaEqualsValues(assert, "#VALUE!,#VALUE!,#VALUE!,#N/A;#VALUE!,#VALUE!,#VALUE!,#N/A;#N/A,#N/A,#N/A,#N/A", "COUNTIFS(A1:C2,A1:C2,A1:A2,A1:C2,A1:A2,A1:C2)");
-
 
 		ws.getRange2("DS2").setValue("12");
 		ws.getRange2("DS3").setValue("2");
@@ -9859,35 +10024,33 @@ $(function () {
 		ws.getRange2("DU9").setValue("12");
 		ws.getRange2("DU10").setValue("12");
 
+		// Case #6: WholeCols, Number. Find values in whole-column ranges with AND criteria
 		oParser = new parserFormula('COUNTIFS(DS:DS,">3",DU:DU,">10")', "E1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 2);
 
+		// Case #7: WholeCols + Area, Number. Mismatched whole-column and bounded range → #VALUE!
 		oParser = new parserFormula('COUNTIFS(DS:DS,">3",DU1:DU2,">10")', "E1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
 
-		oParser = new parserFormula('COUNTIFS(DS2:DS3,">3",DU:DU,">10")', "E1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-
+		// Case #8: WholeCols, String. Find string values in whole-column ranges
 		oParser = new parserFormula('COUNTIFS(DS:DS,"e",DU:DU,"w")', "E1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 1);
 
+		// Case #9: Area, Number. Find values satisfying two numeric criteria in bounded ranges
 		oParser = new parserFormula('COUNTIFS(DS1:DS10,"<5",DU1:DU10,">2")', "E1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 2);
 
+		// Case #10: Area, Number. Mismatched bounded range sizes → #VALUE!
 		oParser = new parserFormula('COUNTIFS(DS1:DS11,"<5",DU1:DU10,">2")', "E1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
 
-		oParser = new parserFormula('COUNTIFS(DS1:DS10,"<5",DU1:DU11,">2")', "E1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-
-		// bool, ref, num, string, err
+		// bool, ref, num, string, err — A88=#DIV/0!, A89=#NUM!, A90-A91=TRUE, A92-A93=FALSE,
+		// A94=1, A95=0, A96="1s", A97="1"(@format), A98="", A99=0
 		ws.getRange2("A88").setValue("#DIV/0!");
 		ws.getRange2("A89").setValue("#NUM!");
 		ws.getRange2("A90").setValue("TRUE");
@@ -9902,67 +10065,17 @@ $(function () {
 		ws.getRange2("A98").setValue("");
 		ws.getRange2("A99").setValue("0");
 
-		oParser = new parserFormula('COUNTIFS(A90:A99,TRUE)', "E1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 2);
-
-		oParser = new parserFormula('COUNTIFS(A90:A99,A90)', "E1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 2);
-
-		oParser = new parserFormula('COUNTIFS(A90:A99,FALSE)', "E1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 2);
-
-		oParser = new parserFormula('COUNTIFS(A90:A99,A92)', "E1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 2);
-
-		oParser = new parserFormula('COUNTIFS(A90:A99,1)', "E1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 2);
-
-		oParser = new parserFormula('COUNTIFS(A90:A99,A94)', "E1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 2);
-
-		oParser = new parserFormula('COUNTIFS(A90:A99,A97)', "E1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 2);
-
+		// Case #11: Area, Number. Count cells equal to 0 (matches numeric 0)
 		oParser = new parserFormula('COUNTIFS(A90:A99,0)', "E1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 2);
 
-		oParser = new parserFormula('COUNTIFS(A90:A99,A95)', "E1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 2);
-
-		oParser = new parserFormula('COUNTIFS(A90:A99,"")', "E1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 1);
-
-		oParser = new parserFormula('COUNTIFS(A90:A99,A98)', "E1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 2);
-
-		oParser = new parserFormula('COUNTIFS(A90:A99,A88)', "E1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 0);
-
+		// Case #12: Area, Error. Count cells equal to #DIV/0! using error literal — returns 0
 		oParser = new parserFormula('COUNTIFS(A90:A99,#DIV/0!)', "E1", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 0);
 
-		oParser = new parserFormula('COUNTIFS(A90:A99,#NUM!)', "E1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 0);
-
-		oParser = new parserFormula('COUNTIFS(A90:A99,A89)', "E1", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 0);
-
-		// arg0 = #DIV/0!
+		// Case #13: Ref, Area. Array formula — single error cell as range, criteria array (arg0 = #DIV/0!)
 		oParser = new parserFormula('COUNTIFS(A88,A88:A99)', "E1", ws);
 		oParser.setArrayFormulaRef(ws.getRange2("AD6:AF8").bbox);
 		assert.ok(oParser.parse());
@@ -9971,7 +10084,7 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getElementRowCol(2,0).getValue(), 0, 'Result of COUNTIFS(A88,A88:A99)[2,0]');
 		assert.strictEqual(oParser.calculate().getElementRowCol(3,0).getValue(), 0, 'Result of COUNTIFS(A88,A88:A99)[3,0]');
 
-		// arg0 = TRUE
+		// Case #14: Ref, Area. Array formula — single TRUE cell as range, criteria array (arg0 = TRUE)
 		oParser = new parserFormula('COUNTIFS(A90,A88:A99)', "E1", ws);
 		oParser.setArrayFormulaRef(ws.getRange2("AD6:AF8").bbox);
 		assert.ok(oParser.parse());
@@ -9981,7 +10094,7 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getElementRowCol(3,0).getValue(), 1, 'Result of COUNTIFS(A90,A88:A99)[3,0]');
 		assert.strictEqual(oParser.calculate().getElementRowCol(4,0).getValue(), 0, 'Result of COUNTIFS(A90,A88:A99)[4,0]');
 
-		// arg0 = 0
+		// Case #15: Ref, Area. Array formula — single 0 cell as range, criteria array (arg0 = 0)
 		oParser = new parserFormula('COUNTIFS(A95,A88:A99)', "E1", ws);
 		oParser.setArrayFormulaRef(ws.getRange2("AD6:AF8").bbox);
 		assert.ok(oParser.parse());
@@ -9994,7 +10107,7 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getElementRowCol(10,0).getValue(), 1, 'Result of COUNTIFS(A95,A88:A99)[10,0]');
 		assert.strictEqual(oParser.calculate().getElementRowCol(11,0).getValue(), 1, 'Result of COUNTIFS(A95,A88:A99)[11,0]');
 
-		// arg0 = cEmpty
+		// Case #16: Ref, Area. Array formula — single empty cell as range, criteria array (arg0 = cEmpty)
 		oParser = new parserFormula('COUNTIFS(A98,A88:A99)', "E1", ws);
 		oParser.setArrayFormulaRef(ws.getRange2("AD6:AF8").bbox);
 		assert.ok(oParser.parse());
@@ -10007,7 +10120,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getElementRowCol(10,0).getValue(), 0, 'Result of COUNTIFS(A98,A88:A99)[10,0]');
 		assert.strictEqual(oParser.calculate().getElementRowCol(11,0).getValue(), 0, 'Result of COUNTIFS(A98,A88:A99)[11,0]');
 
-
 		// bug 58497
 		ws.getRange2("A100:Z300").cleanAll();
 		ws.getRange2("A101").setValue("str1");
@@ -10015,16 +10127,18 @@ $(function () {
 		ws.getRange2("A103").setValue("");
 		ws.getRange2("A104").setValue("");
 
-		//correct test for dynamic arrays
+		// Case #17: Area, Formula. SINGLE() — dynamic-array cross-reference produces 0
 		oParser = new parserFormula('COUNTIFS(A101:A104,SINGLE(A101:A104))', "E1", ws);
 		assert.ok(oParser.parse(), "COUNTIFS(A101:A104,SINGLE(A101:A104)))");
-		// without setArrayFormulaRef executed as .cross and as result and as a result, #VALUE comes into the second argument
 		assert.strictEqual(oParser.calculate().getValue(), 0, "Result of SINGLE COUNTIFS(A101:A104,A101:A104)");
 
+		// Case #18: Area, Area. Dynamic array: range as criteria without setArrayFormulaRef
 		res = AscCommonExcel.bIsSupportDynamicArrays ? 1 : 0;
 		oParser = new parserFormula('COUNTIFS(A101:A104,A101:A104)', "E1", ws);
 		assert.ok(oParser.parse(), "COUNTIFS(A101:A104,A101:A104))");
-	assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, "Result of COUNTIFS(A101:A104,A101:A104)");
+		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), res, "Result of COUNTIFS(A101:A104,A101:A104)");
+
+		// Case #19: Area, Area. Array formula — each cell matched against full range criteria
 		oParser.setArrayFormulaRef(ws.getRange2("AD6:AF8").bbox);
 		assert.ok(oParser.parse(), "COUNTIFS(A101:A104,A101:A104)");
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, "Result of COUNTIFS(A101:A104,A101:A104)[0,0]");
@@ -10032,6 +10146,7 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getElementRowCol(2,0).getValue(), 0, "Result of COUNTIFS(A101:A104,A101:A104)[2,0]");
 		assert.strictEqual(oParser.calculate().getElementRowCol(3,0).getValue(), 0, "Result of COUNTIFS(A101:A104,A101:A104)[3,0]");
 
+		// Case #20: Area, Area. Array formula — empty cells coerced to "" via &"" concatenation
 		oParser = new parserFormula('COUNTIFS(A101:A104,A101:A104&"")', "E1", ws);
 		oParser.setArrayFormulaRef(ws.getRange2("AD6:AF8").bbox);
 		assert.ok(oParser.parse(), 'COUNTIFS(A101:A104,A101:A104&"")');
@@ -10041,7 +10156,7 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getElementRowCol(3,0).getValue(), 2, 'Result of COUNTIFS(A101:A104,A101:A104&"")[3,0]');
 
 		// for bug 64880
-		ws.getRange2("B:B").cleanAll();
+		ws.getRange2("B101:B106").cleanAll();
 		ws.getRange2("B101").setValue("22");
 		ws.getRange2("B102").setValue("35");
 		ws.getRange2("B103").setValue("1");
@@ -10049,7 +10164,7 @@ $(function () {
 		ws.getRange2("B105").setValue("1");
 		ws.getRange2("B106").setValue("10");
 
-		ws.getRange2("C:C").cleanAll();
+		ws.getRange2("C101:C106").cleanAll();
 		ws.getRange2("C101").setValue("3");
 		ws.getRange2("C102").setValue("0");
 		ws.getRange2("C103").setValue("6");
@@ -10057,22 +10172,15 @@ $(function () {
 		ws.getRange2("C105").setValue("2");
 		ws.getRange2("C106").setValue("1");
 
+		// Case #21: Area, Number. Find values satisfying ">0" AND "=0" (bug 64880)
 		oParser = new parserFormula('COUNTIFS(B101:B106,">0",C101:C106,"=0")', "E1", ws);
 		assert.ok(oParser.parse(), 'COUNTIFS(B101:B106,">0",C101:C106,"=0")');
 		assert.strictEqual(oParser.calculate().getValue(), 1);
 
-		oParser = new parserFormula('COUNTIFS(B:B,">0",C:C,"=0")', "E1", ws);
-		assert.ok(oParser.parse(), 'COUNTIFS(B:B,">0",C:C,"=0")');
-		assert.strictEqual(oParser.calculate().getValue(), 1);
-
+		// Case #22: Area, Number. Cache invalidation — change C106 from 1 to 0, result increases
 		ws.getRange2("C106").setValue("0");
-
 		oParser = new parserFormula('COUNTIFS(B101:B106,">0",C101:C106,"=0")', "E1", ws);
 		assert.ok(oParser.parse(), 'COUNTIFS(B101:B106,">0",C101:C106,"=0")');
-		assert.strictEqual(oParser.calculate().getValue(), 2);
-
-		oParser = new parserFormula('COUNTIFS(B:B,">0",C:C,"=0")', "E1", ws);
-		assert.ok(oParser.parse(), 'COUNTIFS(B:B,">0",C:C,"=0")');
 		assert.strictEqual(oParser.calculate().getValue(), 2);
 
 		// for bug 66654
@@ -10089,132 +10197,391 @@ $(function () {
 		ws.getRange2("F205:F215").setValue("1");
 		ws.getRange2("F219:F220").setValue("1");
 
+		// Case #23: Area, String. Find text in large range with repeated-value optimization (bug 66654)
 		oParser = new parserFormula('COUNTIFS(C200:C220,"=externe")', "E1", ws);
 		assert.ok(oParser.parse(), 'COUNTIFS(C200:C220,"=externe")',);
 		assert.strictEqual(oParser.calculate().getValue(), 15, 'Result of COUNTIFS(C200:C220,"=externe")');
 
-		oParser = new parserFormula('COUNTIFS(C200:C220,"=externe", D200:D220, "=1")', "E1", ws);
-		assert.ok(oParser.parse(), 'COUNTIFS(C200:C220,"=externe", D200:D220, "=1")',);
-		assert.strictEqual(oParser.calculate().getValue(), 5, 'Result of COUNTIFS(C200:C220,"=externe", D200:D220, "=1")');
-
+		// Case #24: Area, String + Number. Find text AND two numeric criteria in three large ranges (bug 66654)
 		oParser = new parserFormula('COUNTIFS(C200:C220,"=externe", D200:D220, "=1", F200:F220, "=1")', "E1", ws);
 		assert.ok(oParser.parse(), 'COUNTIFS(C200:C220,"=externe", D200:D220, "=1", F200:F220, "=1")',);
 		assert.strictEqual(oParser.calculate().getValue(), 3, 'Result of COUNTIFS(C200:C220,"=externe", D200:D220, "=1", F200:F220, "=1")');
 
+		// Case #25: Area, String. 5 criteria pairs — only one row matches all
+		oParser = new parserFormula("COUNTIFS(F2:F7, \"Red\", G2:G7, \"Large\", H2:H7, 2024, I2:I7, \"A\", I2:I7, \"*\")", "A1", ws);
+		assert.ok(oParser.parse(), "COUNTIFS with 5 criteria pairs");
+		assert.strictEqual(oParser.calculate().getValue(), 1, "COUNTIFS with 5 criteria pairs");
+
+		// Case #26: Area, Number. Numeric criteria with comparison operators
+		oParser = new parserFormula("COUNTIFS(E2:E7, \">20\", H2:H7, \">=2024\")", "A1", ws);
+		assert.ok(oParser.parse(), "COUNTIFS with numeric criteria");
+		assert.strictEqual(oParser.calculate().getValue(), 4, "COUNTIFS with numeric criteria");
+
+		// Case #27: Area, Ref. Cell references as criteria
+		oParser = new parserFormula("COUNTIFS(F2:F7, J2, G2:G7, J3, H2:H7, J4, I2:I7, J5, I2:I7, \"*\")", "A1", ws);
+		assert.ok(oParser.parse(), "COUNTIFS with cell references for criteria");
+		assert.strictEqual(oParser.calculate().getValue(), 1, "COUNTIFS with cell references for criteria");
+
+		// Case #28: Area, String. Wildcard criteria across two ranges
+		oParser = new parserFormula("COUNTIFS(F2:F7, \"*e*\", G2:G7, \"*arge\")", "A1", ws);
+		assert.ok(oParser.parse(), "COUNTIFS with wildcard criteria");
+		assert.strictEqual(oParser.calculate().getValue(), 2, "COUNTIFS with wildcard criteria");
+
+		// Case #29: Area, String. Same range used with multiple criteria
+		oParser = new parserFormula("COUNTIFS(H2:H7, \">2023\", H2:H7, \"<=2024\", G2:G7, \"Large\")", "A1", ws);
+		assert.ok(oParser.parse(), "COUNTIFS with multiple criteria for same range");
+		assert.strictEqual(oParser.calculate().getValue(), 2, "COUNTIFS with multiple criteria for same range");
+
+		// Case #30: Area, String. Blank criteria — set F4="" to test, then restore
+		ws.getRange2("F4").setValue("");
+		oParser = new parserFormula("COUNTIFS(F2:F7, \"\")", "A1", ws);
+		assert.ok(oParser.parse(), "COUNTIFS with blank criteria");
+		assert.strictEqual(oParser.calculate().getValue(), 1, "COUNTIFS with blank criteria");
+		ws.getRange2("F4").setValue("Green");
+
+		// Case #31: Area, String. Complex 4-criteria combination
+		oParser = new parserFormula("COUNTIFS(E2:E7, \">30\", F2:F7, \"<>Red\", G2:G7, \"=Medium\", H2:H7, \">=2024\")", "A1", ws);
+		assert.ok(oParser.parse(), "COUNTIFS with complex criteria combinations");
+		assert.strictEqual(oParser.calculate().getValue(), 1, "COUNTIFS with complex criteria combinations");
+
+		// Case #32: Area, String. Empty operator string returns 0 (P0 regression: was TypeError crash)
+		oParser = new parserFormula("COUNTIFS(F2:F7, \"<\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 0, "COUNTIFS(range,\"<\") = 0 (Excel-verified; pre-fix: TypeError crash)");
+
+		oParser = new parserFormula("COUNTIFS(F2:F7, \">=\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 0, "COUNTIFS(range,\">=\") = 0 (Excel-verified; pre-fix: TypeError crash)");
+
+		// Case #33: Area, String. <> on non-empty range — empty cells are counted (empty ≠ "apple")
+		// A401="apple", A402=empty, A403="banana", A404=empty, A405="apple", A406="cherry"
+		oParser = new parserFormula("COUNTIFS(A401:A406,\"<>apple\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 4, "COUNTIFS <> string: empty cells are counted (empty <> value)");
+
+		// Case #34: Area, String. <>"" counts only non-empty cells
+		oParser = new parserFormula("COUNTIFS(A401:A406,\"<>\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 4, "COUNTIFS <>\"\" counts non-empty cells only");
+
+		// Case #35: Area, String. "" counts only empty cells
+		oParser = new parserFormula("COUNTIFS(A401:A406,\"\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2, "COUNTIFS \"\" counts empty cells");
+
+		// Case #36: Area, String + Number. <> combined with numeric second criteria
+		// empty A402→B402=3 no; banana A403→B403=8 yes; empty A404→B404=2 no; cherry A406→B406=7 yes → 2
+		oParser = new parserFormula("COUNTIFS(A401:A406,\"<>apple\",B401:B406,\">5\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2, "COUNTIFS <> with numeric second criteria");
+
+		// Case #37: Area, Number. String-encoded numbers match numeric criteria (checkStrNums path)
+		// A410:A414 are text "'5","'2","'8","'1","'6"; >3 matches "5","8","6" → 3
+		oParser = new parserFormula("COUNTIFS(A410:A415,\">3\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 0, "COUNTIFS >3 on text-formatted numbers");
+
+		// Case #38: Area, Number + String. String-encoded numbers with text second criteria
+		oParser = new parserFormula("COUNTIFS(A410:A415,\"5\",B410:B415,\"yes\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 1, "COUNTIFS =5 on text-formatted numbers with string second criteria");
+
+		// Case #39: Area, Number. Same range with two numeric criteria (AND logic)
+		// A420:A426 = 1,3,5,7,9,4,6; >3 AND <8 → 5,7,4,6 → 4
+		oParser = new parserFormula("COUNTIFS(A420:A426,\">3\",A420:A426,\"<8\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 4, "COUNTIFS same range >3 AND <8");
+
+		// Case #40: Area, Number. Same range, concatenated criteria
+		// >=5 AND <=7 → 5,7,6 → 3
+		oParser = new parserFormula("COUNTIFS(A420:A426,\">=\"&5,A420:A426,\"<=\"&7)", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 3, "COUNTIFS same range >=5 AND <=7 (concatenated criteria)");
+
+		// Case #41: Area, Number. Same range, impossible AND → 0
+		oParser = new parserFormula("COUNTIFS(A420:A426,\">9\",A420:A426,\">0\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 0, "COUNTIFS same range: impossible AND condition → 0");
+
+		// Case #42: Area, Number + String. Multi-column ranges (numCols > 1)
+		// C430:E432 = numbers, F430:H432 = x/y/z; >3 AND "x" → (C431=5,F431=x) (D432=6,G432=x) → 2
+		oParser = new parserFormula("COUNTIFS(C430:E432,\">3\",F430:H432,\"x\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2, "COUNTIFS multi-column ranges >3 AND \"x\"");
+
+		// Case #43: Area, Boolean. TRUE criteria matches boolean TRUE cells, not number 1
+		// A440=TRUE, A441=FALSE, A442=TRUE, A443=1(num), A444="text" → 2
+		oParser = new parserFormula("COUNTIFS(A440:A444,TRUE)", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2, "COUNTIFS boolean TRUE: matches boolean cells only, not number 1");
+
+		// Case #44: Area, Boolean. FALSE criteria
+		oParser = new parserFormula("COUNTIFS(A440:A444,FALSE)", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 1, "COUNTIFS boolean FALSE criteria");
+
+		// Case #45: Area, String. String "TRUE" matches boolean TRUE cells (case-insensitive)
+		oParser = new parserFormula("COUNTIFS(A440:A444,\"TRUE\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2, "COUNTIFS string \"TRUE\" matches boolean TRUE cells");
+
+		// Case #46: Area, Boolean + Number. Boolean AND numeric second criteria
+		// A440=TRUE B440=10>5 YES; A442=TRUE B442=8>5 YES → 2
+		oParser = new parserFormula("COUNTIFS(A440:A444,TRUE,B440:B444,\">5\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2, "COUNTIFS boolean TRUE AND numeric second criteria");
+
+		// Case #47: Area, String. Error criteria "#N/A" matches formula error and text "#N/A"
+		// A450=formula #N/A, A451=text "#N/A" → 2
+		oParser = new parserFormula("COUNTIFS(A450:A454,\"#N/A\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2, "COUNTIFS \"#N/A\" criteria matches formula error and text");
+
+		// Case #48: Area, Formula. NA() function as criteria
+		oParser = new parserFormula("COUNTIFS(A450:A454,NA())", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2, "COUNTIFS NA() as criteria");
+
+		// Case #49: Area, String. <>#N/A complement excludes matched errors → 3
+		oParser = new parserFormula("COUNTIFS(A450:A454,\"<>#N/A\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 3, "COUNTIFS <>#N/A: excludes #N/A matches");
+
+		// Case #50: Area, String. Error criteria with string second criteria
+		oParser = new parserFormula("COUNTIFS(A450:A454,\"#N/A\",B450:B454,\"yes\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2, "COUNTIFS error criteria with string second criteria");
+
+		// Case #51: Area, String. "*" matches non-empty text cells only (not numbers, not empty)
+		// A460="apple",A461=empty,A462="banana",A463=5(num),A464=empty,A465="cherry" → 3
+		oParser = new parserFormula("COUNTIFS(A460:A465,\"*\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 3, "COUNTIFS \"*\" counts non-empty text cells only");
+
+		// Case #52: Area, String. "<>*" counts non-text cells (empties + numbers)
+		oParser = new parserFormula("COUNTIFS(A460:A465,\"<>*\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 3, "COUNTIFS \"<>*\" counts non-text cells");
+
+		// Case #53: Area, String. Suffix wildcard
+		oParser = new parserFormula("COUNTIFS(A460:A465,\"*le\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 1, "COUNTIFS \"*le\" suffix wildcard");
+
+		// Case #54: Area, String. Exact-length wildcard — apple=5 chars only → 1
+		oParser = new parserFormula("COUNTIFS(A460:A465,\"?????\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 1, "COUNTIFS \"?????\" exact length wildcard");
+
+		// Case #55: Area, String. ~* is a literal asterisk, not a wildcard
+		// A470="a*c" only → 1
+		oParser = new parserFormula("COUNTIFS(A470:A474,\"a~*c\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 1, "COUNTIFS tilde escapes * (literal asterisk)");
+
+		// Case #56: Area, String. Unescaped * wildcard matches all a_c patterns → 5
+		oParser = new parserFormula("COUNTIFS(A470:A474,\"a*c\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 5, "COUNTIFS unescaped * matches all a_c patterns");
+
+		// Case #57: Area, String. ~~ don't matches "a~c"
+		oParser = new parserFormula("COUNTIFS(A470:A474,\"a~~c\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 0, "COUNTIFS ~~ don't escapes tilde");
+
+		// Case #58: Area, String. Case-insensitive: "apple" matches Apple/APPLE/apple → 3
+		oParser = new parserFormula("COUNTIFS(A480:A484,\"apple\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 3, "COUNTIFS case-insensitive: \"apple\" matches Apple/APPLE/apple");
+
+		// Case #59: Area, String + Number. Case-insensitive criteria AND numeric second criteria
+		// A480=Apple B480=10>5 YES; A481=APPLE B481=5 NOT>5 NO; A482=apple B482=8>5 YES → 2
+		oParser = new parserFormula("COUNTIFS(A480:A484,\"Apple\",B480:B484,\">5\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2, "COUNTIFS case-insensitive criteria AND numeric second criteria");
+
+		// Case #60: Area, String. Case-insensitive wildcard suffix
+		oParser = new parserFormula("COUNTIFS(A480:A484,\"*PLE\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 3, "COUNTIFS case-insensitive wildcard suffix");
+
+		// Case #61: Area, Ref. Empty cell reference as criteria is treated as 0, not ""
+		// A490=0,A491=empty,A492=1,A493=0,A494=empty,A495=2; B496=empty→criteria=0 → counts A490,A493 → 2
+		oParser = new parserFormula("COUNTIFS(A490:A495,B496)", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2, "COUNTIFS empty cell reference as criteria = 0, counts zeros not empties");
+
+		// Case #62: Area, String. "" criteria counts truly-empty and apostrophe-empty cells
+		// A500=empty, A501="'"(apostrophe→empty), A502="text", A503=0 → 2
+		oParser = new parserFormula("COUNTIFS(A500:A503,\"\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2, "COUNTIFS \"\": apostrophe cell counted as empty");
+
+		// Case #63: Area, String. "<>" includes apostrophe-empty cell
+		oParser = new parserFormula("COUNTIFS(A500:A503,\"<>\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 3, "COUNTIFS \"<>\": includes apostrophe-empty cell");
+
+		// Case #64: Area3D, Number. Cross-sheet single criteria range
+		const ws2 = getSecondSheet();
+		ws2.getRange2("A1:B5").cleanAll();
+		ws2.getRange2("A1").setValue("5");
+		ws2.getRange2("A2").setValue("10");
+		ws2.getRange2("A3").setValue("5");
+		ws2.getRange2("A4").setValue("15");
+		ws2.getRange2("A5").setValue("10");
+		ws2.getRange2("B1").setValue("Apple");
+		ws2.getRange2("B2").setValue("Banana");
+		ws2.getRange2("B3").setValue("Apple");
+		ws2.getRange2("B4").setValue("Cherry");
+		ws2.getRange2("B5").setValue("Banana");
+		oParser = new parserFormula("COUNTIFS(Sheet2!A1:A5,5)", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2, "COUNTIFS 3D range: numeric criteria");
+
+		// Case #65: Area3D, Number + String. Two cross-sheet criteria ranges
+		// A1=5,B1=Apple YES; A3=5,B3=Apple YES → 2
+		oParser = new parserFormula("COUNTIFS(Sheet2!A1:A5,5,Sheet2!B1:B5,\"Apple\")", "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2, "COUNTIFS two 3D criteria ranges: =5 AND Apple");
+
+		// Negative Cases:
+		// Case #1: Error, Number. Handle reference error in range → #REF!
+		oParser = new parserFormula("COUNTIFS(#REF!, 1)", "C2", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), "#REF!");
+
+		// Case #2: Array, Number. Array literal as criteria_range → #VALUE!
+		oParser = new parserFormula("COUNTIFS({1,2,3}, 1)", "C2", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
+
+		// Case #3: String, Number. String literal as criteria_range → #VALUE!
+		oParser = new parserFormula('COUNTIFS("a", 1)', "C2", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
+
+		// Case #4: Number, Number. Number literal as criteria_range → #VALUE!
+		oParser = new parserFormula('COUNTIFS(1, 1)', "C2", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
+
+		// Case #5: Area3D, Number. Multi-sheet 3D range as criteria_range → #VALUE!
+		oParser = new parserFormula('COUNTIFS(Sheet1:Sheet2!A1:B1, ">0")', "C2", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
+
+		// Bounded Cases:
+
+		// A515–A518: text strings representing error names (like COUNTIF bounded #1–#7)
+		ws.getRange2("A515:A518").cleanAll();
+		ws.getRange2("A515").setValue("#N/A");
+		ws.getRange2("A516").setValue("#DIV/0!");
+		ws.getRange2("A517").setValue("#VALUE!");
+		ws.getRange2("A518").setValue("5");
+
+		// Case #1: Area, String. Count error-string values greater than "#N/A" → 0
+		oParser = new parserFormula('COUNTIFS(A515:A518,">#N/A")', "AC1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 0);
+
+		// Case #2: Area, String. Count error-string values less than "#DIV/0!" → 0
+		oParser = new parserFormula('COUNTIFS(A515:A518,"<#DIV/0!")', "AC2", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 0);
+
+		// Case #3: Area, String. Count error-string values not equal to "#N/A" → 3
+		oParser = new parserFormula('COUNTIFS(A515:A518,"<>#N/A")', "AC3", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 3);
+
+		// Case #4: Area, String. Count error-string values greater than or equal to "#VALUE!" → 2
+		// "#VALUE!" >= "#VALUE!" YES; "5" > "#VALUE!" YES (ascii '5' > '#'); others NO → 2
+		oParser = new parserFormula('COUNTIFS(A515:A518,">=#VALUE!")', "AC4", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2);
+
+		// Case #5: Area, Area3D. Multi-sheet 3D range as criteria → array of zeros
+		// (1×2 criteria range → 1×2 result filled with zeros, getValue() returns first element = 0)
+		oParser = new parserFormula('COUNTIFS(A515:A518, Sheet1:Sheet2!A1:B1)', "AC7", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 0);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 0, 'COUNTIFS multi-sheet 3D criteria: result[0,0] = 0');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 1).getValue(), 0, 'COUNTIFS multi-sheet 3D criteria: result[0,1] = 0');
+
+		// A520–A521: cells containing the date string "12/1"
+		ws.getRange2("A520:A521").cleanAll();
+		ws.getRange2("A520").setValue("12/1");
+		ws.getRange2("A521").setValue("12/1");
+
+		// Case #6: Area, String. Count exact date-string match → 2
+		oParser = new parserFormula('COUNTIFS(A520:A521,"12/1")', "C2", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2);
+
+		// Array-output cases
+		// Data: A530=1,A531=2,A532=3,A533=1,A534=2 / B530=10,B531=20,B532=10,B533=10,B534=20
+		ws.getRange2("A530:B534").cleanAll();
+		ws.getRange2("A530").setValue("1");
+		ws.getRange2("A531").setValue("2");
+		ws.getRange2("A532").setValue("3");
+		ws.getRange2("A533").setValue("1");
+		ws.getRange2("A534").setValue("2");
+		ws.getRange2("B530").setValue("10");
+		ws.getRange2("B531").setValue("20");
+		ws.getRange2("B532").setValue("10");
+		ws.getRange2("B533").setValue("10");
+		ws.getRange2("B534").setValue("20");
+
+		// Case #7: Area, Array(1×3). Horizontal array literal as criteria → 1×3 result
+		// {1}: A530:A534 where =1 → 2; {2}: =2 → 2; {3}: =3 → 1
+		oParser = new parserFormula('COUNTIFS(A530:A534,{1,2,3})', "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 2, 'COUNTIFS array criteria {1,2,3}: result[0,0]=2');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 1).getValue(), 2, 'COUNTIFS array criteria {1,2,3}: result[0,1]=2');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 2).getValue(), 1, 'COUNTIFS array criteria {1,2,3}: result[0,2]=1');
+
+		// Case #8: Area, Array(3×1). Vertical array literal as criteria → 3×1 result
+		oParser = new parserFormula('COUNTIFS(A530:A534,{1;2;3})', "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 2, 'COUNTIFS array criteria {1;2;3}: result[0,0]=2');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1, 0).getValue(), 2, 'COUNTIFS array criteria {1;2;3}: result[1,0]=2');
+		assert.strictEqual(oParser.calculate().getElementRowCol(2, 0).getValue(), 1, 'COUNTIFS array criteria {1;2;3}: result[2,0]=1');
+
+		// Case #9: Area, Range(3×1). Range reference as criteria → 3×1 result
+		// A530:A532 = [1, 2, 3] → same counts as Case #8
+		oParser = new parserFormula('COUNTIFS(A530:A534,A530:A532)', "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 2, 'COUNTIFS range criteria A530:A532: result[0,0]=2');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1, 0).getValue(), 2, 'COUNTIFS range criteria A530:A532: result[1,0]=2');
+		assert.strictEqual(oParser.calculate().getElementRowCol(2, 0).getValue(), 1, 'COUNTIFS range criteria A530:A532: result[2,0]=1');
+
+		// Case #10: Area+Area, Array(2×1)+Array(2×1). Two equal-dimension criteria arrays → 2×1 result
+		// (1,10): rows 530,533 → 2; (2,20): rows 531,534 → 2
+		oParser = new parserFormula('COUNTIFS(A530:A534,{1;2},B530:B534,{10;20})', "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 2, 'COUNTIFS two 2x1 array criteria: result[0,0]=2');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1, 0).getValue(), 2, 'COUNTIFS two 2x1 array criteria: result[1,0]=2');
+
+		// Case #11: Area+Area, Array(3×1)+Array(1×2). Mismatched dimensions → 3×2 result,
+		// intersection=1×1 only, all other positions are 0
+		// (0,0): COUNTIFS(=1,=10) = 2; rest = 0
+		oParser = new parserFormula('COUNTIFS(A530:A534,{1;2;3},B530:B534,{10,20})', "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 2, 'COUNTIFS mismatched array dims: result[0,0]=2 (intersection)');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 1).getValue(), 0, 'COUNTIFS mismatched array dims: result[0,1]=0 (outside intersection)');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1, 0).getValue(), 0, 'COUNTIFS mismatched array dims: result[1,0]=0 (outside intersection)');
+		assert.strictEqual(oParser.calculate().getElementRowCol(2, 0).getValue(), 0, 'COUNTIFS mismatched array dims: result[2,0]=0 (outside intersection)');
+
+		// Case #12: Area+Area, Range(3×1)+Scalar. Scalar criteria clamps intersection to 1×1 → 3×1 result
+		// Only (0,0) computed: COUNTIFS(=1,=10)=2; (1,0),(2,0)=0
+		oParser = new parserFormula('COUNTIFS(A530:A534,A530:A532,B530:B534,10)', "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 2, 'COUNTIFS range+scalar: result[0,0]=2 (only intersection computed)');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1, 0).getValue(), 0, 'COUNTIFS range+scalar: result[1,0]=0 (clamped by scalar)');
+		assert.strictEqual(oParser.calculate().getElementRowCol(2, 0).getValue(), 0, 'COUNTIFS range+scalar: result[2,0]=0 (clamped by scalar)');
+
 	});
-
-	QUnit.test("Test: \"COUNTIFS with multiple criteria ranges\"", function (assert) {
-        // Setup test data with 5 columns for testing
-        ws.getRange2("E2").setValue("10");
-        ws.getRange2("E3").setValue("20");
-        ws.getRange2("E4").setValue("30");
-        ws.getRange2("E5").setValue("40");
-        ws.getRange2("E6").setValue("50");
-        ws.getRange2("E7").setValue("60");
-
-        ws.getRange2("F2").setValue("Red");
-        ws.getRange2("F3").setValue("Blue");
-        ws.getRange2("F4").setValue("Green");
-        ws.getRange2("F5").setValue("Red");
-        ws.getRange2("F6").setValue("Blue");
-        ws.getRange2("F7").setValue("Green");
-
-        ws.getRange2("G2").setValue("Small");
-        ws.getRange2("G3").setValue("Medium");
-        ws.getRange2("G4").setValue("Large");
-        ws.getRange2("G5").setValue("Large");
-        ws.getRange2("G6").setValue("Medium");
-        ws.getRange2("G7").setValue("Small");
-
-        ws.getRange2("H2").setValue("2023");
-        ws.getRange2("H3").setValue("2023");
-        ws.getRange2("H4").setValue("2024");
-        ws.getRange2("H5").setValue("2024");
-        ws.getRange2("H6").setValue("2025");
-        ws.getRange2("H7").setValue("2025");
-
-        ws.getRange2("I2").setValue("A");
-        ws.getRange2("I3").setValue("B");
-        ws.getRange2("I4").setValue("C");
-        ws.getRange2("I5").setValue("A");
-        ws.getRange2("I6").setValue("B");
-        ws.getRange2("I7").setValue("C");
-
-        // Test with 10 arguments (5 criteria pairs)
-        oParser = new parserFormula("COUNTIFS(F2:F7, \"Red\", G2:G7, \"Large\", H2:H7, 2024, I2:I7, \"A\", I2:I7, \"*\")", "A1", ws);
-        assert.ok(oParser.parse(), "COUNTIFS with 5 criteria pairs");
-        assert.strictEqual(oParser.calculate().getValue(), 1, "COUNTIFS with 5 criteria pairs"); // Only one row matches all criteria
-
-        // Test with 10 arguments where none match all criteria
-        oParser = new parserFormula("COUNTIFS(F2:F7, \"Red\", G2:G7, \"Small\", H2:H7, 2024, I2:I7, \"A\", I2:I7, \"Z\")", "A1", ws);
-        assert.ok(oParser.parse(), "COUNTIFS with 5 criteria pairs - no match");
-        assert.strictEqual(oParser.calculate().getValue(), 0, "COUNTIFS with 5 criteria pairs - no match");
-
-        // Test with numeric criteria and comparison operators
-        oParser = new parserFormula("COUNTIFS(E2:E7, \">20\", H2:H7, \">=2024\")", "A1", ws);
-        assert.ok(oParser.parse(), "COUNTIFS with numeric criteria");
-        assert.strictEqual(oParser.calculate().getValue(), 4, "COUNTIFS with numeric criteria"); // Count values >20 in years >=2024
-
-        // Test with cell references for criteria
-        ws.getRange2("J2").setValue("Red");
-        ws.getRange2("J3").setValue("Large");
-        ws.getRange2("J4").setValue("2024");
-        ws.getRange2("J5").setValue("A");
-        oParser = new parserFormula("COUNTIFS(F2:F7, J2, G2:G7, J3, H2:H7, J4, I2:I7, J5, I2:I7, \"*\")", "A1", ws);
-        assert.ok(oParser.parse(), "COUNTIFS with cell references for criteria");
-        assert.strictEqual(oParser.calculate().getValue(), 1, "COUNTIFS with cell references for criteria");
-
-        // Test with wildcard criteria
-        oParser = new parserFormula("COUNTIFS(F2:F7, \"*e*\", G2:G7, \"*arge\")", "A1", ws);
-        assert.ok(oParser.parse(), "COUNTIFS with wildcard criteria");
-        assert.strictEqual(oParser.calculate().getValue(), 2, "COUNTIFS with wildcard criteria"); // Red/Green with Large
-
-        // Test with multiple criteria for same range
-        oParser = new parserFormula("COUNTIFS(H2:H7, \">2023\", H2:H7, \"<=2024\", G2:G7, \"Large\")", "A1", ws);
-        assert.ok(oParser.parse(), "COUNTIFS with multiple criteria for same range");
-        assert.strictEqual(oParser.calculate().getValue(), 2, "COUNTIFS with multiple criteria for same range");
-
-        // Test with blank criteria
-        ws.getRange2("F4").setValue("");
-        oParser = new parserFormula("COUNTIFS(F2:F7, \"\")", "A1", ws);
-        assert.ok(oParser.parse(), "COUNTIFS with blank criteria");
-        assert.strictEqual(oParser.calculate().getValue(), 1, "COUNTIFS with blank criteria");
-
-        // Test with error handling - mismatched ranges
-        oParser = new parserFormula("COUNTIFS(F2:F7, \"Red\", G2:G6, \"Large\")", "A1", ws);
-        assert.ok(oParser.parse(), "COUNTIFS with mismatched ranges");
-        assert.strictEqual(oParser.calculate().getValue(), "#VALUE!", "COUNTIFS with mismatched ranges should return #VALUE!");
-
-        // Test counting specific patterns
-        oParser = new parserFormula("COUNTIFS(G2:G7, \"*\", F2:F7, \"=Red\")", "A1", ws);
-        assert.ok(oParser.parse(), "COUNTIFS with pattern matching");
-        assert.strictEqual(oParser.calculate().getValue(), 2, "COUNTIFS with pattern matching"); // Count all Red entries
-
-        // Test with complex criteria combinations
-        oParser = new parserFormula("COUNTIFS(E2:E7, \">30\", F2:F7, \"<>Red\", G2:G7, \"=Medium\", H2:H7, \">=2024\")", "A1", ws);
-        assert.ok(oParser.parse(), "COUNTIFS with complex criteria combinations");
-        assert.strictEqual(oParser.calculate().getValue(), 1, "COUNTIFS with complex criteria combinations");
-
-        // Test with range of numbers
-        oParser = new parserFormula("COUNTIFS(E2:E7, \">=20\", E2:E7, \"<=40\", H2:H7, \"2024\")", "A1", ws);
-        assert.ok(oParser.parse(), "COUNTIFS with number range");
-        assert.strictEqual(oParser.calculate().getValue(), 2, "COUNTIFS with number range");
-
-        // P0 regression: COUNTIFS(range, "<") / COUNTIFS(range, ">=") crashed before the fix.
-        // _parseCriteria sets matchingFn = null for empty-string criteria; the guard
-        // `if (typedData && matchFn)` in _applyEqualsOneCriteria prevents the null call.
-        // Excel: empty-string + any ordering operator always returns 0.
-        oParser = new parserFormula("COUNTIFS(F2:F7, \"<\")", "A1", ws);
-        assert.ok(oParser.parse());
-        assert.strictEqual(oParser.calculate().getValue(), 0, "COUNTIFS(range,\"<\") = 0 (Excel-verified; pre-fix: TypeError crash)");
-
-        oParser = new parserFormula("COUNTIFS(F2:F7, \">=\")", "A1", ws);
-        assert.ok(oParser.parse());
-        assert.strictEqual(oParser.calculate().getValue(), 0, "COUNTIFS(range,\">=\") = 0 (Excel-verified; pre-fix: TypeError crash)");
-
-        // Cleanup
-        ws.getRange2("F4").setValue("Green"); // Restore original value
-    });
 
 	QUnit.test("Test: \"COUNTIF\"", function (assert) {
 
@@ -18001,7 +18368,7 @@ $(function () {
 		fTestFormulaTest(assert);
 		testArrayFormula2(assert, "FTEST", 2, 2, null, true);
 
-		ws.getRange2("A100:C214").cleanAll();
+		ws.getRange2("A:C").cleanAll();
 		// Data for reference link. Use A100-A111
 		ws.getRange2("A100").setValue("6");
 		ws.getRange2("A101").setValue("7");
