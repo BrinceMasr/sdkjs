@@ -5199,6 +5199,8 @@
 
 		return oDoc.Viewer.file.nativeFile['CheckOwnerPassword'](password);
 	};
+	PDFEditorApi.prototype._onStartGroupActions = function() {};
+	PDFEditorApi.prototype._onEndGroupActions = function() {};
 
 	function CPdfContextMenuData(obj) {
 		if (obj) {

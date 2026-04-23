@@ -1684,7 +1684,9 @@
 		Object.values(oSearchEngine.Elements).forEach(function(pdfMatch, idx) {
 			if (pdfMatch.GetAbsolutePage() == nPageIdx) {
 				let aPageSelQuads = oDoc.GetSearchElementSelectionQuads(idx);
-				aResult = aResult.concat(aPageSelQuads[0].quads);
+				aPageSelQuads.forEach(function(pageSelQuads) {
+					aResult = aResult.concat(pageSelQuads.quads);
+				});
 			}
 		});
 		
@@ -1760,6 +1762,18 @@
 	 */
 	ApiPage.prototype.GetSelectedText = function() {
 		return this.Page.GetSelectedText();
+	};
+
+	/**
+	 * Gets all text content on the page.
+	 * @memberof ApiPage
+	 * @typeofeditors ["PDFE"]
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiPage/Methods/GetText.js
+	 */
+	ApiPage.prototype.GetText = function() {
+		let oDoc = private_GetLogicDocument();
+		return oDoc.GetFile().copyPageText(this.GetIndex());
 	};
 
 	/**
@@ -1861,9 +1875,34 @@
 	};
 	
 	/**
+	 * Sets field tooltip
+	 * @memberof ApiBaseField
+	 * @typeofeditors ["PDFE"]
+	 * @param {?string} tooltip
+	 * @returns {boolean}
+	 * @see office-js-api/Examples/{Editor}/ApiBaseField/Methods/SetTooltip.js
+	 */
+	ApiBaseField.prototype.SetTooltip = function(tooltip) {
+		this.Field.SetTooltip(tooltip);
+		return true;
+	};
+
+	/**
+	 * Gets field tooltip
+	 * @memberof ApiBaseField
+	 * @typeofeditors ["PDFE"]
+	 * @returns {boolean}
+	 * @see office-js-api/Examples/{Editor}/ApiBaseField/Methods/GetTooltip.js
+	 */
+	ApiBaseField.prototype.GetTooltip = function() {
+		return this.Field.GetTooltip();
+	};
+
+	/**
 	 * Sets field required
 	 * @memberof ApiBaseField
 	 * @typeofeditors ["PDFE"]
+	 * @param {boolean} bRequired
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiBaseField/Methods/SetRequired.js
 	 */
@@ -1887,6 +1926,7 @@
 	 * Sets field read only
 	 * @memberof ApiBaseField
 	 * @typeofeditors ["PDFE"]
+	 * @param {boolean} bRequired
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiBaseField/Methods/SetReadOnly.js
 	 */
@@ -2467,7 +2507,7 @@
 	 * @memberof ApiTextField
 	 * @typeofeditors ["PDFE"]
 	 * @param {number} nDemical - number of decimals
-	 * @param {NumberSepStyle} - number separate style
+	 * @param {NumberSepStyle} sSepStyle - number separate style
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiTextField/Methods/SetPercentageFormat.js
 	 */
@@ -2925,8 +2965,8 @@
 	 * @memberof ApiComboboxField
 	 * @typeofeditors ["PDFE"]
 	 * @param {number} nDemical - number of decimals
-	 * @param {NumberSepStyle} - number separate style
-	 * @param {NumberNegStyle} - number negative style
+	 * @param {NumberSepStyle} sSepStyle - number separate style
+	 * @param {NumberNegStyle} sNegStyle - number negative style
 	 * @param {string} sCurrency - currency sybmol
 	 * @param {boolean} bCurrencyPrepend - If true, places the currency symbol before the number (e.g., $1,234.56); 
 	 * if false, places it after (e.g., 1,234.56$).
@@ -2958,7 +2998,7 @@
 	 * @memberof ApiComboboxField
 	 * @typeofeditors ["PDFE"]
 	 * @param {number} nDemical - number of decimals
-	 * @param {NumberSepStyle} - number separate style
+	 * @param {NumberSepStyle} sSepStyle - number separate style
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiComboboxField/Methods/SetPercentageFormat.js
 	 */
@@ -3953,7 +3993,13 @@
 			AscBuilder.throwException("The name parameter must be an ApiColor object or undefined");
 		}
 
-		this.Annot.SetFillColor(color ? private_GetInnerColorByRGB(color["r"], color["g"], color["b"]) : undefined);
+		if (this.Annot.IsShapeBased() || this.Annot.IsRedact()) {
+			this.Annot.SetFillColor(color ? private_GetInnerColorByRGB(color["r"], color["g"], color["b"]) : undefined);
+		}
+		else {
+			this.Annot.SetBorderColor(color ? private_GetInnerColorByRGB(color["r"], color["g"], color["b"]) : undefined);
+		}
+		
 		return true;
 	};
 
@@ -3965,7 +4011,14 @@
 	 * @see office-js-api/Examples/{Editor}/ApiBaseAnnotation/Methods/GetFillColor.js
 	 */
 	ApiBaseAnnotation.prototype.GetFillColor = function() {
-		let aInnerColor = this.Annot.GetFillColor();
+		let aInnerColor;
+		if (this.Annot.IsShapeBased() || this.Annot.IsRedact()) {
+			aInnerColor = this.Annot.GetFillColor();
+		}
+		else {
+			aInnerColor = this.Annot.GetBorderColor();
+		}
+
 		if (!aInnerColor) {
 			return null;
 		}
@@ -8464,6 +8517,7 @@
 	ApiPage.prototype["SetSelection"]						= ApiPage.prototype.SetSelection;
 	ApiPage.prototype["GetSelectionQuads"]					= ApiPage.prototype.GetSelectionQuads;
 	ApiPage.prototype["GetSelectedText"]					= ApiPage.prototype.GetSelectedText;
+	ApiPage.prototype["GetText"]							= ApiPage.prototype.GetText;
 	ApiPage.prototype["RecognizeContent"]					= ApiPage.prototype.RecognizeContent;
 	ApiPage.prototype["GetAllDrawings"]						= ApiPage.prototype.GetAllDrawings;
 
@@ -8472,6 +8526,8 @@
 	ApiBaseField.prototype["GetFullName"]					= ApiBaseField.prototype.GetFullName;
 	ApiBaseField.prototype["SetPartialName"]				= ApiBaseField.prototype.SetPartialName;
 	ApiBaseField.prototype["GetPartialName"]				= ApiBaseField.prototype.GetPartialName;
+	ApiBaseField.prototype["SetTooltip"]					= ApiBaseField.prototype.SetTooltip;
+	ApiBaseField.prototype["GetTooltip"]					= ApiBaseField.prototype.GetTooltip;
 	ApiBaseField.prototype["SetRequired"]					= ApiBaseField.prototype.SetRequired;
 	ApiBaseField.prototype["IsRequired"]					= ApiBaseField.prototype.IsRequired;
 	ApiBaseField.prototype["SetReadOnly"]					= ApiBaseField.prototype.SetReadOnly;
