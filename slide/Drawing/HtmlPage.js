@@ -1186,66 +1186,72 @@
 
 	CEditorPage.prototype.recalculateThumbnailsBounds = function () {
 		const scrollWidth = 10 * g_dKoef_pix_to_mm;
+		const scrollWidthWithSplitterWidth = scrollWidth +  + GlobalSkin.SplitterWidthMM;
+		const splitterPositionWithSplitterWidth = this.splitters[0].position + GlobalSkin.SplitterWidthMM;
 
-		if (Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.left) {
-			this.m_oThumbnailsContainer.Bounds.SetParams(0, 0, this.splitters[0].position, 1000, false, false, true, false, this.splitters[0].position, -1);
-			this.m_oThumbnailsContainer.Anchor = (g_anchor_left | g_anchor_top | g_anchor_bottom);
-		}
-		if (Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.right) {
-			this.m_oThumbnailsContainer.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, this.splitters[0].position, -1);
-			this.m_oThumbnailsContainer.Anchor = (g_anchor_top | g_anchor_right | g_anchor_bottom);
-		}
-		if (Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.bottom) {
-			this.m_oThumbnailsContainer.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, -1, this.splitters[0].position);
-			this.m_oThumbnailsContainer.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
-		}
+		switch (Asc.editor.getThumbnailsPosition()) {
+			case thumbnailsPositionMap.left: {
+				this.m_oThumbnailsContainer.Bounds.SetParams(0, 0, splitterPositionWithSplitterWidth, 1000, false, false, true, false, splitterPositionWithSplitterWidth, -1);
+				this.m_oThumbnailsContainer.Anchor = (g_anchor_left | g_anchor_top | g_anchor_bottom);
 
-		if (Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.left || Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.right) {
-			Asc.editor.isRtlInterface
-				? this.m_oThumbnailsBack.Bounds.SetParams(scrollWidth, 0, 1000, 1000, true, false, false, false, -1, -1)
-				: this.m_oThumbnailsBack.Bounds.SetParams(0, 0, scrollWidth, 1000, false, false, true, false, -1, -1);
-		}
-		if (Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.bottom) {
-			this.m_oThumbnailsBack.Bounds.SetParams(0, 0, 1000, scrollWidth, false, false, false, true, -1, -1);
-		}
-		this.m_oThumbnailsBack.Anchor = (g_anchor_left | g_anchor_top | g_anchor_right | g_anchor_bottom);
+				if (Asc.editor.isRtlInterface) {
+					this.m_oThumbnailsBack.Bounds.SetParams(scrollWidth, 0, 1000, 1000, true, false, false, false, -1, -1);
+					this.m_oThumbnails.Bounds.SetParams(scrollWidth, 0, 1000, 1000, true, false, false, false, -1, -1)
 
-		if (Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.left || Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.right) {
-			Asc.editor.isRtlInterface
-				? this.m_oThumbnails.Bounds.SetParams(scrollWidth, 0, 1000, 1000, true, false, false, false, -1, -1)
-				: this.m_oThumbnails.Bounds.SetParams(0, 0, scrollWidth, 1000, false, false, true, false, -1, -1);
-		}
-		if (Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.bottom) {
-			this.m_oThumbnails.Bounds.SetParams(0, 0, 1000, scrollWidth, false, false, false, true, -1, -1);
-		}
-		this.m_oThumbnails.Anchor = (g_anchor_left | g_anchor_top | g_anchor_right | g_anchor_bottom);
+					this.m_oThumbnails_scroll.Bounds.SetParams(GlobalSkin.SplitterWidthMM, 0, 1000, 1000, true, false, false, false, scrollWidth, -1);
+					this.m_oThumbnails_scroll.Anchor = (g_anchor_left | g_anchor_top | g_anchor_bottom);
+				} else {
+					this.m_oThumbnailsBack.Bounds.SetParams(0, 0, scrollWidthWithSplitterWidth, 1000, false, false, true, false, -1, -1);
+					this.m_oThumbnails.Bounds.SetParams(0, 0, scrollWidthWithSplitterWidth, 1000, false, false, true, false, -1, -1);
 
-		if (Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.left || Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.right) {
-			if (Asc.editor.isRtlInterface) {
-				this.m_oThumbnails_scroll.Bounds.SetParams(0, 0, scrollWidth, 1000, false, false, true, false, scrollWidth, -1);
-				this.m_oThumbnails_scroll.Anchor = (g_anchor_left | g_anchor_top | g_anchor_bottom);
-			} else {
-				this.m_oThumbnails_scroll.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, scrollWidth, -1);
-				this.m_oThumbnails_scroll.Anchor = (g_anchor_top | g_anchor_right | g_anchor_bottom);
+					this.m_oThumbnails_scroll.Bounds.SetParams(0, 0, GlobalSkin.SplitterWidthMM, 1000, false, false, true, false, scrollWidth, -1);
+					this.m_oThumbnails_scroll.Anchor = (g_anchor_top | g_anchor_right | g_anchor_bottom);
+				}
+
+				this.m_oThumbnailsSplit.Bounds.SetParams(this.splitters[0].position, 0, 1000, 1000, true, false, false, false, GlobalSkin.SplitterWidthMM, -1);
+				this.m_oThumbnailsSplit.Anchor = (g_anchor_left | g_anchor_top | g_anchor_bottom);
+				break;
+			}
+			case thumbnailsPositionMap.right: {
+				this.m_oThumbnailsContainer.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, splitterPositionWithSplitterWidth, -1);
+				this.m_oThumbnailsContainer.Anchor = (g_anchor_top | g_anchor_right | g_anchor_bottom);
+
+				if (Asc.editor.isRtlInterface) {
+					this.m_oThumbnailsBack.Bounds.SetParams(scrollWidthWithSplitterWidth, 0, 1000, 1000, true, false, false, false, -1, -1);
+					this.m_oThumbnails.Bounds.SetParams(scrollWidthWithSplitterWidth, 0, 1000, 1000, true, false, false, false, -1, -1)
+
+					this.m_oThumbnails_scroll.Bounds.SetParams(GlobalSkin.SplitterWidthMM, 0, 1000, 1000, true, false, false, false, scrollWidth, -1);
+					this.m_oThumbnails_scroll.Anchor = (g_anchor_left | g_anchor_top | g_anchor_bottom);
+				} else {
+					this.m_oThumbnailsBack.Bounds.SetParams(GlobalSkin.SplitterWidthMM, 0, scrollWidth, 1000, true, false, true, false, -1, -1);
+					this.m_oThumbnails.Bounds.SetParams(GlobalSkin.SplitterWidthMM, 0, scrollWidth, 1000, true, false, true, false, -1, -1);
+
+					this.m_oThumbnails_scroll.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, scrollWidth, -1);
+					this.m_oThumbnails_scroll.Anchor = (g_anchor_top | g_anchor_right | g_anchor_bottom);
+				}
+
+				this.m_oThumbnailsSplit.Bounds.SetParams(0, 0, this.splitters[0].position, 1000, false, false, true, false, GlobalSkin.SplitterWidthMM, -1);
+				this.m_oThumbnailsSplit.Anchor = (g_anchor_top | g_anchor_right | g_anchor_bottom);
+				break;
+			}
+			case thumbnailsPositionMap.bottom: {
+				this.m_oThumbnailsContainer.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, -1, splitterPositionWithSplitterWidth);
+				this.m_oThumbnailsContainer.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
+
+				this.m_oThumbnailsSplit.Bounds.SetParams(0, 0, 1000, this.splitters[0].position, false, false, false, true, -1, GlobalSkin.SplitterWidthMM);
+				this.m_oThumbnailsSplit.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
+
+				this.m_oThumbnailsBack.Bounds.SetParams(0, 0, 1000, scrollWidth, false, false, false, true, -1, -1);
+				this.m_oThumbnails.Bounds.SetParams(0, 0, 1000, scrollWidth, false, false, false, true, -1, -1);
+
+				this.m_oThumbnails_scroll.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, -1, scrollWidth);
+				this.m_oThumbnails_scroll.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
+				break;
 			}
 		}
-		if (Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.bottom) {
-			this.m_oThumbnails_scroll.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, -1, scrollWidth);
-			this.m_oThumbnails_scroll.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
-		}
 
-		if (Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.left) {
-			this.m_oThumbnailsSplit.Bounds.SetParams(this.splitters[0].position, 0, 1000, 1000, true, false, false, false, GlobalSkin.SplitterWidthMM, -1);
-			this.m_oThumbnailsSplit.Anchor = (g_anchor_left | g_anchor_top | g_anchor_bottom);
-		}
-		if (Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.right) {
-			this.m_oThumbnailsSplit.Bounds.SetParams(0, 0, this.splitters[0].position, 1000, false, false, true, false, GlobalSkin.SplitterWidthMM, -1);
-			this.m_oThumbnailsSplit.Anchor = (g_anchor_top | g_anchor_right | g_anchor_bottom);
-		}
-		if (Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.bottom) {
-			this.m_oThumbnailsSplit.Bounds.SetParams(0, 0, 1000, this.splitters[0].position, false, false, false, true, -1, GlobalSkin.SplitterWidthMM);
-			this.m_oThumbnailsSplit.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
-		}
+		this.m_oThumbnailsBack.Anchor = (g_anchor_left | g_anchor_top | g_anchor_right | g_anchor_bottom);
+		this.m_oThumbnails.Anchor = (g_anchor_left | g_anchor_top | g_anchor_right | g_anchor_bottom);
 	};
 	CEditorPage.prototype.recalculateMainContentBounds = function () {
 		if (Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.left) {
@@ -1784,16 +1790,16 @@
 			this.splitters[0].setPosition(0, false, true);
 		}
 		if (Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.left) {
-			this.m_oThumbnailsContainer.Bounds.AbsW = this.splitters[0].position;
-			this.m_oThumbnailsContainer.Bounds.R = this.splitters[0].position;
+			this.m_oThumbnailsContainer.Bounds.AbsW = this.splitters[0].position + GlobalSkin.SplitterWidthMM;
+			this.m_oThumbnailsContainer.Bounds.R = this.splitters[0].position + GlobalSkin.SplitterWidthMM;
 			this.m_oThumbnailsSplit.Bounds.L = this.splitters[0].position;
 		}
 		if (Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.right) {
-			this.m_oThumbnailsContainer.Bounds.AbsW = this.splitters[0].position;
+			this.m_oThumbnailsContainer.Bounds.AbsW = this.splitters[0].position + GlobalSkin.SplitterWidthMM;
 			this.m_oThumbnailsSplit.Bounds.R = this.splitters[0].position;
 		}
 		if (Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.bottom) {
-			this.m_oThumbnailsContainer.Bounds.AbsH = this.splitters[0].position;
+			this.m_oThumbnailsContainer.Bounds.AbsH = this.splitters[0].position + GlobalSkin.SplitterWidthMM;
 			this.m_oThumbnailsSplit.Bounds.B = this.splitters[0].position;
 		}
 

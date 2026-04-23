@@ -937,6 +937,7 @@ function CDrawingDocument()
 				}
 				case FOCUS_OBJECT_THUMBNAILS: {
 					this.m_oWordControl.m_oThumbnailsContainer.HtmlElement.appendChild(this.TargetHtmlElement);
+					this.TargetHtmlElement.style.zIndex = isReporter ? 0 : 9;
 					break;
 				}
 			}
