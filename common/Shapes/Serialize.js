@@ -2752,14 +2752,6 @@ function BinaryPPTYLoader()
                 nRecLen = s.GetLong();
                 nRecEnd = nRecStart + nRecLen + 4;
                 oEffect = new AscFormat.CFillEffect();
-                s.Skip2(1); // start attributes
-
-                while (true)
-                {
-                    var _at = s.GetUChar();
-                    if (_at == g_nodeAttributeEnd)
-                        break;
-                }
 
                 while (s.cur < nRecEnd)
                 {
@@ -2787,14 +2779,7 @@ function BinaryPPTYLoader()
                 nRecLen = s.GetLong();
                 nRecEnd = nRecStart + nRecLen + 4;
                 oEffect = new AscFormat.CClrRepl();
-                s.Skip2(1);
 
-                while (true)
-                {
-                    var _at = s.GetUChar();
-                    if (_at == g_nodeAttributeEnd)
-                        break;
-                }
                 while (s.cur < nRecEnd)
                 {
                     var _at = s.GetUChar();
@@ -2865,14 +2850,7 @@ function BinaryPPTYLoader()
                 nRecLen = s.GetLong();
                 nRecEnd = nRecStart + nRecLen + 4;
                 oEffect = new AscFormat.CAlphaInv();
-                s.Skip2(1);
 
-                while (true)
-                {
-                    var _at = s.GetUChar();
-                    if (_at == g_nodeAttributeEnd)
-                        break;
-                }
                 while (s.cur < nRecEnd)
                 {
                     var _at = s.GetUChar();
@@ -2899,14 +2877,7 @@ function BinaryPPTYLoader()
                 nRecLen = s.GetLong();
                 nRecEnd = nRecStart + nRecLen + 4;
                 oEffect = new AscFormat.CAlphaMod();
-                s.Skip2(1);
 
-                while (true)
-                {
-                    var _at = s.GetUChar();
-                    if (_at == g_nodeAttributeEnd)
-                        break;
-                }
                 while (s.cur < nRecEnd)
                 {
                     var _at = s.GetUChar();
