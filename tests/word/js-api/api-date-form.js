@@ -30,22 +30,31 @@
  *
  */
 
-$(function()
+$(function ()
 {
-	AscTest.JsApi.CreateTextForm      = AscBuilder.Word.Api.CreateTextForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateSignatureForm = AscBuilder.Word.Api.CreateSignatureForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateComboBoxForm  = AscBuilder.Word.Api.CreateComboBoxForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateCheckBoxForm  = AscBuilder.Word.Api.CreateCheckBoxForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateDateForm      = AscBuilder.Word.Api.CreateDateForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreatePictureForm   = AscBuilder.Word.Api.CreatePictureForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateComplexForm   = AscBuilder.Word.Api.CreateComplexForm.bind(AscTest.Editor);
-	
-	// Use this method anytime we need to test roles
-	AscTest.InitFormRoles = function()
+	QUnit.module("Test the ApiDateForm methods");
+
+	function createApiDateForm(pr)
 	{
-		let logicDocument = AscTest.GetLogicDocument();
-		let oform = logicDocument.GetOFormDocument();
-		oform.removeAllRoles();
-		oform.onEndLoad();
-	};
+		return AscTest.JsApi.CreateDateForm(pr || {"key": "BirthDate", "format": "mm.dd.yyyy", "lang": "en-US"});
+	}
+
+	QUnit.test("SetValue, GetValue, Value", function (assert)
+	{
+		const form = createApiDateForm();
+
+		assert.strictEqual(form.GetValue(), undefined, "Check GetValue returns undefined for a new placeholder date form");
+
+		const testDate = new Date(2024, 0, 15);
+		const result = form.SetValue(testDate);
+		assert.strictEqual(result, true, "Check SetValue returns true on success");
+
+		const value = form.GetValue();
+		assert.strictEqual(form.Value.getTime(), testDate.getTime(), "Check Value getter returns the correct date");
+		assert.strictEqual(value.getTime(), testDate.getTime(), "Check GetValue returns the correct date after SetValue");
+
+		const newDate = new Date(2025, 5, 20);
+		form.Value = newDate;
+		assert.strictEqual(form.GetValue().getTime(), newDate.getTime(), "Check Value setter updates the date");
+	});
 });

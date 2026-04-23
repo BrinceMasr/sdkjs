@@ -30,22 +30,27 @@
  *
  */
 
-$(function()
+$(function ()
 {
-	AscTest.JsApi.CreateTextForm      = AscBuilder.Word.Api.CreateTextForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateSignatureForm = AscBuilder.Word.Api.CreateSignatureForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateComboBoxForm  = AscBuilder.Word.Api.CreateComboBoxForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateCheckBoxForm  = AscBuilder.Word.Api.CreateCheckBoxForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateDateForm      = AscBuilder.Word.Api.CreateDateForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreatePictureForm   = AscBuilder.Word.Api.CreatePictureForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateComplexForm   = AscBuilder.Word.Api.CreateComplexForm.bind(AscTest.Editor);
-	
-	// Use this method anytime we need to test roles
-	AscTest.InitFormRoles = function()
+	QUnit.module("Test the ApiComboBoxForm methods");
+
+	function createApiComboBoxForm(pr)
 	{
-		let logicDocument = AscTest.GetLogicDocument();
-		let oform = logicDocument.GetOFormDocument();
-		oform.removeAllRoles();
-		oform.onEndLoad();
-	};
+		return AscTest.JsApi.CreateComboBoxForm(pr || {"key": "Choice"});
+	}
+
+	QUnit.test("SetValue, GetValue, Value", function (assert)
+	{
+		const form = createApiComboBoxForm({"key": "Choice", "list": ["Option1", "Option2", "Option3"]});
+		form.SetListValues(["Option1", "Option2", "Option3"]);
+
+		const result = form.SetValue("Option1");
+		assert.strictEqual(result, true, "Check SetValue returns true when value matches a list item");
+		assert.strictEqual(form.GetValue(), "Option1", "Check GetValue returns the selected value");
+
+		assert.strictEqual(form.Value, "Option1", "Check Value getter returns the current value");
+
+		form.Value = "Option2";
+		assert.strictEqual(form.GetValue(), "Option2", "Check Value setter updates the value");
+	});
 });

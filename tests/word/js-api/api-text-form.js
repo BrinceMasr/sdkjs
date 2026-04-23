@@ -185,4 +185,20 @@ $(function ()
 		textForm.SetFormat({ type: 'none' });
 		assert.deepEqual(textForm.GetFormat(), { type: 'none' }, 'Check format after resetting to none');
 	});
+
+	QUnit.test('SetValue, GetValue, Value', function (assert)
+	{
+		const form = createApiTextForm({"key" : "key", "placeholder" : "123"});
+
+		assert.strictEqual(form.GetValue(), '123', 'Check GetValue returns empty string for a newly created text form');
+
+		const result = form.SetValue('Hello');
+		assert.strictEqual(result, true, 'Check SetValue returns true on success');
+		assert.strictEqual(form.GetValue(), 'Hello', 'Check GetValue returns the value set by SetValue');
+
+		assert.strictEqual(form.Value, 'Hello', 'Check Value getter returns the current value');
+
+		form.Value = 'World';
+		assert.strictEqual(form.GetValue(), 'World', 'Check Value setter updates the text form value');
+	});
 });

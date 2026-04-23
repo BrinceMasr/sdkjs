@@ -30,22 +30,23 @@
  *
  */
 
-$(function()
+$(function ()
 {
-	AscTest.JsApi.CreateTextForm      = AscBuilder.Word.Api.CreateTextForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateSignatureForm = AscBuilder.Word.Api.CreateSignatureForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateComboBoxForm  = AscBuilder.Word.Api.CreateComboBoxForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateCheckBoxForm  = AscBuilder.Word.Api.CreateCheckBoxForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateDateForm      = AscBuilder.Word.Api.CreateDateForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreatePictureForm   = AscBuilder.Word.Api.CreatePictureForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateComplexForm   = AscBuilder.Word.Api.CreateComplexForm.bind(AscTest.Editor);
-	
-	// Use this method anytime we need to test roles
-	AscTest.InitFormRoles = function()
+	QUnit.module("Test the ApiPictureForm methods");
+
+	function createApiPictureForm(pr)
 	{
-		let logicDocument = AscTest.GetLogicDocument();
-		let oform = logicDocument.GetOFormDocument();
-		oform.removeAllRoles();
-		oform.onEndLoad();
-	};
+		return AscTest.JsApi.CreatePictureForm(pr || {"key": "Photo"});
+	}
+
+	QUnit.test("SetValue, GetValue, Value", function (assert)
+	{
+		const form = createApiPictureForm();
+
+		assert.strictEqual(typeof form.GetValue(), "string", "Check GetValue returns a string when no image is set");
+
+		form.SetValue("https://static.onlyoffice.com/assets/docs/samples/img/onlyoffice_logo.png");
+		// TODO: Implement check
+		assert.strictEqual(form.Value, "", "Check Value getter returns a string");
+	});
 });

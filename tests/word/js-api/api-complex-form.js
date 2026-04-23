@@ -30,22 +30,25 @@
  *
  */
 
-$(function()
+$(function ()
 {
-	AscTest.JsApi.CreateTextForm      = AscBuilder.Word.Api.CreateTextForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateSignatureForm = AscBuilder.Word.Api.CreateSignatureForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateComboBoxForm  = AscBuilder.Word.Api.CreateComboBoxForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateCheckBoxForm  = AscBuilder.Word.Api.CreateCheckBoxForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateDateForm      = AscBuilder.Word.Api.CreateDateForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreatePictureForm   = AscBuilder.Word.Api.CreatePictureForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateComplexForm   = AscBuilder.Word.Api.CreateComplexForm.bind(AscTest.Editor);
-	
-	// Use this method anytime we need to test roles
-	AscTest.InitFormRoles = function()
+	QUnit.module("Test the ApiComplexForm methods");
+
+	function createApiComplexForm(pr)
 	{
-		let logicDocument = AscTest.GetLogicDocument();
-		let oform = logicDocument.GetOFormDocument();
-		oform.removeAllRoles();
-		oform.onEndLoad();
-	};
+		return AscTest.JsApi.CreateComplexForm(pr || {"key": "Email"});
+	}
+
+	QUnit.test("GetValue, Value", function (assert)
+	{
+		const form = createApiComplexForm();
+		const textForm = AscTest.JsApi.CreateTextForm({});
+		textForm.SetText("user");
+		form.Add(textForm);
+		form.Add("@example.com");
+
+		const value = form.GetValue();
+		assert.strictEqual(value, "user@example.com", "Check GetValue returns the correct text value");
+		assert.strictEqual(form.Value, "user@example.com", "Check Value getter returns the correct text value");
+	});
 });

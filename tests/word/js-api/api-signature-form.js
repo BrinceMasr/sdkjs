@@ -263,4 +263,16 @@ $(function ()
 		form.SetLock(false);
 		assert.strictEqual(form.GetLock(), false, "Check that the form is unlocked after SetLock(false)");
 	});
+
+	QUnit.test("SetValue, GetValue, Value", function (assert)
+	{
+		const form = createApiSignatureForm();
+
+		assert.strictEqual(typeof form.GetValue(), "string", "Check GetValue returns a string when no image is set");
+
+		const result = form.SetValue("https://static.onlyoffice.com/assets/docs/samples/img/onlyoffice_logo.png");
+		
+		// TODO:
+		assert.strictEqual(typeof form.Value, "string", "Check Value getter returns a string");
+	});
 });

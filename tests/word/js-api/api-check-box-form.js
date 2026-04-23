@@ -30,22 +30,28 @@
  *
  */
 
-$(function()
+$(function ()
 {
-	AscTest.JsApi.CreateTextForm      = AscBuilder.Word.Api.CreateTextForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateSignatureForm = AscBuilder.Word.Api.CreateSignatureForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateComboBoxForm  = AscBuilder.Word.Api.CreateComboBoxForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateCheckBoxForm  = AscBuilder.Word.Api.CreateCheckBoxForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateDateForm      = AscBuilder.Word.Api.CreateDateForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreatePictureForm   = AscBuilder.Word.Api.CreatePictureForm.bind(AscTest.Editor);
-	AscTest.JsApi.CreateComplexForm   = AscBuilder.Word.Api.CreateComplexForm.bind(AscTest.Editor);
-	
-	// Use this method anytime we need to test roles
-	AscTest.InitFormRoles = function()
+	QUnit.module("Test the ApiCheckBoxForm methods");
+
+	function createApiCheckBoxForm(pr)
 	{
-		let logicDocument = AscTest.GetLogicDocument();
-		let oform = logicDocument.GetOFormDocument();
-		oform.removeAllRoles();
-		oform.onEndLoad();
-	};
+		return AscTest.JsApi.CreateCheckBoxForm(pr || {"key": "Agree"});
+	}
+
+	QUnit.test("SetValue, GetValue, Value", function (assert)
+	{
+		const form = createApiCheckBoxForm();
+
+		assert.strictEqual(form.GetValue(), false, "Check GetValue returns false for a newly created checkbox");
+
+		const result = form.SetValue(true);
+		assert.strictEqual(result, true, "Check SetValue returns true on success");
+		assert.strictEqual(form.GetValue(), true, "Check GetValue returns true after SetValue(true)");
+
+		assert.strictEqual(form.Value, true, "Check Value getter returns the current state");
+
+		form.Value = false;
+		assert.strictEqual(form.GetValue(), false, "Check Value setter updates the checkbox state");
+	});
 });

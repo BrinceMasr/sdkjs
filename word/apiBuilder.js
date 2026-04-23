@@ -26448,7 +26448,31 @@
 		let lock = this.Sdt.GetContentControlLock();
 		return (c_oAscSdtLockType.SdtContentLocked === lock || c_oAscSdtLockType.SdtLocked === lock);
 	};
-	
+	/**
+	 * Returns the current value of the form field.
+	 * @memberof ApiFormBase
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @returns {string | boolean}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiFormBase/Methods/GetValue.js
+	 */
+	ApiFormBase.prototype.GetValue = function()
+	{
+		return "";
+	};
+	/**
+	 * Sets the value of the form field. 
+	 * @memberof ApiFormBase
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @param {string | boolean} value - The value to set.
+	 * @returns {boolean}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiFormBase/Methods/SetValue.js
+	 */
+	ApiFormBase.prototype.SetValue = function(value)
+	{
+		return false;
+	};
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiTextForm
@@ -26721,23 +26745,59 @@
 	/**
 	 * Sets the text to the current text field.
 	 * @memberof ApiTextForm
-	 * @param {string} sText - The text that will be set to the current text field.
+	 * @param {string} text - The text that will be set to the current text field.
 	 * @typeofeditors ["CDE", "CFE"]
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiTextForm/Methods/SetText.js
 	 */
-	ApiTextForm.prototype.SetText = function(sText)
+	ApiTextForm.prototype.SetText = function(text)
 	{
 		return executeNoFormLockCheck(function(){
-			let _sText = GetStringParameter(sText, null);
+			let _sText = GetStringParameter(text, null);
 			if (!_sText)
 				return false;
-	
+
 			this.Sdt.SetInnerText(_sText);
 			this.OnChangeValue();
 			return true;
 		}, this);
 	};
+	/**
+	 * Returns the current text value of the text form.
+	 * @memberof ApiTextForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @returns {string}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiTextForm/Methods/GetValue.js
+	 */
+	ApiTextForm.prototype.GetValue = function()
+	{
+		return this.Sdt.GetInnerText();
+	};
+	/**
+	 * Sets the text value of the text form.
+	 * @memberof ApiTextForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @param {string} value - The text value to set.
+	 * @returns {boolean}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiTextForm/Methods/SetValue.js
+	 */
+	ApiTextForm.prototype.SetValue = function(value)
+	{
+		return this.SetText(value);
+	};
+	/**
+	 * Gets or sets the current text value of the text form.
+	 * @memberof ApiTextForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @type {string}
+	 * @since 9.4.0
+	 */
+	Object.defineProperty(ApiTextForm.prototype, "Value", {
+		get: function() { return this.GetValue(); },
+		set: function(value) { this.SetValue(value); }
+	});
 
 	//------------------------------------------------------------------------------------------------------------------
 	//
@@ -27027,10 +27087,46 @@
 			
 			this.OnChangeValue();
 			this.Sdt.SetShowingPlcHdr(false);
-			
+
 			return true;
 		}, this);
 	};
+	/**
+	 * Returns the current image of the picture form as a base64 encoded string.
+	 * @memberof ApiPictureForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @returns {string}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiPictureForm/Methods/GetValue.js
+	 */
+	ApiPictureForm.prototype.GetValue = function()
+	{
+		return this.GetImage();
+	};
+	/**
+	 * Sets an image to the picture form.
+	 * @memberof ApiPictureForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @param {string} value - The image source (URL or base64 encoded image).
+	 * @returns {boolean}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiPictureForm/Methods/SetValue.js
+	 */
+	ApiPictureForm.prototype.SetValue = function(value)
+	{
+		return this.SetImage(value);
+	};
+	/**
+	 * Gets or sets the current image of the picture form as a base64 encoded string.
+	 * @memberof ApiPictureForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @type {string}
+	 * @since 9.4.0
+	 */
+	Object.defineProperty(ApiPictureForm.prototype, "Value", {
+		get: function() { return this.GetValue(); },
+		set: function(value) { this.SetValue(value); }
+	});
 
 	//------------------------------------------------------------------------------------------------------------------
 	//
@@ -27171,6 +27267,45 @@
 	{
 		return (this.Sdt.IsComboBox());
 	};
+	/**
+	 * Returns the current text value of the combo box form.
+	 * @memberof ApiComboBoxForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @returns {string}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiComboBoxForm/Methods/GetValue.js
+	 */
+	ApiComboBoxForm.prototype.GetValue = function()
+	{
+		return this.Sdt.GetInnerText();
+	};
+	/**
+	 * Sets the value of the combo box form. Selects a list item if the value matches one,
+	 * otherwise sets it as free text (only for editable combo boxes).
+	 * @memberof ApiComboBoxForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @param {string} value - The value to set.
+	 * @returns {boolean}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiComboBoxForm/Methods/SetValue.js
+	 */
+	ApiComboBoxForm.prototype.SetValue = function(value)
+	{
+		if (this.SelectListValue(value))
+			return true;
+		return this.SetText(value);
+	};
+	/**
+	 * Gets or sets the current text value of the combo box form.
+	 * @memberof ApiComboBoxForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @type {string}
+	 * @since 9.4.0
+	 */
+	Object.defineProperty(ApiComboBoxForm.prototype, "Value", {
+		get: function() { return this.GetValue(); },
+		set: function(value) { this.SetValue(value); }
+	});
 
 	//------------------------------------------------------------------------------------------------------------------
 	//
@@ -27345,6 +27480,42 @@
 		else
 			return this.Sdt.GetCheckBoxLabel();
 	};
+	/**
+	 * Returns the current state of the checkbox form as a boolean value.
+	 * @memberof ApiCheckBoxForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @returns {boolean}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiCheckBoxForm/Methods/GetValue.js
+	 */
+	ApiCheckBoxForm.prototype.GetValue = function()
+	{
+		return this.IsChecked();
+	};
+	/**
+	 * Sets the state of the checkbox form.
+	 * @memberof ApiCheckBoxForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @param {boolean} value - Specifies if the checkbox will be checked (true) or not (false).
+	 * @returns {boolean}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiCheckBoxForm/Methods/SetValue.js
+	 */
+	ApiCheckBoxForm.prototype.SetValue = function(value)
+	{
+		return this.SetChecked(value);
+	};
+	/**
+	 * Gets or sets the current state of the checkbox form.
+	 * @memberof ApiCheckBoxForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @type {boolean}
+	 * @since 9.4.0
+	 */
+	Object.defineProperty(ApiCheckBoxForm.prototype, "Value", {
+		get: function() { return this.GetValue(); },
+		set: function(value) { this.SetValue(value); }
+	});
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiDateForm
@@ -27534,6 +27705,42 @@
 		let fullDate = this.Sdt.GetDatePickerPr().GetFullDate();
 		return new Date(fullDate);
 	};
+	/**
+	 * Returns the date of the current form.
+	 * @memberof ApiDateForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @returns {Date | undefined}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiDateForm/Methods/GetValue.js
+	 */
+	ApiDateForm.prototype.GetValue = function()
+	{
+		return this.GetDate();
+	};
+	/**
+	 * Sets the date of the current form.
+	 * @memberof ApiDateForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @param {Date | string} value - The date object or the date in the string format.
+	 * @returns {boolean}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiDateForm/Methods/SetValue.js
+	 */
+	ApiDateForm.prototype.SetValue = function(value)
+	{
+		return this.SetDate(value);
+	};
+	/**
+	 * Gets or sets the date of the current form.
+	 * @memberof ApiDateForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @type {Date | undefined}
+	 * @since 9.4.0
+	 */
+	Object.defineProperty(ApiDateForm.prototype, "Value", {
+		get: function() { return this.GetValue(); },
+		set: function(value) { this.SetValue(value); }
+	});
 
 	//------------------------------------------------------------------------------------------------------------------
 	//
@@ -27643,7 +27850,29 @@
 			return true;
 		}, this);
 	};
-	
+	/**
+	 * Returns the current text value of the complex form.
+	 * @memberof ApiComplexForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @returns {string}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiComplexForm/Methods/GetValue.js
+	 */
+	ApiComplexForm.prototype.GetValue = function()
+	{
+		return this.Sdt.GetInnerText();
+	};
+	/**
+	 * Gets the current text value of the complex form.
+	 * @memberof ApiComplexForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @type {string}
+	 * @since 9.4.0
+	 */
+	Object.defineProperty(ApiComplexForm.prototype, "Value", {
+		get: function() { return this.GetValue(); }
+	});
+
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiSignatureForm
@@ -27680,7 +27909,43 @@
 	 * @see office-js-api/Examples/{Editor}/ApiSignatureForm/Methods/SetImage.js
 	 */
 	ApiSignatureForm.prototype.SetImage = ApiPictureForm.prototype.SetImage;
-	
+	/**
+	 * Returns the current image of the signature form as a base64 encoded string.
+	 * @memberof ApiSignatureForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @returns {string}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiSignatureForm/Methods/GetValue.js
+	 */
+	ApiSignatureForm.prototype.GetValue = function()
+	{
+		return this.GetImage();
+	};
+	/**
+	 * Sets an image to the signature form.
+	 * @memberof ApiSignatureForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @param {string} value - The image source (URL or base64 encoded image).
+	 * @returns {boolean}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiSignatureForm/Methods/SetValue.js
+	 */
+	ApiSignatureForm.prototype.SetValue = function(value)
+	{
+		return this.SetImage(value);
+	};
+	/**
+	 * Gets or sets the current image of the signature form as a base64 encoded string.
+	 * @memberof ApiSignatureForm
+	 * @typeofeditors ["CDE", "CFE"]
+	 * @type {string}
+	 * @since 9.4.0
+	 */
+	Object.defineProperty(ApiSignatureForm.prototype, "Value", {
+		get: function() { return this.GetValue(); },
+		set: function(value) { this.SetValue(value); }
+	});
+
 	/**
 	 * Converts the ApiBlockLvlSdt object into the JSON object.
 	 * @memberof ApiBlockLvlSdt
@@ -31373,6 +31638,8 @@
 	ApiFormBase.prototype["Delete"]             = ApiFormBase.prototype.Delete;
 	ApiFormBase.prototype["SetLock"]            = ApiFormBase.prototype.SetLock;
 	ApiFormBase.prototype["GetLock"]            = ApiFormBase.prototype.GetLock;
+	ApiFormBase.prototype["GetValue"]           = ApiFormBase.prototype.GetValue;
+	ApiFormBase.prototype["SetValue"]           = ApiFormBase.prototype.SetValue;
 	ApiFormBase.prototype["Copy"]               = ApiFormBase.prototype.Copy;
 
 	ApiTextForm.prototype["GetClassType"]        = ApiTextForm.prototype.GetClassType;
@@ -31386,6 +31653,8 @@
 	ApiTextForm.prototype["SetComb"]             = ApiTextForm.prototype.SetComb;
 	ApiTextForm.prototype["SetCellWidth"]        = ApiTextForm.prototype.SetCellWidth;
 	ApiTextForm.prototype["SetText"]             = ApiTextForm.prototype.SetText;
+	ApiTextForm.prototype["GetValue"]            = ApiTextForm.prototype.GetValue;
+	ApiTextForm.prototype["SetValue"]            = ApiTextForm.prototype.SetValue;
 	ApiTextForm.prototype["GetFormat"]           = ApiTextForm.prototype.GetFormat;
 	ApiTextForm.prototype["SetFormat"]           = ApiTextForm.prototype.SetFormat;
 	ApiTextForm.prototype["GetAllowedSymbols"]   = ApiTextForm.prototype.GetAllowedSymbols;
@@ -31414,17 +31683,22 @@
 	ApiDateForm.prototype["SetTime"]      = ApiDateForm.prototype.SetTime;
 	ApiDateForm.prototype["SetDate"]      = ApiDateForm.prototype.SetDate;
 	ApiDateForm.prototype["GetDate"]      = ApiDateForm.prototype.GetDate;
+	ApiDateForm.prototype["GetValue"]     = ApiDateForm.prototype.GetValue;
+	ApiDateForm.prototype["SetValue"]     = ApiDateForm.prototype.SetValue;
 	ApiDateForm.prototype["Copy"]         = ApiDateForm.prototype.Copy;
 	
 	ApiComplexForm.prototype["GetClassType"] = ApiComplexForm.prototype.GetClassType;
 	ApiComplexForm.prototype["Add"]          = ApiComplexForm.prototype.Add;
 	ApiComplexForm.prototype["GetSubForms"]  = ApiComplexForm.prototype.GetSubForms;
 	ApiComplexForm.prototype["ClearContent"] = ApiComplexForm.prototype.ClearContent;
+	ApiComplexForm.prototype["GetValue"]     = ApiComplexForm.prototype.GetValue;
 	ApiComplexForm.prototype["Copy"]         = ApiComplexForm.prototype.Copy;
 	
 	ApiSignatureForm.prototype["GetClassType"] = ApiSignatureForm.prototype.GetClassType;
 	ApiSignatureForm.prototype["GetImage"]     = ApiSignatureForm.prototype.GetImage;
 	ApiSignatureForm.prototype["SetImage"]     = ApiSignatureForm.prototype.SetImage;
+	ApiSignatureForm.prototype["GetValue"]     = ApiSignatureForm.prototype.GetValue;
+	ApiSignatureForm.prototype["SetValue"]     = ApiSignatureForm.prototype.SetValue;
 	ApiSignatureForm.prototype["Copy"]         = ApiSignatureForm.prototype.Copy;
 	
 	ApiComboBoxForm.prototype["GetClassType"]    = ApiComboBoxForm.prototype.GetClassType;
@@ -31433,6 +31707,8 @@
 	ApiComboBoxForm.prototype["SelectListValue"] = ApiComboBoxForm.prototype.SelectListValue;
 	ApiComboBoxForm.prototype["SetText"]         = ApiComboBoxForm.prototype.SetText;
 	ApiComboBoxForm.prototype["IsEditable"]      = ApiComboBoxForm.prototype.IsEditable;
+	ApiComboBoxForm.prototype["GetValue"]        = ApiComboBoxForm.prototype.GetValue;
+	ApiComboBoxForm.prototype["SetValue"]        = ApiComboBoxForm.prototype.SetValue;
 	ApiComboBoxForm.prototype["Copy"]            = ApiComboBoxForm.prototype.Copy;
 	
 	ApiCheckBoxForm.prototype["GetClassType"]  = ApiCheckBoxForm.prototype.GetClassType;
@@ -31445,6 +31721,8 @@
 	ApiCheckBoxForm.prototype["SetChoiceName"] = ApiCheckBoxForm.prototype.SetChoiceName;
 	ApiCheckBoxForm.prototype["GetLabel"]      = ApiCheckBoxForm.prototype.GetLabel;
 	ApiCheckBoxForm.prototype["SetLabel"]      = ApiCheckBoxForm.prototype.SetLabel;
+	ApiCheckBoxForm.prototype["GetValue"]      = ApiCheckBoxForm.prototype.GetValue;
+	ApiCheckBoxForm.prototype["SetValue"]      = ApiCheckBoxForm.prototype.SetValue;
 	ApiCheckBoxForm.prototype["Copy"]          = ApiCheckBoxForm.prototype.Copy;
 
 	ApiComment.prototype["GetClassType"]	= ApiComment.prototype.GetClassType;
