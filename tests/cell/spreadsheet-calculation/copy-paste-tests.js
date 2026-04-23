@@ -558,5 +558,143 @@ $(function () {
 		console.log("All parseText CSV tests completed successfully!");
 	});
 
+	QUnit.test("Test: \"autofilter copy-paste\"", function (assert) {
+		var c_oAscAutoFilterTypes = Asc.c_oAscAutoFilterTypes;
+
+		// Copy via checkCopyToClipboard — real copy path that handles autofilter/hidden rows
+		var doCopy = function () {
+			var capturedBinary = null;
+			AscCommonExcel.g_clipboardExcel.checkCopyToClipboard(wsView, {
+				pushData: function (fmt, data) {
+					if (fmt === AscCommon.c_oAscClipboardDataFormat.Internal) {
+						capturedBinary = data;
+					}
+				}
+			}, AscCommon.c_oAscClipboardDataFormat.Internal);
+			return capturedBinary;
+		};
+
+		// Apply filter: hide rows where column colId equals valueToHide.
+		// tableId: null = worksheet AutoFilter, number = ws.TableParts index
+		var hideValue = function (colId, valueToHide, tableId) {
+			var id = (tableId !== undefined && tableId !== null) ? tableId : null;
+			var opts = ws.autoFilters.getAutoFiltersOptions(ws, {colId: colId, id: id});
+			for (var i = 0; i < opts.values.length; i++) {
+				if (opts.values[i].val === valueToHide) {
+					opts.values[i].asc_setVisible(false);
+				}
+			}
+			opts.filter.asc_setType(c_oAscAutoFilterTypes.Filters);
+			ws.autoFilters.applyAutoFilter(opts);
+		};
+
+		// Source data for autofilter tests: rows 50–53 (A51:B54), header + 3 data rows with formulas
+		ws.getRange2("A51").setValue("Name");    ws.getRange2("B51").setValue("Score");
+		ws.getRange2("A52").setValue("Alice");   ws.getRange2("B52").setValue("=1+1");  // value = 2
+		ws.getRange2("A53").setValue("Bob");     ws.getRange2("B53").setValue("=2+2");  // value = 4, will be hidden
+		ws.getRange2("A54").setValue("Charlie"); ws.getRange2("B54").setValue("=3+3");  // value = 6
+
+		// ---- Case 1: AutoFilter with hidden rows → standard paste → values only, Bob skipped ----
+		ws.autoFilters.addAutoFilter(null, getRange(0, 50, 1, 53));
+		hideValue(0, "Bob");
+
+		assert.strictEqual(ws.getRowHidden(52), true,  "Case 1: Bob row hidden by autofilter");
+		assert.strictEqual(ws.getRowHidden(51), false, "Case 1: Alice row visible");
+		assert.strictEqual(ws.getRowHidden(53), false, "Case 1: Charlie row visible");
+
+		ws.selectionRange.ranges = [getRange(0, 50, 1, 53)];
+		var binary1 = doCopy();
+		ws.selectionRange.ranges = [getRange(0, 55, 1, 55)];
+		AscCommonExcel.g_clipboardExcel.pasteData(wsView, AscCommon.c_oAscClipboardDataFormat.Internal, binary1);
+
+		// 3 rows pasted (header + Alice + Charlie), Bob was hidden and must be absent
+		assert.strictEqual(ws.getRange2("A56").getValue(), "Name",    "Case 1: header pasted at row 1");
+		assert.strictEqual(ws.getRange2("A57").getValue(), "Alice",   "Case 1: Alice pasted at row 2");
+		assert.strictEqual(ws.getRange2("A58").getValue(), "Charlie", "Case 1: Charlie pasted at row 3 (Bob skipped)");
+		assert.strictEqual(ws.getRange2("A59").getValue(), "",        "Case 1: row 4 empty — Bob was not pasted");
+
+		// Standard paste must replace formulas with their computed values
+		assert.strictEqual(ws.getRange2("B57").getValueForEdit(), "2", "Case 1: Alice score is 2 (no formula on standard paste)");
+		assert.strictEqual(ws.getRange2("B58").getValueForEdit(), "6", "Case 1: Charlie score is 6 (no formula on standard paste)");
+
+		// ---- Case 2: AutoFilter with hidden rows → special paste (pasteOnlyFormula) → formulas kept ----
+		ws.selectionRange.ranges = [getRange(0, 50, 1, 53)];
+		var binary2 = doCopy();
+
+		var specialPasteHelper = window['AscCommon'].g_specialPasteHelper;
+		var savedSpecialPasteStart = specialPasteHelper.specialPasteStart;
+		specialPasteHelper.specialPasteStart = true;
+		var specialProps = new Asc.SpecialPasteProps();
+		specialProps.asc_setProps(Asc.c_oSpecialPasteProps.pasteOnlyFormula);
+		specialPasteHelper.specialPasteProps = specialProps;
+
+		ws.selectionRange.ranges = [getRange(0, 60, 1, 60)];
+		AscCommonExcel.g_clipboardExcel.pasteData(wsView, AscCommon.c_oAscClipboardDataFormat.Internal, binary2, null, null, true);
+
+		specialPasteHelper.specialPasteStart = savedSpecialPasteStart;
+		specialPasteHelper.specialPasteProps = null;
+
+		// 3 rows pasted, formulas preserved
+		assert.strictEqual(ws.getRange2("A61").getValue(), "Name",    "Case 2: header pasted (special paste)");
+		assert.strictEqual(ws.getRange2("A62").getValue(), "Alice",   "Case 2: Alice pasted (special paste)");
+		assert.strictEqual(ws.getRange2("A63").getValue(), "Charlie", "Case 2: Charlie pasted (special paste, Bob skipped)");
+		assert.strictEqual(ws.getRange2("B62").getValueForEdit(), "=1+1", "Case 2: Alice formula preserved on special paste");
+		assert.strictEqual(ws.getRange2("B63").getValueForEdit(), "=3+3", "Case 2: Charlie formula preserved on special paste");
+
+		// ---- Case 3: AutoFilter present but NO hidden rows → standard paste → all rows + formulas ----
+		ws.autoFilters.deleteAutoFilter(getRange(0, 50, 1, 53));
+		ws.setRowHidden(false, 50, 53);
+		ws.autoFilters.addAutoFilter(null, getRange(0, 50, 1, 53));
+		// No applyAutoFilter call → isApplyAutoFilter() = false → bIsExcludeHiddenRows = false → regular copy
+
+		ws.selectionRange.ranges = [getRange(0, 50, 1, 53)];
+		var binary3 = doCopy();
+		ws.selectionRange.ranges = [getRange(0, 65, 1, 65)];
+		AscCommonExcel.g_clipboardExcel.pasteData(wsView, AscCommon.c_oAscClipboardDataFormat.Internal, binary3);
+
+		// All 4 rows pasted (no hidden rows)
+		assert.strictEqual(ws.getRange2("A66").getValue(), "Name",    "Case 3: header (no filter)");
+		assert.strictEqual(ws.getRange2("A67").getValue(), "Alice",   "Case 3: Alice (no filter)");
+		assert.strictEqual(ws.getRange2("A68").getValue(), "Bob",     "Case 3: Bob pasted (not hidden)");
+		assert.strictEqual(ws.getRange2("A69").getValue(), "Charlie", "Case 3: Charlie (no filter)");
+		// Formulas preserved because no multiselect copy was made
+		assert.strictEqual(ws.getRange2("B67").getValueForEdit(), "=1+1", "Case 3: Alice formula preserved");
+		assert.strictEqual(ws.getRange2("B68").getValueForEdit(), "=2+2", "Case 3: Bob formula preserved");
+		assert.strictEqual(ws.getRange2("B69").getValueForEdit(), "=3+3", "Case 3: Charlie formula preserved");
+
+		// ---- Case 4: Formatted table with hidden rows → standard paste → values only, Bob skipped ----
+		ws.autoFilters.deleteAutoFilter(getRange(0, 50, 1, 53));
+
+		ws.getRange2("A71").setValue("Name");    ws.getRange2("B71").setValue("Score");
+		ws.getRange2("A72").setValue("Alice");   ws.getRange2("B72").setValue("=1+1");
+		ws.getRange2("A73").setValue("Bob");     ws.getRange2("B73").setValue("=2+2");
+		ws.getRange2("A74").setValue("Charlie"); ws.getRange2("B74").setValue("=3+3");
+
+		ws.autoFilters.addAutoFilter("TableStyleMedium2", getRange(0, 70, 1, 73));
+		var tableIdx = ws.TableParts.length - 1;
+
+		hideValue(0, "Bob", tableIdx);
+		// activeCell must be inside the table for bIsExcludeHiddenRows to detect the table filter
+		ws.selectionRange.activeCell = new AscCommon.CellBase(71, 0);
+
+		assert.strictEqual(ws.getRowHidden(72), true, "Case 4: Bob hidden in formatted table");
+
+		ws.selectionRange.ranges = [getRange(0, 70, 1, 73)];
+		var binary4 = doCopy();
+		ws.selectionRange.ranges = [getRange(0, 75, 1, 75)];
+		AscCommonExcel.g_clipboardExcel.pasteData(wsView, AscCommon.c_oAscClipboardDataFormat.Internal, binary4);
+
+		assert.strictEqual(ws.getRange2("A76").getValue(), "Name",    "Case 4: table header pasted");
+		assert.strictEqual(ws.getRange2("A77").getValue(), "Alice",   "Case 4: Alice pasted from table");
+		assert.strictEqual(ws.getRange2("A78").getValue(), "Charlie", "Case 4: Charlie pasted (Bob hidden in table)");
+		assert.strictEqual(ws.getRange2("A79").getValue(), "",        "Case 4: no Bob in paste (table filter)");
+		assert.strictEqual(ws.getRange2("B77").getValueForEdit(), "2", "Case 4: Alice value is 2 (no formula on table standard paste)");
+		assert.strictEqual(ws.getRange2("B78").getValueForEdit(), "6", "Case 4: Charlie value is 6 (no formula on table standard paste)");
+
+		// Cleanup
+		ws.setRowHidden(false, 50, 85);
+		ws.removeRows(50, 85, false);
+	});
+
 	QUnit.module("CopyPaste");
 });

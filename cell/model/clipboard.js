@@ -360,7 +360,6 @@
 				//TODO we need to ignore both formulas and hidden rows if the selection includes them + standard conditions in bIsExcludeHiddenRows
 				var origSelectionRanges = null;
 				if (ws.model.autoFilters.bIsExcludeHiddenRows(selectionRange, activeCell, true)) {
-					// split into multiselect: one range per group of consecutive visible rows (like MS Excel)
 					var noHiddenRows = ws.model._getNoHiddenRowsArr(selectionRange.r1, selectionRange.r2);
 					if (noHiddenRows.length > 1) {
 						origSelectionRanges = ws.model.selectionRange.ranges;
@@ -370,6 +369,8 @@
 						}
 						ws.model.selectionRange.ranges = visibleRanges;
 					}
+					ws.model.excludeHiddenRows(true);
+					ws.model.ignoreWriteFormulas(true);
 				}
 
 
@@ -399,6 +400,10 @@
 				}
 				//INTERNAL
 				if (AscCommon.c_oAscClipboardDataFormat.Internal & _formats) {
+					if (origSelectionRanges) {
+						ws.model.excludeHiddenRows(false);
+						ws.model.ignoreWriteFormulas(false);
+					}
 					if (window["NATIVE_EDITOR_ENJINE"]) {
 						_data = this.copyProcessor.getBinaryForMobile();
 					} else {
@@ -731,7 +736,7 @@
 
 			constructor: CopyProcessorExcel,
 
-			getHtml: function (range, worksheet) {
+			getHtml: function (range, worksheet, isCopingMultiselect) {
 				var t = this;
 				var sBase64 = null;
 
@@ -741,7 +746,15 @@
 				History.TurnOff();
 				//use binary strings
 				if (copyPasteUseBinary) {
+					if (isCopingMultiselect) {
+						worksheet.model.excludeHiddenRows(false);
+						worksheet.model.ignoreWriteFormulas(false);
+					}
 					sBase64 = this.getBinaryForCopy(worksheet.model, worksheet.objectRender);
+					if (isCopingMultiselect) {
+						worksheet.model.excludeHiddenRows(true);
+						worksheet.model.ignoreWriteFormulas(true);
+					}
 				}
 				History.TurnOn();
 
