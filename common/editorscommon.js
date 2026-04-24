@@ -763,8 +763,20 @@
 
 		return !!_relsPiece;
 	}
+	function isOfdFormatFile(stream) {
+		if (!(stream && stream.length > 4 && 0x50 === stream[0] && 0x4b === stream[1] && 0x03 === stream[2] && 0x04 === stream[3])) {
+			return false;
+		}
+		let jsZlib = new AscCommon.ZLib();
+		if (!jsZlib.open(stream)) {
+			return false;
+		}
+		let ofdXml = jsZlib.getFile("OFD.xml");
+		jsZlib.close();
+		return !!ofdXml;
+	}
 	function checkNativeViewerSignature(stream) {
-		return isPdfFormatFile(stream) || isDjvuFormatFile(stream) || isXpsFormatFile(stream);
+		return isPdfFormatFile(stream) || isDjvuFormatFile(stream) || isXpsFormatFile(stream) || isOfdFormatFile(stream);
 	}
 	function checkStreamSignature(stream, Signature) {
 		if (stream.length > Signature.length) {
