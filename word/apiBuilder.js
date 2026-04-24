@@ -401,7 +401,7 @@
 
 		// рендер html тагов
 		if (!this.Config.renderHTMLTags) {
-			sOutputText = private_EscapeHtml(sOutputText);
+			sOutputText = this.private_EscapeHtml(sOutputText);
 		}
 
 		return sOutputText;
@@ -755,6 +755,7 @@
 	};
 	CMarkdownConverter.prototype.HandleRun = function(oRun, sType)
 	{
+		let _t = this;
 		function IsHaveCodeRun(oRun)
 		{
 			if (!oRun)
@@ -931,7 +932,7 @@
 
 			}
 
-			return private_EscapeHtml(sText);
+			return _t.private_EscapeHtml(sText);
 		}
 
 		var oCMarkdownConverter    = this;
@@ -1184,6 +1185,14 @@
 
 		sOutputText += '</' + symbol + '>\n';
 		return sOutputText;
+	};
+	CMarkdownConverter.prototype.private_EscapeHtml = function(text)
+	{
+		return text.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#39;');
 	};
 	/**
 	 * Class representing a continuous region in a document. 
@@ -31663,6 +31672,7 @@
 	window['AscBuilder'].GetNumberParameter     = GetNumberParameter;
 	window['AscBuilder'].GetIntParameter        = GetIntParameter;
 	window['AscBuilder'].GetArrayParameter      = GetArrayParameter;
+	window['AscBuilder'].CMarkdownConverter		= CMarkdownConverter;
 	window['AscBuilder'].executeNoFormLockCheck = executeNoFormLockCheck;
 	window['AscBuilder'].throwException			= throwException;
 
@@ -31671,6 +31681,8 @@
 	
 	window['AscBuilder'].private_CheckForm               = private_CheckForm;
 	window['AscBuilder'].private_GetSupportedParaElement = private_GetSupportedParaElement;
+	window['AscBuilder'].private_GetLogicDocument        = private_GetLogicDocument;
+	window['AscBuilder'].GetLogicDocument                = private_GetLogicDocument;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Private area
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -32565,14 +32577,6 @@
 		if (!console.error)
 			logError(err);
 		throw err;
-	}
-
-	function private_EscapeHtml(text) {
-		return text.replace(/&/g, '&amp;')
-				.replace(/</g, '&lt;')
-				.replace(/>/g, '&gt;')
-				.replace(/"/g, '&quot;')
-				.replace(/'/g, '&#39;');
 	}
 	
 	function private_GuardedArray(arr, label)
