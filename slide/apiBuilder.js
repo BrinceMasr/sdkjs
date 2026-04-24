@@ -1094,47 +1094,6 @@
 		return new ApiSlideShowTransition(new Asc.CAscSlideTransition());
 	};
 
-	/**
-	 * Returns a slide by its position in the presentation.
-	 * @memberof Api
-	 * @typeofeditors ["CPE"]
-	 * @param {number} nIndex - The slide index (position) in the presentation.
-	 * @returns {?ApiSlide}
-	 * @since 9.4.0
-	 * @see office-js-api/Examples/{Editor}/Api/Methods/GetSlideByIndex.js
-	 */
-	Api.GetSlideByIndex = function(nIndex)
-	{
-		return Api.GetPresentation().GetSlideByIndex(nIndex);
-	};
-
-	/**
-	 * Returns the first slide of the presentation.
-	 * @memberof Api
-	 * @typeofeditors ["CPE"]
-	 * @returns {?ApiSlide}
-	 * @since 9.4.0
-	 * @see office-js-api/Examples/{Editor}/Api/Methods/GetFirstSlide.js
-	 */
-	Api.GetFirstSlide = function()
-	{
-		return Api.GetPresentation().GetSlideByIndex(0);
-	};
-
-	/**
-	 * Returns the last slide of the presentation.
-	 * @memberof Api
-	 * @typeofeditors ["CPE"]
-	 * @returns {?ApiSlide}
-	 * @since 9.4.0
-	 * @see office-js-api/Examples/{Editor}/Api/Methods/GetLastSlide.js
-	 */
-	Api.GetLastSlide = function()
-	{
-		let presentation = Api.GetPresentation();
-		return presentation.GetSlideByIndex(presentation.GetSlidesCount() - 1);
-	};
-
     /**
 	 * Converts the specified JSON object into the Document Builder object of the corresponding type.
 	 * @memberof Api
@@ -1512,19 +1471,6 @@
     };
 
 	/**
-	 * Returns a number of slides.
-	 * @memberof ApiPresentation
-	 * @typeofeditors ["CPE"]
-	 * @returns {number}
-	 * @since 9.4.0
-	 * @see office-js-api/Examples/{Editor}/ApiPresentation/Methods/GetSlideCount.js
-	 */
-	ApiPresentation.prototype.GetSlideCount = function()
-	{
-		return this.GetSlidesCount();
-	};
-
-	/**
 	 * Returns an array of all slides from the current presentation.
 	 * @memberof ApiPresentation
 	 * @typeofeditors ["CPE"]
@@ -1694,20 +1640,6 @@
         }
 
         return false;
-	};
-
-	/**
-	 * Removes a slide at the specified position from the presentation.
-	 * @memberof ApiPresentation
-	 * @typeofeditors ["CPE"]
-	 * @param {number} nIndex - The zero-based slide index.
-	 * @returns {boolean}
-	 * @since 9.4.0
-	 * @see office-js-api/Examples/{Editor}/ApiPresentation/Methods/RemoveSlide.js
-	 */
-	ApiPresentation.prototype.RemoveSlide = function(nIndex)
-	{
-		return this.RemoveSlides(nIndex, 1);
 	};
 
     /**
@@ -6981,8 +6913,6 @@
 		return true;
 	};
 
-	ApiDrawing.prototype.SetBackgroundColor = AscBuilder.ApiDrawing.prototype.SetBackgroundColor;
-
 	/**
 	 * Sets the outline properties to the specified graphic object.
 	 * @memberof ApiDrawing
@@ -8262,9 +8192,6 @@
 	Api["FromJSON"]                             = Api.FromJSON;
 	Api["GetSelection"]                         = Api.GetSelection;
 	Api["GetByInternalId"]                      = Api.GetByInternalId;
-	Api["GetSlideByIndex"]                      = Api.GetSlideByIndex;
-	Api["GetFirstSlide"]                        = Api.GetFirstSlide;
-	Api["GetLastSlide"]                         = Api.GetLastSlide;
 
 
     ApiPresentation.prototype["GetClassType"]             = ApiPresentation.prototype.GetClassType;
@@ -8304,9 +8231,6 @@
     ApiPresentation.prototype["GetCustomXmlParts"]        = ApiPresentation.prototype.GetCustomXmlParts;
     ApiPresentation.prototype["GetLoopUntilStopped"]      = ApiPresentation.prototype.GetLoopUntilStopped;
     ApiPresentation.prototype["SetLoopUntilStopped"]      = ApiPresentation.prototype.SetLoopUntilStopped;
-    ApiPresentation.prototype["GetSlideCount"]              = ApiPresentation.prototype.GetSlideCount;
-    ApiPresentation.prototype["RemoveSlide"]                = ApiPresentation.prototype.RemoveSlide;
-    ApiPresentation.prototype["DeleteSlide"]                = ApiPresentation.prototype.DeleteSlide = ApiPresentation.prototype.RemoveSlide;
 
     ApiMaster.prototype["GetClassType"]                   = ApiMaster.prototype.GetClassType;
     ApiMaster.prototype["GetInternalId"]                  = ApiMaster.prototype.GetInternalId;
@@ -8519,8 +8443,6 @@
 
     ApiDrawing.prototype["ToJSON"]                        = ApiDrawing.prototype.ToJSON;
     ApiDrawing.prototype["Fill"]                          = ApiDrawing.prototype.Fill;
-    ApiDrawing.prototype["SetBackgroundColor"]            = ApiDrawing.prototype.SetBackgroundColor;
-    ApiDrawing.prototype["SetBgColor"]                    = ApiDrawing.prototype.SetBgColor = ApiDrawing.prototype.SetBackgroundColor;
     ApiDrawing.prototype["SetOutLine"]                    = ApiDrawing.prototype.SetOutLine;
 
 
@@ -9033,8 +8955,11 @@
 	window['AscBuilder'] = window['AscBuilder'] || {};
 	
 	window['AscBuilder']["Slide"] = window['AscBuilder'].Slide = window['AscBuilder'].Slide || {};
-	AscBuilder.Slide["Api"] = AscBuilder.Slide.Api = Api;
-	
+	AscBuilder.Slide["Api"]              = AscBuilder.Slide.Api              = Api;
+	AscBuilder.Slide["ApiPresentation"]  = AscBuilder.Slide.ApiPresentation  = ApiPresentation;
+	AscBuilder.Slide["ApiShape"]         = AscBuilder.Slide.ApiShape         = ApiShape;
+	AscBuilder.Slide["ApiDrawing"]       = AscBuilder.Slide.ApiDrawing       = ApiDrawing;
+
 	AscBuilder.Slide.init = function()
 	{
 		AscBuilder.ApiDrawing   = ApiDrawing;

@@ -13643,7 +13643,6 @@
 		this.Drawing.spPr.setFill(oFill.UniFill);
 		return true;
 	};
-	ApiDrawing.prototype.SetBackgroundColor = AscBuilder.ApiDrawing.prototype.SetBackgroundColor;
 
 	/**
 	 * Sets the outline properties to the specified graphic object.
@@ -30719,8 +30718,6 @@
 	ApiDrawing.prototype["SetFlipV"]                   =  ApiDrawing.prototype.SetFlipV;
 	ApiDrawing.prototype["Select"]                     =  ApiDrawing.prototype.Select;
 	ApiDrawing.prototype["Fill"]                       =  ApiDrawing.prototype.Fill;
-	ApiDrawing.prototype["SetBackgroundColor"]         =  ApiDrawing.prototype.SetBackgroundColor;
-	ApiDrawing.prototype["SetBgColor"]                 =  ApiDrawing.prototype.SetBgColor = ApiDrawing.prototype.SetBackgroundColor;
 	ApiDrawing.prototype["SetOutLine"]                 =  ApiDrawing.prototype.SetOutLine;
 	ApiDrawing.prototype["Unselect"]                   =  ApiDrawing.prototype.Unselect;
 	ApiDrawing.prototype["Delete"]                     =  ApiDrawing.prototype.Delete;
@@ -31993,8 +31990,9 @@
 	window['AscBuilder'] = window['AscBuilder'] || {};
 	
 	window['AscBuilder']["Cell"] = window['AscBuilder'].Cell = window['AscBuilder'].Cell || {};
-	AscBuilder.Cell["Api"] = AscBuilder.Cell.Api = Api;
-	
+	AscBuilder.Cell["Api"]          = AscBuilder.Cell.Api          = Api;
+	AscBuilder.Cell["ApiDrawing"]   = AscBuilder.Cell.ApiDrawing   = ApiDrawing;
+
 	AscBuilder.Cell.init = function()
 	{
 		AscBuilder.ApiDrawing   = ApiDrawing;
