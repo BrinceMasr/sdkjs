@@ -498,9 +498,9 @@ function (window, undefined) {
 	cAGGREGATE.prototype.argumentsMax = 253;
 	cAGGREGATE.prototype.isXLFN = true;
 	cAGGREGATE.prototype.argumentsType = [argType.number, argType.number, [argType.reference]];
-	cAGGREGATE.prototype.arrayIndexes = {1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1};
+	cAGGREGATE.prototype.arrayIndexes = {/*1: 1,*/ 2: 1, 3: 1, 4: 1, 5: 1, 6: 1};
 	cAGGREGATE.prototype.getArrayIndex = function (index) {
-		if (index === 0) {
+		if (index < 2) {
 			return undefined;
 		}
 		return 1;
@@ -512,7 +512,7 @@ function (window, undefined) {
 
 		argClone[0] = argClone[0].tocNumber();
 		argClone[1] = argClone[1].tocNumber();
-
+		
 		let argError;
 		if (argError = this._checkErrorArg(argClone)) {
 			return argError;
@@ -591,7 +591,7 @@ function (window, undefined) {
 				}
 				break;
 			default:
-				return new cError(cErrorType.not_numeric);
+				return new cError(cErrorType.wrong_value_type);
 		}
 
 		if (null === f) {
@@ -632,7 +632,7 @@ function (window, undefined) {
 				ignoreErrorsVal = true;
 				break;
 			default :
-				return new cError(cErrorType.not_numeric);
+				return new cError(cErrorType.wrong_value_type);
 		}
 
 		let res;
@@ -653,6 +653,8 @@ function (window, undefined) {
 				//otherwise - error
 				if (doNotCheckRef || this.checkRef(arg[i])) {
 					newArgs.push(arg[i]);
+				} else if (arg[i].type === cElementType.error) {
+					return arg[i];
 				} else {
 					return new cError(cErrorType.wrong_value_type);
 				}

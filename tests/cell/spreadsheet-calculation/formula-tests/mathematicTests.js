@@ -1638,7 +1638,6 @@ $(function () {
 		ws2.getRange2("B18").setValue("95"); // TestNameArea3D2
 
 		// Positive cases:
-
 		// Case #1: Number(2), Area. Function_num is AVERAGE (4), options is 6 (ignore errors), ref is area with numbers
 		oParser = new parserFormula('AGGREGATE(4, 6, A101:A111)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(4, 6, A101:A111) is parsed.');
@@ -1696,7 +1695,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(12,3,A101:B105) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 64, 'Test: Positive case: Number(2), Area. Function_num is MEDIAN (12), options is 3 (ignore hidden rows, errors, and nested SUBTOTAL/AGGREGATE), ref is area with numbers');
 		// Case #15: Number(2), Area(2). Function_num is MODE.SNGL (13), options is 3 (ignore hidden rows, errors, and nested SUBTOTAL/AGGREGATE), two area references as arguments
-		// Different result with MS
 		oParser = new parserFormula('AGGREGATE(13,3,A101:B105,A101:B105)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(13,3,A101:B105,A101:B105) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 30, 'Test: Positive case: Number(2), Area(2). Function_num is MODE.SNGL (13), options is 3 (ignore hidden rows, errors, and nested SUBTOTAL/AGGREGATE), two area references as arguments'); // ms result: 82
@@ -1742,14 +1740,14 @@ $(function () {
 		let cellWithFormula = new window['AscCommonExcel'].CCellWithFormula(ws, bbox.r1, bbox.c1);
 		oParser = new parserFormula('AGGREGATE(15,E101:E107,D101:D107,1)', cellWithFormula, ws);
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(15,E101:E107,D101:D107,1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 3, 'Test: Positive case: Number, Area(2), Number. Function_num is SMALL (15), options is area with numbers, ref is area with numbers, k is 1');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), "#DIV/0!", 'Test: Positive case: Number, Area(2), Number. Function_num is SMALL (15), options is area with numbers, ref is area with numbers, k is 1');
 		// Case #26: Number, Area(2), Number. Function_num is SMALL (15), options is area with numbers, ref is area with numbers, k is 1
 		// cross test
 		bbox = ws.getRange2("G104").bbox;
 		cellWithFormula = new window['AscCommonExcel'].CCellWithFormula(ws, bbox.r1, bbox.c1);
 		oParser = new parserFormula('AGGREGATE(15,E101:E107,D101:D107,1)', cellWithFormula, ws);
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(15,E101:E107,D101:D107,1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 3, 'Test: Positive case: Number, Area(2), Number. Function_num is SMALL (15), options is area with numbers, ref is area with numbers, k is 1');
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), "#DIV/0!", 'Test: Positive case: Number, Area(2), Number. Function_num is SMALL (15), options is area with numbers, ref is area with numbers, k is 1');
 		// Case #27: String(2), Number, Area. Function_num and options as strings that convert to numbers, ref is area with numbers
 		oParser = new parserFormula('AGGREGATE("6", "0", A101:A105)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE("6", "0", A101:A105) is parsed.');
@@ -1775,10 +1773,9 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(E103,E106,A101:A111) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 9, 'Test: Positive case: Reference link(2), Area. Function_num and options from reference links, ref is area');
 		// Case #33: Array(2), Area. Function_num and options as arrays with single elements, ref is area
-		// TODO: Need to fix: Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row#10
-		/*oParser = new parserFormula('AGGREGATE({7},{2},A101:A111)', 'A2', ws);
+		oParser = new parserFormula('AGGREGATE({7},{2},A101:A111)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE({7},{2},A101:A111) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue()/!*.toFixed(8) - 0*!/, 25.45584412, 'Test: Positive case: Array(2), Area. Function_num and options as arrays with single elements, ref is area');*/
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), '25.45584', 'Test: Positive case: Array(2), Area. Function_num and options as arrays with single elements, ref is area');
 		// Case #34: Number(2), Area3D(2). Function_num is PRODUCT (12), options is 6 (ignore errors), ref is area3D, k area3D
 		oParser = new parserFormula('AGGREGATE(12,6,Sheet2!A1:A10,Sheet2!B1:B10)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(12,6,Sheet2!A1:A10,Sheet2!B1:B10) is parsed.');
@@ -1840,13 +1837,11 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula AVERAGE(AGGREGATE(9,0,A101:A111),10) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 236, 'Test: Positive case: Formula. AGGREGATE inside another formula (AVERAGE)');
 		// Case #49: Number(2), Formula. Function_num is LARGE (14), options is 6 (ignore errors), array with error, k is 2
-		//TODO Need to fix. https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row #13
-		/*oParser = new parserFormula('AGGREGATE(1,6,IF(TRUE,A101:A111,""))', 'A2', ws);
+		oParser = new parserFormula('AGGREGATE(1,6,IF(TRUE,A101:A111,""))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(1,6,IF(TRUE,A101:A111,"")) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue()/!*.toFixed(8) - 0*!/, 51.33333333, 'Test: Positive case: Number(2), Formula. Function_num is LARGE (14), options is 6 (ignore errors), array with error, k is 2');
-		*/
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), '51.33333', 'Test: Positive case: Number(2), Formula. Function_num is LARGE (14), options is 6 (ignore errors), array with error, k is 2');
+		
 		// Negative cases:
-
 		// Case #1: Number(2), Area. Function_num is SMALL (15) which requires k parameter, options is 6 (ignore errors), ref is area
 		oParser = new parserFormula('AGGREGATE(15, 6, A101:A111)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(15, 6, A101:A111) is parsed.');
@@ -1863,22 +1858,20 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(15,E101:E107,D101:D107,1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#DIV/0!', 'Test: Negative case: Number, Area(2), Number. Function_num is SMALL (15), options is area with value 1, ref is area, k is 1');
 		// Case #4: Number, Area(2), Number. Function_num is SMALL (15), options is area with DIV/0 error, ref is area, k is 1
-		// Different result with MS
 		bbox = ws.getRange2("G107").bbox;
 		cellWithFormula = new window['AscCommonExcel'].CCellWithFormula(ws, bbox.r1, bbox.c1);
 		oParser = new parserFormula('AGGREGATE(15,D101:D107,C101:C107,1)', cellWithFormula, ws);
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(15,D101:D107,C101:C107,1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number, Area(2), Number. Function_num is SMALL (15), options is area with DIV/0 error, ref is area, k is 1');// #VALUE!
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), "#DIV/0!", 'Test: Negative case: Number, Area(2), Number. Function_num is SMALL (15), options is area with DIV/0 error, ref is area, k is 1');// #VALUE!
 		// Case #5: Number(2), String. Function_num is SMALL (15), options is 6 (ignore errors), non-numeric string in array argument
 		oParser = new parserFormula('AGGREGATE(15,6,"abc")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(15,6,"abc") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Number(2), String. Function_num is SMALL (15), options is 6 (ignore errors), non-numeric string in array argument');
 		// Case #6: Number(2), Error. Function_num is SUM (6), options is 0 (default behavior), error value as array
-		// TODO Need to fix it. Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row #12
-		/*oParser = new parserFormula('AGGREGATE(6,0,#N/A)', 'A2', ws);
+		oParser = new parserFormula('AGGREGATE(6,0,#N/A)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(6,0,#N/A) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Number(2), Error. Function_num is SUM (6), options is 0 (default behavior), error value as array');
-		*/// Case #7: String, Number, Area, Number. Function_num is non-numeric string, options is 6 (ignore errors), ref is area, k is 2
+		// Case #7: String, Number, Area, Number. Function_num is non-numeric string, options is 6 (ignore errors), ref is area, k is 2
 		oParser = new parserFormula('AGGREGATE("x",6,A101:A111,2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE("x",6,A101:A111,2) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String, Number, Area, Number. Function_num is non-numeric string, options is 6 (ignore errors), ref is area, k is 2');
@@ -1891,23 +1884,22 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(14,6,A101:A111,"z") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Number(2), Area, String. Function_num is LARGE (14), options is 6 (ignore errors), ref is area, k is non-numeric string');
 		// Case #10: Number(3), Area. Function_num is 20 (exceeds maximum of 19), options is 6 (ignore errors), ref is area
-		// TODO Need to fix it. Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row #12
-		/*oParser = new parserFormula('AGGREGATE(20,6,A101:A111)', 'A2', ws);
+		oParser = new parserFormula('AGGREGATE(20,6,A101:A111)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(20,6,A101:A111) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Number(3), Area. Function_num is 20 (exceeds maximum of 19), options is 6 (ignore errors), ref is area');*/
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Number(3), Area. Function_num is 20 (exceeds maximum of 19), options is 6 (ignore errors), ref is area');
 		// Case #11: Number(3), Area. Function_num is 0 (below minimum of 1), options is 6 (ignore errors), ref is area
-		/*oParser = new parserFormula('AGGREGATE(0,6,A101:A111)', 'A2', ws);
+		oParser = new parserFormula('AGGREGATE(0,6,A101:A111)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(0,6,A101:A111) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Number(3), Area. Function_num is 0 (below minimum of 1), options is 6 (ignore errors), ref is area');
-		*/// Case #12: Number, Number(2), Area. Function_num is SUM (9), options is 8 (exceeds maximum of 7), ref is area
-		/*oParser = new parserFormula('AGGREGATE(9,8,A101:A111)', 'A2', ws);
+		// Case #12: Number, Number(2), Area. Function_num is SUM (9), options is 8 (exceeds maximum of 7), ref is area
+		oParser = new parserFormula('AGGREGATE(9,8,A101:A111)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(9,8,A101:A111) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Number, Number(2), Area. Function_num is SUM (9), options is 8 (exceeds maximum of 7), ref is area');
-		*/// Case #13: Number, Number(2), Area. Function_num is SUM (9), options is -1 (below minimum of 0), ref is area
-		/*oParser = new parserFormula('AGGREGATE(9,-1,A101:A111)', 'A2', ws);
+		// Case #13: Number, Number(2), Area. Function_num is SUM (9), options is -1 (below minimum of 0), ref is area
+		oParser = new parserFormula('AGGREGATE(9,-1,A101:A111)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(9,-1,A101:A111) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Number, Number(2), Area. Function_num is SUM (9), options is -1 (below minimum of 0), ref is area');
-		*/// Case #14: Number(2), Area. Function_num is LARGE (14) which requires k parameter, missing k parameter
+		// Case #14: Number(2), Area. Function_num is LARGE (14) which requires k parameter, missing k parameter
 		oParser = new parserFormula('AGGREGATE(14,6,A101:A111)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(14,6,A101:A111) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Number(2), Area. Function_num is LARGE (14) which requires k parameter, missing k parameter');
@@ -1928,11 +1920,11 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE("9", "4", "100") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String(3). All arguments as strings that convert to numbers');
 		// Case #19: Number(2), Area, Number. Function_num is LARGE (14), options is 6 (ignore errors), ref is area, k is 0 (invalid for LARGE)
-		// TODO Need to fix it. Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row #12
-		/*oParser = new parserFormula('AGGREGATE(14,6,A101:A111,0)', 'A2', ws);
+		oParser = new parserFormula('AGGREGATE(14,6,A101:A111,0)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(14,6,A101:A111,0) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number(2), Area, Number. Function_num is LARGE (14), options is 6 (ignore errors), ref is area, k is 0 (invalid for LARGE)');
-		*/// Case #20: Number(2), Area, Number. Function_num is SMALL (15), options is 6 (ignore errors), ref is area, k is 0 (invalid for SMALL)
+		// Todo problem in a result of another function
+		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number(2), Area, Number. Function_num is LARGE (14), options is 6 (ignore errors), ref is area, k is 0 (invalid for LARGE)');
+		// Case #20: Number(2), Area, Number. Function_num is SMALL (15), options is 6 (ignore errors), ref is area, k is 0 (invalid for SMALL)
 		oParser = new parserFormula('AGGREGATE(15,6,A101:A111,0)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(15,6,A101:A111,0) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number(2), Area, Number. Function_num is SMALL (15), options is 6 (ignore errors), ref is area, k is 0 (invalid for SMALL)');
@@ -1953,13 +1945,11 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(18,6,A101:A111,1.5) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number(2), Area, Number. Function_num is PERCENTILE.EXC (18), options is 6 (ignore errors), ref is area, k is 1.5 (exceeds max of 1)');
 		// Case #25: Empty, Number, Area. Function_num is empty (error expected), options is 4, ref is area
-		// TODO Need to fix it. Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row #12
-		/*oParser = new parserFormula('AGGREGATE(,4,A101:A111)', 'A2', ws);
+		oParser = new parserFormula('AGGREGATE(,4,A101:A111)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(,4,A101:A111) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Empty, Number, Area. Function_num is empty (error expected), options is 4, ref is area');
-		*/
+		
 		// Bounded cases:
-
 		// Case #1: Number(3), Area. Function_num is minimum valid value (1), options is minimum valid value (0), ref is area
 		oParser = new parserFormula('AGGREGATE(1,0,A101:A111)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AGGREGATE(1,0,A101:A111) is parsed.');
