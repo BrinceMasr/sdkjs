@@ -412,7 +412,9 @@
 
 		if (this.IsReadOnly()) {
             return;
-        }        let bCommit = false;
+        }
+
+		let bCommit = false;
         if (this.IsChecked()) {
             if (this.IsNoToggleToOff() == false) {
                 this.SetChecked(false);
@@ -501,7 +503,7 @@
         
         let hasOptions = !!this._options;
         
-        AscCommon.History.Add(new CChangesPDFCheckOptions(this, this._options, aOpt));
+        AscCommon.History.Add(new CChangesPDFCheckboxOptions(this, this._options, aOpt));
 
         if (this._options == aOpt) {
             return true;
@@ -690,13 +692,12 @@
             sExportValue = value;
         }
 
-        if (this.GetExportValue() == sExportValue)
-            this.SetChecked(true);
-        else
-            this.SetChecked(false);
-        
-        if (Asc.editor.getDocumentRenderer().IsOpenFormsInProgress && oParent == null)
-            this.SetParentValue(value);
+		if (this.GetExportValue() == sExportValue) {
+			this.SetChecked(true);
+		}
+		else {
+			this.SetChecked(false);
+		}
     };
     CBaseCheckBoxField.prototype.private_SetValue = CBaseCheckBoxField.prototype.SetValue;
     CBaseCheckBoxField.prototype.GetValue = function() {
@@ -714,17 +715,11 @@
         if (bChecked == this.IsChecked())
             return;
 
-        this.SetWasChanged(true);
-        this.AddToRedraw();
+        AscCommon.History.Add(new CChangesPDFCheckboxChecked(this, this._checked, bChecked));
+		this._checked = bChecked;
 
-        if (bChecked) {
-            AscCommon.History.Add(new CChangesPDFFormValue(this, this.GetValue(), this.GetExportValue()));
-            this._checked = true;
-        }
-        else {
-            AscCommon.History.Add(new CChangesPDFFormValue(this, this.GetValue(), "Off"));
-            this._checked = false;
-        }
+		this.SetWasChanged(true);
+        this.AddToRedraw();
     };
     /**
 	 * Synchronizes this field with fields with the same name.
