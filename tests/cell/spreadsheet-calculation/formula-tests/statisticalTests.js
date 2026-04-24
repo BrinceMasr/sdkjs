@@ -482,7 +482,6 @@ $(function () {
 		ws2.getRange2("A17").setValue("40"); // TestNameArea3D
 
 		// Positive cases:
-
 		// Case #1: Number(4). Aguments are number.  4 arguments were used.
 		oParser = new parserFormula('AVEDEV(-3.5,1.4,6.9,-4.5)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AVEDEV(-3.5,1.4,6.9,-4.5) is parsed.');
@@ -512,11 +511,10 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula AVEDEV(ABS(-1),SQRT(4),SUM(1,2),ROUND(3.5,0)) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Positive case: Formula(4). Test with formulas returning numbers. 4 arguments used.');
 		// Case #8: String(3). Test with strings convertible to numbers. 3 arguments used.
-		// Different result with MS TODO: Need to fix: Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row#37
-		/*oParser = new parserFormula('AVEDEV("1","2.5","3.75")', 'A2', ws);
+		oParser = new parserFormula('AVEDEV("1","2.5","3.75")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AVEDEV("1","2.5","3.75") is parsed.');
-		assert.strictEqual(oParser.calculate().getValue()/!*.toFixed(9) - 0*!/, 0.944444444, 'Test: Positive case: String(3). Test with strings convertible to numbers. 3 arguments used.');
-		*/// Case #9: Reference link(4). Test with references to cells containing numbers. 4 arguments used.
+		assert.strictEqual(oParser.calculate().getValue().toFixed(5), '0.94444', 'Test: Positive case: String(3). Test with strings convertible to numbers. 3 arguments used.');
+		// Case #9: Reference link(4). Test with references to cells containing numbers. 4 arguments used.
 		oParser = new parserFormula('AVEDEV(A100,A101,A102,A103)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AVEDEV(A100,A101,A102,A103) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue().toFixed(3) - 0, 1.625, 'Test: Positive case: Reference link(4). Test with references to cells containing numbers. 4 arguments used.');
@@ -565,11 +563,10 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula AVEDEV(1,2,3,) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Positive case: Number(3), Empty. Test with numbers and an empty argument (ignored). 4 arguments used.');
 		// Case #21: Number, String, Reference link, Array. Test with mixed data types. 4 arguments used.
-		// Different result with MS TODO: Need to fix: Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row#37
-		/*oParser = new parserFormula('AVEDEV(1,"2",A100,{3,4})', 'A2', ws);
+		oParser = new parserFormula('AVEDEV(1,"2",A100,{3,4})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AVEDEV(1,"2",A100,{3,4}) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue()/!*.toFixed(2) - 0*!/, 0.96, 'Test: Positive case: Number, String, Reference link, Array. Test with mixed data types. 4 arguments used.');
-		*/// Case #22: Boolean(4). Test with boolean values (TRUE=1, FALSE=0). 4 arguments used.
+		assert.strictEqual(oParser.calculate().getValue(), 0.96, 'Test: Positive case: Number, String, Reference link, Array. Test with mixed data types. 4 arguments used.');
+		// Case #22: Boolean(4). Test with boolean values (TRUE=1, FALSE=0). 4 arguments used.
 		oParser = new parserFormula('AVEDEV(TRUE,FALSE,TRUE,FALSE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AVEDEV(TRUE,FALSE,TRUE,FALSE) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue().toFixed(1) - 0, 0.5, 'Test: Positive case: Boolean(4). Test with boolean values (TRUE=1, FALSE=0). 4 arguments used.');
@@ -590,11 +587,10 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula AVEDEV(10,A100,A101,{20,30}) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue().toFixed(3) - 0, 9.616, 'Test: Positive case: Number, Reference link(2), Array. Test with a combination of numbers, references and an array. 4 arguments used.');
 		// Case #27: Formula, String, Boolean. Test with a formula, string and boolean value. 3 arguments used.
-		// Different result with MS TODO: Need to fix: Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row#37
-		/*oParser = new parserFormula('AVEDEV(PI(),"3.14",TRUE)', 'A2', ws);
+		oParser = new parserFormula('AVEDEV(PI(),"3.14",TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AVEDEV(PI(),"3.14",TRUE) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue()/!*.toFixed(9) - 0*!/, 0.951465034, 'Test: Positive case: Formula, String, Boolean. Test with a formula, string and boolean value. 3 arguments used.');
-		*/// Case #28: Number(2), Name. Test with numbers and a named range with multiple values. 3 arguments used.
+		assert.strictEqual(oParser.calculate().getValue().toFixed(7), '0.9514650', 'Test: Positive case: Formula, String, Boolean. Test with a formula, string and boolean value. 3 arguments used.');
+		// Case #28: Number(2), Name. Test with numbers and a named range with multiple values. 3 arguments used.
 		oParser = new parserFormula('AVEDEV(100,200,TestNameArea)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AVEDEV(100,200,TestNameArea) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 100, 'Test: Positive case: Number(2), Name. Test with numbers and a named range with multiple values. 3 arguments used.');
@@ -624,17 +620,15 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Empty(3). Test with empty arguments. 3 arguments used.');
 
 		// Negative cases:
-
 		// Case #1: String. Test with a non-numeric string. #VALUE! error.
-		// Different result with MS TODO: Need to fix: Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row#38
-		/*oParser = new parserFormula('AVEDEV("abc")', 'A2', ws);
+		oParser = new parserFormula('AVEDEV("abc")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AVEDEV("abc") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String. Test with a non-numeric string. #VALUE! error.');
 		// Case #2: Error. Test with #N/A error. Returns #N/A.
 		oParser = new parserFormula('AVEDEV(NA())', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AVEDEV(NA()) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#N/A', 'Test: Negative case: Error. Test with #N/A error. Returns #N/A.');
-		*/// Case #3: Empty. Test with an empty cell.
+		// Case #3: Empty. Test with an empty cell.
 		oParser = new parserFormula('AVEDEV(A106)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AVEDEV(A106) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Empty. Test with an empty cell.');
@@ -643,11 +637,10 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula AVEDEV(A109:A110) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Area. Test with a range containing an error. Returns #NUM! error.');
 		// Case #5: String(3). Test with multiple non-numeric strings. #VALUE! error.
-		// Different result with MS TODO: Need to fix: Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row#38
-		/*oParser = new parserFormula('AVEDEV("abc","def","ghi")', 'A2', ws);
+		oParser = new parserFormula('AVEDEV("abc","def","ghi")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AVEDEV("abc","def","ghi") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String(3). Test with multiple non-numeric strings. #VALUE! error.');
-		*/// Case #6: Array. Test with an array of text values. #VALUE! error.
+		// Case #6: Array. Test with an array of text values. #VALUE! error.
 		oParser = new parserFormula('AVEDEV({"a","b","c"})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AVEDEV({"a","b","c"}) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Array. Test with an array of text values. #VALUE! error.');
@@ -668,8 +661,7 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula AVEDEV(Sheet2!A3:A4) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Area3D. Test with a 3D range containing an error. Returns an error.');
 		// Case #11: Number, String, Error. Test with mixed types including an error. Returns an error.
-		// Different result with MS TODO: Need to fix: Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row#38
-		/*oParser = new parserFormula('AVEDEV(1,"abc",NA())', 'A2', ws);
+		oParser = new parserFormula('AVEDEV(1,"abc",NA())', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AVEDEV(1,"abc",NA()) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Number, String, Error. Test with mixed types including an error. Returns an error.');
 		// Case #12: Array. Test with an array containing an error. Returns an error.
@@ -684,7 +676,7 @@ $(function () {
 		oParser = new parserFormula('AVEDEV("")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AVEDEV("") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String. Test with an empty string. #VALUE! error.');
-		*/// Case #15: Reference link. Test with a reference to a cell with text. #NUM! error.
+		// Case #15: Reference link. Test with a reference to a cell with text. #NUM! error.
 		oParser = new parserFormula('AVEDEV(A110)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AVEDEV(A110) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Reference link. Test with a reference to a cell with text. #NUM! error.');
@@ -698,7 +690,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Area. Test with a range containing only logical values and text. #NUM! error.');
 
 		// Bounded cases:
-
 		// Case #1: Number. Test with the minimum positive number in Excel. 1 argument used.
 		oParser = new parserFormula('AVEDEV(1E-307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AVEDEV(1E-307) is parsed.');

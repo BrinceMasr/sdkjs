@@ -3907,36 +3907,47 @@ function (window, undefined) {
 	cAVEDEV.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.array;
 	cAVEDEV.prototype.argumentsType = [[argType.number]];
 	cAVEDEV.prototype.enabledToSingle = {"*": true};
+	/**
+	 * Returns the average of the absolute deviations of data points from their mean.
+	 * Logical values and text numbers passed directly are counted; inside arrays they are ignored.
+	 * @param {number1, [number2],...} arg - 1 to 255 arguments
+	 * @returns {cNumber|cError}
+	 */
 	cAVEDEV.prototype.Calculate = function (arg) {
-		var count = 0, sum = new cNumber(0), arrX = [], i;
+		let count = 0, sum = new cNumber(0), arrX = [], i;
 		for (i = 0; i < arg.length; i++) {
-			var _arg = arg[i];
-			if (_arg instanceof cRef || _arg instanceof cRef3D) {
-				var _argV = _arg.getValue();
-				if (_argV instanceof cNumber) {
+			let _arg = arg[i];
+
+			if (_arg.type === cElementType.array || _arg.type === cElementType.cellsRange || _arg.type === cElementType.cellsRange3D) {
+				let dimensions = _arg.getDimensions();
+
+				for (let row = 0; row < dimensions.row; row++) {
+					for (let col = 0; col < dimensions.col; col++) {
+						let elem = _arg.getValueByRowCol ? _arg.getValueByRowCol(row,col) : _arg.getElementRowCol(row,col);
+						if (!elem) {
+							continue;
+						}
+
+						if (elem.type === cElementType.error) {
+							return elem;
+						}
+
+						if (elem.type === cElementType.number) {
+							arrX.push(elem);
+							count++;
+						}
+					}
+				}
+			} else if (_arg.type === cElementType.cell || _arg.type === cElementType.cell3D) {
+				let _argV = _arg.getValue();
+				if (_argV.type === cElementType.number) {
 					arrX.push(_argV);
 					count++;
 				}
-			} else if (_arg instanceof cArea || _arg instanceof cArea3D) {
-				var _argAreaValue = _arg.getValue();
-				for (var j = 0; j < _argAreaValue.length; j++) {
-					var __arg = _argAreaValue[j];
-					if (__arg instanceof cNumber) {
-						arrX.push(__arg);
-						count++;
-					}
-				}
-			} else if (_arg instanceof cArray) {
-				_arg.foreach(function (elem) {
-					var e = elem.tocNumber();
-					if (e instanceof cNumber) {
-						arrX.push(e);
-						count++;
-					}
-				})
 			} else {
-				if (_arg instanceof cError) {
-					continue;
+				_arg = _arg.tocNumber();
+				if (_arg.type === cElementType.error) {
+					return _arg;
 				}
 				arrX.push(_arg);
 				count++;
@@ -3946,8 +3957,10 @@ function (window, undefined) {
 		for (i = 0; i < arrX.length; i++) {
 			sum = _func[sum.type][arrX[i].type](sum, arrX[i], "+");
 		}
+
 		sum = new cNumber(sum.getValue() / count);
-		var a = 0;
+
+		let a = 0;
 		for (i = 0; i < arrX.length; i++) {
 			a += Math.abs(_func[sum.type][arrX[i].type](sum, arrX[i], "-").getValue());
 		}
