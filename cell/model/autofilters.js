@@ -1659,6 +1659,8 @@
 							var redrawTablesArr;
 							if (data.type === true) {
 								redrawTablesArr = this.insertLastTableColumn(data.displayName, data.activeCells);
+							} else if (data.type === undefined) {
+								redrawTablesArr = this.insertFirstTableColumn(data.displayName, data.activeCells);
 							} else if (data.type === false) {
 								redrawTablesArr = this.insertLastTableRow(data.displayName, data.activeCells);
 							}
@@ -2299,9 +2301,11 @@
 						var changeElement = {
 							oldFilter: oldFilter, newFilterRef: filter.Ref.clone()
 						};
-						t.deferredHistoryAction = t._getHistoryObj(changeElement, AscCH.historyitem_AutoFilter_Change,
-							{displayName: displayNameFormatTable, activeCells: activeRange, type: true}, false,
+						let historyObj = t._getHistoryObj(changeElement, AscCH.historyitem_AutoFilter_Change,
+							{displayName: displayNameFormatTable, activeCells: activeRange}, false,
 							oldFilter.Ref, null, activeRange);
+						History.Add(AscCommonExcel.g_oUndoRedoAutoFilters, AscCH.historyitem_AutoFilter_Change, worksheet.getId(), worksheet.selectionRange.getLast().clone(),
+							historyObj);
 					}
 
 					redrawTablesArr.push({oldfilterRef: oldFilter.Ref, newFilter: filter});
