@@ -1698,38 +1698,6 @@
 		
 		return Text;
 	};
-
-	/**
-	 * Converts the range to HTML.
-	 * @memberof ApiRange
-	 * @typeofeditors ["CDE"]
-	 * @since 9.4.0
-	 * @param {ToHtmlOptions} [options={}] - The HTML conversion options.
-	 * @returns {string}
-	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/ToHtml.js
-	 */
-	ApiRange.prototype.ToHtml = function(options)
-	{
-		private_RefreshRangesPosition();
-
-		let logicDocument = private_GetLogicDocument();
-		let docState      = logicDocument.SaveDocumentState();
-
-		this.Select(true);
-
-		let config = {
-			convertType    : "html",
-			htmlHeadings   : GetBoolParameter(options && options["HtmlHeadings"],   false),
-			base64img      : GetBoolParameter(options && options["Base64img"],      false),
-			demoteHeadings : GetBoolParameter(options && options["DemoteHeadings"], false),
-			renderHTMLTags : GetBoolParameter(options && options["RenderHTMLTags"], false)
-		};
-
-		let converter = new CMarkdownConverter(config);
-		let result = converter.DoHtml();
-		logicDocument.LoadDocumentState(docState);
-		return result;
-	};
 	/**
 	 * Returns a collection of paragraphs that represents all the paragraphs in the specified range.
 	 * @memberof ApiRange
@@ -11515,30 +11483,6 @@
 		});
 	};
 	/**
-	 * Converts the paragraph to HTML.
-	 * @memberof ApiParagraph
-	 * @typeofeditors ["CDE"]
-	 * @since 9.4.0
-	 * @param {ToHtmlOptions} [options={}] - The HTML conversion options.
-	 * @returns {string}
-	 * @see office-js-api/Examples/{Editor}/ApiParagraph/Methods/ToHtml.js
-	 */
-	ApiParagraph.prototype.ToHtml = function(options)
-	{
-		let config = {
-			convertType    : "html",
-			htmlHeadings   : GetBoolParameter(options && options["HtmlHeadings"],   false),
-			base64img      : GetBoolParameter(options && options["Base64img"],      false),
-			demoteHeadings : GetBoolParameter(options && options["DemoteHeadings"], false),
-			renderHTMLTags : GetBoolParameter(options && options["RenderHTMLTags"], false)
-		};
-		let converter = new CMarkdownConverter(config);
-		let result = converter.HandleChildElement(this, 'html');
-		if (!config.renderHTMLTags)
-			result = private_EscapeHtml(result);
-		return result;
-	};
-	/**
 	 * Returns the text properties for a paragraph end mark.
 	 * @memberof ApiParagraph
 	 * @typeofeditors ["CDE"]
@@ -12328,42 +12272,6 @@
 	{
 		this.SetPageBreakBefore(true);
 		return this;
-	};
-	/**
-	 * Moves the cursor to the start of the paragraph.
-	 * @memberof ApiParagraph
-	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
-	 * @returns {boolean}
-	 * @since 9.4.0
-	 * @see office-js-api/Examples/{Editor}/ApiParagraph/Methods/MoveCursorToStart.js
-	 */
-	ApiParagraph.prototype.MoveCursorToStart = function()
-	{
-		let logicDocument = private_GetLogicDocument();
-		if (logicDocument)
-			logicDocument.RemoveSelection();
-		
-		this.Paragraph.Document_SetThisElementCurrent(false);
-		this.Paragraph.MoveCursorToStartPos(false);
-		return true;
-	};
-	/**
-	 * Moves the cursor to the end of the paragraph.
-	 * @memberof ApiParagraph
-	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
-	 * @returns {boolean}
-	 * @since 9.4.0
-	 * @see office-js-api/Examples/{Editor}/ApiParagraph/Methods/MoveCursorToEnd.js
-	 */
-	ApiParagraph.prototype.MoveCursorToEnd = function()
-	{
-		let logicDocument = private_GetLogicDocument();
-		if (logicDocument)
-			logicDocument.RemoveSelection();
-
-		this.Paragraph.Document_SetThisElementCurrent(false);
-		this.Paragraph.MoveCursorToEndPos(false);
-		return true;
 	};
 	//------------------------------------------------------------------------------------------------------------------
 	//
@@ -30704,7 +30612,6 @@
 	ApiRange.prototype["AddBookmark"]                = ApiRange.prototype.AddBookmark;
 	ApiRange.prototype["AddHyperlink"]               = ApiRange.prototype.AddHyperlink;
 	ApiRange.prototype["GetText"]                    = ApiRange.prototype.GetText;
-	ApiRange.prototype["ToHtml"]                     = ApiRange.prototype.ToHtml;
 	ApiRange.prototype["GetAllParagraphs"]           = ApiRange.prototype.GetAllParagraphs;
 	ApiRange.prototype["Select"]                     = ApiRange.prototype.Select;
 	ApiRange.prototype["ExpandTo"]                   = ApiRange.prototype.ExpandTo;
@@ -30915,7 +30822,6 @@
 	ApiParagraph.prototype["GetParentTable"]         = ApiParagraph.prototype.GetParentTable;
 	ApiParagraph.prototype["GetParentTableCell"]     = ApiParagraph.prototype.GetParentTableCell;
 	ApiParagraph.prototype["GetText"]                = ApiParagraph.prototype.GetText;
-	ApiParagraph.prototype["ToHtml"]                 = ApiParagraph.prototype.ToHtml;
 	ApiParagraph.prototype["GetTextPr"]              = ApiParagraph.prototype.GetTextPr;
 	ApiParagraph.prototype["SetTextPr"]              = ApiParagraph.prototype.SetTextPr;
 	ApiParagraph.prototype["InsertInContentControl"] = ApiParagraph.prototype.InsertInContentControl;
@@ -30937,9 +30843,6 @@
 	ApiParagraph.prototype["GetInternalId"]          = ApiParagraph.prototype.GetInternalId;
 	ApiParagraph.prototype["ToJSON"]                 = ApiParagraph.prototype.ToJSON;
 	ApiParagraph.prototype["AddPageBreakBefore"]     = ApiParagraph.prototype.AddPageBreakBefore;
-	ApiParagraph.prototype["MoveCursorToStart"]      = ApiParagraph.prototype.MoveCursorToStart;
-	ApiParagraph.prototype["MoveCursorToEnd"]        = ApiParagraph.prototype.MoveCursorToEnd;
-
 
 	ApiRun.prototype["GetClassType"]                 = ApiRun.prototype.GetClassType;
 	ApiRun.prototype["GetTextPr"]                    = ApiRun.prototype.GetTextPr;
