@@ -1487,7 +1487,16 @@ Slide.prototype.getOutlineSlide = function () {
 Slide.prototype.isHaveOutlineShapes = function () {
     for (let i = 0; i < this.cSld.spTree.length; i += 1) {
         const shape = this.cSld.spTree[i];
-        if (shape.isOutlineTitlePlaceholder()) {
+        if (shape.isOutlinePlaceholder()) {
+            return true;
+        }
+    }
+    return false;
+};
+Slide.prototype.isHaveOutlineShapesWithContent = function () {
+    for (let i = 0; i < this.cSld.spTree.length; i += 1) {
+        const shape = this.cSld.spTree[i];
+        if (shape.isOutlinePlaceholderWithContent()) {
             return true;
         }
     }
@@ -1515,6 +1524,37 @@ Slide.prototype.createTitle = function () {
     }
     this.shapeAdd(this.cSld.spTree.length, copySp);
 
+    return copySp;
+};
+Slide.prototype.createContent = function () {
+    const titleSp = this.getMatchingShape(AscFormat.phType_subTitle, null, false, {});
+    if (titleSp) {
+        return null;
+    }
+    let matchingShape = null;
+    const layout = this.Layout;
+    const master = this.Layout.Master;
+    function forEachSpCallback(shape) {
+        const placeholderType = shape.getPlaceholderType();
+        if (placeholderType === AscFormat.phType_subTitle || placeholderType === AscFormat.phType_obj || placeholderType === AscFormat.phType_body) {
+            matchingShape = shape;
+            return true;
+        }
+    }
+
+    if (layout) {
+        layout.cSld.forEachSp(forEachSpCallback);
+        if (!matchingShape && master) {
+            master.cSld.forEachSp(forEachSpCallback);
+        }
+    }
+    let copySp;
+    if (matchingShape) {
+        copySp = matchingShape.copy();
+    } else {
+        copySp = AscCommonSlide.CreatePlaceholder(AscFormat.phType_body);
+    }
+    this.shapeAdd(this.cSld.spTree.length, copySp);
     return copySp;
 };
 

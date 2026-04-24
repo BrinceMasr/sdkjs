@@ -11214,8 +11214,11 @@
 		};
 		CSld.prototype.forEachSp = function(fCallback) {
 			for(let nSp = 0; nSp < this.spTree.length; ++nSp) {
-				fCallback(this.spTree[nSp]);
+				if (fCallback(this.spTree[nSp])) {
+					return true;
+				}
 			}
+			return false;
 		};
 		CSld.prototype.handleAllContents = function(fCallback) {
 			this.forEachSp(function(oSp) {
