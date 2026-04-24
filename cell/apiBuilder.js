@@ -29226,17 +29226,19 @@
 	 * @see office-js-api/Examples/Cell/ApiListColumn/Methods/SetName.js
 	 */
 	ApiListColumn.prototype.SetName = function (sName) {
-		this.tableColumn.setTableColumnName(sName);
-		var tablePart = this.listObject.tablePart;
+		let tablePart = this.listObject.tablePart;
 		if (!tablePart.isHeaderRow()) {
 			return;
 		}
-		var bbox = this.tableColumn.getRange(tablePart, true, false);
+		let bbox = this.tableColumn.getRange(tablePart, true, false);
 		if (!bbox) {
 			return;
 		}
-		var ws = this.listObject.ws.worksheet;
-		ws.getRange3(bbox.r1, bbox.c1, bbox.r1, bbox.c1).setValue(sName);
+		let ws = this.listObject.ws.worksheet;
+		let _range = ws.getRange3(bbox.r1, bbox.c1, bbox.r1, bbox.c1)
+		_range.setValue(sName);
+
+		ws.checkChangeTablesContent(_range.bbox);
 	};
 
 	Object.defineProperty(ApiListColumn.prototype, "Name", {
