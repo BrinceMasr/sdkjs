@@ -673,6 +673,57 @@ function (window, undefined) {
 	};
 
 
+	const ARABIC_ROMAN_REGEXP = /^[IVXLCDM]*$/;
+	const ARABIC_ROMAN_CHARS = {
+		"M": 1000,
+		"D": 500,
+		"C": 100,
+		"L": 50,
+		"X": 10,
+		"V": 5,
+		"I": 1
+	};
+	function romanToArabic(roman) {
+		roman = roman.trim().toUpperCase();
+
+		const isNegative = roman[0] === '-';
+		if (isNegative) {
+			roman = roman.slice(1);
+		}
+
+		const len = roman.length;
+		if (len === 0) {
+			return 0;
+		} else if (!ARABIC_ROMAN_REGEXP.test(roman)) {
+			return NaN;
+		}
+
+		let result = 0;
+		let i = 0;
+
+		while (i < len) {
+			let current = ARABIC_ROMAN_CHARS[roman[i]];
+
+			// Count how many identical symbols are in a row
+			let count = 1;
+			while (i + count < len && roman[i + count] === roman[i]) {
+				count++;
+			}
+
+			let next = ARABIC_ROMAN_CHARS[roman[i + count]];
+			if (next && current < next) {
+				// The entire group of identical ones is subtracted from the next one
+				result += next - current * count;
+				i += count + 1;
+			} else {
+				result += current * count;
+				i += count;
+			}
+		}
+
+		return isNegative ? -result : result;
+	}
+
 	/**
 	 * @constructor
 	 * @extends {AscCommonExcel.cBaseFunction}
@@ -689,39 +740,12 @@ function (window, undefined) {
 	cARABIC.prototype.isXLFN = true;
 	cARABIC.prototype.argumentsType = [argType.text];
 	cARABIC.prototype.Calculate = function (arg) {
-		var to_arabic = function (roman) {
-			roman = roman.toUpperCase();
-			if (roman < 1) {
-				return 0;
-			} else if (!/^M*(?:D?C{0,3}|C[MD])(?:L?X{0,3}|X[CL])(?:V?I{0,3}|I[XV])$/i.test(roman)) {
-				return NaN;
+		let arg0 = arg[0];
+		if (cElementType.cellsRange === arg0.type || cElementType.cellsRange3D === arg0.type) {
+			if (cElementType.cellsRange3D === arg0.type && !arg0.isSingleSheet()) {
+				return new cError(cErrorType.bad_reference);
 			}
 
-			var chars = {
-				"M": 1000,
-				"CM": 900,
-				"D": 500,
-				"CD": 400,
-				"C": 100,
-				"XC": 90,
-				"L": 50,
-				"XL": 40,
-				"X": 10,
-				"IX": 9,
-				"V": 5,
-				"IV": 4,
-				"I": 1
-			};
-			var arabic = 0;
-			roman.replace(/[MDLV]|C[MD]?|X[CL]?|I[XV]?/g, function (i) {
-				arabic += chars[i];
-			});
-
-			return arabic;
-		};
-
-		var arg0 = arg[0];
-		if (cElementType.cellsRange === arg0.type || cElementType.cellsRange3D === arg0.type) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 		arg0 = arg0.tocString();
@@ -731,20 +755,28 @@ function (window, undefined) {
 		}
 
 		if (cElementType.array === arg0.type) {
-			arg0.foreach(function (elem, r, c) {
-				var a = elem;
-				if (cElementType.string === a.type) {
-					var res = to_arabic(a.getValue());
-					this.array[r][c] = isNaN(res) ? new cError(cErrorType.wrong_value_type) : new cNumber(res);
-				} else {
-					this.array[r][c] = new cError(cErrorType.wrong_value_type);
+			let resArr = new cArray();
+			let dimensions = arg0.getDimensions();
+
+			for (let row = 0; row < dimensions.row; row++) {
+				resArr.addRow();
+				for (let col = 0; col < dimensions.col; col++) {
+					let elemVal = arg0.getElementRowCol(row,col);
+
+					if (cElementType.string === elemVal.type) {
+						let res = romanToArabic(elemVal.getValue());
+						resArr.addElement(isNaN(res) ? new cError(cErrorType.wrong_value_type) : new cNumber(res));
+					} else {
+						resArr.addElement(new cError(cErrorType.wrong_value_type));
+					}
 				}
-			});
-			return arg0;
+			}
+
+			return resArr;
+
 		}
 
-		//TODO check error returns!
-		var res = to_arabic(arg0.getValue());
+		let res = romanToArabic(arg0.getValue());
 		return isNaN(res) ? new cError(cErrorType.wrong_value_type) : new cNumber(res);
 	};
 

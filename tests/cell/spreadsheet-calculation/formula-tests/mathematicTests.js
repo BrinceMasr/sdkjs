@@ -2013,7 +2013,6 @@ $(function () {
 		ws2.getRange2("A17").setValue("MMXXV"); // TestNameArea3D
 
 		// Positive cases:
-
 		// Case #1: String. Text LVII
 		oParser = new parserFormula('ARABIC("LVII")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ARABIC("LVII") is parsed.');
@@ -2035,15 +2034,13 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula ARABIC("MmXxV") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 2025, 'Test: Positive case: String. Mixed case MmXxV converts to 2025');
 		// Case #6: String. Negative Roman numeral -X converts to -10
-		// Different result with MS TODO: Need to fix: Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row #15
-		/*oParser = new parserFormula('ARABIC("-X")', 'A2', ws);
+		oParser = new parserFormula('ARABIC("-X")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ARABIC("-X") is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), -10, 'Test: Positive case: String. Negative Roman numeral -X converts to -10');*/
+		assert.strictEqual(oParser.calculate().getValue(), -10, 'Test: Positive case: String. Negative Roman numeral -X converts to -10');
 		// Case #7: String. Leading and trailing spaces are ignored
-		// Different result with MS TODO: Need to fix: Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row #16
-		/*oParser = new parserFormula('ARABIC(" X ")', 'A2', ws);
+		oParser = new parserFormula('ARABIC(" X ")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ARABIC(" X ") is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 10, 'Test: Positive case: String. Leading and trailing spaces are ignored');*/
+		assert.strictEqual(oParser.calculate().getValue(), 10, 'Test: Positive case: String. Leading and trailing spaces are ignored');
 		// Case #8: String. Empty string returns 0
 		oParser = new parserFormula('ARABIC("")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ARABIC("") is parsed.');
@@ -2065,10 +2062,10 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula ARABIC(A100) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 4, 'Test: Positive case: Reference link. Reference to cell with valid Roman numeral');
 		// Case #13: Area. Single-cell range with valid Roman numeral
-		// Different result with MS TODO: Need to fix: Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row #17
-		/*oParser = new parserFormula('ARABIC(A101:A101)', 'A2', ws);
+		oParser = new parserFormula('ARABIC(A101:A101)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ARABIC(A101:A101) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 2025, 'Test: Positive case: Area. Single-cell range with valid Roman numeral');*/
+		oParser.setArrayFormulaRef(ws.getRange2("E100:F102").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), 2025, 'Test: Positive case: Area. Single-cell range with valid Roman numeral');
 		// Case #14: Name. Named range with valid Roman numeral
 		oParser = new parserFormula('ARABIC(TestName)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ARABIC(TestName) is parsed.');
@@ -2082,10 +2079,10 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula ARABIC(Sheet2!A1) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 4, 'Test: Positive case: Ref3D. 3D reference to cell with valid Roman numeral');
 		// Case #17: Area3D. 3D single-cell range with valid Roman numeral
-		// Different result with MS TODO: Need to fix: Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row #17
-		/*oParser = new parserFormula('ARABIC(Sheet2!A2:A2)', 'A2', ws);
+		oParser = new parserFormula('ARABIC(Sheet2!A2:A2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ARABIC(Sheet2!A2:A2) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 2025, 'Test: Positive case: Area3D. 3D single-cell range with valid Roman numeral');*/
+		oParser.setArrayFormulaRef(ws.getRange2("E100:F102").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), 2025, 'Test: Positive case: Area3D. 3D single-cell range with valid Roman numeral');
 		// Case #18: Formula. ARABIC inside another formula returns 15
 		oParser = new parserFormula('SUM(ARABIC("V"),ARABIC("X"))', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula SUM(ARABIC("V"),ARABIC("X")) is parsed.');
@@ -2119,8 +2116,7 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula POWER(ARABIC("II"),ARABIC("II")) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 4, 'Test: Positive case: Formula. Nested formula with ARABIC as arguments returns 2^2=4');
 		// Case #26: String. Non-standard but acceptable Roman numeral IIII converts to 4
-		// Different result with MS TODO: Need to fix: Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row #18
-		/*oParser = new parserFormula('ARABIC("IIII")', 'A2', ws);
+		oParser = new parserFormula('ARABIC("IIII")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ARABIC("IIII") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 4, 'Test: Positive case: String. Non-standard but acceptable Roman numeral IIII converts to 4');
 		// Case #27: String. Incorrectly formed Roman numeral
@@ -2162,23 +2158,40 @@ $(function () {
 		// Case #36: String. Roman numeral with C repeated more than 4 times
 		oParser = new parserFormula('ARABIC("CCCCCC")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ARABIC("CCCCCC") is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 600, 'Test: Positive case: String. Roman numeral with C repeated more than 4 times');*/
+		assert.strictEqual(oParser.calculate().getValue(), 600, 'Test: Positive case: String. Roman numeral with C repeated more than 4 times');
 		// Case #37: Area. Multi-cell range
-		// Different result with MS TODO: Need to fix: Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row #17
-		/*oParser = new parserFormula('ARABIC(A102:A103)', 'A2', ws);
+		oParser = new parserFormula('ARABIC(A102:A103)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ARABIC(A102:A103) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 2025, 'Test: Positive case: Area. Multi-cell range');
+		oParser.setArrayFormulaRef(ws.getRange2("E100:F102").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 2025, 'Test: Positive case: Area. Multi-cell range');
 		// Case #38: Name. Name with area. Valid Roman number
 		oParser = new parserFormula('ARABIC(TestNameArea)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ARABIC(TestNameArea) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 4, 'Test: Positive case: Name. Name with area. Valid Roman number');
+		oParser.setArrayFormulaRef(ws.getRange2("E100:F102").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 4, 'Test: Positive case: Name. Name with area. Valid Roman number');
 		// Case #39: Name3D. Name 3D with area. Valid Roman number
 		oParser = new parserFormula('ARABIC(TestNameArea3D)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ARABIC(TestNameArea3D) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 4, 'Test: Positive case: Name3D. Name 3D with area. Valid Roman number');*/
+		oParser.setArrayFormulaRef(ws.getRange2("E100:F102").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 4, 'Test: Positive case: Name3D. Name 3D with area. Valid Roman number');
+		// Case #40: String. Unusual roman number as string.
+		oParser = new parserFormula('ARABIC("IIIVIII")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula ARABIC("IIIVIII") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 5, 'Test: Positive case: String. Unusual roman number as string.');
+		// Case #41: String. Unusual roman number as string.
+		oParser = new parserFormula('ARABIC("IIIIV")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula ARABIC("IIIIV") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Positive case: String. Unusual roman number as string.');
+		// Case #42: String. Unusual roman number as string.
+		oParser = new parserFormula('ARABIC("IIIIX")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula ARABIC("IIIIX") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 6, 'Test: Positive case: String. Unusual roman number as string.');
+		// Case #43: String. Unusual roman number as string.
+		oParser = new parserFormula('ARABIC("IIIIM")', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula ARABIC("IIIIM") is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 996, 'Test: Positive case: String. Unusual roman number as string.');
 
 		// Negative cases:
-
 		// Case #1: String. Invalid Roman numeral returns #VALUE!
 		oParser = new parserFormula('ARABIC("ABC")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ARABIC("ABC") is parsed.');
@@ -2219,9 +2232,13 @@ $(function () {
 		oParser = new parserFormula('ARABIC("Text")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ARABIC("Text") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String. Text instead of Roman number');
+		// Case #11: Area3D. Multi sheets link.
+		let multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A100";
+		oParser = new parserFormula('ARABIC('+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula ARABIC('+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#REF!', 'Test: Negative case: Area3D. Multi sheets link.');
 
 		// Bounded cases:
-
 		// Case #1: String. Roman numeral M converts to 1000
 		oParser = new parserFormula('ARABIC("M")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ARABIC("M") is parsed.');
@@ -2235,10 +2252,9 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula ARABIC("MMMCMXCIX") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 3999, 'Test: Bounded case: String. Largest standard Roman numeral MMMCMXCIX converts to 3999');
 		// Case #4: String. Largest negative standard Roman numeral -MMMCMXCIX converts to -3999
-		// Different result with MS TODO: Need to fix: Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row #15
-		/*oParser = new parserFormula('ARABIC("-MMMCMXCIX")', 'A2', ws);
+		oParser = new parserFormula('ARABIC("-MMMCMXCIX")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ARABIC("-MMMCMXCIX") is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), -3999, 'Test: Bounded case: String. Largest negative standard Roman numeral -MMMCMXCIX converts to -3999');*/
+		assert.strictEqual(oParser.calculate().getValue(), -3999, 'Test: Bounded case: String. Largest negative standard Roman numeral -MMMCMXCIX converts to -3999');
 	});
 
 	QUnit.test("Test: \"ASIN\"", function (assert) {
