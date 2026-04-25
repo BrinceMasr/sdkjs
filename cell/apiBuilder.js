@@ -28053,23 +28053,6 @@
         }
     });
 
-	/**
-	 * Returns the Sort object for this list object.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiSort}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetSort.js
-	 */
-	ApiListObject.prototype.GetSort = function () {
-		return new ApiSort(this);
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "Sort", {
-		get: function () {
-			return this.GetSort();
-		}
-	});
-
 	Api["Format"]                = Api.Format;
 	Api["AddSheet"]              = Api.AddSheet;
 	Api["GetSheets"]             = Api.GetSheets;
