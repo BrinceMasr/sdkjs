@@ -33230,8 +33230,14 @@
 	};
 	
 	window['AscBuilder']["Word"] = window['AscBuilder'].Word = window['AscBuilder'].Word || {};
-	AscBuilder.Word["Api"]         = AscBuilder.Word.Api         = Api;
-	AscBuilder.Word["ApiDrawing"]  = AscBuilder.Word.ApiDrawing  = ApiDrawing;
+	AscBuilder.Word["Api"]          = AscBuilder.Word.Api          = Api;
+	AscBuilder.Word["ApiDrawing"]   = AscBuilder.Word.ApiDrawing   = ApiDrawing;
+	AscBuilder.Word["ApiShape"]     = AscBuilder.Word.ApiShape     = ApiShape;
+	AscBuilder.Word["ApiImage"]     = AscBuilder.Word.ApiImage     = ApiImage;
+	AscBuilder.Word["ApiGroup"]     = AscBuilder.Word.ApiGroup     = ApiGroup;
+	AscBuilder.Word["ApiSmartArt"]  = AscBuilder.Word.ApiSmartArt  = ApiSmartArt;
+	AscBuilder.Word["ApiOleObject"] = AscBuilder.Word.ApiOleObject = ApiOleObject;
+	AscBuilder.Word["ApiChart"]     = AscBuilder.Word.ApiChart     = ApiChart;
 
 	AscBuilder.private_GetInt = private_GetInt;
 	AscBuilder.private_Twips2MM = private_Twips2MM;

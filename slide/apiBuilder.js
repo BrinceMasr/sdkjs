@@ -8957,8 +8957,14 @@
 	window['AscBuilder']["Slide"] = window['AscBuilder'].Slide = window['AscBuilder'].Slide || {};
 	AscBuilder.Slide["Api"]              = AscBuilder.Slide.Api              = Api;
 	AscBuilder.Slide["ApiPresentation"]  = AscBuilder.Slide.ApiPresentation  = ApiPresentation;
-	AscBuilder.Slide["ApiShape"]         = AscBuilder.Slide.ApiShape         = ApiShape;
 	AscBuilder.Slide["ApiDrawing"]       = AscBuilder.Slide.ApiDrawing       = ApiDrawing;
+	AscBuilder.Slide["ApiShape"]         = AscBuilder.Slide.ApiShape         = ApiShape;
+	AscBuilder.Slide["ApiImage"]         = AscBuilder.Slide.ApiImage         = ApiImage;
+	AscBuilder.Slide["ApiGroup"]         = AscBuilder.Slide.ApiGroup         = ApiGroup;
+	AscBuilder.Slide["ApiSmartArt"]      = AscBuilder.Slide.ApiSmartArt      = ApiSmartArt;
+	AscBuilder.Slide["ApiOleObject"]     = AscBuilder.Slide.ApiOleObject     = ApiOleObject;
+	AscBuilder.Slide["ApiTable"]         = AscBuilder.Slide.ApiTable         = ApiTable;
+	AscBuilder.Slide["ApiChart"]         = AscBuilder.Slide.ApiChart         = ApiChart;
 
 	AscBuilder.Slide.init = function()
 	{

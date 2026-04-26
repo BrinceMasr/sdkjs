@@ -29546,6 +29546,12 @@
 	AscBuilder.Cell["Api"]            = AscBuilder.Cell.Api            = Api;
 	AscBuilder.Cell["ApiColor"]       = AscBuilder.Cell.ApiColor       = ApiColor;
 	AscBuilder.Cell["ApiDrawing"]     = AscBuilder.Cell.ApiDrawing     = ApiDrawing;
+	AscBuilder.Cell["ApiShape"]       = AscBuilder.Cell.ApiShape       = ApiShape;
+	AscBuilder.Cell["ApiImage"]       = AscBuilder.Cell.ApiImage       = ApiImage;
+	AscBuilder.Cell["ApiGroup"]       = AscBuilder.Cell.ApiGroup       = ApiGroup;
+	AscBuilder.Cell["ApiSmartArt"]    = AscBuilder.Cell.ApiSmartArt    = ApiSmartArt;
+	AscBuilder.Cell["ApiOleObject"]   = AscBuilder.Cell.ApiOleObject   = ApiOleObject;
+	AscBuilder.Cell["ApiChart"]       = AscBuilder.Cell.ApiChart       = ApiChart;
 	AscBuilder.Cell["ApiWorksheet"]   = AscBuilder.Cell.ApiWorksheet   = ApiWorksheet;
 	AscBuilder.Cell["ApiRange"]       = AscBuilder.Cell.ApiRange       = ApiRange;
 	AscBuilder.Cell["ApiName"]        = AscBuilder.Cell.ApiName        = ApiName;
