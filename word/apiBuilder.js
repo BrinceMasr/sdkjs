@@ -1235,9 +1235,13 @@
 		this.private_RemoveEqual();
 		private_TrackRangesPositions(true);
 	}
-
+	
 	ApiRange.prototype.constructor = ApiRange;
 	
+	ApiRange.prototype.private_RefreshRangesPosition = function()
+	{
+		private_RefreshRangesPosition();
+	};
 	ApiRange.prototype.private_UpdateDocPos = function(nStartPos, nEndPos, oElement)
 	{
 		function correctPositions(oElement) {
