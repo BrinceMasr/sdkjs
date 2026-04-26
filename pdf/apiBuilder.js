@@ -6717,7 +6717,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/Copy.js
 	 */
 	ApiDrawing.prototype.Copy = function() {
-		return new ApiDrawing(this.Drawing.copy());
+		return new this.constructor(this.Drawing.copy());
 	};
 
 	/**

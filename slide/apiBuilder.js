@@ -6286,7 +6286,7 @@
     ApiDrawing.prototype.Copy = function()
     {
         if (this.Drawing)
-            return new ApiDrawing(this.Drawing.copy());
+            return new this.constructor(this.Drawing.copy());
 
         return null;
     };
