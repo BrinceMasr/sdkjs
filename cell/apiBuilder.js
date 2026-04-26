@@ -29573,6 +29573,7 @@
 	
 	window['AscBuilder']["Cell"] = window['AscBuilder'].Cell = window['AscBuilder'].Cell || {};
 	AscBuilder.Cell["Api"]            = AscBuilder.Cell.Api            = Api;
+	AscBuilder.Cell["ApiColor"]       = AscBuilder.Cell.ApiColor       = ApiColor;
 	AscBuilder.Cell["ApiDrawing"]     = AscBuilder.Cell.ApiDrawing     = ApiDrawing;
 	AscBuilder.Cell["ApiWorksheet"]   = AscBuilder.Cell.ApiWorksheet   = ApiWorksheet;
 	AscBuilder.Cell["ApiRange"]       = AscBuilder.Cell.ApiRange       = ApiRange;
