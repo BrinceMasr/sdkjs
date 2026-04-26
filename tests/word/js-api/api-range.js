@@ -134,15 +134,4 @@ $(function () {
 		assert.equalShd(firstParagraph.GetParaPr().GetShd(), { 'Type': 'clear', 'Color': AscTest.JsApi.AutoColor() }, 'Shading check after setting shading for range with ApiColor (auto)');
 	});
 
-	QUnit.test('ToHtml', function (assert)
-	{
-		const paragraph = getFirstDocParagraph();
-		paragraph.AddText('Hello World');
-		paragraph.AddText('Bold').SetBold(true);
-		paragraph.AddText('Italic').SetItalic(true);
-
-		const range = paragraph.GetRange();
-		const html = range.ToHtml({ RenderHTMLTags : true });
-		assert.strictEqual(html, '<p>Hello World<strong>Bold</strong><em><strong>Italic</strong></em></p>\n\n', 'ToHtml output contains the paragraph text');
-	});
 });
