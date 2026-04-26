@@ -8,8 +8,8 @@ try:
     base.cmd_in_dir('.', "npm", ["install", "-g", "grunt-cli"])
     base.cmd_in_dir('.', "npm", ["ci"])
 
-    base.cmd_in_dir('.', "grunt", ["--level=WHITESPACE_ONLY", "--addon=sdkjs-forms", "--addon=sdkjs-ooxml", "--addon=sdkjs-ext"])
-    base.cmd_in_dir('.', "grunt", ["develop", "--compiled", "--addon=sdkjs-forms", "--addon=sdkjs-ooxml", "--addon=sdkjs-ext"])
+    base.cmd_in_dir('.', "grunt", ["--level=WHITESPACE_ONLY", "--addon=sdkjs-forms", "--addon=sdkjs-ooxml"])
+    base.cmd_in_dir('.', "grunt", ["develop", "--compiled", "--addon=sdkjs-forms", "--addon=sdkjs-ooxml"])
 
     input("Press Enter to continue...")
     exit(0)
