@@ -8974,8 +8974,15 @@
 	ApiSmartArt.prototype["GetClassType"]					= ApiSmartArt.prototype.GetClassType;
 	
 	window['AscBuilder']["Pdf"] = window['AscBuilder'].Pdf = window['AscBuilder'].Pdf || {};
-	AscBuilder.Pdf["Api"] = AscBuilder.Pdf.Api = Api;
-	
+	AscBuilder.Pdf["Api"]          = AscBuilder.Pdf.Api          = Api;
+	AscBuilder.Pdf["ApiDrawing"]   = AscBuilder.Pdf.ApiDrawing   = ApiDrawing;
+	AscBuilder.Pdf["ApiShape"]     = AscBuilder.Pdf.ApiShape     = ApiShape;
+	AscBuilder.Pdf["ApiImage"]     = AscBuilder.Pdf.ApiImage     = ApiImage;
+	AscBuilder.Pdf["ApiTable"]     = AscBuilder.Pdf.ApiTable     = ApiTable;
+	AscBuilder.Pdf["ApiChart"]     = AscBuilder.Pdf.ApiChart     = ApiChart;
+	AscBuilder.Pdf["ApiGroup"]     = AscBuilder.Pdf.ApiGroup     = ApiGroup;
+	AscBuilder.Pdf["ApiSmartArt"]  = AscBuilder.Pdf.ApiSmartArt  = ApiSmartArt;
+
 	AscBuilder.Pdf.init = function()
 	{
 		AscBuilder.ApiDrawing   = ApiDrawing;
