@@ -29572,8 +29572,10 @@
 	window['AscBuilder'] = window['AscBuilder'] || {};
 	
 	window['AscBuilder']["Cell"] = window['AscBuilder'].Cell = window['AscBuilder'].Cell || {};
-	AscBuilder.Cell["Api"]          = AscBuilder.Cell.Api          = Api;
-	AscBuilder.Cell["ApiDrawing"]   = AscBuilder.Cell.ApiDrawing   = ApiDrawing;
+	AscBuilder.Cell["Api"]           = AscBuilder.Cell.Api           = Api;
+	AscBuilder.Cell["ApiDrawing"]    = AscBuilder.Cell.ApiDrawing    = ApiDrawing;
+	AscBuilder.Cell["ApiWorksheet"]  = AscBuilder.Cell.ApiWorksheet  = ApiWorksheet;
+	AscBuilder.Cell["ApiRange"]      = AscBuilder.Cell.ApiRange      = ApiRange;
 
 	AscBuilder.Cell.init = function()
 	{
