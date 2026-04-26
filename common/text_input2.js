@@ -145,6 +145,8 @@
 
 		this.TextAreaHeightMin = 50;
 		this.TextAreaHeight = this.TextAreaHeightMin;
+
+		this.isMoveAccurateSync = false;
 	}
 
 	var CTextInputPrototype = CTextInput2.prototype;
@@ -1159,13 +1161,17 @@
 				focusHtmlElement(this.getFocusElement());
 		}
 	};
+	CTextInputPrototype.moveAccurateForce = function()
+	{
+		this.isMoveAccurateSync = true;
+	};
 	CTextInputPrototype.moveAccurate = function(x, y)
 	{
 		if (!this.moveAccurateFunc)
 		{
 			this.moveAccurateFunc = function() {
 				let ctx = AscCommon.g_inputContext;
-				ctx.move(ctx.moveAccurateInfo.x, ctx.moveAccurateInfo.y);
+				ctx.move(ctx.moveAccurateInfo.x / AscCommon.AscBrowser.retinaPixelRatio, ctx.moveAccurateInfo.y / AscCommon.AscBrowser.retinaPixelRatio);
 				ctx.moveAccurateInfo.id = -1;
 			};
 		}
@@ -1175,7 +1181,14 @@
 
 		this.moveAccurateInfo.x = x;
 		this.moveAccurateInfo.y = y;
-		this.moveAccurateInfo.id = setTimeout(this.moveAccurateFunc, 20);
+
+		if (true === this.isMoveAccurateSync)
+		{
+			this.isMoveAccurateSync = false;
+			this.moveAccurateFunc();
+		}
+		else
+			this.moveAccurateInfo.id = setTimeout(this.moveAccurateFunc, 20);
 	};
 	CTextInputPrototype.move = function(x, y)
 	{
