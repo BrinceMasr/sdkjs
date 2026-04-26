@@ -34,6 +34,21 @@ $(function () {
 	
 	let PluginsApi = AscTest.Editor;
 	
+	PluginsApi.pluginMethod_GetAllAddinFields = AscCommon.DocumentEditorApi.prototype.pluginMethod_GetAllAddinFields.bind(PluginsApi);
+	PluginsApi.pluginMethod_AddAddinField = AscCommon.DocumentEditorApi.prototype.pluginMethod_AddAddinField.bind(PluginsApi);
+	PluginsApi.pluginMethod_UpdateAddinFields = AscCommon.DocumentEditorApi.prototype.pluginMethod_UpdateAddinFields.bind(PluginsApi);
+	PluginsApi.pluginMethod_SelectAddinField = AscCommon.DocumentEditorApi.prototype.pluginMethod_SelectAddinField.bind(PluginsApi);
+	PluginsApi.pluginMethod_RemoveAddinField = AscCommon.DocumentEditorApi.prototype.pluginMethod_RemoveAddinField.bind(PluginsApi);
+	PluginsApi.pluginMethod_GetCurrentAddinField = AscCommon.DocumentEditorApi.prototype.pluginMethod_GetCurrentAddinField.bind(PluginsApi);
+	PluginsApi.pluginMethod_RemoveFieldWrapper = AscCommon.DocumentEditorApi.prototype.pluginMethod_RemoveFieldWrapper.bind(PluginsApi);
+	PluginsApi.pluginMethod_MoveCursorToField = AscCommon.DocumentEditorApi.prototype.pluginMethod_MoveCursorToField.bind(PluginsApi);
+	PluginsApi.pluginMethod_MoveCursorOutsideField = AscCommon.DocumentEditorApi.prototype.pluginMethod_MoveCursorOutsideField.bind(PluginsApi);
+	PluginsApi.pluginMethod_SetEditingRestrictions = AscCommon.DocumentEditorApi.prototype.pluginMethod_SetEditingRestrictions.bind(PluginsApi);
+	PluginsApi.pluginMethod_GetCurrentWord = AscCommon.DocumentEditorApi.prototype.pluginMethod_GetCurrentWord.bind(PluginsApi);
+	PluginsApi.pluginMethod_GetCurrentSentence = AscCommon.DocumentEditorApi.prototype.pluginMethod_GetCurrentSentence.bind(PluginsApi);
+	PluginsApi.pluginMethod_ReplaceCurrentWord = AscCommon.DocumentEditorApi.prototype.pluginMethod_ReplaceCurrentWord.bind(PluginsApi);
+	PluginsApi.pluginMethod_ReplaceCurrentSentence = AscCommon.DocumentEditorApi.prototype.pluginMethod_ReplaceCurrentSentence.bind(PluginsApi);
+	
 	let logicDocument = AscTest.CreateLogicDocument();
 	logicDocument.RemoveFromContent(0, logicDocument.GetElementsCount(), false);
 	
