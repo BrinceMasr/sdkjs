@@ -2034,6 +2034,51 @@
 			this.setWidth(width);
 		}
 	};
+	OutlineView.prototype.isTitleOutlineParagraph = function (paragraph) {
+		return !!this.outlineInfo.getSlideInfoByParagraph(paragraph);
+	};
+	OutlineView.prototype.getOutlineSlideParagraphs = function (slide) {
+		this.update();
+		const result = [];
+		const info = this.outlineInfo.getSlideInfoBySlide(slide);
+		if (!info) {
+			return result;
+		}
+		const content = this.getDocContent();
+		if (!content) {
+			return result;
+		}
+		const outlineParagraph = info.outlineParagraph;
+		for (let i = outlineParagraph.Index; i < content.Content.length; i += 1) {
+			const currentOutlineParagraph = content.Content[i];
+			if (this.isTitleOutlineParagraph(currentOutlineParagraph)) {
+				break;
+			}
+			result.push(currentOutlineParagraph);
+		}
+		return result;
+	};
+	OutlineView.prototype.getThumbnailPagePosition = function (pageIndex) {
+		const presentation = this.getPresentation();
+		const paragraphs = this.getOutlineSlideParagraphs(presentation.Slides[pageIndex]);
+		if (paragraphs.length) {
+			const firstParagraph = paragraphs[0];
+			const lastParagraph = paragraphs[paragraphs.length - 1];
+			const lastLine = lastParagraph.Lines[lastParagraph.Lines.length - 1];
+			if (!lastLine) {
+				return null;
+			}
+			const Y = this.getTransformY(firstParagraph.Y);
+			const H = Y - (this.getTransformY(lastParagraph.Y) + lastLine.Bottom);
+			return {
+				X: this.getTransformX(0),
+				Y: Y,
+				W: this.outlineShape.contentWidth,
+				H: H
+			};
+		}
+		return null;
+	};
 
 
 

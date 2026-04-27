@@ -2626,6 +2626,9 @@
 		if (global_mouseEvent.Button == 2 && !global_keyboardEvent.CtrlKey) {
 			this.showContextMenu(false);
 		}
+		this.SelectPageEnabled = false;
+		this.m_oWordControl.GoToPage(pos.Page);
+		this.SelectPageEnabled = true;
 		checkSelectionEnd();
 		return false;
 	};
@@ -3014,21 +3017,22 @@
 		const oPresentation = this.m_oWordControl.m_oLogicDocument;
 		const aSlides = oPresentation.GetAllSlides();
 
-		aSlides.findIndex(function (slide) {
+		const nSlideIdx = aSlides.findIndex(function (slide) {
 			return slide.Get_Id() === sSlideId;
 		});
 		if (nSlideIdx === -1) return null;
 
-		// todo
-
+		const menuPos = this.GetThumbnailPagePosition(nSlideIdx);
 		const oThContainer = editor.WordControl.m_oThumbnailsContainer;
 		const offsetX = oThContainer.AbsolutePosition.L * g_dKoef_mm_to_pix;
 		const offsetY = oThContainer.AbsolutePosition.T * g_dKoef_mm_to_pix;
-
+		const isHidden = oThContainer.HtmlElement.style.display === "none";
+		const coordX = isHidden ? 0: menuPos.X;
+		const coordY = menuPos.Y;
 
 		return {
-			X: offsetX/* + coordX*/,
-			Y: offsetY/* + coordY*/
+			X: offsetX + coordX,
+			Y: offsetY + coordY
 		};
 	};
 
@@ -3135,6 +3139,19 @@
 	};
 	COutlineThumbnailsManager.prototype.OnRecalculateSlide = function (index) {
 		this.m_bIsUpdate = true;
+	};
+	COutlineThumbnailsManager.prototype.GetThumbnailPagePosition = function (pageIndex) {
+		const slidePosition = this.outlineView.getThumbnailPagePosition(pageIndex);
+		if (slidePosition) {
+			const scaleFactor = AscCommon.g_dKoef_mm_to_pix;
+			return {
+				X: slidePosition.X * scaleFactor,
+				Y: slidePosition.Y * scaleFactor,
+				W: slidePosition.W * scaleFactor,
+				H: slidePosition.H * scaleFactor
+			};
+		}
+		return null;
 	};
 
 
