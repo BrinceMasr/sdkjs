@@ -29556,6 +29556,11 @@
 	AscBuilder.Cell["ApiRange"]       = AscBuilder.Cell.ApiRange       = ApiRange;
 	AscBuilder.Cell["ApiName"]        = AscBuilder.Cell.ApiName        = ApiName;
 	AscBuilder.Cell["ApiAutoFilter"]  = AscBuilder.Cell.ApiAutoFilter  = ApiAutoFilter;
+	AscBuilder.Cell["ApiPivotTable"]             = AscBuilder.Cell.ApiPivotTable             = ApiPivotTable;
+	AscBuilder.Cell["ApiPivotField"]             = AscBuilder.Cell.ApiPivotField             = ApiPivotField;
+	AscBuilder.Cell["ApiPivotDataField"]         = AscBuilder.Cell.ApiPivotDataField         = ApiPivotDataField;
+	AscBuilder.Cell["ApiPivotItem"]              = AscBuilder.Cell.ApiPivotItem              = ApiPivotItem;
+	AscBuilder.Cell["ApiPivotFilters"]           = AscBuilder.Cell.ApiPivotFilters           = ApiPivotFilters;
 
 	AscBuilder.Cell.init = function()
 	{
