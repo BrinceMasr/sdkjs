@@ -84,6 +84,7 @@ var SignType = {Negative: 1, Null:2, Positive: 3};
 var gc_nMaxDigCount = 15;//Maximum number of precision digits
 var gc_nMaxDigCountView = 11;//Maximum number of digits in a cell
 var gc_nMaxMantissa = Math.pow(10, gc_nMaxDigCount);
+var gc_log10of2 = Math.log10(2); // log10(2): converts binary exponent to decimal exponent
 
 // Pre-allocated buffers for IEEE 754 bit-level exponent extraction in getNumberParts.
 // Avoids Math.log() floating-point precision issues and is slightly faster.
@@ -179,7 +180,7 @@ function getNumberParts(x)
 		// existing correction below fixes it.
 		_g_numPartsF64[0] = x;
 		const binaryExp = ((_g_numPartsI32[1] >>> 20) & 0x7FF) - 1023;
-		exp = Math.floor(binaryExp * 0.30102999566398120) - gc_nMaxDigCount + 1;
+		exp = Math.floor(binaryExp * gc_log10of2) - gc_nMaxDigCount + 1;
 		man = Math.round(x / Math.pow(10, exp));
 		if(man >= gc_nMaxMantissa)
 		{
@@ -3324,23 +3325,27 @@ CellFormat.prototype =
 			}
 		} else {
 			var info = format.getFormatCellsInfo();
-			var types = [c_oAscNumFormatType.Text, c_oAscNumFormatType.Percent, c_oAscNumFormatType.Scientific,
+			var normalized = stripFormatEscaping(this.sFormat);
+			if (format.bScientific && /^0\.0*,*E\+00$/.test(normalized)) {
+				nType = c_oAscNumFormatType.Scientific;
+			} else {
+				var types = [c_oAscNumFormatType.Text, c_oAscNumFormatType.Percent,
 				c_oAscNumFormatType.Number, c_oAscNumFormatType.Fraction, c_oAscNumFormatType.Currency,
 				c_oAscNumFormatType.Accounting
-			];
-			var normalized = stripFormatEscaping(this.sFormat);
-			for (var i = 0; i < types.length; ++i) {
-				var type = types[i];
-				info.asc_setType(type);
-				var formats = getFormatCells(info);
-				for (var j = 0; j < formats.length; j++) {
-					if (stripFormatEscaping(formats[j]) === normalized) {
-						nType = type;
+				];
+				for (var i = 0; i < types.length; ++i) {
+					var type = types[i];
+					info.asc_setType(type);
+					var formats = getFormatCells(info);
+					for (var j = 0; j < formats.length; j++) {
+						if (stripFormatEscaping(formats[j]) === normalized) {
+							nType = type;
+							break;
+						}
+					}
+					if (nType !== c_oAscNumFormatType.Custom) {
 						break;
 					}
-				}
-				if (nType !== c_oAscNumFormatType.Custom) {
-					break;
 				}
 			}
 		}
