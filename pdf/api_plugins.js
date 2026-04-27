@@ -248,8 +248,8 @@
 			return false;
 		}
 
-		if (rect != null && !Array.isArray(rect)) {
-			return false;
+		if (!Array.isArray(rect)) {
+			rect = [];
 		}
 
 		let nGoToType = AscPDF.GOTO_TYPES.xyz;
