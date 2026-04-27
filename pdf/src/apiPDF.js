@@ -875,10 +875,10 @@
                         if (oDoc.isOnValidate)
                             throw Error('InvalidSetError: Set not possible, invalid or unknown.');
 
-						let sApiValueToSet = sValue;
+						let sApiValueToSet = value;
                         let aOpt = this.field.GetOptions();
                         if (aOpt) {
-                            let nIdx = aOpt.indexOf(sValue);
+                            let nIdx = aOpt.indexOf(value);
                             if (nIdx != -1)
                                 sApiValueToSet = String(nIdx);
                         }
