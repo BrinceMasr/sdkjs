@@ -1568,6 +1568,86 @@ void main() {\n\
         }
         return ret;
     };
+    CFile.prototype.copyPageTextWithQuads = function(pageIndex)
+    {
+        let stream = this.getPageTextStream(pageIndex);
+        if (!stream || this.pages[pageIndex].isRecognized)
+            return [];
+
+        let result = [];
+        let dKoefX = this.pages[pageIndex].Dpi / 25.4;
+        let dKoefY = this.pages[pageIndex].Dpi / 25.4;
+
+        while (stream.pos < stream.size)
+        {
+            let _lineX = stream.GetDouble();
+            let _lineY = stream.GetDouble();
+            let _lineEx = 1;
+            let _lineEy = 0;
+            if (stream.GetChar())
+            {
+                _lineEx = stream.GetDouble();
+                _lineEy = stream.GetDouble();
+            }
+            let _lineAscent  = stream.GetDouble();
+            let _lineDescent = stream.GetDouble();
+            let _lineWidth   = stream.GetDouble();
+
+            let nChars = stream.GetLong();
+            let lineText = "";
+
+            for (let i = 0; i < nChars; ++i)
+            {
+                if (i)
+                    stream.GetDouble();
+                let nChar = stream.GetLong();
+                stream.Skip(4);
+
+                lineText += nChar === 0xFFFF ? ' ' : String.fromCodePoint(nChar);
+            }
+
+            if (!lineText)
+                continue;
+
+            let quad;
+            if (_lineEx == 1 && _lineEy == 0)
+            {
+                let _x = dKoefX * _lineX;
+                let _r = dKoefX * (_lineX + _lineWidth);
+                let _y = dKoefY * (_lineY - _lineAscent);
+                let _b = dKoefY * (_lineY + _lineDescent);
+                quad = [_x, _y, _r, _y, _x, _b, _r, _b];
+            }
+            else
+            {
+                let ortX = -_lineEy;
+                let ortY = _lineEx;
+
+                let _dx = _lineX + ortX * _lineDescent;
+                let _dy = _lineY + ortY * _lineDescent;
+
+                let _x1 = _dx;
+                let _y1 = _dy;
+                let _x2 = _x1 - ortX * (_lineAscent + _lineDescent);
+                let _y2 = _y1 - ortY * (_lineAscent + _lineDescent);
+                let _x3 = _x2 + _lineWidth * _lineEx;
+                let _y3 = _y2 + _lineWidth * _lineEy;
+                let _x4 = _x3 + ortX * (_lineAscent + _lineDescent);
+                let _y4 = _y3 + ortY * (_lineAscent + _lineDescent);
+
+                quad = [
+                    dKoefX * _x2, dKoefY * _y2,
+                    dKoefX * _x3, dKoefY * _y3,
+                    dKoefX * _x1, dKoefY * _y1,
+                    dKoefX * _x4, dKoefY * _y4
+                ];
+            }
+
+            result.push({ text: lineText, quads: quad });
+        }
+
+        return result;
+    };
     CFile.prototype.copy = function(_text_format)
     {
         let sel = this.Selection;

@@ -8812,7 +8812,8 @@ var CPresentation = CPresentation || function(){};
 	CPDFDoc.prototype.SetTextSelectionType = function(type){};
 	CPDFDoc.prototype.ResetTextSelectionType = function(){};
 	CPDFDoc.prototype.IsWordSelection = function(){return false;};
-	CPDFDoc.prototype.IsParagraphSelection = function() {return false;};    CPDFDoc.prototype.Get_AllImageUrls = function(aImages) {
+	CPDFDoc.prototype.IsParagraphSelection = function() {return false;};
+	CPDFDoc.prototype.Get_AllImageUrls = function(aImages) {
         if (!Array.isArray(aImages)) {
             aImages = [];
         }
