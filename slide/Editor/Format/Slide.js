@@ -1527,20 +1527,22 @@ Slide.prototype.createTitle = function () {
     return copySp;
 };
 Slide.prototype.createContent = function () {
-    const titleSp = this.getMatchingShape(AscFormat.phType_subTitle, null, false, {});
-    if (titleSp) {
+	let matchingShape = null;
+	function forEachSpCallback(shape) {
+		const placeholderType = shape.getPlaceholderType();
+		if (placeholderType === AscFormat.phType_subTitle || placeholderType === AscFormat.phType_obj || placeholderType === AscFormat.phType_body) {
+			matchingShape = shape;
+			return true;
+		}
+	}
+    this.cSld.forEachSp(forEachSpCallback);
+    if (matchingShape) {
         return null;
     }
-    let matchingShape = null;
+
     const layout = this.Layout;
     const master = this.Layout.Master;
-    function forEachSpCallback(shape) {
-        const placeholderType = shape.getPlaceholderType();
-        if (placeholderType === AscFormat.phType_subTitle || placeholderType === AscFormat.phType_obj || placeholderType === AscFormat.phType_body) {
-            matchingShape = shape;
-            return true;
-        }
-    }
+
 
     if (layout) {
         layout.cSld.forEachSp(forEachSpCallback);
