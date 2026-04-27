@@ -14822,53 +14822,6 @@ background-repeat: no-repeat;\
 		logicDocument.UpdateSelection();
 	};
 	
-	asc_docs_api.prototype._onStartGroupActions = function()
-	{
-		let logicDocument = this.private_GetLogicDocument();
-		if (!logicDocument)
-			return;
-		
-		logicDocument.GetSpellCheckManager().TurnOff();
-	};
-	asc_docs_api.prototype._onEndGroupActions = function(isFullEnd)
-	{
-		let logicDocument = this.private_GetLogicDocument();
-		if (!logicDocument)
-			return;
-
-		let groupChanges = AscCommon.History.getGroupChanges();
-		AscCommon.History.resetGroupChanges();
-		if (groupChanges.length)
-			logicDocument.RecalculateByChanges(groupChanges);
-
-		if (isFullEnd)
-		{
-			logicDocument.FullRecalc.ScrollToTarget = false;
-			logicDocument.UpdateTargetOnRecalculate = true;
-			
-			logicDocument.UpdateInterface();
-			logicDocument.UpdateSelection();
-			logicDocument.GetSpellCheckManager().TurnOn();
-		}
-	};
-	asc_docs_api.prototype._saveGroupActionsState = function()
-	{
-		let logicDocument = this.private_GetLogicDocument();
-		if (!logicDocument)
-			return;
-
-		this.groupActionsPr.selectionState = logicDocument.SaveDocumentState();
-	};
-	asc_docs_api.prototype._restoreGroupActionsState = function()
-	{
-		let logicDocument = this.private_GetLogicDocument();
-		if (!logicDocument || !this.groupActionsPr.selectionState)
-			return;
-
-		logicDocument.LoadDocumentState(this.groupActionsPr.selectionState);
-		this.groupActionsPr.selectionState = null;
-	};
-	
 	asc_docs_api.prototype.getJsApi = function()
 	{
 		return AscBuilder.Word.Api;

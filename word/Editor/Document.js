@@ -14523,14 +14523,14 @@ CDocument.prototype.OnUserScroll = function()
 	{
 		if (this.DrawingDocument.IsTargetOnScreen())
 		{
-			this.UpdateTargetOnRecalculate     = true;
-			this.Api.groupActionsPr.userScroll = false;
+			this.UpdateTargetOnRecalculate = true;
+			this.Api.setUserScrollGroupActions(false);
 		}
 		else
 		{
-			this.NeedUpdateTarget              = false;
-			this.UpdateTargetOnRecalculate     = false;
-			this.Api.groupActionsPr.userScroll = true;
+			this.NeedUpdateTarget          = false;
+			this.UpdateTargetOnRecalculate = false;
+			this.Api.setUserScrollGroupActions(true);
 		}
 	}
 };
