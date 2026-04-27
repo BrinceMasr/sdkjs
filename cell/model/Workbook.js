@@ -1338,12 +1338,17 @@
 		changeTableName: function(tableName, newName) {
 			var defName = this.getDefNameByName(tableName, null);
 			if (defName) {
+				this.buildDependency();
 				var oldUndoName = defName.getUndoDefName();
 				var newUndoName = defName.getUndoDefName();
 				newUndoName.name = newName;
+				
+				var notifyData = {type: c_oNotifyType.ChangeDefName, from: oldUndoName, to: newUndoName};
+				this._broadcastDefName(tableName, notifyData);
 				AscCommon.History.TurnOff();
 				this.editDefinesNames(oldUndoName, newUndoName);
 				AscCommon.History.TurnOn();
+				this.calcTree();
 			}
 		},
 		delTableName: function(tableName, bConvertTableFormulaToRef) {
