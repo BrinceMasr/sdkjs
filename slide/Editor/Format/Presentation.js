@@ -9170,6 +9170,10 @@ CPresentation.prototype.addNextSlideAction = function (layoutIndex) {
 				sp.setParent(new_slide);
 				if (sp.txBody) {
 					sp.txBody.setBodyPr(new AscFormat.CBodyPr());
+					sp.txBody.setLstStyle(new AscFormat.TextListStyle());
+				}
+				if (sp.spPr) {
+					sp.spPr.setXfrm(null);
 				}
 				!bIsSpecialPh && sp.clearContent && sp.clearContent();
 				new_slide.addToSpTreeToPos(new_slide.cSld.spTree.length, sp);
