@@ -1313,36 +1313,6 @@
 		return new ApiChart(oChartSpace);
 	};
 
-	/**
-	 * Returns the object by it's internal ID.
-	 * @memberof Api
-	 * @typeofeditors ["PDFE"]
-	 * @param {string} id - the object internal ID.
-	 * @returns {?object}
-	 * @see office-js-api/Examples/{Editor}/Api/Methods/GetByInternalId.js
-	 */
-	Api.GetByInternalId = function(id) {
-		let obj = AscCommon.g_oTableId.Get_ById(id);
-		if (!obj) {
-			return null;
-		}
-		
-		if (obj instanceof AscFormat.CGraphicObjectBase) {
-			return AscBuilder.GetApiDrawing(obj);
-		}
-		else if (obj instanceof AscPDF.CBaseField && !obj.IsWidget()) {
-			return private_GetFieldApi(obj);
-		}
-		else if (obj instanceof AscPDF.CBaseField && obj.IsWidget()) {
-			return private_GetWidgetApi(obj);
-		}
-		else if (obj instanceof AscPDF.CAnnotationBase) {
-			return private_GetAnnotApi(obj);
-		}
-
-		return null;
-	};
-
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiDocument
@@ -1474,7 +1444,7 @@
 			});
 		}
 
-		return aFields.map(private_GetFieldApi);
+		return aFields.map(GetFieldApi);
 	};
 
 	/**
@@ -1490,15 +1460,15 @@
 			return null;
 
 		if (!oField.IsWidget()) {
-			return oField.IsAllKidsWidgets() ? private_GetFieldApi(oField) : null;
+			return oField.IsAllKidsWidgets() ? GetFieldApi(oField) : null;
 		}
 
 		let oParent = oField.GetParent();
 		if (oParent && oParent.IsAllKidsWidgets()) {
-			return private_GetFieldApi(oParent);
+			return GetFieldApi(oParent);
 		}
 
-		return private_GetFieldApi(oField);
+		return GetFieldApi(oField);
 	};
 
 	/**
@@ -1528,7 +1498,7 @@
 		searchSettings.put_WholeWords(wholeWords);
 
 		this.Document.Search(searchSettings);
-		return this.Document.MarkAllSearchElementsForRedact().map(private_GetAnnotApi);
+		return this.Document.MarkAllSearchElementsForRedact().map(GetAnnotApi);
 	};
 
 	/**
@@ -1625,7 +1595,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPage/Methods/GetAllWidgets.js
 	 */
 	ApiPage.prototype.GetAllWidgets = function() {
-		return this.Page.fields.map(private_GetWidgetApi);
+		return this.Page.fields.map(GetWidgetApi);
 	};
 
 	/**
@@ -1676,7 +1646,7 @@
 				continue;
 			}
 
-			aResult.push(private_GetAnnotApi(aAnnots[i]));
+			aResult.push(GetAnnotApi(aAnnots[i]));
 		}
 		
 		return aResult;
@@ -1798,30 +1768,6 @@
 	};
 
 	/**
-	 * Gets all text content on the page.
-	 * @memberof ApiPage
-	 * @typeofeditors ["PDFE"]
-	 * @returns {string}
-	 * @see office-js-api/Examples/{Editor}/ApiPage/Methods/GetText.js
-	 */
-	ApiPage.prototype.GetText = function() {
-		let oDoc = private_GetLogicDocument();
-		return oDoc.GetFile().copyPageText(this.GetIndex());
-	};
-
-	/**
-	 * Gets all text content on the page with quads per line.
-	 * @memberof ApiPage
-	 * @typeofeditors ["PDFE"]
-	 * @returns {Array.<{text: string, quads: number[]}>}
-	 * @see office-js-api/Examples/{Editor}/ApiPage/Methods/GetTextWithQuads.js
-	 */
-	ApiPage.prototype.GetTextWithQuads = function() {
-		let oDoc = private_GetLogicDocument();
-		return oDoc.GetFile().copyPageTextWithQuads(this.GetIndex());
-	};
-
-	/**
 	 * Recognizes content on the page and returns an array of recognized objects.
 	 * @memberof ApiPage
 	 * @typeofeditors ["PDFE"]
@@ -1874,17 +1820,6 @@
 	};
 
 	/**
-	 * Returns an internal ID of the current field.
-	 * @memberof ApiBaseField
-	 * @typeofeditors ["PDFE"]
-	 * @returns {string}
-	 * @see office-js-api/Examples/{Editor}/ApiBaseField/Methods/GetInternalId.js
-	 */
-	ApiBaseField.prototype.GetInternalId = function() {
-		return this.Field.GetId();
-	};
-
-	/**
 	 * Sets new field name if possible.
 	 * @memberof ApiBaseField
 	 * @typeofeditors ["PDFE"]
@@ -1930,30 +1865,6 @@
 		return this.Field.GetPartialName();
 	};
 	
-	/**
-	 * Sets field tooltip
-	 * @memberof ApiBaseField
-	 * @typeofeditors ["PDFE"]
-	 * @param {?string} tooltip
-	 * @returns {boolean}
-	 * @see office-js-api/Examples/{Editor}/ApiBaseField/Methods/SetTooltip.js
-	 */
-	ApiBaseField.prototype.SetTooltip = function(tooltip) {
-		this.Field.SetTooltip(tooltip);
-		return true;
-	};
-
-	/**
-	 * Gets field tooltip
-	 * @memberof ApiBaseField
-	 * @typeofeditors ["PDFE"]
-	 * @returns {boolean}
-	 * @see office-js-api/Examples/{Editor}/ApiBaseField/Methods/GetTooltip.js
-	 */
-	ApiBaseField.prototype.GetTooltip = function() {
-		return this.Field.GetTooltip();
-	};
-
 	/**
 	 * Sets field required
 	 * @memberof ApiBaseField
@@ -2070,7 +1981,7 @@
 
 		this.Field = oWidget.GetParent();
 
-		return private_GetWidgetApi(oWidget);
+		return GetWidgetApi(oWidget);
 	};
 
 	/**
@@ -2081,7 +1992,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiBaseField/Methods/GetAllWidgets.js
 	 */
 	ApiBaseField.prototype.GetAllWidgets = function() {
-		return this.Field.GetAllWidgets().map(private_GetWidgetApi);
+		return this.Field.GetAllWidgets().map(GetWidgetApi);
 	};
 
 	/**
@@ -2119,17 +2030,6 @@
 	 */
 	ApiBaseWidget.prototype.GetClassType = function() {
 		return "baseWidget";
-	};
-
-	/**
-	 * Returns an internal ID of the current field widget.
-	 * @memberof ApiBaseWidget
-	 * @typeofeditors ["PDFE"]
-	 * @returns {string}
-	 * @see office-js-api/Examples/{Editor}/ApiBaseWidget/Methods/GetInternalId.js
-	 */
-	ApiBaseWidget.prototype.GetInternalId = function() {
-		return this.Field.GetId();
 	};
 
 	/**
@@ -2422,133 +2322,6 @@
 	ApiBaseWidget.prototype.Delete = function() {
 		let oDoc = private_GetLogicDocument();
 		return oDoc.RemoveField(this.Field.GetId());
-	};
-
-	/**
-	 * Gets all field actions in json format.
-	 * @memberof ApiBaseWidget
-	 * @typeofeditors ["PDFE"]
-	 * @returns {JSON}
-	 * @see office-js-api/Examples/{Editor}/ApiBaseWidget/Methods/GetActionsJSON.js
-	 */
-	ApiBaseWidget.prototype.GetActionsJSON = function() {
-		let oActionsJSON = {};
-		
-		function getActionsJSON(actions) {
-			if (actions.length === 0) {
-				return null;
-			}
-
-			const head = getActionJSON(actions[0]);
-			let tail = head;
-
-			for (let i = 1; i < actions.length; i++) {
-				const node = getActionJSON(actions[i]);
-				tail["next"] = node;
-				tail = node;
-			}
-
-			return head;
-		}
-
-		function getActionJSON(actionInfo) {
-			let result = {};
-
-			switch (actionInfo["S"]) {
-				case AscPDF.ACTIONS_TYPES.GoTo: {
-					result["type"] = "GoTo";
-
-					switch (actionInfo["kind"]) {
-						case AscPDF.GOTO_TYPES.xyz: {
-							result["goToType"] = "xyz";
-							break;
-						}
-						case AscPDF.GOTO_TYPES.fit: {
-							result["goToType"] = "fit";
-							break;
-						}
-						case AscPDF.GOTO_TYPES.fitB: {
-							result["goToType"] = "fitB";
-							break;
-						}
-						case AscPDF.GOTO_TYPES.fitH: {
-							result["goToType"] = "fitH";
-							break;
-						}
-						case AscPDF.GOTO_TYPES.fitBH: {
-							result["goToType"] = "fitBH";
-							break;
-						}
-						case AscPDF.GOTO_TYPES.fitV: {
-							result["goToType"] = "fitV";
-							break;
-						}
-						case AscPDF.GOTO_TYPES.fitBV: {
-							result["goToType"] = "fitBV";
-							break;
-						}
-						case AscPDF.GOTO_TYPES.fitR: {
-							result["goToType"] = "fitR";
-							break;
-						}
-					}
-
-					result["pageIndex"] = actionInfo["page"];
-                    result["goToType"] = actionInfo["kind"];
-                    result["zoom"] = actionInfo["zoom"];
-					result["rect"] = {
-						x1:  actionInfo["left"],
-						y1:  actionInfo["top"],
-						x2:  actionInfo["right"],
-						y2:  actionInfo["bottom"],
-					};
-					
-					break;
-				}
-				case AscPDF.ACTIONS_TYPES.URI: {
-					result["type"] = "URI";
-					result["uri"] = actionInfo["URI"];
-					break;
-				}
-				case AscPDF.ACTIONS_TYPES.HideShow: {
-					result["type"] = "HideShow";
-					result["fieldNames"] = actionInfo["T"];
-					result["isHide"] = actionInfo["H"];
-					break;
-				}
-				case AscPDF.ACTIONS_TYPES.Named: {
-					result["type"] = "Named";
-					result["name"] = actionInfo["N"];
-					break;
-				}
-				case AscPDF.ACTIONS_TYPES.ResetForm: {
-					result["type"] = "ResetForm";
-					result["fieldNames"] = actionInfo["Fields"];
-					result["isAllExcept"] = Boolean(actionInfo["Flags"]);
-					break;
-				}
-				case AscPDF.ACTIONS_TYPES.JavaScript: {
-					result["type"] = "JavaScript";
-					result["script"] = actionInfo["JS"];
-					break;
-				}
-			}
-
-			return result;
-		}
-
-		oActionsJSON["MouseUp"]		= getActionsJSON(this.Field.GetActions(AscPDF.PDF_TRIGGERS_TYPES.MouseUp));
-		oActionsJSON["MouseDown"]	= getActionsJSON(this.Field.GetActions(AscPDF.PDF_TRIGGERS_TYPES.MouseDown));
-		oActionsJSON["MouseEnter"]	= getActionsJSON(this.Field.GetActions(AscPDF.PDF_TRIGGERS_TYPES.MouseEnter));
-		oActionsJSON["MouseExit"]	= getActionsJSON(this.Field.GetActions(AscPDF.PDF_TRIGGERS_TYPES.MouseExit));
-		oActionsJSON["OnFocus"]		= getActionsJSON(this.Field.GetActions(AscPDF.PDF_TRIGGERS_TYPES.OnFocus));
-		oActionsJSON["OnBlur"]		= getActionsJSON(this.Field.GetActions(AscPDF.PDF_TRIGGERS_TYPES.OnBlur));
-		oActionsJSON["Keystroke"]	= getActionsJSON(this.Field.GetActions(AscPDF.PDF_TRIGGERS_TYPES.Keystroke));
-		oActionsJSON["Validate"]	= getActionsJSON(this.Field.GetActions(AscPDF.PDF_TRIGGERS_TYPES.Validate));
-		oActionsJSON["Calculate"]	= getActionsJSON(this.Field.GetActions(AscPDF.PDF_TRIGGERS_TYPES.Calculate));
-		oActionsJSON["Format"]		= getActionsJSON(this.Field.GetActions(AscPDF.PDF_TRIGGERS_TYPES.Format));
-
-		return oActionsJSON;
 	};
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -3758,22 +3531,6 @@
 	};
 
 	/**
-	 * Sets image for all button field widgets
-	 * @memberof ApiButtonField
-	 * @typeofeditors ["PDFE"]
-	 * @param {string} imageUrl
-	 * @returns {boolean}
-	 * @see office-js-api/Examples/{Editor}/ApiButtonField/Methods/SetValue.js
-	 */
-	ApiButtonField.prototype.SetValue = function(imageUrl) {
-		this.GetAllWidgets().forEach(function(apiWidget) {
-			apiWidget.SetImage(imageUrl);
-		});
-
-		return true;
-	};
-
-	/**
 	 * Class representing a button widget.
 	 * @constructor
 	 * @typeofeditors ["PDFE"]
@@ -4105,17 +3862,6 @@
 
 	ApiBaseAnnotation.prototype.private_GetImpl = function() {
 		return this.Annot;
-	};
-
-	/**
-	 * Returns an internal ID of the current annotation.
-	 * @memberof ApiBaseAnnotation
-	 * @typeofeditors ["PDFE"]
-	 * @returns {string}
-	 * @see office-js-api/Examples/{Editor}/ApiBaseAnnotation/Methods/GetInternalId.js
-	 */
-	ApiBaseAnnotation.prototype.GetInternalId = function() {
-		return this.Annot.GetId();
 	};
 
 	/**
@@ -4694,7 +4440,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiBaseAnnotation/Methods/GetReplies.js
 	 */
 	ApiBaseAnnotation.prototype.GetReplies = function() {
-		return this.Annot.GetReplies().map(private_GetAnnotApi);
+		return this.Annot.GetReplies().map(GetAnnotApi);
 	};
 
 	/**
@@ -6819,17 +6565,6 @@
 	};
 
 	/**
-	 * Returns an internal ID of the current drawing.
-	 * @memberof ApiDrawing
-	 * @typeofeditors ["PDFE"]
-	 * @returns {string}
-	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetInternalId.js
-	 */
-	ApiDrawing.prototype.GetInternalId = function() {
-		return this.Drawing.GetId();
-	};
-
-	/**
 	 * Returns the type of the ApiDrawing class.
 	 * @memberof ApiDrawing
 	 * @typeofeditors ["PDFE"]
@@ -8081,7 +7816,7 @@
 		return Asc.editor.getPDFDoc();
 	}
 
-	function private_GetFieldApi(field) {
+	function GetFieldApi(field) {
 		if (!field) {
 			return null;
 		}
@@ -8108,7 +7843,7 @@
 		}
 	}
 
-	function private_GetWidgetApi(field) {
+	function GetWidgetApi(field) {
 		if (!field) {
 			return null;
 		}
@@ -8459,7 +8194,7 @@
 		return [r / 255, g / 255, b / 255];
 	}
 
-	function private_GetAnnotApi(annot) {
+	function GetAnnotApi(annot) {
 		if (!annot) {
 			return null;
 		}
@@ -8738,7 +8473,6 @@
 	Api["CreateImage"]				= Api.CreateImage;
 	Api["CreateTable"]				= Api.CreateTable;
 	Api["CreateChart"]				= Api.CreateChart;
-	Api["GetByInternalId"]			= Api.GetByInternalId;
 
 	// ApiDocument
 	ApiDocument.prototype["GetClassType"]					= ApiDocument.prototype.GetClassType;
@@ -8763,19 +8497,14 @@
 	ApiPage.prototype["SetSelection"]						= ApiPage.prototype.SetSelection;
 	ApiPage.prototype["GetSelectionQuads"]					= ApiPage.prototype.GetSelectionQuads;
 	ApiPage.prototype["GetSelectedText"]					= ApiPage.prototype.GetSelectedText;
-	ApiPage.prototype["GetText"]							= ApiPage.prototype.GetText;
-	ApiPage.prototype["GetTextWithQuads"]					= ApiPage.prototype.GetTextWithQuads;
 	ApiPage.prototype["RecognizeContent"]					= ApiPage.prototype.RecognizeContent;
 	ApiPage.prototype["GetAllDrawings"]						= ApiPage.prototype.GetAllDrawings;
 
 	// ApiBaseField
-	ApiBaseField.prototype["GetInternalId"]					= ApiBaseField.prototype.GetInternalId;
 	ApiBaseField.prototype["SetFullName"]					= ApiBaseField.prototype.SetFullName;
 	ApiBaseField.prototype["GetFullName"]					= ApiBaseField.prototype.GetFullName;
 	ApiBaseField.prototype["SetPartialName"]				= ApiBaseField.prototype.SetPartialName;
 	ApiBaseField.prototype["GetPartialName"]				= ApiBaseField.prototype.GetPartialName;
-	ApiBaseField.prototype["SetTooltip"]					= ApiBaseField.prototype.SetTooltip;
-	ApiBaseField.prototype["GetTooltip"]					= ApiBaseField.prototype.GetTooltip;
 	ApiBaseField.prototype["SetRequired"]					= ApiBaseField.prototype.SetRequired;
 	ApiBaseField.prototype["IsRequired"]					= ApiBaseField.prototype.IsRequired;
 	ApiBaseField.prototype["SetReadOnly"]					= ApiBaseField.prototype.SetReadOnly;
@@ -8788,7 +8517,6 @@
 
 	// ApiBaseWidget
 	ApiBaseWidget.prototype["GetClassType"]					= ApiBaseWidget.prototype.GetClassType;
-	ApiBaseWidget.prototype["GetInternalId"]				= ApiBaseWidget.prototype.GetInternalId;
 	ApiBaseWidget.prototype["SetRect"]						= ApiBaseWidget.prototype.SetRect;
 	ApiBaseWidget.prototype["GetRect"]						= ApiBaseWidget.prototype.GetRect;
 	ApiBaseWidget.prototype["SetPosition"]					= ApiBaseWidget.prototype.SetPosition;
@@ -8808,7 +8536,6 @@
 	ApiBaseWidget.prototype["SetAutoFit"]					= ApiBaseWidget.prototype.SetAutoFit;
 	ApiBaseWidget.prototype["IsAutoFit"]					= ApiBaseWidget.prototype.IsAutoFit;
 	ApiBaseWidget.prototype["Delete"]						= ApiBaseWidget.prototype.Delete;
-	ApiBaseWidget.prototype["GetActionsJSON"]				= ApiBaseWidget.prototype.GetActionsJSON;
 
 	// ApiTextField
 	ApiTextField.prototype["GetClassType"]					= ApiTextField.prototype.GetClassType;
@@ -8891,7 +8618,6 @@
 
 	// ApiButtonField
 	ApiButtonField.prototype["GetClassType"]				= ApiButtonField.prototype.GetClassType;
-	ApiButtonField.prototype["SetValue"]					= ApiButtonField.prototype.SetValue;
 
 	// ApiButtonWidget
 	ApiButtonWidget.prototype["GetClassType"]				= ApiButtonWidget.prototype.GetClassType;
@@ -8914,7 +8640,6 @@
 	ApiButtonWidget.prototype["SetImage"]					= ApiButtonWidget.prototype.SetImage;
 
 	// ApiBaseAnnotation
-	ApiBaseAnnotation.prototype["GetInternalId"]			= ApiBaseAnnotation.prototype.GetInternalId;
 	ApiBaseAnnotation.prototype["SetRect"]					= ApiBaseAnnotation.prototype.SetRect;
 	ApiBaseAnnotation.prototype["GetRect"]					= ApiBaseAnnotation.prototype.GetRect;
 	ApiBaseAnnotation.prototype["SetPosition"]				= ApiBaseAnnotation.prototype.SetPosition;
@@ -9109,7 +8834,6 @@
 	
 	// ApiDrawing
 	ApiDrawing.prototype["GetClassType"]					= ApiDrawing.prototype.GetClassType;
-	ApiDrawing.prototype["GetInternalId"]					= ApiDrawing.prototype.GetInternalId;
 	ApiDrawing.prototype["GetParentPage"]					= ApiDrawing.prototype.GetParentPage;
 	ApiDrawing.prototype["SetSize"]							= ApiDrawing.prototype.SetSize;
 	ApiDrawing.prototype["SetPosition"]						= ApiDrawing.prototype.SetPosition;
@@ -9235,6 +8959,17 @@
 	AscBuilder.Pdf["ApiChart"]     = AscBuilder.Pdf.ApiChart     = ApiChart;
 	AscBuilder.Pdf["ApiGroup"]     = AscBuilder.Pdf.ApiGroup     = ApiGroup;
 	AscBuilder.Pdf["ApiSmartArt"]  = AscBuilder.Pdf.ApiSmartArt  = ApiSmartArt;
+
+	AscBuilder.Pdf["ApiPage"]			= AscBuilder.Pdf.ApiPage			= ApiPage;
+	AscBuilder.Pdf["ApiBaseField"]		= AscBuilder.Pdf.ApiBaseField		= ApiBaseField;
+	AscBuilder.Pdf["ApiButtonField"]	= AscBuilder.Pdf.ApiButtonField		= ApiButtonField;
+	AscBuilder.Pdf["ApiBaseWidget"]		= AscBuilder.Pdf.ApiBaseWidget		= ApiBaseWidget;
+	AscBuilder.Pdf["ApiBaseAnnotation"]	= AscBuilder.Pdf.ApiBaseAnnotation	= ApiBaseAnnotation;
+
+	AscBuilder.Pdf["private_GetLogicDocument"]	= AscBuilder.Pdf.private_GetLogicDocument	= private_GetLogicDocument;
+	AscBuilder.Pdf["GetFieldApi"]				= AscBuilder.Pdf.GetFieldApi				= GetFieldApi;
+	AscBuilder.Pdf["GetWidgetApi"]				= AscBuilder.Pdf.GetWidgetApi				= GetWidgetApi;
+	AscBuilder.Pdf["GetAnnotApi"]				= AscBuilder.Pdf.GetAnnotApi				= GetAnnotApi;
 
 	AscBuilder.Pdf.init = function()
 	{
