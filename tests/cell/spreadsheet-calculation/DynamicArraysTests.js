@@ -1515,6 +1515,90 @@ $(function () {
 	});
 
 
+	QUnit.test('Test @ parent lookup: nearest wrapping function decides, not transitive ancestor', function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+		let fillRange, fragment, parsed, outStack, parent;
+		let flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		function findOperandIndex(stack, name) {
+			for (let i = 0; i < stack.length; i++) {
+				let el = stack[i];
+				if (el && (el.type === AscCommonExcel.cElementType.cellsRange ||
+						el.type === AscCommonExcel.cElementType.cellsRange3D) &&
+						el.toString && el.toString() === name) {
+					return i;
+				}
+			}
+			return -1;
+		}
+
+		// Setup: full nested formula equivalent to the user's case
+		// IF(B19=""," ",INDEX(A!H:H,MATCH(B:B,A!F:F,0),0)).
+		let formula = "=IF(B19>0,F1,INDEX(F:F,MATCH(H:H,G:G,0),0))";
+		fillRange = ws.getRange2("A2");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A2").getValueForEdit2();
+		fragment[0].setFragmentText(formula);
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+		parsed = getCell(ws.getRange2("A2")).getFormulaParsed();
+		outStack = parsed.outStack;
+
+		// Case 1 (regression): H:H sits at MATCH/0 (not enabledToSingle). Outer
+		// ancestors: INDEX/1 (not enabled) and IF/2 (enabled). The buggy code
+		// walked outward via containsIndices and returned IF/2; the fix stops at
+		// the immediate wrapping function and returns null.
+		parent = parsed._findParentFuncInOutStack(findOperandIndex(outStack, "H:H"));
+		assert.strictEqual(parent, null,
+			"H:H at MATCH/0 (not enabled) -> null; must NOT bubble to IF/2 through containsIndices");
+
+		// Case 2: G:G at MATCH/1 (enabled). Immediate parent returned as-is.
+		parent = parsed._findParentFuncInOutStack(findOperandIndex(outStack, "G:G"));
+		assert.strictEqual(parent && parent.funcName, "MATCH", "G:G parent is MATCH");
+		assert.strictEqual(parent && parent.argIndex, 1, "G:G is at MATCH arg 1 (enabled)");
+
+		// Case 3: F:F at INDEX/0 (enabled). Returns INDEX/0, not the outer IF.
+		parent = parsed._findParentFuncInOutStack(findOperandIndex(outStack, "F:F"));
+		assert.strictEqual(parent && parent.funcName, "INDEX", "F:F parent is INDEX (not IF)");
+		assert.strictEqual(parent && parent.argIndex, 0, "F:F is at INDEX arg 0 (enabled)");
+
+		// Case 4 (regression): SUM(MATCH(B:B,A:A,0)) — outer SUM has * enabled, inner
+		// MATCH/0 is not. The buggy code returned SUM/0 via containsIndices; the fix
+		// stops at MATCH and returns null.
+		formula = "=SUM(MATCH(B:B,A:A,0))";
+		fillRange = ws.getRange2("A3");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A3").getValueForEdit2();
+		fragment[0].setFragmentText(formula);
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+		parsed = getCell(ws.getRange2("A3")).getFormulaParsed();
+		outStack = parsed.outStack;
+		parent = parsed._findParentFuncInOutStack(findOperandIndex(outStack, "B:B"));
+		assert.strictEqual(parent, null,
+			"B:B at MATCH/0 (not enabled) -> null; must NOT bubble to SUM/* through containsIndices");
+
+		// Case 5 (round-trip with explicit @): the SINGLE node displays as @, and the
+		// surrounding raw ranges that sit at enabledToSingle positions stay bare.
+		formula = "=IF(B19>0,F1,INDEX(F:F,MATCH(@B:B,G:G,0),0))";
+		fillRange = ws.getRange2("A4");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A4").getValueForEdit2();
+		fragment[0].setFragmentText(formula);
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+		assert.strictEqual(getCell(ws.getRange2("A4")).getFormulaParsed().getFormula(),
+			"IF(B19>0,F1,INDEX(F:F,MATCH(_xlfn.SINGLE(B:B),G:G,0),0))",
+			"@B:B at MATCH/0 -> SINGLE(B:B); F:F and G:G stay raw");
+		assert.strictEqual(ws.getRange2("A4").getValueForEdit(), formula,
+			"round-trip preserves @B:B at MATCH/0 inside IF(INDEX(MATCH(...)))");
+
+		ws.getRange2("A1:Z10").cleanAll();
+	});
+
+
 	QUnit.test('Test @ -> not single() -> exceptions', function (assert) {
 		if (!AscCommonExcel.bIsSupportDynamicArrays) {
 			assert.ok(true, "Dynamic arrays support is disabled");

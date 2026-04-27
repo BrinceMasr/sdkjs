@@ -10683,7 +10683,7 @@ function parserFormula( formula, parent, _ws ) {
 							if (elem.name === "SINGLE" || isArgPosEnabledToSingle(elem, k)) {
 								return {func: elem, funcName: elem.name, argIndex: k};
 							}
-							break;
+							return null;
 						}
 					}
 				}
