@@ -998,7 +998,7 @@
 	OutlineView.prototype.setOutlineShape = function (shape) {
 		this.outlineShape = shape;
 	};
-	OutlineView.prototype.updateAll = function (width, height) {
+	OutlineView.prototype.updateAll = function (width) {
 		const presentation = this.getPresentation();
 		const outlineSlides = [];
 		for (let i = 0; i < presentation.Slides.length; i += 1) {
@@ -1006,7 +1006,7 @@
 			const outlineSlide = slide.getOutlineSlide();
 			outlineSlides.push(outlineSlide);
 		}
-		this.createOutlineShape(outlineSlides, width, height);
+		this.createOutlineShape(outlineSlides, width);
 	};
 	OutlineView.prototype.addOutlineParagraph = function (sourceParagraph, outlineParagraph, pr) {
 		const outlineId = outlineParagraph.Get_Id();
@@ -1076,7 +1076,7 @@
 		}, this, []);
 
 	};
-	OutlineView.prototype.fillOutlineShape = function (outlineShape, outlineSlides, width) {
+	OutlineView.prototype.fillOutlineShape = function (outlineShape, outlineSlides) {
 		const paragraphs = outlineShape.txBody.content.Content;
 		for (let i = 0; i < outlineSlides.length; i += 1) {
 			const slide = outlineSlides[i];
@@ -1139,14 +1139,19 @@
 			outlineShape.txBody.bodyPr.setInsets(0, 0, 0, 0);
 			const outlineContent = outlineShape.txBody.content;
 			outlineContent.ClearContent(false);
-			this.fillOutlineShape(outlineShape, outlineSlides, width);
-			outlineShape.extX = width;
-			outlineShape.extY = 2000;
-			outlineShape.recalculateContent();
-			outlineShape.contentWidth = width;
+			this.fillOutlineShape(outlineShape, outlineSlides);
+			this.setWidth(width);
 			return outlineShape;
 		}, this, []);
 	};
+	OutlineView.prototype.setWidth = function (width) {
+		if (this.outlineShape) {
+			this.outlineShape.extX = width;
+			this.outlineShape.extY = 2000;
+			this.outlineShape.recalculateContent();
+			this.outlineShape.contentWidth = width;
+		}
+	}
 	OutlineView.prototype.getCopyParagraph = function (parent, paragraph, isTitle) {
 		return AscFormat.ExecuteNoHistory(function () {
 			const copyParagraph = paragraph.Copy2(parent, null, null);
@@ -2020,6 +2025,14 @@
 			return AscFormat.HitToRect(x, y, this.outlineShape.invertTransformText, 0, 0, this.outlineShape.contentWidth, 20000);
 		}
 		return false;
+	};
+	OutlineView.prototype.checkOutlineWidth = function (width) {
+		if (!this.outlineShape) {
+			return;
+		}
+		if (!AscFormat.fApproxEqual(width, this.outlineShape.extX)) {
+			this.setWidth(width);
+		}
 	};
 
 

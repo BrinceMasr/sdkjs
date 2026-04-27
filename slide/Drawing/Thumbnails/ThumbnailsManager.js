@@ -2863,15 +2863,13 @@
 
 		const scaleFactor = g_dKoef_pix_to_mm / AscCommon.AscBrowser.retinaPixelRatio;
 		const widthMM = canvas.width * scaleFactor;
-		const heightMM = canvas.height * scaleFactor;
 		const outlineTopMarginMM = this.const_offset_y * scaleFactor;
 		const outlineLeftMarginMM = this.const_offset_x * scaleFactor;
-		const currentSlideIndex = this.m_oWordControl.m_oDrawingDocument.SlideCurrent;
 		const scrollYMm = this.m_dScrollY * g_dKoef_pix_to_mm;
 
 		if (!this.outlineView.outlineShape) {
 			const outlineWidth = widthMM - outlineLeftMarginMM;
-			this.outlineView.updateAll(outlineWidth, heightMM, currentSlideIndex);
+			this.outlineView.updateAll(outlineWidth);
 		}
 
 		this.outlineView.updateOutlineShapeTransform(outlineLeftMarginMM, -scrollYMm + outlineTopMarginMM);
@@ -3006,6 +3004,8 @@
 				this.m_dScrollY = scrollApi.getCurScrolledY();
 			}
 		}
+		const newWidth = AscCommon.AscBrowser.convertToRetinaValue(thumbnailsCanvas.width - this.const_offset_x) * AscCommon.g_dKoef_pix_to_mm;
+		this.outlineView.checkOutlineWidth(newWidth);
 	};
 
 	COutlineThumbnailsManager.prototype.getSpecialPasteButtonCoords = function (sSlideId) {
