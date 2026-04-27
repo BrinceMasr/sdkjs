@@ -2877,9 +2877,6 @@
 		this.outlineView.updateOutlineShapeTransform(outlineLeftMarginMM, -scrollYMm + outlineTopMarginMM);
 		this.m_oWordControl.m_oApi.clearEyedropperImgData();
 		this.outlineView.draw(graphics);
-		this.m_oWordControl.m_oDrawingDocument.TargetStart();
-		this.m_oWordControl.m_oDrawingDocument.TargetShow();
-		this.m_oWordControl.m_oDrawingDocument.UpdateTargetNoAttack();
 		this.OnUpdateOverlay();
 	};
 
@@ -2921,7 +2918,9 @@
 				const pos = this.ConvertCoords(global_mouseEvent.X, global_mouseEvent.Y);
 				shape.selectionSetEnd(global_mouseEvent, pos.X * g_dKoef_pix_to_mm, pos.Y * g_dKoef_pix_to_mm, 0);
 				shape.updateSelectionState(this.m_oWordControl.m_oDrawingDocument);
-				this.m_oWordControl.OnUpdateOverlay();
+			}
+			if (shape.getDocContent().IsSelectionUse()) {
+				this.m_oWordControl.m_oDrawingDocument.SelectShow();
 			} else {
 				this.m_oWordControl.m_oDrawingDocument.UpdateTargetNoAttack();
 			}
