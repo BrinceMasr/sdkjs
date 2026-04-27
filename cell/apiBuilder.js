@@ -1,4 +1,4 @@
-﻿/*
+/*
  * (c) Copyright Ascensio System SIA 2010-2024
  *
  * This program is a free software product. You can redistribute it and/or
@@ -83,7 +83,6 @@
 	 * @property {ApiRange} Selection - Returns an object that represents the selected range.
 	 * @property {ApiRange} Cells - Returns ApiRange that represents all the cells on the worksheet (not just the cells that are currently in use).
 	 * @property {ApiRange} Rows - Returns ApiRange that represents all the cells of the rows range.
-     * @property {ApiAutoFilter} AutoFilter - Returns AutoFilter that represents all applied autofilters
 	 * @property {ApiRange} Cols - Returns ApiRange that represents all the cells of the columns range.
 	 * @property {ApiRange} UsedRange - Returns ApiRange that represents the used range on the specified worksheet.
 	 * @property {string} Name - Returns or sets a name of the active sheet.
@@ -8510,21 +8509,6 @@
 		}
 	};
 
-    /**
-     * Returns the instante of ApiAutoFilter object that represents the worksheet AutoFilter.
-     * @memberof ApiWorksheet
-     * @typeofeditors ["CSE"]
-     * @returns {ApiAutoFilter}
-     * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/GetAutoFilter.js
-     */
-    ApiWorksheet.prototype.GetAutoFilter = function () {
-		return new ApiAutoFilter(this);
-	};
-	Object.defineProperty(ApiWorksheet.prototype, "AutoFilter", {
-		get: function () {
-			return this.GetAutoFilter();
-		}
-	});
 
 	/**
 	 * Returns the ApiRange object that represents all the cells on the columns range.
@@ -9700,6 +9684,22 @@
 		let workbook = this.worksheet.workbook;
 		return new AscBuilder.ApiCustomXmlParts(workbook);
 	};
+
+	/**
+	 * Returns the instance of ApiAutoFilter object that represents the worksheet AutoFilter.
+	 * @memberof ApiWorksheet
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiAutoFilter}
+	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/GetAutoFilter.js
+	 */
+	ApiWorksheet.prototype.GetAutoFilter = function () {
+		return new ApiAutoFilter(this);
+	};
+	Object.defineProperty(ApiWorksheet.prototype, "AutoFilter", {
+		get: function () {
+			return this.GetAutoFilter();
+		}
+	});
 
 
 	/**
@@ -12077,67 +12077,6 @@
 		return res;
 	};
 
-    function _ascCustomOpToSign(op) {
-        var c = Asc.c_oAscCustomAutoFilter;
-        switch (op) {
-            case c.equals:                 return "=";
-            case c.doesNotEqual:           return "<>";
-            case c.isGreaterThan:          return ">";
-            case c.isGreaterThanOrEqualTo: return ">=";
-            case c.isLessThan:             return "<";
-            case c.isLessThanOrEqualTo:    return "<=";
-            default:                       return "";
-        }
-    }
-
-    function _dynamicTypeToCriteria(type) {
-        var d = Asc.c_oAscDynamicAutoFilter;
-        switch (type) {
-            case d.aboveAverage:  return "xlFilterAboveAverage";
-            case d.belowAverage:  return "xlFilterBelowAverage";
-
-            case d.lastMonth:     return "xlFilterLastMonth";
-            case d.lastQuarter:   return "xlFilterLastQuarter";
-            case d.lastWeek:      return "xlFilterLastWeek";
-            case d.lastYear:      return "xlFilterLastYear";
-
-            case d.nextMonth:     return "xlFilterNextMonth";
-            case d.nextQuarter:   return "xlFilterNextQuarter";
-            case d.nextWeek:      return "xlFilterNextWeek";
-            case d.nextYear:      return "xlFilterNextYear";
-
-            case d.thisMonth:     return "xlFilterThisMonth";
-            case d.thisQuarter:   return "xlFilterThisQuarter";
-            case d.thisWeek:      return "xlFilterThisWeek";
-            case d.thisYear:      return "xlFilterThisYear";
-
-            case d.today:         return "xlFilterToday";
-            case d.tomorrow:      return "xlFilterTomorrow";
-            case d.yearToDate:    return "xlFilterYearToDate";
-            case d.yesterday:     return "xlFilterYesterday";
-
-            case d.m1:  return "xlFilterAllDatesInPeriodJanuary";
-            case d.m2:  return "xlFilterAllDatesInPeriodFebruary";
-            case d.m3:  return "xlFilterAllDatesInPeriodMarch";
-            case d.m4:  return "xlFilterAllDatesInPeriodApril";
-            case d.m5:  return "xlFilterAllDatesInPeriodMay";
-            case d.m6:  return "xlFilterAllDatesInPeriodJune";
-            case d.m7:  return "xlFilterAllDatesInPeriodJuly";
-            case d.m8:  return "xlFilterAllDatesInPeriodAugust";
-            case d.m9:  return "xlFilterAllDatesInPeriodSeptember";
-            case d.m10: return "xlFilterAllDatesInPeriodOctober";
-            case d.m11: return "xlFilterAllDatesInPeriodNovember";
-            case d.m12: return "xlFilterAllDatesInPeriodDecember";
-
-            case d.q1:  return "xlFilterAllDatesInPeriodQuarter1";
-            case d.q2:  return "xlFilterAllDatesInPeriodQuarter2";
-            case d.q3:  return "xlFilterAllDatesInPeriodQuarter3";
-            case d.q4:  return "xlFilterAllDatesInPeriodQuarter4";
-
-            default:    return null;
-        }
-    }
-
 	let createCustomFilter = function (autoFilterOptions, Criteria1, Criteria2, Operator, cellId, opt_operator1, opt_operator2) {
 		if (Criteria1 || Criteria1) {
 			let filterObj = new Asc.AutoFilterObj();
@@ -12368,11 +12307,6 @@
 		return res;
 	};
 
-	/**
-	 * Filter type.
-	 * @typedef {("xlAnd" | "xlBottom10Items" | "xlBottom10Percent" | "xlFilterCellColor" | "xlFilterDynamic" | "xlFilterFontColor" | "xlFilterValues" | "xlOr" | "xlTop10Items" | "xlTop10Percent")} XlAutoFilterOperator
-	 * @see office-js-api/Examples/Enumerations/XlAutoFilterOperator.js
-	 */
 
 	/**
 	 * Specifies the filter criterion.
@@ -27653,378 +27587,6 @@
 	//ApiUniqueValues.prototype.GetCalcFor = null;
 	//ApiUniqueValues.prototype.SetCalcFor = null;
 
-    /**
-     * Class representing worksheet autofilters.
-     * @constructor
-     * @property {ApiFilter[]} Filters - Returns the array of ApiFilter objects that represents the filters applied to the range.
-     * @property {boolean} FilterMode - Returns a value that indicates whether the worksheet has an AutoFilter applied.
-     * @property {ApiWorksheet} Parent - Returns the ApiWorksheet object that contains the AutoFilter.
-     * @property {ApiRange | null} Range - Returns the ApiRange object that represents the AutoFilter range; null if no AutoFilter is defined.
-     */
-    function ApiAutoFilter(ws, listObject) {
-        this.ws = ws;
-        this.listObject = listObject || null;
-    }
-
-    ApiAutoFilter.prototype._getAutoFilter = function () {
-        if (this.listObject) {
-            return this.listObject.tablePart.AutoFilter || null;
-        }
-        return this.ws && this.ws.worksheet && this.ws.worksheet.AutoFilter || null;
-    };
-
-    /**
-     * Reapplies the AutoFilter to the worksheet using the existing filter criteria.
-     *
-     * This method corresponds to the Excel AutoFilter.ApplyFilter behavior:
-     * it does not change the currently defined filter conditions; it only
-     * reevaluates which rows should be visible based on the active filters.
-     * If no AutoFilter is defined for the worksheet, the method does nothing.
-     *
-     * @memberof ApiAutoFilter
-     * @typeofeditors ["CSE"]
-     * @returns {void}
-     * @see office-js-api/Examples/{Editor}/ApiAutoFilter/Methods/ApplyFilter.js
-     */
-    ApiAutoFilter.prototype.ApplyFilter = function () {
-        if (this.GetFilterMode()) {
-            if (this.listObject) {
-                this.ws.worksheet.autoFilters.reapplyAutoFilter(this.listObject.tablePart.DisplayName);
-            } else {
-                const Id = this.ws.worksheet.Id;
-                if (Id) {
-                    this.ws.worksheet.workbook.oApi.asc_reapplyAutoFilter(null, Id);
-                }
-            }
-        }
-    };
-
-    /**
-     * Clears all filters and displays all rows in the AutoFilter range.
-     *
-     * This method corresponds to the Excel AutoFilter.ShowAllData behavior:
-     * it removes any active filtering from the worksheet while preserving the
-     * AutoFilter drop-downs on the header row. If no AutoFilter is defined
-     * for the worksheet, the method does nothing.
-     *
-     * @memberof ApiAutoFilter
-     * @typeofeditors ["CSE"]
-     * @returns {void}
-     * @see office-js-api/Examples/{Editor}/ApiAutoFilter/Methods/ShowAllData.js
-     */
-    ApiAutoFilter.prototype.ShowAllData = function () {
-        if (this.GetFilterMode()) {
-            if (this.listObject) {
-                this.ws.worksheet.autoFilters.isApplyAutoFilterInCell(this.listObject.tablePart.Ref, true);
-            } else {
-                const Id = this.ws.worksheet.Id;
-                if (Id) {
-                    this.ws.worksheet.workbook.oApi.asc_clearFilter(Id);
-                }
-            }
-        }
-    };
-
-    /**
-     * Returns the array of ApiFilter objects that represents the filters applied to the AutoFilter range.
-     * @memberof ApiAutoFilter
-     * @typeofeditors ["CSE"]
-     * @returns {ApiFilter[]}
-     * @see office-js-api/Examples/{Editor}/ApiAutoFilter/Methods/GetFilters.js
-     */
-    ApiAutoFilter.prototype.GetFilters = function () {
-        var af = this._getAutoFilter();
-        var cols = af && af.FilterColumns ? af.FilterColumns : [];
-        return createAutoFilterArray(this, cols);
-    };
-
-    Object.defineProperty(ApiAutoFilter.prototype, "Filters", {
-        get: function () {
-            return this.GetFilters();
-        }
-    });
-
-    /**
-     * Returns a value that indicates whether the worksheet has an AutoFilter applied.
-     * @memberof ApiAutoFilter
-     * @typeofeditors ["CSE"]
-     * @returns {boolean} true if the worksheet has an AutoFilter; otherwise, false.
-     * @see office-js-api/Examples/{Editor}/ApiAutoFilter/Methods/GetFilterMode.js
-     */
-    ApiAutoFilter.prototype.GetFilterMode = function () {
-        return !!this._getAutoFilter();
-    };
-
-    Object.defineProperty(ApiAutoFilter.prototype, "FilterMode", {
-        get: function () {
-            return this.GetFilterMode();
-        }
-    });
-
-    /**
-     * Returns the parent ApiWorksheet object for the AutoFilter.
-     * @memberof ApiAutoFilter
-     * @typeofeditors ["CSE"]
-     * @returns {ApiWorksheet}
-     * @see office-js-api/Examples/{Editor}/ApiAutoFilter/Methods/GetParent.js
-     */
-    ApiAutoFilter.prototype.GetParent = function () {
-        return this.listObject || this.ws;
-    };
-
-    Object.defineProperty(ApiAutoFilter.prototype, "Parent", {
-        get: function () {
-            return this.GetParent();
-        }
-    });
-
-    /**
-     * Returns the ApiRange object that represents the AutoFilter range.
-     * @memberof ApiAutoFilter
-     * @typeofeditors ["CSE"]
-     * @returns {ApiRange | null} The range to which the AutoFilter is applied; null if no AutoFilter is defined.
-     * @see office-js-api/Examples/{Editor}/ApiAutoFilter/Methods/GetRange.js
-     */
-    ApiAutoFilter.prototype.GetRange = function () {
-        var af = this._getAutoFilter();
-        if (!af || !af.Ref) {
-            return null;
-        }
-        return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this.ws.worksheet, af.Ref));
-    };
-
-    Object.defineProperty(ApiAutoFilter.prototype, "Range", {
-        get: function () {
-            return this.GetRange();
-        }
-    });
-
-    /**
-     * Class representing a single AutoFilter column.
-     * @constructor
-     * @property {ApiAutoFilter} Parent - Returns the parent filters collection for this filter column.
-     * @property {string|string[]|number|XlDynamicFilterCriteria|null} Criteria1 - Returns the first criteria associated with the filter.
-     * @property {string|null} Criteria2 - Returns the second criteria associated with the filter (used with xlAnd/xlOr).
-     * @property {boolean} On - Indicates whether any filter is applied to this column.
-     * @property {XlAutoFilterOperator|null} Operator - Returns the operator used for the filter on this column.
-     */
-    function ApiFilter(parent, filter){
-        this.parent = parent;
-        this.filter = filter;
-    }
-
-    /**
-     * Returns the first criteria associated with the filter for this column.
-     *
-     *
-     * @memberof ApiFilter
-     * @typeofeditors ["CSE"]
-     * @returns {string|string[]|number|XlDynamicFilterCriteria|null} The first criteria for the filter.
-     * @see office-js-api/Examples/{Editor}/ApiFilter/Methods/GetCriteria1.js
-     */
-    ApiFilter.prototype.GetCriteria1 = function () {
-        var f = this.filter;
-        if (!f) {
-            return null;
-        }
-
-        var op = this.GetOperator();
-
-        // 1) Values filter
-        if (op === "xlFilterValues" && f.Filters && f.Filters.Values) {
-            // Values: { "3":1,"5":1,... } -> ["3","5",...]
-            return Object.keys(f.Filters.Values);
-        }
-
-        // 2) Custom filters (numeric / text with AND / OR)
-        if ((op === "xlAnd" || op === "xlOr") &&
-            f.CustomFiltersObj &&
-            Array.isArray(f.CustomFiltersObj.CustomFilters) &&
-            f.CustomFiltersObj.CustomFilters.length
-        ) {
-            var cf1 = f.CustomFiltersObj.CustomFilters[0];
-            if (!cf1) {
-                return null;
-            }
-            var sign1 = _ascCustomOpToSign(cf1.Operator);
-            var val1  = cf1.Val != null ? (cf1.Val + "") : "";
-            return sign1 + val1; // e.g. ">0"
-        }
-
-        // 3) Dynamic filter
-        if (op === "xlFilterDynamic" && f.DynamicFilter) {
-            return _dynamicTypeToCriteria(f.DynamicFilter.Type);
-        }
-
-        // 4) Top10 filter
-        if (
-            (op === "xlTop10Items" ||
-                op === "xlTop10Percent" ||
-                op === "xlBottom10Items" ||
-                op === "xlBottom10Percent") &&
-            f.Top10
-        ) {
-            // In SetAutoFilter Criteria1 was the "Val" (items count or percentage)
-            return f.Top10.Val;
-        }
-
-        // 5) Color filters – Criteria1 in SetAutoFilter was ApiColor.
-        // We could reconstruct it via asc_getCColor, but API type is different.
-        // For now return null; extend later if needed.
-        return null;
-    };
-
-    Object.defineProperty(ApiFilter.prototype, "Criteria1", {
-        get: function () {
-            return this.GetCriteria1();
-        }
-    });
-
-    /**
-     * Returns the second criteria associated with the filter for this column.
-     *
-     * @memberof ApiFilter
-     * @typeofeditors ["CSE"]
-     * @returns {string|null} The second criteria for the filter, or null if not applicable.
-     * @see office-js-api/Examples/{Editor}/ApiFilter/Methods/GetCriteria2.js
-     */
-    ApiFilter.prototype.GetCriteria2 = function () {
-        var f = this.filter;
-        if (!f) {
-            return null;
-        }
-
-        var op = this.GetOperator();
-        if ((op !== "xlAnd" && op !== "xlOr") ||
-            !f.CustomFiltersObj ||
-            !Array.isArray(f.CustomFiltersObj.CustomFilters)
-        ) {
-            return null;
-        }
-
-        var cfArr = f.CustomFiltersObj.CustomFilters;
-        if (cfArr.length < 2) {
-            return null;
-        }
-
-        var cf2 = cfArr[1];
-        if (!cf2) {
-            return null;
-        }
-
-        var sign2 = _ascCustomOpToSign(cf2.Operator);
-        var val2  = cf2.Val != null ? (cf2.Val + "") : "";
-        return sign2 + val2; // e.g. "<=8"
-    };
-
-    Object.defineProperty(ApiFilter.prototype, "Criteria2", {
-        get: function () {
-            return this.GetCriteria2();
-        }
-    });
-
-    /**
-     * Indicates whether any filter is applied on this column.
-     *
-     * The property is true when at least one of the following underlying
-     * structures is present for the column:
-     * - Filters
-     * - CustomFiltersObj
-     * - DynamicFilter
-     * - ColorFilter
-     * - Top10
-     *
-     * @memberof ApiFilter
-     * @typeofeditors ["CSE"]
-     * @returns {boolean} True if a filter is applied; otherwise, false.
-     * @see office-js-api/Examples/{Editor}/ApiFilter/Methods/GetOn.js
-     */
-    ApiFilter.prototype.GetOn = function () {
-        var f = this.filter;
-        if (!f) {
-            return false;
-        }
-        return !!(f.Filters || f.CustomFiltersObj || f.DynamicFilter || f.ColorFilter || f.Top10);
-    };
-
-    Object.defineProperty(ApiFilter.prototype, "On", {
-        get: function () {
-            return this.GetOn();
-        }
-    });
-
-    /**
-     * Returns the operator used for the filter on this column.
-     *
-     * @memberof ApiFilter
-     * @typeofeditors ["CSE"]
-     * @returns {XlAutoFilterOperator|null} The operator for the current filter.
-     * @see office-js-api/Examples/{Editor}/ApiFilter/Methods/GetOperator.js
-     */
-    ApiFilter.prototype.GetOperator = function () {
-        var f = this.filter;
-        if (!f) {
-            return null;
-        }
-
-        // 1) Color filters
-        if (f.ColorFilter) {
-            // CellColor === false -> font color; otherwise cell color
-            return (f.ColorFilter.CellColor === false)
-                ? "xlFilterFontColor"
-                : "xlFilterCellColor";
-        }
-
-        // 2) Dynamic filter
-        if (f.DynamicFilter) {
-            return "xlFilterDynamic";
-        }
-
-        // 3) Top10 filter
-        if (f.Top10) {
-            var t = f.Top10;
-            if (t.Percent) {
-                return t.Top ? "xlTop10Percent" : "xlBottom10Percent";
-            }
-            return t.Top ? "xlTop10Items" : "xlBottom10Items";
-        }
-
-        // 4) Custom filters (numeric/text) – AND / OR
-        if (f.CustomFiltersObj) {
-            return f.CustomFiltersObj.And ? "xlAnd" : "xlOr";
-        }
-
-        // 5) Simple values filter
-        if (f.Filters) {
-            return "xlFilterValues";
-        }
-
-        return null;
-    };
-
-    Object.defineProperty(ApiFilter.prototype, "Operator", {
-        get: function () {
-            return this.GetOperator();
-        }
-    });
-
-    /**
-     * Returns the parent filters collection for this filter column.
-     * @memberof ApiFilter
-     * @typeofeditors ["CSE"]
-     * @returns {ApiAutoFilter} The parent filters collection.
-     * @see office-js-api/Examples/{Editor}/ApiFilter/Methods/GetParent.js
-     */
-    ApiFilter.prototype.GetParent = function () {
-        return this.parent;
-    };
-
-    Object.defineProperty(ApiFilter.prototype, "Parent", {
-        get: function () {
-            return this.GetParent();
-        }
-    });
-
 	Api["Format"]                = Api.Format;
 	Api["AddSheet"]              = Api.AddSheet;
 	Api["GetSheets"]             = Api.GetSheets;
@@ -28092,7 +27654,6 @@
 	ApiWorksheet.prototype["GetActiveCell"] = ApiWorksheet.prototype.GetActiveCell;
 	ApiWorksheet.prototype["GetSelection"] = ApiWorksheet.prototype.GetSelection;
 	ApiWorksheet.prototype["GetCells"] = ApiWorksheet.prototype.GetCells;
-    ApiWorksheet.prototype["GetAutoFilter"] = ApiWorksheet.prototype.GetAutoFilter;
 	ApiWorksheet.prototype["GetCols"] = ApiWorksheet.prototype.GetCols;
 	ApiWorksheet.prototype["GetRows"] = ApiWorksheet.prototype.GetRows;
 	ApiWorksheet.prototype["GetUsedRange"] = ApiWorksheet.prototype.GetUsedRange;
@@ -28149,19 +27710,7 @@
 	ApiWorksheet.prototype["GetAllPivotTables"] = ApiWorksheet.prototype.GetAllPivotTables;
 	ApiWorksheet.prototype["RefreshAllPivots"] = ApiWorksheet.prototype.RefreshAllPivots;
 	ApiWorksheet.prototype["GetCustomXmlParts"] = ApiWorksheet.prototype.GetCustomXmlParts;
-
-    ApiAutoFilter.prototype["ShowAllData"] = ApiAutoFilter.prototype.ShowAllData;
-    ApiAutoFilter.prototype["ApplyFilter"] = ApiAutoFilter.prototype.ApplyFilter;
-    ApiAutoFilter.prototype["GetFilters"] = ApiAutoFilter.prototype.GetFilters;
-    ApiAutoFilter.prototype["GetFilterMode"] = ApiAutoFilter.prototype.GetFilterMode;
-    ApiAutoFilter.prototype["GetParent"] = ApiAutoFilter.prototype.GetParent;
-    ApiAutoFilter.prototype["GetRange"] = ApiAutoFilter.prototype.GetRange;
-
-    ApiFilter.prototype["GetCriteria1"] = ApiFilter.prototype.GetCriteria1;
-    ApiFilter.prototype["GetCriteria2"] = ApiFilter.prototype.GetCriteria2;
-    ApiFilter.prototype["GetOperator"] = ApiFilter.prototype.GetOperator;
-    ApiFilter.prototype["GetOn"] = ApiFilter.prototype.GetOn;
-    ApiFilter.prototype["GetParent"] = ApiFilter.prototype.GetParent;
+	ApiWorksheet.prototype["GetAutoFilter"]     = ApiWorksheet.prototype.GetAutoFilter;
 
 
 
@@ -29277,18 +28826,6 @@
 	ApiIconCriterion.prototype["SetIcon"] = ApiIconCriterion.prototype.SetIcon;
 
 
-    function createAutoFilterArray(parent, filters) {
-        if (!Array.isArray(filters)) return [];
-
-        const res = [];
-        for (let i = 0; i < filters.length; i++) {
-            const col = filters[i];
-            let wrapper = new ApiFilter(parent, col);
-            res.push(wrapper);
-        }
-        return res;
-    }
-
 	function private_SetCoords(oDrawing, oWorksheet, nExtX, nExtY, nFromCol, nColOffset, nFromRow, nRowOffset, pos) {
 		oDrawing.x = 0;
 		oDrawing.y = 0;
@@ -29534,6 +29071,338 @@
         return null;
     }
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// ApiAutoFilter / ApiFilter
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Filter type.
+	 * @typedef {("xlAnd" | "xlBottom10Items" | "xlBottom10Percent" | "xlFilterCellColor" | "xlFilterDynamic" | "xlFilterFontColor" | "xlFilterValues" | "xlOr" | "xlTop10Items" | "xlTop10Percent")} XlAutoFilterOperator
+	 * @see office-js-api/Examples/Enumerations/XlAutoFilterOperator.js
+	 */
+
+	function _ascCustomOpToSign(op) {
+		var c = Asc.c_oAscCustomAutoFilter;
+		switch (op) {
+			case c.equals:                 return "=";
+			case c.doesNotEqual:           return "<>";
+			case c.isGreaterThan:          return ">";
+			case c.isGreaterThanOrEqualTo: return ">=";
+			case c.isLessThan:             return "<";
+			case c.isLessThanOrEqualTo:    return "<=";
+			default:                       return "";
+		}
+	}
+
+	function _dynamicTypeToCriteria(type) {
+		var d = Asc.c_oAscDynamicAutoFilter;
+		switch (type) {
+			case d.aboveAverage:  return "xlFilterAboveAverage";
+			case d.belowAverage:  return "xlFilterBelowAverage";
+			case d.lastMonth:     return "xlFilterLastMonth";
+			case d.lastQuarter:   return "xlFilterLastQuarter";
+			case d.lastWeek:      return "xlFilterLastWeek";
+			case d.lastYear:      return "xlFilterLastYear";
+			case d.nextMonth:     return "xlFilterNextMonth";
+			case d.nextQuarter:   return "xlFilterNextQuarter";
+			case d.nextWeek:      return "xlFilterNextWeek";
+			case d.nextYear:      return "xlFilterNextYear";
+			case d.thisMonth:     return "xlFilterThisMonth";
+			case d.thisQuarter:   return "xlFilterThisQuarter";
+			case d.thisWeek:      return "xlFilterThisWeek";
+			case d.thisYear:      return "xlFilterThisYear";
+			case d.today:         return "xlFilterToday";
+			case d.tomorrow:      return "xlFilterTomorrow";
+			case d.yearToDate:    return "xlFilterYearToDate";
+			case d.yesterday:     return "xlFilterYesterday";
+			case d.m1:  return "xlFilterAllDatesInPeriodJanuary";
+			case d.m2:  return "xlFilterAllDatesInPeriodFebruary";
+			case d.m3:  return "xlFilterAllDatesInPeriodMarch";
+			case d.m4:  return "xlFilterAllDatesInPeriodApril";
+			case d.m5:  return "xlFilterAllDatesInPeriodMay";
+			case d.m6:  return "xlFilterAllDatesInPeriodJune";
+			case d.m7:  return "xlFilterAllDatesInPeriodJuly";
+			case d.m8:  return "xlFilterAllDatesInPeriodAugust";
+			case d.m9:  return "xlFilterAllDatesInPeriodSeptember";
+			case d.m10: return "xlFilterAllDatesInPeriodOctober";
+			case d.m11: return "xlFilterAllDatesInPeriodNovember";
+			case d.m12: return "xlFilterAllDatesInPeriodDecember";
+			case d.q1:  return "xlFilterAllDatesInPeriodQuarter1";
+			case d.q2:  return "xlFilterAllDatesInPeriodQuarter2";
+			case d.q3:  return "xlFilterAllDatesInPeriodQuarter3";
+			case d.q4:  return "xlFilterAllDatesInPeriodQuarter4";
+			default:    return null;
+		}
+	}
+
+	function createAutoFilterArray(parent, filters) {
+		if (!Array.isArray(filters)) return [];
+		var res = [];
+		for (var i = 0; i < filters.length; i++) {
+			res.push(new ApiFilter(parent, filters[i]));
+		}
+		return res;
+	}
+
+	/**
+	 * Class representing worksheet autofilters.
+	 * @constructor
+	 * @property {ApiFilter[]} Filters - Returns the array of ApiFilter objects that represents the filters applied to the range.
+	 * @property {boolean} FilterMode - Returns a value that indicates whether the worksheet has an AutoFilter applied.
+	 * @property {ApiWorksheet} Parent - Returns the ApiWorksheet object that contains the AutoFilter.
+	 * @property {ApiRange | null} Range - Returns the ApiRange object that represents the AutoFilter range; null if no AutoFilter is defined.
+	 */
+	function ApiAutoFilter(ws, listObject) {
+		this.ws = ws;
+		this.listObject = listObject || null;
+	}
+
+	ApiAutoFilter.prototype._getAutoFilter = function () {
+		if (this.listObject) {
+			return this.listObject.tablePart && this.listObject.tablePart.AutoFilter || null;
+		}
+		return this.ws && this.ws.worksheet && this.ws.worksheet.AutoFilter || null;
+	};
+
+	/**
+	 * Reapplies the AutoFilter to the worksheet using the existing filter criteria.
+	 * @memberof ApiAutoFilter
+	 * @typeofeditors ["CSE"]
+	 * @returns {void}
+	 * @see office-js-api/Examples/{Editor}/ApiAutoFilter/Methods/ApplyFilter.js
+	 */
+	ApiAutoFilter.prototype.ApplyFilter = function () {
+		if (this.GetFilterMode()) {
+			if (this.listObject) {
+				this.ws.worksheet.autoFilters.reapplyAutoFilter(this.listObject.tablePart.DisplayName);
+			} else {
+				var Id = this.ws.worksheet.Id;
+				if (Id) {
+					this.ws.worksheet.workbook.oApi.asc_reapplyAutoFilter(null, Id);
+				}
+			}
+		}
+	};
+
+	/**
+	 * Clears all filters and displays all rows in the AutoFilter range.
+	 * @memberof ApiAutoFilter
+	 * @typeofeditors ["CSE"]
+	 * @returns {void}
+	 * @see office-js-api/Examples/{Editor}/ApiAutoFilter/Methods/ShowAllData.js
+	 */
+	ApiAutoFilter.prototype.ShowAllData = function () {
+		if (this.GetFilterMode()) {
+			if (this.listObject) {
+				this.ws.worksheet.autoFilters.isApplyAutoFilterInCell(this.listObject.tablePart.Ref, true);
+			} else {
+				var Id = this.ws.worksheet.Id;
+				if (Id) {
+					this.ws.worksheet.workbook.oApi.asc_clearFilter(Id);
+				}
+			}
+		}
+	};
+
+	/**
+	 * Returns the array of ApiFilter objects that represents the filters applied to the AutoFilter range.
+	 * @memberof ApiAutoFilter
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiFilter[]}
+	 * @see office-js-api/Examples/{Editor}/ApiAutoFilter/Methods/GetFilters.js
+	 */
+	ApiAutoFilter.prototype.GetFilters = function () {
+		var af = this._getAutoFilter();
+		var cols = af && af.FilterColumns ? af.FilterColumns : [];
+		return createAutoFilterArray(this, cols);
+	};
+	Object.defineProperty(ApiAutoFilter.prototype, "Filters", {
+		get: function () { return this.GetFilters(); }
+	});
+
+	/**
+	 * Returns a value that indicates whether the worksheet has an AutoFilter applied.
+	 * @memberof ApiAutoFilter
+	 * @typeofeditors ["CSE"]
+	 * @returns {boolean}
+	 * @see office-js-api/Examples/{Editor}/ApiAutoFilter/Methods/GetFilterMode.js
+	 */
+	ApiAutoFilter.prototype.GetFilterMode = function () {
+		return !!this._getAutoFilter();
+	};
+	Object.defineProperty(ApiAutoFilter.prototype, "FilterMode", {
+		get: function () { return this.GetFilterMode(); }
+	});
+
+	/**
+	 * Returns the parent ApiWorksheet object for the AutoFilter.
+	 * @memberof ApiAutoFilter
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiWorksheet}
+	 * @see office-js-api/Examples/{Editor}/ApiAutoFilter/Methods/GetParent.js
+	 */
+	ApiAutoFilter.prototype.GetParent = function () {
+		return this.listObject || this.ws;
+	};
+	Object.defineProperty(ApiAutoFilter.prototype, "Parent", {
+		get: function () { return this.GetParent(); }
+	});
+
+	/**
+	 * Returns the ApiRange object that represents the AutoFilter range.
+	 * @memberof ApiAutoFilter
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiRange | null}
+	 * @see office-js-api/Examples/{Editor}/ApiAutoFilter/Methods/GetRange.js
+	 */
+	ApiAutoFilter.prototype.GetRange = function () {
+		var af = this._getAutoFilter();
+		if (!af || !af.Ref) {
+			return null;
+		}
+		return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this.ws.worksheet, af.Ref));
+	};
+	Object.defineProperty(ApiAutoFilter.prototype, "Range", {
+		get: function () { return this.GetRange(); }
+	});
+
+	ApiAutoFilter.prototype["ShowAllData"]   = ApiAutoFilter.prototype.ShowAllData;
+	ApiAutoFilter.prototype["ApplyFilter"]   = ApiAutoFilter.prototype.ApplyFilter;
+	ApiAutoFilter.prototype["GetFilters"]    = ApiAutoFilter.prototype.GetFilters;
+	ApiAutoFilter.prototype["GetFilterMode"] = ApiAutoFilter.prototype.GetFilterMode;
+	ApiAutoFilter.prototype["GetParent"]     = ApiAutoFilter.prototype.GetParent;
+	ApiAutoFilter.prototype["GetRange"]      = ApiAutoFilter.prototype.GetRange;
+
+	//------------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Class representing a single AutoFilter column.
+	 * @constructor
+	 * @property {ApiAutoFilter} Parent - Returns the parent filters collection for this filter column.
+	 * @property {string|string[]|number|XlDynamicFilterCriteria|null} Criteria1 - Returns the first criteria associated with the filter.
+	 * @property {string|null} Criteria2 - Returns the second criteria associated with the filter (used with xlAnd/xlOr).
+	 * @property {boolean} On - Indicates whether any filter is applied to this column.
+	 * @property {XlAutoFilterOperator|null} Operator - Returns the operator used for the filter on this column.
+	 */
+	function ApiFilter(parent, filter) {
+		this.parent = parent;
+		this.filter = filter;
+	}
+
+	/**
+	 * Returns the first criteria associated with the filter for this column.
+	 * @memberof ApiFilter
+	 * @typeofeditors ["CSE"]
+	 * @returns {string|string[]|number|XlDynamicFilterCriteria|null}
+	 * @see office-js-api/Examples/{Editor}/ApiFilter/Methods/GetCriteria1.js
+	 */
+	ApiFilter.prototype.GetCriteria1 = function () {
+		var f = this.filter;
+		if (!f) return null;
+		var op = this.GetOperator();
+		if (op === "xlFilterValues" && f.Filters && f.Filters.Values) {
+			return Object.keys(f.Filters.Values);
+		}
+		if ((op === "xlAnd" || op === "xlOr") && f.CustomFiltersObj && Array.isArray(f.CustomFiltersObj.CustomFilters) && f.CustomFiltersObj.CustomFilters.length) {
+			var cf1 = f.CustomFiltersObj.CustomFilters[0];
+			if (!cf1) return null;
+			return _ascCustomOpToSign(cf1.Operator) + (cf1.Val != null ? (cf1.Val + "") : "");
+		}
+		if (op === "xlFilterDynamic" && f.DynamicFilter) {
+			return _dynamicTypeToCriteria(f.DynamicFilter.Type);
+		}
+		if ((op === "xlTop10Items" || op === "xlTop10Percent" || op === "xlBottom10Items" || op === "xlBottom10Percent") && f.Top10) {
+			return f.Top10.Val;
+		}
+		return null;
+	};
+	Object.defineProperty(ApiFilter.prototype, "Criteria1", {
+		get: function () { return this.GetCriteria1(); }
+	});
+
+	/**
+	 * Returns the second criteria associated with the filter for this column.
+	 * @memberof ApiFilter
+	 * @typeofeditors ["CSE"]
+	 * @returns {string|null}
+	 * @see office-js-api/Examples/{Editor}/ApiFilter/Methods/GetCriteria2.js
+	 */
+	ApiFilter.prototype.GetCriteria2 = function () {
+		var f = this.filter;
+		if (!f) return null;
+		var op = this.GetOperator();
+		if ((op !== "xlAnd" && op !== "xlOr") || !f.CustomFiltersObj || !Array.isArray(f.CustomFiltersObj.CustomFilters)) return null;
+		var cfArr = f.CustomFiltersObj.CustomFilters;
+		if (cfArr.length < 2 || !cfArr[1]) return null;
+		return _ascCustomOpToSign(cfArr[1].Operator) + (cfArr[1].Val != null ? (cfArr[1].Val + "") : "");
+	};
+	Object.defineProperty(ApiFilter.prototype, "Criteria2", {
+		get: function () { return this.GetCriteria2(); }
+	});
+
+	/**
+	 * Indicates whether any filter is applied on this column.
+	 * @memberof ApiFilter
+	 * @typeofeditors ["CSE"]
+	 * @returns {boolean}
+	 * @see office-js-api/Examples/{Editor}/ApiFilter/Methods/GetOn.js
+	 */
+	ApiFilter.prototype.GetOn = function () {
+		var f = this.filter;
+		if (!f) return false;
+		return !!(f.Filters || f.CustomFiltersObj || f.DynamicFilter || f.ColorFilter || f.Top10);
+	};
+	Object.defineProperty(ApiFilter.prototype, "On", {
+		get: function () { return this.GetOn(); }
+	});
+
+	/**
+	 * Returns the operator used for the filter on this column.
+	 * @memberof ApiFilter
+	 * @typeofeditors ["CSE"]
+	 * @returns {XlAutoFilterOperator|null}
+	 * @see office-js-api/Examples/{Editor}/ApiFilter/Methods/GetOperator.js
+	 */
+	ApiFilter.prototype.GetOperator = function () {
+		var f = this.filter;
+		if (!f) return null;
+		if (f.ColorFilter) return f.ColorFilter.CellColor === false ? "xlFilterFontColor" : "xlFilterCellColor";
+		if (f.DynamicFilter) return "xlFilterDynamic";
+		if (f.Top10) {
+			var t = f.Top10;
+			if (t.Percent) return t.Top ? "xlTop10Percent" : "xlBottom10Percent";
+			return t.Top ? "xlTop10Items" : "xlBottom10Items";
+		}
+		if (f.CustomFiltersObj) return f.CustomFiltersObj.And ? "xlAnd" : "xlOr";
+		if (f.Filters) return "xlFilterValues";
+		return null;
+	};
+	Object.defineProperty(ApiFilter.prototype, "Operator", {
+		get: function () { return this.GetOperator(); }
+	});
+
+	/**
+	 * Returns the parent filters collection for this filter column.
+	 * @memberof ApiFilter
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiAutoFilter}
+	 * @see office-js-api/Examples/{Editor}/ApiFilter/Methods/GetParent.js
+	 */
+	ApiFilter.prototype.GetParent = function () {
+		return this.parent;
+	};
+	Object.defineProperty(ApiFilter.prototype, "Parent", {
+		get: function () { return this.GetParent(); }
+	});
+
+	ApiFilter.prototype["GetCriteria1"] = ApiFilter.prototype.GetCriteria1;
+	ApiFilter.prototype["GetCriteria2"] = ApiFilter.prototype.GetCriteria2;
+	ApiFilter.prototype["GetOperator"]  = ApiFilter.prototype.GetOperator;
+	ApiFilter.prototype["GetOn"]        = ApiFilter.prototype.GetOn;
+	ApiFilter.prototype["GetParent"]    = ApiFilter.prototype.GetParent;
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	function private_MakeError(message) {
 		throwException(new Error(message));
 	}
@@ -29556,6 +29425,7 @@
 	AscBuilder.Cell["ApiRange"]       = AscBuilder.Cell.ApiRange       = ApiRange;
 	AscBuilder.Cell["ApiName"]        = AscBuilder.Cell.ApiName        = ApiName;
 	AscBuilder.Cell["ApiAutoFilter"]  = AscBuilder.Cell.ApiAutoFilter  = ApiAutoFilter;
+	AscBuilder.Cell["ApiFilter"]      = AscBuilder.Cell.ApiFilter      = ApiFilter;
 
 	AscBuilder.Cell.init = function()
 	{

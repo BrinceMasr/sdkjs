@@ -55,31 +55,4 @@ $(function ()
 		);
 	});
 
-	QUnit.test("GetDefNames", function (assert) {
-		var ws = AscTest.JsApi.GetActiveSheet();
-
-		// Create a table — its name must not appear in GetDefNames result
-		var tbl = ws.AddListObject("xlSrcRange", "A1:C3");
-		var tableName = tbl.GetName();
-
-		// Add workbook-scoped and sheet-scoped named ranges
-		AscTest.JsApi.AddDefName("WbScopedName", "Sheet1!$A$1");
-		ws.AddDefName("WsScopedName", "Sheet1!$B$1");
-
-		var names = AscTest.JsApi.GetDefNames();
-
-		assert.ok(Array.isArray(names), "GetDefNames returns an array");
-		assert.ok(names.length >= 2, "GetDefNames returns at least the two added names");
-
-		var nameStrings = names.map(function (n) { return n.GetName(); });
-
-		assert.ok(nameStrings.indexOf("WbScopedName") !== -1, "Workbook-scoped name is included");
-		assert.ok(nameStrings.indexOf("WsScopedName") !== -1, "Sheet-scoped name is included");
-		assert.ok(nameStrings.indexOf(tableName) === -1, "Table name is excluded from GetDefNames result");
-
-		// Cleanup
-		AscTest.JsApi.GetDefName("WbScopedName").Delete();
-		ws.GetDefName("WsScopedName").Delete();
-		tbl.Delete();
-	});
 });
