@@ -3616,8 +3616,7 @@
 				var worksheet = this.worksheet;
 				if (displayName === null) {
 					res = worksheet.AutoFilter;
-				} else if (worksheet.TableParts &&
-					worksheet.TableParts.length) {
+				} else if (worksheet.TableParts && worksheet.TableParts.length && displayName) {
 					for (var i = 0; i < worksheet.TableParts.length; i++) {
 						if (worksheet.TableParts[i].DisplayName.toLowerCase() === displayName.toLowerCase()) {
 							res = worksheet.TableParts[i];
