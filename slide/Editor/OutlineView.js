@@ -1712,9 +1712,9 @@
 	}
 	UpdateExistingParagraphManager.prototype.unlinkOutlineParagraph = function (outlineParagraph, sourceParagraph) {
 		const outlineView = this.outlineView;
+		const info = outlineView.outlineInfo.getSlideInfoByParagraph(outlineParagraph);
 		outlineView.unlinkOutlineParagraph(outlineParagraph);
 		if (this.isNeedAddMockParagraph(sourceParagraph)) {
-			const info = outlineView.outlineInfo.getSlideInfoByParagraph(outlineParagraph);
 			outlineView.addMockTitle(outlineParagraph.Index, info);
 		} else if (sourceParagraph) {
 			this.setRecalculateContentShapeIndexes(sourceParagraph);
@@ -1733,11 +1733,21 @@
 		}
 	}
 	OutlineView.prototype.updateExistingParagraphs = function (existingOutlineParagraphs) {
+		if (!existingOutlineParagraphs.length) {
+			return;
+		}
+		const content = this.getDocContent();
+		content.Update_ContentIndexing();
 		const manager = new UpdateExistingParagraphManager(this, new UseInDocumentManager());
 		manager.update(existingOutlineParagraphs);
 	}
 
 	OutlineView.prototype.updateNewParagraphs = function (newParagraphs) {
+		if (!newParagraphs.length) {
+			return;
+		}
+		const content = this.getDocContent();
+		content.Update_ContentIndexing();
 		const updateManager = new UpdateNewParagraphsManager(this, newParagraphs);
 		updateManager.update();
 	}
