@@ -4465,13 +4465,15 @@
 
 		var isDesktopVersion = window["AscDesktopEditor"] !== undefined;
 
-		if (this.splitters[0].position > 0.1 && !isDesktopVersion) {
+		if (this.Width > 0 && !isDesktopVersion) {
 			const maxSplitterThMax = Math.min(g_dKoef_pix_to_mm * this.Width / 3, 80);
 			this.splitters[0].setLimits(maxSplitterThMax >> 2, maxSplitterThMax >> 0);
+		}
 
-			const considerLimits = true;
-			this.splitters[0].setPosition(this.splitters[0].initialPosition, considerLimits);
-
+		if (this.splitters[0].position > 0.1 && !isDesktopVersion) {
+			if (this.Width > 0) {
+				this.splitters[0].setPosition(this.splitters[0].initialPosition, true, true);
+			}
 			this.onSplitterResize(true);
 		}
 
