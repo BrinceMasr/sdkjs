@@ -1054,7 +1054,7 @@
 	OutlineView.prototype.removeParagraph = function (outlineParagraph, pos) {
 		AscFormat.ExecuteNoHistory(function () {
 			const outlineContent = this.getDocContent();
-			outlineContent.Remove_FromContent(pos, 1);
+			outlineContent.Remove_FromContent(pos, 1, false);
 			this.removeOutlineParagraph(outlineParagraph);
 		}, this, []);
 	}
@@ -1590,8 +1590,11 @@
 					const outlineParagraph = this.sourceToOutlineMap[paragraph.Get_Id()];
 					if (outlineParagraph) {
 						updateData.existingParagraphs.push(outlineParagraph);
-					} else if (paragraph.IsUseInDocument() && !content.IsEmpty()) {
-						updateData.newParagraphs.push(paragraph);
+					} else if (paragraph.IsUseInDocument()) {
+						const isEmptyContent = content.IsEmpty();
+						if (isEmptyContent && shape.isOutlineTitlePlaceholder() || !isEmptyContent) {
+							updateData.newParagraphs.push(paragraph);
+						}
 					}
 				}
 			}
@@ -2038,6 +2041,7 @@
 		if (this.isEmptyPresentation()) {
 			return -1;
 		}
+		this.update();
 		const docContent = this.getDocContent();
 		if (docContent) {
 			const tx = this.getInvertTransformX(x);

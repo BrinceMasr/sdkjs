@@ -378,6 +378,14 @@ AscFormat.InitClass(Slide, AscCommonSlide.SlideBase, AscDFH.historyitem_type_Sli
                     }
                     break;
                 }
+                case AscDFH.historyitem_SlideRemoveFromSpTree:
+                case AscDFH.historyitem_SlideAddToSpTree:
+                {
+                    if (this.presentation) {
+                        data.CheckOutlineView(this.presentation);
+                    }
+                    break;
+                }
             }
             this.addToRecalculate();
         }
@@ -573,14 +581,14 @@ AscFormat.InitClass(Slide, AscCommonSlide.SlideBase, AscDFH.historyitem_type_Sli
             this.collaborativeMarks.Update_OnAdd(_pos);
         }
         const presentation = Asc.editor.WordControl.m_oLogicDocument;
-        if (this.isSlide() && presentation) {
+        if (presentation) {
             presentation.checkShapeOutlineView(item);
         }
     };
 
     Slide.prototype.shapeRemove = function (pos, count) {
         if(pos > -1 && pos < this.cSld.spTree.length){
-        History.Add(new AscDFH.CChangesDrawingsContent(this, AscDFH.historyitem_SlideRemoveFromSpTree, pos, this.cSld.spTree.slice(pos, pos + count), false));
+        History.Add(new AscDFH.CChangesDrawingsContentPresentation(this, AscDFH.historyitem_SlideRemoveFromSpTree, pos, this.cSld.spTree.slice(pos, pos + count), false));
         this.cSld.spTree.splice(pos, count);
         }
     };

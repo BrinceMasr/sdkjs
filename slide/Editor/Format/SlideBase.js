@@ -540,7 +540,7 @@
 				}
 			}
 			this.shapeRemove(pos, 1);
-			const presentation = Asc.editor.WordControl.m_oLogicDocument;
+			const presentation = this.presentation;
 			if (this.isSlide() && presentation) {
 				presentation.checkShapeOutlineView(oSp);
 			}

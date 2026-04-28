@@ -753,6 +753,22 @@
         }
         return true;
     };
+    CChangesDrawingsContentPresentation.prototype.CheckOutlineView = function (presentation) {
+        for (let i = 0; i < this.Items.length; i += 1) {
+            const item = this.Items[i];
+            switch (item.getObjectType()) {
+                case AscDFH.historyitem_type_Slide: {
+                    presentation.checkSlideOutlineView(item);
+                    break;
+                }
+                case AscDFH.historyitem_type_Shape: {
+                    presentation.checkShapeOutlineView(item);
+                    break;
+                }
+            }
+
+        }
+    };
 
     window['AscDFH'].CChangesDrawingsContentPresentation = CChangesDrawingsContentPresentation;
 
