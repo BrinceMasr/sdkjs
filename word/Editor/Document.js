@@ -1218,8 +1218,8 @@ function CDocument(DrawingDocument, isMainLogicDocument)
 
 	this.Layout = this.Layouts.Print;
 	
-	this.CustomTextAnnotator = false !== isMainLogicDocument ? new AscWord.CustomTextAnnotator(this) : null;
-	
+	if (false !== isMainLogicDocument)
+		this.InitCustomTextAnnotator();
 	
 	this.Content[0] = new AscWord.Paragraph(this);
     this.Content[0].Set_DocumentNext(null);
@@ -10718,7 +10718,9 @@ CDocument.prototype.OnMouseUp = function(e, X, Y, PageIndex)
 	
 	if (!this.IsTextSelectionUse() && (this.IsInText(X, Y, this.CurPage) || -1 !== this.DrawingObjects.IsInDrawingObject(X, Y, this.CurPage, this)))
 	{
-		this.CustomTextAnnotator.onClick(X, Y, this.CurPage, e);
+		let customTextAnnotator = this.GetCustomTextAnnotator();
+		if (customTextAnnotator)
+			customTextAnnotator.onClick(X, Y, this.CurPage, e);
 	}
 	
 	let _t = this;
@@ -12455,8 +12457,9 @@ CDocument.prototype.private_UpdateTracks = function(bSelection, bEmptySelection)
 
 	this.UpdateContentControlFocusState(oInlineLevelSdt ? oInlineLevelSdt : (oBlockLevelSdt ? oBlockLevelSdt : null));
 	
-	if (true)
-		this.CustomTextAnnotator.onCurrentParagraph(this.GetCurrentParagraph());
+	let customTextAnnotator = this.GetCustomTextAnnotator();
+	if (customTextAnnotator)
+		customTextAnnotator.onCurrentParagraph(this.GetCurrentParagraph());
 
 	if (this.private_SetCurrentSpecialForm(oCurrentForm))
 	{
@@ -27871,9 +27874,6 @@ CDocument.prototype.StopSpellCheck = function()
 CDocument.prototype.ContinueSpellCheck = function()
 {
 	this.Spelling.ContinueSpellCheck();
-	
-	// TODO: Пока таймер для проверки внешний аннотаций запускаем тут
-	this.CustomTextAnnotator.continueProcessing();
 };
 CDocument.prototype.TurnOffSpellCheck = function()
 {
@@ -28548,19 +28548,16 @@ CDocument.prototype.IsFirstOnDocumentPage = function(curPage)
 {
 	return true;
 };
-/**
- * @returns {?AscWord.CustomTextAnnotator}
- */
+CDocument.prototype.InitCustomTextAnnotator = function()
+{
+};
 CDocument.prototype.GetCustomTextAnnotator = function()
 {
-	return this.CustomTextAnnotator;
+	return null;
 };
-/**
- * @returns {?AscWord.CustomMarks}
- */
 CDocument.prototype.GetCustomMarks = function()
 {
-	return this.CustomTextAnnotator ? this.CustomTextAnnotator.getMarks() : null;
+	return null;
 };
 
 function CDocumentSelectionState()

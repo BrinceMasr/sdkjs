@@ -140,21 +140,6 @@
 	 * @property {string} Value - The element value.
 	 * @see office-js-api/Examples/Plugins/{Editor}/Enumeration/ContentControlListElement.js
 	 */
-	
-	/**
-	 * @typedef {Object} TextAnnotation
-	 * @property  {string} paragraphId  - ID of the paragraph containing the annotation.
-	 * @property  {string} rangeId - ID of the annotation range.
-	 * @property  {string} [name] -  Annotation type (e.g., `"grammar"`).
-	 */
-	
-	/**
-	 * @typedef {Object} TextAnnotationRange
-	 * @property  {string} id  - Unique identifier for the range.
-	 * @property  {number} start - Starting index of the text range.
-	 * @property  {number} length - Length of the text range.
-	 * @property  {string} [name] -  Annotation type (e.g., `"grammar"`).
-	 */
 
     var Api = window["asc_docs_api"];
 
@@ -1463,63 +1448,6 @@
 		}
 		
 		return currentBookmarks.length ? currentBookmarks[0] : null;
-	};
-	/**
-	 * Adds annotations to the specified paragraph.
-	 * @memberof Api
-	 * @typeofeditors ["CDE"]
-	 * @alias AnnotateParagraph
-	 * @param {Object} data - Annotation data specifying what to annotate.
-	 * @param {string} data.type - The type of annotation operation (e.g., `"highlightText"`).
-	 * @param {string} [data.name] - Optional name of the annotation.
-	 * @param {string} data.paragraphId - ID of the paragraph being annotated.
-	 * @param {string} data.recalcId - Paragraph recalculation ID.
-	 * @param {Array<TextAnnotationRange>} [data.ranges] - Array of text ranges to highlight (for highlightText type)
-	 * @since 9.2.0
-	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/AnnotateParagraph.js
-	 */
-	Api.prototype["pluginMethod_AnnotateParagraph"] = function(data)
-	{
-		if (!data)
-			return;
-		
-		data["guid"] = window.g_asc_plugins.getCurrentPluginGuid();
-		this.getTextAnnotatorEventManager().onResponse(data);
-	};
-	/**
-	 * Selects text in a document using a given annotation.
-	 * @memberof Api
-	 * @typeofeditors ["CDE"]
-	 * @alias SelectAnnotationRange
-	 * @param {TextAnnotation} annotation - The annotation selection object.
-	 * @since 9.2.0
-	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/SelectAnnotationRange.js
-	 */
-	Api.prototype["pluginMethod_SelectAnnotationRange"] = function(annotation)
-	{
-		if (!annotation)
-			return;
-		
-		annotation["guid"] = window.g_asc_plugins.getCurrentPluginGuid();
-		this.getTextAnnotatorEventManager().selectRange(annotation);
-	};
-	/**
-	 * Remove a specific annotation range from the document.
-	 * @memberof Api
-	 * @typeofeditors ["CDE"]
-	 * @alias RemoveAnnotationRange
-	 * @param {TextAnnotation} annotation - The annotation removing object.
-	 * @param {boolean} [annotation.all=false] - Optional parameter, flag to remove all annotations for the current paragraph.
-	 * @since 9.2.0
-	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/RemoveAnnotationRange.js
-	 */
-	Api.prototype["pluginMethod_RemoveAnnotationRange"] = function(annotation)
-	{
-		if (!annotation)
-			return;
-		
-		annotation["guid"] = window.g_asc_plugins.getCurrentPluginGuid();
-		this.getTextAnnotatorEventManager().removeRange(annotation);
 	};
 
 	function private_ReadContentControlCommonPr(commonPr)

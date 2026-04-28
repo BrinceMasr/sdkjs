@@ -14734,9 +14734,10 @@ background-repeat: no-repeat;\
 		if (this.WordControl && this.WordControl.m_oLogicDocument && this.WordControl.m_oLogicDocument.DrawingDocument)
 			this.WordControl.m_oLogicDocument.DrawingDocument.contentControls.removePluginButtons(guid);
 		
-		let logicDocument = this.private_GetLogicDocument();
-		if (logicDocument && logicDocument.IsDocumentEditor())
-			this.getTextAnnotatorEventManager().removePluginListener(guid);
+		this._onPluginClose(guid);
+	};
+	asc_docs_api.prototype._onPluginClose = function(guid)
+	{
 	};
 	asc_docs_api.prototype.onAttachPluginEvent = function(guid, name)
 	{
@@ -14747,9 +14748,10 @@ background-repeat: no-repeat;\
 			&& this.WordControl.m_oDrawingDocument)
 			this.WordControl.m_oDrawingDocument.contentControls.onAttachPluginEvent(guid);
 		
-		let logicDocument = this.private_GetLogicDocument();
-		if ("onParagraphText" === name && logicDocument && logicDocument.IsDocumentEditor())
-			this.getTextAnnotatorEventManager().addPluginListener(guid);
+		this._onAttachPluginEvent(guid, name);
+	};
+	asc_docs_api.prototype._onAttachPluginEvent = function(guid, name)
+	{
 	};
 	asc_docs_api.prototype.initBroadcastChannelListeners = function() {
 		let oThis = this;

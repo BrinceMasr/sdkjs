@@ -254,8 +254,6 @@
 		this._correctEmbeddedWork();
 
 		this.broadcastChannel = null;
-		
-		this.textAnnotatorEventManager = null;
 
 		return this;
 	}
@@ -6110,13 +6108,6 @@
 	baseEditorsApi.prototype.setUserScrollGroupActions = function(isUserScroll)
 	{};
 	
-	baseEditorsApi.prototype.getTextAnnotatorEventManager = function()
-	{
-		if (!this.textAnnotatorEventManager)
-			this.textAnnotatorEventManager = new AscCommon.TextAnnotatorEventManager(this);
-		
-		return this.textAnnotatorEventManager;
-	};
 	baseEditorsApi.prototype.getMacroRecorder = function()
 	{
 		return this.macroRecorder;

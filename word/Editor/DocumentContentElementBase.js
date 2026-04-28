@@ -1452,14 +1452,6 @@ CDocumentContentElementBase.prototype.IsSpellingUse = function()
 	return oSpelling.Use;
 };
 /**
- * @returns {?AscWord.CustomTextAnnotator}
- */
-CDocumentContentElementBase.prototype.getCustomTextAnnotator = function()
-{
-	let logicDocument = this.GetLogicDocument();
-	return logicDocument && logicDocument.IsDocumentEditor() ? logicDocument.CustomTextAnnotator : null;
-};
-/**
  * Получаем настройки рамки для данного элемента
  * @returns {?CFramePr}
  */
