@@ -822,6 +822,7 @@
 		this.titleShape = null;
 		this.contentShape = null;
 		this.slideNumberShape = null;
+		this.emptySlideShape = null;
 		this.measureInfo = null;
 		this.resetColors();
 	}
@@ -875,14 +876,24 @@
 		this.recalculateStrContent(this.slideNumberShape, strContent);
 		return this.slideNumberShape;
 	};
-
+	DecorCacheManager.prototype.getEmptySlideShape = function (width, height) {
+		if (this.emptySlideShape === null) {
+			this.emptySlideShape = this.createDecorShape(width, height, "rect", AscCommon.align_Left);
+			this.recalculateStrContent(this.emptySlideShape, AscCommon.translateManager.getValue("Click to add first slide"), 16);
+		}
+		this.recalculateShape(this.emptySlideShape, null, null, 0, width, height, true);
+		return this.emptySlideShape;
+	};
 	DecorCacheManager.prototype.getRGBFromHex = function (color) {
 		const prepareColor = parseInt(color.slice(1), 16);
 		return {R: (prepareColor >> 16) & 0xff, G: (prepareColor >> 8) & 0xff, B: prepareColor & 0xff};
 	};
-	DecorCacheManager.prototype.checkShapeSizes = function (shape, width, height) {
+	DecorCacheManager.prototype.checkShapeSizes = function (shape, width, height, isRecalculateContent) {
 		if (!(AscFormat.fApproxEqual(shape.extX, width) && AscFormat.fApproxEqual(shape.extY, height))) {
 			this.recalculateShapeSizes(shape, width, height);
+			if (isRecalculateContent) {
+				shape.recalculateContent();
+			}
 		}
 	};
 	DecorCacheManager.prototype.recalculateShapeSizes = function (shape, width, height) {
@@ -893,17 +904,20 @@
 			shape.calcGeometry.Recalculate(width, height);
 		}
 	};
-	DecorCacheManager.prototype.recalculateShape = function (shape, brushHex, penHex, penW, width, height) {
-		this.checkShapeSizes(shape, width, height);
+	DecorCacheManager.prototype.recalculateShape = function (shape, brushHex, penHex, penW, width, height, isRecalculateContent) {
+		this.checkShapeSizes(shape, width, height,isRecalculateContent);
 		shape.brush = this.getBrush(brushHex);
 		shape.pen = this.getPen(penHex, penW);
 	};
-	DecorCacheManager.prototype.recalculateStrContent = function (shape, label) {
+	DecorCacheManager.prototype.recalculateStrContent = function (shape, label, fontSize) {
 		AscFormat.ExecuteNoHistory(function () {
 			const docContent = shape.getDocContent();
 			const para = docContent.Content[0];
 			var run = new ParaRun(para, false);
 			var textPr = getOutlineTextPr();
+			if (fontSize !== undefined) {
+				textPr.SetFontSize(fontSize);
+			}
 			run.Set_Pr(textPr);
 			run.AddText(label);
 			para.Content[0] = run;
@@ -1098,7 +1112,7 @@
 			}
 		}
 	};
-	OutlineView.prototype.getParaPr = function (compiledParaPr, isTitle) {
+	OutlineView.prototype.getParaPr = function (compiledParaPr) {
 		const copyParaPr = new CParaPr();
 		if (compiledParaPr.ParaPr.Bullet) {
 			copyParaPr.Bullet = compiledParaPr.ParaPr.Bullet.createDuplicate();
@@ -1118,7 +1132,7 @@
 	};
 	OutlineView.prototype.applyParagraphProps = function (outlineParagraph, slideParagraph, isTitle) {
 		const compiledPr = slideParagraph ? slideParagraph.getCompiledPr() : {ParaPr: g_oDocumentDefaultParaPr};
-		const copyParaPr = this.getParaPr(compiledPr, isTitle);
+		const copyParaPr = this.getParaPr(compiledPr);
 		const oThis = this;
 		outlineParagraph.SetPr(copyParaPr);
 		outlineParagraph.CheckRunContent(function (run) {
@@ -1161,9 +1175,17 @@
 	};
 	OutlineView.prototype.draw = function (graphics) {
 		if (this.outlineShape) {
-			this.update();
-			this.outlineShape.draw(graphics);
+			if (this.isEmptyPresentation()) {
+				this.drawEmpty(graphics);
+			} else {
+				this.update();
+				this.outlineShape.draw(graphics);
+			}
 		}
+	};
+	OutlineView.prototype.drawEmpty = function (graphics) {
+		const shape = this.decorCacheManager.getEmptySlideShape(this.outlineShape.extX + this.outlineShape.x, this.outlineShape.extY);
+		shape.draw(graphics);
 	};
 
 	OutlineView.prototype.drawDecorShape = function (graphics, shape, x, y) {
@@ -1282,6 +1304,8 @@
 		if (!this.outlineShape) {
 			return;
 		}
+		this.outlineShape.x = offsetX;
+		this.outlineShape.y = offsetY;
 		this.outlineShape.transform.tx = offsetX || 0;
 		this.outlineShape.transform.ty = offsetY || 0;
 		this.outlineShape.transformText.tx = offsetX || 0;
@@ -2011,6 +2035,9 @@
 	};
 
 	OutlineView.prototype.getNearestPage = function (x, y) {
+		if (this.isEmptyPresentation()) {
+			return -1;
+		}
 		const docContent = this.getDocContent();
 		if (docContent) {
 			const tx = this.getInvertTransformX(x);
@@ -2021,7 +2048,7 @@
 		return -1;
 	};
 	OutlineView.prototype.hitInTextRect = function (x, y) {
-		if (this.outlineShape) {
+		if (this.outlineShape && !this.isEmptyPresentation()) {
 			return AscFormat.HitToRect(x, y, this.outlineShape.invertTransformText, 0, 0, this.outlineShape.contentWidth, 20000);
 		}
 		return false;
@@ -2078,6 +2105,13 @@
 			};
 		}
 		return null;
+	};
+	OutlineView.prototype.isEmptyPresentation = function () {
+		const presentation = this.getPresentation();
+		if (!presentation.Slides.length) {
+			return true;
+		}
+		return false;
 	};
 
 

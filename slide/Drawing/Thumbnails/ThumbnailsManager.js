@@ -2597,6 +2597,11 @@
 		if (global_mouseEvent.Button == undefined)
 			global_mouseEvent.Button = 0;
 
+		if (this.outlineView.isEmptyPresentation()) {
+			this.m_oWordControl.m_oLogicDocument.addNextSlide();
+			return;
+		}
+
 		this.SetFocusElement(FOCUS_OBJECT_THUMBNAILS);
 		const pos = this.ConvertCoords(global_mouseEvent.X, global_mouseEvent.Y);
 		this.MouseDownTrack.Start(pos.Page, global_mouseEvent.X, global_mouseEvent.Y);
@@ -2702,7 +2707,7 @@
 		var cursor_moved = "default";
 		if (this.MouseDownTrack.IsHitInTextRect) {
 			cursor_moved = "text";
-		} else if (this.MouseDownTrack.FocusPage != -1)
+		} else if (this.MouseDownTrack.FocusPage !== -1)
 		{
 			cursor_moved = "pointer";
 		}
@@ -2903,6 +2908,10 @@
 		const canvas = this.m_oWordControl.m_oThumbnailsBack.HtmlElement;
 		if (canvas == null)
 			return;
+
+		if (this.outlineView.isEmptyPresentation()) {
+			return;
+		}
 
 		if (this.m_oWordControl)
 			this.m_oWordControl.m_oApi.checkLastWork();
