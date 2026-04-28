@@ -312,35 +312,37 @@ ParaRun.prototype.Copy = function(Selected, oPr)
 
     return NewRun;
 };
-
+ParaRun.prototype.CopyComparison = function (oComparisonPr)
+{
+	var NewRun = new ParaRun(this.Paragraph);
+	NewRun.Set_Pr( this.Pr.Copy(undefined, oPr) );
+	oComparisonPr.Comparison.checkCopyParaRun(NewRun, this);
+	var StartPos = 0;
+	var EndPos   = this.Content.length;
+	var CurPos;
+	var aContentToInsert = [];
+	for (CurPos = StartPos; CurPos < EndPos; CurPos++ )
+	{
+		aContentToInsert.push(this.Content[CurPos].Copy(oComparisonPr));
+	}
+	NewRun.ConcatToContent(aContentToInsert);
+	return NewRun;
+};
 ParaRun.prototype.Copy2 = function(oPr)
 {
-    var NewRun = new ParaRun(this.Paragraph);
-
+	const isMathRun = this.IsMathRun();
+    const NewRun = new ParaRun(undefined, isMathRun);
     NewRun.Set_Pr( this.Pr.Copy(undefined, oPr) );
-	if(oPr && oPr.Comparison)
+
+	if (isMathRun)
+		NewRun.Set_MathPr(this.MathPrp.Copy());
+
+    const StartPos = 0;
+    const EndPos   = this.Content.length;
+	for (let CurPos = StartPos; CurPos < EndPos; CurPos++ )
 	{
-		oPr.Comparison.checkCopyParaRun(NewRun, this);
-	}
-    var StartPos = 0;
-    var EndPos   = this.Content.length;
-	var CurPos;
-	if(oPr && oPr.Comparison)
-	{
-		var aContentToInsert = [];
-		for (CurPos = StartPos; CurPos < EndPos; CurPos++ )
-		{
-			aContentToInsert.push(this.Content[CurPos].Copy(oPr));
-		}
-		NewRun.ConcatToContent(aContentToInsert);
-	}
-	else
-	{
-		for (CurPos = StartPos; CurPos < EndPos; CurPos++ )
-		{
-			var Item = this.Content[CurPos];
-			NewRun.Add_ToContent( CurPos - StartPos, Item.Copy(oPr), false );
-		}
+		const Item = this.Content[CurPos];
+		NewRun.Add_ToContent( CurPos - StartPos, Item.Copy(oPr), false );
 	}
     return NewRun;
 };

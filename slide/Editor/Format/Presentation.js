@@ -3638,6 +3638,10 @@ CPresentation.prototype.AddToParagraph = function (ParaItem, bRecalculate, noUpd
 		}
 		if (this.IsFocusOnOutline()) {
 			Asc.editor.WordControl.Thumbnails.outlineView.paragraphAdd(ParaItem, false);
+			if (bRecalculate !== false) {
+				this.Recalculate();
+			}
+			bRecalculate = false;
 		} else if (this.IsFocusOnNotes()) {
 			var oCurSlide = this.GetCurrentSlide();
 			if (oCurSlide.notes) {

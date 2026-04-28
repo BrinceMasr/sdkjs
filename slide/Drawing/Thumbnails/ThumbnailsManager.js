@@ -2920,10 +2920,12 @@
 				shape.selectionSetEnd(global_mouseEvent, pos.X * g_dKoef_pix_to_mm, pos.Y * g_dKoef_pix_to_mm, 0);
 				shape.updateSelectionState(this.m_oWordControl.m_oDrawingDocument);
 			}
-			if (shape.getDocContent().IsSelectionUse()) {
-				this.m_oWordControl.m_oDrawingDocument.SelectShow();
-			} else {
-				this.m_oWordControl.m_oDrawingDocument.UpdateTargetNoAttack();
+			if (this.m_oWordControl.m_oLogicDocument.IsFocusOnOutline()) {
+				if (shape.getDocContent().IsSelectionUse()) {
+					this.m_oWordControl.m_oDrawingDocument.SelectShow();
+				} else {
+					this.m_oWordControl.m_oDrawingDocument.UpdateTargetNoAttack();
+				}
 			}
 		}
 	};
