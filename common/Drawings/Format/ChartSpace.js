@@ -509,6 +509,13 @@ function(window, undefined) {
 				oElement.tx.rich.content.SetApplyToAll(false);
 			}
 			CheckParagraphTextPr(oElement.txPr.content.Content[0], oTextPr);
+
+			var nElementType = oElement.getObjectType && oElement.getObjectType();
+			if (nElementType === AscDFH.historyitem_type_DataLabels || nElementType === AscDFH.historyitem_type_DataLabel) {
+				oElement.txPr.content.SetApplyToAll(true);
+				oElement.txPr.content.AddToParagraph(new AscCommonWord.ParaTextPr(oTextPr));
+				oElement.txPr.content.SetApplyToAll(false);
+			}
 		}
 	}
 
@@ -3703,42 +3710,81 @@ function(window, undefined) {
 		} else if (AscFormat.isRealNumber(this.selection.dataLbls)) {
 			var ser = this.getAllSeries()[this.selection.dataLbls];
 			if (ser) {
-				var pts = ser.getNumPts();
-				if (!ser.dLbls) {
-					var oDlbls;
-					var oChart = ser.parent;
-					if (oChart && oChart.dLbls) {
-						oDlbls = oChart.dLbls.createDuplicate();
+				var bChartEx = ser.isChartEx();
+				var oDlbls = bChartEx ? ser.dataLabels : ser.dLbls;
+				if (!oDlbls) {
+					if (bChartEx) {
+						oDlbls = new AscFormat.CDataLabels();
+						ser.setDataLabels(oDlbls);
 					} else {
-						oDlbls = new AscFormat.CDLbls();
+						if (ser.parent && ser.parent.dLbls) {
+							oDlbls = ser.parent.dLbls.createDuplicate();
+						} else {
+							oDlbls = new AscFormat.CDLbls();
+						}
+						ser.setDLbls(oDlbls);
 					}
-					ser.setDLbls(oDlbls);
 				}
+				var pts = ser.getNumPts();
 				if (!AscFormat.isRealNumber(this.selection.dataLbl)) {
-					fCallback(ser.dLbls, value, this.getDrawingDocument(), 10);
+					fCallback(oDlbls, value, this.getDrawingDocument(), 10);
+					if (bChartEx && oDlbls.txPr) {
+						if (!oDlbls.txPr.bodyPr) {
+							oDlbls.txPr.setBodyPr(new AscFormat.CBodyPr());
+						}
+						oDlbls.txPr.bodyPr.resetInsets();
+						if (!oDlbls.txPr.lstStyle) {
+							oDlbls.txPr.setLstStyle(new AscFormat.TextListStyle());
+						}
+					}
 					for (var i = 0; i < pts.length; ++i) {
-						var dLbl = ser.dLbls && ser.dLbls.findDLblByIdx(pts[i].idx);
+						var dLbl = oDlbls.findDLblByIdx(pts[i].idx);
 						if (dLbl) {
-							if (ser.dLbls.txPr && !dLbl.txPr) {
-								dLbl.setTxPr(ser.dLbls.txPr.createDuplicate());
+							if (oDlbls.txPr && !dLbl.txPr) {
+								dLbl.setTxPr(oDlbls.txPr.createDuplicate());
 							}
 							fCallback(dLbl, value, this.getDrawingDocument(), 10);
+							if (bChartEx && dLbl.txPr) {
+								if (!dLbl.txPr.bodyPr) {
+									dLbl.txPr.setBodyPr(new AscFormat.CBodyPr());
+								}
+								dLbl.txPr.bodyPr.resetInsets();
+								if (!dLbl.txPr.lstStyle) {
+									dLbl.txPr.setLstStyle(new AscFormat.TextListStyle());
+								}
+							}
 						}
 					}
 				} else {
 					var pt = pts[this.selection.dataLbl];
 					if (pt) {
-						var dLbl = ser.dLbls && ser.dLbls.findDLblByIdx(pt.idx);
+						var dLbl = oDlbls.findDLblByIdx(pt.idx);
 						if (!dLbl) {
-							dLbl = new AscFormat.CDLbl();
-							dLbl.setIdx(pt.idx);
-							if (ser.dLbls.txPr) {
-								dLbl.merge(ser.dLbls);
+							if (bChartEx) {
+								dLbl = new AscFormat.CDataLabel();
+								dLbl.setIdx(pt.idx);
+								if (oDlbls.txPr) {
+									dLbl.setTxPr(oDlbls.txPr.createDuplicate());
+								}
+							} else {
+								dLbl = new AscFormat.CDLbl();
+								dLbl.setIdx(pt.idx);
+								if (oDlbls.txPr) {
+									dLbl.merge(oDlbls);
+								}
 							}
-							ser.dLbls.addDLbl(dLbl);
-
+							oDlbls.addDLbl(dLbl);
 						}
 						fCallback(dLbl, value, this.getDrawingDocument(), 10);
+						if (bChartEx && dLbl.txPr) {
+							if (!dLbl.txPr.bodyPr) {
+								dLbl.txPr.setBodyPr(new AscFormat.CBodyPr());
+							}
+							dLbl.txPr.bodyPr.resetInsets();
+							if (!dLbl.txPr.lstStyle) {
+								dLbl.txPr.setLstStyle(new AscFormat.TextListStyle());
+							}
+						}
 					}
 				}
 			}
@@ -4005,7 +4051,7 @@ function(window, undefined) {
 		} else if (AscFormat.isRealNumber(this.selection.dataLbls)) {
 			var ser = this.getAllSeries()[this.selection.dataLbls];
 			if (ser) {
-				var oDlbls = ser.dLbls;
+				var oDlbls = ser.isChartEx() ? ser.dataLabels : ser.dLbls;
 				if (!AscFormat.isRealNumber(this.selection.dataLbl)) {
 					if (oDlbls && oDlbls.spPr && oDlbls.spPr.Fill && oDlbls.spPr.Fill.fill) {
 						ret = oDlbls.spPr.Fill;
@@ -4014,7 +4060,7 @@ function(window, undefined) {
 					var pts = ser.getNumPts();
 					var pt = pts[this.selection.dataLbl];
 					if (pt) {
-						var dLbl = ser.dLbls && ser.dLbls.findDLblByIdx(pt.idx);
+						var dLbl = oDlbls && oDlbls.findDLblByIdx(pt.idx);
 						if (dLbl && dLbl.spPr && dLbl.spPr.Fill && dLbl.spPr.Fill.fill) {
 							ret = dLbl.spPr.Fill;
 						}
@@ -4114,7 +4160,7 @@ function(window, undefined) {
 		} else if (AscFormat.isRealNumber(this.selection.dataLbls)) {
 			var ser = this.getAllSeries()[this.selection.dataLbls];
 			if (ser) {
-				var oDlbls = ser.dLbls;
+				var oDlbls = ser.isChartEx() ? ser.dataLabels : ser.dLbls;
 				if (!AscFormat.isRealNumber(this.selection.dataLbl)) {
 					if (oDlbls && oDlbls.spPr && oDlbls.spPr.ln && oDlbls.spPr.ln.Fill) {
 						ret = oDlbls.spPr.ln;
@@ -4123,7 +4169,7 @@ function(window, undefined) {
 					var pts = ser.getNumPts();
 					var pt = pts[this.selection.dataLbl];
 					if (pt) {
-						var dLbl = ser.dLbls && ser.dLbls.findDLblByIdx(pt.idx);
+						var dLbl = oDlbls && oDlbls.findDLblByIdx(pt.idx);
 						if (dLbl && dLbl.spPr && dLbl.spPr.ln && dLbl.spPr.ln.Fill) {
 							ret = dLbl.spPr.ln;
 						}
@@ -4261,16 +4307,20 @@ function(window, undefined) {
 		} else if (AscFormat.isRealNumber(this.selection.dataLbls)) {
 			var ser = this.getAllSeries()[this.selection.dataLbls];
 			if (ser) {
-				var oDlbls = ser.dLbls;
-				if (!ser.dLbls) {
-
-					if (ser.parent && ser.parent.dLbls) {
-						oDlbls = ser.parent.dLbls.createDuplicate();
+				var bChartEx = ser.isChartEx();
+				var oDlbls = bChartEx ? ser.dataLabels : ser.dLbls;
+				if (!oDlbls) {
+					if (bChartEx) {
+						oDlbls = new AscFormat.CDataLabels();
+						ser.setDataLabels(oDlbls);
 					} else {
-						oDlbls = new AscFormat.CDLbls();
+						if (ser.parent && ser.parent.dLbls) {
+							oDlbls = ser.parent.dLbls.createDuplicate();
+						} else {
+							oDlbls = new AscFormat.CDLbls();
+						}
+						ser.setDLbls(oDlbls);
 					}
-
-					ser.setDLbls(oDlbls);
 				}
 				if (!AscFormat.isRealNumber(this.selection.dataLbl)) {
 					if (!oDlbls.spPr) {
@@ -4285,15 +4335,22 @@ function(window, undefined) {
 					var pts = ser.getNumPts();
 					var pt = pts[this.selection.dataLbl];
 					if (pt) {
-						var dLbl = ser.dLbls && ser.dLbls.findDLblByIdx(pt.idx);
+						var dLbl = oDlbls.findDLblByIdx(pt.idx);
 						if (!dLbl) {
-							dLbl = new AscFormat.CDLbl();
-							dLbl.setIdx(pt.idx);
-							if (ser.dLbls.txPr) {
-								dLbl.merge(ser.dLbls);
+							if (bChartEx) {
+								dLbl = new AscFormat.CDataLabel();
+								dLbl.setIdx(pt.idx);
+								if (oDlbls.txPr) {
+									dLbl.setTxPr(oDlbls.txPr.createDuplicate());
+								}
+							} else {
+								dLbl = new AscFormat.CDLbl();
+								dLbl.setIdx(pt.idx);
+								if (oDlbls.txPr) {
+									dLbl.merge(oDlbls);
+								}
 							}
-							ser.dLbls.addDLbl(dLbl);
-
+							oDlbls.addDLbl(dLbl);
 						}
 						var brush = null;
 						if (pt.compiledDlb) {
@@ -4525,16 +4582,20 @@ function(window, undefined) {
 		} else if (AscFormat.isRealNumber(this.selection.dataLbls)) {
 			var ser = this.getAllSeries()[this.selection.dataLbls];
 			if (ser) {
-				var oDlbls = ser.dLbls;
-				if (!ser.dLbls) {
-
-					if (ser.parent && ser.parent.dLbls) {
-						oDlbls = ser.parent.dLbls.createDuplicate();
+				var bChartEx = ser.isChartEx();
+				var oDlbls = bChartEx ? ser.dataLabels : ser.dLbls;
+				if (!oDlbls) {
+					if (bChartEx) {
+						oDlbls = new AscFormat.CDataLabels();
+						ser.setDataLabels(oDlbls);
 					} else {
-						oDlbls = new AscFormat.CDLbls();
+						if (ser.parent && ser.parent.dLbls) {
+							oDlbls = ser.parent.dLbls.createDuplicate();
+						} else {
+							oDlbls = new AscFormat.CDLbls();
+						}
+						ser.setDLbls(oDlbls);
 					}
-
-					ser.setDLbls(oDlbls);
 				}
 				if (!AscFormat.isRealNumber(this.selection.dataLbl)) {
 					if (!oDlbls.spPr) {
@@ -4550,15 +4611,22 @@ function(window, undefined) {
 					var pts = ser.getNumPts();
 					var pt = pts[this.selection.dataLbl];
 					if (pt) {
-						var dLbl = ser.dLbls && ser.dLbls.findDLblByIdx(pt.idx);
+						var dLbl = oDlbls.findDLblByIdx(pt.idx);
 						if (!dLbl) {
-							dLbl = new AscFormat.CDLbl();
-							dLbl.setIdx(pt.idx);
-							if (ser.dLbls.txPr) {
-								dLbl.merge(ser.dLbls);
+							if (bChartEx) {
+								dLbl = new AscFormat.CDataLabel();
+								dLbl.setIdx(pt.idx);
+								if (oDlbls.txPr) {
+									dLbl.setTxPr(oDlbls.txPr.createDuplicate());
+								}
+							} else {
+								dLbl = new AscFormat.CDLbl();
+								dLbl.setIdx(pt.idx);
+								if (oDlbls.txPr) {
+									dLbl.merge(oDlbls);
+								}
 							}
-							ser.dLbls.addDLbl(dLbl);
-
+							oDlbls.addDLbl(dLbl);
 						}
 						if (!dLbl.spPr) {
 							dLbl.setSpPr(new AscFormat.CSpPr());
@@ -5969,6 +6037,11 @@ function(window, undefined) {
 				pt = aPts[nPt];
 				const compiled_dlb = new AscFormat.CDLbl();
 				compiled_dlb.merge(default_lbl);
+				compiled_dlb.merge(seria.dataLabels);
+				const oIndividualDLbl = seria.dataLabels.findDataLabelByIdx(pt.idx);
+				if (oIndividualDLbl) {
+					compiled_dlb.merge(oIndividualDLbl);
+				}
 				pt.compiledDlb = compiled_dlb;
 				pt.compiledDlb.chart = this;
 				pt.compiledDlb.series = seria;
