@@ -818,7 +818,7 @@ void main() {\n\
         let stream = this.getPageTextStream(pageIndex);
         if (!stream) return { Line : -1, Glyph : -1 };
 
-        if (this.type === 2)
+        if (this.type === 2 || this.type === 3)
         {
             let k = 72 / 96;
             x *= k;
