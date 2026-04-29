@@ -14477,7 +14477,7 @@ function(window, undefined) {
 	window['AscFormat'].G_O_NO_ACTIVE_COMMENT_BRUSH = G_O_NO_ACTIVE_COMMENT_BRUSH;
 	window['AscFormat'].G_O_ACTIVE_COMMENT_BRUSH = G_O_ACTIVE_COMMENT_BRUSH;
 	window['AscFormat'].CChartSpace = CChartSpace;
-	window['AscFormat'].CreateUnifillFromRGB = window['AscFormat'].CreateUnfilFromRGB = CreateUnfilFromRGB;
+	window['AscFormat'].CreateUnfilFromRGB = CreateUnfilFromRGB;
 	window['AscFormat'].CreateUniFillSolidFillWidthTintOrShade = CreateUniFillSolidFillWidthTintOrShade;
 	window['AscFormat'].CreateUnifillSolidFillSchemeColor = CreateUnifillSolidFillSchemeColor;
 	window['AscFormat'].CreateNoFillLine = CreateNoFillLine;
