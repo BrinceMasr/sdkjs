@@ -1706,8 +1706,16 @@
 		for (let i = 0; i < existingOutlineParagraphs.length; i += 1) {
 			const outlineParagraph = existingOutlineParagraphs[i];
 			const sourceParagraph = outlineView.outlineToSourceMap[outlineParagraph.Get_Id()];
-			const content = sourceParagraph && sourceParagraph.GetParent();
-			if (this.useInDocumentManager.isUseInDocumentParagraph(sourceParagraph) && !content.IsEmpty()) {
+			let content;
+			let shape;
+			let isEmptyContent = false;
+			if (sourceParagraph) {
+				content = sourceParagraph.GetParent();
+				isEmptyContent = content.IsEmpty();
+				shape = content.Is_DrawingShape(true);
+			}
+
+			if (this.useInDocumentManager.isUseInDocumentParagraph(sourceParagraph) && (!isEmptyContent || isEmptyContent && shape.isOutlineTitlePlaceholder())) {
 				outlineView.updateFromSourceParagraph(sourceParagraph);
 			} else {
 				this.unlinkOutlineParagraph(outlineParagraph, sourceParagraph);
