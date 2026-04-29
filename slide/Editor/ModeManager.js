@@ -1484,7 +1484,8 @@
 
 	function OutlineModeManager(api) {
 		SlideModeManager.call(this, api);
-		this.type = Asc.c_oAscPresentationViewMode.sorter;
+		this.type = Asc.c_oAscPresentationViewMode.outline;
+		this.outlineView = new AscCommonSlide.OutlineView(api);
 	}
 
 	AscFormat.InitClassWithoutType(OutlineModeManager, SlideModeManager);

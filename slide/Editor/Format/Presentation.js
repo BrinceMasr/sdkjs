@@ -2653,8 +2653,8 @@ CPresentation.prototype.CheckTargetUpdate = function () {
 };
 CPresentation.prototype.RecalculateOutlineCurPos = function (bUpdateX, bUpdateY) {
 	if (this.IsFocusOnOutline()) {
-		const oTargetDocContent = Asc.editor.WordControl.Thumbnails.outlineView.getDocContent();
-		oTargetDocContent.RecalculateCurPos(bUpdateX, bUpdateY);
+		const view = this.GetOutlineView();
+		view.recalculateCurPos(bUpdateX, bUpdateY);
 		return true;
 	}
 	return false;
@@ -3637,7 +3637,8 @@ CPresentation.prototype.AddToParagraph = function (ParaItem, bRecalculate, noUpd
 			}
 		}
 		if (this.IsFocusOnOutline()) {
-			Asc.editor.WordControl.Thumbnails.outlineView.paragraphAdd(ParaItem, false);
+			const outlineView = this.GetOutlineView();
+			outlineView.paragraphAdd(ParaItem, false);
 			if (bRecalculate !== false) {
 				this.Recalculate();
 			}
@@ -6453,7 +6454,8 @@ CPresentation.prototype.TurnOn_InterfaceEvents = function (bUpdate) {
 	}
 };
 CPresentation.prototype.GetOutlineView = function () {
-	return Asc.editor.WordControl.Thumbnails.outlineView;
+	const viewManager = this.getViewManager();
+	return viewManager && viewManager.outlineView;
 };
 CPresentation.prototype.Document_UpdateInterfaceState = function () {
 	if (this.TurnOffInterfaceEvents) {

@@ -4394,13 +4394,9 @@
 
 			ctxOverlay.beginPath();
 
-			if (drDoc.SlideCurrent != -1) {
-				const shape = this.Thumbnails.outlineView.outlineShape;
-				const content = shape && shape.getDocContent();
-				if (content) {
-					this.m_oDrawingDocument.UpdateTargetTransform(shape.transformText);
-					content.DrawSelectionOnPage(0);
-				}
+			const outlineView = this.m_oLogicDocument && this.m_oLogicDocument.GetOutlineView();
+			if (outlineView && drDoc.SlideCurrent != -1) {
+				outlineView.drawSelectionOnPage(this.m_oDrawingDocument);
 			}
 
 			ctxOverlay.globalAlpha = 0.2;

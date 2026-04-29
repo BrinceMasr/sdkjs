@@ -364,7 +364,7 @@ CShape.prototype.isOutlineShape = function () {
 };
 CShape.prototype.getParentObjects = function ()
 {
-	if (this.isOutlineShape()) {
+	if (this.isOutlineShape && this.isOutlineShape()) {
 		return { slide: null, layout: null, master: null, theme: AscFormat.GetDefaultTheme()};
 	}
     let oParent;

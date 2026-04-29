@@ -2443,8 +2443,6 @@
 		this.ScrollerHeight = 0;
 		this.ScrollerWidth = 0;
 
-		this.outlineView = new AscCommonSlide.OutlineView();
-
 		this.m_oOverlayApi = new AscCommon.COverlay();
 		this.m_oOverlayApi.m_oControl = this.m_oWordControl.m_oThumbnails;
 		this.m_oOverlayApi.m_oHtmlPage = this.m_oWordControl;
@@ -2543,10 +2541,13 @@
 	{
 		return this.m_oWordControl.m_oLogicDocument.IsMixedSelection();
 	};
-
+	COutlineThumbnailsManager.prototype.GetOutlineView = function () {
+		return this.m_oWordControl.m_oLogicDocument.GetOutlineView();
+	};
 	// events
 	COutlineThumbnailsManager.prototype.getSelectedPage = function () {
-		const selectedPage = this.outlineView.getSelectedSlide();
+		const outlineView = this.GetOutlineView();
+		const selectedPage = outlineView && outlineView.getSelectedSlide();
 		if (selectedPage !== null) {
 			return selectedPage;
 		}
@@ -2597,7 +2598,8 @@
 		if (global_mouseEvent.Button == undefined)
 			global_mouseEvent.Button = 0;
 
-		if (this.outlineView.isEmptyPresentation()) {
+		const outlineView = this.GetOutlineView();
+		if (outlineView && outlineView.isEmptyPresentation()) {
 			this.m_oWordControl.m_oLogicDocument.addNextSlide();
 			return;
 		}
@@ -2605,11 +2607,11 @@
 		this.SetFocusElement(FOCUS_OBJECT_THUMBNAILS);
 		const pos = this.ConvertCoords(global_mouseEvent.X, global_mouseEvent.Y);
 		this.MouseDownTrack.Start(pos.Page, global_mouseEvent.X, global_mouseEvent.Y);
-		if (global_mouseEvent.Button == 0 && this.outlineView) {
+		if (global_mouseEvent.Button == 0 && outlineView) {
 			const outlineXMm = pos.X * g_dKoef_pix_to_mm;
 			const outlineYMm = pos.Y * g_dKoef_pix_to_mm;
-			this.outlineView.selectionSetStart(global_mouseEvent, outlineXMm, outlineYMm, 0);
-			const selectedPage = this.outlineView.getSelectedSlide();
+			outlineView.selectionSetStart(global_mouseEvent, outlineXMm, outlineYMm, 0);
+			const selectedPage = outlineView.getSelectedSlide();
 			if (selectedPage !== null) {
 				this.SelectPageEnabled = false;
 				this.m_oWordControl.GoToPage(selectedPage);
@@ -2804,7 +2806,8 @@
 			return false;
 		}
 		AscCommon.check_KeyboardEvent(e);
-		return this.outlineView.onKeyDown(global_keyboardEvent);
+		const outlineView = this.GetOutlineView();
+		return outlineView && outlineView.onKeyDown(global_keyboardEvent);
 	};
 
 	COutlineThumbnailsManager.prototype.SetFocusElement = function(type)
@@ -2860,6 +2863,10 @@
 		if (!this.isThumbnailsShown()) {
 			return;
 		}
+		const outlineView = this.GetOutlineView();
+		if (!outlineView) {
+			return;
+		}
 
 		const canvas = this.m_oWordControl.m_oThumbnailsBack.HtmlElement;
 		if (!canvas)
@@ -2875,14 +2882,15 @@
 		const outlineLeftMarginMM = this.const_offset_x * scaleFactor;
 		const scrollYMm = this.m_dScrollY * g_dKoef_pix_to_mm;
 
-		if (!this.outlineView.outlineShape) {
+
+		if (!outlineView.outlineShape) {
 			const outlineWidth = widthMM - outlineLeftMarginMM;
-			this.outlineView.updateAll(outlineWidth);
+			outlineView.updateAll(outlineWidth);
 		}
 
-		this.outlineView.updateOutlineShapeTransform(outlineLeftMarginMM, -scrollYMm + outlineTopMarginMM);
+		outlineView.updateOutlineShapeTransform(outlineLeftMarginMM, -scrollYMm + outlineTopMarginMM);
 		this.m_oWordControl.m_oApi.clearEyedropperImgData();
-		this.outlineView.draw(graphics);
+		outlineView.draw(graphics);
 		this.OnUpdateOverlay();
 	};
 
@@ -2909,7 +2917,12 @@
 		if (canvas == null)
 			return;
 
-		if (this.outlineView.isEmptyPresentation()) {
+		const outlineView = this.GetOutlineView();
+		if (!outlineView) {
+			return;
+		}
+
+		if (outlineView.isEmptyPresentation()) {
 			return;
 		}
 
@@ -2920,10 +2933,10 @@
 		context.clearRect(0, 0, this.const_offset_x, canvas.height);
 
 		const currentSlideIndex = this.m_oWordControl.m_oDrawingDocument.SlideCurrent;
-		this.outlineView.drawDecorations(this.getOutlineGraphics(context), currentSlideIndex, this.MouseDownTrack.FocusPage);
-		const shape = this.outlineView.outlineShape;
+		outlineView.drawDecorations(this.getOutlineGraphics(context), currentSlideIndex, this.MouseDownTrack.FocusPage);
+		const shape = outlineView.outlineShape;
 		if (shape) {
-			this.m_oWordControl.m_oDrawingDocument.UpdateTargetTransform(this.outlineView.getTransformText());
+			this.m_oWordControl.m_oDrawingDocument.UpdateTargetTransform(outlineView.getTransformText());
 			if (checkSelectionEnd || this.MouseDownTrack.IsDragged()) {
 				const pos = this.ConvertCoords(global_mouseEvent.X, global_mouseEvent.Y);
 				shape.selectionSetEnd(global_mouseEvent, pos.X * g_dKoef_pix_to_mm, pos.Y * g_dKoef_pix_to_mm, 0);
@@ -2946,28 +2959,46 @@
 
 	COutlineThumbnailsManager.prototype.GetSelectedSlidesRange = function()
 	{
-		return this.outlineView.getSelectedSlidesRange();
+		const outlineView = this.GetOutlineView();
+		if (outlineView) {
+			return outlineView.getSelectedSlidesRange();
+		}
+		return {Min: -1, Max: -1};
 	};
 
 	COutlineThumbnailsManager.prototype.GetSelectedArray = function()
 	{
-		return this.outlineView.getSelectedSlideArray();
+		const outlineView = this.GetOutlineView();
+		if (outlineView) {
+			return outlineView.getSelectedSlideArray();
+		}
+		return [];
 	};
 
 	COutlineThumbnailsManager.prototype.isSelectedPage = function(pageNum)
 	{
-		return this.outlineView.isSelectedPage(pageNum);
+		const outlineView = this.GetOutlineView();
+		if (outlineView) {
+			return outlineView.isSelectedPage(pageNum);
+		}
+		return false;
 	};
 
 	COutlineThumbnailsManager.prototype.SelectPage = function (pageNum) {
 		if (!this.SelectPageEnabled)
 			return;
 
-		this.outlineView.selectPage(pageNum);
+		const outlineView = this.GetOutlineView();
+		if (!outlineView) {
+			return;
+		}
+
+		outlineView.selectPage(pageNum);
 	};
 
 	// position
 	COutlineThumbnailsManager.prototype.ConvertCoords = function (x, y) {
+		const outlineView = this.GetOutlineView();
 		let posX, posY;
 		switch (Asc.editor.getThumbnailsPosition()) {
 			case thumbnailsPositionMap.left:
@@ -2991,8 +3022,8 @@
 		}
 		const mmPosX = posX * AscCommon.g_dKoef_pix_to_mm;
 		const mmPosY = posY * AscCommon.g_dKoef_pix_to_mm;
-		const pageIndex = this.outlineView.getNearestPage(mmPosX, mmPosY);
-		const hitInTextRect = this.outlineView.hitInTextRect(mmPosX, mmPosY);
+		const pageIndex = outlineView ? outlineView.getNearestPage(mmPosX, mmPosY) : -1;
+		const hitInTextRect = !!(outlineView && outlineView.hitInTextRect(mmPosX, mmPosY));
 		return {
 			X: posX,
 			Y: posY,
@@ -3018,8 +3049,11 @@
 				this.m_dScrollY = scrollApi.getCurScrolledY();
 			}
 		}
-		const newWidth = AscCommon.AscBrowser.convertToRetinaValue(thumbnailsCanvas.width - this.const_offset_x) * AscCommon.g_dKoef_pix_to_mm;
-		this.outlineView.checkOutlineWidth(newWidth);
+		const outlineView = this.GetOutlineView();
+		if (outlineView) {
+			const newWidth = AscCommon.AscBrowser.convertToRetinaValue(thumbnailsCanvas.width - this.const_offset_x) * AscCommon.g_dKoef_pix_to_mm;
+			outlineView.checkOutlineWidth(newWidth);
+		}
 	};
 
 	COutlineThumbnailsManager.prototype.getSpecialPasteButtonCoords = function (sSlideId) {
@@ -3130,10 +3164,17 @@
 		this.const_offset_r = 4;
 		this.const_offset_b = 0;
 		this.const_border_w = 4;
-		this.const_offset_x += this.outlineView.getSlideNumbersWidth() * scaleFactor >> 0;
+		const outlineView = this.GetOutlineView();
+		if (outlineView) {
+			this.const_offset_x += outlineView.getSlideNumbersWidth() * scaleFactor >> 0;
+		}
 	};
 	COutlineThumbnailsManager.prototype.calculateTotalThumbnailsLength = function (containerWidth, containerHeight) {
-		return this.outlineView.getOutlineHeight() * AscCommon.AscBrowser.retinaPixelRatio * g_dKoef_mm_to_pix + this.const_offset_y;
+		const outlineView = this.GetOutlineView();
+		if (outlineView) {
+			return outlineView.getOutlineHeight() * AscCommon.AscBrowser.retinaPixelRatio * g_dKoef_mm_to_pix + this.const_offset_y;
+		}
+		return 0;
 	};
 
 	COutlineThumbnailsManager.prototype.GetCurSld = function()
@@ -3152,7 +3193,8 @@
 		this.m_bIsUpdate = true;
 	};
 	COutlineThumbnailsManager.prototype.GetThumbnailPagePosition = function (pageIndex) {
-		const slidePosition = this.outlineView.getThumbnailPagePosition(pageIndex);
+		const outlineView = this.GetOutlineView();
+		const slidePosition = outlineView && outlineView.getThumbnailPagePosition(pageIndex);
 		if (slidePosition) {
 			const scaleFactor = AscCommon.g_dKoef_mm_to_pix;
 			return {

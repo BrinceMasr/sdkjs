@@ -965,7 +965,8 @@
 		return this.measureInfo;
 	};
 
-	function OutlineView() {
+	function OutlineView(api) {
+		this.api = api;
 		this.outlineShape = null;
 		this.decorCacheManager = new DecorCacheManager();
 		this.reset();
@@ -1007,7 +1008,7 @@
 		this.resetPosition();
 	};
 	OutlineView.prototype.getPresentation = function () {
-		return Asc.editor.private_GetLogicDocument();
+		return this.api.private_GetLogicDocument();
 	};
 	OutlineView.prototype.setOutlineShape = function (shape) {
 		this.outlineShape = shape;
@@ -1772,7 +1773,7 @@
 		}
 	};
 	OutlineView.prototype.getApi = function () {
-		return Asc.editor;
+		return this.api;
 	};
 	OutlineView.prototype.selectAll = function () {
 		const content = this.getDocContent();
@@ -2122,12 +2123,21 @@
 	};
 	OutlineView.prototype.isEmptyPresentation = function () {
 		const presentation = this.getPresentation();
-		if (!presentation.Slides.length) {
-			return true;
-		}
-		return false;
+		return !presentation.Slides.length;
 	};
-
+	OutlineView.prototype.drawSelectionOnPage = function (drawingDocument) {
+		const content = this.getDocContent();
+		if (content) {
+			drawingDocument.UpdateTargetTransform(shape.transformText);
+			content.DrawSelectionOnPage(0);
+		}
+	};
+	OutlineView.prototype.recalculateCurPos = function (bUpdateX, bUpdateY) {
+		const content = this.getDocContent();
+		if (content) {
+			content.RecalculateCurPos(bUpdateX, bUpdateY);
+		}
+	};
 
 
 	window["AscCommonSlide"] = window["AscCommonSlide"] || {};
