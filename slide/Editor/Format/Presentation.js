@@ -8798,11 +8798,11 @@ CPresentation.prototype.removeSlide = function (pos, bNoCheck) {
 };
 CPresentation.prototype.checkSlideOutlineView = function (slide) {
 	const outlineView = this.GetOutlineView();
-	outlineView.checkSourceSlide(slide);
+	outlineView && outlineView.checkSourceSlide(slide);
 };
 CPresentation.prototype.checkShapeOutlineView = function (shape) {
 	const outlineView = this.GetOutlineView();
-	outlineView.checkSourceShape(shape);
+	outlineView && outlineView.checkSourceShape(shape);
 };
 CPresentation.prototype.removeSlideByObject = function (oSlide, bNoCheck, pos) {
 	if(!oSlide) return;
