@@ -11548,6 +11548,28 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Bounded case: Area, Ref. Empty cell reference as criteria is treated as 0, counts 2 cells with value 0');
 
+		// Case #40: Area, String. Count strings greater than or equal to empty string — bare operator ">=" with no rhs.
+		// Range B601:B606 = {"Apple","Banana","Apple","Orange","Banana","Cherry"} — 6 non-empty text cells.
+		AscCommonExcel.g_oCountIfCache.clean();
+		oParser = new parserFormula('COUNTIF(B601:B606,">=")', "AC8", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 0);
+
+		// Case #41: Area, String. Count strings less than or equal to empty string — bare operator "<=".
+		oParser = new parserFormula('COUNTIF(B601:B606,"<=")', "AC8", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 0);
+
+		// Case #42: Area, String. Count strings greater than empty string — bare operator ">".
+		oParser = new parserFormula('COUNTIF(B601:B606,">")', "AC8", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 0);
+
+		// Case #43: Area, String. Count strings less than empty string — bare operator "<".
+		oParser = new parserFormula('COUNTIF(B601:B606,"<")', "AC8", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 0);
+
 		testArrayFormula2(assert, "COUNTIF", 2, 2);
 	});
 
