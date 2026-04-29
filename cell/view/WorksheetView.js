@@ -1532,7 +1532,7 @@ function isAllowPasteLink(pastedWb) {
 
     WorksheetView.prototype.getSelectedColumnWidthInSymbols = function () {
         var i, charCount, res = null;
-        var range = this.model.selectionRange.getLast();
+        var range = this.model.getSelection().getLast();
         for (i = range.c1; i <= range.c2; ++i) {
 			charCount = this.getColumnWidthInSymbols(i);
 			if (null !== res && res !== charCount) {
@@ -1549,7 +1549,7 @@ function isAllowPasteLink(pastedWb) {
 
     WorksheetView.prototype.getSelectedRowHeight = function () {
         var i, hR, res = null;
-        var range = this.model.selectionRange.getLast();
+        var range = this.model.getSelection().getLast();
         for (i = range.r1; i <= range.r2; ++i) {
 			hR = this._getRowHeightReal(i);
 			if (null !== res && res !== hR) {
@@ -1806,7 +1806,7 @@ function isAllowPasteLink(pastedWb) {
 
 			var bIsHiddenArr;
 			var startUpdateCol = col;
-			var _selectionRange = t.model.selectionRange;
+			var _selectionRange = t.model.getSelection();
 			if (_selectionRange && _selectionRange.ranges && _selectionRange.isContainsOnlyFullRowOrCol(true) && _selectionRange.containsCol(col)) {
 				bIsHiddenArr = [];
 				for (var i = 0; i < _selectionRange.ranges.length; i++) {
@@ -1946,7 +1946,7 @@ function isAllowPasteLink(pastedWb) {
 			var bIsHiddenArr;
 			var startUpdateRow = row;
 			var endUpdateRow = row;
-			var _selectionRange = t.model.selectionRange;
+			var _selectionRange = t.model.getSelection();
 			if (_selectionRange && _selectionRange.ranges && _selectionRange.isContainsOnlyFullRowOrCol() && _selectionRange.containsRow(row)) {
 				bIsHiddenArr = [];
 				for (var i = 0; i < _selectionRange.ranges.length; i++) {
@@ -2676,7 +2676,7 @@ function isAllowPasteLink(pastedWb) {
     };
 
     WorksheetView.prototype._getSelection = function () {
-        return this.model.selectionRange;
+        return this.model.getSelection();
     };
 
 	WorksheetView.prototype.getSelectionState = function () {
@@ -3869,7 +3869,7 @@ function isAllowPasteLink(pastedWb) {
 			}
 
 			if (!selection) {
-				selection = this.model.selectionRange.ranges;
+				selection = this.model.getSelection().ranges;
 			}
 			for (var i = 0; i < selection.length; ++i) {
 				range = selection[i];
@@ -5186,7 +5186,7 @@ function isAllowPasteLink(pastedWb) {
 		};
 
 		let checkSelectionFirstRowCol = function () {
-			let ranges = t.model.selectionRange && t.model.selectionRange.ranges;
+			let ranges = t.model.getSelection() && t.model.getSelection().ranges;
 			if (!ranges) {
 				return false;
 			}
@@ -8043,7 +8043,7 @@ function isAllowPasteLink(pastedWb) {
 	/** For frozen panes api */
 	WorksheetView.prototype.freezePane = function (type, c, r) {
 		var t = this;
-		var activeCell = this.model.selectionRange.activeCell.clone();
+		var activeCell = this.model.getSelection().activeCell.clone();
 		var onChangeFreezePane = function (isSuccess) {
 			if (false === isSuccess) {
 				return;
@@ -8578,7 +8578,7 @@ function isAllowPasteLink(pastedWb) {
                         if (shift) {
                             let insertToCol = fullColumnRowProps.colByX;
                             let insertToRow = fullColumnRowProps.rowByY;
-                            var selectionRange = (this.dragAndDropRange || this.model.selectionRange.getLast());
+                            var selectionRange = (this.dragAndDropRange || this.model.getSelection().getLast());
 
                             if (insertToCol != null && insertToCol >= selectionRange.c1 && insertToCol <= selectionRange.c2) {
                                 insertToCol = Math.max(0, selectionRange.c1 - 1);
@@ -8724,10 +8724,10 @@ function isAllowPasteLink(pastedWb) {
     };
 
     WorksheetView.prototype._drawSelectRange = function () {
-        if (!this.model.selectionRange) {
+        if (!this.model.getSelection()) {
             return;
         }
-        var ranges = this.model.selectionRange.ranges;
+        var ranges = this.model.getSelection().ranges;
         for (var i = 0, l = ranges.length; i < l; ++i) {
             this._drawElements(this._drawSelectionElement, ranges[i], AscCommonExcel.selectionLineType.Dash,
               AscCommonExcel.c_oAscCoAuthoringOtherBorderColor);
@@ -9057,7 +9057,7 @@ function isAllowPasteLink(pastedWb) {
         }
 
         if (this.model.copySelection) {
-            selectionRange = this.model.selectionRange;
+            selectionRange = this.model.getSelection();
         } else if (this.workbook.isDrawFormatPainter()) {
 			let oData = this.workbook.Api.getFormatPainterData();
 	        selectionRange = null;
@@ -9296,7 +9296,7 @@ function isAllowPasteLink(pastedWb) {
 		var rows = this.cache.rows;
 
         if (range === undefined) {
-            range = this.model.selectionRange.getLast();
+            range = this.model.getSelection().getLast();
         }
 
         // ToDo now delete all. Change this code
@@ -10178,7 +10178,7 @@ function isAllowPasteLink(pastedWb) {
     };
 
     WorksheetView.prototype._selectColumnsByRange = function () {
-        var ar = this.model.selectionRange.getLast();
+        var ar = this.model.getSelection().getLast();
         var type = ar.getType();
         if (c_oAscSelectionType.RangeMax !== type) {
             this.cleanSelection();
@@ -10194,7 +10194,7 @@ function isAllowPasteLink(pastedWb) {
     };
 
     WorksheetView.prototype._selectRowsByRange = function () {
-        var ar = this.model.selectionRange.getLast();
+        var ar = this.model.getSelection().getLast();
 		var type = ar.getType();
         if (c_oAscSelectionType.RangeMax !== type) {
             this.cleanSelection();
@@ -10211,7 +10211,7 @@ function isAllowPasteLink(pastedWb) {
     };
 
 	WorksheetView.prototype._selectAllByRange = function () {
-		var ar = this.model.selectionRange.getLast();
+		var ar = this.model.getSelection().getLast();
 		var type = ar.getType();
 		if (this.isMultiSelect() || c_oAscSelectionType.RangeCol === type || c_oAscSelectionType.RangeRow === type) {
 			this._selectColumnsByRange();
@@ -10221,7 +10221,7 @@ function isAllowPasteLink(pastedWb) {
 			if (c_oAscSelectionType.RangeCol === type || c_oAscSelectionType.RangeRow === type) {
 				ar.assign(0, 0, gc_nMaxCol0, gc_nMaxRow0);
 			} else {
-				let ar = this.model.selectionRange.getLast();
+				let ar = this.model.getSelection().getLast();
 				let newRange;
 				let tableParts = this.model.TableParts;
 				if (tableParts && tableParts.length) {
@@ -12643,7 +12643,7 @@ function isAllowPasteLink(pastedWb) {
     };
 
     WorksheetView.prototype._fixSelectionOfHiddenCells = function (dc, dr, range) {
-        var ar = (range) ? range : this.model.selectionRange.getLast(), c1, c2, r1, r2, mc, i, arn = ar.clone(true);
+        var ar = (range) ? range : this.model.getSelection().getLast(), c1, c2, r1, r2, mc, i, arn = ar.clone(true);
 
         if (dc === undefined) {
             dc = +1;
@@ -12776,13 +12776,13 @@ function isAllowPasteLink(pastedWb) {
 
     // Movement of active cell in selected area
     WorksheetView.prototype._moveActivePointInSelection = function (dc, dr) {
-        var t = this, cell = this.model.selectionRange.activeCell;
+        var t = this, cell = this.model.getSelection().activeCell;
 
         // If we are on a hidden row or cell, we cannot move in the selection (Excel does the same)
         if (0 === this._getColumnWidth(cell.col) || 0 === this._getRowHeight(cell.row)) {
             return;
         }
-        return this.model.selectionRange.offsetCell(dr, dc, true, function (row, col) {
+        return this.model.getSelection().offsetCell(dr, dc, true, function (row, col) {
             return (0 === ((0 <= row) ? t._getRowHeight(row) : t._getColumnWidth(col)));
         });
     };
@@ -12989,7 +12989,7 @@ function isAllowPasteLink(pastedWb) {
 		var vr = this.visibleRange;
 		var nRowsCount = this.nRowsCount;
 		var nColsCount = this.nColsCount;
-		var selection = this.model.selectionRange || this.model.copySelection;
+		var selection = this.model.getSelection() || this.model.copySelection;
 		var ar = range || selection.getLast();
 		if (this.getFormulaEditMode()) {
 			// For formulas, we need to limit by range (we store the full range)
@@ -13104,8 +13104,8 @@ function isAllowPasteLink(pastedWb) {
      */
     WorksheetView.prototype._calcActiveCellOffset = function (range) {
         var vr = this.visibleRange;
-        var activeCell = this.model.selectionRange.activeCell;
-        var ar = range ? range : this.model.selectionRange.getLast();
+        var activeCell = this.model.getSelection().activeCell;
+        var ar = range ? range : this.model.getSelection().getLast();
         var mc = this.model.getMergedByCell(activeCell.row, activeCell.col);
         var startCol = mc ? mc.c1 : activeCell.col;
         var startRow = mc ? mc.r1 : activeCell.row;
@@ -13134,7 +13134,7 @@ function isAllowPasteLink(pastedWb) {
     WorksheetView.prototype.getSelectionMergeInfo = function (options) {
         // ToDo now check only last selection range
 		var t = this;
-		var arn = this.model.selectionRange.getLast().clone(true);
+		var arn = this.model.getSelection().getLast().clone(true);
 		var range = this.model.getRange3(arn.r1, arn.c1, arn.r2, arn.c2);
 		var lastRow = -1, res;
 
@@ -13172,7 +13172,7 @@ function isAllowPasteLink(pastedWb) {
 	//do we need to ask user about range expansion
 	WorksheetView.prototype.getSelectionSortInfo = function () {
 		//in case of attempt to sort multiselect, need to show error
-		var arn = this.model.selectionRange.getLast().clone(true);
+		var arn = this.model.getSelection().getLast().clone(true);
 
 		//null - don't show message and don't expand, false - don't show message and expand, true - show message
 		var bResult = Asc.c_oAscSelectionSortExpand.expandAndNotShowMessage;
@@ -13202,7 +13202,7 @@ function isAllowPasteLink(pastedWb) {
 			else
 			{
 				//next we check if there are adjacent cells at startCol/startRow
-				var activeCell = this.model.selectionRange.activeCell;
+				var activeCell = this.model.getSelection().activeCell;
 				var activeCellRange = new Asc.Range(activeCell.col, activeCell.row, activeCell.col, activeCell.row);
 
 				var expandRange = this.model.autoFilters.expandRange(activeCellRange, true);
@@ -13258,7 +13258,7 @@ function isAllowPasteLink(pastedWb) {
 		}
 
 		let action = function (stopFunc, props) {
-			let _ranges = props && props.ranges ? props.ranges : t.model.selectionRange.ranges;
+			let _ranges = props && props.ranges ? props.ranges : t.model.getSelection().ranges;
 			let _oExistCells = props && props.oExistCells ? props.oExistCells : new Map();
 			let _oSelectionMathInfo = props.oSelectionMathInfo;
 
@@ -13383,7 +13383,7 @@ function isAllowPasteLink(pastedWb) {
 			let sum = _props.sum;
 			if (1 < _oSelectionMathInfo.count && 0 < _oSelectionMathInfo.countNumbers) {
 				// We should return in format of active cell
-				var activeCell = t.model.selectionRange.activeCell;
+				var activeCell = t.model.getSelection().activeCell;
 				var numFormat = t.model.getRange3(activeCell.row, activeCell.col,
 					activeCell.row, activeCell.col).getNumFormat();
 				if (Asc.c_oAscNumFormatType.Time === numFormat.getType()) {
@@ -13406,7 +13406,7 @@ function isAllowPasteLink(pastedWb) {
 		};
 
 		let nLargeArea = 3000000;
-		let selectionSize = this.model.selectionRange.getSize();
+		let selectionSize = this.model.getSelection().getSize();
 		if (selectionSize > nLargeArea) {
 			if (!t.asyncOperations) {
 				t.asyncOperations = {};
@@ -13430,7 +13430,7 @@ function isAllowPasteLink(pastedWb) {
 			oAsyncSelectionMathInfo.props.oSelectionMathInfo = oSelectionMathInfo;
 			oAsyncSelectionMathInfo.props.sum = 0;
 			let cloneRanges = [];
-			this.model.selectionRange.ranges.forEach(function (item) {
+			this.model.getSelection().ranges.forEach(function (item) {
 				cloneRanges.push(item.clone());
 			});
 			oAsyncSelectionMathInfo.props.ranges = cloneRanges;
@@ -13459,7 +13459,7 @@ function isAllowPasteLink(pastedWb) {
             return " ";
         }
 
-        var selection = this.model.selectionRange || this.model.copySelection;
+        var selection = this.model.getSelection() || this.model.copySelection;
         var ar = selection.getLast();
         var cell = selection.activeCell;
         var mc = this.model.getMergedByCell(cell.row, cell.col);
@@ -13587,8 +13587,8 @@ function isAllowPasteLink(pastedWb) {
 		absName = absName || this.workbook.dialogAbsName;
 		addSheet = addSheet || this.workbook.getDialogSheetName();
 		addBook = addBook || this.workbook.getDialogBookName();
-		if (this.model.selectionRange) {
-			var ranges = this.model.selectionRange.ranges;
+		if (this.model.getSelection()) {
+			var ranges = this.model.getSelection().ranges;
 
 			//formula edit mode - check tables selection
 			if (ranges.length === 1 && this.getFormulaEditMode()) {
@@ -13607,8 +13607,8 @@ function isAllowPasteLink(pastedWb) {
 			absName = absName || this.workbook.dialogAbsName;
 			addSheet = addSheet || this.workbook.getDialogSheetName();
 			addBook = addBook || this.workbook.getDialogBookName();
-			if (this.model.selectionRange) {
-				var ranges = this.model.selectionRange.ranges;
+			if (this.model.getSelection()) {
+				var ranges = this.model.getSelection().ranges;
 
 				if (ranges.length === 1 && ranges[0].isOneCell() && this.getFormulaEditMode()) {
 					let range = ranges[0];
@@ -13668,7 +13668,7 @@ function isAllowPasteLink(pastedWb) {
 	};
 
     WorksheetView.prototype._getSelectionInfoCell = function () {
-        var selectionRange = this.model.selectionRange;
+        var selectionRange = this.model.getSelection();
         var cell = selectionRange.activeCell;
         var mc = this.model.getMergedByCell(cell.row, cell.col);
         var c1 = mc ? mc.c1 : cell.col;
@@ -14080,16 +14080,16 @@ function isAllowPasteLink(pastedWb) {
 			if (type === c_oAscSelectionType.RangeCells || type === c_oAscSelectionType.RangeCol ||
 				type === c_oAscSelectionType.RangeRow || type === c_oAscSelectionType.RangeMax) {
 				if (bFirst) {
-					this.model.selectionRange.clean();
+					this.model.getSelection().clean();
 					bFirst = false;
 				} else {
-					this.model.selectionRange.addRange();
+					this.model.getSelection().addRange();
 				}
-				this.model.selectionRange.getLast().assign2(bbox);
+				this.model.getSelection().getLast().assign2(bbox);
 			}
 		}
 		if (!bFirst) {
-			this.model.selectionRange.update();
+			this.model.getSelection().update();
 		}
 
 		this._fixSelectionOfMergedCells(null, onlyCells);
@@ -14101,7 +14101,7 @@ function isAllowPasteLink(pastedWb) {
     WorksheetView.prototype.setActiveCell = function (cell) {
 		this.cleanSelection();
 
-		this.model.selectionRange.setActiveCell(cell.row, cell.col);
+		this.model.getSelection().setActiveCell(cell.row, cell.col);
 		var valid = !this.getFormulaEditMode() && this._getSelection().validActiveCell();
 
 		this._fixSelectionOfMergedCells(null, valid);
@@ -14117,9 +14117,9 @@ function isAllowPasteLink(pastedWb) {
 		var activeCell = this._getSelection().activeCell.clone();
 
         if (isCtrl) {
-            this.model.selectionRange.addRange();
+            this.model.getSelection().addRange();
         } else {
-            this.model.selectionRange.clean();
+            this.model.getSelection().clean();
         }
 		var ret = {};
 		var isChangeSelectionShape = false;
@@ -14258,10 +14258,10 @@ function isAllowPasteLink(pastedWb) {
         }
 
 		range = new asc_Range(c1, r1, c2, r2);
-        if (!this.model.selectionRange.containsRange(range)) {
+        if (!this.model.getSelection().containsRange(range)) {
             // Didn't hit the selection (change first point)
             this.cleanSelection();
-            this.model.selectionRange.clean();
+            this.model.getSelection().clean();
 			this.setSelection(range, true);
             this._drawSelection();
 
@@ -14373,7 +14373,7 @@ function isAllowPasteLink(pastedWb) {
 
 	WorksheetView.prototype.checkSelectionSparkline = function () {
 		if (!this.getSelectionShape() && !this.getCellEditMode()) {
-			var cell = this.model.selectionRange.activeCell;
+			var cell = this.model.getSelection().activeCell;
 			var mc = this.model.getMergedByCell(cell.row, cell.col);
 			var c1 = mc ? mc.c1 : cell.col;
 			var r1 = mc ? mc.r1 : cell.row;
@@ -14401,7 +14401,7 @@ function isAllowPasteLink(pastedWb) {
 		let oRange = oData && oData.range;
 		if(oRange) {
 			let t = this;
-			let from = oRange.getLast(), to = this.model.selectionRange.getLast().clone();
+			let from = oRange.getLast(), to = this.model.getSelection().getLast().clone();
 			let onApplyFormatPainterCallback = function (isSuccess) {
 				// Clear selection
 				t.cleanSelection();
@@ -14454,7 +14454,7 @@ function isAllowPasteLink(pastedWb) {
 		//if don't have empty rows/columns
 		//if all range is empty
 		if (!range) {
-			range = this.model.selectionRange.getLast().clone();
+			range = this.model.getSelection().getLast().clone();
 		}
 
 		range = typeof range === "string" ? AscCommonExcel.g_oRangeCache.getAscRange(range) : range;
@@ -14488,7 +14488,7 @@ function isAllowPasteLink(pastedWb) {
 		let t = this;
 
 		let doFill = function (_start, _end) {
-			t.model.selectionRange.getLast().assign2(_start);
+			t.model.getSelection().getLast().assign2(_start);
 			t.activeFillHandle = _end.clone();
 
 			if (_start.r1 !== _end.r1 || _start.r2 !== _end.r2) {
@@ -14531,10 +14531,10 @@ function isAllowPasteLink(pastedWb) {
 
 		//only end range - selected range
 		//1. search base
-		var activeCell = this.model.selectionRange.activeCell.clone();
+		var activeCell = this.model.getSelection().activeCell.clone();
 
 		if (!range) {
-			range = this.model.selectionRange.getLast().clone();
+			range = this.model.getSelection().getLast().clone();
 		}
 		range = typeof range === "string" ? AscCommonExcel.g_oRangeCache.getAscRange(range) : range;
 
@@ -14599,8 +14599,8 @@ function isAllowPasteLink(pastedWb) {
 		History.SetSelectionRedo(range);
 		History.EndTransaction();
 
-		t.model.selectionRange.getLast().assign2(range);
-		t.model.selectionRange.activeCell = activeCell;
+		t.model.getSelection().getLast().assign2(range);
+		t.model.getSelection().activeCell = activeCell;
 		t.draw();
 	};
 
@@ -15020,7 +15020,7 @@ function isAllowPasteLink(pastedWb) {
 		}
 
 		// Current selection (autofill will be applied to it)
-		let arn = t.model.selectionRange.getLast();
+		let arn = t.model.getSelection().getLast();
 		let range = t.model.getRange3(arn.r1, arn.c1, arn.r2, arn.c2);
 
 		// Check whether the filter is applied to the sheet
@@ -15162,7 +15162,7 @@ function isAllowPasteLink(pastedWb) {
 						callback && callback(true);
 					} else {
 						t.handlers.trigger("onErrorEvent", c_oAscError.ID.CannotFillRange, c_oAscError.Level.NoCritical);
-						t.model.selectionRange.assign2(range.bbox);
+						t.model.getSelection().assign2(range.bbox);
 
 						// Reset autofill parameters
 						t.activeFillHandle = null;
@@ -15249,7 +15249,7 @@ function isAllowPasteLink(pastedWb) {
 		//2. if only empty rows below - call expandRange and go to the nearest non-empty
 		var range;
 
-		var activeRange = this.model.selectionRange && this.model.selectionRange.getLast();
+		var activeRange = this.model.getSelection() && this.model.getSelection().getLast();
 		if (activeRange) {
 			if (activeRange.r2 === gc_nMaxRow0) {
 				return;
@@ -15307,7 +15307,7 @@ function isAllowPasteLink(pastedWb) {
 
         //if a formatted table header cell is selected, change selection from cell to formatted table column
         //if the entire visible part of the formatted table is selected, but the last hidden rows are not selected
-        var selectionRange = (this.dragAndDropRange || this.model.selectionRange.getLast()).clone();
+        var selectionRange = (this.dragAndDropRange || this.model.getSelection().getLast()).clone();
         if (null === this.startCellMoveRange) {
             this.af_changeSelectionTablePart(selectionRange);
         }
@@ -15932,7 +15932,7 @@ function isAllowPasteLink(pastedWb) {
 		this.model.workbook.handlers.trigger("cleanCutData", null, true);
 		this.model.workbook.handlers.trigger("cleanCopyData");
 
-        let arnFrom = this.model.selectionRange.getLast();
+        let arnFrom = this.model.getSelection().getLast();
         let arnTo = this.activeMoveRange.clone(true);
         if (arnFrom.isEqual(arnTo)) {
             this._cleanSelectionMoveRange();
@@ -15963,7 +15963,7 @@ function isAllowPasteLink(pastedWb) {
 			}
 
 			if (shiftMove) {
-				arnTo = t.model.selectionRange.getLast().clone();
+				arnTo = t.model.getSelection().getLast().clone();
 				if (lastSelection.getType() === c_oAscSelectionType.RangeCol && lastSelection.c1 > arnTo.c1) {
 					let diff = arnFrom.c2 - arnFrom.c1 + 1;
 					arnFrom = new asc_Range(lastSelection.c1 + diff, lastSelection.r1, lastSelection.c2 + diff, lastSelection.r2);
@@ -15994,7 +15994,7 @@ function isAllowPasteLink(pastedWb) {
 				}
 				if (!ctrlKey) {
 					let insProp = null != colByX ? c_oAscDeleteOptions.DeleteCellsAndShiftLeft : c_oAscDeleteOptions.DeleteCellsAndShiftTop;
-					t.model.selectionRange.getLast().assign2(arnFrom);
+					t.model.getSelection().getLast().assign2(arnFrom);
 					t.changeWorksheet("delCell", insProp, function (_success) {
 						if (!_success) {
 							History.EndTransaction();
@@ -16032,21 +16032,21 @@ function isAllowPasteLink(pastedWb) {
 		let lastSelection;
 		let shiftMove = this.startCellMoveRange.colRowMoveProps && this.startCellMoveRange.colRowMoveProps.shiftKey;
 		if (shiftMove) {
-			lastSelection = t.model.selectionRange.getLast().clone();
+			lastSelection = t.model.getSelection().getLast().clone();
 
 			colByX = this.startCellMoveRange.colRowMoveProps.colByX;
 			rowByY = this.startCellMoveRange.colRowMoveProps.rowByY;
 			if (colByX != null) {
 				let colStart = colByX + 1;
 				let colEnd = colStart + lastSelection.c2 - lastSelection.c1;
-				t.model.selectionRange.getLast().assign(colStart, lastSelection.r1, colEnd, lastSelection.r2);
+				t.model.getSelection().getLast().assign(colStart, lastSelection.r1, colEnd, lastSelection.r2);
 			} else if (rowByY != null) {
 				let rowStart = rowByY + 1;
 				let rowEnd = rowStart + lastSelection.r2 - lastSelection.r1;
-				t.model.selectionRange.getLast().assign(lastSelection.c1, rowStart, lastSelection.c2, rowEnd);
+				t.model.getSelection().getLast().assign(lastSelection.c1, rowStart, lastSelection.c2, rowEnd);
 			}
 
-			if (t.model.selectionRange.getLast().isEqual(lastSelection) !== true &&(colByX != null || rowByY != null)) {
+			if (t.model.getSelection().getLast().isEqual(lastSelection) !== true &&(colByX != null || rowByY != null)) {
 				History.Create_NewPoint();
 				History.StartTransaction();
 				let insProp = null != colByX ? c_oAscInsertOptions.InsertCellsAndShiftRight : c_oAscInsertOptions.InsertCellsAndShiftDown;
@@ -16210,7 +16210,7 @@ function isAllowPasteLink(pastedWb) {
 				wsTo._updateRange(arnTo);
 				t._updateRange(arnFrom);
 
-				wsTo.model.selectionRange.assign2(arnTo);
+				wsTo.model.getSelection().assign2(arnTo);
 				// Reset parameters
 				wsTo.activeMoveRange = null;
 				wsTo.startCellMoveRange = null;
@@ -16316,7 +16316,7 @@ function isAllowPasteLink(pastedWb) {
 
 	WorksheetView.prototype.isMultiSelect = function () {
 		if(!this.objectRender.selectedGraphicObjectsExists()) {
-			return !this.model.selectionRange.isSingleRange();
+			return !this.model.getSelection().isSingleRange();
 		}
 		return null;
 	};
@@ -16334,12 +16334,12 @@ function isAllowPasteLink(pastedWb) {
         const t = this;
 		const ws = t.model;
         let checkRange = [];
-        let activeCell = this.model.selectionRange.activeCell.clone();
-        let arn = this.model.selectionRange.getLast().clone(true);
+        let activeCell = this.model.getSelection().activeCell.clone();
+        let arn = this.model.getSelection().getLast().clone(true);
 
 		const revertSelection = function () {
 			if (val.originalSelectBeforePaste && val.originalSelectBeforePaste.ranges) {
-				t.model.selectionRange.ranges = val.originalSelectBeforePaste.ranges;
+				t.model.getSelection().ranges = val.originalSelectBeforePaste.ranges;
 			}
 		};
 
@@ -16868,7 +16868,7 @@ function isAllowPasteLink(pastedWb) {
 				if (val.fromBinary) {
 					//this handling doesn't work in MS when pasting from outside
 					//not cloning, since it won't be changed anywhere
-					val.originalSelectBeforePaste = this.model.selectionRange ? this.model.selectionRange.clone() : null;
+					val.originalSelectBeforePaste = this.model.getSelection() ? this.model.getSelection().clone() : null;
 					if (!this.changeSelectOnMultiSelect()) {
 						val.originalSelectBeforePaste = undefined;
 					}
@@ -16910,7 +16910,7 @@ function isAllowPasteLink(pastedWb) {
 		} else if (onlyActive) {
 			checkRange.push(new asc_Range(activeCell.col, activeCell.row, activeCell.col, activeCell.row));
 		} else {
-			this.model.selectionRange.ranges.forEach(function (item) {
+			this.model.getSelection().ranges.forEach(function (item) {
 				checkRange.push(item.clone());
 			});
 		}
@@ -17046,7 +17046,7 @@ function isAllowPasteLink(pastedWb) {
 
 		if (prop === "changeDigNum")
 		{
-			let activeCell = this.model.selectionRange.activeCell.clone();
+			let activeCell = this.model.getSelection().activeCell.clone();
 			let colWidth = this.getColumnWidthInSymbols(activeCell.col);
 			let cell = this.model.getRange3(activeCell.row, activeCell.col, activeCell.row, activeCell.col);
 			let changeDigNumFormat = cell.getShiftedNumFormat(val, colWidth);
@@ -17129,7 +17129,7 @@ function isAllowPasteLink(pastedWb) {
 		var isChange;
 		var newRanges = [];
 		if (breakRange) {
-			var sr = this.model.selectionRange;
+			var sr = this.model.getSelection();
 			for (var i = 0; i < sr.ranges.length; i++) {
 				if (sr.ranges[i]) {
 					var intersection = sr.ranges[i].intersection(breakRange);
@@ -17148,7 +17148,7 @@ function isAllowPasteLink(pastedWb) {
 		}
 
 		if (isChange && newRanges.length) {
-			this.model.selectionRange.ranges = newRanges;
+			this.model.getSelection().ranges = newRanges;
 			return true;
 		}
 		return false;
@@ -17430,7 +17430,7 @@ function isAllowPasteLink(pastedWb) {
 		}
 
 		var t = this;
-		var arn = this.model.selectionRange.getLast().clone();
+		var arn = this.model.getSelection().getLast().clone();
 		var checkRange = arn.clone();
 
 		var range, count;
@@ -17616,7 +17616,7 @@ function isAllowPasteLink(pastedWb) {
 			History.Create_NewPoint();
 			History.StartTransaction();
 
-			var _selectionRange = t.model.selectionRange;
+			var _selectionRange = t.model.getSelection();
 			if (_selectionRange && _selectionRange.ranges) {
 				//need to merge intersecting ranges and sort from end to beginning
 				if (!multiRanges) {
@@ -17648,7 +17648,7 @@ function isAllowPasteLink(pastedWb) {
 
 
 		//check user protect
-		let checkUserRanges = t.model.selectionRange && t.model.selectionRange.ranges;
+		let checkUserRanges = t.model.getSelection() && t.model.getSelection().ranges;
 		if (prop === "colWidth" || prop === "showCols" || prop === "groupCols" || prop === "hideCols" || (prop === "delCell" && val === c_oAscDeleteOptions.DeleteColumns)) {
 			if (!checkUserRanges || prop === "groupCols") {
 				checkUserRanges = new Asc.Range(checkRange.c1, 0, checkRange.c2, gc_nMaxRow0);
@@ -18229,7 +18229,7 @@ function isAllowPasteLink(pastedWb) {
 								t.model.shiftDataValidation(false, val, checkRange, true);
 								t.model.autoFilters.isEmptyAutoFilters(updateRange, c_oAscDeleteOptions.DeleteRows);
 
-								var bExcludeHiddenRows = t.model.autoFilters.bIsExcludeHiddenRows(checkRange, t.model.selectionRange.activeCell);
+								var bExcludeHiddenRows = t.model.autoFilters.bIsExcludeHiddenRows(checkRange, t.model.getSelection().activeCell);
 								t.model.removeRows(checkRange.r1, checkRange.r2, bExcludeHiddenRows);
 
 								t._updateSlicers(updateRange);
@@ -18445,7 +18445,7 @@ function isAllowPasteLink(pastedWb) {
 		var ranges = [];
 		if (null !== col) {
 			//if col contains into selected range
-			let selectionRanges = this.model.selectionRange.ranges;
+			let selectionRanges = this.model.getSelection().ranges;
 			for (let i = 0; i < selectionRanges.length; ++i) {
 				if (!(selectionRanges[i].getType() === c_oAscSelectionType.RangeMax || selectionRanges[i].getType() === c_oAscSelectionType.RangeCol)) {
 					break;
@@ -18459,7 +18459,7 @@ function isAllowPasteLink(pastedWb) {
 		if (null !== col) {
 			ranges.push(new Asc.Range(col, r1, col, r2));
 		} else {
-			let selectionRanges = this.model.selectionRange.ranges;
+			let selectionRanges = this.model.getSelection().ranges;
 			for (let i = 0; i < selectionRanges.length; ++i) {
 				ranges.push(new Asc.Range(selectionRanges[i].c1, r1, selectionRanges[i].c2, r2));
 			}
@@ -18509,7 +18509,7 @@ function isAllowPasteLink(pastedWb) {
     	var viewMode = this.handlers.trigger('getViewMode');
         var t = this;
 		if (null === r1) {
-			var lastSelection = this.model.selectionRange.getLast();
+			var lastSelection = this.model.getSelection().getLast();
 			r1 = lastSelection.r1;
 			r2 = lastSelection.r2;
 		}
@@ -18581,7 +18581,7 @@ function isAllowPasteLink(pastedWb) {
 		if (true !== options.isMatchCase) {
 			options.findWhat = options.findWhat.toLowerCase();
 		}
-		var selectionRange = options.selectionRange || this.model.selectionRange;
+		var selectionRange = options.selectionRange || this.model.getSelection();
 		var lastRange = selectionRange.getLast();
 		var ar = selectionRange.activeCell;
 		var c = ar.col;
@@ -18714,7 +18714,7 @@ function isAllowPasteLink(pastedWb) {
 				});
 			}
 		} else {
-			cell = bSearchEngine ? this.workbook.SearchEngine.GetCurrentElem() : this.model.selectionRange.activeCell;
+			cell = bSearchEngine ? this.workbook.SearchEngine.GetCurrentElem() : this.model.getSelection().activeCell;
 			// Try to find first
 			if (cell) {
 				var isEqual = this._isCellEqual(cell.col, cell.row, options);
@@ -18893,7 +18893,7 @@ function isAllowPasteLink(pastedWb) {
 				this._updateSelectionNameAndInfo();
 			} else {
 				// ToDo multiselect defined names
-				var selectionLast = this.model.selectionRange.getLast();
+				var selectionLast = this.model.getSelection().getLast();
 				mc = selectionLast.isOneCell() ? this.model.getMergedByCell(selectionLast.r1, selectionLast.c1) : null;
 
 				var defName;
@@ -19471,7 +19471,7 @@ function isAllowPasteLink(pastedWb) {
 			wsModel.workbook.handlers.trigger("asc_onError", c_oAscError.ID.ChangeOnProtectedSheet, c_oAscError.Level.NoCritical);
 			return;
 		}
-		let activeCell = selectionRange && selectionRange.activeCell ? selectionRange.activeCell : wsModel.selectionRange.activeCell;
+		let activeCell = selectionRange && selectionRange.activeCell ? selectionRange.activeCell : wsModel.getSelection().activeCell;
 		if (window['IS_NATIVE_EDITOR'] && activeCell && wsModel.getSheetProtection() && wsModel.isLockedRange(new Asc.Range(activeCell.col, activeCell.row, activeCell.col, activeCell.row))) {
 			wsModel.workbook.handlers.trigger("asc_onError", c_oAscError.ID.ChangeOnProtectedSheet, c_oAscError.Level.NoCritical);
 			return;
@@ -19486,7 +19486,7 @@ function isAllowPasteLink(pastedWb) {
 			this._drawSelection();
 		}
 
-		var cell = this.model.selectionRange.activeCell;
+		var cell = this.model.getSelection().activeCell;
 
 		function getVisibleRangeObject() {
 			var vr = t.visibleRange.clone(), offsetX = 0, offsetY = 0;
@@ -19980,7 +19980,7 @@ function isAllowPasteLink(pastedWb) {
 		}
 
 		var t = this;
-		var ar = range ? range : this.model.selectionRange.getLast().clone();
+		var ar = range ? range : this.model.getSelection().getLast().clone();
 
 		var isChangeAutoFilterToTablePart = function (addFormatTableOptionsObj) {
 			var res = false;
@@ -20177,7 +20177,7 @@ function isAllowPasteLink(pastedWb) {
 		}
 
 		var t = this;
-		var ar = this.model.selectionRange.getLast().clone();
+		var ar = this.model.getSelection().getLast().clone();
 
 		//check user range protect
 		var isChangeStyle = Asc.c_oAscChangeFilterOptions.style === optionType;
@@ -20316,7 +20316,7 @@ function isAllowPasteLink(pastedWb) {
 		}
 
 		var t = this;
-		var ar = this.model.selectionRange.getLast().clone();
+		var ar = this.model.getSelection().getLast().clone();
 		//todo filteringMode
 		//pivot
 		var cellId = autoFilterObject.asc_getCellId();
@@ -20381,7 +20381,7 @@ function isAllowPasteLink(pastedWb) {
 
 	WorksheetView.prototype.reapplyAutoFilter = function (tableName) {
 		var t = this;
-		var ar = this.model.selectionRange.getLast().clone();
+		var ar = this.model.getSelection().getLast().clone();
 
 		let filter = tableName ? this.model.getTableByName(tableName) : this.model.AutoFilter;
 		if (filter && filter.Ref && this.model.isUserProtectedRangesIntersection(filter.Ref)) {
@@ -20469,8 +20469,8 @@ function isAllowPasteLink(pastedWb) {
 		}
 
 		var t = this;
-		var activeCell = this.model.selectionRange.activeCell.clone();
-		var ar = this.model.selectionRange.getLast().clone();
+		var activeCell = this.model.getSelection().activeCell.clone();
+		var ar = this.model.getSelection().getLast().clone();
 
 		let filterRange = autoFilterObject && autoFilterObject.getFilterRef(this.model, activeCell);
 		if (filterRange && this.model.isUserProtectedRangesIntersection(filterRange)) {
@@ -20611,14 +20611,14 @@ function isAllowPasteLink(pastedWb) {
 
     WorksheetView.prototype.sortRange = function (type, cellId, displayName, color, bIsExpandRange) {
         var t = this;
-        var ar = this.model.selectionRange.getLast().clone();
+        var ar = this.model.getSelection().getLast().clone();
 
 		if (!window['AscCommonExcel'].filteringMode) {
 			return;
 		}
 		//pivot
 		var activeRangeOrCellId = ar;
-		var activeCellOrCellId = this.model.selectionRange.activeCell;
+		var activeCellOrCellId = this.model.getSelection().activeCell;
 		if (cellId && typeof cellId == 'string') {
 			activeRangeOrCellId = AscCommonExcel.g_oRangeCache.getAscRange(cellId);
 			activeCellOrCellId = new AscCommon.CellBase(activeRangeOrCellId.r1, activeRangeOrCellId.c1);
@@ -20652,7 +20652,7 @@ function isAllowPasteLink(pastedWb) {
 		}
 
 		var expandRange;
-		var selectionRange = t.model.selectionRange;
+		var selectionRange = t.model.getSelection();
 		var activeCell = selectionRange.activeCell.clone();
 		var activeRange = selectionRange.getLast();
 		if (null === sortProps) {
@@ -20749,14 +20749,14 @@ function isAllowPasteLink(pastedWb) {
     	if (this.model.getSheetProtection()) {
 			return null;
 		}
-    	var selectionRange = this.model.selectionRange.getLast();
+    	var selectionRange = this.model.getSelection().getLast();
         //TODO maybe should move getAddFormatTableOptions to view
         return this.model.autoFilters.getAddFormatTableOptions(selectionRange, range, isPivot);
     };
 
 	WorksheetView.prototype.clearFilter = function () {
 		var t = this;
-		var ar = this.model.selectionRange.getLast().clone();
+		var ar = this.model.getSelection().getLast().clone();
 		//pivot
 		if (Asc.CT_pivotTableDefinition.prototype.asc_removeFilters) {
 			var pivotTable = this.model.inPivotTable(ar);
@@ -21844,7 +21844,7 @@ function isAllowPasteLink(pastedWb) {
 
 		var refTablePart = tablePart.Ref;
 
-		var lastSelection = this.model.selectionRange.getLast();
+		var lastSelection = this.model.getSelection().getLast();
 		var startCol = undefined !== opt_col ? opt_col : lastSelection.c1;
 		var endCol = undefined !== opt_col ? opt_col : lastSelection.c2;
 		var startRow = undefined !== opt_row ? opt_row : lastSelection.r1;
@@ -21935,7 +21935,7 @@ function isAllowPasteLink(pastedWb) {
     WorksheetView.prototype.af_changeFormatTableInfo = function (tableName, optionType, val) {
         var tablePart = this.model.autoFilters._getFilterByDisplayName(tableName);
         var t = this;
-        var ar = this.model.selectionRange.getLast();
+        var ar = this.model.getSelection().getLast();
 
         if (!tablePart || (tablePart && !tablePart.TableStyleInfo)) {
             return false;
@@ -22165,7 +22165,7 @@ function isAllowPasteLink(pastedWb) {
 					range.addCellsShiftRight(displayName) : range.addCellsShiftBottom(displayName);
 				var deferredHistoryAction = t.model.autoFilters.deferredHistoryAction;
 				if (deferredHistoryAction) {
-					History.Add(AscCommonExcel.g_oUndoRedoAutoFilters, deferredHistoryAction._type, t.model.getId(), t.model.selectionRange.getLast().clone(),
+					History.Add(AscCommonExcel.g_oUndoRedoAutoFilters, deferredHistoryAction._type, t.model.getId(), t.model.getSelection().getLast().clone(),
 						deferredHistoryAction);
 					t.model.autoFilters.deferredHistoryAction = null;
 				}
@@ -22185,7 +22185,7 @@ function isAllowPasteLink(pastedWb) {
 			t._isLockedCells(changedRange, null, callback);
 		};
 
-		var newActiveRange = this.model.selectionRange.getLast().clone();
+		var newActiveRange = this.model.getSelection().getLast().clone();
 		var displayName = undefined;
 		var type = null;
 		var totalRow = tablePart.isTotalsRow();
@@ -22323,7 +22323,7 @@ function isAllowPasteLink(pastedWb) {
             t._isLockedCells(ref, null, callback);
         };
 
-        var newActiveRange = this.model.selectionRange.getLast().clone();
+        var newActiveRange = this.model.getSelection().getLast().clone();
         var val = null;
         switch (optionType) {
             case c_oAscDeleteOptions.DeleteColumns:
@@ -22538,7 +22538,7 @@ function isAllowPasteLink(pastedWb) {
 	};
 
     WorksheetView.prototype.af_setDisableProps = function (tablePart, formatTableInfo) {
-        var selectionRange = this.model.selectionRange;
+        var selectionRange = this.model.getSelection();
         var lastRange = selectionRange.getLast();
         var activeCell = selectionRange.activeCell;
 
@@ -23150,7 +23150,7 @@ function isAllowPasteLink(pastedWb) {
 
 			var getRangesStr = function(ranges, oldStr) {
 				var str = oldStr ? oldStr : "";
-				var selectionLast = opt_ranges ? opt_ranges[opt_ranges.length - 1] : t.model.selectionRange.getLast();
+				var selectionLast = opt_ranges ? opt_ranges[opt_ranges.length - 1] : t.model.getSelection().getLast();
 				var mc = selectionLast.isOneCell() ? t.model.getMergedByCell(selectionLast.r1, selectionLast.c1) : null;
 				for(var i = 0; i < ranges.length; i++) {
 					if(i === 0 && str !== "") {
@@ -23177,7 +23177,7 @@ function isAllowPasteLink(pastedWb) {
 
 					oldDefName = printArea ? printArea.getAscCDefName() : null;
 					oldScope = oldDefName ? oldDefName.asc_getScope() : t.model.index;
-					newRef = getRangesStr(opt_ranges ? opt_ranges : t.model.selectionRange.ranges);
+					newRef = getRangesStr(opt_ranges ? opt_ranges : t.model.getSelection().ranges);
 					newDefName = new Asc.asc_CDefName("Print_Area", newRef, oldScope, null, null, null, true);
 					t.changeViewPrintLines(true);
 					wb.editDefinedNames(oldDefName, newDefName);
@@ -23196,7 +23196,7 @@ function isAllowPasteLink(pastedWb) {
 					if(oldDefName) {
 						oldScope = oldDefName ? oldDefName.asc_getScope() : t.model.index;
 						oldRef = oldDefName.asc_getRef();
-						newRef = getRangesStr(opt_ranges ? opt_ranges : t.model.selectionRange.ranges, oldRef);
+						newRef = getRangesStr(opt_ranges ? opt_ranges : t.model.getSelection().ranges, oldRef);
 						newDefName = new Asc.asc_CDefName("Print_Area", newRef, oldScope, null, null, null, true);
 						t.recalcPrintScale();
 						t.changeViewPrintLines(true);
@@ -23248,7 +23248,7 @@ function isAllowPasteLink(pastedWb) {
         var res = false, t = this;
         var printArea = this.model.workbook.getDefinesNames("Print_Area", this.model.getId());
         if(printArea && printArea.sheetId === this.model.getId()) {
-            var selection = this.model.selectionRange.ranges;
+            var selection = this.model.getSelection().ranges;
 
             var areaRefsArr;
 			AscCommonExcel.executeInR1C1Mode(false, function () {
@@ -23559,7 +23559,7 @@ function isAllowPasteLink(pastedWb) {
 	WorksheetView.prototype.getRangeText = function (range, delimiter) {
 		var t = this;
 		if (range === undefined) {
-			range = this.model.selectionRange.getLast();
+			range = this.model.getSelection().getLast();
 		}
 		if(delimiter === undefined) {
 			delimiter = "\n";
@@ -25054,11 +25054,11 @@ function isAllowPasteLink(pastedWb) {
 
 	WorksheetView.prototype.changeGroupDetails = function (bExpand) {
 		//multiselect
-		if(this.model.selectionRange.ranges.length > 1) {
+		if(this.model.getSelection().ranges.length > 1) {
 			return;
 		}
 
-		var ar = this.model.selectionRange.getLast().clone();
+		var ar = this.model.getSelection().getLast().clone();
 		var t = this;
 
 		//ms does the following:
@@ -25191,11 +25191,11 @@ function isAllowPasteLink(pastedWb) {
 	//priority goes to group with maximum level
 	WorksheetView.prototype.changeGroupDetailsSimple = function (bExpand) {
 		//multiselect
-		if (this.model.selectionRange.ranges.length > 1) {
+		if (this.model.getSelection().ranges.length > 1) {
 			return;
 		}
 
-		var ar = this.model.selectionRange.getLast().clone();
+		var ar = this.model.getSelection().getLast().clone();
 		var t = this;
 
 
@@ -25320,7 +25320,7 @@ function isAllowPasteLink(pastedWb) {
 		var t = this;
 
 		//TODO check filtering mode
-		var ar = t.model.selectionRange;
+		var ar = t.model.getSelection();
 
 		//if active cell is 1 cell, then reset all groups
 		var isOneCell = 1 === ar.ranges.length && ar.ranges[0].isOneCell();
@@ -25378,7 +25378,7 @@ function isAllowPasteLink(pastedWb) {
 			History.Create_NewPoint();
 			History.StartTransaction();
 
-			var ar = t.model.selectionRange.getLast();
+			var ar = t.model.getSelection().getLast();
 			var _type = ar.getType();
 			if(_type === c_oAscSelectionType.RangeMax || _type === c_oAscSelectionType.RangeRow) {
 				if(t.model.oAllCol) {
@@ -25416,7 +25416,7 @@ function isAllowPasteLink(pastedWb) {
 		//true - rows, false - columns, null - show dialog, undefined - error
 
 		//multiselect
-		if(this.model.selectionRange.ranges.length > 1) {
+		if(this.model.getSelection().ranges.length > 1) {
 			this.model.workbook.handlers.trigger("asc_onError", c_oAscError.ID.CopyMultiselectAreaError, c_oAscError.Level.NoCritical);
 			return;
 		}
@@ -25426,7 +25426,7 @@ function isAllowPasteLink(pastedWb) {
 		}
 
 		var res = null;
-		var ar = this.model.selectionRange.getLast().clone();
+		var ar = this.model.getSelection().getLast().clone();
 		var type = ar.getType();
 
 		if (c_oAscSelectionType.RangeCol === type) {
@@ -25555,7 +25555,7 @@ function isAllowPasteLink(pastedWb) {
 		//before this function need to call getSelectionSortInfo - whether to expand
 		//bExpand - response from that function, passed through interface
 		//if multiselect - disable sort button
-		var selection = t.model.selectionRange.getLast();
+		var selection = t.model.getSelection().getLast();
 
 		//TODO is it need here?
 		if (t.model.isUserProtectedRangesIntersection(selection)) {
@@ -25573,7 +25573,7 @@ function isAllowPasteLink(pastedWb) {
 			}
 		}
 
-		var activeCell = t.model.selectionRange.activeCell.clone();
+		var activeCell = t.model.getSelection().activeCell.clone();
 		var oldSelection = selection.clone();
 
 		var autoFilter = t.model.AutoFilter;
@@ -25647,9 +25647,9 @@ function isAllowPasteLink(pastedWb) {
 
 		//change selection
 		t.cleanSelection();
-		t.model.selectionRange.getLast().assign2(selection);
+		t.model.getSelection().getLast().assign2(selection);
 		if(!selection.contains(activeCell.col, activeCell.row)) {
-			t.model.selectionRange.activeCell = new AscCommon.CellBase(selection.r1, selection.c1);
+			t.model.getSelection().activeCell = new AscCommon.CellBase(selection.r1, selection.c1);
 		}
 		t._drawSelection();
 
@@ -25753,7 +25753,7 @@ function isAllowPasteLink(pastedWb) {
 		}
 
 		var t = this;
-		var selection = t.model.selectionRange.getLast();
+		var selection = t.model.getSelection().getLast();
 
 		if (t.model.isUserProtectedRangesIntersection(selection)) {
 			t.model.workbook.handlers.trigger("asc_onError", c_oAscError.ID.ProtectedRangeByOtherUser, c_oAscError.Level.NoCritical);
@@ -25767,13 +25767,13 @@ function isAllowPasteLink(pastedWb) {
 			}
 		}
 
-		var activeCell = t.model.selectionRange.activeCell.clone();
+		var activeCell = t.model.getSelection().activeCell.clone();
 
 		var revertSelection = function() {
 			t.cleanSelection();
-			t.model.selectionRange.getLast().assign2(props.selection.clone());
+			t.model.getSelection().getLast().assign2(props.selection.clone());
 			if(!selection.contains(activeCell.col, activeCell.row)) {
-				t.model.selectionRange.activeCell = new AscCommon.CellBase(selection.r1, selection.c1);
+				t.model.getSelection().activeCell = new AscCommon.CellBase(selection.r1, selection.c1);
 			}
 			t._drawSelection();
 		};
@@ -25904,8 +25904,8 @@ function isAllowPasteLink(pastedWb) {
 
 		//bExpand - response from this function, which is passed through the interface
 		//if multiselect - disable button
-		var selection = t.model.selectionRange.getLast();
-		var activeCell = t.model.selectionRange.activeCell.clone();
+		var selection = t.model.getSelection().getLast();
+		var activeCell = t.model.getSelection().activeCell.clone();
 		var oldSelection = selection.clone();
 
 		var autoFilter = t.model.AutoFilter;
@@ -25950,9 +25950,9 @@ function isAllowPasteLink(pastedWb) {
 
 		//change selection
 		t.cleanSelection();
-		t.model.selectionRange.getLast().assign2(selection);
+		t.model.getSelection().getLast().assign2(selection);
 		if(!selection.contains(activeCell.col, activeCell.row)) {
-			t.model.selectionRange.activeCell = new AscCommon.CellBase(selection.r1, selection.c1);
+			t.model.getSelection().activeCell = new AscCommon.CellBase(selection.r1, selection.c1);
 		}
 		t._drawSelection();
 
@@ -25972,14 +25972,14 @@ function isAllowPasteLink(pastedWb) {
 
 	WorksheetView.prototype.setRemoveDuplicates = function(props, bCancel) {
 		var t = this;
-		var selection = t.model.selectionRange.getLast();
-		var activeCell = t.model.selectionRange.activeCell.clone();
+		var selection = t.model.getSelection().getLast();
+		var activeCell = t.model.getSelection().activeCell.clone();
 
 		var revertSelection = function() {
 			t.cleanSelection();
-			t.model.selectionRange.getLast().assign2(props.selection.clone());
+			t.model.getSelection().getLast().assign2(props.selection.clone());
 			if(!selection.contains(activeCell.col, activeCell.row)) {
-				t.model.selectionRange.activeCell = new AscCommon.CellBase(selection.r1, selection.c1);
+				t.model.getSelection().activeCell = new AscCommon.CellBase(selection.r1, selection.c1);
 			}
 			t._drawSelection();
 		};
@@ -26246,7 +26246,7 @@ function isAllowPasteLink(pastedWb) {
 			}
 			return res;
 		}
-		var ar = this.model.selectionRange.getLast().clone();
+		var ar = this.model.getSelection().getLast().clone();
 		//pivot
 		var pivotTable = this.model.inPivotTable(ar);
 		if (pivotTable) {
@@ -26299,7 +26299,7 @@ function isAllowPasteLink(pastedWb) {
 				}
 			}
 		} else {
-			var ar = this.model.selectionRange.getLast().clone();
+			var ar = this.model.getSelection().getLast().clone();
 			//pivot
 			pivotTable = this.model.inPivotTable(ar);
 			if (pivotTable) {
@@ -26636,7 +26636,7 @@ function isAllowPasteLink(pastedWb) {
 	};
 
 	WorksheetView.prototype.getDefaultDefinedNameText = function () {
-		var selectionRange = this.model.selectionRange;
+		var selectionRange = this.model.getSelection();
 		var cell = selectionRange.activeCell;
 		var mc = this.model.getMergedByCell(cell.row, cell.col);
 		var c1 = mc ? mc.c1 : cell.col;
@@ -26791,9 +26791,9 @@ function isAllowPasteLink(pastedWb) {
 				}
 				if (_rule.ranges === null) {
 					_rule.ranges = [];
-					if (t.model.selectionRange && t.model.selectionRange.ranges) {
-						for (var j = 0; j < t.model.selectionRange.ranges.length; j++) {
-							_rule.ranges.push(t.model.selectionRange.ranges[j].clone());
+					if (t.model.getSelection() && t.model.getSelection().ranges) {
+						for (var j = 0; j < t.model.getSelection().ranges.length; j++) {
+							_rule.ranges.push(t.model.getSelection().ranges[j].clone());
 						}
 					}
 				}
@@ -26856,16 +26856,16 @@ function isAllowPasteLink(pastedWb) {
 
 		switch (type) {
 			case Asc.c_oAscSelectionForCFType.selection:
-				_ranges = this.model.selectionRange.getLast();
+				_ranges = this.model.getSelection().getLast();
 				break;
 			case Asc.c_oAscSelectionForCFType.table:
-				var thisTableIndex = this.model.autoFilters.searchRangeInTableParts(this.model.selectionRange.getLast());
+				var thisTableIndex = this.model.autoFilters.searchRangeInTableParts(this.model.getSelection().getLast());
 				if (thisTableIndex >= 0) {
 					_ranges = this.model.TableParts[thisTableIndex].Ref;
 				}
 				break;
 			case Asc.c_oAscSelectionForCFType.pivot:
-				var _activeCell = this.model.selectionRange.activeCell;
+				var _activeCell = this.model.getSelection().activeCell;
 				var _pivot = this.model.getPivotTable(_activeCell.col, _activeCell.row);
 				if (_pivot) {
 					_ranges = _pivot.location && _pivot.location.ref;
@@ -26994,7 +26994,7 @@ function isAllowPasteLink(pastedWb) {
 			var canSelectUnLockedCells = !sheetProtection.getSelectUnlockedCells();
 			if (!canSelectLockedCells && canSelectUnLockedCells) {
 				//if on locked cell, change selection to unlocked
-				var isUnlocked = this.model.getUnlockedCellInRange(this.model.selectionRange.getLast());
+				var isUnlocked = this.model.getUnlockedCellInRange(this.model.getSelection().getLast());
 				if (!isUnlocked) {
 					isUnlocked = this.model.getUnlockedCellInRange();
 				}
@@ -27016,7 +27016,7 @@ function isAllowPasteLink(pastedWb) {
                 oObjectRender.controller.updateSelectionState(true);
             }
         }
-		var ar = this.model.selectionRange && this.model.selectionRange.getLast();
+		var ar = this.model.getSelection() && this.model.getSelection().getLast();
 		if (ar) {
 			this._updateRange(ar);
 		}
@@ -27109,7 +27109,7 @@ function isAllowPasteLink(pastedWb) {
 		var wsModel = this.model;
 		var isProtectSheet = wsModel && wsModel.getSheetProtection();
 		if (isProtectSheet) {
-			var activeCell = wsModel.selectionRange && wsModel.selectionRange.activeCell;
+			var activeCell = wsModel.getSelection() && wsModel.getSelection().activeCell;
 			if (activeCell) {
 				return wsModel.getLockedCell(activeCell.col, activeCell.row) && !wsModel.protectedRangesContains(activeCell.col, activeCell.row);
 			}
@@ -27121,7 +27121,7 @@ function isAllowPasteLink(pastedWb) {
 		var t = this;
 		var wsModel = this.model;
 		if (wsModel.userProtectedRanges && wsModel.userProtectedRanges.length) {
-			var activeCell = wsModel.selectionRange && wsModel.selectionRange.activeCell;
+			var activeCell = wsModel.getSelection() && wsModel.getSelection().activeCell;
 			if (activeCell) {
 				return this.model.isUserProtectedRangesIntersection(new Asc.Range(activeCell.col, activeCell.row, activeCell.col, activeCell.row));
 			}
@@ -27131,7 +27131,7 @@ function isAllowPasteLink(pastedWb) {
 
 	WorksheetView.prototype.executeWithFirstActiveCellInMerge = function (runFunction) {
 		var wsModel = this.model;
-		var activeCell = wsModel.selectionRange && wsModel.selectionRange.activeCell;
+		var activeCell = wsModel.getSelection() && wsModel.getSelection().activeCell;
 		var realRow = activeCell && activeCell.row;
 		var realCol = activeCell && activeCell.col;
 		var merged = this.model.getMergedByCell(realRow, realCol);
@@ -28099,7 +28099,7 @@ function isAllowPasteLink(pastedWb) {
 
 		let revertSelection = function () {
 			if (val && val.originalSelectBeforePaste) {
-				ws.model.selectionRange.ranges = val.originalSelectBeforePaste.ranges;
+				ws.model.getSelection().ranges = val.originalSelectBeforePaste.ranges;
 			}
 		};
 
@@ -28126,14 +28126,14 @@ function isAllowPasteLink(pastedWb) {
 			if (fromBinaryExcel) {
 				for (let n = 0; n < pastedInfo.length; n++) {
 					if (pastedInfo && pastedInfo[n] && pastedInfo[n].selectData && pastedInfo[n].selectData[0]) {
-						_selection = ws.model.selectionRange.ranges[n];
+						_selection = ws.model.getSelection().ranges[n];
 						_selection.c2 = pastedInfo[n].selectData[0].c2;
 						_selection.r2 = pastedInfo[n].selectData[0].r2;
 
 					}
 				}
 			} else {
-				_selection = ws.model.selectionRange.getLast();
+				_selection = ws.model.getSelection().getLast();
 				if (pastedInfo && pastedInfo[0] && pastedInfo[0].selectData && pastedInfo[0].selectData[0]) {
 					_selection.c2 = pastedInfo[0].selectData[0].c2;
 					_selection.r2 = pastedInfo[0].selectData[0].r2;
@@ -28302,7 +28302,7 @@ function isAllowPasteLink(pastedWb) {
 			if (pasteInfo && pasteInfo.originalSelectBeforePaste) {
 				specialPasteHelper.selectionRange = pasteInfo.originalSelectBeforePaste;
 			} else {
-				specialPasteHelper.selectionRange = ws.model.selectionRange ? ws.model.selectionRange.clone() : null;
+				specialPasteHelper.selectionRange = ws.model.getSelection() ? ws.model.getSelection().clone() : null;
 			}
 			window['AscCommon'].g_specialPasteHelper.isAppliedOperation = false;
 		}
@@ -28314,7 +28314,7 @@ function isAllowPasteLink(pastedWb) {
 		}
 
 		//if paste is inside table, expand it downward
-		var activeTable = ws.model.autoFilters.getTableContainActiveCell(ws.model.selectionRange.activeCell);
+		var activeTable = ws.model.autoFilters.getTableContainActiveCell(ws.model.getSelection().activeCell);
 		var newRange;
 		if (pasteToRange && activeTable && specialPasteProps.formatTable) {
 			var delta = pasteToRange.r2 - activeTable.Ref.r2;
@@ -28405,7 +28405,7 @@ function isAllowPasteLink(pastedWb) {
 
 		//add formatted tables
 		var i;
-		var arnToRange = pasteToRange ? pasteToRange : ws.model.selectionRange.getLast();
+		var arnToRange = pasteToRange ? pasteToRange : ws.model.getSelection().getLast();
 		var tablesMap = null, intersectionRangeWithTableParts;
 		var activeRange = fromBinary && AscCommonExcel.g_clipboardExcel.pasteProcessor.activeRange;
 		var refInsertBinary = activeRange && AscCommonExcel.g_oRangeCache.getAscRange(activeRange);
@@ -28569,12 +28569,12 @@ function isAllowPasteLink(pastedWb) {
 				if (pasteInfo && pasteInfo.originalSelectBeforePaste) {
 					specialPasteHelper.selectionRange = pasteInfo.originalSelectBeforePaste;
 				} else {
-					specialPasteHelper.selectionRange = ws.model.selectionRange ? ws.model.selectionRange.clone() : null;
+					specialPasteHelper.selectionRange = ws.model.getSelection() ? ws.model.getSelection().clone() : null;
 				}
 			}
 		}
 
-		ws.model.checkChangeTablesContent(ws.model.selectionRange.getLast());
+		ws.model.checkChangeTablesContent(ws.model.getSelection().getLast());
 
 		if (!pastedData) {
 			bIsUpdate = false;
@@ -28637,7 +28637,7 @@ function isAllowPasteLink(pastedWb) {
 		ws.model.workbook.dependencyFormulas.unlockRecal();
 		//added for case when formula paste happens into table header
 		if (arrFormula && arrFormula.length) {
-			ws.model.checkChangeTablesContent(ws.model.selectionRange.getLast());
+			ws.model.checkChangeTablesContent(ws.model.getSelection().getLast());
 		}
 
 		//for special paste
@@ -28700,7 +28700,7 @@ function isAllowPasteLink(pastedWb) {
 	CCellPasteHelper.prototype.pasteFromHTML = function (pasteContent, isCheckSelection, specialPasteProps) {
 		var t = this;
 		var ws = this.ws;
-		var lastSelection = ws.model.selectionRange.getLast();
+		var lastSelection = ws.model.getSelection().getLast();
 		var arn = AscCommonExcel.g_clipboardExcel.pasteProcessor && AscCommonExcel.g_clipboardExcel.pasteProcessor.activeRange ?
 			AscCommonExcel.g_clipboardExcel.pasteProcessor.activeRange : lastSelection;
 
@@ -28937,7 +28937,7 @@ function isAllowPasteLink(pastedWb) {
 		};
 
 		let ws = this.ws;
-		var selectRanges = ws.model.selectionRange.ranges;
+		var selectRanges = ws.model.getSelection().ranges;
 		var i;
 		if (selectRanges.length > 1) {
 			for (i = 0; i < selectRanges.length; i++) {
@@ -28995,8 +28995,8 @@ function isAllowPasteLink(pastedWb) {
 	CCellPasteHelper.prototype._pasteFromBinary = function (val, isCheckSelection, tablesMap, pasteInRange) {
 		var t = this;
 		var ws = this.ws;
-		var trueActiveRange = pasteInRange ? pasteInRange.clone() : ws.model.selectionRange.getLast().clone();
-		var arn = pasteInRange ? pasteInRange.clone() : ws.model.selectionRange.getLast().clone();
+		var trueActiveRange = pasteInRange ? pasteInRange.clone() : ws.model.getSelection().getLast().clone();
+		var arn = pasteInRange ? pasteInRange.clone() : ws.model.getSelection().getLast().clone();
 		var arrFormula = [];
 
 		var specialPasteHelper = window['AscCommon'].g_specialPasteHelper;
@@ -29055,7 +29055,7 @@ function isAllowPasteLink(pastedWb) {
 			firstValuesRow = 0;
 		}
 
-		var excludeHiddenRows = ws.model.autoFilters.bIsExcludeHiddenRows(pasteInRange ? pasteInRange.clone() : ws.model.selectionRange.getLast(), ws.model.selectionRange.activeCell);
+		var excludeHiddenRows = ws.model.autoFilters.bIsExcludeHiddenRows(pasteInRange ? pasteInRange.clone() : ws.model.getSelection().getLast(), ws.model.getSelection().activeCell);
 		var hiddenRowsArray = {};
 		var getOpenRowsCount = function (oRange) {
 			var res = oRange.r2 - oRange.r1 + 1;
@@ -30294,7 +30294,7 @@ function isAllowPasteLink(pastedWb) {
 
 		if (val.fromBinary && pasteContent && pasteContent.TableParts && pasteContent.TableParts.length && allowedPasteTables) {
 
-			var arnToRange = ws.model.selectionRange.getLast();
+			var arnToRange = ws.model.getSelection().getLast();
 
 			var range, tablePartRange, tables = pasteContent.TableParts, diffRow, diffCol, curTable, bIsAddTable;
 			var activeRange = AscCommonExcel.g_clipboardExcel.pasteProcessor.activeRange;
