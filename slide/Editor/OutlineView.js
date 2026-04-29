@@ -1804,8 +1804,11 @@
 	};
 	OutlineView.prototype.updateSelectionState = function () {
 		if (this.outlineShape) {
-			const drawingDocument = this.outlineShape.getDrawingDocument();
-			this.outlineShape.updateSelectionState(drawingDocument);
+			if (this.isEmptyPresentation()) {
+				this.outlineShape.resetSelectionState();
+			} else {
+				this.outlineShape.updateSelectionState();
+			}
 		}
 	};
 	OutlineView.prototype.moveCursorToStartPos = function (AddToSelect) {
@@ -2005,6 +2008,9 @@
 	};
 
 	OutlineView.prototype.getSelectedSlideArray = function () {
+		if (this.isEmptyPresentation()) {
+			return [];
+		}
 		if (this.isFocusOnOutline()) {
 			const oThis = this;
 			return this.getContentPos(function (isSelectionUse, startPos, endPos) {
@@ -2014,12 +2020,12 @@
 					return oThis.getSelectedSlideArrayFromCurPos(startPos);
 				}
 			});
-		} else {
-			const drawingDocument = this.getDrawingDocument();
-			if (drawingDocument.SlideCurrent >= 0) {
-				return [drawingDocument.SlideCurrent];
-			}
 		}
+		const drawingDocument = this.getDrawingDocument();
+		if (drawingDocument.SlideCurrent >= 0) {
+			return [drawingDocument.SlideCurrent];
+		}
+
 		return [];
 	};
 	OutlineView.prototype.isSelectedPage = function (pageNum) {
@@ -2131,11 +2137,12 @@
 	OutlineView.prototype.drawSelectionOnPage = function (drawingDocument) {
 		const content = this.getDocContent();
 		if (content) {
-			drawingDocument.UpdateTargetTransform(shape.transformText);
+			drawingDocument.UpdateTargetTransform(this.outlineShape.transformText);
 			content.DrawSelectionOnPage(0);
 		}
 	};
 	OutlineView.prototype.recalculateCurPos = function (bUpdateX, bUpdateY) {
+		this.update();
 		const content = this.getDocContent();
 		if (content) {
 			content.RecalculateCurPos(bUpdateX, bUpdateY);

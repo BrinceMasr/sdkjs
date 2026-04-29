@@ -5433,15 +5433,18 @@
 						}
 					}
 				} else {
-					drawing_document.UpdateTargetTransform(new CMatrix());
-					drawing_document.TargetEnd();
-					drawing_document.SelectEnabled(false);
-					drawing_document.SelectClear();
-					drawing_document.SelectShow();
+					this.resetSelectionState();
 				}
 			}
 		};
-
+		CShape.prototype.resetSelectionState = function () {
+			var drawing_document = this.getDrawingDocument();
+			drawing_document.UpdateTargetTransform(new CMatrix());
+			drawing_document.TargetEnd();
+			drawing_document.SelectEnabled(false);
+			drawing_document.SelectClear();
+			drawing_document.SelectShow();
+		};
 		CShape.prototype.check_bounds = function (checker) {
 			if (this.spPr && this.spPr.geometry) {
 				this.spPr.geometry.check_bounds(checker);
