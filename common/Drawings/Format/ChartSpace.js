@@ -4888,27 +4888,46 @@ function(window, undefined) {
 		} else if (AscFormat.isRealNumber(this.selection.dataLbls)) {
 			var ser = this.getAllSeries()[this.selection.dataLbls];
 			if (ser) {
-				var oDlbls = ser.dLbls;
-				if (!ser.dLbls) {
-
-					if (ser.parent && ser.parent.dLbls) {
-						oDlbls = ser.parent.dLbls.createDuplicate();
+				var bChartEx = ser.isChartEx();
+				var oDlbls = bChartEx ? ser.dataLabels : ser.dLbls;
+				if (!oDlbls) {
+					if (bChartEx) {
+						oDlbls = new AscFormat.CDataLabels();
+						ser.setDataLabels(oDlbls);
 					} else {
-						oDlbls = new AscFormat.CDLbls();
+						if (ser.parent && ser.parent.dLbls) {
+							oDlbls = ser.parent.dLbls.createDuplicate();
+						} else {
+							oDlbls = new AscFormat.CDLbls();
+						}
+						ser.setDLbls(oDlbls);
 					}
-
-					ser.setDLbls(oDlbls);
 				}
 				if (!AscFormat.isRealNumber(this.selection.dataLbl)) {
-					oDlbls.setDeleteValue(true);
+					if (bChartEx) {
+						if (!oDlbls.visibility) {
+							oDlbls.setVisibility(new AscFormat.CDataLabelVisibilities());
+						}
+						oDlbls.visibility.setSeriesName(false);
+						oDlbls.visibility.setCategoryName(false);
+						oDlbls.visibility.setValue(false);
+					} else {
+						oDlbls.setDeleteValue(true);
+					}
 				} else {
 					var pts = ser.getNumPts();
 					var pt = pts[this.selection.dataLbl];
 					if (pt) {
-						var dLbl = new AscFormat.CDLbl();
-						dLbl.setIdx(pt.idx);
-						dLbl.setDelete(true);
-						ser.dLbls.addDLbl(dLbl);
+						if (bChartEx) {
+							var oHidden = new AscFormat.CDataLabelHidden();
+							oHidden.setIdx(pt.idx);
+							oDlbls.addDataLabelHidden(oHidden);
+						} else {
+							var dLbl = new AscFormat.CDLbl();
+							dLbl.setIdx(pt.idx);
+							dLbl.setDelete(true);
+							oDlbls.addDLbl(dLbl);
+						}
 					}
 				}
 			}

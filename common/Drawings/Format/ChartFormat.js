@@ -2650,6 +2650,9 @@
         if(this.series && this.pt) {
             var oSeries = this.series;
             if(oSeries) {
+                if (oSeries.isChartEx && oSeries.isChartEx()) {
+                    return this;
+                }
                 var oDlbls;
                 if(!oSeries.dLbls) {
                     var oChart = oSeries.parent;
