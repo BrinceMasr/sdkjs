@@ -17330,6 +17330,10 @@ CTable.prototype.private_StartTrackTable = function(CurPage)
 {
     if (CurPage < 0 || CurPage >= this.Pages.length)
         return;
+	
+	let logicDocument = this.GetLogicDocument();
+	if (!logicDocument || !logicDocument.IsShowTableAdjustments || !logicDocument.IsShowTableAdjustments())
+		return;
 
     var Bounds     = this.Get_PageBounds(CurPage);
     var NewOutline = new AscCommon.CTableOutline(this, this.GetAbsolutePage(CurPage), Bounds.Left, Bounds.Top, Bounds.Right - Bounds.Left, Bounds.Bottom - Bounds.Top);
