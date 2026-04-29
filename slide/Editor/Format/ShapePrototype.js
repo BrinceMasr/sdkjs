@@ -352,8 +352,21 @@ CShape.prototype.getCompiledStyle = function()
     }
     return null;
 };
+CShape.prototype.isOutlineShape = function () {
+	const presentation = editor.WordControl.m_oLogicDocument;
+	if (presentation) {
+		const view = presentation.GetOutlineView();
+		if (view) {
+			return view.outlineShape === this;
+		}
+	}
+	return false;
+};
 CShape.prototype.getParentObjects = function ()
 {
+	if (this.isOutlineShape()) {
+		return { slide: null, layout: null, master: null, theme: AscFormat.GetDefaultTheme()};
+	}
     let oParent;
     if(this.parent)
     {
