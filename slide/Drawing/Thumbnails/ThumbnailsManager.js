@@ -80,8 +80,8 @@
 
 		const isHorizontalThumbnails = Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.bottom;
 		return isHorizontalThumbnails
-			? width >= 0 && height >= 1
-			: width >= 1 && height >= 0;
+			? width >= 0 && (height >= (1 + GlobalSkin.SplitterWidthMM))
+			: (width >= (1 + GlobalSkin.SplitterWidthMM)) && height >= 0;
 	};
 	CThumbnailsManagerBase.prototype.isOutline = function()
 	{
