@@ -795,6 +795,9 @@ function getFlatPenColor() {
 	CCheckBoxController.prototype.drawBounds = function (graphics, transform, transformText, pageIndex, opt) {
 		this.draw(graphics, transform, transformText, pageIndex, opt);
 	};
+	CCheckBoxController.prototype.specialDraw = AscFormat.CShape.prototype.specialDraw;
+	CCheckBoxController.prototype.drawShape = AscFormat.CShape.prototype.drawShape;
+	CCheckBoxController.prototype.isSlideImagePlaceholder = function () {return false;};
 	CCheckBoxController.prototype.draw = function (graphics, transform, transformText, pageIndex, opt) {
 		const oControl = this.control;
 		AscFormat.CShape.prototype.draw.call(oControl, graphics, transform, transformText, pageIndex, opt);

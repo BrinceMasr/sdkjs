@@ -3660,6 +3660,9 @@
         }
         AscFormat.CShape.prototype.draw.apply(this, arguments);
     };
+    CDLbl.prototype.specialDraw = CShape.prototype.specialDraw;
+    CDLbl.prototype.drawShape = CShape.prototype.drawShape;
+    CDLbl.prototype.isSlideImagePlaceholder = function () {return false;};
     CDLbl.prototype.checkContentWordArt = CShape.prototype.checkContentWordArt;
     CDLbl.prototype.drawTxBody = CShape.prototype.drawTxBody;
     CDLbl.prototype.chekBodyPrTransform = function () {return false;};
@@ -10985,7 +10988,10 @@
     CLegend.prototype.isPlaceholder = function() {
         return false;
     };
-    CLegend.prototype.draw = function(g) {
+		CLegend.prototype.specialDraw = AscFormat.CShape.prototype.specialDraw;
+	CLegend.prototype.drawShape = CShape.prototype.drawShape;
+	CLegend.prototype.isSlideImagePlaceholder = function () {return false;};
+	CLegend.prototype.draw = function(g) {
         g.IsDrawSmart = true;
         CShape.prototype.draw.call(this, g);
         for(var i = 0; i < this.calcEntryes.length; ++i) {
@@ -16919,8 +16925,10 @@
     }
 
     CompiledMarker.prototype.draw = CShape.prototype.draw;
-
-    CompiledMarker.prototype.chekBodyPrTransform = function () {return false;};
+    CompiledMarker.prototype.specialDraw = CShape.prototype.specialDraw;
+	CompiledMarker.prototype.drawShape = CShape.prototype.drawShape;
+	CompiledMarker.prototype.isSlideImagePlaceholder = function () {return false;};
+	CompiledMarker.prototype.chekBodyPrTransform = function () {return false;};
     CompiledMarker.prototype.getGeometry = CShape.prototype.getGeometry;
     CompiledMarker.prototype.check_bounds = CShape.prototype.check_bounds;
     CompiledMarker.prototype.getBounds = function() {
