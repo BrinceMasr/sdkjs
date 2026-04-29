@@ -1580,6 +1580,9 @@
 		for (let id in this.mapToCheckParagraphs) {
 			const paragraph = this.mapToCheckParagraphs[id];
 			const shape = paragraph.GetParentShape();
+			if (shape.getObjectType() !== AscDFH.historyitem_type_Shape) {
+				continue;
+			}
 			if (shape === this.outlineShape) {
 				const sourceParagraph = this.outlineToSourceMap[paragraph.Get_Id()];
 				if (!sourceParagraph) {
