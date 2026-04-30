@@ -227,23 +227,23 @@
 						return false;
 					}, false)
 				}
-			}
 
-			// Cursor for graphic objects. We define mousedown and mouseup for text selection.
-			var oShapeCursor = document.getElementById("id_target_cursor");
-			if (null != oShapeCursor && oShapeCursor.addEventListener) {
-				oShapeCursor.addEventListener(AscCommon.getPtrEvtName("down"), function () {
-					return self._onMouseDown.apply(self, arguments);
-				}, false);
-				oShapeCursor.addEventListener(AscCommon.getPtrEvtName("up"), function () {
-					return self._onMouseUp.apply(self, arguments);
-				}, false);
-				oShapeCursor.addEventListener(AscCommon.getPtrEvtName("move"), function () {
-					return self._onMouseMove.apply(self, arguments);
-				}, false);
-				oShapeCursor.addEventListener(AscCommon.getPtrEvtName("leave"), function () {
-					return self._onMouseLeave.apply(self, arguments);
-				}, false);
+				// Cursor for graphic objects. We define mousedown and mouseup for text selection.
+				var oShapeCursor = document.getElementById("id_target_cursor");
+				if (null != oShapeCursor && oShapeCursor.addEventListener) {
+					oShapeCursor.addEventListener(AscCommon.getPtrEvtName("down"), function () {
+						return self._onMouseDown.apply(self, arguments);
+					}, false);
+					oShapeCursor.addEventListener(AscCommon.getPtrEvtName("up"), function () {
+						return self._onMouseUp.apply(self, arguments);
+					}, false);
+					oShapeCursor.addEventListener(AscCommon.getPtrEvtName("move"), function () {
+						return self._onMouseMove.apply(self, arguments);
+					}, false);
+					oShapeCursor.addEventListener(AscCommon.getPtrEvtName("leave"), function () {
+						return self._onMouseLeave.apply(self, arguments);
+					}, false);
+				}
 			}
 
 			return this;
