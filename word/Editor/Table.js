@@ -3913,6 +3913,9 @@ CTable.prototype.Document_UpdateRulersState = function(CurPage)
 };
 CTable.prototype.Document_SetThisElementCurrent = function(bUpdateStates)
 {
+	if (!this.Parent)
+		return;
+	
 	this.Parent.Update_ContentIndexing();
 	this.Parent.Set_CurrentElement(this.Index, bUpdateStates);
 };

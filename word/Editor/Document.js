@@ -27740,11 +27740,12 @@ CDocument.prototype.private_ConvertTableToText = function(oTable, oProps)
 
 		if (!isConvertAll)
 		{
-			for (var i = oSelectedRows.End; i >= oSelectedRows.Start; i--)
+			for (let i = oSelectedRows.End; i >= oSelectedRows.Start; --i)
 			{
-				TableC.RemoveTableRow(i);
+				TableC.private_RemoveRow(i);
 			}
-			if (!oSelectedRows.IsSelectionToEnd && oSelectedRows.Start) {
+			if (!oSelectedRows.IsSelectionToEnd && oSelectedRows.Start)
+			{
 				var oNewTable = TableC.Split();
 				NewContent.after = oNewTable;
 				NewContent.before = TableC;
