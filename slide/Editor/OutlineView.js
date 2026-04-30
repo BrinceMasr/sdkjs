@@ -280,14 +280,14 @@
 	ForEachSelectManager.prototype.getDocContent = function () {
 		return this.outlineView.getDocContent();
 	};
-	ForEachSelectManager.prototype.processNullableContent = function (contentInfo, callback) {
-		return callback(contentInfo);
+	ForEachSelectManager.prototype.processNullableContent = function (outlineInfo, callback) {
+		return callback(outlineInfo);
 	};
 	ForEachSelectManager.prototype.processSingleSelectedContent = function (contentInfo, callback) {
 		if (contentInfo.content) {
 			return this.processSingleSelectedNotNullableContent(contentInfo, callback);
 		}
-		return this.processNullableContent(contentInfo, callback);
+		return this.processNullableContent({outlineParagraph: contentInfo.outlineParagraph, index: 0, count: 1}, callback);
 
 	};
 	ForEachSelectManager.prototype.processSingleSelectedNotNullableContent = function (contentInfo, callback) {
@@ -305,7 +305,7 @@
 	ForEachSelectManager.prototype.processStartContent = function (contentInfo, count, callback) {
 		const content = contentInfo.content;
 		if (!content) {
-			return this.processNullableContent(contentInfo, callback);
+			return this.processNullableContent({outlineParagraph: contentInfo.outlineParagraph, index: 0, count: count}, callback);
 		}
 
 		content.MoveCursorToEndPos(false, true);
@@ -326,7 +326,7 @@
 			const contentInfo = contents[i];
 			const content = contentInfo.content;
 			if (!content) {
-				const nullableRes = this.processNullableContent(contentInfo, callback);
+				const nullableRes = this.processNullableContent({outlineParagraph: contentInfo.outlineParagraph, index: i, count: contents.length}, callback);
 				if (nullableRes) {
 					return nullableRes;
 				}
@@ -343,7 +343,7 @@
 	ForEachSelectManager.prototype.processEndContent = function (contentInfo, count, callback) {
 		const content = contentInfo.content;
 		if (!content) {
-			return this.processNullableContent(contentInfo, callback);
+			return this.processNullableContent({outlineParagraph: contentInfo.outlineParagraph, index: count - 1, count: count}, callback);
 		}
 		content.MoveCursorToStartPos();
 		const targetPos = content.GetContentPosition(true, true);
@@ -389,7 +389,7 @@
 		if (sourceParagraph) {
 			return this.processRealCursorContent(sourceParagraph, contentPos, callback);
 		}
-		return this.processNullableContent({outlineParagraph: paragraph}, callback);
+		return this.processNullableContent({outlineParagraph: paragraph, index: 0, count: 1}, callback);
 	};
 	ForEachSelectManager.prototype.processRealCursorContent = function (sourceParagraph, contentPos, callback) {
 		const sourceContent = sourceParagraph.GetParent();
@@ -425,6 +425,9 @@
 	};
 	RemoveOutlineParagraphsManager.prototype.getSourceParagraph = function (outlineParagraph) {
 		return this.outlineView.outlineToSourceMap[outlineParagraph.Get_Id()];
+	};
+	RemoveOutlineParagraphsManager.prototype.getOutlineParagraph = function (sourceParagraph) {
+		return this.outlineView.sourceToOutlineMap[sourceParagraph.Get_Id()];
 	};
 	RemoveOutlineParagraphsManager.prototype.getContentPosParagraph = function (docContent) {
 		return docContent.Content[docContent.CurPos.ContentPos];
@@ -463,16 +466,22 @@
 	};
 	RemoveOutlineParagraphsManager.prototype.processRealCursorAtBegin = function (outlineParagraph) {
 		const docContent = this.getDocContent();
-		const sourceParagraph = this.getSourceParagraph(outlineParagraph);
-		const currentParagraphContent = sourceParagraph.GetParent();
 		const previousOutlineParagraph = docContent.Content[outlineParagraph.Index - 1];
-		const previousSourceParagraph = this.getSourceParagraph(previousOutlineParagraph);
-		if (previousSourceParagraph) {
-			const previousParagraphContent = previousSourceParagraph.GetParent();
-			this.checkRemoveEdgeContents(previousParagraphContent, currentParagraphContent);
+		this.checkRemoveEdgeParagraphs(previousOutlineParagraph, outlineParagraph);
+	};
+	RemoveOutlineParagraphsManager.prototype.checkRemoveEdgeParagraphs = function (firstParagraph, lastParagraph, isSkipConcatContents) {
+		const lastSourceParagraph = this.getSourceParagraph(lastParagraph);
+		if (!lastSourceParagraph) {
+			return;
+		}
+		const lastContent = lastSourceParagraph.GetParent();
+		const firstSourceParagraph = this.getSourceParagraph(firstParagraph);
+		if (firstSourceParagraph) {
+			const previousParagraphContent = firstSourceParagraph.GetParent();
+			this.checkRemoveEdgeContents(previousParagraphContent, lastContent, isSkipConcatContents);
 		} else {
-			const titleDocContent = this.outlineView.createTitleContent(previousOutlineParagraph);
-			this.checkRemoveEdgeContents(titleDocContent, currentParagraphContent);
+			const titleDocContent = this.outlineView.createTitleContent(firstParagraph);
+			this.checkRemoveEdgeContents(titleDocContent, lastContent);
 		}
 	};
 	RemoveOutlineParagraphsManager.prototype.isNeedProcessCursorAtBegin = function () {
@@ -496,12 +505,30 @@
 			}
 		}
 	};
+	RemoveOutlineParagraphsManager.prototype.saveFirstOutlineParagraph = function (edgeContents, selectProps) {
+		if (selectProps.index !== 0) {
+			return;
+		}
+
+		if (selectProps.outlineParagraph) {
+			const outlineParagraph = selectProps.outlineParagraph;
+			edgeContents.firstOutlineParagraph = outlineParagraph;
+		} else {
+			const content = selectProps.content;
+			const sourceParagraph = content.Content[0];
+			const outlineParagraph = sourceParagraph && this.getOutlineParagraph(sourceParagraph);
+			if (outlineParagraph) {
+				edgeContents.firstOutlineParagraph = outlineParagraph;
+			}
+		}
+	}
 	RemoveOutlineParagraphsManager.prototype.processSelectedContent = function (isOnAddText) {
 		const outlineView = this.outlineView;
-		const edgeContents = {firstContent: null, lastContent: null};
+		const edgeContents = {firstContent: null, lastContent: null, firstOutlineParagraph: null};
 		const oThis = this;
 		let isSingleContent = false;
 		outlineView.forEachSelectedContent(function (selectProps) {
+			oThis.saveFirstOutlineParagraph(edgeContents, selectProps);
 			if (selectProps.outlineParagraph) {
 				const outlineParagraph = selectProps.outlineParagraph;
 				oThis.processNullableContent(outlineParagraph);
@@ -526,9 +553,21 @@
 		} else if (edgeContents.firstContent) {
 			const content = edgeContents.firstContent.Content;
 			this.saveEndPosSourceParagraph(content[content.length - 1]);
-		} else if (edgeContents.lastContent) {
-			const content = edgeContents.lastContent.Content;
+		} else if (edgeContents.lastContent && edgeContents.firstOutlineParagraph) {
+			this.processLastContent(edgeContents.lastContent, edgeContents.firstOutlineParagraph);
+		}
+	};
+	RemoveOutlineParagraphsManager.prototype.processLastContent = function (lastContent, firstOutlineParagraph) {
+		const content = lastContent.Content;
+		const shape = lastContent.Is_DrawingShape(true);
+		if (shape.isOutlineTitlePlaceholder()) {
 			this.saveStartPosSourceParagraph(content[0]);
+		} else if (firstOutlineParagraph.Index !== 0) {
+			const outlineContent = this.outlineView.getDocContent();
+			const previousOutlineParagraph = outlineContent.Content[firstOutlineParagraph.Index - 1];
+			const lastContentSourceParagraph = content[0];
+			const lastOutlineParagraph = this.getOutlineParagraph(lastContentSourceParagraph);
+			this.checkRemoveEdgeParagraphs(previousOutlineParagraph, lastOutlineParagraph, true);
 		}
 	};
 	RemoveOutlineParagraphsManager.prototype.remove = function (isOnAddText) {
