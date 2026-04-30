@@ -358,16 +358,14 @@
 
 
 				//TODO we need to ignore both formulas and hidden rows if the selection includes them + standard conditions in bIsExcludeHiddenRows
-				var origSelectionRanges = null;
+				let aMultiRanges;
 				if (ws.model.autoFilters.bIsExcludeHiddenRows(selectionRange, activeCell, true)) {
 					var noHiddenRows = ws.model._getNoHiddenRowsArr(selectionRange.r1, selectionRange.r2);
 					if (noHiddenRows.length > 1) {
-						origSelectionRanges = ws.model.selectionRange.ranges;
-						var visibleRanges = [];
+						aMultiRanges = [];
 						for (var i = 0; i < noHiddenRows.length; i++) {
-							visibleRanges.push(new Asc.Range(selectionRange.c1, noHiddenRows[i].start, selectionRange.c2, noHiddenRows[i].stop));
+							aMultiRanges.push(new Asc.Range(selectionRange.c1, noHiddenRows[i].start, selectionRange.c2, noHiddenRows[i].stop));
 						}
-						ws.model.selectionRange.ranges = visibleRanges;
 					}
 					ws.model.excludeHiddenRows(true);
 					ws.model.ignoreWriteFormulas(true);
@@ -392,7 +390,7 @@
 				}
 				//HTML
 				if (AscCommon.c_oAscClipboardDataFormat.Html & _formats) {
-					_data = this.copyProcessor.getHtml(activeRange, ws);
+					_data = this.copyProcessor.getHtml(activeRange, ws, aMultiRanges);
 
 					if (null !== _data && "" !== _data.html) {
 						_clipboard.pushData(AscCommon.c_oAscClipboardDataFormat.Html, _data.html)
@@ -400,7 +398,9 @@
 				}
 				//INTERNAL
 				if (AscCommon.c_oAscClipboardDataFormat.Internal & _formats) {
-					if (origSelectionRanges) {
+					let origSelectionRanges = ws.model.selectionRange.ranges;
+					if (aMultiRanges) {
+						ws.model.selectionRange.ranges = aMultiRanges;
 						ws.model.excludeHiddenRows(false);
 						ws.model.ignoreWriteFormulas(false);
 					}
@@ -414,6 +414,10 @@
 						}
 					}
 
+					if (aMultiRanges) {
+						ws.model.selectionRange.ranges = origSelectionRanges;
+					}
+
 					if (null !== _data) {
 						_clipboard.pushData(AscCommon.c_oAscClipboardDataFormat.Internal, _data);
 					}
@@ -421,9 +425,6 @@
 
 				ws.model.excludeHiddenRows(false);
 				ws.model.ignoreWriteFormulas(false);
-				if (origSelectionRanges) {
-					ws.model.selectionRange.ranges = origSelectionRanges;
-				}
 				wb.model.checkProtectedValue = false;
 			}
 
@@ -736,7 +737,7 @@
 
 			constructor: CopyProcessorExcel,
 
-			getHtml: function (range, worksheet, isCopingMultiselect) {
+			getHtml: function (range, worksheet, aMultiRanges) {
 				var t = this;
 				var sBase64 = null;
 
@@ -746,12 +747,15 @@
 				History.TurnOff();
 				//use binary strings
 				if (copyPasteUseBinary) {
-					if (isCopingMultiselect) {
+					let origSelectionRanges = worksheet.model.selectionRange.ranges;
+					if (aMultiRanges) {
+						worksheet.model.selectionRange.ranges = aMultiRanges;
 						worksheet.model.excludeHiddenRows(false);
 						worksheet.model.ignoreWriteFormulas(false);
 					}
 					sBase64 = this.getBinaryForCopy(worksheet.model, worksheet.objectRender);
-					if (isCopingMultiselect) {
+					if (aMultiRanges) {
+						worksheet.model.selectionRange.ranges = origSelectionRanges;
 						worksheet.model.excludeHiddenRows(true);
 						worksheet.model.ignoreWriteFormulas(true);
 					}
