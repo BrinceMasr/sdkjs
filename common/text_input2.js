@@ -1049,6 +1049,20 @@
 			}, false);
 		}
 
+		if (this.Api.isMobileVersion && AscCommon.AscBrowser.isAppleDevices)
+		{
+			var blockMouseEmulation = function(e)
+			{
+				if (document.activeElement === oThis.HtmlArea)
+				{
+					//e.stopImmediatePropagation();
+					e.preventDefault();
+				}
+			};
+			document.addEventListener("mousedown", blockMouseEmulation, true);
+			document.addEventListener("mouseup", blockMouseEmulation, true);
+		}
+
 		this.Api.Input_UpdatePos();
 
 		this.checkViewMode();
