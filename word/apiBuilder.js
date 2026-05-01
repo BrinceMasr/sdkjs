@@ -4866,6 +4866,9 @@
 
 	/**
 	 * Creates a chart with the parameters specified.
+	 * :::note
+	 * Values of <em>styleIndex</em> outside <b>1 - 48</b> are interpreted as a chart style id from the <em>cs:chartStyle</em> element (e.g. 201, 215, 284) and are available only for [ONLYOFFICE Docs Enterprise](https://www.onlyoffice.com/docs-enterprise-prices.aspx?from=api) and [ONLYOFFICE Docs Developer](https://www.onlyoffice.com/developer-edition-prices.aspx?from=api).
+	 * :::
 	 * @memberof Api
 	 * @typeofeditors ["CDE"]
 	 * @param {ChartType} [chartType="bar"] - The chart type used for the chart display.

@@ -17397,11 +17397,15 @@
 			oChartSpace.setBDeleted(false);
 			oChartSpace.extX = nW;
 			oChartSpace.extY = nH;
+			AscFormat.applyChartStyle(oChartSpace, nStyleIndex);
+			AscFormat.CheckSpPrXfrm(oChartSpace);
+			return oChartSpace;
+		}
+
+		function applyChartStyle(oChartSpace, nStyleIndex) {
 			if (AscFormat.isRealNumber(nStyleIndex)) {
 				oChartSpace.setStyle(nStyleIndex);
 			}
-			AscFormat.CheckSpPrXfrm(oChartSpace);
-			return oChartSpace;
 		}
 
 		function builder_CreateGroup(aDrawings, oController) {
@@ -20597,6 +20601,7 @@
 
 		window['AscFormat'].builder_CreateShape = builder_CreateShape;
 		window['AscFormat'].builder_CreateChart = builder_CreateChart;
+		window['AscFormat'].applyChartStyle = applyChartStyle;
 		window['AscFormat'].builder_CreateGroup = builder_CreateGroup;
 		window['AscFormat'].builder_CreateSchemeColor = builder_CreateSchemeColor;
 		window['AscFormat'].builder_CreatePresetColor = builder_CreatePresetColor;
