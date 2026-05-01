@@ -17599,9 +17599,18 @@
 			return null;
 		}
 
+		function builder_ApplyChartStyleToElement(oChartSpace, oElement) {
+			if (!oElement || !oChartSpace || !oChartSpace.chartStyle || !oChartSpace.chartColors) return;
+			if (typeof oElement.applyChartStyle !== "function") return;
+			var oCache = AscFormat.g_oChartStyleCache;
+			var oAdditional = oCache && oCache.getAdditionalData(oChartSpace.getChartType(), oChartSpace.chartStyle.id);
+			oElement.applyChartStyle(oChartSpace.chartStyle, oChartSpace.chartColors, oAdditional, true);
+		}
+
 		function builder_SetChartTitle(oChartSpace, sTitle, nFontSize, bIsBold) {
 			if (oChartSpace) {
 				oChartSpace.chart.setTitle(builder_CreateChartTitle(sTitle, nFontSize, bIsBold, oChartSpace.getDrawingDocument()));
+				builder_ApplyChartStyleToElement(oChartSpace, oChartSpace.chart.title);
 			}
 		}
 
@@ -17621,6 +17630,7 @@
 				var horAxis = oChartSpace.chart.plotArea.getHorizontalAxis();
 				if (horAxis) {
 					horAxis.setTitle(builder_CreateTitle(sTitle, nFontSize, bIsBold, oChartSpace));
+					builder_ApplyChartStyleToElement(oChartSpace, horAxis.title);
 				}
 			}
 		}
@@ -17640,6 +17650,7 @@
 							var _text_body = verAxis.title.txPr;
 							_text_body.setBodyPr(_body_pr);
 							verAxis.title.setOverlay(false);
+							builder_ApplyChartStyleToElement(oChartSpace, verAxis.title);
 						}
 					} else {
 						verAxis.setTitle(null);
@@ -17708,13 +17719,18 @@
 						}
 					}
 					if (null !== nLegendPos) {
+						var bNewLegend = false;
 						if (!oChartSpace.chart.legend) {
 							oChartSpace.chart.setLegend(new AscFormat.CLegend());
+							bNewLegend = true;
 						}
 						if (oChartSpace.chart.legend.legendPos !== nLegendPos)
 							oChartSpace.chart.legend.setLegendPos(nLegendPos);
 						if (oChartSpace.chart.legend.overlay !== false) {
 							oChartSpace.chart.legend.setOverlay(false);
+						}
+						if (bNewLegend) {
+							builder_ApplyChartStyleToElement(oChartSpace, oChartSpace.chart.legend);
 						}
 					}
 				}
@@ -17762,6 +17778,7 @@
 				var ser = oChart.series[nSeriesIndex];
 				if (ser) {
 					{
+						var bNewSerDLbls = false;
 						if (!ser.dLbls) {
 							if (oChart.dLbls) {
 								ser.setDLbls(oChart.dLbls.createDuplicate());
@@ -17776,9 +17793,14 @@
 									ser.dLbls.setShowPercent(false);
 								}
 								ser.dLbls.setShowBubbleSize(false);
+								bNewSerDLbls = true;
 							}
 						}
+						if (bNewSerDLbls) {
+							builder_ApplyChartStyleToElement(oChartSpace, ser.dLbls);
+						}
 						var dLbl = ser.dLbls && ser.dLbls.findDLblByIdx(nPointIndex);
+						var bNewDLbl = false;
 						if (!dLbl) {
 							dLbl = new AscFormat.CDLbl();
 							dLbl.setIdx(nPointIndex);
@@ -17786,6 +17808,7 @@
 								dLbl.merge(ser.dLbls);
 							}
 							ser.dLbls.addDLbl(dLbl);
+							bNewDLbl = true;
 						}
 						dLbl.setSeparator(",");
 						dLbl.setShowSerName(true == bShowSerName);
@@ -17796,6 +17819,9 @@
 							dLbl.setShowPercent(true === bShowPerecent);
 						}
 						dLbl.setShowBubbleSize(false);
+						if (bNewDLbl) {
+							builder_ApplyChartStyleToElement(oChartSpace, dLbl);
+						}
 					}
 				}
 			}
@@ -17810,8 +17836,10 @@
 						oChart.setDLbls(null);
 					}
 				}
+				var bNewDLbls = false;
 				if (!oChart.dLbls) {
 					oChart.setDLbls(new AscFormat.CDLbls());
+					bNewDLbls = true;
 				}
 				oChart.dLbls.setSeparator(",");
 				oChart.dLbls.setShowSerName(true == bShowSerName);
@@ -17823,6 +17851,9 @@
 				}
 
 				oChart.dLbls.setShowBubbleSize(false);
+				if (bNewDLbls) {
+					builder_ApplyChartStyleToElement(oChartSpace, oChart.dLbls);
+				}
 			}
 		}
 
