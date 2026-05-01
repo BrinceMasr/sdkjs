@@ -17403,8 +17403,10 @@
 		}
 
 		function applyChartStyle(oChartSpace, nStyleIndex) {
-			if (AscFormat.isRealNumber(nStyleIndex)) {
+			if (AscFormat.isRealNumber(nStyleIndex) && nStyleIndex >= 1 && nStyleIndex <= 48) {
 				oChartSpace.setStyle(nStyleIndex);
+			} else {
+				oChartSpace.setStyle(2);
 			}
 		}
 
