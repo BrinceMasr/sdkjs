@@ -55,6 +55,7 @@
 			
 			"common/nameMap.js",
 			"common/downloaderfiles.js",
+			"common/NumFormatData.js",
 			"common/NumFormat.js",
 			"common/SerializeChart.js",
 
