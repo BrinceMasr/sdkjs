@@ -1510,9 +1510,8 @@ $(function () {
     });
 
     // --- Latin-g narrow Gannen -------------------------------------
-    // Excel oracle (ja-JP): [$-ja-JP-x-gannen]ge.m.d on 2019-05-01 renders
-    // "R1.5.1", not "R元.5.1". Gannen substitution is kanji-only, so the
-    // single-letter 'g' era token must not trigger the 元 replacement.
+    // Excel keeps Latin-width era names numeric; only kanji-width era names
+    // substitute the first era year.
     QUnit.test('Gannen is kanji-only (Latin g keeps numeric 1)', function (assert) {
         assert.strictEqual(
             renderEra(eraSerial(2019, 5, 1), '[$-ja-JP-x-gannen]ge.m.d'),

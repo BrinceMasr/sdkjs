@@ -346,7 +346,7 @@ function FormatObjBracket(sData)
             var first = data[0];
             if("$" == first)
             {
-                //[$£], [$£-407], [$-411], [$-ja-JP], [$-ja-JP-x-gannen], [$-ja-JP,80]
+                //Examples include currency, LCID, BCP-47, private-use, and calendar modifiers.
                 parseBracketLocaleModifier(data, this);
             }
 			else if("=" == first || ">" == first || "<" == first)
@@ -449,320 +449,15 @@ function ParseLocalFormatSymbol(Name)
 	LocaleFormatSymbol['G'] = 'G';
 	LocaleFormatSymbol['g'] = 'g';
 	LocaleFormatSymbol['general'] = 'General';
-	switch (Name) {
-//___________________________________________________fi________________________________________________________________
-		case("fi"):
-		case("smn"):
-		case("sms"):
-		case("fi-FI"):
-		case("se-FI"):
-		case("smn-FI"):
-		case("sms-FI"):
-		case("sv-AX"):
-		case("sv-FI"):
-		case("en-FI"): {
-			LocaleFormatSymbol['Y'] = 'V';
-			LocaleFormatSymbol['y'] = 'v';
-			LocaleFormatSymbol['M'] = 'K';
-			LocaleFormatSymbol['m'] = 'k';
-			LocaleFormatSymbol['D'] = 'P';
-			LocaleFormatSymbol['d'] = 'p';
-			LocaleFormatSymbol['H'] = 'T';
-			LocaleFormatSymbol['h'] = 't';
-			LocaleFormatSymbol['general'] = 'Yleinen';
-			break;
-		}
-//___________________________________________________fy________________________________________________________________
-		case("fy"):
-		case("nds"):
-		case("nl"):
-		case("en-NL"):
-		case("fy-NL"):
-		case("nds-NL"):
-		case("nl-BE"):
-		case("nl-NL"): {
-			LocaleFormatSymbol['Y'] = 'J';
-			LocaleFormatSymbol['y'] = 'j';
-			LocaleFormatSymbol['H'] = 'U';
-			LocaleFormatSymbol['h'] = 'u';
-			LocaleFormatSymbol['general'] = 'Standaard';
-			break;
-		}
-//___________________________________________________ES________________________________________________________________
-		case("ast"):
-		case("eu"):
-		case("gl"):
-		case("ast-ES"):
-		case("ca-ES"):
-		case("es-ES"):
-		case("es-MX"):
-		case("eu-ES"):
-		case("gl-ES"):
-		case("ca-ES-valencia"): {
-			LocaleFormatSymbol['Y'] = 'A';
-			LocaleFormatSymbol['y'] = 'a';
-			LocaleFormatSymbol['a'] = 'o';
-			LocaleFormatSymbol['general'] = 'Estándar';
-			break;
-		}
-		case("pt-BR"):
-		case("es-BR"): {
-			LocaleFormatSymbol['Y'] = 'A';
-			LocaleFormatSymbol['y'] = 'a';
-			LocaleFormatSymbol['a'] = 'o';
-			LocaleFormatSymbol['general'] = 'Geral';
-			break;
-		}
-		case("pt"):
-		case("pt-PT"): {
-			LocaleFormatSymbol['Y'] = 'A';
-			LocaleFormatSymbol['y'] = 'a';
-			LocaleFormatSymbol['a'] = 'o';
-			LocaleFormatSymbol['general'] = 'Éstandar';
-			break;
-		}
-//____________________________________________________ru_______________________________________________________________
-		case("ba"):
-		case("ce"):
-		case("cu"):
-		case("kk"):
-		case("os"):
-		case("rm"):
-		case("ru"):
-		case("sah"):
-		case("tt"):
-		case("wae"):
-		case("ba-RU"):
-		case("ce-RU"):
-		case("cu-RU"):
-		case("de-BE"):
-		case("en-BE"):
-		case("en-CH"):
-		case("kk-KZ"):
-		case("os-RU"):
-		case("pt-CH"):
-		case("rm-CH"):
-		case("ru-KZ"):
-		case("ru-RU"):
-		case("sah-RU"):
-		case("tt-RU"):
-		case("wae-CH"): {
-			LocaleFormatSymbol['Y'] = 'Г';
-			LocaleFormatSymbol['y'] = 'г';
-			LocaleFormatSymbol['M'] = 'М';
-			LocaleFormatSymbol['m'] = 'М';
-			LocaleFormatSymbol['D'] = 'Д';
-			LocaleFormatSymbol['d'] = 'д';
-			LocaleFormatSymbol['H'] = 'Ч';
-			LocaleFormatSymbol['h'] = 'ч';
-			LocaleFormatSymbol['Minute'] = 'М';
-			LocaleFormatSymbol['minute'] = 'м'
-			LocaleFormatSymbol['S'] = 'C';
-			LocaleFormatSymbol['s'] = 'с';
-			LocaleFormatSymbol['general'] = 'Основной';
-			break;
-		}
-//____________________________________________________fr_______________________________________________________________
-		case("oc"):
-		case("br"):
-		case("co"):
-		case("fr"):
-		case("br-FR"):
-		case("ca-FR"):
-		case("co-FR"):
-		case("fr-BE"):
-		case("fr-CA"):
-		case("fr-CH"):
-		case("fr-FR"):
-		case("gsw-FR"): {
-			LocaleFormatSymbol['Y'] = 'A';
-			LocaleFormatSymbol['y'] = 'a';
-			LocaleFormatSymbol['D'] = 'J';
-			LocaleFormatSymbol['d'] = 'j';
-			LocaleFormatSymbol['a'] = 'o';
-			LocaleFormatSymbol['general'] = 'Standard';
-			break;
-		}
-//____________________________________________________de_______________________________________________________________
-		case("de"):
-		case("ksh"):
-		case("dsb"):
-		case("hsb"):
-		case("de-AT"):
-		case("de-CH"):
-		case("de-DE"):
-		case("dsb-DE"):
-		case("en-AT"):
-		case("en-DE"):
-		case("hsb-DE"):
-		case("ksh-DE"):
-		case("nds-DE"): {
-			LocaleFormatSymbol['Y'] = 'J';
-			LocaleFormatSymbol['y'] = 'j';
-			LocaleFormatSymbol['M'] = 'M';
-			LocaleFormatSymbol['m'] = 'M';
-			LocaleFormatSymbol['Minute'] = 'M';
-			LocaleFormatSymbol['minute'] = 'm';
-			LocaleFormatSymbol['D'] = 'T';
-			LocaleFormatSymbol['d'] = 't';
-			LocaleFormatSymbol['general'] = 'Standard';
-			break;
-		}
-//____________________________________________________it_______________________________________________________________
-		case("ca"):
-		case("it"):
-		case("fur"):
-		case("ca-IT"):
-		case("de-IT"):
-		case("fur-IT"):
-		case("it-CH"):
-		case("it-IT"):
-		case("it-VA"): {
-			LocaleFormatSymbol['Y'] = 'A';
-			LocaleFormatSymbol['y'] = 'a';
-			LocaleFormatSymbol['D'] = 'G';
-			LocaleFormatSymbol['d'] = 'g';
-			LocaleFormatSymbol['G'] = 'X';
-			LocaleFormatSymbol['g'] = 'x';
-			LocaleFormatSymbol['a'] = 'o';
-			LocaleFormatSymbol['general'] = 'Standard';
-			break;
-		}
-//____________________________________________________da_______________________________________________________________
-		case("sv"):
-		case("en-SE"):
-		case("se-SE"):
-		case("sma-SE"):
-		case("smj-SE"):
-		case("sv-SE"): {
-			LocaleFormatSymbol['Y'] = 'Å';
-			LocaleFormatSymbol['y'] = 'å';
-			LocaleFormatSymbol['m'] = 'M'
-			LocaleFormatSymbol['M'] = 'M';
-			LocaleFormatSymbol['Minute'] = 'M';
-			LocaleFormatSymbol['minute'] = 'm';
-			LocaleFormatSymbol['H'] = 'T';
-			LocaleFormatSymbol['h'] = 't';
-			LocaleFormatSymbol['general'] = 'Standard';
-			break;
-		}
-		case("nb"):
-		case("nn"):
-		case("se"):
-		case("smj"):
-		case("sma"):
-		case("fo"):
-		case("da"):
-		case("smj-NO"):
-		case("sma-NO"):
-		case("se-NO"):
-		case("nn-NO"):
-		case("nb-SJ"):
-		case("nb-NO"):
-		case("fo-DK"):
-		case("da-DK"): {
-			LocaleFormatSymbol['Y'] = 'Å';
-			LocaleFormatSymbol['y'] = 'å';
-			LocaleFormatSymbol['H'] = 'T';
-			LocaleFormatSymbol['h'] = 't';
-			LocaleFormatSymbol['general'] = 'Standard';
-			break;
-		}
-//_____________________________________________________ch______________________________________________________________
-		case("bo"):
-		case("ii"):
-		case("ug"):
-		case("zh"):
-		case("bo-CN"):
-		case("ii-CN"):
-		case("mn-Mong-CN"):
-		case("ug-CN"):
-		case("zh-CN"):
-		case("zh-Hans"):
-		case("zh-TW"): {
-			LocaleFormatSymbol['general'] = 'G/通用格式';
-			break;
-		}
-//_________________________________________________special_____________________________________________________________
-		case("el"):
-		case("el-GR"): {
-			LocaleFormatSymbol['Y'] = 'Ε';
-			LocaleFormatSymbol['y'] = 'ε';
-			LocaleFormatSymbol['M'] = 'Μ';
-			LocaleFormatSymbol['m'] = 'μ';
-			LocaleFormatSymbol['D'] = 'Η';
-			LocaleFormatSymbol['d'] = 'η';
-			LocaleFormatSymbol['H'] = 'Ω';
-			LocaleFormatSymbol['h'] = 'ω';
-			LocaleFormatSymbol['Minute'] = 'Λ';
-			LocaleFormatSymbol['minute'] = 'λ';
-			LocaleFormatSymbol['S'] = 'Δ';
-			LocaleFormatSymbol['s'] = 'δ';
-			LocaleFormatSymbol['general'] = 'Γενικός τύπος';
-			break;
-		}
-		case("hu"):
-		case("hu-HU"): {
-			LocaleFormatSymbol['Y'] = 'É';
-			LocaleFormatSymbol['y'] = 'é';
-			LocaleFormatSymbol['M'] = 'H';
-			LocaleFormatSymbol['m'] = 'h';
-			LocaleFormatSymbol['D'] = 'N';
-			LocaleFormatSymbol['d'] = 'n';
-			LocaleFormatSymbol['H'] = 'Ó';
-			LocaleFormatSymbol['h'] = 'ó';
-			LocaleFormatSymbol['Minute'] = 'P';
-			LocaleFormatSymbol['minute'] = 'p';
-			LocaleFormatSymbol['S'] = 'M';
-			LocaleFormatSymbol['s'] = 'm';
-			LocaleFormatSymbol['general'] = 'Normál';
-			break;
-		}
-		case("tr"):
-		case("tr-TR"): {
-			LocaleFormatSymbol['M'] = 'A';
-			LocaleFormatSymbol['m'] = 'a';
-			LocaleFormatSymbol['D'] = 'G';
-			LocaleFormatSymbol['d'] = 'g';
-			LocaleFormatSymbol['G'] = 'X';
-			LocaleFormatSymbol['g'] = 'x';
-			LocaleFormatSymbol['H'] = 'S';
-			LocaleFormatSymbol['h'] = 's';
-			LocaleFormatSymbol['Minute'] = 'D';
-			LocaleFormatSymbol['minute'] = 'd';
-			LocaleFormatSymbol['S'] = 'N';
-			LocaleFormatSymbol['s'] = 'n';
-			LocaleFormatSymbol['a'] = 'o';
-			LocaleFormatSymbol['general'] = 'Genel';
-			break;
-		}
-		case("pl"):
-		case("pl-PL"): {
-			LocaleFormatSymbol['Y'] = 'R';
-			LocaleFormatSymbol['y'] = 'r';
-			LocaleFormatSymbol['H'] = 'G';
-			LocaleFormatSymbol['h'] = 'g';
-			LocaleFormatSymbol['G'] = 'X';
-			LocaleFormatSymbol['g'] = 'x';
-			LocaleFormatSymbol['general'] = 'Standardowy';
-			break;
-		}
-		case("cs"):
-		case("cs-CZ"): {
-			LocaleFormatSymbol['Y'] = 'R';
-			LocaleFormatSymbol['y'] = 'r';
-			LocaleFormatSymbol['general'] = 'Vęeobecný';
-			break;
-		}
-		case("ja"):
-		case("ja-JP"): {
-			LocaleFormatSymbol['general'] = 'G/標準';
-			break;
-		}
-		case("ko"):
-		case("ko-KR"): {
-			LocaleFormatSymbol['general'] = 'G/표준';
-			break;
+	var overrides = AscCommon.g_oLocaleFormatSymbols && AscCommon.g_oLocaleFormatSymbols[Name];
+	if (typeof overrides === 'string') {
+		overrides = AscCommon.g_oLocaleFormatSymbols[overrides];
+	}
+	if (overrides) {
+		for (var k in overrides) {
+			if (overrides.hasOwnProperty(k)) {
+				LocaleFormatSymbol[k] = overrides[k];
+			}
 		}
 	}
 	return true;
@@ -799,10 +494,9 @@ function NumFormat(bAddMinusIfNes)
 	this.LCID = null;
 	this.CurrencyString = null;
 	this.DBNum = 0;
-	//Set from canonical [$-ja-JP-x-gannen]. Triggers "元" for era year 1.
+	//Set from canonical [$-ja-JP-x-gannen]. Enables Gannen year-one substitution.
 	this.bGannen = false;
-	//Format contains gg or ggg. Gannen is kanji-only in Excel:
-	//[$-ja-JP-x-gannen]ge.m.d -> "R1.5.1", not "R元.5.1".
+	//Format contains gg or ggg. Excel keeps Latin-width era names numeric.
 	this.bHasKanjiEra = false;
 	//Numeric [$-411,80] is a non-era calendar override in Excel; the BCP-47
 	//[$-ja-JP,80] keeps era rendering. Falls back to Gregorian when set.
@@ -1340,7 +1034,7 @@ NumFormat.prototype =
                         if (numFormat_Day == item.type)
                             this.bDay = true;
                     }
-                    //Gannen is kanji-only: [$-ja-JP-x-gannen]ge.m.d -> "R1.5.1", not "R元.5.1".
+                    //Only kanji-width era names enable Gannen substitution.
                     else if (numFormat_JapanEra == item.type && item.val >= 2) {
                         this.bHasKanjiEra = true;
                     }
@@ -2554,7 +2248,7 @@ NumFormat.prototype =
                     if (era) {
                         var eraYear = oParsedNumber.date.year - era.startYear + 1;
                         if (this.bGannen && this.bHasKanjiEra && eraYear === 1) {
-                            oCurText.text += '\u5143'; // 元
+                            oCurText.text += '\u5143';
                         } else if (nVal === 1) {
                             oCurText.text += eraYear;
                         } else {

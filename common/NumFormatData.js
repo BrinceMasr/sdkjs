@@ -4332,6 +4332,141 @@ var g_aCultureInfos = {
 		return null;
 	}
 
+	// Locale format-symbol overrides, keyed by BCP-47 / locale name.
+	// Each entry is either an overrides object (keys that differ from the
+	// invariant defaults) or a string alias to another canonical entry.
+	// Consumed by ParseLocalFormatSymbol in NumFormat.js.
+	//
+	// Note on G:'X', g:'x' entries: in those locales the letter 'g'/'G' is
+	// already occupied by a date/hour token, so the localized UI parser maps
+	// the invariant Japanese-era 'g' token to 'x'/'X'. The invariant parser
+	// path (used by styles.xml / API callers) always sees 'g' directly and
+	// does not use these symbols.
+	var g_oLocaleFormatSymbols = {
+		// Finnish
+		'fi': {
+			Y:'V', y:'v', M:'K', m:'k', D:'P', d:'p', H:'T', h:'t',
+			general:'Yleinen'
+		},
+		'smn':    'fi', 'sms':    'fi', 'fi-FI':  'fi', 'se-FI':  'fi',
+		'smn-FI': 'fi', 'sms-FI': 'fi', 'sv-AX':  'fi', 'sv-FI':  'fi', 'en-FI': 'fi',
+
+		// Dutch / Frisian
+		'fy': { Y:'J', y:'j', H:'U', h:'u', general:'Standaard' },
+		'nds':    'fy', 'nl':     'fy', 'en-NL':  'fy', 'fy-NL':  'fy',
+		'nds-NL': 'fy', 'nl-BE':  'fy', 'nl-NL':  'fy',
+
+		// Spanish / Catalan / Galician
+		'ast': { Y:'A', y:'a', a:'o', general:'Estándar' },
+		'eu':  'ast', 'gl': 'ast', 'ast-ES': 'ast', 'ca-ES':  'ast',
+		'es-ES': 'ast', 'es-MX': 'ast', 'eu-ES': 'ast', 'gl-ES': 'ast', 'ca-ES-valencia': 'ast',
+
+		// Portuguese (Brazil)
+		'pt-BR': { Y:'A', y:'a', a:'o', general:'Geral' },
+		'es-BR': 'pt-BR',
+
+		// Portuguese (Portugal)
+		'pt': { Y:'A', y:'a', a:'o', general:'Éstandar' },
+		'pt-PT': 'pt',
+
+		// Russian / Cyrillic
+		'ba': {
+			Y:'Г', y:'г', M:'М', m:'М', D:'Д', d:'д',
+			H:'Ч', h:'ч', Minute:'М', minute:'м', S:'C', s:'с',
+			general:'Основной'
+		},
+		'ce':     'ba', 'cu':    'ba', 'kk':     'ba', 'os':    'ba', 'rm':    'ba', 'ru':    'ba',
+		'sah':    'ba', 'tt':    'ba', 'wae':    'ba', 'ba-RU': 'ba', 'ce-RU': 'ba',
+		'cu-RU':  'ba', 'de-BE': 'ba', 'en-BE':  'ba', 'en-CH': 'ba', 'kk-KZ': 'ba',
+		'os-RU':  'ba', 'pt-CH': 'ba', 'rm-CH':  'ba', 'ru-KZ': 'ba', 'ru-RU': 'ba',
+		'sah-RU': 'ba', 'tt-RU': 'ba', 'wae-CH': 'ba',
+
+		// French
+		'oc': { Y:'A', y:'a', D:'J', d:'j', a:'o', general:'Standard' },
+		'br':     'oc', 'co':    'oc', 'fr':     'oc', 'br-FR': 'oc', 'ca-FR':  'oc',
+		'co-FR':  'oc', 'fr-BE': 'oc', 'fr-CA':  'oc', 'fr-CH': 'oc', 'fr-FR':  'oc', 'gsw-FR': 'oc',
+
+		// German
+		'de': {
+			Y:'J', y:'j', M:'M', m:'M', D:'T', d:'t',
+			Minute:'M', minute:'m', general:'Standard'
+		},
+		'ksh':    'de', 'dsb':   'de', 'hsb':    'de', 'de-AT': 'de', 'de-CH':  'de', 'de-DE': 'de',
+		'dsb-DE': 'de', 'en-AT': 'de', 'en-DE':  'de', 'hsb-DE':'de', 'ksh-DE': 'de', 'nds-DE':'de',
+
+		// Italian / Catalan (G->X: 'g'/'G' occupied by day token in this locale)
+		'ca': {
+			Y:'A', y:'a', D:'G', d:'g',
+			G:'X', g:'x',
+			a:'o', general:'Standard'
+		},
+		'it':    'ca', 'fur':   'ca', 'ca-IT':  'ca', 'de-IT': 'ca', 'fur-IT': 'ca',
+		'it-CH': 'ca', 'it-IT': 'ca', 'it-VA':  'ca',
+
+		// Swedish
+		'sv': {
+			Y:'Å', y:'å', M:'M', m:'M', H:'T', h:'t',
+			Minute:'M', minute:'m', general:'Standard'
+		},
+		'en-SE':  'sv', 'se-SE':  'sv', 'sma-SE': 'sv', 'smj-SE': 'sv', 'sv-SE': 'sv',
+
+		// Danish / Norwegian / Faroese / Sami
+		'nb': { Y:'Å', y:'å', H:'T', h:'t', general:'Standard' },
+		'nn':     'nb', 'se':    'nb', 'smj':    'nb', 'sma':   'nb', 'fo':    'nb', 'da':   'nb',
+		'smj-NO': 'nb', 'sma-NO':'nb', 'se-NO':  'nb', 'nn-NO': 'nb', 'nb-SJ': 'nb',
+		'nb-NO':  'nb', 'fo-DK': 'nb', 'da-DK':  'nb',
+
+		// Chinese / Tibetan / Yi / Uyghur / Mongolian
+		'bo': { general:'G/通用格式' },
+		'ii':         'bo', 'ug':    'bo', 'zh':     'bo', 'bo-CN':   'bo', 'ii-CN':  'bo',
+		'mn-Mong-CN': 'bo', 'ug-CN': 'bo', 'zh-CN':  'bo', 'zh-Hans': 'bo', 'zh-TW':  'bo',
+
+		// Greek
+		'el': {
+			Y:'Ε', y:'ε', M:'Μ', m:'μ', D:'Η', d:'η',
+			H:'Ω', h:'ω', Minute:'Λ', minute:'λ', S:'Δ', s:'δ',
+			general:'Γενικός τύπος'
+		},
+		'el-GR': 'el',
+
+		// Hungarian
+		'hu': {
+			Y:'É', y:'é', M:'H', m:'h', D:'N', d:'n',
+			H:'Ó', h:'ó', Minute:'P', minute:'p', S:'M', s:'m',
+			general:'Normál'
+		},
+		'hu-HU': 'hu',
+
+		// Turkish (G->X: 'g'/'G' occupied by day token in this locale)
+		'tr': {
+			M:'A', m:'a', D:'G', d:'g',
+			G:'X', g:'x',
+			H:'S', h:'s', Minute:'D', minute:'d', S:'N', s:'n',
+			a:'o', general:'Genel'
+		},
+		'tr-TR': 'tr',
+
+		// Polish (G->X: 'g'/'G' occupied by hour token)
+		'pl': {
+			Y:'R', y:'r', H:'G', h:'g',
+			G:'X', g:'x',
+			general:'Standardowy'
+		},
+		'pl-PL': 'pl',
+
+		// Czech
+		'cs': { Y:'R', y:'r', general:'Vęeobecný' },
+		'cs-CZ': 'cs',
+
+		// Japanese
+		'ja': { general:'G/標準' },
+		'ja-JP': 'ja',
+
+		// Korean
+		'ko': { general:'G/표준' },
+		'ko-KR': 'ko'
+	};
+
 	//---------------------------------------------------------export---------------------------------------------------
 	window["AscCommon"] = window["AscCommon"] || {};
 	window["AscCommon"].g_aCultureInfos = g_aCultureInfos;
@@ -4343,5 +4478,6 @@ var g_aCultureInfos = {
 	window["AscCommon"].isJapanEraLcid = isJapanEraLcid;
 	window["AscCommon"].isJapanEraLid = isJapanEraLid;
 	window["AscCommon"].getJapanEraByDate = getJapanEraByDate;
+	window["AscCommon"].g_oLocaleFormatSymbols = g_oLocaleFormatSymbols;
 
 })(window);
