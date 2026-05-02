@@ -4285,11 +4285,63 @@ var g_aCultureInfos = {
 		]
 	};
 
+	// Japanese era boundaries (Excel parity, see Microsoft KB c52091af).
+	// Lookup by (year, month, day) keeps it independent of AscCommon.bDate1904.
+	var g_aJapanEras = [
+		{ latinShort: 'M', kanjiShort: '\u660e', kanjiFull: '\u660e\u6cbb', startYear: 1868, startMonth: 9,  startDay: 8  }, // Meiji
+		{ latinShort: 'T', kanjiShort: '\u5927', kanjiFull: '\u5927\u6b63', startYear: 1912, startMonth: 7,  startDay: 30 }, // Taisho
+		{ latinShort: 'S', kanjiShort: '\u662d', kanjiFull: '\u662d\u548c', startYear: 1926, startMonth: 12, startDay: 25 }, // Showa
+		{ latinShort: 'H', kanjiShort: '\u5e73', kanjiFull: '\u5e73\u6210', startYear: 1989, startMonth: 1,  startDay: 8  }, // Heisei
+		{ latinShort: 'R', kanjiShort: '\u4ee4', kanjiFull: '\u4ee4\u548c', startYear: 2019, startMonth: 5,  startDay: 1  }  // Reiwa
+	];
+
+	// LCIDs that activate Japanese era rendering for g/e tokens. Map shape kept
+	// for future variants; Phase 1 has ja-JP only.
+	var g_oJapanEraLcids = { 0x0411: true };
+
+	function isJapanEraLcid(lcid) {
+		return null != lcid && !!g_oJapanEraLcids[lcid & 0xFFFF];
+	}
+
+	function isJapanEraLid(lid) {
+		var nLid = parseInt(lid, 16);
+		return !isNaN(nLid) && isJapanEraLcid(nLid);
+	}
+
+	/**
+	 * @param {number} year   four-digit Gregorian year
+	 * @param {number} month  1-based month (caller must convert 0-based parseDate() result)
+	 * @param {number} day    1-based day-of-month
+	 * @returns {Object|null} era descriptor, or null for pre-Meiji input
+	 */
+	function getJapanEraByDate(year, month, day) {
+		for (var i = g_aJapanEras.length - 1; i >= 0; --i) {
+			var era = g_aJapanEras[i];
+			if (year > era.startYear) {
+				return era;
+			}
+			if (year === era.startYear) {
+				if (month > era.startMonth) {
+					return era;
+				}
+				if (month === era.startMonth && day >= era.startDay) {
+					return era;
+				}
+			}
+		}
+		return null;
+	}
+
 	//---------------------------------------------------------export---------------------------------------------------
 	window["AscCommon"] = window["AscCommon"] || {};
 	window["AscCommon"].g_aCultureInfos = g_aCultureInfos;
 	window["AscCommon"].g_aAdditionalCurrencySymbols = g_aAdditionalCurrencySymbols;
 	window["AscCommon"].c_oAscDateFormatExcel = c_oAscDateFormatExcel;
 	window["AscCommon"].c_oAscTimeFormatExcel = c_oAscTimeFormatExcel;
+	window["AscCommon"].g_aJapanEras = g_aJapanEras;
+	window["AscCommon"].g_oJapanEraLcids = g_oJapanEraLcids;
+	window["AscCommon"].isJapanEraLcid = isJapanEraLcid;
+	window["AscCommon"].isJapanEraLid = isJapanEraLid;
+	window["AscCommon"].getJapanEraByDate = getJapanEraByDate;
 
 })(window);

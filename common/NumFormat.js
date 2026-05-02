@@ -79,6 +79,8 @@ var numFormat_DigitDrop = 104;
 var numFormat_Plus = 105;
 var numFormat_Minus = 106;
 var numFormat_ThousandText = 107;
+var numFormat_JapanEra = 108;
+var numFormat_JapanEraYear = 109;
 var numFormat_DayOfWeek = 110;
 
 var FormatStates = {Decimal: 1, Frac: 2, Scientific: 3, Slash: 4, SlashFrac: 5};
@@ -253,6 +255,85 @@ function FormatObjDateVal(type, nCount, bElapsed)
     this.val = nCount;//Number of consecutive characters
     this.bElapsed = bElapsed;//true == [hhh]; in square brackets
 }
+//Parses the body of a [$...] locale modifier into target fields.
+//Grammar: <currency>?(-<lid|bcp47>(,<calId>)?(-x-<priv>)?)?
+//Fills: CurrencyString, Lid, LidName, CalendarId, bGannen.
+function parseBracketLocaleModifier(data, target)
+{
+	var rest = data.substring(1);
+	var dashIdx = rest.indexOf('-');
+	var localeStr = null;
+	if (dashIdx === -1) {
+		if (rest.length > 0) {
+			target.CurrencyString = rest;
+		}
+		return;
+	}
+	if (dashIdx > 0) {
+		target.CurrencyString = rest.substring(0, dashIdx);
+	}
+	localeStr = rest.substring(dashIdx + 1);
+	if (!localeStr || localeStr.length === 0) {
+		return;
+	}
+	var tokens = localeStr.split(/[-,]/);
+	var ti = 0;
+	if (ti < tokens.length) {
+		var first0 = tokens[ti];
+		if (/^[0-9a-fA-F]{1,8}$/.test(first0)) {
+			if (first0.toLowerCase() === "87f70000") {
+				target.Lid = "411";
+				target.LidName = "ja-jp";
+				target.bGannen = true;
+			} else {
+				target.Lid = first0;
+			}
+			ti++;
+		} else if (/^[a-zA-Z]{2,3}$/.test(first0)) {
+			var lang = first0;
+			ti++;
+			//Region: 2-4 letters or 3 digits, but not 'x' (private-use marker)
+			if (ti < tokens.length
+				&& /^([a-zA-Z]{2,4}|\d{3})$/.test(tokens[ti])
+				&& tokens[ti].toLowerCase() !== "x") {
+				lang += "-" + tokens[ti];
+				ti++;
+			}
+			var langLower = lang.toLowerCase();
+			target.LidName = langLower;
+			var lcid = null;
+			if (typeof Asc !== "undefined" && Asc.g_oLcidNameToIdMap) {
+				lcid = Asc.g_oLcidNameToIdMap[lang] || Asc.g_oLcidNameToIdMap[langLower];
+			}
+			//Hardcoded ja-JP fallback: parser can run in workers/native
+			//before Asc.g_oLcidNameToIdMap is initialised.
+			if (!lcid && langLower === "ja-jp") {
+				lcid = 0x0411;
+			}
+			if (lcid) {
+				target.Lid = lcid.toString(16);
+			}
+		}
+	}
+	while (ti < tokens.length) {
+		var tok = tokens[ti];
+		if (tok === "x" || tok === "X") {
+			ti++;
+			if (ti < tokens.length) {
+				var ext = tokens[ti].toLowerCase();
+				if (ext === "gannen" && target.LidName === "ja-jp") {
+					target.bGannen = true;
+				}
+				ti++;
+			}
+		} else if (/^\d+$/.test(tok)) {
+			target.CalendarId = parseInt(tok, 10);
+			ti++;
+		} else {
+			ti++;
+		}
+	}
+}
 function FormatObjBracket(sData)
 {
     this.type = numFormat_Bracket;
@@ -265,12 +346,8 @@ function FormatObjBracket(sData)
             var first = data[0];
             if("$" == first)
             {
-                var aParams = data.substring(1).split('-');
-				if (aParams[0].length > 0) {
-					this.CurrencyString = aParams[0];
-				} if(aParams.length > 1 && aParams[1].length > 0) {
-					this.Lid = aParams[1];
-				}
+                //[$£], [$£-407], [$-411], [$-ja-JP], [$-ja-JP-x-gannen], [$-ja-JP,80]
+                parseBracketLocaleModifier(data, this);
             }
 			else if("=" == first || ">" == first || "<" == first)
 			{
@@ -369,6 +446,8 @@ function ParseLocalFormatSymbol(Name)
 	LocaleFormatSymbol['S'] = 'S';
 	LocaleFormatSymbol['s'] = 's';
 	LocaleFormatSymbol['a'] = 'a';
+	LocaleFormatSymbol['G'] = 'G';
+	LocaleFormatSymbol['g'] = 'g';
 	LocaleFormatSymbol['general'] = 'General';
 	switch (Name) {
 //___________________________________________________fi________________________________________________________________
@@ -543,6 +622,8 @@ function ParseLocalFormatSymbol(Name)
 			LocaleFormatSymbol['y'] = 'a';
 			LocaleFormatSymbol['D'] = 'G';
 			LocaleFormatSymbol['d'] = 'g';
+			LocaleFormatSymbol['G'] = 'X';
+			LocaleFormatSymbol['g'] = 'x';
 			LocaleFormatSymbol['a'] = 'o';
 			LocaleFormatSymbol['general'] = 'Standard';
 			break;
@@ -643,6 +724,8 @@ function ParseLocalFormatSymbol(Name)
 			LocaleFormatSymbol['m'] = 'a';
 			LocaleFormatSymbol['D'] = 'G';
 			LocaleFormatSymbol['d'] = 'g';
+			LocaleFormatSymbol['G'] = 'X';
+			LocaleFormatSymbol['g'] = 'x';
 			LocaleFormatSymbol['H'] = 'S';
 			LocaleFormatSymbol['h'] = 's';
 			LocaleFormatSymbol['Minute'] = 'D';
@@ -659,6 +742,8 @@ function ParseLocalFormatSymbol(Name)
 			LocaleFormatSymbol['y'] = 'r';
 			LocaleFormatSymbol['H'] = 'G';
 			LocaleFormatSymbol['h'] = 'g';
+			LocaleFormatSymbol['G'] = 'X';
+			LocaleFormatSymbol['g'] = 'x';
 			LocaleFormatSymbol['general'] = 'Standardowy';
 			break;
 		}
@@ -714,6 +799,17 @@ function NumFormat(bAddMinusIfNes)
 	this.LCID = null;
 	this.CurrencyString = null;
 	this.DBNum = 0;
+	//Set from canonical [$-ja-JP-x-gannen]. Triggers "元" for era year 1.
+	this.bGannen = false;
+	//Format contains gg or ggg. Gannen is kanji-only in Excel:
+	//[$-ja-JP-x-gannen]ge.m.d -> "R1.5.1", not "R元.5.1".
+	this.bHasKanjiEra = false;
+	//Numeric [$-411,80] is a non-era calendar override in Excel; the BCP-47
+	//[$-ja-JP,80] keeps era rendering. Falls back to Gregorian when set.
+	this.bJapanEraCalendarOverride = false;
+	//Set by a parsed Japanese LCID bracket; applies to later localized era-name
+	//tokens in this sub-format (g/G normally, x/X when local g/G is day/hour).
+	this.bJapanEraTokenContext = false;
 
 	this.bGeneralChart = false;//if the format contains only one text (e.g. "General" in chart)
     this.bAddMinusIfNes = bAddMinusIfNes;//when formatting for negative numbers is not specified, sometimes a minus sign needs to be inserted
@@ -791,6 +887,8 @@ NumFormat.prototype =
 		var oFormatObjBracket = new FormatObjBracket(sBracket);
 		if(null != oFormatObjBracket.operator)
 			this.ComporationOperator = oFormatObjBracket;
+		if (AscCommon.isJapanEraLid && AscCommon.isJapanEraLid(oFormatObjBracket.Lid))
+			this.bJapanEraTokenContext = true;
         this._addToFormat2(oFormatObjBracket);
     },
     _ReadAmPm : function(next)
@@ -867,6 +965,8 @@ NumFormat.prototype =
         var Second;
         var second;
 		var dayOfWeek;
+		var JapanEra;
+		var japanEra;
 		if (useLocaleFormat) {
 			sGeneral = LocaleFormatSymbol['general'].toLowerCase();
 			DecimalSeparator = g_oDefaultCultureInfo.NumberDecimalSeparator;
@@ -885,6 +985,8 @@ NumFormat.prototype =
 			Second = LocaleFormatSymbol['S'];
 			second = LocaleFormatSymbol['s'];
 			dayOfWeek = LocaleFormatSymbol['a'];
+			JapanEra = LocaleFormatSymbol['G'];
+			japanEra = LocaleFormatSymbol['g'];
 		} else {
 			sGeneral = AscCommon.g_cGeneralFormat.toLowerCase();
 			DecimalSeparator = gc_sFormatDecimalPoint;
@@ -903,6 +1005,8 @@ NumFormat.prototype =
 			Second = 'S';
 			second = 's';
 			dayOfWeek = 'a';
+			JapanEra = 'G';
+			japanEra = 'g';
 		}
         var sGeneralFirst = sGeneral[0];
         this.bGeneralChart = true;
@@ -965,11 +1069,18 @@ NumFormat.prototype =
 			}
             else if("E" == next || "e" == next)
             {
-                var nextnext = this._readChar();
-                if(this.EOF != nextnext && "+" == nextnext || "-" == nextnext)
-                {
-                    var sign = ("+" == nextnext) ? SignType.Positive : SignType.Negative;
+                //Precedence: E/e+sign -> scientific; lowercase e -> era-year; uppercase E -> literal.
+                //Peek instead of consume so the non-sign char (e.g. '.' in "ge.m.d") survives.
+                var peekSign = this._GetText(1);
+                if (peekSign === "+" || peekSign === "-") {
+                    this._readChar();
+                    var sign = ("+" === peekSign) ? SignType.Positive : SignType.Negative;
                     this._addToFormat2(new FormatObjScientific(next, "", sign));
+                } else if ("e" === next) {
+                    this._addToFormat2(new FormatObjDateVal(numFormat_JapanEraYear, 1, false));
+                } else {
+                    bNoFormat = true;
+                    this._addToFormat(numFormat_Text, next);
                 }
             }
             else if("*" == next)
@@ -987,6 +1098,10 @@ NumFormat.prototype =
             else if("@" == next)
             {
                 this._addToFormat(numFormat_TextPlaceholder);
+            }
+            else if((JapanEra == next || japanEra == next) && this.bJapanEraTokenContext)
+            {
+                this._addToFormat2(new FormatObjDateVal(numFormat_JapanEra, 1, false));
             }
             else if(Year == next || year == next)
             {
@@ -1020,6 +1135,10 @@ NumFormat.prototype =
 			{
 				this._addToFormat2(new FormatObjDateVal(numFormat_DayOfWeek, 1, false));
 			}
+            else if ("g" == next || "G" == next)
+            {
+                this._addToFormat2(new FormatObjDateVal(numFormat_JapanEra, 1, false));
+            }
             else {
                 bNoFormat = true;
                 this._addToFormat(numFormat_Text, next);
@@ -1192,7 +1311,7 @@ NumFormat.prototype =
                 }
             }
             else if(numFormat_Year == item.type || numFormat_MonthMinute == item.type || numFormat_Month == item.type || numFormat_Day == item.type || numFormat_Hour == item.type || numFormat_Minute == item.type || numFormat_Second == item.type || numFormat_Thousand == item.type ||
-				numFormat_DayOfWeek == item.type)
+				numFormat_DayOfWeek == item.type || numFormat_JapanEra == item.type || numFormat_JapanEraYear == item.type)
             {
                 //Combine hhh sequences into one
                 var nStartType = item.type;
@@ -1220,6 +1339,10 @@ NumFormat.prototype =
                         this.bDate = true;
                         if (numFormat_Day == item.type)
                             this.bDay = true;
+                    }
+                    //Gannen is kanji-only: [$-ja-JP-x-gannen]ge.m.d -> "R1.5.1", not "R元.5.1".
+                    else if (numFormat_JapanEra == item.type && item.val >= 2) {
+                        this.bHasKanjiEra = true;
                     }
                 }
             }
@@ -1973,6 +2096,18 @@ NumFormat.prototype =
         // Always return a string so callers get consistent string concatenation.
         return n < 10 ? "0" + n : String(n);
     },
+    //era is null when era rendering is disabled (non-Japanese LCID, calendar
+    //override) or when the date predates Meiji.
+    _resolveJapanEra: function (oParsedNumber)
+    {
+        var bEraLcid = !this.bJapanEraCalendarOverride
+            && AscCommon.isJapanEraLcid && AscCommon.isJapanEraLcid(this.LCID);
+        var era = bEraLcid ? AscCommon.getJapanEraByDate(
+            oParsedNumber.date.year,
+            oParsedNumber.date.month + 1,
+            oParsedNumber.date.d) : null;
+        return {bEraLcid: bEraLcid, era: era};
+    },
     _CommitText: function(res, oCurText, textVal, format)
     {
         // Flush accumulated text first (always with format=null).
@@ -2061,6 +2196,13 @@ NumFormat.prototype =
 							if (null != item.Lid) {
 								//Excel sometimes add 0x10000(0x442 and 0x10442)
 								this.LCID = parseInt(item.Lid, 16) & 0xFFFF;
+							}
+							if (item.bGannen) {
+								this.bGannen = true;
+							}
+							if (AscCommon.isJapanEraLid && AscCommon.isJapanEraLid(item.Lid)
+								&& null != item.CalendarId && !item.LidName) {
+								this.bJapanEraCalendarOverride = true;
 							}
 						}
                     }
@@ -2385,6 +2527,46 @@ NumFormat.prototype =
 						oCurText.text += 'a'.repeat(item.val);
 					}
 				}
+                else if(numFormat_JapanEra == item.type)
+                {
+                    var nVal = Math.min(item.val, 3);
+                    var resolved = this._resolveJapanEra(oParsedNumber);
+                    var era = resolved.era;
+                    if (era) {
+                        if (nVal === 1) {
+                            oCurText.text += era.latinShort;
+                        } else if (nVal === 2) {
+                            oCurText.text += era.kanjiShort;
+                        } else {
+                            oCurText.text += era.kanjiFull;
+                        }
+                    } else if (resolved.bEraLcid) {
+                        //Pre-Meiji date under Japanese LCID: keep literal g.
+                        //Non-era LCID: token disappears (Excel oracle).
+                        oCurText.text += 'g'.repeat(nVal);
+                    }
+                }
+                else if(numFormat_JapanEraYear == item.type)
+                {
+                    var nVal = Math.min(item.val, 2);
+                    var resolved = this._resolveJapanEra(oParsedNumber);
+                    var era = resolved.era;
+                    if (era) {
+                        var eraYear = oParsedNumber.date.year - era.startYear + 1;
+                        if (this.bGannen && this.bHasKanjiEra && eraYear === 1) {
+                            oCurText.text += '\u5143'; // 元
+                        } else if (nVal === 1) {
+                            oCurText.text += eraYear;
+                        } else {
+                            oCurText.text += this._ZeroPad(eraYear);
+                        }
+                    } else if (resolved.bEraLcid) {
+                        oCurText.text += 'e'.repeat(nVal);
+                    } else {
+                        //Non-era LCID: e/ee renders Gregorian year (Excel oracle).
+                        oCurText.text += oParsedNumber.date.year;
+                    }
+                }
                 else if(numFormat_Year == item.type)
                 {
                   if (item.val > 0) {
@@ -2572,8 +2754,8 @@ NumFormat.prototype =
 		output.format = this.toString(nShift, useLocaleFormat);
 		return true;
 	},
-	toString : function(nShift, useLocaleFormat)
-	{
+    toString : function(nShift, useLocaleFormat, options)
+    {
 		var sGeneral;
 		var DecimalSeparator;
 		var GroupSeparator;
@@ -2585,6 +2767,7 @@ NumFormat.prototype =
 		var minute;
 		var second;
 		var dayOfWeek;
+		var era;
 		if (useLocaleFormat) {
 			sGeneral = LocaleFormatSymbol['general'];
 			DecimalSeparator = g_oDefaultCultureInfo.NumberDecimalSeparator;
@@ -2603,6 +2786,7 @@ NumFormat.prototype =
 			minute = LocaleFormatSymbol['minute'];
 			second = LocaleFormatSymbol['s'];
 			dayOfWeek = LocaleFormatSymbol['a'];
+			era = LocaleFormatSymbol['g'];
 		} else {
 			sGeneral = AscCommon.g_cGeneralFormat;
 			DecimalSeparator = gc_sFormatDecimalPoint;
@@ -2615,6 +2799,7 @@ NumFormat.prototype =
 			minute = 'm';
 			second = 's';
 			dayOfWeek = 'a';
+			era = 'g';
 		}
         var nDecLength = this.aDecFormat.length;
         var nDecIndex = 0;
@@ -2660,21 +2845,49 @@ NumFormat.prototype =
 			res += '[DBNum' + this.DBNum + ']';
 		}
 
-        var nFormatLength = this.aRawFormat.length;    
+		var bGannenFallback = options && options.gannenFallback;
+		var bStripGannenFallback = false;
+		if (bGannenFallback && this.bHasKanjiEra) {
+			for (var nGannenItem = 0; nGannenItem < this.aRawFormat.length; ++nGannenItem) {
+				if (this.aRawFormat[nGannenItem] && this.aRawFormat[nGannenItem].type === numFormat_JapanEraYear) {
+					bStripGannenFallback = true;
+					break;
+				}
+			}
+		}
+
+        var nFormatLength = this.aRawFormat.length;
         for(var i = 0; i < nFormatLength; ++i)
         {
             var item = this.aRawFormat[i];
             if(numFormat_Bracket == item.type)
             {
-                if(null != item.CurrencyString || null != item.Lid)
+                if (bGannenFallback && item.bGannen && bStripGannenFallback)
+                {
+                    res += "[$]";
+                }
+                else if(null != item.CurrencyString || null != item.Lid)
                 {
                     res += "[$";
                     if(null != item.CurrencyString)
                         res += item.CurrencyString;
-					if (null != item.Lid) {
-						res += "-";
-						res += item.Lid;
-					}
+                    if (null != item.Lid) {
+                        res += "-";
+                        //Canonical Gannen form is BCP-47; numeric [$-411,x-gannen] is not
+                        //a valid Excel Gannen format and is dropped on round-trip.
+                        if (!bGannenFallback && item.bGannen && AscCommon.isJapanEraLid && AscCommon.isJapanEraLid(item.Lid)) {
+                            res += "ja-JP-x-gannen";
+                        } else if (item.LidName === "ja-jp" && null != item.CalendarId) {
+                            //[$-ja-JP,80] keeps era rendering; [$-411,80] does not.
+                            res += "ja-JP";
+                        } else {
+                            res += item.Lid;
+                        }
+                        if (null != item.CalendarId) {
+                            res += ",";
+                            res += item.CalendarId;
+                        }
+                    }
                     res += "]";
                 }
             }
@@ -2811,6 +3024,19 @@ NumFormat.prototype =
 				for(var j = 0; j < nIndex; ++j)
 					res += dayOfWeek;
 			}
+            else if(numFormat_JapanEra == item.type)
+            {
+                var nIndex = Math.min(item.val, 3);
+                for(var j = 0; j < nIndex; ++j)
+                    res += era;
+            }
+            else if(numFormat_JapanEraYear == item.type)
+            {
+                //Lowercase: parser precedence is e -> era-year, E -> scientific/literal.
+                var nIndex = Math.min(item.val, 2);
+                for(var j = 0; j < nIndex; ++j)
+                    res += "e";
+            }
             else if(numFormat_AmPm == item.type)
                 res += "AM/PM";
             else if(numFormat_Milliseconds == item.type)
@@ -3231,18 +3457,18 @@ CellFormat.prototype =
 		}
         return bRes;
     },
-	toString: function(nShift, useLocaleFormat) {
+	toString: function(nShift, useLocaleFormat, options) {
 		var res = '';
 		if (null == this.aComporationFormats) {
-			res += this.oPositiveFormat.toString(nShift, useLocaleFormat);
+			res += this.oPositiveFormat.toString(nShift, useLocaleFormat, options);
 			if (null != this.oNegativeFormat && this.oPositiveFormat != this.oNegativeFormat) {
-				res += ";" + this.oNegativeFormat.toString(nShift, useLocaleFormat);
+				res += ";" + this.oNegativeFormat.toString(nShift, useLocaleFormat, options);
 			}
 			if (null != this.oNullFormat && this.oPositiveFormat != this.oNullFormat) {
-				res += ";" + this.oNullFormat.toString(nShift, useLocaleFormat);
+				res += ";" + this.oNullFormat.toString(nShift, useLocaleFormat, options);
 			}
 			if (null != this.oTextFormat && this.oPositiveFormat != this.oTextFormat) {
-				res += ";" + this.oTextFormat.toString(nShift, useLocaleFormat);
+				res += ";" + this.oTextFormat.toString(nShift, useLocaleFormat, options);
 			}
 		}
 		else {
@@ -3252,7 +3478,7 @@ CellFormat.prototype =
 				if (0 != i) {
 					res += ";";
 				}
-				res += oCurFormat.toString(nShift, useLocaleFormat);
+				res += oCurFormat.toString(nShift, useLocaleFormat, options);
 			}
 		}
 		return res;
@@ -6128,11 +6354,29 @@ var c_oAscDateFormatExcel = AscCommon.c_oAscDateFormatExcel;
 var g_oDefaultCultureInfo, g_oLCID;
 setCurrentCultureInfo(1033);//en-US//1033//fr-FR//1036//basq//1069//ru-Ru//1049//hindi//1081
 
+function getGannenFormatCodes(format) {
+	var sLowerFormat = format ? format.toLowerCase() : "";
+	if (!sLowerFormat
+		|| (sLowerFormat.indexOf("x-gannen") === -1 && sLowerFormat.indexOf("87f70000") === -1)) {
+		return null;
+	}
+
+	var cf = new CellFormat(format);
+	var canonical = cf.toString();
+	if (canonical.toLowerCase().indexOf("x-gannen") === -1) {
+		return null;
+	}
+
+	var fallback = cf.toString(undefined, undefined, {gannenFallback: true});
+	return fallback !== canonical ? {fallback: fallback, formatCode16: canonical} : null;
+}
+
 	//---------------------------------------------------------export---------------------------------------------------
     window['AscCommon'] = window['AscCommon'] || {};
     window['AscCommon'].isNumber = isNumber;
     window["AscCommon"].NumFormat = NumFormat;
     window["AscCommon"].CellFormat = CellFormat;
+    window["AscCommon"].getGannenFormatCodes = getGannenFormatCodes;
     window["AscCommon"].DecodeGeneralFormat = DecodeGeneralFormat;
     window["AscCommon"].setCurrentCultureInfo = setCurrentCultureInfo;
 	window["AscCommon"].checkCultureInfoFontPicker = checkCultureInfoFontPicker;
