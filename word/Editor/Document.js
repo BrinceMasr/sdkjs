@@ -14524,17 +14524,18 @@ CDocument.prototype.OnUserScroll = function()
 {
 	if (this.Api.isGroupActions())
 	{
+		this.Api.setUserScrollGroupActions(true);
 		if (this.DrawingDocument.IsTargetOnScreen())
 		{
 			this.UpdateTargetOnRecalculate = true;
-			this.Api.setUserScrollGroupActions(false);
 		}
 		else
 		{
 			this.NeedUpdateTarget          = false;
 			this.UpdateTargetOnRecalculate = false;
-			this.Api.setUserScrollGroupActions(true);
 		}
+
+		this.Api.resetUserScrollGroupActionsTimer();
 	}
 };
 //----------------------------------------------------------------------------------------------------------------------

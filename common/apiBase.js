@@ -6106,7 +6106,11 @@
 		return false;
 	};
 	baseEditorsApi.prototype.setUserScrollGroupActions = function(isUserScroll)
-	{};
+	{
+	};
+	baseEditorsApi.prototype.resetUserScrollGroupActionsTimer = function()
+	{
+	};
 	
 	baseEditorsApi.prototype.getMacroRecorder = function()
 	{
