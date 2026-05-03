@@ -10995,32 +10995,44 @@
 		}
 		var borders = new AscCommonExcel.Border();
 		borders.initDefault();
+		if (typeof bordersIndex === 'string') {
+			bordersIndex = bordersIndex.toLowerCase();
+		}
 		switch (bordersIndex) {
-			case 'DiagonalDown':
+			case 'diagonaldown':
 				borders.dd = true;
 				borders.d = private_MakeBorder(lineStyle, oColor);
 				break;
-			case 'DiagonalUp':
+			case 'diagonalup':
 				borders.du = true;
 				borders.d = private_MakeBorder(lineStyle, oColor);
 				break;
-			case 'Bottom':
+			case 'bottom':
 				borders.b = private_MakeBorder(lineStyle, oColor);
 				break;
-			case 'Left':
+			case 'left':
 				borders.l = private_MakeBorder(lineStyle, oColor);
 				break;
-			case 'Right':
+			case 'right':
 				borders.r = private_MakeBorder(lineStyle, oColor);
 				break;
-			case 'Top':
+			case 'top':
 				borders.t = private_MakeBorder(lineStyle, oColor);
 				break;
-			case 'InsideHorizontal':
+			case 'insidehorizontal':
 				borders.ih = private_MakeBorder(lineStyle, oColor);
 				break;
-			case 'InsideVertical':
+			case 'insidevertical':
 				borders.iv = private_MakeBorder(lineStyle, oColor);
+				break;
+			case 'all':
+				var border = private_MakeBorder(lineStyle, oColor);
+				borders.b = border;
+				borders.l = border;
+				borders.r = border;
+				borders.t = border;
+				borders.ih = border;
+				borders.iv = border;
 				break;
 		}
 		this.range.setBorder(borders);
@@ -23127,34 +23139,47 @@
 				newRule.dxf.border.initDefault();
 			}
 
+			if (typeof bordersIndex === 'string') {
+				bordersIndex = bordersIndex.toLowerCase();
+			}
 			var borders = newRule.dxf.border;
 			switch (bordersIndex) {
-				case 'DiagonalDown':
+				case 'diagonaldown':
 					borders.dd = true;
 					borders.d = private_MakeBorder(lineStyle, oColor);
 					break;
-				case 'DiagonalUp':
+				case 'diagonalup':
 					borders.du = true;
 					borders.d = private_MakeBorder(lineStyle, oColor);
 					break;
-				case 'Bottom':
+				case 'bottom':
 					borders.b = private_MakeBorder(lineStyle, oColor);
 					break;
-				case 'Left':
+				case 'left':
 					borders.l = private_MakeBorder(lineStyle, oColor);
 					break;
-				case 'Right':
+				case 'right':
 					borders.r = private_MakeBorder(lineStyle, oColor);
 					break;
-				case 'Top':
+				case 'top':
 					borders.t = private_MakeBorder(lineStyle, oColor);
 					break;
-				case 'InsideHorizontal':
+				case 'insidehorizontal':
 					borders.ih = private_MakeBorder(lineStyle, oColor);
 					break;
-				case 'InsideVertical':
+				case 'insidevertical':
 					borders.iv = private_MakeBorder(lineStyle, oColor);
 					break;
+				case 'all': {
+					var border = private_MakeBorder(lineStyle, oColor);
+					borders.b = border;
+					borders.l = border;
+					borders.r = border;
+					borders.t = border;
+					borders.ih = border;
+					borders.iv = border;
+					break;
+				}
 			}
 		}, true);
 	};
