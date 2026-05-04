@@ -2229,8 +2229,13 @@ CPresentation.prototype.Recalculate = function (RecalcData) {
 	++this.RecalcId;
 	this.private_ClearSearchOnRecalculate();
 
-	if (undefined === RecalcData && this.private_RecalculateFastRunRange(History.GetNonRecalculatedChanges()))
+	const outlineView = this.GetOutlineView();
+	if (outlineView) {
+		outlineView.update();
+	}
+	if (undefined === RecalcData && this.private_RecalculateFastRunRange(History.GetNonRecalculatedChanges())) {
 		return;
+	}
 
 	if (this.SearchEngine.ClearOnRecalc) {
 		this.SearchEngine.Clear();
@@ -2247,6 +2252,10 @@ CPresentation.prototype.Recalculate = function (RecalcData) {
 	let oCurMaster = this.GetCurrentMaster();
 	let aAllSlides = this.GetAllSlides();
 	let oSlide;
+
+
+
+
 	if (_RecalcData.Drawings.All) {
 		b_check_layout = true;
 		for (key in this.slideMasters) {

@@ -268,7 +268,8 @@
 			} else {
 				contents.push({
 					content: null,
-					outlineParagraph: outlineParagraph
+					outlineParagraph: outlineParagraph,
+					direction: direction
 				});
 			}
 		}
@@ -305,7 +306,7 @@
 	ForEachSelectManager.prototype.processStartContent = function (contentInfo, count, callback) {
 		const content = contentInfo.content;
 		if (!content) {
-			return this.processNullableContent({outlineParagraph: contentInfo.outlineParagraph, index: 0, count: count}, callback);
+			return this.processNullableContent({outlineParagraph: contentInfo.outlineParagraph, index: 0, count: count, direction: contentInfo.direction}, callback);
 		}
 
 		content.MoveCursorToEndPos(false, true);
@@ -317,7 +318,7 @@
 			const startPos = this.rebuildPos(contentInfo.endPos, content, contentInfo.endParagraph);
 			content.SetContentSelection(targetPos, startPos, 0, 0, 0);
 		}
-		const res = callback({content: content, index: 0, count: count});
+		const res = callback({content: content, index: 0, count: count, direction: contentInfo.direction});
 		content.RemoveSelection();
 		return res;
 	};
@@ -326,13 +327,13 @@
 			const contentInfo = contents[i];
 			const content = contentInfo.content;
 			if (!content) {
-				const nullableRes = this.processNullableContent({outlineParagraph: contentInfo.outlineParagraph, index: i, count: contents.length}, callback);
+				const nullableRes = this.processNullableContent({outlineParagraph: contentInfo.outlineParagraph, index: i, count: contents.length, direction: contentInfo.direction}, callback);
 				if (nullableRes) {
 					return nullableRes;
 				}
 			} else {
 				content.SelectAll(contentInfo.direction);
-				const res = callback({content: content, index: i, count: contents.length});
+				const res = callback({content: content, index: i, count: contents.length, direction: contentInfo.direction});
 				content.RemoveSelection();
 				if (res) {
 					return true;
@@ -343,7 +344,7 @@
 	ForEachSelectManager.prototype.processEndContent = function (contentInfo, count, callback) {
 		const content = contentInfo.content;
 		if (!content) {
-			return this.processNullableContent({outlineParagraph: contentInfo.outlineParagraph, index: count - 1, count: count}, callback);
+			return this.processNullableContent({outlineParagraph: contentInfo.outlineParagraph, index: count - 1, count: count, direction: contentInfo.direction}, callback);
 		}
 		content.MoveCursorToStartPos();
 		const targetPos = content.GetContentPosition(true, true);
@@ -354,7 +355,7 @@
 			const endPos = this.rebuildPos(contentInfo.startPos, content, contentInfo.startParagraph);
 			content.SetContentSelection(endPos, targetPos, 0, 0, 0);
 		}
-		const res = callback({content: content, index: count - 1, count: count});
+		const res = callback({content: content, index: count - 1, count: count, direction: contentInfo.direction});
 		content.RemoveSelection();
 		return res;
 	};
@@ -733,29 +734,31 @@
 	ParagraphAddManager.prototype.forEachSelectedContent = function (callback) {
 		return this.outlineView.forEachSelectedContent(callback);
 	};
-	ParagraphAddManager.prototype.savePositionAfterEdit = function (content, idx, contentCount) {
-		return this.outlineView.savePositionAfterEdit(content, idx, contentCount);
+	ParagraphAddManager.prototype.savePositionAfterEdit = function (content, idx, contentCount, direction) {
+		return this.outlineView.savePositionAfterEdit(content, idx, contentCount, direction);
 	};
-	ParagraphAddManager.prototype.processMockParagraphAdd = function (outlineParagraph, paraItem) {
+	ParagraphAddManager.prototype.processMockParagraphAdd = function (outlineParagraph, idx, contentCount, direction, paraItem) {
 		const docContent = this.outlineView.createTitleContent(outlineParagraph);
 		if (docContent) {
-			this.processSourceContentAdd(docContent, 0, 1, paraItem);
+			this.processSourceContentAdd(docContent, idx, contentCount, direction, paraItem);
 		}
 	};
-	ParagraphAddManager.prototype.processSourceContentAdd = function (content, idx, contentCount, paraItem) {
+	ParagraphAddManager.prototype.processSourceContentAdd = function (content, idx, contentCount, direction, paraItem) {
 		content.AddToParagraph(paraItem);
-		this.savePositionAfterEdit(content, idx, contentCount);
+		this.savePositionAfterEdit(content, idx, contentCount, direction);
 	};
 	ParagraphAddManager.prototype.processParagraphAdd = function (paraItem) {
 		const oThis = this;
 		this.forEachSelectedContent(function (selectProps) {
+			const idx = selectProps.index;
+			const contentCount = selectProps.count;
+			const direction = selectProps.direction;
 			if (selectProps.outlineParagraph) {
-				oThis.processMockParagraphAdd(selectProps.outlineParagraph, paraItem);
+				const outlineParagraph = selectProps.outlineParagraph;
+				oThis.processMockParagraphAdd(outlineParagraph, idx, contentCount, direction, paraItem);
 			} else {
 				const content = selectProps.content;
-				const idx = selectProps.index;
-				const contentCount = selectProps.count;
-				oThis.processSourceContentAdd(content, idx, contentCount, paraItem);
+				oThis.processSourceContentAdd(content, idx, contentCount, direction, paraItem);
 			}
 		});
 	};
@@ -1006,6 +1009,7 @@
 
 	function OutlineView(api) {
 		this.api = api;
+		this.isInit = false;
 		this.outlineShape = null;
 		this.decorCacheManager = new DecorCacheManager();
 		this.reset();
@@ -1053,6 +1057,7 @@
 		this.outlineShape = shape;
 	};
 	OutlineView.prototype.updateAll = function (width) {
+		this.isInit = true;
 		const presentation = this.getPresentation();
 		const outlineSlides = [];
 		for (let i = 0; i < presentation.Slides.length; i += 1) {
@@ -1218,7 +1223,6 @@
 			if (this.isEmptyPresentation()) {
 				this.drawEmpty(graphics);
 			} else {
-				this.update();
 				this.outlineShape.draw(graphics);
 			}
 		}
@@ -1401,7 +1405,6 @@
 		return res;
 	};
 	OutlineView.prototype.forEachSelectedContent = function (callback) {
-		this.update();
 		const manager = new ForEachSelectManager(this);
 		return manager.forEachSelectedContent(callback);
 	}
@@ -1409,6 +1412,8 @@
 	OutlineView.prototype.remove = function (bOnAddText) {
 		const manager = new RemoveOutlineParagraphsManager(this);
 		manager.remove(bOnAddText);
+		this.update();
+		this.applySavedPositionToOutline();
 	};
 	OutlineView.prototype.removeSlides = function (slideForRemoveMap) {
 		const slides = [];
@@ -1443,7 +1448,8 @@
 		presentation.DrawingDocument.m_oWordControl.GoToPage(Math.min(presentation.GetSlidesCount() - 1, minSlideIndex), undefined, undefined, true);
 		presentation.Api.sync_HideComment();
 	};
-	OutlineView.prototype.savePositionAfterEdit = function (content, idx, count) {
+	OutlineView.prototype.savePositionAfterEdit = function (content, idx, count, direction) {
+		direction = typeof direction === 'number' ? direction : AscWord.Direction.FORWARD;
 		if (count === 1) {
 			if (content.IsSelectionUse()) {
 				const startPos = content.GetContentPosition(true, true);
@@ -1456,8 +1462,8 @@
 			if (idx === 0) {
 					const savedPosition = this.getSavedPosition();
 					if (content.IsSelectionUse()) {
-						if (content.Selection.StartPos > content.Selection.EndPos) {
-							savedPosition.startPos = content.GetContentPosition(true, false);
+						if (direction === AscWord.Direction.BACKWARD) {
+							savedPosition.endPos = content.GetContentPosition(true, false);
 						} else {
 							savedPosition.startPos = content.GetContentPosition(true, true);
 						}
@@ -1468,8 +1474,8 @@
 			} else if (idx === count - 1) {
 					const savedPosition = this.getSavedPosition();
 					if (content.IsSelectionUse()) {
-						if (content.Selection.StartPos > content.Selection.EndPos) {
-							savedPosition.endPos = content.GetContentPosition(true, true);
+						if (direction === AscWord.Direction.BACKWARD) {
+							savedPosition.startPos = content.GetContentPosition(true, true);
 						} else {
 							savedPosition.endPos = content.GetContentPosition(true, false);
 						}
@@ -1517,6 +1523,7 @@
 				this.updateSelectionState();
 			}
 		}
+		this.resetPosition();
 	}
 	OutlineView.prototype.setSavedPosition = function (position) {
 		this.savedPosition = position;
@@ -1533,6 +1540,8 @@
 	OutlineView.prototype.paragraphAdd = function (paraItem) {
 		const manager = new ParagraphAddManager(this);
 		manager.paragraphAdd(paraItem);
+		this.update();
+		this.applySavedPositionToOutline();
 	}
 
 	OutlineView.prototype.getParagraphParaPr = function () {
@@ -1646,13 +1655,14 @@
 		return updateData;
 	};
 	OutlineView.prototype.update = function () {
+		if (!this.isInit) {
+			return;
+		}
 		const updateData = this.getUpdateData();
 		if (updateData.isNeedRecalculate()) {
 			this.updateExistingParagraphs(updateData.existingParagraphs);
 			this.updateNewParagraphs(updateData.newParagraphs);
 			this.outlineShape && this.outlineShape.recalculateContent();
-			this.applySavedPositionToOutline();
-			this.resetPosition();
 		}
 	};
 	function UseInDocumentManager() {
@@ -1673,7 +1683,7 @@
 			return false;
 		}
 		const content = shape.getDocContent();
-		if (content.Content[paragraph.Index] !== paragraph) {
+		if (content.Content[paragraph.GetIndex()] !== paragraph) {
 			return false;
 		}
 		return true;
@@ -1788,6 +1798,9 @@
 			return;
 		}
 		const content = this.getDocContent();
+		if (!content) {
+			return;
+		}
 		content.Update_ContentIndexing();
 		const manager = new UpdateExistingParagraphManager(this, new UseInDocumentManager());
 		manager.update(existingOutlineParagraphs);
@@ -1798,6 +1811,9 @@
 			return;
 		}
 		const content = this.getDocContent();
+		if (!content) {
+			return;
+		}
 		content.Update_ContentIndexing();
 		const updateManager = new UpdateNewParagraphsManager(this, newParagraphs);
 		updateManager.update();
@@ -2108,7 +2124,6 @@
 		if (this.isEmptyPresentation()) {
 			return -1;
 		}
-		this.update();
 		const docContent = this.getDocContent();
 		if (docContent) {
 			const tx = this.getInvertTransformX(x);
@@ -2136,7 +2151,6 @@
 		return !!this.outlineInfo.getSlideInfoByParagraph(paragraph);
 	};
 	OutlineView.prototype.getOutlineSlideParagraphs = function (slide) {
-		this.update();
 		const result = [];
 		const info = this.outlineInfo.getSlideInfoBySlide(slide);
 		if (!info) {
@@ -2189,7 +2203,6 @@
 		}
 	};
 	OutlineView.prototype.recalculateCurPos = function (bUpdateX, bUpdateY) {
-		this.update();
 		const content = this.getDocContent();
 		if (content) {
 			content.RecalculateCurPos(bUpdateX, bUpdateY);
