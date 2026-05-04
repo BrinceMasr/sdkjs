@@ -1932,88 +1932,16 @@
 			return duplicate;
 		};
 		CColorModifiers.prototype.RGB2HSL = function (R, G, B, HLS) {
-			var iMin = (R < G ? R : G);
-			iMin = iMin < B ? iMin : B;//Math.min(R, G, B);
-			var iMax = (R > G ? R : G);
-			iMax = iMax > B ? iMax : B;//Math.max(R, G, B);
-			var iDelta = iMax - iMin;
-			var dMax = (iMax + iMin) / 255.0;
-			var dDelta = iDelta / 255.0;
-			var H = 0;
-			var S = 0;
-			var L = dMax / 2.0;
-
-			if (iDelta != 0) {
-				if (L < 0.5) S = dDelta / dMax;
-				else S = dDelta / (2.0 - dMax);
-
-				dDelta = dDelta * 1530.0;
-				var dR = (iMax - R) / dDelta;
-				var dG = (iMax - G) / dDelta;
-				var dB = (iMax - B) / dDelta;
-
-				if (R == iMax) H = dB - dG;
-				else if (G == iMax) H = cd13 + dR - dB;
-				else if (B == iMax) H = cd23 + dG - dR;
-
-				if (H < 0.0) H += 1.0;
-				if (H > 1.0) H -= 1.0;
-			}
-
-			H = H * max_hls;
-			if (H < 0)
-				H = 0;
-			if (H > 255)
-				H = 255;
-
-			S = S * max_hls;
-			if (S < 0)
-				S = 0;
-			if (S > 255)
-				S = 255;
-
-			L = L * max_hls;
-			if (L < 0)
-				L = 0;
-			if (L > 255)
-				L = 255;
-
-			HLS.H = H;
-			HLS.S = S;
-			HLS.L = L;
+			var hsl = AscCommon.CU.rgbToHsl({R: R, G: G, B: B});
+			HLS.H = hsl.H;
+			HLS.S = hsl.S;
+			HLS.L = hsl.L;
 		};
 		CColorModifiers.prototype.HSL2RGB = function (HSL, RGB, bRoundValues) {
-			if (HSL.S == 0) {
-				const clampL = bRoundValues ? AscFormat.ClampColor(HSL.L) : HSL.L;
-				RGB.R = clampL;
-				RGB.G = clampL;
-				RGB.B = clampL;
-			} else {
-				var H = HSL.H / max_hls;
-				var S = HSL.S / max_hls;
-				var L = HSL.L / max_hls;
-				var v2 = 0;
-				if (L < 0.5)
-					v2 = L * (1.0 + S);
-				else
-					v2 = L + S - S * L;
-
-				var v1 = 2.0 * L - v2;
-
-				var R = (255 * this.Hue_2_RGB(v1, v2, H + cd13));
-				var G = (255 * this.Hue_2_RGB(v1, v2, H));
-				var B = (255 * this.Hue_2_RGB(v1, v2, H - cd13));
-
-				if (bRoundValues) {
-					RGB.R = AscFormat.ClampColor(R);
-					RGB.G = AscFormat.ClampColor(G);
-					RGB.B = AscFormat.ClampColor(B);
-				} else {
-					RGB.R = R;
-					RGB.G = G;
-					RGB.B = B;
-				}
-			}
+			var rgb = AscCommon.CU.hslToRgb(HSL, bRoundValues);
+			RGB.R = rgb.R;
+			RGB.G = rgb.G;
+			RGB.B = rgb.B;
 		};
 		CColorModifiers.prototype.Hue_2_RGB = function (v1, v2, vH) {
 			if (vH < 0.0)
@@ -2029,16 +1957,10 @@
 			return v1;
 		};
 		CColorModifiers.prototype.standardToLinear = function(nColorValue) {
-			if (nColorValue <= 0.04045) {
-				return nColorValue / 12.92;
-			}
-			return Math.pow((nColorValue + 0.055) / 1.055, 2.4);
+			return AscCommon.CU.srgbToLinear(nColorValue);
 		}
 		CColorModifiers.prototype.linearToStandard = function(nColorValue) {
-			if (nColorValue <= 0.0031308) {
-				return  12.92 * nColorValue;
-			}
-			return 1.055 * Math.pow(nColorValue, 1 / 2.4) - 0.055;
+			return AscCommon.CU.linearToSrgb(nColorValue);
 		}
 		CColorModifiers.prototype.RgbtoCrgbColor = function (c) {
 			if (this.isUsePow) {
@@ -2875,13 +2797,9 @@
 		MODS_MAP["shade"] = true;
 		MODS_MAP["tint"] = true;
 
-		function toHex(c) {
-			var res = Number(c).toString(16).toUpperCase();
-			return res.length === 1 ? "0" + res : res;
-		}
-
 		function fRGBAToHexString(oRGBA) {
-			return "" + toHex(oRGBA.R) + toHex(oRGBA.G) + toHex(oRGBA.B);
+			var byteToHex = AscCommon.ByteToHex;
+			return "" + byteToHex(oRGBA.R) + byteToHex(oRGBA.G) + byteToHex(oRGBA.B);
 		}
 
 		/**

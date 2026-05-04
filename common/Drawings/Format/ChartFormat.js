@@ -3002,38 +3002,21 @@
 			return null;
 		}
 
-		function clamp(value, min, max) {
-			return Math.max(min, Math.min(max, value));
-		}
-
-		function relativeLuminance(r, g, b) {
-			const toLinear = function (channel) {
-				const normalized = channel / 255;
-				return normalized <= 0.04045
-					? normalized / 12.92
-					: Math.pow((normalized + 0.055) / 1.055, 2.4);
-			};
-
-			return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
-		}
-
-		function wcagContrastRatio(lum1, lum2) {
-			const lighter = Math.max(lum1, lum2);
-			const darker = Math.min(lum1, lum2);
-			return (lighter + 0.05) / (darker + 0.05);
-		}
-
+		const CU = AscCommon.CU;
 		const MIN_CONTRAST_RATIO = 3.5;
-		const bgLum = relativeLuminance(bgColor.R, bgColor.G, bgColor.B);
-		const fgLum = relativeLuminance(fgColor.R, fgColor.G, fgColor.B);
-		if (wcagContrastRatio(bgLum, fgLum) >= MIN_CONTRAST_RATIO) {
+		const bgLum = CU.relativeLuminance(bgColor);
+		const fgLum = CU.relativeLuminance(fgColor);
+		if (CU.wcagContrastRatio(bgLum, fgLum) >= MIN_CONTRAST_RATIO) {
 			return { R: fgColor.R, G: fgColor.G, B: fgColor.B };
 		}
 
-		const fgHsl = {};
-		AscFormat.CColorModifiers.prototype.RGB2HSL(fgColor.R, fgColor.G, fgColor.B, fgHsl);
+		const fgHsl = CU.rgbToHsl(fgColor);
 		const brightThreshold = MIN_CONTRAST_RATIO * (bgLum + 0.05) - 0.05;
 		const darkThreshold = (bgLum + 0.05) / MIN_CONTRAST_RATIO - 0.05;
+
+		function lumAtL(L) {
+			return CU.relativeLuminance(CU.hslToRgb({ H: fgHsl.H, S: fgHsl.S, L: L }, true));
+		}
 
 		// Binary search: smallest L where luminance >= brightThreshold
 		let lightSideMin = null;
@@ -3042,17 +3025,13 @@
 			let high = 255;
 			while (low < high) {
 				const mid = (low + high) >> 1;
-				const midRgb = {};
-				AscFormat.CColorModifiers.prototype.HSL2RGB({ H: fgHsl.H, S: fgHsl.S, L: mid }, midRgb, true);
-				if (relativeLuminance(midRgb.R, midRgb.G, midRgb.B) >= brightThreshold) {
+				if (lumAtL(mid) >= brightThreshold) {
 					high = mid;
 				} else {
 					low = mid + 1;
 				}
 			}
-			const lowRgb = {};
-			AscFormat.CColorModifiers.prototype.HSL2RGB({ H: fgHsl.H, S: fgHsl.S, L: low }, lowRgb, true);
-			if (relativeLuminance(lowRgb.R, lowRgb.G, lowRgb.B) >= brightThreshold) {
+			if (lumAtL(low) >= brightThreshold) {
 				lightSideMin = low;
 			}
 		}
@@ -3064,34 +3043,28 @@
 			let high = 255;
 			while (low < high) {
 				const mid = (low + high + 1) >> 1;
-				const midRgb = {};
-				AscFormat.CColorModifiers.prototype.HSL2RGB({ H: fgHsl.H, S: fgHsl.S, L: mid }, midRgb, true);
-				if (relativeLuminance(midRgb.R, midRgb.G, midRgb.B) <= darkThreshold) {
+				if (lumAtL(mid) <= darkThreshold) {
 					low = mid;
 				} else {
 					high = mid - 1;
 				}
 			}
-			const lowRgb = {};
-			AscFormat.CColorModifiers.prototype.HSL2RGB({ H: fgHsl.H, S: fgHsl.S, L: low }, lowRgb, true);
-			if (relativeLuminance(lowRgb.R, lowRgb.G, lowRgb.B) <= darkThreshold) {
+			if (lumAtL(low) <= darkThreshold) {
 				darkSideMax = low;
 			}
 		}
 
 		function mapLightnessAffine(lightness, outMin, outMax) {
-			return clamp(Math.round(outMin + (lightness / 255) * (outMax - outMin)), 0, 255);
+			const v = Math.round(outMin + (lightness / 255) * (outMax - outMin));
+			return Math.max(0, Math.min(255, v));
 		}
 
 		const useBrightSide = lightSideMin !== null && (darkSideMax === null || bgLum < 0.7);
-
 		const resultLightness = useBrightSide
 			? mapLightnessAffine(fgHsl.L, lightSideMin, 255)
 			: mapLightnessAffine(fgHsl.L, 0, darkSideMax);
 
-		const resultRgb = {};
-		AscFormat.CColorModifiers.prototype.HSL2RGB({ H: fgHsl.H, S: fgHsl.S, L: resultLightness }, resultRgb, true);
-		return { R: resultRgb.R, G: resultRgb.G, B: resultRgb.B };
+		return CU.hslToRgb({ H: fgHsl.H, S: fgHsl.S, L: resultLightness }, true);
 	}
 
 	CDLbl.prototype.getAutoCorrectedTextColor = function (bgColor, txColor) {
