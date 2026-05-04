@@ -1364,6 +1364,24 @@ function (window, undefined) {
 		}
 	};
 
+	CellEditor.prototype._getCurrentLineText = function () {
+		// Get text for current cursor line only (for topline display when editing in cell)
+		var fullText = AscCommonExcel.getFragmentsText(this.options.fragments);
+		if (!fullText) return '';
+
+		var curCharInfo = this.textRender.calcCharOffset(this.cursorPos);
+		if (!curCharInfo || curCharInfo.lineIndex === undefined) {
+			return fullText;
+		}
+
+		// Find start and end of current line based on newlines
+		var lines = fullText.split('\n');
+		if (curCharInfo.lineIndex < lines.length) {
+			return lines[curCharInfo.lineIndex];
+		}
+		return fullText;
+	};
+
 	CellEditor.prototype._getRenderFragments = function () {
 		var opt = this.options, fragments = opt.fragments, i, k, l, first, last, val, lengthColors, tmpColors,
 			colorIndex, uniqueColorIndex;
@@ -1464,7 +1482,12 @@ function (window, undefined) {
 		var fPos, fName, match, fCurrent;
 
 		if (!this.isTopLineActive || !this.skipTLUpdate || this.undoMode) {
-			this._setInputFragments(this._getRenderFragments());
+			// When editing in cell (not in topline), show only current line in formula bar
+			if (!this.isTopLineActive && this.input) {
+				this.input.textContent = this._getCurrentLineText();
+			} else {
+				this._setInputFragments(this._getRenderFragments());
+			}
 		}
 
 		//get a string without double-byte characters and pass it to the regular expression
@@ -2126,6 +2149,10 @@ function (window, undefined) {
 		}
 		t._updateCursorPosition(null, null, lineIndex);
 		t._updateCursor();
+		// Update formula bar when cursor moves between lines while editing in cell
+		if (!t.isTopLineActive && t.input) {
+			t.input.textContent = t._getCurrentLineText();
+		}
 	};
 
 	CellEditor.prototype._findCursorPosition = function (coord) {
