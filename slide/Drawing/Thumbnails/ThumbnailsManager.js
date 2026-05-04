@@ -2542,7 +2542,7 @@
 		return this.m_oWordControl.m_oLogicDocument.IsMixedSelection();
 	};
 	COutlineThumbnailsManager.prototype.GetOutlineView = function () {
-		return this.m_oWordControl.m_oLogicDocument.GetOutlineView();
+		return this.m_oWordControl.m_oLogicDocument && this.m_oWordControl.m_oLogicDocument.GetOutlineView();
 	};
 	// events
 	COutlineThumbnailsManager.prototype.getSelectedPage = function () {

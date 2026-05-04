@@ -7009,7 +7009,21 @@ CPresentation.prototype.Get_SelectionState2 = function () {
 	}
 	return oState;
 };
-
+CPresentation.prototype.SaveOutlineStateBeforeLoadChanges = function (docState) {
+	const outlineView = this.GetOutlineView();
+	outlineView && outlineView.saveDocumentState(docState);
+};
+CPresentation.prototype.LoadOutlineStateAfterLoadChanges = function (docState) {
+	const outlineView = this.GetOutlineView();
+	outlineView && outlineView.applyDocumentState(docState);
+};
+CPresentation.prototype.ResetOutlineSelection = function () {
+	const view = this.GetOutlineView();
+	const docContent = view && view.getDocContent();
+	if (docContent) {
+		docContent.RemoveSelection();
+	}
+};
 CPresentation.prototype.Set_SelectionState2 = function (oDocState) {
 	this.Load_DocumentStateAfterLoadChanges(oDocState);
 	var oCurController = this.GetCurrentController();
@@ -7031,10 +7045,16 @@ CPresentation.prototype.Save_DocumentStateBeforeLoadChanges = function () {
 	oDocState.CurPage = this.CurPage;
 	//todo
 	oDocState.FocusOnNotes = this.FocusOnNotes;
-	var oController = this.GetCurrentController();
-	if (oController) {
-		oDocState.Slide = this.GetCurrentSlide();
-		oController.Save_DocumentStateBeforeLoadChanges(oDocState);
+
+	oDocState.IsFocusOnOutline = this.IsFocusOnOutline();
+	if (oDocState.IsFocusOnOutline) {
+		this.SaveOutlineStateBeforeLoadChanges(oDocState);
+	} else {
+		var oController = this.GetCurrentController();
+		if (oController) {
+			oDocState.Slide = this.GetCurrentSlide();
+			oController.Save_DocumentStateBeforeLoadChanges(oDocState);
+		}
 	}
 
 	this.CollaborativeEditing.WatchDocumentPositionsByState(oDocState);
@@ -7077,6 +7097,7 @@ CPresentation.prototype.Load_DocumentStateAfterLoadChanges = function (oState) {
 				}
 				this.bGoToPage = true;
 				if (oCurSlide) {
+					this.ResetOutlineSelection();
 					let oDrawingObjects = oCurSlide.graphicObjects;
 					oDrawingObjects.clearPreTrackObjects();
 					oDrawingObjects.clearTrackObjects();
@@ -7086,6 +7107,7 @@ CPresentation.prototype.Load_DocumentStateAfterLoadChanges = function (oState) {
 				return;
 			}
 		}
+		this.ResetOutlineSelection();
 		let oDrawingObjects = oCurSlide.graphicObjects;
 		oDrawingObjects.clearPreTrackObjects();
 		oDrawingObjects.clearTrackObjects();
@@ -7096,6 +7118,8 @@ CPresentation.prototype.Load_DocumentStateAfterLoadChanges = function (oState) {
 				this.FocusOnNotes = true;
 				oCurSlide.notes.graphicObjects.loadDocumentStateAfterLoadChanges(oState);
 			}
+		} else if (oState.IsFocusOnOutline) {
+			this.LoadOutlineStateAfterLoadChanges(oState);
 		} else {
 			this.FocusOnNotes = false;
 			oDrawingObjects.loadDocumentStateAfterLoadChanges(oState);
@@ -7111,6 +7135,7 @@ CPresentation.prototype.Load_DocumentStateAfterLoadChanges = function (oState) {
 		if (oCurSlide) {
 			var oDrawingObjects = oCurSlide.graphicObjects;
 			this.FocusOnNotes = false;
+			this.ResetOutlineSelection();
 			oDrawingObjects.clearPreTrackObjects();
 			oDrawingObjects.clearTrackObjects();
 			oDrawingObjects.resetSelection(undefined, true, true);

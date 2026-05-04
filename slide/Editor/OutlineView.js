@@ -87,6 +87,48 @@
 		this.endPos = endPos || null;
 	}
 
+	SavedPosition.prototype.apply = function (outlineView) {
+		const docContent = outlineView.getDocContent();
+		if (!docContent) {
+			return;
+		}
+		if (this.startPos) {
+			docContent.RemoveSelection();
+			const startPos = this.startPos.getPosition(outlineView);
+			let endPos;
+			if (this.endPos) {
+				endPos = this.endPos.getPosition(docContent);
+			}
+			if (startPos && endPos) {
+				docContent.SetContentSelection(startPos, endPos, 0, 0, 0);
+			} else if (startPos) {
+				docContent.SetContentPosition(startPos, 0, 0);
+			} else if (endPos) {
+				docContent.SetContentPosition(endPos, 0, 0);
+			}
+
+			outlineView.updateSelectionState();
+		}
+	};
+	function ContentPosition(pos) {
+		this.pos = pos;
+	}
+	ContentPosition.prototype.isDocStatePosition = function () {
+		return true;
+	};
+	ContentPosition.prototype.getPosition = function (outlineView) {
+		return outlineView.rebuildSavedPositionPos(this.pos);
+	};
+	function SlidePosition(slide) {
+		this.slide = slide;
+	}
+	SlidePosition.prototype.getPosition = function (outlineView) {
+		return outlineView.rebuildSavedSlidePos(this.slide);
+	};
+	SlidePosition.prototype.isDocStatePosition = function () {
+		return false;
+	};
+
 	function UpdateNewParagraphsManager(outlineView, newParagraphs) {
 		this.outlineView = outlineView;
 		this.paragraphs = newParagraphs;
@@ -734,8 +776,8 @@
 	ParagraphAddManager.prototype.forEachSelectedContent = function (callback) {
 		return this.outlineView.forEachSelectedContent(callback);
 	};
-	ParagraphAddManager.prototype.savePositionAfterEdit = function (content, idx, contentCount, direction) {
-		return this.outlineView.savePositionAfterEdit(content, idx, contentCount, direction);
+	ParagraphAddManager.prototype.setSavedRealContentState = function (content, idx, contentCount, direction) {
+		return this.outlineView.setSavedRealContentState(content, idx, contentCount, direction);
 	};
 	ParagraphAddManager.prototype.processMockParagraphAdd = function (outlineParagraph, idx, contentCount, direction, paraItem) {
 		const docContent = this.outlineView.createTitleContent(outlineParagraph);
@@ -745,7 +787,7 @@
 	};
 	ParagraphAddManager.prototype.processSourceContentAdd = function (content, idx, contentCount, direction, paraItem) {
 		content.AddToParagraph(paraItem);
-		this.savePositionAfterEdit(content, idx, contentCount, direction);
+		this.setSavedRealContentState(content, idx, contentCount, direction);
 	};
 	ParagraphAddManager.prototype.processParagraphAdd = function (paraItem) {
 		const oThis = this;
@@ -1448,44 +1490,6 @@
 		presentation.DrawingDocument.m_oWordControl.GoToPage(Math.min(presentation.GetSlidesCount() - 1, minSlideIndex), undefined, undefined, true);
 		presentation.Api.sync_HideComment();
 	};
-	OutlineView.prototype.savePositionAfterEdit = function (content, idx, count, direction) {
-		direction = typeof direction === 'number' ? direction : AscWord.Direction.FORWARD;
-		if (count === 1) {
-			if (content.IsSelectionUse()) {
-				const startPos = content.GetContentPosition(true, true);
-				const endPos = content.GetContentPosition(true, false);
-				this.setSavedPosition(new SavedPosition(startPos, endPos));
-			} else {
-				this.setSavedPosition(new SavedPosition(content.GetContentPosition(false, false)));
-			}
-		} else {
-			if (idx === 0) {
-					const savedPosition = this.getSavedPosition();
-					if (content.IsSelectionUse()) {
-						if (direction === AscWord.Direction.BACKWARD) {
-							savedPosition.endPos = content.GetContentPosition(true, false);
-						} else {
-							savedPosition.startPos = content.GetContentPosition(true, true);
-						}
-					} else if (!savedPosition.startPos) {
-						savedPosition.startPos = content.GetContentPosition(false, false);
-					}
-
-			} else if (idx === count - 1) {
-					const savedPosition = this.getSavedPosition();
-					if (content.IsSelectionUse()) {
-						if (direction === AscWord.Direction.BACKWARD) {
-							savedPosition.startPos = content.GetContentPosition(true, true);
-						} else {
-							savedPosition.endPos = content.GetContentPosition(true, false);
-						}
-					} else if (!savedPosition.startPos) {
-						savedPosition.startPos = content.GetContentPosition(false, false);
-					}
-
-			}
-		}
-	};
 	OutlineView.prototype.rebuildSavedPositionPos = function (pos) {
 		const docContent = this.getDocContent();
 		if (docContent) {
@@ -1500,29 +1504,24 @@
 		}
 		return null;
 	};
-	OutlineView.prototype.applySavedPositionToOutline = function () {
-		const docContent = this.getDocContent();
-		if (docContent) {
-			const savedPostion = this.getSavedPosition();
-			if (savedPostion.startPos) {
-				docContent.RemoveSelection();
-				const startPos = this.rebuildSavedPositionPos(savedPostion.startPos);
-				if (savedPostion.endPos) {
-					const endPos = this.rebuildSavedPositionPos(savedPostion.endPos);
-					if (startPos && endPos) {
-						docContent.SetContentSelection(startPos, endPos, 0, 0, 0);
-					} else if (startPos) {
-						docContent.SetContentPosition(startPos, 0, 0);
-					} else if (endPos) {
-						docContent.SetContentPosition(endPos, 0, 0);
-					}
-
-				} else if (startPos) {
-					docContent.SetContentPosition(startPos, 0, 0);
-				}
-				this.updateSelectionState();
-			}
+	OutlineView.prototype.rebuildSavedSlidePos = function (slide) {
+		if (!slide) {
+			return null;
 		}
+
+		const info = this.outlineInfo.getSlideInfoBySlide(slide);
+		const docContent = this.getDocContent();
+		if (info && docContent) {
+			const outlineParagraph = info.outlineParagraph;
+			const contentPos = [{Class: docContent, Position: outlineParagraph.Index}];
+			outlineParagraph.GetStartContentPosition(contentPos);
+			return contentPos;
+		}
+		return null;
+	};
+	OutlineView.prototype.applySavedPositionToOutline = function () {
+		const savedPosition = this.getSavedPosition();
+		savedPosition.apply(this);
 		this.resetPosition();
 	}
 	OutlineView.prototype.setSavedPosition = function (position) {
@@ -2206,6 +2205,117 @@
 		const content = this.getDocContent();
 		if (content) {
 			content.RecalculateCurPos(bUpdateX, bUpdateY);
+		}
+	};
+	OutlineView.prototype.setSavedRealContentState = function (content, idx, count, direction) {
+		direction = typeof direction === 'number' ? direction : AscWord.Direction.FORWARD;
+		if (count === 1) {
+			if (content.IsSelectionUse()) {
+				const startPos = content.GetContentPosition(true, true);
+				const endPos = content.GetContentPosition(true, false);
+				this.setSavedPosition(new SavedPosition(new ContentPosition(startPos), new ContentPosition(endPos)));
+			} else {
+				this.setSavedPosition(new SavedPosition(new ContentPosition(content.GetContentPosition(false, false))));
+			}
+		} else if (idx === 0) {
+			const savedPosition = this.getSavedPosition();
+			if (content.IsSelectionUse()) {
+				if (direction === AscWord.Direction.BACKWARD) {
+					savedPosition.endPos = new ContentPosition(content.GetContentPosition(true, false));
+				} else {
+					savedPosition.startPos = new ContentPosition(content.GetContentPosition(true, true));
+				}
+			} else if (!savedPosition.startPos) {
+				savedPosition.startPos = new ContentPosition(content.GetContentPosition(false, false));
+			}
+		} else if (idx === count - 1) {
+			const savedPosition = this.getSavedPosition();
+			if (content.IsSelectionUse()) {
+				if (direction === AscWord.Direction.BACKWARD) {
+					savedPosition.startPos = new ContentPosition(content.GetContentPosition(true, true));
+				} else {
+					savedPosition.endPos = new ContentPosition(content.GetContentPosition(true, false));
+				}
+			} else if (!savedPosition.startPos) {
+				savedPosition.startPos = new ContentPosition(content.GetContentPosition(false, false));
+			}
+		}
+	};
+	OutlineView.prototype.setSavedMockedParagraphState = function (outlineParagraph, idx, count, direction) {
+		direction = typeof direction === 'number' ? direction : AscWord.Direction.FORWARD;
+
+		const info = this.outlineInfo.getSlideInfoByParagraph(outlineParagraph);
+		if (!info) {
+			return;
+		}
+		if (count === 1) {
+			this.setSavedPosition(new SavedPosition(new SlidePosition(info.slide)));
+		} else if (idx === 0) {
+			const savedPosition = this.getSavedPosition();
+			if (content.IsSelectionUse()) {
+				if (direction === AscWord.Direction.BACKWARD) {
+					savedPosition.endPos = new SlidePosition(info.slide);
+				} else {
+					savedPosition.startPos = new SlidePosition(info.slide);
+				}
+			} else if (!savedPosition.startPos) {
+				savedPosition.startPos = new SlidePosition(info.slide);
+			}
+		} else if (idx === count - 1) {
+			const savedPosition = this.getSavedPosition();
+			if (content.IsSelectionUse()) {
+				if (direction === AscWord.Direction.BACKWARD) {
+					savedPosition.startPos = new SlidePosition(info.slide);
+				} else {
+					savedPosition.endPos = new SlidePosition(info.slide);
+				}
+			} else if (!savedPosition.startPos) {
+				savedPosition.startPos = new SlidePosition(info.slide);
+			}
+		}
+	};
+	OutlineView.prototype.saveDocumentState = function (docState) {
+		const presentation = this.getPresentation();
+		const docContent = this.getDocContent();
+		if (!docContent || !presentation) {
+			return;
+		}
+		const oThis = this;
+		this.forEachSelectedContent(function (selectProps) {
+			const idx = selectProps.index;
+			const contentCount = selectProps.count;
+			const direction = selectProps.direction;
+			if (selectProps.outlineParagraph) {
+				oThis.setSavedMockedParagraphState(selectProps.outlineParagraph, idx, contentCount, direction);
+			} else {
+				oThis.setSavedRealContentState(selectProps.content, idx, contentCount, direction);
+			}
+		});
+		const savedPosition = this.getSavedPosition();
+		docState.SavedOutlinePosition = savedPosition;
+		if (savedPosition.startPos && savedPosition.endPos) {
+			if (savedPosition.endPos.isDocStatePosition()) {
+				docState.EndPos = savedPosition.endPos.pos;
+			}
+			if (savedPosition.startPos.isDocStatePosition()) {
+				docState.StartPos = savedPosition.startPos.pos;
+			}
+		} else if (savedPosition.startPos && savedPosition.startPos.isDocStatePosition()) {
+			docState.Pos = savedPosition.startPos.pos;
+		} else if (savedPosition.endPos && savedPosition.endPos.isDocStatePosition()) {
+			docState.Pos = savedPosition.endPos.pos;
+		}
+		docState.DrawingSelection = docContent.Selection.Use;
+		docState.Slide = presentation.GetCurrentSlide();
+		this.resetPosition();
+	};
+
+	OutlineView.prototype.applyDocumentState = function (docState) {
+		this.update();
+		const savedPosition = docState.SavedOutlinePosition;
+		if (savedPosition) {
+			this.setSavedPosition(savedPosition);
+			this.applySavedPositionToOutline();
 		}
 	};
 
