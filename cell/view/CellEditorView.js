@@ -2146,14 +2146,28 @@ function (window, undefined) {
 		this._setInputSelectionRange(Math.min(b, e), Math.max(b, e));
 
 		// Scroll to show active line in contenteditable
-		if (this._isContentEditable() && this.input) {
-			var selection = window.getSelection();
-			if (selection && selection.rangeCount > 0) {
-				var range = selection.getRangeAt(0).cloneRange();
-				var tempSpan = document.createElement('span');
-				range.insertNode(tempSpan);
-				tempSpan.scrollIntoView({block: 'nearest'});
-				tempSpan.parentNode.removeChild(tempSpan);
+		if (this._isContentEditable() && this.input && this.textRender) {
+			var curPos = this.cursorPos;
+			var charInfo = this.textRender.calcCharOffset(curPos);
+			if (charInfo) {
+				var lineInfo = this.textRender.getLineInfo(charInfo.lineIndex);
+				if (lineInfo) {
+					var lineTop = this.textRender.calcLineOffset(charInfo.lineIndex);
+					var scrollTop = lineTop - this.textRender.calcLineOffset(0);
+
+					// Check if line is within visible area, if not scroll
+					var containerHeight = this.input.clientHeight;
+					var visibleTop = this.input.scrollTop;
+					var visibleBottom = visibleTop + containerHeight;
+					var lineHeight = lineInfo.th;
+					var lineBottom = scrollTop + lineHeight;
+
+					if (scrollTop < visibleTop) {
+						this.input.scrollTop = scrollTop;
+					} else if (lineBottom > visibleBottom) {
+						this.input.scrollTop = lineBottom - containerHeight;
+					}
+				}
 			}
 		}
 	};
@@ -2359,7 +2373,11 @@ function (window, undefined) {
 		let sNewLine = "\n";
 		this._addChars( /*codeNewLine*/sNewLine);
 		if (this.isTopLineActive) {
+			// Force immediate scroll to new line
+			let skipTL = this.skipTLUpdate;
+			this.skipTLUpdate = false;
 			this._updateTopLineCurPos();
+			this.skipTLUpdate = skipTL;
 		}
 	};
 
