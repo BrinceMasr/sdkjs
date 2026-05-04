@@ -2358,6 +2358,9 @@ function (window, undefined) {
 		this._wrapText();
 		let sNewLine = "\n";
 		this._addChars( /*codeNewLine*/sNewLine);
+		if (this.isTopLineActive) {
+			this._updateTopLineCurPos();
+		}
 	};
 
 	CellEditor.prototype._removeChars = function (pos, length, isRange) {
