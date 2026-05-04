@@ -7196,13 +7196,10 @@
 
 		// Copy allFormulasCountMap only for same-workbook copy
 		// For cross-workbook copy, it will be regenerated with new indexes
-		if (AscCommonExcel.bIsSupportDynamicArrays && wsFrom.dynamicArrayManager && wsFrom.dynamicArrayManager.allFormulasCountMap) {
+		if (AscCommonExcel.bIsSupportDynamicArrays && wsFrom.dynamicArrayManager) {
 			var isCrossWorkbookCopy = (wsFrom.workbook !== this.workbook);
 			if (!isCrossWorkbookCopy) {
-				this.dynamicArrayManager.allFormulasCountMap = {};
-				for (var cmIndex in wsFrom.dynamicArrayManager.allFormulasCountMap) {
-					this.dynamicArrayManager.allFormulasCountMap[cmIndex] = wsFrom.dynamicArrayManager.allFormulasCountMap[cmIndex];
-				}
+				this.dynamicArrayManager.copyCountMapFrom(wsFrom.dynamicArrayManager);
 			}
 		}
 
@@ -7315,15 +7312,7 @@
 					if (dynamicProps) {
 						if (dynamicProps.cmIndex != null) {
 							parsed.setCm(dynamicProps.cmIndex);
-							// Update allFormulasCountMap for the new index
-							if (!t.dynamicArrayManager.allFormulasCountMap) {
-								t.dynamicArrayManager.allFormulasCountMap = {};
-							}
-							if (!t.dynamicArrayManager.allFormulasCountMap[dynamicProps.cmIndex]) {
-								t.dynamicArrayManager.allFormulasCountMap[dynamicProps.cmIndex] = 1;
-							} else {
-								t.dynamicArrayManager.allFormulasCountMap[dynamicProps.cmIndex]++;
-							}
+							t.dynamicArrayManager.addDynamicFormula(dynamicProps.cmIndex);
 						}
 						if (dynamicProps.vmIndex != null && beforeSpillRange) {
 							parsed.setVm(dynamicProps.vmIndex);
@@ -25411,6 +25400,40 @@
 		this.allFormulasCountMap = null;
 	}
 
+	CDynamicArrayManager.prototype._initCountMap = function () {
+		if (!this.allFormulasCountMap) {
+			this.allFormulasCountMap = {};
+		}
+	};
+
+	CDynamicArrayManager.prototype._incrementCount = function (cmIndex) {
+		this._initCountMap();
+		if (!this.allFormulasCountMap[cmIndex]) {
+			this.allFormulasCountMap[cmIndex] = 0;
+		}
+		this.allFormulasCountMap[cmIndex]++;
+	};
+
+	CDynamicArrayManager.prototype._decrementCount = function (cmIndex) {
+		if (this.allFormulasCountMap && this.allFormulasCountMap[cmIndex]) {
+			this.allFormulasCountMap[cmIndex]--;
+			if (this.allFormulasCountMap[cmIndex] === 0) {
+				delete this.allFormulasCountMap[cmIndex];
+			}
+		}
+	};
+
+	CDynamicArrayManager.prototype.copyCountMapFrom = function (sourceManager) {
+		if (!sourceManager || !sourceManager.allFormulasCountMap) {
+			this.allFormulasCountMap = null;
+			return;
+		}
+		this.allFormulasCountMap = {};
+		for (var cmIndex in sourceManager.allFormulasCountMap) {
+			this.allFormulasCountMap[cmIndex] = sourceManager.allFormulasCountMap[cmIndex];
+		}
+	};
+
 	CDynamicArrayManager.prototype.changeFormula = function (to, from, parent) {
 		if (!AscCommonExcel.bIsSupportDynamicArrays) {
 			return;
@@ -25429,9 +25452,15 @@
 			}
 			if (toCmIndex != null && to.checkFirstCellArray(parent)) {
 				this.addDynamicFormula(toCmIndex);
-				if (to.getVm() != null && !this.ws.workbook.bUndoChanges) {
+				if (to.getVm() != null && !this.ws.workbook.bUndoChanges && !this.ws.workbook.bRedoChanges) {
 					this.ws.workbook.dependencyFormulas.addToVolatileArrays(to);
 				}
+			}
+		} else if (fromCmIndex != null && from && from.checkFirstCellArray(parent)) {
+			if (fromVmIndex != null && (toVmIndex == null || toVmIndex === 0)) {
+				// cm unchanged, but vm cleared: formula unblocked (e.g. redo of expand) → remove listener
+				var listenerId = from.getListenerId();
+				this.ws.workbook.dependencyFormulas.endListeningVolatileArray(listenerId);
 			}
 		}
 	};
@@ -25441,24 +25470,16 @@
 			return;
 		}
 		//add special structure - it help remove metadata/richdata after delete all dynamic formulas
-		if (!this.allFormulasCountMap) {
-			this.allFormulasCountMap = {};
-		}
-		if (!this.allFormulasCountMap[cmIndex]) {
-			this.allFormulasCountMap[cmIndex] = 0;
-		}
-		this.allFormulasCountMap[cmIndex]++;
+		this._incrementCount(cmIndex);
 	};
 
 	CDynamicArrayManager.prototype.deleteDynamicFormula = function (cmIndex, vmIndex, fP) {
 		if (!AscCommonExcel.bIsSupportDynamicArrays) {
 			return;
 		}
-		if (this.allFormulasCountMap && this.allFormulasCountMap[cmIndex]) {
-			this.allFormulasCountMap[cmIndex]--;
-		}
+		this._decrementCount(cmIndex);
 		let isRemovedMetaData;
-		if (this.allFormulasCountMap[cmIndex] < 1) {
+		if (this.getDynamicFormulaCount(cmIndex) < 1) {
 			isRemovedMetaData = this.ws.workbook.checkRemoveMetadataByCmIndex(cmIndex);
 		}
 		if (!isRemovedMetaData && vmIndex != null) {
@@ -25470,7 +25491,7 @@
 		if (!AscCommonExcel.bIsSupportDynamicArrays) {
 			return null;
 		}
-		return this.allFormulasCountMap && this.allFormulasCountMap[cmIndex];
+		return (this.allFormulasCountMap && this.allFormulasCountMap[cmIndex]) || 0;
 	};
 	
 	CDynamicArrayManager.prototype.recalculateVolatileArrays = function () {
@@ -25491,9 +25512,36 @@
 			return;
 		}
 
+		// Anchor formulas (containing ANCHORARRAY / # operator) depend on their head formula
+		// having already expanded. Process them last so head formulas run first.
+		const anchorIds = [];
+		const regularIds = [];
 		for (let listenerId in volatileArrayList) {
+			const f = volatileArrayList[listenerId];
+			let isAnchor = false;
+			if (f && f.outStack) {
+				for (let i = 0; i < f.outStack.length; i++) {
+					if (f.outStack[i] && f.outStack[i].name === 'ANCHORARRAY') {
+						isAnchor = true;
+						break;
+					}
+				}
+			}
+			if (isAnchor) {
+				anchorIds.push(listenerId);
+			} else {
+				regularIds.push(listenerId);
+			}
+		}
+		const orderedIds = regularIds.concat(anchorIds);
+
+		for (let oi = 0; oi < orderedIds.length; oi++) {
+			const listenerId = orderedIds[oi];
 			const formula = volatileArrayList[listenerId];
-			
+			if (!formula) {
+				continue;
+			}
+
 			// Store old range before recalculation
 			const oldDynamicRef = formula.getDynamicRef();
 			const oldRef = oldDynamicRef ? oldDynamicRef.clone() : null;
@@ -25610,7 +25658,10 @@
 			const newR2 = (formula.parent.nRow + arraySize.row) > AscCommon.gc_nMaxRow ? AscCommon.gc_nMaxRow - 1 : (formula.parent.nRow + arraySize.row - 1);
 			const newC2 = (formula.parent.nCol + arraySize.col) > AscCommon.gc_nMaxCol ? AscCommon.gc_nMaxCol - 1 : (formula.parent.nCol + arraySize.col - 1);
 
-			if (formulaResult.type !== cElementType.array) {
+			// cellsRange/cellsRange3D is produced by ANCHORARRAY (`A1#`) — treat as a spillable source.
+			if (formulaResult.type !== cElementType.array &&
+				formulaResult.type !== cElementType.cellsRange &&
+				formulaResult.type !== cElementType.cellsRange3D) {
 				return false;
 			}
 

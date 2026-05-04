@@ -68,12 +68,12 @@ function (window, undefined) {
 	var _func = AscCommonExcel._func;
 
 	cFormulaFunctionGroup['LookupAndReference'] = cFormulaFunctionGroup['LookupAndReference'] || [];
-	cFormulaFunctionGroup['LookupAndReference'].push(cADDRESS, cAREAS, cCHOOSE, cCHOOSECOLS, cCHOOSEROWS, cCOLUMN, cCOLUMNS, cDROP, cEXPAND, cFILTER, cFORMULATEXT,
+	cFormulaFunctionGroup['LookupAndReference'].push(cADDRESS, cANCHORARRAY, cAREAS, cCHOOSE, cCHOOSECOLS, cCHOOSEROWS, cCOLUMN, cCOLUMNS, cDROP, cEXPAND, cFILTER, cFORMULATEXT,
 		cGETPIVOTDATA, cHLOOKUP, cHYPERLINK, cINDEX, cINDIRECT, cLOOKUP, cMATCH, cOFFSET, cROW, cROWS, cSORT, cSORTBY, cRTD, cTRANSPOSE, cTAKE,
 		cUNIQUE, cVLOOKUP, cXLOOKUP, cVSTACK, cHSTACK, cTOROW, cTOCOL, cWRAPROWS, cWRAPCOLS, cXMATCH);
 
 	cFormulaFunctionGroup['NotRealised'] = cFormulaFunctionGroup['NotRealised'] || [];
-	cFormulaFunctionGroup['NotRealised'].push(cRTD);
+	cFormulaFunctionGroup['NotRealised'].push(cRTD, cANCHORARRAY);
 
 	function searchRegExp(str, flags) {
 		var vFS = str
@@ -5416,6 +5416,86 @@ function (window, undefined) {
 	cXMATCH.prototype.Calculate = function (arg) {
 		arg[4] = true;
 		return g_oMatchCache.calculate(arg, arguments[1]);
+	};
+
+	/**
+	 * ANCHORARRAY — internal XLFN used to store the spilled-range operator `#`.
+	 * In UI formula `A1#` is shown; in XLSX it's stored as `_xlfn.ANCHORARRAY(A1)`.
+	 * Hidden from the function wizard via cFormulaFunctionGroup['NotRealised'].
+	 * @constructor
+	 * @extends {AscCommonExcel.cBaseFunction}
+	 */
+	function cANCHORARRAY() {
+	}
+
+	cANCHORARRAY.prototype = Object.create(cBaseFunction.prototype);
+	cANCHORARRAY.prototype.constructor = cANCHORARRAY;
+	cANCHORARRAY.prototype.name = 'ANCHORARRAY';
+	cANCHORARRAY.prototype.argumentsMin = 1;
+	cANCHORARRAY.prototype.argumentsMax = 1;
+	cANCHORARRAY.prototype.argumentsType = [argType.reference];
+	cANCHORARRAY.prototype.arrayIndexes = {0: 1};
+	cANCHORARRAY.prototype.enabledToSingle = {"0": true};
+	cANCHORARRAY.prototype.isXLFN = true;
+	cANCHORARRAY.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.array;
+	cANCHORARRAY.prototype.Calculate = function (arg) {
+		var arg0 = arg[0];
+		var callerWs = arguments[3];
+		var anchorWs = null, anchorCol = -1, anchorRow = -1;
+		var is3D = false;
+
+		if (arg0.type === cElementType.name || arg0.type === cElementType.name3D) {
+			arg0 = arg0.toRef ? arg0.toRef(arguments[1]) : arg0.Calculate();
+			if (!arg0 || arg0.type === cElementType.error) {
+				return arg0 && arg0.type === cElementType.error ? arg0 : new cError(cErrorType.bad_reference);
+			}
+		}
+
+		if (arg0.type === cElementType.cell || arg0.type === cElementType.cellsRange) {
+			var bbox = arg0.getBBox0();
+			if (!bbox) {
+				return new cError(cErrorType.bad_reference);
+			}
+			anchorWs = arg0.getWS();
+			anchorCol = bbox.c1;
+			anchorRow = bbox.r1;
+		} else if (arg0.type === cElementType.cell3D || arg0.type === cElementType.cellsRange3D) {
+			var range3d = arg0.getRange ? arg0.getRange() : null;
+			var bbox3d = range3d && range3d.getBBox0 ? range3d.getBBox0() : (arg0.getBBox0 && arg0.getBBox0());
+			if (!bbox3d) {
+				return new cError(cErrorType.bad_reference);
+			}
+			anchorWs = arg0.getWS();
+			anchorCol = bbox3d.c1;
+			anchorRow = bbox3d.r1;
+			is3D = true;
+		} else if (arg0.type === cElementType.error) {
+			return arg0;
+		} else {
+			return new cError(cErrorType.bad_reference);
+		}
+
+		if (!anchorWs || !anchorWs.dynamicArrayManager) {
+			return new cError(cErrorType.bad_reference);
+		}
+
+		var spillRef = anchorWs.dynamicArrayManager.getDynamicArrayFirstCell(anchorCol, anchorRow);
+		if (!spillRef) {
+			return new cError(cErrorType.bad_reference);
+		}
+
+		// propagate #SPILL! from a blocked anchor formula
+		var anchorCell = null;
+		anchorWs.getCell3(spillRef.r1, spillRef.c1)._foreachNoEmpty(function (c) { anchorCell = c; });
+		if (anchorCell && anchorCell.formulaParsed && anchorCell.formulaParsed.aca && anchorCell.formulaParsed.ca) {
+			return new cError(cErrorType.cannot_be_spilled);
+		}
+
+		var rangeName = anchorWs.getRange3(spillRef.r1, spillRef.c1, spillRef.r2, spillRef.c2).getName();
+		if (is3D || (callerWs && callerWs !== anchorWs)) {
+			return new cArea3D(rangeName, anchorWs, anchorWs);
+		}
+		return new cArea(rangeName, anchorWs);
 	};
 
 	var g_oVLOOKUPCache = new VHLOOKUPCache(false);

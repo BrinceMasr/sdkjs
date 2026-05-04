@@ -6370,6 +6370,13 @@ _func[cElementType.cell3D] = _func[cElementType.cell];
 		this.atOperators.push({start: start, end: end, type: type});
 	};
 
+	ParseResult.prototype.addHashOperator = function(start, end, type) {
+		if (!this.hashOperators) {
+			this.hashOperators = [];
+		}
+		this.hashOperators.push({start: start, end: end, type: type});
+	};
+
 	ParseResult.prototype.addRefPos = function(start, end, index, oper, isName) {
 		if (this.refPos) {
 			this.refPos.push({start: start, end: end, index: index, oper: oper, isName: isName});
@@ -8926,6 +8933,31 @@ function parserFormula( formula, parent, _ws ) {
 					currentAtOperatorPos = null;
 				}
 
+				// Postfix spilled-range operator `#` (ANCHORARRAY).
+				// Only after a ref/area/name/table operand; at this point `operand_expected` has been false,
+				// so `#REF!` / `#N/A` / other error literals (consumed by parserHelp.isError while
+				// `operand_expected` is true) cannot be confused with this operator.
+				// Requires parseResult.refPos to locate the operand start precisely (handles Sheet!A1 etc.);
+				// without it we silently skip — that path (e.g. reading `_xlfn.ANCHORARRAY(A1)` from XLSX)
+				// does not contain a literal `#` anyway.
+				if (AscCommonExcel.bIsSupportDynamicArrays && local && t.Formula[ph.pCurrPos] === '#') {
+					var _hashOperandType = found_operand.type;
+					if (_hashOperandType === cElementType.cell ||
+						_hashOperandType === cElementType.cell3D ||
+						_hashOperandType === cElementType.name || _hashOperandType === cElementType.name3D ||
+						_hashOperandType === cElementType.table) {
+						var _lastRefPos = parseResult.refPos && parseResult.refPos[parseResult.refPos.length - 1];
+						if (_lastRefPos && _lastRefPos.end === ph.pCurrPos) {
+							parseResult.addHashOperator(_lastRefPos.start, ph.pCurrPos + 1, _hashOperandType);
+							ph.pCurrPos++;
+							// Extend refPos span to include '#' and mark it so CellEditorView
+							// can resolve the full spill-range for live formula highlighting.
+							_lastRefPos.end = ph.pCurrPos;
+							_lastRefPos.isHashRef = true;
+						}
+					}
+				}
+
 				t.outStack.push(found_operand);
 				parseResult.addElem(found_operand);
 				parseResult.operand_expected = false;
@@ -9393,6 +9425,28 @@ function parserFormula( formula, parent, _ws ) {
 		return {formula: formula, notReplaceDefaultSingle: formula};
 	};
 
+	parserFormula.prototype._assembleWithHashOperators = function (hashOperators) {
+		if (!hashOperators || hashOperators.length === 0) {
+			return this.Formula;
+		}
+
+		// Sort by start descending so earlier replacements don't shift later positions.
+		var ops = hashOperators.slice().sort(function (a, b) { return b.start - a.start; });
+
+		var formula = this.Formula;
+		for (var i = 0; i < ops.length; i++) {
+			var op = ops[i];
+			// Safety: hash op must end with '#'.
+			if (formula.charAt(op.end - 1) !== '#') {
+				continue;
+			}
+			var operandStr = formula.substring(op.start, op.end - 1);
+			var replacement = "_xlfn.ANCHORARRAY(" + operandStr + ")";
+			formula = formula.substring(0, op.start) + replacement + formula.substring(op.end);
+		}
+		return formula;
+	};
+
 	parserFormula.prototype.findRefByOutStack = function (forceCheck) {
 		if (AscCommonExcel.bIsSupportDynamicArrays || forceCheck) {
 			// using outStack, look at all the arguments in the formulas and compare them with the arrayIndex positions for this formula
@@ -9504,6 +9558,12 @@ function parserFormula( formula, parent, _ws ) {
 							}
 
 							if (isRef || (_tmp && (_tmp.type === cElementType.array /*|| _tmp.type === cElementType.cellsRange || _tmp.type === cElementType.cellsRange3D*/))) {
+								return true;
+							}
+							// ANCHORARRAY (`A1#`) returns the whole spilled range as cArea/cArea3D —
+							// treat it as a dynamic-array producer so the caller spills into it.
+							if (_tmp && currentElement.type === cElementType.func && currentElement.name === "ANCHORARRAY" &&
+								(_tmp.type === cElementType.cellsRange || _tmp.type === cElementType.cellsRange3D)) {
 								return true;
 							}
 
@@ -9823,8 +9883,17 @@ function parserFormula( formula, parent, _ws ) {
 
 					this.value = new cError(cErrorType.cannot_be_spilled);
 				} else {
-					this.setAca(false);
-					this.setCa(false);
+					if (this.value.type === cElementType.error && this.value.errorType === cErrorType.cannot_be_spilled) {
+						// Inherited #SPILL! from upstream (e.g. =A1# when A1 itself is blocked).
+						// Mirror the head formula's collapsed state so recalculateVolatileArrays
+						// puts this formula through the collapsed branch (not the spurious expand-to-1x1 branch).
+						this.setAca(true);
+						this.setCa(true);
+						this.ws.dynamicArrayManager.checkVm(this, this.getDynamicRef());
+					} else {
+						this.setAca(false);
+						this.setCa(false);
+					}
 				}
 			}
 
@@ -9879,6 +9948,13 @@ function parserFormula( formula, parent, _ws ) {
 					//t.ws.dynamicArrayManager.changeCell(cell);
 				});
 			}
+			// Fallback for anchor formulas where checkVm could not assign a vm index
+			// (e.g. formula created while the upstream was already blocked and never expanded).
+			// aca/ca are already true (set in calculate before reaching here).
+			// Enqueue directly in case _foreachChanged misses the cell in this cycle.
+			if (this.ws.workbook && this.ws.workbook.dependencyFormulas) {
+				this.ws.workbook.dependencyFormulas.addToVolatileArrays(this);
+			}
 			return;
 		} else {
 			resultDimensions = {row: 1, col: 1};
@@ -9914,8 +9990,9 @@ function parserFormula( formula, parent, _ws ) {
 			let wasExpanded = oldDynamicRef && (oldDynamicRef.r2 > oldDynamicRef.r1 || oldDynamicRef.c2 > oldDynamicRef.c1);
 			if (wasExpanded) {
 				this._resizeDynamicArray(requiredRange, oldDynamicRef);
-			} else {
-				//this._expandDynamicArray(requiredRange, oldDynamicRef || currentRef);
+			} else if (oldDynamicRef && this.getCm() && this.ws.dynamicArrayManager &&
+					this.ws.dynamicArrayManager.isAutoExpandBBox(requiredRange)) {
+				//this._expandDynamicArray(requiredRange, oldDynamicRef);
 			}
 		}
 	};
@@ -9971,13 +10048,6 @@ function parserFormula( formula, parent, _ws ) {
 			return;
 		}
 
-		this.ref = new Asc.Range(this.parent.nCol, this.parent.nRow, this.parent.nCol, this.parent.nRow);
-		
-		let cmIndex = this.getCm();
-		if (cmIndex && this.ws.dynamicArrayManager) {
-			this.ws.dynamicArrayManager.updateDynamicArrayCollapsedState(cmIndex, true);
-		}
-		
 		if (oldRange && (oldRange.r2 > oldRange.r1 || oldRange.c2 > oldRange.c1)) {
 			for (let r = oldRange.r1; r <= oldRange.r2; r++) {
 				for (let c = oldRange.c1; c <= oldRange.c2; c++) {
@@ -9992,6 +10062,15 @@ function parserFormula( formula, parent, _ws ) {
 				}
 			}
 		}
+
+		this.ref = new Asc.Range(this.parent.nCol, this.parent.nRow, this.parent.nCol, this.parent.nRow);
+		
+		let cmIndex = this.getCm();
+		if (cmIndex && this.ws.dynamicArrayManager) {
+			this.ws.dynamicArrayManager.updateDynamicArrayCollapsedState(cmIndex, true);
+		}
+		
+
 
 		if (this.ws.workbook && this.ws.workbook.dependencyFormulas) {
 			let firstCellRange = new Asc.Range(this.parent.nCol, this.parent.nRow, this.parent.nCol, this.parent.nRow);
@@ -10648,6 +10727,28 @@ function parserFormula( formula, parent, _ws ) {
 					continue;
 				}
 
+				if (bLocale && currentElement.type === cElementType.func && currentElement.name === "ANCHORARRAY" && needUseSingle) {
+					var hashArgIndex = j - _count_arg - _argDiff;
+					var hashArg = elemArr[hashArgIndex];
+					if (hashArg) {
+						var hashArgStr = bLocale ?
+							(hashArg.toLocaleString ? hashArg.toLocaleString(digitDelim) : hashArg.toString()) :
+							hashArg.toString();
+						res = new cString(hashArgStr + "#");
+					} else {
+						res = new cString("#");
+					}
+					j -= _count_arg + _argDiff;
+					elemArr[j] = res;
+					for (var k = 0; k < _count_arg; k++) {
+						parentFuncStack.pop();
+						argIndexInParentStack.pop();
+					}
+					parentFuncStack.push({func: currentElement, isSingle: false});
+					argIndexInParentStack.push(-1);
+					continue;
+				}
+
 				if (bLocale) {
 					res = currentElement.Assemble2Locale(elemArr, j - _count_arg - _argDiff, _count_arg, locale, digitDelim);
 				} else {
@@ -10809,7 +10910,19 @@ function parserFormula( formula, parent, _ws ) {
 				this.wb.dependencyFormulas.startListeningDefName(ref.value, this, ref.ws.getId());
 			} else if ((cElementType.cell === ref.type || cElementType.cell3D === ref.type ||
 				cElementType.cellsRange === ref.type) && ref.isValid()) {
-				this._buildDependenciesRef(ref.getWsId(), ref.getRange() && ref.getRange().getBBox0(), isDefName, true);
+				let _range = ref.getRange() && ref.getRange().getBBox0();
+				if (this.outStack[i + 2] && this.outStack[i + 2].type === cElementType.func && this.getCm() != null && this.outStack[i + 2].name === "ANCHORARRAY") {
+					let ahchorRef;
+					ref.getWS().getCell3(ref.range.bbox.r1, ref.range.bbox.c1)._foreachNoEmpty(function (c) {
+						if (c && c.formulaParsed && c.formulaParsed.getCm() != null) {
+							ahchorRef = c.formulaParsed.getArrayFormulaRef();
+						}
+					});
+					if (ahchorRef) {
+						_range = ahchorRef;
+					}
+				}
+				this._buildDependenciesRef(ref.getWsId(), _range, isDefName, true);
 			} else if (cElementType.cellsRange3D === ref.type && ref.isValid()) {
 				wsR = ref.range(ref.wsRange());
 				for (var j = 0; j < wsR.length; j++) {

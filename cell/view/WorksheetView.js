@@ -19175,6 +19175,30 @@ function isAllowPasteLink(pastedWb) {
 				}
 			}
 
+			//reparse if hash (#) spilled-range operators included — rewrite `A1#` → `_xlfn.ANCHORARRAY(A1)`
+			if (parseResult.hashOperators && parseResult.hashOperators.length > 0) {
+				let sBefore = newFP.Formula;
+				let rewritten = newFP._assembleWithHashOperators(parseResult.hashOperators);
+				if (rewritten !== sBefore) {
+					newFP.Formula = rewritten;
+					newFP.isParsed = false;
+					newFP.outStack = [];
+					let _parseResult = new AscCommonExcel.ParseResult();
+					if (!newFP.parse(AscCommonExcel.oFormulaLocaleInfo.Parse, AscCommonExcel.oFormulaLocaleInfo.DigitSep, _parseResult)) {
+						if (parseResult.error !== c_oAscError.ID.FrmlWrongFunctionName && _parseResult.error !== c_oAscError.ID.FrmlParenthesesCorrectCount) {
+							this.model.workbook.handlers.trigger("asc_onError", _parseResult.error, c_oAscError.Level.NoCritical);
+							endTransaction();
+							return;
+						}
+					}
+					val[0].setFragmentText("=" + newFP.Formula);
+					// merge atOperators detected by the re-parse so the @ pass below still runs
+					if (_parseResult.atOperators && _parseResult.atOperators.length > 0) {
+						parseResult.atOperators = _parseResult.atOperators;
+					}
+				}
+			}
+
 			//reparse if single operators included - @
 			if (/*!isFormulaFromVal &&*/ parseResult.atOperators && parseResult.atOperators.length > 0) {
 				let notReplaceDefaultSingle;
