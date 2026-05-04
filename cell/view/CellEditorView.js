@@ -471,6 +471,8 @@ function (window, undefined) {
 
 		if (this._isContentEditable()) {
 			this.input.style.whiteSpace = 'pre-wrap';
+			this.input.style.overflowY = 'auto';
+			this.input.style.overflowX = 'auto';
 		}
 
 		var b = this._getInputSelectionStart();
@@ -2012,7 +2014,7 @@ function (window, undefined) {
 			AscCommon.g_inputContext.moveAccurate(this.left * this.kx + curLeft, this.top * this.ky + curTop);
 		}
 
-		if (cur) {
+		if (cur && !this._isContentEditable()) {
 			this.input.scrollTop = this.input.clientHeight * cur.lineIndex;
 		}
 		if (this.isTopLineActive && !this.skipTLUpdate) {
@@ -2142,6 +2144,18 @@ function (window, undefined) {
 		var b = isSelected ? this.selectionBegin : this.cursorPos;
 		var e = isSelected ? this.selectionEnd : this.cursorPos;
 		this._setInputSelectionRange(Math.min(b, e), Math.max(b, e));
+
+		// Scroll to show active line in contenteditable
+		if (this._isContentEditable() && this.input) {
+			var selection = window.getSelection();
+			if (selection && selection.rangeCount > 0) {
+				var range = selection.getRangeAt(0).cloneRange();
+				var tempSpan = document.createElement('span');
+				range.insertNode(tempSpan);
+				tempSpan.scrollIntoView({block: 'nearest'});
+				tempSpan.parentNode.removeChild(tempSpan);
+			}
+		}
 	};
 
 	CellEditor.prototype._topLineGotFocus = function () {
