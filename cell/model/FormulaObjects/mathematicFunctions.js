@@ -5260,8 +5260,49 @@ function (window, undefined) {
 	cSINGLE.prototype.isXLFN = true;
 	cSINGLE.prototype.Calculate = function (arg) {
 		let arg0 = arg[0];
-		if (arg0.type === cElementType.cellsRange || arg0.type === cElementType.cellsRange3D) {
-			arg0 = arg0.cross(arguments[1]);
+		let opt_bbox = arguments[1];
+		if (arg0.type === cElementType.cellsRange) {
+			let r = arg0.getRange();
+			if (!r) {
+				return new cError(cErrorType.wrong_name);
+			}
+			let areaBbox = arg0.getBBox0();
+			let ws = arg0.getWS();
+			if (areaBbox.r1 === areaBbox.r2 && areaBbox.c1 === areaBbox.c2) {
+				return new cRef(ws.getCell3(areaBbox.r1, areaBbox.c1).getName(), ws);
+			}
+			let cross = opt_bbox && r.cross(opt_bbox);
+			if (cross) {
+				if (undefined !== cross.r) {
+					return new cRef(ws.getCell3(cross.r, areaBbox.c1).getName(), ws);
+				} else if (undefined !== cross.c) {
+					return new cRef(ws.getCell3(areaBbox.r1, cross.c).getName(), ws);
+				}
+			}
+			return new cError(cErrorType.wrong_value_type);
+		} else if (arg0.type === cElementType.cellsRange3D) {
+			if (!arg0.isSingleSheet()) {
+				return new cError(cErrorType.wrong_value_type);
+			}
+			let r = arg0.getRange();
+			if (!r) {
+				return new cError(cErrorType.wrong_name);
+			}
+			let areaBbox = arg0.getBBox0();
+			let ws = arg0.getWS();
+			let externalLink = arg0.externalLink;
+			if (areaBbox.r1 === areaBbox.r2 && areaBbox.c1 === areaBbox.c2) {
+				return new cRef3D(ws.getCell3(areaBbox.r1, areaBbox.c1).getName(), ws, externalLink);
+			}
+			let cross = opt_bbox && r.cross(opt_bbox);
+			if (cross) {
+				if (undefined !== cross.r) {
+					return new cRef3D(ws.getCell3(cross.r, areaBbox.c1).getName(), ws, externalLink);
+				} else if (undefined !== cross.c) {
+					return new cRef3D(ws.getCell3(areaBbox.r1, cross.c).getName(), ws, externalLink);
+				}
+			}
+			return new cError(cErrorType.wrong_value_type);
 		} else if (arg0.type === cElementType.array) {
 			arg0 = arg0.getElement(0);
 		}
