@@ -3094,8 +3094,29 @@
 		return { R: resultRgb.R, G: resultRgb.G, B: resultRgb.B };
 	}
 
-	CDLbl.prototype.getComputedTextColor = function (bgColor, txColor) {
+	CDLbl.prototype.getAutoCorrectedTextColor = function (bgColor, txColor) {
 		return getContrastAdjustedColor(bgColor, txColor);
+	};
+
+	CDLbl.prototype.useTextColorAutoCorrection = function () {
+		const innerPositions = [
+			AscFormat.DATA_LABEL_POS_CTR,
+			AscFormat.DATA_LABEL_POS_IN_BASE,
+			AscFormat.DATA_LABEL_POS_IN_END,
+			AscFormat.DATA_LABEL_POS_BEST_FIT
+		];
+
+		const layoutId = this.series && this.series.layoutId;
+		const labelsPos = this.series && this.series.dataLabels && this.series.dataLabels.pos;
+
+		const useAutoCorrection = (
+			layoutId === AscFormat.SERIES_LAYOUT_FUNNEL ||
+			layoutId === AscFormat.SERIES_LAYOUT_SUNBURST ||
+			layoutId === AscFormat.SERIES_LAYOUT_WATERFALL && innerPositions.indexOf(labelsPos) !== -1 ||
+			layoutId === AscFormat.SERIES_LAYOUT_CLUSTERED_COLUMN && innerPositions.indexOf(labelsPos) !== -1
+		);
+
+		return useAutoCorrection;
 	};
 
     CDLbl.prototype.getStyles = function() {
@@ -3231,18 +3252,7 @@
 					}
 				}
 
-				if (this.series && this.series.dataLabels) {
-					oParaPr = this.series.dataLabels.getTxPrParaPr();
-					if (oParaPr) {
-						style.ParaPr.Merge(oParaPr);
-						if (oParaPr.DefaultRunPr) {
-							style.TextPr.Merge(oParaPr.DefaultRunPr);
-						}
-					}
-				}
-
-				const isFunnel = this.series && this.series.layoutId === AscFormat.SERIES_LAYOUT_FUNNEL;
-				if (isFunnel) {
+				if (this.useTextColorAutoCorrection()) {
 					const ptBrush = this.pt && this.series && this.series.getPtBrush(this.pt.idx);
 					if (ptBrush) {
 
@@ -3260,10 +3270,20 @@
 
 						const styleRGBA = style.TextPr.Unifill && style.TextPr.Unifill.getRGBAColor();
 						if (barRGBA && styleRGBA) {
-							const labelRgb = this.getComputedTextColor(barRGBA, styleRGBA);
+							const labelRgb = this.getAutoCorrectedTextColor(barRGBA, styleRGBA);
 							if (labelRgb) {
 								style.TextPr.Unifill = AscFormat.CreateUnifillFromRGB(labelRgb.R, labelRgb.G, labelRgb.B);
 							}
+						}
+					}
+				}
+
+				if (this.series && this.series.dataLabels) {
+					oParaPr = this.series.dataLabels.getTxPrParaPr();
+					if (oParaPr) {
+						style.ParaPr.Merge(oParaPr);
+						if (oParaPr.DefaultRunPr) {
+							style.TextPr.Merge(oParaPr.DefaultRunPr);
 						}
 					}
 				}
