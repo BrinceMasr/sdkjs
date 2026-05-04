@@ -10663,6 +10663,7 @@ Paragraph.prototype.Add_PresentationNumbering = function(Bullet)
 			}
 		}
 	}
+	this.UpdatePresentationOutline();
 };
 Paragraph.prototype.Get_PresentationNumbering = function()
 {
@@ -10686,6 +10687,7 @@ Paragraph.prototype.Set_PresentationLevel = function(Level)
 		this.CompiledPr.NeedRecalc = true;
 		this.Recalc_RunsCompiledPr();
 		this.private_UpdateTrackRevisionOnChangeParaPr(true);
+		this.UpdatePresentationOutline();
 	}
 };
 Paragraph.prototype.GetBulletNum = function()
