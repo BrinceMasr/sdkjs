@@ -8172,6 +8172,53 @@
             oPr.TextDirection = textdirection_BTLR;
         this.Cell.Set_Pr(oPr);
     };
+    /**
+     * Appends text to the end of the cell content.
+     * @memberof ApiTableCell
+     * @typeofeditors ["CPE"]
+     * @param {string} text - The text to append.
+     * @returns {ApiRun}
+     * @since 9.4.0
+     * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/AddText.js
+     */
+    ApiTableCell.prototype.AddText = function(text)
+    {
+        return this.GetContent().AddText(text);
+    };
+    /**
+     * Returns the inner text of the current table cell.
+     * @memberof ApiTableCell
+     * @typeofeditors ["CPE"]
+     * @param {object} [pr] - Options for formatting the returned text.
+     * @param {boolean} [pr.Numbering=true] - Defines if the resulting string will include numbering or not.
+     * @param {boolean} [pr.Math=true] - Defines if the resulting string will include mathematical expressions or not.
+     * @param {string} [pr.TableCellSeparator='\t'] - Defines how the table cell separator will be specified in the resulting string.
+     * @param {string} [pr.TableRowSeparator='\r\n'] - Defines how the table row separator will be specified in the resulting string.
+     * @param {string} [pr.ParaSeparator='\r\n'] - Defines how the paragraph separator will be specified in the resulting string.
+     * @param {string} [pr.TabSymbol='\t'] - Defines how the tab will be specified in the resulting string.
+     * @param {string} [pr.NewLineSeparator='\r'] - Defines how the line separator will be specified in the resulting string.
+     * @return {string}
+     * @since 9.4.0
+     * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/GetText.js
+     */
+    ApiTableCell.prototype.GetText = function(pr)
+    {
+        return this.GetContent().GetText(pr);
+    };
+    /**
+     * Replaces all content of the current table cell with the specified text,
+     * preserving the formatting of the first paragraph.
+     * @memberof ApiTableCell
+     * @typeofeditors ["CPE"]
+     * @param {string} text - The text to set.
+     * @return {ApiRun}
+     * @since 9.4.0
+     * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/SetText.js
+     */
+    ApiTableCell.prototype.SetText = function(text)
+    {
+        return this.GetContent().SetText(text);
+    };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Export
@@ -8561,6 +8608,9 @@
     ApiTableCell.prototype["SetCellBorderTop"]            = ApiTableCell.prototype.SetCellBorderTop;
     ApiTableCell.prototype["SetVerticalAlign"]            = ApiTableCell.prototype.SetVerticalAlign;
     ApiTableCell.prototype["SetTextDirection"]            = ApiTableCell.prototype.SetTextDirection;
+    ApiTableCell.prototype["AddText"]                     = ApiTableCell.prototype.AddText;
+    ApiTableCell.prototype["GetText"]                     = ApiTableCell.prototype.GetText;
+    ApiTableCell.prototype["SetText"]                     = ApiTableCell.prototype.SetText;
 
     Api.private_CreateApiSlide = function(oSlide){
         return new ApiSlide(oSlide);
