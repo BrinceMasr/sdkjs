@@ -204,8 +204,8 @@
 		return { L: Ls, a: as, b: bs };
 	}
 
-	// ΔE 2000 (CIEDE2000). Caller controls the L scale: passing canonical L
-	// (0..100) gives canonical ΔE; passing byte-scale L (0..255) gives the
+	// Delta E 2000 (CIEDE2000). Caller controls the L scale: passing canonical L
+	// (0..100) gives canonical Delta E; passing byte-scale L (0..255) gives the
 	// scaled distance used by asc_CColor.getColorDiff.
 	function deltaE2000(lab1, lab2) {
 		const d2r = window['AscCommon'].deg2rad;
