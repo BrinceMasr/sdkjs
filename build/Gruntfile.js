@@ -250,7 +250,7 @@ module.exports = function(grunt) {
 	if (formatting) {
 		compilerArgs.push('--formatting=' + formatting);
 	}
-	const appCopyright = process.env['APP_COPYRIGHT'] || "Copyright (C) Ascensio System SIA 2012-" + grunt.template.today('yyyy') +". All rights reserved";
+	const appCopyright = process.env['APP_COPYRIGHT'] || "Copyright (C) Ascensio System SIA 2009-" + grunt.template.today('yyyy') +". All rights reserved";
 	const publisherUrl = process.env['PUBLISHER_URL'] || "https://www.onlyoffice.com/";
 	const companyName = process.env['COMPANY_NAME'] || 'onlyoffice';
 	const version = process.env['PRODUCT_VERSION'] || '0.0.0';
