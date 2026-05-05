@@ -2997,6 +2997,27 @@
         this.transformText = this.ownTransformText.CreateDublicate();
     };
 
+	function getDataLabelAutoColorBackground(unifill) {
+
+		if (unifill.isNoFill && unifill.isNoFill()) {
+			return { R: 0, G: 0, B: 0 };
+		}
+
+		if (unifill.isBlipFill && unifill.isBlipFill()) {
+			return { R: 255, G: 255, B: 255 };
+		}
+
+		if (unifill.isGradientFill && unifill.isGradientFill()) {
+			return { R: 255, G: 255, B: 255 };
+		}
+
+		if (unifill.isPatternFill && unifill.isPatternFill()) {
+			return { R: 255, G: 255, B: 255 };
+		}
+
+		return unifill.getRGBAColor ? unifill.getRGBAColor() : null;
+	}
+
 	function getContrastAdjustedColor(bgColor, fgColor) {
 		if (!bgColor || !fgColor) {
 			return null;
@@ -3228,8 +3249,7 @@
 				if (this.useTextColorAutoCorrection()) {
 					const ptBrush = this.pt && this.series && this.series.getPtBrush(this.pt.idx);
 					if (ptBrush) {
-
-						const barRGBA = ptBrush.getRGBAColor();
+						const barRGBA = getDataLabelAutoColorBackground(ptBrush);
 
 						if (style.TextPr.Unifill) {
 							const parents = oChartSpace.getParentObjects();

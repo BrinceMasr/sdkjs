@@ -6637,6 +6637,9 @@
 				return true;
 			}
 		};
+		CUniFill.prototype.isPatternFill = function () {
+			return !!(this.fill && this.fill.type === c_oAscFill.FILL_TYPE_PATT);
+		};
 		CUniFill.prototype.checkTransparent = function() {
 			let oFill = this.fill;
 			if(oFill) {
