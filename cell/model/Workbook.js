@@ -6827,6 +6827,7 @@
 		this.rowsData = new AscCommonExcel.SheetMemory(AscCommonExcel.g_nRowStructSize, gc_nMaxRow0);
 		this.cellsByCol = [];
 		this.cellsByColRowsCount = 0;//maximum rows count in cellsByCol
+		this.cellStylesByCol = [];//direct cell styles per column (CRangeAttrArray, populated in later stages)
 		this.aCols = [];// 0 based
 		this.hiddenManager = new HiddenManager(this);
 		this.Drawings = [];
@@ -6956,6 +6957,8 @@
 
 		this.dynamicArrayManager = new CDynamicArrayManager(this);
 	}
+
+	AscCommonExcel.CellStyleStorage.installOnWorksheet(Worksheet);
 
 	Worksheet.prototype.getCompiledStyle = function (row, col, opt_cell, opt_styleComponents, opt_AffectingText) {
 		return getCompiledStyle(this.sheetMergedStyles, this.hiddenManager, row, col, opt_cell, this, opt_styleComponents, opt_AffectingText);

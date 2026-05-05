@@ -180,6 +180,7 @@
 			"cell/model/SheetMemory.js",
 			"cell/model/RangeAttrArray.js",
 			"cell/model/WorkbookElems.js",
+			"cell/model/CellStyleStorage.js",
 			"cell/model/Workbook.js",
 			"cell/model/Serialize.js",
 			"cell/model/ConditionalFormatting.js",
