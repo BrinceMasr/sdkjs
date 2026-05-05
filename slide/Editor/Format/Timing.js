@@ -755,6 +755,9 @@
         }
         this.startSimpleDuration(0, oPlayer);
         this.scheduleEnd(oPlayer);
+        if (window["AscUserTest"]) {
+            Asc.editor.sendEvent("asc_onAnimNodeActivated", this, oPlayer);
+        }
     };
     CTimeNodeBase.prototype.startSimpleDuration = function (nIdx, oPlayer) {
         this.simpleDurationIdx = nIdx;
@@ -861,7 +864,7 @@
                     var aChildren = this.getChildrenTimeNodes();
                     var oThis = this;
 
-                    if(oPlayer instanceof CDemoAnimPlayer) {
+                    if(oPlayer.isDemoPlayer()) {
                         oTrigger.addTrigger(function () {
                             for (var nChild = 0; nChild < aChildren.length; ++nChild) {
                                 if (!aChildren[nChild].isAtEnd() && (!aChildren[nChild].repeatCount || !aChildren[nChild].repeatCount.isIndefinite())) {
@@ -916,6 +919,9 @@
             this.calculateParams(oPlayer);
         }
         this.setState(TIME_NODE_STATE_FROZEN);
+        if (window["AscUserTest"]) {
+            Asc.editor.sendEvent("asc_onAnimNodeFrozen", this, oPlayer);
+        }
         oPlayer.cancelCallerEvent(this);
         var oParentNode = this.getParentTimeNode();
         if (oParentNode) {
@@ -933,6 +939,9 @@
             this.calculateParams(oPlayer);
         }
         this.setState(TIME_NODE_STATE_FINISHED);
+        if (window["AscUserTest"]) {
+            Asc.editor.sendEvent("asc_onAnimNodeFinished", this, oPlayer);
+        }
         oPlayer.cancelCallerEvent(this);
         var oParentNode = this.getParentTimeNode();
         if (oParentNode) {
@@ -1641,6 +1650,47 @@
         }
         return false;
     };
+
+    CTimeNodeBase.prototype.asc_getNodeId = function () {
+        return this.GetId();
+    };
+    CTimeNodeBase.prototype["asc_getNodeId"] = CTimeNodeBase.prototype.asc_getNodeId;
+    CTimeNodeBase.prototype.asc_getNodeType = function () {
+        var oAttr = this.getAttributesObject();
+        return oAttr ? oAttr.nodeType : null;
+    };
+    CTimeNodeBase.prototype["asc_getNodeType"] = CTimeNodeBase.prototype.asc_getNodeType;
+    CTimeNodeBase.prototype.asc_getPresetClass = function () {
+        var oAttr = this.getAttributesObject();
+        return oAttr ? oAttr.presetClass : null;
+    };
+    CTimeNodeBase.prototype["asc_getPresetClass"] = CTimeNodeBase.prototype.asc_getPresetClass;
+    CTimeNodeBase.prototype.asc_getPresetID = function () {
+        var oAttr = this.getAttributesObject();
+        return oAttr ? oAttr.presetID : null;
+    };
+    CTimeNodeBase.prototype["asc_getPresetID"] = CTimeNodeBase.prototype.asc_getPresetID;
+    CTimeNodeBase.prototype.asc_getPresetSubtype = function () {
+        var oAttr = this.getAttributesObject();
+        return oAttr ? oAttr.presetSubtype : null;
+    };
+    CTimeNodeBase.prototype["asc_getPresetSubtype"] = CTimeNodeBase.prototype.asc_getPresetSubtype;
+    CTimeNodeBase.prototype.asc_getTargetObjectId = function () {
+        return this.getTargetObjectId();
+    };
+    CTimeNodeBase.prototype["asc_getTargetObjectId"] = CTimeNodeBase.prototype.asc_getTargetObjectId;
+    CTimeNodeBase.prototype.asc_getEffectDuration = function () {
+        return this.simpleDuration ? this.simpleDuration.getVal() : null;
+    };
+    CTimeNodeBase.prototype["asc_getEffectDuration"] = CTimeNodeBase.prototype.asc_getEffectDuration;
+    CTimeNodeBase.prototype.asc_getEffectRepeatCount = function () {
+        return this.repeatCount ? this.repeatCount.getVal() : null;
+    };
+    CTimeNodeBase.prototype["asc_getEffectRepeatCount"] = CTimeNodeBase.prototype.asc_getEffectRepeatCount;
+    CTimeNodeBase.prototype.asc_getNodeState = function () {
+        return this.state;
+    };
+    CTimeNodeBase.prototype["asc_getNodeState"] = CTimeNodeBase.prototype.asc_getNodeState;
 
     var MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || 9007199254740991;
 
@@ -12318,6 +12368,9 @@
             this.animationDrawer.clearTextureCache();
             this.animationDrawer.collectHiddenObjects();
         }
+        if (window["AscUserTest"]) {
+            Asc.editor.sendEvent("asc_onAnimPlayerStart", this, bIsPaused);
+        }
         if (this.isMainSequenceFinished()) {
             this.onMainSeqFinished();
         }
@@ -12336,12 +12389,18 @@
         }
     };
     CAnimationPlayer.prototype.stop = function () {
+        if (window["AscUserTest"]) {
+            Asc.editor.sendEvent("asc_onAnimPlayerStop", this);
+        }
         this.timer.stop();
         this.animationScheduler.stop();
         this.animationDrawer.stop();
         this.resetNodesState();
     };
     CAnimationPlayer.prototype.onMainSeqFinished = function () {
+        if (window["AscUserTest"]) {
+            Asc.editor.sendEvent("asc_onAnimMainSeqFinished", this);
+        }
         if (this.drawer) {
             var nSlideNum = -1;
             if (this.slide) {
@@ -12361,6 +12420,9 @@
         return true;
     };
     CAnimationPlayer.prototype.pause = function () {
+        if (window["AscUserTest"]) {
+            Asc.editor.sendEvent("asc_onAnimPlayerPause", this);
+        }
         this.timer.pause();
         this.animationDrawer.clearTextureCache();
     };
@@ -12405,9 +12467,18 @@
         if (!this.isStarted()) {
             return false;
         }
-        return this.eventsProcessor.addEvent(oExternalEvent);
+        var bAdded = this.eventsProcessor.addEvent(oExternalEvent);
+        if (bAdded) {
+            if (window["AscUserTest"]) {
+                Asc.editor.sendEvent("asc_onAnimExternalEvent", this, oExternalEvent.type, oExternalEvent.target);
+            }
+        }
+        return bAdded;
     };
     CAnimationPlayer.prototype.onClick = function () {
+        if (window["AscUserTest"]) {
+            Asc.editor.sendEvent("asc_onAnimMouseClick", this, null);
+        }
         var bClick = this.addExternalEvent(new CExternalEvent(this.eventsProcessor, COND_EVNT_ON_CLICK, null));
         if (bClick) {
             return true;
@@ -12417,6 +12488,9 @@
     CAnimationPlayer.prototype.onSpClick = function (oSp) {
         if (!oSp) {
             return false;
+        }
+        if (window["AscUserTest"]) {
+            Asc.editor.sendEvent("asc_onAnimMouseClick", this, oSp.Get_Id());
         }
         var bClick = this.addExternalEvent(new CExternalEvent(this.eventsProcessor, COND_EVNT_ON_CLICK, oSp.Get_Id()));
         if (bClick) {
@@ -12441,11 +12515,17 @@
         if (!oSp) {
             return false;
         }
+        if (window["AscUserTest"]) {
+            Asc.editor.sendEvent("asc_onAnimMouseDblClick", this, oSp.Get_Id());
+        }
         return this.addExternalEvent(new CExternalEvent(this.eventsProcessor, COND_EVNT_ON_DBLCLICK, oSp.Get_Id()));
     };
     CAnimationPlayer.prototype.onSpMouseOver = function (oSp) {
         if (!oSp) {
             return false;
+        }
+        if (window["AscUserTest"]) {
+            Asc.editor.sendEvent("asc_onAnimMouseOver", this, oSp.Get_Id());
         }
         return this.addExternalEvent(new CExternalEvent(this.eventsProcessor, COND_EVNT_ON_MOUSEOVER, oSp.Get_Id()));
     };
@@ -12453,9 +12533,15 @@
         if (!oSp) {
             return false;
         }
+        if (window["AscUserTest"]) {
+            Asc.editor.sendEvent("asc_onAnimMouseOut", this, oSp.Get_Id());
+        }
         return this.addExternalEvent(new CExternalEvent(this.eventsProcessor, COND_EVNT_ON_MOUSEOUT, oSp.Get_Id()));
     };
     CAnimationPlayer.prototype.onNextSlide = function () {
+        if (window["AscUserTest"]) {
+            Asc.editor.sendEvent("asc_onAnimNextSlide", this);
+        }
         var bNext = this.addExternalEvent(new CExternalEvent(this.eventsProcessor, COND_EVNT_ON_NEXT, null));
         if (bNext) {
             return true;
@@ -12513,12 +12599,31 @@
         return  this.animationDrawer.isDrawingAnimated(sDrawingId);
     };
 
+    CAnimationPlayer.prototype.isDemoPlayer = function () {
+        return false;
+    };
+    CAnimationPlayer.prototype.asc_isDemoPlayer = function () {
+        return this.isDemoPlayer();
+    };
+    CAnimationPlayer.prototype["asc_isDemoPlayer"] = CAnimationPlayer.prototype.asc_isDemoPlayer;
+    CAnimationPlayer.prototype.asc_getElapsedTicks = function () {
+        return this.getElapsedTicks();
+    };
+    CAnimationPlayer.prototype["asc_getElapsedTicks"] = CAnimationPlayer.prototype.asc_getElapsedTicks;
+    CAnimationPlayer.prototype.asc_getSlideNum = function () {
+        return this.slide ? this.slide.num : -1;
+    };
+    CAnimationPlayer.prototype["asc_getSlideNum"] = CAnimationPlayer.prototype.asc_getSlideNum;
+
 
     function CDemoAnimPlayer(oSlide) {
         CAnimationPlayer.call(this, oSlide, null);
     }
 
     InitClass(CDemoAnimPlayer, CAnimationPlayer, 0);
+    CDemoAnimPlayer.prototype.isDemoPlayer = function () {
+        return true;
+    };
     CDemoAnimPlayer.prototype.updateTimingList = function () {
         this.timings.length = 0;
         var oTiming = this.slide.timing;
