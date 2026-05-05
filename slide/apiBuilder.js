@@ -6810,7 +6810,7 @@
 	 * @memberof ApiDrawing
 	 * @typeofeditors ["CPE"]
 	 * @returns {string}
-	 * @see office-js-api/Examples/{Editor}/ApiDocumentContent/Methods/GetInternalId.js
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetInternalId.js
 	 */
 	ApiDrawing.prototype.GetInternalId = function() {
 		return this.Drawing.GetId();

@@ -1688,13 +1688,13 @@
 		options = options || {};
 		
 		let _options = {
-			NewLineSeparator   : GetStringParameter(options["NewLineSeparator"], "\r"),
+			NewLineSeparator   : GetStringParameter(options["NewLineSeparator"], "\r", false),
 			Numbering          : GetBoolParameter(options["Numbering"], true),
 			Math               : GetBoolParameter(options["Math"], true),
-			TableCellSeparator : GetStringParameter(options["TableCellSeparator"], "\t"),
-			TableRowSeparator  : GetStringParameter(options["TableRowSeparator"], "\r\n"),
-			ParaSeparator      : GetStringParameter(options["ParaSeparator"], "\r\n"),
-			TabSymbol          : GetStringParameter(options["TabSymbol"], "\t")
+			TableCellSeparator : GetStringParameter(options["TableCellSeparator"], "\t", false),
+			TableRowSeparator  : GetStringParameter(options["TableRowSeparator"], "\r\n", false),
+			ParaSeparator      : GetStringParameter(options["ParaSeparator"], "\r\n", false),
+			TabSymbol          : GetStringParameter(options["TabSymbol"], "\t", false)
 		};
 		
 		private_RefreshRangesPosition();
@@ -6420,12 +6420,50 @@
 		return this.Document.GetText({
 			Numbering          : GetBoolParameter(options["Numbering"], true),
 			Math               : GetBoolParameter(options["Math"], true),
-			TableCellSeparator : GetStringParameter(options["TableCellSeparator"], '\t'),
-			TableRowSeparator  : GetStringParameter(options["TableRowSeparator"], '\r\n'),
-			ParaSeparator      : GetStringParameter(options["ParaSeparator"], '\r\n'),
-			TabSymbol          : GetStringParameter(options["TabSymbol"], '\t'),
-			NewLineSeparator   : GetStringParameter(options["NewLineSeparator"], '\r')
+			TableCellSeparator : GetStringParameter(options["TableCellSeparator"], '\t', false),
+			TableRowSeparator  : GetStringParameter(options["TableRowSeparator"], '\r\n', false),
+			ParaSeparator      : GetStringParameter(options["ParaSeparator"], '\r\n', false),
+			TabSymbol          : GetStringParameter(options["TabSymbol"], '\t', false),
+			NewLineSeparator   : GetStringParameter(options["NewLineSeparator"], '\r', false)
 		});
+	};
+	/**
+	 * Replaces all content of the current document content object with the specified text,
+	 * preserving the formatting of the first paragraph.
+	 * @memberof ApiDocumentContent
+	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
+	 * @param {string} text - The text to set.
+	 * @return {ApiRun}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiDocumentContent/Methods/SetText.js
+	 */
+	ApiDocumentContent.prototype.SetText = function(text)
+	{
+		let docContent = this.Document;
+		
+		let firstParagraph = docContent.GetFirstParagraph();
+		
+		let textPr = firstParagraph.GetFirstRunPr();
+		let endPr  = firstParagraph.GetParaEndPr();
+		let paraPr = firstParagraph.GetDirectParaPr();
+		
+		docContent.ClearContent(false);
+		
+		let para;
+		let logicDocument = private_GetLogicDocument();
+		if (logicDocument && logicDocument.IsDocumentEditor())
+			para = new AscWord.Paragraph();
+		else
+			para = new AscWord.Paragraph(null, true);
+		
+		let run  = new AscWord.Run();
+		run.AddText(text);
+		run.SetPr(textPr.Copy());
+		para.SetDirectParaPr(paraPr);
+		para.SetParaEndPr(endPr);
+		para.AddToContent(0, run);
+		docContent.AddToContent(0, para);
+		return new ApiRun(run);
 	};
 
 	/**
@@ -6573,6 +6611,7 @@
 		
 		return this.AddParagraph().AddText(text);
 	};
+
 
 	/**
 	 * Class representing a custom XML manager, which provides methods to manage custom XML parts in the document.
@@ -11470,7 +11509,7 @@
 	 * @param {boolean} [options.Math=false] - Defines if the resulting string will include mathematical expressions or not.
 	 * @param {string} [options.NewLineSeparator='\r'] - Defines how the line separator will be specified in the resulting string. Any string can be used. The default separator is "\r".
 	 * @param {string} [options.TabSymbol='\t'] - Defines how the tab will be specified in the resulting string (does not apply to numbering). Any string can be used. The default symbol is "\t".
-	 * @typeofeditors ["CDE"]
+	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
 	 * @return {string}
 	 * @see office-js-api/Examples/{Editor}/ApiParagraph/Methods/GetText.js
 	 */
@@ -11484,6 +11523,30 @@
 			Math             : GetBoolParameter(options["Math"], true),
 			TabSymbol        : GetStringParameter(options["TabSymbol"], "\t")
 		});
+	};
+	/**
+	 * Replaces the paragraph content with the specified text.
+	 * @memberof ApiParagraph
+	 * @param {string} text - The text to set.
+	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
+	 * @return {ApiRun}
+	 * @see office-js-api/Examples/{Editor}/ApiParagraph/Methods/SetText.js
+	 */
+	ApiParagraph.prototype.SetText = function(text)
+	{
+		text = GetStringParameter(text, "");
+		
+		let p = this.Paragraph;
+		
+		let textPr = p.GetFirstRunPr();
+		let run    = new AscWord.Run();
+		p.RemoveFromContent(0, p.GetElementsCount());
+		p.AddToContent(0, run);
+		
+		run.AddText(text);
+		run.SetPr(textPr.Copy());
+		
+		return new ApiRun(run);
 	};
 	/**
 	 * Returns the text properties for a paragraph end mark.
@@ -15691,6 +15754,40 @@
 	ApiTableCell.prototype.AddText = function(text)
 	{
 		return this.GetContent().AddText(text);
+	};
+	/**
+	 * Returns the inner text of the current table cell.
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 * @param {object} [pr] - Options for formatting the returned text.
+	 * @param {boolean} [pr.Numbering=true] - Defines if the resulting string will include numbering or not.
+	 * @param {boolean} [pr.Math=true] - Defines if the resulting string will include mathematical expressions or not.
+	 * @param {string} [pr.TableCellSeparator='\t'] - Defines how the table cell separator will be specified in the resulting string.
+	 * @param {string} [pr.TableRowSeparator='\r\n'] - Defines how the table row separator will be specified in the resulting string.
+	 * @param {string} [pr.ParaSeparator='\r\n'] - Defines how the paragraph separator will be specified in the resulting string.
+	 * @param {string} [pr.TabSymbol='\t'] - Defines how the tab will be specified in the resulting string.
+	 * @param {string} [pr.NewLineSeparator='\r'] - Defines how the line separator will be specified in the resulting string.
+	 * @return {string}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/GetText.js
+	 */
+	ApiTableCell.prototype.GetText = function(pr)
+	{
+		return this.GetContent().GetText(pr);
+	};
+	/**
+	 * Replaces all content of the current table cell with the specified text,
+	 * preserving the formatting of the first paragraph.
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 * @param {string} text - The text to set.
+	 * @return {ApiRun}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/SetText.js
+	 */
+	ApiTableCell.prototype.SetText = function(text)
+	{
+		return this.GetContent().SetText(text);
 	};
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -29739,13 +29836,13 @@
 		options = options || {};
 		
 		let _options = {
-			NewLineSeparator   : GetStringParameter(options["NewLineSeparator"], "\r"),
+			NewLineSeparator   : GetStringParameter(options["NewLineSeparator"], "\r", false),
 			Numbering          : GetBoolParameter(options["Numbering"], true),
 			Math               : GetBoolParameter(options["Math"], true),
-			TableCellSeparator : GetStringParameter(options["TableCellSeparator"], "\t"),
-			TableRowSeparator  : GetStringParameter(options["TableRowSeparator"], "\r\n"),
-			ParaSeparator      : GetStringParameter(options["ParaSeparator"], "\r\n"),
-			TabSymbol          : GetStringParameter(options["TabSymbol"], "\t")
+			TableCellSeparator : GetStringParameter(options["TableCellSeparator"], "\t", false),
+			TableRowSeparator  : GetStringParameter(options["TableRowSeparator"], "\r\n", false),
+			ParaSeparator      : GetStringParameter(options["ParaSeparator"], "\r\n", false),
+			TabSymbol          : GetStringParameter(options["TabSymbol"], "\t", false)
 		};
 		
 		let docState = this.Document.SaveDocumentState();
@@ -30358,6 +30455,7 @@
 	ApiDocumentContent.prototype["GetAllParagraphs"]          = ApiDocumentContent.prototype.GetAllParagraphs;
 	ApiDocumentContent.prototype["GetAllTables"]              = ApiDocumentContent.prototype.GetAllTables;
 	ApiDocumentContent.prototype["GetText"]                   = ApiDocumentContent.prototype.GetText;
+	ApiDocumentContent.prototype["SetText"]                   = ApiDocumentContent.prototype.SetText;
 	ApiDocumentContent.prototype["GetCurrentParagraph"]       = ApiDocumentContent.prototype.GetCurrentParagraph;
 	ApiDocumentContent.prototype["GetCurrentRun"]             = ApiDocumentContent.prototype.GetCurrentRun;
 	ApiDocumentContent.prototype["GetCurrentContentControl"]  = ApiDocumentContent.prototype.GetCurrentContentControl;
@@ -30583,6 +30681,7 @@
 	ApiParagraph.prototype["GetParentTable"]         = ApiParagraph.prototype.GetParentTable;
 	ApiParagraph.prototype["GetParentTableCell"]     = ApiParagraph.prototype.GetParentTableCell;
 	ApiParagraph.prototype["GetText"]                = ApiParagraph.prototype.GetText;
+	ApiParagraph.prototype["SetText"]                = ApiParagraph.prototype.SetText;
 	ApiParagraph.prototype["GetTextPr"]              = ApiParagraph.prototype.GetTextPr;
 	ApiParagraph.prototype["SetTextPr"]              = ApiParagraph.prototype.SetTextPr;
 	ApiParagraph.prototype["InsertInContentControl"] = ApiParagraph.prototype.InsertInContentControl;
@@ -30778,6 +30877,8 @@
 	ApiTableCell.prototype["GetBackgroundColor"]       = ApiTableCell.prototype.GetBackgroundColor;
 	ApiTableCell.prototype["SetColumnBackgroundColor"] = ApiTableCell.prototype.SetColumnBackgroundColor;
 	ApiTableCell.prototype["AddText"]                  = ApiTableCell.prototype.AddText;
+	ApiTableCell.prototype["GetText"]                  = ApiTableCell.prototype.GetText;
+	ApiTableCell.prototype["SetText"]                  = ApiTableCell.prototype.SetText;
 
 	ApiStyle.prototype["GetClassType"]               = ApiStyle.prototype.GetClassType;
 	ApiStyle.prototype["GetName"]                    = ApiStyle.prototype.GetName;
@@ -31631,9 +31732,9 @@
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Area for internal usage
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	function GetStringParameter(parameter, defaultValue)
+	function GetStringParameter(parameter, defaultValue, checkEmpty)
 	{
-		if (undefined !== parameter && typeof(parameter) === "string" && "" !== parameter)
+		if (undefined !== parameter && typeof(parameter) === "string" && ("" !== parameter || false === checkEmpty))
 			return parameter;
 
 		return defaultValue;
