@@ -8711,11 +8711,27 @@
 			throwException(new Error('Cannot modify protected sheet'));
 			return false;
 		}
+		let nStart, nEnd;
+		if (typeof nColumn === 'string') {
+			if (AscCommon.isNumber(nColumn)) {
+				nStart = nEnd = parseFloat(nColumn);
+			} else {
+				let sRange = nColumn.indexOf(':') === -1 ? nColumn + ':' + nColumn : nColumn;
+				let oAscRange = AscCommonExcel.g_oRangeCache.getAscRange(sRange);
+				if (!oAscRange) {
+					return false;
+				}
+				nStart = oAscRange.c1;
+				nEnd = oAscRange.c2;
+			}
+		} else {
+			nStart = nEnd = nColumn;
+		}
 		if (bWithotPaddings) {
 			let wb = this.worksheet.workbook;
 			nWidth = (nWidth * wb.maxDigitWidth - wb.paddingPlusBorder) / wb.maxDigitWidth;
 		}
-		this.worksheet.setColWidth(nWidth, nColumn, nColumn);
+		this.worksheet.setColWidth(nWidth, nStart, nEnd);
 		return true;
 	};
 
