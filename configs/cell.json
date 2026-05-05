@@ -178,6 +178,7 @@
 			"cell/model/CellComment.js",
 			"cell/model/whatIfAnalysis.js",
 			"cell/model/SheetMemory.js",
+			"cell/model/RangeAttrArray.js",
 			"cell/model/WorkbookElems.js",
 			"cell/model/Workbook.js",
 			"cell/model/Serialize.js",
