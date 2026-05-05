@@ -4319,6 +4319,11 @@ var CPresentation = CPresentation || function(){};
             return;
         }
 
+		// The link annot is located on the page content layer, so it cannot have a comment
+		if (oAnnot.IsLink()) {
+			return;
+		}
+
         let bUseContentsAsComment = oAnnot.IsUseContentAsComment();
         
         if (oAnnot.IsUseInDocument()) {
