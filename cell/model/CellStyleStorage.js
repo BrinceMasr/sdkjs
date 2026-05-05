@@ -306,6 +306,36 @@
 		setCellXf(ws, cell.nRow, cell.nCol, cell.xfs);
 	}
 
+	// Stage 4 writer entry point.
+	// Resolves the direct-cell xfIndex for a serializer in the order:
+	//   1. Worksheet.cellStylesByCol — the new primary read source.
+	//   2. cell.xfs (from SheetMemory via loadContent) — the safety shadow
+	//      that is still being kept in sync until Stage 8.
+	// During Stages 4–7 both stores are equivalent for any cell that has been
+	// touched by setStyleInternal; the fallback covers cells that were loaded
+	// from disk and never mutated, where cellStylesByCol has not been
+	// populated by the shadow mirror yet.
+	function getWriterCellXfIndex(ws, row, col, cell) {
+		if (ws && row >= 0 && col >= 0) {
+			var idx = getCellXf(ws, row, col);
+			if (idx > 0) {
+				return idx;
+			}
+		}
+		return (cell && cell.xfs) ? cell.xfs.getIndexNumber() : 0;
+	}
+
+	// Same as getWriterCellXfIndex but returns the CellXfs object suitable
+	// for stylesForWrite.add(...). Returns null when there is no direct style.
+	function getWriterCellXfs(ws, row, col, cell) {
+		var idx = getWriterCellXfIndex(ws, row, col, cell);
+		if (idx <= 0) {
+			return null;
+		}
+		var cache = window['AscCommonExcel'].g_StyleCache;
+		return cache ? cache.getXf(idx) : null;
+	}
+
 	function installOnWorksheet(WorksheetCtor) {
 		WorksheetCtor.prototype.getCellStyleStore = function (col, opt_create) {
 			return getCellStyleStore(this, col, opt_create);
@@ -344,6 +374,8 @@
 		shiftCellXfs: shiftCellXfs,
 		iterCellXfs: iterCellXfs,
 		mirrorCellStyle: mirrorCellStyle,
+		getWriterCellXfIndex: getWriterCellXfIndex,
+		getWriterCellXfs: getWriterCellXfs,
 		installOnWorksheet: installOnWorksheet,
 		_toXfIndex: _toXfIndex
 	};

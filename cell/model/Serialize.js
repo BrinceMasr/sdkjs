@@ -6838,9 +6838,12 @@
                     oThis.WriteRowAndFixEmpty(oThis.memory, cur, allRow, tempRow, excludedCount, oThis.stylesForWrite);
                 }
                 //prepare cell for writing
+                // Stage 4: read the direct cell style through Worksheet.getCellXf
+                // (the new primary storage), with cell.xfs / SheetMemory as the
+                // safety-shadow fallback while shadow mode is still active.
                 var nXfsId;
-                var cellXfs = cell.xfs;
-                nXfsId = oThis.stylesForWrite.add(cell.xfs);
+                var cellXfs = AscCommonExcel.CellStyleStorage.getWriterCellXfs(ws, nRow0, nCol0, cell);
+                nXfsId = oThis.stylesForWrite.add(cellXfs);
 
                 // save even an empty style like Excel (needed to remove row/column style)
                 let needWrite = cellXfs || !cell.isNullText()

@@ -168,4 +168,84 @@ $(function () {
 		assert.strictEqual(row._tempCell._isTransient, true,
 			'Row._tempCell is reused across rows and must not pollute cellStylesByCol');
 	});
+
+	// ---- Stage 4: writer helpers ----
+
+	QUnit.test('Stage 4: getWriterCellXfIndex prefers cellStylesByCol when populated', function (assert) {
+		let cell = new AscCommonExcel.Cell(ws);
+		cell.setRowCol(80, 80);
+		cell.setStyleInternal(makeFill(0xCAFE00));
+		let idx = cell.xfs.getIndexNumber();
+		// Both stores are equivalent (shadow mode is in sync).
+		assert.strictEqual(ws.getCellXf(80, 80), idx, 'shadow synced');
+
+		let helper = AscCommonExcel.CellStyleStorage;
+		assert.strictEqual(helper.getWriterCellXfIndex(ws, 80, 80, cell), idx,
+			'helper returns the shadowed index');
+		let xfs = helper.getWriterCellXfs(ws, 80, 80, cell);
+		assert.ok(xfs && xfs.getIndexNumber() === idx,
+			'helper resolves CellXfs from cellStylesByCol');
+	});
+
+	QUnit.test('Stage 4: getWriterCellXfs falls back to cell.xfs when cellStylesByCol is empty', function (assert) {
+		// Simulate a "loaded from disk, never mutated" cell: in-memory xfs set
+		// directly, no shadow mirror to cellStylesByCol.
+		let cell = new AscCommonExcel.Cell(ws);
+		cell.setRowCol(81, 81);
+		// Pre-cache an xfs through g_StyleCache without going through setStyleInternal.
+		let xfs = AscCommonExcel.g_StyleCache.addXf(makeFill(0xBADC0DE));
+		cell.xfs = xfs;
+		let idx = xfs.getIndexNumber();
+		assert.strictEqual(ws.getCellXf(81, 81), 0,
+			'cellStylesByCol intentionally empty (no setStyleInternal)');
+
+		let helper = AscCommonExcel.CellStyleStorage;
+		assert.strictEqual(helper.getWriterCellXfIndex(ws, 81, 81, cell), idx,
+			'helper falls back to cell.xfs when shadow has no entry');
+		let resolved = helper.getWriterCellXfs(ws, 81, 81, cell);
+		assert.strictEqual(resolved && resolved.getIndexNumber(), idx,
+			'helper returns the fallback CellXfs');
+	});
+
+	QUnit.test('Stage 4: getWriterCellXfIndex returns 0 when neither store has a style', function (assert) {
+		let cell = new AscCommonExcel.Cell(ws);
+		cell.setRowCol(82, 82);
+		// Both stores empty.
+		let helper = AscCommonExcel.CellStyleStorage;
+		assert.strictEqual(helper.getWriterCellXfIndex(ws, 82, 82, cell), 0);
+		assert.strictEqual(helper.getWriterCellXfs(ws, 82, 82, cell), null);
+	});
+
+	QUnit.test('Stage 4: getWriterCellXfs is robust to missing ws / negative coords / null cell', function (assert) {
+		let helper = AscCommonExcel.CellStyleStorage;
+		assert.strictEqual(helper.getWriterCellXfs(null, 0, 0, null), null);
+		assert.strictEqual(helper.getWriterCellXfs(ws, -1, 0, null), null);
+		assert.strictEqual(helper.getWriterCellXfs(ws, 0, -1, null), null);
+		// With a cell having xfs but invalid coords, the helper still falls
+		// back to cell.xfs (writer's last-resort safety).
+		let cell = new AscCommonExcel.Cell(ws);
+		cell.xfs = AscCommonExcel.g_StyleCache.addXf(makeFill(0x0F0F0F));
+		let resolved = helper.getWriterCellXfs(ws, -1, -1, cell);
+		assert.ok(resolved, 'fallback engages even when coords are invalid');
+		assert.strictEqual(resolved.getIndexNumber(), cell.xfs.getIndexNumber());
+	});
+
+	QUnit.test('Stage 4: when cellStylesByCol disagrees with cell.xfs, cellStylesByCol wins', function (assert) {
+		let cell = new AscCommonExcel.Cell(ws);
+		cell.setRowCol(83, 83);
+		cell.setStyleInternal(makeFill(0x111111));
+		let firstIdx = cell.xfs.getIndexNumber();
+
+		// Manually override the shadow store with a different value to
+		// simulate a divergence; helper must follow the new primary source.
+		let secondXfs = AscCommonExcel.g_StyleCache.addXf(makeFill(0x222222));
+		ws.setCellXf(83, 83, secondXfs);
+		assert.notStrictEqual(secondXfs.getIndexNumber(), firstIdx,
+			'two distinct xfIndex values for the test');
+
+		let helper = AscCommonExcel.CellStyleStorage;
+		assert.strictEqual(helper.getWriterCellXfIndex(ws, 83, 83, cell),
+			secondXfs.getIndexNumber(),
+			'cellStylesByCol is the new primary read source');
+	});
 });

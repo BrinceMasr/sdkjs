@@ -9304,11 +9304,15 @@
 				xfs = oCol.xfs.clone();
 			// Inheritance-only write: stamp the row/column style into the cell
 			// in-memory, but don't let it pollute cellStylesByCol — the new
-			// storage must hold direct cell styles only.
+			// storage must hold direct cell styles only. try/finally guards
+			// the flag restore against any throw inside setStyleInternal.
 			var prevTransient = cell._isTransient;
 			cell._isTransient = true;
-			cell.setStyleInternal(xfs);
-			cell._isTransient = prevTransient;
+			try {
+				cell.setStyleInternal(xfs);
+			} finally {
+				cell._isTransient = prevTransient;
+			}
 			t.cellsByColRowsCount = Math.max(t.cellsByColRowsCount, nRow + 1);
 			t.nRowsCount = Math.max(t.nRowsCount, t.cellsByColRowsCount);
 			if (nCol >= t.nColsCount)

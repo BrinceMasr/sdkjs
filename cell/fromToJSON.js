@@ -2643,10 +2643,13 @@
 		{
 			var sRef = AscCommon.g_oCellAddressUtils.colnumToColstr(oCell.nCol + 1) + (oCell.nRow + 1);
 			var oFormulaForWrite = oCell.isFormula() ? oThis.InitSaveManager.PrepareFormulaToWrite(oCell) : null;
+			// Stage 4: prefer cellStylesByCol, fall back to cell.xfs (SheetMemory shadow).
+			var oCellXfsForWrite = AscCommonExcel.CellStyleStorage.getWriterCellXfs(
+				oCell.ws, oCell.nRow, oCell.nCol, oCell);
 			oTempCell = {
 				"f": SerFormula(oFormulaForWrite),
 				"r": sRef,
-				"s": oThis.stylesForWrite.add(oCell.getStyle()),
+				"s": oThis.stylesForWrite.add(oCellXfsForWrite),
 				"t": ToXml_ST_CellValueType(oCell.type)
 			}
 			if (oCell.multiText)
