@@ -8177,7 +8177,8 @@
 	var trackRevisionBuffer = {
 		name : "",
 		userId : "",
-		isTrack : false
+		isTrack : false,
+		isUser : false
 	};
 	/**
 	 * Enables or disables AI-assisted change tracking in the document.
@@ -8196,8 +8197,19 @@
 			this.Document.SetGlobalTrackRevisions(true);
 			
 			let userInfo = Asc.editor.DocInfo.get_UserInfo();
-			trackRevisionBuffer.userId   = userInfo.get_Id();
-			trackRevisionBuffer.userName = userInfo.get_FullName();
+			if (!userInfo)
+			{
+				trackRevisionBuffer.isUser = false;
+				
+				userInfo = new Asc.asc_CUserInfo();
+				Asc.editor.DocInfo.put_UserInfo(userInfo);
+			}
+			else
+			{
+				trackRevisionBuffer.isUser   = true;
+				trackRevisionBuffer.userId   = userInfo.get_Id();
+				trackRevisionBuffer.userName = userInfo.get_FullName();
+			}
 			
 			let userId = "uid-" + assistantName;
 			userInfo.put_Id(userId);
@@ -8208,9 +8220,23 @@
 		else
 		{
 			this.Document.SetGlobalTrackRevisions(trackRevisionBuffer.isTrack);
-			let userInfo = Asc.editor.DocInfo.get_UserInfo();
-			userInfo.put_Id(trackRevisionBuffer.userId);
-			userInfo.put_FullName(trackRevisionBuffer.userName);
+			
+			if (trackRevisionBuffer.isUser)
+			{
+				let userInfo = Asc.editor.DocInfo.get_UserInfo();
+				if (!userInfo)
+				{
+					userInfo = new Asc.asc_CUserInfo();
+					Asc.editor.DocInfo.put_UserInfo(userInfo);
+				}
+				userInfo.put_Id(trackRevisionBuffer.userId);
+				userInfo.put_FullName(trackRevisionBuffer.userName);
+			}
+			else
+			{
+				Asc.editor.DocInfo.put_UserInfo(null);
+			}
+			
 		}
 		return true;
 	};
