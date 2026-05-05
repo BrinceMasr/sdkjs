@@ -19550,12 +19550,20 @@
 	{
 		let oDrawing = this.Drawing;
 		if(!oDrawing)
-			return false
+			return false;
 		let oLogicDocument = private_GetLogicDocument();
 		let oDrawingObjects = oLogicDocument.GetDrawingObjects();
 		if (!oDrawingObjects)
 			return false;
+
+		let bIsLast = oDrawingObjects.selectedObjects.length === 1
+			&& oDrawingObjects.selectedObjects[0] === oDrawing;
+
 		oDrawingObjects.deselectObject(oDrawing);
+
+		if (bIsLast)
+			oLogicDocument.DrawingsController.RemoveSelection();
+
 		return true;
 	};
 	/**
