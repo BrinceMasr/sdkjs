@@ -591,6 +591,9 @@
 
         this.LoadImageAsync = function(imgSrc)
         {
+            if (oThis.map_image_index[imgSrc])
+                return;
+
             var oImage = new CImage(imgSrc);
 
             oImage.Status = ImageLoadStatus.Loading;

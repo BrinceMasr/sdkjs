@@ -6770,8 +6770,10 @@
 		let slide = this.Drawing.parent;
 		if (!slide || !slide.graphicObjects) return false;
 
+		let oldSpPr = oDrawing.Drawing.spPr;
+
 		slide.replaceSp(this.Drawing, oDrawing.Drawing);
-        
+
 		oDrawing.Drawing.setSpPr(this.Drawing.spPr.createDuplicate());
         if(oDrawing.GetClassType() === "table")
         {
@@ -6793,6 +6795,11 @@
             xfrm.setOffY(this.GetPosY() / 36000);
             xfrm.setExtX(this.GetWidth() / 36000);
             xfrm.setExtY(this.GetHeight() / 36000);
+            if (oldSpPr)
+            {
+                oDrawing.Drawing.spPr.setFill(oldSpPr.Fill ? oldSpPr.Fill.createDuplicate() : null);
+                oDrawing.Drawing.spPr.setLn(oldSpPr.ln ? oldSpPr.ln.createDuplicate() : null);
+            }
             oDrawing.Drawing.recalculate();
         }
         return true;

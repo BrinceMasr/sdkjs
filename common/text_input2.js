@@ -147,6 +147,7 @@
 		this.TextAreaHeight = this.TextAreaHeightMin;
 
 		this.isMoveAccurateSync = false;
+		this.resizeOnMove = false;
 	}
 
 	var CTextInputPrototype = CTextInput2.prototype;
@@ -1105,6 +1106,11 @@
 			var rectObject = AscCommon.UI.getBoundingClientRect(_elemSrc);
 			this.FixedPosCheckElementX = rectObject.left;
 			this.FixedPosCheckElementY = rectObject.top;
+
+			if (rectObject.width < 1 && rectObject.height < 1)
+				this.resizeOnMove = true;
+			else
+				this.resizeOnMove = false;
 		}
 
 		var _width = _elemSrc.style.width;
@@ -1211,7 +1217,7 @@
 
 		if (this.oldParentForResize)
 		{
-			if (Math.abs(AscCommon.AscBrowser.zoom - this.oldBrowserZoom) > 0.1)
+			if (this.resizeOnMove || Math.abs(AscCommon.AscBrowser.zoom - this.oldBrowserZoom) > 0.1)
 				this.onResize(this.oldParentForResize);
 		}
 
