@@ -638,17 +638,17 @@
 	RemoveOutlineParagraphsManager.prototype.saveContentPosSourceParagraph = function (sourceContent) {
 		const content = sourceContent;
 		const contentPos = content.GetContentPosition(false, true);
-		this.outlineView.setSavedPosition(new SavedPosition(contentPos));
+		this.outlineView.setSavedPosition(new SavedPosition(new ContentPosition(contentPos)));
 	};
 	RemoveOutlineParagraphsManager.prototype.saveEndPosSourceParagraph = function (sourceParagraph) {
 		const contentPos = [{Class: sourceParagraph.GetParent(), Position: sourceParagraph.Index}];
 		sourceParagraph.GetEndContentPosition(contentPos);
-		this.outlineView.setSavedPosition(new SavedPosition(contentPos));
+		this.outlineView.setSavedPosition(new SavedPosition(new ContentPosition(contentPos)));
 	};
 	RemoveOutlineParagraphsManager.prototype.saveStartPosSourceParagraph = function (sourceParagraph) {
 		const contentPos = [{Class: sourceParagraph.GetParent(), Position: sourceParagraph.Index}];
 		sourceParagraph.GetStartContentPosition(contentPos);
-		this.outlineView.setSavedPosition(new SavedPosition(contentPos));
+		this.outlineView.setSavedPosition(new SavedPosition(new ContentPosition(contentPos)));
 	};
 	RemoveOutlineParagraphsManager.prototype.processNullableContent = function (outlineParagraph, isEdgeParagraph) {
 		const outlineView = this.outlineView;
