@@ -15680,7 +15680,7 @@
 		return allCellsUpdated;
 	};
 	/**
-	 * Appends text to the first paragraph of the cell content.
+	 * Appends text to the end of the cell content.
 	 * @memberof ApiTableCell
 	 * @typeofeditors ["CDE"]
 	 * @param {string} text - The text to append.
