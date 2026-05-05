@@ -97,7 +97,7 @@
 			const startPos = this.startPos.getPosition(outlineView);
 			let endPos;
 			if (this.endPos) {
-				endPos = this.endPos.getPosition(docContent);
+				endPos = this.endPos.getPosition(outlineView);
 			}
 			if (startPos && endPos) {
 				docContent.SetContentSelection(startPos, endPos, 0, 0, 0);
@@ -119,11 +119,12 @@
 	ContentPosition.prototype.getPosition = function (outlineView) {
 		return outlineView.rebuildSavedPositionPos(this.pos);
 	};
-	function SlidePosition(slide) {
+	function SlidePosition(slide, isStart) {
 		this.slide = slide;
+		this.isStart = isStart;
 	}
 	SlidePosition.prototype.getPosition = function (outlineView) {
-		return outlineView.rebuildSavedSlidePos(this.slide);
+		return outlineView.rebuildSavedSlidePos(this.slide, this.isStart);
 	};
 	SlidePosition.prototype.isDocStatePosition = function () {
 		return false;
@@ -1504,7 +1505,7 @@
 		}
 		return null;
 	};
-	OutlineView.prototype.rebuildSavedSlidePos = function (slide) {
+	OutlineView.prototype.rebuildSavedSlidePos = function (slide, isStart) {
 		if (!slide) {
 			return null;
 		}
@@ -1514,7 +1515,11 @@
 		if (info && docContent) {
 			const outlineParagraph = info.outlineParagraph;
 			const contentPos = [{Class: docContent, Position: outlineParagraph.Index}];
-			outlineParagraph.GetStartContentPosition(contentPos);
+			if (isStart) {
+				outlineParagraph.GetStartContentPosition(contentPos);
+			} else {
+				outlineParagraph.GetEndContentPosition(contentPos, true);
+			}
 			return contentPos;
 		}
 		return null;
@@ -2252,22 +2257,26 @@
 			this.setSavedPosition(new SavedPosition(new SlidePosition(info.slide)));
 		} else if (idx === 0) {
 			const savedPosition = this.getSavedPosition();
-			if (content.IsSelectionUse()) {
+			if (outlineParagraph.IsSelectionUse()) {
 				if (direction === AscWord.Direction.BACKWARD) {
-					savedPosition.endPos = new SlidePosition(info.slide);
+					const endPos = outlineParagraph.Get_ParaContentPos(true, false);
+					savedPosition.endPos = new SlidePosition(info.slide, outlineParagraph.IsCursorAtBegin(endPos));
 				} else {
-					savedPosition.startPos = new SlidePosition(info.slide);
+					const startPos = outlineParagraph.Get_ParaContentPos(true, true);
+					savedPosition.startPos = new SlidePosition(info.slide, outlineParagraph.IsCursorAtBegin(startPos));
 				}
 			} else if (!savedPosition.startPos) {
 				savedPosition.startPos = new SlidePosition(info.slide);
 			}
 		} else if (idx === count - 1) {
 			const savedPosition = this.getSavedPosition();
-			if (content.IsSelectionUse()) {
+			if (outlineParagraph.IsSelectionUse()) {
 				if (direction === AscWord.Direction.BACKWARD) {
-					savedPosition.startPos = new SlidePosition(info.slide);
+					const startPos = outlineParagraph.Get_ParaContentPos(true, true);
+					savedPosition.startPos = new SlidePosition(info.slide, outlineParagraph.IsCursorAtBegin(startPos));
 				} else {
-					savedPosition.endPos = new SlidePosition(info.slide);
+					const endPos = outlineParagraph.Get_ParaContentPos(true, false);
+					savedPosition.endPos = new SlidePosition(info.slide, outlineParagraph.IsCursorAtBegin(endPos));
 				}
 			} else if (!savedPosition.startPos) {
 				savedPosition.startPos = new SlidePosition(info.slide);
