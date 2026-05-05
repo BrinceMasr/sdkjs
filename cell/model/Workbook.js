@@ -9302,7 +9302,13 @@
 				xfs = row.xfs.clone();
 			else if (null != oCol && null != oCol.xfs)
 				xfs = oCol.xfs.clone();
+			// Inheritance-only write: stamp the row/column style into the cell
+			// in-memory, but don't let it pollute cellStylesByCol — the new
+			// storage must hold direct cell styles only.
+			var prevTransient = cell._isTransient;
+			cell._isTransient = true;
 			cell.setStyleInternal(xfs);
+			cell._isTransient = prevTransient;
 			t.cellsByColRowsCount = Math.max(t.cellsByColRowsCount, nRow + 1);
 			t.nRowsCount = Math.max(t.nRowsCount, t.cellsByColRowsCount);
 			if (nCol >= t.nColsCount)
@@ -12004,6 +12010,7 @@
 			if (cell === null) {
 				if (!emptyCell) {
 					emptyCell = new Cell(t);
+					emptyCell._isTransient = true;
 				}
 				cell = emptyCell;
 			}
@@ -15004,6 +15011,11 @@
 		this.isCalc = false;
 
 		this._hasChanged = false;
+		// Stage 3 shadow mode: when true, setStyleInternal and clearDataKeepXf
+		// skip mirroring this cell's xfs into Worksheet.cellStylesByCol.
+		// Set explicitly at known temporary-cell creation sites; the default
+		// false matches a real, persistent cell.
+		this._isTransient = false;
 	}
 	Cell.prototype.clear = function(keepIndex) {
 			this.nRow = -1;
@@ -15031,6 +15043,10 @@
 		var xfs = this.xfs;
 		this.clearData();
 		this.xfs = xfs;
+		// `this.xfs = xfs` is a direct assignment that bypasses setStyleInternal,
+		// so mirror into cellStylesByCol explicitly. setBorder below also routes
+		// through setStyleInternal, which mirrors again — that's idempotent.
+		AscCommonExcel.CellStyleStorage.mirrorCellStyle(this);
 		AscCommon.History.TurnOff();
 		this.setBorder(border);
 		AscCommon.History.TurnOn();
@@ -16079,6 +16095,7 @@
 	Cell.prototype.setStyleInternal = function(xfs) {
 		this.xfs = g_StyleCache.addXf(xfs);
 		this._hasChanged = true;
+		AscCommonExcel.CellStyleStorage.mirrorCellStyle(this);
 	};
 	Cell.prototype.getFormula=function(){
 		var res = "";
@@ -18709,6 +18726,7 @@
 			var bExcludeHiddenRows = (this.worksheet.bExcludeHiddenRows || excludeHiddenRows);
 			var excludedCount = 0;
 			var tempCell = new Cell(this.worksheet);
+			tempCell._isTransient = true;
 			wb.loadCells.push(tempCell);
 			for (j = oBBox.c1; j <= minC; ++j) {
 				colData = this.worksheet.getColDataNoEmpty(j);
@@ -19890,6 +19908,7 @@
 						xfs = oCol.xfs.clone();
 				});
 				var oTempCell = new Cell(t.worksheet);
+				oTempCell._isTransient = true;
 				oTempCell.setRowCol(t.bbox.r1, t.bbox.c1);
 				oTempCell.setStyleInternal(xfs);
 				valueForEdit2 = oTempCell.getValueForEdit2();
@@ -19975,6 +19994,7 @@
 						xfs = oCol.xfs.clone();
 				});
 				var oTempCell = new Cell(t.worksheet);
+				oTempCell._isTransient = true;
 				oTempCell.setRowCol(t.bbox.r1, t.bbox.c1);
 				oTempCell.setStyleInternal(xfs);
 				value2 = oTempCell.getValue2(dDigitsCount, fIsFitMeasurer);

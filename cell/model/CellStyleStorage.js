@@ -286,6 +286,26 @@
 		}
 	}
 
+	// Stage 3 shadow mirror entry point.
+	// Called from Cell.setStyleInternal (and Cell.clearDataKeepXf, which bypasses
+	// setStyleInternal). Mirrors the in-memory `cell.xfs` into the worksheet's
+	// per-column range storage so cellStylesByCol stays in sync with the
+	// authoritative SheetMemory path. Skipped for transient cells, for cells
+	// without a real (row, col), and for cells without a Worksheet host.
+	function mirrorCellStyle(cell) {
+		if (!cell || cell._isTransient) {
+			return;
+		}
+		if (cell.nRow < 0 || cell.nCol < 0) {
+			return;
+		}
+		var ws = cell.ws;
+		if (!ws || !ws.cellStylesByCol) {
+			return;
+		}
+		setCellXf(ws, cell.nRow, cell.nCol, cell.xfs);
+	}
+
 	function installOnWorksheet(WorksheetCtor) {
 		WorksheetCtor.prototype.getCellStyleStore = function (col, opt_create) {
 			return getCellStyleStore(this, col, opt_create);
@@ -323,6 +343,7 @@
 		copyCellXfRange: copyCellXfRange,
 		shiftCellXfs: shiftCellXfs,
 		iterCellXfs: iterCellXfs,
+		mirrorCellStyle: mirrorCellStyle,
 		installOnWorksheet: installOnWorksheet,
 		_toXfIndex: _toXfIndex
 	};
