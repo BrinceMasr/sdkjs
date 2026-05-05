@@ -21321,9 +21321,7 @@
 			bAscent = !sortConditions[0].ConditionDescending;
 		}
 		if(opt_custom_sort) {
-			//caseSensitive = opt_custom_sort.CaseSensitive;
-			//for now we ignore this flag, since string comparison in excel sorting works differently (e.g. "Green" > "green")
-			//possibly worth using localeCompare function - but need to verify if the comparison will be correct
+			caseSensitive = opt_custom_sort.CaseSensitive;
 		}
 
 		var nLastRow0, nLastCol0;
