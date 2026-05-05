@@ -6593,7 +6593,7 @@
 	/**
 	 * Appends the specified text to the end of the document content.
 	 * @memberof ApiDocumentContent
-	 * @typeofeditors ["CDE"]
+	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
 	 * @param {string} text - The text to add.
 	 * @returns {ApiRun}
 	 * @since 9.4.0
