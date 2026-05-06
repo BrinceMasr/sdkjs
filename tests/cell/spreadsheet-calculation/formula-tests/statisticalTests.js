@@ -11570,6 +11570,42 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 0);
 
+		// Case #44-49: rank-path thresholds must bracket comparator-equal NFC/NFD
+		// strings as a single equivalence class.
+		// CF1 = "\u00e9" (NFC single code point), CF3 = "e\u0301" (NFD base+combining).
+		// localeCompare treats both as equal, so the threshold table must use lower/
+		// upper bounds via stringCompare rather than === identity in _sortedStrings.
+		AscCommonExcel.g_oCountIfCache.clean();
+		ws.getRange2("CF1:CF3").cleanAll();
+		ws.getRange2("CF1").setValue("\u00e9");
+		ws.getRange2("CF2").setValue("z");
+		ws.getRange2("CF3").setValue("e\u0301");
+
+		// "<=" must include the comparator-equal run (NFC + NFD) -> 2.
+		oParser = new parserFormula('COUNTIF(CF1:CF3,"<=e\u0301")', "AC8", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2, 'Unicode <= NFD-\u00e9: NFC and NFD entries both match');
+
+		// ">=" exercises the lower-bound branch \u2014 guards against future threshold-table changes.
+		oParser = new parserFormula('COUNTIF(CF1:CF3,">=e\u0301")', "AC8", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 3, 'Unicode >= NFD-\u00e9: NFC, NFD and z all match');
+
+		// ">" must exclude the comparator-equal run -> 1.
+		oParser = new parserFormula('COUNTIF(CF1:CF3,">e\u0301")', "AC8", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Unicode > NFD-\u00e9: only z matches (NFC and NFD are locale-equal to the criterion)');
+
+		// "<" exercises the lower-bound branch \u2014 guards against future threshold-table changes.
+		oParser = new parserFormula('COUNTIF(CF1:CF3,"<e\u0301")', "AC8", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 0, 'Unicode < NFD-\u00e9: nothing sorts before the comparator-equal run');
+
+		// Sanity: equality goes through the non-rank matchingFunction path.
+		oParser = new parserFormula('COUNTIF(CF1:CF3,"e\u0301")', "AC8", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2, 'Unicode = NFD-\u00e9: NFC and NFD entries both match (non-rank equality path)');
+
 		testArrayFormula2(assert, "COUNTIF", 2, 2);
 	});
 
