@@ -1806,6 +1806,8 @@ var CPresentation = CPresentation || function(){};
             oActiveObj.OnBlur();
         }
         else if (oActiveObj.IsForm()) {
+			Asc.editor.End_CompositeInput();
+			
             if (this.IsEditFieldsMode() && false == oActiveObj.IsInForm()) {
                 this.activeForm = null;
                 oActiveObj.asc_curImageState = undefined;
