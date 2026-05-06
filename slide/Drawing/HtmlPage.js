@@ -4282,7 +4282,7 @@
 				isDrawNotes = true;
 		}
 		var isDrawOutline = false;
-		if (this.IsThumbnailsSupported() && this.Thumbnails)
+		if (this.IsThumbnailsSupported() && this.Thumbnails && this.Thumbnails.isOutline())
 		{
 			overlayOutline = this.Thumbnails.m_oOverlayApi;
 			overlayOutline.SetBaseTransform();
@@ -5048,6 +5048,24 @@
 		this.IsSupportThumbnails = bEnabled;
 		this.ShowThumbnails(bEnabled);
 	};
+	CEditorPage.prototype.SetThumbnails = function (bIsOutlineThumbnails) {
+		if (!this.Thumbnails.isInit || !this.IsSupportThumbnails) {
+			return;
+		}
+		if (bIsOutlineThumbnails) {
+			if (this.Thumbnails instanceof AscCommon.CThumbnailsManager) {
+				this.Thumbnails.ClearAllCanvases();
+				this.Thumbnails = new AscCommon.COutlineThumbnailsManager(this);
+				this.Thumbnails.Init();
+			}
+		} else {
+			if (this.Thumbnails instanceof AscCommon.COutlineThumbnailsManager) {
+				this.Thumbnails.ClearAllCanvases();
+				this.Thumbnails = new AscCommon.CThumbnailsManager(this);
+				this.Thumbnails.Init();
+			}
+		}
+	}
 	CEditorPage.prototype.ShowThumbnails = function (bShow) {
 		if (this.IsThumbnailsShown() === bShow)
 			return;

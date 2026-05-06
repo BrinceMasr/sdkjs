@@ -262,11 +262,10 @@
 				wordControl.m_oScrollThumb_ = new AscCommon.ScrollObject('id_vertical_scroll_thmbnl', settings);
 				wordControl.m_oScrollThumbApi = wordControl.m_oScrollThumb_;
 
-				const oThis = this;
 				const eventName = isHorizontalOrientation ? 'scrollhorizontal' : 'scrollvertical';
 				wordControl.m_oScrollThumb_.bind(eventName, function (evt) {
 					const maxScrollPosition = isHorizontalOrientation ? evt.maxScrollX : evt.maxScrollY;
-					oThis.thumbnailsScroll(oThis, evt.scrollD, maxScrollPosition);
+					wordControl.Thumbnails.thumbnailsScroll(wordControl.Thumbnails, evt.scrollD, maxScrollPosition);
 				});
 			}
 			wordControl.m_oScrollThumb_.isHorizontalScroll = isHorizontalOrientation;
@@ -298,6 +297,17 @@
 	CThumbnailsManagerBase.prototype.OnRecalculateSlide = function (index) {
 
 	}
+	CThumbnailsManagerBase.prototype.ClearAllCanvases = function () {
+		const controls = [this.m_oWordControl.m_oThumbnails, this.m_oWordControl.m_oThumbnailsBack];
+		for (let i = 0; i < controls.length; i += 1) {
+			const canvas = controls[i].HtmlElement;
+			if (!canvas) {
+				continue;
+			}
+			const context = AscCommon.AscBrowser.getContext2D(canvas);
+			context.clearRect(0, 0, canvas.width, canvas.height);
+		}
+	};
 
 	function CThumbnailsManager(editorPage) {
 		CThumbnailsManagerBase.call(this, editorPage);
@@ -305,7 +315,7 @@
 		this.lastPixelRatio = 0;
 		this.m_oFontManager = new AscFonts.CFontManager();
 
-		this.m_bIsScrollVisible = true;
+		this.m_bIsScrollVisible = false;
 
 		// cached measure
 		this.DigitWidths = [];
@@ -345,7 +355,7 @@
 
 		this.SelectPageEnabled = true;
 
-		this.MouseDownTrack = new AscCommon.COutlineMouseDownTrack(this);
+		this.MouseDownTrack = new AscCommon.CMouseDownTrack(this);
 
 		this.MouseTrackCommonImage = null;
 
@@ -2399,10 +2409,7 @@
 		this.lastPixelRatio = 0;
 		this.m_oFontManager = new AscFonts.CFontManager();
 
-		this.m_bIsScrollVisible = true;
-
-		// cached measure
-		this.DigitWidths = [];
+		this.m_bIsScrollVisible = false;
 
 		// skin
 		this.backgroundColor = "#B0B0B0";
@@ -2413,20 +2420,13 @@
 		this.const_offset_b = 0;
 		this.const_border_w = 4;
 
-		// size & position
-		this.SlideWidth = 297;
-		this.SlideHeight = 210;
-
 		this.m_dScrollY = 0;
 		this.m_dScrollY_max = 0;
 
-		this.m_bIsUpdate = false;
+		this.m_bIsUpdate = true;
 
 		//regular mode
 		this.thumbnails = new AscCommon.CSlidesThumbnails();
-		this.bIsEmptyDrawed = false;
-
-		this.m_oCacheManager = new CCacheManager(true);
 
 		this.FocusObjType = FOCUS_OBJECT_MAIN;
 		this.LockMainObjType = false;
@@ -2434,8 +2434,6 @@
 		this.SelectPageEnabled = true;
 
 		this.MouseDownTrack = new AscCommon.COutlineMouseDownTrack(this);
-
-		this.MouseTrackCommonImage = null;
 
 		this.MouseThumbnailsAnimateScrollTopTimer = -1;
 		this.MouseThumbnailsAnimateScrollBottomTimer = -1;
@@ -2475,16 +2473,6 @@
 			Bold: false,
 			FontSize: Math.round(10 * AscCommon.AscBrowser.retinaPixelRatio)
 		});
-
-		// измеряем все цифры
-		for (var i = 0; i < 10; i++)
-		{
-			var _meas = this.m_oFontManager.MeasureChar(("" + i).charCodeAt(0));
-			if (_meas)
-				this.DigitWidths[i] = _meas.fAdvanceX * 25.4 / 96;
-			else
-				this.DigitWidths[i] = 10;
-		}
 
 		if (Asc.editor.getThumbnailsPosition() === thumbnailsPositionMap.bottom) {
 			this.const_offset_x = Math.round(this.lastPixelRatio * 17);
@@ -2896,7 +2884,10 @@
 
 	COutlineThumbnailsManager.prototype.onCheckUpdate = function()
 	{
-		if (!this.isThumbnailsShown() || 0 == this.DigitWidths.length)
+		if (!this.isInit) {
+			return;
+		}
+		if (!this.isThumbnailsShown())
 			return;
 
 		if (this.m_oWordControl.m_oApi.isSaveFonts_Images)
@@ -3144,11 +3135,7 @@
 	// calculate
 	COutlineThumbnailsManager.prototype.RecalculateAll = function()
 	{
-		const sizes = this.m_oWordControl.m_oLogicDocument.GetSizesMM();
-		this.SlideWidth = sizes.width;
-		this.SlideHeight = sizes.height;
 		this.CheckSizes();
-
 		this.ClearCacheAttack();
 	};
 

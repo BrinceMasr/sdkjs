@@ -204,6 +204,7 @@
 		wordControl.GoToPage(0);
 		wordControl.setNotesEnable(true);
 		wordControl.setAnimPaneEnable(true);
+		wordControl.SetThumbnails(false);
 		wordControl.setThumbnailsEnable(true);
 		api.hideMediaControl();
 		api.asc_hideComments();
@@ -684,12 +685,13 @@
 			}
 		}
 		wordControl.GoToPage(nIdx);
-		presentation.Recalculate({Drawings: {All: true, Map: {}}});
 		wordControl.setNotesEnable(false);
 		wordControl.setAnimPaneEnable(false);
+		wordControl.SetThumbnails(false);
 		wordControl.setThumbnailsEnable(true);
 		api.hideMediaControl();
 		api.asc_hideComments();
+		presentation.Recalculate({Drawings: {All: true, Map: {}}});
 		presentation.Document_UpdateInterfaceState();
 	};
 	MasterSlideModeManager.prototype.isMasterSlideMode = function() {
@@ -1316,13 +1318,13 @@
 		for (let i = 0; i < presentation.notes.length; i += 1) {
 			presentation.notes[i].recalcBody();
 		}
-		presentation.Recalculate({Drawings: {All: true, Map: {}}});
 		wordControl.GoToPage(nIdx);
 		wordControl.setNotesEnable(false);
 		wordControl.setAnimPaneEnable(false);
 		wordControl.setThumbnailsEnable(false);
 		api.hideMediaControl();
 		api.asc_hideComments();
+		presentation.Recalculate({Drawings: {All: true, Map: {}}});
 		presentation.Document_UpdateInterfaceState();
 	};
 
@@ -1416,13 +1418,13 @@
 		const wordControl = this.getWordControl();
 		const presentation = this.getPresentation();
 		const api = this.getApi();
-		presentation.Recalculate({Drawings: {All: true, Map: {}}});
 		wordControl.GoToPage(0);
 		wordControl.setNotesEnable(false);
 		wordControl.setAnimPaneEnable(false);
 		wordControl.setThumbnailsEnable(false);
 		api.hideMediaControl();
 		api.asc_hideComments();
+		presentation.Recalculate({Drawings: {All: true, Map: {}}});
 		presentation.Document_UpdateInterfaceState();
 	};
 
@@ -1501,6 +1503,21 @@
 	};
 	OutlineModeManager.prototype.isThumbnailsSupported = function() {
 		return true;
+	};
+	OutlineModeManager.prototype.updateViewMode = function (oldViewManager) {
+		const wordControl = this.getWordControl();
+		const presentation = this.getPresentation();
+		const api = this.getApi();
+		wordControl.GoToPage(0);
+		wordControl.setNotesEnable(true);
+		wordControl.setAnimPaneEnable(true);
+		wordControl.SetThumbnails(true);
+		wordControl.setThumbnailsEnable(true);
+		this.outlineView.updateAll(0);
+		api.hideMediaControl();
+		api.asc_hideComments();
+		presentation.Recalculate({Drawings: {All: true, Map: {}}});
+		presentation.Document_UpdateInterfaceState();
 	};
 
 	function getViewModeByType(type, api) {
