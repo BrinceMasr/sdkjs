@@ -32,6 +32,22 @@
 
 (function (undefined) {
 
+	function rebuildPos(pos, sourceContent, sourceParagraph) {
+		const newPos = pos.slice();
+		newPos[0] = {Class: sourceContent, Position: sourceParagraph.GetIndex()};
+		newPos[1] = {Class: sourceParagraph, Position: pos[1].Position};
+		for (let i = 2; i < newPos.length; i += 1) {
+			const previousPos = newPos[i - 1];
+			const newClass = previousPos.Class.GetElement(previousPos.Position);
+			if (newClass.Get_Type() === para_Math) {
+				newPos[i].Class = newClass.Root;
+			} else {
+				newPos[i].Class = newClass;
+			}
+		}
+		return newPos;
+	}
+
 	function getOutlineTextPr(isTitle, isMathRun) {
 		const textPr = new CTextPr();
 		textPr.SetFontSize(10);
@@ -337,8 +353,8 @@
 	ForEachSelectManager.prototype.processSingleSelectedNotNullableContent = function (contentInfo, callback) {
 		if (contentInfo.content !== null) {
 			const content = contentInfo.content;
-			const startPos = this.rebuildPos(contentInfo.startPos, content, contentInfo.startParagraph);
-			const endPos = this.rebuildPos(contentInfo.endPos, content, contentInfo.endParagraph);
+			const startPos = rebuildPos(contentInfo.startPos, content, contentInfo.startParagraph);
+			const endPos = rebuildPos(contentInfo.endPos, content, contentInfo.endParagraph);
 			content.SetContentPosition(startPos, 0, 0);
 			content.SetContentSelection(startPos, endPos, 0, 0, 0, 0);
 			const res = callback({content: content, index: 0, count: 1});
@@ -355,10 +371,10 @@
 		content.MoveCursorToEndPos(false, true);
 		const targetPos = content.GetContentPosition(true, true);
 		if (contentInfo.direction === AscWord.Direction.FORWARD) {
-			const startPos = this.rebuildPos(contentInfo.startPos, content, contentInfo.startParagraph);
+			const startPos = rebuildPos(contentInfo.startPos, content, contentInfo.startParagraph);
 			content.SetContentSelection(startPos, targetPos, 0, 0, 0);
 		} else {
-			const startPos = this.rebuildPos(contentInfo.endPos, content, contentInfo.endParagraph);
+			const startPos = rebuildPos(contentInfo.endPos, content, contentInfo.endParagraph);
 			content.SetContentSelection(targetPos, startPos, 0, 0, 0);
 		}
 		const res = callback({content: content, index: 0, count: count, direction: contentInfo.direction});
@@ -392,10 +408,10 @@
 		content.MoveCursorToStartPos();
 		const targetPos = content.GetContentPosition(true, true);
 		if (contentInfo.direction === AscWord.Direction.FORWARD) {
-			const endPos = this.rebuildPos(contentInfo.endPos, content, contentInfo.endParagraph);
+			const endPos = rebuildPos(contentInfo.endPos, content, contentInfo.endParagraph);
 			content.SetContentSelection(targetPos, endPos, 0, 0, 0);
 		} else {
-			const endPos = this.rebuildPos(contentInfo.startPos, content, contentInfo.startParagraph);
+			const endPos = rebuildPos(contentInfo.startPos, content, contentInfo.startParagraph);
 			content.SetContentSelection(endPos, targetPos, 0, 0, 0);
 		}
 		const res = callback({content: content, index: count - 1, count: count, direction: contentInfo.direction});
@@ -437,17 +453,11 @@
 	};
 	ForEachSelectManager.prototype.processRealCursorContent = function (sourceParagraph, contentPos, callback) {
 		const sourceContent = sourceParagraph.GetParent();
-		const startPos = this.rebuildPos(contentPos, sourceContent, sourceParagraph);
+		const startPos = rebuildPos(contentPos, sourceContent, sourceParagraph);
 		sourceContent.SetContentPosition(startPos, 0, 0);
 		const res = callback({content: sourceContent, index: 0, count: 1});
 		sourceContent.RemoveSelection();
 		return res;
-	};
-	ForEachSelectManager.prototype.rebuildPos = function (pos, sourceContent, sourceParagraph) {
-		const newPos = pos.slice();
-		newPos[0] = {Class: sourceContent, Position: sourceParagraph.GetIndex()};
-		newPos[1] = {Class: sourceParagraph, Position: pos[1].Position};
-		return newPos;
 	};
 	ForEachSelectManager.prototype.forEachSelectedContent = function (callback) {
 		const content = this.getDocContent();
@@ -1494,13 +1504,10 @@
 	OutlineView.prototype.rebuildSavedPositionPos = function (pos) {
 		const docContent = this.getDocContent();
 		if (docContent) {
-			const newPos = pos.slice();
-			const sourceParagraph = newPos[1].Class;
+			const sourceParagraph = pos[1].Class;
 			const outlineParagraph = this.sourceToOutlineMap[sourceParagraph.GetId()];
 			if (outlineParagraph) {
-				newPos[0] = {Class: docContent, Position: outlineParagraph.Index};
-				newPos[1] = {Class: outlineParagraph, Position: pos[1].Position};
-				return newPos;
+				return rebuildPos(pos, docContent, outlineParagraph);
 			}
 		}
 		return null;

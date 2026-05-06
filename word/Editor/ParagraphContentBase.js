@@ -3855,7 +3855,7 @@ CParagraphContentWithParagraphLikeContent.prototype.SetContentPosition = functio
     this.State.ContentPos = Math.max(0, Math.min(this.Content.length - 1, Pos));
 
     // TODO: Как только в CMathContent CurPos перейдет на стандартное this.State.ContentPos убрать эту проверку
-    if (this.CurPos)
+    if (typeof this.CurPos === 'number')
         this.CurPos = this.State.ContentPos;
 
     if (this.Content[Pos] && this.Content[Pos].SetContentPosition)
