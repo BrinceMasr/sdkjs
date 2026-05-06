@@ -11612,6 +11612,95 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 2, 'Unicode = NFD-\u00e9: NFC and NFD entries both match (non-rank equality path)');
 
+		// Case #50: when several in-place string changes are flushed in a single
+		// _applyPendingStringChanges, every changed row must get its new rank — not
+		// just the last one. The rank-delta pass only shifts existing ranks; the
+		// per-row lookup is what makes the changed rows correct.
+		//
+		// In production this batch is produced by paths that apply many cell updates
+		// before any SUMIF runs: clipboard paste of a multi-cell selection, undo/redo
+		// of a range edit, or collaborative-edit sync. The standard test fixture
+		// recalc engine flushes pending between every formula re-evaluation, so it
+		// can't reproduce a batch from setValue alone — we drive changeColumnsData
+		// directly to emulate the path that paste/undo/sync would take.
+		// Initial CG1:CG3 = {"a","b","a"}, sorted=[a,b], counts={a:2,b:1}, ranks=[0,1,0].
+		// Apply two changes: CG1 a→c, CG3 a→c. Net: dc=1 ac=1, canIncremental passes.
+		// With per-row rank fix-up disabled, only the last changed row gets the
+		// correct rank; the earlier one keeps a stale rank shifted by rank-delta.
+		AscCommonExcel.g_oCountIfCache.clean();
+		ws.getRange2("CG1:CG3").cleanAll();
+		ws.getRange2("CG1").setValue("a");
+		ws.getRange2("CG2").setValue("b");
+		ws.getRange2("CG3").setValue("a");
+		// Prime the rank index so the next batch hits the incremental fix-up branch
+		// instead of a full rebuild.
+		oParser = new parserFormula('COUNTIF(CG1:CG3,">a")', "AC8", ws);
+		assert.ok(oParser.parse());
+		oParser.calculate();
+
+		(function applyMultiCellBatch() {
+			const tc = AscCommonExcel.g_oCountIfCache.typedCache;
+			const wsId = ws.getId();
+			const stringT = AscCommonExcel.cElementType.string;
+			const cg1 = ws.getRange2("CG1").bbox;
+			const cg3 = ws.getRange2("CG3").bbox;
+			tc.changeColumnsData(wsId, {nCol: cg1.c1, nRow: cg1.r1, ws: ws}, "a", stringT, "c", stringT);
+			tc.changeColumnsData(wsId, {nCol: cg3.c1, nRow: cg3.r1, ws: ws}, "a", stringT, "c", stringT);
+		})();
+
+		oParser = new parserFormula('COUNTIF(CG1:CG3,"<c")', "AC8", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'batch in-place: only "b" remains < "c" (returns 2 if only the last changed row is rank-fixed)');
+		oParser = new parserFormula('COUNTIF(CG1:CG3,">=c")', "AC8", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2, 'batch in-place: both "c" entries match >= c (returns 1 if CG1 keeps stale rank=0)');
+
+		// Case #51: when range expansion (pushValue/append) is followed by
+		// changeColumnsData on the new row before the next _ensureStringRank,
+		// _stringCounts must already reflect the appended string. Otherwise the
+		// in-place decrement underflows (count was never incremented), _sortedChanged
+		// drops the string from sorted by mistake, and the rank index loses an entry
+		// that real cells still hold.
+		//
+		// In production this interleave occurs when a SUMIF range is widened in the
+		// same recalc cycle that mutates the new row (e.g. an array-formula spill
+		// that grows and rewrites simultaneously, or paste of a column that adds
+		// rows past the previous column.end). The test fixture cannot fire this
+		// sequence from setValue, so we drive pushValue + changeColumnsData directly.
+		// CH1=foo, CH2=bar are the original range. CH3 is appended manually with the
+		// transient value "bar"; then we change CH3 to "foo" before the next rank-compare.
+		// Final state: stringData=[foo,bar,foo], counts must be {foo:2,bar:1}, sorted=[bar,foo].
+		AscCommonExcel.g_oCountIfCache.clean();
+		ws.getRange2("CH1:CH3").cleanAll();
+		ws.getRange2("CH1").setValue("foo");
+		ws.getRange2("CH2").setValue("bar");
+		ws.getRange2("CH3").setValue("foo");
+		oParser = new parserFormula('COUNTIF(CH1:CH2,">a")', "AC8", ws);
+		assert.ok(oParser.parse());
+		oParser.calculate();
+
+		(function applyExpandWithInterleavedChange() {
+			const tc = AscCommonExcel.g_oCountIfCache.typedCache;
+			const wsId = ws.getId();
+			const stringT = AscCommonExcel.cElementType.string;
+			const ch1 = ws.getRange2("CH1").bbox;
+			const ch3 = ws.getRange2("CH3").bbox;
+			const col = tc.data[wsId][ch1.c1];
+			tc.pushValue(col, {type: stringT, value: "bar"}, ch3.r1);
+			col.end = ch3.r1;
+			tc.changeColumnsData(wsId, {nCol: ch3.c1, nRow: ch3.r1, ws: ws}, "bar", stringT, "foo", stringT);
+		})();
+
+		// Without eager count materialization the pending decrement of "bar" would
+		// underflow (CH3's "bar" was never counted), drop bar from sortedChanged and
+		// remove it from _sortedStrings — leaving CH2's "bar" without a rank entry.
+		oParser = new parserFormula('COUNTIF(CH1:CH3,"<=bar")', "AC8", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'append+change interleave: CH2="bar" must still match <= bar');
+		oParser = new parserFormula('COUNTIF(CH1:CH3,">=foo")', "AC8", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2, 'append+change interleave: both "foo" entries match >= foo');
+
 		testArrayFormula2(assert, "COUNTIF", 2, 2);
 	});
 
