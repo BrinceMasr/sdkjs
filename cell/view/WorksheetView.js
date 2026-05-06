@@ -19380,9 +19380,11 @@ function isAllowPasteLink(pastedWb) {
 					}
 				}
 			} else {
+				this.model.dynamicArrayManager._externalReferenesNeedAdd = parseResult && parseResult.externalReferenesNeedAdd;
 				c.setValue(AscCommonExcel.getFragmentsText(val), function (r) {
 					ret = r;
 				}, null, applyByArray ? bbox : ((!applyByArray && ctrlKey) ? null : undefined), null, AscCommonExcel.bIsSupportDynamicArrays && (dynamicSelectionRange || beforeSpillRange) ? {range: dynamicSelectionRange, beforeSpillRange: beforeSpillRange} : null);
+				this.model.dynamicArrayManager._externalReferenesNeedAdd = null;
 			}
 
 			this.workbook.FinalizeAction();

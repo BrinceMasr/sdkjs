@@ -6466,6 +6466,18 @@
 	Workbook.prototype.addExternalReferencesAfterParseFormulas = function (externalReferenesNeedAdd) {
 		let newExternalReferences = [];
 		for (let i in externalReferenesNeedAdd) {
+			let entries = externalReferenesNeedAdd[i];
+			let allAlreadyExist = entries.length > 0;
+			for (let j = 0; j < entries.length; j++) {
+				if (!entries[j].alreadyExists) {
+					allAlreadyExist = false;
+					break;
+				}
+			}
+			if (allAlreadyExist) {
+				continue;
+			}
+
 			let needAdd = false;
 			let newExternalReference = this.getExternalReferenceById(i);
 			if (!newExternalReference) {
@@ -6474,8 +6486,11 @@
 				needAdd = true;
 			}
 
-			for (let j = 0; j < externalReferenesNeedAdd[i].length; j++) {
-				let oNewSheet = externalReferenesNeedAdd[i][j];
+			for (let j = 0; j < entries.length; j++) {
+				let oNewSheet = entries[j];
+				if (oNewSheet.alreadyExists) {
+					continue;
+				}
 				if (null === newExternalReference.getSheetByName(oNewSheet.sheet)) {
 					let newSheet = oNewSheet.sheet;
 					newExternalReference.addSheetName(newSheet, true);
@@ -15507,6 +15522,16 @@
 					if (externalLinks[i]) {
 						delete externalLinks[i];
 					}
+				}
+			}
+		}
+
+		// full set of external references collected while parsing the formula in _saveCellValueAfterEdit
+		let parseExternalRefs = this.ws && this.ws.dynamicArrayManager && this.ws.dynamicArrayManager._externalReferenesNeedAdd;
+		if (parseExternalRefs && externalLinks) {
+			for (i in parseExternalRefs) {
+				if (externalLinks[i]) {
+					delete externalLinks[i];
 				}
 			}
 		}

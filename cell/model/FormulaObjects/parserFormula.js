@@ -6377,6 +6377,16 @@ _func[cElementType.cell3D] = _func[cElementType.cell];
 		this.hashOperators.push({start: start, end: end, type: type});
 	};
 
+	ParseResult.prototype.addExternalReference = function(key, sheetData) {
+		if (!this.externalReferenesNeedAdd) {
+			this.externalReferenesNeedAdd = [];
+		}
+		if (!this.externalReferenesNeedAdd[key]) {
+			this.externalReferenesNeedAdd[key] = [];
+		}
+		this.externalReferenesNeedAdd[key].push(sheetData);
+	};
+
 	ParseResult.prototype.addRefPos = function(start, end, index, oper, isName) {
 		if (this.refPos) {
 			this.refPos.push({start: start, end: end, index: index, oper: oper, isName: isName});
@@ -8615,22 +8625,10 @@ function parserFormula( formula, parent, _ws ) {
 						externalLink = t.wb.getExternalLinkIndexByName(externalLink);
 						if (externalLink === null) {
 							externalLink = receivedLink ? receivedLink : _3DRefTmp[3];
-							if (!parseResult.externalReferenesNeedAdd) {
-								parseResult.externalReferenesNeedAdd = [];
-							}
-							if (!parseResult.externalReferenesNeedAdd[externalLink]) {
-								parseResult.externalReferenesNeedAdd[externalLink] = [];
-							}
-							parseResult.externalReferenesNeedAdd[externalLink].push({sheet: sheetName /*_3DRefTmp[1]*/});
+							parseResult.addExternalReference(externalLink, {sheet: sheetName /*_3DRefTmp[1]*/});
 						} else {
 							isExternalRefExist = true;
-							if (!parseResult.externalReferenesNeedAdd) {
-								parseResult.externalReferenesNeedAdd = [];
-							}
-							if (!parseResult.externalReferenesNeedAdd[externalName]) {
-								parseResult.externalReferenesNeedAdd[externalName] = [];
-							}
-							parseResult.externalReferenesNeedAdd[externalName].push({sheet: sheetName /*_3DRefTmp[1]*/});
+							parseResult.addExternalReference(externalName, {sheet: sheetName /*_3DRefTmp[1]*/, alreadyExists: true});
 						}
 					}
 
@@ -9200,19 +9198,12 @@ function parserFormula( formula, parent, _ws ) {
 
 				if (this.importFunctionsRangeLinks) {
 					for (let i in this.importFunctionsRangeLinks) {
-						let externalLink = this.wb.getExternalLinkIndexByName(i);
-						if (externalLink === null) {
-							externalLink = i;
-							if (!parseResult.externalReferenesNeedAdd) {
-								parseResult.externalReferenesNeedAdd = [];
-							}
-							if (!parseResult.externalReferenesNeedAdd[externalLink]) {
-								parseResult.externalReferenesNeedAdd[externalLink] = [];
-							}
-
-							for (var j = 0; j < this.importFunctionsRangeLinks[i].length; j++) {
-								parseResult.externalReferenesNeedAdd[externalLink].push({sheet: this.importFunctionsRangeLinks[i][j].sheet, notUpdateId: true});
-							}
+						// register every IMPORTRANGE link in parseResult.externalReferenesNeedAdd, including ones
+						// that already exist in the workbook (mark them with alreadyExists=true so
+						// addExternalReferencesAfterParseFormulas skips re-creation, but checkRemoveExternalReferences
+						let alreadyExists = this.wb.getExternalLinkIndexByName(i) !== null;
+						for (var j = 0; j < this.importFunctionsRangeLinks[i].length; j++) {
+							parseResult.addExternalReference(i, {sheet: this.importFunctionsRangeLinks[i][j].sheet, notUpdateId: true, alreadyExists: alreadyExists});
 						}
 					}
 
