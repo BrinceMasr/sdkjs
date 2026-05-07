@@ -87,8 +87,11 @@
 		// Notes offset for slides
 		this.TargetOffsetY = 0;
 
-		this.HtmlAreaOffset = 50; // height in pix
+		this.isUseLeftOffset = (AscCommon.AscBrowser.isAppleDevices || AscCommon.AscBrowser.isAndroid) ? true : false; // new browsers remove autoscroll textarea
+		this.HtmlAreaOffset = (AscCommon.AscBrowser.isAppleDevices || AscCommon.AscBrowser.isAndroid) ? 50 : 0; // height in pix
 		this.HtmlAreaWidth = 200;
+
+		this.lastFontSize = 0; // in pixels
 		// ---------------------------------------------------------------
 
 		// current text state information -------------------------
@@ -136,6 +139,15 @@
 			x : 0,
 			y : 0
 		};
+
+		this.oldBrowserZoom = 1;
+		this.oldParentForResize = "";
+
+		this.TextAreaHeightMin = 50;
+		this.TextAreaHeight = this.TextAreaHeightMin;
+
+		this.isMoveAccurateSync = false;
+		this.resizeOnMove = false;
 	}
 
 	var CTextInputPrototype = CTextInput2.prototype;
@@ -923,7 +935,7 @@
 			this.HtmlDiv.style.position   = "absolute";
 		this.HtmlDiv.style.zIndex     = 10;
 		this.HtmlDiv.style.width      = TEXT_INPUT_DEBUG ? "200px" : "20px";
-		this.HtmlDiv.style.height     = "50px";
+		this.HtmlDiv.style.height     = this.TextAreaHeight + "px";
 		this.HtmlDiv.style.overflow   = "hidden";
 
 		this.HtmlDiv.style.boxSizing 		= "content-box";
@@ -947,20 +959,33 @@
 		var _style = "";
 		if (!TEXT_INPUT_DEBUG)
 		{
-			_style = ("left:-" + (this.HtmlAreaWidth >> 1) + "px;top:" + (-this.HtmlAreaOffset) + "px;");
+			let _left = this.isUseLeftOffset ? (this.HtmlAreaWidth >> 1) : 0;
+			_style = ("left:-" +_left + "px;top:" + (-this.HtmlAreaOffset) + "px;");
 			_style += "color:transparent;caret-color:transparent;background:transparent;";
 
 			if (this.Api.isUseOldMobileVersion())
 				_style += (AscCommon.AscBrowser.isAppleDevices && !AscCommon.AscBrowser.isTelegramWebView && (AscCommon.AscBrowser.maxTouchPoints > 0)) ? "font-size:0px;" : "font-size:8px;";
 			else
-				_style += "font-size:8px;";
+			{
+				this.lastFontSize = 8;
+				_style += ("font-size:" + this.lastFontSize + "px;");
+			}
 		}
 		else
 		{
 			_style = "left:0px;top:0px;color:black;caret-color:black;font-size:16px;background:transparent;";
 		}
-		_style += ("border:none;position:absolute;text-shadow:0 0 0 #000;outline:none;width:" + this.HtmlAreaWidth + "px;height:50px;");
-		_style += "overflow:hidden;padding:0px;margin:0px;font-family:arial;resize:none;font-weight:normal;box-sizing:content-box;-moz-box-sizing:content-box;-webkit-box-sizing:content-box;";
+
+		_style += "margin:0px;";
+		let textAreaWidth = this.HtmlAreaWidth;
+		if (window.CSS && CSS.supports && CSS.supports("transform", "scaleX(0.2)")) {
+			textAreaWidth *= 5;
+			_style += "transform:scaleX(0.2);";
+			_style += "margin-right:-" + (textAreaWidth * 0.8) + "px;";
+		}
+
+		_style += ("border:none;position:absolute;text-shadow:0 0 0 #000;outline:none;width:" + textAreaWidth + "px;height:100%;");
+		_style += "overflow:hidden;padding:0px;font-family:arial;resize:none;font-weight:normal;box-sizing:content-box;-moz-box-sizing:content-box;-webkit-box-sizing:content-box;";
 		_style += "touch-action: none;-webkit-touch-callout: none;";
 
 		this.HtmlArea.setAttribute("style", _style);
@@ -1025,6 +1050,20 @@
 			}, false);
 		}
 
+		if (this.Api.isMobileVersion && AscCommon.AscBrowser.isAppleDevices)
+		{
+			var blockMouseEmulation = function(e)
+			{
+				if (document.activeElement === oThis.HtmlArea)
+				{
+					//e.stopImmediatePropagation();
+					e.preventDefault();
+				}
+			};
+			document.addEventListener("mousedown", blockMouseEmulation, true);
+			document.addEventListener("mouseup", blockMouseEmulation, true);
+		}
+
 		this.Api.Input_UpdatePos();
 
 		this.checkViewMode();
@@ -1040,7 +1079,7 @@
 		// need another parent. so that it scrolls, not oHtmlParent
 		var oHtmlDivScrollable = document.createElement("div");
 		oHtmlDivScrollable.id = "area_id_main";
-		let styleZIndex = TEXT_INPUT_DEBUG ? "z-index:50;" : "z-index:0;";
+		let styleZIndex = TEXT_INPUT_DEBUG ? "z-index:50;" : "z-index:-1;";
 		oHtmlDivScrollable.setAttribute("style", "background:transparent;border:none;position:absolute;padding:0px;margin:0px;pointer-events:none;" + styleZIndex);
 		var parentStyle = getComputedStyle(oHtmlParent);
 		oHtmlDivScrollable.style.left = parentStyle.left;
@@ -1059,11 +1098,19 @@
 		if (!_elem || !_elemSrc)
 			return;
 
+		this.oldBrowserZoom = AscCommon.AscBrowser.zoom;
+		this.oldParentForResize = editorContainerId;
+
 		if (AscCommon.AscBrowser.isChrome)
 		{
 			var rectObject = AscCommon.UI.getBoundingClientRect(_elemSrc);
 			this.FixedPosCheckElementX = rectObject.left;
 			this.FixedPosCheckElementY = rectObject.top;
+
+			if (rectObject.width < 1 && rectObject.height < 1)
+				this.resizeOnMove = true;
+			else
+				this.resizeOnMove = false;
 		}
 
 		var _width = _elemSrc.style.width;
@@ -1134,13 +1181,17 @@
 				focusHtmlElement(this.getFocusElement());
 		}
 	};
+	CTextInputPrototype.moveAccurateForce = function()
+	{
+		this.isMoveAccurateSync = true;
+	};
 	CTextInputPrototype.moveAccurate = function(x, y)
 	{
 		if (!this.moveAccurateFunc)
 		{
 			this.moveAccurateFunc = function() {
 				let ctx = AscCommon.g_inputContext;
-				ctx.move(ctx.moveAccurateInfo.x, ctx.moveAccurateInfo.y);
+				ctx.move(ctx.moveAccurateInfo.x / AscCommon.AscBrowser.retinaPixelRatio, ctx.moveAccurateInfo.y / AscCommon.AscBrowser.retinaPixelRatio);
 				ctx.moveAccurateInfo.id = -1;
 			};
 		}
@@ -1150,19 +1201,60 @@
 
 		this.moveAccurateInfo.x = x;
 		this.moveAccurateInfo.y = y;
-		this.moveAccurateInfo.id = setTimeout(this.moveAccurateFunc, 20);
+
+		if (true === this.isMoveAccurateSync)
+		{
+			this.isMoveAccurateSync = false;
+			this.moveAccurateFunc();
+		}
+		else
+			this.moveAccurateInfo.id = setTimeout(this.moveAccurateFunc, 20);
 	};
 	CTextInputPrototype.move = function(x, y)
 	{
 		if (this.Api.isUseOldMobileVersion())
 			return;
 
+		if (this.oldParentForResize)
+		{
+			if (this.resizeOnMove || Math.abs(AscCommon.AscBrowser.zoom - this.oldBrowserZoom) > 0.1)
+				this.onResize(this.oldParentForResize);
+		}
+
 		var oTarget = document.getElementById(this.TargetId);
 		if (!oTarget)
 			return;
 
+		let targetSize = parseInt(oTarget.style.height);
 		var xPos = x ? x : parseInt(oTarget.style.left);
-		var yPos = (y ? y : parseInt(oTarget.style.top)) + parseInt(oTarget.style.height);
+		var yPos = (y ? y : parseInt(oTarget.style.top));
+
+		if (this.isUseLeftOffset)
+			yPos += targetSize;
+
+		let addOffset = 0;
+		if (!this.isUseLeftOffset)
+		{
+			addOffset = 5;
+			if (targetSize > 100)
+				targetSize = 100;
+
+			let areaH = targetSize + 2 * addOffset;
+			if (areaH < this.TextAreaHeightMin)
+				areaH = this.TextAreaHeightMin;
+
+			if (areaH != this.TextAreaHeight)
+			{
+				this.TextAreaHeight = areaH;
+				this.HtmlDiv.style.height = this.TextAreaHeight + "px";
+			}
+
+			if (Math.abs(this.lastFontSize - targetSize) > 2)
+			{
+				this.lastFontSize = targetSize;
+				this.HtmlArea.style.fontSize = ((2 * addOffset) + this.lastFontSize) + "px";
+			}
+		}
 
 		if (AscCommon.AscBrowser.isSafari && AscCommon.AscBrowser.isMobile)
 			xPos = -100;
@@ -1175,7 +1267,7 @@
 		}
 
 		this.HtmlDiv.style.left = xPos + this.FixedPosCheckElementX + "px";
-		this.HtmlDiv.style.top  = yPos + this.FixedPosCheckElementY + this.TargetOffsetY + this.HtmlAreaOffset + "px";
+		this.HtmlDiv.style.top  = yPos - addOffset + this.FixedPosCheckElementY + this.TargetOffsetY + this.HtmlAreaOffset + "px";
 
 		this.HtmlArea.scrollTop = this.HtmlArea.scrollHeight;
 		//this.log("" + this.HtmlArea.scrollTop + ", " + this.HtmlArea.scrollHeight);

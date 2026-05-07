@@ -182,6 +182,49 @@
 		assert.strictEqual(sheet.GetRange("A1").GetRowHeight(), 30, "GetRowHeight returns the value that was set");
 	});
 
+	QUnit.test("SetColumnWidth", function (assert) {
+		const sheet = AscTest.JsApi.GetActiveSheet();
+		sheet.worksheet.workbook.maxDigitWidth = 7;
+
+		// Number argument — column index (0-based)
+		assert.strictEqual(sheet.SetColumnWidth(0, 10), true, "SetColumnWidth(0, 10) returns true");
+		assert.strictEqual(sheet.GetRange("A1").GetColumnWidth(), 10, "Column A has width 10 after SetColumnWidth(0, 10)");
+
+		// Numeric string — same as number
+		assert.strictEqual(sheet.SetColumnWidth("1", 12), true, 'SetColumnWidth("1", 12) returns true');
+		assert.strictEqual(sheet.GetRange("B1").GetColumnWidth(), 12, 'Column B (index 1) has width 12 after SetColumnWidth("1", 12)');
+
+		// Single column letter
+		assert.strictEqual(sheet.SetColumnWidth("C", 15), true, 'SetColumnWidth("C", 15) returns true');
+		assert.strictEqual(sheet.GetRange("C1").GetColumnWidth(), 15, 'Column C has width 15 after SetColumnWidth("C", 15)');
+
+		// Single column range "X:X"
+		assert.strictEqual(sheet.SetColumnWidth("D:D", 20), true, 'SetColumnWidth("D:D", 20) returns true');
+		assert.strictEqual(sheet.GetRange("D1").GetColumnWidth(), 20, 'Column D has width 20 after SetColumnWidth("D:D", 20)');
+
+		// Multi-column range "X:Y"
+		assert.strictEqual(sheet.SetColumnWidth("E:G", 25), true, 'SetColumnWidth("E:G", 25) returns true');
+		assert.strictEqual(sheet.GetRange("E1").GetColumnWidth(), 25, 'Column E has width 25 after SetColumnWidth("E:G", 25)');
+		assert.strictEqual(sheet.GetRange("F1").GetColumnWidth(), 25, 'Column F has width 25 after SetColumnWidth("E:G", 25)');
+		assert.strictEqual(sheet.GetRange("G1").GetColumnWidth(), 25, 'Column G has width 25 after SetColumnWidth("E:G", 25)');
+
+		// Untouched column keeps its previous width
+		assert.notStrictEqual(sheet.GetRange("H1").GetColumnWidth(), 25, "Column H is not affected by SetColumnWidth(\"E:G\", 25)");
+
+		// Multi-letter column reference
+		assert.strictEqual(sheet.SetColumnWidth("AA", 18), true, 'SetColumnWidth("AA", 18) returns true');
+		assert.strictEqual(sheet.GetRange("AA1").GetColumnWidth(), 18, 'Column AA has width 18 after SetColumnWidth("AA", 18)');
+
+		// Arbitrary invalid string — returns false and does not change any column width
+		const widthA = sheet.GetRange("A1").GetColumnWidth();
+		const widthC = sheet.GetRange("C1").GetColumnWidth();
+		const widthAA = sheet.GetRange("AA1").GetColumnWidth();
+		assert.strictEqual(sheet.SetColumnWidth("not_a_range", 99), false, 'SetColumnWidth("not_a_range", 99) returns false');
+		assert.strictEqual(sheet.GetRange("A1").GetColumnWidth(), widthA, "Column A width unchanged after invalid range");
+		assert.strictEqual(sheet.GetRange("C1").GetColumnWidth(), widthC, "Column C width unchanged after invalid range");
+		assert.strictEqual(sheet.GetRange("AA1").GetColumnWidth(), widthAA, "Column AA width unchanged after invalid range");
+	});
+
 	QUnit.test("SetDisplayGridlines", function (assert) {
 		const sheet = AscTest.JsApi.GetActiveSheet();
 

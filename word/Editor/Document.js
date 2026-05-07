@@ -1218,8 +1218,8 @@ function CDocument(DrawingDocument, isMainLogicDocument)
 
 	this.Layout = this.Layouts.Print;
 	
-	this.CustomTextAnnotator = false !== isMainLogicDocument ? new AscWord.CustomTextAnnotator(this) : null;
-	
+	if (false !== isMainLogicDocument)
+		this.InitCustomTextAnnotator();
 	
 	this.Content[0] = new AscWord.Paragraph(this);
     this.Content[0].Set_DocumentNext(null);
@@ -1467,6 +1467,7 @@ function CDocument(DrawingDocument, isMainLogicDocument)
 	this.PreventPreDelete          = false; // Заглушка на случай, когда удаляемые объекты, не удаляются, а переносятся
 	this.ClearNotesOnPreDelete     = true;  // Очищать ли сноски при удалении (выключаем, при сплите параграфа) // TODO: Объединить с PreventPreDelete
 	this.ForceScrollToSelectionEnd = false; // При некоторых действиях (переход стрелками), нужно переместиться к концу селекта, даже если часть селекта видна
+	this.UpdateTargetOnRecalculate = true;
 
 	this.DrawTableMode = {
 		Start  : false,
@@ -10717,7 +10718,9 @@ CDocument.prototype.OnMouseUp = function(e, X, Y, PageIndex)
 	
 	if (!this.IsTextSelectionUse() && (this.IsInText(X, Y, this.CurPage) || -1 !== this.DrawingObjects.IsInDrawingObject(X, Y, this.CurPage, this)))
 	{
-		this.CustomTextAnnotator.onClick(X, Y, this.CurPage, e);
+		let customTextAnnotator = this.GetCustomTextAnnotator();
+		if (customTextAnnotator)
+			customTextAnnotator.onClick(X, Y, this.CurPage, e);
 	}
 	
 	let _t = this;
@@ -12454,8 +12457,9 @@ CDocument.prototype.private_UpdateTracks = function(bSelection, bEmptySelection)
 
 	this.UpdateContentControlFocusState(oInlineLevelSdt ? oInlineLevelSdt : (oBlockLevelSdt ? oBlockLevelSdt : null));
 	
-	if (true)
-		this.CustomTextAnnotator.onCurrentParagraph(this.GetCurrentParagraph());
+	let customTextAnnotator = this.GetCustomTextAnnotator();
+	if (customTextAnnotator)
+		customTextAnnotator.onCurrentParagraph(this.GetCurrentParagraph());
 
 	if (this.private_SetCurrentSpecialForm(oCurrentForm))
 	{
@@ -14516,6 +14520,24 @@ CDocument.prototype.Viewer_OnChangePosition = function()
 	this.TrackRevisionsManager.UpdateSelectedChangesPosition(this.Api);
 	this.MathTrackHandler.OnChangePosition();
 };
+CDocument.prototype.OnUserScroll = function()
+{
+	if (this.Api.isGroupActions())
+	{
+		this.Api.setUserScrollGroupActions(true);
+		if (this.DrawingDocument.IsTargetOnScreen())
+		{
+			this.UpdateTargetOnRecalculate = true;
+		}
+		else
+		{
+			this.NeedUpdateTarget          = false;
+			this.UpdateTargetOnRecalculate = false;
+		}
+
+		this.Api.resetUserScrollGroupActionsTimer();
+	}
+};
 //----------------------------------------------------------------------------------------------------------------------
 // Функции для работы с секциями
 //----------------------------------------------------------------------------------------------------------------------
@@ -15045,7 +15067,7 @@ CDocument.prototype._isSelectionVisible = function()
 };
 CDocument.prototype.UpdateCursorOnRecalculate = function()
 {
-	let isLockScroll = false;
+	let isLockScroll = !this.UpdateTargetOnRecalculate;
 	if ((this.FullRecalc.Id && !this.FullRecalc.ScrollToTarget) || this.ViewPosition)
 		isLockScroll = true;
 	
@@ -23838,11 +23860,8 @@ CDocument.prototype.UpdateComplexField = function(oField)
 };
 CDocument.prototype.GetCurrentComplexFields = function()
 {
-	var oParagraph = this.GetCurrentParagraph();
-	if (!oParagraph)
-		return [];
-
-	return oParagraph.GetCurrentComplexFields();
+	let paragraph = this.GetCurrentParagraph();
+	return paragraph ? paragraph.GetCurrentComplexFields() : [];
 };
 CDocument.prototype.ToggleComplexFieldCodes = function()
 {
@@ -27722,11 +27741,12 @@ CDocument.prototype.private_ConvertTableToText = function(oTable, oProps)
 
 		if (!isConvertAll)
 		{
-			for (var i = oSelectedRows.End; i >= oSelectedRows.Start; i--)
+			for (let i = oSelectedRows.End; i >= oSelectedRows.Start; --i)
 			{
-				TableC.RemoveTableRow(i);
+				TableC.private_RemoveRow(i);
 			}
-			if (!oSelectedRows.IsSelectionToEnd && oSelectedRows.Start) {
+			if (!oSelectedRows.IsSelectionToEnd && oSelectedRows.Start)
+			{
 				var oNewTable = TableC.Split();
 				NewContent.after = oNewTable;
 				NewContent.before = TableC;
@@ -27856,9 +27876,6 @@ CDocument.prototype.StopSpellCheck = function()
 CDocument.prototype.ContinueSpellCheck = function()
 {
 	this.Spelling.ContinueSpellCheck();
-	
-	// TODO: Пока таймер для проверки внешний аннотаций запускаем тут
-	this.CustomTextAnnotator.continueProcessing();
 };
 CDocument.prototype.TurnOffSpellCheck = function()
 {
@@ -28533,19 +28550,16 @@ CDocument.prototype.IsFirstOnDocumentPage = function(curPage)
 {
 	return true;
 };
-/**
- * @returns {?AscWord.CustomTextAnnotator}
- */
+CDocument.prototype.InitCustomTextAnnotator = function()
+{
+};
 CDocument.prototype.GetCustomTextAnnotator = function()
 {
-	return this.CustomTextAnnotator;
+	return null;
 };
-/**
- * @returns {?AscWord.CustomMarks}
- */
 CDocument.prototype.GetCustomMarks = function()
 {
-	return this.CustomTextAnnotator ? this.CustomTextAnnotator.getMarks() : null;
+	return null;
 };
 
 function CDocumentSelectionState()

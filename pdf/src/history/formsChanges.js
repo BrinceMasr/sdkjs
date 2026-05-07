@@ -100,7 +100,8 @@ AscDFH.changesFactory[AscDFH.historyitem_Pdf_Pushbutton_Caption]		= CChangesPDFP
 AscDFH.changesFactory[AscDFH.historyitem_Pdf_Checkbox_No_Toggle_To_Off]	= CChangesPDFCheckboxNoToggleToOff;
 AscDFH.changesFactory[AscDFH.historyitem_Pdf_Checkbox_Style]			= CChangesPDFCheckboxStyle;
 AscDFH.changesFactory[AscDFH.historyitem_Pdf_Checkbox_Export_Value]		= CChangesPDFCheckboxExpValue;
-AscDFH.changesFactory[AscDFH.historyitem_Pdf_Checkbox_Options]			= CChangesPDFCheckOptions;
+AscDFH.changesFactory[AscDFH.historyitem_Pdf_Checkbox_Options]			= CChangesPDFCheckboxOptions;
+AscDFH.changesFactory[AscDFH.historyitem_Pdf_Checkbox_Checked]			= CChangesPDFCheckboxChecked;
 
 // radio
 AscDFH.changesFactory[AscDFH.historyitem_Pdf_Radiobutton_Is_Unison]	= CChangesPDFRadiobuttonIsUnison;
@@ -1959,15 +1960,33 @@ CChangesPDFRadiobuttonIsUnison.prototype.private_SetValue = function(Value)
  * @constructor
  * @extends {AscDFH.CChangesPDFArrayOfStringProperty}
  */
-function CChangesPDFCheckOptions(Class, Old, New, Color)
+function CChangesPDFCheckboxOptions(Class, Old, New, Color)
 {
 	AscDFH.CChangesPDFArrayOfStringProperty.call(this, Class, Old, New, Color);
 }
-CChangesPDFCheckOptions.prototype = Object.create(AscDFH.CChangesPDFArrayOfStringProperty.prototype);
-CChangesPDFCheckOptions.prototype.constructor = CChangesPDFCheckOptions;
-CChangesPDFCheckOptions.prototype.Type = AscDFH.historyitem_Pdf_Checkbox_Options;
-CChangesPDFCheckOptions.prototype.private_SetValue = function(Value)
+CChangesPDFCheckboxOptions.prototype = Object.create(AscDFH.CChangesPDFArrayOfStringProperty.prototype);
+CChangesPDFCheckboxOptions.prototype.constructor = CChangesPDFCheckboxOptions;
+CChangesPDFCheckboxOptions.prototype.Type = AscDFH.historyitem_Pdf_Checkbox_Options;
+CChangesPDFCheckboxOptions.prototype.private_SetValue = function(Value)
 {
 	let oForm = this.Class;
 	oForm._options = Value;
 };
+
+/**
+ * @constructor
+ * @extends {AscDFH.CChangesBaseBoolProperty}
+ */
+function CChangesPDFCheckboxChecked(Class, Old, New, Color)
+{
+	AscDFH.CChangesBaseBoolProperty.call(this, Class, Old, New, Color);
+}
+CChangesPDFCheckboxChecked.prototype = Object.create(AscDFH.CChangesBaseBoolProperty.prototype);
+CChangesPDFCheckboxChecked.prototype.constructor = CChangesPDFCheckboxChecked;
+CChangesPDFCheckboxChecked.prototype.Type = AscDFH.historyitem_Pdf_Checkbox_Checked;
+CChangesPDFCheckboxChecked.prototype.private_SetValue = function(Value)
+{
+	let oForm = this.Class;
+	oForm._checked = Value;
+};
+

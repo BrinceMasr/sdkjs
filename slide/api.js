@@ -7364,6 +7364,11 @@ background-repeat: no-repeat;\
 		this.WordControl.m_oLogicDocument.FinalizeAction(true);
 
 		this.sync_EndAction(c_oAscAsyncActionType.BlockInteraction, c_oAscAsyncAction.LoadTheme);
+
+		if (this._pluginApplyThemeCallback) {
+			this._pluginApplyThemeCallback();
+			this._pluginApplyThemeCallback = null;
+		}
 	};
 
 	asc_docs_api.prototype.ChangeLayout = function(layout_index)

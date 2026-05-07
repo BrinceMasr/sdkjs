@@ -116,14 +116,14 @@ $(function ()
 		assert.strictEqual(table.IsEmptyPage(1), false, "Check second page");
 		
 		AscTest.SetCompatibilityMode(AscCommon.document_compatibility_mode_Word15);
-		// Случай, когда таблица разбивается на строке следующей за заголовочной строкой
+		// Case when the table splits on the row following the header row
 		paragraph.SetParagraphSpacing({Before: 200});
 		AscTest.Recalculate();
 		assert.strictEqual(table.GetPagesCount(), 2, "The case when the table is split by the row following the header row (2015 compatibility)");
 		assert.strictEqual(table.IsEmptyPage(0), true, "First page should be empty");
 		assert.strictEqual(table.IsEmptyPage(1), false, "Check second page");
 		
-		// Случай, когда таблица разбивается на заголовочной строке
+		// Case when the table splits on the header row
 		paragraph.SetParagraphSpacing({Before: 225});
 		AscTest.Recalculate();
 		assert.strictEqual(table.GetPagesCount(), 2, "The case when the table is split by the row the header row (but row it's self can be split across multiple pages) (2015 compatibility)");

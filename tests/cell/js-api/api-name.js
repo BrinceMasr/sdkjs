@@ -54,4 +54,5 @@ $(function ()
 			"GetDefName throws after the name is deleted"
 		);
 	});
+
 });

@@ -1682,9 +1682,17 @@
 			if (this.api[methodName])
 			{
 				let api = this.api;
-				methodRetValue = api.executeGroupActions(function(){
-					return api[methodName].apply(api, value);
-				});
+				
+				if ("StartAction" === name || "EndAction" === name)
+				{
+					methodRetValue = api[methodName].apply(api, value);
+				}
+				else
+				{
+					methodRetValue = api.executeGroupActions(function(){
+						return api[methodName].apply(api, value);
+					});
+				}
 			}
 
 			if (guid === this.internalGuid)

@@ -111,26 +111,27 @@ $(function () {
 		let firstParagraph;
 
 		firstParagraph = getFirstDocParagraph();
-		assert.strictEqual(firstParagraph.GetShd(), null, 'Shading (Shd) check for a run with no shading');
+		assert.equalShd(firstParagraph.GetParaPr().GetShd(), { 'Type' : 'nil' }, 'Shading check for a paragraph with no shading');
 
 		apiRange.SetShd('clear', 80, 160, 240);
 		firstParagraph = getFirstDocParagraph();
-		assert.equalRgb(firstParagraph.GetShd(), { r: 80, g: 160, b: 240 }, 'Shading check after setting shading for range with RGB components');
+		assert.equalShd(firstParagraph.GetParaPr().GetShd(), { 'Type': 'clear', 'Color': AscTest.JsApi.RGB(80, 160, 240) }, 'Shading check after setting shading for range with RGB components');
 
 		apiRange.SetShd('clear', rgbColor);
 		firstParagraph = getFirstDocParagraph();
-		assert.equalRgb(firstParagraph.GetShd(), { r: 255, g: 127, b: 0 }, 'Shading check after setting shading for range with ApiColor (RGB)');
+		assert.equalShd(firstParagraph.GetParaPr().GetShd(), { 'Type': 'clear', 'Color': AscTest.JsApi.RGB(255, 127, 0) }, 'Shading check after setting shading for range with ApiColor (RGB)');
 
 		apiRange.SetShd('clear', hexColor);
 		firstParagraph = getFirstDocParagraph();
-		assert.strictEqual(firstParagraph.GetShd().GetHex(), '#BADA55', 'Shading check after setting shading for range with ApiColor (hex)');
+		assert.equalShd(firstParagraph.GetParaPr().GetShd(), { 'Type': 'clear', 'Color': AscTest.JsApi.HexColor('#bada55') }, 'Shading check after setting shading for range with ApiColor (hex)');
 
 		apiRange.SetShd('clear', themeColor);
 		firstParagraph = getFirstDocParagraph();
-		assert.strictEqual(firstParagraph.GetShd().IsThemeColor(), true, 'Shading check after setting shading for range with ApiColor (theme)');
+		assert.equalShd(firstParagraph.GetParaPr().GetShd(), { 'Type': 'clear', 'Color': AscTest.JsApi.ThemeColor('accent2') }, 'Shading check after setting shading for range with ApiColor (theme)');
 
 		apiRange.SetShd('clear', autoColor);
 		firstParagraph = getFirstDocParagraph();
-		assert.strictEqual(firstParagraph.GetShd().IsAutoColor(), true, 'Shading check after setting shading for range with ApiColor (auto)');
+		assert.equalShd(firstParagraph.GetParaPr().GetShd(), { 'Type': 'clear', 'Color': AscTest.JsApi.AutoColor() }, 'Shading check after setting shading for range with ApiColor (auto)');
 	});
+
 });

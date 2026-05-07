@@ -1659,6 +1659,8 @@
 							var redrawTablesArr;
 							if (data.type === true) {
 								redrawTablesArr = this.insertLastTableColumn(data.displayName, data.activeCells);
+							} else if (data.type === undefined) {
+								redrawTablesArr = this.insertFirstTableColumn(data.displayName, data.activeCells);
 							} else if (data.type === false) {
 								redrawTablesArr = this.insertLastTableRow(data.displayName, data.activeCells);
 							}
@@ -2277,6 +2279,43 @@
 					changeFilter(tablePart);
 				}
 
+
+				return redrawTablesArr;
+			},
+
+			insertFirstTableColumn: function (displayNameFormatTable, activeRange) {
+				var worksheet = this.worksheet;
+				var t = this;
+				var bUndoChanges = worksheet.workbook.bUndoChanges;
+				var bRedoChanges = worksheet.workbook.bRedoChanges;
+
+				var redrawTablesArr = [];
+
+				var changeFilter = function (filter) {
+					var oldFilter = filter.clone(null);
+					filter.addTableFirstColumn(t);
+					filter.changeRef(-1, null, true);
+
+					//History
+					if (!bUndoChanges && !bRedoChanges && oldFilter) {
+						var changeElement = {
+							oldFilter: oldFilter, newFilterRef: filter.Ref.clone()
+						};
+						let historyObj = t._getHistoryObj(changeElement, AscCH.historyitem_AutoFilter_Change,
+							{displayName: displayNameFormatTable, activeCells: activeRange}, false,
+							oldFilter.Ref, null, activeRange);
+						History.Add(AscCommonExcel.g_oUndoRedoAutoFilters, AscCH.historyitem_AutoFilter_Change, worksheet.getId(), worksheet.selectionRange.getLast().clone(),
+							historyObj);
+					}
+
+					redrawTablesArr.push({oldfilterRef: oldFilter.Ref, newFilter: filter});
+				};
+
+				var tablePart = t._getFilterByDisplayName(displayNameFormatTable);
+
+				if (tablePart) {
+					changeFilter(tablePart);
+				}
 
 				return redrawTablesArr;
 			},
@@ -3390,6 +3429,12 @@
 					return false;
 				}
 
+				// Prevent conflicts with existing tables or named ranges (case-insensitive)
+				if (newName && newName.toLowerCase() !== tableName.toLowerCase() &&
+					worksheet.workbook.dependencyFormulas.getDefNameByName(newName, null)) {
+					return false;
+				}
+
 				var oldFilter = tablePart.clone(null);
 				History.Create_NewPoint();
 				History.StartTransaction();
@@ -3572,10 +3617,9 @@
 				var worksheet = this.worksheet;
 				if (displayName === null) {
 					res = worksheet.AutoFilter;
-				} else if (worksheet.TableParts &&
-					worksheet.TableParts.length) {
+				} else if (worksheet.TableParts && worksheet.TableParts.length && displayName) {
 					for (var i = 0; i < worksheet.TableParts.length; i++) {
-						if (worksheet.TableParts[i].DisplayName === displayName) {
+						if (worksheet.TableParts[i].DisplayName.toLowerCase() === displayName.toLowerCase()) {
 							res = worksheet.TableParts[i];
 							break;
 						}

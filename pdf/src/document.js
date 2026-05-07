@@ -1815,6 +1815,8 @@ var CPresentation = CPresentation || function(){};
             oActiveObj.OnBlur();
         }
         else if (oActiveObj.IsForm()) {
+			Asc.editor.End_CompositeInput();
+			
             if (this.IsEditFieldsMode() && false == oActiveObj.IsInForm()) {
                 this.activeForm = null;
                 oActiveObj.asc_curImageState = undefined;
@@ -8919,7 +8921,8 @@ var CPresentation = CPresentation || function(){};
 	CPDFDoc.prototype.SetTextSelectionType = function(type){};
 	CPDFDoc.prototype.ResetTextSelectionType = function(){};
 	CPDFDoc.prototype.IsWordSelection = function(){return false;};
-	CPDFDoc.prototype.IsParagraphSelection = function() {return false;};    CPDFDoc.prototype.Get_AllImageUrls = function(aImages) {
+	CPDFDoc.prototype.IsParagraphSelection = function() {return false;};
+	CPDFDoc.prototype.Get_AllImageUrls = function(aImages) {
         if (!Array.isArray(aImages)) {
             aImages = [];
         }

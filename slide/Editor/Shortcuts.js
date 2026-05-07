@@ -210,7 +210,7 @@
 		c_oAscDefaultShortcuts[Asc.c_oAscPresentationShortcutType.Group].push(new AscShortcut(Asc.c_oAscPresentationShortcutType.Group, keyCodes.KeyG, false, false, false, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscPresentationShortcutType.UnGroup].push(new AscShortcut(Asc.c_oAscPresentationShortcutType.UnGroup, keyCodes.KeyG, false, true, false, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscPresentationShortcutType.EditUndo].push(new AscShortcut(Asc.c_oAscPresentationShortcutType.EditUndo, keyCodes.KeyZ, false, false, false, true));
-		c_oAscDefaultShortcuts[Asc.c_oAscPresentationShortcutType.EditRedo].push(new AscShortcut(Asc.c_oAscPresentationShortcutType.EditRedo, keyCodes.KeyY, false, false, false, true));
+		c_oAscDefaultShortcuts[Asc.c_oAscPresentationShortcutType.EditRedo].push(new AscShortcut(Asc.c_oAscPresentationShortcutType.EditRedo, keyCodes.KeyY, false, false, false, true), new AscShortcut(Asc.c_oAscPresentationShortcutType.EditRedo, keyCodes.KeyZ, false, true, false, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscPresentationShortcutType.CopyFormat].push(new AscShortcut(Asc.c_oAscPresentationShortcutType.CopyFormat, keyCodes.KeyC, false, false, true, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscPresentationShortcutType.PasteFormat].push(new AscShortcut(Asc.c_oAscPresentationShortcutType.PasteFormat, keyCodes.KeyV, false, false, true, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscPresentationShortcutType.InsertHyperlink].push(new AscShortcut(Asc.c_oAscPresentationShortcutType.InsertHyperlink, keyCodes.KeyK, false, false, false, true));

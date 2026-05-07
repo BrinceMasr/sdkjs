@@ -174,7 +174,7 @@ $(function () {
 			3,
 			1);
 
-		// Проверяем диакритический знак, который не складывается шейпером
+		// Check the diacritic mark that is not composed by the shaper
 		Test("á",
 			[AscWord.CODEPOINT_TYPE.BASE, AscWord.CODEPOINT_TYPE.BASE],
 			1,

@@ -324,6 +324,10 @@ function (window, undefined) {
 	 */
 	CellEditor.prototype.open = function (options) {
 		this._setEditorState(c_oAscCellEditorState.editStart);
+
+		if (AscCommon.g_inputContext) {
+			AscCommon.g_inputContext.moveAccurateForce();
+		}
 		
 		var b = this.input.selectionStart;
 

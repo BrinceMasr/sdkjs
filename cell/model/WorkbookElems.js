@@ -8770,6 +8770,18 @@ function RangeDataManagerElem(bbox, data)
 		this.buildDependencies();
 	};
 
+	TablePart.prototype.addTableFirstColumn = function (autoFilters) {
+		this.removeDependencies();
+		let newTableColumns = [new TableColumn()].concat(this.TableColumns);
+		newTableColumns[0].setTableColumnName(autoFilters._generateColumnName2(newTableColumns));
+
+		this.TableColumns = newTableColumns;
+		if (this.QueryTable) {
+			this.cleanQueryTables();
+		}
+		this.buildDependencies();
+	};
+
 	TablePart.prototype.isAutoFilter = function () {
 		return false;
 	};

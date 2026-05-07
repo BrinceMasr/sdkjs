@@ -805,6 +805,7 @@ $(function () {
 			Test("_1^f x ", [["ParaRun", ""], ["CDegreeSubSup", "(_1^f)x"], ["ParaRun", ""]], false, "Check prescript index degree");
 			Test("(_(1/2)^y)f ", [["ParaRun", ""], ["CDegreeSubSup", "(_(1/2)^y)f"], ["ParaRun", ""]], false, "Check prescript index degree");
 			Test("(_(1/2)^[x_i])x ", [["ParaRun", ""], ["CDegreeSubSup", "(_(1/2)^[x_i])x"], ["ParaRun", ""]], false, "Check prescript index degree");
+			Test("I_(-1) ' ", [["ParaRun", ""], ["CDegreeSubSup", "I_(-1)^'"], ["ParaRun", ""]], false, "Check prime autocorrection for 80971 bug");
 		})
 
 		QUnit.module( "Radicals", function ()

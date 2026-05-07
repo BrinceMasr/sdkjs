@@ -34,6 +34,11 @@ $(function()
 {
 	AscTest.JsApi.CreateTextForm      = AscBuilder.Word.Api.CreateTextForm.bind(AscTest.Editor);
 	AscTest.JsApi.CreateSignatureForm = AscBuilder.Word.Api.CreateSignatureForm.bind(AscTest.Editor);
+	AscTest.JsApi.CreateComboBoxForm  = AscBuilder.Word.Api.CreateComboBoxForm.bind(AscTest.Editor);
+	AscTest.JsApi.CreateCheckBoxForm  = AscBuilder.Word.Api.CreateCheckBoxForm.bind(AscTest.Editor);
+	AscTest.JsApi.CreateDateForm      = AscBuilder.Word.Api.CreateDateForm.bind(AscTest.Editor);
+	AscTest.JsApi.CreatePictureForm   = AscBuilder.Word.Api.CreatePictureForm.bind(AscTest.Editor);
+	AscTest.JsApi.CreateComplexForm   = AscBuilder.Word.Api.CreateComplexForm.bind(AscTest.Editor);
 	
 	// Use this method anytime we need to test roles
 	AscTest.InitFormRoles = function()

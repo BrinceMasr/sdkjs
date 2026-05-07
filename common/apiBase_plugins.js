@@ -195,7 +195,6 @@
     /**
      * Returns the editor version.
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
      * @alias GetVersion
      * @returns {string} - The editor version.
      * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/GetVersion.js
@@ -205,7 +204,7 @@
     /**
      * Adds an OLE object to the current document position.
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
+     * @typeofeditors ["CDE", "CFE", "CSE", "CPE"]
 	 * @alias AddOleObject
 	 * @this Api
      * @param {OLEProperties} data - The OLE object properties.
@@ -216,7 +215,7 @@
     /**
      * Edits an OLE object in the document.
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
+     * @typeofeditors ["CDE", "CFE", "CSE", "CPE"]
      * @alias EditOleObject
      * @param {OLEProperties} data - The OLE object properties.
      * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/EditOleObject.js
@@ -227,7 +226,7 @@
 	/**
 	 * Returns an array of the selected OLE objects.
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @typeofeditors ["CDE", "CFE", "CSE", "CPE"]
 	 * @alias GetSelectedOleObjects
 	 * @returns {OLEProperties[]} - An array of the *OLEProperties* objects containing the data about the OLE object parameters.
 	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/GetSelectedOleObjects.js
@@ -277,7 +276,6 @@
     /**
      * Returns the fonts list.
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
      * @alias GetFontList
      * @returns {FontInfo[]} - An array of the FontInfo objects containing the data about the used fonts.
      * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/GetFontList.js
@@ -290,7 +288,7 @@
     /**
      * Inserts text into the document.
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
+     * @typeofeditors ["CDE", "CFE", "CSE", "CPE"]
      * @alias InputText
 	 * @param {string} text - A string value that specifies the text to be inserted into the document.
 	 * @param {string} textReplace - A string value that specifies the text to be replaced with a new text.
@@ -314,7 +312,6 @@
 	/**
 	 * Pastes text in the HTML format into the document.
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @alias PasteHtml
 	 * @param {string} htmlText - A string value that specifies the text in the *HTML* format to be pasted into the document.
 	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/PasteHtml.js
@@ -416,7 +413,6 @@
     /**
      * Pastes text into the document.
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
      * @alias PasteText
      * @param {string} text - A string value that specifies the text to be pasted into the document.
      * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/PasteText.js
@@ -450,7 +446,6 @@
     /**
      * Returns the document macros.
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
      * @alias GetMacros
      * @returns {Macros} - The Macros object containing the data about all the macros from the document
      * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/GetMacros.js
@@ -463,7 +458,6 @@
     /**
      * Sets macros to the document.
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
      * @alias SetMacros
      * @param {Macros} data - The *Macros* object containing the data about all the macros from the document.
      * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/SetMacros.js
@@ -476,7 +470,7 @@
 	/**
 	 * Returns all VBA macros from the document.
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @typeofeditors ["CDE", "CFE", "CSE", "CPE"]
 	 * @alias GetVBAMacros
 	 * @returns {string | null} VBA xml macros.
 	 * @since 7.3.0
@@ -489,11 +483,19 @@
 
     /**
      * Specifies the start action for long operations.
+	 * :::note
+	 * GroupActions are available only for [ONLYOFFICE Docs Enterprise](https://www.onlyoffice.com/docs-enterprise-prices.aspx?from=api) and [ONLYOFFICE Docs Developer](https://www.onlyoffice.com/developer-edition-prices.aspx?from=api).
+	 * :::
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
      * @alias StartAction
-     * @param {number} type - A value which defines an action type which can take <b>0</b> if this is an *Information* action or <b>1</b> if this is a *BlockInteraction* action.
-	 * @param {string} description - A string value that specifies the description text for the start action of the operation.
+     * @param {"Information" | "Block" | "GroupActions"} type - The action type:
+     * <b>"Information"</b> - a non-blocking informational action,
+     * <b>"Block"</b> - a blocking interaction action,
+     * <b>"GroupActions"</b> - groups multiple editor operations into a single undoable step.
+     * @param {string | Object} [description] - For <b>"Information"</b> and <b>"Block"</b> types: a string description displayed during the action.
+     * For <b>"GroupActions"</b> type: an optional object with the following properties:
+     * @param {boolean} [description.lockScroll] - If <em>true</em>, the editor scroll position will be locked during the group operation.
+     * @param {boolean} [description.keepSelection] - If <em>true</em>, the cursor position and selection will be preserved after the group operation ends.
      * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/StartAction.js
 	 */
     Api.prototype["pluginMethod_StartAction"] = function(type, description)
@@ -511,24 +513,31 @@
 
     /**
      * Specifies the end action for long operations.
+	 * :::note
+	 * GroupActions are available only for [ONLYOFFICE Docs Enterprise](https://www.onlyoffice.com/docs-enterprise-prices.aspx?from=api) and [ONLYOFFICE Docs Developer](https://www.onlyoffice.com/developer-edition-prices.aspx?from=api).
+	 * :::
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
      * @alias EndAction
-     * @param {number} type - A value which defines an action type which can take <b>"Block"</b> if this is the *BlockInteraction* action or <b>"Information</b> if this is the *Information* action.
-     * @param {string} description - A string value that specifies the description text for the operation end action.
-	 * @param {string} status - The error status code. If no error occurs, then an empty string is passed.
+     * @param {"Information" | "Block" | "GroupActions"} type - The action type:
+     * <b>"Information"</b> - ends a non-blocking informational action,
+     * <b>"Block"</b> - ends a blocking interaction action,
+     * <b>"GroupActions"</b> - ends the grouped operations started with <em>StartAction("GroupActions")</em>.
+     * @param {string | Object} [description] - For <b>"Information"</b> and <b>"Block"</b> types: a string description displayed during the action.
+     * For <b>"GroupActions"</b> type: an optional object with the following properties:
+     * @param {boolean} [description.scrollToTarget=true] - If <em>false</em>, the editor will not scroll to the target after the group operation ends.
+     * @param {boolean} [description.cancel=false] - If <em>true</em>, the group operation is cancelled and rolled back instead of committed.
+     * @param {string} [status] - For <b>"Information"</b> and <b>"Block"</b> types: the error status code. If no error occurs, then an empty string is passed.
      * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/EndAction.js
-	 */
+     */
     Api.prototype["pluginMethod_EndAction"] = function(type, description, status)
     {
 		if ("GroupActions" === type)
 		{
 			let pr = description && (typeof description === "object") ? description : {};
 			if (status)
-				this.cancelGroupActions(pr);
-			else
-				this.endGroupActions(pr);
+				pr["cancel"] = true;
 			
+			this.endGroupActions(pr);
 			return;
 		}
 		
@@ -578,7 +587,7 @@
     /**
      * Encrypts the document.
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
+     * @typeofeditors ["CDE", "CFE", "CSE", "CPE"]
      * @alias OnEncryption
      * @param {object} obj - The encryption properties.
      * @param {string} obj.type - The type of encrypting operation:
@@ -697,7 +706,6 @@
     /**
      * Sets the properties to the document.
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
      * @alias SetProperties
      * @param {object} obj - The document properties.
 	 * @param {?boolean} obj.copyoutenabled - Disables copying from the editor if it is set to **false**.
@@ -922,7 +930,6 @@
 	 * Configures plugins from an external source. The settings can be set for all plugins or for a specific plugin.
 	 * For example, this method can be used to pass an authorization token to the plugin. This method can be used only with the connector class.
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @alias SetPluginsOptions
 	 * @param {PluginOptions} options - Plugin options.
 	 * @since 8.1.1
@@ -940,7 +947,6 @@
     /**
      * Shows the input helper.
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
      * @alias ShowInputHelper
      * @param {string} guid - A string value which specifies a plugin identifier which must be of the *asc.{UUID}* type.
      * @param {number} w - A number which specifies the window width measured in millimeters.
@@ -1028,7 +1034,6 @@
     /**
      * Unshows the input helper.
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
      * @alias UnShowInputHelper
      * @param {string} guid - A string value which specifies a plugin identifier which must be of the *asc.{UUID}* type.
      * @param {string} isclear - Defines if the input context will be cleared (**true**) or not (**false**).
@@ -1074,7 +1079,6 @@
     /**
      * Sends a message to the co-authoring chat.
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
      * @alias CoAuthoringChatSendMessage
      * @param {string} sText - Message text.
      * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/CoAuthoringChatSendMessage.js
@@ -1094,7 +1098,7 @@
 	/**
 	 * Returns the type of the current selection.
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 * @typeofeditors ["CDE", "CFE", "CSE", "CPE"]
 	 * @alias GetSelectionType
 	 * @returns {SelectionType} - The selection type.
 	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/GetSelectionType.js
@@ -1183,7 +1187,7 @@
      /**
      * Converts a document to Markdown or HTML text.
      * @memberof Api
-     * @typeofeditors ["CDE"]
+     * @typeofeditors ["CDE", "CFE"]
      * @alias ConvertDocument
      * @param {"markdown" | "html"} [sConvertType="markdown"] - Conversion type ("markdown" or "html").
      * @param {boolean} [bHtmlHeadings=false] - Defines if the HTML headings and IDs will be generated when the Markdown renderer of your target platform does not handle Markdown-style IDs.
@@ -1201,7 +1205,6 @@
     /**
      * Returns the selected text from the document.
      * @memberof Api
-     * @typeofeditors ["CDE", "CPE", "CSE"]
      * @alias GetSelectedText
      * @param {object} prop - The resulting string display properties.
      * @param {boolean} prop.Numbering - Defines if the resulting string will include numbering or not.
@@ -1244,7 +1247,7 @@
 	/**
 	 * Returns the selected content in the specified format.
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @typeofeditors ["CDE", "CFE", "CSE", "CPE"]
 	 * @alias GetSelectedContent
 	 * @param {object} prop  - The returned content properties.
 	 * @param {"text" | "html"} [prop.type="text"] - The format type of the returned content (text or HTML).
@@ -1263,7 +1266,7 @@
     /**
      * Replaces each paragraph (or text in cell) in the select with the corresponding text from an array of strings.
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
+     * @typeofeditors ["CDE", "CFE", "CSE", "CPE"]
      * @alias ReplaceTextSmart
      * @param {string[]} arrString - An array of replacement strings.
 	 * @param {string} [sParaTab="\t"] - A character which is used to specify the tab in the source text. Any symbol can be used. The default separator is "\t".
@@ -1308,7 +1311,6 @@
 	/**
      * Returns the current file to download in the specified format.
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
      * @alias GetFileToDownload
      * @param {string} [format=" "] - A format in which you need to download a file.
      * @returns {string} - URL to download the file in the specified format or error.
@@ -1354,7 +1356,7 @@
 	/**
      * Returns the image data from the first of the selected drawings. If there are no drawings selected, the method returns a white rectangle.
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
+     * @typeofeditors ["CDE", "CFE", "CSE", "CPE"]
      * @alias GetImageDataFromSelection
      * @returns {?ImageData} - The ImageData object containig the information about the base64 encoded png image.
      * @since 7.2.0
@@ -1368,7 +1370,7 @@
      * Replaces the first selected drawing with the image specified in the parameters.
      * If there are no drawings selected, the method inserts the image at the current position.
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
+     * @typeofeditors ["CDE", "CFE", "CSE", "CPE"]
      * @alias PutImageDataToSelection
      * @param {ImageData} oImageData - The information about the base64 encoded *png* image.
      * @since 7.2.0
@@ -1712,7 +1714,6 @@
 	/**
     * Returns all the installed plugins.
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
      * @alias GetInstalledPlugins
      * @returns {PluginData[]} - An array of all the installed plugins.
      * @since 7.2.0
@@ -1802,7 +1803,6 @@
 	/**
     * Removes a plugin with the specified GUID.
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
      * @param {string} guid - The plugin identifier. It must be of the *asc.{UUID}* type.
 	 * @param {string} backup - The plugin backup. This parameter is used when working with the desktop editors.
      * @alias RemovePlugin
@@ -1865,7 +1865,6 @@
 	/**
     * Installs a plugin using the specified plugin config.
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
      * @param {object} [config] - The plugin {@link /docs/plugin-and-macros/structure/configuration/ config}.
      * @alias InstallPlugin
      * @returns {object} - An object with the result information.
@@ -1879,7 +1878,6 @@
 	/**
     * Updates a plugin using the specified plugin config.
      * @memberof Api
-     * @typeofeditors ["CDE", "CSE", "CPE"]
      * @param {object} [config] - The plugin {@link /docs/plugin-and-macros/structure/configuration/ config}.
      * @alias UpdatePlugin
      * @returns {object} - An object with the result information.
@@ -1915,7 +1913,6 @@
 	/**
 	* Shows or hides buttons in the header.
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @param {string} id - The button ID.
 	 * @param {boolean} bShow - The flag specifies whether the button is shown (**true**) or hidden (**false**).
 	 * @param {string} align - The parameter indicates whether the button will be displayed on the right side of the window or on the left. The default value is "left".
@@ -1977,7 +1974,6 @@
 	/**
 	 * Implements the external drag&drop emulation.
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @param {object} obj The drag&drop emulation properties.
      * @param {string} obj.type - The drag&drop event type:
      * <b>onbeforedrop</b> - an event that is fired when the selected text or element is dragged;
@@ -2026,7 +2022,7 @@
     /**
      * Returns the document language.
      * @memberof Api
-     * @typeofeditors ["CDE", "CPE"]
+     * @typeofeditors ["CDE", "CFE", "CPE"]
      * @alias GetDocumentLang
      * @returns {string} - Document language.
 	 * @since 7.4.0
@@ -2098,7 +2094,6 @@
 	 * Adds an item to the context menu.
 	 * @undocumented
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @alias AddContextMenuItem
 	 * @param {ContextMenuItem[]} items - An array containing the context menu items.
 	 * @since 7.4.0
@@ -2114,7 +2109,6 @@
 	 * Updates an item in the context menu with the specified items.
 	 * @undocumented
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @alias UpdateContextMenuItem
 	 * @param {ContextMenuItem[]} items - An array containing the context menu items for the current item.
 	 * @since 7.4.0
@@ -2199,7 +2193,6 @@
 	 * Adds an item to the toolbar menu.
 	 * @undocumented
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @alias AddToolbarMenuItem
 	 * @param {ToolbarMenuMainItem[]} items - An array containing the main toolbar menu items.
 	 * @since 8.1.0
@@ -2215,7 +2208,6 @@
 	 * Updates the toolbar menu item.
 	 * @undocumented
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @alias UpdateToolbarMenuItem
 	 * @param {ToolbarMenuMainItem[]} items - An array containing the main toolbar menu items.
 	 * @since 8.1.0
@@ -2231,7 +2223,6 @@
 	 * Shows the plugin modal window.
 	 * @undocumented
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @param {string} frameId - The frame ID.
 	 * @param {variation} variation - The plugin variation.
 	 * @alias ShowWindow 
@@ -2318,7 +2309,6 @@
 	 * Activates (moves forward) the plugin window/panel.
 	 * @undocumented
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @param {string} frameId - The frame ID.
 	 * @param {boolean} isFocus - The focus will be made on the window.
 	 * @alias ActivateWindow
@@ -2341,7 +2331,6 @@
 	 * Closes the plugin modal window.
 	 * @undocumented
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @param {string} frameId - The frame ID.
 	 * @alias CloseWindow
 	 * @since 7.4.0
@@ -2357,7 +2346,6 @@
 	 * Sends a message to the plugin modal window.
 	 * @undocumented
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @param {string} windowID - The frame ID.
 	 * @param {string} name - The event name.
 	 * @param {object} data - The event data.
@@ -2374,7 +2362,6 @@
 	 * Resizes the plugin modal window.
 	 * @undocumented
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @param {string} frameId - The frame ID.
 	 * @param {number} size - The frame size.
 	 * @param {number} minSize - The frame minimum size.
@@ -2394,7 +2381,6 @@
 	/**
 	 * Sends an event to the plugin when the mouse button is released inside the plugin iframe.
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @param {string} frameId - The frame ID.
 	 * @param {number} x - The X coordinate.
 	 * @param {number} y - The Y coordinate.
@@ -2410,7 +2396,6 @@
 	/**
 	 * Sends an event to the plugin when the mouse button is moved inside the plugin iframe.
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @param {string} frameId - The frame ID.
  	 * @param {number} x - The X coordinate.
 	 * @param {number} y - The Y coordinate.
@@ -2426,7 +2411,6 @@
 	/**
 	 * Shows an error/warning message.
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE", "PDF"]
 	 * @param {string} error - The error text.
 	 * @param {number} level - -1 or 0 for error or warning.
 	 * @alias ShowError
@@ -2442,7 +2426,6 @@
 	 * Callback from dockChangedEvents.
 	 * @undocumented
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE", "PDF"]
 	 * @param {string} windowID - The frame ID.
 	 * @alias OnWindowDockChangedCallback
 	 * @since 8.2.2
@@ -2461,7 +2444,6 @@
 	 * Catch AI event from plugin.
 	 * @memberof Api
 	 * @undocumented
-	 * @typeofeditors ["CDE", "CSE", "CPE", "PDF"]
 	 * @alias onAIRequest
 	 * @param {object} data - Data.
 	 * @since 9.0.0
@@ -2504,7 +2486,6 @@
 	 * Catch AI event from plugin.
 	 * @memberof Api
 	 * @undocumented
-	 * @typeofeditors ["CDE", "CSE", "CPE", "PDF"]
 	 * @alias onAIRequest
 	 * @param {object} data - Data.
 	 * @since 9.0.0
@@ -2524,7 +2505,6 @@
 	 * Returns the local path to the image.
 	 * @memberof Api
 	 * @undocumented
-	 * @typeofeditors ["CDE", "CSE", "CPE", "PDF"]
 	 * @alias getLocalImagePath
 	 * @param {object} data - Data.
 	 * @since 9.0.0
@@ -2553,7 +2533,6 @@
 	/**
 	 * Returns focus to the editor.
 	 * @memberof Api
-	 * @typeofeditors ["CDE", "CSE", "CPE"]
 	 * @alias FocusEditor
 	 */
 	Api.prototype["pluginMethod_FocusEditor"] = function()

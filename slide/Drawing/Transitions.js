@@ -4728,7 +4728,7 @@ function CDemonstrationManager(htmlpage)
 		    oThis.PointerRemove();
 
         let handleSwipe = false;
-        if (e.pointerType === "touch")
+        if (e.pointerType === "touch" && !Asc.editor.isDrawSlideshowAnnotations())
         {
             let iN = AscFormat.isRealNumber;
             if (iN(oThis.startPageX) && iN(oThis.startPageY) && iN(e.pageX) && iN(e.pageY) )

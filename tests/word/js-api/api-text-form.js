@@ -147,4 +147,58 @@ $(function ()
 		textForm.Clear();
 		assert.strictEqual(textForm.IsFilled(), false, 'Check that the text form is not filled after Clear');
 	});
+
+	QUnit.test('SetAllowedSymbols, GetAllowedSymbols', function (assert)
+	{
+		const textForm = createApiTextForm();
+
+		assert.strictEqual(textForm.GetAllowedSymbols(), '', 'Check that a newly created text form has no allowed symbols restriction');
+
+		textForm.SetAllowedSymbols('abc');
+		assert.strictEqual(textForm.GetAllowedSymbols(), 'abc', 'Check allowed symbols after setting "abc"');
+
+		textForm.SetAllowedSymbols('0123456789');
+		assert.strictEqual(textForm.GetAllowedSymbols(), '0123456789', 'Check allowed symbols after setting digits string');
+
+		textForm.SetAllowedSymbols('');
+		assert.strictEqual(textForm.GetAllowedSymbols(), '', 'Check allowed symbols after clearing with empty string');
+	});
+
+	QUnit.test('SetFormat, GetFormat', function (assert)
+	{
+		const textForm = createApiTextForm();
+
+		assert.deepEqual(textForm.GetFormat(), { type: 'none' }, 'Check that a newly created text form has no format');
+
+		textForm.SetFormat({ type: 'digit' });
+		assert.deepEqual(textForm.GetFormat(), { type: 'digit' }, 'Check format after setting digit type');
+
+		textForm.SetFormat({ type: 'letter' });
+		assert.deepEqual(textForm.GetFormat(), { type: 'letter' }, 'Check format after setting letter type');
+
+		textForm.SetFormat({ type: 'mask', value: '9-9-9' });
+		assert.deepEqual(textForm.GetFormat(), { type: 'mask', value: '9-9-9' }, 'Check format after setting mask type with value');
+
+		textForm.SetFormat({ type: 'regExp', value: '\\d+' });
+		assert.deepEqual(textForm.GetFormat(), { type: 'regExp', value: '\\d+' }, 'Check format after setting regExp type with value');
+
+		textForm.SetFormat({ type: 'none' });
+		assert.deepEqual(textForm.GetFormat(), { type: 'none' }, 'Check format after resetting to none');
+	});
+
+	QUnit.test('SetValue, GetValue, Value', function (assert)
+	{
+		const form = createApiTextForm({"key" : "key", "placeholder" : "123"});
+
+		assert.strictEqual(form.GetValue(), '123', 'Check GetValue returns empty string for a newly created text form');
+
+		const result = form.SetValue('Hello');
+		assert.strictEqual(result, true, 'Check SetValue returns true on success');
+		assert.strictEqual(form.GetValue(), 'Hello', 'Check GetValue returns the value set by SetValue');
+
+		assert.strictEqual(form.Value, 'Hello', 'Check Value getter returns the current value');
+
+		form.Value = 'World';
+		assert.strictEqual(form.GetValue(), 'World', 'Check Value setter updates the text form value');
+	});
 });

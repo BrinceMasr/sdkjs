@@ -878,8 +878,10 @@
 
     // Set save state
     this._state = ConnectionState.SaveChanges;
-    if (!reSave) {
-      this._serverChangesSize += curBytes;
+    // Credit all bytes of this save operation upfront on the first batch (not per-batch),
+    // so localSize + serverSize stays accurate while batches 2..N are sent asynchronously.
+    if (!reSave && startIndex === 0) {
+      this._serverChangesSize += arrayChanges.reduce((s, c) => s + c.length, 0);
     }
     let _changes = this.binaryChanges ? arrayChanges.slice(startIndex, endIndex) : JSON.stringify(arrayChanges.slice(startIndex, endIndex));
     this._send({'type': 'saveChanges', 'changes': _changes,

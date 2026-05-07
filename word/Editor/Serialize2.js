@@ -11811,8 +11811,9 @@ function Binary_DocumentTableReader(doc, oReadResult, openParams, stream, curNot
 				return oThis.ReadSdt(t,l, oSdt, 1, oSdt);
 			});
 			oSdt.checkDataBinding();
+			oSdt.CheckFormType();
 			if (oSdt.IsEmpty())
-				oSdt.ReplaceContentWithPlaceHolder();
+				oSdt.ReplaceContentWithPlaceHolder(false, true);
 			paragraphContent.AddToContentToEnd(oSdt);
 		} else if ( c_oSerParType.BookmarkStart === type) {
 			res = readBookmarkStart(length, this.bcr, this.oReadResult, paragraphContent);

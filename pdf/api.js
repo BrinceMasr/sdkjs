@@ -1894,13 +1894,13 @@
 
 				let aActionsFormat = [{
 					"S": AscPDF.ACTIONS_TYPES.JavaScript,
-					"JS": 'AFTime_FormatEx(' + nFormat + ');'
+					"JS": 'AFTime_Format(' + nFormat + ');'
 				}]
 				oField.SetActions(AscPDF.PDF_TRIGGERS_TYPES.Format, aActionsFormat);
 
 				let aActionsKeystroke = [{
 					"S": AscPDF.ACTIONS_TYPES.JavaScript,
-					"JS": 'AFTime_KeystrokeEx(' + nFormat + ');'
+					"JS": 'AFTime_Keystroke(' + nFormat + ');'
 				}];
 				oField.SetActions(AscPDF.PDF_TRIGGERS_TYPES.Keystroke, aActionsKeystroke);
 				if (oField.IsCanCommit()) {

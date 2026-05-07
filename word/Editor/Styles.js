@@ -15437,6 +15437,18 @@ CParaTab.prototype.IsValid = function()
 {
 	return null != this.Pos && null != this.Value;
 };
+CParaTab.prototype.GetPos = function()
+{
+	return this.Pos;
+};
+CParaTab.prototype.GetValue = function()
+{
+	return this.Value;
+};
+CParaTab.prototype.GetLeader = function()
+{
+	return this.Leader;
+};
 
 function CParaTabs()
 {

@@ -118,19 +118,6 @@
 
 		let result4 = shape.SetName(undefined);
 		assert.strictEqual(result4, false, 'Check SetName returns false for undefined');
-
-		// Test that setting duplicate name causes previous shape to get default name
-		let shape2 = worksheet.AddShape("rect", 50 * 36000, 50 * 36000, fill, stroke, 0, 1 * 36000, 0, 0);
-
-		shape.SetName("DuplicateName");
-		const firstShapeName = shape.GetName();
-		assert.strictEqual(firstShapeName, "DuplicateName", 'Check first shape has duplicate name');
-
-		shape2.SetName("DuplicateName");
-
-		assert.strictEqual(shape2.GetName(), "DuplicateName", 'Check second shape has the duplicate name');
-		assert.notStrictEqual(shape.GetName(), "DuplicateName", 'Check first shape name changed from duplicate');
-		assert.notStrictEqual(shape.GetName(), firstShapeName, 'Check first shape has a new default name');
 	});
 
 	QUnit.test("Select", function (assert) {

@@ -86,8 +86,8 @@ $(function ()
 		
 		function testAddingNewParagraph(paraIndex, types)
 		{
-			// Предполагаем, что параграф не пустой (как минимум 3 символа), проверяем добавление параграфа
-			// когда курсор стоит в начале/середине/конце
+			// Assume the paragraph is not empty (at least 3 characters), check paragraph insertion
+			// when the cursor is at the beginning/middle/end
 			initTestDocument();
 			let p = logicDocument.GetElement(paraIndex);
 			AscTest.MoveCursorToParagraph(p, true);

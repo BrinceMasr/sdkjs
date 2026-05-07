@@ -107,9 +107,7 @@
 		this.IsActionRestrictionCurrent  = 0;
 		this.IsActionRestrictionPrev  = null;
 		
-		this.groupActionsCounter        = 0;
-		this.groupActionsPr             = {};
-		this.groupActionsExecuteCounter = 0;
+		this.initGroupActions();
 
 		// AutoSave
 		this.autoSaveGap = 0;					// Autosave interval (0 means no autosave) in milliseconds
@@ -256,8 +254,6 @@
 		this._correctEmbeddedWork();
 
 		this.broadcastChannel = null;
-		
-		this.textAnnotatorEventManager = null;
 
 		return this;
 	}
@@ -6086,142 +6082,39 @@
 	{
 	};
 
+	baseEditorsApi.prototype.initGroupActions = function()
+	{
+	};
 	baseEditorsApi.prototype.startGroupActions = function(pr)
 	{
-		++this.groupActionsCounter;
-
-		AscCommon.History.startGroupPoints();
-
-		if (this.groupActionsCounter > 1)
-			return;
-		
-		this.groupActionsExecuteCounter = 0;
-		this.groupActionsPr = {};
-		this.groupActionsPr.lockScroll = !!(pr && pr["lockScroll"]);
-
-		if (this.groupActionsPr.lockScroll && !this.isLockScrollToTarget)
-			this.asc_LockScrollToTarget(true);
-		else
-			this.groupActionsPr.lockScroll = false;
-
-		if (!!(pr && pr["keepSelection"]))
-			this._saveGroupActionsState();
-
-		this._onStartGroupActions();
-
-		AscCommon.CollaborativeEditing.Set_GlobalLock(true);
-		AscCommon.CollaborativeEditing.Set_GlobalLockSelection(true);
 	};
 	baseEditorsApi.prototype.executeGroupActions = function(f)
 	{
-		if (!this.isGroupActions())
-			return f.call();
-
-		this.executeGroupActionsStart();
-		let res = f.call();
-		this.updateSelection();
-		this.executeGroupActionsEnd();
-		return res;
+		return f.call();
 	};
 	baseEditorsApi.prototype.executeGroupActionsStart = function()
 	{
-		if (!this.isGroupActions())
-			return;
-		
-		++this.groupActionsExecuteCounter;
-		if (this.groupActionsExecuteCounter > 1)
-			return;
-		
-		AscCommon.CollaborativeEditing.Set_GlobalLock(false);
-		AscCommon.CollaborativeEditing.Set_GlobalLockSelection(false);
 	};
 	baseEditorsApi.prototype.executeGroupActionsEnd = function()
 	{
-		if (!this.isGroupActions())
-			return;
-		
-		--this.groupActionsExecuteCounter;
-		if (this.groupActionsExecuteCounter > 0)
-			return;
-		
-		AscCommon.CollaborativeEditing.Set_GlobalLock(true);
-		AscCommon.CollaborativeEditing.Set_GlobalLockSelection(true);
 	};
 	baseEditorsApi.prototype.cancelGroupActions = function(pr)
 	{
-		if (!this.isGroupActions())
-			return;
-
-		--this.groupActionsCounter;
-
-		AscCommon.History.cancelGroupPoints();
-		
-		if (this.groupActionsCounter > 0)
-			return;
-		
-		AscCommon.CollaborativeEditing.Set_GlobalLock(false);
-		AscCommon.CollaborativeEditing.Set_GlobalLockSelection(false);
-		
-		this._onEndGroupActions(false);
-
-		if (this.groupActionsPr.selectionState)
-			this._restoreGroupActionsState();
-
-		if (this.groupActionsPr.lockScroll)
-			this.asc_LockScrollToTarget(false);
-
-		if (!pr || false !== pr["scrollToTarget"])
-			this.scrollToTarget();
 	};
 	baseEditorsApi.prototype.endGroupActions = function(pr)
 	{
-		if (!this.isGroupActions())
-			return;
-
-		--this.groupActionsCounter;
-		AscCommon.History.endGroupPoints();
-
-		if (this.groupActionsCounter > 0)
-			return;
-
-		AscCommon.CollaborativeEditing.Set_GlobalLock(false);
-		AscCommon.CollaborativeEditing.Set_GlobalLockSelection(false);
-
-		this._onEndGroupActions(true);
-
-		if (this.groupActionsPr.selectionState)
-			this._restoreGroupActionsState();
-
-		if (this.groupActionsPr.lockScroll)
-			this.asc_LockScrollToTarget(false);
-
-		if (!pr || false !== pr["scrollToTarget"])
-			this.scrollToTarget();
 	};
 	baseEditorsApi.prototype.isGroupActions = function()
 	{
-		return this.groupActionsCounter > 0;
+		return false;
 	};
-	baseEditorsApi.prototype._onStartGroupActions = function()
+	baseEditorsApi.prototype.setUserScrollGroupActions = function(isUserScroll)
 	{
 	};
-	baseEditorsApi.prototype._onEndGroupActions = function(isFullEnd)
-	{
-	};
-	baseEditorsApi.prototype._saveGroupActionsState = function()
-	{
-	};
-	baseEditorsApi.prototype._restoreGroupActionsState = function()
+	baseEditorsApi.prototype.resetUserScrollGroupActionsTimer = function()
 	{
 	};
 	
-	baseEditorsApi.prototype.getTextAnnotatorEventManager = function()
-	{
-		if (!this.textAnnotatorEventManager)
-			this.textAnnotatorEventManager = new AscCommon.TextAnnotatorEventManager(this);
-		
-		return this.textAnnotatorEventManager;
-	};
 	baseEditorsApi.prototype.getMacroRecorder = function()
 	{
 		return this.macroRecorder;

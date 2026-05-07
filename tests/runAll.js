@@ -30,9 +30,57 @@
  *
  */
 
+const fs = require("fs");
 const path = require("path");
 
-const allTests = [
+// If first argument is provided, use it as custom test directory
+const customTestDir = process.argv[2];
+
+let allTests;
+let dir = __dirname;
+
+if (customTestDir) 
+{
+	dir = "";
+	function collectHtmlTests(rootDir) 
+	{
+		const tests = [];
+		const skipDirs = new Set(['node_modules', '.git', '.vscode', 'Editor']);
+
+		function walk(dir) 
+		{
+			for (const entry of fs.readdirSync(dir, { withFileTypes: true })) 
+			{
+				const fullPath = path.join(dir, entry.name);
+				if (entry.isDirectory()) 
+				{
+					if (!skipDirs.has(entry.name))
+						walk(fullPath);
+				} 
+				else if (entry.isFile() && entry.name.toLowerCase().endsWith('.html')) 
+				{
+					tests.push(path.relative(rootDir, fullPath));
+				}
+			}
+		}
+
+		try 
+		{
+			walk(rootDir);
+		} 
+		catch (e) 
+		{
+			console.error(`Error scanning test directory ${rootDir}:`, e.message);
+		}
+
+		tests.sort();
+		return tests;
+	}
+
+	allTests = collectHtmlTests(customTestDir).map(t => path.join(customTestDir, t));
+} else {
+	// Default hardcoded tests
+	allTests = [
 	'cell/spreadsheet-calculation/FormulaTests.html',
 	'cell/spreadsheet-calculation/PivotTests.html',
 	'cell/spreadsheet-calculation/copy-paste-tests.html',
@@ -94,7 +142,9 @@ const allTests = [
 	//related ooxml tests
 	'oform/xml/oformXml.html',
 	'word/custom-xml/custom-xml-ooxml.html',
-];
+	];
+}
+
 
 const maxTestsAtOnce = require('events').defaultMaxListeners;
 
@@ -121,7 +171,7 @@ const {
 	
 	for (let nIndex = 0, nCount = allTests.length; nIndex < nCount; ++nIndex)
 	{
-		promiseTests.push(runQunitPuppeteer({targetUrl : path.join(__dirname, allTests[nIndex]), timeout : 60000})
+		promiseTests.push(runQunitPuppeteer({targetUrl : path.join(dir, allTests[nIndex]), timeout : 60000})
 			.then(result =>
 			{
 				count++;

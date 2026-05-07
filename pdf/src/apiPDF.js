@@ -875,12 +875,17 @@
                         if (oDoc.isOnValidate)
                             throw Error('InvalidSetError: Set not possible, invalid or unknown.');
 
-                        let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
-                        aFields.forEach(function(field) {
-                            field.SetValue(value);
-                        });
+						let sApiValueToSet = value;
+                        let aOpt = this.field.GetOptions();
+                        if (aOpt) {
+                            let nIdx = aOpt.indexOf(value);
+                            if (nIdx != -1)
+                                sApiValueToSet = String(nIdx);
+                        }
 
-                        this.field.SetParentValue(value);
+                        let oWidget = this.field.GetKid(0);
+                        oWidget.SetValue(sApiValueToSet);
+						oWidget.Commit();
 
                         if (oCalcInfo.IsInProgress() == false && oDoc.IsNeedDoCalculate()) {
                             oDoc.DoCalculateFields(this.field);
@@ -966,8 +971,9 @@
                                 sApiValueToSet = String(nIdx);
                         }
 
-                        this.field.SetParentValue(sApiValueToSet);
-                        this.field.GetKid(0).UpdateAll();
+                        let oWidget = this.field.GetKid(0);
+                        oWidget.SetValue(sApiValueToSet);
+						oWidget.Commit();
     
                         if (oCalcInfo.IsInProgress() == false && oDoc.IsNeedDoCalculate()) {
                             oDoc.DoCalculateFields(this.field);

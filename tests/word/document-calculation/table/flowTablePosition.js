@@ -44,7 +44,7 @@ $(function ()
 
 	QUnit.test("Flow table inside another table", function (assert)
 	{
-		// Здесь мы проверяем горизонтальную позицию вложенной таблицы
+		// Here we check the horizontal position of a nested table
 
 		logicDocument.Settings.CompatibilityMode = AscCommon.document_compatibility_mode_Word15;
 		AscTest.ClearDocument();

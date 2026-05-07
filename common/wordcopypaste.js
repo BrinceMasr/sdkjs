@@ -11164,11 +11164,13 @@ PasteProcessor.prototype =
 			}
 
 			if (_type === "complexform" && AscCommon.IsSupportOFormFeature()) {
-				this._applyComplexFormPr(node, levelSdt);
+				let complexFormPr = this._createComplexFormPr(node);
+				levelSdt.SetComplexFormPr(complexFormPr);
 			}
 
 			if (_type === "text" && AscCommon.IsSupportOFormFeature()) {
-				this._applyTextFormPr(node, levelSdt);
+				let textFormPr = this._createTextFormPr(node);
+				levelSdt.ApplyTextFormPr(textFormPr);
 			}
 
 			if (_type === "datetime" && AscCommon.IsSupportOFormFeature()) {
@@ -11330,18 +11332,18 @@ PasteProcessor.prototype =
 		return oPr;
 	},
 
-	_applyComplexFormPr: function (node, levelSdt) {
+	_createComplexFormPr: function (node) {
 		let complexFormType = node.attributes["complexformtype"];
 		if (complexFormType && complexFormType.value) {
 			let nType = parseInt(complexFormType.value);
 			if (!isNaN(nType)) {
-				let complexFormPr = new AscWord.CSdtComplexFormPr(nType);
-				levelSdt.SetComplexFormPr(complexFormPr);
+				return new AscWord.CSdtComplexFormPr(nType);
 			}
 		}
+		return new AscWord.CSdtComplexFormPr();
 	},
 
-	_applyTextFormPr: function (node, levelSdt) {
+	_createTextFormPr: function (node) {
 		let textFormNode = null;
 		for (let i = 0; i < node.childNodes.length; i++) {
 			let childNode = node.childNodes[i];
@@ -11350,12 +11352,11 @@ PasteProcessor.prototype =
 				break;
 			}
 		}
-
-		if (!textFormNode) {
-			return;
-		}
-
+		
 		let textFormPr = new AscWord.CSdtTextFormPr();
+		if (!textFormNode) {
+			return textFormPr;
+		}
 
 		let maxCharacters = textFormNode.attributes["maxcharacters"];
 		if (maxCharacters && maxCharacters.value) {
@@ -11439,7 +11440,7 @@ PasteProcessor.prototype =
 			}
 		}
 
-		levelSdt.ApplyTextFormPr(textFormPr);
+		return textFormPr;
 	},
 
 	_createDatePickerPr: function (node) {

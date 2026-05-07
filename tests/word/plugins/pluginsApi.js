@@ -34,6 +34,21 @@ $(function () {
 	
 	let PluginsApi = AscTest.Editor;
 	
+	PluginsApi.pluginMethod_GetAllAddinFields = AscCommon.DocumentEditorApi.prototype.pluginMethod_GetAllAddinFields.bind(PluginsApi);
+	PluginsApi.pluginMethod_AddAddinField = AscCommon.DocumentEditorApi.prototype.pluginMethod_AddAddinField.bind(PluginsApi);
+	PluginsApi.pluginMethod_UpdateAddinFields = AscCommon.DocumentEditorApi.prototype.pluginMethod_UpdateAddinFields.bind(PluginsApi);
+	PluginsApi.pluginMethod_SelectAddinField = AscCommon.DocumentEditorApi.prototype.pluginMethod_SelectAddinField.bind(PluginsApi);
+	PluginsApi.pluginMethod_RemoveAddinField = AscCommon.DocumentEditorApi.prototype.pluginMethod_RemoveAddinField.bind(PluginsApi);
+	PluginsApi.pluginMethod_GetCurrentAddinField = AscCommon.DocumentEditorApi.prototype.pluginMethod_GetCurrentAddinField.bind(PluginsApi);
+	PluginsApi.pluginMethod_RemoveFieldWrapper = AscCommon.DocumentEditorApi.prototype.pluginMethod_RemoveFieldWrapper.bind(PluginsApi);
+	PluginsApi.pluginMethod_MoveCursorToField = AscCommon.DocumentEditorApi.prototype.pluginMethod_MoveCursorToField.bind(PluginsApi);
+	PluginsApi.pluginMethod_MoveCursorOutsideField = AscCommon.DocumentEditorApi.prototype.pluginMethod_MoveCursorOutsideField.bind(PluginsApi);
+	PluginsApi.pluginMethod_SetEditingRestrictions = AscCommon.DocumentEditorApi.prototype.pluginMethod_SetEditingRestrictions.bind(PluginsApi);
+	PluginsApi.pluginMethod_GetCurrentWord = AscCommon.DocumentEditorApi.prototype.pluginMethod_GetCurrentWord.bind(PluginsApi);
+	PluginsApi.pluginMethod_GetCurrentSentence = AscCommon.DocumentEditorApi.prototype.pluginMethod_GetCurrentSentence.bind(PluginsApi);
+	PluginsApi.pluginMethod_ReplaceCurrentWord = AscCommon.DocumentEditorApi.prototype.pluginMethod_ReplaceCurrentWord.bind(PluginsApi);
+	PluginsApi.pluginMethod_ReplaceCurrentSentence = AscCommon.DocumentEditorApi.prototype.pluginMethod_ReplaceCurrentSentence.bind(PluginsApi);
+	
 	let logicDocument = AscTest.CreateLogicDocument();
 	logicDocument.RemoveFromContent(0, logicDocument.GetElementsCount(), false);
 	
@@ -160,6 +175,33 @@ $(function () {
 		assert.strictEqual(AscTest.GetParagraphText(p), "1", "Check the text of the third paragraph");
 	});
 	
+	QUnit.test("Test MoveCursorToField / MoveCursorOutsideField", function(assert)
+	{
+		AscTest.ClearDocument();
+		MoveToNewParagraph();
+
+		const fieldData = PluginsApi.pluginMethod_AddAddinField({"Value": "test-field", "Content": "Inside the field"});
+		const fieldId = fieldData.FieldId;
+
+		PluginsApi.pluginMethod_MoveCursorToField(fieldId, true);
+		let currentField = PluginsApi.pluginMethod_GetCurrentAddinField();
+		assert.notStrictEqual(currentField, null, "Check cursor is inside the field after MoveCursorToField to beginning");
+		assert.strictEqual(currentField.FieldId, fieldId, "Check current field matches the expected field after moving to beginning");
+
+		PluginsApi.pluginMethod_MoveCursorToField(fieldId, false);
+		currentField = PluginsApi.pluginMethod_GetCurrentAddinField();
+		assert.notStrictEqual(currentField, null, "Check cursor is inside the field after MoveCursorToField to end");
+
+		PluginsApi.pluginMethod_MoveCursorOutsideField(fieldId, true);
+		currentField = PluginsApi.pluginMethod_GetCurrentAddinField();
+		assert.strictEqual(currentField, null, "Check cursor is outside the field after MoveCursorOutsideField before the field");
+
+		PluginsApi.pluginMethod_MoveCursorToField(fieldId, false);
+		PluginsApi.pluginMethod_MoveCursorOutsideField(fieldId, false);
+		currentField = PluginsApi.pluginMethod_GetCurrentAddinField();
+		assert.strictEqual(currentField, null, "Check cursor is outside the field after MoveCursorOutsideField after the field");
+	});
+
 	QUnit.test("Test SetEditingRestrictions", function(assert)
 	{
 		AscTest.ClearDocument();
@@ -295,6 +337,7 @@ $(function () {
 		
 		
 	})
-	
-	
+
+
+
 });

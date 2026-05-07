@@ -1353,7 +1353,7 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 
 		var ws = r.worksheet;
 		var oldExcludeHiddenRows = ws.bExcludeHiddenRows;
-		ws.bExcludeHiddenRows = false;
+		ws.excludeHiddenRows(false);
 		r._foreach2(function (cell, i, j, r1, c1) {
 			if (!arr[i - r1]) {
 				arr[i - r1] = [];
@@ -1369,7 +1369,7 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 
 			arr[i - r1][j - c1] = resValue;
 		});
-		ws.bExcludeHiddenRows = oldExcludeHiddenRows;
+		ws.excludeHiddenRows(oldExcludeHiddenRows);
 
 		return arr;
 	};
@@ -1758,7 +1758,7 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 		var ws = r[0] ? r[0].worksheet : null;
 		if (ws) {
 			var oldExcludeHiddenRows = ws.bExcludeHiddenRows;
-			ws.bExcludeHiddenRows = false;
+			ws.excludeHiddenRows(false);
 		}
 		for (var k = 0; k < r.length; k++) {
 			arr[k] = [];
@@ -1842,7 +1842,7 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 			});
 		}
 		if (ws) {
-			ws.bExcludeHiddenRows = oldExcludeHiddenRows;
+			ws.excludeHiddenRows(oldExcludeHiddenRows);
 		}
 
 		return arr;
@@ -10848,7 +10848,7 @@ function parserFormula( formula, parent, _ws ) {
 							if (elem.name === "SINGLE" || isArgPosEnabledToSingle(elem, k)) {
 								return {func: elem, funcName: elem.name, argIndex: k};
 							}
-							break;
+							return null;
 						}
 					}
 				}

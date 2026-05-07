@@ -1920,21 +1920,38 @@
 		return this.oLookahead.data === "⁗" ||
 			this.oLookahead.data === "‴" ||
 			this.oLookahead.data === "″" ||
-			this.oLookahead.data === "′";
+			this.oLookahead.data === "′" || 
+			this.oLookahead.data === "'";
 	};
 	CUnicodeParser.prototype.GetPrimeLiteral = function (oBase)
 	{
+		oBase = this.GetContentOfLiteral(oBase);
 		let oSupStyle = this.oLookahead.style;
 		let strPrime = this.EatToken(this.oLookahead.class).data;
 
-		return {
-			type: Struc.sub_sub,
-			up: {
-				type: Struc.char,
-				value: strPrime,
-			},
-			value: oBase,
-			style: {supStyle: oSupStyle, subStyle: undefined},
+		if (oBase.type === Struc.sub_sub)
+		{
+			if(oBase.down && !oBase.up)
+			{
+				oBase.up = {
+					type: Struc.char,
+					value: strPrime
+				}
+
+				return oBase;
+			}
+		}
+		else
+		{
+			return {
+				type: Struc.sub_sub,
+				up: {
+					type: Struc.char,
+					value: strPrime,
+				},
+				value: oBase,
+				style: {supStyle: oSupStyle, subStyle: undefined},
+			}
 		}
 	};
 	CUnicodeParser.prototype.GetFactorLiteral = function ()

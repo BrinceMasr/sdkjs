@@ -351,10 +351,12 @@
     CActionGoTo.prototype.Do = function() {
         let oViewer         = Asc.editor.getDocumentRenderer();
         let oField          = this.GetCallerFiled();
-        let oDoc            = oField.GetDocument();
+        let oDoc            = oField ? oField.GetDocument() : Asc.editor.getPDFDoc();
         let oActionsQueue   = oDoc.GetActionsQueue();
 
-        oActionsQueue.SetCurAction(this);
+		if (oField) {
+	        oActionsQueue.SetCurAction(this);
+		}
         
         // if onFocus but form is not active, then skip action
         if (this.GetTriggerType() == PDF_TRIGGERS_TYPES.OnFocus && oField != oDoc.activeForm) {
@@ -386,7 +388,9 @@
             oViewer.needRedraw = true; // at the end of Actions we'll perform repaint
         }
 
-        oActionsQueue.Continue();
+		if (oField) {
+	        oActionsQueue.Continue();
+		}
     };
     
     CActionGoTo.prototype.WriteToBinary = function(memory) {

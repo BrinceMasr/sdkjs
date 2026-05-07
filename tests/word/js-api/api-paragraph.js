@@ -61,22 +61,23 @@ $(function ()
 		}), "123_t_456_nl_789\r\n", "Check GetText");
 	});
 	
-	QUnit.test('SetShd, GetShd', function (assert) {
+	QUnit.test('SetShd, GetShd', function (assert)
+	{
 		const apiParagraph = createApiParagraph();
 
-		assert.strictEqual(apiParagraph.GetShd(), null, 'Shading check for a newly created paragraph');
+		assert.equalShd(apiParagraph.GetShd(), {'Type' : 'nil', 'Color' : AscTest.JsApi.RGB(255, 255, 255)}, 'Shading check for a newly created paragraph');
 
 		apiParagraph.SetShd('clear', 255, 122, 100);
-		assert.equalRgb(apiParagraph.GetShd(), { r: 255, g: 122, b: 100 }, 'Check shd color set with RGB components');
+		assert.equalShd(apiParagraph.GetShd(), { 'Type' : 'clear', 'Color' : AscTest.JsApi.RGB(255, 122, 100) }, 'Check shd color set with RGB components');
 
 		apiParagraph.SetShd('clear', AscTest.JsApi.HexColor('55aa00'));
-		assert.equalRgb(apiParagraph.GetShd(), { r: 85, g: 170, b: 0 }, 'Check shd color set with ApiColor (hex)');
+		assert.equalShd(apiParagraph.GetShd(), { 'Type': 'clear', 'Color': AscTest.JsApi.RGB(85, 170, 0) }, 'Check shd color set with ApiColor (hex)');
 
 		apiParagraph.SetShd('clear', AscTest.JsApi.ThemeColor('accent2'));
-		assert.strictEqual(apiParagraph.GetShd().IsThemeColor(), true, 'Check shd color set with ApiColor (theme)');
+		assert.equalShd(apiParagraph.GetShd(), { 'Type': 'clear', 'Color': AscTest.JsApi.ThemeColor('accent2') }, 'Check shd color set with ApiColor (theme)');
 
 		apiParagraph.SetShd('clear', AscTest.JsApi.AutoColor());
-		assert.strictEqual(apiParagraph.GetShd().IsAutoColor(), true, 'Check shd color set with ApiColor (auto)');
+		assert.equalShd(apiParagraph.GetShd(), { 'Type': 'clear', 'Color': AscTest.JsApi.AutoColor() }, 'Check shd color set with ApiColor (auto)');
 	});
 	
 	QUnit.test('GetRange', function (assert)
@@ -137,6 +138,18 @@ $(function ()
 		assert.strictEqual(run.Run.GetReviewType(), reviewtype_Remove, "Text run inside the paragraph is marked as removed in review");
 	});
 
+	QUnit.test("SetText", function (assert)
+	{
+		let p = createApiParagraph();
+		p.AddText("Hello World");
+		assert.strictEqual(p.GetText(), "Hello World\r\n", "Check initial text");
+		p.SetText("Replaced");
+		assert.strictEqual(p.GetText(), "Replaced\r\n", "Check SetText replaces all content");
+
+		p.SetText("");
+		assert.strictEqual(p.GetText(), "\r\n", "Check SetText with empty string");
+	});
+
 	QUnit.test('SetColor, GetColor', function (assert) {
 		const hexColor = AscTest.JsApi.HexColor('#bada55');
 		const themeColor = AscTest.JsApi.ThemeColor('accent2');
@@ -166,4 +179,5 @@ $(function ()
 		apiRun = apiParagraph.GetElement(0);
 		assert.strictEqual(apiRun.GetColor().IsAutoColor(), true, 'Color check after setting color with ApiColor (auto)');
 	});
+
 });

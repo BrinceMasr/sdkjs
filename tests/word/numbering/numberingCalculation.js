@@ -78,7 +78,7 @@ $(function ()
 			assert.strictEqual(p.GetNumberingText(false), text, "Check numbering text for paragraph " + paraIndex);
 		}
 		
-		// Задаем 3 независимых стиля и свяжем их с тремя уровнями нумерации
+		// Create 3 independent styles and link them to three numbering levels
 		let style0 = CreateStyle();
 		let style1 = CreateStyle();
 		let style2 = CreateStyle();
@@ -98,7 +98,7 @@ $(function ()
 		}
 		
 		//--------------------------------------------------------------------------------------------------------------
-		// Нет нумерации
+		// No numbering
 		//--------------------------------------------------------------------------------------------------------------
 		Recalculate();
 		CheckParagraph(0, "");
@@ -106,7 +106,7 @@ $(function ()
 		CheckParagraph(2, "");
 		
 		//--------------------------------------------------------------------------------------------------------------
-		// Нумерация указана в стиле, и в стиле сразу заданы правильные уровни
+		// Numbering is specified in the style, and the correct levels are set directly in the style
 		//--------------------------------------------------------------------------------------------------------------
 		let num = CreateNum();
 		num.GetLvl(0).SetPStyle(style0.GetId());
@@ -122,10 +122,10 @@ $(function ()
 		CheckParagraph(1, "1.1.");
 		CheckParagraph(2, "1.1.1.");
 		//--------------------------------------------------------------------------------------------------------------
-		// Нумерация указана в стиле, но в стиле уровни не указаны
-		// Не смотря на то, что в спецификации написано, что мы должны определять уровень по pStyle в уровне нумерации,
-		// MSWord так не делает. В MSWord если не задан уровнь, значит уровень = 0. А если стиль не совпадает со стилем
-		// в заданном уровне, значит нумерации нет.
+		// Numbering is specified in the style, but levels are not set in the style
+		// Even though the specification states that we should determine the level from pStyle in the numbering level,
+		// MSWord does not do this. In MSWord if a level is not set, the level is 0. And if the style does not match the style
+		// in the given level, then there is no numbering.
 		//--------------------------------------------------------------------------------------------------------------
 		style0.SetNumPr(num.GetId(), undefined);
 		style1.SetNumPr(num.GetId(), undefined);
@@ -136,9 +136,9 @@ $(function ()
 		CheckParagraph(1, "");
 		CheckParagraph(2, "");
 		//--------------------------------------------------------------------------------------------------------------
-		// Нумерация указана в стиле, но в стиле уровни не указаны. Сами стили наследуются друг от друга
-		// В добавок к предыдущей ситуации, MSWord проверят иерархию наследования стилей, если один из цепочки подходит
-		// с текущим уровнем, то нумерация добавляется именно для подошедшего стиля.
+		// Numbering is specified in the style, but levels are not set in the style. The styles inherit from each other
+		// In addition to the previous case, MSWord checks the style inheritance hierarchy; if one in the chain matches
+		// the current level, then numbering is applied for that matching style.
 		// https://bugzilla.onlyoffice.com/show_bug.cgi?id=51893
 		//--------------------------------------------------------------------------------------------------------------
 		style1.SetNumPr(null);
@@ -152,7 +152,7 @@ $(function ()
 		CheckParagraph(2, "3.");
 	});
 	
-	// TODO: Добавить больше тестов и вынести в отдельный файл
+	// TODO: Add more tests and move to a separate file
 	QUnit.test("Test numbering collection", function (assert)
 	{
 		function AddParagraph(text)

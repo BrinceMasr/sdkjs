@@ -2466,14 +2466,6 @@ CInlineLevelSdt.prototype.private_UpdateCheckBoxContent = function()
 	}
 };
 /**
- * Проверяем, является ли данный класс специальным контейнером для картинки
- * @returns {boolean}
- */
-CInlineLevelSdt.prototype.IsPicture = function()
-{
-	return (!!this.Pr.Picture);
-};
-/**
  * Выставляем настройку того, что это контент контрол с картинкой
  * @param isPicture {boolean}
  */

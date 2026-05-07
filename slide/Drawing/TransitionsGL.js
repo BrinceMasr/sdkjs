@@ -41,7 +41,6 @@
 
     var c_oAscSlideTransitionTypes = Asc.c_oAscSlideTransitionTypes;
     var c_oAscSlideTransitionParams = Asc.c_oAscSlideTransitionParams;
-	const easeOutCubic = AscCommonSlide.easeOutCubic;
 
     // ---- WebGL transition type lookup ----
 
@@ -64,13 +63,6 @@
     _WebGLTransitionTypes[c_oAscSlideTransitionTypes.RandomBar]      = true;
     _WebGLTransitionTypes[c_oAscSlideTransitionTypes.Dissolve]       = true;
     _WebGLTransitionTypes[c_oAscSlideTransitionTypes.BoxZoom]        = true;
-	_WebGLTransitionTypes[c_oAscSlideTransitionTypes.Flash]          = true;
-	_WebGLTransitionTypes[c_oAscSlideTransitionTypes.Pan]            = true;
-	_WebGLTransitionTypes[c_oAscSlideTransitionTypes.Conveyor]       = true;
-	_WebGLTransitionTypes[c_oAscSlideTransitionTypes.Reveal]         = true;
-	_WebGLTransitionTypes[c_oAscSlideTransitionTypes.Flythrough]     = true;
-	_WebGLTransitionTypes[c_oAscSlideTransitionTypes.Glitter]        = true;
-	_WebGLTransitionTypes[c_oAscSlideTransitionTypes.Shred]          = true;
 
     function CTransitionGL(transitionAnimation)
     {
@@ -520,27 +512,6 @@
             case c_oAscSlideTransitionTypes.BoxZoom:
                 this._prepareBoxZoom();
                 break;
-			case c_oAscSlideTransitionTypes.Flash:
-				this._prepareFlash();
-				break;
-			case c_oAscSlideTransitionTypes.Pan:
-				this._preparePan();
-				break;
-			case c_oAscSlideTransitionTypes.Conveyor:
-				this._prepareConveyor();
-				break;
-			case c_oAscSlideTransitionTypes.Reveal:
-				this._prepareReveal();
-				break;
-			case c_oAscSlideTransitionTypes.Flythrough:
-				this._prepareFlythrough();
-				break;
-			case c_oAscSlideTransitionTypes.Glitter:
-				this._prepareGlitter();
-				break;
-			case c_oAscSlideTransitionTypes.Shred:
-				this._prepareShred(param);
-				break;
             default:
                 this._prepareCrossfade();
                 break;
@@ -615,27 +586,6 @@
             case c_oAscSlideTransitionTypes.BoxZoom:
                 this._renderBoxZoom(progress, param);
                 break;
-			case c_oAscSlideTransitionTypes.Flash:
-				this._renderFlash(progress);
-				break;
-			case c_oAscSlideTransitionTypes.Pan:
-				this._renderPan(progress, param);
-				break;
-			case c_oAscSlideTransitionTypes.Conveyor:
-				this._renderConveyor(progress, param);
-				break;
-			case c_oAscSlideTransitionTypes.Reveal:
-				this._renderReveal(progress, param);
-				break;
-			case c_oAscSlideTransitionTypes.Flythrough:
-				this._renderFlythrough(progress, param);
-				break;
-			case c_oAscSlideTransitionTypes.Glitter:
-				this._renderGlitter(progress, param);
-				break;
-			case c_oAscSlideTransitionTypes.Shred:
-				this._renderShred(progress, param);
-				break;
             default:
                 this._renderCrossfade(progress);
                 break;
@@ -715,7 +665,6 @@
 
     CTransitionGL.prototype._renderCrossfade = function(progress)
     {
-		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['crossfade'];
         if (!prog) return;
@@ -792,7 +741,6 @@
 
     CTransitionGL.prototype._renderFlip = function(progress, param)
     {
-		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['flip3d'];
         if (!prog) return;
@@ -806,7 +754,7 @@
         let projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
 
         let isLeft = (param === c_oAscSlideTransitionParams.Flip_Left);
-        let dir = isLeft ? -1 : 1;
+        let dir = isLeft ? 1 : -1;
         let angle = dir * progress * Math.PI; // 0 to ±180°
 
         gl.uniformMatrix4fv(prog.uniforms['uProjection'], false, projection);
@@ -934,7 +882,6 @@
 
     CTransitionGL.prototype._renderDoors = function(progress, param, isWindow)
     {
-		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['flip3d'];
         if (!prog) return;
@@ -1059,7 +1006,6 @@
 
     CTransitionGL.prototype._renderSwitch = function(progress, param)
     {
-		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['flip3d'];
         if (!prog) return;
@@ -1190,7 +1136,6 @@
 
     CTransitionGL.prototype._renderGallery = function(progress, param)
     {
-		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['flip3d'];
         let reflProg = this.programs['galleryRefl'];
@@ -1312,7 +1257,6 @@
 
     CTransitionGL.prototype._renderRipple = function(progress, param)
     {
-		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['ripple'];
         if (!prog) return;
@@ -1324,11 +1268,11 @@
         let originX = 0.5, originY = 0.5;
         switch (param)
         {
-            case c_oAscSlideTransitionParams.Ripple_LeftUp:    originX = 1.0; originY = 0.0; break;
-            case c_oAscSlideTransitionParams.Ripple_RightUp:   originX = 0.0; originY = 0.0; break;
-            case c_oAscSlideTransitionParams.Ripple_LeftDown:  originX = 1.0; originY = 1.0; break;
-            case c_oAscSlideTransitionParams.Ripple_RightDown: originX = 0.0; originY = 1.0; break;
-            case c_oAscSlideTransitionParams.Ripple_Center:    originX = 0.5; originY = 0.5; break;
+			case c_oAscSlideTransitionParams.Ripple_LeftUp: originX = 0.0; originY = 1.0; break;
+			case c_oAscSlideTransitionParams.Ripple_RightUp: originX = 1.0; originY = 1.0; break;
+			case c_oAscSlideTransitionParams.Ripple_LeftDown: originX = 0.0; originY = 0.0; break;
+			case c_oAscSlideTransitionParams.Ripple_RightDown: originX = 1.0; originY = 0.0; break;
+			case c_oAscSlideTransitionParams.Ripple_Center: originX = 0.5; originY = 0.5; break;
         }
 
         gl.activeTexture(gl.TEXTURE0);
@@ -1347,89 +1291,76 @@
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     };
 
-    CTransitionGL.prototype._prepareFerris = function()
-    {
-        this.GetProgram('flip3d', _VERT_3D, _FRAG_TEXTURED);
-        this._initQuadBuffer3D();
-    };
+	// ============================================================
+	// Transition: Ferris Wheel
+	// ============================================================
 
-    CTransitionGL.prototype._renderFerris = function(progress, param)
-    {
-		progress = easeOutCubic(progress);
-        let gl = this.gl;
-        let prog = this.programs['flip3d'];
-        if (!prog) return;
+	CTransitionGL.prototype._prepareFerris = function () {
+		this.GetProgram('flip3d', _VERT_3D, _FRAG_TEXTURED);
+		this._initQuadBuffer3D();
+	};
 
-        gl.useProgram(prog.program);
-        gl.enable(gl.DEPTH_TEST);
+	CTransitionGL.prototype._renderFerris = function (progress, param) {
+		const prog = this.programs['flip3d'];
+		if (!prog) {
+			return;
+		}
 
-        let aspect = this.glCanvas.width / this.glCanvas.height;
-        let fov = Math.PI / 4;
-        let dist = 1.0 / Math.tan(fov / 2);
-        let projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
+		const aspect = this.glCanvas.width / this.glCanvas.height;
+		const halfWidth = aspect;
 
-        let isLeft = (param === c_oAscSlideTransitionParams.Ferris_Left);
-        let dir = isLeft ? 1 : -1;
-        let arcRadius = 2.0;
-        let arcAngle = progress * Math.PI / 2;
+		const axisGap = halfWidth * 0.8;
+		const arm = halfWidth + axisGap;
+		const fov = Math.PI / 6;
+		const dist = 1 / Math.tan(fov / 2);
+		const projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
 
-        // Old slide rotates away on arc
-        {
-            let x = dir * Math.sin(arcAngle) * arcRadius;
-            let y = -(1.0 - Math.cos(arcAngle)) * arcRadius;
-            let tilt = dir * arcAngle;
+		const srcAngle = progress * Math.PI / 2;
+		const newAngle = -(1.0 - progress) * Math.PI / 2;
+		const yShiftDelta = -3;
 
-            let mv = _Mat4.identity();
-            mv = _Mat4.translate(mv, x, y, -dist);
-            mv = _Mat4.rotateY(mv, 0);
-            // Tilt the slide as it goes around the wheel
-            mv[0] = Math.cos(tilt);  mv[4] = -Math.sin(tilt);
-            mv[1] = Math.sin(tilt);  mv[5] = Math.cos(tilt);
+		const isLeft = (param === c_oAscSlideTransitionParams.Ferris_Left);
+		const axisDir = isLeft ? 1 : -1;
 
-            let mvFull = _Mat4.identity();
-            mvFull = _Mat4.translate(mvFull, x, y, -dist);
-            // Apply Z-rotation for ferris wheel tilt
-            let cosT = Math.cos(tilt), sinT = Math.sin(tilt);
-            let rotZ = _Mat4.identity();
-            rotZ[0] = cosT; rotZ[4] = -sinT;
-            rotZ[1] = sinT; rotZ[5] = cosT;
-            mvFull = _Mat4.multiply(mvFull, rotZ);
+		const gl = this.gl;
+		gl.useProgram(prog.program);
+		gl.enable(gl.DEPTH_TEST);
 
-            gl.uniformMatrix4fv(prog.uniforms['uProjection'], false, projection);
-            gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mvFull);
-            gl.uniform1f(prog.uniforms['uAlpha'], 1.0 - progress);
-            gl.activeTexture(gl.TEXTURE0);
-            gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
-            gl.uniform1i(prog.uniforms['uTexture'], 0);
-            this._bindQuad3D(prog);
-            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-        }
+		gl.uniform1f(prog.uniforms['uAlpha'], 1.0);
+		gl.uniformMatrix4fv(prog.uniforms['uProjection'], false, projection);
 
-        // New slide rotates in from opposite side
-        {
-            let revAngle = (1.0 - progress) * Math.PI / 2;
-            let x = -dir * Math.sin(revAngle) * arcRadius;
-            let y = -(1.0 - Math.cos(revAngle)) * arcRadius;
-            let tilt = -dir * revAngle;
+		let mv;
 
-            let mvFull = _Mat4.identity();
-            mvFull = _Mat4.translate(mvFull, x, y, -dist);
-            let cosT = Math.cos(tilt), sinT = Math.sin(tilt);
-            let rotZ = _Mat4.identity();
-            rotZ[0] = cosT; rotZ[4] = -sinT;
-            rotZ[1] = sinT; rotZ[5] = cosT;
-            mvFull = _Mat4.multiply(mvFull, rotZ);
+		mv = _Mat4.identity();
+		mv = _Mat4.translate(mv, 0, 0, -dist);
+		mv = _Mat4.translate(mv, -arm * axisDir, 0, 0);
+		mv = _Mat4.translate(mv, 0, yShiftDelta * Math.sin(newAngle), 0);
+		mv = _Mat4.rotateY(mv, axisDir * newAngle);
+		mv = _Mat4.rotateX(mv, -newAngle);
+		mv = _Mat4.translate(mv, arm * axisDir, 0, 0);
 
-            gl.uniformMatrix4fv(prog.uniforms['uProjection'], false, projection);
-            gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mvFull);
-            gl.uniform1f(prog.uniforms['uAlpha'], progress);
-            gl.activeTexture(gl.TEXTURE0);
-            gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
-            gl.uniform1i(prog.uniforms['uTexture'], 0);
-            this._bindQuad3D(prog);
-            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-        }
-    };
+		gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mv);
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
+		gl.uniform1i(prog.uniforms['uTexture'], 0);
+		this._bindQuad3D(prog);
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+		mv = _Mat4.identity();
+		mv = _Mat4.translate(mv, 0, 0, -dist);
+		mv = _Mat4.translate(mv, -arm * axisDir, 0, 0);
+		mv = _Mat4.translate(mv, 0, yShiftDelta * Math.sin(srcAngle), 0);
+		mv = _Mat4.rotateY(mv, axisDir * srcAngle);
+		mv = _Mat4.rotateX(mv, -srcAngle);
+		mv = _Mat4.translate(mv, arm * axisDir, 0, 0);
+
+		gl.uniformMatrix4fv(prog.uniforms['uModelView'], false, mv);
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
+		gl.uniform1i(prog.uniforms['uTexture'], 0);
+		this._bindQuad3D(prog);
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+	};
 
     // ============================================================
     // Transition: Prism — rectangular prism (cube) rotation, 90°
@@ -1443,7 +1374,6 @@
 
     CTransitionGL.prototype._renderPrism = function(progress, param)
     {
-		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['flip3d'];
         if (!prog) return;
@@ -1468,7 +1398,8 @@
         let prismR = (dirIdx <= 1) ? aspect : 1.0;
 
         let isVertical = (dirIdx <= 1); // left/right rotate around Y
-        let dirSign = (dirIdx === 0 || dirIdx === 2) ? 1 : -1;
+		let dirSign = (dirIdx === 0 || dirIdx === 2) ? -1 : 1;
+		if (isInverted) dirSign = -dirSign;
 
         // isInverted=0 (default): faces on OUTSIDE (convex cube, axis behind faces)
         // isInverted=1: faces on INSIDE (concave, axis in front of faces)
@@ -1751,7 +1682,6 @@
 
     CTransitionGL.prototype._renderVortex = function(progress, param)
     {
-		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['vortexScatter'];
         if (!prog) return;
@@ -1765,10 +1695,10 @@
         let projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
         let mv = _Mat4.translate(_Mat4.identity(), 0, 0, -dist);
 
-        let dir = 0;
-        if (param === c_oAscSlideTransitionParams.Vortex_Right) dir = 1;
-        else if (param === c_oAscSlideTransitionParams.Vortex_Up) dir = 2;
-        else if (param === c_oAscSlideTransitionParams.Vortex_Down) dir = 3;
+		let dir = 1;
+		if (param === c_oAscSlideTransitionParams.Vortex_Right) dir = 0;
+		else if (param === c_oAscSlideTransitionParams.Vortex_Up) dir = 3;
+		else if (param === c_oAscSlideTransitionParams.Vortex_Down) dir = 2;
 
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -1875,7 +1805,6 @@
 
     CTransitionGL.prototype._renderCircle = function(progress)
     {
-		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['circle'];
         if (!prog) return;
@@ -1927,7 +1856,6 @@
 
     CTransitionGL.prototype._renderDiamond = function(progress)
     {
-		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['diamond'];
         if (!prog) return;
@@ -1979,7 +1907,6 @@
 
     CTransitionGL.prototype._renderPlus = function(progress)
     {
-		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['plus'];
         if (!prog) return;
@@ -2038,7 +1965,6 @@
 
     CTransitionGL.prototype._renderBoxZoom = function(progress, param)
     {
-		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['boxzoom'];
         if (!prog) return;
@@ -2101,7 +2027,6 @@
 
     CTransitionGL.prototype._renderRandomBar = function(progress, param)
     {
-		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['randombar'];
         if (!prog) return;
@@ -2155,7 +2080,6 @@
 
     CTransitionGL.prototype._renderDissolve = function(progress)
     {
-		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['dissolve'];
         if (!prog) return;
@@ -2374,7 +2298,6 @@
 
     CTransitionGL.prototype._renderHoneycomb = function(progress)
     {
-		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['honeycomb'];
         let flatProg = this.programs['flip3d'];
@@ -2725,7 +2648,6 @@
 
     CTransitionGL.prototype._renderBlinds = function(progress, param)
     {
-		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['blindsPrism'];
         if (!prog) return;
@@ -2994,7 +2916,6 @@
 
     CTransitionGL.prototype._renderChecker = function(progress, param)
     {
-		progress = easeOutCubic(progress);
         let gl = this.gl;
         let prog = this.programs['checkerPlate'];
         if (!prog) return;
@@ -3038,1006 +2959,6 @@
         gl.enable(gl.BLEND);
         gl.activeTexture(gl.TEXTURE0);
     };
-
-	// ============================================================
-	// Transition: Flash — white flash between slides
-	// ============================================================
-
-	CTransitionGL.prototype._prepareFlash = function () {
-		const flashFragmentShader = [
-			'precision mediump float;',
-			'uniform sampler2D uTexture1;',
-			'uniform sampler2D uTexture2;',
-			'uniform float uProgress;',
-			'varying vec2 vTexCoord;',
-			'void main() {',
-			'    vec4 oldSlide = texture2D(uTexture1, vTexCoord);',
-			'    vec4 newSlide = texture2D(uTexture2, vTexCoord);',
-			'    float flashIntensity = 1.0 - abs(uProgress - 0.5) * 2.0;',
-			'    flashIntensity = flashIntensity * flashIntensity * flashIntensity;',
-			'    vec4 currentSlide = uProgress < 0.5 ? oldSlide : newSlide;',
-			'    gl_FragColor = mix(currentSlide, vec4(1.0), flashIntensity);',
-			'}'
-		].join('\n');
-
-		this.GetProgram('flash', _VERT_QUAD, flashFragmentShader);
-	};
-
-	CTransitionGL.prototype._renderFlash = function (progress) {
-		progress = easeOutCubic(progress);
-
-		const programInfo = this.programs['flash'];
-		if (!programInfo) {
-			return;
-		}
-
-		const gl = this.gl;
-		const uniforms = programInfo.uniforms;
-
-		gl.useProgram(programInfo.program);
-		gl.disable(gl.DEPTH_TEST);
-
-		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
-		gl.uniform1i(uniforms['uTexture1'], 0);
-
-		gl.activeTexture(gl.TEXTURE1);
-		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
-		gl.uniform1i(uniforms['uTexture2'], 1);
-
-		gl.uniform1f(uniforms['uProgress'], progress);
-
-		this._bindQuad(programInfo);
-		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-	};
-
-	// ============================================================
-	// Transition: Pan — flat slide push (single-pass 2D)
-	// ============================================================
-
-	CTransitionGL.prototype._preparePan = function () {
-		const panFragmentShader = [
-			'precision mediump float;',
-			'uniform sampler2D uTexture1;',
-			'uniform sampler2D uTexture2;',
-			'uniform float uProgress;',
-			'uniform float uDirX;',
-			'uniform float uDirY;',
-			'varying vec2 vTexCoord;',
-			'void main() {',
-			'    vec2 slideDirection = vec2(uDirX, uDirY);',
-			'    vec2 shiftedUV = vTexCoord + slideDirection * uProgress;',
-			'    bool insideBounds = shiftedUV.x >= 0.0 && shiftedUV.x <= 1.0',
-			'                     && shiftedUV.y >= 0.0 && shiftedUV.y <= 1.0;',
-			'    if (insideBounds)',
-			'        gl_FragColor = texture2D(uTexture1, shiftedUV);',
-			'    else',
-			'        gl_FragColor = texture2D(uTexture2, shiftedUV - slideDirection);',
-			'}'
-		].join('\n');
-
-		this.GetProgram('pan', _VERT_QUAD, panFragmentShader);
-	};
-
-	CTransitionGL.prototype._renderPan = function (progress, param) {
-		progress = easeOutCubic(progress);
-
-		const programInfo = this.programs['pan'];
-		if (!programInfo) {
-			return;
-		}
-
-		let dx = 0, dy = 0;
-		switch (param) {
-			case c_oAscSlideTransitionParams.Pan_Left:  dx = 1; break;
-			case c_oAscSlideTransitionParams.Pan_Right: dx = -1; break;
-			case c_oAscSlideTransitionParams.Pan_Up:    dy = -1; break;
-			case c_oAscSlideTransitionParams.Pan_Down:  dy = 1; break;
-		}
-
-		const gl = this.gl;
-		const uniforms = programInfo.uniforms;
-
-		gl.useProgram(programInfo.program);
-		gl.disable(gl.DEPTH_TEST);
-
-		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
-		gl.uniform1i(uniforms['uTexture1'], 0);
-
-		gl.activeTexture(gl.TEXTURE1);
-		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
-		gl.uniform1i(uniforms['uTexture2'], 1);
-
-		gl.uniform1f(uniforms['uProgress'], progress);
-		gl.uniform1f(uniforms['uDirX'], dx);
-		gl.uniform1f(uniforms['uDirY'], dy);
-
-		this._bindQuad(programInfo);
-		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-	};
-
-	// ============================================================
-	// Transition: Conveyor — perspective gallery sliding
-	// ============================================================
-
-	CTransitionGL.prototype._prepareConveyor = function () {
-		this.GetProgram('flip3d', _VERT_3D, _FRAG_TEXTURED);
-		this._initQuadBuffer3D();
-	};
-
-	CTransitionGL.prototype._renderConveyor = function (progress, param) {
-		const programInfo = this.programs['flip3d'];
-		if (!programInfo) {
-			return;
-		}
-
-		const aspect = this.glCanvas.width / this.glCanvas.height;
-		const fov = Math.PI / 4;
-		const dist = 1.0 / Math.tan(fov / 2);
-		const projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
-
-		const dir = (param === c_oAscSlideTransitionParams.Conveyor_Left) ? -1 : 1;
-		const quadHalfWidth = aspect;
-
-		const clampedProgress = Math.max(0, Math.min(progress, 1.0));
-
-		// Three phases: move away with rotation, slide, move closer with rotation reset
-		const pullBackEnd = 1 / 3;
-		const slideEnd = 2 / 3;
-
-		let awayProgress = Math.min(clampedProgress / pullBackEnd, 1.0);
-		awayProgress = awayProgress * awayProgress * (3.0 - 2.0 * awayProgress);
-
-		let slideProgress = Math.max(0, Math.min((clampedProgress - pullBackEnd) / (slideEnd - pullBackEnd), 1.0));
-		slideProgress = slideProgress * slideProgress * (3.0 - 2.0 * slideProgress);
-
-		let returnProgress = Math.max(0, Math.min((clampedProgress - slideEnd) / (1.0 - slideEnd), 1.0));
-		returnProgress = returnProgress * returnProgress * (3.0 - 2.0 * returnProgress);
-
-		const maxRotationAngle = -dir * Math.PI / 10;
-		const rotationAngle = maxRotationAngle * (awayProgress - returnProgress);
-
-		const maxPullBack = 0.6;
-		const zOffset = -maxPullBack * (awayProgress - returnProgress);
-
-		const gap = quadHalfWidth * 0.06;
-		const totalSlideDistance = quadHalfWidth * 2 + gap;
-		const slideOffset = dir * slideProgress * totalSlideDistance;
-
-		let oldSlideModelView = _Mat4.identity();
-		oldSlideModelView = _Mat4.translate(oldSlideModelView, 0, 0, -dist + zOffset);
-		oldSlideModelView = _Mat4.rotateY(oldSlideModelView, rotationAngle);
-		oldSlideModelView = _Mat4.translate(oldSlideModelView, slideOffset, 0, 0);
-
-		let newSlideModelView = _Mat4.identity();
-		newSlideModelView = _Mat4.translate(newSlideModelView, 0, 0, -dist + zOffset);
-		newSlideModelView = _Mat4.rotateY(newSlideModelView, rotationAngle);
-		newSlideModelView = _Mat4.translate(newSlideModelView, slideOffset - dir * totalSlideDistance, 0, 0);
-
-		const gl = this.gl;
-		const uniforms = programInfo.uniforms;
-
-		gl.useProgram(programInfo.program);
-		gl.enable(gl.DEPTH_TEST);
-
-		gl.clearColor(1.0, 1.0, 1.0, 1.0);
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-		gl.uniformMatrix4fv(uniforms['uProjection'], false, projection);
-
-		gl.uniformMatrix4fv(uniforms['uModelView'], false, oldSlideModelView);
-		gl.uniform1f(uniforms['uAlpha'], 1.0);
-		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
-		gl.uniform1i(uniforms['uTexture'], 0);
-		this._bindQuad3D(programInfo);
-		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
-		gl.uniformMatrix4fv(uniforms['uModelView'], false, newSlideModelView);
-		gl.uniform1f(uniforms['uAlpha'], 1.0);
-		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
-		gl.uniform1i(uniforms['uTexture'], 0);
-		this._bindQuad3D(programInfo);
-		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-	};
-
-	// ============================================================
-	// Transition: Reveal — slight zoom with white flash
-	// ============================================================
-
-	CTransitionGL.prototype._prepareReveal = function () {
-		const revealFragmentShader = [
-			'precision mediump float;',
-			'uniform sampler2D uTexture;',
-			'uniform float uAlpha;',
-			'uniform float uSweepProgress;',
-			'uniform float uBackdropValue;',
-			'uniform float uDirection;',
-			'uniform float uEdgeWidth;',
-			'varying vec2 vTexCoord;',
-			'void main() {',
-			'    vec4 slide = texture2D(uTexture, vTexCoord);',
-			'    float coord = (uDirection > 0.0) ? vTexCoord.x : (1.0 - vTexCoord.x);',
-			'    float sweepFront = mix(-uEdgeWidth, 1.0 + uEdgeWidth, uSweepProgress);',
-			'    float backdropMix = 1.0 - smoothstep(sweepFront - uEdgeWidth, sweepFront + uEdgeWidth, coord);',
-			'    slide.rgb = mix(slide.rgb, vec3(uBackdropValue), backdropMix);',
-			'    gl_FragColor = vec4(slide.rgb, slide.a * uAlpha);',
-			'}'
-		].join('\n');
-
-		this.GetProgram('reveal', _VERT_3D, revealFragmentShader);
-		this._initQuadBuffer3D();
-	};
-
-	CTransitionGL.prototype._renderReveal = function (progress, param) {
-		progress = easeOutCubic(progress);
-
-		const programInfo = this.programs['reveal'];
-		if (!programInfo) {
-			return;
-		}
-
-		const startsFromRight = (
-			param === c_oAscSlideTransitionParams.Reveal_SmoothLeft ||
-			param === c_oAscSlideTransitionParams.Reveal_BlackLeft
-		);
-		const useBlackBackdrop = (
-			param === c_oAscSlideTransitionParams.Reveal_BlackLeft ||
-			param === c_oAscSlideTransitionParams.Reveal_BlackRight
-		);
-
-		const aspect = this.glCanvas.width / this.glCanvas.height;
-		const fov = Math.PI / 4;
-		const dist = 1.0 / Math.tan(fov / 2);
-		const projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
-
-		const edgeWidth = 0.5;
-		const sweepDirection = startsFromRight ? -1.0 : 1.0;
-		const phaseSplit = 0.5;
-		const maxZoomOffset = 0.05;
-		const slideHalfWidth = aspect;
-
-		const isFirstPhase = progress <= phaseSplit;
-
-		let localPhaseProgress;
-		let currentScale;
-		let sweepProgress;
-		let currentTexture;
-
-		if (isFirstPhase) {
-			localPhaseProgress = progress / phaseSplit;
-			sweepProgress = localPhaseProgress;
-			currentTexture = this.textures.slide1;
-		} else {
-			localPhaseProgress = (progress - phaseSplit) / phaseSplit;
-			sweepProgress = 1.0 - localPhaseProgress;
-			currentTexture = this.textures.slide2;
-		}
-
-		localPhaseProgress = localPhaseProgress * localPhaseProgress * (3.0 - 2.0 * localPhaseProgress);
-		sweepProgress = sweepProgress * sweepProgress * (3.0 - 2.0 * sweepProgress);
-		currentScale = (isFirstPhase)
-			? 1.0 + maxZoomOffset * localPhaseProgress
-			: 1.0 + maxZoomOffset * (1 - localPhaseProgress);
-		const horizontalShift = slideHalfWidth * (currentScale - 1.0) * (isFirstPhase ? -1.0 : 1.0);
-
-		let modelView = _Mat4.identity();
-		modelView = _Mat4.translate(modelView, horizontalShift, 0, -dist);
-		modelView[0] *= currentScale;
-		modelView[5] *= currentScale;
-
-		const gl = this.gl;
-		const uniforms = programInfo.uniforms;
-		const clearValue = useBlackBackdrop ? 0.0 : 1.0;
-
-		gl.useProgram(programInfo.program);
-		gl.enable(gl.DEPTH_TEST);
-		gl.clearColor(clearValue, clearValue, clearValue, 1.0);
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-		gl.uniformMatrix4fv(uniforms['uProjection'], false, projection);
-		gl.uniformMatrix4fv(uniforms['uModelView'], false, modelView);
-		gl.uniform1f(uniforms['uAlpha'], 1.0);
-		gl.uniform1f(uniforms['uSweepProgress'], sweepProgress);
-		gl.uniform1f(uniforms['uBackdropValue'], clearValue);
-		gl.uniform1f(uniforms['uDirection'], sweepDirection);
-		gl.uniform1f(uniforms['uEdgeWidth'], edgeWidth);
-		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_2D, currentTexture);
-		gl.uniform1i(uniforms['uTexture'], 0);
-		this._bindQuad3D(programInfo);
-		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-	};
-
-	// ============================================================
-	// Transition: Flythrough — scale-based zoom through
-	// ============================================================
-
-	CTransitionGL.prototype._prepareFlythrough = function () {
-		const flythroughFragShader = [
-			'precision mediump float;',
-			'uniform sampler2D uTexture;',
-			'uniform float uAlpha;',
-			'uniform float uScale;',
-			'varying vec2 vTexCoord;',
-			'void main() {',
-			'    vec2 uv = (vTexCoord - 0.5) / uScale + 0.5;',
-			'    if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {',
-			'        gl_FragColor = vec4(0.0);',
-			'        return;',
-			'    }',
-			'    vec4 color = texture2D(uTexture, uv);',
-			'    gl_FragColor = vec4(color.rgb, color.a * uAlpha);',
-			'}'
-		].join('\n');
-
-		this.GetProgram('flythrough', _VERT_QUAD, flythroughFragShader);
-	};
-
-	CTransitionGL.prototype._renderFlythrough = function (progress, param) {
-		progress = easeOutCubic(progress);
-
-		const programInfo = this.programs['flythrough'];
-		if (!programInfo) {
-			return;
-		}
-
-		const isOut = (
-			param === c_oAscSlideTransitionParams.Flythrough_Out ||
-			param === c_oAscSlideTransitionParams.Flythrough_Out_Bounce
-		);
-		const hasBounce = (
-			param === c_oAscSlideTransitionParams.Flythrough_In_Bounce ||
-			param === c_oAscSlideTransitionParams.Flythrough_Out_Bounce
-		);
-
-		const oldSlideInitialScale = 1.0;
-		const oldSlideFinalScale = isOut ? 0.3 : 3.5;
-		const newSlideInitialScale = isOut ? 3.5 : 0.3;
-		const newSlideFinalScale = 1.0;
-
-		const scaleRange = Math.abs(newSlideFinalScale - newSlideInitialScale);
-		const scaleOvershoot = isOut ? 0.02 : 0.01;
-		const scaleReturn = isOut ? 0.01 : 0.02;
-
-		const finalPoint = 1.0;
-		const overshootPoint = finalPoint + (hasBounce ? scaleOvershoot / scaleRange : 0.0);
-		const returnPoint = finalPoint - (hasBounce ? scaleReturn / scaleRange : 0.0);
-
-		const leg1 = overshootPoint;
-		const leg2 = overshootPoint - returnPoint;
-		const leg3 = finalPoint - returnPoint;
-		const totalDistance = leg1 + leg2 + leg3;
-
-		const distanceTraveled = progress * totalDistance;
-		let cameraPosition;
-		if (distanceTraveled <= leg1) {
-			cameraPosition = overshootPoint * _smoothstep(distanceTraveled / leg1);
-		} else if (distanceTraveled <= leg1 + leg2) {
-			cameraPosition = overshootPoint - (overshootPoint - returnPoint) * _smoothstep((distanceTraveled - leg1) / leg2);
-		} else {
-			cameraPosition = returnPoint + (finalPoint - returnPoint) * _smoothstep((distanceTraveled - leg1 - leg2) / leg3);
-		}
-
-		const oldSlideScale = oldSlideInitialScale + (oldSlideFinalScale - oldSlideInitialScale) * cameraPosition;
-		const newSlideScale = newSlideInitialScale + (newSlideFinalScale - newSlideInitialScale) * cameraPosition;
-
-		const oldSlideAlpha = 1.0 - _linearFade(progress, 0.2, 0.6);
-		const newSlideAlpha = _linearFade(progress, 0.4, 0.8);
-
-		const gl = this.gl;
-		const uniforms = programInfo.uniforms;
-
-		gl.useProgram(programInfo.program);
-		gl.disable(gl.DEPTH_TEST);
-		gl.clearColor(1.0, 1.0, 1.0, 1.0);
-		gl.clear(gl.COLOR_BUFFER_BIT);
-		gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-
-		gl.uniform1f(uniforms['uScale'], newSlideScale);
-		gl.uniform1f(uniforms['uAlpha'], newSlideAlpha);
-		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
-		gl.uniform1i(uniforms['uTexture'], 0);
-		this._bindQuad(programInfo);
-		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
-		gl.uniform1f(uniforms['uScale'], oldSlideScale);
-		gl.uniform1f(uniforms['uAlpha'], oldSlideAlpha);
-		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
-		gl.uniform1i(uniforms['uTexture'], 0);
-		this._bindQuad(programInfo);
-		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
-		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-	};
-
-	function _smoothstep(v) { return Math.pow(v, 2) * (3 - 2 * v); }
-	function _linearFade(v, start, end) { return Math.max(0, Math.min((v - start) / (end - start), 1)); }
-
-	// ============================================================
-	// Transition: Glitter — tiles flip around Y axis with directional sparkle
-	// ============================================================
-
-	const _VERT_GLITTER = [
-		'attribute vec3 aPosition;',
-		'attribute vec2 aTexCoord;',
-		'attribute float aTilePhase;',
-		'attribute vec2 aTileCenter;',
-		'uniform mat4 uProjection;',
-		'uniform mat4 uModelView;',
-		'uniform float uProgress;',
-		'uniform float uDirX;',
-		'uniform float uDirY;',
-		'uniform float uAspect;',
-		'varying vec2 vTexCoord;',
-		'varying float vFlipProgress;',
-		'varying vec2 vTileCenterUV;',
-		'',
-		'void main() {',
-		'    vec3 pos = aPosition;',
-		'',
-		'    // Directional sweep from tile center position',
-		'    float nx = (aTileCenter.x + uAspect) / (2.0 * uAspect);',
-		'    float ny = (aTileCenter.y + 1.0) / 2.0;',
-		'    float isHorz = step(abs(uDirY), abs(uDirX));',
-		'    float hSweep = mix(1.0 - nx, nx, step(uDirX, 0.0));',
-		'    float vSweep = mix(1.0 - ny, ny, step(0.0, uDirY));',
-		'    float sweep = mix(vSweep, hSweep, isHorz);',
-		'',
-		'    // Flip timing: directional sweep + per-tile randomness from mesh',
-		'    float flipDuration = 0.4;',
-		'    float maxDelay = 1.0 - flipDuration;',
-		'    float flipStart = sweep * maxDelay * 0.7 + aTilePhase * maxDelay * 0.3;',
-		'    float fp = clamp((uProgress - flipStart) / flipDuration, 0.0, 1.0);',
-		'    fp = fp * fp * (3.0 - 2.0 * fp);',
-		'    vFlipProgress = fp;',
-		'',
-		'    // Rotate tile around Y axis at its center',
-		'    vec3 local = pos - vec3(aTileCenter, 0.0);',
-		'    float angle = fp * 3.14159;',
-		'    float ca = cos(angle);',
-		'    float sa = sin(angle);',
-		'    local = vec3(local.x * ca, local.y, -local.x * sa);',
-		'    pos = vec3(aTileCenter, 0.0) + local;',
-		'',
-		'    vTexCoord = aTexCoord;',
-		'    vTileCenterUV = vec2(nx, ny);',
-		'    gl_Position = uProjection * uModelView * vec4(pos, 1.0);',
-		'}'
-	].join('\n');
-
-	const _FRAG_GLITTER = [
-		'precision mediump float;',
-		'uniform sampler2D uTexture1;',
-		'uniform sampler2D uTexture2;',
-		'varying vec2 vTexCoord;',
-		'varying float vFlipProgress;',
-		'varying vec2 vTileCenterUV;',
-		'void main() {',
-		'    vec4 color;',
-		'    if (vFlipProgress < 0.5) {',
-		'        color = texture2D(uTexture1, vTexCoord);',
-		'    } else {',
-		'        vec2 uv = vec2(2.0 * vTileCenterUV.x - vTexCoord.x, vTexCoord.y);',
-		'        color = texture2D(uTexture2, uv);',
-		'    }',
-		'    float sparkle = sin(vFlipProgress * 3.14159);',
-		'    color.rgb += sparkle * sparkle * 0.3;',
-		'    gl_FragColor = color;',
-		'}'
-	].join('\n');
-
-	function _mulberry32(seed) {
-		return function () {
-			seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
-			let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-			t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-			return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-		};
-	}
-
-	CTransitionGL.prototype._initGlitterMeshBuffer = function (name, tileRadius, colSpacing, rowSpacing, seed, getCorners) {
-		if (this.buffers[name]) {
-			return;
-		}
-
-		const gl = this.gl;
-		const aspect = this.glCanvas.width / this.glCanvas.height;
-		const hw = aspect;
-		const hh = 1.0;
-		const r = tileRadius;
-
-		const cols = Math.ceil(hw * 2 / colSpacing) + 2;
-		const rows = Math.ceil(hh * 2 / rowSpacing) + 2;
-		const rand = _mulberry32(seed);
-
-		const _TILE_EDGE_PADDING = 0.2;
-
-		const tiles = [];
-		for (let row = 0; row < rows; row++) {
-			const cy = -hh - r + row * rowSpacing;
-			const rowOffset = (row & 1) ? colSpacing * 0.5 : 0;
-			for (let col = 0; col < cols; col++) {
-				const cx = -hw - r + col * colSpacing + rowOffset;
-				if (cx + r < -hw - _TILE_EDGE_PADDING || cx - r > hw + _TILE_EDGE_PADDING) continue;
-				if (cy + r < -hh - _TILE_EDGE_PADDING || cy - r > hh + _TILE_EDGE_PADDING) continue;
-				tiles.push({ cx: cx, cy: cy, phase: rand() });
-			}
-		}
-
-		const cornersPerTile = getCorners(0, 0).length;
-		const vertCount = tiles.length * cornersPerTile * 3;
-		const data = new Float32Array(vertCount * 8);
-		const invW = 1 / (2 * hw);
-		const invH = 1 / (2 * hh);
-		let vi = 0;
-
-		for (let t = 0; t < tiles.length; t++) {
-			const tile = tiles[t];
-			const cx = tile.cx, cy = tile.cy;
-			const corners = getCorners(cx, cy);
-
-			for (let edge = 0; edge < corners.length; edge++) {
-				const p1 = corners[edge];
-				const p2 = corners[(edge + 1) % corners.length];
-				const pts = [[cx, cy], p1, p2];
-
-				for (let v = 0; v < 3; v++) {
-					const px = pts[v][0];
-					const py = pts[v][1];
-					data[vi++] = px;
-					data[vi++] = py;
-					data[vi++] = 0;
-					data[vi++] = (px + hw) * invW;
-					data[vi++] = (py + hh) * invH;
-					data[vi++] = tile.phase;
-					data[vi++] = cx;
-					data[vi++] = cy;
-				}
-			}
-		}
-
-		const vbo = gl.createBuffer();
-		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-		gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-		this.buffers[name] = { vbo: vbo, vertCount: vertCount, stride: 32 };
-	};
-
-	CTransitionGL.prototype._prepareGlitter = function () {
-		this.GetProgram('glitter', _VERT_GLITTER, _FRAG_GLITTER);
-
-		const hexR = 0.07;
-		this._initGlitterMeshBuffer('hexGlitter', hexR, hexR * Math.sqrt(3), hexR * 1.5, 12345, function (cx, cy) {
-			const corners = [];
-			for (let i = 0; i < 6; i++) {
-				const a = (Math.PI / 6) + (i * Math.PI / 3);
-				corners.push([cx + hexR * Math.cos(a), cy + hexR * Math.sin(a)]);
-			}
-			return corners;
-		});
-
-		const dR = 0.06;
-		this._initGlitterMeshBuffer('diamondGlitter', dR, dR * 2, dR, 67890, function (cx, cy) {
-			return [
-				[cx, cy + dR],
-				[cx + dR, cy],
-				[cx, cy - dR],
-				[cx - dR, cy]
-			];
-		});
-	};
-
-	CTransitionGL.prototype._renderGlitter = function (progress, param) {
-		progress = easeOutCubic(progress);
-
-		const programInfo = this.programs['glitter'];
-		if (!programInfo) {
-			return;
-		}
-
-		const isDiamond = (
-			param === c_oAscSlideTransitionParams.Glitter_Left_Diamond ||
-			param === c_oAscSlideTransitionParams.Glitter_Right_Diamond ||
-			param === c_oAscSlideTransitionParams.Glitter_Up_Diamond ||
-			param === c_oAscSlideTransitionParams.Glitter_Down_Diamond
-		);
-
-		const isLeft = (
-			param === c_oAscSlideTransitionParams.Glitter_Left_Diamond ||
-			param === c_oAscSlideTransitionParams.Glitter_Left_Hexagon
-		);
-		const isRight = (
-			param === c_oAscSlideTransitionParams.Glitter_Right_Diamond ||
-			param === c_oAscSlideTransitionParams.Glitter_Right_Hexagon
-		);
-		const isUp = (
-			param === c_oAscSlideTransitionParams.Glitter_Up_Diamond ||
-			param === c_oAscSlideTransitionParams.Glitter_Up_Hexagon
-		);
-		const isDown = (
-			param === c_oAscSlideTransitionParams.Glitter_Down_Diamond ||
-			param === c_oAscSlideTransitionParams.Glitter_Down_Hexagon
-		);
-
-		const dirX = isLeft ? -1 : (isRight ? 1 : 0);
-		const dirY = isUp ? -1 : (isDown ? 1 : 0);
-
-		const meshName = isDiamond ? 'diamondGlitter' : 'hexGlitter';
-
-		const gl = this.gl;
-		const uniforms = programInfo.uniforms;
-		const aspect = this.glCanvas.width / this.glCanvas.height;
-		const fov = Math.PI / 4;
-		const dist = 1.0 / Math.tan(fov / 2);
-		const projection = _Mat4.perspective(fov, aspect, 0.1, 100.0);
-		const modelView = _Mat4.translate(_Mat4.identity(), 0, 0, -dist);
-
-		gl.enable(gl.DEPTH_TEST);
-		gl.useProgram(programInfo.program);
-
-		gl.uniformMatrix4fv(uniforms['uProjection'], false, projection);
-		gl.uniformMatrix4fv(uniforms['uModelView'], false, modelView);
-		gl.uniform1f(uniforms['uProgress'], progress);
-		gl.uniform1f(uniforms['uDirX'], dirX);
-		gl.uniform1f(uniforms['uDirY'], dirY);
-		gl.uniform1f(uniforms['uAspect'], aspect);
-
-		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide1);
-		gl.uniform1i(uniforms['uTexture1'], 0);
-
-		gl.activeTexture(gl.TEXTURE1);
-		gl.bindTexture(gl.TEXTURE_2D, this.textures.slide2);
-		gl.uniform1i(uniforms['uTexture2'], 1);
-
-		this._bindHexMesh(meshName, programInfo);
-		gl.drawArrays(gl.TRIANGLES, 0, this.buffers[meshName].vertCount);
-	};
-
-	// ============================================================
-	// Transition: Shred — pieces scatter in 3D
-	// ============================================================
-
-	const _VERT_SHRED = [
-		'attribute vec3 aPosition;',
-		'attribute vec2 aTexCoord;',
-		'attribute float aTileZOffset;',
-		'uniform mat4 uProjection;',
-		'uniform mat4 uModelView;',
-		'uniform float uScatterProgress;',
-		'uniform float uFlyProgress;',
-		'uniform float uMaxScatter;',
-		'varying vec2 vTexCoord;',
-		'varying float vAlpha;',
-		'void main() {',
-		'    vec3 pos = aPosition;',
-		'    float tileZ = aTileZOffset * uMaxScatter * uScatterProgress;',
-		'    pos.z += tileZ;',
-		'    float threshold = uMaxScatter * 0.5 * uScatterProgress;',
-		'    float flyDist = uMaxScatter * 10.0;',
-		'    if (uFlyProgress > 0.0) {',
-		'        float speed;',
-		'        if (tileZ > threshold) {',
-		'            speed = tileZ / (uMaxScatter * uScatterProgress + 0.001);',
-		'            pos.z += uFlyProgress * flyDist * speed;',
-		'        } else {',
-		'            speed = 1.0 - tileZ / (threshold + 0.001);',
-		'            pos.z -= uFlyProgress * flyDist * speed;',
-		'        }',
-		'        vAlpha = 1.0 - uFlyProgress;',
-		'    } else {',
-		'        vAlpha = 1.0;',
-		'    }',
-		'    vTexCoord = aTexCoord;',
-		'    gl_Position = uProjection * uModelView * vec4(pos, 1.0);',
-		'}'
-	].join('\n');
-
-	function _writeShredQuad(data, vi, left, top, right, bottom, zOffset, invW, invH, halfW, halfH) {
-		const corners = [
-			left, top, right, top, left, bottom,
-			right, top, right, bottom, left, bottom
-		];
-		for (let v = 0; v < 6; v++) {
-			const px = corners[v * 2];
-			const py = corners[v * 2 + 1];
-			data[vi++] = px;
-			data[vi++] = py;
-			data[vi++] = 0;
-			data[vi++] = (px + halfW) * invW;
-			data[vi++] = (py + halfH) * invH;
-			data[vi++] = zOffset;
-		}
-		return vi;
-	}
-
-	function _generateShredBoundary(xStart, rowCount, cellSize, rand, prevBoundary) {
-		const shiftRow = Math.floor(rand() * rowCount);
-		const shiftDx = rand() * cellSize;
-		const boundary = [];
-		let x = xStart;
-
-		for (let i = 0; i < rowCount; i++) {
-			if (prevBoundary && x < prevBoundary[i]) {
-				x = prevBoundary[i];
-			}
-			if (i === shiftRow) {
-				x += shiftDx;
-			}
-			boundary.push(x);
-		}
-
-		return boundary;
-	}
-
-	function _makeConstantBoundary(xValue, rowCount) {
-		const boundary = [];
-		for (let i = 0; i < rowCount; i++) {
-			boundary.push(xValue);
-		}
-		return boundary;
-	}
-
-	CTransitionGL.prototype._initShredParticlesMesh = function (name) {
-		if (this.buffers[name]) {
-			return;
-		}
-
-		const gl = this.gl;
-		const aspect = this.glCanvas.width / this.glCanvas.height;
-		const halfW = aspect;
-		const halfH = 1.0;
-		const invW = 1 / (2 * halfW);
-		const invH = 1 / (2 * halfH);
-
-		const tileSize = (2 * halfW) / 150;
-		const cols = Math.ceil(2 * halfW / tileSize);
-		const rows = Math.ceil(2 * halfH / tileSize);
-		const rand = _mulberry32(42);
-
-		const vertCount = cols * rows * 6;
-		const data = new Float32Array(vertCount * 6);
-		let vi = 0;
-
-		for (let row = 0; row < rows; row++) {
-			for (let col = 0; col < cols; col++) {
-				const left = -halfW + (col / cols) * 2 * halfW;
-				const right = -halfW + ((col + 1) / cols) * 2 * halfW;
-				const top = -halfH + (row / rows) * 2 * halfH;
-				const bottom = -halfH + ((row + 1) / rows) * 2 * halfH;
-
-				vi = _writeShredQuad(
-					data, vi,
-					left, top, right, bottom,
-					rand(),
-					invW, invH, halfW, halfH
-				);
-			}
-		}
-
-		const vbo = gl.createBuffer();
-		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-		gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-		this.buffers[name] = { vbo: vbo, vertCount: vertCount, stride: 24 };
-	};
-
-	CTransitionGL.prototype._initShredStripsMesh = function (name) {
-		if (this.buffers[name]) {
-			return;
-		}
-
-		const gl = this.gl;
-		const aspect = this.glCanvas.width / this.glCanvas.height;
-		const halfW = aspect;
-		const halfH = 1.0;
-		const invW = 1 / (2 * halfW);
-		const invH = 1 / (2 * halfH);
-
-		const cellSize = (2 * halfW) / 25;
-		const rowCount = Math.ceil(2 * halfH / cellSize);
-		const rowHeight = 2 * halfH / rowCount;
-		const rand = _mulberry32(77);
-
-		// Fixed Y levels shared by all boundaries
-		const yLevels = [];
-		for (let r = 0; r <= rowCount; r++) {
-			yLevels.push(-halfH + r * rowHeight);
-		}
-
-		// Generate boundaries: left edge - procedural - right edge
-		const boundaries = [_makeConstantBoundary(-halfW, rowCount + 1)];
-
-		let xCursor = -halfW;
-		while (xCursor < halfW) {
-			xCursor += cellSize * 0.5 + rand() * cellSize * 0.5;
-			if (xCursor >= halfW) {
-				break;
-			}
-			const prevBoundary = boundaries[boundaries.length - 1];
-			boundaries.push(_generateShredBoundary(xCursor, rowCount + 1, cellSize, rand, prevBoundary));
-		}
-
-		boundaries.push(_makeConstantBoundary(halfW, rowCount + 1));
-
-		// Build quads: each strip x each row = one axis-aligned rectangle
-		const stripCount = boundaries.length - 1;
-		const vertCount = stripCount * rowCount * 6;
-		const data = new Float32Array(vertCount * 6);
-		let vi = 0;
-
-		for (let strip = 0; strip < stripCount; strip++) {
-			const leftBoundary = boundaries[strip];
-			const rightBoundary = boundaries[strip + 1];
-			const stripZOffset = rand();
-
-			for (let row = 0; row < rowCount; row++) {
-				const top = yLevels[row];
-				const bottom = yLevels[row + 1];
-				const left = leftBoundary[row];
-				const right = rightBoundary[row];
-
-				vi = _writeShredQuad(
-					data, vi,
-					left, top, right, bottom,
-					stripZOffset,
-					invW, invH, halfW, halfH
-				);
-			}
-		}
-
-		const vbo = gl.createBuffer();
-		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-		gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-		this.buffers[name] = { vbo: vbo, vertCount: vertCount, stride: 24 };
-	};
-
-	CTransitionGL.prototype._bindShredMesh = function (name, progInfo) {
-		const gl = this.gl;
-		const buf = this.buffers[name];
-		if (!buf) {
-			return;
-		}
-
-		gl.bindBuffer(gl.ARRAY_BUFFER, buf.vbo);
-		const stride = buf.stride;
-		const attrs = progInfo.attrs;
-
-		const aPos = attrs['aPosition'];
-		const aTex = attrs['aTexCoord'];
-		const aZOff = attrs['aTileZOffset'];
-
-		if (aPos !== undefined && aPos !== -1) {
-			gl.enableVertexAttribArray(aPos);
-			gl.vertexAttribPointer(aPos, 3, gl.FLOAT, false, stride, 0);
-		}
-		if (aTex !== undefined && aTex !== -1) {
-			gl.enableVertexAttribArray(aTex);
-			gl.vertexAttribPointer(aTex, 2, gl.FLOAT, false, stride, 12);
-		}
-		if (aZOff !== undefined && aZOff !== -1) {
-			gl.enableVertexAttribArray(aZOff);
-			gl.vertexAttribPointer(aZOff, 1, gl.FLOAT, false, stride, 20);
-		}
-	};
-
-	CTransitionGL.prototype._prepareShred = function (param) {
-		this.GetProgram('shred', _VERT_SHRED, _FRAG_TILE_SCATTER);
-
-		const isStrips = (
-			param === c_oAscSlideTransitionParams.Shred_StripIn ||
-			param === c_oAscSlideTransitionParams.Shred_StripOut
-		);
-
-		if (isStrips) {
-			this._initShredStripsMesh('shredStrips');
-		} else {
-			this._initShredParticlesMesh('shredParticles');
-		}
-	};
-
-	CTransitionGL.prototype._renderShred = function (progress, param) {
-		progress = easeOutCubic(progress);
-
-		const programInfo = this.programs['shred'];
-		if (!programInfo) {
-			return;
-		}
-
-		const isStrips = (
-			param === c_oAscSlideTransitionParams.Shred_StripIn ||
-			param === c_oAscSlideTransitionParams.Shred_StripOut
-		);
-		const isOut = (
-			param === c_oAscSlideTransitionParams.Shred_StripOut ||
-			param === c_oAscSlideTransitionParams.Shred_RectangleOut
-		);
-
-		const meshName = isStrips ? 'shredStrips' : 'shredParticles';
-		const maxScatter = 2.0;
-
-		const PHASE_SCATTER_END = 0.50;
-		const PHASE_FLY_OUT_END = 0.60;
-		const PHASE_FLY_IN_END = 0.70;
-
-		const ORBIT_Y = Math.PI / 6;
-		const ORBIT_X = Math.PI / 9;
-		const ORBIT_PULLBACK = 1.5;
-
-		let scatterProgress, flyProgress, cameraPhase;
-		let isNewSlide;
-
-		if (progress <= PHASE_SCATTER_END) {
-			const t = _smoothstep(progress / PHASE_SCATTER_END);
-			scatterProgress = t;
-			flyProgress = 0.0;
-			cameraPhase = t;
-			isNewSlide = false;
-
-		} else if (progress <= PHASE_FLY_OUT_END) {
-			const t = _smoothstep((progress - PHASE_SCATTER_END) / (PHASE_FLY_OUT_END - PHASE_SCATTER_END));
-			scatterProgress = 1.0;
-			flyProgress = t;
-			cameraPhase = 1.0;
-			isNewSlide = false;
-
-		} else if (progress <= PHASE_FLY_IN_END) {
-			const t = _smoothstep((progress - PHASE_FLY_OUT_END) / (PHASE_FLY_IN_END - PHASE_FLY_OUT_END));
-			scatterProgress = 1.0;
-			flyProgress = 1.0 - t;
-			cameraPhase = 1.0;
-			isNewSlide = true;
-
-		} else {
-			const t = _smoothstep((progress - PHASE_FLY_IN_END) / (1.0 - PHASE_FLY_IN_END));
-			scatterProgress = 1.0 - t;
-			flyProgress = 0.0;
-			cameraPhase = 1.0 - t;
-			isNewSlide = true;
-		}
-
-		// Camera orbit: "In" orbits left-up, "Out" new slide orbits right-up
-		const isMirrored = isNewSlide && isOut;
-		const camRotY = (isMirrored ? ORBIT_Y : -ORBIT_Y) * cameraPhase;
-		const camRotX = ORBIT_X * cameraPhase;
-		const camPullBack = ORBIT_PULLBACK * cameraPhase;
-
-		const gl = this.gl;
-		const uniforms = programInfo.uniforms;
-		const aspect = this.glCanvas.width / this.glCanvas.height;
-		const fov = Math.PI / 4;
-		const dist = 1.0 / Math.tan(fov / 2);
-		const projection = _Mat4.perspective(fov, aspect, 0.1, 200.0);
-
-		let modelView = _Mat4.identity();
-		modelView = _Mat4.translate(modelView, 0, 0, -(dist + camPullBack));
-		modelView = _Mat4.rotateY(modelView, camRotY);
-		modelView = _Mat4.rotateX(modelView, camRotX);
-
-		gl.useProgram(programInfo.program);
-		gl.enable(gl.DEPTH_TEST);
-		gl.enable(gl.BLEND);
-		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-		gl.clearColor(0, 0, 0, 1);
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-		gl.uniformMatrix4fv(uniforms['uProjection'], false, projection);
-		gl.uniformMatrix4fv(uniforms['uModelView'], false, modelView);
-		gl.uniform1f(uniforms['uScatterProgress'], scatterProgress);
-		gl.uniform1f(uniforms['uFlyProgress'], flyProgress);
-		gl.uniform1f(uniforms['uMaxScatter'], maxScatter);
-
-		const slideTexture = isNewSlide ? this.textures.slide2 : this.textures.slide1;
-		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_2D, slideTexture);
-		gl.uniform1i(uniforms['uTexture'], 0);
-
-		this._bindShredMesh(meshName, programInfo);
-		gl.drawArrays(gl.TRIANGLES, 0, this.buffers[meshName].vertCount);
-	};
 
     window['AscCommonSlide'] = window['AscCommonSlide'] || {};
     window['AscCommonSlide'].CTransitionGL = CTransitionGL;

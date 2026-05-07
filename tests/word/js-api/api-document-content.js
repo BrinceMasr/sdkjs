@@ -60,7 +60,29 @@ $(function ()
 			"TableCellSeparator" : "_c_",
 			"TableRowSeparator" : "_r_",
 			"ParaSeparator" : "_p_"
-			
+
 		}), "123_t_456_nl_789_p_A_c_B_r_C_c_D_r__p_", "Check GetText");
+	});
+
+	QUnit.test("SetText", function (assert)
+	{
+		let docContent = AscTest.JsApi.CreateDocContent();
+		docContent.GetElement(0).AddText("Original text");
+
+		docContent.SetText("Replaced text");
+		assert.strictEqual(docContent.GetText(), "Replaced text\r\n", "Check SetText replaces all content");
+
+		docContent.SetText("");
+		assert.strictEqual(docContent.GetText(), "\r\n", "Check SetText with empty string");
+	});
+
+	QUnit.test("AddText", function (assert)
+	{
+		let docContent = AscTest.JsApi.CreateDocContent();
+		docContent.AddText("Appended");
+		assert.strictEqual(docContent.GetText(), "Appended\r\n", "Check AddText appends text to last paragraph");
+
+		docContent.AddText(" More");
+		assert.strictEqual(docContent.GetText(), "Appended More\r\n", "Check AddText appends to existing last paragraph");
 	});
 });

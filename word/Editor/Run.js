@@ -5144,8 +5144,9 @@ ParaRun.prototype.Recalculate_LineMetrics = function(PRS, ParaPr, _CurLine, _Cur
 					let textAscent2 = metrics.Ascent;
 					let textAscent  = metrics.Ascent + metrics.LineGap;
 					
-					if (Item.getHeight() > textAscent && textAscent > AscWord.EPSILON)
-						textDescent *= Item.getHeight() / textAscent;
+					let horRuleH = Item.getHeight() + 1; // take into account 1mm offset from top
+					if (horRuleH > textAscent && textAscent > AscWord.EPSILON)
+						textAscent *= horRuleH / textAscent;
 					
 					if (Asc.linerule_Exact === LineRule)
 					{

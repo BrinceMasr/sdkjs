@@ -15063,18 +15063,12 @@ Paragraph.prototype.RestartSpellCheck = function()
 };
 Paragraph.prototype.RequestSpellCheck = function()
 {
-	if (this.RecalcInfo.SpellCheck)
-	{
-		let oSpelling = this.getSpelling();
-		if(oSpelling)
-		{
-			oSpelling.AddParagraphToCheck(this);
-		}
-		
-		let textAnnotator = this.getCustomTextAnnotator();
-		if (textAnnotator)
-			textAnnotator.addParagraphToCheck(this);
-	}
+	if (!this.RecalcInfo.SpellCheck)
+		return;
+	
+	let spelling = this.getSpelling();
+	if (spelling)
+		spelling.AddParagraphToCheck(this);
 };
 /**
  * Производим проверку орфографии.

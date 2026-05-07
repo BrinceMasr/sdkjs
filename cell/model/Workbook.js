@@ -4340,6 +4340,15 @@
 	Workbook.prototype.getDefinedNamesWS = function (sheetId) {
 		return this.dependencyFormulas.getDefinedNamesWS(sheetId);
 	};
+	Workbook.prototype.getAllDefinedNames = function (skipTables) {
+		var names = [];
+		this.dependencyFormulas._foreachDefName(function (defName) {
+			if (defName.ref && !(skipTables && defName.type === Asc.c_oAscDefNameType.table)) {
+				names.push(defName);
+			}
+		});
+		return names;
+	};
 	Workbook.prototype.addDefName = function (name, ref, sheetId, hidden, isTable) {
 		return this.dependencyFormulas.addDefName(name, ref, sheetId, hidden, isTable);
 	};
@@ -18517,7 +18526,7 @@
 		var res = false;
 
 		var oldExcludeVal = worksheet.bExcludeHiddenRows;
-		worksheet.bExcludeHiddenRows = false;
+		worksheet.excludeHiddenRows(false);
 		if(bbox.r1 < bbox.r2) {
 			var rowFirst = worksheet.getRange3(bbox.r1, bbox.c1, bbox.r1, bbox.c2);
 			var rowSecond = worksheet.getRange3(bbox.r1 + 1, bbox.c1, bbox.r1 + 1, bbox.c2);
@@ -18553,7 +18562,7 @@
 				}
 			}
 		}
-		worksheet.bExcludeHiddenRows = oldExcludeVal;
+		worksheet.excludeHiddenRows(oldExcludeVal);
 
 		return res;
 	}

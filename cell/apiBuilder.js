@@ -1,4 +1,4 @@
-/*
+﻿/*
  * (c) Copyright Ascensio System SIA 2010-2024
  *
  * This program is a free software product. You can redistribute it and/or
@@ -175,6 +175,7 @@
 	/**
 	 * Class representing a shape.
 	 * @constructor
+	 * @extends ApiDrawing
 	 */
 	function ApiShape(oShape) {
 		ApiDrawing.call(this, oShape);
@@ -187,6 +188,7 @@
 	/**
 	 * Class representing an image.
 	 * @constructor
+	 * @extends ApiDrawing
 	 */
 	function ApiImage(oImage) {
 		ApiDrawing.call(this, oImage);
@@ -198,6 +200,7 @@
 	/**
 	 * Class representing an OLE object.
 	 * @constructor
+	 * @extends ApiDrawing
 	 */
 	function ApiOleObject(OleObject) {
 		ApiDrawing.call(this, OleObject);
@@ -276,6 +279,13 @@
 	 * @typedef {("top" | "bottom" | "right" | "left")} AxisPos
 	 * @see office-js-api/Examples/Enumerations/AxisPos.js
 	 */
+
+	/**
+	 * The available text vertical alignment (used to align text in a shape with a placement for text inside it).
+	 * @typedef {("top" | "center" | "bottom")} VerticalTextAlign
+	 * @see office-js-api/Examples/Enumerations/VerticalTextAlign.js
+	 */
+
 
 	/**
 	 * Standard numeric format.
@@ -515,6 +525,10 @@
 		/** @type {CT_PivotField} */
 		this.pivotField = pivotField;
 	}
+	ApiPivotField.prototype._getAxis = function () {
+		return this.pivotField ? this.pivotField.axis
+			: (this.table.pivot.dataOnRows ? Asc.c_oAscAxis.AxisRow : Asc.c_oAscAxis.AxisCol);
+	};
 
 	/**
 	 * Class representing a pivot table data field.
@@ -1043,6 +1057,7 @@
         }
         return new ApiName(defNameFound);
     };
+
 
 	/**
 	 * Saves changes to the specified document.
@@ -8678,46 +8693,6 @@
 		return true;
 	};
 
-	/**
-	 * Returns an array of ApiListObject objects representing the formatted tables on the worksheet.
-	 * @memberof ApiWorksheet
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiListObject[]}
-	 */
-	ApiWorksheet.prototype.GetListObjects = function () {
-		var parts = this.worksheet.TableParts;
-		var res = [];
-		if (!parts) {
-			return res;
-		}
-		for (var i = 0; i < parts.length; i++) {
-			res.push(new ApiListObject(parts[i], this));
-		}
-		return res;
-	};
-
-	/**
-	 * Adds a formatted table to the worksheet and returns the ApiListObject object.
-	 * @memberof ApiWorksheet
-	 * @typeofeditors ["CSE"]
-	 * @param {XlListObjectSourceType} [sSourceType="xlSrcRange"] - The source type for the table. Currently only <b>"xlSrcRange"</b> is supported.
-	 * @param {string} [sSource] - The range to which the table will be applied, e.g. <b>"A1:D10"</b>. Required when <em>sSourceType</em> is <b>"xlSrcRange"</b>.
-	 * @param {boolean} [bLinkSource=false] - Not supported. Specifies whether the external data source should be linked to the ListObject. Only applicable when <em>sSourceType</em> is <b>"xlSrcExternal"</b>.
-	 * @param {XlYesNoGuess} [sHasHeaders="xlGuess"] - Specifies whether the source range has column labels.
-	 * <b>"xlYes"</b> — the first row contains headers; <b>"xlNo"</b> — a header row will be added automatically; <b>"xlGuess"</b> — the application determines the location of the header.
-	 * @param {string} [sDestination] - Not supported. The destination cell for the top-left corner of the table. Only applicable when <em>sSourceType</em> is <b>"xlSrcExternal"</b>.
-	 * @param {string} [sTableStyleName="TableStyleLight9"] - The table style name.
-	 * @returns {ApiListObject | null}
-	 */
-	ApiWorksheet.prototype.AddListObject = function (sSourceType, sSource, bLinkSource, sHasHeaders, sDestination, sTableStyleName) {
-		var styleName = sTableStyleName || "TableStyleLight9";
-		var ascRange = AscCommonExcel.g_oRangeCache.getAscRange(sSource);
-		var hasHeaders = (sHasHeaders === "xlYes") ? true : (sHasHeaders === "xlNo") ? false : undefined;
-		this.worksheet.autoFilters.addAutoFilter(styleName, ascRange, hasHeaders);
-		var parts = this.worksheet.TableParts;
-		var newPart = parts && parts[parts.length - 1];
-		return newPart ? new ApiListObject(newPart, this) : null;
-	};
 
 	/**
 	 * Sets the width of the specified column.
@@ -8736,11 +8711,27 @@
 			throwException(new Error('Cannot modify protected sheet'));
 			return false;
 		}
+		let nStart, nEnd;
+		if (typeof nColumn === 'string') {
+			if (AscCommon.isNumber(nColumn)) {
+				nStart = nEnd = parseFloat(nColumn);
+			} else {
+				let sRange = nColumn.indexOf(':') === -1 ? nColumn + ':' + nColumn : nColumn;
+				let oAscRange = AscCommonExcel.g_oRangeCache.getAscRange(sRange);
+				if (!oAscRange) {
+					return false;
+				}
+				nStart = oAscRange.c1;
+				nEnd = oAscRange.c2;
+			}
+		} else {
+			nStart = nEnd = nColumn;
+		}
 		if (bWithotPaddings) {
 			let wb = this.worksheet.workbook;
 			nWidth = (nWidth * wb.maxDigitWidth - wb.paddingPlusBorder) / wb.maxDigitWidth;
 		}
-		this.worksheet.setColWidth(nWidth, nColumn, nColumn);
+		this.worksheet.setColWidth(nWidth, nStart, nEnd);
 		return true;
 	};
 
@@ -9174,6 +9165,9 @@
 	 * Creates a chart of the specified type from the selected data range of the current sheet.
 	 * <note>Please note that the horizontal and vertical offsets are calculated within the limits of the specified column and
 	 * row cells only. If this value exceeds the cell width or height, another vertical/horizontal position will be set.</note>
+	 * :::note
+	 * Values of <em>nStyleIndex</em> outside <b>1 - 48</b> are interpreted as a chart style id from the <em>cs:chartStyle</em> element (e.g. 201, 215, 284) and are available only for [ONLYOFFICE Docs Enterprise](https://www.onlyoffice.com/docs-enterprise-prices.aspx?from=api) and [ONLYOFFICE Docs Developer](https://www.onlyoffice.com/developer-edition-prices.aspx?from=api).
+	 * :::
 	 * @memberof ApiWorksheet
 	 * @typeofeditors ["CSE"]
 	 * @param {string} sDataRange - The selected cell range which will be used to get the data for the chart, formed specifically and including the sheet name.
@@ -9210,9 +9204,7 @@
 			} else {
 				private_SetCoords(oChart, this.worksheet, nExtX, nExtY, nFromCol, nColOffset, nFromRow, nRowOffset);
 			}
-			if (AscFormat.isRealNumber(nStyleIndex)) {
-				oChart.setStyle(nStyleIndex);
-			}
+			AscFormat.applyChartStyle(oChart, nStyleIndex);
 			oChart.recalculateReferences();
 			return new ApiChart(oChart);
 		};
@@ -9242,6 +9234,8 @@
 			throwException(new Error('Cannot modify protected sheet'));
 			return null;
 		}
+		sType = sType || "rect";
+		if (!AscFormat.isValidShapeType(sType)) sType = "rect";
 		var oShape = AscFormat.builder_CreateShape(sType, nWidth / 36000, nHeight / 36000, oFill.UniFill, oStroke.Ln, null, this.worksheet.workbook.theme, this.worksheet.getDrawingDocument(), false, this.worksheet);
 		private_SetCoords(oShape, this.worksheet, nWidth, nHeight, nFromCol, nColOffset, nFromRow, nRowOffset);
 		return new ApiShape(oShape);
@@ -10373,17 +10367,18 @@
 	 */
 	ApiRange.prototype.GetFormula = function () {
 		if (this.range.isFormula())
-			return "= " + this.range.getFormula();
+			return "=" + this.range.getFormula();
 		else
 			return this.GetValue2();
 	};
+
 
 	Object.defineProperty(ApiRange.prototype, "Formula", {
 		get: function () {
 			return this.GetFormula();
 		},
 		set: function (value) {
-			this.SetValue(value);
+			this.SetFormula(value);
 		}
 	});
 
@@ -11033,32 +11028,44 @@
 		}
 		var borders = new AscCommonExcel.Border();
 		borders.initDefault();
+		if (typeof bordersIndex === 'string') {
+			bordersIndex = bordersIndex.toLowerCase();
+		}
 		switch (bordersIndex) {
-			case 'DiagonalDown':
+			case 'diagonaldown':
 				borders.dd = true;
 				borders.d = private_MakeBorder(lineStyle, oColor);
 				break;
-			case 'DiagonalUp':
+			case 'diagonalup':
 				borders.du = true;
 				borders.d = private_MakeBorder(lineStyle, oColor);
 				break;
-			case 'Bottom':
+			case 'bottom':
 				borders.b = private_MakeBorder(lineStyle, oColor);
 				break;
-			case 'Left':
+			case 'left':
 				borders.l = private_MakeBorder(lineStyle, oColor);
 				break;
-			case 'Right':
+			case 'right':
 				borders.r = private_MakeBorder(lineStyle, oColor);
 				break;
-			case 'Top':
+			case 'top':
 				borders.t = private_MakeBorder(lineStyle, oColor);
 				break;
-			case 'InsideHorizontal':
+			case 'insidehorizontal':
 				borders.ih = private_MakeBorder(lineStyle, oColor);
 				break;
-			case 'InsideVertical':
+			case 'insidevertical':
 				borders.iv = private_MakeBorder(lineStyle, oColor);
+				break;
+			case 'all':
+				var border = private_MakeBorder(lineStyle, oColor);
+				borders.b = border;
+				borders.l = border;
+				borders.r = border;
+				borders.t = border;
+				borders.ih = border;
+				borders.iv = border;
 				break;
 		}
 		this.range.setBorder(borders);
@@ -11252,7 +11259,18 @@
 						newSelection.ranges.push(el.bbox);
 				})
 			}
-			newSelection.Select();
+			var wsView = this.range.worksheet.workbook.oApi && this.range.worksheet.workbook.oApi.wb &&
+				this.range.worksheet.workbook.oApi.wb.getWorksheet(this.range.worksheet.getIndex());
+			if (wsView) {
+				wsView.cleanSelection();
+				newSelection.Select(true);
+				wsView.updateSelection();
+				if (wsView.drawingCtx) {
+					wsView._scrollToRange(bbox);
+				}
+			} else {
+				newSelection.Select();
+			}
 			return true;
 		}
 		return false;
@@ -11968,7 +11986,7 @@
 	 * @memberof ApiRange
 	 * @typeofeditors ["CSE"]
 	 * @param {ReplaceData} oReplaceData - The data used to make search and replace.
-	 * @returns {ApiRange | null} - Returns null if the current range does not contain such text.
+	 * @returns {boolean} - Returns true if at least one match was found and replacement was initiated, false otherwise.
 	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/Replace.js
 	 */
 	ApiRange.prototype.Replace = function (oReplaceData) {
@@ -11984,7 +12002,7 @@
 				MatchCase = oReplaceData['MatchCase'];
 				ReplaceAll = oReplaceData['ReplaceAll'];
 			} else {
-				return null;
+				return false;
 			}
 		} else {
 			What = arguments[0];
@@ -12005,6 +12023,7 @@
 			options.asc_setIsWholeCell(LookAt === 'xlWhole');
 			options.asc_setScanOnOnlySheet(Asc.c_oAscSearchBy.Range);
 			options.asc_setSpecificRange(this["Address"]);
+			options.asc_setWsIndex(this.range.worksheet.index);
 			options.asc_setScanByRows(SearchOrder === 'xlByRows');
 			options.asc_setLookIn(Asc.c_oAscFindLookIn.Formulas);
 			if (typeof ReplaceAll !== 'boolean')
@@ -12015,9 +12034,11 @@
 			let engine = this.range.worksheet.workbook.oApi.wb.Search(options);
 			engine.Reset();
 			engine = this.range.worksheet.workbook.oApi.wb.Search(options);
-			let id = this.range.worksheet.workbook.oApi.wb.GetSearchElementId(SearchDirection != 'xlPrevious');
-			options.asc_setIsForMacros(true);
-			if (id != null) {
+			// True if matches found; replaceCellText is async so write completion cannot be confirmed.
+			let hasMatches = engine.GetCount() > 0;
+			if (hasMatches) {
+				let id = this.range.worksheet.workbook.oApi.wb.GetSearchElementId(SearchDirection != 'xlPrevious');
+				options.asc_setIsForMacros(true);
 				if (ReplaceAll)
 					engine.SetCurrent(id);
 				else
@@ -12025,6 +12046,7 @@
 
 				this.range.worksheet.workbook.oApi.wb.replaceCellText(options);
 			}
+			return hasMatches;
 		} else {
 			throwException(new Error('Invalid type of parametr "What" or "Replacement".'));
 		}
@@ -13063,6 +13085,7 @@
 		}
 	});
 
+
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiDrawing
@@ -13136,7 +13159,7 @@
 	/**
 	 * Returns the width of the current drawing.
 	 * @memberof ApiDrawing
-	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @returns {EMU}
 	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetWidth.js
 	 */
@@ -13146,7 +13169,7 @@
 	/**
 	 * Returns the height of the current drawing.
 	 * @memberof ApiDrawing
-	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @returns {EMU}
 	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetHeight.js
 	 */
@@ -13179,23 +13202,12 @@
 		if (name === "" || name === null || name === undefined)
 			return false
 
-		let worksheet = this.Drawing.getWorksheet();
-		let drawings = GetApiDrawings(worksheet.Drawings.map(function(drawingBase) { return drawingBase.graphicObject }));
-
-		for (let nCount = 0; nCount < drawings.length; nCount++)
-		{
-			let drawing = drawings[nCount];
-			if (drawing.Drawing.getOwnName() === name)
-			{
-				drawing.Drawing.setName("");
-				break;
-			}
-		}
 		this.Drawing.setName(name);
 		return true;
 	}
 	/**
 	 * Returns the lock value for the specified lock type of the current drawing.
+	 * @memberof ApiDrawing
 	 * @typeofeditors ["CSE"]
 	 * @param {DrawingLockType} sType - Lock type in the string format.
 	 * @returns {boolean}
@@ -13215,6 +13227,7 @@
 
 	/**
 	 * Sets the lock value to the specified lock type of the current drawing.
+	 * @memberof ApiDrawing
 	 * @typeofeditors ["CSE"]
 	 * @param {DrawingLockType} sType - Lock type in the string format.
 	 * @param {boolean} bValue - Specifies if the specified lock is applied to the current drawing.
@@ -13238,6 +13251,7 @@
 
 	/**
 	 * Returns the parent sheet of the current drawing.
+	 * @memberof ApiDrawing
 	 * @typeofeditors ["CSE"]
 	 * @returns {?ApiWorksheet}
 	 * @since 8.3.0
@@ -13514,34 +13528,6 @@
 		return true;
 	};
 
-	/**
-	 * Deletes the specified drawing object.
-	 *
-	 * @memberof ApiDrawing
-	 * @typeofeditors ["CSE"]
-	 * @returns {boolean} - returns false if the drawing object can not be deleted.
-	 *
-	 * @since 9.5.0
-	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/Delete.js
-	 */
-	ApiDrawing.prototype.Delete = function () {
-		if (!this.Drawing) {
-			return false;
-		}
-
-		const controller = this.Drawing.getDrawingObjectsController();
-		if (controller) {
-			if (controller.selection.groupSelection === this.Drawing) {
-				controller.resetInternalSelection();
-			}
-			this.Drawing.deselect(controller);
-		}
-
-		this.Drawing.setBDeleted(true);
-		this.Drawing.deleteDrawingBase();
-		return true;
-	};
-
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiImage
@@ -13551,7 +13537,7 @@
 	/**
 	 * Returns a type of the ApiImage class.
 	 * @memberof ApiImage
-	 * @typeofeditors ["CDE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @returns {"image"}
 	 * @see office-js-api/Examples/{Editor}/ApiImage/Methods/GetClassType.js
 	 */
@@ -13568,6 +13554,7 @@
 	/**
 	 * Class representing a group of drawings.
 	 * @constructor
+	 * @extends ApiDrawing
 	 */
 	function ApiGroup(oGroup) {
 		ApiDrawing.call(this, oGroup);
@@ -13595,6 +13582,7 @@
 	/**
 	 * Class representing a smart art.
 	 * @constructor
+	 * @extends ApiDrawing
 	 */
 	function ApiSmartArt(oGroup){
 		ApiDrawing.call(this, oGroup);
@@ -13664,13 +13652,13 @@
 	 * Sets the vertical alignment to the shape content where a paragraph or text runs can be inserted.
 	 * @memberof ApiShape
 	 * @typeofeditors ["CSE"]
-	 * @param {"top" | "center" | "bottom" } sVerticalAlign - The vertical alignment type for the shape inner contents.
+	 * @param {VerticalTextAlign} verticalAlign - The vertical alignment type for the shape inner contents.
 	 * @returns {boolean} - returns false if shape or aligment doesn't exist.
 	 * @see office-js-api/Examples/{Editor}/ApiShape/Methods/SetVerticalTextAlign.js
 	 */
-	ApiShape.prototype.SetVerticalTextAlign = function (sVerticalAlign) {
+	ApiShape.prototype.SetVerticalTextAlign = function (verticalAlign) {
 		if (this.Shape) {
-			switch (sVerticalAlign) {
+			switch (verticalAlign) {
 				case "top": {
 					this.Shape.setVerticalAlign(4);
 					break;
@@ -13812,6 +13800,7 @@
 	/**
 	 * Class representing a chart.
 	 * @constructor
+	 * @extends ApiDrawing
 	 */
 	function ApiChart(Chart) {
 		ApiDrawing.call(this, Chart);
@@ -13913,7 +13902,7 @@
 	/**
 	 * Returns a type of the ApiOleObject class.
 	 * @memberof ApiOleObject
-	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @returns {"oleObject"}
 	 * @see office-js-api/Examples/{Editor}/ApiOleObject/Methods/GetClassType.js
 	 */
@@ -13924,7 +13913,7 @@
 	/**
 	 * Sets the data to the current OLE object.
 	 * @memberof ApiOleObject
-	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @param {string} sData - The OLE object string data.
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiOleObject/Methods/SetData.js
@@ -13940,7 +13929,7 @@
 	/**
 	 * Returns the string data from the current OLE object.
 	 * @memberof ApiOleObject
-	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @returns {string}
 	 * @see office-js-api/Examples/{Editor}/ApiOleObject/Methods/GetData.js
 	 */
@@ -13954,7 +13943,7 @@
 	/**
 	 * Sets the application ID to the current OLE object.
 	 * @memberof ApiOleObject
-	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @param {string} sAppId - The application ID associated with the current OLE object.
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiOleObject/Methods/SetApplicationId.js
@@ -13970,7 +13959,7 @@
 	/**
 	 * Returns the application ID from the current OLE object.
 	 * @memberof ApiOleObject
-	 * @typeofeditors ["CDE", "CPE", "CSE"]
+	 * @typeofeditors ["CSE"]
 	 * @returns {string}
 	 * @see office-js-api/Examples/{Editor}/ApiOleObject/Methods/GetApplicationId.js
 	 */
@@ -16067,10 +16056,15 @@
 	ApiFreezePanes.prototype.FreezeColumns = function (count) {
 		let api = this.ws.workbook.oApi;
 		if (count == undefined) count = 0;
+		let wsView = api.wb.getWorksheetById(this.ws.getId());
 		if (typeof count === 'number' && count > 0 && count <= AscCommon.gc_nMaxCol0) {
-			api.asc_freezePane(null, count, 0);
-		} else if (!!api.wb.getWorksheet().topLeftFrozenCell && count === 0) {
-			api.asc_freezePane(undefined);
+			if (api.canEdit() && wsView) {
+				wsView.freezePane(null, count, 0);
+			}
+		} else if (wsView && wsView.topLeftFrozenCell && count === 0) {
+			if (api.canEdit()) {
+				wsView.freezePane(undefined);
+			}
 		} else {
 			throwException(new Error('Invalid parametr "count".'));
 		}
@@ -16087,10 +16081,15 @@
 	ApiFreezePanes.prototype.FreezeRows = function (count) {
 		let api = this.ws.workbook.oApi;
 		if (count == undefined) count = 0;
+		let wsView = api.wb.getWorksheetById(this.ws.getId());
 		if (typeof count === 'number' && count > 0 && count <= AscCommon.gc_nMaxRow0) {
-			api.asc_freezePane(null, 0, count);
-		} else if (!!api.wb.getWorksheet().topLeftFrozenCell && count === 0) {
-			api.asc_freezePane(undefined);
+			if (api.canEdit && wsView) {
+				wsView.freezePane(null, 0, count);
+			}
+		} else if (wsView && wsView.topLeftFrozenCell && count === 0) {
+			if (api.canEdit()) {
+				wsView.freezePane(undefined);
+			}
 		} else {
 			throwException(new Error('Invalid parametr "count".'));
 		}
@@ -16107,7 +16106,8 @@
 	ApiFreezePanes.prototype.GetLocation = function () {
 		let result = null;
 		let api = this.ws.workbook.oApi;
-		let cell = api.wb.getWorksheet().topLeftFrozenCell;
+		let wsView = api.wb.getWorksheetById(this.ws.getId());
+		let cell = wsView && wsView.topLeftFrozenCell;
 		if (cell) {
 			let c = cell.getCol0();
 			let r = cell.getRow0();
@@ -16873,8 +16873,9 @@
 	ApiPivotTable.prototype.GetColumnFields = function (field) {
 		const pivotFields = this.pivot.asc_getPivotFields();
 		const colFields = this.pivot.asc_getColumnFields();
+		if (!colFields) return [];
 		const t = this;
-		return colFields.map(function(colField, i) {
+		return colFields.map(function(colField) {
 			const index = colField.asc_getIndex();
 			return new ApiPivotField(t, index, pivotFields[index]);
 		});
@@ -16897,6 +16898,7 @@
 	 */
 	ApiPivotTable.prototype.GetDataFields = function (field) {
 		const dataFields = this.pivot.asc_getDataFields();
+		if (!dataFields) return field != null ? null : [];
 		if (field != null) {
 			let dataIndex = -1;
 			if (typeof field === 'number') {
@@ -16988,6 +16990,7 @@
 	ApiPivotTable.prototype.GetPageFields = function (field) {
 		const pivotFields = this.pivot.asc_getPivotFields();
 		const pageFields = this.pivot.asc_getPageFields();
+		if (!pageFields) return [];
 		const t = this;
 		return pageFields.map(function(pageField, i) {
 			const index = pageField.asc_getIndex();
@@ -17012,8 +17015,9 @@
 	ApiPivotTable.prototype.GetRowFields = function (field) {
 		const pivotFields = this.pivot.asc_getPivotFields();
 		const rowFields = this.pivot.asc_getRowFields();
+		if (!rowFields) return [];
 		const t = this;
-		return rowFields.map(function(rowField, i) {
+		return rowFields.map(function(rowField) {
 			const index = rowField.asc_getIndex();
 			return new ApiPivotField(t, index, pivotFields[index]);
 		});
@@ -17790,12 +17794,16 @@
 	ApiPivotDataField.prototype.Move = function (type, index) {
 		function getIndexTo(type, indexFrom, fields) {
 			switch (type) {
+				case "xlUp":
 				case "Up":
 					return (indexFrom > 0) ? indexFrom - 1 : indexFrom;
+				case "xlDown":
 				case "Down":
 					return (indexFrom < fields.length - 1) ? indexFrom + 1 : fields.length - 1;
+				case "xlBegin":
 				case "Begin":
 					return 0;
+				case "xlEnd":
 				case "End":
 					return fields.length - 1;
 				default:
@@ -17803,15 +17811,19 @@
 			}
 		}
 		switch (type) {
+			case "xlRowField":
 			case "Rows":
 				this.table.pivot.asc_moveToRowField(this.table.api, this.index, this.dataIndex, index);
 				break;
+			case "xlColumnField":
 			case "Columns":
 				this.table.pivot.asc_moveToColField(this.table.api, this.index, this.dataIndex, index);
 				break;
+			case "xlPageField":
 			case "Filters":
 				this.table.pivot.asc_moveToPageField(this.table.api, this.index, this.dataIndex, index);
 				break;
+			case "xlDataField":
 			case "Values":
 				this.SetPosition(index);
 				break;
@@ -17847,36 +17859,47 @@
 	ApiPivotDataField.prototype.SetFunction = function (func) {
 		const field = new Asc.CT_DataField();
 		switch (func) {
+			case "xlAverage":
 			case "Average":
 				field.asc_setSubtotal(Asc.c_oAscDataConsolidateFunction.Average);
 				break;
+			case "xlCount":
 			case "Count":
 				field.asc_setSubtotal(Asc.c_oAscDataConsolidateFunction.Count);
 				break;
+			case "xlCountNumbers":
 			case "CountNumbers":
 				field.asc_setSubtotal(Asc.c_oAscDataConsolidateFunction.CountNums);
 				break;
+			case "xlMax":
 			case "Max":
 				field.asc_setSubtotal(Asc.c_oAscDataConsolidateFunction.Max);
 				break;
+			case "xlMin":
 			case "Min":
 				field.asc_setSubtotal(Asc.c_oAscDataConsolidateFunction.Min);
 				break;
+			case "xlProduct":
 			case "Product":
 				field.asc_setSubtotal(Asc.c_oAscDataConsolidateFunction.Product);
 				break;
+			case "xlStdDev":
 			case "StdDev":
 				field.asc_setSubtotal(Asc.c_oAscDataConsolidateFunction.StdDev);
 				break;
+			case "xlStdDevP":
 			case "StdDevP":
 				field.asc_setSubtotal(Asc.c_oAscDataConsolidateFunction.StdDevp);
 				break;
+			case "xlSum":
 			case "Sum":
 				field.asc_setSubtotal(Asc.c_oAscDataConsolidateFunction.Sum);
 				break;
+			case "xlVar":
 			case "Var":
 				field.asc_setSubtotal(Asc.c_oAscDataConsolidateFunction.Var);
 				break;
+			case "xlVarP":
 			case "VarP":
 				field.asc_setSubtotal(Asc.c_oAscDataConsolidateFunction.Varp);
 				break;
@@ -18212,6 +18235,9 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetPivotItems.js
 	 */
 	ApiPivotField.prototype.GetPivotItems = function (index) {
+		if (this.index === AscCommonExcel.st_VALUES) {
+			return [];
+		}
 		const pivotFields = this.table.pivot.asc_getPivotFields();
 		const pivotField = pivotFields[this.index];
 		if (index != null) {
@@ -18249,12 +18275,16 @@
 	ApiPivotField.prototype.Move = function (type, index) {
 		function getIndexTo(type, indexFrom, fields) {
 			switch (type) {
+				case "xlUp":
 				case "Up":
 					return (indexFrom > 0) ? indexFrom - 1 : indexFrom;
+				case "xlDown":
 				case "Down":
 					return (indexFrom < fields.length - 1) ? indexFrom + 1 : fields.length - 1;
+				case "xlBegin":
 				case "Begin":
 					return 0;
+				case "xlEnd":
 				case "End":
 					return fields.length - 1;
 				default:
@@ -18265,35 +18295,43 @@
 			index = 0;
 		}
 		switch (type) {
-			case "Rows":
-				if (this.pivotField.axis !== Asc.c_oAscAxis.AxisRow) {
+			case "xlRowField":
+			case "Rows": {
+				if (this._getAxis() !== Asc.c_oAscAxis.AxisRow) {
 					this.table.pivot.asc_moveToRowField(this.table.api, this.index, undefined, index - 1);
 				} else {
-					this.SetPosition(index)
+					this.SetPosition(index);
 				}
 				break;
-			case "Columns":
-				if (this.pivotField.axis !== Asc.c_oAscAxis.AxisCol) {
+			}
+			case "xlColumnField":
+			case "Columns": {
+				if (this._getAxis() !== Asc.c_oAscAxis.AxisCol) {
 					this.table.pivot.asc_moveToColField(this.table.api, this.index, undefined, index - 1);
 				} else {
-					this.SetPosition(index)
+					this.SetPosition(index);
 				}
 				break;
-			case "Filters":
-				if (this.pivotField.axis !== Asc.c_oAscAxis.AxisPage) {
+			}
+			case "xlPageField":
+			case "Filters": {
+				if (this._getAxis() !== Asc.c_oAscAxis.AxisPage) {
 					this.table.pivot.asc_moveToPageField(this.table.api, this.index, undefined, index - 1);
 				} else {
-					this.SetPosition(index)
+					this.SetPosition(index);
 				}
 				break;
+			}
+			case "xlDataField":
 			case "Values":
 				this.table.pivot.asc_moveToDataField(this.table.api, this.index, undefined, index - 1);
 				break;
+			case "xlHidden":
 			case "Hidden":
 				this.Remove();
 				break;
-			default:
-				const fields = this.table.pivot.getAxisFields(this.pivotField.axis);
+			default: {
+				const fields = this.table.pivot.getAxisFields(this._getAxis());
 				if (fields) {
 					let indexFrom = null;
 					for (let i = 0; i < fields.length; i += 1) {
@@ -18312,6 +18350,7 @@
 					private_MakeError("Field is hidden.");
 				}
 				break;
+			}
 		}
 	};
 	/**
@@ -18337,7 +18376,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetPosition.js
 	 */
 	ApiPivotField.prototype.GetPosition = function () {
-		const fields = this.table.pivot.getAxisFields(this.pivotField.axis);
+		const fields = this.table.pivot.getAxisFields(this._getAxis());
 		if (fields) {
 			for (let i = 0; i < fields.length; i += 1) {
 				if (fields[i].asc_getIndex() === this.index) {
@@ -18362,14 +18401,15 @@
 	 */
 	ApiPivotField.prototype.SetPosition = function (position) {
 		if (typeof position == "number") {
-			if (this.pivotField.axis === null) {
+			const axis = this._getAxis();
+			if (axis === null) {
 				private_MakeError('The field is hidden.\n' +
 					'If you need to set the position of the data field then use ApiPivotDataField.SetPosition.\n' +
 					'See ApiPivotTable.GetDataFields or ApiPivotTable.GetPivotFields with dataField identifier to get ' +
 					'ApiPivotDataField object');
 				return;
 			}
-			if (!this.table.pivot.moveFieldInAxis(this.table.api, this.index, this.pivotField.axis, position - 1)) {
+			if (!this.table.pivot.moveFieldInAxis(this.table.api, this.index, axis, position - 1)) {
 				private_MakeError('Invalid position (out of range or the same).')
 			}
 		} else {
@@ -18396,6 +18436,9 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetOrientation.js
 	 */
 	ApiPivotField.prototype.GetOrientation = function () {
+		if (!this.pivotField) {
+			return this.table.pivot.dataOnRows ? "Rows" : "Columns";
+		}
 		if (this.pivotField.axis === Asc.c_oAscAxis.AxisRow) {
 			return "Rows";
 		} else if (this.pivotField.axis === Asc.c_oAscAxis.AxisCol) {
@@ -18421,29 +18464,32 @@
 	ApiPivotField.prototype.SetOrientation = function (type) {
 		switch (type) {
 			case "xlRowField":
-			case "Rows":
-				if (this.pivotField.axis !== Asc.c_oAscAxis.AxisRow) {
+			case "Rows": {
+				if (this._getAxis() !== Asc.c_oAscAxis.AxisRow) {
 					this.table.pivot.asc_moveToRowField(this.table.api, this.index);
 				} else {
-					private_MakeError('The field already has that orientation.')
+					private_MakeError('The field already has that orientation.');
 				}
 				break;
+			}
 			case "xlColumnField":
-			case "Columns":
-				if (this.pivotField.axis !== Asc.c_oAscAxis.AxisCol) {
+			case "Columns": {
+				if (this._getAxis() !== Asc.c_oAscAxis.AxisCol) {
 					this.table.pivot.asc_moveToColField(this.table.api, this.index);
 				} else {
-					private_MakeError('The field already has that orientation.')
+					private_MakeError('The field already has that orientation.');
 				}
 				break;
+			}
 			case "xlPageField":
-			case "Filters":
-				if (this.pivotField.axis !== Asc.c_oAscAxis.AxisPage) {
+			case "Filters": {
+				if (this._getAxis() !== Asc.c_oAscAxis.AxisPage) {
 					this.table.pivot.asc_moveToPageField(this.table.api, this.index);
 				} else {
-					private_MakeError('The field already has that orientation.')
+					private_MakeError('The field already has that orientation.');
 				}
 				break;
+			}
 			case "xlDataField":
 			case "Values":
 				this.table.pivot.asc_moveToDataField(this.table.api, this.index);
@@ -18539,6 +18585,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetName.js
 	 */
 	ApiPivotField.prototype.GetName = function () {
+		if (!this.pivotField) return AscCommonExcel.DATA_CAPTION;
 		return this.pivotField.asc_getName() || this.GetSourceName();
 	};
 
@@ -18551,6 +18598,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetName.js
 	 */
 	ApiPivotField.prototype.SetName = function (name) {
+		if (!this.pivotField) return;
 		if (typeof name === 'string' && name.length > 0) {
 			const field = new Asc.CT_PivotField();
 			field.asc_setName(name);
@@ -18651,6 +18699,7 @@
 	 */
 	ApiPivotField.prototype.GetLayoutCompactRow = function () {
 		const pivField = this.table.pivot.asc_getPivotFields()[this.index];
+		if (!pivField) return null;
 		return (pivField.asc_getOutline() && pivField.asc_getCompact());
 	};
 
@@ -18663,9 +18712,10 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetLayoutCompactRow.js
 	 */
 	ApiPivotField.prototype.SetLayoutCompactRow = function (compact) {
+		const pivField = this.table.pivot.asc_getPivotFields()[this.index];
+		if (!pivField) return;
 		if (typeof compact == "boolean") {
 			const field = new Asc.CT_PivotField();
-			const pivField = this.table.pivot.asc_getPivotFields()[this.index];
 			field.asc_setCompact( (pivField.asc_getOutline() && compact) );
 			pivField.asc_set(this.table.api, this.table.pivot, this.index, field);
 		} else {
@@ -18696,6 +18746,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetLayoutForm.js
 	 */
 	ApiPivotField.prototype.GetLayoutForm = function () {
+		if (!this.pivotField) return null;
 		return this.pivotField.asc_getOutline() ? "Outline" : "Tabular";
 	};
 
@@ -18708,6 +18759,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetLayoutForm.js
 	 */
 	ApiPivotField.prototype.SetLayoutForm = function (type) {
+		if (!this.pivotField) return;
 		if (type === "Tabular" || type === "Outline") {
 			const newField = new Asc.CT_PivotField();
 			newField.asc_setOutline(type === "Outline");
@@ -18735,6 +18787,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetLayoutPageBreak.js
 	 */
 	ApiPivotField.prototype.GetLayoutPageBreak = function () {
+		if (!this.pivotField) return null;
 		return this.pivotField.insertPageBreak;
 	};
 
@@ -18747,6 +18800,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetLayoutPageBreak.js
 	 */
 	ApiPivotField.prototype.SetLayoutPageBreak = function (insert) {
+		if (!this.pivotField) return;
 		if ( typeof insert == "boolean") {
 			this.pivotField.insertPageBreak = insert;
 		} else {
@@ -18772,6 +18826,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetShowingInAxis.js
 	 */
 	ApiPivotField.prototype.GetShowingInAxis = function () {
+		if (!this.pivotField) return true;
 		return this.pivotField.showingInAxis();
 	};
 
@@ -18790,6 +18845,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetRepeatLabels.js
 	 */
 	ApiPivotField.prototype.GetRepeatLabels = function () {
+		if (!this.pivotField) return null;
 		return this.pivotField.asc_getFillDownLabelsDefault();
 	};
 
@@ -18802,6 +18858,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetRepeatLabels.js
 	 */
 	ApiPivotField.prototype.SetRepeatLabels = function (repeat) {
+		if (!this.pivotField) return;
 		if (typeof repeat == "boolean") {
 			const field = new Asc.CT_PivotField();
 			field.asc_setFillDownLabelsDefault(repeat);
@@ -18829,6 +18886,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetLayoutBlankLine.js
 	 */
 	ApiPivotField.prototype.GetLayoutBlankLine = function () {
+		if (!this.pivotField) return null;
 		return this.pivotField.asc_getInsertBlankRow();
 	};
 
@@ -18841,6 +18899,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetLayoutBlankLine.js
 	 */
 	ApiPivotField.prototype.SetLayoutBlankLine = function (insert) {
+		if (!this.pivotField) return;
 		if (typeof insert == "boolean") {
 			const field = new Asc.CT_PivotField();
 			field.asc_setInsertBlankRow(insert);
@@ -18868,6 +18927,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetShowAllItems.js
 	 */
 	ApiPivotField.prototype.GetShowAllItems = function () {
+		if (!this.pivotField) return null;
 		return this.pivotField.asc_getShowAll();
 	};
 
@@ -18880,6 +18940,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetShowAllItems.js
 	 */
 	ApiPivotField.prototype.SetShowAllItems = function (show) {
+		if (!this.pivotField) return;
 		if (typeof show == "boolean") {
 			const field = new Asc.CT_PivotField();
 			field.asc_setShowAll(show);
@@ -18907,6 +18968,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetLayoutSubtotals.js
 	 */
 	ApiPivotField.prototype.GetLayoutSubtotals = function () {
+		if (!this.pivotField) return null;
 		return this.pivotField.asc_getDefaultSubtotal();
 	};
 
@@ -18919,6 +18981,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetLayoutSubtotals.js
 	 */
 	ApiPivotField.prototype.SetLayoutSubtotals = function (show) {
+		if (!this.pivotField) return;
 		if (typeof show == "boolean") {
 			const field = new Asc.CT_PivotField();
 			field.asc_setDefaultSubtotal(show);
@@ -18951,6 +19014,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetLayoutSubtotalLocation.js
 	 */
 	ApiPivotField.prototype.GetLayoutSubtotalLocation = function () {
+		if (!this.pivotField) return null;
 		return ( this.pivotField.asc_getSubtotalTop() ? "Top" : "Bottom" );
 	};
 
@@ -18963,6 +19027,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetLayoutSubtotalLocation.js
 	 */
 	ApiPivotField.prototype.SetLayoutSubtotalLocation = function (type) {
+		if (!this.pivotField) return;
 		if (typeof type == "string" && ( type == "Top" || type == "Bottom")) {
 			const field = new Asc.CT_PivotField();
 			field.asc_setSubtotalTop( (type == "Top") );
@@ -18990,6 +19055,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetSubtotalName.js
 	 */
 	ApiPivotField.prototype.GetSubtotalName = function () {
+		if (!this.pivotField) return null;
 		return (this.pivotField.subtotalCaption);
 	};
 
@@ -19002,6 +19068,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetSubtotalName.js
 	 */
 	ApiPivotField.prototype.SetSubtotalName = function (caption) {
+		if (!this.pivotField) return;
 		if ( typeof caption == "string") {
 			const field = new Asc.CT_PivotField();
 			field.subtotalCaption = caption.trim();
@@ -19045,6 +19112,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetSubtotals.js
 	 */
 	ApiPivotField.prototype.GetSubtotals = function () {
+		if (!this.pivotField) return null;
 		const res = {
 			'Sum': false,
 			'Count': false,
@@ -19110,6 +19178,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetSubtotals.js
 	 */
 	ApiPivotField.prototype.SetSubtotals = function (subtotals) {
+			if (!this.pivotField) return;
 			if (typeof subtotals == "object") {
 				const field = new Asc.CT_PivotField();
 				const arr = [];
@@ -19175,6 +19244,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetDragToColumn.js
 	 */
 	ApiPivotField.prototype.GetDragToColumn = function () {
+		if (!this.pivotField) return true;
 		return this.pivotField.dragToCol;
 	};
 
@@ -19187,6 +19257,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetDragToColumn.js
 	 */
 	ApiPivotField.prototype.SetDragToColumn = function (flag) {
+		if (!this.pivotField) return;
 		if (typeof flag == "boolean") {
 			this.pivotField.dragToCol = flag;
 		} else {
@@ -19212,6 +19283,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetDragToRow.js
 	 */
 	ApiPivotField.prototype.GetDragToRow = function () {
+		if (!this.pivotField) return true;
 		return this.pivotField.dragToRow;
 	};
 
@@ -19224,6 +19296,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetDragToRow.js
 	 */
 	ApiPivotField.prototype.SetDragToRow = function (flag) {
+		if (!this.pivotField) return;
 		if (typeof flag == "boolean") {
 			this.pivotField.dragToRow = flag;
 		} else {
@@ -19249,6 +19322,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetDragToData.js
 	 */
 	ApiPivotField.prototype.GetDragToData = function () {
+		if (!this.pivotField) return null;
 		return this.pivotField.dragToData;
 	};
 
@@ -19261,6 +19335,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetDragToData.js
 	 */
 	ApiPivotField.prototype.SetDragToData = function (flag) {
+		if (!this.pivotField) return;
 		if (typeof flag == "boolean") {
 			this.pivotField.dragToData = flag;
 		} else {
@@ -19286,6 +19361,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetDragToPage.js
 	 */
 	ApiPivotField.prototype.GetDragToPage = function () {
+		if (!this.pivotField) return false;
 		return this.pivotField.dragToPage;
 	};
 
@@ -19298,6 +19374,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/SetDragToPage.js
 	 */
 	ApiPivotField.prototype.SetDragToPage = function (flag) {
+		if (!this.pivotField) return;
 		if (typeof flag == "boolean") {
 			this.pivotField.dragToPage = flag;
 		} else {
@@ -19323,6 +19400,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPivotField/Methods/GetCurrentPage.js
 	 */
 	ApiPivotField.prototype.GetCurrentPage = function () {
+		if (!this.pivotField) return null;
 		const pageFields = this.table.pivot.asc_getPageFields();
 		const t = this;
 		const pageIndex = pageFields.findIndex(function(pageField) {
@@ -20794,8 +20872,8 @@
 	/**
 	 * The conditional formatting type.
 	 * @typedef {("xlCellValue" | "xlExpression" | "xlTop10" | "xlAboveAverageCondition" |
-	 * "xlUniqueValues" | "xlTextString" | "xlBlanksCondition" | "xlTimePeriod" | "xlErrorsCondition" |
-	 * "xlNoErrorsCondition" | "xlColorScale" | "xlDatabar" | "xlIconSets")} XlFormatConditionType
+	 * "xlUniqueValues" | "xlTextString" | "xlBlanksCondition" | "xlNoBlanksCondition" | "xlTimePeriod" | "xlErrorsCondition" |
+	 * "xlNoErrorsCondition" | "xlColorScale" | "xlDataBar" | "xlIconSet")} XlFormatConditionType
 	 */
 
 	/**
@@ -20860,6 +20938,9 @@
 			case "xlBlanksCondition":
 				nType = Asc.ECfType.containsBlanks;
 				break;
+			case "xlNoBlanksCondition":
+				nType = Asc.ECfType.notContainsBlanks;
+				break;
 			case "xlTimePeriod":
 				nType = Asc.ECfType.timePeriod;
 				break;
@@ -20872,9 +20953,11 @@
 			case "xlColorScale":
 				nType = Asc.ECfType.colorScale;
 				break;
+			case "xlDataBar":
 			case "xlDatabar":
 				nType = Asc.ECfType.dataBar;
 				break;
+			case "xlIconSet":
 			case "xlIconSets":
 				nType = Asc.ECfType.iconSet;
 				break;
@@ -20909,6 +20992,9 @@
 			case Asc.ECfType.containsBlanks:
 				sType = "xlBlanksCondition";
 				break;
+			case Asc.ECfType.notContainsBlanks:
+				sType = "xlNoBlanksCondition";
+				break;
 			case Asc.ECfType.timePeriod:
 				sType = "xlTimePeriod";
 				break;
@@ -20922,10 +21008,10 @@
 				sType = "xlColorScale";
 				break;
 			case Asc.ECfType.dataBar:
-				sType = "xlDatabar";
+				sType = "xlDataBar";
 				break;
 			case Asc.ECfType.iconSet:
-				sType = "xlIconSets";
+				sType = "xlIconSet";
 				break;
 		}
 		return sType;
@@ -21221,6 +21307,7 @@
 
 			case Asc.ECfType.duplicateValues:
 			case Asc.ECfType.containsBlanks:
+			case Asc.ECfType.notContainsBlanks:
 
 				if (Operator !== undefined) {
 					let specificType = FromXlFormatConditionOperatorTo(Operator);
@@ -21294,7 +21381,7 @@
 		}
 
 		if (internalType === Asc.ECfType.containsText || internalType === Asc.ECfType.containsBlanks ||
-			internalType === Asc.ECfType.duplicateValues || internalType === Asc.ECfType.timePeriod ||
+			internalType === Asc.ECfType.notContainsBlanks || internalType === Asc.ECfType.duplicateValues || internalType === Asc.ECfType.timePeriod ||
 			internalType === Asc.ECfType.aboveAverage || internalType === Asc.ECfType.top10 ||
 			internalType === Asc.ECfType.cellIs || internalType === Asc.ECfType.expression) {
 			props.dxf = new window['AscCommonExcel'].CellXfs();
@@ -23085,34 +23172,47 @@
 				newRule.dxf.border.initDefault();
 			}
 
+			if (typeof bordersIndex === 'string') {
+				bordersIndex = bordersIndex.toLowerCase();
+			}
 			var borders = newRule.dxf.border;
 			switch (bordersIndex) {
-				case 'DiagonalDown':
+				case 'diagonaldown':
 					borders.dd = true;
 					borders.d = private_MakeBorder(lineStyle, oColor);
 					break;
-				case 'DiagonalUp':
+				case 'diagonalup':
 					borders.du = true;
 					borders.d = private_MakeBorder(lineStyle, oColor);
 					break;
-				case 'Bottom':
+				case 'bottom':
 					borders.b = private_MakeBorder(lineStyle, oColor);
 					break;
-				case 'Left':
+				case 'left':
 					borders.l = private_MakeBorder(lineStyle, oColor);
 					break;
-				case 'Right':
+				case 'right':
 					borders.r = private_MakeBorder(lineStyle, oColor);
 					break;
-				case 'Top':
+				case 'top':
 					borders.t = private_MakeBorder(lineStyle, oColor);
 					break;
-				case 'InsideHorizontal':
+				case 'insidehorizontal':
 					borders.ih = private_MakeBorder(lineStyle, oColor);
 					break;
-				case 'InsideVertical':
+				case 'insidevertical':
 					borders.iv = private_MakeBorder(lineStyle, oColor);
 					break;
+				case 'all': {
+					var border = private_MakeBorder(lineStyle, oColor);
+					borders.b = border;
+					borders.l = border;
+					borders.r = border;
+					borders.t = border;
+					borders.ih = border;
+					borders.iv = border;
+					break;
+				}
 			}
 		}, true);
 	};
@@ -25040,7 +25140,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiDatabar/Methods/GetType.js
 	 */
 	ApiDatabar.prototype.GetType = function() {
-		return "xlDatabar";
+		return "xlDataBar";
 	};
 
 	Object.defineProperty(ApiDatabar.prototype, "Type", {
@@ -25844,7 +25944,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiIconSetCondition/Methods/GetType.js
 	 */
 	ApiIconSetCondition.prototype.GetType = function() {
-		return "xlIconSets";
+		return "xlIconSet";
 	};
 
 	Object.defineProperty(ApiIconSetCondition.prototype, "Type", {
@@ -27983,2021 +28083,6 @@
         }
     });
 
-	/**
-	 * Specifies the data source for the ListObject.
-	 * Only <b>"xlSrcRange"</b> is currently supported.
-	 * @typedef {("xlSrcRange" | "xlSrcExternal" | "xlSrcQuery" | "xlSrcModel")} XlListObjectSourceType
-	 */
-
-	/**
-	 * Specifies whether the first row of the source range contains column headers.
-	 * @typedef {("xlYes" | "xlNo" | "xlGuess")} XlYesNoGuess
-	 */
-
-	/**
-	 * Specifies the totals row calculation type for a list column.
-	 * @typedef {("xlTotalsCalculationNone" | "xlTotalsCalculationSum" | "xlTotalsCalculationAverage" | "xlTotalsCalculationCount" | "xlTotalsCalculationCountNums" | "xlTotalsCalculationMax" | "xlTotalsCalculationMin" | "xlTotalsCalculationStdDev" | "xlTotalsCalculationVar" | "xlTotalsCalculationCustom")} XlTotalsCalculation
-	 */
-
-	/**
-	 * Specifies what value is used as the sort criteria for the sort field.
-	 * @typedef {("xlSortOnValues" | "xlSortOnCellColor" | "xlSortOnFontColor" | "xlSortOnIcon")} XlSortOn
-	 */
-
-	/**
-	 * Specifies how to sort text in the sort field.
-	 * @typedef {("xlSortNormal" | "xlSortTextAsNumbers")} XlSortDataOption
-	 */
-
-	/**
-	 * Specifies the sort method for Chinese text.
-	 * @typedef {("xlPinYin" | "xlStroke")} XlSortMethod
-	 */
-
-	/**
-	 * Specifies the sort orientation: sort by rows (top to bottom) or by columns (left to right).
-	 * @typedef {("xlTopToBottom" | "xlLeftToRight")} XlSortOrientation
-	 */
-
-	/**
-	 * Class representing a formatted table.
-	 * @constructor
-	 * @property {boolean} Active - Indicates whether the active cell is within the table range.
-	 * @property {string} AlternativeText - Returns or sets the alternative text for the table.
-	 * @property {string} Comment - Returns or sets the comment for the table.
-	 * @property {string} Name - Returns or sets the internal name of the table.
-	 * @property {ApiWorksheet} Parent - Returns the worksheet that contains the table.
-	 * @property {string} DisplayName - Returns or sets the display name of the table.
-	 * @property {ApiRange} Range - Returns the range occupied by the table.
-	 * @property {ApiRange | null} HeaderRowRange - Returns the range of the header row; null if no header row.
-	 * @property {boolean} ShowAutoFilter - Returns or sets whether the AutoFilter arrows are shown.
-	 * @property {boolean} ShowAutoFilterDropDown - Returns or sets whether the AutoFilter drop-down is visible.
-	 * @property {boolean} ShowHeaders - Returns or sets whether the header row is shown.
-	 * @property {ApiAutoFilter | null} AutoFilter - Returns the AutoFilter object for the table, or null.
-	 * @property {ApiRange | null} DataBodyRange - Returns the range of the data rows; null if no data rows.
-	 * @property {boolean} ShowTableStyleColumnStripes - Returns or sets whether column stripes are applied.
-	 * @property {boolean} ShowTableStyleFirstColumn - Returns or sets whether the first column style is applied.
-	 * @property {boolean} ShowTableStyleLastColumn - Returns or sets whether the last column style is applied.
-	 * @property {boolean} ShowTableStyleRowStripes - Returns or sets whether row stripes are applied.
-	 * @property {boolean} ShowTotals - Returns or sets whether the totals row is displayed.
-	 * @property {XlListObjectSourceType} SourceType - Returns the data source type of the table.
-	 * @property {string} TableStyle - Returns or sets the name of the table style.
-	 * @property {ApiRange | null} TotalsRowRange - Returns the range of the totals row; null if not shown.
-	 * @property {string} Summary - Returns or sets the description of the table.
-	 * @property {ApiSort} Sort - Returns the Sort object associated with the table.
-	 */
-	function ApiListObject(tablePart, ws) {
-		this.tablePart = tablePart;
-		this.ws = ws;
-	}
-
-	/**
-	 * Returns a Boolean value that indicates whether the ListObject is active,
-	 * i.e., whether the active cell is within the range of the ListObject.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {boolean}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetActive.js
-	 */
-	ApiListObject.prototype.GetActive = function () {
-		var ref = this.tablePart.Ref;
-		if (!ref) {
-			return false;
-		}
-		var activeCell = this.ws.worksheet.selectionRange.activeCell;
-		return activeCell.row >= ref.r1 && activeCell.row <= ref.r2 &&
-			activeCell.col >= ref.c1 && activeCell.col <= ref.c2;
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "Active", {
-		get: function () {
-			return this.GetActive();
-		}
-	});
-
-	/**
-	 * Returns the alternative text for the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {string}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetAlternativeText.js
-	 */
-	ApiListObject.prototype.GetAlternativeText = function () {
-		return this.tablePart.altText || "";
-	};
-
-	/**
-	 * Sets the alternative text for the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @param {string} sAltText - The alternative text string.
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetAlternativeText.js
-	 */
-	ApiListObject.prototype.SetAlternativeText = function (sAltText) {
-		this.tablePart.changeAltText(sAltText);
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "AlternativeText", {
-		get: function () {
-			return this.GetAlternativeText();
-		},
-		set: function (sAltText) {
-			this.SetAlternativeText(sAltText);
-		}
-	});
-
-	/**
-	 * Returns the comment (summary alternative text) for the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {string}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetComment.js
-	 */
-	ApiListObject.prototype.GetComment = function () {
-		return this.tablePart.altTextSummary || "";
-	};
-
-	/**
-	 * Sets the comment (summary alternative text) for the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @param {string} sComment - The comment string.
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetComment.js
-	 */
-	ApiListObject.prototype.SetComment = function (sComment) {
-		this.tablePart.changeAltTextSummary(sComment);
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "Comment", {
-		get: function () {
-			return this.GetComment();
-		},
-		set: function (sComment) {
-			this.SetComment(sComment);
-		}
-	});
-
-	/**
-	 * Returns the display name of the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {string}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetName.js
-	 */
-	ApiListObject.prototype.GetName = function () {
-		return this.tablePart.DisplayName;
-	};
-
-	/**
-	 * Sets the name of the table. Equivalent to SetDisplayName.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @param {string} sName
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetName.js
-	 */
-	ApiListObject.prototype.SetName = function (sName) {
-		this.ws.worksheet.autoFilters.changeDisplayNameTable(this.tablePart.DisplayName, sName);
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "Name", {
-		get: function () {
-			return this.GetName();
-		},
-		set: function (sName) {
-			this.SetName(sName);
-		}
-	});
-
-	/**
-	 * Returns the ApiWorksheet object that is the parent of the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiWorksheet}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetParent.js
-	 */
-	ApiListObject.prototype.GetParent = function () {
-		return this.ws;
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "Parent", {
-		get: function () {
-			return this.GetParent();
-		}
-	});
-
-	/**
-	 * Returns the display name of the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {string}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetDisplayName.js
-	 */
-	ApiListObject.prototype.GetDisplayName = function () {
-		return this.tablePart.DisplayName;
-	};
-
-	/**
-	 * Sets the display name of the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @param {string} sDisplayName - The new display name for the table.
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetDisplayName.js
-	 */
-	ApiListObject.prototype.SetDisplayName = function (sDisplayName) {
-		this.ws.worksheet.autoFilters.changeDisplayNameTable(this.tablePart.DisplayName, sDisplayName);
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "DisplayName", {
-		get: function () {
-			return this.GetDisplayName();
-		},
-		set: function (sDisplayName) {
-			this.SetDisplayName(sDisplayName);
-		}
-	});
-
-	/**
-	 * Returns the ApiRange object that represents the range of the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange | null}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetRange.js
-	 */
-	ApiListObject.prototype.GetRange = function () {
-		var bbox = this.tablePart.Ref;
-		if (!bbox) { return null; }
-		return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this.ws.worksheet, bbox));
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "Range", {
-		get: function () {
-			return this.GetRange();
-		}
-	});
-
-	/**
-	 * Returns the range of the header row of the table.
-	 * Returns null if the table has no header row.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange | null}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetHeaderRowRange.js
-	 */
-	ApiListObject.prototype.GetHeaderRowRange = function () {
-		var ref = this.tablePart.Ref;
-		if (!ref || !this.tablePart.isHeaderRow()) {
-			return null;
-		}
-		var bbox = new Asc.Range(ref.c1, ref.r1, ref.c2, ref.r1);
-		return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this.ws.worksheet, bbox));
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "HeaderRowRange", {
-		get: function () {
-			return this.GetHeaderRowRange();
-		}
-	});
-
-	/**
-	 * Returns whether the AutoFilter dropdown buttons are displayed on the header row of the table.
-	 * Returns true by default for a new table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {boolean}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetShowAutoFilter.js
-	 */
-	ApiListObject.prototype.GetShowAutoFilter = function () {
-		return !!this.tablePart.AutoFilter;
-	};
-
-	/**
-	 * Sets whether the AutoFilter is present on the table.
-	 * Setting to false removes the AutoFilter entirely; setting to true creates it if not present.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @param {boolean} bShow
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetShowAutoFilter.js
-	 */
-	ApiListObject.prototype.SetShowAutoFilter = function (bShow) {
-		if (bShow) {
-			if (!this.tablePart.AutoFilter) {
-				this.tablePart.addAutoFilter();
-			}
-		} else {
-			this.tablePart.AutoFilter = null;
-		}
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "ShowAutoFilter", {
-		get: function () {
-			return this.GetShowAutoFilter();
-		},
-		set: function (bShow) {
-			this.SetShowAutoFilter(bShow);
-		}
-	});
-
-	/**
-	 * Returns whether the AutoFilter dropdown arrows are displayed on the header row of the table.
-	 * Returns true by default for a new table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {boolean}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetShowAutoFilterDropDown.js
-	 */
-	ApiListObject.prototype.GetShowAutoFilterDropDown = function () {
-		if (!this.tablePart.AutoFilter) {
-			return false;
-		}
-		return this.tablePart.isShowButton() !== false;
-	};
-
-	/**
-	 * Sets whether the AutoFilter dropdown arrows are displayed on the header row of the table.
-	 * Does not remove the AutoFilter itself, only hides or shows the dropdown buttons.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @param {boolean} bShow - Pass true to show the dropdown arrows, false to hide them.
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetShowAutoFilterDropDown.js
-	 */
-	ApiListObject.prototype.SetShowAutoFilterDropDown = function (bShow) {
-		this.tablePart.showButton(bShow);
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "ShowAutoFilterDropDown", {
-		get: function () {
-			return this.GetShowAutoFilterDropDown();
-		},
-		set: function (bShow) {
-			this.SetShowAutoFilterDropDown(bShow);
-		}
-	});
-
-	/**
-	 * Returns whether the header row is displayed for the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {boolean}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetShowHeaders.js
-	 */
-	ApiListObject.prototype.GetShowHeaders = function () {
-		return this.tablePart.isHeaderRow();
-	};
-
-	/**
-	 * Sets whether the header row is displayed for the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @param {boolean} bShow
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetShowHeaders.js
-	 */
-	ApiListObject.prototype.SetShowHeaders = function (bShow) {
-		if (this.GetShowHeaders() !== bShow) {
-			this.ws.worksheet.autoFilters.changeFormatTableInfo(
-				this.tablePart.DisplayName,
-				Asc.c_oAscChangeTableStyleInfo.rowHeader,
-				bShow
-			);
-		}
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "ShowHeaders", {
-		get: function () {
-			return this.GetShowHeaders();
-		},
-		set: function (bShow) {
-			this.SetShowHeaders(bShow);
-		}
-	});
-
-	/**
-	 * Returns the ApiAutoFilter object representing the autofilter applied to the table.
-	 * Returns null if the table has no autofilter.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiAutoFilter | null}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetAutoFilter.js
-	 */
-	ApiListObject.prototype.GetAutoFilter = function () {
-		if (!this.tablePart.AutoFilter) {
-			return null;
-		}
-		return new ApiAutoFilter(this.ws, this);
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "AutoFilter", {
-		get: function () {
-			return this.GetAutoFilter();
-		}
-	});
-
-	/**
-	 * Returns the range of the data rows in the table, excluding the header row and totals row.
-	 * Returns null if the table has no data rows.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange | null}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetDataBodyRange.js
-	 */
-	ApiListObject.prototype.GetDataBodyRange = function () {
-		var ref = this.tablePart.Ref;
-		if (!ref) {
-			return null;
-		}
-		var r1 = ref.r1 + (this.tablePart.isHeaderRow() ? 1 : 0);
-		var r2 = ref.r2 - (this.tablePart.TotalsRowCount || 0);
-		if (r1 > r2) {
-			return null;
-		}
-		var bbox = new Asc.Range(ref.c1, r1, ref.c2, r2);
-		return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this.ws.worksheet, bbox));
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "DataBodyRange", {
-		get: function () {
-			return this.GetDataBodyRange();
-		}
-	});
-
-	/**
-	 * Returns whether banded column formatting is applied to the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {boolean}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetShowTableStyleColumnStripes.js
-	 */
-	ApiListObject.prototype.GetShowTableStyleColumnStripes = function () {
-		return !!this.tablePart.TableStyleInfo.ShowColumnStripes;
-	};
-
-	/**
-	 * Sets whether banded column formatting is applied to the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @param {boolean} bShow
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetShowTableStyleColumnStripes.js
-	 */
-	ApiListObject.prototype.SetShowTableStyleColumnStripes = function (bShow) {
-		if (this.GetShowTableStyleColumnStripes() !== bShow) {
-			this.ws.worksheet.autoFilters.changeFormatTableInfo(
-				this.tablePart.DisplayName,
-				Asc.c_oAscChangeTableStyleInfo.columnBanded,
-				bShow
-			);
-		}
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "ShowTableStyleColumnStripes", {
-		get: function () {
-			return this.GetShowTableStyleColumnStripes();
-		},
-		set: function (bShow) {
-			this.SetShowTableStyleColumnStripes(bShow);
-		}
-	});
-
-	/**
-	 * Returns whether the first column formatting is applied to the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {boolean}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetShowTableStyleFirstColumn.js
-	 */
-	ApiListObject.prototype.GetShowTableStyleFirstColumn = function () {
-		return !!this.tablePart.TableStyleInfo.ShowFirstColumn;
-	};
-
-	/**
-	 * Sets whether the first column formatting is applied to the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @param {boolean} bShow
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetShowTableStyleFirstColumn.js
-	 */
-	ApiListObject.prototype.SetShowTableStyleFirstColumn = function (bShow) {
-		if (this.GetShowTableStyleFirstColumn() !== bShow) {
-			this.ws.worksheet.autoFilters.changeFormatTableInfo(
-				this.tablePart.DisplayName,
-				Asc.c_oAscChangeTableStyleInfo.columnFirst,
-				bShow
-			);
-		}
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "ShowTableStyleFirstColumn", {
-		get: function () {
-			return this.GetShowTableStyleFirstColumn();
-		},
-		set: function (bShow) {
-			this.SetShowTableStyleFirstColumn(bShow);
-		}
-	});
-
-	/**
-	 * Returns whether the last column formatting is applied to the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {boolean}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetShowTableStyleLastColumn.js
-	 */
-	ApiListObject.prototype.GetShowTableStyleLastColumn = function () {
-		return !!this.tablePart.TableStyleInfo.ShowLastColumn;
-	};
-
-	/**
-	 * Sets whether the last column formatting is applied to the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @param {boolean} bShow
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetShowTableStyleLastColumn.js
-	 */
-	ApiListObject.prototype.SetShowTableStyleLastColumn = function (bShow) {
-		if (this.GetShowTableStyleLastColumn() !== bShow) {
-			this.ws.worksheet.autoFilters.changeFormatTableInfo(
-				this.tablePart.DisplayName,
-				Asc.c_oAscChangeTableStyleInfo.columnLast,
-				bShow
-			);
-		}
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "ShowTableStyleLastColumn", {
-		get: function () {
-			return this.GetShowTableStyleLastColumn();
-		},
-		set: function (bShow) {
-			this.SetShowTableStyleLastColumn(bShow);
-		}
-	});
-
-	/**
-	 * Returns whether banded row formatting is applied to the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {boolean}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetShowTableStyleRowStripes.js
-	 */
-	ApiListObject.prototype.GetShowTableStyleRowStripes = function () {
-		return !!this.tablePart.TableStyleInfo.ShowRowStripes;
-	};
-
-	/**
-	 * Sets whether banded row formatting is applied to the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @param {boolean} bShow
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetShowTableStyleRowStripes.js
-	 */
-	ApiListObject.prototype.SetShowTableStyleRowStripes = function (bShow) {
-		if (this.GetShowTableStyleRowStripes() !== bShow) {
-			this.ws.worksheet.autoFilters.changeFormatTableInfo(
-				this.tablePart.DisplayName,
-				Asc.c_oAscChangeTableStyleInfo.rowBanded,
-				bShow
-			);
-		}
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "ShowTableStyleRowStripes", {
-		get: function () {
-			return this.GetShowTableStyleRowStripes();
-		},
-		set: function (bShow) {
-			this.SetShowTableStyleRowStripes(bShow);
-		}
-	});
-
-	/**
-	 * Returns whether the totals row is displayed for the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {boolean}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetShowTotals.js
-	 */
-	ApiListObject.prototype.GetShowTotals = function () {
-		return !!this.tablePart.TotalsRowCount;
-	};
-
-	/**
-	 * Sets whether the totals row is displayed for the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @param {boolean} bShow
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetShowTotals.js
-	 */
-	ApiListObject.prototype.SetShowTotals = function (bShow) {
-		if (this.GetShowTotals() !== bShow) {
-			this.ws.worksheet.autoFilters.changeFormatTableInfo(
-				this.tablePart.DisplayName,
-				Asc.c_oAscChangeTableStyleInfo.rowTotal,
-				bShow
-			);
-		}
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "ShowTotals", {
-		get: function () {
-			return this.GetShowTotals();
-		},
-		set: function (bShow) {
-			this.SetShowTotals(bShow);
-		}
-	});
-
-	/**
-	 * Deletes the ListObject object and clears the cell formatting.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/Delete.js
-	 */
-	ApiListObject.prototype.Delete = function () {
-		var ref = this.tablePart.Ref;
-		if (!ref) {
-			return;
-		}
-		this.ws.worksheet.autoFilters.isEmptyAutoFilters(ref);
-	};
-
-	/**
-	 * Removes the list functionality from the ListObject and converts it to a regular data range.
-	 * Cell data, formatting, and formulas remain on the sheet.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/Unlist.js
-	 */
-	ApiListObject.prototype.Unlist = function () {
-		var ref = this.tablePart.Ref;
-		if (!ref) {
-			return;
-		}
-		this.ws.worksheet.autoFilters.isEmptyAutoFilters(ref, null, null, true);
-	};
-
-	/**
-	 * Resizes the ListObject to a new range. Cells are not inserted or moved.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @param {ApiRange | string} Range - The new range for the table as an ApiRange object or address string, e.g. <b>"A1:D10"</b>.
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/Resize.js
-	 */
-	ApiListObject.prototype.Resize = function (Range) {
-		var ascRange;
-		if (Range instanceof ApiRange) {
-			ascRange = Range.range.bbox;
-		} else {
-			ascRange = AscCommonExcel.g_oRangeCache.getAscRange(Range);
-		}
-		if (!ascRange) {
-			return;
-		}
-		this.ws.worksheet.autoFilters.changeTableRange(this.tablePart.DisplayName, ascRange);
-	};
-
-	/**
-	 * Returns the source type of the table. Always returns "xlSrcRange" for range-based tables.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {string}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetSourceType.js
-	 */
-	ApiListObject.prototype.GetSourceType = function () {
-		return "xlSrcRange";
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "SourceType", {
-		get: function () {
-			return this.GetSourceType();
-		}
-	});
-
-	/**
-	 * Returns the name of the table style applied to the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {string}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetTableStyle.js
-	 */
-	ApiListObject.prototype.GetTableStyle = function () {
-		return this.tablePart.TableStyleInfo && this.tablePart.TableStyleInfo.Name || "";
-	};
-
-	/**
-	 * Sets the table style by name.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @param {string} sStyleName
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetTableStyle.js
-	 */
-	ApiListObject.prototype.SetTableStyle = function (sStyleName) {
-		this.ws.worksheet.autoFilters.changeTableStyleInfo(sStyleName, this.tablePart.Ref);
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "TableStyle", {
-		get: function () {
-			return this.GetTableStyle();
-		},
-		set: function (sStyleName) {
-			this.SetTableStyle(sStyleName);
-		}
-	});
-
-	/**
-	 * Returns the range of the totals row of the table.
-	 * Returns null if the table has no totals row.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange | null}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetTotalsRowRange.js
-	 */
-	ApiListObject.prototype.GetTotalsRowRange = function () {
-		var ref = this.tablePart.Ref;
-		if (!ref || !this.tablePart.TotalsRowCount) {
-			return null;
-		}
-		var bbox = new Asc.Range(ref.c1, ref.r2, ref.c2, ref.r2);
-		return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this.ws.worksheet, bbox));
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "TotalsRowRange", {
-		get: function () {
-			return this.GetTotalsRowRange();
-		}
-	});
-
-	/**
-	 * Returns the summary description (alternative text summary) for the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {string}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetSummary.js
-	 */
-	ApiListObject.prototype.GetSummary = function () {
-		return this.GetComment();
-	};
-
-	/**
-	 * Sets the summary description (alternative text summary) for the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @param {string} sSummary
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/SetSummary.js
-	 */
-	ApiListObject.prototype.SetSummary = function (sSummary) {
-		this.SetComment(sSummary);
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "Summary", {
-		get: function () {
-			return this.GetSummary();
-		},
-		set: function (sSummary) {
-			this.SetSummary(sSummary);
-		}
-	});
-
-	/**
-	 * Returns an array of all columns in the table.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiListColumn[]}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetListColumns.js
-	 */
-	ApiListObject.prototype.GetListColumns = function () {
-		var columns = this.tablePart.TableColumns;
-		var result = [];
-		if (!columns) {
-			return result;
-		}
-		for (var i = 0; i < columns.length; i++) {
-			result.push(new ApiListColumn(columns[i], this));
-		}
-		return result;
-	};
-
-	/**
-	 * Adds a new column to the table at the specified 1-based position.
-	 * If no position is provided, the column is appended at the end.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @param {number} [nPosition] - The 1-based position at which to insert the new column.
-	 * @returns {ApiListColumn | null}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/AddListColumn.js
-	 */
-	ApiListObject.prototype.AddListColumn = function (nPosition) {
-		var tablePart = this.tablePart;
-		var ws = this.ws.worksheet;
-		var ref = tablePart.Ref;
-		if (!ref) {
-			return null;
-		}
-		var count = tablePart.TableColumns ? tablePart.TableColumns.length : 0;
-		var range, displayName;
-		if (nPosition === undefined || nPosition === null || nPosition > count) {
-			range = ws.getRange3(ref.r1, ref.c2 + 1, ref.r2, ref.c2 + 1);
-			displayName = tablePart.DisplayName;
-			nPosition = count + 1;
-		} else {
-			var colIndex = ref.c1 + (nPosition - 1);
-			range = ws.getRange3(ref.r1, colIndex, ref.r2, colIndex);
-			displayName = undefined;
-		}
-		range.addCellsShiftRight(displayName);
-		var columns = tablePart.TableColumns;
-		if (!columns || !columns[nPosition - 1]) {
-			return null;
-		}
-		return new ApiListColumn(columns[nPosition - 1], this);
-	};
-
-	// -------------------------------------------------------------------------
-	// ApiListColumn
-	// -------------------------------------------------------------------------
-
-	/**
-	 * Class representing a single column in a list object (table).
-	 * @constructor
-	 * @property {ApiRange | null} DataBodyRange - Returns the data body range of the column, excluding header and totals rows.
-	 * @property {number} Index - Returns the 1-based index of the column within the table.
-	 * @property {string} Name - Returns or sets the name of the column.
-	 * @property {ApiListObject} Parent - Returns the parent list object.
-	 * @property {ApiRange | null} Range - Returns the full range of the column, including header and totals rows.
-	 * @property {XlTotalsCalculation} TotalsCalculation - Returns or sets the totals row calculation type.
-	 * @property {ApiRange | null} Total - Returns the totals row cell range for the column.
-	 */
-	function ApiListColumn(tableColumn, listObject) {
-		this.tableColumn = tableColumn;
-		this.listObject  = listObject;
-	}
-
-	/**
-	 * Returns the range of the data body of the column, excluding the header and totals rows.
-	 * @memberof ApiListColumn
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange | null}
-	 * @see office-js-api/Examples/Cell/ApiListColumn/Methods/GetDataBodyRange.js
-	 */
-	ApiListColumn.prototype.GetDataBodyRange = function () {
-		var tablePart = this.listObject.tablePart;
-		var bbox = this.tableColumn.getRange(tablePart, false, false);
-		if (!bbox) {
-			return null;
-		}
-		return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this.listObject.ws.worksheet, bbox));
-	};
-
-	Object.defineProperty(ApiListColumn.prototype, "DataBodyRange", {
-		get: function () {
-			return this.GetDataBodyRange();
-		}
-	});
-
-	/**
-	 * Returns the 1-based index of the column within the table.
-	 * @memberof ApiListColumn
-	 * @typeofeditors ["CSE"]
-	 * @returns {number}
-	 * @see office-js-api/Examples/Cell/ApiListColumn/Methods/GetIndex.js
-	 */
-	ApiListColumn.prototype.GetIndex = function () {
-		var columns = this.listObject.tablePart.TableColumns;
-		if (!columns) {
-			return -1;
-		}
-		for (var i = 0; i < columns.length; i++) {
-			if (columns[i] === this.tableColumn) {
-				return i + 1;
-			}
-		}
-		return -1;
-	};
-
-	Object.defineProperty(ApiListColumn.prototype, "Index", {
-		get: function () {
-			return this.GetIndex();
-		}
-	});
-
-	/**
-	 * Returns the name of the table column.
-	 * @memberof ApiListColumn
-	 * @typeofeditors ["CSE"]
-	 * @returns {string}
-	 * @see office-js-api/Examples/Cell/ApiListColumn/Methods/GetName.js
-	 */
-	ApiListColumn.prototype.GetName = function () {
-		return this.tableColumn.getTableColumnName() || "";
-	};
-
-	/**
-	 * Sets the name of the table column.
-	 * @memberof ApiListColumn
-	 * @typeofeditors ["CSE"]
-	 * @param {string} sName - The new column name.
-	 * @see office-js-api/Examples/Cell/ApiListColumn/Methods/SetName.js
-	 */
-	ApiListColumn.prototype.SetName = function (sName) {
-		this.tableColumn.setTableColumnName(sName);
-	};
-
-	Object.defineProperty(ApiListColumn.prototype, "Name", {
-		get: function () {
-			return this.GetName();
-		},
-		set: function (sName) {
-			this.SetName(sName);
-		}
-	});
-
-	/**
-	 * Returns the parent list object.
-	 * @memberof ApiListColumn
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiListObject}
-	 * @see office-js-api/Examples/Cell/ApiListColumn/Methods/GetParent.js
-	 */
-	ApiListColumn.prototype.GetParent = function () {
-		return this.listObject;
-	};
-
-	Object.defineProperty(ApiListColumn.prototype, "Parent", {
-		get: function () {
-			return this.GetParent();
-		}
-	});
-
-	/**
-	 * Returns the range of the entire column, including the header and totals rows.
-	 * @memberof ApiListColumn
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange | null}
-	 * @see office-js-api/Examples/Cell/ApiListColumn/Methods/GetRange.js
-	 */
-	ApiListColumn.prototype.GetRange = function () {
-		var tablePart = this.listObject.tablePart;
-		var bbox = this.tableColumn.getRange(tablePart, true, true);
-		if (!bbox) {
-			return null;
-		}
-		return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this.listObject.ws.worksheet, bbox));
-	};
-
-	Object.defineProperty(ApiListColumn.prototype, "Range", {
-		get: function () {
-			return this.GetRange();
-		}
-	});
-
-	/**
-	 * Returns the totals calculation type for the column.
-	 * @memberof ApiListColumn
-	 * @typeofeditors ["CSE"]
-	 * @returns {XlTotalsCalculation}
-	 * @see office-js-api/Examples/Cell/ApiListColumn/Methods/GetTotalsCalculation.js
-	 */
-	ApiListColumn.prototype.GetTotalsCalculation = function () {
-		var fn = this.tableColumn.getTotalsRowFunction();
-		switch (fn) {
-			case Asc.ETotalsRowFunction.totalrowfunctionAverage:
-				return "xlTotalsCalculationAverage";
-			case Asc.ETotalsRowFunction.totalrowfunctionCount:
-				return "xlTotalsCalculationCount";
-			case Asc.ETotalsRowFunction.totalrowfunctionCountNums:
-				return "xlTotalsCalculationCountNums";
-			case Asc.ETotalsRowFunction.totalrowfunctionCustom:
-				return "xlTotalsCalculationCustom";
-			case Asc.ETotalsRowFunction.totalrowfunctionMax:
-				return "xlTotalsCalculationMax";
-			case Asc.ETotalsRowFunction.totalrowfunctionMin:
-				return "xlTotalsCalculationMin";
-			case Asc.ETotalsRowFunction.totalrowfunctionStdDev:
-				return "xlTotalsCalculationStdDev";
-			case Asc.ETotalsRowFunction.totalrowfunctionSum:
-				return "xlTotalsCalculationSum";
-			case Asc.ETotalsRowFunction.totalrowfunctionVar:
-				return "xlTotalsCalculationVar";
-			default:
-				return "xlTotalsCalculationNone";
-		}
-	};
-
-	/**
-	 * Sets the totals calculation type for the column.
-	 * @memberof ApiListColumn
-	 * @typeofeditors ["CSE"]
-	 * @param {XlTotalsCalculation} sType - The totals calculation type.
-	 * @see office-js-api/Examples/Cell/ApiListColumn/Methods/SetTotalsCalculation.js
-	 */
-	ApiListColumn.prototype.SetTotalsCalculation = function (sType) {
-		var fn;
-		switch (sType) {
-			case "xlTotalsCalculationAverage":
-				fn = Asc.ETotalsRowFunction.totalrowfunctionAverage;
-				break;
-			case "xlTotalsCalculationCount":
-				fn = Asc.ETotalsRowFunction.totalrowfunctionCount;
-				break;
-			case "xlTotalsCalculationCountNums":
-				fn = Asc.ETotalsRowFunction.totalrowfunctionCountNums;
-				break;
-			case "xlTotalsCalculationCustom":
-				fn = Asc.ETotalsRowFunction.totalrowfunctionCustom;
-				break;
-			case "xlTotalsCalculationMax":
-				fn = Asc.ETotalsRowFunction.totalrowfunctionMax;
-				break;
-			case "xlTotalsCalculationMin":
-				fn = Asc.ETotalsRowFunction.totalrowfunctionMin;
-				break;
-			case "xlTotalsCalculationNone":
-				fn = Asc.ETotalsRowFunction.totalrowfunctionNone;
-				break;
-			case "xlTotalsCalculationStdDev":
-				fn = Asc.ETotalsRowFunction.totalrowfunctionStdDev;
-				break;
-			case "xlTotalsCalculationSum":
-				fn = Asc.ETotalsRowFunction.totalrowfunctionSum;
-				break;
-			case "xlTotalsCalculationVar":
-				fn = Asc.ETotalsRowFunction.totalrowfunctionVar;
-				break;
-			default:
-				return;
-		}
-		this.tableColumn.setTotalsRowFunction(fn);
-	};
-
-	Object.defineProperty(ApiListColumn.prototype, "TotalsCalculation", {
-		get: function () {
-			return this.GetTotalsCalculation();
-		},
-		set: function (sType) {
-			this.SetTotalsCalculation(sType);
-		}
-	});
-
-	/**
-	 * Returns the range of the totals row cell for the column.
-	 * Returns null if the table has no totals row.
-	 * @memberof ApiListColumn
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange | null}
-	 * @see office-js-api/Examples/Cell/ApiListColumn/Methods/GetTotal.js
-	 */
-	ApiListColumn.prototype.GetTotal = function () {
-		var tablePart = this.listObject.tablePart;
-		if (!tablePart.isTotalsRow()) {
-			return null;
-		}
-		var ref = tablePart.Ref;
-		var col = null;
-		var columns = tablePart.TableColumns;
-		for (var i = 0; i < columns.length; i++) {
-			if (columns[i] === this.tableColumn) {
-				col = ref.c1 + i;
-				break;
-			}
-		}
-		if (col === null) {
-			return null;
-		}
-		var bbox = new Asc.Range(col, ref.r2, col, ref.r2);
-		return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this.listObject.ws.worksheet, bbox));
-	};
-
-	Object.defineProperty(ApiListColumn.prototype, "Total", {
-		get: function () {
-			return this.GetTotal();
-		}
-	});
-
-	/**
-	 * Deletes the column from the table.
-	 * @memberof ApiListColumn
-	 * @typeofeditors ["CSE"]
-	 * @see office-js-api/Examples/Cell/ApiListColumn/Methods/Delete.js
-	 */
-	ApiListColumn.prototype.Delete = function () {
-		var tablePart = this.listObject.tablePart;
-		var ws = this.listObject.ws.worksheet;
-		var bbox = this.tableColumn.getRange(tablePart, true, true);
-		if (!bbox) {
-			return;
-		}
-		var range = ws.getRange3(bbox.r1, bbox.c1, bbox.r2, bbox.c2);
-		range.deleteCellsShiftLeft();
-	};
-
-	// -------------------------------------------------------------------------
-	// ApiListRow
-	// -------------------------------------------------------------------------
-
-	/**
-	 * Returns an array of all data rows in the table, excluding the header and totals rows.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiListRow[]}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetListRows.js
-	 */
-	ApiListObject.prototype.GetListRows = function () {
-		var tablePart = this.tablePart;
-		var ref = tablePart.Ref;
-		var result = [];
-		if (!ref) {
-			return result;
-		}
-		var startRow = ref.r1 + (tablePart.isHeaderRow() ? 1 : 0);
-		var endRow   = ref.r2 - (tablePart.isTotalsRow() ? 1 : 0);
-		var count    = endRow - startRow + 1;
-		for (var i = 1; i <= count; i++) {
-			result.push(new ApiListRow(i, this));
-		}
-		return result;
-	};
-
-	/**
-	 * Adds a new data row to the table at the specified 1-based position.
-	 * If no position is provided, the row is appended at the end.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @param {number} [nPosition] - The 1-based position within the data body at which to insert the row.
-	 * @returns {ApiListRow | null}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/AddListRow.js
-	 */
-	ApiListObject.prototype.AddListRow = function (nPosition) {
-		var tablePart = this.tablePart;
-		var ws = this.ws.worksheet;
-		var ref = tablePart.Ref;
-		if (!ref) {
-			return null;
-		}
-		var startRow = ref.r1 + (tablePart.isHeaderRow() ? 1 : 0);
-		var endRow   = ref.r2 - (tablePart.isTotalsRow() ? 1 : 0);
-		var count    = endRow - startRow + 1;
-		var range, displayName;
-		if (nPosition === undefined || nPosition === null || nPosition > count) {
-			// Append at end: insert below the last data row (or push the totals row down)
-			var hasTotals = tablePart.isTotalsRow();
-			var insertRow = hasTotals ? ref.r2 : ref.r2 + 1;
-			range       = ws.getRange3(insertRow, ref.c1, insertRow, ref.c2);
-			displayName = hasTotals ? undefined : tablePart.DisplayName;
-			nPosition   = count + 1;
-		} else {
-			// Insert above the row at nPosition
-			var rowIndex = startRow + (nPosition - 1);
-			range       = ws.getRange3(rowIndex, ref.c1, rowIndex, ref.c2);
-			displayName = undefined;
-		}
-		range.addCellsShiftBottom(displayName);
-		return new ApiListRow(nPosition, this);
-	};
-
-	/**
-	 * Class representing a single data row in a list object (table).
-	 * @constructor
-	 * @property {number} Index - Returns the 1-based index of the row within the data body.
-	 * @property {ApiListObject} Parent - Returns the parent list object.
-	 * @property {ApiRange | null} Range - Returns the range of the entire row spanning all columns.
-	 */
-	function ApiListRow(nIndex, listObject) {
-		this.index      = nIndex;
-		this.listObject = listObject;
-	}
-
-	/**
-	 * Returns the 1-based index of the row within the data body of the table.
-	 * @memberof ApiListRow
-	 * @typeofeditors ["CSE"]
-	 * @returns {number}
-	 * @see office-js-api/Examples/Cell/ApiListRow/Methods/GetIndex.js
-	 */
-	ApiListRow.prototype.GetIndex = function () {
-		return this.index;
-	};
-
-	Object.defineProperty(ApiListRow.prototype, "Index", {
-		get: function () {
-			return this.GetIndex();
-		}
-	});
-
-	/**
-	 * Returns the parent list object.
-	 * @memberof ApiListRow
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiListObject}
-	 * @see office-js-api/Examples/Cell/ApiListRow/Methods/GetParent.js
-	 */
-	ApiListRow.prototype.GetParent = function () {
-		return this.listObject;
-	};
-
-	Object.defineProperty(ApiListRow.prototype, "Parent", {
-		get: function () {
-			return this.GetParent();
-		}
-	});
-
-	/**
-	 * Returns the range of the entire row, spanning all columns of the table.
-	 * @memberof ApiListRow
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange | null}
-	 * @see office-js-api/Examples/Cell/ApiListRow/Methods/GetRange.js
-	 */
-	ApiListRow.prototype.GetRange = function () {
-		var tablePart = this.listObject.tablePart;
-		var ref = tablePart.Ref;
-		if (!ref) {
-			return null;
-		}
-		var startRow = ref.r1 + (tablePart.isHeaderRow() ? 1 : 0);
-		var absRow   = startRow + (this.index - 1);
-		var bbox = new Asc.Range(ref.c1, absRow, ref.c2, absRow);
-		return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this.listObject.ws.worksheet, bbox));
-	};
-
-	Object.defineProperty(ApiListRow.prototype, "Range", {
-		get: function () {
-			return this.GetRange();
-		}
-	});
-
-	/**
-	 * Deletes the row from the table.
-	 * @memberof ApiListRow
-	 * @typeofeditors ["CSE"]
-	 * @see office-js-api/Examples/Cell/ApiListRow/Methods/Delete.js
-	 */
-	ApiListRow.prototype.Delete = function () {
-		var tablePart = this.listObject.tablePart;
-		var ref = tablePart.Ref;
-		if (!ref) {
-			return;
-		}
-		var startRow = ref.r1 + (tablePart.isHeaderRow() ? 1 : 0);
-		var absRow   = startRow + (this.index - 1);
-		var ws = this.listObject.ws.worksheet;
-		var range = ws.getRange3(absRow, ref.c1, absRow, ref.c2);
-		range.deleteCellsShiftUp();
-	};
-
-	// -------------------------------------------------------------------------
-	// ApiSort
-	// -------------------------------------------------------------------------
-
-	function _sortByToStr(sortBy) {
-		switch (sortBy) {
-			case Asc.ESortBy.sortbyCellColor:
-				return "xlSortOnCellColor";
-			case Asc.ESortBy.sortbyFontColor:
-				return "xlSortOnFontColor";
-			case Asc.ESortBy.sortbyIcon:
-				return "xlSortOnIcon";
-			default:
-				return "xlSortOnValues";
-		}
-	}
-
-	function _sortByFromStr(sortOn) {
-		switch (sortOn) {
-			case "xlSortOnCellColor":
-				return Asc.c_oAscSortOptions.ByColorFill;
-			case "xlSortOnFontColor":
-				return Asc.c_oAscSortOptions.ByColorFont;
-			case "xlSortOnIcon":
-				return Asc.c_oAscSortOptions.ByIcon;
-			default:
-				return Asc.c_oAscSortOptions.ByValue;
-		}
-	}
-
-	function _sortMethodToStr(sortMethod) {
-		switch (sortMethod) {
-			case AscCommonExcel.ESortMethod.sortmethodStroke:
-				return "xlStroke";
-			default:
-				return "xlPinYin";
-		}
-	}
-
-	/**
-	 * Class representing the sort state of a list object (table).
-	 * @constructor
-	 * @property {ApiSortFields} SortFields - Returns the collection of sort fields.
-	 * @property {boolean} MatchCase - Returns or sets whether the sort is case-sensitive.
-	 * @property {string} Header - Returns the header setting (always "xlYes" for a ListObject).
-	 * @property {XlSortOrientation} Orientation - Returns or sets the sort orientation.
-	 * @property {XlSortMethod} SortMethod - Returns or sets the sort method for Chinese text.
-	 * @property {ApiListObject} Parent - Returns the parent list object.
-	 * @property {ApiRange | null} Rng - Returns the data body range that the sort applies to.
-	 */
-	function ApiSort(listObject) {
-		this.listObject   = listObject;
-		this._fields      = [];
-		this._matchCase   = false;
-		this._orientation = "xlTopToBottom";
-		this._sortMethod  = "xlPinYin";
-		var ss = listObject.tablePart.SortState;
-		if (ss) {
-			this._matchCase   = !!ss.CaseSensitive;
-			this._orientation = ss.ColumnSort ? "xlLeftToRight" : "xlTopToBottom";
-			this._sortMethod  = _sortMethodToStr(ss.SortMethod);
-			if (ss.SortConditions) {
-				for (var i = 0; i < ss.SortConditions.length; i++) {
-					var sc = ss.SortConditions[i];
-					this._fields.push({
-						absColIndex:  sc.Ref.c1,
-						sortOn:       _sortByToStr(sc.ConditionSortBy),
-						descending:   !!sc.ConditionDescending,
-						customOrder:  null,
-						dataOption:   "xlSortNormal",
-						subField:     null,
-						sortOnValue:  null
-					});
-				}
-			}
-		}
-	}
-
-	/**
-	 * Returns the sort fields collection.
-	 * @memberof ApiSort
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiSortFields}
-	 * @see office-js-api/Examples/Cell/ApiSort/Methods/GetSortFields.js
-	 */
-	ApiSort.prototype.GetSortFields = function () {
-		return new ApiSortFields(this);
-	};
-
-	Object.defineProperty(ApiSort.prototype, "SortFields", {
-		get: function () {
-			return this.GetSortFields();
-		}
-	});
-
-	/**
-	 * Returns whether the sort is case-sensitive.
-	 * @memberof ApiSort
-	 * @typeofeditors ["CSE"]
-	 * @returns {boolean}
-	 * @see office-js-api/Examples/Cell/ApiSort/Methods/GetMatchCase.js
-	 */
-	ApiSort.prototype.GetMatchCase = function () {
-		return this._matchCase;
-	};
-
-	/**
-	 * Sets whether the sort is case-sensitive.
-	 * @memberof ApiSort
-	 * @typeofeditors ["CSE"]
-	 * @param {boolean} bMatchCase
-	 * @see office-js-api/Examples/Cell/ApiSort/Methods/SetMatchCase.js
-	 */
-	ApiSort.prototype.SetMatchCase = function (bMatchCase) {
-		this._matchCase = !!bMatchCase;
-	};
-
-	Object.defineProperty(ApiSort.prototype, "MatchCase", {
-		get: function () {
-			return this.GetMatchCase();
-		},
-		set: function (val) {
-			this.SetMatchCase(val);
-		}
-	});
-
-	/**
-	 * Returns the header setting. Always "xlYes" for a ListObject.
-	 * @memberof ApiSort
-	 * @typeofeditors ["CSE"]
-	 * @returns {string}
-	 * @see office-js-api/Examples/Cell/ApiSort/Methods/GetHeader.js
-	 */
-	ApiSort.prototype.GetHeader = function () {
-		return "xlYes";
-	};
-
-	Object.defineProperty(ApiSort.prototype, "Header", {
-		get: function () {
-			return this.GetHeader();
-		}
-	});
-
-	/**
-	 * Returns the sort orientation: "xlTopToBottom" or "xlLeftToRight".
-	 * @memberof ApiSort
-	 * @typeofeditors ["CSE"]
-	 * @returns {XlSortOrientation}
-	 * @see office-js-api/Examples/Cell/ApiSort/Methods/GetOrientation.js
-	 */
-	ApiSort.prototype.GetOrientation = function () {
-		return this._orientation;
-	};
-
-	/**
-	 * Sets the sort orientation.
-	 * @memberof ApiSort
-	 * @typeofeditors ["CSE"]
-	 * @param {XlSortOrientation} sOrientation
-	 * @see office-js-api/Examples/Cell/ApiSort/Methods/SetOrientation.js
-	 */
-	ApiSort.prototype.SetOrientation = function (sOrientation) {
-		this._orientation = sOrientation === "xlLeftToRight" ? "xlLeftToRight" : "xlTopToBottom";
-	};
-
-	Object.defineProperty(ApiSort.prototype, "Orientation", {
-		get: function () {
-			return this.GetOrientation();
-		},
-		set: function (val) {
-			this.SetOrientation(val);
-		}
-	});
-
-	/**
-	 * Returns the sort method: "xlPinYin" or "xlStroke".
-	 * @memberof ApiSort
-	 * @typeofeditors ["CSE"]
-	 * @returns {XlSortMethod}
-	 * @see office-js-api/Examples/Cell/ApiSort/Methods/GetSortMethod.js
-	 */
-	ApiSort.prototype.GetSortMethod = function () {
-		return this._sortMethod;
-	};
-
-	/**
-	 * Sets the sort method.
-	 * @memberof ApiSort
-	 * @typeofeditors ["CSE"]
-	 * @param {XlSortMethod} sSortMethod
-	 * @see office-js-api/Examples/Cell/ApiSort/Methods/SetSortMethod.js
-	 */
-	ApiSort.prototype.SetSortMethod = function (sSortMethod) {
-		this._sortMethod = sSortMethod === "xlStroke" ? "xlStroke" : "xlPinYin";
-	};
-
-	Object.defineProperty(ApiSort.prototype, "SortMethod", {
-		get: function () {
-			return this.GetSortMethod();
-		},
-		set: function (val) {
-			this.SetSortMethod(val);
-		}
-	});
-
-	/**
-	 * Returns the parent list object.
-	 * @memberof ApiSort
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiListObject}
-	 * @see office-js-api/Examples/Cell/ApiSort/Methods/GetParent.js
-	 */
-	ApiSort.prototype.GetParent = function () {
-		return this.listObject;
-	};
-
-	Object.defineProperty(ApiSort.prototype, "Parent", {
-		get: function () {
-			return this.GetParent();
-		}
-	});
-
-	/**
-	 * Returns the data body range that the sort applies to.
-	 * @memberof ApiSort
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange | null}
-	 * @see office-js-api/Examples/Cell/ApiSort/Methods/GetRng.js
-	 */
-	ApiSort.prototype.GetRng = function () {
-		return this.listObject.GetDataBodyRange();
-	};
-
-	Object.defineProperty(ApiSort.prototype, "Rng", {
-		get: function () {
-			return this.GetRng();
-		}
-	});
-
-	// /**
-	//  * No-op for a ListObject — the sort range is always the data body range.
-	//  * @memberof ApiSort
-	//  * @typeofeditors ["CSE"]
-	//  * @see office-js-api/Examples/Cell/ApiSort/Methods/SetRange.js
-	//  */
-	// ApiSort.prototype.SetRange = function () {
-	// };
-
-	/**
-	 * Applies the current sort settings to the table.
-	 * @memberof ApiSort
-	 * @typeofeditors ["CSE"]
-	 * @see office-js-api/Examples/Cell/ApiSort/Methods/Apply.js
-	 */
-	ApiSort.prototype.Apply = function () {
-		if (!this._fields.length) {
-			return;
-		}
-		var tablePart = this.listObject.tablePart;
-		var ws        = this.listObject.ws.worksheet;
-		var ref       = tablePart.Ref;
-		if (!ref) {
-			return;
-		}
-		var columnSort = this._orientation !== "xlLeftToRight";
-		var startRow   = ref.r1 + (tablePart.isHeaderRow() ? 1 : 0);
-		var endRow     = ref.r2 - (tablePart.isTotalsRow() ? 1 : 0);
-		var props      = new Asc.CSortProperties(ws);
-		props.columnSort    = columnSort;
-		props.caseSensitive = this._matchCase;
-		props.hasHeaders    = false;
-		props.levels        = [];
-		for (var i = 0; i < this._fields.length; i++) {
-			var field = this._fields[i];
-			var level = new Asc.CSortPropertiesLevel();
-			if (columnSort) {
-				level.index = field.absColIndex - ref.c1;
-			} else {
-				level.index = field.absColIndex - ref.r1;
-			}
-			level.descending = field.descending
-				? Asc.c_oAscSortOptions.Descending
-				: Asc.c_oAscSortOptions.Ascending;
-			level.sortBy = _sortByFromStr(field.sortOn);
-			if ((field.sortOn === "xlSortOnCellColor" || field.sortOn === "xlSortOnFontColor") &&
-					field.sortOnValue instanceof ApiColor) {
-				var _c = field.sortOnValue.color;
-				level.color = new Asc.asc_CColor(_c.getR(), _c.getG(), _c.getB());
-			}
-			props.levels.push(level);
-		}
-		var range = new Asc.Range(ref.c1, startRow, ref.c2, endRow);
-		ws.setCustomSort(props, tablePart, null, null, range);
-	};
-
-	// -------------------------------------------------------------------------
-	// ApiSortFields
-	// -------------------------------------------------------------------------
-
-	/**
-	 * Class representing the collection of sort fields for a Sort object.
-	 * @constructor
-	 * @property {ApiSort} Parent - Returns the parent Sort object.
-	 * @property {number} Count - Returns the number of sort fields in the collection.
-	 */
-	function ApiSortFields(apiSort) {
-		this._sort = apiSort;
-	}
-
-	/**
-	 * Returns the parent Sort object.
-	 * @memberof ApiSortFields
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiSort}
-	 * @see office-js-api/Examples/Cell/ApiSortFields/Methods/GetParent.js
-	 */
-	ApiSortFields.prototype.GetParent = function () {
-		return this._sort;
-	};
-
-	Object.defineProperty(ApiSortFields.prototype, "Parent", {
-		get: function () {
-			return this.GetParent();
-		}
-	});
-
-	/**
-	 * Returns the number of sort fields.
-	 * @memberof ApiSortFields
-	 * @typeofeditors ["CSE"]
-	 * @returns {number}
-	 * @see office-js-api/Examples/Cell/ApiSortFields/Methods/GetCount.js
-	 */
-	ApiSortFields.prototype.GetCount = function () {
-		return this._sort._fields.length;
-	};
-
-	Object.defineProperty(ApiSortFields.prototype, "Count", {
-		get: function () {
-			return this.GetCount();
-		}
-	});
-
-	/**
-	 * Returns the sort field at the given 1-based index.
-	 * @memberof ApiSortFields
-	 * @typeofeditors ["CSE"]
-	 * @param {number} nIndex - 1-based index.
-	 * @returns {ApiSortField | null}
-	 * @see office-js-api/Examples/Cell/ApiSortFields/Methods/Item.js
-	 */
-	ApiSortFields.prototype.Item = function (nIndex) {
-		var fieldObj = this._sort._fields[nIndex - 1];
-		if (!fieldObj) {
-			return null;
-		}
-		return new ApiSortField(fieldObj, this._sort);
-	};
-
-	/**
-	 * Adds a sort field to the collection.
-	 * @memberof ApiSortFields
-	 * @typeofeditors ["CSE"]
-	 * @param {ApiRange} Key - A range within the table that defines the sort column.
-	 * @param {XlSortOn} [SortOn="xlSortOnValues"] - The value used as the sort criteria.
-	 * @param {SortOrder} [Order="xlAscending"] - The sort order.
-	 * @param {number | string} [CustomOrder=0] - Reserved. Custom order sorting is not yet supported by the engine.
-	 * @param {XlSortDataOption} [DataOption="xlSortNormal"] - The data sort option.
-	 * @returns {ApiSortField | null}
-	 * @see office-js-api/Examples/Cell/ApiSortFields/Methods/Add.js
-	 */
-	ApiSortFields.prototype.Add = function (Key, SortOn, Order, CustomOrder, DataOption) {
-		if (!(Key instanceof ApiRange)) {
-			return null;
-		}
-		var fieldObj = {
-			absColIndex:  Key.range.bbox.c1,
-			sortOn:       SortOn       || "xlSortOnValues",
-			descending:   Order === "xlDescending",
-			customOrder:  CustomOrder  || null,
-			dataOption:   DataOption   || "xlSortNormal",
-			subField:     null,
-			sortOnValue:  null
-		};
-		this._sort._fields.push(fieldObj);
-		this._sort.Apply();
-		return new ApiSortField(fieldObj, this._sort);
-	};
-
-	/**
-	 * Adds a sort field with subfield support for linked data types (Stocks, Geography).
-	 * @memberof ApiSortFields
-	 * @typeofeditors ["CSE"]
-	 * @param {ApiRange} Key - A range within the table that defines the sort column.
-	 * @param {XlSortOn} [SortOn="xlSortOnValues"] - The value used as the sort criteria.
-	 * @param {SortOrder} [Order="xlAscending"] - The sort order.
-	 * @param {number | string} [CustomOrder=0] - Reserved. Custom order sorting is not yet supported by the engine.
-	 * @param {XlSortDataOption} [DataOption="xlSortNormal"] - The data sort option.
-	 * @param {string} [SubField] - Subfield name for linked data types (e.g. "Population", "Volume").
-	 * @returns {ApiSortField | null}
-	 * @see office-js-api/Examples/Cell/ApiSortFields/Methods/Add2.js
-	 */
-	ApiSortFields.prototype.Add2 = function (Key, SortOn, Order, CustomOrder, DataOption, SubField) {
-		if (!(Key instanceof ApiRange)) {
-			return null;
-		}
-		var fieldObj = {
-			absColIndex:  Key.range.bbox.c1,
-			sortOn:       SortOn       || "xlSortOnValues",
-			descending:   Order === "xlDescending",
-			customOrder:  CustomOrder  || null,
-			dataOption:   DataOption   || "xlSortNormal",
-			subField:     SubField     || null,
-			sortOnValue:  null
-		};
-		this._sort._fields.push(fieldObj);
-		this._sort.Apply();
-		return new ApiSortField(fieldObj, this._sort);
-	};
-
-	/**
-	 * Removes all sort fields from the collection.
-	 * @memberof ApiSortFields
-	 * @typeofeditors ["CSE"]
-	 * @see office-js-api/Examples/Cell/ApiSortFields/Methods/Clear.js
-	 */
-	ApiSortFields.prototype.Clear = function () {
-		this._sort._fields = [];
-		this._sort.Apply();
-	};
-
-	// -------------------------------------------------------------------------
-	// ApiSortField
-	// -------------------------------------------------------------------------
-
-	/**
-	 * Class representing a single sort field within a SortFields collection.
-	 * @constructor
-	 * @property {ApiSortFields} Parent - Returns the parent SortFields collection.
-	 * @property {ApiRange | null} Key - Returns or sets the sort key range (the full table column).
-	 * @property {XlSortOn} SortOn - Returns or sets what value is used as the sort criteria.
-	 * @property {SortOrder} Order - Returns or sets the sort order.
-	 * @property {number} Priority - Returns or sets the 1-based sort priority.
-	 */
-	function ApiSortField(fieldObj, apiSort) {
-		this._fieldObj = fieldObj;
-		this._sort     = apiSort;
-	}
-
-	/**
-	 * Returns the parent SortFields collection.
-	 * @memberof ApiSortField
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiSortFields}
-	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetParent.js
-	 */
-	ApiSortField.prototype.GetParent = function () {
-		return new ApiSortFields(this._sort);
-	};
-
-	Object.defineProperty(ApiSortField.prototype, "Parent", {
-		get: function () {
-			return this.GetParent();
-		}
-	});
-
-	/**
-	 * Returns the sort key range (the full table column).
-	 * @memberof ApiSortField
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiRange | null}
-	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetKey.js
-	 */
-	ApiSortField.prototype.GetKey = function () {
-		var tablePart = this._sort.listObject.tablePart;
-		var ref       = tablePart.Ref;
-		if (!ref) {
-			return null;
-		}
-		var c    = this._fieldObj.absColIndex;
-		var bbox = new Asc.Range(c, ref.r1, c, ref.r2);
-		return new ApiRange(AscCommonExcel.Range.prototype.createFromBBox(this._sort.listObject.ws.worksheet, bbox));
-	};
-
-	Object.defineProperty(ApiSortField.prototype, "Key", {
-		get: function () {
-			return this.GetKey();
-		},
-		set: function (rng) {
-			this.ModifyKey(rng);
-		}
-	});
-
-	/**
-	 * Returns the sort-on type: "xlSortOnValues", "xlSortOnCellColor", "xlSortOnFontColor", "xlSortOnIcon".
-	 * @memberof ApiSortField
-	 * @typeofeditors ["CSE"]
-	 * @returns {XlSortOn}
-	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetSortOn.js
-	 */
-	ApiSortField.prototype.GetSortOn = function () {
-		return this._fieldObj.sortOn;
-	};
-
-	/**
-	 * Sets the sort-on type.
-	 * @memberof ApiSortField
-	 * @typeofeditors ["CSE"]
-	 * @param {XlSortOn} sSortOn - The value used as the sort criteria.
-	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetSortOn.js
-	 */
-	ApiSortField.prototype.SetSortOn = function (sSortOn) {
-		this._fieldObj.sortOn = sSortOn || "xlSortOnValues";
-	};
-
-	Object.defineProperty(ApiSortField.prototype, "SortOn", {
-		get: function () {
-			return this.GetSortOn();
-		},
-		set: function (val) {
-			this.SetSortOn(val);
-		}
-	});
-
-	/**
-	 * Returns the sort order: "xlAscending" or "xlDescending".
-	 * @memberof ApiSortField
-	 * @typeofeditors ["CSE"]
-	 * @returns {SortOrder}
-	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetOrder.js
-	 */
-	ApiSortField.prototype.GetOrder = function () {
-		return this._fieldObj.descending ? "xlDescending" : "xlAscending";
-	};
-
-	/**
-	 * Sets the sort order.
-	 * @memberof ApiSortField
-	 * @typeofeditors ["CSE"]
-	 * @param {SortOrder} sOrder - The sort order.
-	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetOrder.js
-	 */
-	ApiSortField.prototype.SetOrder = function (sOrder) {
-		this._fieldObj.descending = sOrder === "xlDescending";
-	};
-
-	Object.defineProperty(ApiSortField.prototype, "Order", {
-		get: function () {
-			return this.GetOrder();
-		},
-		set: function (val) {
-			this.SetOrder(val);
-		}
-	});
-
-	/**
-	 * Returns the 1-based priority of this sort field within the collection.
-	 * @memberof ApiSortField
-	 * @typeofeditors ["CSE"]
-	 * @returns {number}
-	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetPriority.js
-	 */
-	ApiSortField.prototype.GetPriority = function () {
-		return this._sort._fields.indexOf(this._fieldObj) + 1;
-	};
-
-	/**
-	 * Sets the 1-based priority of this sort field, repositioning it within the collection.
-	 * @memberof ApiSortField
-	 * @typeofeditors ["CSE"]
-	 * @param {number} nPriority
-	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetPriority.js
-	 */
-	ApiSortField.prototype.SetPriority = function (nPriority) {
-		var fields = this._sort._fields;
-		var idx    = fields.indexOf(this._fieldObj);
-		if (idx === -1) {
-			return;
-		}
-		var newIdx = Math.max(0, Math.min(nPriority - 1, fields.length - 1));
-		if (idx === newIdx) {
-			return;
-		}
-		fields.splice(idx, 1);
-		fields.splice(newIdx, 0, this._fieldObj);
-	};
-
-	Object.defineProperty(ApiSortField.prototype, "Priority", {
-		get: function () {
-			return this.GetPriority();
-		},
-		set: function (val) {
-			this.SetPriority(val);
-		}
-	});
-
-	//need support in sdk
-	// /**
-	//  * Returns the custom sort order for this field.
-	//  * Returns 0 if no custom order is set (matches MS Excel VBA behavior).
-	//  * @memberof ApiSortField
-	//  * @typeofeditors ["CSE"]
-	//  * @returns {number | string}
-	//  * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetCustomOrder.js
-	//  * @remarks Custom order sorting is not yet supported by the engine. The value is stored
-	//  * and returned correctly but has no effect when {@link ApiSort#Apply} is called.
-	//  */
-	// ApiSortField.prototype.GetCustomOrder = function () {
-	// 	return this._fieldObj.customOrder !== null ? this._fieldObj.customOrder : 0;
-	// };
-	//
-	// /**
-	//  * Sets a custom sort order for this field.
-	//  * Pass 0 or null to clear the custom order.
-	//  * @memberof ApiSortField
-	//  * @typeofeditors ["CSE"]
-	//  * @param {number | string} customOrder - 0 to reset, or a custom order string/index.
-	//  * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetCustomOrder.js
-	//  * @remarks Custom order sorting is not yet supported by the engine. The value is stored
-	//  * and returned correctly but has no effect when {@link ApiSort#Apply} is called.
-	//  */
-	// ApiSortField.prototype.SetCustomOrder = function (customOrder) {
-	// 	this._fieldObj.customOrder = (customOrder === 0 || customOrder === null) ? null : customOrder;
-	// };
-	//
-	// Object.defineProperty(ApiSortField.prototype, "CustomOrder", {
-	// 	get: function () {
-	// 		return this.GetCustomOrder();
-	// 	},
-	// 	set: function (val) {
-	// 		this.SetCustomOrder(val);
-	// 	}
-	// });
-
-	//need support in sdk
-	// /**
-	//  * Returns the data option: "xlSortNormal" or "xlSortTextAsNumbers".
-	//  * @memberof ApiSortField
-	//  * @typeofeditors ["CSE"]
-	//  * @returns {XlSortDataOption}
-	//  * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetDataOption.js
-	//  */
-	// ApiSortField.prototype.GetDataOption = function () {
-	// 	return this._fieldObj.dataOption || "xlSortNormal";
-	// };
-	//
-	// /**
-	//  * Sets the data option.
-	//  * @memberof ApiSortField
-	//  * @typeofeditors ["CSE"]
-	//  * @param {XlSortDataOption} sDataOption - The data sort option.
-	//  * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetDataOption.js
-	//  */
-	// ApiSortField.prototype.SetDataOption = function (sDataOption) {
-	// 	this._fieldObj.dataOption = sDataOption === "xlSortTextAsNumbers" ? "xlSortTextAsNumbers" : "xlSortNormal";
-	// };
-	//
-	// Object.defineProperty(ApiSortField.prototype, "DataOption", {
-	// 	get: function () {
-	// 		return this.GetDataOption();
-	// 	},
-	// 	set: function (val) {
-	// 		this.SetDataOption(val);
-	// 	}
-	// });
-
-	/**
-	 * Returns the value (color or null) by which this sort field is sorted.
-	 * For color-based sorts returns the fill/font color; otherwise returns null.
-	 * @memberof ApiSortField
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiColor | null}
-	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/GetSortOnValue.js
-	 */
-	ApiSortField.prototype.GetSortOnValue = function () {
-		return this._fieldObj.sortOnValue || null;
-	};
-
-	Object.defineProperty(ApiSortField.prototype, "SortOnValue", {
-		get: function () {
-			return this.GetSortOnValue();
-		}
-	});
-
-	/**
-	 * Sets an icon for icon-based sorting.
-	 * @memberof ApiSortField
-	 * @typeofeditors ["CSE"]
-	 * @param {XlIcon} Icon - The icon constant to sort by.
-	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetIcon.js
-	 */
-	ApiSortField.prototype.SetIcon = function (Icon) {
-		this._fieldObj.sortOn      = "xlSortOnIcon";
-		this._fieldObj.sortOnValue = Icon;
-	};
-
-	/**
-	 * Sets the color for color-based sorting.
-	 * @memberof ApiSortField
-	 * @typeofeditors ["CSE"]
-	 * @param {ApiColor} oColor - The color to sort by.
-	 * @param {XlSortOn} [sSortOn="xlSortOnCellColor"] - "xlSortOnCellColor" or "xlSortOnFontColor".
-	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/SetSortOnColor.js
-	 */
-	ApiSortField.prototype.SetSortOnColor = function (oColor, sSortOn) {
-		if (!(oColor instanceof ApiColor)) {
-			return;
-		}
-		var sortOn = sSortOn === "xlSortOnFontColor" ? "xlSortOnFontColor" : "xlSortOnCellColor";
-		this._fieldObj.sortOn      = sortOn;
-		this._fieldObj.sortOnValue = oColor;
-	};
-
-	/**
-	 * Changes the sort key column.
-	 * @memberof ApiSortField
-	 * @typeofeditors ["CSE"]
-	 * @param {ApiRange} rng - New sort key range.
-	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/ModifyKey.js
-	 */
-	ApiSortField.prototype.ModifyKey = function (rng) {
-		if (!(rng instanceof ApiRange)) {
-			return;
-		}
-		this._fieldObj.absColIndex = rng.range.bbox.c1;
-	};
-
-	/**
-	 * Removes this sort field from the collection.
-	 * @memberof ApiSortField
-	 * @typeofeditors ["CSE"]
-	 * @see office-js-api/Examples/Cell/ApiSortField/Methods/Delete.js
-	 */
-	ApiSortField.prototype.Delete = function () {
-		var idx = this._sort._fields.indexOf(this._fieldObj);
-		if (idx !== -1) {
-			this._sort._fields.splice(idx, 1);
-		}
-	};
-
-	/**
-	 * Returns the Sort object for this list object.
-	 * @memberof ApiListObject
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiSort}
-	 * @see office-js-api/Examples/Cell/ApiListObject/Methods/GetSort.js
-	 */
-	ApiListObject.prototype.GetSort = function () {
-		return new ApiSort(this);
-	};
-
-	Object.defineProperty(ApiListObject.prototype, "Sort", {
-		get: function () {
-			return this.GetSort();
-		}
-	});
-
 	Api["Format"]                = Api.Format;
 	Api["AddSheet"]              = Api.AddSheet;
 	Api["GetSheets"]             = Api.GetSheets;
@@ -30122,8 +28207,6 @@
 	ApiWorksheet.prototype["GetAllPivotTables"] = ApiWorksheet.prototype.GetAllPivotTables;
 	ApiWorksheet.prototype["RefreshAllPivots"] = ApiWorksheet.prototype.RefreshAllPivots;
 	ApiWorksheet.prototype["GetCustomXmlParts"] = ApiWorksheet.prototype.GetCustomXmlParts;
-	ApiWorksheet.prototype["GetListObjects"]  = ApiWorksheet.prototype.GetListObjects;
-	ApiWorksheet.prototype["AddListObject"]   = ApiWorksheet.prototype.AddListObject;
 
     ApiAutoFilter.prototype["ShowAllData"] = ApiAutoFilter.prototype.ShowAllData;
     ApiAutoFilter.prototype["ApplyFilter"] = ApiAutoFilter.prototype.ApplyFilter;
@@ -30138,104 +28221,11 @@
     ApiFilter.prototype["GetOn"] = ApiFilter.prototype.GetOn;
     ApiFilter.prototype["GetParent"] = ApiFilter.prototype.GetParent;
 
-	ApiListObject.prototype["GetActive"]          = ApiListObject.prototype.GetActive;
-	ApiListObject.prototype["GetAlternativeText"] = ApiListObject.prototype.GetAlternativeText;
-	ApiListObject.prototype["SetAlternativeText"] = ApiListObject.prototype.SetAlternativeText;
-	ApiListObject.prototype["GetComment"]         = ApiListObject.prototype.GetComment;
-	ApiListObject.prototype["SetComment"]         = ApiListObject.prototype.SetComment;
-	ApiListObject.prototype["GetShowAutoFilter"]          = ApiListObject.prototype.GetShowAutoFilter;
-	ApiListObject.prototype["SetShowAutoFilter"]          = ApiListObject.prototype.SetShowAutoFilter;
-	ApiListObject.prototype["GetShowAutoFilterDropDown"]  = ApiListObject.prototype.GetShowAutoFilterDropDown;
-	ApiListObject.prototype["SetShowAutoFilterDropDown"]  = ApiListObject.prototype.SetShowAutoFilterDropDown;
-	ApiListObject.prototype["GetAutoFilter"]                     = ApiListObject.prototype.GetAutoFilter;
-	ApiListObject.prototype["GetShowHeaders"]                    = ApiListObject.prototype.GetShowHeaders;
-	ApiListObject.prototype["SetShowHeaders"]                    = ApiListObject.prototype.SetShowHeaders;
-	ApiListObject.prototype["GetShowTableStyleColumnStripes"]    = ApiListObject.prototype.GetShowTableStyleColumnStripes;
-	ApiListObject.prototype["SetShowTableStyleColumnStripes"]    = ApiListObject.prototype.SetShowTableStyleColumnStripes;
-	ApiListObject.prototype["GetShowTableStyleFirstColumn"]      = ApiListObject.prototype.GetShowTableStyleFirstColumn;
-	ApiListObject.prototype["SetShowTableStyleFirstColumn"]      = ApiListObject.prototype.SetShowTableStyleFirstColumn;
-	ApiListObject.prototype["GetShowTableStyleLastColumn"]       = ApiListObject.prototype.GetShowTableStyleLastColumn;
-	ApiListObject.prototype["SetShowTableStyleLastColumn"]       = ApiListObject.prototype.SetShowTableStyleLastColumn;
-	ApiListObject.prototype["GetShowTableStyleRowStripes"]       = ApiListObject.prototype.GetShowTableStyleRowStripes;
-	ApiListObject.prototype["SetShowTableStyleRowStripes"]       = ApiListObject.prototype.SetShowTableStyleRowStripes;
-	ApiListObject.prototype["GetShowTotals"]                     = ApiListObject.prototype.GetShowTotals;
-	ApiListObject.prototype["SetShowTotals"]                     = ApiListObject.prototype.SetShowTotals;
-	ApiListObject.prototype["GetHeaderRowRange"]   = ApiListObject.prototype.GetHeaderRowRange;
-	ApiListObject.prototype["GetDataBodyRange"]   = ApiListObject.prototype.GetDataBodyRange;
-	ApiListObject.prototype["GetDisplayName"]      = ApiListObject.prototype.GetDisplayName;
-	ApiListObject.prototype["SetDisplayName"]      = ApiListObject.prototype.SetDisplayName;
-	ApiListObject.prototype["GetParent"]            = ApiListObject.prototype.GetParent;
-	ApiListObject.prototype["GetName"]             = ApiListObject.prototype.GetName;
-	ApiListObject.prototype["SetName"]             = ApiListObject.prototype.SetName;
-	ApiListObject.prototype["GetRange"]           = ApiListObject.prototype.GetRange;
-	ApiListObject.prototype["GetSourceType"]      = ApiListObject.prototype.GetSourceType;
-	ApiListObject.prototype["GetTableStyle"]      = ApiListObject.prototype.GetTableStyle;
-	ApiListObject.prototype["SetTableStyle"]      = ApiListObject.prototype.SetTableStyle;
-	ApiListObject.prototype["GetTotalsRowRange"]  = ApiListObject.prototype.GetTotalsRowRange;
-	ApiListObject.prototype["GetSummary"]         = ApiListObject.prototype.GetSummary;
-	ApiListObject.prototype["SetSummary"]         = ApiListObject.prototype.SetSummary;
-	ApiListObject.prototype["Delete"]             = ApiListObject.prototype.Delete;
-	ApiListObject.prototype["Unlist"]          = ApiListObject.prototype.Unlist;
-	ApiListObject.prototype["Resize"]          = ApiListObject.prototype.Resize;
-	ApiListObject.prototype["GetListColumns"]  = ApiListObject.prototype.GetListColumns;
-	ApiListObject.prototype["AddListColumn"]   = ApiListObject.prototype.AddListColumn;
-	ApiListObject.prototype["GetListRows"]     = ApiListObject.prototype.GetListRows;
-	ApiListObject.prototype["AddListRow"]      = ApiListObject.prototype.AddListRow;
-	ApiListObject.prototype["GetSort"] = ApiListObject.prototype.GetSort;
 
-	ApiListRow.prototype["GetIndex"]  = ApiListRow.prototype.GetIndex;
-	ApiListRow.prototype["GetParent"] = ApiListRow.prototype.GetParent;
-	ApiListRow.prototype["GetRange"]  = ApiListRow.prototype.GetRange;
-	ApiListRow.prototype["Delete"]    = ApiListRow.prototype.Delete;
 
-	ApiListColumn.prototype["GetDataBodyRange"]     = ApiListColumn.prototype.GetDataBodyRange;
-	ApiListColumn.prototype["GetIndex"]             = ApiListColumn.prototype.GetIndex;
-	ApiListColumn.prototype["GetName"]              = ApiListColumn.prototype.GetName;
-	ApiListColumn.prototype["SetName"]              = ApiListColumn.prototype.SetName;
-	ApiListColumn.prototype["GetParent"]            = ApiListColumn.prototype.GetParent;
-	ApiListColumn.prototype["GetRange"]             = ApiListColumn.prototype.GetRange;
-	ApiListColumn.prototype["GetTotalsCalculation"] = ApiListColumn.prototype.GetTotalsCalculation;
-	ApiListColumn.prototype["SetTotalsCalculation"] = ApiListColumn.prototype.SetTotalsCalculation;
-	ApiListColumn.prototype["GetTotal"]             = ApiListColumn.prototype.GetTotal;
-	ApiListColumn.prototype["Delete"]               = ApiListColumn.prototype.Delete;
 
-	ApiSort.prototype["GetParent"]      = ApiSort.prototype.GetParent;
-	ApiSort.prototype["GetSortFields"]  = ApiSort.prototype.GetSortFields;
-	ApiSort.prototype["GetMatchCase"]   = ApiSort.prototype.GetMatchCase;
-	ApiSort.prototype["SetMatchCase"]   = ApiSort.prototype.SetMatchCase;
-	ApiSort.prototype["GetHeader"]      = ApiSort.prototype.GetHeader;
-	ApiSort.prototype["GetOrientation"] = ApiSort.prototype.GetOrientation;
-	ApiSort.prototype["SetOrientation"] = ApiSort.prototype.SetOrientation;
-	ApiSort.prototype["GetSortMethod"]  = ApiSort.prototype.GetSortMethod;
-	ApiSort.prototype["SetSortMethod"]  = ApiSort.prototype.SetSortMethod;
-	ApiSort.prototype["GetRng"]         = ApiSort.prototype.GetRng;
-	//ApiSort.prototype["SetRange"]       = ApiSort.prototype.SetRange;
-	ApiSort.prototype["Apply"]          = ApiSort.prototype.Apply;
 
-	ApiSortFields.prototype["GetParent"] = ApiSortFields.prototype.GetParent;
-	ApiSortFields.prototype["GetCount"] = ApiSortFields.prototype.GetCount;
-	ApiSortFields.prototype["Item"]     = ApiSortFields.prototype.Item;
-	ApiSortFields.prototype["Add"]      = ApiSortFields.prototype.Add;
-	ApiSortFields.prototype["Add2"]     = ApiSortFields.prototype.Add2;
-	ApiSortFields.prototype["Clear"]    = ApiSortFields.prototype.Clear;
 
-	ApiSortField.prototype["GetParent"]       = ApiSortField.prototype.GetParent;
-	ApiSortField.prototype["GetKey"]          = ApiSortField.prototype.GetKey;
-	ApiSortField.prototype["GetSortOn"]       = ApiSortField.prototype.GetSortOn;
-	ApiSortField.prototype["SetSortOn"]       = ApiSortField.prototype.SetSortOn;
-	ApiSortField.prototype["GetOrder"]        = ApiSortField.prototype.GetOrder;
-	ApiSortField.prototype["SetOrder"]        = ApiSortField.prototype.SetOrder;
-	ApiSortField.prototype["GetPriority"]     = ApiSortField.prototype.GetPriority;
-	ApiSortField.prototype["SetPriority"]     = ApiSortField.prototype.SetPriority;
-	// ApiSortField.prototype["GetCustomOrder"]  = ApiSortField.prototype.GetCustomOrder;
-	// ApiSortField.prototype["SetCustomOrder"]  = ApiSortField.prototype.SetCustomOrder;
-	// ApiSortField.prototype["GetDataOption"]   = ApiSortField.prototype.GetDataOption;
-	// ApiSortField.prototype["SetDataOption"]   = ApiSortField.prototype.SetDataOption;
-	ApiSortField.prototype["GetSortOnValue"]  = ApiSortField.prototype.GetSortOnValue;
-	ApiSortField.prototype["SetIcon"]         = ApiSortField.prototype.SetIcon;
-	ApiSortField.prototype["SetSortOnColor"]  = ApiSortField.prototype.SetSortOnColor;
-	ApiSortField.prototype["ModifyKey"]       = ApiSortField.prototype.ModifyKey;
-	ApiSortField.prototype["Delete"]          = ApiSortField.prototype.Delete;
 
 	ApiRange.prototype["GetClassType"] = ApiRange.prototype.GetClassType;
 	ApiRange.prototype["GetRow"] = ApiRange.prototype.GetRow;
@@ -30343,7 +28333,6 @@
 	ApiDrawing.prototype["GetFill"]                    =  ApiDrawing.prototype.GetFill;
 	ApiDrawing.prototype["SetOutLine"]                 =  ApiDrawing.prototype.SetOutLine;
 	ApiDrawing.prototype["Unselect"]                   =  ApiDrawing.prototype.Unselect;
-	ApiDrawing.prototype["Delete"]                     =  ApiDrawing.prototype.Delete;
 
 	ApiImage.prototype["GetClassType"]                 =  ApiImage.prototype.GetClassType;
 
@@ -31613,8 +29602,25 @@
 	window['AscBuilder'] = window['AscBuilder'] || {};
 	
 	window['AscBuilder']["Cell"] = window['AscBuilder'].Cell = window['AscBuilder'].Cell || {};
-	AscBuilder.Cell["Api"] = AscBuilder.Cell.Api = Api;
-	
+	AscBuilder.Cell["Api"]            = AscBuilder.Cell.Api            = Api;
+	AscBuilder.Cell["ApiColor"]       = AscBuilder.Cell.ApiColor       = ApiColor;
+	AscBuilder.Cell["ApiDrawing"]     = AscBuilder.Cell.ApiDrawing     = ApiDrawing;
+	AscBuilder.Cell["ApiShape"]       = AscBuilder.Cell.ApiShape       = ApiShape;
+	AscBuilder.Cell["ApiImage"]       = AscBuilder.Cell.ApiImage       = ApiImage;
+	AscBuilder.Cell["ApiGroup"]       = AscBuilder.Cell.ApiGroup       = ApiGroup;
+	AscBuilder.Cell["ApiSmartArt"]    = AscBuilder.Cell.ApiSmartArt    = ApiSmartArt;
+	AscBuilder.Cell["ApiOleObject"]   = AscBuilder.Cell.ApiOleObject   = ApiOleObject;
+	AscBuilder.Cell["ApiChart"]       = AscBuilder.Cell.ApiChart       = ApiChart;
+	AscBuilder.Cell["ApiWorksheet"]   = AscBuilder.Cell.ApiWorksheet   = ApiWorksheet;
+	AscBuilder.Cell["ApiRange"]       = AscBuilder.Cell.ApiRange       = ApiRange;
+	AscBuilder.Cell["ApiName"]        = AscBuilder.Cell.ApiName        = ApiName;
+	AscBuilder.Cell["ApiAutoFilter"]  = AscBuilder.Cell.ApiAutoFilter  = ApiAutoFilter;
+	AscBuilder.Cell["ApiPivotTable"]             = AscBuilder.Cell.ApiPivotTable             = ApiPivotTable;
+	AscBuilder.Cell["ApiPivotField"]             = AscBuilder.Cell.ApiPivotField             = ApiPivotField;
+	AscBuilder.Cell["ApiPivotDataField"]         = AscBuilder.Cell.ApiPivotDataField         = ApiPivotDataField;
+	AscBuilder.Cell["ApiPivotItem"]              = AscBuilder.Cell.ApiPivotItem              = ApiPivotItem;
+	AscBuilder.Cell["ApiPivotFilters"]           = AscBuilder.Cell.ApiPivotFilters           = ApiPivotFilters;
+
 	AscBuilder.Cell.init = function()
 	{
 		AscBuilder.ApiDrawing   = ApiDrawing;

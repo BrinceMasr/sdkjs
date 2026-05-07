@@ -195,14 +195,14 @@ $(function ()
 			"cd aaa-",
 			"bbb"
 		]);
-		// Дефис переноса не убирается
+		// The hyphen doesn't fit on the line
 		checkLines(assert, true, charWidth * 7.5, [
 			"abcd ",
 			"abcd ",
 			"aaabbb"
 		]);
 		
-		// Перенос на первой букве
+		// Hyphenation after the first letter
 		setText("abbb");
 		checkLines(assert, false, charWidth * 3.5, [
 			"abb",
@@ -247,8 +247,8 @@ $(function ()
 			"½www bbbb"
 		]);
 
-		// Перенос идет после второго символа z, а следующий за ним символ меньше по ширине, чем
-		// размер дефиса, который мы рисуем во время переноса
+		// The auto-hyphen after the second z character, and the next character is narrower than
+		// the width of the auto-hyphen we use
 		setText("zz½www");
 		checkLines(assert, false, charWidth * 2.75, [
 			"zz½",
@@ -271,8 +271,7 @@ $(function ()
 			"ww"
 		]);
 		
-		// Специальная ситуация, когда во время прилегания влево не убирается знак переноса, но при прилегании
-		// по ширине перенос начинает убираться
+		// Special case where auto-hyphen doesn't fit a line when the paragraph is left- alignment, but it fits a line when paragraph is justified
 		setCondensedSpaces(true);
 		setText("a b c d aabbb");
 		checkLines(assert, true, charWidth * 10.5, [
@@ -281,11 +280,10 @@ $(function ()
 		]);
 		setCondensedSpaces(false);
 		
-		// TODO: Разобрать случай, когда перенос слова происходит в двух (или более местах) и следующее место переноса
-		//       надо начинать считать с последнего места переноса, а не с начала слова
-		
-		// TODO: Случай, когда одно длинное слово разбивается по переносам и целиком переходит на следующую страницу
-		//       из-за этого
+		// TODO: Handle the case when word hyphenation occurs at two (or more) places and the next hyphenation point
+		//       should be calculated from the last hyphenation point, not from the beginning of the word
+
+		// TODO: Case when a long word is broken up by hyphens and must be carried to the next page beacause of that
 	});
 	
 	QUnit.test("Test: \"Test DoNotHyphenateCaps parameter\"", function (assert)
@@ -392,7 +390,7 @@ $(function ()
 			"dddd"
 		]);
 		
-		// В этом примере важно, что ccdddd тоже переносится по второму символу
+		// In this example it is important that ccdddd is also hyphenated at the second character
 		setHyphenLimit(1);
 		checkLines(assert, true, charWidth * 4.5, [
 			"aa-",
@@ -413,7 +411,7 @@ $(function ()
 	
 	QUnit.test("Test: \"Test HyphenationZone parameter\"", function(assert)
 	{
-		// На длинном слове, единственном на строке, не работает HyphenationZone (проверял на MS2019)
+		// HyphenationZone does not work for a long word that is alone on a line (verified in MS2019)
 		setText("aabbbcccdddd");
 		
 		setHyphenationZone(2.5 * charWidth);
@@ -475,9 +473,9 @@ $(function ()
 			"abcd"
 		]);
 		
-		// Делаем как в MSWord (проверено в 2019 версии)
-		// HyphenationZone расчитываерся начиная от левого поля, а не от левого края параграфа, но прибавляется
-		// текущий сдвиг относительно левого края параграфа
+		// Follows MSWord behavior (verified in 2019 version)
+		// HyphenationZone is calculated starting from the left margin, not the left edge of the paragraph, but
+		// the current offset from the left edge of the paragraph is added
 		para.SetParagraphIndent({Left : 10 * charWidth, FirstLine : 0});
 		setHyphenationZone(4 * charWidth);
 		checkLines(assert, true, charWidth * 18.5, [
@@ -492,8 +490,8 @@ $(function ()
 		
 		para.SetParagraphIndent({Left : 0, FirstLine : 0});
 		
-		// TODO: Реализовать этот случай
-		// Проверяем, что расчет HyphenationZone идет с начала слова, а не с места первого разрыва
+		// TODO: Implement this case
+		// Check that HyphenationZone calculation starts from the beginning of the word, not from the first break point
 		// setText("abcd aabbbcccdddd");
 		//
 		// setHyphenationZone(6 * charWidth);
@@ -515,8 +513,8 @@ $(function ()
 		// ]);
 		
 		
-		// Начиная с 15-ой версии параметр hyphenationZone не учитывается, и всегда предполагается, что он
-		// равен стандартному значению
+		// Starting from version 15 the hyphenationZone parameter is ignored, and it is always assumed that it
+		// equals the default value
 		setText("abcd aaaaabbb");
 		setHyphenationZone(7.5 * charWidth);
 		

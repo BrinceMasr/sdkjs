@@ -251,7 +251,7 @@
         oAnnot.SetParentPage(this);
 
         AscCommon.History.Add(new CChangesPDFDocumentAnnotsContent(this, nPos, [oAnnot], true));
-		this.RedrawAnnots();
+		this.RedrawAnnots(oAnnot.IsTextMarkup());
 
 		let oDoc = Asc.editor.getPDFDoc();
 		oDoc.CheckComment(oAnnot);
@@ -1529,7 +1529,7 @@
 				posY = 0;
 			}
 			else if (posY > this.scrollMaxY) {
-				posY = this.this.scrollMaxY;
+				posY = this.scrollMaxY;
 			}
 			
 			if (posX < 0) {
@@ -2101,6 +2101,13 @@
 				}
 			}
 
+			function pluginOnClick() {
+				if (AscCommon.check_MouseClickOnUp()) {
+					if (window.g_asc_plugins)
+						window.g_asc_plugins.onPluginEvent("onClick", oThis.file.isSelectionUse());
+				}
+			}
+
 			oDoc.OnMouseUp(AscCommon.global_mouseEvent.X, AscCommon.global_mouseEvent.Y, AscCommon.global_mouseEvent);
 
 			if (oThis.MouseHandObject) {
@@ -2120,6 +2127,7 @@
 			}
 
 			delete oThis.wasMouseDown;
+			pluginOnClick();
 		};
 
 		this.onMouseMove = function(e)

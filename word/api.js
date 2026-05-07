@@ -14734,9 +14734,10 @@ background-repeat: no-repeat;\
 		if (this.WordControl && this.WordControl.m_oLogicDocument && this.WordControl.m_oLogicDocument.DrawingDocument)
 			this.WordControl.m_oLogicDocument.DrawingDocument.contentControls.removePluginButtons(guid);
 		
-		let logicDocument = this.private_GetLogicDocument();
-		if (logicDocument && logicDocument.IsDocumentEditor())
-			this.getTextAnnotatorEventManager().removePluginListener(guid);
+		this._onPluginClose(guid);
+	};
+	asc_docs_api.prototype._onPluginClose = function(guid)
+	{
 	};
 	asc_docs_api.prototype.onAttachPluginEvent = function(guid, name)
 	{
@@ -14747,9 +14748,10 @@ background-repeat: no-repeat;\
 			&& this.WordControl.m_oDrawingDocument)
 			this.WordControl.m_oDrawingDocument.contentControls.onAttachPluginEvent(guid);
 		
-		let logicDocument = this.private_GetLogicDocument();
-		if ("onParagraphText" === name && logicDocument && logicDocument.IsDocumentEditor())
-			this.getTextAnnotatorEventManager().addPluginListener(guid);
+		this._onAttachPluginEvent(guid, name);
+	};
+	asc_docs_api.prototype._onAttachPluginEvent = function(guid, name)
+	{
 	};
 	asc_docs_api.prototype.initBroadcastChannelListeners = function() {
 		let oThis = this;
@@ -14820,50 +14822,6 @@ background-repeat: no-repeat;\
 		this.WordControl.m_oDrawingDocument.UpdateTargetFromPaint = true;
 		logicDocument.RecalculateCurPos();
 		logicDocument.UpdateSelection();
-	};
-	
-	asc_docs_api.prototype._onStartGroupActions = function()
-	{
-		let logicDocument = this.private_GetLogicDocument();
-		if (!logicDocument)
-			return;
-		
-		logicDocument.GetSpellCheckManager().TurnOff();
-	};
-	asc_docs_api.prototype._onEndGroupActions = function(isFullEnd)
-	{
-		let logicDocument = this.private_GetLogicDocument();
-		if (!logicDocument)
-			return;
-
-		let groupChanges = AscCommon.History.getGroupChanges();
-		AscCommon.History.resetGroupChanges();
-		if (groupChanges.length)
-			logicDocument.RecalculateByChanges(groupChanges);
-
-		if (isFullEnd)
-		{
-			logicDocument.UpdateInterface();
-			logicDocument.UpdateSelection();
-			logicDocument.GetSpellCheckManager().TurnOn();
-		}
-	};
-	asc_docs_api.prototype._saveGroupActionsState = function()
-	{
-		let logicDocument = this.private_GetLogicDocument();
-		if (!logicDocument)
-			return;
-
-		this.groupActionsPr.selectionState = logicDocument.SaveDocumentState();
-	};
-	asc_docs_api.prototype._restoreGroupActionsState = function()
-	{
-		let logicDocument = this.private_GetLogicDocument();
-		if (!logicDocument || !this.groupActionsPr.selectionState)
-			return;
-
-		logicDocument.LoadDocumentState(this.groupActionsPr.selectionState);
-		this.groupActionsPr.selectionState = null;
 	};
 	
 	asc_docs_api.prototype.getJsApi = function()

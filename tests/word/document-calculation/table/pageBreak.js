@@ -87,7 +87,7 @@ $(function ()
 	
 	QUnit.test("Test page break of a float table in a special case (bug 57159)", function (assert)
 	{
-		// Таблица имеет прилегание по вертикали к параграфу с некоторым смещением и не убирается целиком на странице
+		// The table has vertical alignment to a paragraph with non-zero offset and does not fit entirely on the page
 		let table = AscTest.CreateTable(8, 3);
 		logicDocument.AddToContent(0, table);
 		AscTest.RemoveTableBorders(table);

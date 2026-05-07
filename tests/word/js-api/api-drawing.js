@@ -155,20 +155,6 @@ $(function ()
 
         let result4 = drawing.SetName(undefined);
         assert.strictEqual(result4, false, 'Check SetName returns false for undefined');
-
-        // Test that setting duplicate name causes previous drawing to get default name
-        let drawing2 = AscTest.JsApi.CreateShape("rect", 3212465, 963295, fill, stroke);
-        p.AddDrawing(drawing2);
-
-        drawing.SetName("DuplicateName");
-        const firstDrawingName = drawing.GetName();
-        assert.strictEqual(firstDrawingName, "DuplicateName", 'Check first drawing has duplicate name');
-
-        drawing2.SetName("DuplicateName");
-
-        assert.strictEqual(drawing2.GetName(), "DuplicateName", 'Check second drawing has the duplicate name');
-        assert.notStrictEqual(drawing.GetName(), "DuplicateName", 'Check first drawing name changed from duplicate');
-        assert.notStrictEqual(drawing.GetName(), firstDrawingName, 'Check first drawing has a new default name');
     });
 
     QUnit.test("Unselect", function (assert) {

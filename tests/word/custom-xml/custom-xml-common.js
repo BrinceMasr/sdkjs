@@ -137,7 +137,7 @@ function MockZLib () {
 	this.removeFile = function (path) {
 		const index = this.files.indexOf(path);
 		if (index > -1) {
-			this.files.splice(index, 1); // Удаляем имя файла
+			this.files.splice(index, 1); // Remove the file name
 		}
 		
 		return this.engine.removeFile(path);
@@ -261,7 +261,6 @@ function CreateCheckBoxCC(nPos, isInline)
 	cc.ApplyCheckBoxPr(checkboxPr);
 	return cc;
 }
-// поле со списком
 function CreateComboBox(nPos, isInline)
 {
 	let cc = CreateFilledContentControl(nPos, isInline);
@@ -269,7 +268,6 @@ function CreateComboBox(nPos, isInline)
 	cc.ApplyComboBoxPr(comboBoxPr, true);
 	return cc;
 }
-// раскрывающийся список
 function CreateDropDown(nPos, isInline)
 {
 	let cc = CreateFilledContentControl(nPos, isInline);

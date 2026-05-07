@@ -22243,7 +22243,7 @@ function isAllowPasteLink(pastedWb) {
 		insertCellsAndShiftDownRight(newActiveRange, displayName, type)
 	};
 
-    WorksheetView.prototype.af_deleteCellsInTable = function (tableName, optionType) {
+    WorksheetView.prototype.af_deleteCellsInTable = function (tableName, optionType, activeRange, skipError) {
         var t = this;
         var ws = this.model;
 
@@ -22254,9 +22254,9 @@ function isAllowPasteLink(pastedWb) {
         }
 
         var deleteCellsAndShiftLeftTop = function (arn, type) {
-            var isCheckChangeAutoFilter = t.af_checkInsDelCells(arn, type, "delCell", true);
+            var isCheckChangeAutoFilter = t.af_checkInsDelCells(arn, type, "delCell", true, skipError);
             if (isCheckChangeAutoFilter === false) {
-                return;
+                return false;
             }
 
             var callback = function (isSuccess) {
@@ -22328,7 +22328,7 @@ function isAllowPasteLink(pastedWb) {
             t._isLockedCells(ref, null, callback);
         };
 
-        var newActiveRange = this.model.selectionRange.getLast().clone();
+        var newActiveRange = activeRange ? activeRange.clone() : this.model.selectionRange.getLast().clone();
         var val = null;
         switch (optionType) {
             case c_oAscDeleteOptions.DeleteColumns:
@@ -22355,15 +22355,16 @@ function isAllowPasteLink(pastedWb) {
         }
 
         if (val !== null) {
-            deleteCellsAndShiftLeftTop(newActiveRange, val);
+            return deleteCellsAndShiftLeftTop(newActiveRange, val) !== false;
         }
+        return true;
     };
 
     WorksheetView.prototype.af_changeDisplayNameTable = function (tableName, newName) {
         this.model.autoFilters.changeDisplayNameTable(tableName, newName);
     };
 
-	WorksheetView.prototype.af_checkInsDelCells = function (activeRange, val, prop, isFromFormatTable) {
+	WorksheetView.prototype.af_checkInsDelCells = function (activeRange, val, prop, isFromFormatTable, skipError) {
 		var ws = this.model;
 		var res = true;
 		var filterError;
@@ -22531,7 +22532,7 @@ function isAllowPasteLink(pastedWb) {
 
 		prop === "insCell" ? checkInsCells() : checkDelCells();
 
-		if (res === false) {
+		if (res === false && !skipError) {
 			if (filterError) {
 				ws.workbook.handlers.trigger("asc_onError", c_oAscError.ID.ChangeFilteredRangeError,
 					c_oAscError.Level.NoCritical);
@@ -28294,6 +28295,10 @@ function isAllowPasteLink(pastedWb) {
 
 		let isPasteOptions = window['AscCommon'].g_specialPasteHelper.isPasteOptions;
 
+		if (!specialPasteHelper.specialPasteStart && AscCommonExcel.g_clipboardExcel.pasteProcessor.bIsMultiselectPaste) {
+			specialPasteProps.formula = null;
+		}
+
 		if (val.props && val.props.onlyImages === true) {
 			if (!specialPasteHelper.specialPasteStart) {
 				ws.handlers.trigger("showSpecialPasteOptions", [Asc.c_oSpecialPasteProps.picture]);
@@ -28844,7 +28849,7 @@ function isAllowPasteLink(pastedWb) {
 			}
 
 			//hyperlink
-			if (currentObj.hyperLink || currentObj.location) {
+			if ((currentObj.hyperLink || currentObj.location) && !currentObj.doNotApplyHyperlink) {
 				pastedRangeProps.hyperLink = currentObj;
 			}
 
