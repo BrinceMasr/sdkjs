@@ -30389,6 +30389,7 @@ function isAllowPasteLink(pastedWb) {
 				//transaction will close in end_paste
 				History.Create_NewPoint();
 				History.StartTransaction();
+				History.Add(AscCommonExcel.g_oUndoRedoWorksheet, AscCH.historyitem_Workbook_SpecialPaste, null, null, null, true);
 
 				//then special paste
 				specialPasteHelper.specialPasteProps = props;
