@@ -427,7 +427,7 @@
 			FontSize: Math.round(10 * AscCommon.AscBrowser.retinaPixelRatio)
 		});
 
-		// измеряем все цифры
+		// measure all digits
 		for (var i = 0; i < 10; i++)
 		{
 			var _meas = this.m_oFontManager.MeasureChar(("" + i).charCodeAt(0));
@@ -513,7 +513,7 @@
 			this.m_oWordControl.m_oApi.checkInterfaceElementBlur();
 			this.m_oWordControl.m_oApi.checkLastWork();
 
-			// после fullscreen возможно изменение X, Y после вызова Resize.
+			// after fullscreen, X, Y may change after Resize call.
 			this.m_oWordControl.checkBodyOffset();
 		}
 
@@ -524,7 +524,7 @@
 
 		var control = this.m_oWordControl.m_oThumbnails.HtmlElement;
 		if (global_mouseEvent.IsLocked == true && global_mouseEvent.Sender != control) {
-			// кто-то зажал мышку. кто-то другой
+			// someone is holding the mouse. someone else
 			return false;
 		}
 
@@ -540,7 +540,7 @@
 
 		this.m_oWordControl.m_oApi.sync_EndAddShape();
 		if (global_mouseEvent.Sender != control) {
-			// такого быть не должно
+			// this should not happen
 			return false;
 		}
 
@@ -621,7 +621,7 @@
 						isMouseDownOnAnimPreview = true
 				}
 
-				if (!isMouseDownOnAnimPreview) // приготавливаемся к треку
+				if (!isMouseDownOnAnimPreview) // preparing for tracking
 				{
 					this.MouseDownTrack.Start(pos.Page, global_mouseEvent.X, global_mouseEvent.Y);
 				}
@@ -706,19 +706,19 @@
 		var control = this.m_oWordControl.m_oThumbnails.HtmlElement;
 		if (global_mouseEvent.IsLocked == true && global_mouseEvent.Sender != control)
 		{
-			// кто-то зажал мышку. кто-то другой
+			// someone is holding the mouse. someone else
 			return;
 		}
 		AscCommon.check_MouseMoveEvent(e);
 		if (global_mouseEvent.Sender != control)
 		{
-			// такого быть не должно
+			// this should not happen
 			return;
 		}
 
 		if (this.MouseDownTrack.IsStarted())
 		{
-			// это трек для перекидывания слайдов
+			// this is the track for moving slides
 			if (this.MouseDownTrack.IsSimple() && !this.m_oWordControl.m_oApi.isViewMode)
 			{
 				if (Math.abs(this.MouseDownTrack.GetX() - global_mouseEvent.X) > 10 || Math.abs(this.MouseDownTrack.GetY() - global_mouseEvent.Y) > 10)
@@ -728,7 +728,7 @@
 			{
 				if (!this.MouseDownTrack.IsSimple())
 				{
-					// нужно определить активная позиция между слайдами
+					// need to determine the active position between slides
 					this.MouseDownTrack.SetPosition(this.ConvertCoords2(global_mouseEvent.X, global_mouseEvent.Y));
 				}
 			}
@@ -736,7 +736,7 @@
 
 			this.OnUpdateOverlay();
 
-			// теперь нужно посмотреть, нужно ли проскроллить
+			// now check whether scrolling is needed
 			if (this.m_bIsScrollVisible) {
 				const _X = global_mouseEvent.X - this.m_oWordControl.X;
 				const _Y = global_mouseEvent.Y - this.m_oWordControl.Y;
@@ -825,7 +825,7 @@
 		{
 			if (_oldSender != control || true !== bIsWindow)
 			{
-				// такого быть не должно
+				// this should not happen
 				return;
 			}
 		}
@@ -835,7 +835,7 @@
 		if (!this.MouseDownTrack.IsStarted())
 			return;
 
-		// теперь смотрим, просто ли это селект, или же это трек
+		// now check whether this is just a select, or a track
 		if (this.MouseDownTrack.IsSimple())
 		{
 			if (this.MouseDownTrack.IsMoved(global_mouseEvent.X, global_mouseEvent.Y))
@@ -844,7 +844,7 @@
 
 		if (this.MouseDownTrack.IsSimple())
 		{
-			// это просто селект
+			// this is just a select
 			var pages_count = this.m_arrPages.length;
 			for (var i = 0; i < pages_count; i++)
 			{
@@ -855,18 +855,18 @@
 
 			this.OnUpdateOverlay();
 
-			// послали уже на mouseDown
+			// already sent on mouseDown
 			//this.SelectPageEnabled = false;
 			//this.m_oWordControl.GoToPage(this.MouseDownTrack.GetPage());
 			//this.SelectPageEnabled = true;
 		} else
 		{
-			// это трек
+			// this is a track
 			this.MouseDownTrack.SetPosition(this.ConvertCoords2(global_mouseEvent.X, global_mouseEvent.Y));
 
 			if (-1 !== this.MouseDownTrack.GetPosition() && (!this.MouseDownTrack.IsSamePos() || AscCommon.global_mouseEvent.CtrlKey))
 			{
-				// вызвать функцию апи для смены слайдов местами
+				// call the api function to swap slides
 				var _array = this.GetSelectedArray();
 				this.m_oWordControl.m_oLogicDocument.shiftSlides(this.MouseDownTrack.GetPosition(), _array);
 				this.ClearCacheAttack();
@@ -1552,7 +1552,7 @@
 
 		if (!this.m_bIsUpdate)
 		{
-			// определяем, нужно ли пересчитать и закэшировать табнейл (хотя бы один)
+			// determine whether to recalculate and cache the thumbnail (at least one)
 			for (var i = this.m_lDrawingFirst; i <= this.m_lDrawingEnd; i++)
 			{
 				var page = this.m_arrPages[i];
@@ -1630,6 +1630,10 @@
 		if (!this.isThumbnailsShown())
 			return;
 
+		const oLogicDocument = this.m_oWordControl && this.m_oWordControl.m_oLogicDocument;
+		if (!oLogicDocument || oLogicDocument.GetAllSlides().length !== this.m_arrPages.length)
+			return;
+
 		const canvas = this.m_oWordControl.m_oThumbnailsBack.HtmlElement;
 		if (canvas == null)
 			return;
@@ -1664,6 +1668,8 @@
 
 		const arrSlides = oLogicDocument.GetAllSlides();
 
+		if (arrSlides.length !== this.m_arrPages.length)
+			return;
 
 		for (let i = 0; i < arrSlides.length; i++) {
 			const page = this.m_arrPages[i];
@@ -2554,7 +2560,7 @@
 			this.m_oWordControl.m_oApi.checkInterfaceElementBlur();
 			this.m_oWordControl.m_oApi.checkLastWork();
 
-			// после fullscreen возможно изменение X, Y после вызова Resize.
+			// after fullscreen, X, Y may change after Resize call.
 			this.m_oWordControl.checkBodyOffset();
 		}
 
@@ -2647,13 +2653,13 @@
 		var control = this.m_oWordControl.m_oThumbnails.HtmlElement;
 		if (global_mouseEvent.IsLocked == true && global_mouseEvent.Sender != control)
 		{
-			// кто-то зажал мышку. кто-то другой
+			// someone is holding the mouse. someone else
 			return;
 		}
 		AscCommon.check_MouseMoveEvent(e);
 		if (global_mouseEvent.Sender != control)
 		{
-			// такого быть не должно
+			// this should not happen
 			return;
 		}
 
@@ -2732,7 +2738,7 @@
 		{
 			if (_oldSender != control || true !== bIsWindow)
 			{
-				// такого быть не должно
+				// this should not happen
 				return;
 			}
 		}

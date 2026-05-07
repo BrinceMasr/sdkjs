@@ -10756,7 +10756,8 @@
 							for (let sKey in oThemedObjects) {
 								const arrSlides = oThemedObjects[sKey];
 								for(let nIdx = 0; nIdx < arrSlides.length; ++nIdx) {
-									arrSlides[nIdx].checkSlideTheme();
+									arrSlides[nIdx].checkSlideColorScheme();
+									arrSlides[nIdx].addToRecalculate();
 								}
 							}
 							AscCommon.History.RecalcData_Add({Type: AscDFH.historyitem_recalctype_Drawing, Object: this});

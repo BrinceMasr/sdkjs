@@ -252,6 +252,7 @@
 
 		let specialPasteShowOptions = window['AscCommon'].g_specialPasteHelper.buttonInfo;
 		specialPasteShowOptions.asc_setOptions(props);
+		specialPasteShowOptions.asc_setLastSelectedPasteProperty(window['AscCommon'].g_specialPasteHelper.isPasteOptions ? window['AscCommon'].g_specialPasteHelper.specialPasteProps : null);
 
 		let targetDocContent = presentation.Get_TargetDocContent();
 		if (targetDocContent && targetDocContent.Id) {
@@ -287,6 +288,11 @@
 			}
 			presentation.UpdateInterface();
 			presentation.FinalizeAction();
+			const api = this.getApi();
+			if (oTransition.get_TransitionType() !== undefined || oTransition.get_TransitionOption() !== undefined)
+			{
+				api.SlideTransitionPlay();
+			}
 		}
 	};
 	SlideModeManager.prototype.applySlideTransitionToAll = function() {
