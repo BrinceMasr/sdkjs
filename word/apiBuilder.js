@@ -5085,11 +5085,11 @@
 	 * <b>Numeric components</b>: "Api.Color(r, g, b)" or "Api.Color(r, g, b, a)" creates an RGB or RGBA color from byte components (0-255).
 	 * <b>Packed integer</b>: "Api.Color(0xRRGGBB)" creates an RGB color from a 24-bit integer.
 	 * <b>Full HEX string</b>: "Api.Color('#RRGGBB')" or "Api.Color('RRGGBB')" creates a HEX color; the leading "#" is optional.
-	 * <b>Short HEX string</b>: "Api.Color('#RGB')" or "Api.Color('RGB')" expands each digit by duplication, so "#F0A" becomes "#FF00AA".
+	 * <b>Short HEX string</b>: "Api.Color('#RGB')" expands each digit by duplication, so "#F0A" becomes "#FF00AA".
 	 * <b>Theme color name</b>: "Api.Color('accent1')" creates a theme color; any value of SchemeColorId is accepted.
 	 * <b>Preset color name</b>: "Api.Color('aliceBlue')" resolves any value of PresetColor to its RGB equivalent.
 	 * <b>Auto color</b>: "Api.Color('auto')" creates an auto color.
-	 * For a single string argument, the resolution priority is: "auto", a string starting with "#", a theme name, a preset name, a bare 6-digit HEX, a bare 3-digit HEX. Theme and preset palettes do not overlap.
+	 * For a single string argument, the resolution priority is: "auto", a string starting with "#", a theme name, a preset name, a bare 6-digit HEX. Theme and preset palettes do not overlap. A 3-digit shorthand is accepted only with the leading "#".
 	 * Unsupported inputs (objects, arrays, an existing ApiColor, unknown strings, no arguments) return a black color (#000000).
 	 *
 	 * @memberof Api
@@ -5101,13 +5101,22 @@
 	 * @returns {ApiColor}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/Color.js
 	 */
+	function private_IsHexString(s) {
+		for (let i = 0; i < s.length; i++) {
+			const c = s.charCodeAt(i);
+			if (!((c >= 0x30 && c <= 0x39) || (c >= 0x41 && c <= 0x46) || (c >= 0x61 && c <= 0x66)))
+				return false;
+		}
+		return true;
+	}
+
 	Api.Color = function (r, g, b, a) {
 		if (arguments.length === 4)
 			return Api.RGBA(r, g, b, a);
 		if (arguments.length === 3)
 			return Api.RGB(r, g, b);
-		if (typeof r === 'number' && isFinite(r) && r >= 0)
-			return new ApiColor('rgb', r & 0xFFFFFF);
+		if (typeof r === 'number' && isFinite(r) && r >= 0 && r <= 0xFFFFFF && (r | 0) === r)
+			return new ApiColor('rgb', r);
 		if (typeof r === 'string') {
 			if (r === 'auto')
 				return new ApiColor('auto');
@@ -5115,20 +5124,14 @@
 			if (!hasHash) {
 				if (ApiColor.ThemeColorMap[r] !== undefined)
 					return Api.ThemeColor(r);
-				const presetMap = (typeof AscFormat !== 'undefined') && AscFormat.map_prst_color;
-				if (presetMap && presetMap[r] !== undefined)
-					return new ApiColor('rgb', presetMap[r]);
+				if (AscFormat.map_prst_color[r] !== undefined)
+					return new ApiColor('rgb', AscFormat.map_prst_color[r]);
 			}
 			let hex = hasHash ? r.slice(1) : r;
-			if (hex.length === 3)
+			if (hasHash && hex.length === 3 && private_IsHexString(hex))
 				hex = hex.charAt(0) + hex.charAt(0) + hex.charAt(1) + hex.charAt(1) + hex.charAt(2) + hex.charAt(2);
-			if (hex.length === 6) {
-				const nR = parseInt(hex.substring(0, 2), 16);
-				const nG = parseInt(hex.substring(2, 4), 16);
-				const nB = parseInt(hex.substring(4, 6), 16);
-				if (!isNaN(nR) && !isNaN(nG) && !isNaN(nB))
-					return Api.HexColor(hex);
-			}
+			if (hex.length === 6 && private_IsHexString(hex))
+				return Api.HexColor(hex);
 		}
 		return new ApiColor('rgb', 0);
 	};
