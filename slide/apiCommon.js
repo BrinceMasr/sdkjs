@@ -47,6 +47,162 @@ function CAscSlideTransition()
 }
 AscFormat.InitClass(CAscSlideTransition, AscFormat.CBaseNoIdObject, 0);
 
+CAscSlideTransition.getDefaultTransitionDuration = function (type, option) {
+	switch (type) {
+		case c_oAscSlideTransitionTypes.None:
+			return 500;
+
+		case c_oAscSlideTransitionTypes.Morph:
+			return 2000;
+
+		case c_oAscSlideTransitionTypes.Fade:
+			if (option === c_oAscSlideTransitionParams.Fade_Smoothly)
+				return 700;
+			if (option === c_oAscSlideTransitionParams.Fade_Through_Black)
+				return 1000;
+			break;
+
+		case c_oAscSlideTransitionTypes.Push:
+			return 1000;
+
+		case c_oAscSlideTransitionTypes.Wipe:
+			return 1000;
+
+		case c_oAscSlideTransitionTypes.Split:
+			return 1500;
+
+		case c_oAscSlideTransitionTypes.Cut:
+			if (option === c_oAscSlideTransitionParams.Cut_Default)
+				return 100;
+			if (option === c_oAscSlideTransitionParams.Cut_ThroughBlack)
+				return 500;
+			break;
+
+		case c_oAscSlideTransitionTypes.Random:
+			return 1500;
+
+		case c_oAscSlideTransitionTypes.RandomBar:
+			return 1000;
+
+		case c_oAscSlideTransitionTypes.Circle:
+			return 800;
+
+		case c_oAscSlideTransitionTypes.Diamond:
+			return 800;
+
+		case c_oAscSlideTransitionTypes.UnCover:
+			if (option === c_oAscSlideTransitionParams.Param_TopLeft ||
+				option === c_oAscSlideTransitionParams.Param_TopRight ||
+				option === c_oAscSlideTransitionParams.Param_BottomLeft ||
+				option === c_oAscSlideTransitionParams.Param_BottomRight)
+				return 1000;
+			if (option === c_oAscSlideTransitionParams.Param_Left ||
+				option === c_oAscSlideTransitionParams.Param_Top ||
+				option === c_oAscSlideTransitionParams.Param_Right ||
+				option === c_oAscSlideTransitionParams.Param_Bottom)
+				return 750;
+			break;
+
+		case c_oAscSlideTransitionTypes.Cover:
+			return 1000;
+
+		case c_oAscSlideTransitionTypes.Dissolve:
+			return 1200;
+
+		case c_oAscSlideTransitionTypes.Checker:
+			return 2500;
+
+		case c_oAscSlideTransitionTypes.Blinds:
+			if (option === c_oAscSlideTransitionParams.Blinds_Vertical)
+				return 1600;
+			if (option === c_oAscSlideTransitionParams.Blinds_Horizontal)
+				return 1400;
+			break;
+
+		case c_oAscSlideTransitionTypes.Clock:
+			return 1000;
+
+		case c_oAscSlideTransitionTypes.Ripple:
+			if (option === c_oAscSlideTransitionParams.Ripple_Center)
+				return 1400;
+			if (option === c_oAscSlideTransitionParams.Ripple_LeftUp ||
+				option === c_oAscSlideTransitionParams.Ripple_RightUp ||
+				option === c_oAscSlideTransitionParams.Ripple_LeftDown ||
+				option === c_oAscSlideTransitionParams.Ripple_RightDown)
+				return 1500;
+			break;
+
+		case c_oAscSlideTransitionTypes.Honeycomb:
+			return 4400;
+
+		case c_oAscSlideTransitionTypes.Vortex:
+			return 4000;
+
+		case c_oAscSlideTransitionTypes.Switch:
+			return 1250;
+
+		case c_oAscSlideTransitionTypes.Flip:
+			return 1250;
+
+		case c_oAscSlideTransitionTypes.Gallery:
+			return 1600;
+
+		case c_oAscSlideTransitionTypes.Doors:
+			return 1400;
+
+		case c_oAscSlideTransitionTypes.Comb:
+			return 1000;
+
+		case c_oAscSlideTransitionTypes.Zoom:
+			if (option === c_oAscSlideTransitionParams.Zoom_AndRotate)
+				return 1500;
+			if (option === c_oAscSlideTransitionParams.Zoom_In ||
+				option === c_oAscSlideTransitionParams.Zoom_Out)
+				return 900;
+			break;
+
+		case c_oAscSlideTransitionTypes.Plus:
+			return 1000;
+
+		case c_oAscSlideTransitionTypes.BoxZoom:
+			return 1200;
+
+		case c_oAscSlideTransitionTypes.Ferris:
+			return 2000;
+
+		case c_oAscSlideTransitionTypes.Window:
+			return 1500;
+
+		case c_oAscSlideTransitionTypes.Prism: {
+			if (option === c_oAscSlideTransitionParams.Prism_Left_Content ||
+				option === c_oAscSlideTransitionParams.Prism_Up_Content)
+				return 2000;
+
+			if (option === c_oAscSlideTransitionParams.Prism_Right_Content ||
+				option === c_oAscSlideTransitionParams.Prism_Down_Content ||
+				option === c_oAscSlideTransitionParams.Prism_Left_Inverted ||
+				option === c_oAscSlideTransitionParams.Prism_Right_Inverted ||
+				option === c_oAscSlideTransitionParams.Prism_Up_Inverted ||
+				option === c_oAscSlideTransitionParams.Prism_Down_Inverted ||
+				option === c_oAscSlideTransitionParams.Prism_Left_ContentInv ||
+				option === c_oAscSlideTransitionParams.Prism_Right_ContentInv ||
+				option === c_oAscSlideTransitionParams.Prism_Up_ContentInv ||
+				option === c_oAscSlideTransitionParams.Prism_Down_ContentInv)
+				return 1600;
+
+			if (option === c_oAscSlideTransitionParams.Prism_Left ||
+				option === c_oAscSlideTransitionParams.Prism_Right ||
+				option === c_oAscSlideTransitionParams.Prism_Up ||
+				option === c_oAscSlideTransitionParams.Prism_Down)
+				return 1200;
+
+			break;
+		}
+	}
+
+	return 500;
+};
+
 CAscSlideTransition.prototype.put_TransitionType = function(v) { this.TransitionType = v; };
 CAscSlideTransition.prototype.get_TransitionType = function() { return this.TransitionType; };
 CAscSlideTransition.prototype.put_TransitionOption = function(v) { this.TransitionOption = v; };
@@ -64,12 +220,22 @@ CAscSlideTransition.prototype.put_ShowLoop = function(v) { this.ShowLoop = v; };
 CAscSlideTransition.prototype.get_ShowLoop = function() { return this.ShowLoop; };
 CAscSlideTransition.prototype.applyProps = function(v)
 {
+	const oldTransitionType = this.TransitionType;
+	const oldTransitionOption = this.TransitionOption;
+
     if (undefined !== v.TransitionType && null !== v.TransitionType)
         this.TransitionType = v.TransitionType;
     if (undefined !== v.TransitionOption && null !== v.TransitionOption)
         this.TransitionOption = v.TransitionOption;
-    if (undefined !== v.TransitionDuration && null !== v.TransitionDuration)
-        this.TransitionDuration = v.TransitionDuration;
+
+	if (undefined !== v.TransitionDuration && null !== v.TransitionDuration) {
+		this.TransitionDuration = v.TransitionDuration;
+	} else {
+		const typeOrOptionChanged = (this.TransitionType !== oldTransitionType) || (this.TransitionOption !== oldTransitionOption);
+		if (typeOrOptionChanged) {
+			this.TransitionDuration = CAscSlideTransition.getDefaultTransitionDuration(this.TransitionType, this.TransitionOption);
+		}
+	}
 
     if (undefined !== v.SlideAdvanceOnMouseClick && null !== v.SlideAdvanceOnMouseClick)
         this.SlideAdvanceOnMouseClick = v.SlideAdvanceOnMouseClick;
@@ -135,7 +301,7 @@ CAscSlideTransition.prototype.setDefaultParams = function()
 {
     this.TransitionType     = c_oAscSlideTransitionTypes.None;
     this.TransitionOption   = -1;
-    this.TransitionDuration = 500;
+	this.TransitionDuration = CAscSlideTransition.getDefaultTransitionDuration(this.TransitionType, this.TransitionOption);
 
     this.SlideAdvanceOnMouseClick   = true;
     this.SlideAdvanceAfter          = false;
