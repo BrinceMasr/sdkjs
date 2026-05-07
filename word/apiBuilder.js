@@ -5081,7 +5081,7 @@
 	};
 
 	/**
-	 * Creates an ApiColor from a universal input. The method recognizes several call forms and either delegates to a narrower factory or constructs an ApiColor directly.
+	 * Creates an ApiColor from a universal input. The method recognizes several call signatures and either delegates to a narrower factory or constructs an ApiColor directly.
 	 * <b>Numeric components</b>: "Api.Color(r, g, b)" or "Api.Color(r, g, b, a)" creates an RGB or RGBA color from byte components (0-255).
 	 * <b>Packed integer</b>: "Api.Color(0xRRGGBB)" creates an RGB color from a 24-bit integer.
 	 * <b>Full HEX string</b>: "Api.Color('#RRGGBB')" or "Api.Color('RRGGBB')" creates a HEX color; the leading "#" is optional.
