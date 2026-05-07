@@ -2203,11 +2203,24 @@ CChartsDrawer.prototype =
 						const seria = series[i];
 						if (seria && !seria.isHidden) {
 							numCache = t.getNumCache(seria.val);
-							const ptCount = numCache && AscFormat.isRealNumber(numCache.ptCount) ? numCache.ptCount : 0;
-							// trendline can affect max value
+
+							const pts = numCache ? numCache.pts : null;
+							if (!pts || pts.length === 0) {
+								continue;
+							}
+
+							const firstRealIndex = pts[0].idx + 1;
+							const lastRealIndex = pts[pts.length - 1].idx + 1;
+
 							const trendline = seria.getLastTrendline();
-							const newMin = trendline && trendline.backward && ptCount > 1 ? min - Math.floor(trendline.backward) : ptCount;
-							const newMax = trendline && trendline.forward && ptCount > 1 ? ptCount + trendline.forward : ptCount;
+							const canExpandTrendline = pts.length > 1;
+							const newMin = trendline && trendline.backward && canExpandTrendline
+								? firstRealIndex - Math.floor(trendline.backward)
+								: firstRealIndex;
+							const newMax = trendline && trendline.forward && canExpandTrendline
+								? lastRealIndex + trendline.forward
+								: lastRealIndex;
+
 							max = Math.max(max, newMax);
 							min = Math.min(min, newMin);
 						}

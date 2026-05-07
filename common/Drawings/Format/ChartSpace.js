@@ -6303,9 +6303,11 @@ function(window, undefined) {
 								oCurPts = oSeries.val.numLit;
 							}
 							if (oCurPts) {
+								const pts = Array.isArray(oCurPts.pts) ? oCurPts.pts : null;
+								const lastRealIndex = pts && pts.length ? (pts[pts.length - 1].idx + 1) : 0;
 								const trendline = oSeries.getLastTrendline();
 								const forward = trendline && trendline.forward ? trendline.forward : 0;
-								const newNPtsLength = oCurPts.ptCount + forward;
+								const newNPtsLength = lastRealIndex > 0 ? (lastRealIndex + forward) : 0;
 								nPtsLength = Math.max(nPtsLength, newNPtsLength);
 							}
 						}
@@ -6340,16 +6342,18 @@ function(window, undefined) {
 				} else {
 					aStrings.splice(nPtsLength, aStrings.length - nPtsLength);
 				}
+
 				if (aScale.length > 0) {
-					while (aStrings.length < aScale[aScale.length - 1]) {
-						aStrings.push("");
-					}
+					const aScaleStrings = [];
 					for (i = 0; i < aScale.length; ++i) {
-						if (aScale[i] > 0) {
-							break;
+						const scaleValue = aScale[i];
+						if (scaleValue > 0 && scaleValue <= aStrings.length) {
+							aScaleStrings.push(aStrings[scaleValue - 1]);
+						} else {
+							aScaleStrings.push("");
 						}
-						aStrings.splice(0, 0, "");
 					}
+					aStrings = aScaleStrings;
 				}
 
 				break;

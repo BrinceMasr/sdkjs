@@ -13237,8 +13237,9 @@
 						ser.isHidden = false;
 					}
 					oCell = oWS.getCell3(nR, nC);
+					const isErrorCell = oCell.getType && oCell.getType() === AscCommon.CellValueType.Error;
 					dVal = oCell.getNumberValue();
-					if (!AscFormat.isRealNumber(dVal) && (!AscFormat.isRealNumber(displayEmptyCellsAs) || displayEmptyCellsAs === 1)) {
+					if (!isErrorCell && !AscFormat.isRealNumber(dVal) && (!AscFormat.isRealNumber(displayEmptyCellsAs) || displayEmptyCellsAs === 1)) {
 						sVal = oCell.getValueForEdit();
 						if ((typeof sVal === "string") && sVal.length > 0) {
 							dVal = 0;
@@ -13275,7 +13276,7 @@
 						nLastNoEmptyIndex = oPt.idx;
 						nSpliceIndex = this.pts.length;
 					} else {
-						if (AscFormat.isRealNumber(displayEmptyCellsAs) && displayEmptyCellsAs !== 1) {
+						if (!isErrorCell && AscFormat.isRealNumber(displayEmptyCellsAs) && displayEmptyCellsAs !== 1) {
 							sVal = oCell.getValue();
 							if (displayEmptyCellsAs === 2 || ((typeof sVal === "string") && sVal.length > 0)) {
 								oPt = new AscFormat.CNumericPoint();
@@ -13309,6 +13310,11 @@
 			}
 		}
 		this.setPtCount(nPtCount);
+
+		if (ser) {
+			ser.isHidden = (this.pts.length === 0);
+		}
+
 		//check format
 		if (sCommonFormatCode) {
 			this.setFormatCode(sCommonFormatCode);
