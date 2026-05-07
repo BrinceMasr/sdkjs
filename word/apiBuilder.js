@@ -5116,7 +5116,7 @@
 		if (arguments.length === 3)
 			return Api.RGB(r, g, b);
 		if (typeof r === 'number' && isFinite(r) && r >= 0 && r <= 0xFFFFFF && (r | 0) === r)
-			return new ApiColor('rgb', r);
+			return Api.RGB((r >> 16) & 0xFF, (r >> 8) & 0xFF, r & 0xFF);
 		if (typeof r === 'string') {
 			if (r === 'auto')
 				return new ApiColor('auto');
@@ -5124,8 +5124,10 @@
 			if (!hasHash) {
 				if (ApiColor.ThemeColorMap[r] !== undefined)
 					return Api.ThemeColor(r);
-				if (AscFormat.map_prst_color[r] !== undefined)
-					return new ApiColor('rgb', AscFormat.map_prst_color[r]);
+				if (AscFormat.map_prst_color[r] !== undefined) {
+					const v = AscFormat.map_prst_color[r];
+					return Api.RGB((v >> 16) & 0xFF, (v >> 8) & 0xFF, v & 0xFF);
+				}
 			}
 			let hex = hasHash ? r.slice(1) : r;
 			if (hasHash && hex.length === 3 && private_IsHexString(hex))
@@ -5133,7 +5135,7 @@
 			if (hex.length === 6 && private_IsHexString(hex))
 				return Api.HexColor(hex);
 		}
-		return new ApiColor('rgb', 0);
+		return Api.RGB(0, 0, 0);
 	};
 
 	/**
