@@ -5081,6 +5081,59 @@
 	};
 
 	/**
+	 * Creates an ApiColor from a universal input. The method recognizes several call forms and either delegates to a narrower factory or constructs an ApiColor directly.
+	 * <b>Numeric components</b>: "Api.Color(r, g, b)" or "Api.Color(r, g, b, a)" creates an RGB or RGBA color from byte components (0-255).
+	 * <b>Packed integer</b>: "Api.Color(0xRRGGBB)" creates an RGB color from a 24-bit integer.
+	 * <b>Full HEX string</b>: "Api.Color('#RRGGBB')" or "Api.Color('RRGGBB')" creates a HEX color; the leading "#" is optional.
+	 * <b>Short HEX string</b>: "Api.Color('#RGB')" or "Api.Color('RGB')" expands each digit by duplication, so "#F0A" becomes "#FF00AA".
+	 * <b>Theme color name</b>: "Api.Color('accent1')" creates a theme color; any value of SchemeColorId is accepted.
+	 * <b>Preset color name</b>: "Api.Color('aliceBlue')" resolves any value of PresetColor to its RGB equivalent.
+	 * <b>Auto color</b>: "Api.Color('auto')" creates an auto color.
+	 * For a single string argument, the resolution priority is: "auto", a string starting with "#", a theme name, a preset name, a bare 6-digit HEX, a bare 3-digit HEX. Theme and preset palettes do not overlap.
+	 * Unsupported inputs (objects, arrays, an existing ApiColor, unknown strings, no arguments) return a black color (#000000).
+	 *
+	 * @memberof Api
+	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
+	 * @param {number | string | byte | SchemeColorId | PresetColor} r - The universal color input. With three or four arguments, the red component (0-255).
+	 * @param {byte} [g] - The green component (0-255). Used only with the (r, g, b) and (r, g, b, a) forms.
+	 * @param {byte} [b] - The blue component (0-255). Used only with the (r, g, b) and (r, g, b, a) forms.
+	 * @param {byte} [a] - The alpha component (0-255). Used only with the (r, g, b, a) form.
+	 * @returns {ApiColor}
+	 * @see office-js-api/Examples/{Editor}/Api/Methods/Color.js
+	 */
+	Api.Color = function (r, g, b, a) {
+		if (arguments.length === 4)
+			return Api.RGBA(r, g, b, a);
+		if (arguments.length === 3)
+			return Api.RGB(r, g, b);
+		if (typeof r === 'number' && isFinite(r) && r >= 0)
+			return new ApiColor('rgb', r & 0xFFFFFF);
+		if (typeof r === 'string') {
+			if (r === 'auto')
+				return new ApiColor('auto');
+			const hasHash = r.charAt(0) === '#';
+			if (!hasHash) {
+				if (ApiColor.ThemeColorMap[r] !== undefined)
+					return Api.ThemeColor(r);
+				const presetMap = (typeof AscFormat !== 'undefined') && AscFormat.map_prst_color;
+				if (presetMap && presetMap[r] !== undefined)
+					return new ApiColor('rgb', presetMap[r]);
+			}
+			let hex = hasHash ? r.slice(1) : r;
+			if (hex.length === 3)
+				hex = hex.charAt(0) + hex.charAt(0) + hex.charAt(1) + hex.charAt(1) + hex.charAt(2) + hex.charAt(2);
+			if (hex.length === 6) {
+				const nR = parseInt(hex.substring(0, 2), 16);
+				const nG = parseInt(hex.substring(2, 4), 16);
+				const nB = parseInt(hex.substring(4, 6), 16);
+				if (!isNaN(nR) && !isNaN(nG) && !isNaN(nB))
+					return Api.HexColor(hex);
+			}
+		}
+		return new ApiColor('rgb', 0);
+	};
+
+	/**
 	 * Creates a solid fill to apply to the object using a selected solid color as the object background.
 	 *
 	 * @memberof Api
@@ -30394,6 +30447,7 @@
 	Api["RGBA"]                             = Api.RGBA;
 	Api["HexColor"]                         = Api.HexColor;
 	Api["ThemeColor"]                       = Api.ThemeColor;
+	Api["Color"]                            = Api.Color;
 	Api["CreateSolidFill"]                  = Api.CreateSolidFill;
 	Api["CreateLinearGradientFill"]         = Api.CreateLinearGradientFill;
 	Api["CreateRadialGradientFill"]         = Api.CreateRadialGradientFill;
