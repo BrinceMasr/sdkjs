@@ -63,9 +63,9 @@
 
 	function CGlyph()
 	{
-		this.lUnicode = 0; // Юникод
-		this.fX = 0;       // Позиция глифа
-		this.fY = 0;       // на BaseLine
+		this.lUnicode = 0; // Unicode
+		this.fX = 0;       // Glyph position
+		this.fY = 0;       // on BaseLine
 
 		this.fLeft = 0;    //
 		this.fTop = 0;     // BBox
@@ -274,7 +274,7 @@
 
 			if (0 == nType && !(1 == m[0] && 0 == m[1] && 0 == m[2] && 1 == m[3] && 0 == m[4] && 0 == m[5]))
 			{
-				// Применяем глобальную матрицу преобразования и пересчитываем BBox
+				// Apply the global transformation matrix and recalculate BBox
 				var arrfX =[fLeft, fLeft, fRight, fRight];
 				var arrfY = [fTop, fBottom, fBottom, fTop];
 
@@ -329,7 +329,7 @@
 			var m = this.m_arrCTM;
 			if (!(1 == m[0] && 0 == m[1] && 0 == m[2] && 1 == m[3] && 0 == m[4] && 0 == m[5]))
 			{
-				// Применяем глобальную матрицу преобразования и пересчитываем BBox
+				// Apply the global transformation matrix and recalculate BBox
 				var arrfX = [fLeft, fLeft, fRight, fRight];
 				var arrfY = [fTop, fBottom, fBottom, fTop];
 

@@ -533,7 +533,7 @@ function (window, undefined)
 	{
 		this.Api = _api;
 
-		// создаем делегата. инициализация его - ПОСЛЕ создания iScroll
+		// create delegate. its initialization - AFTER creating iScroll
 		this.delegate = new CMobileDelegateEditorCell(this);
 		var _element = this.delegate.GetScrollerParent();
 		this.CreateScrollerDiv(_element);
@@ -554,7 +554,7 @@ function (window, undefined)
 
 		this.delegate.Init();
 
-		// никаких таблиц
+		// no tables
 		this.TableTrackEnabled = false;
 
 		this.CellEditorType = Asc.c_oAscCellEditorState.editEnd;
@@ -631,7 +631,7 @@ function (window, undefined)
 		if (this.Mode == AscCommon.MobileTouchMode.None)
 			this.CheckSelectTrackObject();
 
-		// если не используем этот моус даун - то уменьшаем количество кликов
+		// if we don't use this mouse down - decrease click count
 		switch (this.Mode)
 		{
 			case AscCommon.MobileTouchMode.None:
@@ -643,7 +643,7 @@ function (window, undefined)
 			case AscCommon.MobileTouchMode.TableMove:
 			case AscCommon.MobileTouchMode.SelectTrack:
 			{
-				// так как был уже check, нужно уменьшить количество кликов
+				// since check was already done, need to decrease click count
 				if (global_mouseEvent.ClickCount > 0)
 					global_mouseEvent.ClickCount--;
 				break;
@@ -693,7 +693,7 @@ function (window, undefined)
 			}
 			case AscCommon.MobileTouchMode.Scroll:
 			{
-				// ничего не меняем, просто перемещаем точку
+				// don't change anything, just move the point
 				this.DownPoint           = this.delegate.ConvertCoordsFromCursor(global_mouseEvent.X, global_mouseEvent.Y);
 				this.DownPointOriginal.X = global_mouseEvent.X;
 				this.DownPointOriginal.Y = global_mouseEvent.Y;
@@ -704,7 +704,7 @@ function (window, undefined)
 			}
 			case AscCommon.MobileTouchMode.Select:
 			{
-				// сдвиг на чуток, чтобы не попасть на "перемещение" ячеек
+				// shift a bit so as not to trigger cell "movement"
 				var epsilonForCell = 1.5;
 				var _x1 = this.RectSelect1.x + epsilonForCell;
 				var _y1 = this.RectSelect1.y + epsilonForCell;
@@ -713,7 +713,7 @@ function (window, undefined)
 				var _y2 = this.RectSelect2.y + this.RectSelect2.h - epsilonForCell;
 
 				if (this.RectSelectType === Asc.c_oAscSelectionType.RangeCol || this.RectSelectType === Asc.c_oAscSelectionType.RangeRow)
-					AscCommon.global_mouseEvent.KoefPixToMM = -10; // чтобы не попасть в движения
+					AscCommon.global_mouseEvent.KoefPixToMM = -10; // to avoid triggering movements
 
 				if (1 == this.DragSelect)
 				{
@@ -876,7 +876,7 @@ function (window, undefined)
 			}
 			case AscCommon.MobileTouchMode.Select:
 			{
-				// во время движения может смениться порядок ректов
+				// during movement the order of rects may change
 				global_mouseEvent.ClickCount = 1;
 				this.delegate.Drawing_OnMouseMove(_e);
 				AscCommon.stopEvent(e);
@@ -925,7 +925,7 @@ function (window, undefined)
 		{
 			case AscCommon.MobileTouchMode.Cursor:
 			{
-				// ничего не делаем. курсор уже установлен
+				// do nothing. cursor is already set
 				this.Mode = AscCommon.MobileTouchMode.None;
 				break;
 			}
@@ -947,7 +947,7 @@ function (window, undefined)
 				}
 				else
 				{
-					// нужно запускать анимацию скролла, если она есть
+					// need to start scroll animation if there is one
 					// TODO:
 					isCheckContextMenuMode = false;
 					this.iScroll._end(e);
@@ -983,7 +983,7 @@ function (window, undefined)
 			}
 			case AscCommon.MobileTouchMode.Select:
 			{
-				// ничего не нужно делать
+				// nothing needs to be done
 				this.DragSelect = 0;
 				this.Mode       = AscCommon.MobileTouchMode.None;
 				this.delegate.Drawing_OnMouseUp(_e);
@@ -999,7 +999,7 @@ function (window, undefined)
 
 		if (true)
 		{
-			// нужно послать мув в никуда, чтобы сбросить состояния (схема, где все решает мув а не даун)
+			// need to send move to nowhere to reset states (scheme where move decides everything, not down)
 			var _e = {};
 
 			_e.pageX = -1000;
@@ -1053,7 +1053,7 @@ function (window, undefined)
 		return res;
 	};
 
-	// отрисовка текстового селекта
+	// text select drawing
 	CMobileTouchManager.prototype.CheckSelect = function(overlay, color, drDocument)
 	{
 		if (!this.desktopTouchState)
@@ -1297,7 +1297,7 @@ function (window, undefined)
 		if (this.RectSelectType !== Asc.c_oAscSelectionType.RangeRow && this.RectSelectType !== Asc.c_oAscSelectionType.RangeCol)
 			return AscCommon.CMobileTouchManagerBase.prototype.CheckSelectTrack.call(this);
 
-		// проверим на попадание в селект - это может произойти на любом mode
+		// check for hit on select - this can happen on any mode
 		if (null != this.RectSelect1 && null != this.RectSelect2)
 		{
 			var pos1 = null;
@@ -1345,7 +1345,7 @@ function (window, undefined)
 
 			if (this.RectSelectType === Asc.c_oAscSelectionType.RangeCol)
 			{
-				// только правая граница
+				// only right border
 				if (Math.abs(pos4.X - global_mouseEvent.X) < this.TrackTargetEps)
 				{
 					if (pos4.X > global_mouseEvent.X)
@@ -1354,7 +1354,7 @@ function (window, undefined)
 			}
 			else if (this.RectSelectType === Asc.c_oAscSelectionType.RangeRow)
 			{
-				// только нижняя граница
+				// only bottom border
 				if (Math.abs(pos4.Y - global_mouseEvent.Y) < this.TrackTargetEps)
 				{
 					if (pos4.Y > global_mouseEvent.Y)

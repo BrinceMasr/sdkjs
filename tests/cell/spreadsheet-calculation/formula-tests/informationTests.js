@@ -233,7 +233,7 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-		//формируем массив значений
+		// Create array of values
 		const randomArray = [];
 		let randomStrArray = "{";
 		let maxArg = 4;
@@ -4181,6 +4181,66 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: ISREF(1/0) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Bounded case: Formula. Formula resulting in #DIV/0!, returns TRUE');
 
+		// Case #1: SINGLE on cRef passes through, returns TRUE
+		oParser = new parserFormula('ISREF(SINGLE(A100))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: ISREF(SINGLE(A100)) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: SINGLE case: cRef passes through, returns TRUE');
+
+		// Case #2: SINGLE on 1x1 area returns cRef to that cell, returns TRUE
+		oParser = new parserFormula('ISREF(SINGLE(A100:A100))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: ISREF(SINGLE(A100:A100)) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: SINGLE case: 1x1 area always resolves, returns TRUE');
+
+		// Case #3: SINGLE on single-column area, formula row inside range, returns cRef, TRUE
+		oParser = new parserFormula('ISREF(SINGLE(A1:A100))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: ISREF(SINGLE(A1:A100)) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: SINGLE case: single-column with row intersect, returns TRUE');
+
+		// Case #4: SINGLE on single-row area, formula col inside range, returns cRef, TRUE
+		oParser = new parserFormula('ISREF(SINGLE(A1:Z1))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: ISREF(SINGLE(A1:Z1)) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: SINGLE case: single-row with col intersect, returns TRUE');
+
+		// Case #5: SINGLE on cRef3D passes through, returns TRUE
+		oParser = new parserFormula('ISREF(SINGLE(Sheet2!A1))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: ISREF(SINGLE(Sheet2!A1)) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: SINGLE case: cRef3D passes through, returns TRUE');
+
+		// Case #6: SINGLE on 3D 1x1 area returns cRef3D, returns TRUE
+		oParser = new parserFormula('ISREF(SINGLE(Sheet2!A1:A1))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: ISREF(SINGLE(Sheet2!A1:A1)) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: SINGLE case: 3D 1x1 area, returns TRUE');
+
+		// Case #7: SINGLE on 3D single-column area with row intersect returns cRef3D, TRUE
+		oParser = new parserFormula('ISREF(SINGLE(Sheet2!A1:A10))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: ISREF(SINGLE(Sheet2!A1:A10)) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: SINGLE case: 3D single-column with row intersect, returns TRUE');
+
+		// Case #8: SINGLE on single-column area with NO intersect returns #VALUE!, ISREF FALSE
+		oParser = new parserFormula('ISREF(SINGLE(A100:A111))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: ISREF(SINGLE(A100:A111)) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: SINGLE case: no row intersect, ISREF returns FALSE');
+
+		// Case #9: SINGLE on 2D area returns #VALUE!, ISREF FALSE
+		oParser = new parserFormula('ISREF(SINGLE(A1:B100))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: ISREF(SINGLE(A1:B100)) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: SINGLE case: 2D area, ISREF returns FALSE');
+
+		// Case #10: SINGLE on number scalar returns the number, ISREF FALSE
+		oParser = new parserFormula('ISREF(SINGLE(123))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: ISREF(SINGLE(123)) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: SINGLE case: number scalar, ISREF returns FALSE');
+
+		// Case #11: SINGLE on string scalar returns the string, ISREF FALSE
+		oParser = new parserFormula('ISREF(SINGLE("text"))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: ISREF(SINGLE("text")) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: SINGLE case: string scalar, ISREF returns FALSE');
+
+		// Case #12: SINGLE on array returns first element (value), ISREF FALSE
+		oParser = new parserFormula('ISREF(SINGLE({1,2,3}))', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: ISREF(SINGLE({1,2,3})) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: SINGLE case: array, ISREF returns FALSE');
+
 
 		testArrayFormula2(assert, "ISREF", 1, 1, null, true);
 	});
@@ -4695,7 +4755,7 @@ $(function () {
 		// Case #4: Area. Multi-cell range returns first cell’s value (1.1). 1 argument used.
 		// Case #12: Area3D. 3D multi-cell range, returns first cell’s value (2). 1 argument used.
 
-		//TODO нужна другая функция для тестирования
+		// TODO need a different function for testing
 		//testArrayFormula2(assert, "N", 1, 1);
 	});
 
@@ -5421,7 +5481,7 @@ $(function () {
 		// Case #6: Name3D. 3D named range with multiple cells. Returns #VALUE!.
 
 
-		//TODO нужна другая функция для тестирования
+		// TODO need a different function for testing
 		//testArrayFormula2(assert, "TYPE", 1, 1);
 	});
 

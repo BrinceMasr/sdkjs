@@ -180,8 +180,8 @@ function Slide(presentation, slideLayout, slideNum)
         recalculateSpTree: true
     };
 
-    this.searchingArray = [];  // массив объектов для селекта
-    this.selectionArray = [];  // массив объектов для поиска
+    this.searchingArray = [];  // array of objects for selection
+    this.selectionArray = [];  // array of objects for search
 
 
     this.writecomments = [];
@@ -1747,7 +1747,7 @@ AscFormat.CTextBody.prototype.checkCurrentPlaceholder = function()
 function SlideComments(slide)
 {
     this.comments = [];
-    this.m_oContentChanges = new AscCommon.CContentChanges(); // список изменений(добавление/удаление элементов)
+    this.m_oContentChanges = new AscCommon.CContentChanges(); // list of changes (adding/removing elements)
     this.slide = slide;
     this.Id = AscCommon.g_oIdCounter.Get_NewId();
     g_oTableId.Add(this, this.Id);

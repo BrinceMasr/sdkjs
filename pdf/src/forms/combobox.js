@@ -68,7 +68,7 @@
         this.DrawBackground(oGraphicsPDF);
         
         let oContentToDraw = this.GetTrigger(AscPDF.PDF_TRIGGERS_TYPES.Format) && this.IsNeedDrawHighlight() ? this.contentFormat : this.content;
-        this.curContent = oContentToDraw; // запоминаем текущий контент
+        this.curContent = oContentToDraw; // remember current content
 
         if (oDoc.activeForm == this)
             this.CheckFormViewWindow();
@@ -236,7 +236,7 @@
         }
 
         let oOnFocus = this.GetTrigger(AscPDF.PDF_TRIGGERS_TYPES.OnFocus);
-        // вызываем выставление курсора после onFocus. Если уже в фокусе, тогда сразу.
+        // call cursor positioning after onFocus. If already in focus, then immediately.
         if (false == isInFocus && oOnFocus && oOnFocus.Actions.length > 0)
             oActionsQueue.callbackAfterFocus = callbackAfterFocus.bind(this, x, y, e);
         else
@@ -427,7 +427,7 @@
 		this.content.EnterText(aChars);
 		
 		this.SetNeedRecalc(true);
-		this.SetNeedCommit(true); // флаг что значение будет применено к остальным формам с таким именем
+		this.SetNeedCommit(true); // flag that value will be applied to other forms with the same name
 		this._bAutoShiftContentView = true && this._doNotScroll == false;
 		return true;
 	};
@@ -496,8 +496,8 @@
         this.SetParentValue(this.GetValue());
         this.SetParentCurIdxs(aCurIdxs);
 
-        // когда выравнивание посередине или справа, то после того
-        // как ширина контента будет больше чем размер формы, выравнивание становится слева, пока текста вновь не станет меньше чем размер формы
+        // when alignment is center or right, then after
+        // content width becomes larger than form size, alignment becomes left, until text is smaller than form size again
         aFields.forEach(function(field) {
             field.SetNeedCheckAlign(true);
         });
@@ -728,7 +728,7 @@
     CComboBoxField.prototype.WriteToBinary = function(memory) {
 		memory.WriteByte(AscCommon.CommandType.ctAnnotField);
 
-        // длина комманд
+        // command length
         let nStartPos = memory.GetCurPosition();
         memory.Skip(4);
 
@@ -741,7 +741,7 @@
             memory.WriteString(value);
         }
 
-        // элементы списка выбора
+        // selection list elements
         let aOptions = this.GetOptions(memory.isCopyPaste);
         if (aOptions && aOptions.length !== 0) {
             memory.fieldDataFlags |= (1 << 10);
@@ -753,7 +753,7 @@
         }
 
         if (value != null && Array.isArray(value) == true) {
-            // флаг что значение - это массив
+            // flag that value is an array
             memory.fieldDataFlags |= (1 << 13);
             memory.WriteLong(value.length);
             for (let i = 0; i < value.length; i++) {
@@ -761,7 +761,7 @@
             }
         }
 
-        // массив I (выделенные значения списка)
+        // I array (selected list values)
         let curIdxs;
         if ([AscPDF.FIELD_TYPES.combobox, AscPDF.FIELD_TYPES.listbox].includes(this.GetType())) {
             curIdxs = this.GetParentCurIdxs(memory.isCopyPaste);
@@ -794,13 +794,13 @@
         
         let nEndPos = memory.GetCurPosition();
 
-        // запись флагов
+        // write flags
         memory.Seek(memory.posForWidgetFlags);
         memory.WriteLong(memory.widgetFlags);
         memory.Seek(memory.posForFieldDataFlags);
         memory.WriteLong(memory.fieldDataFlags);
 
-        // запись длины комманд
+        // write command length
         memory.Seek(nStartPos);
         memory.WriteLong(nEndPos - nStartPos);
         memory.Seek(nEndPos);
@@ -857,6 +857,7 @@
     CComboBoxField.prototype.DrawMarker             = AscPDF.CTextField.prototype.DrawMarker;
     CComboBoxField.prototype.beforeCompositeInput   = AscPDF.CTextField.prototype.beforeCompositeInput;
     CComboBoxField.prototype.IsCanCommit            = AscPDF.CTextField.prototype.IsCanCommit;
+    CComboBoxField.prototype.hitInTextRectWord      = AscPDF.CTextField.prototype.hitInTextRectWord;
 
 	window["AscPDF"].CComboBoxField = CComboBoxField;
 })();

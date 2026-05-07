@@ -107,7 +107,7 @@ var c_oAscError = Asc.c_oAscError;
 	/////////////////////////////////////////////////////////
 	spreadsheet_api.prototype.onUpdateDocumentModified = function(bIsModified)
 	{
-		// Обновляем только после окончания сохранения
+		// Update only after saving is complete
 		if (this.canSave) {
 			this.handlers.trigger("asc_onDocumentModifiedChanged", bIsModified);
 			this._onUpdateDocumentCanSave();
@@ -263,7 +263,7 @@ var c_oAscError = Asc.c_oAscError;
 		if (isSaveAs === true)
 			_param += "saveas=true;";
 
-		// настройки для pdf
+		// settings for pdf
 		var printOptions = "";
 		if (isSaveAs)
 		{

@@ -276,7 +276,7 @@
 		}
 		this.canvas = document.getElementById("id_viewer");
 	};
-	// работа с шрифтами
+	// Font operations
 	VisioEditorApi.prototype.asyncFontsDocumentStartLoaded = function(blockType)
 	{
 		this.sync_StartAction(undefined === blockType ? Asc.c_oAscAsyncActionType.BlockInteraction : blockType, Asc.c_oAscAsyncAction.LoadDocumentFonts);
@@ -309,7 +309,7 @@
 			// this.sendColorThemes(this.WordControl.m_oLogicDocument.themes[0]);
 		}
 
-		// открытие после загрузки документа
+		// Opening after document loading
 
 		var _loader_object = this.WordControl.m_oLogicDocument;
 		if (null == _loader_object)
@@ -332,7 +332,7 @@
 	{
 		this.ImageLoader.bIsLoadDocumentFirst = false;
 
-		// на методе _openDocumentEndCallback может поменяться this.EndActionLoadImages
+		// this.EndActionLoadImages may change in _openDocumentEndCallback method
 		if (this.EndActionLoadImages == 1)
 		{
 			this.sync_EndAction(Asc.c_oAscAsyncActionType.BlockInteraction, Asc.c_oAscAsyncAction.LoadDocumentImages);
@@ -365,7 +365,7 @@
 		if (this.isViewMode)
 			this.asc_setViewMode(true);
 
-		// Меняем тип состояния (на никакое)
+		// Change state type (to none)
 		this.advancedOptionsAction = AscCommon.c_oAscAdvancedOptionsAction.None;
 
 		this.WordControl.GoToPage(this.Document.getCurrentPage());
@@ -709,7 +709,7 @@
 		return false;
 		if (!this.canSave)
 		{
-			// Пока идет сохранение, мы не закрываем документ
+			// While saving is in progress, we don't close the document
 			return true;
 		}
 		return this.isDocumentModify;

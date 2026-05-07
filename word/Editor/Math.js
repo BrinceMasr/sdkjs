@@ -336,14 +336,16 @@ CParaMathLineParameters.prototype.Get_LineState = function(Line)
 };
 CParaMathLineParameters.prototype.Get_SpaceAlign = function(Line)
 {
-    var NumLine = this.private_GetNumberLine(Line);
+	var NumLine = this.private_GetNumberLine(Line);
+	var lineInfo = this.LineParameters[NumLine];
+	var SpaceAlign = 0;
 
-    var SpaceAlign = 0;
+	if (lineInfo.StyleLine === MATH_LINE_ALiGN_AT
+		|| (this.bMathWordLarge == false && (this.WrapState == ALIGN_MARGIN_WRAP || this.WrapState == ALIGN_WRAP))
+	)
+		SpaceAlign = lineInfo.SpaceAlign;
 
-    if(this.bMathWordLarge == false && (this.WrapState == ALIGN_MARGIN_WRAP || this.WrapState == ALIGN_WRAP))
-        SpaceAlign = this.LineParameters[NumLine].SpaceAlign;
-
-    return SpaceAlign;
+	return SpaceAlign;
 };
 
 
@@ -1756,7 +1758,7 @@ ParaMath.prototype.private_RecalculateRangeWrap = function(PRS, ParaPr, Depth)
 	{
 		PRS.RecalcResult = recalcresult_NextLine;
 
-		PRS.ResetMathRecalcInfo();
+		PRS.ResetMathRecalcInfo(PRS.Line);
 
 		// выставляем только для инлайновых формул => может случится так, что в одном параграфе окажутся несколько формул и для того, чтобы при первом пересчете пересчитались настройки нужно возвращать null
 		// при последующих пересчетах PRS.MathRecalcInfo.Math будет выставлен null на ResetMathRecalcInfo в ф-ии private_RecalculatePage
@@ -1996,7 +1998,12 @@ ParaMath.prototype.UpdateWidthLine = function(PRS, Width)
 	if (PrevRecalcObject == null || PrevRecalcObject == this)
 	{
 		var W = Width - PRS.OperGapRight - PRS.OperGapLeft;
-		this.PageInfo.UpdateWidth(PRS.Line, W);
+		var bMaxWChanged = this.PageInfo.UpdateWidth(PRS.Line, W);
+
+		// When MaxW grows, earlier lines were aligned with the smaller MaxW, producing
+		// incorrect centering. Restart so all lines use the same final MaxW.
+		if (bMaxWChanged && !PRS.bFastRecalculate && !this.IsInline())
+			this.private_SetRestartRecalcInfo(PRS);
 	}
 };
 ParaMath.prototype.Recalculate_Range_Spaces = function(PRSA, _CurLine, _CurRange, _CurPage)

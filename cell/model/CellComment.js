@@ -322,10 +322,10 @@ function (window, undefined) {
 	asc_CCommentData.prototype.asc_putText = function(val) { this.sText = val ? val.slice(0, Asc.c_oAscMaxCellOrCommentLength) : val; };
 	asc_CCommentData.prototype.asc_getText = function() { return this.sText; };
 
-	asc_CCommentData.prototype.asc_putTime = function(val) { this.sTime = val; };
+	asc_CCommentData.prototype.asc_putTime = function(val) { this.sTime = undefined !== val && null !== val ? val : ""; };
 	asc_CCommentData.prototype.asc_getTime = function() { return this.sTime; };
 
-	asc_CCommentData.prototype.asc_putOnlyOfficeTime = function(val) { this.sOOTime = val; };
+	asc_CCommentData.prototype.asc_putOnlyOfficeTime = function(val) { this.sOOTime = undefined !== val && null !== val ? val : ""; };
 	asc_CCommentData.prototype.asc_getOnlyOfficeTime = function() { return this.sOOTime; };
 
 	asc_CCommentData.prototype.asc_putUserId = function(val) { this.sUserId = val; this.sProviderId = "Teamlab"; };
@@ -533,7 +533,7 @@ CCellCommentator.sStartCommentId = 'comment_';
 CCellCommentator.prototype.isLockedComment = function(oComment, callbackFunc) {
 	var objectGuid = oComment.asc_getId();
 	if (objectGuid) {
-		// Комментарии не должны влиять на lock-листа, поэтому вместо добавления нового c_oAscLockTypeElem, поменяем имя листа
+		// Comments should not affect sheet locking, so instead of adding a new c_oAscLockTypeElem, we change the sheet name
 		var sheetId = CCellCommentator.sStartCommentId;
 		if (!oComment.bDocument)
 			sheetId += this.model.getId();
@@ -704,7 +704,7 @@ CCellCommentator.prototype.isLockedComment = function(oComment, callbackFunc) {
 	};
 
 CCellCommentator.prototype.updateCommentsDependencies = function(bInsert, operType, updateRange) {
-	// ToDo переделать функцию, странная какая-то
+	// ToDo refactor this function, it's somewhat strange
 	var t = this;
 	var UpdatePair = function (comment, bChange) {
 		this.comment = comment;
@@ -1031,7 +1031,7 @@ CCellCommentator.prototype.selectComment = function(id) {
 	var comment = this.findComment(id);
 	var metrics;
 
-	// Чистим предыдущий селект
+	// Clear the previous selection
 	this.cleanLastSelection();
 	this.lastSelectedId = null;
 

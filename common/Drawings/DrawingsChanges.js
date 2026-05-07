@@ -182,7 +182,7 @@
     CChangesDrawingsDouble2.prototype.WriteToBinary = function(Writer)
     {
         // Long  : Flag
-        // 1-bit : Подсвечивать ли данные изменения
+        // 1-bit : Whether to highlight these changes
         // 2-bit : IsUndefined New
         // 3-bit : IsUndefined Old
         // double : New
@@ -215,7 +215,7 @@
         Reader.Seek2(Reader.GetCurPos() - 4);
         this.Type = Reader.GetLong();
         // Long  : Flag
-        // 1-bit : Подсвечивать ли данные изменения
+        // 1-bit : Whether to highlight these changes
         // 2-bit : IsUndefined New
         // 3-bit : IsUndefined Old
         // double : New

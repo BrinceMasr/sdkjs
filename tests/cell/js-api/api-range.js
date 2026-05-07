@@ -33,6 +33,11 @@
 $(function () {
 	let ws = AscTest.JsApi.GetActiveSheet();
 
+    const initializeTest = function (/*rangeAddress optional*/) {
+        var r = ws.GetRange("A1:Z100");
+        r.Clear();
+    };
+
 	AscTest.JsApi.AddDefName('super', 'Sheet1!$A$1:$F$4');
 	AscTest.JsApi.AddDefName('negativeIndexColumn', 'Sheet1!$F$5:$I$14');
 	AscTest.JsApi.AddDefName('negativeIndexRow', 'Sheet1!$F$8:$H$13');
@@ -67,24 +72,24 @@ $(function () {
         // r1: (1,1,1,2,2,2)
         // r2: (a,c,d,a,b,z)
         // r3: (4,2,1,5,3,2)
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "1", "Row1 A1");
-        assert.strictEqual(ws.GetRange("B1").GetValue(), "1", "Row1 B1");
-        assert.strictEqual(ws.GetRange("C1").GetValue(), "1", "Row1 C1");
-        assert.strictEqual(ws.GetRange("D1").GetValue(), "2", "Row1 D1");
-        assert.strictEqual(ws.GetRange("E1").GetValue(), "2", "Row1 E1");
-        assert.strictEqual(ws.GetRange("F1").GetValue(), "2", "Row1 F1");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 1, "Row1 A1");
+        assert.strictEqual(ws.GetRange("B1").GetValue(), 1, "Row1 B1");
+        assert.strictEqual(ws.GetRange("C1").GetValue(), 1, "Row1 C1");
+        assert.strictEqual(ws.GetRange("D1").GetValue(), 2, "Row1 D1");
+        assert.strictEqual(ws.GetRange("E1").GetValue(), 2, "Row1 E1");
+        assert.strictEqual(ws.GetRange("F1").GetValue(), 2, "Row1 F1");
         assert.strictEqual(ws.GetRange("A2").GetValue(), "a", "Row2 A1");
         assert.strictEqual(ws.GetRange("B2").GetValue(), "c", "Row2 B1");
         assert.strictEqual(ws.GetRange("C2").GetValue(), "d", "Row2 C1");
         assert.strictEqual(ws.GetRange("D2").GetValue(), "a", "Row2 D1");
         assert.strictEqual(ws.GetRange("E2").GetValue(), "b", "Row2 E1");
         assert.strictEqual(ws.GetRange("F2").GetValue(), "z", "Row2 F1");
-        assert.strictEqual(ws.GetRange("A3").GetValue(), "4", "Row3 A1");
-        assert.strictEqual(ws.GetRange("B3").GetValue(), "2", "Row3 B1");
-        assert.strictEqual(ws.GetRange("C3").GetValue(), "1", "Row3 C1");
-        assert.strictEqual(ws.GetRange("D3").GetValue(), "5", "Row3 D1");
-        assert.strictEqual(ws.GetRange("E3").GetValue(), "3", "Row3 E1");
-        assert.strictEqual(ws.GetRange("F3").GetValue(), "2", "Row3 F1");
+        assert.strictEqual(ws.GetRange("A3").GetValue(), 4, "Row3 A1");
+        assert.strictEqual(ws.GetRange("B3").GetValue(), 2, "Row3 B1");
+        assert.strictEqual(ws.GetRange("C3").GetValue(), 1, "Row3 C1");
+        assert.strictEqual(ws.GetRange("D3").GetValue(), 5, "Row3 D1");
+        assert.strictEqual(ws.GetRange("E3").GetValue(), 3, "Row3 E1");
+        assert.strictEqual(ws.GetRange("F3").GetValue(), 2, "Row3 F1");
     });
 
     QUnit.test("SetSort: handles empty cells (row)", function (assert) {
@@ -93,8 +98,8 @@ $(function () {
         ws.GetRange("C1").SetValue("");
         ws.GetRange("D1").SetValue("1");
         ws.GetRange("A1:D1").SetSort("A1", "xlAscending", null, null, null, null, "xlNo", "xlSortRows");
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "1");
-        assert.strictEqual(ws.GetRange("B1").GetValue(), "2");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 1);
+        assert.strictEqual(ws.GetRange("B1").GetValue(), 2);
         assert.strictEqual(ws.GetRange("C1").GetValue(), "");
         assert.strictEqual(ws.GetRange("D1").GetValue(), "");
     });
@@ -105,10 +110,10 @@ $(function () {
         ws.GetRange("C1").SetValue("1");
         ws.GetRange("D1").SetValue("1");
         ws.GetRange("A1:D1").SetSort("A1", "xlAscending", null, null, null, null, "xlNo", "xlSortRows");
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "1");
-        assert.strictEqual(ws.GetRange("B1").GetValue(), "1");
-        assert.strictEqual(ws.GetRange("C1").GetValue(), "2");
-        assert.strictEqual(ws.GetRange("D1").GetValue(), "2");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 1);
+        assert.strictEqual(ws.GetRange("B1").GetValue(), 1);
+        assert.strictEqual(ws.GetRange("C1").GetValue(), 2);
+        assert.strictEqual(ws.GetRange("D1").GetValue(), 2);
     });
 
     QUnit.test("SetSort: handles mixed types (row)", function (assert) {
@@ -118,8 +123,8 @@ $(function () {
         ws.GetRange("D1").SetValue("banana");
         ws.GetRange("A1:D1").SetSort("A1", "xlAscending", null, null, null, null, "xlNo", "xlSortRows");
         // Numbers before strings
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "1");
-        assert.strictEqual(ws.GetRange("B1").GetValue(), "2");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 1);
+        assert.strictEqual(ws.GetRange("B1").GetValue(), 2);
         assert.strictEqual(ws.GetRange("C1").GetValue(), "apple");
         assert.strictEqual(ws.GetRange("D1").GetValue(), "banana");
     });
@@ -127,7 +132,7 @@ $(function () {
     QUnit.test("SetSort: handles single column (row)", function (assert) {
         ws.GetRange("A1").SetValue("5");
         ws.GetRange("A1:A1").SetSort("A1", "xlDescending", null, null, null, null, "xlNo", "xlSortRows");
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "5");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 5);
     });
 
     QUnit.test("SetSort: handles all identical values (row)", function (assert) {
@@ -148,9 +153,9 @@ $(function () {
         ws.GetRange("C1").SetValue("3");
         ws.GetRange("A1:C1").SetSort("A5", "xlAscending", null, null, null, null, "xlNo", "xlSortRows");
         // Should not crash, order unchanged
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "1");
-        assert.strictEqual(ws.GetRange("B1").GetValue(), "2");
-        assert.strictEqual(ws.GetRange("C1").GetValue(), "3");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 1);
+        assert.strictEqual(ws.GetRange("B1").GetValue(), 2);
+        assert.strictEqual(ws.GetRange("C1").GetValue(), 3);
     });
 
     QUnit.test("SetSort: with header column (row)", function (assert) {
@@ -161,9 +166,9 @@ $(function () {
         ws.GetRange("A1:D1").SetSort("B1", "xlAscending", null, null, null, null, "xlYes", "xlSortRows");
         // Header should remain at left
         assert.strictEqual(ws.GetRange("A1").GetValue(), "Header");
-        assert.strictEqual(ws.GetRange("B1").GetValue(), "1");
-        assert.strictEqual(ws.GetRange("C1").GetValue(), "2");
-        assert.strictEqual(ws.GetRange("D1").GetValue(), "3");
+        assert.strictEqual(ws.GetRange("B1").GetValue(), 1);
+        assert.strictEqual(ws.GetRange("C1").GetValue(), 2);
+        assert.strictEqual(ws.GetRange("D1").GetValue(), 3);
     });
 
     QUnit.test("SetSort: handles empty cells", function (assert) {
@@ -172,8 +177,8 @@ $(function () {
         ws.GetRange("A3").SetValue("");
         ws.GetRange("A4").SetValue("1");
         ws.GetRange("A1:A4").SetSort("A1", "xlAscending", null, null, null, null, "xlNo", "xlSortColumns");
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "1");
-        assert.strictEqual(ws.GetRange("A2").GetValue(), "2");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 1);
+        assert.strictEqual(ws.GetRange("A2").GetValue(), 2);
         assert.strictEqual(ws.GetRange("A3").GetValue(), "");
         assert.strictEqual(ws.GetRange("A4").GetValue(), "");
     });
@@ -184,10 +189,10 @@ $(function () {
         ws.GetRange("A3").SetValue("1");
         ws.GetRange("A4").SetValue("1");
         ws.GetRange("A1:A4").SetSort("A1", "xlAscending", null, null, null, null, "xlNo", "xlSortColumns");
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "1");
-        assert.strictEqual(ws.GetRange("A2").GetValue(), "1");
-        assert.strictEqual(ws.GetRange("A3").GetValue(), "2");
-        assert.strictEqual(ws.GetRange("A4").GetValue(), "2");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 1);
+        assert.strictEqual(ws.GetRange("A2").GetValue(), 1);
+        assert.strictEqual(ws.GetRange("A3").GetValue(), 2);
+        assert.strictEqual(ws.GetRange("A4").GetValue(), 2);
     });
 
     QUnit.test("SetSort: handles mixed types", function (assert) {
@@ -198,8 +203,8 @@ $(function () {
         ws.GetRange("A1:A4").SetSort("A1", "xlAscending", null, null, null, null, "xlNo", "xlSortColumns");
 
         // Numbers before strings
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "1");
-        assert.strictEqual(ws.GetRange("A2").GetValue(), "2");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 1);
+        assert.strictEqual(ws.GetRange("A2").GetValue(), 2);
         assert.strictEqual(ws.GetRange("A3").GetValue(), "apple");
         assert.strictEqual(ws.GetRange("A4").GetValue(), "banana");
     });
@@ -207,7 +212,7 @@ $(function () {
     QUnit.test("SetSort: handles single row", function (assert) {
         ws.GetRange("A1").SetValue("5");
         ws.GetRange("A1:A1").SetSort("A1", "xlDescending", null, null, null, null, "xlNo", "xlSortColumns");
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "5");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 5);
     });
 
     QUnit.test("SetSort: handles all identical values", function (assert) {
@@ -228,9 +233,9 @@ $(function () {
         ws.GetRange("A3").SetValue("3");
         ws.GetRange("A1:A3").SetSort("Z1", "xlAscending", null, null, null, null, "xlNo", "xlSortColumns");
         // Should not crash, order unchanged
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "1");
-        assert.strictEqual(ws.GetRange("A2").GetValue(), "2");
-        assert.strictEqual(ws.GetRange("A3").GetValue(), "3");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 1);
+        assert.strictEqual(ws.GetRange("A2").GetValue(), 2);
+        assert.strictEqual(ws.GetRange("A3").GetValue(), 3);
     });
 
     QUnit.test("SetSort: with header row", function (assert) {
@@ -241,9 +246,9 @@ $(function () {
         ws.GetRange("A1:A4").SetSort("A2", "xlAscending", null, null, null, null, "xlYes", "xlSortColumns");
         // Header should remain at top
         assert.strictEqual(ws.GetRange("A1").GetValue(), "Header");
-        assert.strictEqual(ws.GetRange("A2").GetValue(), "1");
-        assert.strictEqual(ws.GetRange("A3").GetValue(), "2");
-        assert.strictEqual(ws.GetRange("A4").GetValue(), "3");
+        assert.strictEqual(ws.GetRange("A2").GetValue(), 1);
+        assert.strictEqual(ws.GetRange("A3").GetValue(), 2);
+        assert.strictEqual(ws.GetRange("A4").GetValue(), 3);
     });
 
     QUnit.test("SetSort: orientation row (sort by row)", function (assert) {
@@ -251,9 +256,9 @@ $(function () {
         ws.GetRange("B1").SetValue("3");
         ws.GetRange("C1").SetValue("2");
         ws.GetRange("A1:C1").SetSort("A1", "xlAscending", null, null, null, null, "xlNo", "xlSortRows");
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "1");
-        assert.strictEqual(ws.GetRange("B1").GetValue(), "2");
-        assert.strictEqual(ws.GetRange("C1").GetValue(), "3");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 1);
+        assert.strictEqual(ws.GetRange("B1").GetValue(), 2);
+        assert.strictEqual(ws.GetRange("C1").GetValue(), 3);
     });
 
     QUnit.test("Test asc_sortRanges", function (assert) {
@@ -271,18 +276,18 @@ $(function () {
         ws.GetRange("C4").SetValue("2");
         // ApiRange
         ws.GetRange("A1:C4").SetSort("A1", "xlDescending", null, null, null, null, "xlNo", "xlSortColumns");
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "4", "Check A1");
-        assert.strictEqual(ws.GetRange("A2").GetValue(), "3", "Check A2");
-        assert.strictEqual(ws.GetRange("A3").GetValue(), "2", "Check A3");
-        assert.strictEqual(ws.GetRange("A4").GetValue(), "1", "Check A4");
-        assert.strictEqual(ws.GetRange("B1").GetValue(), "1", "Check B1");
-        assert.strictEqual(ws.GetRange("B2").GetValue(), "2", "Check B2");
-        assert.strictEqual(ws.GetRange("B3").GetValue(), "3", "Check B3");
-        assert.strictEqual(ws.GetRange("B4").GetValue(), "4", "Check B4");
-        assert.strictEqual(ws.GetRange("C1").GetValue(), "2", "Check C1");
-        assert.strictEqual(ws.GetRange("C2").GetValue(), "1", "Check C2");
-        assert.strictEqual(ws.GetRange("C3").GetValue(), "4", "Check C3");
-        assert.strictEqual(ws.GetRange("C4").GetValue(), "3", "Check C4");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 4, "Check A1");
+        assert.strictEqual(ws.GetRange("A2").GetValue(), 3, "Check A2");
+        assert.strictEqual(ws.GetRange("A3").GetValue(), 2, "Check A3");
+        assert.strictEqual(ws.GetRange("A4").GetValue(), 1, "Check A4");
+        assert.strictEqual(ws.GetRange("B1").GetValue(), 1, "Check B1");
+        assert.strictEqual(ws.GetRange("B2").GetValue(), 2, "Check B2");
+        assert.strictEqual(ws.GetRange("B3").GetValue(), 3, "Check B3");
+        assert.strictEqual(ws.GetRange("B4").GetValue(), 4, "Check B4");
+        assert.strictEqual(ws.GetRange("C1").GetValue(), 2, "Check C1");
+        assert.strictEqual(ws.GetRange("C2").GetValue(), 1, "Check C2");
+        assert.strictEqual(ws.GetRange("C3").GetValue(), 4, "Check C3");
+        assert.strictEqual(ws.GetRange("C4").GetValue(), 3, "Check C4");
     });
 
     QUnit.test("One column range sorting (A1:A5) asc/desc", function (assert) {
@@ -295,29 +300,29 @@ $(function () {
 
         // Ascending by A
         ws.GetRange("A1:A5").SetSort("A1", "xlAscending", null, null, null, null, "xlNo", "xlSortColumns");
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "1", "Asc A1");
-        assert.strictEqual(ws.GetRange("A2").GetValue(), "2", "Asc A2");
-        assert.strictEqual(ws.GetRange("A3").GetValue(), "3", "Asc A3");
-        assert.strictEqual(ws.GetRange("A4").GetValue(), "4", "Asc A4");
-        assert.strictEqual(ws.GetRange("A5").GetValue(), "5", "Asc A5");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 1, "Asc A1");
+        assert.strictEqual(ws.GetRange("A2").GetValue(), 2, "Asc A2");
+        assert.strictEqual(ws.GetRange("A3").GetValue(), 3, "Asc A3");
+        assert.strictEqual(ws.GetRange("A4").GetValue(), 4, "Asc A4");
+        assert.strictEqual(ws.GetRange("A5").GetValue(), 5, "Asc A5");
 
         // Descending by A (same range)
         ws.GetRange("A1:A5").SetSort("A1", "xlDescending", null, null, null, null, "xlNo", "xlSortColumns");
 
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "5", "Desc A1");
-        assert.strictEqual(ws.GetRange("A2").GetValue(), "4", "Desc A2");
-        assert.strictEqual(ws.GetRange("A3").GetValue(), "3", "Desc A3");
-        assert.strictEqual(ws.GetRange("A4").GetValue(), "2", "Desc A4");
-        assert.strictEqual(ws.GetRange("A5").GetValue(), "1", "Desc A5");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 5, "Desc A1");
+        assert.strictEqual(ws.GetRange("A2").GetValue(), 4, "Desc A2");
+        assert.strictEqual(ws.GetRange("A3").GetValue(), 3, "Desc A3");
+        assert.strictEqual(ws.GetRange("A4").GetValue(), 2, "Desc A4");
+        assert.strictEqual(ws.GetRange("A5").GetValue(), 1, "Desc A5");
 
         // Ascending by A
         ws.GetRange("B1").SetSort("A1", "xlDescending", null, null, null, null, "xlNo", "xlSortColumns");
 
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "5", "Asc A1");
-        assert.strictEqual(ws.GetRange("A2").GetValue(), "4", "Asc A2");
-        assert.strictEqual(ws.GetRange("A3").GetValue(), "3", "Asc A3");
-        assert.strictEqual(ws.GetRange("A4").GetValue(), "2", "Asc A4");
-        assert.strictEqual(ws.GetRange("A5").GetValue(), "1", "Asc A5");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 5, "Asc A1");
+        assert.strictEqual(ws.GetRange("A2").GetValue(), 4, "Asc A2");
+        assert.strictEqual(ws.GetRange("A3").GetValue(), 3, "Asc A3");
+        assert.strictEqual(ws.GetRange("A4").GetValue(), 2, "Asc A4");
+        assert.strictEqual(ws.GetRange("A5").GetValue(), 1, "Asc A5");
     });
 
     QUnit.test("Two-column range sorting by first key (A)", function (assert) {
@@ -335,13 +340,13 @@ $(function () {
         // Sort A1:B4 by column A ascending
         ws.GetRange("A1:B4").SetSort("A1", "xlAscending", null, null, null, null, "xlNo", "xlSortColumns");
         // Expect rows ordered by A: (1,c), (2,b), (3,a), (4,d)
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "1", "Row1 A");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 1, "Row1 A");
         assert.strictEqual(ws.GetRange("B1").GetValue(), "c", "Row1 B");
-        assert.strictEqual(ws.GetRange("A2").GetValue(), "2", "Row2 A");
+        assert.strictEqual(ws.GetRange("A2").GetValue(), 2, "Row2 A");
         assert.strictEqual(ws.GetRange("B2").GetValue(), "b", "Row2 B");
-        assert.strictEqual(ws.GetRange("A3").GetValue(), "3", "Row3 A");
+        assert.strictEqual(ws.GetRange("A3").GetValue(), 3, "Row3 A");
         assert.strictEqual(ws.GetRange("B3").GetValue(), "a", "Row3 B");
-        assert.strictEqual(ws.GetRange("A4").GetValue(), "4", "Row4 A");
+        assert.strictEqual(ws.GetRange("A4").GetValue(), 4, "Row4 A");
         assert.strictEqual(ws.GetRange("B4").GetValue(), "d", "Row4 B");
     });
 
@@ -361,13 +366,13 @@ $(function () {
         ws.GetRange("A1:B4").SetSort("B1", "xlAscending", null, null, null, null, "xlNo", "xlSortColumns");
 
         // Expect rows ordered by B: a,b,c,d with A moved accordingly -> (3,a),(2,b),(1,c),(4,d)
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "3", "Row1 A (a)");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 3, "Row1 A (a)");
         assert.strictEqual(ws.GetRange("B1").GetValue(), "a", "Row1 B (a)");
-        assert.strictEqual(ws.GetRange("A2").GetValue(), "2", "Row2 A (b)");
+        assert.strictEqual(ws.GetRange("A2").GetValue(), 2, "Row2 A (b)");
         assert.strictEqual(ws.GetRange("B2").GetValue(), "b", "Row2 B (b)");
-        assert.strictEqual(ws.GetRange("A3").GetValue(), "1", "Row3 A (c)");
+        assert.strictEqual(ws.GetRange("A3").GetValue(), 1, "Row3 A (c)");
         assert.strictEqual(ws.GetRange("B3").GetValue(), "c", "Row3 B (c)");
-        assert.strictEqual(ws.GetRange("A4").GetValue(), "4", "Row4 A (d)");
+        assert.strictEqual(ws.GetRange("A4").GetValue(), 4, "Row4 A (d)");
         assert.strictEqual(ws.GetRange("B4").GetValue(), "d", "Row4 B (d)");
     });
 
@@ -377,7 +382,7 @@ $(function () {
         ws.GetRange("A1").SetValue("42");
         // Sorting a single cell can't reorder anything
         ws.GetRange("A1:A1").SetSort("A1", "xlAscending", null, null, null, null, "xlNo", "xlSortColumns");
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "42", "Single cell remains unchanged");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 42, "Single cell remains unchanged");
     });
 
     // 5) Sorting works only when sorting key and range intersect
@@ -402,13 +407,13 @@ $(function () {
         ws.GetRange("A1:B4").SetSort("C1", "xlAscending", null, null, null, null, "xlNo", "xlSortColumns");
 
         // Expect NO changes in A/B
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "5", "A1 unchanged");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 5, "A1 unchanged");
         assert.strictEqual(ws.GetRange("B1").GetValue(), "w", "B1 unchanged");
-        assert.strictEqual(ws.GetRange("A2").GetValue(), "3", "A2 unchanged");
+        assert.strictEqual(ws.GetRange("A2").GetValue(), 3, "A2 unchanged");
         assert.strictEqual(ws.GetRange("B2").GetValue(), "y", "B2 unchanged");
-        assert.strictEqual(ws.GetRange("A3").GetValue(), "4", "A3 unchanged");
+        assert.strictEqual(ws.GetRange("A3").GetValue(), 4, "A3 unchanged");
         assert.strictEqual(ws.GetRange("B3").GetValue(), "x", "B3 unchanged");
-        assert.strictEqual(ws.GetRange("A4").GetValue(), "1", "A4 unchanged");
+        assert.strictEqual(ws.GetRange("A4").GetValue(), 1, "A4 unchanged");
         assert.strictEqual(ws.GetRange("B4").GetValue(), "z", "B4 unchanged");
     });
 
@@ -444,15 +449,15 @@ $(function () {
         );
 
         // Expected: (1,d), (1,c), (2,b), (2,a), (3,e)
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "1", "Row1 A");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 1, "Row1 A");
         assert.strictEqual(ws.GetRange("B1").GetValue(), "d", "Row1 B");
-        assert.strictEqual(ws.GetRange("A2").GetValue(), "1", "Row2 A");
+        assert.strictEqual(ws.GetRange("A2").GetValue(), 1, "Row2 A");
         assert.strictEqual(ws.GetRange("B2").GetValue(), "c", "Row2 B");
-        assert.strictEqual(ws.GetRange("A3").GetValue(), "2", "Row3 A");
+        assert.strictEqual(ws.GetRange("A3").GetValue(), 2, "Row3 A");
         assert.strictEqual(ws.GetRange("B3").GetValue(), "b", "Row3 B");
-        assert.strictEqual(ws.GetRange("A4").GetValue(), "2", "Row4 A");
+        assert.strictEqual(ws.GetRange("A4").GetValue(), 2, "Row4 A");
         assert.strictEqual(ws.GetRange("B4").GetValue(), "a", "Row4 B");
-        assert.strictEqual(ws.GetRange("A5").GetValue(), "3", "Row5 A");
+        assert.strictEqual(ws.GetRange("A5").GetValue(), 3, "Row5 A");
         assert.strictEqual(ws.GetRange("B5").GetValue(), "e", "Row5 B");
     });
 
@@ -500,44 +505,44 @@ $(function () {
         // (3,e,9)
 
         // Row 1
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "1", "R1 A");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 1, "R1 A");
         assert.strictEqual(ws.GetRange("B1").GetValue(), "c", "R1 B");
-        assert.strictEqual(ws.GetRange("C1").GetValue(), "2", "R1 C");
+        assert.strictEqual(ws.GetRange("C1").GetValue(), 2, "R1 C");
 
         // Row 2
-        assert.strictEqual(ws.GetRange("A2").GetValue(), "1", "R2 A");
+        assert.strictEqual(ws.GetRange("A2").GetValue(), 1, "R2 A");
         assert.strictEqual(ws.GetRange("B2").GetValue(), "c", "R2 B");
-        assert.strictEqual(ws.GetRange("C2").GetValue(), "1", "R2 C");
+        assert.strictEqual(ws.GetRange("C2").GetValue(), 1, "R2 C");
 
         // Row 3
-        assert.strictEqual(ws.GetRange("A3").GetValue(), "1", "R3 A");
+        assert.strictEqual(ws.GetRange("A3").GetValue(), 1, "R3 A");
         assert.strictEqual(ws.GetRange("B3").GetValue(), "d", "R3 B");
-        assert.strictEqual(ws.GetRange("C3").GetValue(), "1", "R3 C");
+        assert.strictEqual(ws.GetRange("C3").GetValue(), 1, "R3 C");
 
         // Row 4
-        assert.strictEqual(ws.GetRange("A4").GetValue(), "2", "R4 A");
+        assert.strictEqual(ws.GetRange("A4").GetValue(), 2, "R4 A");
         assert.strictEqual(ws.GetRange("B4").GetValue(), "a", "R4 B");
-        assert.strictEqual(ws.GetRange("C4").GetValue(), "5", "R4 C");
+        assert.strictEqual(ws.GetRange("C4").GetValue(), 5, "R4 C");
 
         // Row 5
-        assert.strictEqual(ws.GetRange("A5").GetValue(), "2", "R5 A");
+        assert.strictEqual(ws.GetRange("A5").GetValue(), 2, "R5 A");
         assert.strictEqual(ws.GetRange("B5").GetValue(), "a", "R5 B");
-        assert.strictEqual(ws.GetRange("C5").GetValue(), "1", "R5 C");
+        assert.strictEqual(ws.GetRange("C5").GetValue(), 1, "R5 C");
 
         // Row 6
-        assert.strictEqual(ws.GetRange("A6").GetValue(), "2", "R6 A");
+        assert.strictEqual(ws.GetRange("A6").GetValue(), 2, "R6 A");
         assert.strictEqual(ws.GetRange("B6").GetValue(), "b", "R6 B");
-        assert.strictEqual(ws.GetRange("C6").GetValue(), "3", "R6 C");
+        assert.strictEqual(ws.GetRange("C6").GetValue(), 3, "R6 C");
 
         // Row 7
-        assert.strictEqual(ws.GetRange("A7").GetValue(), "2", "R7 A");
+        assert.strictEqual(ws.GetRange("A7").GetValue(), 2, "R7 A");
         assert.strictEqual(ws.GetRange("B7").GetValue(), "b", "R7 B");
-        assert.strictEqual(ws.GetRange("C7").GetValue(), "2", "R7 C");
+        assert.strictEqual(ws.GetRange("C7").GetValue(), 2, "R7 C");
 
         // Row 8
-        assert.strictEqual(ws.GetRange("A8").GetValue(), "3", "R8 A");
+        assert.strictEqual(ws.GetRange("A8").GetValue(), 3, "R8 A");
         assert.strictEqual(ws.GetRange("B8").GetValue(), "e", "R8 B");
-        assert.strictEqual(ws.GetRange("C8").GetValue(), "9", "R8 C");
+        assert.strictEqual(ws.GetRange("C8").GetValue(), 9, "R8 C");
     });
 
     QUnit.test("Multi-key sorting by A then C (A asc, C desc) with key2=null", function (assert) {
@@ -574,34 +579,34 @@ $(function () {
         // (1, a, 4), (1, c, 2), (1, d, 1), (2, a, 5), (2, b, 3), (2, z, 2)
 
         // Row 1
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "1", "R1 A");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 1, "R1 A");
         assert.strictEqual(ws.GetRange("B1").GetValue(), "a", "R1 B");
-        assert.strictEqual(ws.GetRange("C1").GetValue(), "4", "R1 C");
+        assert.strictEqual(ws.GetRange("C1").GetValue(), 4, "R1 C");
 
         // Row 2
-        assert.strictEqual(ws.GetRange("A2").GetValue(), "1", "R2 A");
+        assert.strictEqual(ws.GetRange("A2").GetValue(), 1, "R2 A");
         assert.strictEqual(ws.GetRange("B2").GetValue(), "c", "R2 B");
-        assert.strictEqual(ws.GetRange("C2").GetValue(), "2", "R2 C");
+        assert.strictEqual(ws.GetRange("C2").GetValue(), 2, "R2 C");
 
         // Row 3
-        assert.strictEqual(ws.GetRange("A3").GetValue(), "1", "R3 A");
+        assert.strictEqual(ws.GetRange("A3").GetValue(), 1, "R3 A");
         assert.strictEqual(ws.GetRange("B3").GetValue(), "d", "R3 B");
-        assert.strictEqual(ws.GetRange("C3").GetValue(), "1", "R3 C");
+        assert.strictEqual(ws.GetRange("C3").GetValue(), 1, "R3 C");
 
         // Row 4
-        assert.strictEqual(ws.GetRange("A4").GetValue(), "2", "R4 A");
+        assert.strictEqual(ws.GetRange("A4").GetValue(), 2, "R4 A");
         assert.strictEqual(ws.GetRange("B4").GetValue(), "a", "R4 B");
-        assert.strictEqual(ws.GetRange("C4").GetValue(), "5", "R4 C");
+        assert.strictEqual(ws.GetRange("C4").GetValue(), 5, "R4 C");
 
         // Row 5
-        assert.strictEqual(ws.GetRange("A5").GetValue(), "2", "R5 A");
+        assert.strictEqual(ws.GetRange("A5").GetValue(), 2, "R5 A");
         assert.strictEqual(ws.GetRange("B5").GetValue(), "b", "R5 B");
-        assert.strictEqual(ws.GetRange("C5").GetValue(), "3", "R5 C");
+        assert.strictEqual(ws.GetRange("C5").GetValue(), 3, "R5 C");
 
         // Row 6
-        assert.strictEqual(ws.GetRange("A6").GetValue(), "2", "R6 A");
+        assert.strictEqual(ws.GetRange("A6").GetValue(), 2, "R6 A");
         assert.strictEqual(ws.GetRange("B6").GetValue(), "z", "R6 B");
-        assert.strictEqual(ws.GetRange("C6").GetValue(), "2", "R6 C");
+        assert.strictEqual(ws.GetRange("C6").GetValue(), 2, "R6 C");
     });
 
     QUnit.test("SetSort: A1:C4, sort by 'super' defined name, headers no, orientation column, should sort by A", function(assert) {
@@ -619,10 +624,10 @@ $(function () {
         ws.GetRange("A1:C4").SetSort("super", "xlDescending", null, null, null, null, "xlNo", "xlSortColumns");
 
         // sort by A Column
-        assert.strictEqual(ws.GetRange("A1").GetValue(), "4"); assert.strictEqual(ws.GetRange("B1").GetValue(), "1"); assert.strictEqual(ws.GetRange("C1").GetValue(), "2");
-        assert.strictEqual(ws.GetRange("A2").GetValue(), "3"); assert.strictEqual(ws.GetRange("B2").GetValue(), "2"); assert.strictEqual(ws.GetRange("C2").GetValue(), "1");
-        assert.strictEqual(ws.GetRange("A3").GetValue(), "2"); assert.strictEqual(ws.GetRange("B3").GetValue(), "3"); assert.strictEqual(ws.GetRange("C3").GetValue(), "4");
-        assert.strictEqual(ws.GetRange("A4").GetValue(), "1"); assert.strictEqual(ws.GetRange("B4").GetValue(), "4"); assert.strictEqual(ws.GetRange("C4").GetValue(), "3");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 4); assert.strictEqual(ws.GetRange("B1").GetValue(), 1); assert.strictEqual(ws.GetRange("C1").GetValue(), 2);
+        assert.strictEqual(ws.GetRange("A2").GetValue(), 3); assert.strictEqual(ws.GetRange("B2").GetValue(), 2); assert.strictEqual(ws.GetRange("C2").GetValue(), 1);
+        assert.strictEqual(ws.GetRange("A3").GetValue(), 2); assert.strictEqual(ws.GetRange("B3").GetValue(), 3); assert.strictEqual(ws.GetRange("C3").GetValue(), 4);
+        assert.strictEqual(ws.GetRange("A4").GetValue(), 1); assert.strictEqual(ws.GetRange("B4").GetValue(), 4); assert.strictEqual(ws.GetRange("C4").GetValue(), 3);
     });
 
     QUnit.test("SetSort: negativeIndexColumn", function(assert) {
@@ -633,10 +638,10 @@ $(function () {
 
         ws.GetRange("G8:H11").SetSort("negativeIndexColumn", "xlDescending", null, null, null, null, "xlNo", "xlSortColumns");
         // should be no changes at all
-        assert.strictEqual(ws.GetRange("F8").GetValue(), "1"); assert.strictEqual(ws.GetRange('G8').GetValue(), "4"); assert.strictEqual(ws.GetRange("H8").GetValue(), "3");
-        assert.strictEqual(ws.GetRange("F9").GetValue(), "2"); assert.strictEqual(ws.GetRange('G9').GetValue(), "3"); assert.strictEqual(ws.GetRange("H9").GetValue(), "4");
-        assert.strictEqual(ws.GetRange("F10").GetValue(), "3"); assert.strictEqual(ws.GetRange('G10').GetValue(), "2"); assert.strictEqual(ws.GetRange("H10").GetValue(), "1");
-        assert.strictEqual(ws.GetRange("F11").GetValue(), "4"); assert.strictEqual(ws.GetRange('G11').GetValue(), "1"); assert.strictEqual(ws.GetRange("H11").GetValue(), "2");
+        assert.strictEqual(ws.GetRange("F8").GetValue(), 1); assert.strictEqual(ws.GetRange('G8').GetValue(), 4); assert.strictEqual(ws.GetRange("H8").GetValue(), 3);
+        assert.strictEqual(ws.GetRange("F9").GetValue(), 2); assert.strictEqual(ws.GetRange('G9').GetValue(), 3); assert.strictEqual(ws.GetRange("H9").GetValue(), 4);
+        assert.strictEqual(ws.GetRange("F10").GetValue(), 3); assert.strictEqual(ws.GetRange('G10').GetValue(), 2); assert.strictEqual(ws.GetRange("H10").GetValue(), 1);
+        assert.strictEqual(ws.GetRange("F11").GetValue(), 4); assert.strictEqual(ws.GetRange('G11').GetValue(), 1); assert.strictEqual(ws.GetRange("H11").GetValue(), 2);
     });
 
     QUnit.test("SetSort: negativeIndexRow", function(assert) {
@@ -647,10 +652,10 @@ $(function () {
 
         ws.GetRange("F9:H11").SetSort("negativeIndexRow", "xlDescending", null, null, null, null, "xlNo", "xlSortRows");
         // should be no changes at all
-        assert.strictEqual(ws.GetRange("F8").GetValue(), "1"); assert.strictEqual(ws.GetRange('G8').GetValue(), "4"); assert.strictEqual(ws.GetRange("H8").GetValue(), "3");
-        assert.strictEqual(ws.GetRange("F9").GetValue(), "2"); assert.strictEqual(ws.GetRange('G9').GetValue(), "3"); assert.strictEqual(ws.GetRange("H9").GetValue(), "4");
-        assert.strictEqual(ws.GetRange("F10").GetValue(), "3"); assert.strictEqual(ws.GetRange('G10').GetValue(), "2"); assert.strictEqual(ws.GetRange("H10").GetValue(), "1");
-        assert.strictEqual(ws.GetRange("F11").GetValue(), "4"); assert.strictEqual(ws.GetRange('G11').GetValue(), "1"); assert.strictEqual(ws.GetRange("H11").GetValue(), "2");
+        assert.strictEqual(ws.GetRange("F8").GetValue(), 1); assert.strictEqual(ws.GetRange('G8').GetValue(), 4); assert.strictEqual(ws.GetRange("H8").GetValue(), 3);
+        assert.strictEqual(ws.GetRange("F9").GetValue(), 2); assert.strictEqual(ws.GetRange('G9').GetValue(), 3); assert.strictEqual(ws.GetRange("H9").GetValue(), 4);
+        assert.strictEqual(ws.GetRange("F10").GetValue(), 3); assert.strictEqual(ws.GetRange('G10').GetValue(), 2); assert.strictEqual(ws.GetRange("H10").GetValue(), 1);
+        assert.strictEqual(ws.GetRange("F11").GetValue(), 4); assert.strictEqual(ws.GetRange('G11').GetValue(), 1); assert.strictEqual(ws.GetRange("H11").GetValue(), 2);
     });
 
     QUnit.test("SetSort: outOfRangeColumn", function(assert) {
@@ -661,10 +666,10 @@ $(function () {
 
         ws.GetRange("F8:G11").SetSort("outOfRangeColumn", "xlDescending", null, null, null, null, "xlNo", "xlSortColumns");
         // should be no changes at all
-        assert.strictEqual(ws.GetRange("F8").GetValue(), "1"); assert.strictEqual(ws.GetRange('G8').GetValue(), "4"); assert.strictEqual(ws.GetRange("H8").GetValue(), "3");
-        assert.strictEqual(ws.GetRange("F9").GetValue(), "2"); assert.strictEqual(ws.GetRange('G9').GetValue(), "3"); assert.strictEqual(ws.GetRange("H9").GetValue(), "4");
-        assert.strictEqual(ws.GetRange("F10").GetValue(), "3"); assert.strictEqual(ws.GetRange('G10').GetValue(), "2"); assert.strictEqual(ws.GetRange("H10").GetValue(), "1");
-        assert.strictEqual(ws.GetRange("F11").GetValue(), "4"); assert.strictEqual(ws.GetRange('G11').GetValue(), "1"); assert.strictEqual(ws.GetRange("H11").GetValue(), "2");
+        assert.strictEqual(ws.GetRange("F8").GetValue(), 1); assert.strictEqual(ws.GetRange('G8').GetValue(), 4); assert.strictEqual(ws.GetRange("H8").GetValue(), 3);
+        assert.strictEqual(ws.GetRange("F9").GetValue(), 2); assert.strictEqual(ws.GetRange('G9').GetValue(), 3); assert.strictEqual(ws.GetRange("H9").GetValue(), 4);
+        assert.strictEqual(ws.GetRange("F10").GetValue(), 3); assert.strictEqual(ws.GetRange('G10').GetValue(), 2); assert.strictEqual(ws.GetRange("H10").GetValue(), 1);
+        assert.strictEqual(ws.GetRange("F11").GetValue(), 4); assert.strictEqual(ws.GetRange('G11').GetValue(), 1); assert.strictEqual(ws.GetRange("H11").GetValue(), 2);
     });
 
     QUnit.test("SetSort: outOfRangeRow", function(assert) {
@@ -675,9 +680,727 @@ $(function () {
 
         ws.GetRange("F8:H10").SetSort("outOfRangeRow", "xlDescending", null, null, null, null, "xlNo", "xlSortRows");
         // should be no changes at all
-        assert.strictEqual(ws.GetRange("F8").GetValue(), "1"); assert.strictEqual(ws.GetRange('G8').GetValue(), "4"); assert.strictEqual(ws.GetRange("H8").GetValue(), "3");
-        assert.strictEqual(ws.GetRange("F9").GetValue(), "2"); assert.strictEqual(ws.GetRange('G9').GetValue(), "3"); assert.strictEqual(ws.GetRange("H9").GetValue(), "4");
-        assert.strictEqual(ws.GetRange("F10").GetValue(), "3"); assert.strictEqual(ws.GetRange('G10').GetValue(), "2"); assert.strictEqual(ws.GetRange("H10").GetValue(), "1");
-        assert.strictEqual(ws.GetRange("F11").GetValue(), "4"); assert.strictEqual(ws.GetRange('G11').GetValue(), "1"); assert.strictEqual(ws.GetRange("H11").GetValue(), "2");
+        assert.strictEqual(ws.GetRange("F8").GetValue(), 1); assert.strictEqual(ws.GetRange('G8').GetValue(), 4); assert.strictEqual(ws.GetRange("H8").GetValue(), 3);
+        assert.strictEqual(ws.GetRange("F9").GetValue(), 2); assert.strictEqual(ws.GetRange('G9').GetValue(), 3); assert.strictEqual(ws.GetRange("H9").GetValue(), 4);
+        assert.strictEqual(ws.GetRange("F10").GetValue(), 3); assert.strictEqual(ws.GetRange('G10').GetValue(), 2); assert.strictEqual(ws.GetRange("H10").GetValue(), 1);
+        assert.strictEqual(ws.GetRange("F11").GetValue(), 4); assert.strictEqual(ws.GetRange('G11').GetValue(), 1); assert.strictEqual(ws.GetRange("H11").GetValue(), 2);
     });
+
+    QUnit.module("GetValue typed return values");
+
+    QUnit.test("GetValue: single cell returns correct JS type", function (assert) {
+        // integer number
+        ws.GetRange("A1").SetValue("42");
+        assert.strictEqual(ws.GetRange("A1").GetValue(), 42, "integer → number");
+        assert.strictEqual(typeof ws.GetRange("A1").GetValue(), "number", "integer typeof number");
+
+        // fractional number
+        ws.GetRange("A2").SetValue("3.14");
+        assert.strictEqual(ws.GetRange("A2").GetValue(), 3.14, "float → number");
+        assert.strictEqual(typeof ws.GetRange("A2").GetValue(), "number", "float typeof number");
+
+        // boolean true via formula
+        ws.GetRange("A3").SetValue("=TRUE()");
+        assert.strictEqual(ws.GetRange("A3").GetValue(), true, "TRUE() → boolean true");
+        assert.strictEqual(typeof ws.GetRange("A3").GetValue(), "boolean", "TRUE() typeof boolean");
+
+        // boolean false via formula
+        ws.GetRange("A4").SetValue("=FALSE()");
+        assert.strictEqual(ws.GetRange("A4").GetValue(), false, "FALSE() → boolean false");
+        assert.strictEqual(typeof ws.GetRange("A4").GetValue(), "boolean", "FALSE() typeof boolean");
+
+        // string
+        ws.GetRange("A5").SetValue("hello");
+        assert.strictEqual(ws.GetRange("A5").GetValue(), "hello", "text → string");
+        assert.strictEqual(typeof ws.GetRange("A5").GetValue(), "string", "text typeof string");
+
+        // empty cell
+        ws.GetRange("A6").SetValue("");
+        assert.strictEqual(ws.GetRange("A6").GetValue(), "", "empty → empty string");
+    });
+
+    QUnit.test("GetValue: multi-cell range returns 2D array with correct types", function (assert) {
+        ws.GetRange("B1").SetValue("10");
+        ws.GetRange("B2").SetValue("=TRUE()");
+        ws.GetRange("B3").SetValue("text");
+
+        var result = ws.GetRange("B1:B3").GetValue();
+
+        assert.ok(Array.isArray(result), "result is array");
+        assert.strictEqual(result[0][0], 10, "[0][0] integer");
+        assert.strictEqual(result[1][0], true, "[1][0] boolean true");
+        assert.strictEqual(result[2][0], "text", "[2][0] string");
+    });
+
+	QUnit.test("Clear", function (assert) {
+		ws.GetRange("A1").SetValue("test");
+		assert.strictEqual(ws.GetRange("A1").Clear(), true, "Clear returns true");
+		assert.strictEqual(ws.GetRange("A1").GetValue(), "", "Cell is empty after Clear");
+	});
+
+	QUnit.test("SetOffset", function (assert) {
+		const range = ws.GetRange("A1");
+		assert.strictEqual(range.SetOffset(2, 2), true, "SetOffset returns true");
+		assert.strictEqual(range.GetAddress(false, false, "xlA1", false), "C3", "Range address is C3 after SetOffset(2, 2) from A1");
+	});
+
+	QUnit.test("SetFontColor", function (assert) {
+		const range = ws.GetRange("A1");
+		const color = AscTest.JsApi.CreateColorFromRGB(255, 0, 0);
+		assert.strictEqual(range.SetFontColor(color), true, "SetFontColor returns true");
+	});
+
+	QUnit.test("SetHidden", function (assert) {
+		const sheet = AscTest.JsApi.GetActiveSheet();
+		const colRange = sheet.GetRangeByNumber(0, 0).GetEntireColumn();
+
+		assert.strictEqual(colRange.SetHidden(true), true, "SetHidden returns true");
+		assert.strictEqual(colRange.GetHidden(), true, "Column is hidden after SetHidden(true)");
+
+		assert.strictEqual(colRange.SetHidden(false), true, "SetHidden returns true");
+		assert.strictEqual(colRange.GetHidden(), false, "Column is visible after SetHidden(false)");
+	});
+
+	QUnit.test("SetRowHeight", function (assert) {
+		const range = ws.GetRange("A1");
+		assert.strictEqual(range.SetRowHeight(30), true, "SetRowHeight returns true");
+		assert.strictEqual(range.GetRowHeight(), 30, "GetRowHeight returns the value that was set");
+	});
+
+	QUnit.test("SetFontSize", function (assert) {
+		const range = ws.GetRange("A1");
+		assert.strictEqual(range.SetFontSize(14), true, "SetFontSize returns true");
+	});
+
+	QUnit.test("SetFontName", function (assert) {
+		const range = ws.GetRange("A1");
+		assert.strictEqual(range.SetFontName("Arial"), true, "SetFontName returns true");
+	});
+
+	QUnit.test("SetBold", function (assert) {
+		const range = ws.GetRange("A1");
+		assert.strictEqual(range.SetBold(true), true, "SetBold returns true");
+	});
+
+	QUnit.test("SetItalic", function (assert) {
+		const range = ws.GetRange("A1");
+		assert.strictEqual(range.SetItalic(true), true, "SetItalic returns true");
+	});
+
+	QUnit.test("SetUnderline", function (assert) {
+		const range = ws.GetRange("A1");
+		assert.strictEqual(range.SetUnderline("single"), true, "SetUnderline returns true");
+	});
+
+	QUnit.test("SetStrikeout", function (assert) {
+		const range = ws.GetRange("A1");
+		assert.strictEqual(range.SetStrikeout(true), true, "SetStrikeout returns true");
+	});
+
+	QUnit.test("SetWrap", function (assert) {
+		const range = ws.GetRange("A1");
+		assert.strictEqual(range.SetWrap(true), true, "SetWrap returns true");
+		assert.strictEqual(range.GetWrapText(), true, "GetWrapText returns true after SetWrap(true)");
+
+		assert.strictEqual(range.SetWrap(false), true, "SetWrap returns true");
+		assert.strictEqual(range.GetWrapText(), false, "GetWrapText returns false after SetWrap(false)");
+	});
+
+	QUnit.test("SetFillColor", function (assert) {
+		const range = ws.GetRange("A1");
+		const color = AscTest.JsApi.CreateColorFromRGB(0, 255, 0);
+
+		assert.strictEqual(range.SetFillColor(color), true, "SetFillColor returns true");
+		const fillColor = range.GetFillColor();
+		assert.ok(fillColor && typeof fillColor === "object", "GetFillColor returns a color object after SetFillColor");
+
+		assert.strictEqual(range.SetFillColor("No Fill"), true, "SetFillColor returns true for No Fill");
+		assert.strictEqual(range.GetFillColor(), "No Fill", "GetFillColor returns 'No Fill' after clearing fill");
+	});
+
+	QUnit.test("SetNumberFormat", function (assert) {
+		const range = ws.GetRange("A1");
+		assert.strictEqual(range.SetNumberFormat("0.00"), true, "SetNumberFormat returns true");
+		assert.strictEqual(range.GetNumberFormat(), "0.00", "GetNumberFormat returns the format that was set");
+	});
+
+	QUnit.test("SetBorders", function (assert) {
+		const range = ws.GetRange("A1");
+		const color = AscTest.JsApi.CreateColorFromRGB(0, 0, 0);
+		assert.strictEqual(range.SetBorders("Bottom", "Thin", color), true, "SetBorders returns true");
+	});
+
+	QUnit.test("Merge / UnMerge", function (assert) {
+		const range = ws.GetRange("B2:C3");
+		assert.strictEqual(range.Merge(false), true, "Merge returns true");
+		assert.strictEqual(range.UnMerge(), true, "UnMerge returns true");
+	});
+
+	QUnit.test("ForEach", function (assert) {
+		ws.GetRange("A1").SetValue("1");
+		ws.GetRange("A2").SetValue("2");
+		const cells = [];
+		assert.strictEqual(ws.GetRange("A1:A2").ForEach(function (cell) { cells.push(cell.GetValue()); }), true, "ForEach returns true when callback is a function");
+		assert.strictEqual(ws.GetRange("A1:A2").ForEach(null), false, "ForEach returns false when callback is not a function");
+	});
+
+	QUnit.test("Select", function (assert) {
+		assert.strictEqual(ws.GetRange("A1").Select(), true, "Select returns true for range on active sheet");
+	});
+
+    QUnit.module("Test api range find for all editors");
+
+    QUnit.test("Find: finds first exact match by rows", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("100");
+        ws.GetRange("B1").SetValue("200");
+        ws.GetRange("C1").SetValue("300");
+        ws.GetRange("A2").SetValue("200");
+        ws.GetRange("B2").SetValue("400");
+        ws.GetRange("C2").SetValue("200");
+
+        const range = ws.GetRange("A1:C2");
+        const found = range.Find("200", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", false);
+
+        assert.ok(found, "Find returned a range");
+        assert.strictEqual(found.GetAddress(true, true, "xlA1", false), "$B$1", "First match by rows is B1");
+    });
+
+    QUnit.test("Find: finds first exact match by columns", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("100");
+        ws.GetRange("B1").SetValue("200");
+        ws.GetRange("C1").SetValue("300");
+        ws.GetRange("A2").SetValue("200");
+        ws.GetRange("B2").SetValue("400");
+        ws.GetRange("C2").SetValue("200");
+
+        const range = ws.GetRange("A1:C2");
+        const found = range.Find("200", "A1", "xlValues", "xlWhole", "xlByColumns", "xlNext", false);
+
+        assert.ok(found, "Find returned a range");
+        assert.strictEqual(found.GetAddress(true, true, "xlA1", false), "$A$2", "First match by columns is A2");
+    });
+
+    QUnit.test("Find: returns null when value does not exist", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("100");
+        ws.GetRange("A2").SetValue("200");
+        ws.GetRange("A3").SetValue("300");
+
+        const range = ws.GetRange("A1:A3");
+        const found = range.Find("999", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", false);
+
+        assert.strictEqual(found, null, "Find returns null when nothing found");
+    });
+
+    QUnit.test("FindNext: iterates all matches by rows", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("200");
+        ws.GetRange("B1").SetValue("x");
+        ws.GetRange("C1").SetValue("200");
+        ws.GetRange("A2").SetValue("y");
+        ws.GetRange("B2").SetValue("200");
+        ws.GetRange("C2").SetValue("z");
+
+        const range = ws.GetRange("A1:C2");
+        const first = range.Find("200", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", false);
+        const second = range.FindNext(first);
+        const third = range.FindNext(second);
+
+        assert.ok(first, "First result exists");
+        assert.ok(second, "Second result exists");
+        assert.ok(third, "Third result exists");
+
+        assert.strictEqual(first.GetAddress(true, true, "xlA1", false), "$C$1", "First match is C1");
+        assert.strictEqual(second.GetAddress(true, true, "xlA1", false), "$B$2", "Second match is B2");
+        assert.strictEqual(third.GetAddress(true, true, "xlA1", false), "$A$1", "Third match wrapped to A1");
+    });
+
+    QUnit.test("FindNext: iterates all matches by columns", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("200");
+        ws.GetRange("B1").SetValue("x");
+        ws.GetRange("C1").SetValue("200");
+        ws.GetRange("A2").SetValue("y");
+        ws.GetRange("B2").SetValue("200");
+        ws.GetRange("C2").SetValue("z");
+
+        const range = ws.GetRange("A1:C2");
+        const first = range.Find("200", "A1", "xlValues", "xlWhole", "xlByColumns", "xlNext", false);
+        const second = range.FindNext(first);
+        const third = range.FindNext(second);
+
+        assert.ok(first, "First result exists");
+        assert.ok(second, "Second result exists");
+        assert.ok(third, "Third result exists");
+
+        assert.strictEqual(first.GetAddress(true, true, "xlA1", false), "$B$2", "First match is B2");
+        assert.strictEqual(second.GetAddress(true, true, "xlA1", false), "$C$1", "Second match is C1");
+        assert.strictEqual(third.GetAddress(true, true, "xlA1", false), "$A$1", "Third match wrapped to A1");
+    });
+
+    QUnit.test("FindPrevious: iterates backwards by rows", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("200");
+        ws.GetRange("B1").SetValue("x");
+        ws.GetRange("C1").SetValue("200");
+        ws.GetRange("A2").SetValue("y");
+        ws.GetRange("B2").SetValue("200");
+        ws.GetRange("C2").SetValue("z");
+
+        const range = ws.GetRange("A1:C2");
+        const first = range.Find("200", "C2", "xlValues", "xlWhole", "xlByRows", "xlPrevious", false);
+        const second = range.FindPrevious(first);
+        const third = range.FindPrevious(second);
+
+        assert.ok(first, "First result exists");
+        assert.ok(second, "Second result exists");
+        assert.ok(third, "Third result exists");
+
+        assert.strictEqual(first.GetAddress(true, true, "xlA1", false), "$B$2", "First previous match is B2");
+        assert.strictEqual(second.GetAddress(true, true, "xlA1", false), "$C$1", "Second previous match is C1");
+        assert.strictEqual(third.GetAddress(true, true, "xlA1", false), "$A$1", "Third previous match is A1");
+    });
+
+    QUnit.test("FindPrevious: iterates backwards by columns", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("200");
+        ws.GetRange("B1").SetValue("x");
+        ws.GetRange("C1").SetValue("200");
+        ws.GetRange("A2").SetValue("y");
+        ws.GetRange("B2").SetValue("200");
+        ws.GetRange("C2").SetValue("z");
+
+        const range = ws.GetRange("A1:C2");
+        const first = range.Find("200", "C2", "xlValues", "xlWhole", "xlByColumns", "xlPrevious", false);
+        const second = range.FindPrevious(first);
+        const third = range.FindPrevious(second);
+
+        assert.ok(first, "First result exists");
+        assert.ok(second, "Second result exists");
+        assert.ok(third, "Third result exists");
+
+        assert.strictEqual(first.GetAddress(true, true, "xlA1", false), "$C$1", "First previous match is C1");
+        assert.strictEqual(second.GetAddress(true, true, "xlA1", false), "$B$2", "Second previous match is B2");
+        assert.strictEqual(third.GetAddress(true, true, "xlA1", false), "$A$1", "Third previous match is A1");
+    });
+
+    QUnit.test("Find: match case works correctly", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("Test");
+        ws.GetRange("A2").SetValue("TEST");
+        ws.GetRange("A3").SetValue("test");
+
+        const range = ws.GetRange("A1:A3");
+
+        const caseInsensitive = range.Find("test", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", false);
+        const caseSensitive = range.Find("test", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", true);
+
+        assert.ok(caseInsensitive, "Case-insensitive find returned a result");
+        assert.ok(caseSensitive, "Case-sensitive find returned a result");
+
+        assert.strictEqual(caseInsensitive.GetAddress(true, true, "xlA1", false), "$A$2", "Case-insensitive matched A2");
+        assert.strictEqual(caseSensitive.GetAddress(true, true, "xlA1", false), "$A$3", "Case-sensitive matched exact case A3");
+    });
+
+    QUnit.test("Find: LookAt xlPart works correctly", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("abc");
+        ws.GetRange("A2").SetValue("abc200xyz");
+        ws.GetRange("A3").SetValue("200");
+
+        const range = ws.GetRange("A1:A3");
+
+        const whole = range.Find("200", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", false);
+        const part = range.Find("200", "A1", "xlValues", "xlPart", "xlByRows", "xlNext", false);
+
+        assert.ok(whole, "Whole search returned a result");
+        assert.ok(part, "Part search returned a result");
+
+        assert.strictEqual(whole.GetAddress(true, true, "xlA1", false), "$A$3", "Whole match found A3");
+        assert.strictEqual(part.GetAddress(true, true, "xlA1", false), "$A$2", "Part match found A2");
+    });
+
+    QUnit.test("Find: starts after middle cell with xlByRows + xlNext", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("200");
+        ws.GetRange("B1").SetValue("x");
+        ws.GetRange("C1").SetValue("200");
+        ws.GetRange("A2").SetValue("200");
+        ws.GetRange("B2").SetValue("y");
+        ws.GetRange("C2").SetValue("z");
+
+        const range = ws.GetRange("A1:C2");
+        const found = range.Find("200", "B1", "xlValues", "xlWhole", "xlByRows", "xlNext", false);
+
+        assert.ok(found, "Find returned a range");
+        assert.strictEqual(found.GetAddress(true, true, "xlA1", false), "$C$1", "Search starts after B1 and finds C1");
+    });
+
+    QUnit.test("Find: starts after middle cell with xlByColumns + xlNext", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("200");
+        ws.GetRange("B1").SetValue("x");
+        ws.GetRange("C1").SetValue("200");
+        ws.GetRange("A2").SetValue("200");
+        ws.GetRange("B2").SetValue("y");
+        ws.GetRange("C2").SetValue("z");
+
+        const range = ws.GetRange("A1:C2");
+        const found = range.Find("200", "A1", "xlValues", "xlWhole", "xlByColumns", "xlNext", false);
+
+        assert.ok(found, "Find returned a range");
+        assert.strictEqual(found.GetAddress(true, true, "xlA1", false), "$A$2", "Search by columns starts after A1 and finds A2");
+    });
+
+    QUnit.test("Find: xlPrevious + xlByRows", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("200");
+        ws.GetRange("B1").SetValue("x");
+        ws.GetRange("C1").SetValue("200");
+        ws.GetRange("A2").SetValue("200");
+        ws.GetRange("B2").SetValue("y");
+        ws.GetRange("C2").SetValue("z");
+
+        const range = ws.GetRange("A1:C2");
+        const found = range.Find("200", "B2", "xlValues", "xlWhole", "xlByRows", "xlPrevious", false);
+
+        assert.ok(found, "Find returned a range");
+        assert.strictEqual(found.GetAddress(true, true, "xlA1", false), "$A$2", "Previous by rows from B2 finds A2");
+    });
+
+    QUnit.test("Find: xlPrevious + xlByColumns", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("200");
+        ws.GetRange("B1").SetValue("x");
+        ws.GetRange("C1").SetValue("200");
+        ws.GetRange("A2").SetValue("200");
+        ws.GetRange("B2").SetValue("y");
+        ws.GetRange("C2").SetValue("z");
+
+        const range = ws.GetRange("A1:C2");
+        const found = range.Find("200", "C2", "xlValues", "xlWhole", "xlByColumns", "xlPrevious", false);
+
+        assert.ok(found, "Find returned a range");
+        assert.strictEqual(found.GetAddress(true, true, "xlA1", false), "$C$1", "Previous by columns from C2 finds C1");
+    });
+
+    QUnit.test("Find: xlWhole vs xlPart", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("1200");
+        ws.GetRange("A2").SetValue("200");
+        ws.GetRange("A3").SetValue("abc200def");
+
+        const range = ws.GetRange("A1:A3");
+
+        const whole = range.Find("200", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", false);
+        const part = range.Find("200", "A1", "xlValues", "xlPart", "xlByRows", "xlNext", false);
+
+        assert.ok(whole, "Whole search found a result");
+        assert.ok(part, "Part search found a result");
+
+        assert.strictEqual(whole.GetAddress(true, true, "xlA1", false), "$A$2", "xlWhole finds exact 200");
+        assert.strictEqual(part.GetAddress(true, true, "xlA1", false), "$A$2", "First xlPart result after A1 is A2");
+    });
+
+    QUnit.test("Find: xlPart wraps around correctly", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("asdf");
+        ws.GetRange("A2").SetValue("abc200");
+        ws.GetRange("A3").SetValue("x");
+        ws.GetRange("A4").SetValue("200");
+
+        const range = ws.GetRange("A1:A4");
+        const found = range.Find("200", "A4", "xlValues", "xlPart", "xlByRows", "xlNext", false);
+
+        assert.ok(found, "Find returned a range");
+        assert.strictEqual(found.GetAddress(true, true, "xlA1", false), "$A$2", "Wrapped and found A2");
+    });
+
+    QUnit.test("FindNext: numeric duplicates by rows", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("200");
+        ws.GetRange("A2").SetValue("200");
+        ws.GetRange("B1").SetValue("200");
+        ws.GetRange("C1").SetValue("200");
+        console.log("here");
+        const range = ws.GetRange("A1:C2");
+        const first = range.Find("200", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", false);
+        const second = range.FindNext(first);
+        const third = range.FindNext(second);
+        const fourth = range.FindNext(third);
+
+        assert.strictEqual(first.GetAddress(true, true, "xlA1", false), "$B$1", "First is B1");
+        assert.strictEqual(second.GetAddress(true, true, "xlA1", false), "$C$1", "Second is C1");
+        assert.strictEqual(third.GetAddress(true, true, "xlA1", false), "$A$2", "Third is A2");
+        assert.strictEqual(fourth.GetAddress(true, true, "xlA1", false), "$A$1", "Fourth wraps to A1");
+    });
+
+    QUnit.test("FindNext: numeric duplicates by columns", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("200");
+        ws.GetRange("A2").SetValue("200");
+        ws.GetRange("B1").SetValue("200");
+        ws.GetRange("C1").SetValue("200");
+
+        const range = ws.GetRange("A1:C2");
+        const first = range.Find("200", "A1", "xlValues", "xlWhole", "xlByColumns", "xlNext", false);
+        const second = range.FindNext(first);
+        const third = range.FindNext(second);
+        const fourth = range.FindNext(third);
+
+        assert.strictEqual(first.GetAddress(true, true, "xlA1", false), "$A$2", "First is A2");
+        assert.strictEqual(second.GetAddress(true, true, "xlA1", false), "$B$1", "Second is B1");
+        assert.strictEqual(third.GetAddress(true, true, "xlA1", false), "$C$1", "Third is C1");
+        assert.strictEqual(fourth.GetAddress(true, true, "xlA1", false), "$A$1", "Fourth wraps to A1");
+    });
+
+    QUnit.test("FindPrevious: numeric duplicates by rows", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("200");
+        ws.GetRange("A2").SetValue("200");
+        ws.GetRange("B1").SetValue("200");
+        ws.GetRange("C1").SetValue("200");
+
+        const range = ws.GetRange("A1:C2");
+        const first = range.Find("200", "A1", "xlValues", "xlWhole", "xlByRows", "xlPrevious", false);
+        const second = range.FindPrevious(first);
+        const third = range.FindPrevious(second);
+        const fourth = range.FindPrevious(third);
+
+        assert.strictEqual(first.GetAddress(true, true, "xlA1", false), "$A$2", "First is A2");
+        assert.strictEqual(second.GetAddress(true, true, "xlA1", false), "$C$1", "Second is C1");
+        assert.strictEqual(third.GetAddress(true, true, "xlA1", false), "$B$1", "Third is B1");
+        assert.strictEqual(fourth.GetAddress(true, true, "xlA1", false), "$A$1", "Fourth wraps to A1");
+    });
+
+    QUnit.test("FindPrevious: numeric duplicates by columns", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("200");
+        ws.GetRange("A2").SetValue("200");
+        ws.GetRange("B1").SetValue("200");
+        ws.GetRange("C1").SetValue("200");
+
+        const range = ws.GetRange("A1:C2");
+        const first = range.Find("200", "A1", "xlValues", "xlWhole", "xlByColumns", "xlPrevious", false);
+        const second = range.FindPrevious(first);
+        const third = range.FindPrevious(second);
+        const fourth = range.FindPrevious(third);
+
+        assert.strictEqual(first.GetAddress(true, true, "xlA1", false), "$C$1", "First is C1");
+        assert.strictEqual(second.GetAddress(true, true, "xlA1", false), "$B$1", "Second is B1");
+        assert.strictEqual(third.GetAddress(true, true, "xlA1", false), "$A$2", "Third is A2");
+        assert.strictEqual(fourth.GetAddress(true, true, "xlA1", false), "$A$1", "Fourth wraps to A1");
+    });
+
+    QUnit.test("Find: on non-active sheet returns result from that sheet", function (assert) {
+        initializeTest();
+        const sheet2 = AscTest.JsApi.AddSheet("FindSheet2_" + Date.now());
+        sheet2.GetRange("B2").SetValue("hello");
+        ws.SetActive();
+
+        const found = sheet2.GetRange("A1:D4").Find("hello", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", false);
+
+        assert.ok(found, "Find returned a range");
+        assert.strictEqual(found.GetAddress(true, true, "xlA1", false), "$B$2", "Found in B2 on sheet2");
+
+        sheet2.Delete();
+    });
+
+    QUnit.test("Find: returns null on non-active sheet when value absent", function (assert) {
+        initializeTest();
+        const sheet2 = AscTest.JsApi.AddSheet("FindSheet2Null_" + Date.now());
+        sheet2.GetRange("A1").SetValue("other");
+        ws.SetActive();
+
+        const found = sheet2.GetRange("A1:D4").Find("missing", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", false);
+
+        assert.strictEqual(found, null, "Returns null when value not found on non-active sheet");
+
+        sheet2.Delete();
+    });
+
+    QUnit.test("FindNext: on non-active sheet iterates correctly", function (assert) {
+        initializeTest();
+        const sheet2 = AscTest.JsApi.AddSheet("FindNextSheet2_" + Date.now());
+        sheet2.GetRange("A1").SetValue("x");
+        sheet2.GetRange("B1").SetValue("x");
+        sheet2.GetRange("C1").SetValue("x");
+        ws.SetActive();
+
+        const range = sheet2.GetRange("A1:C1");
+        const first = range.Find("x", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", false);
+        const second = range.FindNext(first);
+        const third = range.FindNext(second);
+        const fourth = range.FindNext(third);
+
+        assert.strictEqual(first.GetAddress(true, true, "xlA1", false), "$B$1", "First is B1");
+        assert.strictEqual(second.GetAddress(true, true, "xlA1", false), "$C$1", "Second is C1");
+        assert.strictEqual(third.GetAddress(true, true, "xlA1", false), "$A$1", "Third wraps to A1");
+        assert.strictEqual(fourth.GetAddress(true, true, "xlA1", false), "$B$1", "Fourth wraps to B1");
+
+        sheet2.Delete();
+    });
+
+    QUnit.test("FindPrevious: on non-active sheet iterates correctly", function (assert) {
+        initializeTest();
+        const sheet2 = AscTest.JsApi.AddSheet("FindPrevSheet2_" + Date.now());
+        sheet2.GetRange("A1").SetValue("y");
+        sheet2.GetRange("B1").SetValue("y");
+        sheet2.GetRange("C1").SetValue("y");
+        ws.SetActive();
+
+        const range = sheet2.GetRange("A1:C1");
+        const first = range.Find("y", "A1", "xlValues", "xlWhole", "xlByRows", "xlPrevious", false);
+        const second = range.FindPrevious(first);
+        const third = range.FindPrevious(second);
+
+        assert.strictEqual(first.GetAddress(true, true, "xlA1", false), "$C$1", "First is C1 (xlPrevious wraps back from A1)");
+        assert.strictEqual(second.GetAddress(true, true, "xlA1", false), "$B$1", "Second is B1");
+        assert.strictEqual(third.GetAddress(true, true, "xlA1", false), "$A$1", "Third is A1");
+
+        sheet2.Delete();
+    });
+
+    QUnit.test("Find: active sheet result unaffected when non-active sheet has same value", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("dup");
+        const sheet2 = AscTest.JsApi.AddSheet("FindDupSheet2_" + Date.now());
+        sheet2.GetRange("C3").SetValue("dup");
+        ws.SetActive();
+
+        const foundOnWs = ws.GetRange("A1:D4").Find("dup", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", false);
+        const foundOnSheet2 = sheet2.GetRange("A1:D4").Find("dup", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", false);
+
+        assert.strictEqual(foundOnWs.GetAddress(true, true, "xlA1", false), "$A$1", "Found A1 on active sheet");
+        assert.strictEqual(foundOnSheet2.GetAddress(true, true, "xlA1", false), "$C$3", "Found C3 on non-active sheet");
+
+        sheet2.Delete();
+    });
+
+    QUnit.test("FindNext: without After argument starts from first match", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("z");
+        ws.GetRange("B1").SetValue("z");
+        ws.GetRange("C1").SetValue("z");
+
+        const range = ws.GetRange("A1:C1");
+        const first = range.Find("z", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", false);
+        const second = range.FindNext(first);
+        const third = range.FindNext(second);
+
+        assert.strictEqual(first.GetAddress(true, true, "xlA1", false), "$B$1", "First match is B1");
+        assert.strictEqual(second.GetAddress(true, true, "xlA1", false), "$C$1", "FindNext gives C1");
+        assert.strictEqual(third.GetAddress(true, true, "xlA1", false), "$A$1", "FindNext wraps to A1");
+    });
+
+    QUnit.test("Find: case-sensitive on non-active sheet finds only matching case", function (assert) {
+        initializeTest();
+        const sheet2 = AscTest.JsApi.AddSheet("FindCaseSheet2_" + Date.now());
+        sheet2.GetRange("A1").SetValue("Hello");
+        sheet2.GetRange("B1").SetValue("hello");
+        sheet2.GetRange("C1").SetValue("HELLO");
+        ws.SetActive();
+
+        const range = sheet2.GetRange("A1:C1");
+        const found = range.Find("hello", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", true);
+
+        assert.ok(found, "Find returned a range");
+        assert.strictEqual(found.GetAddress(true, true, "xlA1", false), "$B$1", "Only lowercase hello matched");
+
+        sheet2.Delete();
+    });
+
+    QUnit.test("Find: case-insensitive on non-active sheet finds all variants", function (assert) {
+        initializeTest();
+        const sheet2 = AscTest.JsApi.AddSheet("FindCaseInsSheet2_" + Date.now());
+        sheet2.GetRange("A1").SetValue("Hello");
+        sheet2.GetRange("B1").SetValue("hello");
+        sheet2.GetRange("C1").SetValue("HELLO");
+        ws.SetActive();
+
+        const range = sheet2.GetRange("A1:C1");
+        const first = range.Find("hello", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", false);
+        const second = range.FindNext(first);
+        const third = range.FindNext(second);
+
+        assert.strictEqual(first.GetAddress(true, true, "xlA1", false), "$B$1", "First: hello at B1");
+        assert.strictEqual(second.GetAddress(true, true, "xlA1", false), "$C$1", "Second: HELLO at C1");
+        assert.strictEqual(third.GetAddress(true, true, "xlA1", false), "$A$1", "Third: Hello at A1");
+
+        sheet2.Delete();
+    });
+
+    QUnit.test("Find: case-sensitive returns null when case does not match on non-active sheet", function (assert) {
+        initializeTest();
+        const sheet2 = AscTest.JsApi.AddSheet("FindCaseNullSheet2_" + Date.now());
+        sheet2.GetRange("A1").SetValue("Hello");
+        sheet2.GetRange("B1").SetValue("HELLO");
+        ws.SetActive();
+
+        const found = sheet2.GetRange("A1:B1").Find("hello", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", true);
+
+        assert.strictEqual(found, null, "Case-sensitive find returns null when no exact match");
+
+        sheet2.Delete();
+    });
+
+    QUnit.test("Find: case-sensitive active sheet vs non-active sheet with same mixed-case values", function (assert) {
+        initializeTest();
+        ws.GetRange("A1").SetValue("Word");
+        ws.GetRange("B1").SetValue("word");
+        const sheet2 = AscTest.JsApi.AddSheet("FindCase2Sheets_" + Date.now());
+        sheet2.GetRange("A1").SetValue("word");
+        sheet2.GetRange("B1").SetValue("Word");
+        ws.SetActive();
+
+        const foundOnWs = ws.GetRange("A1:B1").Find("word", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", true);
+        const foundOnSheet2 = sheet2.GetRange("A1:B1").Find("word", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", true);
+
+        assert.strictEqual(foundOnWs.GetAddress(true, true, "xlA1", false), "$B$1", "Active sheet: lowercase word at B1");
+        assert.strictEqual(foundOnSheet2.GetAddress(true, true, "xlA1", false), "$A$1", "Non-active sheet: lowercase word at A1");
+
+        sheet2.Delete();
+    });
+
+    QUnit.test("Find: xlPart match case-sensitive on non-active sheet", function (assert) {
+        initializeTest();
+        const sheet2 = AscTest.JsApi.AddSheet("FindPartCaseSheet2_" + Date.now());
+        sheet2.GetRange("A1").SetValue("FooBar");
+        sheet2.GetRange("B1").SetValue("foobar");
+        sheet2.GetRange("C1").SetValue("FOOBAR");
+        ws.SetActive();
+
+        const range = sheet2.GetRange("A1:C1");
+        const found = range.Find("foo", "A1", "xlValues", "xlPart", "xlByRows", "xlNext", true);
+        const second = range.FindNext(found);
+
+        assert.ok(found, "Find returned a range");
+        assert.strictEqual(found.GetAddress(true, true, "xlA1", false), "$B$1", "xlPart case-sensitive: only foobar matched");
+        assert.strictEqual(second.GetAddress(true, true, "xlA1", false), "$B$1", "FindNext wraps to same cell — only one match");
+
+        sheet2.Delete();
+    });
+
+    QUnit.test("FindNext: case-sensitive on non-active sheet skips non-matching case", function (assert) {
+        initializeTest();
+        const sheet2 = AscTest.JsApi.AddSheet("FindNextCaseSheet2_" + Date.now());
+        sheet2.GetRange("A1").SetValue("test");
+        sheet2.GetRange("B1").SetValue("Test");
+        sheet2.GetRange("C1").SetValue("test");
+        ws.SetActive();
+
+        const range = sheet2.GetRange("A1:C1");
+        const first = range.Find("test", "A1", "xlValues", "xlWhole", "xlByRows", "xlNext", true);
+        const second = range.FindNext(first);
+        const third = range.FindNext(second);
+
+        assert.strictEqual(first.GetAddress(true, true, "xlA1", false), "$C$1", "First: test at C1 (after A1)");
+        assert.strictEqual(second.GetAddress(true, true, "xlA1", false), "$A$1", "Second: test at A1 (wraps, skips Test at B1)");
+        assert.strictEqual(third.GetAddress(true, true, "xlA1", false), "$C$1", "Third: back to C1");
+
+        sheet2.Delete();
+    });
+
 });

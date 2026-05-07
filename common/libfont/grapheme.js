@@ -81,7 +81,7 @@
 		let nKoef = COEF * nFontSize * coeff;
 		if (1 === oGrapheme[2])
 		{
-			oContext.tg(oGrapheme[3], nX + oGrapheme[6] * nKoef, nY - oGrapheme[7] * nKoef, oGrapheme[8]);
+			oContext.tg(oGrapheme[3], nX + oGrapheme[6] * nKoef, nY - oGrapheme[7] * nKoef, oGrapheme[8], oGrapheme[4] * nKoef, oGrapheme[5] * nKoef);
 		}
 		else
 		{
@@ -90,15 +90,15 @@
 			for (let nIndex = 0, nCount = oGrapheme[2]; nIndex < nCount; ++nIndex)
 			{
 				let nGID          = oGrapheme[nPos++];
-				let nAdvanceX     = oGrapheme[nPos++];
-				let nAdvanceY     = oGrapheme[nPos++];
+				let nAdvanceX     = oGrapheme[nPos++] * nKoef;
+				let nAdvanceY     = oGrapheme[nPos++] * nKoef;
 				let nOffsetX      = oGrapheme[nPos++];
 				let nOffsetY      = oGrapheme[nPos++];
 				let arrCodePoints = oGrapheme[nPos++];
 				
-				oContext.tg(nGID, nX + nOffsetX * nKoef, nY - nOffsetY * nKoef, arrCodePoints);
-				nX += nAdvanceX * nKoef;
-				nY += nAdvanceY * nKoef;
+				oContext.tg(nGID, nX + nOffsetX * nKoef, nY - nOffsetY * nKoef, arrCodePoints, nAdvanceX, nAdvanceY);
+				nX += nAdvanceX;
+				nY += nAdvanceY;
 			}
 		}
 	}
@@ -117,8 +117,8 @@
 	}
 	function FillCodePoints(codePoints)
 	{
-		// Пишем по схеме: распределяем везде по 1, если есть лишние, то все они уходят в первый глиф, если
-		// последним глифам не хватает, тогда им проставляем пробелы
+		// We write according to the scheme: distribute 1 to each, if there are extra ones, they all go to the first glyph,
+		// if the last glyphs don't have enough, then we assign spaces to them
 
 		let nCount = GRAPHEME_BUFFER[2];
 		if (nCount <= 0)
@@ -182,7 +182,7 @@
 			result = result[nGID];
 		}
 
-		// TODO: Для скорости проверку совпадения отключили (всегда совпадает)
+		// TODO: For speed, the match check is disabled (always matches)
 		if (!result.Grapheme)
 			result.Grapheme = GetGraphemeIndex(codePoints);
 		// else if (!CompareGraphemes(result.Buffer))

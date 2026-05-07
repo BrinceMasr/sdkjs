@@ -45,7 +45,7 @@
         this._exportValue   = "Yes";
         this._chStyle       = AscPDF.CHECKBOX_STYLES.check;
         this._checked       = false;
-        this._options       = undefined; // используется для храненния export values дочерних полей
+        this._options       = undefined; // used to store export values of child fields
         this._textSize      = 0;
         
         // states
@@ -208,7 +208,7 @@
                 let r     = R/2.5;
                 let pts   = 5;
                 let step  = Math.PI/pts;
-                let start = -Math.PI/2 + rot;  // «вверх» + учёт поворота страницы
+                let start = -Math.PI/2 + rot;  // "up" + account for page rotation
 
                 oGraphicsPDF.BeginPath();
                 for (let i = 0; i < pts*2; i++) {
@@ -270,7 +270,7 @@
 
     //     this.content.Recalculate_Page(0, true);
 
-    //     // подгоняем размер галочки
+    //     // adjust checkmark size
     //     let nCharH = this.ProcessAutoFitContent();
         
     //     let oRect = this.getFormRelRect();
@@ -367,7 +367,7 @@
         this.DrawPressed();
         
         let oOnFocus = this.GetTrigger(AscPDF.PDF_TRIGGERS_TYPES.OnFocus);
-        // вызываем выставление курсора после onFocus. Если уже в фокусе, тогда сразу.
+        // call cursor positioning after onFocus. If already in focus, then immediately.
         if (false == isInFocus && oOnFocus && oOnFocus.Actions.length > 0)
             oActionsQueue.callbackAfterFocus = callbackAfterFocus.bind(this);
         else
@@ -412,7 +412,9 @@
 
 		if (this.IsReadOnly()) {
             return;
-        }        let bCommit = false;
+        }
+
+		let bCommit = false;
         if (this.IsChecked()) {
             if (this.IsNoToggleToOff() == false) {
                 this.SetChecked(false);
@@ -501,7 +503,7 @@
         
         let hasOptions = !!this._options;
         
-        AscCommon.History.Add(new CChangesPDFCheckOptions(this, this._options, aOpt));
+        AscCommon.History.Add(new CChangesPDFCheckboxOptions(this, this._options, aOpt));
 
         if (this._options == aOpt) {
             return true;
@@ -690,13 +692,12 @@
             sExportValue = value;
         }
 
-        if (this.GetExportValue() == sExportValue)
-            this.SetChecked(true);
-        else
-            this.SetChecked(false);
-        
-        if (Asc.editor.getDocumentRenderer().IsOpenFormsInProgress && oParent == null)
-            this.SetParentValue(value);
+		if (this.GetExportValue() == sExportValue) {
+			this.SetChecked(true);
+		}
+		else {
+			this.SetChecked(false);
+		}
     };
     CBaseCheckBoxField.prototype.private_SetValue = CBaseCheckBoxField.prototype.SetValue;
     CBaseCheckBoxField.prototype.GetValue = function() {
@@ -714,17 +715,11 @@
         if (bChecked == this.IsChecked())
             return;
 
-        this.SetWasChanged(true);
-        this.AddToRedraw();
+        AscCommon.History.Add(new CChangesPDFCheckboxChecked(this, this._checked, bChecked));
+		this._checked = bChecked;
 
-        if (bChecked) {
-            AscCommon.History.Add(new CChangesPDFFormValue(this, this.GetValue(), this.GetExportValue()));
-            this._checked = true;
-        }
-        else {
-            AscCommon.History.Add(new CChangesPDFFormValue(this, this.GetValue(), "Off"));
-            this._checked = false;
-        }
+		this.SetWasChanged(true);
+        this.AddToRedraw();
     };
     /**
 	 * Synchronizes this field with fields with the same name.
@@ -765,7 +760,7 @@
     CBaseCheckBoxField.prototype.WriteToBinary = function(memory) {
         memory.WriteByte(AscCommon.CommandType.ctAnnotField);
 
-        // длина комманд
+        // command length
         let nStartPos = memory.GetCurPosition();
         memory.Skip(4);
 
@@ -774,8 +769,8 @@
 
         // checked
         let isChecked = this.IsChecked();
-        // не пишем значение, если есть родитель с такими же видджет полями,
-        // т.к. значение будет хранить родитель
+        // don't write value if there's a parent with same widget fields,
+        // since the parent will store the value
         let oParent = this.GetParent(true);
         if (oParent == null) {
             memory.fieldDataFlags |= (1 << 9);
@@ -817,13 +812,13 @@
         }
         let nEndPos = memory.GetCurPosition();
 
-        // запись флагов
+        // write flags
         memory.Seek(memory.posForWidgetFlags);
         memory.WriteLong(memory.widgetFlags);
         memory.Seek(memory.posForFieldDataFlags);
         memory.WriteLong(memory.fieldDataFlags);
 
-        // запись длины комманд
+        // write command length
         memory.Seek(nStartPos);
         memory.WriteLong(nEndPos - nStartPos);
         memory.Seek(nEndPos);
@@ -849,7 +844,7 @@
 		else {
 			image.src = "data:image/svg+xml;base64," + toBase64(svg);
 			image.onload = function() {
-				// Почему-то IE не определяет размеры сам
+				// For some reason IE doesn't determine dimensions by itself
 				this.width = 20;
 				this.height = 20;
 			};

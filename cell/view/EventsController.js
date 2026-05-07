@@ -134,6 +134,8 @@
 
 			this.skipCellEditor = false;
 
+			this.isElementEventsInit = false;
+
 			return this;
 		}
 
@@ -155,89 +157,93 @@
 				return;
 			}
 
-			if (this.view.Api.isUseOldMobileVersion()) {
-				/*Previously, resize events were called from the menu via the controller. Now the controller is not available in the menu, for resize we subscribe to the global resize from window.*/
-				window.addEventListener("resize", function () {
-					self._onWindowResize.apply(self, arguments);
-				}, false);
-				return this;
-			}
+			if (!this.isElementEventsInit) {
+				this.isElementEventsInit = true;
 
-			// initialize events
-			if (window.addEventListener) {
-				window.addEventListener("resize", function () {
-					self._onWindowResize.apply(self, arguments);
-				}, false);
-				window.addEventListener(AscCommon.getPtrEvtName("move"), function () {
-					return self._onWindowMouseMove.apply(self, arguments);
-				}, false);
-				window.addEventListener(AscCommon.getPtrEvtName("up"), function () {
-					return self._onWindowMouseUp.apply(self, arguments);
-				}, false);
-				window.addEventListener(AscCommon.getPtrEvtName("leave"), function () {
-					return self._onWindowMouseLeaveOut.apply(self, arguments);
-				}, false);
-				window.addEventListener(AscCommon.getPtrEvtName("out"), function () {
-					return self._onWindowMouseLeaveOut.apply(self, arguments);
-				}, false);
-			}
+				if (this.view.Api.isUseOldMobileVersion()) {
+					/*Previously, resize events were called from the menu via the controller. Now the controller is not available in the menu, for resize we subscribe to the global resize from window.*/
+					window.addEventListener("resize", function () {
+						self._onWindowResize.apply(self, arguments);
+					}, false);
+					return this;
+				}
 
-			// prevent changing mouse cursor when 'mousedown' is occurred
-			if (this.element.onselectstart) {
-				this.element.onselectstart = function () {
-					return false;
-				};
-			}
+				// initialize events
+				if (window.addEventListener) {
+					window.addEventListener("resize", function () {
+						self._onWindowResize.apply(self, arguments);
+					}, false);
+					window.addEventListener(AscCommon.getPtrEvtName("move"), function () {
+						return self._onWindowMouseMove.apply(self, arguments);
+					}, false);
+					window.addEventListener(AscCommon.getPtrEvtName("up"), function () {
+						return self._onWindowMouseUp.apply(self, arguments);
+					}, false);
+					window.addEventListener(AscCommon.getPtrEvtName("leave"), function () {
+						return self._onWindowMouseLeaveOut.apply(self, arguments);
+					}, false);
+					window.addEventListener(AscCommon.getPtrEvtName("out"), function () {
+						return self._onWindowMouseLeaveOut.apply(self, arguments);
+					}, false);
+				}
 
-			if (this.element.addEventListener) {
-				this.element.addEventListener(AscCommon.getPtrEvtName("down"), function () {
-					return self._onMouseDown.apply(self, arguments);
-				}, false);
-				this.element.addEventListener(AscCommon.getPtrEvtName("up"), function () {
-					return self._onMouseUp.apply(self, arguments);
-				}, false);
-				this.element.addEventListener(AscCommon.getPtrEvtName("move"), function () {
-					return self._onMouseMove.apply(self, arguments);
-				}, false);
-				this.element.addEventListener(AscCommon.getPtrEvtName("leave"), function () {
-					return self._onMouseLeave.apply(self, arguments);
-				}, false);
-				this.element.addEventListener("dblclick", function () {
-					return self._onMouseDblClick.apply(self, arguments);
-				}, false);
-			}
-			if (this.widget.addEventListener) {
-				// https://developer.mozilla.org/en-US/docs/Web/Reference/Events/wheel
-				// detect available wheel event
-				var nameWheelEvent = (!AscCommon.AscBrowser.isMacOs && "onwheel" in document.createElement("div")) ? "wheel" :	// Modern browsers support "wheel"
-					document.onmousewheel !== undefined ? "mousewheel" : 				// Webkit and IE support at least "mousewheel"
-						"DOMMouseScroll";												// let's assume that remaining browsers are older Firefox
+				// prevent changing mouse cursor when 'mousedown' is occurred
+				if (this.element.onselectstart) {
+					this.element.onselectstart = function () {
+						return false;
+					};
+				}
 
-				this.widget.addEventListener(nameWheelEvent, function () {
-					return self._onMouseWheel.apply(self, arguments);
-				}, false);
-				this.widget.addEventListener('contextmenu', function (e) {
-					e.stopPropagation();
-					e.preventDefault();
-					return false;
-				}, false)
-			}
+				if (this.element.addEventListener) {
+					this.element.addEventListener(AscCommon.getPtrEvtName("down"), function () {
+						return self._onMouseDown.apply(self, arguments);
+					}, false);
+					this.element.addEventListener(AscCommon.getPtrEvtName("up"), function () {
+						return self._onMouseUp.apply(self, arguments);
+					}, false);
+					this.element.addEventListener(AscCommon.getPtrEvtName("move"), function () {
+						return self._onMouseMove.apply(self, arguments);
+					}, false);
+					this.element.addEventListener(AscCommon.getPtrEvtName("leave"), function () {
+						return self._onMouseLeave.apply(self, arguments);
+					}, false);
+					this.element.addEventListener("dblclick", function () {
+						return self._onMouseDblClick.apply(self, arguments);
+					}, false);
+				}
+				if (this.widget.addEventListener) {
+					// https://developer.mozilla.org/en-US/docs/Web/Reference/Events/wheel
+					// detect available wheel event
+					var nameWheelEvent = (!AscCommon.AscBrowser.isMacOs && "onwheel" in document.createElement("div")) ? "wheel" :	// Modern browsers support "wheel"
+						document.onmousewheel !== undefined ? "mousewheel" : 				// Webkit and IE support at least "mousewheel"
+							"DOMMouseScroll";												// let's assume that remaining browsers are older Firefox
 
-			// Cursor for graphic objects. We define mousedown and mouseup for text selection.
-			var oShapeCursor = document.getElementById("id_target_cursor");
-			if (null != oShapeCursor && oShapeCursor.addEventListener) {
-				oShapeCursor.addEventListener(AscCommon.getPtrEvtName("down"), function () {
-					return self._onMouseDown.apply(self, arguments);
-				}, false);
-				oShapeCursor.addEventListener(AscCommon.getPtrEvtName("up"), function () {
-					return self._onMouseUp.apply(self, arguments);
-				}, false);
-				oShapeCursor.addEventListener(AscCommon.getPtrEvtName("move"), function () {
-					return self._onMouseMove.apply(self, arguments);
-				}, false);
-				oShapeCursor.addEventListener(AscCommon.getPtrEvtName("leave"), function () {
-					return self._onMouseLeave.apply(self, arguments);
-				}, false);
+					this.widget.addEventListener(nameWheelEvent, function () {
+						return self._onMouseWheel.apply(self, arguments);
+					}, false);
+					this.widget.addEventListener('contextmenu', function (e) {
+						e.stopPropagation();
+						e.preventDefault();
+						return false;
+					}, false)
+				}
+
+				// Cursor for graphic objects. We define mousedown and mouseup for text selection.
+				var oShapeCursor = document.getElementById("id_target_cursor");
+				if (null != oShapeCursor && oShapeCursor.addEventListener) {
+					oShapeCursor.addEventListener(AscCommon.getPtrEvtName("down"), function () {
+						return self._onMouseDown.apply(self, arguments);
+					}, false);
+					oShapeCursor.addEventListener(AscCommon.getPtrEvtName("up"), function () {
+						return self._onMouseUp.apply(self, arguments);
+					}, false);
+					oShapeCursor.addEventListener(AscCommon.getPtrEvtName("move"), function () {
+						return self._onMouseMove.apply(self, arguments);
+					}, false);
+					oShapeCursor.addEventListener(AscCommon.getPtrEvtName("leave"), function () {
+						return self._onMouseLeave.apply(self, arguments);
+					}, false);
+				}
 			}
 
 			return this;

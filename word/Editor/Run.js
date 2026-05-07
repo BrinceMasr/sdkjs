@@ -4131,7 +4131,7 @@ ParaRun.prototype.Recalculate_Range = function(PRS, ParaPr, Depth)
                 {
                 	// TODO: Проверку Balanced перенести в Measure (и избавиться от WidthEn)
                 	if (PRS.IsBalanceSingleByteDoubleByteWidth(this, Pos))
-                		Item.BalanceSingleByteDoubleByteWidth();
+                		Item.BalanceSingleByteDoubleByteWidth(textPr);
 					else if (PRS.IsCondensedSpaces())
 						PRS.AddCondensedSpaceToRange(Item);
 					else
@@ -4423,6 +4423,10 @@ ParaRun.prototype.Recalculate_Range = function(PRS, ParaPr, Depth)
                         {
                             // Добавляем длину пробелов до автофигуры
                             X += SpaceLen + DrawingWidth;
+							
+							// MSWord treats the horizontal line as a text element element
+							if (Item.getHorizontalRule())
+								TextOnLine = true;
 
                             FirstItemOnLine = false;
                             EmptyLine = false;
@@ -5134,7 +5138,54 @@ ParaRun.prototype.Recalculate_LineMetrics = function(PRS, ParaPr, _CurLine, _Cur
 			}
 			case para_Drawing:
 			{
-				if (true === Item.Is_Inline() || true === Para.Parent.Is_DrawingShape())
+				if (Item.getHorizontalRule())
+				{
+					let metrics = textPr.GetTextMetrics(AscWord.fontslot_ASCII, this.Paragraph.GetTheme());
+					
+					let textDescent = metrics.Descent;
+					let textAscent2 = metrics.Ascent;
+					let textAscent  = metrics.Ascent + metrics.LineGap;
+					
+					let horRuleH = Item.getHeight() + 1; // take into account 1mm offset from top
+					if (horRuleH > textAscent && textAscent > AscWord.EPSILON)
+						textAscent *= horRuleH / textAscent;
+					
+					if (Asc.linerule_Exact === LineRule)
+					{
+						if (PRS.LineAscent < textAscent)
+							PRS.LineAscent = textAscent;
+						
+						if (PRS.LineDescent < textDescent)
+							PRS.LineDescent = textDescent;
+					}
+					else
+					{
+						let yOffset = this.getYOffset();
+						
+						if (yOffset >= 0)
+						{
+							PRS.LineAscent = Math.max(PRS.LineAscent, textAscent + yOffset);
+							textDescent    = Math.max(0, textDescent - yOffset);
+						}
+						else
+						{
+							PRS.LineDescent = Math.max(PRS.LineDescent, textDescent - yOffset);
+							textAscent2     = Math.max(0, textAscent2 + yOffset);
+						}
+						
+						textAscent = textAscent2 + metrics.LineGap;
+					}
+					
+					if (PRS.LineTextAscent < textAscent)
+						PRS.LineTextAscent = textAscent;
+					
+					if (PRS.LineTextAscent2 < textAscent2)
+						PRS.LineTextAscent2 = textAscent2;
+					
+					if (PRS.LineTextDescent < textDescent)
+						PRS.LineTextDescent = textDescent;
+				}
+				else if (true === Item.Is_Inline() || true === Para.Parent.Is_DrawingShape())
 				{
 					// Обновим метрики строки
 					if (Asc.linerule_Exact === LineRule)
@@ -6306,6 +6357,9 @@ ParaRun.prototype.RecalculateMinMaxContentWidth = function(MinMax)
                     bWord    = false;
                     nWordLen = 0;
                 }
+				
+				if (Item.getHorizontalRule())
+					break;
 
                 if ((true === Item.Is_Inline() || true === this.Paragraph.Parent.Is_DrawingShape() || Item.IsForm()) && Item.Width > nMinWidth)
                 {

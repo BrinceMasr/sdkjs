@@ -655,6 +655,7 @@ CGraphicObjects.prototype =
             oDrawing.setBodyPr(oBodyPr);
 
             var oContentSize = AscFormat.GetContentOneStringSizes(oContent);
+			oContentSize.w = AscFormat.CTextBody.prototype.getContentWidth.call({ content: oContent }) + 0.1;
             oXfrm.setExtX(oContentSize.w + 1);
             oXfrm.setExtY(oContentSize.h);
             if(oTextPropMenu.get_FontSize() < 0)
@@ -672,6 +673,7 @@ CGraphicObjects.prototype =
                 oContent.AddToParagraph(new ParaTextPr(oTextPr));
                 oContent.SetApplyToAll(false);
                 oContentSize = AscFormat.GetContentOneStringSizes(oContent);
+				oContentSize.w = AscFormat.CTextBody.prototype.getContentWidth.call({ content: oContent }) + 0.1;
                 oXfrm.setExtX(extX + 1);
                 oXfrm.setExtY(oContentSize.h);
             }
@@ -2418,9 +2420,12 @@ CGraphicObjects.prototype =
                 let oParaPr = oParagraph.Get_CompiledPr2(true).ParaPr;
                 if (oParaPr)
                 {
+                    let oHR = oDrawing.getHorizontalRule();
+                    let nJc = oHR ? oHR.getJc() : oParaPr.Jc;
+                    oParaPr.Jc = nJc;
                     editor.sync_ParaSpacingLine( oParaPr.Spacing );
                     editor.Update_ParaInd(oParaPr.Ind, oParaPr.Bidi);
-                    editor.sync_PrAlignCallBack(oParaPr.Jc);
+                    editor.sync_PrAlignCallBack(nJc);
                     editor.sync_ParaStyleName(oParaPr.StyleName);
                 }
             }

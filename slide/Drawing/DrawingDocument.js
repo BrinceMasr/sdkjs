@@ -932,7 +932,7 @@ function CDrawingDocument()
 				case FOCUS_OBJECT_NOTES: {
 					this.m_oWordControl.m_oNotesContainer.HtmlElement.appendChild(this.TargetHtmlElement);
 					this.TargetHtmlElement.style.zIndex = isReporter ? 0 : 9;
-					AscCommon.g_inputContext.TargetOffsetY = (this.m_oWordControl.m_oNotesContainer.AbsolutePosition.T * AscCommon.g_dKoef_mm_to_pix) >> 0;
+					AscCommon.g_inputContext.TargetOffsetY = ((this.m_oWordControl.m_oBottomPanesContainer.AbsolutePosition.T + this.m_oWordControl.m_oNotesContainer.AbsolutePosition.T) * AscCommon.g_dKoef_mm_to_pix) >> 0;
 					break;
 				}
 				case FOCUS_OBJECT_THUMBNAILS: {
@@ -945,7 +945,7 @@ function CDrawingDocument()
 		}
 		else if (focusType === FOCUS_OBJECT_NOTES)
 		{
-			AscCommon.g_inputContext.TargetOffsetY = (this.m_oWordControl.m_oNotesContainer.AbsolutePosition.T * AscCommon.g_dKoef_mm_to_pix) >> 0;
+			AscCommon.g_inputContext.TargetOffsetY = ((this.m_oWordControl.m_oBottomPanesContainer.AbsolutePosition.T + this.m_oWordControl.m_oNotesContainer.AbsolutePosition.T) * AscCommon.g_dKoef_mm_to_pix) >> 0;
 		}
 
 		var targetZoom = (focusType === FOCUS_OBJECT_THUMBNAILS || focusType === FOCUS_OBJECT_NOTES) ? 100 : this.m_oWordControl.m_nZoomValue;
@@ -1050,7 +1050,7 @@ function CDrawingDocument()
 		this.m_oWordControl.m_oLogicDocument.Set_TargetPos(x, y, pageIndex);
 		if (pageIndex != this.SlideCurrent && !this.m_oWordControl.DemonstrationManager.Mode)
 		{
-			// сначала выставим страницу
+			// first set the page
 			this.m_oWordControl.GoToPage(pageIndex);
 		}
 
@@ -1686,8 +1686,6 @@ function CDrawingDocument()
 		{
 			this.m_oWordControl.Thumbnails.LockMainObjType = true;
 
-			// так как серега посылает по сто раз - делаем такую заглушку ---------------------
-
 			this.m_oWordControl.SlideDrawer.CheckSlide(this.SlideCurrent);
 			this.m_oWordControl.CalculateDocumentSize(false);
 			// --------------------------------------------------------------------------------
@@ -1749,7 +1747,6 @@ function CDrawingDocument()
 
 		this.m_oWordControl.Thumbnails.LockMainObjType = true;
 
-		// так как серега посылает по сто раз - делаем такую заглушку ---------------------
 		this.m_oWordControl.SlideDrawer.CheckSlide(this.SlideCurrent);
 		this.m_oWordControl.CalculateDocumentSize(false);
 		// --------------------------------------------------------------------------------
@@ -1940,13 +1937,13 @@ function CDrawingDocument()
 
 			if (this.GuiLastTextProps.Position !== undefined && this.GuiLastTextProps.Position != null && this.GuiLastTextProps.Position != 0)
 			{
-				// TODO: нужна высота без учета Position
+				// TODO: need height without considering Position
 				// _pxBoundsH -= (this.GuiLastTextProps.Position * g_dKoef_mm_to_pix);
 			}
 
 			if (_pxBoundsH < _hPx && _pxBoundsW < _wPx)
 			{
-				// рисуем линию
+				// draw the line
 				var _lineY = (((_hPx + _pxBoundsH) / 2) >> 0) + 0.5;
 				var _lineW = (((_wPx - _pxBoundsW) / 4) >> 0);
 
@@ -2008,7 +2005,7 @@ function CDrawingDocument()
 			arr_colors[i].setColorSchemeId(color.color.id);
 		}
 
-		// теперь проверим
+		// now let's check
 		let bIsSend = false;
 		if (this.GuiControlColorsMap != null)
 		{
@@ -2072,7 +2069,7 @@ function CDrawingDocument()
 			_ret_array[_cur_index].setColorSchemeId(array_colors_types[i]);
 			_cur_index++;
 
-			// теперь с модификаторами
+			// now with modifiers
 			let _count_mods = 5;
 			for (let j = 0; j < _count_mods; ++j)
 			{
@@ -2306,8 +2303,8 @@ function CDrawingDocument()
 
 	this.CheckTableStyles = function(tableLook)
 	{
-		// сначала проверим, подписан ли кто на этот евент
-		// а то во вьюере не стоит ничего посылать
+		// first check if anyone is subscribed to this event
+		// otherwise in the viewer there's no need to send anything
 		if (!this.m_oWordControl.m_oApi.asc_checkNeedCallback("asc_onInitTableTemplates"))
 			return;
 		var isChanged = this.m_oWordControl.m_oLogicDocument.CheckNeedUpdateTableStyles(tableLook);
@@ -2418,8 +2415,8 @@ function CDrawingDocument()
 		ver_ruler.CurrentObjectType = RULER_OBJECT_TYPE_PARAGRAPH;
 		ver_ruler.m_oTableMarkup    = null;
 
-		// вообще надо посмотреть... может и был параграф до этого.
-		// тогда вэкграунд перерисовывать не нужно. Только надо знать, на той же странице это было или нет
+		// need to check... maybe there was a paragraph before this.
+		// then background doesn't need to be redrawn. Just need to know if it was on the same page or not
 		if (-1 != this.SlideCurrent)
 		{
 			this.m_oWordControl.CreateBackgroundHorRuler(margins);
@@ -2453,8 +2450,8 @@ function CDrawingDocument()
 		ver_ruler.header_bottom     = Y1;
 		ver_ruler.m_oTableMarkup    = null;
 
-		// вообще надо посмотреть... может и бал параграф до этого.
-		// тогда вэкграунд перерисовывать не нужно. Только надо знать, на той же странице это было или нет
+		// need to check... maybe there was a paragraph before this.
+		// then background doesn't need to be redrawn. Just need to know if it was on the same page or not
 		if (-1 != this.m_lCurrentPage)
 		{
 			this.m_oWordControl.CreateBackgroundHorRuler();
@@ -2505,7 +2502,7 @@ function CDrawingDocument()
 		var _len = __tabs.length;
 		if ((Default_Tab == hor_ruler.m_dDefaultTab) && (hor_ruler.m_arrTabs.length == _len) && (_len == 0))
 		{
-			// потом можно и проверить сами табы
+			// later can also check the tabs themselves
 			return;
 		}
 
@@ -2519,7 +2516,7 @@ function CDrawingDocument()
 				_ar[i] = new CTab(__tabs[i].Pos, __tabs[i].Value);
 			else
 			{
-				// не должно такого быть. но приходит
+				// this should not happen. but it does
 				_ar[i] = new CTab(__tabs[i].Pos, tab_Left);
 			}
 		}
@@ -3183,7 +3180,7 @@ function CDrawingDocument()
 		this.m_oWordControl.SetCurrentPage();
 	};
 
-	// вот оооочень важные функции. она выкидывает из кэша неиспользуемые шрифты
+	// here's a veeeery important function. it removes unused fonts from cache
 	this.CheckFontCache = function()
 	{
 		var map_used = this.m_oWordControl.m_oLogicDocument.Document_CreateFontMap();
@@ -3199,7 +3196,7 @@ function CDrawingDocument()
 			map_keys[key] = true;
 		}
 
-		// а теперь просто пробегаем по кэшам и удаляем ненужное
+		// and now just iterate through caches and delete unnecessary items
 		for (var i in _measure_map)
 		{
 			if (map_keys[i] == undefined)
@@ -3548,7 +3545,7 @@ CThPage.prototype.Draw = function(context, xDst, yDst, wDst, hDst)
 
 	if (null != this.cachedImage)
 	{
-		// потом посмотреть на кусочную отрисовку
+		// later look at partial drawing
 		context.drawImage(this.cachedImage.image, xDst, yDst, wDst, hDst);
 	}
 	else
@@ -3592,10 +3589,10 @@ CThPage.prototype.GetPosition = function()
 
 function DrawBackground(graphics, unifill, w, h)
 {
-	// первым делом рисуем белый рект!
+	// first thing we draw is a white rect!
 	if (true)
 	{
-		// ну какой-то бэкграунд должен быть
+		// well there should be some background
 		graphics.SetIntegerGrid(false);
 
 		var _l = 0;
@@ -3668,7 +3665,7 @@ function CSlideDrawer()
 
 	this.EmptyPresenattionTextHeight = 60;
 
-	// TODO: максимальная ширина всех линий и запас под локи
+	// TODO: maximum width of all lines and reserve for locks
 	this.SlideEps = 20;
 
 	this.CheckRecalculateSlide = function()
@@ -3756,7 +3753,7 @@ function CSlideDrawer()
 		presentation.DrawPage(slideNum, this.BoundsChecker);
 
 
-		// поидее если был ресайз только
+		// here should be only resize
 		dKoef = this.m_oWordControl.m_nZoomValue * g_dKoef_mm_to_pix / 100;
 		dKoef *= AscCommon.AscBrowser.retinaPixelRatio;
 
@@ -3766,7 +3763,7 @@ function CSlideDrawer()
 		w_px = (w_mm * dKoef) >> 0;
 		h_px = (h_mm * dKoef) >> 0;
 
-		// теперь смотрим, используем ли кэш для скролла
+		// now see if we use cache for scrolling
 		const _need_pix_width  = this.BoundsChecker.Bounds.max_x - this.BoundsChecker.Bounds.min_x + 1 + 2 * this.SlideEps;
 		const _need_pix_height = this.BoundsChecker.Bounds.max_y - this.BoundsChecker.Bounds.min_y + 1 + 2 * this.SlideEps;
 
@@ -3784,7 +3781,7 @@ function CSlideDrawer()
 
 		if (this.IsCached)
 		{
-			// кэш используется. теперь нужно решить, нужно ли создать картинку, или управимся и старой
+			// cache is used. now need to decide if we need to create an image, or will manage with the old one
 			let _need_reinit_image = false;
 			if (null == this.CachedCanvas)
 				_need_reinit_image = true;
@@ -3796,8 +3793,8 @@ function CSlideDrawer()
 
 			if (_need_reinit_image)
 			{
-				// все равно перевыделяем память - сделаем небольшой задел, чтобы обезопасить
-				// себя от чувака, который будет быстро выдвигать/задвигать элемент на "чуть-чуть"
+				// we reallocate memory anyway - let's make a small reserve to protect
+				// ourselves from a guy who will quickly extend/retract element by "just a bit"
 
 				this.CachedCanvas        = null;
 				this.CachedCanvas        = document.createElement('canvas');
@@ -3808,12 +3805,12 @@ function CSlideDrawer()
 			}
 			else
 			{
-				// здесь просто нужно очистить место под новую отрисовку
+				// here we just need to clear space for new drawing
 				this.CachedCanvasCtx.setTransform(1, 0, 0, 1, 0, 0);
 				this.CachedCanvasCtx.clearRect(0, 0, _need_pix_width, _need_pix_height);
 			}
 
-			// и сразу отрисуем его на кешированной картинке
+			// and immediately draw it on the cached image
 			const g = new AscCommon.CGraphics();
 			g.init(this.CachedCanvasCtx, w_px, h_px, w_mm, h_mm);
 			g.m_oFontManager = AscCommon.g_fontManager;
@@ -4207,7 +4204,7 @@ function CNotesDrawer(page)
 		if (-1 == oThis.HtmlPage.m_oDrawingDocument.SlideCurrent)
 			return;
 
-		// после fullscreen возможно изменение X, Y после вызова Resize.
+		// after fullscreen, X and Y may change after calling Resize.
 		oThis.HtmlPage.checkBodyOffset();
 
 		AscCommon.check_MouseDownEvent(e, true);
@@ -4320,7 +4317,7 @@ function CNotesDrawer(page)
 		if (0 != deltaY)
 			oThis.HtmlPage.m_oScrollNotes_.scrollBy(0, deltaY, false);
 
-		// здесь - имитируем моус мув ---------------------------
+		// here - simulate mouse move ---------------------------
 		oThis.onMouseMove(CreateBrowserEventObject(), true);
 		// ------------------------------------------------------
 
@@ -4734,7 +4731,7 @@ function CPaneDrawerBase(page, htmlElement, parentDrawer, pageControl)
 		// }
 		//
 		//
-		// // здесь - имитируем моус мув ---------------------------
+		// // here - simulate mouse move ---------------------------
 		// var _e   = CreateBrowserEventObject();
 		//
 		// oThis.onMouseMove(_e, true);
@@ -4848,7 +4845,7 @@ function CAnimPaneListDrawer(page, htmlElement, parentDrawer)
 			}
 		}
 
-		// здесь - имитируем моус мув ---------------------------
+		// here - simulate mouse move ---------------------------
 		oThis.onMouseMove(CreateBrowserEventObject(), true);
 		// ------------------------------------------------------
 

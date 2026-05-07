@@ -156,7 +156,7 @@
 		this.m_oScrollThumb_ = null;
 		this.m_oScrollNotes_ = null;
 		this.m_oScrollAnim_ = null;
-		this.m_nVerticalSlideChangeOnScrollInterval = 300; // как часто можно менять слайды при вертикальном скролле
+		this.m_nVerticalSlideChangeOnScrollInterval = 300; // how often slides can be changed on vertical scroll
 		this.m_nVerticalSlideChangeOnScrollLast = -1;
 		this.m_nVerticalSlideChangeOnScrollEnabled = false;
 
@@ -247,7 +247,7 @@
 		this.m_bIsIE = AscCommon.AscBrowser.isIE;
 
 
-		// сплиттеры (для табнейлов и для заметок)
+		// splitters (for thumbnails and notes)
 		this.splitters;
 
 		this.SplitterDiv = null;
@@ -258,7 +258,7 @@
 		this.SlideScrollMIN = 0;
 		this.SlideScrollMAX = 0;
 
-		// поддерживает ли браузер нецелые пикселы
+		// whether browser supports non-integer pixels
 		this.bIsDoublePx = AscCommon.isSupportDoublePx();
 
 		this.m_nCurrentTimeClearCache = 0;
@@ -468,8 +468,10 @@
 			_buttonsContent += ("<button class=\"btn-text-default\" id=\"dem_id_reset\" style=\"left: 85px; bottom: 2px; \">" + this.reporterTranslates[0] + "</button>");
 			_buttonsContent += ("<button class=\"btn-text-default\" id=\"dem_id_end\" style=\"right: 10px; bottom: 2px; \">" + this.reporterTranslates[2] + "</button>");
 
-			_buttonsContent += "<button class=\"btn-text-default-img\" id=\"dem_id_prev\"  data-tooltip=\"" + this.reporterTranslates[11] + "\" style=\"left: 150px; bottom: 3px; width: 20px; height: 20px;\"><span class=\"btn-prev back_image_buttons\" style=\"width:100%;height:100%;\"></span></button>";
-			_buttonsContent += "<button class=\"btn-text-default-img\" id=\"dem_id_next\" data-tooltip=\"" + this.reporterTranslates[12] + "\" style=\"left: 170px; bottom: 3px; width: 20px; height: 20px;\"><span class=\"btn-next back_image_buttons\" style=\"width:100%;height:100%;\"></span></button>";
+			const prevIcon = Asc.editor.isRtlInterface ? "btn-next" : "btn-prev";
+			const nextIcon = Asc.editor.isRtlInterface ? "btn-prev" : "btn-next";
+			_buttonsContent += "<button class=\"btn-text-default-img\" id=\"dem_id_prev\"  data-tooltip=\"" + this.reporterTranslates[11] + "\" style=\"left: 150px; bottom: 3px; width: 20px; height: 20px;\"><span id=\"dem_id_prev_span\" class=\"" + prevIcon + " back_image_buttons\" style=\"width:100%;height:100%;\"></span></button>";
+			_buttonsContent += "<button class=\"btn-text-default-img\" id=\"dem_id_next\" data-tooltip=\"" + this.reporterTranslates[12] + "\" style=\"left: 170px; bottom: 3px; width: 20px; height: 20px;\"><span id=\"dem_id_next_span\" class=\"" + nextIcon + " back_image_buttons\" style=\"width:100%;height:100%;\"></span></button>";
 
 			_buttonsContent += "<div class=\"separator block_elem_no_select\" id=\"dem_id_sep\" style=\"left: 185px; bottom: 3px;\"></div>";
 
@@ -1102,7 +1104,7 @@
 		this.m_oMainView = CreateControlContainer("id_main_view");
 		this.m_oMainContent.AddControl(this.m_oMainView);
 
-		// проблема с фокусом fixed-позиционированного элемента внутри (bug 63194)
+		// problem with focus of fixed-positioned element inside (bug 63194)
 		this.m_oMainView.HtmlElement.onscroll = function () {
 			this.scrollTop = 0;
 		};
@@ -1929,7 +1931,7 @@
 			AscCommon.addMouseEvent(this.m_oBody.HtmlElement, "up", this.onBodyMouseUp);
 		}
 
-		// в мобильной версии - при транзишне - не обновляется позиция/размер
+		// in mobile version - during transition - position/size is not updated
 		if (this.m_oApi.isMobileVersion) {
 			var _t = this;
 			document.addEventListener && document.addEventListener("transitionend", function () { _t.OnResize(false); }, false);
@@ -2431,7 +2433,7 @@
 
 		this.m_nZoomType = type;
 
-		// нужно проверить режим и сбросить кеш грамотно (ie version)
+		// need to check mode and reset cache properly (ie version)
 		AscCommon.g_fontManager.ClearRasterMemory();
 
 		var oWordControl = oThis;
@@ -2775,7 +2777,7 @@
 		this.SlideScrollMIN = size.SlideScrollMIN;
 		this.SlideScrollMAX = size.SlideScrollMAX;
 
-		// теперь проверим необходимость перезуммирования
+		// now check if re-zooming is needed
 		if (1 == this.m_nZoomType) {
 			if (true === this.zoom_FitToWidth())
 				return;
@@ -2879,7 +2881,7 @@
 		var _x = -this.m_dScrollX + _centerX - _centerSlideX - _hor_width_left;
 		var _y = -(this.m_dScrollY - this.SlideScrollMIN) + _centerY - _centerSlideY - _ver_height_top;
 
-		// теперь расчитаем какие нужны позиции, чтобы слайд находился по центру
+		// now calculate positions needed to center the slide
 		var _x_c = _centerX - _centerSlideX;
 		var _y_c = _centerY - _centerSlideY;
 		this.m_dScrollX_Central = _centerX - _centerSlideX - _hor_width_left - _x_c;
@@ -2934,7 +2936,7 @@
 			return true;
 		}
 
-		// защита от внутренних скроллах. мы превентим ТОЛЬКО самый верхний из onMouseWheel
+		// protection from internal scrolls. we prevent ONLY the topmost onMouseWheel
 		this.m_nVerticalSlideChangeOnScrollEnabled = false;
 
 		var newTime = new Date().getTime();
@@ -2977,7 +2979,7 @@
 				return;
 			}
 
-			var lNumSlide = ((scrollPositionY / this.m_dDocumentPageHeight) + 0.01) >> 0; // 0.01 - ошибка округления!!
+			var lNumSlide = ((scrollPositionY / this.m_dDocumentPageHeight) + 0.01) >> 0; // 0.01 - rounding error!!
 			var _can_change_slide = true;
 			if (-1 != this.ZoomFreePageNum && this.ZoomFreePageNum == this.m_oDrawingDocument.SlideCurrent)
 				_can_change_slide = false;
@@ -3392,6 +3394,23 @@
 			var _drawMenu = document.getElementById("dem_id_draw_menu");
 			var _buttonEnd = document.getElementById("dem_id_end");
 
+			const prevSpan = document.getElementById('dem_id_prev_span');
+			const nextSpan = document.getElementById('dem_id_next_span');
+			prevSpan.classList.remove(Asc.editor.isRtlInterface ? 'btn-prev' : 'btn-next');
+			prevSpan.classList.add(Asc.editor.isRtlInterface ? 'btn-next' : 'btn-prev');
+			nextSpan.classList.remove(Asc.editor.isRtlInterface ? 'btn-next' : 'btn-prev');
+			nextSpan.classList.add(Asc.editor.isRtlInterface ? 'btn-prev' : 'btn-next');
+
+			const startSide = Asc.editor.isRtlInterface ? 'right' : 'left';
+			const endSide = Asc.editor.isRtlInterface ? 'left' : 'right';
+			function setHorizontalPosition(element, offset) {
+				element.style[endSide] = '';
+				element.style[startSide] = offset;
+			}
+
+			_buttonEnd.style[startSide] = '';
+			_buttonEnd.style[endSide] = '10px';
+
 			function redrawMenu() {
 				if (_drawMenu.style.display === "block") {
 					var offset = AscCommon.UI.getBoundingClientRect(_buttonDrawMenuTrigger);
@@ -3435,21 +3454,21 @@
 				_buttonReset.style.display = "block";
 				_buttonEnd.style.display = "block";
 
-				_label1.style.left = "10px";
-				_buttonPlay.style.left = (10 + _label1_width + 6) + "px";
-				_buttonReset.style.left = (10 + _label1_width + 6 + 20 + 6) + "px";
+				setHorizontalPosition(_label1, '10px');
+				setHorizontalPosition(_buttonPlay, (10 + _label1_width + 6) + 'px');
+				setHorizontalPosition(_buttonReset, (10 + _label1_width + 6 + 20 + 6) + 'px');
 
 				if (!_is1) {
 					_posCenter = 10 + _label1_width + 6 + 20 + 6 + _buttonReset_width + 10 + ((_width - _test_width1) >> 1);
 				}
 
-				_buttonPrev.style.left = _posCenter + "px";
-				_buttonNext.style.left = (_posCenter + 20) + "px";
-				_buttonSeparator.style.left = (_posCenter + 48 - 10) + "px";
-				_labelMain.style.left = (_posCenter + 55) + "px";
-				_buttonSeparator2.style.left = (_posCenter + 55 + _main_width + 7 - 10) + "px";
-				_buttonPointer.style.left = (_posCenter + 70 + _main_width) + "px";
-				_buttonDrawMenuTrigger.style.left = (_posCenter + 90 + _main_width) + "px";
+				setHorizontalPosition(_buttonPrev, _posCenter + 'px');
+				setHorizontalPosition(_buttonNext, (_posCenter + 20) + 'px');
+				setHorizontalPosition(_buttonSeparator, (_posCenter + 48 - 10) + 'px');
+				setHorizontalPosition(_labelMain, (_posCenter + 55) + 'px');
+				setHorizontalPosition(_buttonSeparator2, (_posCenter + 55 + _main_width + 7 - 10) + 'px');
+				setHorizontalPosition(_buttonPointer, (_posCenter + 70 + _main_width) + 'px');
+				setHorizontalPosition(_buttonDrawMenuTrigger, (_posCenter + 90 + _main_width) + 'px');
 				redrawMenu();
 
 				return;
@@ -3465,13 +3484,13 @@
 				_buttonReset.style.display = "none";
 				_buttonEnd.style.display = "block";
 
-				_buttonPrev.style.left = "10px";
-				_buttonNext.style.left = "30px";
-				_buttonSeparator.style.left = (58 - 10) + "px";
-				_labelMain.style.left = "65px";
-				_buttonSeparator2.style.left = (65 + _main_width + 7 - 10) + "px";
-				_buttonPointer.style.left = (80 + _main_width) + "px";
-				_buttonDrawMenuTrigger.style.left = (100 + _main_width) + "px";
+				setHorizontalPosition(_buttonPrev, '10px');
+				setHorizontalPosition(_buttonNext, '30px');
+				setHorizontalPosition(_buttonSeparator, (58 - 10) + 'px');
+				setHorizontalPosition(_labelMain, '65px');
+				setHorizontalPosition(_buttonSeparator2, (65 + _main_width + 7 - 10) + 'px');
+				setHorizontalPosition(_buttonPointer, (80 + _main_width) + 'px');
+				setHorizontalPosition(_buttonDrawMenuTrigger, (100 + _main_width) + 'px');
 				redrawMenu();
 
 				return;
@@ -3488,13 +3507,13 @@
 			_buttonReset.style.display = "none";
 			_buttonEnd.style.display = "none";
 
-			_buttonPrev.style.left = _posCenter + "px";
-			_buttonNext.style.left = (_posCenter + 20) + "px";
-			_buttonSeparator.style.left = (_posCenter + 48 - 10) + "px";
-			_labelMain.style.left = (_posCenter + 55) + "px";
-			_buttonSeparator2.style.left = (_posCenter + 55 + _main_width + 7 - 10) + "px";
-			_buttonPointer.style.left = (_posCenter + 70 + _main_width) + "px";
-			_buttonDrawMenuTrigger.style.left = (_posCenter + 90 + _main_width) + "px";
+			setHorizontalPosition(_buttonPrev, _posCenter + 'px');
+			setHorizontalPosition(_buttonNext, (_posCenter + 20) + 'px');
+			setHorizontalPosition(_buttonSeparator, (_posCenter + 48 - 10) + 'px');
+			setHorizontalPosition(_labelMain, (_posCenter + 55) + 'px');
+			setHorizontalPosition(_buttonSeparator2, (_posCenter + 55 + _main_width + 7 - 10) + 'px');
+			setHorizontalPosition(_buttonPointer, (_posCenter + 70 + _main_width) + 'px');
+			setHorizontalPosition(_buttonDrawMenuTrigger, (_posCenter + 90 + _main_width) + 'px');
 			redrawMenu();
 		}
 	};
@@ -3559,7 +3578,7 @@
 		if (oWordControl.m_oDrawingDocument.TransitionSlide.IsPlaying())
 			oWordControl.m_oDrawingDocument.TransitionSlide.End(true);
 
-		// после fullscreen возможно изменение X, Y после вызова Resize.
+		// after fullscreen, X and Y may change after calling Resize.
 		oWordControl.checkBodyOffset();
 
 		if (!oThis.m_bIsIE) {
@@ -4069,7 +4088,7 @@
 
 		if (oWordControl.Thumbnails.FocusObjType == FOCUS_OBJECT_THUMBNAILS) {
 			if (0 == oWordControl.splitters[0].position) {
-				// табнейлы не видны. Чего же тогда обрабатывать им клавиатуру
+				// thumbnails are not visible. Why handle keyboard for them then
 				e.preventDefault();
 				return false;
 			}
@@ -4101,7 +4120,7 @@
 		oWordControl.bIsUseKeyPress = ((_ret_mouseDown & keydownresult_PreventKeyPress) != 0) ? false : true;
 
 		if ((_ret_mouseDown & keydownresult_PreventDefault) != 0) {
-			// убираем превент с альтом. Уж больно итальянцы недовольны.
+			// remove prevent with alt. Workaround for Italian keyboard layout.
 			e.preventDefault();
 		}
 
@@ -4140,7 +4159,7 @@
 		oWordControl.EndUpdateOverlay();
 
 		if ((_ret_mouseDown & keydownresult_PreventDefault) != 0) {
-			// убираем превент с альтом. Уж больно итальянцы недовольны.
+			// remove prevent with alt. Workaround for Italian keyboard layout.
 			e.preventDefault();
 			return false;
 		}
@@ -4501,13 +4520,15 @@
 
 		var isDesktopVersion = window["AscDesktopEditor"] !== undefined;
 
-		if (this.splitters[0].position > 0.1 && !isDesktopVersion) {
+		if (this.Width > 0 && !isDesktopVersion) {
 			const maxSplitterThMax = Math.min(g_dKoef_pix_to_mm * this.Width / 3, 80);
 			this.splitters[0].setLimits(maxSplitterThMax >> 2, maxSplitterThMax >> 0);
+		}
 
-			const considerLimits = true;
-			this.splitters[0].setPosition(this.splitters[0].initialPosition, considerLimits);
-
+		if (this.splitters[0].position > 0.1 && !isDesktopVersion) {
+			if (this.Width > 0) {
+				this.splitters[0].setPosition(this.splitters[0].initialPosition, true, true);
+			}
 			this.onSplitterResize(true);
 		}
 
@@ -4546,7 +4567,7 @@
 			return;
 		}
 
-		// теперь проверим необходимость перезуммирования
+		// now check if re-zooming is needed
 		if (1 == this.m_nZoomType && 0 != this.m_dDocumentPageWidth && 0 != this.m_dDocumentPageHeight) {
 			if (true === this.zoom_FitToWidth()) {
 				this.m_oBoundsController.ClearNoAttack();
@@ -4607,7 +4628,7 @@
 			return;
 		}
 
-		// теперь проверим необходимость перезуммирования
+		// now check if re-zooming is needed
 		if (1 == this.m_nZoomType) {
 			if (true === this.zoom_FitToWidth()) {
 				this.m_oBoundsController.ClearNoAttack();
@@ -4785,7 +4806,7 @@
 		var drDoc = this.m_oDrawingDocument;
 
 		if (!this.m_oScrollVerApi) {
-			// сборка файлов
+			// file assembly
 			return;
 		}
 		if (this.m_oApi.isEyedropperStarted() && drDoc.SlideCurrent !== lPageNum) {
@@ -4834,7 +4855,7 @@
 			}
 		}
 
-		// теперь пошлем все шаблоны первой темы
+		// now send all layouts of the first theme
 		this.CheckLayouts();
 
 		this.SlideDrawer.CheckSlide(drDoc.SlideCurrent);
@@ -4903,7 +4924,7 @@
 	CEditorPage.prototype.CheckFontCache = function () {
 		var _c = oThis;
 		_c.m_nCurrentTimeClearCache++;
-		if (_c.m_nCurrentTimeClearCache > 750) // 30 секунд. корректировать при смене интервала главного таймера!!!
+		if (_c.m_nCurrentTimeClearCache > 750) // 30 seconds. adjust when changing the main timer interval!!!
 		{
 			_c.m_nCurrentTimeClearCache = 0;
 			_c.m_oDrawingDocument.CheckFontCache();

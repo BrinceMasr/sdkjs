@@ -161,8 +161,8 @@
 		};
 		this.AllocHeap = function()
 		{
-			// TODO: нужно посмотреть, как эта память будет использоваться.
-			// нужно ли здесь делать стек, либо все время от нуля делать??
+			// TODO: need to see how this memory will be used.
+			// should we make a stack here, or always start from zero??
 		};
 		this.CreateStream = function(size)
 		{
@@ -173,7 +173,7 @@
 	window['AscFonts'].FT_Memory = FT_Memory;
 	window['AscFonts'].g_memory = new FT_Memory();
 
-	// память для растеризации буквы
+	// memory for character rasterization
 	function CRasterMemory()
 	{
 		this.width = 0;
@@ -183,7 +183,7 @@
 		this.m_oBuffer = null;
 		this.CheckSize = function(w, h)
 		{
-			let extra = 10; // с запасом под device pixelratio
+			let extra = 10; // extra margin for device pixelratio
 			if (this.width < (w + extra) || this.height < (h + extra))
 			{
 				this.width = Math.max(this.width, w + extra);

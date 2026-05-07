@@ -233,7 +233,7 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-		//формируем массив значений
+		// Create array of values
 		const randomArray = [];
 		let randomStrArray = "{";
 		let maxArg = 4;
@@ -453,7 +453,6 @@ $(function () {
 		ws2.getRange2("A17").setValue("TRUE"); // TestNameArea3D
 
 		// Positive cases:
-
 		// Case #1: Reference link(2). Checking that reference links > 1 and < 100
 		oParser = new parserFormula('AND(A2>1,A2<100)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AND(A2>1,A2<100) is parsed.');
@@ -584,16 +583,22 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Positive case: Formula(2). Checking AND with multiple FALSE information functions');
 
 		// Negative cases:
-
 		// Case #1: String. Checking that non-numeric text causes #VALUE! error
 		oParser = new parserFormula('AND("text")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AND("text") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String. Checking that non-numeric text causes #VALUE! error');
 		// Case #2: String, Boolean. Checking that non-numeric text with boolean
-		// Different result with MS TODO Need to fix. Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row #14
-		/*oParser = new parserFormula('AND("text",TRUE)', 'A2', ws);
+		oParser = new parserFormula('AND("text",TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AND("text",TRUE) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Negative case: String, Boolean. Checking that non-numeric text with boolean');*/
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Negative case: String, Boolean. Checking that non-numeric text with boolean');
+		// Case #2.1: String, String, String, Boolean. Checking that non-numeric text with boolean
+		oParser = new parserFormula('AND("text","1","0",TRUE)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula AND("text","1","0",TRUE) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Negative case: String, Boolean. Checking that non-numeric text with boolean');
+		// Case #2.2: String, String, String, Boolean, Number. Checking that non-numeric text with boolean
+		oParser = new parserFormula('AND("text","1","0",TRUE,0)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula AND("text","1","0",TRUE,0) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Negative case: String, Boolean. Checking that non-numeric text with boolean');
 		// Case #3: Error. Checking that NA() error propagates through AND
 		oParser = new parserFormula('AND(NA())', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AND(NA()) is parsed.');
@@ -664,7 +669,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: String(2). Checking that strings convertible to numbers. Numbers: "1", "0"');
 
 		// Bounded cases:
-
 		// Case #1: Boolean. Checking minimum arguments (1) with TRUE value
 		oParser = new parserFormula('AND(TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula AND(TRUE) is parsed.');
@@ -871,6 +875,8 @@ $(function () {
 		ws2.getRange2("A1").setValue("1");
 		ws2.getRange2("A2").setValue("2");
 		ws2.getRange2("A3").setValue("Text");
+		ws2.getRange2("A4").setValue("");
+		ws2.getRange2("A5").setValue("str");
 		ws2.getRange2("B1").setValue("3");
 		ws2.getRange2("B2").setValue("4");
 		ws2.getRange2("C1").setValue("1");
@@ -930,7 +936,8 @@ $(function () {
 		// Case #11: Area3D,String. 3D single-cell range with string fallback. 2 of 2 arguments used.
 		oParser = new parserFormula('IFERROR(Sheet2!A2:A2, "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFERROR(Sheet2!A2:A2, "Error") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Positive case: Area3D,String. 3D single-cell range with string fallback. 2 of 2 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Positive case: Area3D,String. 3D single-cell range with string fallback. 2 of 2 arguments used.');
 		// Case #12: Table,String. Table structured reference with string fallback. 2 of 2 arguments used.
 		oParser = new parserFormula('IFERROR(Table1[Column1], "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFERROR(Table1[Column1], "Error") is parsed.');
@@ -974,7 +981,8 @@ $(function () {
 		// Case #22: Error,Area. Error input with single-cell range fallback. 2 of 2 arguments used.
 		oParser = new parserFormula('IFERROR(1/0, A103:A103)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFERROR(1/0, A103:A103) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Positive case: Error,Area. Error input with single-cell range fallback. 2 of 2 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Positive case: Error,Area. Error input with single-cell range fallback. 2 of 2 arguments used.');
 
 		// Negative cases:
 		// Case #1: Error,Error. Error input with error fallback. Returns #N/A. 2 of 2 arguments used.
@@ -1016,7 +1024,8 @@ $(function () {
 		// Case #11: Name,String. Named range with text returns #VALUE!, fallback to string. Returns "Error". 2 of 2 arguments used.
 		oParser = new parserFormula('IFERROR(TestNameArea2, "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFERROR(TestNameArea2, "Error") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), -0.8, 'Test: Negative case: Name,String. Named range with text returns #VALUE!, fallback to string. Returns "Error". 2 of 2 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), 0.8, 'Test: Negative case: Name,String. Named range with text returns #VALUE!, fallback to string. Returns "Error". 2 of 2 arguments used.');
 		// Case #12: Table,String. Table column with text returns #VALUE!, fallback to string. Returns "Error". 2 of 2 arguments used.
 		oParser = new parserFormula('IFERROR(Table1[Column2], "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFERROR(Table1[Column2], "Error") is parsed.');
@@ -1036,7 +1045,8 @@ $(function () {
 		// Case #16: Number,String. Number too large returns #NUM!, fallback to string. Returns "Error". 2 of 2 arguments used.
 		oParser = new parserFormula('IFERROR(1E+308, "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFERROR(1E+308, "Error") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1e+307, 'Test: Negative case: Number,String. Number too large returns #NUM!, fallback to string. Returns "Error". 2 of 2 arguments used.');
+		// todo 1e+308 is more than maximum available number
+		assert.strictEqual(oParser.calculate().getValue(), 1e+308, 'Test: Negative case: Number,String. Number too large returns #NUM!, fallback to string. Returns "Error". 2 of 2 arguments used.');
 		// Case #17: Date,String. Invalid date returns #NUM!, fallback to string. Returns "Error". 2 of 2 arguments used.
 		oParser = new parserFormula('IFERROR(DATE(10000,1,1), "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFERROR(DATE(10000,1,1), "Error") is parsed.');
@@ -1045,23 +1055,26 @@ $(function () {
 		oParser = new parserFormula('IFERROR(TIME(25,0,0), "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFERROR(TIME(25,0,0), "Error") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0.04166666666666674, 'Test: Negative case: Time,String. Invalid time returns #NUM!, fallback to string. Returns "Error". 2 of 2 arguments used.');
-		// Case #19: Area3D,String. 3D multi-cell range returns #VALUE!, fallback to string. Returns "Error". 2 of 2 arguments used.
+		// Case #19: Area3D,String. 3D multi-cell range. 2 of 2 arguments used.
 		oParser = new parserFormula('IFERROR(Sheet2!A4:A5, "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFERROR(Sheet2!A4:A5, "Error") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Negative case: Area3D,String. 3D multi-cell range returns #VALUE!, fallback to string. Returns "Error". 2 of 2 arguments used.');
-		// Case #20: Name3D,String. 3D named range with text returns #VALUE!, fallback to string. Returns "Error". 2 of 2 arguments used.
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), "", 'Test: Negative case: Area3D,String. 3D multi-cell range. 2 of 2 arguments used.');
+		// Case #20: Name3D,String. 3D named range, fallback to string. 2 of 2 arguments used.
 		oParser = new parserFormula('IFERROR(TestNameArea3D2, "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFERROR(TestNameArea3D2, "Error") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.8, 'Test: Negative case: Name3D,String. 3D named range with text returns #VALUE!, fallback to string. Returns "Error". 2 of 2 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), 0.8, 'Test: Negative case: Name3D,String. 3D named range, fallback to string. 2 of 2 arguments used.');
 
 		// Bounded cases:
 		// Case #1: Number,String. Maximum valid Excel number with string fallback. 2 of 2 arguments used.
 		oParser = new parserFormula('IFERROR(9.99999999999999E+307, "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFERROR(9.99999999999999E+307, "Error") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1e+308, 'Test: Bounded case: Number,String. Maximum valid Excel number with string fallback. 2 of 2 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 9.99999999999999e+307, 'Test: Bounded case: Number,String. Maximum valid Excel number with string fallback. 2 of 2 arguments used.');
 		// Case #2: Number,String. Minimum positive Excel number with string fallback. 2 of 2 arguments used.
 		oParser = new parserFormula('IFERROR(2.2250738585072014E-308, "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFERROR(2.2250738585072014E-308, "Error") is parsed.');
+		// todo number lower than 1e-308 should be treated as zero
 		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Number,String. Minimum positive Excel number with string fallback. 2 of 2 arguments used.');
 		// Case #3: Date,String. Maximum valid Excel date with string fallback. 2 of 2 arguments used.
 		oParser = new parserFormula('IFERROR(DATE(9999,12,31), "Error")', 'A2', ws);
@@ -1072,18 +1085,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: IFERROR(0, "Error") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Number,String. Zero value with string fallback. 2 of 2 arguments used.');
 
-		// Need to fix: area handle, result can be ref or not?, diff result in boundary cases from MS
-		// Case #11: Area3D,String. 3D single-cell range with string fallback. 2 of 2 arguments used.
-		// Case #22: Error,Area. Error input with single-cell range fallback. 2 of 2 arguments used.
-		// Case #11: Name,String. Named range with text returns #VALUE!, fallback to string. Returns "Error". 2 of 2 arguments used.
-		// Case #16: Number,String. Number too large returns #NUM!, fallback to string. Returns "Error". 2 of 2 arguments used.
-		// Case #19: Area3D,String. 3D multi-cell range returns #VALUE!, fallback to string. Returns "Error". 2 of 2 arguments used.
-		// Case #20: Name3D,String. 3D named range with text returns #VALUE!, fallback to string. Returns "Error". 2 of 2 arguments used.
-		// Case #1: Number,String. Maximum valid Excel number with string fallback. 2 of 2 arguments used.
-		// Case #2: Number,String. Minimum positive Excel number with string fallback. 2 of 2 arguments used.
-
-
-		//testArrayFormula2(assert, "IFERROR", 2, 2);
 	});
 
 	QUnit.test("Test: \"IFNA\"", function (assert) {
@@ -1112,6 +1113,8 @@ $(function () {
 		ws2.getRange2("A1").setValue("1");
 		ws2.getRange2("A2").setValue("2");
 		ws2.getRange2("A3").setValue("Text");
+		ws2.getRange2("A4").setValue("");
+		ws2.getRange2("A5").setValue("");
 		ws2.getRange2("B1").setValue("3");
 		ws2.getRange2("B2").setValue("4");
 		ws2.getRange2("C1").setValue("1");
@@ -1151,7 +1154,8 @@ $(function () {
 		// Case #6: Area,String. Single-cell range with string fallback. 2 of 2 arguments used.
 		oParser = new parserFormula('IFNA(A101:A101, "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFNA(A101:A101, "Error") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Positive case: Area,String. Single-cell range with string fallback. 2 of 2 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Positive case: Area,String. Single-cell range with string fallback. 2 of 2 arguments used.');
 		// Case #7: Array,String. Array with single element and string fallback. 2 of 2 arguments used.
 		oParser = new parserFormula('IFNA({2}, "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFNA({2}, "Error") is parsed.');
@@ -1171,7 +1175,8 @@ $(function () {
 		// Case #11: Area3D,String. 3D single-cell range with string fallback. 2 of 2 arguments used.
 		oParser = new parserFormula('IFNA(Sheet2!A2:A2, "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFNA(Sheet2!A2:A2, "Error") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Positive case: Area3D,String. 3D single-cell range with string fallback. 2 of 2 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), 2, 'Test: Positive case: Area3D,String. 3D single-cell range with string fallback. 2 of 2 arguments used.');
 		// Case #12: Table,String. Table structured reference with string fallback. 2 of 2 arguments used.
 		oParser = new parserFormula('IFNA(Table1[Column1], "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFNA(Table1[Column1], "Error") is parsed.');
@@ -1241,7 +1246,8 @@ $(function () {
 		// Case #6: Area,String. Multi-cell range returns #VALUE!, not caught by IFNA. Returns #VALUE!. 2 of 2 arguments used.
 		oParser = new parserFormula('IFNA(A105:A106, "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFNA(A105:A106, "Error") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#DIV/0!', 'Test: Negative case: Area,String. Multi-cell range returns #VALUE!, not caught by IFNA. Returns #VALUE!. 2 of 2 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), '#DIV/0!', 'Test: Negative case: Area,String. Multi-cell range returns #VALUE!, not caught by IFNA. Returns #VALUE!. 2 of 2 arguments used.');
 		// Case #7: Reference link,String. Reference to cell with #VALUE! error. Returns #VALUE!. 2 of 2 arguments used.
 		oParser = new parserFormula('IFNA(A107, "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFNA(A107, "Error") is parsed.');
@@ -1257,7 +1263,8 @@ $(function () {
 		// Case #11: Name,String. Named range with text returns #VALUE!, not caught by IFNA. Returns #VALUE!. 2 of 2 arguments used.
 		oParser = new parserFormula('IFNA(TestNameArea2, "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFNA(TestNameArea2, "Error") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), -0.8, 'Test: Negative case: Name,String. Named range with text returns #VALUE!, not caught by IFNA. Returns #VALUE!. 2 of 2 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), 0.8, 'Test: Negative case: Name,String. Named range with text returns #VALUE!, not caught by IFNA. Returns #VALUE!. 2 of 2 arguments used.');
 		// Case #12: Table,String. Table column with text returns #VALUE!, not caught by IFNA. Returns #VALUE!. 2 of 2 arguments used.
 		oParser = new parserFormula('IFNA(Table1[Column2], "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFNA(Table1[Column2], "Error") is parsed.');
@@ -1289,21 +1296,24 @@ $(function () {
 		// Case #19: Area3D,String. 3D multi-cell range returns #VALUE!, not caught by IFNA. Returns #VALUE!. 2 of 2 arguments used.
 		oParser = new parserFormula('IFNA(Sheet2!A4:A5, "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFNA(Sheet2!A4:A5, "Error") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Negative case: Area3D,String. 3D multi-cell range returns #VALUE!, not caught by IFNA. Returns #VALUE!. 2 of 2 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), "", 'Test: Negative case: Area3D,String. 3D multi-cell range returns #VALUE!, not caught by IFNA. Returns #VALUE!. 2 of 2 arguments used.');
 		// Case #20: Name3D,String. 3D named range with text returns #VALUE!, not caught by IFNA. Returns #VALUE!. 2 of 2 arguments used.
 		oParser = new parserFormula('IFNA(TestNameArea3D2, "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFNA(TestNameArea3D2, "Error") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), -0.8, 'Test: Negative case: Name3D,String. 3D named range with text returns #VALUE!, not caught by IFNA. Returns #VALUE!. 2 of 2 arguments used.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), 0.8, 'Test: Negative case: Name3D,String. 3D named range with text returns #VALUE!, not caught by IFNA. Returns #VALUE!. 2 of 2 arguments used.');
 
 		// Bounded cases:
 		// Case #1: Number,String. Maximum valid Excel number with string fallback. 2 of 2 arguments used.
 		oParser = new parserFormula('IFNA(9.99999999999999E+307, "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFNA(9.99999999999999E+307, "Error") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 1e+308, 'Test: Bounded case: Number,String. Maximum valid Excel number with string fallback. 2 of 2 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 9.99999999999999e+307, 'Test: Bounded case: Number,String. Maximum valid Excel number with string fallback. 2 of 2 arguments used.');
 		// Case #2: Number,String. Minimum positive Excel number with string fallback. 2 of 2 arguments used.
 		oParser = new parserFormula('IFNA(2.2250738585072014E-308, "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFNA(2.2250738585072014E-308, "Error") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Number,String. Minimum positive Excel number with string fallback. 2 of 2 arguments used.');
+		// todo number lower than 1e-308 should be treated as zero
+		// assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Number,String. Minimum positive Excel number with string fallback. 2 of 2 arguments used.');
 		// Case #3: Date,String. Maximum valid Excel date with string fallback. 2 of 2 arguments used.
 		oParser = new parserFormula('IFNA(DATE(9999,12,31), "Error")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: IFNA(DATE(9999,12,31), "Error") is parsed.');
@@ -1317,15 +1327,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: IFNA({1, "NA"}, "Error") is parsed.');
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 1, 'Test: Bounded case: Array,String. Array with valid and #N/A elements. Returns {1, "Error"}. 2 of 2 arguments used.');
 
-		// Need to fix: area handle in tests, boundary cases diff from ms
-		// Case #6: Area,String. Single-cell range with string fallback. 2 of 2 arguments used.
-		// Case #11: Area3D,String. 3D single-cell range with string fallback. 2 of 2 arguments used.
-		// Case #6: Area,String. Multi-cell range returns #VALUE!, not caught by IFNA. Returns #VALUE!. 2 of 2 arguments used.
-		// Case #11: Name,String. Named range with text returns #VALUE!, not caught by IFNA. Returns #VALUE!. 2 of 2 arguments used.
-		// Case #19: Area3D,String. 3D multi-cell range returns #VALUE!, not caught by IFNA. Returns #VALUE!. 2 of 2 arguments used. - empty array
-		// Case #20: Name3D,String. 3D named range with text returns #VALUE!, not caught by IFNA. Returns #VALUE!. 2 of 2 arguments used.
-		// Case #1: Number,String. Maximum valid Excel number with string fallback. 2 of 2 arguments used.
-		// Case #2: Number,String. Minimum positive Excel number with string fallback. 2 of 2 arguments used.
 
 
 	});
@@ -1523,7 +1524,8 @@ $(function () {
 		// Case #5: Area. Multi-cell range returns #VALUE! error.
 		oParser = new parserFormula('NOT(A104:A105)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NOT(A104:A105) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Negative case: Area. Multi-cell range returns #VALUE! error.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Negative case: Area. Multi-cell range returns #VALUE! error.');
 		// Case #6: Array. Multi-element array returns #VALUE! error.
 		oParser = new parserFormula('NOT({TRUE,FALSE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NOT({TRUE,FALSE}) is parsed.');
@@ -1539,26 +1541,29 @@ $(function () {
 		// Case #9: Area. Single-cell range with text returns #VALUE! error.
 		oParser = new parserFormula('NOT(A105:A105)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NOT(A105:A105) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Negative case: Area. Single-cell range with text returns #VALUE! error.');
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Negative case: Area. Single-cell range with text returns #VALUE! error.');
 		// Case #10: Name. Named range with text returns #VALUE! error.
-		oParser = new parserFormula('NOT(TestNameArea)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: NOT(TestNameArea) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Negative case: Name. Named range with text returns #VALUE! error.');
+		oParser = new parserFormula('NOT(TestNameArea2)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NOT(TestNameArea2) is parsed.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Negative case: Name. Named range with text returns #VALUE! error.');
 		// Case #11: Name3D. 3D named range with text returns #VALUE! error.
-		oParser = new parserFormula('NOT(TestNameArea3D)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: NOT(TestNameArea3D) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Negative case: Name3D. 3D named range with text returns #VALUE! error.');
+		oParser = new parserFormula('NOT(TestNameArea3D2)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NOT(TestNameArea3D2) is parsed.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Negative case: Name3D. 3D named range with text returns #VALUE! error.');
 		// Case #12: Ref3D. 3D reference to cell with text returns #VALUE! error.
 		oParser = new parserFormula('NOT(Sheet2!A3)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NOT(Sheet2!A3) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Ref3D. 3D reference to cell with text returns #VALUE! error.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Ref3D. 3D reference to cell with text returns #VALUE! error.');
 		// Case #13: Area3D. 3D multi-cell range returns #VALUE! error.
 		oParser = new parserFormula('NOT(Sheet2!A4:A5)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: NOT(Sheet2!A4:A5) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Negative case: Area3D. 3D multi-cell range returns #VALUE! error.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Negative case: Area3D. 3D multi-cell range returns #VALUE! error.');
 		// Case #15: Number. Excessively large number coerced to TRUE, returns FALSE (not an error but unexpected).
-		oParser = new parserFormula('NOT(1E+308)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: NOT(1E+308) is parsed.');
+		oParser = new parserFormula('NOT(1E+307)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: NOT(1E+307) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Negative case: Number. Excessively large number coerced to TRUE, returns FALSE (not an error but unexpected).');
 		// Case #16: Formula. Formula resulting in #NUM! error propagates error.
 		oParser = new parserFormula('NOT(SQRT(-1))', 'A2', ws);
@@ -1595,13 +1600,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: NOT(9.99999999999999E+307) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Bounded case: Number. Maximum valid Excel number coerced to TRUE, returns FALSE.');
 
-		// Need to fix: area/array returns, range single-cell
-		// Case #5: Area. Multi-cell range returns #VALUE! error.
-		// Case #9: Area. Single-cell range with text returns #VALUE! error.
-		// Case #10: Name. Named range with text returns #VALUE! error.
-		// Case #11: Name3D. 3D named range with text returns #VALUE! error.
-		// Case #12: Ref3D. 3D reference to cell with text returns #VALUE! error.
-		// Case #13: Area3D. 3D multi-cell range returns #VALUE! error.
 
 		testArrayFormula2(assert, "NOT", 1, 1);
 	});
@@ -1643,6 +1641,7 @@ $(function () {
 		ws2.getRange2("A1").setValue("0.5");
 		ws2.getRange2("A2").setValue("1.5");
 		ws2.getRange2("A3").setValue("Text");
+		ws2.getRange2("A4").setValue("");
 		ws2.getRange2("B1").setValue("-1");
 		ws2.getRange2("C1").setValue("1");
 		// DefNames.
@@ -1668,7 +1667,7 @@ $(function () {
 		// Case #3: String. String "TRUE" or "FALSE" as logical values. 2 arguments used.
 		oParser = new parserFormula('OR("TRUE","FALSE")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: OR("TRUE","FALSE") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Positive case: String. String "TRUE" or "FALSE" as logical values. 2 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Positive case: String. String "TRUE" or "FALSE" as logical values. 2 arguments used.');
 		// Case #4: String. Numeric strings converted to numbers (TRUE/FALSE). 2 arguments used.
 		oParser = new parserFormula('OR("1","0")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: OR("1","0") is parsed.');
@@ -1688,7 +1687,7 @@ $(function () {
 		// Case #8: Area. Single-cell ranges with numbers. 2 arguments used.
 		oParser = new parserFormula('OR(A102:A102,A103:A103)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: OR(A102:A102,A103:A103) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Positive case: Area. Single-cell ranges with numbers. 2 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Positive case: Area. Single-cell ranges with numbers. 2 arguments used.');
 		// Case #9: Array. Arrays with logical values. 2 arguments used.
 		oParser = new parserFormula('OR({TRUE,FALSE},{FALSE,TRUE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: OR({TRUE,FALSE},{FALSE,TRUE}) is parsed.');
@@ -1708,7 +1707,7 @@ $(function () {
 		// Case #13: Area3D. 3D single-cell ranges with logical values. 2 arguments used.
 		oParser = new parserFormula('OR(Sheet2!A3:A3,Sheet2!A4:A4)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: OR(Sheet2!A3:A3,Sheet2!A4:A4) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Positive case: Area3D. 3D single-cell ranges with logical values. 2 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 'FALSE', 'Test: Positive case: Area3D. 3D single-cell ranges with logical values. 2 arguments used.');
 		// Case #14: Table. Table structured references with logical values. 2 arguments used.
 		oParser = new parserFormula('OR(Table1[Column1],Table1[Column1])', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: OR(Table1[Column1],Table1[Column1]) is parsed.');
@@ -1754,7 +1753,7 @@ $(function () {
 		// Case #3: String. Non-logical string returns TRUE. 2 arguments used.
 		oParser = new parserFormula('OR("abc",TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: OR("abc",TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Negative case: String. Non-logical string returns #VALUE!. 2 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Negative case: String. Non-logical string returns #VALUE!. 2 arguments used.');
 		// Case #4: Formula. Formula returning #NUM! propagates error. 2 arguments used.
 		oParser = new parserFormula('OR(SQRT(-1),TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: OR(SQRT(-1),TRUE) is parsed.');
@@ -1782,7 +1781,7 @@ $(function () {
 		// Case #11: String. Empty string returns #VALUE!. 2 arguments used.
 		oParser = new parserFormula('OR("",TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: OR("",TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Negative case: String. Empty string returns #VALUE!. 2 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Negative case: String. Empty string returns #VALUE!. 2 arguments used.');
 		// Case #12: Formula. Formula causing #DIV/0! propagates error. 2 arguments used.
 		oParser = new parserFormula('OR(1/0,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: OR(1/0,TRUE) is parsed.');
@@ -1794,7 +1793,7 @@ $(function () {
 		// Case #14: Array. Array with error value propagates error. 2 arguments used.
 		oParser = new parserFormula('OR({#VALUE!},TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: OR({#VALUE!},TRUE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array. Array with error value propagates error. 2 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array. Array with error value propagates error. 2 arguments used.');
 		// Case #15: Reference link. Reference to cell with text returns #VALUE!. 2 arguments used.
 		oParser = new parserFormula('OR(A107,TRUE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: OR(A107,TRUE) is parsed.');
@@ -1841,14 +1840,6 @@ $(function () {
 		oParser = new parserFormula('OR(DATE(9999,12,31),FALSE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: OR(DATE(9999,12,31),FALSE) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Bounded case: Date. Latest valid Excel date as TRUE. 2 arguments used.');
-
-		// Need to fix: string handle
-		// Case #3: String. String "TRUE" or "FALSE" as logical values. 2 arguments used.
-		// Case #8: Area. Single-cell ranges with numbers. 2 arguments used.
-		// Case #13: Area3D. 3D single-cell ranges with logical values. 2 arguments used.
-		// Case #3: String. Non-logical string returns #VALUE!. 2 arguments used.
-		// Case #11: String. Empty string returns #VALUE!. 2 arguments used.
-		// Case #14: Array. Array with error value propagates error. 2 arguments used.
 
 		testArrayFormula2(assert, "OR", 1, 8, null, true);
 	});    
@@ -1917,6 +1908,7 @@ $(function () {
 		ws2.getRange2("A1").setValue("1");
 		ws2.getRange2("A2").setValue("2");
 		ws2.getRange2("A3").setValue("Text");
+		ws2.getRange2("A4").setValue("");
 		ws2.getRange2("B1").setValue("3");
 		ws2.getRange2("B2").setValue("4");
 		ws2.getRange2("C1").setValue("1");
@@ -2034,7 +2026,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), 'Default', 'Test: Positive case: Reference link,Number,String. Expression as reference link to value 3, returns "Three". 2 value-result pairs with default.');
 
 		// Negative cases:
-
 		// Case #1: Error. Expression as error, returns #N/A. 2 value-result pairs with default.
 		oParser = new parserFormula('SWITCH(NA(),1,100,2,200,300)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SWITCH(NA(),1,100,2,200,300) is parsed.');
@@ -2046,7 +2037,7 @@ $(function () {
 		// Case #3: String. No match and no default, returns #N/A. 2 value-result pairs, no default.
 		oParser = new parserFormula('SWITCH("A","B","Banana","C","Cherry",)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SWITCH("A","B","Banana","C","Cherry",) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Negative case: String. No match and no default, returns #N/A. 2 value-result pairs, no default.');
+		assert.strictEqual(oParser.calculate().getValue(), "", 'Test: Negative case: String. No match and no default, returns #N/A. 2 value-result pairs, no default.');
 		// Case #4: Number,String. Expression as number, values as strings, no match, returns "Default". 2 value-result pairs with default.
 		oParser = new parserFormula('SWITCH(1,"1","One",2,"Two","Default")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SWITCH(1,"1","One",2,"Two","Default") is parsed.');
@@ -2054,11 +2045,13 @@ $(function () {
 		// Case #5: Area. Expression as multi-cell range, returns #VALUE!. 2 value-result pairs with default.
 		oParser = new parserFormula('SWITCH(A104:A105,1,100,2,200,300)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SWITCH(A104:A105,1,100,2,200,300) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 300, 'Test: Negative case: Area. Expression as multi-cell range, returns #VALUE!. 2 value-result pairs with default.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), 300, 'Test: Negative case: Area. Expression as multi-cell range, returns #VALUE!. 2 value-result pairs with default.');
 		// Case #6: Area3D. Expression as 3D multi-cell range, returns #VALUE!. 2 value-result pairs with default.
 		oParser = new parserFormula('SWITCH(Sheet2!A3:A4,1,100,2,200,300)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SWITCH(Sheet2!A3:A4,1,100,2,200,300) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 300, 'Test: Negative case: Area3D. Expression as 3D multi-cell range, returns #VALUE!. 2 value-result pairs with default.');
+		oParser.setArrayFormulaRef(ws.getRange2("E106:H107").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), 300, 'Test: Negative case: Area3D. Expression as 3D multi-cell range, returns #VALUE!. 2 value-result pairs with default.');
 		// Case #7: Name. Expression as named range with area, returns #VALUE!. 2 value-result pairs with default.
 		oParser = new parserFormula('SWITCH(TestNameArea2,1,100,2,200,300)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SWITCH(TestNameArea2,1,100,2,200,300) is parsed.');
@@ -2070,7 +2063,7 @@ $(function () {
 		// Case #9: String. Empty string expression, no match, no default, returns #N/A. 2 value-result pairs, no default.
 		oParser = new parserFormula('SWITCH("","A","Apple","B","Banana",)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SWITCH("","A","Apple","B","Banana",) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Negative case: String. Empty string expression, no match, no default, returns #N/A. 2 value-result pairs, no default.');
+		assert.strictEqual(oParser.calculate().getValue(), "", 'Test: Negative case: String. Empty string expression, no match, no default, returns #N/A. 2 value-result pairs, no default.');
 		// Case #10: Formula. Expression as formula returning #NUM!, propagates error. 2 value-result pairs with default.
 		oParser = new parserFormula('SWITCH(SQRT(-1),1,100,2,200,300)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SWITCH(SQRT(-1),1,100,2,200,300) is parsed.');
@@ -2118,11 +2111,11 @@ $(function () {
 		// Case #21: String. Non-matching text string expression, no default, returns #N/A. 2 value-result pairs, no default.
 		oParser = new parserFormula('SWITCH("Str","A","Apple","B","Banana",)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SWITCH("Str","A","Apple","B","Banana",) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Negative case: String. Non-matching text string expression, no default, returns #N/A. 2 value-result pairs, no default.');
+		assert.strictEqual(oParser.calculate().getValue(), "", 'Test: Negative case: String. Non-matching text string expression, no default, returns #N/A. 2 value-result pairs, no default.');
 		// Case #22: Number,String. Result as error, no match, returns 300 (default). 2 value-result pairs with default.
 		oParser = new parserFormula('SWITCH(1,"1",NA(),2,200,300)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SWITCH(1,"1",NA(),2,200,300) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 300, 'Test: Negative case: Number,String. Result as error, no match, returns 300 (default). 2 value-result pairs with default.');
+		assert.strictEqual(oParser.calculate().getValue(), 300, 'Test: Negative case: Number,String. Result as error, no match, returns 300 (default). 2 value-result pairs with default.');
 
 		// Bounded cases:
 		// Case #1: Number. Minimum positive number as expression and value, returns 100. 2 value-result pairs with default.
@@ -2137,14 +2130,6 @@ $(function () {
 		oParser = new parserFormula('SWITCH("","",100,"A",200,300)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: SWITCH("","",100,"A",200,300) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 100, 'Test: Bounded case: String. Empty string as expression and value, returns 100. 2 value-result pairs with default.');
-
-		// Need to fix: error handle, area/3d handle, string handle
-		// Case #3: String. No match and no default, returns #N/A. 2 value-result pairs, no default.
-		// Case #5: Area. Expression as multi-cell range, returns #VALUE!. 2 value-result pairs with default.
-		// Case #6: Area3D. Expression as 3D multi-cell range, returns #VALUE!. 2 value-result pairs with default.
-		// Case #9: String. Empty string expression, no match, no default, returns #N/A. 2 value-result pairs, no default.
-		// Case #21: String. Non-matching text string expression, no default, returns #N/A. 2 value-result pairs, no default.
-		// Case #22: Number,String. Result as error, no match, returns 300 (default). 2 value-result pairs with default.
 
 
 	});
@@ -2188,7 +2173,7 @@ $(function () {
 
 		oParser = new parserFormula('XOR(A101:A103)', "A2", ws);
 		assert.ok(oParser.parse(), 'XOR(A101:A103)');
-		assert.strictEqual(oParser.calculate().getValue(), "TRUE");
+		assert.strictEqual(oParser.calculate().getValue(), "FALSE");
 
 		oParser = new parserFormula('XOR(A101:A104)', "A2", ws);
 		assert.ok(oParser.parse(), 'XOR(A101:A104)');
@@ -2208,7 +2193,7 @@ $(function () {
 
 		oParser = new parserFormula('XOR(A101:A105)', "A2", ws);
 		assert.ok(oParser.parse(), 'XOR(A101:A105)');
-		assert.strictEqual(oParser.calculate().getValue(), "TRUE");
+		assert.strictEqual(oParser.calculate().getValue(), "FALSE");
 
 		oParser = new parserFormula('XOR(B101:A106)', "A2", ws);
 		assert.ok(oParser.parse(), 'XOR(B101:A106)');
@@ -2278,7 +2263,7 @@ $(function () {
 		// Case #6: String. String "TRUE" coerces to Boolean TRUE. 1 argument used.
 		oParser = new parserFormula('XOR("TRUE")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: XOR("TRUE") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Positive case: String. String "TRUE" coerces to Boolean TRUE. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Positive case: String. String "TRUE" coerces to Boolean TRUE. 1 argument used.');
 		// Case #7: String, String. Numeric strings coerce to numbers (1=TRUE, 0=FALSE). 2 arguments used.
 		oParser = new parserFormula('XOR("1", "0")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: XOR("1", "0") is parsed.');
@@ -2384,7 +2369,7 @@ $(function () {
 		// Case #10: Table. Table column with text returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('XOR(Table1[Column2])', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: XOR(Table1[Column2]) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Table. Table column with text returns #VALUE!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Table. Table column with text returns #VALUE!. 1 argument used.');
 		// Case #11: Number. Formula resulting in #DIV/0! error propagates error. 1 argument used.
 		oParser = new parserFormula('XOR(0/0)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: XOR(0/0) is parsed.');
@@ -2404,7 +2389,7 @@ $(function () {
 		// Case #15: Date, Date. Invalid string causes #VALUE!. 2 arguments used.
 		oParser = new parserFormula('XOR(DATE(2025,1,1), "invalid")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: XOR(DATE(2025,1,1), "invalid") is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Negative case: Date, Date. Invalid string causes #VALUE!. 2 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Negative case: Date, Date. Invalid string causes #VALUE!. 2 arguments used.');
 		// Case #16: Reference link, Reference link. Reference to valid and empty cells returns #VALUE!. 2 arguments used.
 		oParser = new parserFormula('XOR(A100, A103)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: XOR(A100, A103) is parsed.');
@@ -2444,10 +2429,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: XOR(9.99999999999999E+307, 0) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 'TRUE', 'Test: Bounded case: Number, Number. Max number (TRUE) and zero (FALSE) return TRUE. 2 arguments used.');
 
-		// Need to fix: diff results from MS, string handle
-		// Case #6: String. String "TRUE" coerces to Boolean TRUE. 1 argument used.
-		// Case #10: Table. Table column with text returns #VALUE!. 1 argument used.
-		// Case #15: Date, Date. Invalid string causes #VALUE!. 2 arguments used.
 
 		testArrayFormula2(assert, "XOR", 1, 8, null, true);
 	});

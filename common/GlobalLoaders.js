@@ -40,36 +40,36 @@
 
     function CGlobalFontLoader()
     {
-        // сначала хотел писать "вытеснение" из этого мапа.
-        // но тогда нужно хранить base64 строки. Это не круто. По памяти - даже
-        // выигрыш будет. Не особо то шрифты жмутся lzw или deflate
-        // поэтому лучше из памяти будем удалять base64 строки
+        // Initially wanted to implement "eviction" from this map.
+        // But then we would need to store base64 strings. That's not cool. Memory-wise -
+        // there would even be a gain. Fonts don't compress well with lzw or deflate anyway.
+        // So it's better to delete base64 strings from memory.
         this.fonts_streams = [];
 
-        // теперь вся информация о всех возможных шрифтах. Они во всех редакторах должны быть одни и те же
+        // Now all information about all available fonts. They should be the same in all editors.
         this.fontFilesPath = "../../../../fonts/";
         this.fontFiles = AscFonts.g_font_files;
         this.fontInfos = AscFonts.g_font_infos;
         this.map_font_index = AscFonts.g_map_font_index;
 
-        // динамическая подгрузка шрифтов
+        // Dynamic font loading
         this.ThemeLoader = null;
         this.Api = null;
         this.fonts_loading = [];
         this.bIsLoadDocumentFirst = false;
 
-        // информация для загрузки по одному шрифту
+        // Information for loading a single font
         this.currentInfoLoaded = null;
         this.loadFontCallBack     = null;
         this.loadFontCallBackArgs = null;
 
-        // при переоткрытиях файла - заменить на LoadDocumentFonts2
+        // When reopening files - replace with LoadDocumentFonts2
         this.IsLoadDocumentFonts2 = false;
 
         this.check_loaded_timer_id = -1;
         this.endLoadingCallback = null;
 		
-		// Счетчик загрузки шрифтов через метод LoadFonts
+		// Counter for font loading via the LoadFonts method
 		this.loadFontsCounter = 0;
 
         this.perfStart = 0;
@@ -79,7 +79,7 @@
             this.Api = api;
         };
 
-        // добавляем шрифт в список для загрузки
+        // Add font to the loading list
         this.AddLoadFonts = function(name, need_styles)
         {
             var fontinfo = g_fontApplication.GetFontInfo(name);
@@ -93,7 +93,7 @@
             this.fonts_loading[this.fonts_loading.length - 1].NeedStyles = (need_styles === undefined) ? 0x0F : need_styles;
         };
 
-        // проверить все fontinfo из fonts_loading на нужность загрузки, и вернуть есть ли хоть один заново запущенный
+        // Check all fontinfo from fonts_loading for loading necessity, and return whether at least one was started again
         this.CheckFontsNeedLoadingLoad = function()
         {
             let fonts = this.fonts_loading;
@@ -106,7 +106,7 @@
             return isNeed;
         };
 
-        // нужно ли грузить хоть один из списка (без запуска загрузки)
+        // Check if at least one from the list needs loading (without starting the load)
         this.CheckFontsNeedLoading = function(fonts)
         {
             for (let i in fonts)
@@ -137,7 +137,7 @@
                     gui_fonts[gui_count++] = new AscFonts.CFont(info.Name, "", info.Thumbnail);
             }
 
-            // сначала заполняем массив this.fonts_loading объекстами fontinfo
+            // First, fill the this.fonts_loading array with fontinfo objects
             for (let i in fonts)
             {
                 this.AddLoadFonts(fonts[i].name, fonts[i].NeedStyles);
@@ -145,10 +145,10 @@
 
             this.Api.sync_InitEditorFonts(gui_fonts);
 
-            // но только если редактор!!!
+            // But only if it's an editor!!!
             if (this.Api.IsNeedDefaultFonts())
             {
-                // теперь добавим шрифты, без которых редактор как без рук (спецсимволы + дефолтовые стили документа)
+                // Now add fonts that the editor can't function without (special symbols + default document styles)
                 this.AddLoadFonts("Arial", 0x0F);
                 this.AddLoadFonts("Symbol", 0x0F);
                 this.AddLoadFonts("Wingdings", 0x0F);
@@ -156,6 +156,7 @@
                 this.AddLoadFonts("Times New Roman", 0x0F);
             }
 
+			this.BlockOperationType = undefined;
             this.Api.asyncFontsDocumentStartLoaded();
 
             this.bIsLoadDocumentFirst = true;
@@ -168,14 +169,14 @@
         {
             if (this.isWorking())
             {
-                // такого быть не должно
+                // This shouldn't happen
                 return;
             }
 
             this.endLoadingCallback = (undefined !== callback) ? callback : null;
             this.BlockOperationType = blockType;
 
-            // сначала заполняем массив this.fonts_loading объекстами fontinfo
+            // First, fill the this.fonts_loading array with fontinfo objects
             for (var i in fonts)
                 this.AddLoadFonts(fonts[i].name, 0x0F);
 
@@ -204,6 +205,7 @@
 
                 if (null != this.endLoadingCallback)
                 {
+                    this.Api.sync_EndAction(undefined === this.BlockOperationType ? Asc.c_oAscAsyncActionType.BlockInteraction : this.BlockOperationType, Asc.c_oAscAsyncAction.LoadDocumentFonts);
                     this.endLoadingCallback.call(this.Api);
                     this.endLoadingCallback = null;
                 }
@@ -242,7 +244,7 @@
             this.check_loaded_timer_id = -1;
             if (0 === this.fonts_loading.length)
             {
-                // значит асинхронно удалилось
+                // Means it was deleted asynchronously
                 this._LoadFonts();
                 return;
             }
@@ -269,11 +271,11 @@
             }
         };
 
-        // одиночная загрузка шрифта
+        // Single font loading
         this.LoadFont = function(fontinfo, loadFontCallBack, loadFontCallBackArgs)
         {
             this.currentInfoLoaded = fontinfo;
-            this.currentInfoLoaded.NeedStyles = 15; // все стили
+            this.currentInfoLoaded.NeedStyles = 15; // all styles
 
             let isNeed = this.currentInfoLoaded.CheckFontLoadStyles(this);
 
@@ -323,7 +325,7 @@
             }
         };
 
-        // используется только в тестовом примере (предзагрузка в кэш браузера)
+        // Used only in test example (preloading into browser cache)
         this.LoadFontsFromServer = function(fonts)
         {
             let count = fonts.length;
@@ -473,7 +475,7 @@
 				    return;
 		    }
 
-		    // сначала заполним массив
+		    // First, fill the array
 
 		    const oRequiredSyncImages = {};
 		    const arrImagesLoading = [];
@@ -560,7 +562,7 @@
 
             var oImage = new CImage(src);
 
-            // просто прокидываем параметр
+            // Just passing through the parameter
             oImage.Type = type;
 
             oImage.Image = new Image();
@@ -589,6 +591,9 @@
 
         this.LoadImageAsync = function(imgSrc)
         {
+            if (oThis.map_image_index[imgSrc])
+                return;
+
             var oImage = new CImage(imgSrc);
 
             oImage.Status = ImageLoadStatus.Loading;

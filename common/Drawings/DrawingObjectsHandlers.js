@@ -658,7 +658,7 @@ function handleShapeImage(drawing, drawingObjectsController, e, x, y, group, pag
 
 function handlePdfTextField(field, drawingObjectsController, e, x, y, group, pageIndex, bWord)
 {
-	if (drawingObjectsController.document.GetActiveObject() == field) {
+	if (drawingObjectsController.document.GetActiveObject() == field && field.hitInTextRectWord(x, y)) {
 		return drawingObjectsController.handleTextHit(field, e, x, y, null, pageIndex, false);
 	}
 }
@@ -1635,19 +1635,23 @@ function handleInternalChart(drawing, drawingObjectsController, e, x, y, group, 
 
                                     if((hit_in_inner_area && (!hit_in_text_rect) || (hit_in_path && bIsMobileVersion !== true)) && !window["NATIVE_EDITOR_ENJINE"])
                                     {
+                                        var bChartExLbl = drawing.isChartEx();
                                         if(drawingObjectsController.handleEventMode === HANDLE_EVENT_MODE_HANDLE)
                                         {
                                             drawing.selection.dataLbl = j;
                                             drawingObjectsController.arrPreTrackObjects.length = 0;
-                                            drawingObjectsController.arrPreTrackObjects.push(new AscFormat.MoveChartObjectTrack(oDLbl, drawing));
-                                            drawingObjectsController.changeCurrentState(new AscFormat.PreMoveState(drawingObjectsController, x, y, false, false, drawing, true, true));
+                                            if(!bChartExLbl)
+                                            {
+                                                drawingObjectsController.arrPreTrackObjects.push(new AscFormat.MoveChartObjectTrack(oDLbl, drawing));
+                                                drawingObjectsController.changeCurrentState(new AscFormat.PreMoveState(drawingObjectsController, x, y, false, false, drawing, true, true));
+                                            }
                                             drawingObjectsController.updateSelectionState();
                                             drawingObjectsController.updateOverlay();
                                             return true;
                                         }
                                         else
                                         {
-                                            return {objectId: drawing.Get_Id(), cursorType: "move", title: null};
+                                            return {objectId: drawing.Get_Id(), cursorType: bChartExLbl ? "default" : "move", title: null};
                                         }
                                     }
                                     else if(hit_in_text_rect)
@@ -1688,8 +1692,11 @@ function handleInternalChart(drawing, drawingObjectsController, e, x, y, group, 
 
                                         drawing.selection.dataLbl = j;
                                         drawingObjectsController.arrPreTrackObjects.length = 0;
-                                        drawingObjectsController.arrPreTrackObjects.push(new AscFormat.MoveChartObjectTrack(oDLbl, drawing));
-                                        drawingObjectsController.changeCurrentState(new AscFormat.PreMoveState(drawingObjectsController, x, y, false, false, drawing, true, true));
+                                        if(!drawing.isChartEx())
+                                        {
+                                            drawingObjectsController.arrPreTrackObjects.push(new AscFormat.MoveChartObjectTrack(oDLbl, drawing));
+                                            drawingObjectsController.changeCurrentState(new AscFormat.PreMoveState(drawingObjectsController, x, y, false, false, drawing, true, true));
+                                        }
                                         drawingObjectsController.updateSelectionState();
                                         drawingObjectsController.updateOverlay();
                                         return true;

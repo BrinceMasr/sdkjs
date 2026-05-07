@@ -172,7 +172,10 @@
 				let isNL = stringRenderer.codesHypNL[char];
 				let isSP = !isNL ? stringRenderer.codesHypSp[char] : false;
 
-				if (isNL || isSP) {
+				if (isNL) {
+					this.FlushWord();
+					this.private_HandleItem({idx: beginIndex + i, char: char}, AscFonts.NO_GRAPHEME, 0);
+				} else if (isSP) {
 					this.FlushWord();
 					this.AppendToString({idx: beginIndex + i, char: char});
 				} else {
@@ -396,9 +399,9 @@
 		};
 
 		/**
-		 * Применяем только трансформации поворота в области
+		 * Apply only rotation transformations in the area
 		 * @param {drawingCtx} drawingCtx
-		 * @param {type} angle Угол поворота в градусах
+		 * @param {type} angle Rotation angle in degrees
 		 * @param {Number} x
 		 * @param {Number} y
 		 * @param {Number} dx
@@ -449,11 +452,11 @@
 		StringRender.prototype.getTransformBound = function (angle, w, h, textW, alignHorizontal, alignVertical, maxWidth) {
 			var ctx = this.drawingCtx;
 
-			// TODO: добавить padding по сторонам
+			// TODO: add padding on sides
 
 			this.angle = 0;  //  angle;
 
-			var dx = 0, dy = 0, offsetX = 0,    // смещение BB
+			var dx = 0, dy = 0, offsetX = 0,    // BB offset
 
 				tm = this._doMeasure(maxWidth),
 
@@ -691,8 +694,11 @@
 		 * @param {Number} endPos
 		 * @return {Number}
 		 */
-		StringRender.prototype._calcLineWidth = function (startPos, endPos) {
-			var wrap = this.flags && (this.flags.wrapText || this.flags.wrapOnlyNL || this.flags.wrapOnlyCE);
+		StringRender.prototype._calcLineWidth = function (startPos, endPos, skipTrailingSpaces) {
+			if (startPos < 0 || startPos >= this.chars.length) {
+				return 0;
+			}
+			var shouldSkip = skipTrailingSpaces || (this.flags && (this.flags.wrapText || this.flags.wrapOnlyNL || this.flags.wrapOnlyCE));
 			var isAtEnd, j, chProp, tw;
 
 			if (endPos === undefined || endPos < 0) {
@@ -709,7 +715,7 @@
 			for (j = endPos, tw = 0, isAtEnd = true; j >= startPos; --j) {
 				if (isAtEnd) {
 					// skip space char at end of line
-					if ((wrap) && this.codesSpace[this.chars[j]]) {
+					if (shouldSkip && this.codesSpace[this.chars[j]]) {
 						continue;
 					}
 					isAtEnd = false;
@@ -886,7 +892,7 @@
 
 			function insertRepeatChars() {
 				if (0 === charProp.total)
-					return;	// Символ уже изначально лежит в строке и в списке
+					return;	// Character is already initially in the string and list
 				var repeatEnd = pos + charProp.total;
 				self.chars = [].concat(
 					self.chars.slice(0, repeatEnd),
@@ -1059,8 +1065,8 @@
 				fmt = fr.format.clone();
 				var va = fmt.getVerticalAlign();
 
-				//TODO пока не убрал эту регулярку, сначала перевожу в текст, потом обратно в сиволы
-				//TODO избавиться от регулярки!
+				//TODO haven't removed this regex yet, first convert to text, then back to symbols
+				//TODO get rid of regex!
 				if (fr.isInitCharCodes()) {
 					fr.initText();
 				}
@@ -1117,7 +1123,7 @@
 				}
 				measureFragment(chars, fmt);
 
-				// для italic текста прибавляем к концу строки разницу между charWidth и BBox
+				// for italic text add difference between charWidth and BBox to end of line
 				for (j = startCh; font.getItalic() && j < this.charWidths.length; ++j) {
 					if (this.charProps[j] && this.charProps[j].delta && j > 0) {
 						if (this.charWidths[j - 1] > 0) {
@@ -1132,7 +1138,7 @@
 			if (0 !== this.chars.length && this.charProps[this.chars.length] !== undefined) {
 				delete this.charProps[this.chars.length];
 			} else if (font.getItalic()) {
-				// для italic текста прибавляем к концу текста разницу между charWidth и BBox
+				// for italic text add difference between charWidth and BBox to end of text
 				this.charWidths[this.charWidths.length - 1] += delta;
 			}
 
@@ -1292,17 +1298,18 @@
 		};
 		StringRender.prototype.initStartX = function (startPos, l, x, maxWidth, initAllLines, lineAlign) {
 			let align = lineAlign != null ? lineAlign : this.getEffectiveAlign();
+			let isRtl = this.drawState.getMainDirection() === AscBidi.DIRECTION_FLAG.RTL;
 
 			if (initAllLines) {
 				if (this.lines) {
 					for (let i = 0; i < this.lines.length; ++i) {
 						let la = this._getJustifyLastLineAlign(align, i === this.lines.length - 1);
-						let lineWidth = this._calcLineWidth(this.lines[i].beg);
+						let lineWidth = this._calcLineWidth(this.lines[i].beg, undefined, isRtl);
 						this.lines[i].initStartX(lineWidth, x, maxWidth, la);
 					}
 				}
 			} else {
-				return l.initStartX(this._calcLineWidth(startPos), x, maxWidth, align);
+				return l.initStartX(this._calcLineWidth(startPos, undefined, isRtl), x, maxWidth, align);
 			}
 		};
 		StringRender.prototype._getJustifyLastLineAlign = function (align, isLastLine) {
@@ -1391,7 +1398,7 @@
 					continue;
 				}
 
-				if (charProp && (charProp.nl || charProp.hp)) {
+				if (charProp && (charProp.nl || charProp.hp) && i !== line.beg) {
 					break;
 				}
 
@@ -1431,6 +1438,7 @@
 			this.afterSpaceInLine = false;
 			this.seenNonSpaceInLine = false;
 			this.trailingSpaceStart = Infinity;
+			this.trailingSpaceX = 0;
 			this.positionCallback = null;
 		}
 
@@ -1530,6 +1538,17 @@
 			let charIndex = data.charIndex;
 
 			if (charIndex >= this.trailingSpaceStart) {
+				if (this.positionCallback) {
+					let width = this.stringRender.charWidths[charIndex];
+					if (this.bidiFlow.direction === AscBidi.DIRECTION.R) {
+						this.positionCallback(charIndex, this.trailingSpaceX, width, direction);
+						this.trailingSpaceX += width;
+					} else {
+						this.positionCallback(charIndex, this.x, width, direction);
+						this.x += width;
+					}
+					this.afterSpaceInLine = true;
+				}
 				return;
 			}
 
@@ -1624,6 +1643,7 @@
 			this.seenNonSpaceInLine = false;
 
 			this.trailingSpaceStart = line ? line.end + 1 : Infinity;
+			this.trailingSpaceX = x;
 			if (line && line.beg >= 0) {
 				let endPos = line.end;
 				let endProp = this.stringRender.charProps[endPos];
@@ -1636,6 +1656,13 @@
 					} else {
 						break;
 					}
+				}
+				if (this.trailingSpaceStart <= endPos) {
+					let totalTrailingWidth = 0;
+					for (let j = this.trailingSpaceStart; j <= endPos; ++j) {
+						totalTrailingWidth += this.stringRender.charWidths[j];
+					}
+					this.trailingSpaceX = x - totalTrailingWidth;
 				}
 			}
 
@@ -1660,6 +1687,7 @@
 			this.afterSpaceInLine = false;
 			this.seenNonSpaceInLine = false;
 			this.trailingSpaceStart = Infinity;
+			this.trailingSpaceX = 0;
 			this.positionCallback = null;
 			this.textColor = textColor || null;
 			this.angle = angle || 0;

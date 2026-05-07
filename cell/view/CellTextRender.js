@@ -133,14 +133,14 @@
 		};
 
 		CellTextRender.prototype.getPrevWord = function (pos) {
-			//TODO регулярку не меняю, перегоняю в строку
+			//TODO not changing the regex, converting to string
 			let s = AscCommonExcel.convertUnicodeToSimpleString(this.chars);
 			let i = asc_lastindexof(s.slice(0, pos), this.reWordBegining);
 			return i >= 0 ? i + 1 : 0;
 		};
 
 		CellTextRender.prototype.getNextWord = function (pos) {
-			//TODO регулярку не меняю, перегоняю в строку
+			//TODO not changing the regex, converting to string
 			let s = AscCommonExcel.convertUnicodeToSimpleString(this.chars);
 			let i = s.slice(pos).search(this.reWordBegining);
 			return i >= 0 ? pos + (i + 1) : this.getEndOfLine(pos);
@@ -161,7 +161,7 @@
 				}
 			}
 
-			// pos - в конце текста
+			// pos - at the end of text
 			var lastLine = l.length - 1;
 			var lastChar = this.chars.length - 1;
 			return this.charWidths[lastChar] !== 0 ? l[lastLine].beg : pos;
@@ -178,7 +178,7 @@
 				}
 			}
 
-			// pos - на последней линии
+			// pos - on the last line
 			var lastChar = this.chars.length - 1;
 			return pos > lastChar ? pos : lastChar + (this.charWidths[lastChar] !== 0 ? 1 : 0);
 		};
@@ -200,7 +200,7 @@
 				}
 			}
 
-			// pos - в конце текста
+			// pos - at the end of text
 			var lastLine = l.length - 1;
 			var lastChar = this.chars.length - 1;
 			return this.charWidths[lastChar] === 0 || l.length < 2 ?
@@ -219,7 +219,7 @@
 				}
 			}
 
-			// pos - на последней линии
+			// pos - on the last line
 			return this.chars.length;
 		};
 
@@ -242,8 +242,6 @@
 
 			if (pos <= li.beg) {
 				left = isRtl ? (li.startX + li.tw) : li.startX;
-			} else if (pos > li.end) {
-				left = isRtl ? li.startX : (li.startX + li.tw);
 			} else {
 				let atPos = null;
 				let beforePos = null;

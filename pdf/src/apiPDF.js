@@ -870,17 +870,22 @@
                         let oCalcInfo       = oDoc.GetCalculateInfo();
                         let oSourceField    = oCalcInfo.GetSourceField();
 
-                        if (oCalcInfo.IsInProgress() && oSourceField && oSourceField.GetFullName() == this.field.GetFullName())
+                        if (oCalcInfo.IsInProgress() && ((oSourceField && oSourceField.GetFullName() == this.field.GetFullName() && oCalcInfo.GetCurrentField() !== oSourceField) && oCalcInfo.GetCurrentField() !== oSourceField))
                             throw Error('InvalidSetError: Set not possible, invalid or unknown.');
                         if (oDoc.isOnValidate)
                             throw Error('InvalidSetError: Set not possible, invalid or unknown.');
 
-                        let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
-                        aFields.forEach(function(field) {
-                            field.SetValue(value);
-                        });
+						let sApiValueToSet = value;
+                        let aOpt = this.field.GetOptions();
+                        if (aOpt) {
+                            let nIdx = aOpt.indexOf(value);
+                            if (nIdx != -1)
+                                sApiValueToSet = String(nIdx);
+                        }
 
-                        this.field.SetParentValue(value);
+                        let oWidget = this.field.GetKid(0);
+                        oWidget.SetValue(sApiValueToSet);
+						oWidget.Commit();
 
                         if (oCalcInfo.IsInProgress() == false && oDoc.IsNeedDoCalculate()) {
                             oDoc.DoCalculateFields(this.field);
@@ -952,7 +957,7 @@
                         let oCalcInfo       = oDoc.GetCalculateInfo();
                         let oSourceField    = oCalcInfo.GetSourceField();
     
-                        if (oCalcInfo.IsInProgress() && oSourceField && oSourceField.GetFullName() == this.field.GetFullName())
+                        if (oCalcInfo.IsInProgress() && (oSourceField && oSourceField.GetFullName() == this.field.GetFullName() && oCalcInfo.GetCurrentField() !== oSourceField))
                             throw Error('InvalidSetError: Set not possible, invalid or unknown.');
                         if (oDoc.isOnValidate)
                             throw Error('InvalidSetError: Set not possible, invalid or unknown.');;
@@ -966,8 +971,9 @@
                                 sApiValueToSet = String(nIdx);
                         }
 
-                        this.field.SetParentValue(sApiValueToSet);
-                        this.field.GetKid(0).UpdateAll();
+                        let oWidget = this.field.GetKid(0);
+                        oWidget.SetValue(sApiValueToSet);
+						oWidget.Commit();
     
                         if (oCalcInfo.IsInProgress() == false && oDoc.IsNeedDoCalculate()) {
                             oDoc.DoCalculateFields(this.field);
@@ -1245,7 +1251,7 @@
                         let oCalcInfo       = oDoc.GetCalculateInfo();
                         let oSourceField    = oCalcInfo.GetSourceField();
 
-                        if (oCalcInfo.IsInProgress() && oSourceField && oSourceField.GetFullName() == this.field.GetFullName())
+                        if (oCalcInfo.IsInProgress() && (oSourceField && oSourceField.GetFullName() == this.field.GetFullName() && oCalcInfo.GetCurrentField() !== oSourceField))
                             throw Error('InvalidSetError: Set not possible, invalid or unknown.');
                         if (oDoc.isOnValidate)
                             throw Error('InvalidSetError: Set not possible, invalid or unknown.');
@@ -1280,7 +1286,7 @@
             },
             get: function() {
                 let value = this.field.GetParentValue();
-                let isNumber = /^\d+(\.\d+)?$/.test(value);
+                let isNumber = /^[+-]?\d+(\.\d+)?$/.test(value);
                 return isNumber ? parseFloat(value) : (value != undefined ? value : "");
             }
         },
@@ -1443,7 +1449,7 @@
                     let oCalcInfo       = oDoc.GetCalculateInfo();
                     let oSourceField    = oCalcInfo.GetSourceField();
 
-                    if (oCalcInfo.IsInProgress() && oSourceField && oSourceField.GetFullName() == this.field.GetFullName())
+                    if (oCalcInfo.IsInProgress() && (oSourceField && oSourceField.GetFullName() == this.field.GetFullName() && oCalcInfo.GetCurrentField() !== oSourceField))
                         throw Error('InvalidSetError: Set not possible, invalid or unknown.');
                     if (oDoc.isOnValidate)
                         throw Error('InvalidSetError: Set not possible, invalid or unknown.');
@@ -1529,7 +1535,7 @@
                         let oCalcInfo = oDoc.GetCalculateInfo();
                         let oSourceField = oCalcInfo.GetSourceField();
 
-                        if (oCalcInfo.IsInProgress() && oSourceField && oSourceField.GetFullName() == this.field.GetFullName())
+                        if (oCalcInfo.IsInProgress() && (oSourceField && oSourceField.GetFullName() == this.field.GetFullName() && oCalcInfo.GetCurrentField() !== oSourceField))
                             throw Error('InvalidSetError: Set not possible, invalid or unknown.');
                         if (oDoc.isOnValidate)
                             throw Error('InvalidSetError: Set not possible, invalid or unknown.');
@@ -1676,7 +1682,7 @@
                 let aFields         = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
                 let oWidget         = aFields[0];
 
-                if (oCalcInfo.IsInProgress() && oSourceField && oSourceField.GetFullName() == this.field.GetFullName())
+                if (oCalcInfo.IsInProgress() && (oSourceField && oSourceField.GetFullName() == this.field.GetFullName() && oCalcInfo.GetCurrentField() !== oSourceField))
                     throw Error('InvalidSetError: Set not possible, invalid or unknown.');
                 if (oDoc.isOnValidate)
                     throw Error('InvalidSetError: Set not possible, invalid or unknown.');
@@ -1758,7 +1764,7 @@
                         let oCalcInfo = oDoc.GetCalculateInfo();
                         let oSourceField = oCalcInfo.GetSourceField();
 
-                        if (oCalcInfo.IsInProgress() && oSourceField && oSourceField.GetFullName() == this.field.GetFullName())
+                        if (oCalcInfo.IsInProgress() && (oSourceField && oSourceField.GetFullName() == this.field.GetFullName() && oCalcInfo.GetCurrentField() !== oSourceField))
                             throw Error('InvalidSetError: Set not possible, invalid or unknown.');
                         if (oDoc.isOnValidate)
                             throw Error('InvalidSetError: Set not possible, invalid or unknown.');

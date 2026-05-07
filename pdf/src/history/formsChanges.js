@@ -100,7 +100,8 @@ AscDFH.changesFactory[AscDFH.historyitem_Pdf_Pushbutton_Caption]		= CChangesPDFP
 AscDFH.changesFactory[AscDFH.historyitem_Pdf_Checkbox_No_Toggle_To_Off]	= CChangesPDFCheckboxNoToggleToOff;
 AscDFH.changesFactory[AscDFH.historyitem_Pdf_Checkbox_Style]			= CChangesPDFCheckboxStyle;
 AscDFH.changesFactory[AscDFH.historyitem_Pdf_Checkbox_Export_Value]		= CChangesPDFCheckboxExpValue;
-AscDFH.changesFactory[AscDFH.historyitem_Pdf_Checkbox_Options]			= CChangesPDFCheckOptions;
+AscDFH.changesFactory[AscDFH.historyitem_Pdf_Checkbox_Options]			= CChangesPDFCheckboxOptions;
+AscDFH.changesFactory[AscDFH.historyitem_Pdf_Checkbox_Checked]			= CChangesPDFCheckboxChecked;
 
 // radio
 AscDFH.changesFactory[AscDFH.historyitem_Pdf_Radiobutton_Is_Unison]	= CChangesPDFRadiobuttonIsUnison;
@@ -159,7 +160,7 @@ CChangesPDFFormParentValue.prototype.private_SetValue = function(Value)
 CChangesPDFFormValue.prototype.WriteToBinary = function(Writer)
 {
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// string : New
@@ -192,7 +193,7 @@ CChangesPDFFormValue.prototype.WriteToBinary = function(Writer)
 CChangesPDFFormValue.prototype.ReadFromBinary = function(Reader)
 {
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// string : New
@@ -658,7 +659,7 @@ CChangesPDFFormActions.prototype.ReadFromBinary = function(Reader)
 	this.FromLoad = true;
 
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// long : New
@@ -726,7 +727,7 @@ CChangesPDFFormMeta.prototype.private_SetValue = function(Value)
 CChangesPDFFormMeta.prototype.WriteToBinary = function(Writer)
 {
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// string : New
@@ -756,7 +757,7 @@ CChangesPDFFormMeta.prototype.WriteToBinary = function(Writer)
 CChangesPDFFormMeta.prototype.ReadFromBinary = function(Reader)
 {
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// string : New
@@ -1168,7 +1169,7 @@ CChangesPDFListFormCurIdxs.prototype.private_SetValue = function(Value)
 CChangesPDFListFormCurIdxs.prototype.WriteToBinary = function(Writer)
 {
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// string : New
@@ -1198,7 +1199,7 @@ CChangesPDFListFormCurIdxs.prototype.WriteToBinary = function(Writer)
 CChangesPDFListFormCurIdxs.prototype.ReadFromBinary = function(Reader)
 {
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// string : New
@@ -1242,7 +1243,7 @@ CChangesPDFListFormParentCurIdxs.prototype.private_SetValue = function(Value)
 CChangesPDFListFormParentCurIdxs.prototype.WriteToBinary = function(Writer)
 {
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// string : New
@@ -1272,7 +1273,7 @@ CChangesPDFListFormParentCurIdxs.prototype.WriteToBinary = function(Writer)
 CChangesPDFListFormParentCurIdxs.prototype.ReadFromBinary = function(Reader)
 {
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// string : New
@@ -1670,7 +1671,7 @@ CChangesPDFPushbuttonImage.prototype.ReadFromBinary = function(Reader)
 	this.FromLoad = true;
 
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// long : New
@@ -1856,7 +1857,7 @@ CChangesPDFPushbuttonCaption.prototype.ReadFromBinary = function(Reader)
 	this.FromLoad = true;
 
 	// Long  : Flag
-	// 1-bit : Подсвечивать ли данные изменения
+	// 1-bit : Whether to highlight these changes
 	// 2-bit : IsUndefined New
 	// 3-bit : IsUndefined Old
 	// long : New
@@ -1959,15 +1960,33 @@ CChangesPDFRadiobuttonIsUnison.prototype.private_SetValue = function(Value)
  * @constructor
  * @extends {AscDFH.CChangesPDFArrayOfStringProperty}
  */
-function CChangesPDFCheckOptions(Class, Old, New, Color)
+function CChangesPDFCheckboxOptions(Class, Old, New, Color)
 {
 	AscDFH.CChangesPDFArrayOfStringProperty.call(this, Class, Old, New, Color);
 }
-CChangesPDFCheckOptions.prototype = Object.create(AscDFH.CChangesPDFArrayOfStringProperty.prototype);
-CChangesPDFCheckOptions.prototype.constructor = CChangesPDFCheckOptions;
-CChangesPDFCheckOptions.prototype.Type = AscDFH.historyitem_Pdf_Checkbox_Options;
-CChangesPDFCheckOptions.prototype.private_SetValue = function(Value)
+CChangesPDFCheckboxOptions.prototype = Object.create(AscDFH.CChangesPDFArrayOfStringProperty.prototype);
+CChangesPDFCheckboxOptions.prototype.constructor = CChangesPDFCheckboxOptions;
+CChangesPDFCheckboxOptions.prototype.Type = AscDFH.historyitem_Pdf_Checkbox_Options;
+CChangesPDFCheckboxOptions.prototype.private_SetValue = function(Value)
 {
 	let oForm = this.Class;
 	oForm._options = Value;
 };
+
+/**
+ * @constructor
+ * @extends {AscDFH.CChangesBaseBoolProperty}
+ */
+function CChangesPDFCheckboxChecked(Class, Old, New, Color)
+{
+	AscDFH.CChangesBaseBoolProperty.call(this, Class, Old, New, Color);
+}
+CChangesPDFCheckboxChecked.prototype = Object.create(AscDFH.CChangesBaseBoolProperty.prototype);
+CChangesPDFCheckboxChecked.prototype.constructor = CChangesPDFCheckboxChecked;
+CChangesPDFCheckboxChecked.prototype.Type = AscDFH.historyitem_Pdf_Checkbox_Checked;
+CChangesPDFCheckboxChecked.prototype.private_SetValue = function(Value)
+{
+	let oForm = this.Class;
+	oForm._checked = Value;
+};
+

@@ -115,17 +115,17 @@
 	
     CSignatureField.prototype.WriteToBinary = function(memory) {};
     function MakeColorMoreGray(rgbColor, nPower) {
-        // Получаем значения компонентов цвета
+        // Get color component values
         const r = rgbColor.r;
         const g = rgbColor.g;
         const b = rgbColor.b;
       
-        // Вычисляем новые значения компонентов с учетом затемнения (уменьшения интенсивности)
+        // Calculate new component values with darkening (reducing intensity)
         const grayR = Math.max(0, r - nPower);
         const grayG = Math.max(0, g - nPower);
         const grayB = Math.max(0, b - nPower);
       
-        // Возвращаем новый серый цвет
+        // Return new gray color
         return {
             r: grayR,
             g: grayG,

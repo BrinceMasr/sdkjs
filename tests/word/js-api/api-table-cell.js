@@ -58,4 +58,42 @@ $(function () {
 		cell.SetBackgroundColor(0, 0, 0, true);
 		assert.strictEqual(cell.GetBackgroundColor(), null, 'Color check after resetting color');
 	});
+
+	QUnit.test('AddText', function (assert)
+	{
+		const table = AscTest.JsApi.CreateTable(2, 2);
+		const cell  = table.GetCell(0, 0);
+
+		cell.AddText("Hello");
+		assert.strictEqual(cell.GetText(), "Hello\t", "Check AddText appends text to cell");
+
+		cell.AddText(" World");
+		assert.strictEqual(cell.GetText(), "Hello World\t", "Check AddText appends to existing paragraph");
+	});
+
+	QUnit.test('GetText', function (assert)
+	{
+		const table = AscTest.JsApi.CreateTable(2, 2);
+		const cell  = table.GetCell(0, 0);
+
+		const run = cell.GetContent().GetElement(0).AddText("line1");
+		run.AddLineBreak();
+		run.AddText("line2");
+
+		assert.strictEqual(cell.GetText(), "line1\rline2\t", "Check GetText returns cell text");
+		assert.strictEqual(cell.GetText({"NewLineSeparator": "_nl_"}), "line1_nl_line2\t", "Check GetText with custom newline separator");
+	});
+
+	QUnit.test('SetText', function (assert)
+	{
+		const table = AscTest.JsApi.CreateTable(2, 2);
+		const cell  = table.GetCell(0, 0);
+
+		cell.AddText("Original");
+		cell.SetText("Replaced");
+		assert.strictEqual(cell.GetText(), "Replaced\t", "Check SetText replaces cell content");
+
+		cell.SetText("");
+		assert.strictEqual(cell.GetText(), "\t", "Check SetText with empty string");
+	});
 });

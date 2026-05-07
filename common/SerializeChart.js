@@ -14898,23 +14898,41 @@ BinaryChartReader.prototype.ReadAlternateContentFallback = function (type, lengt
     window['AscFormat'].LAYOUT_TARGET_INNER = LAYOUT_TARGET_INNER;
     window['AscFormat'].LAYOUT_TARGET_OUTER = LAYOUT_TARGET_OUTER;
 
-    window['AscFormat'].st_errbartypeBOTH       = st_errbartypeBOTH;
-    window['AscFormat'].st_errbartypeMINUS      = st_errbartypeMINUS;
-    window['AscFormat'].st_errbartypePLUS       = st_errbartypePLUS;
-    window['AscFormat'].st_errdirX              = st_errdirX;
-    window['AscFormat'].st_errdirY              = st_errdirY;
-    window['AscFormat'].st_errvaltypeCUST       = st_errvaltypeCUST;
-    window['AscFormat'].st_errvaltypeFIXEDVAL   = st_errvaltypeFIXEDVAL;
-    window['AscFormat'].st_errvaltypePERCENTAGE = st_errvaltypePERCENTAGE;
-    window['AscFormat'].st_errvaltypeSTDDEV     = st_errvaltypeSTDDEV;
-    window['AscFormat'].st_errvaltypeSTDERR     = st_errvaltypeSTDERR;
+	window['AscFormat']['st_errbartypeBOTH'] =
+		window['AscFormat'].st_errbartypeBOTH = st_errbartypeBOTH;
+	window['AscFormat']['st_errbartypeMINUS'] =
+		window['AscFormat'].st_errbartypeMINUS = st_errbartypeMINUS;
+	window['AscFormat']['st_errbartypePLUS'] =
+		window['AscFormat'].st_errbartypePLUS = st_errbartypePLUS;
 
-    window['AscFormat'].st_trendlinetypeEXP       = st_trendlinetypeEXP;
-    window['AscFormat'].st_trendlinetypeLINEAR    = st_trendlinetypeLINEAR;
-    window['AscFormat'].st_trendlinetypeLOG       = st_trendlinetypeLOG;
-    window['AscFormat'].st_trendlinetypeMOVINGAVG = st_trendlinetypeMOVINGAVG;
-    window['AscFormat'].st_trendlinetypePOLY      = st_trendlinetypePOLY;
-    window['AscFormat'].st_trendlinetypePOWER     = st_trendlinetypePOWER;
+	window['AscFormat']['st_errdirX'] =
+		window['AscFormat'].st_errdirX = st_errdirX;
+	window['AscFormat']['st_errdirY'] =
+		window['AscFormat'].st_errdirY = st_errdirY;
+
+	window['AscFormat']['st_errvaltypeCUST'] =
+		window['AscFormat'].st_errvaltypeCUST = st_errvaltypeCUST;
+	window['AscFormat']['st_errvaltypeFIXEDVAL'] =
+		window['AscFormat'].st_errvaltypeFIXEDVAL = st_errvaltypeFIXEDVAL;
+	window['AscFormat']['st_errvaltypePERCENTAGE'] =
+		window['AscFormat'].st_errvaltypePERCENTAGE = st_errvaltypePERCENTAGE;
+	window['AscFormat']['st_errvaltypeSTDDEV'] =
+		window['AscFormat'].st_errvaltypeSTDDEV = st_errvaltypeSTDDEV;
+	window['AscFormat']['st_errvaltypeSTDERR'] =
+		window['AscFormat'].st_errvaltypeSTDERR = st_errvaltypeSTDERR;
+
+	window['AscFormat']['st_trendlinetypeEXP']
+		= window['AscFormat'].st_trendlinetypeEXP = st_trendlinetypeEXP;
+	window['AscFormat']['st_trendlinetypeLINEAR']
+		= window['AscFormat'].st_trendlinetypeLINEAR = st_trendlinetypeLINEAR;
+	window['AscFormat']['st_trendlinetypeLOG']
+		= window['AscFormat'].st_trendlinetypeLOG = st_trendlinetypeLOG;
+	window['AscFormat']['st_trendlinetypeMOVINGAVG']
+		= window['AscFormat'].st_trendlinetypeMOVINGAVG = st_trendlinetypeMOVINGAVG;
+	window['AscFormat']['st_trendlinetypePOLY']
+		= window['AscFormat'].st_trendlinetypePOLY = st_trendlinetypePOLY;
+	window['AscFormat']['st_trendlinetypePOWER']
+		= window['AscFormat'].st_trendlinetypePOWER = st_trendlinetypePOWER;
 
     window['AscFormat'].RADAR_STYLE_STANDARD = RADAR_STYLE_STANDARD;
     window['AscFormat'].RADAR_STYLE_MARKER   = RADAR_STYLE_MARKER;
@@ -14927,12 +14945,18 @@ BinaryChartReader.prototype.ReadAlternateContentFallback = function (type, lengt
 	window['AscFormat'].PICTURE_FORMAT_STACK_SCALE    = PICTURE_FORMAT_STACK_SCALE;
 	window['AscFormat'].PICTURE_FORMAT_STACK_STRETCH    = PICTURE_FORMAT_STACK_STRETCH;
 
-	window['AscFormat'].TRENDLINE_TYPE_EXP = TRENDLINE_TYPE_EXP;
-	window['AscFormat'].TRENDLINE_TYPE_LINEAR    = TRENDLINE_TYPE_LINEAR;
-	window['AscFormat'].TRENDLINE_TYPE_LOG    = TRENDLINE_TYPE_LOG;
-	window['AscFormat'].TRENDLINE_TYPE_MOVING_AVG    = TRENDLINE_TYPE_MOVING_AVG;
-	window['AscFormat'].TRENDLINE_TYPE_POLY    = TRENDLINE_TYPE_POLY;
-	window['AscFormat'].TRENDLINE_TYPE_POWER    = TRENDLINE_TYPE_POWER;
+	window['AscFormat']['TRENDLINE_TYPE_EXP']
+		= window['AscFormat'].TRENDLINE_TYPE_EXP = TRENDLINE_TYPE_EXP;
+	window['AscFormat']['TRENDLINE_TYPE_LINEAR']
+		= window['AscFormat'].TRENDLINE_TYPE_LINEAR = TRENDLINE_TYPE_LINEAR;
+	window['AscFormat']['TRENDLINE_TYPE_LOG']
+		= window['AscFormat'].TRENDLINE_TYPE_LOG = TRENDLINE_TYPE_LOG;
+	window['AscFormat']['TRENDLINE_TYPE_MOVING_AVG']
+		= window['AscFormat'].TRENDLINE_TYPE_MOVING_AVG = TRENDLINE_TYPE_MOVING_AVG;
+	window['AscFormat']['TRENDLINE_TYPE_POLY']
+		= window['AscFormat'].TRENDLINE_TYPE_POLY = TRENDLINE_TYPE_POLY;
+	window['AscFormat']['TRENDLINE_TYPE_POWER']
+		= window['AscFormat'].TRENDLINE_TYPE_POWER = TRENDLINE_TYPE_POWER;
 
 	window['AscFormat'].ERR_DIR_X    = ERR_DIR_X;
 	window['AscFormat'].ERR_DIR_Y    = ERR_DIR_Y;

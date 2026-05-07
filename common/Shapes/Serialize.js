@@ -70,7 +70,7 @@ function CBuilderImages(blip_fill, full_url, image_shape, sp_pr, ln, text_pr, pa
     this.Run        = run;
     this.Paragraph  = paragraph;
     this.Bullet = bullet;
-    this.AdditionalUrls = [];//для wmf, ole
+    this.AdditionalUrls = [];//for wmf, ole
 }
 CBuilderImages.prototype =
 {
@@ -325,7 +325,7 @@ function BinaryPPTYLoader()
 
     this.LoadDocument = function()
     {
-        // чтение формата ppty
+        // reading ppty format
         var _main_tables = {};
         var s = this.stream;
         var err = 0;
@@ -516,7 +516,7 @@ function BinaryPPTYLoader()
                 var _nm_count = s.GetULong();
                 for (var i = 0; i < _nm_count; i++){
                     this.presentation.notesMasters[i] = this.ReadNoteMaster();
-                    this.presentation.notesMasters[i].setTheme(this.aThemes[0]);//TODO: убрать после того как будут сделаны рельсы
+                    this.presentation.notesMasters[i].setTheme(this.aThemes[0]);//TODO: remove after rels are implemented
                 }
             }
 
@@ -531,7 +531,7 @@ function BinaryPPTYLoader()
             }
         }
 
-        // теперь нужно прочитать используемые в презентации шрифты и картинки
+        // now we need to read fonts and images used in the presentation
         if (null == this.ImageMapChecker)
         {
             if (undefined != _main_tables["42"])
@@ -598,7 +598,7 @@ function BinaryPPTYLoader()
             }
         }
 
-        // все загружено, осталось расставить связи и загрузить картинки тем и шаблонов
+        // everything is loaded, now we need to establish relationships and load images from themes and layouts
         if (undefined != _main_tables["41"])
         {
             s.Seek2(_main_tables["41"]);
@@ -2752,14 +2752,6 @@ function BinaryPPTYLoader()
                 nRecLen = s.GetLong();
                 nRecEnd = nRecStart + nRecLen + 4;
                 oEffect = new AscFormat.CFillEffect();
-                s.Skip2(1); // start attributes
-
-                while (true)
-                {
-                    var _at = s.GetUChar();
-                    if (_at == g_nodeAttributeEnd)
-                        break;
-                }
 
                 while (s.cur < nRecEnd)
                 {
@@ -2787,14 +2779,7 @@ function BinaryPPTYLoader()
                 nRecLen = s.GetLong();
                 nRecEnd = nRecStart + nRecLen + 4;
                 oEffect = new AscFormat.CClrRepl();
-                s.Skip2(1);
 
-                while (true)
-                {
-                    var _at = s.GetUChar();
-                    if (_at == g_nodeAttributeEnd)
-                        break;
-                }
                 while (s.cur < nRecEnd)
                 {
                     var _at = s.GetUChar();
@@ -2865,14 +2850,7 @@ function BinaryPPTYLoader()
                 nRecLen = s.GetLong();
                 nRecEnd = nRecStart + nRecLen + 4;
                 oEffect = new AscFormat.CAlphaInv();
-                s.Skip2(1);
 
-                while (true)
-                {
-                    var _at = s.GetUChar();
-                    if (_at == g_nodeAttributeEnd)
-                        break;
-                }
                 while (s.cur < nRecEnd)
                 {
                     var _at = s.GetUChar();
@@ -2899,14 +2877,7 @@ function BinaryPPTYLoader()
                 nRecLen = s.GetLong();
                 nRecEnd = nRecStart + nRecLen + 4;
                 oEffect = new AscFormat.CAlphaMod();
-                s.Skip2(1);
 
-                while (true)
-                {
-                    var _at = s.GetUChar();
-                    if (_at == g_nodeAttributeEnd)
-                        break;
-                }
                 while (s.cur < nRecEnd)
                 {
                     var _at = s.GetUChar();
@@ -3347,7 +3318,7 @@ function BinaryPPTYLoader()
                             }
                             default:
                             {
-                                // пока никаких настроек градиента нет
+                                // no gradient settings for now
                                 var _len = s.GetULong();
                                 s.Skip2(_len);
                             }
@@ -3444,7 +3415,7 @@ function BinaryPPTYLoader()
                             }
                             default:
                             {
-                                // пока никаких настроек градиента нет
+                                // no gradient settings for now
                                 var _len = s.GetULong();
                                 s.Skip2(_len);
                             }
@@ -3454,7 +3425,7 @@ function BinaryPPTYLoader()
                     }
                     if (null != uni_fill.fill.lin && null != uni_fill.fill.path)
                     {
-                        // ms office не открывает такие файлы.
+                        // ms office does not open such files.
                         uni_fill.fill.setPath(null);
                     }
 
@@ -3516,7 +3487,7 @@ function BinaryPPTYLoader()
                             }
                             default:
                             {
-                                // пока никаких настроек градиента нет
+                                // no gradient settings for now
                                 s.SkipRecord();
                             }
                         }
@@ -6125,7 +6096,7 @@ function BinaryPPTYLoader()
         var _rec_start = s.cur;
         var _end_rec = _rec_start + s.GetULong() + 4;
 
-        if (s.cur < _end_rec)
+        while (s.cur < _end_rec)
         {
             var _t = s.GetUChar();
 
@@ -6225,6 +6196,46 @@ function BinaryPPTYLoader()
                         }
                     }
                 }
+            }
+            else if (3 == _t)
+            {
+                var _hr_end = s.cur + s.GetULong() + 4;
+                var hr = new AscFormat.CHorizontalRule();
+
+                s.Skip2(1); // start attributes
+                while (true)
+                {
+                    var _at = s.GetUChar();
+                    if (_at == g_nodeAttributeEnd)
+                        break;
+
+                    switch (_at)
+                    {
+                        case 0:
+                            hr.noshade = s.GetBool();
+                            break;
+                        case 1:
+                            hr.align = s.GetString2();
+                            break;
+                        case 2:
+                            hr.pct = s.GetDouble();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                s.Seek2(_hr_end);
+
+                if (!geom)
+                {
+                    geom = AscFormat.CreateGeometry("rect");
+                    geom.setPreset("rect");
+                }
+                geom.setHR(hr);
+            }
+            else
+            {
+                break;
             }
         }
 
@@ -8383,7 +8394,7 @@ function BinaryPPTYLoader()
 				s.Skip2(1);
 				this.ReadCell(row.Content[i]);
 
-				// удаляем
+				// remove
 				row.Remove_Cell(i);
 				i--;
 				_count--;
@@ -9349,7 +9360,7 @@ function BinaryPPTYLoader()
     this.CorrectBodyPr = function(bodyPr)
     {
 
-        //TODO: сделать через методы
+        //TODO: implement using methods
         var s = this.stream;
         var _end_rec = s.cur + s.GetULong() + 4;
 
@@ -10174,7 +10185,7 @@ function BinaryPPTYLoader()
 
         if(b_bullet)
             para_pr.Bullet = bullet;
-        // пока записи не поддерживаем
+        // records are not supported for now
         s.Seek2(_end_rec);
         return para_pr;
     };
@@ -11678,7 +11689,11 @@ function BinaryPPTYLoader()
                 {
                     case 0:
                     {
-                        s.SkipRecord();
+						const nvSpPr = this.Reader.ReadNvUniProp(shape);
+						shape.setNvSpPr(nvSpPr);
+						if (AscFormat.isRealNumber(nvSpPr.locks)) {
+							shape.setLocks(nvSpPr.locks);
+						}
                         break;
                     }
                     case 1:
@@ -11914,7 +11929,7 @@ function BinaryPPTYLoader()
 
         this.Clear = function(bClearStreamOnly)
         {
-            //вызывается пока только перед вставкой
+            //called only before paste for now
             this.Reader.stream = null;
             this.stream = null;
             this.BaseReader = null;

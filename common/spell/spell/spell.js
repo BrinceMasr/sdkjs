@@ -96,7 +96,7 @@ function onMessageEvent(data, port)
 
     if (1 < self.spellchecker.messages.length)
     {
-        // значит еще грузим что-то
+        // still loading something
         return;
     }
 
@@ -307,7 +307,7 @@ function Spellchecker()
 			var readyLang = this.readyLanguages[lang_key];
 			if (!readyLang)
 			{
-				// начнем грузить
+				// start loading
 				var langToReady = new Dictionary();
 				langToReady.id = lang_key;
 				langToReady.language = this.languages[lang_key];
@@ -320,20 +320,20 @@ function Spellchecker()
 			}
 			else if (readyLang.status != 2)
 			{
-				// ждем
+				// waiting
 				isReady = false;
 				break;
 			}
 			else
-			{				
-				// все готово.
+			{
+				// all ready.
 				continue;	
 			}
 		}
 
 		if (!isReady)
 		{
-			// ждем
+			// waiting
 			return;
 		}
 

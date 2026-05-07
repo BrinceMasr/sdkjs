@@ -40,25 +40,33 @@
      * @class
      * @name Api
      */
-
-    /**
-     * @typedef {Object} ContentControl
-	 * Content control object.
-     * @property {string} Tag - A tag assigned to the content control. The same tag can be assigned to several content controls so that it is possible to make reference to them in your code.
-     * @property {string} Id - A unique identifier of the content control. It can be used to search for a certain content control and make reference to it in the code.
-     * @property {ContentControlLock} Lock - A value that defines if it is possible to delete and/or edit the content control or not: 0 - only deleting, 1 - no deleting or editing, 2 - only editing, 3 - full access.
-     * @property {string} InternalId - A unique internal identifier of the content control. It is used for all operations with content controls.
-     * @see office-js-api/Examples/Plugins/{Editor}/Enumeration/ContentControl.js
+	
+	/**
+	 * @typedef {Object} ContentControl
+	 * The content control object.
+	 * @property {string} Tag - A tag assigned to the content control. The same tag can be assigned to several content controls so that you can make reference to them in your code.
+	 * @property {string} Id - A unique content control identifier. It can be used to search for a certain content control and make reference to it in your code.
+	 * @property {ContentControlLock} Lock - A value that defines if it is possible to delete and/or edit the content control or not.
+	 * @property {string} InternalId - A unique internal identifier of the content control. It is used for all operations with content controls.
+	 * @property {string} Alias - An alias of the content control.
+	 * @property {1 | 2} Appearance - The visualization type of the content control: <b>1</b> - frame (bounding box), <b>2</b> - hidden.
+	 * @property {string} [FormKey] - A unique form key. Present only if the content control is a form field.
+	 * @property {string} [RadioGroup] - A group key of the radio button. Present only if the content control is a radio button form field .
+	 * @property {*} [FormValue] - The current value of the form field. Present only if the content control is a form field.
+	 * @property {{R: number, G: number, B: number}} [Color] - The tag color of the content control. Present only if the tag color is set.
+	 * @property {{Color: {R: number, G: number, B: number, A: number}}} [Border] - The border color of the content control. Present only if the border color is set.
+	 * @property {{Color: {R: number, G: number, B: number, A: number}}} [Shd] - The shading color of the content control. Present only if the shading color is set.
+	 * @see office-js-api/Examples/Plugins/{Editor}/Enumeration/ContentControl.js
 	 */
-
-    /**
-     * @typedef {(0 | 1 | 2 | 3)} ContentControlLock
-     * A value that defines if it is possible to delete and/or edit the content control or not:
+	
+	/**
+	 * @typedef {(0 | 1 | 2 | 3)} ContentControlLock
+	 * A value that defines if it is possible to delete and/or edit the content control or not:
 	 * <b>0</b> - only deleting
 	 * <b>1</b> - disable deleting or editing
 	 * <b>2</b> - only editing
 	 * <b>3</b> - full access
-     * @see office-js-api/Examples/Plugins/{Editor}/Enumeration/ContentControlLock.js
+	 * @see office-js-api/Examples/Plugins/{Editor}/Enumeration/ContentControlLock.js
 	 */
 
     /**
@@ -132,21 +140,6 @@
 	 * @property {string} Value - The element value.
 	 * @see office-js-api/Examples/Plugins/{Editor}/Enumeration/ContentControlListElement.js
 	 */
-	
-	/**
-	 * @typedef {Object} TextAnnotation
-	 * @property  {string} paragraphId  - ID of the paragraph containing the annotation.
-	 * @property  {string} rangeId - ID of the annotation range.
-	 * @property  {string} [name] -  Annotation type (e.g., `"grammar"`).
-	 */
-	
-	/**
-	 * @typedef {Object} TextAnnotationRange
-	 * @property  {string} id  - Unique identifier for the range.
-	 * @property  {number} start - Starting index of the text range.
-	 * @property  {number} length - Length of the text range.
-	 * @property  {string} [name] -  Annotation type (e.g., `"grammar"`).
-	 */
 
     var Api = window["asc_docs_api"];
 
@@ -184,7 +177,7 @@
         return this.asc_GetBlockChainData();
     };
     /**
-     * Inserts the content control containing data. The data is specified by the JS code for {@link /docbuilder/basic Document Builder}, or by a link to the shared document.
+     * Inserts the content control containing data. The data is specified by the JS code for {@link /docs/office-api/usage-api/text-document-api/ Document Builder}, or by a link to the shared document.
      * @memberof Api
      * @typeofeditors ["CDE"]
      * @alias InsertAndReplaceContentControls
@@ -360,15 +353,12 @@
 		if (!logicDocument || !logicDocument.IsSelectionUse())
 			return;
 		
-		this.executeGroupActions(function()
+		if (!logicDocument.IsSelectionLocked(AscCommon.changestype_Remove, null, true, logicDocument.IsFormFieldEditing()))
 		{
-			if (!logicDocument.IsSelectionLocked(AscCommon.changestype_Remove, null, true, logicDocument.IsFormFieldEditing()))
-			{
-				logicDocument.StartAction(AscDFH.historydescription_Document_BackSpaceButton);
-				logicDocument.Remove(-1, true);
-				logicDocument.FinalizeAction();
-			}
-		});
+			logicDocument.StartAction(AscDFH.historydescription_Document_BackSpaceButton);
+			logicDocument.Remove(-1, true);
+			logicDocument.FinalizeAction();
+		}
     };
 
 	/**
@@ -480,7 +470,7 @@
 	/**
 	 * Finds and selects the next occurrence of the text starting at the current position.
 	 * @memberof Api
-	 * @typeofeditors ["CDE"]
+	 * @typeofeditors ["CDE", "PDFE"]
 	 * @alias SearchNext
 	 * @param {Object} oProperties - An object which contains the search string.
 	 * @param {string} oProperties.searchString - The search string.
@@ -499,6 +489,13 @@
 		searchProps.SetText(oProperties["searchString"]);
 		searchProps.SetMatchCase(undefined !== oProperties["matchCase"] ? oProperties["matchCase"] : true);
 		
+		if (this.isPdfEditor()) {
+			let oViewer = logicDocument.Viewer;
+			oViewer.findText(searchProps, isForward);
+			this._selectSearchingResults(true);
+			return 0 !== logicDocument.SearchEngine.Count;
+		}
+
 		logicDocument.Search(searchProps);
 		let elementId = logicDocument.GetSearchElementId(!(false === isForward || 0 === isForward));
 		if (null === elementId)
@@ -1100,7 +1097,7 @@
 		if (!logicDocument)
 			return null;
 		
-		let fields = logicDocument.GetCurrentComplexFields();
+		let fields = logicDocument.GetAllFields(true);
 		let data = null;
 		for (let i = 0; i < fields.length; ++i)
 		{
@@ -1142,7 +1139,11 @@
 	 * @memberof Api
 	 * @typeofeditors ["CDE"]
 	 * @alias AddAddinField
+	 * @param {Object} data - Addin field data.
+	 * @param {string} data.Value - Field value.
+	 * @param {string} data.Content - Field text content.
 	 * @param {AddinFieldData} data - Addin field data.
+	 * @returns {AddinFieldData} - An AddinFieldData object containing the data about the current added field, or null if no addin field was added.
 	 * @since 7.3.3
 	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/AddAddinField.js
 	 */
@@ -1150,9 +1151,10 @@
 	{
 		let logicDocument = this.private_GetLogicDocument();
 		if (!logicDocument)
-			return;
+			return null;
 		
-		logicDocument.AddAddinField(AscWord.CAddinFieldData.FromJson(data));
+		let field = logicDocument.AddAddinField(AscWord.CAddinFieldData.FromJson(data));
+		return field ? AscWord.CAddinFieldData.FromField(field).ToJson() : null;
 	};
 	/**
 	 * Selects the specified add-in field.
@@ -1208,6 +1210,59 @@
 			return;
 		
 		logicDocument.RemoveComplexFieldWrapper(fieldId);
+	};
+	/**
+	 * Moves the cursor to the beginning or end of a field.
+	 * @memberof Api
+	 * @typeofeditors ["CDE"]
+	 * @alias MoveCursorToField
+	 * @param {string} [fieldId=undefined] - Field ID. If it is not specified, the current field is used.
+	 * @param {boolean} [isBegin=false] - Defines whether the cursor is moved to the beginning (<b>true</b>) or end (<b>false</b>) of the field.
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/MoveCursorToField.js
+	 */
+	Api.prototype["pluginMethod_MoveCursorToField"] = function(fieldId, isBegin)
+	{
+		let logicDocument = this.private_GetLogicDocument();
+		if (!logicDocument)
+			return;
+		
+		let field = logicDocument.GetComplexFieldById(fieldId);
+		if (!field)
+			return;
+		
+		field.MoveCursorToField(true, !!isBegin);
+		logicDocument.UpdateSelection();
+		logicDocument.UpdateInterface();
+		logicDocument.UpdateRulers();
+		logicDocument.UpdateTracks();
+	};
+	/**
+	 * Moves the cursor outside a field to the position before or after it.
+	 * @memberof Api
+	 * @typeofeditors ["CDE"]
+	 * @alias MoveCursorOutsideField
+	 * @param {string} [fieldId=undefined] - Field ID. If it is not specified, the current field is used.
+	 * @param {boolean} [isBefore=true] - Defines whether the cursor is moved before (<b>true</b>) or after (<b>false</b>) the field.
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/MoveCursorOutsideField.js
+	 */
+	Api.prototype["pluginMethod_MoveCursorOutsideField"] = function(fieldId, isBefore)
+	{
+		let logicDocument = this.private_GetLogicDocument();
+		if (!logicDocument)
+			return;
+		
+		let field = logicDocument.GetComplexFieldById(fieldId);
+		if (!field)
+			return;
+		
+		field.MoveCursorOutsideElement(!!isBefore);
+		logicDocument.UpdateSelection();
+		logicDocument.UpdateInterface();
+		logicDocument.UpdateRulers();
+		logicDocument.UpdateTracks();
+
 	};
 	/**
 	 * Sets the document editing restrictions.
@@ -1383,65 +1438,23 @@
 		let bookmarks = logicDocument.GetBookmarksManager();
 		let para = logicDocument.GetCurrentParagraph();
 		let topDocument = para ? para.GetTopDocumentContent() : null;
-		let docPos = topDocument && topDocument.GetContentPosition ? topDocument.GetContentPosition(false) : null;
-		return bookmarks.GetBookmarkByDocPos(docPos);
-	};
-	/**
-	 * Adds annotations to the specified paragraph.
-	 * @memberof Api
-	 * @typeofeditors ["CDE"]
-	 * @alias AnnotateParagraph
-	 * @param {Object} data - Annotation data specifying what to annotate.
-	 * @param {string} data.type - The type of annotation operation (e.g., `"highlightText"`).
-	 * @param {string} [data.name] - Optional name of the annotation.
-	 * @param {string} data.paragraphId - ID of the paragraph being annotated.
-	 * @param {string} data.recalcId - Paragraph recalculation ID.
-	 * @param {Array<TextAnnotationRange>} [data.ranges] - Array of text ranges to highlight (for highlightText type)
-	 * @since 9.2.0
-	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/AnnotateParagraph.js
-	 */
-	Api.prototype["pluginMethod_AnnotateParagraph"] = function(data)
-	{
-		if (!data)
-			return;
+		if (!topDocument || !topDocument.GetContentPosition)
+			return null;
 		
-		data["guid"] = window.g_asc_plugins.getCurrentPluginGuid();
-		this.getTextAnnotatorEventManager().onResponse(data);
-	};
-	/**
-	 * Selects text in a document using a given annotation.
-	 * @memberof Api
-	 * @typeofeditors ["CDE"]
-	 * @alias SelectAnnotationRange
-	 * @param {TextAnnotation} annotation - The annotation selection object.
-	 * @since 9.2.0
-	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/SelectAnnotationRange.js
-	 */
-	Api.prototype["pluginMethod_SelectAnnotationRange"] = function(annotation)
-	{
-		if (!annotation)
-			return;
+		let currentBookmarks;
+		if (topDocument.IsTextSelectionUse())
+		{
+			let startPos = topDocument.GetContentPosition(true, true);
+			let endPos   = topDocument.GetContentPosition(true, false);
+			currentBookmarks = bookmarks.GetBookmarksByRange(startPos, endPos);
+		}
+		else
+		{
+			let curPos = topDocument.GetContentPosition(false);
+			currentBookmarks = bookmarks.GetBookmarksByDocPos(curPos);
+		}
 		
-		annotation["guid"] = window.g_asc_plugins.getCurrentPluginGuid();
-		this.getTextAnnotatorEventManager().selectRange(annotation);
-	};
-	/**
-	 * Remove a specific annotation range from the document.
-	 * @memberof Api
-	 * @typeofeditors ["CDE"]
-	 * @alias RemoveAnnotationRange
-	 * @param {TextAnnotation} annotation - The annotation removing object.
-	 * @param {boolean} [annotation.all=false] - Optional parameter, flag to remove all annotations for the current paragraph.
-	 * @since 9.2.0
-	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/RemoveAnnotationRange.js
-	 */
-	Api.prototype["pluginMethod_RemoveAnnotationRange"] = function(annotation)
-	{
-		if (!annotation)
-			return;
-		
-		annotation["guid"] = window.g_asc_plugins.getCurrentPluginGuid();
-		this.getTextAnnotatorEventManager().removeRange(annotation);
+		return currentBookmarks.length ? currentBookmarks[0] : null;
 	};
 
 	function private_ReadContentControlCommonPr(commonPr)
@@ -1473,14 +1486,14 @@
 		if (shd)
 		{
 			if (undefined !== shd["Color"])
-				ccPr.ShdColor = new Asc.asc_CColor(shd["Color"]["R"], shd["Color"]["G"], shd["Color"]["B"], shd["Color"]["A"]);
+				ccPr.ShdColor = new Asc.asc_CColor(shd["Color"]["R"], shd["Color"]["G"], shd["Color"]["B"], undefined === shd["Color"]["A"] ? 255 : shd["Color"]["A"]);
 		}
 		
 		let border = commonPr["Border"];
 		if (border)
 		{
 			if (undefined !== border["Color"])
-				ccPr.BorderColor = new Asc.asc_CColor(border["Color"]["R"], border["Color"]["G"], border["Color"]["B"], border["Color"]["A"]);
+				ccPr.BorderColor = new Asc.asc_CColor(border["Color"]["R"], border["Color"]["G"], border["Color"]["B"],  undefined === border["Color"]["A"] ? 255 : border["Color"]["A"]);
 		}
 
 		return ccPr;
@@ -1503,66 +1516,6 @@
 		}
 		return direction;
 	}
-
-	/**
-	 * Insert streamed content.
-	 * @undocumented
-	 * @memberof Api
-	 * @typeofeditors ["CDE"]
-	 * @alias InsertStreamedContent
-	 * @returns {undefined}
-	 * @since 9.2.0
-	 */
-	Api.prototype["pluginMethod_InsertStreamedContent"] = function(streamObj)
-	{
-		let logicDocument = this.private_GetLogicDocument();
-		if (!logicDocument)
-			return null;
-
-		if (streamObj["word"] && streamObj["word"]["removeSelection"])
-			logicDocument.RemoveSelection();
-
-		if (streamObj["undo"])
-			this["pluginMethod_EndAction"]("GroupActions", "", "cancel");
-		
-		let _t = this;
-		function startSilentMode()
-		{
-			window.g_asc_plugins && window.g_asc_plugins.setPluginMethodReturnAsync();
-			
-			logicDocument.TurnOff_Recalculate();
-			logicDocument.TurnOff_InterfaceEvents();
-		}
-		
-		function endSilentMode()
-		{
-			logicDocument.TurnOn_Recalculate();
-			logicDocument.TurnOn_InterfaceEvents();
-			
-			logicDocument.Recalculate();
-			window.g_asc_plugins && window.g_asc_plugins.onPluginMethodReturn(true);
-		}
-		
-		function pasteTail()
-		{
-			if (streamObj["tail"] !== "")
-			{
-				_t["pluginMethod_StartAction"]("GroupActions");
-				_t._pluginMethod_PasteHtml(streamObj["tail"], endSilentMode);
-			}
-			else
-			{
-				endSilentMode();
-			}
-		}
-		
-		startSilentMode();
-		
-		if (streamObj["stable"] !== "")
-			this._pluginMethod_PasteHtml(streamObj["stable"], pasteTail);
-		else
-			pasteTail();
-	};
 
 	/**
 	 * Checks if the document is in the filling form mode.
@@ -1619,7 +1572,7 @@
 
 	window["AscCommon"] = window["AscCommon"] || {};
 	window["AscCommon"].readContentControlCommonPr = readContentControlCommonPr;
-	
+
 })(window);
 
 

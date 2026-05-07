@@ -62,8 +62,8 @@ Math.imul = Math.imul || function(a, b) {
   var al = a & 0xffff;
   var bh = (b >>> 16) & 0xffff;
   var bl = b & 0xffff;
-  // сдвиг на 0 бит закрепляет знак в старшей части числа
-  // окончательный |0 преобразует беззнаковое значение обратно в знаковое значение
+  // shifting by 0 bits fixes the sign in the high part of the number
+  // the final |0 converts the unsigned value back to a signed value
   return ((al * bl) + (((ah * bl + al * bh) << 16) >>> 0)|0);
 };
 
@@ -167,7 +167,7 @@ function onMessageEvent(data, port)
 
     if (1 < self.spellchecker.messages.length)
     {
-        // значит еще грузим что-то
+        // still loading something
         return;
     }
 
@@ -378,7 +378,7 @@ function Spellchecker()
 			var readyLang = this.readyLanguages[lang_key];
 			if (!readyLang)
 			{
-				// начнем грузить
+				// start loading
 				var langToReady = new Dictionary();
 				langToReady.id = lang_key;
 				langToReady.language = this.languages[lang_key];
@@ -391,20 +391,20 @@ function Spellchecker()
 			}
 			else if (readyLang.status != 2)
 			{
-				// ждем
+				// waiting
 				isReady = false;
 				break;
 			}
 			else
-			{				
-				// все готово.
+			{
+				// all ready.
 				continue;	
 			}
 		}
 
 		if (!isReady)
 		{
-			// ждем
+			// waiting
 			return;
 		}
 

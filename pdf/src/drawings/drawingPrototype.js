@@ -37,7 +37,7 @@
 	 * @constructor
     */
     function CPdfDrawingPrototype() {
-        this._isFromScan = false;   // флаг, что был прочитан из скана страницы 
+        this._isFromScan = false;   // flag indicating it was read from page scan 
 
         this._doc           = undefined;
         this._needRecalc    = true;
@@ -202,7 +202,7 @@
                     let nRangeStart = oRange.StartPos;
                     let nRangeEnd   = oRange.EndPos;
                     
-                    // Если пересечение пустое с селектом, тогда пропускаем данный отрезок
+                    // If intersection with selection is empty, then skip this segment
                     if (nStartInPara > nRangeEnd || nEndInPara < nRangeStart)
                         continue;
                     
@@ -242,10 +242,10 @@
                 
                 let isTextMatrixUse = ((null != oTextTr) && !global_MatrixTransformer.IsIdentity(oTextTr));
                 if (isTextMatrixUse) {
-                    let oPt1 = oTextTr.TransformPoint(x, y);            // левый верхний
-                    let oPt2 = oTextTr.TransformPoint(x + w, y);        // правый верхний
-                    let oPt3 = oTextTr.TransformPoint(x + w, y + h);    // правый нижний
-                    let oPt4 = oTextTr.TransformPoint(x, y + h);        // левый нижний
+                    let oPt1 = oTextTr.TransformPoint(x, y);            // top left
+                    let oPt2 = oTextTr.TransformPoint(x + w, y);        // top right
+                    let oPt3 = oTextTr.TransformPoint(x + w, y + h);    // bottom right
+                    let oPt4 = oTextTr.TransformPoint(x, y + h);        // bottom left
 
                     let nKoeff = oViewer.getDrawingPageScale(nPage) * g_dKoef_pix_to_mm;
 
@@ -421,6 +421,12 @@
             if (oGroup && oGroup != this) {
                 oGroup.SetNeedRecalc(true);
             }
+
+			let oFile = oDoc.GetFile();
+			let nPage = this.GetPage();
+			if (oFile.pages[nPage]) {
+				oFile.pages[nPage].drawingsText = null;
+			}
         }
     };
     CPdfDrawingPrototype.prototype.addToRecalculate = function() {

@@ -267,6 +267,12 @@ CShape.prototype.handleUpdateGeometry = function()
     this.recalcContent();
     this.recalcTransformText();
     this.addToRecalculate();
+    if (this.isHorizontalRule()) {
+        this.recalcTransform();
+        if (this.parent && this.parent.Refresh_RecalcData) {
+            this.parent.Refresh_RecalcData({Type: AscDFH.historyitem_Drawing_SetExtent});
+        }
+    }
 };
 CShape.prototype.convertPixToMM = function(pix)
 {
@@ -509,7 +515,10 @@ CShape.prototype.recalculateText = function()
         {
             if (this.recalcInfo.recalculateTxBoxContent)
             {
+                let oldCheckAutoFitFlag = this.bCheckAutoFitFlag;
+                this.bCheckAutoFitFlag = true;
                 this.recalcInfo.oContentMetrics = this.recalculateTxBoxContent();
+                this.bCheckAutoFitFlag = oldCheckAutoFitFlag;
                 this.recalcInfo.recalculateTxBoxContent = false;
                 this.recalcInfo.AllDrawings = [];
                 var oContent = this.getDocContent();

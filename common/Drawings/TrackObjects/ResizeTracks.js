@@ -165,7 +165,7 @@ SHAPE_EXT["flowChartDelay"] = 612648/36000;
 SHAPE_EXT["flowChartMagneticTape"] = 612648/36000;
 SHAPE_EXT["actionButtonHome"] = 1042416/36000;
 
-var MIN_SHAPE_SIZE = 1.27;//размер меньше которого нельзя уменшить автофигуру или картинку по горизонтали или вертикали
+var MIN_SHAPE_SIZE = 1.27;//minimum size below which the autoshape or image cannot be reduced horizontally or vertically
 
 function CreatePenBrushForChartTrack()
 {
@@ -357,6 +357,9 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
             this.pen = AscFormat.CreatePenBrushForChartTrack().pen;
         }
         this.overlayObject = new AscFormat.OverlayObject(this.geometry, this.resizedExtX, this.resizedExtY, this.brush, this.pen, this.transform);
+        if (originalObject.isHorizontalRule && originalObject.isHorizontalRule()) {
+            this.overlayObject.hr = originalObject.getHorizontalRule();
+        }
 
 
         this.resizeConnector = function(kd1, kd2, e, x, y){
@@ -524,26 +527,26 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
             }
         };
         this.correctKDForPdfFreeText = function(kd1, kd2) {
-            // точка коннектора соединённая с перпендикулярной линией должна двигаться только по одной из осей
-            // этот метод обрабатывает данный случай и корректирует координаты
+            // connector point connected to a perpendicular line should move only along one axis
+            // this method handles this case and adjusts the coordinates
 
             let oFreeText               = this.originalObject.group;
             let oFreeTextRect           = oFreeText.GetTextBoxRect().map(function(measure) {
                 return measure * g_dKoef_pt_to_mm;
             });
             let aCallout                = oFreeText.GetCallout();
-            let oExitPoint              = undefined; // перпендикулярная линия выходящая из freetext аннотации
-            let oCalloutArrowPt         = undefined; // x2, y2 точка линии (точка начала стрелки)
-            let oCalloutArrowEndPt      = undefined; // x1, y1 точка линии (точка конца стрелки)
+            let oExitPoint              = undefined; // perpendicular line exiting from freetext annotation
+            let oCalloutArrowPt         = undefined; // x2, y2 line point (arrow start point)
+            let oCalloutArrowEndPt      = undefined; // x1, y1 line point (arrow end point)
 
             if (aCallout && aCallout.length == 6) {
-                // точка выхода callout из аннотации
+                // callout exit point from annotation
                 oExitPoint = {
                     x: (aCallout[2 * 2]) * g_dKoef_pt_to_mm,
                     y: (aCallout[2 * 2 + 1]) * g_dKoef_pt_to_mm
                 };
 
-                // x2, y2 линии
+                // x2, y2 of line
                 oCalloutArrowPt = {
                     x: aCallout[1 * 2] * g_dKoef_pt_to_mm,
                     y: (aCallout[1 * 2 + 1]) * g_dKoef_pt_to_mm
@@ -559,7 +562,7 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
             }
 
             if (this.numberHandle == 4) {
-                // если x начала стрелки находится в пределах ректа аннотации то фиксируем x
+                // if arrow start x is within annotation rect bounds then fix x
                 if (oCalloutArrowPt.x < oFreeTextRect[0] || oCalloutArrowPt.x > oFreeTextRect[2]) {
                     kd2 = 1;
                 }
@@ -580,9 +583,9 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
             if (!aCalloutMM)
                 return {x: x, y: y};
 
-            // x1, y1 линии callout
+            // x1, y1 of callout line
             if (this.numberHandle == 0) {
-                // если конец стрелки внутри textbox то поднимаем выше/ниже
+                // if arrow end is inside textbox then move it up/down
                 if (x >= aTextBoxRectMM[0] && x <= aTextBoxRectMM[2] && y >= aTextBoxRectMM[1] && y <= aTextBoxRectMM[3]) {
                     if (y <= aTextBoxRectMM[1] + (aTextBoxRectMM[3] - aTextBoxRectMM[1]) / 2) {
                         y = aTextBoxRectMM[1] - 10;
@@ -592,9 +595,9 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
                     }
                 }
             }
-            // x2, y2 линии
+            // x2, y2 of line
             else if (this.numberHandle == 4) {
-                // фиксируем x или y в зависимости от положения стрелки
+                // fix x or y depending on arrow position
                 switch (nExitPos) {
                     case AscPDF.CALLOUT_EXIT_POS.left:
                     case AscPDF.CALLOUT_EXIT_POS.right:
@@ -638,6 +641,9 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
             var _new_used_half_width;
             var _new_used_half_height;
             var _temp;
+            var _bHR = this.originalObject.isHorizontalRule && this.originalObject.isHorizontalRule();
+            var _minExtY = _bHR ? 0.05 * 25.4 / 72 : MIN_SHAPE_SIZE;
+            var _hrSnapRange = _bHR ? 0.3 : 0;
 
             if (Asc.editor.isPdfEditor()) {
                 let isFreeText = this.originalObject.group && this.originalObject.group.IsAnnot() && this.originalObject.group.IsFreeText();
@@ -708,16 +714,23 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
                     _real_height = this.usedExtY*kd2;
                     _abs_height = Math.abs(_real_height);
 
-                    if(!this.isLine)
+                    if(_bHR && _abs_height < _minExtY + _hrSnapRange)
                     {
-                        this.resizedExtY = _abs_height >= MIN_SHAPE_SIZE  ? _abs_height : MIN_SHAPE_SIZE;
+                        this.resizedExtY = _minExtY;
+                    }
+                    else if(!this.isLine)
+                    {
+                        this.resizedExtY = _abs_height >= _minExtY  ? _abs_height : _minExtY;
                     }
                     else
                     {
-                        this.resizedExtY = _abs_height >= MIN_SHAPE_SIZE  ? _abs_height : 0;
+                        this.resizedExtY = _abs_height >= _minExtY  ? _abs_height : 0;
                     }
 
-                    this.resizedExtY = _abs_height >= MIN_SHAPE_SIZE  || this.isLine  ? _abs_height : MIN_SHAPE_SIZE;
+                    if(!_bHR)
+                    {
+                        this.resizedExtY = _abs_height >= _minExtY  || this.isLine  ? _abs_height : _minExtY;
+                    }
                     if(_real_height < 0 )
                     {
                         this.resizedflipV = !this.originalFlipV;
@@ -770,7 +783,7 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
                         kd1 = _temp;
                         _real_height = this.usedExtY*kd2;
                         _abs_height = Math.abs(_real_height);
-                        this.resizedExtY = _abs_height >= MIN_SHAPE_SIZE  ? _abs_height : (this.isLine ? 0 : MIN_SHAPE_SIZE);
+                        this.resizedExtY = (_bHR && _abs_height < _minExtY + _hrSnapRange) ? _minExtY : (_abs_height >= _minExtY ? _abs_height : (this.isLine ? 0 : _minExtY));
                         if(_real_height < 0 )
                             this.resizedflipV = !this.originalFlipV;
                         else
@@ -846,7 +859,7 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
 
                     _real_height = this.usedExtY*kd2;
                     _abs_height = Math.abs(_real_height);
-                    this.resizedExtY = _abs_height >= MIN_SHAPE_SIZE  ? _abs_height :  (this.isLine ? 0 : MIN_SHAPE_SIZE);
+                    this.resizedExtY = (_bHR && _abs_height < _minExtY + _hrSnapRange) ? _minExtY : (_abs_height >= _minExtY ? _abs_height : (this.isLine ? 0 : _minExtY));
                     if(_real_height < 0 )
                     {
                         this.resizedflipV = !this.originalFlipV;
@@ -897,7 +910,7 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
                     {
                         _real_height = this.usedExtY*kd1;
                         _abs_height = Math.abs(_real_height);
-                        this.resizedExtY = _abs_height >= MIN_SHAPE_SIZE   ? _abs_height : (this.isLine ? 0 : MIN_SHAPE_SIZE);
+                        this.resizedExtY = (_bHR && _abs_height < _minExtY + _hrSnapRange) ? _minExtY : (_abs_height >= _minExtY ? _abs_height : (this.isLine ? 0 : _minExtY));
                         if(_real_height < 0 )
                             this.resizedflipV = !this.originalFlipV;
                         else
@@ -1021,6 +1034,9 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
             }
             var _real_height, _real_width;
             var _abs_height, _abs_width;
+            var _bHR = this.originalObject.isHorizontalRule && this.originalObject.isHorizontalRule();
+            var _minExtY = _bHR ? 0.05 * 25.4 / 72 : MIN_SHAPE_SIZE;
+            var _hrSnapRange = _bHR ? 0.3 : 0;
 
             var isCrop = (this.originalObject.isCrop || !!this.originalObject.cropObject);
             if((ShiftKey === true || window.AscAlwaysSaveAspectOnResizeTrack === true || (!isCrop && this.originalObject.getNoChangeAspect())) && this.bAspect === true)
@@ -1059,7 +1075,7 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
 
                 _real_height = this.usedExtY*kd2;
                 _abs_height = Math.abs(_real_height);
-                this.resizedExtY = _abs_height >= MIN_SHAPE_SIZE  || this.isLine ? _abs_height : MIN_SHAPE_SIZE;
+                this.resizedExtY = (_bHR && _abs_height < _minExtY + _hrSnapRange) ? _minExtY : (_abs_height >= _minExtY || this.isLine ? _abs_height : _minExtY);
                 this.resizedflipV  = _real_height < 0 ? !this.originalFlipV : this.originalFlipV;
 
 
@@ -1074,7 +1090,7 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
 
                     _real_height = this.usedExtY*kd2;
                     _abs_height = Math.abs(_real_height);
-                    this.resizedExtY = _abs_height >= MIN_SHAPE_SIZE  || this.isLine ? _abs_height : MIN_SHAPE_SIZE;
+                    this.resizedExtY = (_bHR && _abs_height < _minExtY + _hrSnapRange) ? _minExtY : (_abs_height >= _minExtY || this.isLine ? _abs_height : _minExtY);
                     this.resizedflipV  = _real_height < 0 ? !this.originalFlipV : this.originalFlipV;
 
                 }
@@ -1418,6 +1434,30 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
                         xfrm.setExtX(this.resizedExtX/scale_coefficients.cx);
                         xfrm.setExtY(this.resizedExtY/scale_coefficients.cy);
 						Asc.editor.addMacroStepData("SetShapeSize", {width: this.resizedExtX, height: this.resizedExtY});
+                        let oHR = this.originalObject.getHorizontalRule && this.originalObject.getHorizontalRule();
+                        if (oHR) {
+                            let oParaDrawing = this.originalObject.parent;
+                            if (oParaDrawing) {
+                                let oParagraph = oParaDrawing.Get_ParentParagraph && oParaDrawing.Get_ParentParagraph();
+                                if (oParagraph) {
+                                    let oSectPr = oParagraph.Get_SectPr();
+                                    if (oSectPr) {
+                                        let nColIdx = oParagraph.ColumnNum || 0;
+                                        let contentWidth = oSectPr.GetColumnWidth(nColIdx);
+                                        let newPct = (this.resizedExtX / scale_coefficients.cx) / contentWidth * 1000;
+                                        if (newPct > 1000) {
+                                            newPct = 1000;
+                                        }
+                                        let oGeom = this.originalObject.getGeometry();
+                                        if (oGeom) {
+                                            let oNewHR = oHR.createDuplicate();
+                                            oNewHR.pct = newPct;
+                                            oGeom.setHR(oNewHR);
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                     else
                     {
@@ -1454,17 +1494,20 @@ function ResizeTrackShapeImage(originalObject, cardDirection, drawingsController
                     this.originalObject.getObjectType() !== AscDFH.historyitem_type_SlicerView)
                 {
 
-                    if(!this.originalObject.isCrop)
+                    if(!(this.originalObject.isHorizontalRule && this.originalObject.isHorizontalRule()))
                     {
-                        xfrm.setFlipH(this.resizedflipH);
-                        xfrm.setFlipV(this.resizedflipV);
-                    }
-                    else
-                    {
-                        AscFormat.ExecuteNoHistory(function () {
+                        if(!this.originalObject.isCrop)
+                        {
                             xfrm.setFlipH(this.resizedflipH);
                             xfrm.setFlipV(this.resizedflipV);
-                        }, this, []);
+                        }
+                        else
+                        {
+                            AscFormat.ExecuteNoHistory(function () {
+                                xfrm.setFlipH(this.resizedflipH);
+                                xfrm.setFlipV(this.resizedflipV);
+                            }, this, []);
+                        }
                     }
                 }
                 if(this.originalObject.getObjectType && this.originalObject.getObjectType() === AscDFH.historyitem_type_OleObject)

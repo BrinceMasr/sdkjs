@@ -239,7 +239,7 @@
 
 			ClearRasterMemory : function()
 			{
-				// быстрая очистка всей памяти (убирание всех дыр)
+				// fast cleanup of all memory (removing all holes)
 				if (null == this.RasterMemory || null == this.m_oFontsCache)
 					return;
 
@@ -305,7 +305,7 @@
 
 				this.SetStringGID(true);
 
-				// это SetString
+				// this is SetString
 				var string = this.m_oGlyphString;
 				this.m_pFont.codePointsForGid = codepoints;
 
@@ -334,7 +334,7 @@
 				if (!this.m_pFont)
 					return false;
 
-				// это SetString
+				// this is SetString
 				var string = this.m_oGlyphString;
 
 				string.m_fX = fX + string.m_fTransX;
@@ -358,7 +358,7 @@
 				if (!this.m_pFont)
 					return false;
 
-				// это SetString
+				// this is SetString
 				var string = this.m_oGlyphString;
 
 				string.m_fX = fX + string.m_fTransX;
@@ -384,7 +384,7 @@
 
 				this.SetStringGID(isGid);
 
-				// это SetString
+				// this is SetString
 				var string = this.m_oGlyphString;
 
 				string.m_fX = fX + string.m_fTransX;

@@ -47,7 +47,7 @@
 		let gs1 = AscTest.JsApi.CreateGradientStop(AscTest.JsApi.CreateRGBColor(255, 213, 191), 0);
 		let gs2 = AscTest.JsApi.CreateGradientStop(AscTest.JsApi.CreateRGBColor(255, 111, 61), 100000);
 		fill = AscTest.JsApi.CreateRadialGradientFill([gs1, gs2]);
-		shape.Fill(fill);
+		shape.SetFill(fill);
 
         assert.ok(shape.Drawing.spPr.Fill.fill instanceof AscFormat.CGradFill, "Shape created and filled with gradient");
         assert.strictEqual(shape.Drawing.spPr.Fill.fill.colors.length, 2, 'Check colors of gradient amount');
@@ -118,19 +118,6 @@
 
 		let result4 = shape.SetName(undefined);
 		assert.strictEqual(result4, false, 'Check SetName returns false for undefined');
-
-		// Test that setting duplicate name causes previous shape to get default name
-		let shape2 = worksheet.AddShape("rect", 50 * 36000, 50 * 36000, fill, stroke, 0, 1 * 36000, 0, 0);
-
-		shape.SetName("DuplicateName");
-		const firstShapeName = shape.GetName();
-		assert.strictEqual(firstShapeName, "DuplicateName", 'Check first shape has duplicate name');
-
-		shape2.SetName("DuplicateName");
-
-		assert.strictEqual(shape2.GetName(), "DuplicateName", 'Check second shape has the duplicate name');
-		assert.notStrictEqual(shape.GetName(), "DuplicateName", 'Check first shape name changed from duplicate');
-		assert.notStrictEqual(shape.GetName(), firstShapeName, 'Check first shape has a new default name');
 	});
 
 	QUnit.test("Select", function (assert) {

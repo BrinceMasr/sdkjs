@@ -989,11 +989,25 @@
 	CGraphicObjectBase.prototype.canEditGeometry = function () {
 		return this.getObjectType() === AscDFH.historyitem_type_Shape &&
 			!this.isPlaceholder() &&
+			!this.isHorizontalRule() &&
 			this.getNoEditPoints() !== true &&
 			!!(this.spPr && this.spPr.geometry) && !(this.isObjectInSmartArt()); // todo: functionality not available in microsoft for smartart shapes, but the OOX format supports it, currently blocked due to resizing blocking
 	};
 	CGraphicObjectBase.prototype.canEditTableOleObject = function (bReturnOle) {
 		return bReturnOle ? null : false;
+	};
+	CGraphicObjectBase.prototype.isHorizontalRule = function () {
+		let oGeom = this.getGeometry && this.getGeometry();
+		if (!(oGeom && oGeom.hr))
+			return false;
+		if (this.group)
+			return false;
+		let oParaDrawing = this.parent;
+		return !oParaDrawing || !oParaDrawing.Is_Inline || oParaDrawing.Is_Inline();
+	};
+	CGraphicObjectBase.prototype.getHorizontalRule = function () {
+		let oGeom = this.getGeometry && this.getGeometry();
+		return oGeom && oGeom.hr || null;
 	};
 	CGraphicObjectBase.prototype.canRotate = function () {
 		if (!this.canEdit()) {
@@ -1856,42 +1870,65 @@
 		}
 		return false;
 	};
+	CGraphicObjectBase.prototype.getEffectiveCNvProps = function () {
+		if (this.parent && this.parent.docPr) {
+			return this.parent.docPr;
+		}
+		return this.getCNvProps();
+	};
+	CGraphicObjectBase.prototype.collectAllCNvProps = function () {
+		const allProps = [];
+
+		const oCNvPr = this.getCNvProps();
+		if (oCNvPr) {
+			allProps.push(oCNvPr);
+		}
+
+		if (this.parent && this.parent.docPr && this.parent.docPr !== oCNvPr) {
+			allProps.push(this.parent.docPr);
+		}
+
+		return allProps;
+	};
 	CGraphicObjectBase.prototype.setTitle = function (sTitle) {
 		if (undefined === sTitle || null === sTitle) {
 			return;
 		}
-		var oNvPr = this.getCNvProps();
-		if (oNvPr) {
-			oNvPr.setTitle(sTitle ? sTitle : null);
+		this.checkDrawingUniNvPr();
+		const allCNvProps = this.collectAllCNvProps();
+		for (let i = 0; i < allCNvProps.length; i++) {
+			allCNvProps[i].setTitle(sTitle ? sTitle : null);
 		}
 	};
 	CGraphicObjectBase.prototype.setDescription = function (sDescription) {
 		if (undefined === sDescription || null === sDescription) {
 			return;
 		}
-		var oNvPr = this.getCNvProps();
-		if (oNvPr) {
-			oNvPr.setDescr(sDescription ? sDescription : null);
+		this.checkDrawingUniNvPr();
+		const allCNvProps = this.collectAllCNvProps();
+		for (let i = 0; i < allCNvProps.length; i++) {
+			allCNvProps[i].setDescr(sDescription ? sDescription : null);
 		}
 	};
 	CGraphicObjectBase.prototype.setName = function (sName) {
 		if (undefined === sName || null === sName) {
 			return;
 		}
-		var oNvPr = this.getCNvProps();
-		if (oNvPr) {
-			oNvPr.setName(sName ? sName : null);
+		this.checkDrawingUniNvPr();
+		const allCNvProps = this.collectAllCNvProps();
+		for (let i = 0; i < allCNvProps.length; i++) {
+			allCNvProps[i].setName(sName ? sName : null);
 		}
 	};
 	CGraphicObjectBase.prototype.getTitle = function () {
-		var oNvPr = this.getCNvProps();
+		const oNvPr = this.getEffectiveCNvProps();
 		if (oNvPr) {
 			return oNvPr.title ? oNvPr.title : undefined;
 		}
 		return undefined;
 	};
 	CGraphicObjectBase.prototype.getDescription = function () {
-		var oNvPr = this.getCNvProps();
+		const oNvPr = this.getEffectiveCNvProps();
 		if (oNvPr) {
 			return oNvPr.descr ? oNvPr.descr : undefined;
 		}
@@ -2223,8 +2260,9 @@
 			}
 		}
 
+		let bHR = this.isHorizontalRule && this.isHorizontalRule();
 		if (numHandle === 0 || numHandle === 1 || numHandle === 2) {
-			if (Math.abs(t_y) < AscFormat.SNAP_DISTANCE) {
+			if (Math.abs(t_y) < AscFormat.SNAP_DISTANCE && !bHR) {
 				t_y = 0;
 				bSnapV = true;
 				bOwnV = true;
@@ -2232,7 +2270,7 @@
 		}
 
 		if (numHandle === 4 || numHandle === 5 || numHandle === 6) {
-			if (Math.abs(t_y - this.extY) < AscFormat.SNAP_DISTANCE) {
+			if (Math.abs(t_y - this.extY) < AscFormat.SNAP_DISTANCE && !bHR) {
 				t_y = this.extY;
 				bSnapV = true;
 				bOwnV = true;
@@ -3344,24 +3382,9 @@
 	};
 	CGraphicObjectBase.prototype.getBoundsByDrawing = function (bMorph) {
 		const oCopy = this.bounds.copy();
-		if(this.shdwSp) {
+		if (this.shdwSp) {
 			this.shdwSp.recalculateBounds();
 			oCopy.checkByOther(this.shdwSp.bounds);
-		}
-		if(!bMorph) {
-			oCopy.l -= 3;
-			oCopy.r += 3;
-			oCopy.t -= 3;
-			oCopy.b += 3;
-			oCopy.checkWH();
-			return oCopy;//TODO: do not count shape rect
-		}
-		if(this.pen) {
-			const dCorrection = this.pen.getWidthMM() / 2;
-			oCopy.l -= dCorrection;
-			oCopy.r += dCorrection;
-			oCopy.t -= dCorrection;
-			oCopy.b += dCorrection;
 		}
 		oCopy.checkWH();
 		return oCopy;
@@ -3636,7 +3659,7 @@
 		return AscCommon.translateManager.getValue("Graphic Object");
 	};
 	CGraphicObjectBase.prototype.getOwnName = function() {
-		const oCNvPr = this.getCNvProps();
+		const oCNvPr = this.getEffectiveCNvProps();
 		if (oCNvPr && typeof oCNvPr.name === "string" && oCNvPr.name.length > 0) {
 			return oCNvPr.name;
 		}

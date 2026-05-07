@@ -151,7 +151,7 @@
             const cos = Math.cos(rad);
             const sin = Math.sin(rad);
 
-            // центр прямоугольника
+            // rectangle center
             let cx = 0, cy = 0;
             for (let i = 0; i < 8; i += 2) {
                 cx += pts[i];
@@ -160,7 +160,7 @@
             cx /= 4;
             cy /= 4;
 
-            // поворот каждой точки
+            // rotate each point
             const res = new Array(8);
             for (let i = 0; i < 8; i += 2) {
                 const dx = pts[i]     - cx;
@@ -229,6 +229,9 @@
         let nScale = this.GetOriginViewScale();
         let oTr = new AscCommon.CMatrix();
         
+		let oldAlpha = oGraphicsWord.globalAlpha;
+		oGraphicsWord.put_GlobalAlpha(true, this.GetOpacity());
+
         // draw without rotate and scale for saving
         if (oGraphicsWord.isPdf()) {
             let hc = this.extX * 0.5;
@@ -250,6 +253,7 @@
         }
 
         oStructure.draw(oGraphicsWord, oTr);
+		oGraphicsWord.put_GlobalAlpha(true, oldAlpha);
     };
     CAnnotationStamp.prototype.SetRenderStructure = function(oStructure) {
         AscCommon.History.Add(new AscDFH.CChangesDrawingsObjectNoId(this, AscDFH.historyitem_Pdf_Stamp_RenderStructure, this.renderStructure, oStructure));
@@ -340,7 +344,7 @@
             if (this.IsHighlight())
                 AscPDF.startMultiplyMode(oGraphicsPDF.GetContext());
             
-            oGraphicsPDF.SetGlobalAlpha(1);
+            oGraphicsPDF.SetGlobalAlpha(this.GetOpacity());
             oGraphicsPDF.DrawImageXY(originView, X, Y, nRot, true);
             AscPDF.endMultiplyMode(oGraphicsPDF.GetContext());
         }
@@ -589,18 +593,17 @@
         return fontMap;
     };
     CAnnotationStamp.prototype.WriteRenderToBinary = function(memory) {
-        // пока только для основанных на фигурах
         if (this.IsNeedDrawFromStream() || !memory.docRenderer || (memory.isForSplit || memory.isCopyPaste)) {
             return;
         }
 
-        // тут будет длина комманд
+        // command length will be here
         let nStartPos = memory.GetCurPosition();
         memory.Skip(4);
 
-        this.Draw(undefined, memory.docRenderer); // для каждой страницы инициализируется свой renderer
+        this.Draw(undefined, memory.docRenderer); // separate renderer is initialized for each page
 
-        // запись длины комманд
+        // write command length
         let nEndPos = memory.GetCurPosition();
         memory.Seek(nStartPos);
         memory.WriteLong(nEndPos - nStartPos);

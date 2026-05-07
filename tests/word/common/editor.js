@@ -95,6 +95,8 @@
 	editor.GetCollaborativeMarksShowType = function(){return c_oAscCollaborativeMarksShowType.All;};
 	editor.asc_OnChangeContentControl = function(){};
 	editor.sync_OnAllRequiredFormsFilled = function(){};
+	editor.sync_OnChangeSdtGlobalSettings = function(){};
+	editor.sync_OnChangeSpecialFormsGlobalSettings = function(){};
 	editor.asc_OnFocusContentControl = function(){};
 	editor.asc_OnBlurContentControl = function(){};
 	editor.sync_CanUndoCallback = function(){};
@@ -188,6 +190,16 @@
 	window.editor = editor;
 	Asc['editor'] = Asc.editor = editor;
 
-	// TODO: Заменить на вызов onEndLoadSdk
+	// TODO: Replace with onEndLoadSdk
 	editor.initCollaborativeEditing();
+
+	AscCommon.g_clipboardBase.Init(editor);
+
+	AscFonts.g_fontApplication.GetFontFileWeb = function(name, style)
+	{
+		return {
+			m_wsFontName : name
+		}
+	};
+	
 })(window);

@@ -5982,6 +5982,60 @@ CStyle.prototype =
 
         return true;
     },
+
+	Is_Similar : function(oStyle, bSkipLink)
+    {
+		if (this.BasedOn && oStyle.BasedOn)
+		{
+			let oStyles = this.Parent;
+
+			if (!oStyles.Get(this.BasedOn).Is_Similar(oStyles.Get(oStyle.BasedOn)))
+				return false;
+		}
+		if (this.Next && oStyle.Next)
+		{
+			let oStyles = this.Parent;
+
+			if (!oStyles.Get(this.Next).Is_Similar(oStyles.Get(oStyle.Next)))
+				return false;
+		}
+		if (this.Link && oStyle.Link && bSkipLink !== true)
+		{
+			let oStyles = this.Parent;
+
+			let oLinkStyle1 = oStyles.Get(this.Link);
+			let oLinkStyle2 = oStyles.Get(oStyle.Link);
+
+			if (!oLinkStyle1.Is_Similar(oLinkStyle2, oLinkStyle1.Link == this.Id && oLinkStyle2.Link == oStyle.Id))
+				return false;
+		}
+
+        if (true !== this.TextPr.Is_Equal(oStyle.TextPr)
+            || true !== this.ParaPr.Is_Equal(oStyle.ParaPr)
+            || (styletype_Table === this.Type
+                	&& (true !== this.TablePr.Is_Equal(oStyle.TablePr)
+                    || true !== this.TableRowPr.Is_Equal(oStyle.TableRowPr)
+                    || true !== this.TableCellPr.Is_Equal(oStyle.TableCellPr)
+                    || true !== IsEqualStyleObjects(this.TableBand1Horz , oStyle.TableBand1Horz )
+                    || true !== IsEqualStyleObjects(this.TableBand1Vert , oStyle.TableBand1Vert )
+                    || true !== IsEqualStyleObjects(this.TableBand2Horz , oStyle.TableBand2Horz )
+                    || true !== IsEqualStyleObjects(this.TableBand2Vert , oStyle.TableBand2Vert )
+                    || true !== IsEqualStyleObjects(this.TableFirstCol  , oStyle.TableFirstCol  )
+                    || true !== IsEqualStyleObjects(this.TableFirstRow  , oStyle.TableFirstRow  )
+                    || true !== IsEqualStyleObjects(this.TableLastCol   , oStyle.TableLastCol   )
+                    || true !== IsEqualStyleObjects(this.TableLastRow   , oStyle.TableLastRow   )
+                    || true !== IsEqualStyleObjects(this.TableTLCell    , oStyle.TableTLCell    )
+                    || true !== IsEqualStyleObjects(this.TableTRCell    , oStyle.TableTRCell    )
+                    || true !== IsEqualStyleObjects(this.TableBLCell    , oStyle.TableBLCell    )
+                    || true !== IsEqualStyleObjects(this.TableBRCell    , oStyle.TableBRCell    )
+                    || true !== IsEqualStyleObjects(this.TableWholeTable, oStyle.TableWholeTable)
+                    )
+                )
+            )
+            return false;
+
+        return true;
+    },
 //-----------------------------------------------------------------------------------
 // Undo/Redo функции
 //-----------------------------------------------------------------------------------
@@ -10456,7 +10510,7 @@ CDocumentBorder.prototype =
         if ( undefined === this.Color )
             Border.Color = undefined;
         else
-            Border.Color.Set(this.Color.r, this.Color.g, this.Color.b);
+            Border.Color.Set(this.Color.r, this.Color.g, this.Color.b, this.Color.Auto);
 
         if(undefined === this.Unifill)
             Border.Unifill = undefined;
@@ -10649,7 +10703,11 @@ CDocumentBorder.prototype =
 };
 CDocumentBorder.prototype.IsNone = function()
 {
-	return (this.Value === border_None);
+	return (this.Value === AscWord.BorderType.none);
+};
+CDocumentBorder.prototype.IsNoBorder = function()
+{
+	return (AscWord.BorderType.none === this.Value || AscWord.BorderType.nil === this.Value);
 };
 CDocumentBorder.prototype.SetNone = function()
 {
@@ -10724,6 +10782,18 @@ CDocumentBorder.prototype.IsEqual = function(oBorder)
 		&& IsEqualStyleObjects(this.Unifill, oBorder.Unifill)
 		&& this.Space === oBorder.Space
 		&& this.Size === oBorder.Size);
+};
+/**
+ * Difference from IsEqual is that nil/none/undefined are considered the same borders
+ * @param {?CDocumentBorder} border
+ * @returns {boolean}
+ */
+CDocumentBorder.prototype.IsEqualWeak = function(border)
+{
+	if (this.IsNoBorder() && (!border || border.IsNoBorder()))
+		return true;
+	
+	return this.IsEqual(border);
 };
 CDocumentBorder.prototype.WriteToBinary = function(oWriter)
 {
@@ -15366,6 +15436,18 @@ CParaTab.prototype.GetLeader = function()
 CParaTab.prototype.IsValid = function()
 {
 	return null != this.Pos && null != this.Value;
+};
+CParaTab.prototype.GetPos = function()
+{
+	return this.Pos;
+};
+CParaTab.prototype.GetValue = function()
+{
+	return this.Value;
+};
+CParaTab.prototype.GetLeader = function()
+{
+	return this.Leader;
 };
 
 function CParaTabs()

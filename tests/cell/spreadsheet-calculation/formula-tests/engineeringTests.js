@@ -240,7 +240,7 @@ $(function () {
 		ws.getRange2("B101").setValue("4");
 		ws.getRange2("C101").setValue("5");
 
-		//формируем массив значений
+		// Create array of values
 		const randomArray = [];
 		let randomStrArray = "{";
 		let maxArg = 4;
@@ -6971,6 +6971,9 @@ $(function () {
 		ws.getRange2("A109").setValue("1");
 		ws.getRange2("A110").setValue("2");
 
+		ws.getRange2("B100").setValue("FALSE");
+		ws.getRange2("B101").setValue("TRUE");
+
 		// Table type. Use A601:L6**
 		getTableType(599, 0, 600, 2);
 		ws.getRange2("A601").setValue("1.005"); // Number (Column1)
@@ -7059,7 +7062,7 @@ $(function () {
 		// Case #17: Name3D, Name3D. 3D named ranges for both arguments. 2 arguments used.
 		oParser = new parserFormula('GESTEP(TestName3D,TestNameArea3D2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GESTEP(TestName3D,TestNameArea3D2) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NAME?', 'Test: Positive case: Name3D, Name3D. 3D named ranges for both arguments. 2 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Name3D, Name3D. 3D named ranges for both arguments. 2 arguments used.');
 		// Case #18: Ref3D. 3D reference to cell for number. 1 argument used.
 		oParser = new parserFormula('GESTEP(Sheet2!A1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GESTEP(Sheet2!A1) is parsed.');
@@ -7129,11 +7132,19 @@ $(function () {
 		// Case #8: Boolean. Boolean FALSE returns 0 (treated as 0). 1 argument used.
 		oParser = new parserFormula('GESTEP(FALSE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GESTEP(FALSE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Boolean. Boolean FALSE returns 0 (treated as 0). 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Boolean. Boolean FALSE returns 0 (treated as 0). 1 argument used.');
+		// Case #8.2: Cell. Boolean FALSE in Cell returns #VALUE!. 1 argument used.
+		oParser = new parserFormula('GESTEP(B100)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: GESTEP(B100) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Boolean FALSE in Cell returns #VALUE!. 1 argument used.');
 		// Case #9: Boolean, Boolean. Booleans treated as numbers (1, 0). 2 arguments used.
 		oParser = new parserFormula('GESTEP(TRUE,FALSE)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GESTEP(TRUE,FALSE) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Boolean, Boolean. Booleans treated as numbers (1, 0). 2 arguments used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Boolean, Boolean. Booleans treated as numbers (1, 0). 2 arguments used.');
+		// Case #9.2: Cell,Cell. Boolean in Cell returns #VALUE!. 2 argument used.
+		oParser = new parserFormula('GESTEP(B101,B100)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: GESTEP(TRUE,FALSE) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Cell,Cell. Boolean in Cell returns #VALUE!. 2 argument used.');
 		// Case #10: Area. Multi-cell range for number returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('GESTEP(A100:A101)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GESTEP(A100:A101) is parsed.');
@@ -7153,7 +7164,7 @@ $(function () {
 		// Case #14: Name. Named range with text returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('GESTEP(TestNameArea)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GESTEP(TestNameArea) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Name. Named range with text returns #VALUE!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Name. Named range with text returns #VALUE!. 1 argument used.');
 		// Case #14/2: Name. Named range with text returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('GESTEP(TestNameArea2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GESTEP(TestNameArea2) is parsed.');
@@ -7173,16 +7184,25 @@ $(function () {
 		// Case #18: Array. Array with boolean treated as 0. 1 argument used.
 		oParser = new parserFormula('GESTEP({FALSE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GESTEP({FALSE}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array. Array with boolean treated as 0. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array. Array with boolean treated as 0. 1 argument used.');
 		// Case #19: Array. Multi-element array returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('GESTEP({TRUE,FALSE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GESTEP({TRUE,FALSE}) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array. Multi-element array returns #VALUE!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Array. Multi-element array returns #VALUE!. 1 argument used.');
 		// Case #20: Array, Array. Multi-element arrays for both arguments return #VALUE!. 2 arguments used.
 		oParser = new parserFormula('GESTEP({5,TRUE},{2,FALSE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: GESTEP({5,TRUE},{2,FALSE}) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Negative case: Array, Array. Multi-element arrays for both arguments return #VALUE!. 2 arguments used.');
-
+		// Case #21: Area3D. Multi sheets link. 1 argument used.
+		let multiAreaLink = ws.getName() + ":" + ws2.getName() + "!A100";
+		oParser = new parserFormula('GESTEP('+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula GESTEP('+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area3D. Multi sheets link.');
+		// Case #21: Area3D. Multi sheets link. 2 argument used.
+		oParser = new parserFormula('GESTEP(1,'+multiAreaLink+')', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: Formula GESTEP(1,'+multiAreaLink+') is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Area3D. Multi sheets link.');
+				
 		// Bounded cases:
 		// Case #1: Number. Maximum valid Excel number for number. 1 argument used.
 		oParser = new parserFormula('GESTEP(1.7976931348623157E+307)', 'A2', ws);
@@ -7201,14 +7221,6 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: GESTEP(1E-307,0) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number, Number. Smallest positive number for number, step is 0. 2 arguments used.');
 
-		// TODO crit problem with .cross method, tocNumber method
-		// Need to fix: bool handle
-		// Case #17: Name3D, Name3D. 3D named ranges for both arguments. 2 arguments used. - critical
-		// Case #8: Boolean. Boolean FALSE returns 0 (treated as 0). 1 argument used. - diff res
-		// Case #9: Boolean, Boolean. Booleans treated as numbers (1, 0). 2 arguments used. - diff res
-		// Case #14: Name. Named range with text returns #VALUE!. 1 argument used. - critical
-		// Case #18: Array. Array with boolean treated as 0. 1 argument used.
-		// Case #19: Array. Multi-element array returns #VALUE!. 1 argument used.
 
 		testArrayFormula2(assert, "GESTEP", 1, 2, true);
 	});
@@ -11297,7 +11309,7 @@ $(function () {
 	});
 
 	QUnit.test("Test: \"IMEXP\"", function (assert) {
-		//TODO в excel результат данной формулы - "1.46869393991589+2.28735528717884i"
+		// TODO in Excel the result of this formula is "1.46869393991589+2.28735528717884i"
 		oParser = new parserFormula('IMEXP("1+i")', "A2", ws);
 		assert.ok(oParser.parse(), 'IMEXP("1+i")');
 		assert.strictEqual(oParser.calculate().getValue(), "1.4686939399158851+2.2873552871788423i", 'IMEXP("1+i")');

@@ -335,9 +335,9 @@ CNativeGraphics.prototype.FillTextCode = function(x, y, lUnicode)
 {
     this.Native["FillTextCode"](x, y, lUnicode);
 };
-CNativeGraphics.prototype.tg = function(code, x, y)
+CNativeGraphics.prototype.tg = function(code, x, y, advX, advY)
 {
-    this.Native["tg"](code, x, y);
+    this.Native["tg"](code, x, y, advX, advY);
 };
 
 CNativeGraphics.prototype.SetIntegerGrid = function(param)
@@ -417,7 +417,7 @@ CNativeGraphics.prototype.drawVerLine = function(align, x, y, b, penW)
         this.ArrayPoints[this.ArrayPoints.length] = {x: x, y: b};
     }
 };
-// мега крутые функции для таблиц
+// advanced functions for tables
 CNativeGraphics.prototype.drawHorLineExt = function(align, y, x, r, penW, leftMW, rightMW)
 {
     this.Native["drawHorLineExt"](align, y, x, r, penW, leftMW, rightMW);
@@ -435,7 +435,7 @@ CNativeGraphics.prototype.TableRect = function(x, y, w, h)
 {
     this.Native["TableRect"](x, y, w, h);
 };
-// функции клиппирования
+// clipping functions
 CNativeGraphics.prototype.AddClipRect = function(x, y, w, h)
 {
     this.Native["AddClipRect"](x, y, w, h);

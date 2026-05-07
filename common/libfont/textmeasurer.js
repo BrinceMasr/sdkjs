@@ -45,6 +45,7 @@
 		this.m_oLastFont = new AscCommon.CFontSetup();
 
 		this.LastFontOriginInfo = {Name : "", Replace : null};
+		this.LastFontFile = null;
 	}
 
 	CTextMeasurer.prototype =
@@ -67,7 +68,7 @@
 		SetFont : function(font)
 		{
 			if (!font)
-				return;
+				return null;
 
 			this.m_oFont = font;
 
@@ -89,9 +90,10 @@
 				_lastSetUp.SetUpSize = font.FontSize;
 				_lastSetUp.SetUpStyle = oFontStyle;
 				_lastSetUp.SetUpDpi   = 72;
-
-				g_fontApplication.LoadFont(_lastSetUp.SetUpName, AscCommon.g_font_loader, this.m_oManager, _lastSetUp.SetUpSize, _lastSetUp.SetUpStyle, 72, 72, undefined, this.LastFontOriginInfo);
+				
+				this.LastFontFile = g_fontApplication.LoadFont(_lastSetUp.SetUpName, AscCommon.g_font_loader, this.m_oManager, _lastSetUp.SetUpSize, _lastSetUp.SetUpStyle, 72, 72, undefined, this.LastFontOriginInfo);
 			}
+			return this.LastFontFile;
 		},
 
 		SetFontInternal : function(_name, _size, _style, _dpi)
@@ -106,9 +108,10 @@
 				_lastSetUp.SetUpSize = _size;
 				_lastSetUp.SetUpStyle = _style;
 				_lastSetUp.SetUpDpi   = undefined !== _dpi ? _dpi : 72;
-
-				g_fontApplication.LoadFont(_lastSetUp.SetUpName, AscCommon.g_font_loader, this.m_oManager, _lastSetUp.SetUpSize, _lastSetUp.SetUpStyle, _dpi, _dpi, undefined, this.LastFontOriginInfo);
+				
+				this.LastFontFile = g_fontApplication.LoadFont(_lastSetUp.SetUpName, AscCommon.g_font_loader, this.m_oManager, _lastSetUp.SetUpSize, _lastSetUp.SetUpStyle, _dpi, _dpi, undefined, this.LastFontOriginInfo);
 			}
+			return this.LastFontFile;
 		},
 
 		CheckUnicodeInCurrentFont : function(codePoint)
@@ -154,11 +157,9 @@
 			return this.m_oManager.m_pFont;
 		},
 
-		GetGraphemeByUnicode : function(codePoint, sFontName, nFontStyle)
+		GetGraphemeByUnicode : function(codePoint, fontName, fontStyle)
 		{
-			this.SetFontInternal(sFontName, AscFonts.MEASURE_FONTSIZE, nFontStyle);
-
-			let oFont = this.m_oManager.m_oFont;
+			let oFont = this.SetFontInternal(fontName, AscFonts.MEASURE_FONTSIZE, fontStyle);
 			let nGID  = oFont ? oFont.GetGIDByUnicode(codePoint) : 0;
 			if (!nGID)
 			{
@@ -167,28 +168,26 @@
 					return AscFonts.NO_GRAPHEME;
 
 				nGID = oFont.GetGIDByUnicode(codePoint);
-				sFontName = oFont.GetFamilyName();
 			}
 
 			let oGlyph = oFont.GetChar(codePoint);
 			if (!oGlyph)
 				return AscFonts.NO_GRAPHEME;
-
-			AscFonts.InitGrapheme(AscCommon.FontNameMap.GetId(sFontName), nFontStyle);
+			
+			fontName = oFont.GetFamilyName();
+			AscFonts.InitGrapheme(AscCommon.FontNameMap.GetId(fontName), fontStyle);
 			AscFonts.AddGlyphToGrapheme(nGID, oGlyph.fAdvanceX * 64, 0, 0, 0);
 			return AscFonts.GetGrapheme(getSingleCodePointCalculator(codePoint));
 		},
 		
 		GetGraphemeByGid : function(gid, fontName, fontStyle, codePoint)
 		{
-			this.SetFontInternal(fontName, AscFonts.MEASURE_FONTSIZE, fontStyle);
-			
-			let font = this.m_oManager.m_oFont;
+			let font = this.SetFontInternal(fontName, AscFonts.MEASURE_FONTSIZE, fontStyle);
 			if (!font)
-			{
 				font = this.GetFontBySymbol(gid).Font;
-				//return AscFonts.NO_GRAPHEME;
-			}
+			
+			if (!font)
+				return AscFonts.NO_GRAPHEME;
 			
 			let stringGid = true;
 			if (!font.GetStringGID())
@@ -205,6 +204,7 @@
 			if (!glyph)
 				return AscFonts.NO_GRAPHEME;
 			
+			fontName = font.GetFamilyName();
 			AscFonts.InitGrapheme(AscCommon.FontNameMap.GetId(fontName), fontStyle);
 			AscFonts.AddGlyphToGrapheme(gid, glyph.fAdvanceX * 64, 0, 0, 0);
 			return AscFonts.GetGrapheme(getSingleCodePointCalculator(codePoint));
@@ -450,7 +450,7 @@
 
 	function GetLoadInfoForMeasurer(info, lStyle)
 	{
-		// подбираем шрифт по стилю
+		// select font by style
 		var sReturnName = info.Name;
 		var bNeedBold   = false;
 		var bNeedItalic = false;

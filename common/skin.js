@@ -32,9 +32,9 @@
 
 "use strict";
 
-// не скрываем переменные, скин используется напрямую в sdk-all.js
-// а экспорт в AscCommon - только для sdk-all-min.js
-// если хочется скрыть - то везде GlobalSkin => AscCommon.GlobalSkin
+// we don't hide variables, skin is used directly in sdk-all.js
+// and export to AscCommon - only for sdk-all-min.js
+// if you want to hide - then everywhere GlobalSkin => AscCommon.GlobalSkin
 
 var EditorSkins = {
 	"theme-light" : {
@@ -158,7 +158,7 @@ var EditorSkins = {
 		DemTextColor                    : "#666666",
 
 		/* spreadsheets */
-		//TODO названия не менял. использую такие же как и были ранее. пересмотреть!
+		//TODO didn't change names. using same as before. review!
 		Background               : "#F7F7F7",
 		BackgroundActive         : "#c1c1c1",
 		BackgroundHighlighted    : "#dfdfdf",
@@ -340,7 +340,7 @@ var EditorSkins = {
 };
 
 /*
-функция для генерации "else" updateGlobalSkin
+function for generating "else" updateGlobalSkin
 function setter_from_interface(obj)
 {
 	var code = "";
@@ -476,9 +476,9 @@ function updateGlobalSkinColors(theme)
 		SheetViewSelectAllIcon          : "canvas-sheet-view-select-all-icon"
 	};
 
-	// корректируем цвета для старого хрома:
-	// в старых хромах (desktop windows XP)
-	// если начинается цвет с цифры (#0-9) - то помечается символом \3 (конец текста)
+	// fix colors for old Chrome:
+	// in old Chrome (desktop windows XP)
+	// if color starts with a digit (#0-9) - it's marked with \3 symbol (end of text)
 	for (var item in theme)
 	{
 		var testValue = theme[item];
@@ -718,7 +718,7 @@ window['AscCommon']['RgbaTextToRGBA'] = window['AscCommon'].RgbaTextToRGBA = fun
 
 if (AscCommon.TEMP_STYLE_THUMBNAIL_WIDTH !== undefined && AscCommon.TEMP_STYLE_THUMBNAIL_HEIGHT !== undefined)
 {
-	// TODO: переделать.
+	// TODO: refactor.
 	GlobalSkin.STYLE_THUMBNAIL_WIDTH = AscCommon.TEMP_STYLE_THUMBNAIL_WIDTH;
 	GlobalSkin.STYLE_THUMBNAIL_HEIGHT = AscCommon.TEMP_STYLE_THUMBNAIL_HEIGHT;
 }

@@ -246,6 +246,7 @@
 			"value" : value
 		});
 		
+		macroData["current"] = macroData["macrosArray"].length - 1;
 		this.editor.asc_setMacros(JSON.stringify(macroData));
 		this.editor.sendEvent("asc_onMacroRecordingStop");
 	};
@@ -831,7 +832,7 @@
 		addTable				: function(prop){
 			return "\t(function () {\n"
 				+ "\t\tlet tableStyle = doc.GetStyle(\"" + (prop.style ? prop.style : "") + "\");\n"
-				+ "\t\tlet table = Api.CreateTable(" + prop.col + ", " + prop.row + ");\n"
+				+ "\t\tlet table = Api.CreateTable(" + prop.row + ", " + prop.col + ");\n"
 				+ "\t\tif (tableStyle)\n"
 				+	"\t\t\ttable.SetStyle(tableStyle);\n"
 				+ "\t\ttable.SetWidth(\"percent\", 100);\n"
@@ -2156,7 +2157,7 @@
 			return "\tApi.GetSelection().GetShapes().forEach(function(shape) { shape.Ungroup(); });\n";
 		},
 		addFlowTable			: function(table){
-			return "\tconst table = Api.CreateTable(" + table.col + ", " + table.row + ");\n" +
+			return "\tconst table = Api.CreateTable(" + table.row + ", " + table.col + ");\n" +
 				"\tpresentation.GetCurrentSlide().AddObject(table);\n";
 		},
 		addFlowImage			: function(image){

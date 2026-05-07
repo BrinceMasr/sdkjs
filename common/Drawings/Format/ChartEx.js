@@ -900,11 +900,13 @@ function (window, undefined) {
 		History.CanAddChanges() && History.Add(new CChangesDrawingsObject(this, AscDFH.historyitem_DataLabel_SetSpPr, this.spPr, pr));
 		this.spPr = pr;
 		this.setParentToChild(pr);
+		this.onChartUpdateDataLabels();
 	};
 	CDataLabel.prototype.setTxPr = function (pr) {
 		History.CanAddChanges() && History.Add(new CChangesDrawingsObject(this, AscDFH.historyitem_DataLabel_SetTxPr, this.txPr, pr));
 		this.txPr = pr;
 		this.setParentToChild(pr);
+		this.onChartUpdateDataLabels();
 	};
 	CDataLabel.prototype.setVisibility = function (pr) {
 		History.CanAddChanges() && History.Add(new CChangesDrawingsObject(this, AscDFH.historyitem_DataLabel_SetVisibility, this.visibility, pr));
@@ -922,6 +924,18 @@ function (window, undefined) {
 	CDataLabel.prototype.setPos = function (pr) {
 		History.CanAddChanges() && History.Add(new CChangesDrawingsLong(this, AscDFH.historyitem_DataLabel_SetPos, this.pos, pr));
 		this.pos = pr;
+	};
+	CDataLabel.prototype.Refresh_RecalcData = function () {
+		this.Refresh_RecalcData2();
+	};
+	CDataLabel.prototype.Refresh_RecalcData2 = function () {
+		this.onChartUpdateDataLabels();
+	};
+	CDataLabel.prototype.handleUpdateFill = function () {
+		this.Refresh_RecalcData2();
+	};
+	CDataLabel.prototype.handleUpdateLn = function () {
+		this.Refresh_RecalcData2();
 	};
 
 
@@ -1043,11 +1057,13 @@ function (window, undefined) {
 		History.CanAddChanges() && History.Add(new CChangesDrawingsObject(this, AscDFH.historyitem_DataLabels_SetSpPr, this.spPr, pr));
 		this.spPr = pr;
 		this.setParentToChild(pr);
+		this.onChartUpdateDataLabels();
 	};
 	CDataLabels.prototype.setTxPr = function (pr) {
 		History.CanAddChanges() && History.Add(new CChangesDrawingsObject(this, AscDFH.historyitem_DataLabels_SetTxPr, this.txPr, pr));
 		this.txPr = pr;
 		this.setParentToChild(pr);
+		this.onChartUpdateDataLabels();
 	};
 	CDataLabels.prototype.setVisibility = function (pr) {
 		History.CanAddChanges() && History.Add(new CChangesDrawingsObject(this, AscDFH.historyitem_DataLabels_SetVisibility, this.visibility, pr));
@@ -1079,6 +1095,22 @@ function (window, undefined) {
 			History.CanAddChanges() && History.Add(new CChangesDrawingsContent(this, AscDFH.historyitem_DataLabels_RemoveDataLabel, pos, [dataLabel], false));
 		}
 	};
+	CDataLabels.prototype.findDataLabelByIdx = function (idx) {
+		for (let i = 0; i < this.dataLabel.length; ++i) {
+			if (this.dataLabel[i] && this.dataLabel[i].idx === idx) {
+				return this.dataLabel[i];
+			}
+		}
+		return null;
+	};
+	CDataLabels.prototype.removeAllDataLabels = function () {
+		for (let i = this.dataLabel.length - 1; i > -1; --i) {
+			this.removeDataLabelByPos(i);
+		}
+	};
+	CDataLabels.prototype.findDLblByIdx = CDataLabels.prototype.findDataLabelByIdx;
+	CDataLabels.prototype.addDLbl = CDataLabels.prototype.addDataLabel;
+	CDataLabels.prototype.removeAllDLbls = CDataLabels.prototype.removeAllDataLabels;
 	CDataLabels.prototype.addDataLabelHidden = function (pr, idx) {
 		let pos;
 		if (AscFormat.isRealNumber(idx))
@@ -1098,6 +1130,18 @@ function (window, undefined) {
 	CDataLabels.prototype.setPos = function (pr) {
 		History.CanAddChanges() && History.Add(new CChangesDrawingsLong(this, AscDFH.historyitem_DataLabels_SetPos, this.pos, pr));
 		this.pos = pr;
+	};
+	CDataLabels.prototype.Refresh_RecalcData = function () {
+		this.Refresh_RecalcData2();
+	};
+	CDataLabels.prototype.Refresh_RecalcData2 = function () {
+		this.onChartUpdateDataLabels();
+	};
+	CDataLabels.prototype.handleUpdateFill = function () {
+		this.Refresh_RecalcData2();
+	};
+	CDataLabels.prototype.handleUpdateLn = function () {
+		this.Refresh_RecalcData2();
 	};
 
 
@@ -3320,6 +3364,7 @@ function (window, undefined) {
 		History.CanAddChanges() && History.Add(new CChangesDrawingsObject(this, AscDFH.historyitem_Series_SetDataLabels, this.dataLabels, pr));
 		this.dataLabels = pr;
 		this.setParentToChild(pr);
+		this.onChartUpdateDataLabels();
 	};
 	CSeries.prototype.setDataId = function (pr) {
 		History.CanAddChanges() && History.Add(new CChangesDrawingsLong(this, AscDFH.historyitem_Series_SetDataId, this.dataId, pr));

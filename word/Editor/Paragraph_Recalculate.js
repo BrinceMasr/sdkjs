@@ -4145,9 +4145,9 @@ CParagraphRecalculateStateWrap.prototype.ResetMathRecalcInfo = function()
 	this.MathRecalcInfo.Line = 0;
 	this.MathRecalcInfo.Math = null;
 };
-CParagraphRecalculateStateWrap.prototype.SetMathRecalcInfo = function(math)
+CParagraphRecalculateStateWrap.prototype.SetMathRecalcInfo = function(line, math)
 {
-	this.MathRecalcInfo.Line = this.Line;
+	this.MathRecalcInfo.Line = line;
 	this.MathRecalcInfo.Math = math;
 };
 CParagraphRecalculateStateWrap.prototype.resetToMathFirstLine = function()
