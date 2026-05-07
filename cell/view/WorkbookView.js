@@ -5573,7 +5573,7 @@
 		if (!this.SearchEngine) {
 			return;
 		}
-		if (this.SearchEngine.Compare(oProps) && !oProps.isNeedRecalc && !(oProps.lastSearchElem && this.SearchEngine.modifiedDocument)) {
+		if (this.SearchEngine.Compare(oProps) && !oProps.isNeedRecalc && !this.SearchEngine.modifiedDocument) {
 			this.SearchEngine.props.activeCell = oProps.activeCell;
 			return this.SearchEngine;
 		}
