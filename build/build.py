@@ -17,6 +17,7 @@ Environment variables (optional):
     BUILD_NUMBER     — value substituted in license header (default: 0)
 """
 import os
+import re
 import sys
 import json
 import glob
@@ -142,30 +143,48 @@ def get_files(sdk, mobile=False, desktop=False):
 # Build steps
 # ---------------------------------------------------------------------------
 
-def concat_files(files, dest, header, iife=False):
+def apply_defines(content, defines):
+    """Rewrite `window.AscCommon.<name> = "..."` assignments to the given values.
+    Tolerant of any whitespace around `=` (matches both `name = "x"` and `name="x"`).
+    """
+    for name, value in defines.items():
+        pattern = re.compile(r'window\.AscCommon\.' + re.escape(name) + r'\s*=\s*"[^"]*"')
+        replacement = f'window.AscCommon.{name} = "{value}"'
+        content = pattern.sub(lambda m, r=replacement: r, content)
+    return content
+
+
+def concat_files(files, dest, header, defines=None, iife=False):
     """Concatenate JS source files into dest, prepending the license header.
     If iife=True, wrap the concatenated body in `(function(window, undefined){ ... })(window);`.
+    If defines is given, apply window.AscCommon.* value replacements via regex.
     """
     os.makedirs(os.path.dirname(dest), exist_ok=True)
+    parts = [header, '\n']
+    if iife:
+        parts.append('(function(window, undefined) {\n')
+    for path in files:
+        with open(path, 'r', encoding='utf-8') as f:
+            parts.append(f.read())
+            parts.append('\n')
+    if iife:
+        parts.append('})(window);\n')
+
+    content = ''.join(parts)
+    if defines:
+        content = apply_defines(content, defines)
+
     with open(dest, 'w', encoding='utf-8') as out:
-        out.write(header + '\n')
-        if iife:
-            out.write('(function(window, undefined) {\n')
-        for path in files:
-            with open(path, 'r', encoding='utf-8') as f:
-                out.write(f.read())
-                out.write('\n')
-        if iife:
-            out.write('})(window);\n')
+        out.write(content)
 
 
-def build_sdk(name, sdk, license_text, args):
+def build_sdk(name, sdk, license_text, defines, args):
     """Concatenate one product into sdk-all-min.js + sdk-all.js."""
     out_dir = os.path.join(DEPLOY_DIR, name)
     min_files, common_files = get_files(sdk, mobile=args.mobile, desktop=args.desktop)
     print(f'Building {name}...')
-    concat_files(min_files,    os.path.join(out_dir, 'sdk-all-min.js'), license_text)
-    concat_files(common_files, os.path.join(out_dir, 'sdk-all.js'),     license_text, iife=True)
+    concat_files(min_files,    os.path.join(out_dir, 'sdk-all-min.js'), license_text, defines)
+    concat_files(common_files, os.path.join(out_dir, 'sdk-all.js'),     license_text, defines, iife=True)
 
 
 def deploy_assets():
@@ -231,6 +250,10 @@ def main():
                         help='addon directory whose configs are merged in (repeatable)')
     parser.add_argument('--mobile',  action='store_true', help='include mobile-specific files')
     parser.add_argument('--desktop', action='store_true', help='include desktop-specific files')
+    parser.add_argument('--beta',    default='false',     help='value for window.AscCommon.g_cIsBeta (default: false)')
+    parser.add_argument('--map',     action='store_true', help='(no-op in concat build; accepted for compatibility)')
+    parser.add_argument('--minimize', action=argparse.BooleanOptionalAction, default=None,
+                        help='(no-op in concat build; accepted for compatibility)')
     parser.add_argument('--product', action='append',     default=[],
                         choices=['word', 'cell', 'slide', 'visio'], metavar='PRODUCT',
                         help='build only this product (default: all four, repeatable)')
@@ -271,12 +294,19 @@ def main():
             .replace('@@Version',       version)
             .replace('@@Build',         build_number))
 
+    defines = {
+        'g_cCompanyName':    os.environ.get('COMPANY_NAME', 'onlyoffice'),
+        'g_cProductVersion': version,
+        'g_cBuildNumber':    build_number,
+        'g_cIsBeta':         args.beta,
+    }
+
     print('Cleaning deploy directory...')
     if os.path.exists(DEPLOY_DIR):
         shutil.rmtree(DEPLOY_DIR)
 
     for name in products:
-        build_sdk(name, configs[name]['sdk'], license_text, args)
+        build_sdk(name, configs[name]['sdk'], license_text, defines, args)
 
     print('Copying other files...')
     deploy_assets()
