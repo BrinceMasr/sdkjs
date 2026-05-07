@@ -586,6 +586,9 @@ function (window, undefined) {
 		let num_format = AscCommon.oNumFormatCache.get(this.getFormatCode());
 		return num_format.getTypeInfo();
 	};
+	asc_CAxNumFmt.prototype.getFormatType = function () {
+		return this.getFormatCellsInfo().asc_getType();
+	};
 	asc_CAxNumFmt.prototype.getSourceLinked = function () {
 		return this.sourceLinked;
 	};
@@ -912,6 +915,12 @@ function (window, undefined) {
 	};
 	asc_ValAxisSettings.prototype.getNumFmt = function () {
 		return this.numFmt;
+	};
+	asc_ValAxisSettings.prototype.getFormatType = function () {
+		const numFmt = this.getNumFmt();
+		return numFmt
+			? numFmt.getFormatType()
+			: Asc.c_oAscNumFormatType.General;
 	};
 	asc_ValAxisSettings.prototype.putNumFmt = function (v) {
 		this.numFmt = v;
@@ -8346,6 +8355,7 @@ function (window, undefined) {
 	prot["getFormatCode"] = prot.getFormatCode;
 	prot["putFormatCode"] = prot.putFormatCode;
 	prot["getFormatCellsInfo"] = prot.getFormatCellsInfo;
+	prot["getFormatType"] = prot.getFormatType;
 	prot["getSourceLinked"] = prot.getSourceLinked;
 	prot["putSourceLinked"] = prot.putSourceLinked;
 
@@ -8392,6 +8402,7 @@ function (window, undefined) {
 	prot["getGridlines"] = prot.getGridlines;
 	prot["putNumFmt"] = prot.putNumFmt;
 	prot["getNumFmt"] = prot.getNumFmt;
+	prot["getFormatType"] = prot.getFormatType;
 	prot["isRadarAxis"] = prot.isRadarAxis;
 	prot["getMajorUnit"] = prot.getMajorUnit;
 	prot["getMinorUnit"] = prot.getMinorUnit;
