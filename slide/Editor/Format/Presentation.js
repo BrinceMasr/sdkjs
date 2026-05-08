@@ -2230,10 +2230,10 @@ CPresentation.prototype.Recalculate = function (RecalcData) {
 	this.private_ClearSearchOnRecalculate();
 
 	const outlineView = this.GetOutlineView();
-	if (outlineView) {
-		outlineView.update();
-	}
 	if (undefined === RecalcData && this.private_RecalculateFastRunRange(History.GetNonRecalculatedChanges())) {
+		if (outlineView) {
+			outlineView.update();
+		}
 		return;
 	}
 
@@ -2243,6 +2243,11 @@ CPresentation.prototype.Recalculate = function (RecalcData) {
 	}
 	let _RecalcData = RecalcData ? RecalcData : History.Get_RecalcData(), key, bSync = true, i,
 		bRedrawAllSlides = false, isUpdateThemes = false;
+
+	if (outlineView) {
+		outlineView.update();
+	}
+
 	const redrawSlidesMap = new RedrawSlidesInfo(this);
 	let bAttack = undefined;
 	this.updateSlideIndexes();
@@ -8565,6 +8570,7 @@ CPresentation.prototype.addNextSlideAction = function (layoutIndex) {
 	for (i = this.CurPage + 2; i < this.Slides.length; ++i) {
 		this.Slides[i].setSlideNum(i);
 	}
+	return new_slide;
 };
 CPresentation.prototype.getDefaultMasterSlide = function () {
 	if (this.lastMaster && this.lastMaster.sldLayoutLst.length > 0) {

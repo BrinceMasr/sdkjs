@@ -1535,15 +1535,8 @@ Slide.prototype.createTitle = function () {
     return copySp;
 };
 Slide.prototype.createContent = function () {
-	let matchingShape = null;
-	function forEachSpCallback(shape) {
-		const placeholderType = shape.getPlaceholderType();
-		if (placeholderType === AscFormat.phType_subTitle || placeholderType === AscFormat.phType_obj || placeholderType === AscFormat.phType_body) {
-			matchingShape = shape;
-			return true;
-		}
-	}
-    this.cSld.forEachSp(forEachSpCallback);
+	let matchingShape;
+    matchingShape = this.cSld.findContentShape();
     if (matchingShape) {
         return null;
     }
@@ -1551,11 +1544,10 @@ Slide.prototype.createContent = function () {
     const layout = this.Layout;
     const master = this.Layout.Master;
 
-
     if (layout) {
-        layout.cSld.forEachSp(forEachSpCallback);
+        matchingShape = layout.cSld.findContentShape();
         if (!matchingShape && master) {
-            master.cSld.forEachSp(forEachSpCallback);
+            matchingShape = master.cSld.findContentShape();
         }
     }
     let copySp;

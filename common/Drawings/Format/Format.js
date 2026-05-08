@@ -11166,6 +11166,18 @@
 			}
 			return {backFill: null, RGBA: null};
 		};
+		CSld.prototype.getContentShape = function () {
+			let matchingShape;
+			function forEachSpCallback(shape) {
+				const placeholderType = shape.getPlaceholderType();
+				if (placeholderType === AscFormat.phType_subTitle || placeholderType === AscFormat.phType_obj || placeholderType === AscFormat.phType_body) {
+					matchingShape = shape;
+					return true;
+				}
+			}
+			this.forEachSp(forEachSpCallback);
+			return matchingShape;
+		};
 
 		function RefreshContentAllFields(oContent) {
 			if(!oContent) {
