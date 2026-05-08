@@ -4603,10 +4603,23 @@
 		let oThumbnails = oDoc.Viewer.Thumbnails;
 		aPages = aPages != undefined ? aPages : oThumbnails.getSelectedPages().slice();
 
-		oDoc.DoAction(function() {
+		let isLocalRotate = false == Asc.editor.canEdit();
+
+		function rotatePages() {
 			oDoc.RotatePages(aPages, nAngle);
 			oThumbnails.keepSelectedPages = true;
-		}, AscDFH.historydescription_Pdf_RotatePage, this, aPages);
+		}
+
+		// editing rotate, for history
+		if (!isLocalRotate) {
+			oDoc.DoAction(function() {
+				rotatePages();
+			}, AscDFH.historydescription_Pdf_RotatePage, this, aPages);
+		}
+		// viewing rotate, no history
+		else {
+			rotatePages();
+		}
 	};
 	PDFEditorApi.prototype.asc_GetPageRotate = function(nPage) {
 		let oViewer = this.getDocumentRenderer();

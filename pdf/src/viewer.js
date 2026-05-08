@@ -349,8 +349,16 @@
 			return;
 		}
 
-        AscCommon.History.Add(new CChangesPDFDocumentRotatePage(this, oFile.pages[nIndex].Rotate, nAngle));
-		oFile.pages[nIndex].Rotate = nAngle;
+		let isLocalRotate = false == Asc.editor.canEdit();
+
+        if (!isLocalRotate) {
+			AscCommon.History.Add(new CChangesPDFDocumentRotatePage(this, oFile.pages[nIndex].Rotate, nAngle));
+			oFile.pages[nIndex].Rotate = nAngle;
+			oFile.pages[nIndex].LocalRotate = undefined;
+		}
+		else {
+			oFile.pages[nIndex].LocalRotate = nAngle;
+		}
 
 		if (oDoc.IsEditFieldsMode()) {
 			this.fields.forEach(function(field) {
@@ -3675,6 +3683,12 @@
 				return 0;
 
 			let value = this.file.pages[pageNum].Rotate;
+
+			let localValue = this.file.pages[pageNum].LocalRotate;
+			if (localValue !== undefined) {
+				return localValue;
+			}
+
 			return (undefined === value) ? 0 : value;
 		};
 		this.getDrawingPageScale = function(pageNum)
