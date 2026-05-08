@@ -438,6 +438,7 @@ CChangesTableRowAddCell.prototype.Undo = function()
 		return;
 
 	var oRow = this.Class;
+	oRow.Content[this.Pos].OnDetach();
 	oRow.Content[this.Pos].SetIndex(-1);
 	oRow.Content.splice(this.Pos, 1);
 	oRow.CellsInfo.splice(this.Pos, 1);
@@ -526,6 +527,7 @@ CChangesTableRowRemoveCell.prototype.Redo = function()
 		return;
 
 	var oRow = this.Class;
+	oRow.Content[this.Pos].OnDetach();
 	oRow.Content[this.Pos].SetIndex(-1);
 	oRow.Content.splice(this.Pos, 1);
 	oRow.CellsInfo.splice(this.Pos, 1);
@@ -552,6 +554,7 @@ CChangesTableRowRemoveCell.prototype.Load = function(Color)
 	if (false === Pos)
 		return;
 
+	oRow.Content[Pos].OnDetach();
 	oRow.Content[Pos].SetIndex(-1);
 	oRow.Content.splice(Pos, 1);
 	AscCommon.CollaborativeEditing.Update_DocumentPositionsOnRemove(oRow, Pos, 1);

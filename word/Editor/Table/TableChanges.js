@@ -670,6 +670,7 @@ CChangesTableAddRow.prototype.Undo = function()
 {
 	var oTable = this.Class;
 
+	oTable.Content[this.Pos].OnDetach();
 	oTable.Content[this.Pos].SetIndex(-1);
 	oTable.Content.splice(this.Pos, 1);
 	oTable.TableRowsBottom.splice(this.Pos, 1);
@@ -771,6 +772,7 @@ CChangesTableRemoveRow.prototype.Redo = function()
 
 	var oTable = this.Class;
 
+	oTable.Content[this.Pos].OnDetach();
 	oTable.Content[this.Pos].SetIndex(-1);
 	oTable.Content.splice(this.Pos, 1);
 	oTable.TableRowsBottom.splice(this.Pos, 1);
@@ -800,6 +802,7 @@ CChangesTableRemoveRow.prototype.Load = function(Color)
 	if (false === Pos)
 		return;
 
+	oTable.Content[Pos].OnDetach();
 	oTable.Content[Pos].SetIndex(-1);
 	oTable.Content.splice(Pos, 1);
 	AscCommon.CollaborativeEditing.Update_DocumentPositionsOnRemove(oTable, Pos, 1);

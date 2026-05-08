@@ -224,6 +224,17 @@ CTableRow.prototype =
 			this.GetCell(iCell).PreDelete();
 		}
     },
+	
+	OnDetach : function()
+	{
+		if (!this.IsUseInDocument())
+			return;
+		
+		for (let iCell = this.GetCellsCount() - 1; iCell >= 0; --iCell)
+		{
+			this.GetCell(iCell).OnDetach();
+		}
+	},
     //-----------------------------------------------------------------------------------
     // Работаем с стилем строки
     //-----------------------------------------------------------------------------------
@@ -595,6 +606,7 @@ CTableRow.prototype =
 	Remove_Cell : function(Index)
 	{
 		this.Content[Index].PreDelete();
+		this.Content[Index].OnDetach();
 		
 		AscCommon.History.Add(new CChangesTableRowRemoveCell(this, Index, [this.Content[Index]]));
 

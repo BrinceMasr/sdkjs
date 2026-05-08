@@ -93,7 +93,8 @@ CChangesDocumentAddItem.prototype.Undo = function()
 		var Pos = true !== this.UseArray ? this.Pos : this.PosArray[nIndex];
 		
 		oDocument.UpdateSectionsBeforeRemove([oDocument.Content[Pos]], false);
-		
+		oDocument.Content[Pos].OnDetach();
+
 		var Elements = oDocument.Content.splice(Pos, 1);
 		oDocument.private_RecalculateNumbering(Elements);
 		oDocument.private_ReindexContent(Pos);
@@ -272,7 +273,10 @@ CChangesDocumentRemoveItem.prototype.Redo = function()
 	
 	let removedElements = oDocument.Content.slice(this.Pos, this.Pos + this.Items.length);
 	oDocument.UpdateSectionsBeforeRemove(removedElements, false);
-	
+
+	for (let i = 0; i < removedElements.length; ++i)
+		removedElements[i].OnDetach();
+
 	var Elements = oDocument.Content.splice(this.Pos, this.Items.length);
 	oDocument.private_RecalculateNumbering(Elements);
 	oDocument.private_ReindexContent(this.Pos);
@@ -317,6 +321,7 @@ CChangesDocumentRemoveItem.prototype.Load = function(Color)
 			continue;
 		
 		oDocument.UpdateSectionsBeforeRemove([oDocument.Content[Pos]], false);
+		oDocument.Content[Pos].OnDetach();
 
 		var Elements = oDocument.Content.splice(Pos, 1);
 		oDocument.private_RecalculateNumbering(Elements);

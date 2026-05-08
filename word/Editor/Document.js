@@ -11388,10 +11388,13 @@ CDocument.prototype.Internal_Content_Remove = function(Position, Count, isCorrec
 	{
 		this.Content[Position + Index].PreDelete();
 	}
-	
+
 	let removedElements = this.Content.slice(Position, Position + Count);
 	this.UpdateSectionsBeforeRemove(removedElements, true);
-	
+
+	for (let i = 0; i < removedElements.length; ++i)
+		removedElements[i].OnDetach();
+
 	this.History.Add(new CChangesDocumentRemoveItem(this, Position, removedElements));
 	var Elements = this.Content.splice(Position, Count);
 	this.private_RecalculateNumbering(Elements);

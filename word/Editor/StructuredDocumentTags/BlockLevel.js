@@ -674,6 +674,13 @@ CBlockLevelSdt.prototype.PreDelete = function()
 
 	this.Content.PreDelete();
 };
+CBlockLevelSdt.prototype.OnDetach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+	
+	this.Content.OnDetach();
+};
 CBlockLevelSdt.prototype.ClearParagraphFormatting = function(isClearParaPr, isClearTextPr)
 {
 	if (this.IsPlaceHolder())
