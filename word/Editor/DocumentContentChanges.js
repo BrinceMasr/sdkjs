@@ -128,6 +128,7 @@ CChangesDocumentContentAddItem.prototype.Redo = function()
 
 		Element.Parent = oDocument;
 		oDocument.UpdateSectionsAfterAdd([Element]);
+		Element.OnAttach();
 	}
 	this.Class.Recalculated = false;
 };
@@ -182,9 +183,10 @@ CChangesDocumentContentAddItem.prototype.Load = function(Color)
 
 			AscCommon.CollaborativeEditing.Update_DocumentPositionsOnAdd(oDocument, Pos);
 			oDocument.UpdateSectionsAfterAdd([Element]);
+			Element.OnAttach();
 		}
 	}
-	
+
 	this.Class.Recalculated = false;
 };
 CChangesDocumentContentAddItem.prototype.IsRelated = function(oChanges)
@@ -244,6 +246,8 @@ CChangesDocumentContentRemoveItem.prototype.Undo = function()
 	}
 	this.Class.Recalculated = false;
 	oDocument.UpdateSectionsAfterAdd(this.Items);
+	for (let i = 0; i < this.Items.length; ++i)
+		this.Items[i].OnAttach();
 };
 CChangesDocumentContentRemoveItem.prototype.Redo = function()
 {

@@ -2791,8 +2791,15 @@ CTableCell.prototype.OnDetach = function()
 {
 	if (!this.IsUseInDocument())
 		return;
-	
+
 	this.Content.OnDetach();
+};
+CTableCell.prototype.OnAttach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+
+	this.Content.OnAttach();
 };
 
 

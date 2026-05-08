@@ -678,8 +678,15 @@ CBlockLevelSdt.prototype.OnDetach = function()
 {
 	if (!this.IsUseInDocument())
 		return;
-	
+
 	this.Content.OnDetach();
+};
+CBlockLevelSdt.prototype.OnAttach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+
+	this.Content.OnAttach();
 };
 CBlockLevelSdt.prototype.ClearParagraphFormatting = function(isClearParaPr, isClearTextPr)
 {

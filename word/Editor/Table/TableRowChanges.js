@@ -457,6 +457,7 @@ CChangesTableRowAddCell.prototype.Redo = function()
 	oRow.Internal_ReIndexing(this.Pos);
 	oRow.private_CheckCurCell();
 	oRow.private_UpdateTableGrid();
+	this.Items[0].OnAttach();
 };
 CChangesTableRowAddCell.prototype.private_WriteItem = function(Writer, Item)
 {
@@ -480,6 +481,7 @@ CChangesTableRowAddCell.prototype.Load = function(Color)
 	{
 		oRow.Content.splice(Pos, 0, Element);
 		AscCommon.CollaborativeEditing.Update_DocumentPositionsOnAdd(oRow, Pos);
+		Element.OnAttach();
 	}
 
 	oRow.Internal_ReIndexing();
@@ -520,6 +522,7 @@ CChangesTableRowRemoveCell.prototype.Undo = function()
 	oRow.Internal_ReIndexing(this.Pos);
 	oRow.private_CheckCurCell();
 	oRow.private_UpdateTableGrid();
+	this.Items[0].OnAttach();
 };
 CChangesTableRowRemoveCell.prototype.Redo = function()
 {

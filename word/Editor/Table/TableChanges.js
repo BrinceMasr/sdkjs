@@ -696,6 +696,7 @@ CChangesTableAddRow.prototype.Redo = function()
 	oTable.Recalc_CompiledPr2();
 	oTable.private_CheckCurCell();
 	oTable.private_UpdateTableGrid();
+	this.Items[0].OnAttach();
 };
 CChangesTableAddRow.prototype.private_WriteItem = function(Writer, Item)
 {
@@ -719,6 +720,7 @@ CChangesTableAddRow.prototype.Load = function(Color)
 	{
 		oTable.Content.splice(Pos, 0, Element);
 		AscCommon.CollaborativeEditing.Update_DocumentPositionsOnAdd(oTable, Pos);
+		Element.OnAttach();
 	}
 
 	oTable.Internal_ReIndexing();
@@ -764,6 +766,7 @@ CChangesTableRemoveRow.prototype.Undo = function()
 	oTable.Recalc_CompiledPr2();
 	oTable.private_CheckCurCell();
 	oTable.private_UpdateTableGrid();
+	this.Items[0].OnAttach();
 };
 CChangesTableRemoveRow.prototype.Redo = function()
 {

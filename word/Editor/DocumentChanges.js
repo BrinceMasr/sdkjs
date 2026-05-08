@@ -153,6 +153,7 @@ CChangesDocumentAddItem.prototype.Redo = function()
 
 		Element.Parent = oDocument;
 		oDocument.UpdateSectionsAfterAdd([Element]);
+		Element.OnAttach();
 	}
 };
 CChangesDocumentAddItem.prototype.private_WriteItem = function(Writer, Item)
@@ -210,6 +211,7 @@ CChangesDocumentAddItem.prototype.Load = function(Color)
 				Element.UpdateDocumentOutline();
 			}
 			oDocument.UpdateSectionsAfterAdd([Element]);
+			Element.OnAttach();
 		}
 	}
 };
@@ -266,6 +268,8 @@ CChangesDocumentRemoveItem.prototype.Undo = function()
 		oElement.Parent = oDocument;
 	}
 	oDocument.UpdateSectionsAfterAdd(this.Items);
+	for (let i = 0; i < this.Items.length; ++i)
+		this.Items[i].OnAttach();
 };
 CChangesDocumentRemoveItem.prototype.Redo = function()
 {

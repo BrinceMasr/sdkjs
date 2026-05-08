@@ -629,6 +629,9 @@ CDocumentContentElementBase.prototype.PreDelete = function()
 CDocumentContentElementBase.prototype.OnDetach = function()
 {
 };
+CDocumentContentElementBase.prototype.OnAttach = function()
+{
+};
 CDocumentContentElementBase.prototype.ClearParagraphFormatting = function(isClearParaPr, isClearTextPr)
 {
 };

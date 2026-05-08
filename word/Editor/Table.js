@@ -4000,16 +4000,26 @@ CTable.prototype.OnDetach = function()
 {
 	if (!this.IsUseInDocument())
 		return;
-	
+
 	this.DrawingDocument.EndTrackTable(this, false);
-	
+
 	let rowCount = this.GetRowsCount();
 	for (let iRow = rowCount - 1; iRow >= 0; --iRow)
 	{
 		this.GetRow(iRow).OnDetach();
 	}
-	
+
 	this.RemoveSelection();
+};
+CTable.prototype.OnAttach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+
+	for (let iRow = 0, rowCount = this.GetRowsCount(); iRow < rowCount; ++iRow)
+	{
+		this.GetRow(iRow).OnAttach();
+	}
 };
 CTable.prototype.RemoveInnerTable = function()
 {
@@ -14970,6 +14980,7 @@ CTable.prototype.private_AddRow = function(Index, CellsCount, bReIndexing, _NewR
 	this.private_UpdateTableGrid();
 	this.OnContentChange();
 	this.updateTrackRevisions();
+	NewRow.OnAttach();
 
 	return NewRow;
 };

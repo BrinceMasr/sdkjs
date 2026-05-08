@@ -229,10 +229,21 @@ CTableRow.prototype =
 	{
 		if (!this.IsUseInDocument())
 			return;
-		
+
 		for (let iCell = this.GetCellsCount() - 1; iCell >= 0; --iCell)
 		{
 			this.GetCell(iCell).OnDetach();
+		}
+	},
+
+	OnAttach : function()
+	{
+		if (!this.IsUseInDocument())
+			return;
+
+		for (let iCell = 0, cellCount = this.GetCellsCount(); iCell < cellCount; ++iCell)
+		{
+			this.GetCell(iCell).OnAttach();
 		}
 	},
     //-----------------------------------------------------------------------------------
@@ -656,6 +667,7 @@ CTableRow.prototype =
 		this.private_CheckCurCell();
 		this.private_UpdateTableGrid();
 		this.OnContentChange();
+		Cell.OnAttach();
 
 		return Cell;
 	},

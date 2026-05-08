@@ -11371,8 +11371,9 @@ CDocument.prototype.Internal_Content_Add = function(Position, NewObject, isCorre
 
 	if (type_Paragraph === NewObject.GetType())
 		this.DocumentOutline.CheckParagraph(NewObject);
-	
+
 	this.UpdateSectionsAfterAdd([NewObject]);
+	NewObject.OnAttach();
 };
 CDocument.prototype.Internal_Content_Remove = function(Position, Count, isCorrectContent)
 {

@@ -7523,6 +7523,7 @@ CDocumentContent.prototype.Internal_Content_Add = function(Position, NewObject, 
 	this.private_ReindexContent(Position);
 	this.OnContentChange();
 	this.UpdateSectionsAfterAdd([NewObject]);
+	NewObject.OnAttach();
 	this.Recalculated = false;
 };
 CDocumentContent.prototype.Internal_Content_Remove = function(Position, Count, isCorrectContent)
@@ -8840,13 +8841,23 @@ CDocumentContent.prototype.OnDetach = function()
 {
 	if (!this.IsUseInDocument())
 		return;
-	
+
 	for (let i = this.Content.length - 1; i >= 0; --i)
 	{
 		this.Content[i].OnDetach();
 	}
-	
+
 	this.RemoveSelection();
+};
+CDocumentContent.prototype.OnAttach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+
+	for (let i = 0; i < this.Content.length; ++i)
+	{
+		this.Content[i].OnAttach();
+	}
 };
 CDocumentContent.prototype.IsBlockLevelSdtContent = function()
 {
