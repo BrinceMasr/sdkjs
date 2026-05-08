@@ -100,6 +100,7 @@
 	 * @property {ApiFreezePanes} FreezePanes - Returns the freeze panes for the current worksheet.
 	 * @property {ApiProtectedRange[]} AllProtectedRanges - Returns all protected ranges from the current worksheet.
 	 * @property {ApiPivotTable[]} PivotTables - Returns all pivot tables from the current worksheet.
+	 * @property {ApiHyperlink[]} Hyperlinks - Returns an array of all the hyperlinks on the worksheet.
 	 */
 	function ApiWorksheet(worksheet) {
 		this.worksheet = worksheet;
@@ -154,6 +155,7 @@
 	 * @property {number} RowsCount - Returns a number of rows in the current range.
 	 * @property {ApiFormatConditions} FormatConditions - Returns the collection of conditional formatting rules for the current range.
      * @property {ApiValidation} Validation - Returns the ApiValidation class instance associated with this range. If no validation instance exists yet, it will be created.
+	 * @property {ApiHyperlink[]} Hyperlinks - Returns an array of all the hyperlinks in the range.
 	 */
 	function ApiRange(range, areas) {
 		this.range = range;
@@ -438,6 +440,22 @@
 		for (var i = 0; i < items.length; i++) {
 			this.Items.push(new ApiRange(items[i]));
 		}
+	}
+
+	/**
+	 * Class representing a hyperlink.
+	 * @constructor
+	 * @property {string} Address - Returns or sets the address of the target document.
+	 * @property {string} SubAddress - Returns or sets the subaddress of the target document.
+	 * @property {string} ScreenTip - Returns or sets the screen tip text for the hyperlink.
+	 * @property {string} TextToDisplay - Returns or sets the text to be displayed for the hyperlink.
+	 * @property {ApiRange} Range - Returns the range the hyperlink is attached to.
+	 * @property {string} Name - Returns the name of the hyperlink.
+	 * @property {number} Type - Returns the type of the hyperlink.
+	 */
+	function ApiHyperlink(oElem, oWorksheet) {
+		this._elem = oElem;
+		this._ws   = oWorksheet;
 	}
 
 	/**
@@ -9108,7 +9126,7 @@
 	 */
 	ApiWorksheet.prototype.SetHyperlink = function (sRange, sAddress, subAddress, sScreenTip, sTextToDisplay) {
 		// Validate required parameters
-		if (!sRange || !sAddress) {
+		if (!sRange || sAddress == null) {
 			throwException(new Error('Incorrect required parameters'));
 			return false;
 		}
@@ -9160,6 +9178,25 @@
 		}
 		return true;
 	};
+
+	/**
+	 * Returns a collection of all the hyperlinks on the worksheet.
+	 * @memberof ApiWorksheet
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiHyperlinks}
+	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/GetHyperlinks.js
+	 */
+	ApiWorksheet.prototype.GetHyperlinks = function () {
+		var ws    = this.worksheet;
+		var items = ws.hyperlinkManager.getAll();
+		return items.map(function (elem) { return new ApiHyperlink(elem, ws); });
+	};
+
+	Object.defineProperty(ApiWorksheet.prototype, "Hyperlinks", {
+		get: function () {
+			return this.GetHyperlinks();
+		}
+	});
 
 	/**
 	 * Creates a chart of the specified type from the selected data range of the current sheet.
@@ -9898,6 +9935,25 @@
 		}
         this.range.cleanHyperlinks();
     };
+
+	/**
+	 * Returns a collection of all the hyperlinks in the range.
+	 * @memberof ApiRange
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiHyperlinks}
+	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/GetHyperlinks.js
+	 */
+	ApiRange.prototype.GetHyperlinks = function () {
+		var ws    = this.range.worksheet;
+		var items = ws.hyperlinkManager.get(this.range.bbox).all;
+		return items.map(function (elem) { return new ApiHyperlink(elem, ws); });
+	};
+
+	Object.defineProperty(ApiRange.prototype, "Hyperlinks", {
+		get: function () {
+			return this.GetHyperlinks();
+		}
+	});
 
 	/**
 	 * Returns a Range object that represents the rows in the specified range. If the specified row is outside the Range object, a new Range will be returned that represents the cells between the columns of the original range in the specified row.
@@ -14763,6 +14819,224 @@
 			return this.GetParent();
 		}
 	});
+
+	//------------------------------------------------------------------------------------------------------------------
+	//
+	// ApiHyperlink
+	//
+	//------------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Returns a type of the ApiHyperlink class.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @returns {"hyperlink"}
+	 */
+	ApiHyperlink.prototype.GetClassType = function () {
+		return "hyperlink";
+	};
+
+	ApiHyperlink.prototype._applyData = function (oData) {
+		var bbox = this._elem.bbox;
+		this._ws.getRange3(bbox.r1, bbox.c1, bbox.r2, bbox.c2).setHyperlink(oData, true);
+		var oNewElem = this._ws.hyperlinkManager.getFirst(bbox);
+		if (oNewElem) {
+			this._elem = oNewElem;
+		}
+	};
+
+	/**
+	 * Returns the address of the target document.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/GetAddress.js
+	 */
+	ApiHyperlink.prototype.GetAddress = function () {
+		return this._elem.data.Hyperlink || "";
+	};
+
+	/**
+	 * Sets the address of the target document.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @param {string} sAddress - The hyperlink address.
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/SetAddress.js
+	 */
+	ApiHyperlink.prototype.SetAddress = function (sAddress) {
+		var clone = this._elem.data.clone();
+		clone.Hyperlink = sAddress || null;
+		this._applyData(clone);
+	};
+
+	Object.defineProperty(ApiHyperlink.prototype, "Address", {
+		get: function () {
+			return this.GetAddress();
+		},
+		set: function (v) {
+			this.SetAddress(v);
+		}
+	});
+
+	/**
+	 * Returns the subaddress of the target document.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/GetSubAddress.js
+	 */
+	ApiHyperlink.prototype.GetSubAddress = function () {
+		return this._elem.data.getLocation() || "";
+	};
+
+	/**
+	 * Sets the subaddress of the target document.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @param {string} sSubAddress - The subaddress in "Sheet1!A1" format.
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/SetSubAddress.js
+	 */
+	ApiHyperlink.prototype.SetSubAddress = function (sSubAddress) {
+		var clone = this._elem.data.clone();
+		clone.setLocation(sSubAddress || null);
+		this._applyData(clone);
+	};
+
+	Object.defineProperty(ApiHyperlink.prototype, "SubAddress", {
+		get: function () {
+			return this.GetSubAddress();
+		},
+		set: function (v) {
+			this.SetSubAddress(v);
+		}
+	});
+
+	/**
+	 * Returns the screen tip text for the hyperlink.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/GetScreenTip.js
+	 */
+	ApiHyperlink.prototype.GetScreenTip = function () {
+		return this._elem.data.Tooltip || "";
+	};
+
+	/**
+	 * Sets the screen tip text for the hyperlink.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @param {string} sScreenTip - The screen tip text.
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/SetScreenTip.js
+	 */
+	ApiHyperlink.prototype.SetScreenTip = function (sScreenTip) {
+		var clone = this._elem.data.clone();
+		clone.Tooltip = sScreenTip || null;
+		this._applyData(clone);
+	};
+
+	Object.defineProperty(ApiHyperlink.prototype, "ScreenTip", {
+		get: function () {
+			return this.GetScreenTip();
+		},
+		set: function (v) {
+			this.SetScreenTip(v);
+		}
+	});
+
+	/**
+	 * Returns the text displayed for the hyperlink.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/GetTextToDisplay.js
+	 */
+	ApiHyperlink.prototype.GetTextToDisplay = function () {
+		return this.GetRange().GetText();
+	};
+
+	/**
+	 * Sets the text to be displayed for the hyperlink.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @param {string} sText - The text to display.
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/SetTextToDisplay.js
+	 */
+	ApiHyperlink.prototype.SetTextToDisplay = function (sText) {
+		this.GetRange().SetValue(sText);
+	};
+
+	Object.defineProperty(ApiHyperlink.prototype, "TextToDisplay", {
+		get: function () {
+			return this.GetTextToDisplay();
+		},
+		set: function (v) {
+			this.SetTextToDisplay(v);
+		}
+	});
+
+	/**
+	 * Returns the range the hyperlink is attached to.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiRange}
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/GetRange.js
+	 */
+	ApiHyperlink.prototype.GetRange = function () {
+		var bbox = this._elem.bbox;
+		return new ApiRange(this._ws.getRange3(bbox.r1, bbox.c1, bbox.r2, bbox.c2));
+	};
+
+	Object.defineProperty(ApiHyperlink.prototype, "Range", {
+		get: function () {
+			return this.GetRange();
+		}
+	});
+
+	/**
+	 * Returns the name of the hyperlink.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/GetName.js
+	 */
+	ApiHyperlink.prototype.GetName = function () {
+		return this.GetTextToDisplay();
+	};
+
+	Object.defineProperty(ApiHyperlink.prototype, "Name", {
+		get: function () {
+			return this.GetName();
+		}
+	});
+
+	/**
+	 * Returns the type of the hyperlink.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @returns {number}
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/GetType.js
+	 */
+	ApiHyperlink.prototype.GetType = function () {
+		return Asc.c_oAscMsoHyperlinkType.Range;
+	};
+
+	Object.defineProperty(ApiHyperlink.prototype, "Type", {
+		get: function () {
+			return this.GetType();
+		}
+	});
+
+	/**
+	 * Deletes the hyperlink.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/Delete.js
+	 */
+	ApiHyperlink.prototype.Delete = function () {
+		var bbox = this._elem.bbox;
+		this._ws.getRange3(bbox.r1, bbox.c1, bbox.r2, bbox.c2).removeHyperlink(this._elem, true);
+	};
 
 	//------------------------------------------------------------------------------------------------------------------
 	//
@@ -28183,7 +28457,8 @@
 	ApiWorksheet.prototype["AddDefName"] = ApiWorksheet.prototype.AddDefName;
 	ApiWorksheet.prototype["GetComments"] = ApiWorksheet.prototype.GetComments;
 	ApiWorksheet.prototype["Delete"] = ApiWorksheet.prototype.Delete;
-	ApiWorksheet.prototype["SetHyperlink"] = ApiWorksheet.prototype.SetHyperlink;
+	ApiWorksheet.prototype["SetHyperlink"]   = ApiWorksheet.prototype.SetHyperlink;
+	ApiWorksheet.prototype["GetHyperlinks"] = ApiWorksheet.prototype.GetHyperlinks;
 	ApiWorksheet.prototype["AddChart"] = ApiWorksheet.prototype.AddChart;
 	ApiWorksheet.prototype["AddShape"] = ApiWorksheet.prototype.AddShape;
 	ApiWorksheet.prototype["AddImage"] = ApiWorksheet.prototype.AddImage;
@@ -28237,6 +28512,7 @@
     ApiRange.prototype["ClearFormats"] = ApiRange.prototype.ClearFormats;
     ApiRange.prototype["ClearContents"] = ApiRange.prototype.ClearContents;
     ApiRange.prototype["ClearHyperlinks"] = ApiRange.prototype.ClearHyperlinks;
+	ApiRange.prototype["GetHyperlinks"]   = ApiRange.prototype.GetHyperlinks;
 	ApiRange.prototype["GetRows"] = ApiRange.prototype.GetRows;
 	ApiRange.prototype["GetCols"] = ApiRange.prototype.GetCols;
 	ApiRange.prototype["End"] = ApiRange.prototype.End;
@@ -28459,6 +28735,21 @@
 	ApiAreas.prototype["GetCount"]               = ApiAreas.prototype.GetCount;
 	ApiAreas.prototype["GetItem"]                = ApiAreas.prototype.GetItem;
 	ApiAreas.prototype["GetParent"]              = ApiAreas.prototype.GetParent;
+
+
+	ApiHyperlink.prototype["GetClassType"]     = ApiHyperlink.prototype.GetClassType;
+	ApiHyperlink.prototype["GetAddress"]       = ApiHyperlink.prototype.GetAddress;
+	ApiHyperlink.prototype["SetAddress"]       = ApiHyperlink.prototype.SetAddress;
+	ApiHyperlink.prototype["GetSubAddress"]    = ApiHyperlink.prototype.GetSubAddress;
+	ApiHyperlink.prototype["SetSubAddress"]    = ApiHyperlink.prototype.SetSubAddress;
+	ApiHyperlink.prototype["GetScreenTip"]     = ApiHyperlink.prototype.GetScreenTip;
+	ApiHyperlink.prototype["SetScreenTip"]     = ApiHyperlink.prototype.SetScreenTip;
+	ApiHyperlink.prototype["GetTextToDisplay"] = ApiHyperlink.prototype.GetTextToDisplay;
+	ApiHyperlink.prototype["SetTextToDisplay"] = ApiHyperlink.prototype.SetTextToDisplay;
+	ApiHyperlink.prototype["GetRange"]         = ApiHyperlink.prototype.GetRange;
+	ApiHyperlink.prototype["GetName"]          = ApiHyperlink.prototype.GetName;
+	ApiHyperlink.prototype["GetType"]          = ApiHyperlink.prototype.GetType;
+	ApiHyperlink.prototype["Delete"]           = ApiHyperlink.prototype.Delete;
 
 
 	ApiCharacters.prototype["GetCount"]          = ApiCharacters.prototype.GetCount;
@@ -29620,6 +29911,7 @@
 	AscBuilder.Cell["ApiPivotDataField"]         = AscBuilder.Cell.ApiPivotDataField         = ApiPivotDataField;
 	AscBuilder.Cell["ApiPivotItem"]              = AscBuilder.Cell.ApiPivotItem              = ApiPivotItem;
 	AscBuilder.Cell["ApiPivotFilters"]           = AscBuilder.Cell.ApiPivotFilters           = ApiPivotFilters;
+	AscBuilder.Cell["ApiHyperlink"]              = AscBuilder.Cell.ApiHyperlink              = ApiHyperlink;
 
 	AscBuilder.Cell.init = function()
 	{

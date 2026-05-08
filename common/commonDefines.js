@@ -4915,6 +4915,11 @@ window.AscCommon.g_cIsBeta = "false";
 		FileLink: 3
 	};
 
+	var c_oAscMsoHyperlinkType = {
+		Range: 0,
+		Shape: 1
+	};
+
 	//------------------------------------------------------------export--------------------------------------------------
 	var prot;
 	window['Asc']['FONT_THUMBNAIL_HEIGHT'] = FONT_THUMBNAIL_HEIGHT;
@@ -6640,6 +6645,11 @@ window.AscCommon.g_cIsBeta = "false";
 	prot['WebLink'] = prot.WebLink;
 	prot['RangeLink'] = prot.RangeLink;
 	prot['FileLink'] = prot.FileLink;
+
+	window['Asc']['c_oAscMsoHyperlinkType'] = window['Asc'].c_oAscMsoHyperlinkType = c_oAscMsoHyperlinkType;
+	prot = c_oAscMsoHyperlinkType;
+	prot['Range'] = prot.Range;
+	prot['Shape'] = prot.Shape;
 
 	window['AscCommonExcel'] = window['AscCommonExcel'] || {};
 	window['AscCommonExcel'].c_oAscPaneState = c_oAscPaneState;
