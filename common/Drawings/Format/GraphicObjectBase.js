@@ -144,6 +144,9 @@
 	};
 	drawingsChangesMap[AscDFH.historyitem_ShapeSetTextLink] = function (oClass, value) {
 		oClass.textLink = value;
+		if (oClass.recalcInfo) {
+			oClass.recalcInfo._textLinkCache = null;
+		}
 	};
 	drawingsChangesMap[AscDFH.historyitem_ShapeSetModelId] = function (oClass, value) {
 		oClass.modelId = value;
@@ -880,6 +883,9 @@
 	CGraphicObjectBase.prototype.setTextLink = function (sLink) {
 		AscCommon.History.Add(new AscDFH.CChangesDrawingsString(this, AscDFH.historyitem_ShapeSetTextLink, this.textLink, sLink));
 		this.textLink = sLink;
+		if (this.recalcInfo) {
+			this.recalcInfo._textLinkCache = null;
+		}
 	};
 	CGraphicObjectBase.prototype.hasMacro = function () {
 		var sMacro = this.getMacroOwnOrGroup();

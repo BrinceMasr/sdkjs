@@ -103,6 +103,12 @@
         {
             Field.SetPPr(this.PPr.Copy());
         }
+        Field.CanAddToContent = true;
+        for(var nPos = 0; nPos < this.Content.length; ++nPos)
+        {
+            Field.Add_ToContent(nPos, this.Content[nPos].Copy(), false);
+        }
+        Field.CanAddToContent = false;
         return Field;
     };
 
@@ -262,6 +268,21 @@
                     if(oStylesObject.shape && oStylesObject.shape.getPercentageString())
                     {
                         sStr = oStylesObject.shape.getPercentageString();
+                    }
+                }
+            }
+            else if("txlink" === sFieldType)
+            {
+                if(this.Paragraph && this.Paragraph.Parent)
+                {
+                    oStylesObject = this.Paragraph.Parent.Get_Styles();
+                    if(oStylesObject.shape && oStylesObject.shape.getTextLinkString)
+                    {
+                        var sTxLink = oStylesObject.shape.getTextLinkString();
+                        if(typeof sTxLink === "string")
+                        {
+                            sStr = sTxLink;
+                        }
                     }
                 }
             }
