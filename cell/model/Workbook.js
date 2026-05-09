@@ -5534,13 +5534,20 @@
 		var aCharts = [];
 		var aRanges = [new AscCommonExcel.Range(oWorksheet, 0, 0, gc_nMaxRow0, gc_nMaxCol0)];
 		const fDrawingCallback = function(oDrawing) {
-			if(oDrawing.getObjectType() === AscDFH.historyitem_type_ChartSpace) {
+			var nType = oDrawing.getObjectType();
+			if(nType === AscDFH.historyitem_type_ChartSpace) {
 				var nPrevLength = aRefsToChange.length;
 				oDrawing.clearDataRefs();
 				oDrawing.collectIntersectionRefs(aRanges, aRefsToChange);
 				oDrawing.clearDataRefs();
 				if(aRefsToChange.length > nPrevLength) {
 					aCharts.push(oDrawing);
+					aId.push(oDrawing.Get_Id());
+				}
+			}
+			else if(nType === AscDFH.historyitem_type_Shape) {
+				if(oDrawing.matchesTextLinkSheet && oDrawing.matchesTextLinkSheet(oWorksheet.sName)) {
+					aRefsToChange.push(oDrawing);
 					aId.push(oDrawing.Get_Id());
 				}
 			}
@@ -6792,6 +6799,7 @@
 		const oApi = this.oApi;
 		var aChartRefsToChange = [];
 		var aCharts = [];
+		var aShapesWithTextLink = [];
 		let bHandled = false;
 		const fDrawingCallback = function(oDrawing) {
 			switch (oDrawing.getObjectType()) {
@@ -6808,6 +6816,13 @@
 					bHandled |= oDrawing.handleChangeRanges(aRanges);
 					break;
 				}
+				case AscDFH.historyitem_type_Shape: {
+					if(oDrawing.handleTextLinkChange && oDrawing.handleTextLinkChange(aRanges)) {
+						aShapesWithTextLink.push(oDrawing);
+						bHandled = true;
+					}
+					break;
+				}
 				default: {
 					break;
 				}
@@ -6815,6 +6830,9 @@
 		};
 		this.handleDrawings(fDrawingCallback);
 		oApi.frameManager.handleMainDiagram(fDrawingCallback);
+		for(var nSp = 0; nSp < aShapesWithTextLink.length; ++nSp) {
+			aShapesWithTextLink[nSp].recalculate();
+		}
 		if(aChartRefsToChange.length > 0) {
 			for(var nRef = 0; nRef < aChartRefsToChange.length; ++nRef) {
 				aChartRefsToChange[nRef].updateCacheAndCat();

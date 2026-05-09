@@ -293,6 +293,141 @@ CChangeContentDrawingWorksheet.prototype.constructor = CChangeContentDrawingWork
         }
     };
 
+    CShape.prototype._resolveTextLinkRange = function(sLink)
+    {
+        if(typeof sLink !== "string" || !this.worksheet) {
+            return null;
+        }
+        const cache = this.recalcInfo && this.recalcInfo._textLinkCache;
+        if(cache && cache.input === sLink) {
+            return cache.range;
+        }
+
+        let sBody = sLink;
+        if(sBody.charAt(0) === "=") {
+            sBody = sBody.substr(1);
+        }
+        let oRange = null;
+        if(sBody.length > 0) {
+            const ws = this.worksheet;
+            const parsed = new AscCommonExcel.parserFormula(sBody, null, ws);
+            if(parsed.parse()) {
+                const selection = ws.getSelection && ws.getSelection();
+                const activeCell = selection && selection.activeCell;
+                const bbox = activeCell
+                    ? new Asc.Range(activeCell.col, activeCell.row, activeCell.col, activeCell.row)
+                    : null;
+                const result = parsed.calculate(null, bbox);
+                if(result && !(result instanceof AscCommonExcel.cError) && typeof result.getRange === "function") {
+                    oRange = result.getRange();
+                }
+            }
+        }
+        if(this.recalcInfo) {
+            this.recalcInfo._textLinkCache = {input: sLink, range: oRange};
+        }
+        return oRange;
+    };
+
+    CShape.prototype.getTextLinkString = function()
+    {
+        if(typeof this.textLink !== "string" || this.textLink.length === 0) {
+            return null;
+        }
+        var oRange = this._resolveTextLinkRange(this.textLink);
+        if(!oRange) {
+            return null;
+        }
+        return oRange.getValueWithFormat();
+    };
+
+    CShape.prototype._invalidateTextLinkFields = function()
+    {
+        if(!this.txBody || !this.txBody.content) {
+            return false;
+        }
+        var bFound = false;
+        var aContent = this.txBody.content.Content;
+        for(var i = 0; i < aContent.length; ++i) {
+            var oPara = aContent[i];
+            if(!oPara || !oPara.Content) continue;
+            for(var j = 0; j < oPara.Content.length; ++j) {
+                var oElem = oPara.Content[j];
+                if(oElem instanceof AscCommonWord.CPresentationField &&
+                    oElem.GetFieldType && oElem.GetFieldType() === "txlink") {
+                    if(oElem.RecalcInfo) {
+                        oElem.RecalcInfo.Measure = true;
+                    }
+                    bFound = true;
+                }
+            }
+        }
+        return bFound;
+    };
+
+    CShape.prototype._parseTextLink = function()
+    {
+        if(typeof this.textLink !== "string" || this.textLink.length === 0) {
+            return null;
+        }
+        var sLink = this.textLink;
+        var bHasEq = sLink.charAt(0) === "=";
+        var sBody = bHasEq ? sLink.substr(1) : sLink;
+        var oParsed = AscCommon.parserHelp.parse3DRef(sBody);
+        if(!oParsed || oParsed.external) {
+            return null;
+        }
+        return {bHasEq: bHasEq, sheet: oParsed.sheet, range: oParsed.range};
+    };
+
+    CShape.prototype.matchesTextLinkSheet = function(sSheetName)
+    {
+        var oParsed = this._parseTextLink();
+        return !!(oParsed && oParsed.sheet === sSheetName);
+    };
+
+    CShape.prototype.handleOnChangeSheetName = function(sOldNameEscaped, sNewNameEscaped)
+    {
+        var oParsed = this._parseTextLink();
+        if(!oParsed) {
+            return;
+        }
+        var sParsedEscaped = AscCommon.parserHelp.getEscapeSheetName(oParsed.sheet);
+        if(sParsedEscaped !== sOldNameEscaped) {
+            return;
+        }
+        var sNewLink = sNewNameEscaped + "!" + oParsed.range;
+        this.setTextLink(oParsed.bHasEq ? "=" + sNewLink : sNewLink);
+    };
+
+    CShape.prototype.handleTextLinkChange = function(aRanges)
+    {
+        if(typeof this.textLink !== "string" || this.textLink.length === 0) {
+            return false;
+        }
+        if(!this.worksheet || !Array.isArray(aRanges)) {
+            return false;
+        }
+        var oTargetRange = this._resolveTextLinkRange(this.textLink);
+        if(!oTargetRange || !oTargetRange.bbox || !oTargetRange.worksheet) {
+            return false;
+        }
+        var bIntersects = false;
+        for(var i = 0; i < aRanges.length; ++i) {
+            var r = aRanges[i];
+            if(r && r.isIntersect && oTargetRange.isIntersect(r)) {
+                bIntersects = true;
+                break;
+            }
+        }
+        if(!bIntersects) {
+            return false;
+        }
+        this.recalcInfo.recalculateContent = true;
+        this._invalidateTextLinkFields();
+        return true;
+    };
+
 
     function editorAddToDrawingObjects(oGraphicObject, pos, type)
     {
