@@ -312,8 +312,11 @@ CChangeContentDrawingWorksheet.prototype.constructor = CChangeContentDrawingWork
             const ws = this.worksheet;
             const parsed = new AscCommonExcel.parserFormula(sBody, null, ws);
             if(parsed.parse()) {
-                const activeCell = ws.getSelection().activeCell;
-                const bbox = new Asc.Range(activeCell.col, activeCell.row, activeCell.col, activeCell.row);
+                const selection = ws.getSelection && ws.getSelection();
+                const activeCell = selection && selection.activeCell;
+                const bbox = activeCell
+                    ? new Asc.Range(activeCell.col, activeCell.row, activeCell.col, activeCell.row)
+                    : null;
                 const result = parsed.calculate(null, bbox);
                 if(result && !(result instanceof AscCommonExcel.cError) && typeof result.getRange === "function") {
                     oRange = result.getRange();
