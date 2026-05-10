@@ -678,14 +678,22 @@ CBlockLevelSdt.prototype.OnDetach = function()
 {
 	if (!this.IsUseInDocument())
 		return;
-
+	
+	let logicDocument = this.GetLogicDocument();
+	if (logicDocument && logicDocument.IsDocumentEditor())
+		logicDocument.OnDetachContentControl(this);
+	
 	this.Content.OnDetach();
 };
 CBlockLevelSdt.prototype.OnAttach = function()
 {
 	if (!this.IsUseInDocument())
 		return;
-
+	
+	let logicDocument = this.GetLogicDocument();
+	if (logicDocument && logicDocument.IsDocumentEditor())
+		logicDocument.OnAttachContentControl(this);
+	
 	this.Content.OnAttach();
 };
 CBlockLevelSdt.prototype.ClearParagraphFormatting = function(isClearParaPr, isClearTextPr)

@@ -75,6 +75,12 @@ CParagraphContentBase.prototype.IsStopCursorOnEntryExit = function()
 CParagraphContentBase.prototype.PreDelete = function()
 {
 };
+CParagraphContentBase.prototype.OnDetach = function()
+{
+};
+CParagraphContentBase.prototype.OnAttach = function()
+{
+};
 CParagraphContentBase.prototype.GetCurrentPermRanges = function(permRanges, isCurrent)
 {
 };
@@ -1294,6 +1300,12 @@ CParagraphContentWithContentBase.prototype.CanSplit = function()
 	return true;
 };
 CParagraphContentWithContentBase.prototype.PreDelete = function(isDeep)
+{
+};
+CParagraphContentWithContentBase.prototype.OnDetach = function()
+{
+};
+CParagraphContentWithContentBase.prototype.OnAttach = function()
 {
 };
 CParagraphContentWithContentBase.prototype.private_UpdateDocumentOutline = function()
@@ -4623,7 +4635,7 @@ CParagraphContentWithParagraphLikeContent.prototype.PreDelete = function()
 {
 	if (this.Paragraph && this.Paragraph.isPreventedPreDelete())
 		return;
-	
+
 	for (var nIndex = 0, nCount = this.Content.length; nIndex < nCount; ++nIndex)
 	{
 		if (this.Content[nIndex] && this.Content[nIndex].PreDelete)
@@ -4631,6 +4643,26 @@ CParagraphContentWithParagraphLikeContent.prototype.PreDelete = function()
 	}
 
 	this.RemoveSelection();
+};
+CParagraphContentWithParagraphLikeContent.prototype.OnAttach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+	
+	for (let i = 0; i < this.Content.length; ++i)
+	{
+		this.Content[i].OnAttach();
+	}
+};
+CParagraphContentWithParagraphLikeContent.prototype.OnDetach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+	
+	for (let i = 0; i < this.Content.length; ++i)
+	{
+		this.Content[i].OnAttach();
+	}
 };
 CParagraphContentWithParagraphLikeContent.prototype.GetCurrentPermRanges = function(permRanges, isCurrent)
 {

@@ -4257,6 +4257,28 @@ CInlineLevelSdt.prototype.GetDataBinding = function()
 {
 	return this.Pr.DataBinding;
 };
+CInlineLevelSdt.prototype.OnAttach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+	
+	let logicDocument = this.GetLogicDocument();
+	if (logicDocument && logicDocument.IsDocumentEditor())
+		logicDocument.OnAttachContentControl(this);
+	
+	CParagraphContentWithParagraphLikeContent.prototype.OnAttach.apply(this, arguments);
+};
+CInlineLevelSdt.prototype.OnDetach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+	
+	let logicDocument = this.GetLogicDocument();
+	if (logicDocument && logicDocument.IsDocumentEditor())
+		logicDocument.OnDetachContentControl(this);
+	
+	CParagraphContentWithParagraphLikeContent.prototype.OnDetach.apply(this, arguments);
+};
 
 
 //--------------------------------------------------------export--------------------------------------------------------

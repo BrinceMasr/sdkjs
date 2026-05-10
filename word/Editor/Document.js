@@ -26688,6 +26688,29 @@ CDocument.prototype.OnChangeContentControl = function(oControl)
 
 	this.Action.Additional.ContentControlChange[sId] = oControl;
 };
+CDocument.prototype.OnAttachContentControl = function(contentControl)
+{
+	this.sendEvent("onContentControlAttach", contentControl.GetContentControlPr().GetEventObject());
+	
+	if (window.g_asc_plugins)
+		window.g_asc_plugins.onPluginEvent("onContentControlAttach", contentControl.GetContentControlPr().GetEventObject());
+};
+CDocument.prototype.OnDetachContentControl = function(contentControl)
+{
+	if (!contentControl)
+		return;
+	
+	if (this.FocusCC === contentControl)
+	{
+		this.Api.asc_OnBlurContentControl(this.FocusCC);
+		this.FocusCC = null;
+	}
+	
+	this.sendEvent("onContentControlDetach", contentControl.GetContentControlPr().GetEventObject());
+	
+	if (window.g_asc_plugins)
+		window.g_asc_plugins.onPluginEvent("onContentControlDetach", contentControl.GetContentControlPr().GetEventObject());
+};
 /**
  * @returns {?AscOForm.CDocument}
  */

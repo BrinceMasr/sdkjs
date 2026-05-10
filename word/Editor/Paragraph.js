@@ -1034,7 +1034,8 @@ Paragraph.prototype.Internal_Content_Add = function(Pos, Item)
 
 	if (Item.SetParagraph)
 		Item.SetParagraph(this);
-
+	
+	Item.OnAttach();
 	this.OnContentChange();
 };
 Paragraph.prototype.Add_ToContent = function(Pos, Item)
@@ -1106,6 +1107,9 @@ Paragraph.prototype.Internal_Content_Remove = function(Pos)
 
 	if (Item.PreDelete)
 		Item.PreDelete();
+
+	if (Item.OnDetach)
+		Item.OnDetach();
 
 	this.Content.splice(Pos, 1);
 	this.updateTrackRevisions();
@@ -1184,6 +1188,8 @@ Paragraph.prototype.Internal_Content_Remove2 = function(Pos, Count)
 	{
 		if (this.Content[nIndex].PreDelete)
 			this.Content[nIndex].PreDelete();
+		
+		this.Content[nIndex].OnDetach();
 	}
 
 	var DeletedItems = this.Content.slice(Pos, Pos + Count);
@@ -13085,6 +13091,26 @@ Paragraph.prototype.PreDelete = function()
 		// Чтобы при удалении параграфа с секцией автоматически запускался правильно пересчет секции, и правильно
 		// пересчитывалось на Undo/Redo.
 		this.Set_SectionPr(undefined);
+	}
+};
+Paragraph.prototype.OnDetach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+
+	for (let i = this.Content.length - 1; i >= 0; --i)
+	{
+		this.Content[i].OnDetach();
+	}
+};
+Paragraph.prototype.OnAttach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+
+	for (let i = 0; i < this.Content.length; ++i)
+	{
+		this.Content[i].OnAttach();
 	}
 };
 //----------------------------------------------------------------------------------------------------------------------
