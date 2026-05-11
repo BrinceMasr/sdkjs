@@ -4738,9 +4738,7 @@ function CDemonstrationManager(htmlpage)
                     oThis.OnPrevSlide();
                     handleSwipe = true;
                 }
-                else if (oThis.startPageX - e.pageX > 20 ||
-                        (Math.abs(e.pageX - oThis.startPageX) < 1 &&
-                            Math.abs(e.pageY- oThis.startPageY) < 1))
+                else if (oThis.startPageX - e.pageX > 20)
                 {
                     oThis.OnNextSlide();
                     handleSwipe = true;
