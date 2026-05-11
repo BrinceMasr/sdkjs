@@ -26711,6 +26711,16 @@ CDocument.prototype.OnDetachContentControl = function(contentControl)
 	if (window.g_asc_plugins)
 		window.g_asc_plugins.onPluginEvent("onContentControlDetach", contentControl.GetContentControlPr().GetEventObject());
 };
+CDocument.prototype.OnAttachParagraph = function(paragraph)
+{
+	if (window.g_asc_plugins)
+		window.g_asc_plugins.onPluginEvent("onParagraphAdd", {"InternalId" : paragraph.GetId()});
+};
+CDocument.prototype.OnDetachParagraph = function(paragraph)
+{
+	if (window.g_asc_plugins)
+		window.g_asc_plugins.onPluginEvent("onParagraphRemove", {"InternalId" : paragraph.GetId()});
+};
 /**
  * @returns {?AscOForm.CDocument}
  */

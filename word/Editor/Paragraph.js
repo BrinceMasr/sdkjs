@@ -13097,7 +13097,11 @@ Paragraph.prototype.OnDetach = function()
 {
 	if (!this.IsUseInDocument())
 		return;
-
+	
+	let logicDocument = this.GetLogicDocument();
+	if (logicDocument && logicDocument.IsDocumentEditor())
+		logicDocument.OnDetachParagraph(this);
+	
 	for (let i = this.Content.length - 1; i >= 0; --i)
 	{
 		this.Content[i].OnDetach();
@@ -13107,7 +13111,11 @@ Paragraph.prototype.OnAttach = function()
 {
 	if (!this.IsUseInDocument())
 		return;
-
+	
+	let logicDocument = this.GetLogicDocument();
+	if (logicDocument && logicDocument.IsDocumentEditor())
+		logicDocument.OnAttachParagraph(this);
+	
 	for (let i = 0; i < this.Content.length; ++i)
 	{
 		this.Content[i].OnAttach();
