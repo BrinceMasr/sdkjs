@@ -2214,6 +2214,8 @@
 		function isNumberInfinity(val) {
 			var valTrim = trim(val);
 			var valInt = valTrim - 0;
+			if (valInt !== 0 && Math.abs(valInt) < 1e-309)
+				return false;
 			return valInt == valTrim && valTrim.length > 0 && MIN_EXCEL_INT < valInt && valInt < MAX_EXCEL_INT;//
 		}
 

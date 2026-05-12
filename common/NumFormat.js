@@ -184,13 +184,25 @@ function getNumberParts(x)
 		// When it is one too small, man ends up >= gc_nMaxMantissa and the
 		// existing correction below fixes it.
 		_g_numPartsF64[0] = x;
-		const binaryExp = ((_g_numPartsI32[1] >>> 20) & 0x7FF) - 1023;
-		exp = Math.floor(binaryExp * gc_log10of2) - gc_nMaxDigCount + 1;
-		man = Math.round(x / Math.pow(10, exp));
-		if(man >= gc_nMaxMantissa)
-		{
-			exp++;
-			man = Math.floor(man / 10);
+		const biasedExp = (_g_numPartsI32[1] >>> 20) & 0x7FF;
+		if (biasedExp === 0) {
+			sig = SignType.Null;
+		} else {
+			const binaryExp = biasedExp - 1023;
+			exp = Math.floor(binaryExp * gc_log10of2) - gc_nMaxDigCount + 1;
+			var dividend = x;
+			var divisorExp = exp;
+			if (exp < -307) {
+				var extraExp = -307 - exp;
+				dividend = x * Math.pow(10, extraExp);
+				divisorExp = -307;
+			}
+			man = Math.round(dividend / Math.pow(10, divisorExp));
+			if(man >= gc_nMaxMantissa)
+			{
+				exp++;
+				man = Math.floor(man / 10);
+			}
 		}
 	}
     return {mantissa: man, exponent: exp, sign: sig};//for 0.123 exponent == - gc_nMaxDigCount
@@ -3510,6 +3522,10 @@ GeneralEditFormatCache.prototype =
 			{
 				var sRes = "";
 				var parts = getNumberParts(number);
+				if (SignType.Null === parts.sign) {
+					// Subnormal number (below ~2.23e-308): treated as 0, matches Excel.
+					value = "0";
+				} else {
 				var nRealExp = gc_nMaxDigCount + parts.exponent;//nRealExp == 0 for 0.123
 				if(parts.exponent >= 0)//nRealExp >= -gc_nMaxDigCount
 				{
@@ -3577,6 +3593,7 @@ GeneralEditFormatCache.prototype =
 					value = "-" + sRes;
 				else
 					value = sRes;
+				} // end else (not subnormal)
 			}
             this.oCache[number] = value;
         }
