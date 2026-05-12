@@ -1260,7 +1260,7 @@
 	 * @memberof Api
 	 * @typeofeditors ["CPE"]
 	 *
-	 * @param {string} link - The hyperlink address.
+	 * @param {string} link - The hyperlink address. Accepts an external URL (http, https, mailto, ftp) or one of the internal slide actions: "ppaction://hlinkshowjump?jump=firstslide", "ppaction://hlinkshowjump?jump=lastslide", "ppaction://hlinkshowjump?jump=nextslide", "ppaction://hlinkshowjump?jump=previousslide", "ppaction://hlinksldjumpslide<N>" (N is the zero-based slide index), "ppaction://hlinkfile?file=<path>" (opens an external file).
 	 * @param {string} tooltip - The tooltip text.
 	 *
 	 * @returns {ApiHyperlink}
@@ -1349,6 +1349,7 @@
         }
         return null;
     };
+    ApiPresentation.prototype.GetSlide = ApiPresentation.prototype.GetSlideByIndex;
 
     /**
      * Returns the current slide.
@@ -8254,6 +8255,7 @@
     ApiPresentation.prototype["GetClassType"]             = ApiPresentation.prototype.GetClassType;
     ApiPresentation.prototype["GetCurSlideIndex"]         = ApiPresentation.prototype.GetCurSlideIndex;
     ApiPresentation.prototype["GetSlideByIndex"]          = ApiPresentation.prototype.GetSlideByIndex;
+    ApiPresentation.prototype["GetSlide"]                 = ApiPresentation.prototype.GetSlide;
     ApiPresentation.prototype["GetCurrentSlide"]          = ApiPresentation.prototype.GetCurrentSlide;
     ApiPresentation.prototype["GetCurrentVisibleSlide"]   = ApiPresentation.prototype.GetCurrentVisibleSlide;
     ApiPresentation.prototype["AddSlide"]                 = ApiPresentation.prototype.AddSlide;
