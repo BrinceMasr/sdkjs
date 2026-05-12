@@ -21987,6 +21987,9 @@ $(function () {
 
 	QUnit.test("Test: \"SUMIFS\"", function (assert) {
 
+		ws.getRange2("A1:J510").cleanAll();
+
+		// Rows 2–9, cols A–C: fruits/names data (sum range A2:A9)
 		ws.getRange2("A2").setValue("5");
 		ws.getRange2("A3").setValue("4");
 		ws.getRange2("A4").setValue("15");
@@ -21995,7 +21998,6 @@ $(function () {
 		ws.getRange2("A7").setValue("12");
 		ws.getRange2("A8").setValue("10");
 		ws.getRange2("A9").setValue("33");
-
 		ws.getRange2("B2").setValue("Apples");
 		ws.getRange2("B3").setValue("Apples");
 		ws.getRange2("B4").setValue("Artichokes");
@@ -22004,7 +22006,6 @@ $(function () {
 		ws.getRange2("B7").setValue("Bananas");
 		ws.getRange2("B8").setValue("Carrots");
 		ws.getRange2("B9").setValue("Carrots");
-
 		ws.getRange2("C2").setValue("Tom");
 		ws.getRange2("C3").setValue("Sarah");
 		ws.getRange2("C4").setValue("Tom");
@@ -22014,126 +22015,652 @@ $(function () {
 		ws.getRange2("C8").setValue("Tom");
 		ws.getRange2("C9").setValue("Sarah");
 
-		ws.getRange2("D:E").cleanAll();
-		oParser = new parserFormula("SUMIFS(A2:A9, B2:B9, \"=A*\", C2:C9, \"Tom\")", "A10", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 20);
-
-		oParser = new parserFormula("SUMIFS(A2:A9, B2:B9, \"<>Bananas\", C2:C9, \"Tom\")", "A11", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 30);
-
-		oParser = new parserFormula("SUMIFS(D:D,E:E,$H2)", "A11", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), 0);
-
-		oParser = new parserFormula("SUMIFS(C:D,E:E,$H2)", "A11", ws);
-		assert.ok(oParser.parse());
-		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
-
-		// for bug 58684
-		let calculateResult = new AscCommonExcel.CalculateResult(true);
-
-		oParser = new parserFormula("SUMIFS({1,2,3},A2:A9,A2)", "A11", ws);
-		assert.ok(oParser.parse(), 'SUMIFS({1,2,3},A2:A9,A2) - wrong argument type check');
-		assert.strictEqual(oParser.calculate(null, null, null, null, calculateResult).getValue(), "#NULL!", 'Result of SUMIFS({1,2,3},A2:A9,A2) - wrong argument type check');
-
-		oParser = new parserFormula("SUMIFS(MONTH(A2:A9),A2:A9,A2)", "A11", ws);
-		assert.ok(oParser.parse(), 'SUMIFS(MONTH(A2:A9),A2:A9,A2) - wrong argument type check');
-		assert.strictEqual(oParser.calculate(null, null, null, null, calculateResult).getValue(), "#NULL!", 'Result of SUMIFS(MONTH(A2:A9),A2:A9,A2) - wrong argument type check');
-
-		oParser = new parserFormula("SUMIFS(A2:A9,{1,2,3},A2)", "A11", ws);
-		assert.ok(oParser.parse(), 'SUMIFS(A2:A9,{1,2,3},A2) - wrong argument type check');
-		assert.strictEqual(oParser.calculate(null, null, null, null, calculateResult).getValue(), "#NULL!", 'Result of SUMIFS(A2:A9,{1,2,3},A2) - wrong argument type check');
-
-		oParser = new parserFormula("SUMIFS(A2:A9,A2:A9*2,A2)", "A11", ws);
-		assert.ok(oParser.parse(), 'SUMIFS(A2:A9,A2:A9*2,A2) - wrong argument type check');
-		assert.strictEqual(oParser.calculate(null, null, null, null, calculateResult).getValue(), "#NULL!", 'Result of SUMIFS(A2:A9,A2:A9*2,A2) - wrong argument type check');
-
-		oParser = new parserFormula("SUMIFS(A2:A9,A2:A9,A2,{1,2,3},A2)", "A11", ws);
-		assert.ok(oParser.parse(), 'SUMIFS(A2:A9,A2:A9,A2,{1,2,3},A2) - wrong argument type check');
-		assert.strictEqual(oParser.calculate(null, null, null, null, calculateResult).getValue(), "#NULL!", 'Result of SUMIFS(A2:A9,A2:A9,A2,{1,2,3},A2) - wrong argument type check');
-
-		oParser = new parserFormula("SUMIFS(A2:A9,A2:A9,A2,A2:A9*2,A2)", "A11", ws);
-		assert.ok(oParser.parse(), 'SUMIFS(A2:A9,A2:A9,A2,A2:A9*2,A2) - wrong argument type check');
-		assert.strictEqual(oParser.calculate(null, null, null, null, calculateResult).getValue(), "#NULL!", 'Result of SUMIFS(A2:A9,A2:A9,A2,A2:A9*2,A2) - wrong argument type check');
-
-
-	});
-
-	QUnit.test("Test: \"SUMIFS with multiple criteria ranges\"", function (assert) {
-		// Setup test data with 5 columns for testing
+		// Rows 2–7, cols E–J: multi-criteria data (sum range E2:E7)
 		ws.getRange2("E2").setValue("10");
 		ws.getRange2("E3").setValue("20");
 		ws.getRange2("E4").setValue("30");
 		ws.getRange2("E5").setValue("40");
 		ws.getRange2("E6").setValue("50");
 		ws.getRange2("E7").setValue("60");
-
 		ws.getRange2("F2").setValue("Red");
 		ws.getRange2("F3").setValue("Blue");
 		ws.getRange2("F4").setValue("Green");
 		ws.getRange2("F5").setValue("Red");
 		ws.getRange2("F6").setValue("Blue");
 		ws.getRange2("F7").setValue("Green");
-
 		ws.getRange2("G2").setValue("Small");
 		ws.getRange2("G3").setValue("Medium");
 		ws.getRange2("G4").setValue("Large");
 		ws.getRange2("G5").setValue("Large");
 		ws.getRange2("G6").setValue("Medium");
 		ws.getRange2("G7").setValue("Small");
-
 		ws.getRange2("H2").setValue("2023");
 		ws.getRange2("H3").setValue("2023");
 		ws.getRange2("H4").setValue("2024");
 		ws.getRange2("H5").setValue("2024");
 		ws.getRange2("H6").setValue("2025");
 		ws.getRange2("H7").setValue("2025");
-
 		ws.getRange2("I2").setValue("A");
 		ws.getRange2("I3").setValue("B");
 		ws.getRange2("I4").setValue("C");
 		ws.getRange2("I5").setValue("A");
 		ws.getRange2("I6").setValue("B");
 		ws.getRange2("I7").setValue("C");
-
-		// Test with 11 arguments (1 sum_range + 5 criteria pairs)
-		oParser = new parserFormula("SUMIFS(E2:E7, F2:F7, \"Red\", G2:G7, \"Large\", H2:H7, 2024, I2:I7, \"A\", I2:I7, \"*\")", "A1", ws);
-		assert.ok(oParser.parse(), "SUMIFS with 5 criteria pairs");
-		assert.strictEqual(oParser.calculate().getValue(), 40, "SUMIFS with 5 criteria pairs");
-
-		// Test with 11 arguments where none match all criteria
-		oParser = new parserFormula("SUMIFS(E2:E7, F2:F7, \"Red\", G2:G7, \"Small\", H2:H7, 2024, I2:I7, \"A\", I2:I7, \"Z\")", "A1", ws);
-		assert.ok(oParser.parse(), "SUMIFS with 5 criteria pairs - no match");
-		assert.strictEqual(oParser.calculate().getValue(), 0, "SUMIFS with 5 criteria pairs - no match");
-
-		// Test with OR condition using multiple SUMIFS with max params
-		oParser = new parserFormula("SUMIFS(E2:E7, F2:F7, \"Red\", G2:G7, \"Large\", H2:H7, 2024, I2:I7, \"A\")" +
-			"+SUMIFS(E2:E7, F2:F7, \"Blue\", G2:G7, \"Medium\", H2:H7, 2025, I2:I7, \"B\")", "A1", ws);
-		assert.ok(oParser.parse(), "Multiple SUMIFS with 4 criteria pairs");
-		assert.strictEqual(oParser.calculate().getValue(), 40 + 50, "Multiple SUMIFS with 4 criteria pairs");
-
-
-		// Test with cell references for criteria
 		ws.getRange2("J2").setValue("Red");
 		ws.getRange2("J3").setValue("Large");
 		ws.getRange2("J4").setValue("2024");
 		ws.getRange2("J5").setValue("A");
+
+		// Rows 101–103, cols B–C: cache-invalidation data
+		ws.getRange2("B101").setValue("10");
+		ws.getRange2("B102").setValue("20");
+		ws.getRange2("B103").setValue("30");
+		ws.getRange2("C101").setValue("5");
+		ws.getRange2("C102").setValue("1");
+		ws.getRange2("C103").setValue("2");
+
+		// Rows 401–406, cols A–B: blank/<> criteria data
+		// A401=apple, A402=empty, A403=banana, A404=empty, A405=apple, A406=cherry
+		ws.getRange2("A401").setValue("apple");
+		ws.getRange2("A403").setValue("banana");
+		ws.getRange2("A405").setValue("apple");
+		ws.getRange2("A406").setValue("cherry");
+		ws.getRange2("B401").setValue("10");
+		ws.getRange2("B402").setValue("3");
+		ws.getRange2("B403").setValue("8");
+		ws.getRange2("B404").setValue("2");
+		ws.getRange2("B405").setValue("5");
+		ws.getRange2("B406").setValue("7");
+
+		// Rows 410–415, cols A–B: string-encoded number criteria
+		// A410='5, A411='2, A412='8, A413='1, A414='6, A415=empty
+		ws.getRange2("A410").setValue("'5");
+		ws.getRange2("A411").setValue("'2");
+		ws.getRange2("A412").setValue("'8");
+		ws.getRange2("A413").setValue("'1");
+		ws.getRange2("A414").setValue("'6");
+		ws.getRange2("B410").setValue("10");
+		ws.getRange2("B411").setValue("20");
+		ws.getRange2("B412").setValue("30");
+		ws.getRange2("B413").setValue("40");
+		ws.getRange2("B414").setValue("50");
+		ws.getRange2("B415").setValue("60");
+
+		// Rows 420–426, col A: same-range AND / impossible-AND data
+		ws.getRange2("A420").setValue("1");
+		ws.getRange2("A421").setValue("3");
+		ws.getRange2("A422").setValue("5");
+		ws.getRange2("A423").setValue("7");
+		ws.getRange2("A424").setValue("9");
+		ws.getRange2("A425").setValue("4");
+		ws.getRange2("A426").setValue("6");
+
+		// Rows 440–444, cols A–B: boolean TRUE/FALSE criteria
+		ws.getRange2("A440").setValue("TRUE");
+		ws.getRange2("A441").setValue("FALSE");
+		ws.getRange2("A442").setValue("TRUE");
+		ws.getRange2("A443").setValue("1");
+		ws.getRange2("A444").setValue("text");
+		ws.getRange2("B440").setValue("10");
+		ws.getRange2("B441").setValue("3");
+		ws.getRange2("B442").setValue("8");
+		ws.getRange2("B443").setValue("5");
+		ws.getRange2("B444").setValue("7");
+
+		// Rows 450–454, cols A–B: error criteria data
+		ws.getRange2("A450").setValue("=NA()");
+		ws.getRange2("A451").setValue("#N/A");
+		ws.getRange2("A452").setValue("=1/0");
+		ws.getRange2("A453").setValue("5");
+		ws.getRange2("A454").setValue("text");
+		ws.getRange2("B450").setValue("10");
+		ws.getRange2("B451").setValue("20");
+		ws.getRange2("B452").setValue("30");
+		ws.getRange2("B453").setValue("40");
+		ws.getRange2("B454").setValue("50");
+
+		// Rows 460–465, cols A–B: "<>*" non-text criteria data
+		// A460=apple(text), A461=empty, A462=banana(text), A463=5(num), A464=empty, A465=cherry(text)
+		ws.getRange2("A460").setValue("apple");
+		ws.getRange2("A462").setValue("banana");
+		ws.getRange2("A463").setValue("5");
+		ws.getRange2("A465").setValue("cherry");
+		ws.getRange2("B460").setValue("10");
+		ws.getRange2("B461").setValue("20");
+		ws.getRange2("B462").setValue("30");
+		ws.getRange2("B463").setValue("40");
+		ws.getRange2("B464").setValue("50");
+		ws.getRange2("B465").setValue("60");
+
+		// Rows 500–503, cols A–B: apostrophe cell with blank/non-blank criteria
+		// A500=empty, A501=apostrophe(empty), A502=text, A503=0(num)
+		ws.getRange2("A501").setValue("'");
+		ws.getRange2("A502").setValue("text");
+		ws.getRange2("A503").setValue("0");
+		ws.getRange2("B500").setValue("10");
+		ws.getRange2("B501").setValue("20");
+		ws.getRange2("B502").setValue("30");
+		ws.getRange2("B503").setValue("40");
+
+		// Rows 106–109, cols D–E: SINGLE()/dynamic-array data
+		ws.getRange2("D106").setValue("1");
+		ws.getRange2("D107").setValue("2");
+		ws.getRange2("E106").setValue("10");
+		ws.getRange2("E107").setValue("20");
+		ws.getRange2("E108").setValue("30");
+		ws.getRange2("E109").setValue("40");
+
+		// Rows 466–470, cols A–B: tilde wildcard data
+		ws.getRange2("A466").setValue("a*c");
+		ws.getRange2("A467").setValue("aac");
+		ws.getRange2("A468").setValue("a~c");
+		ws.getRange2("A469").setValue("a??c");
+		ws.getRange2("A470").setValue("abc");
+		ws.getRange2("B466").setValue("10");
+		ws.getRange2("B467").setValue("20");
+		ws.getRange2("B468").setValue("30");
+		ws.getRange2("B469").setValue("40");
+		ws.getRange2("B470").setValue("50");
+
+		// Rows 471–475, cols A–B: case-insensitive data
+		ws.getRange2("A471").setValue("Apple");
+		ws.getRange2("A472").setValue("APPLE");
+		ws.getRange2("A473").setValue("apple");
+		ws.getRange2("A474").setValue("BANANA");
+		ws.getRange2("A475").setValue("banana");
+		ws.getRange2("B471").setValue("10");
+		ws.getRange2("B472").setValue("5");
+		ws.getRange2("B473").setValue("8");
+		ws.getRange2("B474").setValue("3");
+		ws.getRange2("B475").setValue("7");
+
+		// Rows 476–481, cols A–B: empty cell ref data (empty ref = 0)
+		// A477 and A480 intentionally left empty
+		ws.getRange2("A476").setValue("0");
+		ws.getRange2("A478").setValue("1");
+		ws.getRange2("A479").setValue("0");
+		ws.getRange2("A481").setValue("2");
+		ws.getRange2("B476").setValue("10");
+		ws.getRange2("B477").setValue("20");
+		ws.getRange2("B478").setValue("30");
+		ws.getRange2("B479").setValue("40");
+		ws.getRange2("B480").setValue("50");
+		ws.getRange2("B481").setValue("60");
+		// B482 intentionally left empty — used as empty criteria reference
+
+		// Rows 484–486, cols C–H: multi-column criteria data
+		ws.getRange2("C484").setValue("1");
+		ws.getRange2("D484").setValue("2");
+		ws.getRange2("E484").setValue("3");
+		ws.getRange2("F484").setValue("x");
+		ws.getRange2("G484").setValue("y");
+		ws.getRange2("H484").setValue("x");
+		ws.getRange2("C485").setValue("5");
+		ws.getRange2("D485").setValue("0");
+		ws.getRange2("E485").setValue("8");
+		ws.getRange2("F485").setValue("x");
+		ws.getRange2("G485").setValue("x");
+		ws.getRange2("H485").setValue("z");
+		ws.getRange2("C486").setValue("4");
+		ws.getRange2("D486").setValue("6");
+		ws.getRange2("E486").setValue("2");
+		ws.getRange2("F486").setValue("y");
+		ws.getRange2("G486").setValue("x");
+		ws.getRange2("H486").setValue("x");
+
+		// Rows 491–494, cols A–B: bounded error-string data (text strings that look like errors)
+		ws.getRange2("A491").setValue("#N/A");
+		ws.getRange2("A492").setValue("#DIV/0!");
+		ws.getRange2("A493").setValue("#VALUE!");
+		ws.getRange2("A494").setValue("5");
+		ws.getRange2("B491").setValue("10");
+		ws.getRange2("B492").setValue("20");
+		ws.getRange2("B493").setValue("30");
+		ws.getRange2("B494").setValue("40");
+
+		// Rows 495–496, cols A–B: date-string data
+		ws.getRange2("A495").setValue("12/1");
+		ws.getRange2("A496").setValue("12/1");
+		ws.getRange2("B495").setValue("10");
+		ws.getRange2("B496").setValue("20");
+
+		// Rows 505–509, cols A–B: array-output data
+		ws.getRange2("A505").setValue("1");
+		ws.getRange2("A506").setValue("2");
+		ws.getRange2("A507").setValue("3");
+		ws.getRange2("A508").setValue("1");
+		ws.getRange2("A509").setValue("2");
+		ws.getRange2("B505").setValue("10");
+		ws.getRange2("B506").setValue("20");
+		ws.getRange2("B507").setValue("10");
+		ws.getRange2("B508").setValue("10");
+		ws.getRange2("B509").setValue("20");
+
+		// Sheet2 data for 3D criteria tests
+		const ws2 = getSecondSheet();
+		ws2.getRange2("A1:C5").cleanAll();
+		ws2.getRange2("A1").setValue("5");
+		ws2.getRange2("A2").setValue("10");
+		ws2.getRange2("A3").setValue("5");
+		ws2.getRange2("A4").setValue("15");
+		ws2.getRange2("A5").setValue("10");
+		ws2.getRange2("B1").setValue("Apple");
+		ws2.getRange2("B2").setValue("Banana");
+		ws2.getRange2("B3").setValue("Apple");
+		ws2.getRange2("B4").setValue("Cherry");
+		ws2.getRange2("B5").setValue("Banana");
+		ws2.getRange2("C1").setValue("10");
+		ws2.getRange2("C2").setValue("20");
+		ws2.getRange2("C3").setValue("30");
+		ws2.getRange2("C4").setValue("40");
+		ws2.getRange2("C5").setValue("50");
+
+		// Positive Cases:
+
+		// Case #1: Area, String. Wildcard "A*" + string criteria
+		// Apples+Artichokes match A*; Tom rows: A2=5, A4=15 → sum=20
+		oParser = new parserFormula("SUMIFS(A2:A9, B2:B9, \"=A*\", C2:C9, \"Tom\")", "A10", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 20);
+
+		// Case #2: Area, String. Inequality "<>Bananas" + string criteria
+		// Non-Bananas+Tom rows: A2=5, A4=15, A8=10 → sum=30
+		oParser = new parserFormula("SUMIFS(A2:A9, B2:B9, \"<>Bananas\", C2:C9, \"Tom\")", "A11", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 30);
+
+		// Case #3: Area, Number. 5 criteria pairs — one row matches all
+		// E5=40: F5=Red, G5=Large, H5=2024, I5=A → sum=40
+		oParser = new parserFormula("SUMIFS(E2:E7, F2:F7, \"Red\", G2:G7, \"Large\", H2:H7, 2024, I2:I7, \"A\", I2:I7, \"*\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS with 5 criteria pairs");
+		assert.strictEqual(oParser.calculate().getValue(), 40, "SUMIFS with 5 criteria pairs");
+
+		// Case #4: Area, Number. 5 criteria pairs — no row matches all → 0
+		oParser = new parserFormula("SUMIFS(E2:E7, F2:F7, \"Red\", G2:G7, \"Small\", H2:H7, 2024, I2:I7, \"A\", I2:I7, \"Z\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS with 5 criteria pairs - no match");
+		assert.strictEqual(oParser.calculate().getValue(), 0, "SUMIFS with 5 criteria pairs - no match");
+
+		// Case #5: Area, Number. OR via two SUMIFS calls (Red+Large+2024+A) + (Blue+Medium+2025+B)
+		// Row5=40, Row6=50 → total=90
+		oParser = new parserFormula("SUMIFS(E2:E7, F2:F7, \"Red\", G2:G7, \"Large\", H2:H7, 2024, I2:I7, \"A\")" +
+			"+SUMIFS(E2:E7, F2:F7, \"Blue\", G2:G7, \"Medium\", H2:H7, 2025, I2:I7, \"B\")", "A1", ws);
+		assert.ok(oParser.parse(), "Multiple SUMIFS with 4 criteria pairs");
+		assert.strictEqual(oParser.calculate().getValue(), 90, "Multiple SUMIFS with 4 criteria pairs");
+
+		// Case #6: Area, Ref. Cell references as criteria (J2=Red, J3=Large, J4=2024, J5=A)
 		oParser = new parserFormula("SUMIFS(E2:E7, F2:F7, J2, G2:G7, J3, H2:H7, J4, I2:I7, J5, I2:I7, \"*\")", "A1", ws);
 		assert.ok(oParser.parse(), "SUMIFS with cell references for all criteria");
 		assert.strictEqual(oParser.calculate().getValue(), 40, "SUMIFS with cell references for all criteria");
 
-		// Test with complex criteria expressions
+		// Case #7: Area, String. Concatenated criteria using & operator
+		// Red AND any size AND >2023 AND A AND <>Z → row5 only → 40
 		oParser = new parserFormula("SUMIFS(E2:E7, F2:F7, \"Red\", G2:G7, \"*\", H2:H7, \">\" & 2023, I2:I7, \"A\", I2:I7, \"<>Z\")", "A1", ws);
 		assert.ok(oParser.parse(), "SUMIFS with complex criteria expressions");
 		assert.strictEqual(oParser.calculate().getValue(), 40, "SUMIFS with complex criteria expressions");
 
-
-		// Test with criteria that select a single row
+		// Case #8: Area, Number. Criteria selecting a single row by sum-range value
 		oParser = new parserFormula("SUMIFS(E2:E7, F2:F7, \"Red\", G2:G7, \"Large\", H2:H7, 2024, I2:I7, \"A\", E2:E7, 40)", "A1", ws);
 		assert.ok(oParser.parse(), "SUMIFS with criteria selecting one row");
 		assert.strictEqual(oParser.calculate().getValue(), 40, "SUMIFS with criteria selecting one row");
+
+		// Case #9: Area, Number. Numeric comparison criteria on two ranges
+		// E>20 AND H>=2024 → rows 4,5,6,7 → E4+E5+E6+E7 = 30+40+50+60 = 180
+		oParser = new parserFormula("SUMIFS(E2:E7, E2:E7, \">20\", H2:H7, \">=2024\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS numeric comparison criteria");
+		assert.strictEqual(oParser.calculate().getValue(), 180, "SUMIFS numeric comparison criteria");
+
+		// Case #10: Area, String. Same range used with two criteria (AND logic)
+		// I=A AND I matches * → rows 2,5 → E2+E5 = 10+40 = 50
+		oParser = new parserFormula("SUMIFS(E2:E7, I2:I7, \"A\", I2:I7, \"*\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS same range AND criteria");
+		assert.strictEqual(oParser.calculate().getValue(), 50, "SUMIFS same range AND criteria");
+
+		// Case #11: Area, Number. Same range with concatenated numeric bounds
+		// H>=2024 AND H<2025 → rows 4,5 → E4+E5 = 30+40 = 70
+		oParser = new parserFormula("SUMIFS(E2:E7, H2:H7, \">=\"&2024, H2:H7, \"<\"&2025)", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS same range concatenated criteria");
+		assert.strictEqual(oParser.calculate().getValue(), 70, "SUMIFS same range concatenated criteria");
+
+		// Case #12: Area, Number. Same range, impossible AND condition → 0
+		// E>40 AND E<20 → no row satisfies both → 0
+		oParser = new parserFormula("SUMIFS(E2:E7, E2:E7, \">40\", E2:E7, \"<20\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS same range impossible AND");
+		assert.strictEqual(oParser.calculate().getValue(), 0, "SUMIFS same range impossible AND");
+
+		// Case #13: Area, String. "" criteria sums where criteria_range is empty
+		// A402=empty, A404=empty → B402+B404 = 3+2 = 5
+		oParser = new parserFormula("SUMIFS(B401:B406, A401:A406, \"\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS blank criteria sums empty cells");
+		assert.strictEqual(oParser.calculate().getValue(), 5, "SUMIFS blank criteria sums empty cells");
+
+		// Case #14: Area, String. "<>" criteria sums where criteria_range is non-empty
+		// A401=apple, A403=banana, A405=apple, A406=cherry → B401+B403+B405+B406 = 10+8+5+7 = 30
+		oParser = new parserFormula("SUMIFS(B401:B406, A401:A406, \"<>\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS non-blank criteria sums non-empty cells");
+		assert.strictEqual(oParser.calculate().getValue(), 30, "SUMIFS non-blank criteria sums non-empty cells");
+
+		// Case #15: Area, String + Number. "<>value" plus numeric second criteria
+		// non-apple AND B>5: banana(8) + cherry(7) = 15
+		oParser = new parserFormula("SUMIFS(B401:B406, A401:A406, \"<>apple\", B401:B406, \">5\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS inequality with numeric second criteria");
+		assert.strictEqual(oParser.calculate().getValue(), 15, "SUMIFS inequality with numeric second criteria");
+
+		// Case #16: Area, Boolean. Boolean TRUE criteria matches boolean cells only, not number 1
+		// A440=TRUE→10, A442=TRUE→8; A443=1 does NOT match boolean TRUE → sum=18
+		oParser = new parserFormula("SUMIFS(B440:B444, A440:A444, TRUE)", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS boolean TRUE criteria");
+		assert.strictEqual(oParser.calculate().getValue(), 18, "SUMIFS boolean TRUE criteria");
+
+		// Case #17: Area, Boolean. Boolean FALSE criteria
+		// A441=FALSE→3
+		oParser = new parserFormula("SUMIFS(B440:B444, A440:A444, FALSE)", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS boolean FALSE criteria");
+		assert.strictEqual(oParser.calculate().getValue(), 3, "SUMIFS boolean FALSE criteria");
+
+		// Case #18: Area, String. "#N/A" text criteria matches formula #N/A error and text "#N/A"
+		// A450=NA()→10, A451="#N/A"→20 → sum=30
+		oParser = new parserFormula("SUMIFS(B450:B454, A450:A454, \"#N/A\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS #N/A text criteria matches error and text");
+		assert.strictEqual(oParser.calculate().getValue(), 30, "SUMIFS #N/A text criteria matches error and text");
+
+		// Case #19: Area, Formula. NA() function as criteria
+		oParser = new parserFormula("SUMIFS(B450:B454, A450:A454, NA())", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS NA() as criteria");
+		assert.strictEqual(oParser.calculate().getValue(), 30, "SUMIFS NA() as criteria");
+
+		// Case #20: Area, Number. String-encoded numbers do NOT match numeric criteria
+		// A410='5 (text), ">3" numeric → no match → 0
+		oParser = new parserFormula("SUMIFS(B410:B415, A410:A415, \">3\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS numeric criteria does not match text-formatted numbers");
+		assert.strictEqual(oParser.calculate().getValue(), 0, "SUMIFS numeric criteria does not match text-formatted numbers");
+
+		// Case #21: Area, String. Text criteria "5" matches string-encoded number '5
+		// A410='5 matches text "5" → B410=10
+		oParser = new parserFormula("SUMIFS(B410:B415, A410:A415, \"5\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS text criteria matches text-formatted number");
+		assert.strictEqual(oParser.calculate().getValue(), 10, "SUMIFS text criteria matches text-formatted number");
+
+		// Case #22: Area, String. "<>*" sums non-text cells (empties and numbers)
+		// A461=empty→20, A463=5(num)→40, A464=empty→50; text cells excluded → sum=110
+		oParser = new parserFormula("SUMIFS(B460:B465, A460:A465, \"<>*\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS \"<>*\" sums non-text cells");
+		assert.strictEqual(oParser.calculate().getValue(), 110, "SUMIFS \"<>*\" sums non-text cells");
+
+		// Case #23: Area, String. "" criteria treats apostrophe cell as empty
+		// A500=empty→10, A501=apostrophe(empty)→20; text and number excluded → sum=30
+		oParser = new parserFormula("SUMIFS(B500:B503, A500:A503, \"\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS blank criteria: apostrophe cell treated as empty");
+		assert.strictEqual(oParser.calculate().getValue(), 30, "SUMIFS blank criteria: apostrophe cell treated as empty");
+
+		// Case #24: Area, String. "<>" criteria excludes apostrophe cell (treated as empty)
+		// A502=text→30, A503=0(num)→40 → sum=70
+		oParser = new parserFormula("SUMIFS(B500:B503, A500:A503, \"<>\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS non-blank criteria: apostrophe cell treated as not empty");
+		assert.strictEqual(oParser.calculate().getValue(), 90, "SUMIFS non-blank criteria: apostrophe cell treated as not empty");
+
+		// Case #25: Area3D, Number. 3D criteria range on Sheet2
+		// Sheet2 A1=5, A3=5 → C1=10, C3=30 → sum=40
+		oParser = new parserFormula("SUMIFS(Sheet2!C1:C5, Sheet2!A1:A5, 5)", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS 3D criteria range");
+		assert.strictEqual(oParser.calculate().getValue(), 40, "SUMIFS 3D criteria range");
+
+		// Case #26: Area, Number. Cache invalidation — change criteria cell value between evaluations
+		// C101=5>3 → B101=10; after C101←0: no match → 0
+		oParser = new parserFormula("SUMIFS(B101:B103, C101:C103, \">3\")", "E1", ws);
+		assert.ok(oParser.parse(), "SUMIFS cache invalidation - before change");
+		assert.strictEqual(oParser.calculate().getValue(), 10, "SUMIFS cache: C101=5 → sum=10");
+		ws.getRange2("C101").setValue("0");
+		assert.strictEqual(oParser.calculate().getValue(), 0, "SUMIFS cache: C101=0 → sum=0");
+
+		// Case #27: Area, String. "*" matches only non-empty text cells
+		// A460=apple→10, A462=banana→30, A465=cherry→60; empty and numeric excluded → 100
+		oParser = new parserFormula("SUMIFS(B460:B465, A460:A465, \"*\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS \"*\" matches only non-empty text");
+		assert.strictEqual(oParser.calculate().getValue(), 100, "SUMIFS \"*\" matches only non-empty text");
+
+		// Case #28: Area, String. Suffix wildcard "*le" matches only "apple"
+		oParser = new parserFormula("SUMIFS(B460:B465, A460:A465, \"*le\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS suffix wildcard \"*le\"");
+		assert.strictEqual(oParser.calculate().getValue(), 10, "SUMIFS suffix wildcard \"*le\"");
+
+		// Case #29: Area, String. "a~*c" — tilde-escaped star matches literal "a*c" only
+		oParser = new parserFormula("SUMIFS(B466:B470, A466:A470, \"a~*c\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS tilde-escaped star matches literal a*c");
+		assert.strictEqual(oParser.calculate().getValue(), 10, "SUMIFS tilde-escaped star matches literal a*c");
+
+		// Case #30: Area, String. "a*c" unescaped matches all 5 values
+		// a*c(10)+aac(20)+a~c(30)+a??c(40)+abc(50) = 150
+		oParser = new parserFormula("SUMIFS(B466:B470, A466:A470, \"a*c\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS unescaped wildcard matches all");
+		assert.strictEqual(oParser.calculate().getValue(), 150, "SUMIFS unescaped wildcard matches all");
+
+		// Case #31: Area, String. Case-insensitive: "apple" matches Apple, APPLE, apple
+		// 10+5+8 = 23
+		oParser = new parserFormula("SUMIFS(B471:B475, A471:A475, \"apple\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS case-insensitive exact match");
+		assert.strictEqual(oParser.calculate().getValue(), 23, "SUMIFS case-insensitive exact match");
+
+		// Case #32: Area, String + Number. Case-insensitive + numeric second criteria
+		// Apple→10>5 YES, APPLE→5 NOT>5, apple→8>5 YES → 18
+		oParser = new parserFormula("SUMIFS(B471:B475, A471:A475, \"Apple\", B471:B475, \">5\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS case-insensitive with numeric second criteria");
+		assert.strictEqual(oParser.calculate().getValue(), 18, "SUMIFS case-insensitive with numeric second criteria");
+
+		// Case #33: Area, String. Case-insensitive wildcard "*PLE" matches all three "apple" variants
+		oParser = new parserFormula("SUMIFS(B471:B475, A471:A475, \"*PLE\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS case-insensitive wildcard");
+		assert.strictEqual(oParser.calculate().getValue(), 23, "SUMIFS case-insensitive wildcard");
+
+		// Case #34: Area, Ref. Empty cell reference as criteria = 0
+		// A476=0→10, A479=0→40; B482 empty → criteria=0 → sum=50
+		oParser = new parserFormula("SUMIFS(B476:B481, A476:A481, B482)", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS empty cell ref as criteria = 0");
+		assert.strictEqual(oParser.calculate().getValue(), 50, "SUMIFS empty cell ref as criteria = 0");
+
+		// Case #35: Area(multi-col), String. Multi-column sum/criteria ranges
+		// "x" matches: C484(F=x)=1, E484(H=x)=3, C485(F=x)=5, D485(G=x)=0, D486(G=x)=6, E486(H=x)=2 → 17
+		oParser = new parserFormula("SUMIFS(C484:E486, F484:H486, \"x\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS multi-column ranges");
+		assert.strictEqual(oParser.calculate().getValue(), 17, "SUMIFS multi-column ranges");
+
+		// Case #36: Area, String. "<>#N/A" excludes both formula #N/A and text "#N/A"
+		// A450=NA()→10 excluded, A451="#N/A"→20 excluded → A452+A453+A454 = 30+40+50 = 120
+		oParser = new parserFormula("SUMIFS(B450:B454, A450:A454, \"<>#N/A\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS <>#N/A excludes error and text");
+		assert.strictEqual(oParser.calculate().getValue(), 120, "SUMIFS <>#N/A excludes error and text");
+
+		// Case #37: Area, String + Number. Error text criteria with numeric second criteria
+		// "#N/A" matches A450(NA()) and A451("#N/A"); B>10: only B451=20>10 → sum=20
+		oParser = new parserFormula("SUMIFS(B450:B454, A450:A454, \"#N/A\", B450:B454, \">10\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS error criteria with numeric second criteria");
+		assert.strictEqual(oParser.calculate().getValue(), 20, "SUMIFS error criteria with numeric second criteria");
+
+		// Case #38: Area, String. String "TRUE" matches boolean TRUE cells
+		// A440=TRUE→10, A442=TRUE→8 → sum=18
+		oParser = new parserFormula("SUMIFS(B440:B444, A440:A444, \"TRUE\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS string \"TRUE\" matches boolean TRUE");
+		assert.strictEqual(oParser.calculate().getValue(), 18, "SUMIFS string \"TRUE\" matches boolean TRUE");
+
+		// Case #39: Area, Boolean + Number. Boolean TRUE criteria + numeric second criteria
+		// A440=TRUE,B440=10>5 YES; A442=TRUE,B442=8>5 YES → sum=18
+		oParser = new parserFormula("SUMIFS(B440:B444, A440:A444, TRUE, B440:B444, \">5\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS boolean TRUE with numeric second criteria");
+		assert.strictEqual(oParser.calculate().getValue(), 18, "SUMIFS boolean TRUE with numeric second criteria");
+
+		// Case #40: Area, String. "a~~c" does not match "a~c" (~~ is not treated as tilde escape)
+		oParser = new parserFormula("SUMIFS(B466:B470, A466:A470, \"a~~c\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS ~~ tilde escape gives 0");
+		assert.strictEqual(oParser.calculate().getValue(), 0, "SUMIFS ~~ tilde escape gives 0");
+
+		// Case #41: Area, String. Empty operator strings return 0 (regression: was TypeError crash)
+		oParser = new parserFormula("SUMIFS(B460:B465, A460:A465, \"<\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS empty operator \"<\" returns 0");
+		assert.strictEqual(oParser.calculate().getValue(), 0, "SUMIFS empty operator \"<\" returns 0");
+		oParser = new parserFormula("SUMIFS(B460:B465, A460:A465, \">=\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS empty operator \">=\" returns 0");
+		assert.strictEqual(oParser.calculate().getValue(), 0, "SUMIFS empty operator \">=\" returns 0");
+
+		// Case #42: Area, Formula. SINGLE() — no intersection at row 1 → criteria=0, no match → 0
+		oParser = new parserFormula("SUMIFS(E106:E109, D106:D109, SINGLE(D106:D109))", "E1", ws);
+		assert.ok(oParser.parse(), "SUMIFS SINGLE() no intersection");
+		assert.strictEqual(oParser.calculate().getValue(), 0, "SUMIFS SINGLE() no intersection → 0");
+
+		// Case #43: Area, Area. Dynamic array: range as criteria without setArrayFormulaRef
+		// D106=1 → first element → sum where D=1 → E106=10; no dynamic: 0
+		var resDynamic = AscCommonExcel.bIsSupportDynamicArrays ? 10 : 0;
+		oParser = new parserFormula("SUMIFS(E106:E109, D106:D109, D106:D109)", "E1", ws);
+		assert.ok(oParser.parse(), "SUMIFS range criteria without array context");
+		assert.strictEqual(oParser.calculate(null, null, null, null, null, null, true).getValue(), resDynamic, "SUMIFS range criteria without array context");
+
+		// Negative Cases:
+
+		// Case #1: MultiColumn, String. Multi-column sum range → #VALUE!
+		oParser = new parserFormula("SUMIFS(C:D, E:E, $H2)", "A11", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), "#VALUE!");
+
+		// for bug 58684
+		let calculateResult = new AscCommonExcel.CalculateResult(true);
+
+		// Case #2: Array, Area, Ref. Array literal as sum_range → #NULL!
+		oParser = new parserFormula("SUMIFS({1,2,3},A2:A9,A2)", "A11", ws);
+		assert.ok(oParser.parse(), 'SUMIFS({1,2,3},A2:A9,A2) - wrong argument type check');
+		assert.strictEqual(oParser.calculate(null, null, null, null, calculateResult).getValue(), "#NULL!", 'Result of SUMIFS({1,2,3},A2:A9,A2) - wrong argument type check');
+
+		// Case #3: Formula, Area, Ref. Formula result as sum_range → #NULL!
+		oParser = new parserFormula("SUMIFS(MONTH(A2:A9),A2:A9,A2)", "A11", ws);
+		assert.ok(oParser.parse(), 'SUMIFS(MONTH(A2:A9),A2:A9,A2) - wrong argument type check');
+		assert.strictEqual(oParser.calculate(null, null, null, null, calculateResult).getValue(), "#NULL!", 'Result of SUMIFS(MONTH(A2:A9),A2:A9,A2) - wrong argument type check');
+
+		// Case #4: Area, Array, Ref. Array literal as criteria_range → #NULL!
+		oParser = new parserFormula("SUMIFS(A2:A9,{1,2,3},A2)", "A11", ws);
+		assert.ok(oParser.parse(), 'SUMIFS(A2:A9,{1,2,3},A2) - wrong argument type check');
+		assert.strictEqual(oParser.calculate(null, null, null, null, calculateResult).getValue(), "#NULL!", 'Result of SUMIFS(A2:A9,{1,2,3},A2) - wrong argument type check');
+
+		// Case #5: Area, Formula, Ref. Expression as criteria_range → #NULL!
+		oParser = new parserFormula("SUMIFS(A2:A9,A2:A9*2,A2)", "A11", ws);
+		assert.ok(oParser.parse(), 'SUMIFS(A2:A9,A2:A9*2,A2) - wrong argument type check');
+		assert.strictEqual(oParser.calculate(null, null, null, null, calculateResult).getValue(), "#NULL!", 'Result of SUMIFS(A2:A9,A2:A9*2,A2) - wrong argument type check');
+
+		// Case #6: Area, Area, Ref, Array, Ref. Array literal as second criteria_range → #NULL!
+		oParser = new parserFormula("SUMIFS(A2:A9,A2:A9,A2,{1,2,3},A2)", "A11", ws);
+		assert.ok(oParser.parse(), 'SUMIFS(A2:A9,A2:A9,A2,{1,2,3},A2) - wrong argument type check');
+		assert.strictEqual(oParser.calculate(null, null, null, null, calculateResult).getValue(), "#NULL!", 'Result of SUMIFS(A2:A9,A2:A9,A2,{1,2,3},A2) - wrong argument type check');
+
+		// Case #7: Area, Area, Ref, Formula, Ref. Expression as second criteria_range → #NULL!
+		oParser = new parserFormula("SUMIFS(A2:A9,A2:A9,A2,A2:A9*2,A2)", "A11", ws);
+		assert.ok(oParser.parse(), 'SUMIFS(A2:A9,A2:A9,A2,A2:A9*2,A2) - wrong argument type check');
+		assert.strictEqual(oParser.calculate(null, null, null, null, calculateResult).getValue(), "#NULL!", 'Result of SUMIFS(A2:A9,A2:A9,A2,A2:A9*2,A2) - wrong argument type check');
+
+		// Bounded Cases:
+
+		// Case #1: Area, String. Error-string ">#N/A" — text error strings have no numeric order → 0
+		oParser = new parserFormula("SUMIFS(B491:B494, A491:A494, \">#N/A\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS error-string >#N/A");
+		assert.strictEqual(oParser.calculate().getValue(), 0, "SUMIFS error-string >#N/A → 0");
+
+		// Case #2: Area, String. Error-string "<#DIV/0!" — no numeric order → 0
+		oParser = new parserFormula("SUMIFS(B491:B494, A491:A494, \"<#DIV/0!\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS error-string <#DIV/0!");
+		assert.strictEqual(oParser.calculate().getValue(), 0, "SUMIFS error-string <#DIV/0! → 0");
+
+		// Case #3: Area, String. Error-string "<>#N/A" — excludes "#N/A", keeps rest
+		// A492+A493+A494 = 20+30+40 = 90
+		oParser = new parserFormula("SUMIFS(B491:B494, A491:A494, \"<>#N/A\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS error-string <>#N/A");
+		assert.strictEqual(oParser.calculate().getValue(), 90, "SUMIFS error-string <>#N/A → 90");
+
+		// Case #4: Area, String. Error-string ">=#VALUE!".
+		// setValue("#N/A"/"#DIV/0!"/"#VALUE!") stores cells as CellValueType.Error;
+		// setValue("5") stores cell as Number. Errors compare by numeric error code
+		// (cErrorLocal order: div=1, value=2, na=6). For >= value(2):
+		//   A491=na(6) ≥ 2 ✓ → +B491=10
+		//   A492=div(1) ≥ 2 ✗
+		//   A493=value(2) ≥ 2 ✓ → +B493=30
+		//   A494=Number(5) is in number column → not compared against an error criteria
+		// → 10 + 30 = 40
+		oParser = new parserFormula("SUMIFS(B491:B494, A491:A494, \">=#VALUE!\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS error-string >=#VALUE!");
+		assert.strictEqual(oParser.calculate().getValue(), 40, "SUMIFS error-string >=#VALUE! → 40");
+
+		// Case #5: Area, String. Date-string exact match "12/1"
+		oParser = new parserFormula("SUMIFS(B495:B496, A495:A496, \"12/1\")", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS date-string exact match");
+		assert.strictEqual(oParser.calculate().getValue(), 30, "SUMIFS date-string \"12/1\" → 30");
+
+		// Array-output Cases:
+
+		// Case #1: Area, Array(1×3). Horizontal array literal as criteria → 1×3 result
+		// {1}: A505+A508=2 → sum=10+10=20; {2}: A506+A509=2 → sum=20+20=40; {3}: A507=1 → sum=10
+		oParser = new parserFormula("SUMIFS(B505:B509, A505:A509, {1,2,3})", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS array criteria {1,2,3}");
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 20, "SUMIFS {1,2,3}: [0,0]=20");
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 1).getValue(), 40, "SUMIFS {1,2,3}: [0,1]=40");
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 2).getValue(), 10, "SUMIFS {1,2,3}: [0,2]=10");
+
+		// Case #2: Area, Array(3×1). Vertical array literal as criteria → 3×1 result
+		oParser = new parserFormula("SUMIFS(B505:B509, A505:A509, {1;2;3})", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS array criteria {1;2;3}");
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 20, "SUMIFS {1;2;3}: [0,0]=20");
+		assert.strictEqual(oParser.calculate().getElementRowCol(1, 0).getValue(), 40, "SUMIFS {1;2;3}: [1,0]=40");
+		assert.strictEqual(oParser.calculate().getElementRowCol(2, 0).getValue(), 10, "SUMIFS {1;2;3}: [2,0]=10");
+
+		// Case #3: Area, Range(3×1). Range reference as criteria → 3×1 result
+		oParser = new parserFormula("SUMIFS(B505:B509, A505:A509, A505:A507)", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS range criteria A505:A507");
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 20, "SUMIFS range criteria: [0,0]=20");
+		assert.strictEqual(oParser.calculate().getElementRowCol(1, 0).getValue(), 40, "SUMIFS range criteria: [1,0]=40");
+		assert.strictEqual(oParser.calculate().getElementRowCol(2, 0).getValue(), 10, "SUMIFS range criteria: [2,0]=10");
+
+		// Case #4: Area+Area, Array(2×1)+Array(2×1). Two equal-dimension criteria arrays → 2×1 result
+		// (1,10): A505+A508 → B=10 → 10+10=20; (2,20): A506+A509 → B=20 → 20+20=40
+		oParser = new parserFormula("SUMIFS(B505:B509, A505:A509, {1;2}, B505:B509, {10;20})", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS two matching 2×1 array criteria");
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 20, "SUMIFS two arrays: [0,0]=20");
+		assert.strictEqual(oParser.calculate().getElementRowCol(1, 0).getValue(), 40, "SUMIFS two arrays: [1,0]=40");
+
+		// Case #5: Area, Area. Array formula — each D element as criteria (COUNTIFS #19 equivalent)
+		// D106=1→E106=10, D107=2→E107=20, D108=empty(0 criteria)→0, D109=empty→0
+		oParser = new parserFormula("SUMIFS(E106:E109, D106:D109, D106:D109)", "E1", ws);
+		oParser.setArrayFormulaRef(ws.getRange2("AD6:AF9").bbox);
+		assert.ok(oParser.parse(), "SUMIFS array formula range criteria");
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 10, "SUMIFS array formula range: [0,0]=10");
+		assert.strictEqual(oParser.calculate().getElementRowCol(1, 0).getValue(), 20, "SUMIFS array formula range: [1,0]=20");
+		assert.strictEqual(oParser.calculate().getElementRowCol(2, 0).getValue(), 0, "SUMIFS array formula range: [2,0]=0");
+		assert.strictEqual(oParser.calculate().getElementRowCol(3, 0).getValue(), 0, "SUMIFS array formula range: [3,0]=0");
+
+		// Case #6: Area, Area. Array formula with &"" coerce (COUNTIFS #20 equivalent)
+		// "1"→10, "2"→20, ""→E108+E109=30+40=70, ""→70
+		oParser = new parserFormula("SUMIFS(E106:E109, D106:D109, D106:D109&\"\")", "E1", ws);
+		oParser.setArrayFormulaRef(ws.getRange2("AD6:AF9").bbox);
+		assert.ok(oParser.parse(), "SUMIFS array formula &\"\" coerce");
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 10, "SUMIFS &\"\" coerce: [0,0]=10");
+		assert.strictEqual(oParser.calculate().getElementRowCol(1, 0).getValue(), 20, "SUMIFS &\"\" coerce: [1,0]=20");
+		assert.strictEqual(oParser.calculate().getElementRowCol(2, 0).getValue(), 70, "SUMIFS &\"\" coerce: [2,0]=70");
+		assert.strictEqual(oParser.calculate().getElementRowCol(3, 0).getValue(), 70, "SUMIFS &\"\" coerce: [3,0]=70");
+
+		// Case #7: Area+Area, Array(3×1)+Array(1×2). Mismatched dims → 3×2 via broadcasting.
+		// [0,0]: A=1 AND B=10 → rows 505,508 → 10+10=20
+		// [0,1]: A=1 AND B=20 → no match → 0
+		// [1,0]: A=2 AND B=10 → no match → 0
+		// [2,0]: A=3 AND B=10 → row 507 (A507=3, B507=10) → 10
+		oParser = new parserFormula("SUMIFS(B505:B509, A505:A509, {1;2;3}, B505:B509, {10,20})", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS mismatched array dimensions");
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 20, "SUMIFS mismatched dims: [0,0]=20");
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 1).getValue(), 0, "SUMIFS mismatched dims: [0,1]=0");
+		assert.strictEqual(oParser.calculate().getElementRowCol(1, 0).getValue(), 0, "SUMIFS mismatched dims: [1,0]=0");
+		assert.strictEqual(oParser.calculate().getElementRowCol(2, 0).getValue(), 10, "SUMIFS mismatched dims: [2,0]=10 (row 507 matches)");
+
+		// Case #8: Area+Area, Range(3×1)+Scalar. Scalar broadcasts as 1×1 → 3×1 result.
+		// [0,0]: A=1 AND B=10 → rows 505,508 → 20
+		// [1,0]: A=2 AND B=10 → no match → 0
+		// [2,0]: A=3 AND B=10 → row 507 → 10
+		oParser = new parserFormula("SUMIFS(B505:B509, A505:A509, A505:A507, B505:B509, 10)", "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS range+scalar criteria");
+		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue(), 20, "SUMIFS range+scalar: [0,0]=20");
+		assert.strictEqual(oParser.calculate().getElementRowCol(1, 0).getValue(), 0, "SUMIFS range+scalar: [1,0]=0");
+		assert.strictEqual(oParser.calculate().getElementRowCol(2, 0).getValue(), 10, "SUMIFS range+scalar: [2,0]=10 (row 507 matches)");
+
 	});
 
 	QUnit.test("Test: \"SUMPRODUCT\"", function (assert) {
