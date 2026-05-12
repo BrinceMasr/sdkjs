@@ -317,5 +317,52 @@
 		assert.strictEqual(AscTest.JsApi.GetSheet(sheetName), null, "Deleted sheet is no longer accessible by name");
 	});
 
+	QUnit.test("GetHyperlinks - empty sheet", function (assert) {
+		const sheet = AscTest.JsApi.GetActiveSheet();
+		sheet.GetHyperlinks().forEach(function (h) { h.Delete(); });
+		let hyperlinks = sheet.GetHyperlinks();
+		assert.ok(Array.isArray(hyperlinks), "returns array");
+		assert.strictEqual(hyperlinks.length, 0, "sheet without hyperlinks returns empty array");
+	});
+
+	QUnit.test("GetHyperlinks - count and types", function (assert) {
+		const sheet = AscTest.JsApi.GetActiveSheet();
+		sheet.GetHyperlinks().forEach(function (h) { h.Delete(); });
+		sheet.SetHyperlink("A1", "https://onlyoffice.com", null, "tip1", "link1");
+		sheet.SetHyperlink("B1", "https://helpcenter.onlyoffice.com", null, "tip2", "link2");
+		let hyperlinks = sheet.GetHyperlinks();
+		assert.strictEqual(hyperlinks.length, 2, "returns 2 hyperlinks");
+		assert.strictEqual(hyperlinks[0].GetClassType(), "hyperlink", "first item is ApiHyperlink");
+		assert.strictEqual(hyperlinks[1].GetClassType(), "hyperlink", "second item is ApiHyperlink");
+	});
+
+	QUnit.test("GetHyperlinks - correct data mapping", function (assert) {
+		const sheet = AscTest.JsApi.GetActiveSheet();
+		sheet.GetHyperlinks().forEach(function (h) { h.Delete(); });
+		sheet.SetHyperlink("A1", "https://onlyoffice.com", null, "My Tip", "My Text");
+		sheet.SetHyperlink("B2", "", "Sheet1!C3", "Inner Tip", "Inner Text");
+		let hyperlinks = sheet.GetHyperlinks();
+		assert.strictEqual(hyperlinks.length, 2, "2 hyperlinks");
+		let addresses = hyperlinks.map(function (h) { return h.GetAddress(); });
+		assert.ok(addresses.indexOf("https://onlyoffice.com") !== -1, "external address present");
+		let subAddresses = hyperlinks.map(function (h) { return h.GetSubAddress(); });
+		assert.ok(subAddresses.indexOf("Sheet1!C3") !== -1, "sub-address present");
+		let tips = hyperlinks.map(function (h) { return h.GetScreenTip(); });
+		assert.ok(tips.indexOf("My Tip") !== -1, "screen tip present");
+		let texts = hyperlinks.map(function (h) { return h.GetTextToDisplay(); });
+		assert.ok(texts.indexOf("My Text") !== -1, "display text present");
+	});
+
+	QUnit.test("Hyperlinks property", function (assert) {
+		const sheet = AscTest.JsApi.GetActiveSheet();
+		sheet.GetHyperlinks().forEach(function (h) { h.Delete(); });
+		sheet.SetHyperlink("A1", "https://onlyoffice.com", null, "tip", "link");
+		sheet.SetHyperlink("B1", "https://helpcenter.onlyoffice.com", null, "tip2", "link2");
+		let viaMethod = sheet.GetHyperlinks();
+		let viaProp = sheet.Hyperlinks;
+		assert.strictEqual(viaProp.length, viaMethod.length, "Hyperlinks property returns same count as GetHyperlinks()");
+		assert.strictEqual(viaProp[0].GetAddress(), viaMethod[0].GetAddress(), "Hyperlinks[0] matches GetHyperlinks()[0]");
+	});
+
 })(window);
 
