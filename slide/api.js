@@ -8467,18 +8467,14 @@ background-repeat: no-repeat;\
 
 		if (this.isCloudSaveAsLocalToDrawingFormat(actionType, fileType))
 		{
-			this.localSaveToDrawingFormat(this.WordControl.m_oDrawingDocument.ToRendererPart(false, options.isPdfPrint), fileType);
+			this.localSaveToDrawingFormat(this.WordControl.m_oDrawingDocument.ToRendererPart(false, {isSelection: options.isPdfPrint}), fileType);
 			return true;
 		}
 
 		if (c_oAscFileType.PDF === fileType || c_oAscFileType.PDFA === fileType)
 		{
-			var isSelection = false;
-			if (options.advancedOptions && options.advancedOptions && (Asc.c_oAscPrintType.Selection === options.advancedOptions.asc_getPrintType()))
-				isSelection = true;
-
 			var dd             = this.WordControl.m_oDrawingDocument;
-			dataContainer.data = dd.ToRendererPart(oAdditionalData["nobase64"], isSelection);
+			dataContainer.data = dd.ToRendererPart(oAdditionalData["nobase64"], {printOptions: options.advancedOptions});
 		}
 		else if (this.insertDocumentUrlsData) {
 			var last = this.insertDocumentUrlsData.documents.shift();

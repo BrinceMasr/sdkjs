@@ -3023,15 +3023,73 @@ function CDrawingDocument()
 		this.m_oWordControl.m_oApi.ShowParaMarks = old_marks;
 		return ret;
 	};
+	this.toPrintRendererPart = function (start, end, printOptions) {
 
-	this.ToRendererPart = function(noBase64, printerOptions)
+
+		if (end == -1)
+		{
+			renderer.BeginPage(sizes.width, sizes.height);
+			renderer.EndPage()
+		}
+	};
+	this.toPDFRendererPart = function (isSelection) {
+
+		const oPresentation = this.m_oLogicDocument;
+		const watermark = this.m_oWordControl.m_oApi.watermarkDraw;
+		const sizes = this.m_oLogicDocument.GetSizesMM();
+
+		const pagescount = oPresentation.IsVisioEditor() ? oPresentation.GetSlidesCount() : oPresentation.Slides.length;
+		var start = this.m_lCurrentRendererPage;
+		var end   = pagescount - 1;
+
+		const renderer = this.m_oDocRenderer;
+		renderer.Memory.Seek(0);
+		renderer.VectorMemoryForPrint.ClearNoAttack();
+		renderer.DocInfo(this.m_oWordControl.m_oApi.asc_getCoreProps());
+
+		const printPreview = this.m_oWordControl.m_oApi.printPreview;
+		for (var i = start; i <= end; i++)
+		{
+			if ((isSelection && !oPresentation.IsMasterSlideMode()) && !this.m_oWordControl.Thumbnails.isSelectedPage(i))
+				continue;
+
+			if (oPresentation.IsVisioEditor())
+			{
+				renderer.BeginPage(sizes.width, sizes.height);
+				oPresentation.DrawPage(i, renderer);
+				renderer.EndPage();
+			}
+			else
+			{
+				let oSlide = oPresentation.Slides[i];
+
+				if (!oSlide.isVisible())
+					continue;
+				renderer.BeginPage(sizes.width, sizes.height);
+				printPreview.drawOnPaper(i, {width:sizes.width, height:sizes.height, offset: 0}, {
+					width:  sizes.width,
+					height: sizes.height
+				}, renderer, printPreview.drawFullPageSlide.bind(printPreview));
+				renderer.EndPage();
+			}
+
+			if (watermark)
+				watermark.DrawOnRenderer(renderer, sizes.width, sizes.height);
+		}
+
+		if (end == -1)
+		{
+			renderer.BeginPage(sizes.width, sizes.height);
+			renderer.EndPage()
+		}
+		return end;
+	};
+	this.ToRendererPart = function(noBase64, options)
 	{
+		options = options || {};
 		var watermark = this.m_oWordControl.m_oApi.watermarkDraw;
-		let oPresentation = this.m_oWordControl.m_oLogicDocument;
-
-		var pagescount = oPresentation.IsVisioEditor() ? oPresentation.GetSlidesCount() : oPresentation.Slides.length;
-
-		if (-1 == this.m_lCurrentRendererPage)
+		const renderer = this.m_oDocRenderer;
+		if (-1 === this.m_lCurrentRendererPage)
 		{
 			if (watermark)
 				watermark.StartRenderer();
@@ -3045,64 +3103,22 @@ function CDrawingDocument()
 			this.m_oDocRenderer.IsNoDrawingEmptyPlaceholder = true;
 		}
 
-		var start = this.m_lCurrentRendererPage;
-		var end   = pagescount - 1;
-
-		var renderer = this.m_oDocRenderer;
-		renderer.Memory.Seek(0);
-		renderer.VectorMemoryForPrint.ClearNoAttack();
-		renderer.DocInfo(this.m_oWordControl.m_oApi.asc_getCoreProps());
-
-		const sizes = this.m_oLogicDocument.GetSizesMM();
-		//todo change for advanced print options
-		for (var i = start; i <= end; i++)
-		{
-			if ((true === printerOptions && !this.m_oLogicDocument.IsMasterSlideMode()) && !this.m_oWordControl.Thumbnails.isSelectedPage(i))
-				continue;
-
-			if (oPresentation.IsVisioEditor())
-			{
-				//todo override
-				renderer.BeginPage(sizes.width, sizes.height);
-				this.m_oLogicDocument.DrawPage(i, renderer);
-				renderer.EndPage();
-			}
-			else
-			{
-				let oSlide = this.m_oLogicDocument.Slides[i];
-
-				if (!oSlide.isVisible())
-					continue;
-				// todo change that
-				renderer.BeginPage(297, 210);
-				this.m_oWordControl.m_oApi.printPreview.drawOnPaper(i, {width:297, height:210, offset: 0}, {
-					width:  297,
-					height: 210
-				}, renderer, this.m_oWordControl.m_oApi.printPreview.drawHandouts.bind(this.m_oWordControl.m_oApi.printPreview));
-				renderer.EndPage();
-			}
-
-			if (watermark)
-				watermark.DrawOnRenderer(renderer, sizes.width, sizes.height);
+		let endIndex;
+		const printerOptions = options.printerOptions;
+		if (printerOptions) {
+			endIndex = this.toPrintRendererPart(printerOptions);
+		} else {
+			endIndex = this.toPDFRendererPart(options.isSelection);
 		}
 
-		if (end == -1)
-		{
-			renderer.BeginPage(sizes.width, sizes.height);
-			renderer.EndPage()
-		}
+		this.m_lCurrentRendererPage = endIndex + 1;
 
-		this.m_lCurrentRendererPage = end + 1;
+		if (watermark)
+			watermark.EndRenderer();
 
-		if (this.m_lCurrentRendererPage >= pagescount)
-		{
-			if (watermark)
-				watermark.EndRenderer();
-
-			this.m_lCurrentRendererPage              = -1;
-			this.m_oDocRenderer                      = null;
-			this.m_oWordControl.m_oApi.ShowParaMarks = this.m_bOldShowMarks;
-		}
+		this.m_lCurrentRendererPage              = -1;
+		this.m_oDocRenderer                      = null;
+		this.m_oWordControl.m_oApi.ShowParaMarks = this.m_bOldShowMarks;
 
 		if (noBase64) {
 			return renderer.Memory.GetData();
