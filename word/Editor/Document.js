@@ -26690,10 +26690,8 @@ CDocument.prototype.OnChangeContentControl = function(oControl)
 };
 CDocument.prototype.OnAttachContentControl = function(contentControl)
 {
-	this.sendEvent("onContentControlAttach", contentControl.GetContentControlPr().GetEventObject());
-	
 	if (window.g_asc_plugins)
-		window.g_asc_plugins.onPluginEvent("onContentControlAttach", contentControl.GetContentControlPr().GetEventObject());
+		window.g_asc_plugins.onPluginEvent("onContentControlAdd", contentControl.GetContentControlPr().GetEventObject());
 };
 CDocument.prototype.OnDetachContentControl = function(contentControl)
 {
@@ -26706,10 +26704,8 @@ CDocument.prototype.OnDetachContentControl = function(contentControl)
 		this.FocusCC = null;
 	}
 	
-	this.sendEvent("onContentControlDetach", contentControl.GetContentControlPr().GetEventObject());
-	
 	if (window.g_asc_plugins)
-		window.g_asc_plugins.onPluginEvent("onContentControlDetach", contentControl.GetContentControlPr().GetEventObject());
+		window.g_asc_plugins.onPluginEvent("onContentControlRemove", contentControl.GetContentControlPr().GetEventObject());
 };
 CDocument.prototype.OnAttachParagraph = function(paragraph)
 {
