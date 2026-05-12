@@ -378,14 +378,6 @@ AscFormat.InitClass(Slide, AscCommonSlide.SlideBase, AscDFH.historyitem_type_Sli
                     }
                     break;
                 }
-                case AscDFH.historyitem_SlideRemoveFromSpTree:
-                case AscDFH.historyitem_SlideAddToSpTree:
-                {
-                    if (this.presentation) {
-                        data.CheckOutlineView(this.presentation);
-                    }
-                    break;
-                }
             }
             this.addToRecalculate();
         }
@@ -1558,6 +1550,9 @@ Slide.prototype.createContent = function () {
     }
     this.shapeAdd(this.cSld.spTree.length, copySp);
     return copySp;
+};
+Slide.prototype.checkOutlineView = function () {
+  this.presentation && this.presentation.checkSlideOutlineView(this);
 };
 
 function fLoadComments(oObject, authors)

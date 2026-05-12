@@ -8203,7 +8203,6 @@ CPresentation.prototype.Refresh_RecalcData = function (Data) {
 					oSlide.refreshAllContentsFields();
 				}
 			}
-			Data.CheckOutlineView(this);
 			break;
 		}
 		case AscDFH.historyitem_Presentation_SetDefaultTextStyle: {

@@ -766,6 +766,12 @@ CShape.prototype.OnContentReDraw = function(){
 			}
 			return false;
 		};
+    CShape.prototype.checkOutlineView = function() {
+        const oPresentation = this.getLogicDocument();
+        if (oPresentation) {
+            oPresentation.checkShapeOutlineView(this);
+        }
+    };
     //--------------------------------------------------------export----------------------------------------------------
     window['AscFormat'] = window['AscFormat'] || {};
     window['AscFormat'].editorDeleteDrawingBase = editorDeleteDrawingBase;

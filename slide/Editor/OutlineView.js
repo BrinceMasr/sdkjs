@@ -1695,14 +1695,9 @@
 		}
 		const updateData = this.getUpdateData();
 		if (updateData.isNeedRecalculate()) {
-			const oldSavedPosition = this.getSavedPosition();
-			const docState = {};
-			this.saveDocumentState(docState);
 			this.updateExistingParagraphs(updateData.existingParagraphs);
 			this.updateNewParagraphs(updateData.newParagraphs);
 			this.outlineShape && this.outlineShape.recalculateContent();
-			this.applyDocumentState(docState)
-			this.setSavedPosition(oldSavedPosition);
 		}
 	};
 	function UseInDocumentManager() {
