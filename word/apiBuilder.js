@@ -8119,6 +8119,19 @@
 	 * @typedef {("text" | "checkBox" | "picture" | "comboBox" | "dropDownList" | "dateTime" | "radio" | "complex" | "signature")} FormSpecificType
 	 * @see office-js-api/Examples/Enumerations/FormSpecificType.js
 	 */
+
+	/** 
+	 * Option for radio groups, dropdowns and combo boxes.
+	 * @typedef {Object} ChoiceOption
+	 * @property {string} value - Stored value.
+	 * @property {string} label - Display text.
+	 */
+
+	/**
+	 * Option for checkbox
+	 * @typedef {boolean} CheckboxOption
+	 */
+
 	/**
 	 * Form data.
 	 * @typedef {Object} FormData
@@ -8128,11 +8141,8 @@
 	 * @property {FormSpecificType} type - The form type.
 	 * @property {string} [role] - The form role.
 	 * @property {string} [roleColor] - The form role color in hex format.
-	 * @property {Array.<{value: string, label: string}> | Array.<boolean>} [options] - The list of available options for the field.
+	 * @property {ChoiceOption[] | CheckboxOption[]} [options] - The list of available options for the field.
 	 * Present for checkboxes, radio button groups, dropdown lists, and combo boxes.
-	 * For <b>checkboxes</b> this is <b>[true, false]</b>.
-	 * For <b>radio buttons</b>, <b>dropdown lists</b>, and <b>combo boxes</b> each entry contains
-	 * a <b>value</b> (the stored value) and a <b>label</b> (the display text).
 	 * @property {string} [label] - The checkbox label. Present only for checkbox fields.
 	 * @property {string} [format] - The date format string (e.g. <b>MM/DD/YYYY</b>). Present only for date picker fields.
 	 * @property {string} [lang] - The date language/locale name (e.g. <b>en-US</b>). Present only for date picker fields.
