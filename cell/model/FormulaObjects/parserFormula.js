@@ -4119,7 +4119,7 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 			}
 
 			//first iterate over all arguments and convert from cellsRange to array or value depending on how the function should work
-			var tempArgs = [], tempArg, firstArray, _checkArrayIndex;
+			var tempArgs = [], tempArg, firstArray, _checkArrayIndex, maxArrayRows = 1, maxArrayCols = 1;
 			for (var j = 0; j < argumentsCount; j++) {
 				tempArg = arg[j];
 
@@ -4155,12 +4155,16 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 						if (checkArayIndexType(j, arrayIndexesType.array)) {
 							// transfer array to argument without changing
 							tempArg = tempArg;
-						} else if (!firstArray) {	//trying to find an array that has more than 1 column and more than 1 row
-							firstArray = tempArg;
-						} else if((1 === firstArray.getRowCount() || 1 === firstArray.getCountElementInRow()) && 1 !== tempArg.getRowCount() && 1 !== tempArg.getCountElementInRow()) {
-							firstArray = tempArg;
-						} else if((1 === firstArray.getRowCount() && 1 === firstArray.getCountElementInRow()) && (1 !== tempArg.getRowCount() || 1 !== tempArg.getCountElementInRow())){
-							firstArray = tempArg;
+						} else {
+							maxArrayRows = Math.max(maxArrayRows, tempArg.getRowCount());
+							maxArrayCols = Math.max(maxArrayCols, tempArg.getCountElementInRow());
+							if (!firstArray) {
+								firstArray = tempArg;
+							} else if((1 === firstArray.getRowCount() || 1 === firstArray.getCountElementInRow()) && 1 !== tempArg.getRowCount() && 1 !== tempArg.getCountElementInRow()) {
+								firstArray = tempArg;
+							} else if((1 === firstArray.getRowCount() && 1 === firstArray.getCountElementInRow()) && (1 !== tempArg.getRowCount() || 1 !== tempArg.getCountElementInRow())){
+								firstArray = tempArg;
+							}
 						}
 					}
 				}
@@ -4174,11 +4178,21 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 			//TODO added another check. Consider always using parserFormula.ref in the future.
 			//TODO review isOneCell/checkOneRowCol check - may need to look at data count and expand range if parserFormula.ref exceeds argument range
 			let refSize = parserFormula.ref && parserFormula.ref.getSize();
-			if ((replaceAreaByRefs && 0 === argumentsCount && parserFormula.ref) || 
-				(firstArray && parserFormula.ref && !parserFormula.ref.isOneCell() && 
-				(refSize.row > firstArray.rowCount || refSize.col > firstArray.countElementInRow.length) && checkOneRowCol())) {
+			let needRefExpand = (replaceAreaByRefs && 0 === argumentsCount && parserFormula.ref) ||
+				(firstArray && parserFormula.ref && !parserFormula.ref.isOneCell() &&
+				(refSize.row > firstArray.rowCount || refSize.col > firstArray.countElementInRow.length) && checkOneRowCol());
+			let targetRows = needRefExpand ? Math.max(maxArrayRows, refSize.row) : maxArrayRows;
+			let targetCols = needRefExpand ? Math.max(maxArrayCols, refSize.col) : maxArrayCols;
+
+			if (needRefExpand || (firstArray && firstArray.foreach &&
+				(firstArray.getRowCount() < targetRows || firstArray.getCountElementInRow() < targetCols))) {
 				firstArray = new cArray();
-				firstArray.fillEmptyFromRange(parserFormula.ref);
+				for (var _ri = 0; _ri < targetRows; _ri++) {
+					firstArray.addRow();
+					for (var _ci = 0; _ci < targetCols; _ci++) {
+						firstArray.addElement(null);
+					}
+				}
 			}
 
 			if (firstArray) {

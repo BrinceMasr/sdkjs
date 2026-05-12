@@ -17030,7 +17030,7 @@ $(function () {
 		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 0, "Result in [0,0] VDB(F2:F4,F5:F7,F8:F15,F9:F15,F9:F15)");
 		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), "#NUM!", "Result in [1,0] VDB(F2:F4,F5:F7,F8:F15,F9:F15,F9:F15)");
 		assert.strictEqual(array.getElementRowCol(2, 0).getValue(), 0, "Result in [2,0] VDB(F2:F4,F5:F7,F8:F15,F9:F15,F9:F15)");
-		assert.strictEqual(array.getElementRowCol(3, 0).getValue(), "", "Result in [3,0] VDB(F2:F4,F5:F7,F8:F15,F9:F15,F9:F15)");
+		assert.strictEqual(array.getElementRowCol(3, 0).getValue(), "#N/A", "Result in [3,0] VDB(F2:F4,F5:F7,F8:F15,F9:F15,F9:F15)");
 		assert.strictEqual(array.getElementRowCol(5, 5).getValue(), "#N/A", "Result in [5,5] VDB(F2:F4,F5:F7,F8:F15,F9:F15,F9:F15)");
 
 		oParser = new parserFormula("VDB(F2:F4,F5:F7,F8:F15,F9:F15,F9:F15,F9:F15,F9:F15)", "A2", ws);
@@ -17040,7 +17040,7 @@ $(function () {
 		assert.strictEqual(array.getElementRowCol(0, 0).getValue(), 0, "Result in [0,0] VDB(F2:F4,F5:F7,F8:F15,F9:F15,F9:F15,F9:F15,F9:F15)");
 		assert.strictEqual(array.getElementRowCol(1, 0).getValue(), "#NUM!", "Result in [1,0] VDB(F2:F4,F5:F7,F8:F15,F9:F15,F9:F15,F9:F15,F9:F15)");
 		assert.strictEqual(array.getElementRowCol(2, 0).getValue(), 0, "Result in [2,0] VDB(F2:F4,F5:F7,F8:F15,F9:F15,F9:F15,F9:F15,F9:F15)");
-		assert.strictEqual(array.getElementRowCol(3, 0).getValue(), "", "Result in [3,0] VDB(F2:F4,F5:F7,F8:F15,F9:F15,F9:F15,F9:F15,F9:F15)");
+		assert.strictEqual(array.getElementRowCol(3, 0).getValue(), "#N/A", "Result in [3,0] VDB(F2:F4,F5:F7,F8:F15,F9:F15,F9:F15,F9:F15,F9:F15)");
 		assert.strictEqual(array.getElementRowCol(5, 5).getValue(), "#N/A", "Result in [5,5] VDB(F2:F4,F5:F7,F8:F15,F9:F15,F9:F15,F9:F15,F9:F15)");
 
 

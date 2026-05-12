@@ -20065,5 +20065,89 @@ $(function () {
 		assertVolatileArraysEmpty(assert);
 	});
 
+	QUnit.test("Test: \"COUNTIFS/SUMIFS broadcasting with orthogonal inline arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+		clearData(0, 0, 20, 20);
+
+		var flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		var enterAt = function (cell, formula) {
+			var r = ws.getRange2(cell);
+			wsView.setSelection(r.bbox);
+			var frag = r.getValueForEdit2();
+			frag[0].setFragmentText(formula);
+			wsView._saveCellValueAfterEdit(r, frag, flags, null, null);
+		};
+
+		ws.getRange2("A1").setValue("1");
+		ws.getRange2("A2").setValue("2");
+		ws.getRange2("A3").setValue("1");
+		ws.getRange2("A4").setValue("3");
+		ws.getRange2("A5").setValue("2");
+		ws.getRange2("B1").setValue("10");
+		ws.getRange2("B2").setValue("20");
+		ws.getRange2("B3").setValue("10");
+		ws.getRange2("B4").setValue("10");
+		ws.getRange2("B5").setValue("20");
+		ws.getRange2("C1").setValue("100");
+		ws.getRange2("C2").setValue("200");
+		ws.getRange2("C3").setValue("100");
+		ws.getRange2("C4").setValue("300");
+		ws.getRange2("C5").setValue("200");
+
+		// Test 1: COUNTIFS — vertical {1;2;3} * horizontal {10,20} → 3*2 result
+		enterAt("E1", "=COUNTIFS(A1:A5,{1;2;3},B1:B5,{10,20})");
+		var resCell = getCell(ws.getRange2("E1"));
+		var dynamicRef = resCell.getFormulaParsed().getDynamicRef();
+		assert.strictEqual(dynamicRef.getHeight(), 3, "COUNTIFS({1;2;3},{10,20}): height = 3");
+		assert.strictEqual(dynamicRef.getWidth(), 2, "COUNTIFS({1;2;3},{10,20}): width = 2");
+		assert.strictEqual(ws.getRange2("E1").getValue(), "2", "COUNTIFS E1 (cat=1, grp=10) = 2");
+		assert.strictEqual(ws.getRange2("F1").getValue(), "0", "COUNTIFS F1 (cat=1, grp=20) = 0");
+		assert.strictEqual(ws.getRange2("E2").getValue(), "0", "COUNTIFS E2 (cat=2, grp=10) = 0");
+		assert.strictEqual(ws.getRange2("F2").getValue(), "2", "COUNTIFS F2 (cat=2, grp=20) = 2");
+		assert.strictEqual(ws.getRange2("E3").getValue(), "1", "COUNTIFS E3 (cat=3, grp=10) = 1");
+		assert.strictEqual(ws.getRange2("F3").getValue(), "0", "COUNTIFS F3 (cat=3, grp=20) = 0");
+
+		// Test 2: SUMIFS — same orthogonal broadcast
+		enterAt("H1", "=SUMIFS(C1:C5,A1:A5,{1;2;3},B1:B5,{10,20})");
+		resCell = getCell(ws.getRange2("H1"));
+		dynamicRef = resCell.getFormulaParsed().getDynamicRef();
+		assert.strictEqual(dynamicRef.getHeight(), 3, "SUMIFS({1;2;3},{10,20}): height = 3");
+		assert.strictEqual(dynamicRef.getWidth(), 2, "SUMIFS({1;2;3},{10,20}): width = 2");
+		assert.strictEqual(ws.getRange2("H1").getValue(), "200", "SUMIFS H1 (cat=1, grp=10) = 200");
+		assert.strictEqual(ws.getRange2("I1").getValue(), "0", "SUMIFS I1 (cat=1, grp=20) = 0");
+		assert.strictEqual(ws.getRange2("H2").getValue(), "0", "SUMIFS H2 (cat=2, grp=10) = 0");
+		assert.strictEqual(ws.getRange2("I2").getValue(), "400", "SUMIFS I2 (cat=2, grp=20) = 400");
+		assert.strictEqual(ws.getRange2("H3").getValue(), "300", "SUMIFS H3 (cat=3, grp=10) = 300");
+		assert.strictEqual(ws.getRange2("I3").getValue(), "0", "SUMIFS I3 (cat=3, grp=20) = 0");
+
+		// Test 3: COUNTIFS — vertical-only array (Nx1), regression check
+		enterAt("E6", "=COUNTIFS(A1:A5,{1;2;3},B1:B5,10)");
+		resCell = getCell(ws.getRange2("E6"));
+		dynamicRef = resCell.getFormulaParsed().getDynamicRef();
+		assert.strictEqual(dynamicRef.getHeight(), 3, "COUNTIFS({1;2;3},10): height = 3");
+		assert.strictEqual(dynamicRef.getWidth(), 1, "COUNTIFS({1;2;3},10): width = 1");
+		assert.strictEqual(ws.getRange2("E6").getValue(), "2", "COUNTIFS E6 (cat=1, grp=10) = 2");
+		assert.strictEqual(ws.getRange2("E7").getValue(), "0", "COUNTIFS E7 (cat=2, grp=10) = 0");
+		assert.strictEqual(ws.getRange2("E8").getValue(), "1", "COUNTIFS E8 (cat=3, grp=10) = 1");
+
+		// Test 4: COUNTIFS — horizontal-only array (1xM), regression check
+		enterAt("E10", "=COUNTIFS(A1:A5,1,B1:B5,{10,20})");
+		resCell = getCell(ws.getRange2("E10"));
+		dynamicRef = resCell.getFormulaParsed().getDynamicRef();
+		assert.strictEqual(dynamicRef.getHeight(), 1, "COUNTIFS(1,{10,20}): height = 1");
+		assert.strictEqual(dynamicRef.getWidth(), 2, "COUNTIFS(1,{10,20}): width = 2");
+		assert.strictEqual(ws.getRange2("E10").getValue(), "2", "COUNTIFS E10 (cat=1, grp=10) = 2");
+		assert.strictEqual(ws.getRange2("F10").getValue(), "0", "COUNTIFS F10 (cat=1, grp=20) = 0");
+
+		clearData(0, 0, 20, 20);
+		assertVolatileArraysEmpty(assert);
+	});
+
 	QUnit.module("Dynamic Arrays Tests");
 });
