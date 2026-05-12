@@ -11795,8 +11795,8 @@
 			var StartSearchContentPos = SearchResults[FoundId].StartPos;
 			var EndSearchContentPos   = SearchResults[FoundId].EndPos;
 
-			var StartChar	= this.Paragraph.ConvertParaContentPosToRangePos(StartSearchContentPos);
-			var EndChar		= this.Paragraph.ConvertParaContentPosToRangePos(EndSearchContentPos);
+			var StartChar	= this.Paragraph.GetFlatPos(StartSearchContentPos);
+			var EndChar		= this.Paragraph.GetFlatPos(EndSearchContentPos);
 
 			arrApiRanges.push(this.GetRange(StartChar, EndChar));
 		}

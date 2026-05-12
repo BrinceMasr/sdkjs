@@ -1415,38 +1415,22 @@ Paragraph.prototype.Get_ParaPosByContentPos = function(ContentPos)
 };
 /**
  * Функция для перевода позиции внутри параграфа в специальную позицию используемую в ApiRange
- * @param {AscWord.CParagraphContentPos} oContentPos
+ * @param {AscWord.CParagraphContentPos} contentPos
  * @return {number}
  */
-Paragraph.prototype.ConvertParaContentPosToRangePos = function(oContentPos)
+Paragraph.prototype.GetFlatPos = function(contentPos)
 {
-	var nRangePos = 0;
-
-	var nCurPos = oContentPos ? Math.max(0, Math.min(this.Content.length - 1, oContentPos.Get(0))) : this.Content.length;
-	
-	for (var nPos = 0; nPos < nCurPos; ++nPos)
+	let rangePos = 0;
+	let endPos   = contentPos ? Math.max(0, Math.min(this.Content.length - 1, contentPos.Get(0))) : this.Content.length - 1;
+	for (let pos = 0; pos <= endPos; ++pos)
 	{
-		if (this.Content[nPos] instanceof CParagraphContentWithContentBase)
-		{
-			if (nPos != 0 && this.Content[nPos] instanceof ParaRun)
-				nRangePos++;
-			
-			nRangePos += this.Content[nPos].ConvertParaContentPosToRangePos(null);
-		}
-	}
-
-	if (this.Content[nCurPos])
-	{
-		if (this.Content[nCurPos] instanceof CParagraphContentWithContentBase)
-		{
-			if (nCurPos != 0 && this.Content[nCurPos] instanceof ParaRun)
-				nRangePos++;
-
-			nRangePos += this.Content[nCurPos].ConvertParaContentPosToRangePos(oContentPos, 1);
-		}
-	}
+		if (0 !== pos && this.Content[pos] instanceof ParaRun)
+			rangePos++;
 		
-	return nRangePos;
+		rangePos += this.Content[pos].GetFlatPos(pos === endPos && contentPos ? contentPos : null, 1);
+	}
+	
+	return rangePos;
 };
 Paragraph.prototype.Check_Range_OnlyMath = function(CurRange, CurLine)
 {
