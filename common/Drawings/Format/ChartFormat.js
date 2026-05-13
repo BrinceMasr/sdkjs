@@ -14734,6 +14734,7 @@
         AscCommon.History.CanAddChanges() && AscCommon.History.Add(new CChangesDrawingsLong(this, AscDFH.historyitem_StrCache_SetPtCount, this.ptCount, pr));
         this.ptCount = pr;
     };
+    CStrCache.prototype.getEffectiveSize = CNumLit.prototype.getEffectiveSize;
 	CStrCache.prototype.setName = function(pr) {
 		AscCommon.History.CanAddChanges() && AscCommon.History.Add(new CChangesDrawingsLong(this, AscDFH.historyitem_StrCache_SetName, this.name, pr));
 		this.name = pr;
