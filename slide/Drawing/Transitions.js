@@ -3844,6 +3844,11 @@ function CDemonstrationManager(htmlpage)
         }
 
         oThis.WaitAnimationEnd = false;
+        oThis.ScheduleAdvanceAfter(nSlideNum);
+    };
+    this.ScheduleAdvanceAfter = function(nSlideNum)
+    {
+        let oSlide = oThis.GetSlide(nSlideNum);
         if (oSlide && oSlide.isAdvanceAfterTransition() && oThis.CheckSlideDuration === -1)
         {
             oThis.CheckSlideDuration = setTimeout(function()
@@ -4369,6 +4374,7 @@ function CDemonstrationManager(htmlpage)
         if(this.IsPausedAnimation(this.SlideNum) || -1 !== this.CheckSlideDuration)
         {
             this.StartAnimation(this.SlideNum);
+            this.ScheduleAdvanceAfter(this.SlideNum);
         }
         else
         {
@@ -4777,7 +4783,7 @@ function CDemonstrationManager(htmlpage)
 
         // next slide
         oThis.CorrectSlideNum();
-			if (isMouseDown) {
+			if (isMouseDown && !oThis.HtmlPage.m_oApi.isMobileVersion) {
 				var _is_transition = oThis.Transition.IsPlaying();
 				if (_is_transition)
 				{
