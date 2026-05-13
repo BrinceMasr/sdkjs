@@ -6678,6 +6678,11 @@ function BinaryPPTYLoader()
                     shape.setUseBgFill(s.GetBool());
                     break;
                 }
+                case 1:
+                {
+                    shape.setTextLink(s.GetString2());
+                    break;
+                }
                 default:
                     break;
             }
@@ -11156,6 +11161,11 @@ function BinaryPPTYLoader()
                     case 0:
                     {
                         shape.setUseBgFill(s.GetBool());
+                        break;
+                    }
+                    case 1:
+                    {
+                        shape.setTextLink(s.GetString2());
                         break;
                     }
                     default:

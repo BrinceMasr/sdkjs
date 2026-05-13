@@ -529,6 +529,10 @@ CParagraphContentBase.prototype.Get_ElementByPos = function(ContentPos, Depth)
 {
 	return this;
 };
+CParagraphContentBase.prototype.GetFlatPos = function(contentPos, depth)
+{
+	return 0;
+};
 CParagraphContentBase.prototype.Get_ClassesByPos = function(Classes, ContentPos, Depth)
 {
 	Classes.push(this);
@@ -3299,28 +3303,19 @@ CParagraphContentWithParagraphLikeContent.prototype.Get_ElementByPos = function(
 
     return this.Content[CurPos].Get_ElementByPos(ContentPos, Depth + 1);
 };
-CParagraphContentWithParagraphLikeContent.prototype.ConvertParaContentPosToRangePos = function(oContentPos, nDepth)
+CParagraphContentWithParagraphLikeContent.prototype.GetFlatPos = function(contentPos, depth)
 {
-	var nRangePos = 0;
-
-	var nCurPos = oContentPos ? Math.max(0, Math.min(this.Content.length - 1, oContentPos.Get(nDepth))) : this.Content.length - 1;
-	for (var nPos = 0; nPos < nCurPos; ++nPos)
+	let rangePos = 0;
+	let endPos   = contentPos ? Math.max(0, Math.min(this.Content.length - 1, contentPos.Get(depth))) : this.Content.length - 1;
+	for (let pos = 0; pos <= endPos; ++pos)
 	{
-		if (this.Content[nPos] instanceof ParaRun)
-			nRangePos++;
-
-		nRangePos += this.Content[nPos].ConvertParaContentPosToRangePos(null);
-	}
-
-	if (this.Content[nCurPos])
-	{
-		if (this.Content[nPos] instanceof ParaRun)
-			nRangePos++;
-
-		nRangePos += this.Content[nCurPos].ConvertParaContentPosToRangePos(oContentPos, nDepth + 1);
-	}
+		if (this.Content[pos] instanceof ParaRun)
+			rangePos++;
 		
-	return nRangePos;
+		rangePos += this.Content[pos].GetFlatPos(pos === endPos && contentPos ? contentPos : null, depth + 1);
+	}
+	
+	return rangePos;
 };
 CParagraphContentWithParagraphLikeContent.prototype.GetPosByDrawing = function(Id, ContentPos, Depth)
 {

@@ -2553,7 +2553,7 @@
 				case MathStructures.sub_sub:
 					if (oTokens.value && oTokens.value.type === MathStructures.func)
 					{
-						let oStyle		= oTokens.value.style.style
+						let oStyle		= oTokens.value.style ? oTokens.value.style.style : new CTextPr();
 						let oFunc		= oContext.Add_Function({ctrPrp: oStyle}, null, null);
 						let oFuncName	= oFunc.getFName();
 
@@ -6576,6 +6576,9 @@
 			let oMathContent		= CutContentFromEnd(this.oCMathContent, oParamsCutContent);
 
 			let oFuncName			= oMathContent.GetFirstContent();
+			if (!oFuncName)
+				return false;
+			
 			let oAddDataFuncName	= oFuncName.GetAdditionalData();
 			let mPrp				= oAddDataFuncName.mathPrp;
 			mPrp.SetStyle(false, false);
@@ -6609,6 +6612,9 @@
 			let oMathContent		= CutContentFromEnd(this.oCMathContent, oParamsCutContent);
 
 			let oFuncName			= oMathContent.GetFirstContent();
+			if (!oFuncName)
+				return false;
+			
 			let oAddDataFuncName	= oFuncName.GetAdditionalData();
 			let mPrp				= oAddDataFuncName.mathPrp;
 			mPrp.SetStyle(false, false);
@@ -6623,7 +6629,7 @@
 
 			//конвертируем в профф. формат
 			this.SetCursorByConvertedData(this.oCMathContent);
-			return true
+			return true;
 		}
 
 		// конвертация контента ВНУТРИ скобки, при закрытии скобки
@@ -7193,6 +7199,14 @@
 					else if (oEndPos.GetType() === MathLiterals.of.id)
 					{
 						oEndPos.IncreasePosition()
+						return {
+							start: oEndPos,
+							end: oTempStartPos
+						}
+					}
+					else if (oEndPos.GetType() === MathLiterals.divide.id)
+					{
+						oEndPos.IncreasePosition();
 						return {
 							start: oEndPos,
 							end: oTempStartPos

@@ -5094,6 +5094,64 @@
 	};
 
 	/**
+	 * Creates an ApiColor from a universal input. The method recognizes several call signatures and either delegates to a narrower factory or constructs an ApiColor directly.
+	 * <b>Numeric components</b>: "Api.Color(r, g, b)" or "Api.Color(r, g, b, a)" creates an RGB or RGBA color from byte components (0-255).
+	 * <b>Packed integer</b>: "Api.Color(0xRRGGBB)" creates an RGB color from a 24-bit integer.
+	 * <b>Full HEX string</b>: "Api.Color('#RRGGBB')" or "Api.Color('RRGGBB')" creates a HEX color; the leading "#" is optional.
+	 * <b>Short HEX string</b>: "Api.Color('#RGB')" expands each digit by duplication, so "#F0A" becomes "#FF00AA".
+	 * <b>Theme color name</b>: "Api.Color('accent1')" creates a theme color; any value of SchemeColorId is accepted.
+	 * <b>Preset color name</b>: "Api.Color('aliceBlue')" resolves any value of PresetColor to its RGB equivalent.
+	 * <b>Auto color</b>: "Api.Color('auto')" creates an auto color.
+	 * For a single string argument, the resolution priority is: "auto", a string starting with "#", a theme name, a preset name, a bare 6-digit HEX. Theme and preset palettes do not overlap. A 3-digit shorthand is accepted only with the leading "#".
+	 * Unsupported inputs (objects, arrays, an existing ApiColor, unknown strings, no arguments) return a black color (#000000).
+	 *
+	 * @memberof Api
+	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
+	 * @param {number | string | byte | SchemeColorId | PresetColor} r - The universal color input. With three or four arguments, the red component (0-255).
+	 * @param {byte} [g] - The green component (0-255). Used only with the (r, g, b) and (r, g, b, a) forms.
+	 * @param {byte} [b] - The blue component (0-255). Used only with the (r, g, b) and (r, g, b, a) forms.
+	 * @param {byte} [a] - The alpha component (0-255). Used only with the (r, g, b, a) form.
+	 * @returns {ApiColor}
+	 * @see office-js-api/Examples/{Editor}/Api/Methods/Color.js
+	 */
+	function private_IsHexString(s) {
+		for (let i = 0; i < s.length; i++) {
+			const c = s.charCodeAt(i);
+			if (!((c >= 0x30 && c <= 0x39) || (c >= 0x41 && c <= 0x46) || (c >= 0x61 && c <= 0x66)))
+				return false;
+		}
+		return true;
+	}
+
+	Api.Color = function (r, g, b, a) {
+		if (arguments.length === 4)
+			return Api.RGBA(r, g, b, a);
+		if (arguments.length === 3)
+			return Api.RGB(r, g, b);
+		if (typeof r === 'number' && isFinite(r) && r >= 0 && r <= 0xFFFFFF && (r | 0) === r)
+			return Api.RGB((r >> 16) & 0xFF, (r >> 8) & 0xFF, r & 0xFF);
+		if (typeof r === 'string') {
+			if (r === 'auto')
+				return new ApiColor('auto');
+			const hasHash = r.charAt(0) === '#';
+			if (!hasHash) {
+				if (ApiColor.ThemeColorMap[r] !== undefined)
+					return Api.ThemeColor(r);
+				if (AscFormat.map_prst_color[r] !== undefined) {
+					const v = AscFormat.map_prst_color[r];
+					return Api.RGB((v >> 16) & 0xFF, (v >> 8) & 0xFF, v & 0xFF);
+				}
+			}
+			let hex = hasHash ? r.slice(1) : r;
+			if (hasHash && hex.length === 3 && private_IsHexString(hex))
+				hex = hex.charAt(0) + hex.charAt(0) + hex.charAt(1) + hex.charAt(1) + hex.charAt(2) + hex.charAt(2);
+			if (hex.length === 6 && private_IsHexString(hex))
+				return Api.HexColor(hex);
+		}
+		return Api.RGB(0, 0, 0);
+	};
+
+	/**
 	 * Creates a solid fill to apply to the object using a selected solid color as the object background.
 	 *
 	 * @memberof Api
@@ -8074,6 +8132,19 @@
 	 * @typedef {("text" | "checkBox" | "picture" | "comboBox" | "dropDownList" | "dateTime" | "radio" | "complex" | "signature")} FormSpecificType
 	 * @see office-js-api/Examples/Enumerations/FormSpecificType.js
 	 */
+
+	/** 
+	 * Option for radio groups, dropdowns and combo boxes.
+	 * @typedef {Object} ChoiceOption
+	 * @property {string} value - Stored value.
+	 * @property {string} label - Display text.
+	 */
+
+	/**
+	 * Option for checkbox
+	 * @typedef {boolean} CheckboxOption
+	 */
+
 	/**
 	 * Form data.
 	 * @typedef {Object} FormData
@@ -8083,11 +8154,8 @@
 	 * @property {FormSpecificType} type - The form type.
 	 * @property {string} [role] - The form role.
 	 * @property {string} [roleColor] - The form role color in hex format.
-	 * @property {Array.<{value: string, label: string}> | Array.<boolean>} [options] - The list of available options for the field.
+	 * @property {ChoiceOption[] | CheckboxOption[]} [options] - The list of available options for the field.
 	 * Present for checkboxes, radio button groups, dropdown lists, and combo boxes.
-	 * For <b>checkboxes</b> this is <b>[true, false]</b>.
-	 * For <b>radio buttons</b>, <b>dropdown lists</b>, and <b>combo boxes</b> each entry contains
-	 * a <b>value</b> (the stored value) and a <b>label</b> (the display text).
 	 * @property {string} [label] - The checkbox label. Present only for checkbox fields.
 	 * @property {string} [format] - The date format string (e.g. <b>MM/DD/YYYY</b>). Present only for date picker fields.
 	 * @property {string} [lang] - The date language/locale name (e.g. <b>en-US</b>). Present only for date picker fields.
@@ -11795,8 +11863,8 @@
 			var StartSearchContentPos = SearchResults[FoundId].StartPos;
 			var EndSearchContentPos   = SearchResults[FoundId].EndPos;
 
-			var StartChar	= this.Paragraph.ConvertParaContentPosToRangePos(StartSearchContentPos);
-			var EndChar		= this.Paragraph.ConvertParaContentPosToRangePos(EndSearchContentPos);
+			var StartChar	= this.Paragraph.GetFlatPos(StartSearchContentPos);
+			var EndChar		= this.Paragraph.GetFlatPos(EndSearchContentPos);
 
 			arrApiRanges.push(this.GetRange(StartChar, EndChar));
 		}
@@ -30644,6 +30712,7 @@
 	Api["RGBA"]                             = Api.RGBA;
 	Api["HexColor"]                         = Api.HexColor;
 	Api["ThemeColor"]                       = Api.ThemeColor;
+	Api["Color"]                            = Api.Color;
 	Api["CreateSolidFill"]                  = Api.CreateSolidFill;
 	Api["CreateLinearGradientFill"]         = Api.CreateLinearGradientFill;
 	Api["CreateRadialGradientFill"]         = Api.CreateRadialGradientFill;
