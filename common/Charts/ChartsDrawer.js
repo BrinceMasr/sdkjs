@@ -2205,24 +2205,16 @@ CChartsDrawer.prototype =
 							continue;
 						}
 
-
 						numCache = t.getNumCache(seria.val);
 						const effectivePtCount = numCache ? numCache.getEffectiveSize() : 0;
 
-						let catEffectiveCount = 0;
+						let catPtCount = 0;
 						const catLit = seria.cat && seria.cat.getLit ? seria.cat.getLit() : null;
-						if (catLit) {
-							const catPtsLen = Array.isArray(catLit.pts) ? catLit.pts.length : 0;
-							const catLastPt = catPtsLen > 0 ? catLit.pts[catPtsLen - 1] : null;
-							const catLastIdx = catLastPt && AscFormat.isRealNumber(catLastPt.idx) ? catLastPt.idx : null;
-							catEffectiveCount = AscFormat.isRealNumber(catLastIdx)
-								? (catLastIdx + 1)
-								: (AscFormat.isRealNumber(catLit.ptCount) ? catLit.ptCount : 0);
+						if (catLit && AscFormat.isRealNumber(catLit.ptCount)) {
+							catPtCount = catLit.ptCount;
 						}
 
-						const cappedEffectivePtCount = catEffectiveCount > 0
-							? catEffectiveCount
-							: effectivePtCount;
+						const cappedEffectivePtCount = Math.max(effectivePtCount, catPtCount);
 
 						const trendline = seria.getLastTrendline();
 						const canExpandTrendline = cappedEffectivePtCount > 1;
@@ -9211,6 +9203,11 @@ drawLineChart.prototype = {
 				x = this.catAx ? this.cChartDrawer.getYPosition(n + 1, this.catAx) : xPoints[n].pos;
 				y = this.cChartDrawer.getYPosition(val, this.valAx);
 
+				const isBeyondCatRange = this.catAx && xPoints && (n + 1 > xPoints.length);
+				if (isBeyondCatRange) {
+					x = xPoints[0].pos;
+				}
+
 				if (!this.paths.points) {
 					this.paths.points = [];
 				}
@@ -9232,10 +9229,10 @@ drawLineChart.prototype = {
 				if (val != null && ((isLog && val !== 0) || !isLog)) {
 					this.paths.points[i][n] = this.cChartDrawer.calculatePoint(x, y, compiledMarkerSize, compiledMarkerSymbol);
 					let errBars = this.chart.series[i].errBars[0];
-					if (errBars) {
+					if (errBars && !isBeyondCatRange) {
 						this.cChartDrawer.errBars.putPoint(x, y, val, null,  seria.idx, n);
 					}
-					points[i][n] = {x: x, y: y};
+					points[i][n] = isBeyondCatRange ? null : { x: x, y: y };
 				} else {
 					this.paths.points[i][n] = null;
 					points[i][n] = null;
