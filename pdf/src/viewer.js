@@ -345,11 +345,15 @@
 		let oFile       = oViewer.file;
 		let nIndex		= this.GetIndex();
 
+		let isLocalRotate = false == Asc.editor.canEdit();
 		if (oFile.pages[nIndex].Rotate == nAngle) {
+			oFile.pages[nIndex].LocalRotate = undefined;
+			this.fields.forEach(function(field) {
+				field.UpdateEditShape();
+			});
+			
 			return;
 		}
-
-		let isLocalRotate = false == Asc.editor.canEdit();
 
         if (!isLocalRotate) {
 			AscCommon.History.Add(new CChangesPDFDocumentRotatePage(this, oFile.pages[nIndex].Rotate, nAngle));
