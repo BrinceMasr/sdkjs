@@ -20741,6 +20741,8 @@ function isAllowPasteLink(pastedWb) {
 				}
 
 				if(!t.intersectionFormulaArray(doSortRange, true)) {
+					t.model.workbook.handlers.trigger("cleanCutData", true, true);
+					t.model.workbook.handlers.trigger("cleanCopyData", true);
 					t._isLockedAll(onChangeAutoFilterCallback);
 				} else {
 					t.model.workbook.handlers.trigger("asc_onError", c_oAscError.ID.CannotChangeFormulaArray, c_oAscError.Level.NoCritical);
