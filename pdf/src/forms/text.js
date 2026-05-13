@@ -30,6 +30,8 @@
  *
  */
 
+"use strict";
+
 (function(){
     /**
 	 * Class representing a text field.

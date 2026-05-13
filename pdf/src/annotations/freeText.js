@@ -31,6 +31,8 @@
  *
  */
 
+"use strict";
+
 (function(){
 
     let FREE_TEXT_INTENT_TYPE = {

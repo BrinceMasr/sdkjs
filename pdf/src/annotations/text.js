@@ -30,6 +30,8 @@
  *
  */
 
+"use strict";
+
 (function(){
 
     let TEXT_ANNOT_STATE = {

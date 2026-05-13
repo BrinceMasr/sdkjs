@@ -30,6 +30,8 @@
  *
  */
 
+"use strict";
+
 (function(){
 
     let LINE_CAP_STYLES = {

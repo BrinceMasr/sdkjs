@@ -30,6 +30,8 @@
  *
  */
 
+"use strict";
+
 (function(){
 
 	function CCacheManager()

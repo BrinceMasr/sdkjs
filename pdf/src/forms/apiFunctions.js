@@ -30,6 +30,8 @@
  *
  */
 
+"use strict";
+
 (function() {
 
     function FormatNumberValue(value, nDec, sepStyle, negStyle, strCurrency, bCurrencyPrepend) {

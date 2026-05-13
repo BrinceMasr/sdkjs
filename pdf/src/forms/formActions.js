@@ -30,6 +30,8 @@
  *
  */
 
+"use strict";
+
 (function(){
     let PDF_TRIGGERS_TYPES = {
         MouseUp:    0,

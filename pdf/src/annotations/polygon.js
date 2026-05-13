@@ -30,6 +30,8 @@
  *
  */
 
+"use strict";
+
 (function(){
 
     let POLYGON_INTENT_TYPE = {

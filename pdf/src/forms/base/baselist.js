@@ -30,6 +30,8 @@
  *
  */
 
+"use strict";
+
 (function(){
     /**
 	 * A string that sets the trigger for the action. Values are:

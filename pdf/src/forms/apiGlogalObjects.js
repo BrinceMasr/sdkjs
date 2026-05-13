@@ -30,6 +30,8 @@
  *
  */
 
+"use strict";
+
 (function(){
     // please use copy of this object
     // let DEFAULT_SPAN = {

@@ -30,6 +30,8 @@
  *
  */
 
+"use strict";
+
 (function(window, undefined) {
     function TextStreamReader(data, size)
     {

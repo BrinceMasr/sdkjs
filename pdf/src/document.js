@@ -30,6 +30,8 @@
  *
  */
 
+"use strict";
+
 // TODO: Temporary
 var CPresentation = CPresentation || function(){};
 
@@ -123,10 +125,6 @@ var CPresentation = CPresentation || function(){};
 	 * @constructor
 	 */
     function CPDFDoc(viewer) {
-        this.widgets    = []; // the actual fields that we draw (children without descendants)
-        this.annots     = [];
-        this.drawings   = []; // from presentations (charts, shapes, images)
-
         this.maxApIdx               = -1;
         this.CollaborativeEditing   = AscCommon.CollaborativeEditing;
         this.CollaborativeEditing.SetLogicDocument(this);
@@ -209,7 +207,8 @@ var CPresentation = CPresentation || function(){};
     };
     CPDFDoc.prototype.GetFile = function() {
         return this.Viewer.file;
-    };    Object.defineProperties(CPDFDoc.prototype, {
+    };
+    Object.defineProperties(CPDFDoc.prototype, {
 		widgets: {
 			get: function () {
                 let aWidgets = [];

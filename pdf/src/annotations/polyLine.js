@@ -30,6 +30,8 @@
  *
  */
 
+"use strict";
+
 (function(){
 
     let POLYLINE_INTENT_TYPE = {

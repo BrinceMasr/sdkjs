@@ -30,6 +30,8 @@
  *
  */
 
+"use strict";
+
 (function(){
     let LISTBOX_SELECTED_COLOR = {
         r: 153,
