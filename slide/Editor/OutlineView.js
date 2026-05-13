@@ -1132,7 +1132,7 @@
 	OutlineView.prototype.setOutlineShape = function (shape) {
 		this.outlineShape = shape;
 	};
-	OutlineView.prototype.updateAll = function (width) {
+	OutlineView.prototype.updateAll = function (width, height) {
 		this.isInit = true;
 		const presentation = this.getPresentation();
 		const outlineSlides = [];
@@ -1141,7 +1141,7 @@
 			const outlineSlide = slide.getOutlineSlide();
 			outlineSlides.push(outlineSlide);
 		}
-		this.createOutlineShape(outlineSlides, width);
+		this.createOutlineShape(outlineSlides, width, height);
 	};
 	OutlineView.prototype.addOutlineParagraph = function (sourceParagraph, outlineParagraph, pr) {
 		const outlineId = outlineParagraph.Get_Id();
@@ -1264,7 +1264,7 @@
 		outlineParagraph.TextPr.Value = parTextPr;
 		outlineParagraph.TextPr.CalcValue = parTextPr;
 	};
-	OutlineView.prototype.createOutlineShape = function (outlineSlides, width) {
+	OutlineView.prototype.createOutlineShape = function (outlineSlides, width, height) {
 		this.reset();
 		return AscFormat.ExecuteNoHistory(function () {
 			const outlineShape = new AscFormat.CShape();
@@ -1275,14 +1275,14 @@
 			const outlineContent = outlineShape.txBody.content;
 			outlineContent.ClearContent(false);
 			this.fillOutlineShape(outlineShape, outlineSlides);
-			this.setWidth(width);
+			this.setSizes(width);
 			return outlineShape;
 		}, this, []);
 	};
-	OutlineView.prototype.setWidth = function (width) {
+	OutlineView.prototype.setSizes = function (width, height) {
 		if (this.outlineShape) {
 			this.outlineShape.extX = width;
-			this.outlineShape.extY = 2000;
+			this.outlineShape.extY = typeof height === "number" ? height : 2000;
 			this.outlineShape.recalculateContent();
 			this.outlineShape.contentWidth = width;
 		}
@@ -2187,7 +2187,7 @@
 			return;
 		}
 		if (!AscFormat.fApproxEqual(width, this.outlineShape.extX)) {
-			this.setWidth(width);
+			this.setSizes(width);
 		}
 	};
 	OutlineView.prototype.isTitleOutlineParagraph = function (paragraph) {

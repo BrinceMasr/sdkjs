@@ -3023,8 +3023,175 @@ function CDrawingDocument()
 		this.m_oWordControl.m_oApi.ShowParaMarks = old_marks;
 		return ret;
 	};
-	this.toPrintRendererPart = function (start, end, printOptions) {
 
+
+	function PresentationPrinter(presentation, renderer, printOptions) {
+		this.renderer = renderer;
+		this.printOptions = printOptions;
+		this.presentation = presentation;
+	}
+	PresentationPrinter.prototype.getPrintType = function () {
+		return this.printOptions.slidesOnPagePrintOptions.printType;
+	};
+	PresentationPrinter.prototype.startPrint = function () {
+
+	};
+	PresentationPrinter.prototype.endPrint = function () {
+
+	};
+	PresentationPrinter.prototype.print = function () {
+		switch (this.getPrintType()) {
+			case Asc.c_oAscSlidesOnPagePrintType.FullPageSlides: {
+				this.printFullPageSlides();
+				break;
+			}
+			case Asc.c_oAscSlidesOnPagePrintType.Handouts: {
+				this.printHandouts();
+				break;
+			}
+			case Asc.c_oAscSlidesOnPagePrintType.Outline: {
+				this.printOutline();
+				break;
+			}
+			case Asc.c_oAscSlidesOnPagePrintType.SlideWithNotes: {
+				this.printSlideWithNotes();
+				break;
+			}
+		}
+	};
+	PresentationPrinter.prototype.getPresentation = function () {
+		return this.presentation;
+	};
+	PresentationPrinter.prototype.getPrintIndexes = function () {
+		const range = this.printOptions.rangeOptions;
+		const presentation = this.getPresentation();
+		switch (range.rangeType) {
+			case Asc.c_oAscPresentationRangeType.AllSlides: {
+				const slides = presentation.Slides;
+				const result = [];
+				for (let i = 0; i < slides.length; i += 1) {
+					result.push(i);
+				}
+				return result;
+			}
+			case Asc.c_oAscPresentationRangeType.SelectedSlides: {
+				const result = [];
+				if (presentation.IsSlidePageMode()) {
+					const thumbnails = presentation.DrawingDocument.m_oWordControl.Thumbnails;
+					return thumbnails.GetSelectedArray();
+				}
+				const slides = presentation.Slides;
+				for (let i = 0; i < slides.length; i += 1) {
+					result.push(i);
+				}
+				return result;
+			}
+			case Asc.c_oAscPresentationRangeType.ActiveSlide: {
+				if (presentation.CurPage !== -1) {
+					return [presentation.CurPage];
+				}
+				return [];
+			}
+			case Asc.c_oAscPresentationRangeType.CustomRange: {
+				const customRange = range.customRange;
+				const slides = presentation.Slides;
+				const ranges = customRange.trim().split(",");
+				const result = [];
+				for (let i = 0; i < ranges.length; i += 1) {
+					const range = ranges[i].trim().split("-");
+					if (range.length === 2) {
+						const start = parseInt(range[0], 10);
+						const end = parseInt(range[1], 10);
+						if (Number.isNaN(start) || Number.isNaN(end)) {
+							return [];
+						}
+						if (start < 0 || start >= slides.length || end < 0 || end >= slides.length) {
+							return [];
+						}
+						if (start <= end) {
+							for (let slideIndex = start; slideIndex <= end; slideIndex += 1) {
+								result.push(slideIndex);
+							}
+						} else {
+							for (let slideIndex = end; end >= start; slideIndex -= 1) {
+								result.push(slideIndex);
+							}
+						}
+					} else if (range.length === 1) {
+						const slideIndex = parseInt(range[0], 10);
+						if (Number.isNaN(slideIndex) || slideIndex < 0 || slideIndex >= slides.length) {
+							return [];
+						}
+						result.push(slideIndex);
+					} else {
+						return [];
+					}
+				}
+				return result;
+			}
+		}
+	};
+	PresentationPrinter.prototype.printFullPage = function (index) {
+		printPreview.drawOnPaper(index, {width:sizes.width, height:sizes.height, offset: 0}, {
+			width:  sizes.width,
+			height: sizes.height
+		}, renderer, printPreview.drawFullPageSlide.bind(printPreview));
+	};
+	PresentationPrinter.prototype.printFullPageSlides = function () {
+		const indexes = this.getPrintIndexes();
+		for (let i = 0; i < indexes.length; i += 1) {
+			this.printFullPage(indexes[i]);
+		}
+	};
+	PresentationPrinter.prototype.getHandoutSlidesCount = function () {
+		return this.printOptions.slidesOnPagePrintOptions.slidesCount;
+	}
+	PresentationPrinter.prototype.getHandoutPrintPagesCount = function (indexes) {
+		return Math.ceil(indexes.length / this.getHandoutSlidesCount());
+	};
+	PresentationPrinter.prototype.printHandout = function (printSlideIndexes) {
+		const slides = this.presentation.Slides;
+		const printSlides = printSlideIndexes.map(function (index) {
+			return slides[index];
+		});
+
+	};
+	PresentationPrinter.prototype.printHandouts = function () {
+		const indexes = this.getPrintIndexes();
+		const pagesCount = this.getHandoutPrintPagesCount(indexes);
+		const handoutSlidesCount = this.getHandoutSlidesCount();
+		for (let i = 0; i < pagesCount; i += 1) {
+			const printSlideIndexes = indexes.slice(i * handoutSlidesCount, (i + 1) * handoutSlidesCount);
+			this.printHandout(printSlideIndexes);
+		}
+	};
+	PresentationPrinter.prototype.printOutline = function () {
+		const indexes = this.getPrintIndexes();
+		const presentation = this.getPresentation();
+		const slides = presentation.Slides;
+		const outlineSlides = [];
+
+		const outlineView = new AscCommonSlide.OutlineView();
+
+	};
+	PresentationPrinter.prototype.printSlideWithNotes = function () {
+
+	};
+	this.toPrintRendererPart = function (printOptions) {
+
+		const oPresentation = this.m_oLogicDocument;
+		const watermark = this.m_oWordControl.m_oApi.watermarkDraw;
+		const sizes = this.m_oLogicDocument.GetSizesMM();
+
+
+		const pagescount = oPresentation.IsVisioEditor() ? oPresentation.GetSlidesCount() : oPresentation.Slides.length;
+		var start = this.m_lCurrentRendererPage;
+		var end   = pagescount - 1;
+
+		const renderer = this.m_oDocRenderer;
+		renderer.Memory.Seek(0);
+		renderer.VectorMemoryForPrint.ClearNoAttack();
+		renderer.DocInfo(this.m_oWordControl.m_oApi.asc_getCoreProps());
 
 		if (end == -1)
 		{
@@ -3050,7 +3217,7 @@ function CDrawingDocument()
 		const printPreview = this.m_oWordControl.m_oApi.printPreview;
 		for (var i = start; i <= end; i++)
 		{
-			if ((isSelection && !oPresentation.IsMasterSlideMode()) && !this.m_oWordControl.Thumbnails.isSelectedPage(i))
+			if (isSelection && oPresentation.IsSlidePageMode() && !this.m_oWordControl.Thumbnails.isSelectedPage(i))
 				continue;
 
 			if (oPresentation.IsVisioEditor())
@@ -3103,15 +3270,12 @@ function CDrawingDocument()
 			this.m_oDocRenderer.IsNoDrawingEmptyPlaceholder = true;
 		}
 
-		let endIndex;
 		const printerOptions = options.printerOptions;
 		if (printerOptions) {
-			endIndex = this.toPrintRendererPart(printerOptions);
+			this.toPrintRendererPart(printerOptions);
 		} else {
-			endIndex = this.toPDFRendererPart(options.isSelection);
+			this.toPDFRendererPart(options.isSelection);
 		}
-
-		this.m_lCurrentRendererPage = endIndex + 1;
 
 		if (watermark)
 			watermark.EndRenderer();

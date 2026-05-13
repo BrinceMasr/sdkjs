@@ -52,7 +52,7 @@
 
 	function CAscPageRange() {
 		this.rangeType = c_oAscPresentationRangeType.AllSlides;
-		this.customRange = [];
+		this.customRange = "";
 	}
 	CAscPageRange.prototype.asc_setRangeType = function(type) {
 		this.rangeType = type;
@@ -96,6 +96,12 @@
 		this.arrangmentType = c_oAscSlidesOnPageArrangmentType.Horizontal;
 		this.printType = c_oAscSlidesOnPagePrintType.FullPageSlides;
 	}
+	CAscSlidesOnPagePrintOptions.prototype.getHandoutSettings = function () {
+		const handoutSettings = new AscCommonSlide.HandoutSettings();
+		handoutSettings.setSlideCount(this.slidesCount);
+		handoutSettings.setAlign(this.arrangmentType === c_oAscSlidesOnPageArrangmentType.Horizontal ? AscCommonSlide.HANDOUT_ALIGNMENT_HORIZONTAL : AscCommonSlide.HANDOUT_ALIGNMENT_VERTICAL);
+		return handoutSettings;
+	};
 	CAscSlidesOnPagePrintOptions.prototype.asc_setSlidesCount = function(slidesCount) {
 		this.slidesCount = slidesCount;
 	};
@@ -175,6 +181,7 @@
 		this.pageOptions = new CAscPageOptions();
 		this.slidesOnPageOptions = new CAscSlidesOnPageOptions();
 		this.slidePrintOptions = new CAscSlidePrintOptions();
+		this.slidesOnPagePrintOptions = new CAscSlidesOnPagePrintOptions();
 		this.copies = 1;
 		this.nativeOptions = null;
 	}
@@ -213,6 +220,9 @@
 	};
 	CAscPresentationPrintOptions.prototype.asc_getNativeOptions = function() {
 		return this.nativeOptions;
+	};
+	CAscPresentationPrintOptions.prototype.initFromNativeOptions = function () {
+
 	};
 
 	window["Asc"] = window["Asc"] || {};

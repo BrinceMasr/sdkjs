@@ -80,13 +80,26 @@
 		return oClass.cSld.spTree;
 	};
 
+	const HANDOUT_ALIGNMENT_HORIZONTAL = 0;
+	const HANDOUT_ALIGNMENT_VERTICAL = 1;
+	function HandoutSettings() {
+		this.slideCount = 6;
+		this.align = HANDOUT_ALIGNMENT_HORIZONTAL;
+	}
+	HandoutSettings.prototype.setSlideCount = function (count) {
+		this.slideCount = count;
+	};
+	HandoutSettings.prototype.setAlign = function (align) {
+		this.align = align;
+	};
+
 	function CHandoutMaster() {
 		AscCommonSlide.SlideBase.call(this);
 		this.clrMap = new AscFormat.ClrMap();
 		this.cSld = new AscFormat.CSld(this);
 		this.hf = null;
 
-		this.slideCount = 6;
+		this.handoutSettings = new HandoutSettings();
 
 		this.Theme = null;
 		this.kind = AscFormat.TYPE_KIND.HANDOUT_MASTER;
@@ -98,7 +111,6 @@
 	}
 
 	AscFormat.InitClass(CHandoutMaster, AscCommonSlide.SlideBase, AscDFH.historyitem_type_HandoutMaster);
-
 
 	CHandoutMaster.prototype.getObjectType = function() {
 		return AscDFH.historyitem_type_HandoutMaster;
@@ -214,12 +226,16 @@
 	CHandoutMaster.prototype.getGap = function(paperSize, slideSize, scale, repeatCount) {
 		return repeatCount === 1 ? 0 : (paperSize - slideSize * repeatCount * scale) / (repeatCount - 1);
 	}
+	CHandoutMaster.prototype.getAlign = function () {
+		return this.handoutSettings.align;
+	};
+	CHandoutMaster.prototype.getSlidesCount = function () {
+		return this.handoutSettings.slideCount;
+	};
 	CHandoutMaster.prototype.getHandouts = function() {
-		//todo align
-		let align = 1;
-
+		let align = this.getAlign();
 		const handouts = [];
-		let slidesCount = this.slideCount;
+		let slidesCount = this.getSlidesCount();
 		let isDrawWithSlideTextPlaceholder = false;
 		if (slidesCount === 3) {
 			isDrawWithSlideTextPlaceholder = true;
@@ -232,7 +248,7 @@
 			const temp = countSlidesOnRow;
 			countSlidesOnRow = rowsCount;
 			rowsCount = temp;
-			align = 0;
+			align = align === HANDOUT_ALIGNMENT_HORIZONTAL ? HANDOUT_ALIGNMENT_VERTICAL : HANDOUT_ALIGNMENT_HORIZONTAL;
 		}
 		const w_mm = this.presentation.GetWidthMM();
 		const h_mm = this.presentation.GetHeightMM();
@@ -257,7 +273,7 @@
 		const startX = scaledFieldSize + (paperWidth - resultWidth) / 2;
 		const startY = scaledFieldSize + (paperHeight - resultHeight) / 2;
 
-		if (align === 0) {
+		if (align === HANDOUT_ALIGNMENT_HORIZONTAL) {
 			for (let i = 0; i < rowsCount; i += 1) {
 				const slideY = startY + i * verticalGap + h_mm * i * slideScale;
 				for (let j = 0; j < countSlidesOnRow; j += 1) {
@@ -446,7 +462,7 @@
 		}
 	};
 	CHandoutMaster.prototype.setSlideCount = function(count) {
-		this.slideCount = count;
+		this.handoutSettings.setSlideCount(count);
 	};
 
 	CHandoutMaster.prototype.collectRedrawSlides = function (redrawSlides, force) {
@@ -457,6 +473,9 @@
 	};
 	CHandoutMaster.prototype.isHandoutMaster = function() {
 		return true;
+	};
+	CHandoutMaster.prototype.draw = function () {
+
 	};
 
 	function PlaceholderBase(x, y, width, height) {
@@ -549,4 +568,7 @@
 	window['AscCommonSlide'] = window['AscCommonSlide'] || {};
 	window['AscCommonSlide'].CHandoutMaster = CHandoutMaster;
 	window['AscCommonSlide'].createHandoutMaster = createHandoutMaster;
+	window['AscCommonSlide'].HandoutSettings = HandoutSettings;
+	window['AscCommonSlide'].HANDOUT_ALIGNMENT_HORIZONTAL = HANDOUT_ALIGNMENT_HORIZONTAL;
+	window['AscCommonSlide'].HANDOUT_ALIGNMENT_VERTICAL = HANDOUT_ALIGNMENT_VERTICAL;
 })();
