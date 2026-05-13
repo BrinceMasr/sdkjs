@@ -6252,7 +6252,8 @@ function(window, undefined) {
 						if (/*nAxisType === AscDFH.historyitem_type_DateAx && */oAxis.numFmt && typeof oAxis.numFmt.formatCode === "string" && oAxis.numFmt.formatCode.length > 0) {
 							oLitFormat = oNumFormatCache.get(oAxis.numFmt.formatCode);
 						}
-						nPtsLen = oLit.ptCount;
+
+						nPtsLen = oLit.getEffectiveSize();
 
 						let bTickSkip = AscFormat.isRealNumber(oAxis.tickLblSkip) || nPtsLen >= SKIP_LBL_LIMIT;
 						let nTickLblSkip = AscFormat.isRealNumber(oAxis.tickLblSkip) ? oAxis.tickLblSkip : (nPtsLen < SKIP_LBL_LIMIT ? 1 : (Math.floor(nPtsLen / SKIP_LBL_LIMIT) + 1));
@@ -6303,16 +6304,22 @@ function(window, undefined) {
 								oCurPts = oSeries.val.numLit;
 							}
 							if (oCurPts) {
-								const pts = Array.isArray(oCurPts.pts) ? oCurPts.pts : null;
-								const lastRealIndex = pts && pts.length ? (pts[pts.length - 1].idx + 1) : 0;
+								const effectiveCurLength = oCurPts.getEffectiveSize();
+
 								const trendline = oSeries.getLastTrendline();
 								const forward = trendline && trendline.forward ? trendline.forward : 0;
-								const newNPtsLength = lastRealIndex > 0 ? (lastRealIndex + forward) : 0;
+
+								const newNPtsLength = effectiveCurLength + forward;
 								nPtsLength = Math.max(nPtsLength, newNPtsLength);
 							}
 						}
 					}
 				}
+
+				if (bCat && nPtsLen > 0) {
+					nPtsLength = nPtsLen;
+				}
+
 				let nCrossBetween = this.getAxisCrossType(oAxis);
 				if (nCrossBetween === AscFormat.CROSS_BETWEEN_MID_CAT && nPtsLength < 2) {
 					nPtsLength = 2;

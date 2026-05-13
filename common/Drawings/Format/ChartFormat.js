@@ -13137,6 +13137,16 @@
         }
         return this.pts.length;
     };
+	CNumLit.prototype.getEffectiveSize = function () {
+		const lastPt = this.pts[this.pts.length - 1];
+		if (lastPt && AscFormat.isRealNumber(lastPt.idx)) {
+			return lastPt.idx + 1;
+		}
+		if (AscFormat.isRealNumber(this.ptCount)) {
+			return this.ptCount;
+		}
+		return 0;
+	};
     CNumLit.prototype.setFormatCode = function(pr) {
         AscCommon.History.CanAddChanges() && AscCommon.History.Add(new CChangesDrawingsString(this, AscDFH.historyitem_NumLit_SetFormatCode, this.formatCode, pr));
         this.formatCode = pr;
@@ -13237,12 +13247,14 @@
 						ser.isHidden = false;
 					}
 					oCell = oWS.getCell3(nR, nC);
-					const isErrorCell = oCell.getType && oCell.getType() === AscCommon.CellValueType.Error;
 					dVal = oCell.getNumberValue();
-					if (!isErrorCell && !AscFormat.isRealNumber(dVal) && (!AscFormat.isRealNumber(displayEmptyCellsAs) || displayEmptyCellsAs === 1)) {
+					if (!AscFormat.isRealNumber(dVal) && (!AscFormat.isRealNumber(displayEmptyCellsAs) || displayEmptyCellsAs === 1)) {
 						sVal = oCell.getValueForEdit();
 						if ((typeof sVal === "string") && sVal.length > 0) {
-							dVal = 0;
+							const isErrorCell = oCell.getType && oCell.getType() === AscCommon.CellValueType.Error;
+							if (!(isErrorCell && sVal === "#N/A")) {
+								dVal = 0;
+							}
 						}
 					}
 					if (AscFormat.isRealNumber(dVal)) {
@@ -13276,7 +13288,7 @@
 						nLastNoEmptyIndex = oPt.idx;
 						nSpliceIndex = this.pts.length;
 					} else {
-						if (!isErrorCell && AscFormat.isRealNumber(displayEmptyCellsAs) && displayEmptyCellsAs !== 1) {
+						if (AscFormat.isRealNumber(displayEmptyCellsAs) && displayEmptyCellsAs !== 1) {
 							sVal = oCell.getValue();
 							if (displayEmptyCellsAs === 2 || ((typeof sVal === "string") && sVal.length > 0)) {
 								oPt = new AscFormat.CNumericPoint();
@@ -13310,10 +13322,6 @@
 			}
 		}
 		this.setPtCount(nPtCount);
-
-		if (ser) {
-			ser.isHidden = (this.pts.length === 0);
-		}
 
 		//check format
 		if (sCommonFormatCode) {

@@ -2198,32 +2198,44 @@ CChartsDrawer.prototype =
 					// every chart except scatter should start from 1
 					min = 1;
 					max = 1;
-					// find max value across each seria
+
 					for (let i = 0; i < series.length; i++) {
 						const seria = series[i];
-						if (seria && !seria.isHidden) {
-							numCache = t.getNumCache(seria.val);
-
-							const pts = numCache ? numCache.pts : null;
-							if (!pts || pts.length === 0) {
-								continue;
-							}
-
-							const firstRealIndex = pts[0].idx + 1;
-							const lastRealIndex = pts[pts.length - 1].idx + 1;
-
-							const trendline = seria.getLastTrendline();
-							const canExpandTrendline = pts.length > 1;
-							const newMin = trendline && trendline.backward && canExpandTrendline
-								? firstRealIndex - Math.floor(trendline.backward)
-								: firstRealIndex;
-							const newMax = trendline && trendline.forward && canExpandTrendline
-								? lastRealIndex + trendline.forward
-								: lastRealIndex;
-
-							max = Math.max(max, newMax);
-							min = Math.min(min, newMin);
+						if (!seria || seria.isHidden) {
+							continue;
 						}
+
+
+						numCache = t.getNumCache(seria.val);
+						const effectivePtCount = numCache ? numCache.getEffectiveSize() : 0;
+
+						let catEffectiveCount = 0;
+						const catLit = seria.cat && seria.cat.getLit ? seria.cat.getLit() : null;
+						if (catLit) {
+							const catPtsLen = Array.isArray(catLit.pts) ? catLit.pts.length : 0;
+							const catLastPt = catPtsLen > 0 ? catLit.pts[catPtsLen - 1] : null;
+							const catLastIdx = catLastPt && AscFormat.isRealNumber(catLastPt.idx) ? catLastPt.idx : null;
+							catEffectiveCount = AscFormat.isRealNumber(catLastIdx)
+								? (catLastIdx + 1)
+								: (AscFormat.isRealNumber(catLit.ptCount) ? catLit.ptCount : 0);
+						}
+
+						const cappedEffectivePtCount = catEffectiveCount > 0
+							? catEffectiveCount
+							: effectivePtCount;
+
+						const trendline = seria.getLastTrendline();
+						const canExpandTrendline = cappedEffectivePtCount > 1;
+
+						const newMin = canExpandTrendline && trendline && trendline.backward
+							? min - Math.floor(trendline.backward)
+							: cappedEffectivePtCount;
+						const newMax = canExpandTrendline && trendline && trendline.forward
+							? cappedEffectivePtCount + trendline.forward
+							: cappedEffectivePtCount;
+
+						max = Math.max(max, newMax);
+						min = Math.min(min, newMin);
 					}
 				}
 			}
@@ -9753,6 +9765,11 @@ drawAreaChart.prototype = {
 				}
 				const trendline = this.chart.series[i].getLastTrendline();
 				let idx = n != null ? n + Math.floor(trendline && trendline.backward ? trendline.backward : 0) : n;
+
+				if (!this.xPoints[idx]) {
+					continue;
+				}
+
 				x = this.xPoints[idx].pos;
 
 				y = this.cChartDrawer.getYPosition(val, this.valAx);
