@@ -7118,6 +7118,25 @@
                                 }
                             }
                         }
+                        else
+                        {
+                            for(var _c = 0; _c < axis_by_types.valAx.length; ++_c)
+                            {
+                                var val_ax = axis_by_types.valAx[_c];
+                                if(val_ax.axPos !== AscFormat.AX_POS_L && val_ax.axPos !== AscFormat.AX_POS_R)
+                                {
+                                    val_ax.setAxPos(AscFormat.AX_POS_L);
+                                }
+                            }
+                            for(var _c = 0; _c < axis_by_types.catAx.length; ++_c)
+                            {
+                                var cat_ax = axis_by_types.catAx[_c];
+                                if(cat_ax.axPos !== AscFormat.AX_POS_B && cat_ax.axPos !== AscFormat.AX_POS_T)
+                                {
+                                    cat_ax.setAxPos(AscFormat.AX_POS_B);
+                                }
+                            }
+                        }
                     }
                 }
                 if(oChart.setVaryColors && oChart.varyColors === null){
