@@ -2811,7 +2811,6 @@ $(function () {
 		ws2.getRange2("A11").setValue("1") // TestName3D
 
 		// Positive cases:
-
 		// Case #1: Number. Example form documentation. Number is 1
 		oParser = new parserFormula('ATAN(1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ATAN(1) is parsed.');
@@ -3018,7 +3017,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue().toFixed(9) - 0, -0.785398163, 'Test: Positive case: Ref3D. 3D reference to cell.');
 
 		// Negative cases:
-
 		// Case #1: String. Non-numeric string - returns #VALUE!.
 		oParser = new parserFormula('ATAN("text")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ATAN("text") is parsed.');
@@ -3097,7 +3095,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Formula. FIND function not finding match - returns #VALUE!.');
 
 		// Bounded cases:
-
 		// Case #1: Number. Maximum Excel number - approaches π/2 (approx. 1.5708).
 		oParser = new parserFormula('ATAN(9.99999999999999E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ATAN(9.99999999999999E+307) is parsed.');
@@ -3279,10 +3276,9 @@ $(function () {
 		assert.ok(oParser.parse(), 'Test: Formula ATAN2(TRUE,FALSE) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Boolean(2). Logical values as arguments. TRUE converts to 1, FALSE to 0. Should return #DIV/0! error due to second argument equal to 0');
 		// Case #28: Number(2). Too large value for first argument.
-		// Different result with MS TODO: Need to fix: Blocked by https://nct.onlyoffice.com/Products/Files/DocEditor.aspx?fileid=366936 Bugs Row#36
-		/*oParser = new parserFormula('ATAN2(10^308,1)', 'A2', ws);
+		oParser = new parserFormula('ATAN2(10^308,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ATAN2(10^308,1) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Number(2). Too large value for first argument.');*/
+		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Positive case: Number(2). Too large value for first argument.');
 		// Case #29: Number(2). Too large value for second argument.
 		oParser = new parserFormula('ATAN2(1,10^308)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ATAN2(1,10^308) is parsed.');
@@ -3309,7 +3305,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getElementRowCol(0, 0).getValue().toFixed(9) - 0, 0.785398163, 'Test: Positive case: Array(2). Coordinates in array');
 
 		// Negative cases:
-
 		// Case #1: Number(2). Both arguments are zero. Should return #DIV/0! error
 		oParser = new parserFormula('ATAN2(0,0)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ATAN2(0,0) is parsed.');
@@ -3360,7 +3355,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), '#DIV/0!', 'Test: Negative case: Number, Formula. Division by zero in second argument. Should return #DIV/0! error');
 
 		// Bounded cases:
-
 		// Case #1: Number. Maximum possible number in Excel for first argument. Should correctly calculate the result, close to π/2
 		oParser = new parserFormula('ATAN2(1.79769E+307,1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ATAN2(1.79769E+307,1) is parsed.');
@@ -3425,7 +3419,6 @@ $(function () {
 		ws2.getRange2("A12").setValue("-2") // TestName3D1
 
 		// Positive cases:
-
 		// Case #1: Number. Example from documentation.  X - 0.76159416
 		oParser = new parserFormula('ATANH(0.76159416)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ATANH(0.76159416) is parsed.');
@@ -3536,7 +3529,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), -1.000000082840371e-10, 'Test: Positive case: Number. Very small negative number.');
 
 		// Negative cases:
-
 		// Case #1: Number. Upper boundary (x=1) returns #NUM!.
 		oParser = new parserFormula('ATANH(1)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ATANH(1) is parsed.');
@@ -3639,7 +3631,6 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Date. Date calculation resulting in value > 1.');
 
 		// Bounded cases:
-
 		// Case #1: Number. Very close to upper boundary (1).
 		oParser = new parserFormula('ATANH(0.9999999999999)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: Formula ATANH(0.9999999999999) is parsed.');
@@ -23685,6 +23676,9 @@ $(function () {
 		ws.getRange2("A102").setValue("0.5");
 		ws.getRange2("A103").setValue("");
 		ws.getRange2("A105").setValue("1");
+		ws.getRange2("A106").setValue("1E+307");
+		ws.getRange2("A107").setValue("123");
+		ws.getRange2("A108").setValue("-1E+307");
 		ws.getRange2("A110").setValue("TRUE");
 		ws.getRange2("A111").setValue("FALSE");
 
@@ -23801,7 +23795,19 @@ $(function () {
 		oParser = new parserFormula('TAN({0, 1.5708})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TAN({0, 1.5708}) is parsed.');
 		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0, 'Test: Positive case: Array. Array with multiple valid elements, processes first element (0). 1 argument used.');
-
+		// Case #23: Area. Cell range with valid and very big number. 1 argument used.
+		oParser = new parserFormula('TAN(A106:A107)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: TAN(A106:A107) is parsed.');
+		oParser.setArrayFormulaRef(ws.getRange2("A1:C2").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), "#NUM!", 'Test: Positive case: Area. Cell range with valid and very big number. 1 argument used..');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1,0).getValue(), 0.5179274715856552, 'Test: Positive case: Area. Cell range with valid and very big number. 1 argument used..');
+		// Case #24: Area. Cell range with valid and very small number. 1 argument used.
+		oParser = new parserFormula('TAN(A107:A108)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: TAN(A107:A108) is parsed.');
+		oParser.setArrayFormulaRef(ws.getRange2("A1:C2").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.5179274715856552, 'Test: Positive case: Area. Cell range with valid and very small number. 1 argument used..');
+		assert.strictEqual(oParser.calculate().getElementRowCol(1,0).getValue(), "#NUM!", 'Test: Positive case: Area. Cell range with valid and very small number. 1 argument used..');
+		
 		// Negative cases:
 		// Case #1: String. Non-numeric string returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('TAN("abc")', 'A2', ws);
@@ -23814,7 +23820,8 @@ $(function () {
 		// Case #3: Area. Multi-cell range returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('TAN(A102:A103)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TAN(A102:A103) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.54630249, 'Test: Negative case: Area. Multi-cell range returns #VALUE!. 1 argument used.');
+		oParser.setArrayFormulaRef(ws.getRange2("A1:C2").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0.5463024898437905, 'Test: Negative case: Area. Multi-cell range returns #VALUE!. 1 argument used.');
 		// Case #4: Empty. Reference to empty cell returns 0 (Excel treats as 0). 1 argument used.
 		oParser = new parserFormula('TAN(A104)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TAN(A104) is parsed.');
@@ -23842,7 +23849,8 @@ $(function () {
 		// Case #10: Area3D. 3D multi-cell range returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('TAN(Sheet2!A4:A5)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TAN(Sheet2!A4:A5) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Negative case: Area3D. 3D multi-cell range returns #VALUE!. 1 argument used.');
+		oParser.setArrayFormulaRef(ws.getRange2("A1:C2").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Negative case: Area3D. 3D multi-cell range returns #VALUE!. 1 argument used.');
 		// Case #11: Table. Table column with text returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('TAN(Table1[Column2])', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TAN(Table1[Column2]) is parsed.');
@@ -23858,7 +23866,7 @@ $(function () {
 		// Case #14: Number. Number exceeding Excels limit returns #NUM!. 1 argument used.
 		oParser = new parserFormula('TAN(1E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TAN(1E+307) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. Number exceeding Excels limit returns #NUM!. 1 argument used.');
+		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Negative case: Number. Number exceeding Excels limit returns #NUM!. 1 argument used.');
 		// Case #15: Array. Array with boolean returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('TAN({TRUE})', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TAN({TRUE}) is parsed.');
@@ -23875,34 +23883,24 @@ $(function () {
 		oParser = new parserFormula('TAN(A105)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TAN(A105) is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), 1.5574077246549023, 'Test: Negative case: Reference link. Reference to cell with text returns #VALUE!. 1 argument used.');
-		// Case #19: Area. Area with text in one cell returns #VALUE!. 1 argument used.
-		oParser = new parserFormula('TAN(A106:A107)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: TAN(A106:A107) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Negative case: Area. Area with text in one cell returns #VALUE!. 1 argument used.');
-		// Case #20: Formula. String convertible to number exceeding limit returns #NUM!. 1 argument used.
-		oParser = new parserFormula('TAN("1E+309")', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: TAN("1E+309") is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Formula. String convertible to number exceeding limit returns #NUM!. 1 argument used.');
 
 		// Bounded cases:
-		// Case #1: Number. Smallest positive number Excel can handle, returns ~1E-308. 1 argument used.
-		oParser = new parserFormula('TAN(1E-308)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: TAN(1E-308) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Number. Smallest positive number Excel can handle, returns ~1E-308. 1 argument used.');
-		// Case #2: Number. Smallest negative number Excel can handle, returns ~-1E-308. 1 argument used.
-		oParser = new parserFormula('TAN(-1E-308)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: TAN(-1E-308) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Number. Smallest negative number Excel can handle, returns ~-1E-308. 1 argument used.');
-		// Case #3: Number. Largest number Excel can handle, returns valid sine value. 1 argument used.
+		// Case #1: Number. Smallest positive number Excel can handle, returns 1E-307. 1 argument used.
+		oParser = new parserFormula('TAN(1E-307)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: TAN(1E-307) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 1E-307, 'Test: Bounded case: Number. Smallest positive number Excel can handle, returns ~1E-308. 1 argument used.');
+		// Case #2: Number. Smallest negative number Excel can handle, returns -1E-307. 1 argument used.
+		oParser = new parserFormula('TAN(-1E-307)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: TAN(-1E-307) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), -1E-307, 'Test: Bounded case: Number. Smallest negative number Excel can handle, returns ~-1E-308. 1 argument used.');
+		// Case #3: Number. Largest number Excel can handle, returns an error. 1 argument used.
 		oParser = new parserFormula('TAN(1E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TAN(1E+307) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Bounded case: Number. Largest number Excel can handle, returns valid sine value. 1 argument used.');
-
-		// Need to fix: area handle, diff results from ms, boundary cases
-		// Case #3: Area. Multi-cell range returns #VALUE!. 1 argument used.
-		// Case #10: Area3D. 3D multi-cell range returns #VALUE!. 1 argument used.
-		// Case #14: Number. Number exceeding Excels limit returns #NUM!. 1 argument used.
-		// Case #19: Area. Area with text in one cell returns #VALUE!. 1 argument used.
+		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Bounded case: Number. Largest number Excel can handle, returns an error. 1 argument used.');
+		// Case #3: Number. Smallest number Excel can handle, returns an error. 1 argument used.
+		oParser = new parserFormula('TAN(-1E+307)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: TAN(-1E+307) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), '#NUM!', 'Test: Bounded case: Number. Largest number Excel can handle, returns an error. 1 argument used.');
 
 
 		testArrayFormula(assert, "TAN");
@@ -24055,7 +24053,8 @@ $(function () {
 		// Case #3: Area. Multi-cell range returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('TANH(A102:A103)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TANH(A102:A103) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0.462117157, 'Test: Negative case: Area. Multi-cell range returns #VALUE!. 1 argument used.');
+		oParser.setArrayFormulaRef(ws.getRange2("A1:C2").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue().toFixed(4), '0.4621', 'Test: Negative case: Area. Multi-cell range returns #VALUE!. 1 argument used.');
 		// Case #4: Empty. Reference to empty cell returns 0 (Excel treats as 0). 1 argument used.
 		oParser = new parserFormula('TANH(A104)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TANH(A104) is parsed.');
@@ -24071,11 +24070,13 @@ $(function () {
 		// Case #7: Name. Named range with text returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('TANH(TestNameArea2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TANH(TestNameArea2) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.6640367702678491, 'Test: Negative case: Name. Named range with text returns #VALUE!. 1 argument used.');
+		oParser.setArrayFormulaRef(ws.getRange2("A1:C2").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue().toFixed(4), '0.6640', 'Test: Negative case: Name. Named range with text returns #VALUE!. 1 argument used.');
 		// Case #8: Name3D. 3D named range with text returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('TANH(TestNameArea3D2)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TANH(TestNameArea3D2) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 0.6640367702678491, 'Test: Negative case: Name3D. 3D named range with text returns #VALUE!. 1 argument used.');
+		oParser.setArrayFormulaRef(ws.getRange2("A1:C2").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue().toFixed(4), '0.6640', 'Test: Negative case: Name3D. 3D named range with text returns #VALUE!. 1 argument used.');
 		// Case #9: Ref3D. 3D reference to cell with text returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('TANH(Sheet2!A3)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TANH(Sheet2!A3) is parsed.');
@@ -24083,7 +24084,8 @@ $(function () {
 		// Case #10: Area3D. 3D multi-cell range returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('TANH(Sheet2!A4:A5)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TANH(Sheet2!A4:A5) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Negative case: Area3D. 3D multi-cell range returns #VALUE!. 1 argument used.');
+		oParser.setArrayFormulaRef(ws.getRange2("A1:C2").bbox);
+		assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Negative case: Area3D. 3D multi-cell range returns #VALUE!. 1 argument used.');
 		// Case #11: Table. Table column with text returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('TANH(Table1[Column2])', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TANH(Table1[Column2]) is parsed.');
@@ -24119,32 +24121,30 @@ $(function () {
 		// Case #19: Area. Area with text in one cell returns #VALUE!. 1 argument used.
 		oParser = new parserFormula('TANH(A106:A107)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TANH(A106:A107) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Negative case: Area. Area with text in one cell returns #VALUE!. 1 argument used.');
+		oParser.setArrayFormulaRef(ws.getRange2("A1:C2").bbox);
+		assert.strictEqual(oParser.calculate().getElementRowCol(0,0).getValue(), 0, 'Test: Negative case: Area. Area with text in one cell returns #VALUE!. 1 argument used.');
 		// Case #20: Formula. String convertible to number exceeding limit returns #NUM!. 1 argument used.
 		oParser = new parserFormula('TANH("1E+309")', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TANH("1E+309") is parsed.');
 		assert.strictEqual(oParser.calculate().getValue(), '#VALUE!', 'Test: Negative case: Formula. String convertible to number exceeding limit returns #NUM!. 1 argument used.');
 
 		// Bounded cases:
-		// Case #1: Number. Smallest positive number Excel can handle, returns ~1E-308. 1 argument used.
-		oParser = new parserFormula('TANH(1E-308)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: TANH(1E-308) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Number. Smallest positive number Excel can handle, returns ~1E-308. 1 argument used.');
-		// Case #2: Number. Smallest negative number Excel can handle, returns ~-1E-308. 1 argument used.
-		oParser = new parserFormula('TANH(-1E-308)', 'A2', ws);
-		assert.ok(oParser.parse(), 'Test: TANH(-1E-308) is parsed.');
-		//? assert.strictEqual(oParser.calculate().getValue(), 0, 'Test: Bounded case: Number. Smallest negative number Excel can handle, returns ~-1E-308. 1 argument used.');
-		// Case #3: Number. Largest number Excel can handle, returns valid sine value. 1 argument used.
+		// Case #1: Number. Smallest positive number Excel can handle, returns 1E-307. 1 argument used.
+		oParser = new parserFormula('TANH(1E-307)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: TANH(1E-307) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), 1E-307, 'Test: Bounded case: Number. Smallest positive number Excel can handle, returns 1E-307. 1 argument used.');
+		// Case #2: Number. Smallest negative number Excel can handle, returns -1E-307. 1 argument used.
+		oParser = new parserFormula('TANH(-1E-307)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: TANH(-1E-307) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), -1E-307, 'Test: Bounded case: Number. Smallest negative number Excel can handle, returns -1E-307. 1 argument used.');
+		// Case #3: Number. Largest number Excel can handle, returns valid value. 1 argument used.
 		oParser = new parserFormula('TANH(1E+307)', 'A2', ws);
 		assert.ok(oParser.parse(), 'Test: TANH(1E+307) is parsed.');
-		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number. Largest number Excel can handle, returns valid sine value. 1 argument used.');
-
-		// Need to fix: ms results diff, area handle
-		// Case #3: Area. Multi-cell range returns #VALUE!. 1 argument used.
-		// Case #10: Area3D. 3D multi-cell range returns #VALUE!. 1 argument used.
-		// Case #19: Area. Area with text in one cell returns #VALUE!. 1 argument used.
-		// Case #1: Number. Smallest positive number Excel can handle, returns ~1E-308. 1 argument used.
-		// Case #2: Number. Smallest negative number Excel can handle, returns ~-1E-308. 1 argument used.
+		assert.strictEqual(oParser.calculate().getValue(), 1, 'Test: Bounded case: Number. Largest number Excel can handle, returns valid value. 1 argument used.');
+		// Case #4: Number. Smallest number Excel can handle, returns valid value. 1 argument used.
+		oParser = new parserFormula('TANH(-1E+307)', 'A2', ws);
+		assert.ok(oParser.parse(), 'Test: TANH(-1E+307) is parsed.');
+		assert.strictEqual(oParser.calculate().getValue(), -1, 'Test: Bounded case: Number. Smallest number Excel can handle, returns valid value. 1 argument used.');
 
 
 		testArrayFormula(assert, "TANH");
