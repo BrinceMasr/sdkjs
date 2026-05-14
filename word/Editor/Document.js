@@ -5958,6 +5958,67 @@ CDocument.prototype.AddHorizontalRule = function()
 	this.Recalculate();
 	this.UpdateInterface();
 };
+CDocument.prototype.SetHorizontalRuleProperties = function(hrUpdate)
+{
+	let selectedObjects = this.DrawingObjects && this.DrawingObjects.selectedObjects;
+	if (!selectedObjects || selectedObjects.length !== 1)
+		return false;
+	let shape = selectedObjects[0];
+	if (!shape.isHorizontalRule())
+		return false;
+
+	let geom = shape.spPr && shape.spPr.geometry;
+	let oldHr = geom && geom.hr;
+	if (!oldHr)
+		return false;
+
+	let newHr = oldHr.createDuplicate();
+	newHr.pct = hrUpdate.pct;
+	newHr.align = hrUpdate.align;
+	newHr.noshade = hrUpdate.noshade;
+	geom.setHR(newHr);
+
+	let xfrm = shape.spPr.xfrm;
+	let bSizeChanged = false;
+	if (xfrm)
+	{
+		if (AscFormat.isRealNumber(hrUpdate._newHeight))
+		{
+			xfrm.setExtY(hrUpdate._newHeight);
+			bSizeChanged = true;
+		}
+		if (newHr.pct > 0)
+		{
+			let paraDrawing = shape.parent;
+			let paragraph = paraDrawing && paraDrawing.Get_ParentParagraph && paraDrawing.Get_ParentParagraph();
+			let sectPr = paragraph && paragraph.Get_SectPr();
+			if (sectPr)
+			{
+				let nColIdx = paragraph.ColumnNum || 0;
+				let columnWidth = sectPr.GetColumnWidth(nColIdx);
+				let paraInd = paragraph.Get_CompiledPr2(true).ParaPr.Ind;
+				columnWidth -= paraInd.Left + paraInd.Right;
+				columnWidth = Math.max(0, columnWidth);
+				xfrm.setExtX(columnWidth * newHr.pct / 1000);
+				bSizeChanged = true;
+			}
+		}
+		else if (AscFormat.isRealNumber(hrUpdate._newWidth))
+		{
+			xfrm.setExtX(hrUpdate._newWidth);
+			bSizeChanged = true;
+		}
+	}
+
+	if (hrUpdate._newColor)
+		shape.setFill(AscFormat.CreateUnifillFromAscColor(hrUpdate._newColor, 1));
+
+	if (bSizeChanged && shape.parent && shape.parent.CheckWH)
+		shape.parent.CheckWH();
+
+	this.Recalculate();
+	return true;
+};
 CDocument.prototype.AddImages = function(aImages){
     this.Controller.AddImages(aImages);
 };
@@ -7413,8 +7474,10 @@ CDocument.prototype.Interface_Update_DrawingPr = function()
 	for (let i = 0; i < drawingProps.length; ++i)
 	{
 		let pr = drawingProps[i];
-		
-		if (!(pr instanceof Asc.CHyperlinkProperty))
+
+		if (pr instanceof AscFormat.CHorizontalRule)
+			this.Api.sync_HorizontalRulePropCallback(pr);
+		else if (!(pr instanceof Asc.CHyperlinkProperty))
 			this.Api.sync_ImgPropCallback(pr);
 		else if (showHyperlinks)
 			this.Api.sync_HyperlinkPropCallback(pr);

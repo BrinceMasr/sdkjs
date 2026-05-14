@@ -4817,6 +4817,7 @@
 	window['AscDFH'].historydescription_Document_StretchFormToCell                  = 0x01fd;
 	window['AscDFH'].historydescription_Document_InsertHorizontalRule               = 0x01fe;
 	window['AscDFH'].historydescription_Document_SetParagraphHtml                   = 0x01ff;
+	window['AscDFH'].historydescription_Document_SetHorizontalRuleProps             = 0x0200;
 
 	// pdf
 	window['AscDFH'].historydescription_Pdf_AddAnnot			= 0x29a;

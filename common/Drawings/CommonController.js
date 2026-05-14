@@ -7648,6 +7648,14 @@
 				getDrawingPropsFromArray: function (drawings) {
 					const editorId = Asc.editor.getEditorId();
 
+					var horizontal_rule_props = null;
+					if (drawings.length === 1 && drawings[0].isHorizontalRule && drawings[0].isHorizontalRule()) {
+						let oDrawing = drawings[0];
+						let oCurHr = oDrawing.getHorizontalRule();
+						horizontal_rule_props = oCurHr.createDuplicate();
+						horizontal_rule_props._shape = oDrawing;
+					}
+
 					var image_props, shape_props, chart_props, table_props = undefined, new_image_props,
 						new_shape_props, new_chart_props, new_table_props, shape_chart_props, locked;
 					var anim_props = null;
@@ -8374,7 +8382,8 @@
 						hyperlinkProps: hyperlink_properties,
 						shapeChartProps: shape_chart_props,
 						slicerProps: slicer_props,
-						animProps: anim_props
+						animProps: anim_props,
+						horizontalRuleProps: horizontal_rule_props
 					};
 				},
 

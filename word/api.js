@@ -1160,6 +1160,9 @@
 			case Asc.c_oAscTypeSelectElement.UnProtectedRegion:
 				oUnkTypeObj = new Asc.RangePermProp(obj);
 				break;
+			case c_oAscTypeSelectElement.HorizontalLine:
+				oUnkTypeObj = obj;
+				break;
 		}
 
 		var _i       = this.SelectedObjectsStack.length - 1;
@@ -4929,12 +4932,30 @@ background-repeat: no-repeat;\
 		let logicDocument = this.private_GetLogicDocument();
 		if (!logicDocument)
 			return false;
-		
+
 		if (logicDocument.IsSelectionLocked(AscCommon.changestype_Paragraph_Content))
 			return false;
-		
+
 		logicDocument.StartAction(AscDFH.historydescription_Document_InsertHorizontalRule);
 		let result = logicDocument.AddHorizontalRule();
+		logicDocument.FinalizeAction();
+		return result;
+	};
+	asc_docs_api.prototype.sync_HorizontalRulePropCallback = function(hr)
+	{
+		this.SelectedObjectsStack[this.SelectedObjectsStack.length] = new asc_CSelectedObject(c_oAscTypeSelectElement.HorizontalLine, hr);
+	};
+	asc_docs_api.prototype.asc_SetHorizontalRuleProperties = function(hrUpdate)
+	{
+		let logicDocument = this.private_GetLogicDocument();
+		if (!logicDocument || !hrUpdate)
+			return false;
+
+		if (logicDocument.IsSelectionLocked(AscCommon.changestype_Drawing_Props))
+			return false;
+
+		logicDocument.StartAction(AscDFH.historydescription_Document_SetHorizontalRuleProps);
+		let result = logicDocument.SetHorizontalRuleProperties(hrUpdate);
 		logicDocument.FinalizeAction();
 		return result;
 	};
@@ -15676,6 +15697,8 @@ background-repeat: no-repeat;\
 	// signatures
 	asc_docs_api.prototype["asc_addSignatureLine"] 						= asc_docs_api.prototype.asc_addSignatureLine;
 	asc_docs_api.prototype["asc_addHorizontalRule"] 					= asc_docs_api.prototype.asc_addHorizontalRule;
+	asc_docs_api.prototype["asc_SetHorizontalRuleProperties"]			= asc_docs_api.prototype.asc_SetHorizontalRuleProperties;
+	asc_docs_api.prototype["sync_HorizontalRulePropCallback"]			= asc_docs_api.prototype.sync_HorizontalRulePropCallback;
 	asc_docs_api.prototype["asc_CallSignatureDblClickEvent"]			= asc_docs_api.prototype.asc_CallSignatureDblClickEvent;
 	asc_docs_api.prototype["asc_getRequestSignatures"] 					= asc_docs_api.prototype.asc_getRequestSignatures;
 	asc_docs_api.prototype["asc_AddSignatureLine2"]             		= asc_docs_api.prototype.asc_AddSignatureLine2;

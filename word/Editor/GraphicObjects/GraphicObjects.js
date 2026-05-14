@@ -947,6 +947,10 @@ CGraphicObjects.prototype =
 		{
 			ret.push(hyperlink_props);
 		}
+		if (isRealObject(props_by_types.horizontalRuleProps))
+		{
+			ret.push(props_by_types.horizontalRuleProps);
+		}
 
         return ret;
     },
