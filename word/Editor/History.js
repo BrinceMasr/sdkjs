@@ -366,12 +366,6 @@ CHistory.prototype =
 
         // Удаляем ненужные точки
         this.Points.length = this.Index + 1;
-		
-		if(!window['AscCommon'].g_specialPasteHelper.pasteStart)
-		{
-			window['AscCommon'].g_specialPasteHelper.SpecialPasteButton_Hide();
-		}
-
 		return true;
     },
 

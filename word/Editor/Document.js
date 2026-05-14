@@ -2229,7 +2229,13 @@ CDocument.prototype.FinalizeAction = function(checkEmptyAction, additional)
 	this.ResumeRecalculate();
 
 	this.private_CheckAdditionalOnFinalize();
-	this.private_CheckEmptyPointsInAction(checkEmptyAction);
+	
+	if (!this.private_CheckEmptyPointsInAction(checkEmptyAction))
+	{
+		if (!window['AscCommon'].g_specialPasteHelper.pasteStart)
+			window['AscCommon'].g_specialPasteHelper.SpecialPasteButton_Hide();
+	}
+	
 	this.private_CheckActionLock();
 
 	let actionCompleted = true;
@@ -2454,16 +2460,18 @@ CDocument.prototype.private_CheckAdditionalOnFinalize = function()
 CDocument.prototype.private_CheckEmptyPointsInAction = function(checkEmptyAction)
 {
 	if (false === checkEmptyAction)
-		return;
+		return false;
 
 	for (let pointIndex = 0, pointCount = this.Action.PointsCount; pointIndex < pointCount; ++pointIndex)
 	{
 		if (!this.History.Is_LastPointEmpty())
-			break;
+			return false;
 
 		this.History.Remove_LastPoint();
 		--this.Action.PointsCount;
 	}
+	
+	return true;
 };
 CDocument.prototype.private_CheckActionLock = function()
 {
