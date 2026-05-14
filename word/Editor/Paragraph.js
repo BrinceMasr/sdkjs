@@ -11095,6 +11095,14 @@ Paragraph.prototype.private_CompileParaPr = function(isForce)
 };
 Paragraph.prototype.GetCompiledInheritedPr = function()
 {
+	if (!this.Parent)
+	{
+		return {
+			ParaPr : new AscWord.CParaPr(),
+			TextPr : new AscWord.CTextPr()
+		};
+	}
+	
 	var Styles     = this.Parent.Get_Styles();
 	var Numbering  = this.Parent.GetNumbering();
 	var TableStyle = this.Parent.Get_TableStyleForPara();
@@ -11320,25 +11328,28 @@ Paragraph.prototype.getCompiledPrFromStyle = function()
 Paragraph.prototype.GetParaPrForWrite = function(paraPr)
 {
 	paraPr = paraPr.Copy();
+	if (!this.Parent)
+		return paraPr;
+	
 	let inheritedPr = this.GetCompiledInheritedPr().ParaPr;
 	
 	// TODO: Check other properties
 	
-	if (paraPr.Brd)
+	if (paraPr.Brd && inheritedPr.Brd)
 	{
-		if (paraPr.Brd.Top && inheritedPr.Brd.Top.IsEqualWeak(paraPr.Brd.Top))
+		if (paraPr.Brd.Top && paraPr.Brd.Top.IsEqualWeak(inheritedPr.Brd.Top))
 			paraPr.Brd.Top = undefined;
 		
-		if (paraPr.Brd.Left && inheritedPr.Brd.Left.IsEqualWeak(paraPr.Brd.Left))
+		if (paraPr.Brd.Left && paraPr.Brd.Left.IsEqualWeak(inheritedPr.Brd.Left))
 			paraPr.Brd.Left = undefined;
 		
-		if (paraPr.Brd.Right && inheritedPr.Brd.Right.IsEqualWeak(paraPr.Brd.Right))
+		if (paraPr.Brd.Right && paraPr.Brd.Right.IsEqualWeak(inheritedPr.Brd.Right))
 			paraPr.Brd.Right = undefined;
 		
-		if (paraPr.Brd.Bottom && inheritedPr.Brd.Bottom.IsEqualWeak(paraPr.Brd.Bottom))
+		if (paraPr.Brd.Bottom && paraPr.Brd.Bottom.IsEqualWeak(inheritedPr.Brd.Bottom))
 			paraPr.Brd.Bottom = undefined;
 		
-		if (paraPr.Brd.Between && inheritedPr.Brd.Between.IsEqualWeak(paraPr.Brd.Between))
+		if (paraPr.Brd.Between && paraPr.Brd.Between.IsEqualWeak(inheritedPr.Brd.Between))
 			paraPr.Brd.Between = undefined;
 		
 		
