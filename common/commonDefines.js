@@ -709,18 +709,19 @@ window.AscCommon.g_cIsBeta = "false";
 		Hyperlink         : 4,
 		SpellCheck        : 5,
 		Shape             : 6,
-		Slide             : 7,
-		Chart             : 8,
-		Math              : 9,
-		MailMerge         : 10,
-		ContentControl    : 11,
-		Animation         : 12,
-		UnProtectedRegion : 13,
+		HorizontalLine    : 7,
+		Slide             : 8,
+		Chart             : 9,
+		Math              : 10,
+		MailMerge         : 11,
+		ContentControl    : 12,
+		Animation         : 13,
+		UnProtectedRegion : 14,
 		// viewer
-		Text              : 14,
-		Annot             : 15,
-		Field			  : 16,
-		PdfPage           : 17
+		Text              : 15,
+		Annot             : 16,
+		Field             : 17,
+		PdfPage           : 18
 	};
 
 	var c_oAscLineDrawingRule = {

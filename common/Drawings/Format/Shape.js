@@ -3483,9 +3483,13 @@
 										let paraInd = oHRParagraph.Get_CompiledPr2(true).ParaPr.Ind;
 										hrColumnWidth -= paraInd.Left + paraInd.Right;
 										hrColumnWidth = Math.max(0, hrColumnWidth);
-										let hrContentWidth = hrColumnWidth;
-										if (oHR.pct != null && oHR.pct > 0) {
+										let hrContentWidth;
+										if (oHR.pct === null) {
+											hrContentWidth = hrColumnWidth;
+										} else if (oHR.pct > 0) {
 											hrContentWidth = Math.min(hrColumnWidth, hrColumnWidth * oHR.pct / 1000);
+										} else {
+											hrContentWidth = Math.min(hrColumnWidth, xfrm.extX);
 										}
 										this.extX = hrContentWidth;
 										this.m_dHRColumnWidth = hrColumnWidth;

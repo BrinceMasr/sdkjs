@@ -1747,6 +1747,51 @@ function CChangesGeometryAddAdj(Class, Name, OldValue, NewValue, OldAvValue, bRe
         this.align = null;
     }
     AscFormat.InitClass(CHorizontalRule, AscFormat.CBaseNoIdObject, 0);
+
+    CHorizontalRule.prototype.asc_getPct = function() {
+        return null === this.pct || 0 === this.pct ? null : this.pct / 10;
+    };
+    CHorizontalRule.prototype.asc_putPct = function(v) {
+        this.pct = null === v || undefined === v ? null : v * 10;
+        if (this.pct !== 0) this._newWidth = undefined;
+    };
+    CHorizontalRule.prototype.asc_getAlign = function() { return this.align; };
+    CHorizontalRule.prototype.asc_putAlign = function(v) { this.align = v; };
+    CHorizontalRule.prototype.asc_getNoShade = function() { return this.noshade; };
+    CHorizontalRule.prototype.asc_putNoShade = function(v) {
+        this.noshade = v;
+        if (v === false) {
+            this._newColor = AscCommon.CreateAscColorCustom(0xA0, 0xA0, 0xA0);
+        }
+    };
+
+    CHorizontalRule.prototype.asc_getHeight = function() {
+        let shape = this._shape;
+        if (shape && shape.spPr && shape.spPr.xfrm && AscFormat.isRealNumber(shape.spPr.xfrm.extY))
+            return shape.spPr.xfrm.extY;
+        return null;
+    };
+    CHorizontalRule.prototype.asc_putHeight = function(v) { this._newHeight = v; };
+    CHorizontalRule.prototype.asc_getWidth = function() {
+        let shape = this._shape;
+        if (shape && shape.spPr && shape.spPr.xfrm && AscFormat.isRealNumber(shape.spPr.xfrm.extX))
+            return shape.spPr.xfrm.extX;
+        return null;
+    };
+    CHorizontalRule.prototype.asc_putWidth = function(v) {
+        this._newWidth = v;
+        if (this.pct !== 0 && AscFormat.isRealNumber(v)) this.pct = 0;
+    };
+    CHorizontalRule.prototype.asc_getColor = function() {
+        let shape = this._shape;
+        let unifill = shape && shape.spPr && shape.spPr.Fill;
+        let unicolor = unifill && unifill.fill && unifill.fill.color;
+        return unicolor ? AscCommon.CreateAscColor(unicolor) : null;
+    };
+    CHorizontalRule.prototype.asc_putColor = function(v) {
+        this._newColor = v;
+        if (v) this.noshade = true;
+    };
     CHorizontalRule.prototype.Write_ToBinary = function(w) {
         var nStartPos = w.GetCurPosition();
         var nFlags = 0;
@@ -1974,6 +2019,18 @@ function GetArrayPolygonsByPaths(dEpsilon, aPathLst)
     window['AscFormat'] = window['AscFormat'] || {};
     window['AscFormat'].Geometry = Geometry;
     window['AscFormat'].CHorizontalRule = CHorizontalRule;
+    CHorizontalRule.prototype["asc_getPct"] = CHorizontalRule.prototype.asc_getPct;
+    CHorizontalRule.prototype["asc_putPct"] = CHorizontalRule.prototype.asc_putPct;
+    CHorizontalRule.prototype["asc_getAlign"] = CHorizontalRule.prototype.asc_getAlign;
+    CHorizontalRule.prototype["asc_putAlign"] = CHorizontalRule.prototype.asc_putAlign;
+    CHorizontalRule.prototype["asc_getNoShade"] = CHorizontalRule.prototype.asc_getNoShade;
+    CHorizontalRule.prototype["asc_putNoShade"] = CHorizontalRule.prototype.asc_putNoShade;
+    CHorizontalRule.prototype["asc_getHeight"] = CHorizontalRule.prototype.asc_getHeight;
+    CHorizontalRule.prototype["asc_putHeight"] = CHorizontalRule.prototype.asc_putHeight;
+    CHorizontalRule.prototype["asc_getWidth"] = CHorizontalRule.prototype.asc_getWidth;
+    CHorizontalRule.prototype["asc_putWidth"] = CHorizontalRule.prototype.asc_putWidth;
+    CHorizontalRule.prototype["asc_getColor"] = CHorizontalRule.prototype.asc_getColor;
+    CHorizontalRule.prototype["asc_putColor"] = CHorizontalRule.prototype.asc_putColor;
     window['AscFormat'].GraphEdge = GraphEdge;
     window['AscFormat'].PathAccumulator = PathAccumulator;
     window['AscFormat'].CGeomPt = CPos;
