@@ -722,17 +722,66 @@ function (window, undefined) {
 	asc_ValAxisSettings.prototype.putAxisType = function (v) {
 		this.axisType = v;
 	};
+
+	asc_ValAxisSettings.prototype._parseStringValue = function (str) {
+		const num = AscCommon.g_oFormatParser.tryParseLocaleNumber(str);
+		if (num !== null) {
+			return num;
+		}
+
+		let formatType, formatCode;
+		if (this.numFmt) {
+			const typeInfo = this.numFmt.getFormatCellsInfo();
+			formatType = typeInfo.asc_getType();
+			formatCode = this.numFmt.getFormatCode();
+		}
+
+		const res = AscCommon.g_oFormatParser.parse(str, null, formatType, formatCode);
+		return res && AscFormat.isRealNumber(res.value)
+			? res.value
+			: null;
+	};
+
 	asc_ValAxisSettings.prototype.putMinValRule = function (v) {
 		this.minValRule = v;
 	};
-	asc_ValAxisSettings.prototype.putMinVal = function (v) {
-		this.minVal = v;
+	asc_ValAxisSettings.prototype.putMinVal = function (input) {
+		if (typeof input === 'number') {
+			this.minVal = input;
+			return true;
+		}
+
+		if (typeof input !== 'string' || input.length === 0) {
+			return false;
+		}
+
+		const numericValue = this._parseStringValue(input);
+		if (numericValue === null) {
+			return false;
+		}
+
+		this.minVal = numericValue;
+		return true;
 	};
 	asc_ValAxisSettings.prototype.putMaxValRule = function (v) {
 		this.maxValRule = v;
 	};
-	asc_ValAxisSettings.prototype.putMaxVal = function (v) {
-		this.maxVal = v;
+	asc_ValAxisSettings.prototype.putMaxVal = function (input) {
+		if (typeof input === 'number') {
+			this.maxVal = input;
+			return true;
+		}
+
+		if (typeof input !== 'string' || input.length === 0) {
+			return false;
+		}
+
+		const numericValue = this._parseStringValue(input);
+		if (numericValue === null) {
+			return false;
+		}
+		this.maxVal = numericValue;
+		return true;
 	};
 	asc_ValAxisSettings.prototype.putInvertValOrder = function (v) {
 		this.invertValOrder = v;
@@ -773,17 +822,32 @@ function (window, undefined) {
 	asc_ValAxisSettings.prototype.getDispUnitsRule = function () {
 		return this.dispUnitsRule;
 	};
+
+	asc_ValAxisSettings.prototype._formatNumericValue = function (value) {
+		if (value == null) {
+			return '';
+		}
+
+		if (!this.numFmt) {
+			return AscCommon.g_oFormatParser.toLocaleNumber(String(value));
+		}
+
+		const formatCode = this.numFmt.getFormatCode();
+		const numFormat = AscCommon.oNumFormatCache.get(formatCode);
+		return numFormat.formatToChart(value);
+	};
+
 	asc_ValAxisSettings.prototype.getMinValRule = function () {
 		return this.minValRule;
 	};
 	asc_ValAxisSettings.prototype.getMinVal = function () {
-		return this.minVal;
+		return this._formatNumericValue(this.minVal);
 	};
 	asc_ValAxisSettings.prototype.getMaxValRule = function () {
 		return this.maxValRule;
 	};
 	asc_ValAxisSettings.prototype.getMaxVal = function () {
-		return this.maxVal;
+		return this._formatNumericValue(this.maxVal);
 	};
 	asc_ValAxisSettings.prototype.getInvertValOrder = function () {
 		return this.invertValOrder;
@@ -2311,52 +2375,12 @@ function (window, undefined) {
 		return deltaE;
 	};
 	asc_CColor.prototype.RGB2LAB = function (R, G, B) {
-		let r, g, b, X, Y, Z, fx, fy, fz, xr, yr, zr;
-		let Ls, as, bs;
-		let eps = 216.0 / 24389.0;
-		let k = 24389.0 / 27.0;
-
-		let Xr = 0.95047;  // reference white D65
-		let Yr = 1.0;
-		let Zr = 1.08883;
-
-		// RGB to XYZ
-		r = R / 255; //R 0..1
-		g = G / 255; //G 0..1
-		b = B / 255; //B 0..1
-
-		// assuming sRGB (D65)
-		if (r <= 0.04045) r = r / 12.92; else r = Math.pow((r + 0.055) / 1.055, 2.4);
-
-		if (g <= 0.04045) g = g / 12.92; else g = Math.pow((g + 0.055) / 1.055, 2.4);
-
-		if (b <= 0.04045) b = b / 12.92; else b = Math.pow((b + 0.055) / 1.055, 2.4);
-
-
-		X = 0.4124564 * r + 0.3575761 * g + 0.1804375 * b;
-		Y = 0.2126729 * r + 0.7151522 * g + 0.0721750 * b;
-		Z = 0.0193339 * r + 0.1191920 * g + 0.9503041 * b;
-
-		// XYZ to Lab
-		xr = X / Xr;
-		yr = Y / Yr;
-		zr = Z / Zr;
-
-		if (xr > eps) fx = Math.pow(xr, 1 / 3.); else fx = ((k * xr + 16.) / 116.);
-
-		if (yr > eps) fy = Math.pow(yr, 1 / 3.); else fy = ((k * yr + 16.) / 116.);
-
-		if (zr > eps) fz = Math.pow(zr, 1 / 3.); else fz = ((k * zr + 16.) / 116);
-
-		Ls = (116 * fy) - 16;
-		as = 500 * (fx - fy);
-		bs = 200 * (fy - fz);
-
-		let lab = [];
-		lab[0] = (2.55 * Ls + .5) >> 0;
-		lab[1] = (as + .5) >> 0;
-		lab[2] = (bs + .5) >> 0;
-		return lab;
+		var lab = AscCommon.CU.rgbToLab({R: R, G: G, B: B});
+		return [
+			(2.55 * lab.L + .5) >> 0,
+			(lab.a + .5) >> 0,
+			(lab.b + .5) >> 0
+		];
 	};
 	asc_CColor.prototype.asc_getName = function () {
 		const nColorVal = this.getVal();
@@ -2453,7 +2477,7 @@ function (window, undefined) {
 				this.Color = obj.Color;
 			}
 			else {
-				this.Color = (undefined != obj.Color && null != obj.Color) ? CreateAscColorCustom(obj.Color.r, obj.Color.g, obj.Color.b) : null;
+				this.Color = (undefined != obj.Color && null != obj.Color) ? CreateAscColorCustom(obj.Color.r, obj.Color.g, obj.Color.b, !!obj.Color.Auto) : null;
 			}
 			this.Size = (undefined != obj.Size) ? obj.Size : null;
 			this.Value = (undefined != obj.Value) ? obj.Value : null;
@@ -3760,6 +3784,9 @@ function (window, undefined) {
 		}
 		if (this.type && this.annotProps) {
 			this.annotProps.compare(pr.annotProps);
+		}
+		else {
+			this.annotProps = null;
 		}
 	};
 

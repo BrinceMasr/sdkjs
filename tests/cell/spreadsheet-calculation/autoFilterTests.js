@@ -58,6 +58,10 @@ $(function () {
 	};
 	AscCommonExcel.WorksheetView.prototype._reinitializeScroll = function () {
 	};
+	AscCommonExcel.WorksheetView.prototype._initCellsArea = function () {
+	};
+	AscCommonExcel.WorksheetView.prototype._prepareCellTextMetricsCache = function () {
+	};
 	AscCommonExcel.WorksheetView.prototype.getZoom = function () {
 	};
 	AscCommon.baseEditorsApi.prototype._onEndLoadSdk = function () {
@@ -165,7 +169,7 @@ $(function () {
 	};
 
 	const clearData = function (c1, r1, c2, r2) {
-		ws.autoFilters.deleteAutoFilter(getRange(0, 0, 0, 0));
+		ws.autoFilters.isEmptyAutoFilters(getRange(c1, r1, c2, r2));
 		ws.removeRows(r1, r2, false);
 		ws.removeCols(c1, c2);
 	};
@@ -2355,6 +2359,221 @@ $(function () {
 		clearData(8, 1, 12, 5);
 
 		wsView.af_setDialogProp = fOld_af_setDialogProp;
+	});
+
+	QUnit.test('Test: "filteringMode - insert/delete rows/columns protection"', function (assert) {
+		const testData = [
+			['c0', 'c1', 'c2', 'c3', 'c4', 'c5'],
+			['1',  '1',  'r1', '1',  '1',  '1' ],
+			['2',  '2',  'r2', '2',  '2',  '2' ],
+			['3',  '3',  'r3', '3',  '3',  '3' ],
+			['4',  '4',  'r4', '4',  '4',  '4' ],
+			['5',  '5',  'r5', '5',  '5',  '5' ],
+			['6',  '6',  'r6', '6',  '6',  '6' ],
+			['7',  '7',  'r7', '7',  '7',  '7' ],
+		];
+
+		const filterRef = getRange(2, 2, 4, 6);
+
+		const setupAutoFilter = function () {
+			ws.getRange4(0, 0).fillData(testData);
+			ws.autoFilters.addAutoFilter(null, filterRef);
+		};
+
+		const setupTable = function () {
+			ws.getRange4(0, 0).fillData(testData);
+			ws.autoFilters.addAutoFilter('TableStyleLight9', filterRef);
+		};
+
+		const teardown = function () {
+			let oldFilteringMode = window['AscCommonExcel'].filteringMode;
+			api.asc_setFilteringMode(true);
+			clearData(0, 0, 20, 20);
+			api.asc_setFilteringMode(oldFilteringMode);
+		};
+
+		const select = function (c1, r1, c2, r2) {
+			ws.selectionRange.ranges = [getRange(c1, r1, c2, r2)];
+		};
+
+		api.asc_setFilteringMode(false);
+
+		// --- InsertCellsAndShiftRight ---
+
+		teardown();
+
+		setupAutoFilter();
+		assert.strictEqual(wsView.af_checkInsDelCells(getRange(3, 3, 3, 3), Asc.c_oAscInsertOptions.InsertCellsAndShiftRight, 'insCell'), false, 'InsertRight inside autofilter: blocked');
+		assert.strictEqual(wsView.af_checkInsDelCells(getRange(0, 1, 0, 1), Asc.c_oAscInsertOptions.InsertCellsAndShiftRight, 'insCell'), true,  'InsertRight before autofilter rows: allowed');
+		assert.strictEqual(wsView.af_checkInsDelCells(getRange(5, 3, 5, 3), Asc.c_oAscInsertOptions.InsertCellsAndShiftRight, 'insCell'), true,  'InsertRight after autofilter cols: allowed');
+		teardown();
+
+		setupTable();
+		assert.strictEqual(wsView.af_checkInsDelCells(getRange(3, 3, 3, 3), Asc.c_oAscInsertOptions.InsertCellsAndShiftRight, 'insCell'), false, 'InsertRight inside table: blocked');
+		assert.strictEqual(wsView.af_checkInsDelCells(getRange(0, 1, 0, 1), Asc.c_oAscInsertOptions.InsertCellsAndShiftRight, 'insCell'), true,  'InsertRight before table rows: allowed');
+		assert.strictEqual(wsView.af_checkInsDelCells(getRange(5, 3, 5, 3), Asc.c_oAscInsertOptions.InsertCellsAndShiftRight, 'insCell'), true,  'InsertRight after table cols: allowed');
+		teardown();
+
+		// --- DeleteCellsAndShiftLeft ---
+
+		setupAutoFilter();
+		assert.strictEqual(wsView.af_checkInsDelCells(getRange(3, 3, 3, 3), Asc.c_oAscDeleteOptions.DeleteCellsAndShiftLeft, 'delCell'), false, 'DeleteLeft inside autofilter: blocked');
+		assert.strictEqual(wsView.af_checkInsDelCells(getRange(0, 1, 0, 1), Asc.c_oAscDeleteOptions.DeleteCellsAndShiftLeft, 'delCell'), true,  'DeleteLeft before autofilter rows: allowed');
+		assert.strictEqual(wsView.af_checkInsDelCells(getRange(5, 3, 5, 3), Asc.c_oAscDeleteOptions.DeleteCellsAndShiftLeft, 'delCell'), true,  'DeleteLeft after autofilter cols: allowed');
+		teardown();
+
+		setupTable();
+		assert.strictEqual(wsView.af_checkInsDelCells(getRange(3, 3, 3, 3), Asc.c_oAscDeleteOptions.DeleteCellsAndShiftLeft, 'delCell'), false, 'DeleteLeft inside table: blocked');
+		assert.strictEqual(wsView.af_checkInsDelCells(getRange(0, 1, 0, 1), Asc.c_oAscDeleteOptions.DeleteCellsAndShiftLeft, 'delCell'), true,  'DeleteLeft before table rows: allowed');
+		assert.strictEqual(wsView.af_checkInsDelCells(getRange(5, 3, 5, 3), Asc.c_oAscDeleteOptions.DeleteCellsAndShiftLeft, 'delCell'), true,  'DeleteLeft after table cols: allowed');
+		teardown();
+
+		// --- DeleteRows ---
+
+		setupAutoFilter();
+		select(0, 2, 5, 2);
+		wsView.changeWorksheet('delCell', Asc.c_oAscDeleteOptions.DeleteRows);
+		assert.strictEqual(ws.getRange4(2, 2).getValue(), 'r2', 'DeleteRows filter header: blocked');
+		teardown();
+
+		setupAutoFilter();
+		select(0, 1, 5, 1);
+		wsView.changeWorksheet('delCell', Asc.c_oAscDeleteOptions.DeleteRows);
+		assert.strictEqual(ws.getRange4(1, 2).getValue(), 'r2', 'DeleteRows before autofilter: allowed (row shifted)');
+		teardown();
+
+		setupAutoFilter();
+		select(0, 4, 5, 4);
+		wsView.changeWorksheet('delCell', Asc.c_oAscDeleteOptions.DeleteRows);
+		assert.strictEqual(ws.getRange4(4, 2).getValue(), 'r4', 'DeleteRows inside autofilter body: blocked');
+		teardown();
+
+		setupAutoFilter();
+		select(0, 7, 5, 7);
+		wsView.changeWorksheet('delCell', Asc.c_oAscDeleteOptions.DeleteRows);
+		assert.strictEqual(ws.getRange4(7, 2).getValue(), '', 'DeleteRows after autofilter: allowed (row deleted)');
+		teardown();
+
+		setupTable();
+		select(0, 2, 5, 2);
+		wsView.changeWorksheet('delCell', Asc.c_oAscDeleteOptions.DeleteRows);
+		assert.strictEqual(ws.getRange4(2, 2).getValue(), 'r2', 'DeleteRows table header: blocked');
+		teardown();
+
+		setupTable();
+		select(0, 1, 5, 1);
+		wsView.changeWorksheet('delCell', Asc.c_oAscDeleteOptions.DeleteRows);
+		assert.strictEqual(ws.getRange4(1, 2).getValue(), 'r2', 'DeleteRows before table: allowed (row shifted)');
+		teardown();
+
+		setupTable();
+		select(0, 4, 5, 4);
+		wsView.changeWorksheet('delCell', Asc.c_oAscDeleteOptions.DeleteRows);
+		assert.strictEqual(ws.getRange4(4, 2).getValue(), 'r4', 'DeleteRows inside table body: blocked');
+		teardown();
+
+		// --- DeleteColumns ---
+
+		setupAutoFilter();
+		select(3, 0, 3, 7);
+		wsView.changeWorksheet('delCell', Asc.c_oAscDeleteOptions.DeleteColumns);
+		assert.strictEqual(ws.getRange4(0, 3).getValue(), 'c3', 'DeleteColumns inside autofilter: blocked');
+		teardown();
+
+		setupAutoFilter();
+		select(1, 0, 1, 7);
+		wsView.changeWorksheet('delCell', Asc.c_oAscDeleteOptions.DeleteColumns);
+		assert.strictEqual(ws.getRange4(0, 1).getValue(), 'c2', 'DeleteColumns before autofilter: allowed (col shifted)');
+		teardown();
+
+		setupAutoFilter();
+		select(5, 0, 5, 7);
+		wsView.changeWorksheet('delCell', Asc.c_oAscDeleteOptions.DeleteColumns);
+		assert.strictEqual(ws.getRange4(0, 4).getValue(), 'c4', 'DeleteColumns after autofilter: allowed');
+		teardown();
+
+		setupTable();
+		select(3, 0, 3, 7);
+		wsView.changeWorksheet('delCell', Asc.c_oAscDeleteOptions.DeleteColumns);
+		assert.strictEqual(ws.getRange4(0, 3).getValue(), 'c3', 'DeleteColumns inside table: blocked');
+		teardown();
+
+		setupTable();
+		select(1, 0, 1, 7);
+		wsView.changeWorksheet('delCell', Asc.c_oAscDeleteOptions.DeleteColumns);
+		assert.strictEqual(ws.getRange4(0, 1).getValue(), 'c2', 'DeleteColumns before table: allowed (col shifted)');
+		teardown();
+
+		setupTable();
+		select(5, 0, 5, 7);
+		wsView.changeWorksheet('delCell', Asc.c_oAscDeleteOptions.DeleteColumns);
+		assert.strictEqual(ws.getRange4(0, 4).getValue(), 'c4', 'DeleteColumns after table: allowed');
+		teardown();
+
+		// --- InsertColumns ---
+
+		setupAutoFilter();
+		select(3, 0, 3, 7);
+		wsView.changeWorksheet('insCell', Asc.c_oAscInsertOptions.InsertColumns);
+		assert.strictEqual(ws.getRange4(0, 3).getValue(), 'c3', 'InsertColumns inside autofilter: blocked');
+		teardown();
+
+		setupAutoFilter();
+		select(1, 0, 1, 7);
+		wsView.changeWorksheet('insCell', Asc.c_oAscInsertOptions.InsertColumns);
+		assert.strictEqual(ws.getRange4(0, 3).getValue(), 'c2', 'InsertColumns before autofilter: allowed (col shifted)');
+		teardown();
+
+		setupAutoFilter();
+		select(5, 0, 5, 7);
+		wsView.changeWorksheet('insCell', Asc.c_oAscInsertOptions.InsertColumns);
+		assert.strictEqual(ws.getRange4(0, 3).getValue(), 'c3', 'InsertColumns after autofilter: allowed');
+		teardown();
+
+		setupTable();
+		select(3, 0, 3, 7);
+		wsView.changeWorksheet('insCell', Asc.c_oAscInsertOptions.InsertColumns);
+		assert.strictEqual(ws.getRange4(0, 3).getValue(), 'c3', 'InsertColumns inside table: blocked');
+		teardown();
+
+		setupTable();
+		select(1, 0, 1, 7);
+		wsView.changeWorksheet('insCell', Asc.c_oAscInsertOptions.InsertColumns);
+		assert.strictEqual(ws.getRange4(0, 3).getValue(), 'c2', 'InsertColumns before table: allowed (col shifted)');
+		teardown();
+
+		setupTable();
+		select(5, 0, 5, 7);
+		wsView.changeWorksheet('insCell', Asc.c_oAscInsertOptions.InsertColumns);
+		assert.strictEqual(ws.getRange4(0, 3).getValue(), 'c3', 'InsertColumns after table: allowed');
+		teardown();
+
+		// --- filteringMode=true: previously blocked operations are now allowed ---
+
+		api.asc_setFilteringMode(true);
+
+		setupAutoFilter();
+		assert.strictEqual(wsView.af_checkInsDelCells(getRange(3, 3, 3, 3), Asc.c_oAscInsertOptions.InsertCellsAndShiftRight, 'insCell'), true, 'filteringMode=true: InsertRight inside autofilter allowed');
+		assert.strictEqual(wsView.af_checkInsDelCells(getRange(3, 3, 3, 3), Asc.c_oAscDeleteOptions.DeleteCellsAndShiftLeft, 'delCell'), true, 'filteringMode=true: DeleteLeft inside autofilter allowed');
+		teardown();
+
+		setupAutoFilter();
+		select(3, 0, 3, 7);
+		wsView.changeWorksheet('delCell', Asc.c_oAscDeleteOptions.DeleteColumns);
+		assert.strictEqual(ws.getRange4(0, 3).getValue(), 'c4', 'filteringMode=true: DeleteColumns inside autofilter allowed (col shifted)');
+		teardown();
+
+		setupAutoFilter();
+		select(3, 0, 3, 7);
+		wsView.changeWorksheet('insCell', Asc.c_oAscInsertOptions.InsertColumns);
+		assert.strictEqual(ws.getRange4(0, 4).getValue(), 'c3', 'filteringMode=true: InsertColumns inside autofilter allowed (col shifted)');
+		teardown();
+
+		setupAutoFilter();
+		select(0, 2, 5, 2);
+		wsView.changeWorksheet('delCell', Asc.c_oAscDeleteOptions.DeleteRows);
+		assert.strictEqual(ws.getRange4(2, 2).getValue(), 'r3', 'filteringMode=true: DeleteRows filter header allowed (row shifted)');
+		teardown();
 	});
 
 	QUnit.module("Filters");

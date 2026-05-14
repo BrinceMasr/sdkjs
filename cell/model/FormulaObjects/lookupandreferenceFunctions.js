@@ -68,12 +68,12 @@ function (window, undefined) {
 	var _func = AscCommonExcel._func;
 
 	cFormulaFunctionGroup['LookupAndReference'] = cFormulaFunctionGroup['LookupAndReference'] || [];
-	cFormulaFunctionGroup['LookupAndReference'].push(cADDRESS, cAREAS, cCHOOSE, cCHOOSECOLS, cCHOOSEROWS, cCOLUMN, cCOLUMNS, cDROP, cEXPAND, cFILTER, cFORMULATEXT,
+	cFormulaFunctionGroup['LookupAndReference'].push(cADDRESS, cANCHORARRAY, cAREAS, cCHOOSE, cCHOOSECOLS, cCHOOSEROWS, cCOLUMN, cCOLUMNS, cDROP, cEXPAND, cFILTER, cFORMULATEXT,
 		cGETPIVOTDATA, cHLOOKUP, cHYPERLINK, cINDEX, cINDIRECT, cLOOKUP, cMATCH, cOFFSET, cROW, cROWS, cSORT, cSORTBY, cRTD, cTRANSPOSE, cTAKE,
 		cUNIQUE, cVLOOKUP, cXLOOKUP, cVSTACK, cHSTACK, cTOROW, cTOCOL, cWRAPROWS, cWRAPCOLS, cXMATCH);
 
 	cFormulaFunctionGroup['NotRealised'] = cFormulaFunctionGroup['NotRealised'] || [];
-	cFormulaFunctionGroup['NotRealised'].push(cRTD);
+	cFormulaFunctionGroup['NotRealised'].push(cRTD, cANCHORARRAY);
 
 	function searchRegExp(str, flags) {
 		var vFS = str
@@ -245,7 +245,7 @@ function (window, undefined) {
 
 			let res = 0;
 			if (cElementType.string === itemA.type && cElementType.string === itemB.type) {
-				res = AscCommonExcel.stringCompare(itemA.value, itemB.value) * sortOrder;
+				res = AscCommon.stringCompare(itemA.value, itemB.value) * sortOrder;
 			} else if (cElementType.number === itemA.type && cElementType.number === itemB.type) {
 				res = (itemA.value - itemB.value) * sortOrder;
 			} else if (cElementType.string === itemA.type) {
@@ -378,7 +378,7 @@ function (window, undefined) {
 					itemB = _b.item ? _b.item : _b;
 
 				if (cElementType.string === itemA.type && cElementType.string === itemB.type) {
-					res = AscCommonExcel.stringCompare(itemA.value, itemB.value) * _sortOrder;
+					res = AscCommon.stringCompare(itemA.value, itemB.value) * _sortOrder;
 				} else if (cElementType.number === itemA.type && cElementType.number === itemB.type) {
 					res = (itemA.value - itemB.value) * _sortOrder;
 				} else if (cElementType.string === itemA.type) {
@@ -3946,6 +3946,22 @@ function (window, undefined) {
 	MatchCache.prototype = Object.create(VHLOOKUPCache.prototype);
 	MatchCache.prototype.constructor = MatchCache;
 	MatchCache.prototype.calculate = function (arg, _arg1) {
+		function normalizeMatchType (isX, val) {
+			if (isX) {
+				return val;
+			}
+
+			if (val === 0) {
+				return val;
+			} else if (val > 1) {
+				return 1;
+			} else if (val < 1) {
+				return -1;
+			} else {
+				return val;
+			}
+		}
+
 		let arg0 = arg[0], arg1 = arg[1], arg2, arg3;
 		let isXMatch = arg[4];
 
@@ -3960,9 +3976,15 @@ function (window, undefined) {
 			}
 			// default values for XMatch
 			arg2 = arg[2] ? arg[2] : new cNumber(0);
-			arg3 = arg[3] ? arg[3] : new cNumber(1);
+
+			arg3 = arg[3];
+			if (!arg[3] || arg[3].type === cElementType.empty) {
+				arg3 = new cNumber(1);
+			}
+
 		} else {
-			if (cElementType.array !== arg1.type && cElementType.cellsRange !== arg1.type && cElementType.cellsRange3D !== arg1.type) {
+			if (cElementType.array !== arg1.type && cElementType.cellsRange !== arg1.type && cElementType.cellsRange3D !== arg1.type &&
+				cElementType.cell !== arg1.type && cElementType.cell3D !== arg1.type) {
 				return new cError(cErrorType.not_available);
 			}	
 			// default values for Match
@@ -4007,9 +4029,16 @@ function (window, undefined) {
 		if (cElementType.error === a2Value.type) {
 			return a2Value;
 		}
+
 		a2Value = Math.floor(a2Value.toNumber());
-		
-		if (!(-1 === a2Value || 0 === a2Value || 1 === a2Value || 2 === a2Value)) {
+		a2Value = normalizeMatchType(isXMatch, a2Value);
+
+		// -1 - Exact match or next smallest item
+		// 0 - Exact match (default)
+		// 1 - Exact match or next largest item
+		// 2 - A wildcard match where *, ?, and ~ have  special meaning.
+		// 3 - Regex match based on regex pattern, case sensitive.
+		if (!(-1 === a2Value || 0 === a2Value || 1 === a2Value || 2 === a2Value || 3 === a2Value)) {
 			return new cError(cErrorType.wrong_value_type);
 		}
 		
@@ -4253,7 +4282,7 @@ function (window, undefined) {
 				moreEqualArr.sort(function(a, b) {
 					if (cElementType.number === a0Type) {
 						if (cElementType.string === a.v.type && cElementType.string === b.v.type) {
-							return AscCommonExcel.stringCompare(a.v.getValue(), b.v.getValue());
+							return AscCommon.stringCompare(a.v.getValue(), b.v.getValue());
 						} else if (cElementType.number === a.v.type && cElementType.number === b.v.type) {
 							return a.v.getValue() - b.v.getValue();
 						} else if (cElementType.error === a.v.type || cElementType.error === b.v.type) {
@@ -4263,7 +4292,7 @@ function (window, undefined) {
 						}
 					} else if (cElementType.string === a0Type) {
 						if (cElementType.string === a.v.type && cElementType.string === b.v.type) {
-							return AscCommonExcel.stringCompare(a.v.getValue(), b.v.getValue());
+							return AscCommon.stringCompare(a.v.getValue(), b.v.getValue());
 						} else if (cElementType.string === a.v.type || cElementType.string === b.v.type) {
 							return 1;
 						} else if (cElementType.bool === a.v.type && cElementType.bool === b.v.type) {
@@ -4358,7 +4387,7 @@ function (window, undefined) {
 							return b.v.getValue() - a.v.getValue();
 						} else if (cElementType.string === a0Type) {
 							if (cElementType.string === a.v.type && cElementType.string === b.v.type) {
-								return AscCommonExcel.stringCompare(a.v.getValue(), b.v.getValue());
+								return AscCommon.stringCompare(a.v.getValue(), b.v.getValue());
 							} else if (cElementType.string === a.v.type || cElementType.string === b.v.type) {
 								return 1;
 							} else if (cElementType.number === a.v.type && cElementType.number === b.v.type) {
@@ -5218,27 +5247,36 @@ function (window, undefined) {
 	};
 
 	function wrapRowsCols(arg, argument1, toCol) {
-		let argError = cBaseFunction.prototype._checkErrorArg.call(this, arg);
+		let res = new cArray(), valueError = new cError(cErrorType.wrong_value_type), numError = new cError(cErrorType.not_numeric);
+
+		// toCol = true - cWRAPCOLS call
+		// toCol = false - cWRAPROWS call
+		let argError = cBaseFunction.prototype._checkErrorArg.call(this, [arg[0], arg[1]]);
 		if (argError) {
-			return argError;
+			res.addElement(argError);
+			return res;
 		}
 
 		let arg1 = arg[0];
 		if (arg1.type === cElementType.empty) {
-			return new cError(cErrorType.wrong_value_type);
+			res.addElement(valueError);
+			return res;
 		}
-		let arg0Dimensions = arg1.getDimensions();
-		if (arg0Dimensions.col > 1 && arg0Dimensions.row > 1) {
-			return new cError(cErrorType.wrong_value_type);
+		let arg1Dimensions = arg1.getDimensions();
+		if (arg1Dimensions.col > 1 && arg1Dimensions.row > 1) {
+			res.addElement(valueError);
+			return res;
 		}
-
+		let isSingleColumn = arg1Dimensions.col === 1 ? true : false;
 		let arg2 = arg[1];
+
 		if (cElementType.cellsRange === arg2.type || cElementType.cellsRange3D === arg2.type) {
 			arg2 = arg2.getValueByRowCol(0,0);
 		} else if (cElementType.array === arg2.type) {
 			arg2 = arg2.getElementRowCol(0, 0);
 		} else if (arg2.type === cElementType.empty) {
-			return new cError(cErrorType.not_numeric);
+			res.addElement(numError);
+			return res;
 		}
 		if (!arg2) {
 			arg2 = new cEmpty();
@@ -5246,12 +5284,14 @@ function (window, undefined) {
 
 		arg2 = arg2.tocNumber();
 		if (arg2.type === cElementType.error) {
-			return arg2;
+			res.addElement(arg2);
+			return res;
 		}
-		arg2 = arg2.toNumber();
 
+		arg2 = Math.floor(arg2.toNumber());
 		if (arg2 < 1) {
-			return new cError(cErrorType.not_numeric);
+			res.addElement(numError);
+			return res;
 		}
 
 		let arg3 = arg[2] ? arg[2] : new cError(cErrorType.not_available);
@@ -5261,9 +5301,18 @@ function (window, undefined) {
 			arg3 = arg3.getElementRowCol(0, 0);
 		}
 
-		let res = new cArray();
 		if (cElementType.cellsRange === arg1.type || cElementType.cellsRange3D === arg1.type || cElementType.array === arg1.type) {
+			
+			if ((isSingleColumn && arg1Dimensions.row <= arg2) || (!isSingleColumn && arg1Dimensions.col <= arg2)) {
+				if (arg1.type !== cElementType.array) {
+					// convert area to array and the return it
+					arg1 = arg1.getFullArray();
+				}
+				return arg1;
+			}
+
 			let rowCounter = 0, colCounter = 0;
+
 			arg1.foreach2(function (val) {
 				if (toCol) {
 					/*if (res.array.l && res.array[res.array.length - 1].length === arg2) {
@@ -5292,6 +5341,11 @@ function (window, undefined) {
 		} else {
 			if (cElementType.cell === arg1.type || cElementType.cell3D === arg1.type) {
 				arg1 = arg1.getValue();
+			}
+
+			if (arg1.type === cElementType.empty) {
+				res.addElement(valueError);
+				return res;
 			}
 			res.addElement(arg1);
 		}
@@ -5362,6 +5416,86 @@ function (window, undefined) {
 	cXMATCH.prototype.Calculate = function (arg) {
 		arg[4] = true;
 		return g_oMatchCache.calculate(arg, arguments[1]);
+	};
+
+	/**
+	 * ANCHORARRAY — internal XLFN used to store the spilled-range operator `#`.
+	 * In UI formula `A1#` is shown; in XLSX it's stored as `_xlfn.ANCHORARRAY(A1)`.
+	 * Hidden from the function wizard via cFormulaFunctionGroup['NotRealised'].
+	 * @constructor
+	 * @extends {AscCommonExcel.cBaseFunction}
+	 */
+	function cANCHORARRAY() {
+	}
+
+	cANCHORARRAY.prototype = Object.create(cBaseFunction.prototype);
+	cANCHORARRAY.prototype.constructor = cANCHORARRAY;
+	cANCHORARRAY.prototype.name = 'ANCHORARRAY';
+	cANCHORARRAY.prototype.argumentsMin = 1;
+	cANCHORARRAY.prototype.argumentsMax = 1;
+	cANCHORARRAY.prototype.argumentsType = [argType.reference];
+	cANCHORARRAY.prototype.arrayIndexes = {0: 1};
+	cANCHORARRAY.prototype.enabledToSingle = {"0": true};
+	cANCHORARRAY.prototype.isXLFN = true;
+	cANCHORARRAY.prototype.returnValueType = AscCommonExcel.cReturnFormulaType.array;
+	cANCHORARRAY.prototype.Calculate = function (arg) {
+		var arg0 = arg[0];
+		var callerWs = arguments[3];
+		var anchorWs = null, anchorCol = -1, anchorRow = -1;
+		var is3D = false;
+
+		if (arg0.type === cElementType.name || arg0.type === cElementType.name3D) {
+			arg0 = arg0.toRef ? arg0.toRef(arguments[1]) : arg0.Calculate();
+			if (!arg0 || arg0.type === cElementType.error) {
+				return arg0 && arg0.type === cElementType.error ? arg0 : new cError(cErrorType.bad_reference);
+			}
+		}
+
+		if (arg0.type === cElementType.cell || arg0.type === cElementType.cellsRange) {
+			var bbox = arg0.getBBox0();
+			if (!bbox) {
+				return new cError(cErrorType.bad_reference);
+			}
+			anchorWs = arg0.getWS();
+			anchorCol = bbox.c1;
+			anchorRow = bbox.r1;
+		} else if (arg0.type === cElementType.cell3D || arg0.type === cElementType.cellsRange3D) {
+			var range3d = arg0.getRange ? arg0.getRange() : null;
+			var bbox3d = range3d && range3d.getBBox0 ? range3d.getBBox0() : (arg0.getBBox0 && arg0.getBBox0());
+			if (!bbox3d) {
+				return new cError(cErrorType.bad_reference);
+			}
+			anchorWs = arg0.getWS();
+			anchorCol = bbox3d.c1;
+			anchorRow = bbox3d.r1;
+			is3D = true;
+		} else if (arg0.type === cElementType.error) {
+			return arg0;
+		} else {
+			return new cError(cErrorType.bad_reference);
+		}
+
+		if (!anchorWs || !anchorWs.dynamicArrayManager) {
+			return new cError(cErrorType.bad_reference);
+		}
+
+		var spillRef = anchorWs.dynamicArrayManager.getDynamicArrayFirstCell(anchorCol, anchorRow);
+		if (!spillRef) {
+			return new cError(cErrorType.bad_reference);
+		}
+
+		// propagate #SPILL! from a blocked anchor formula
+		var anchorCell = null;
+		anchorWs.getCell3(spillRef.r1, spillRef.c1)._foreachNoEmpty(function (c) { anchorCell = c; });
+		if (anchorCell && anchorCell.formulaParsed && anchorCell.formulaParsed.aca && anchorCell.formulaParsed.ca) {
+			return new cError(cErrorType.cannot_be_spilled);
+		}
+
+		var rangeName = anchorWs.getRange3(spillRef.r1, spillRef.c1, spillRef.r2, spillRef.c2).getName();
+		if (is3D || (callerWs && callerWs !== anchorWs)) {
+			return new cArea3D(rangeName, anchorWs, anchorWs);
+		}
+		return new cArea(rangeName, anchorWs);
 	};
 
 	var g_oVLOOKUPCache = new VHLOOKUPCache(false);

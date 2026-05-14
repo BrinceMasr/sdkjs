@@ -1688,13 +1688,13 @@
 		options = options || {};
 		
 		let _options = {
-			NewLineSeparator   : GetStringParameter(options["NewLineSeparator"], "\r"),
+			NewLineSeparator   : GetStringParameter(options["NewLineSeparator"], "\r", false),
 			Numbering          : GetBoolParameter(options["Numbering"], true),
 			Math               : GetBoolParameter(options["Math"], true),
-			TableCellSeparator : GetStringParameter(options["TableCellSeparator"], "\t"),
-			TableRowSeparator  : GetStringParameter(options["TableRowSeparator"], "\r\n"),
-			ParaSeparator      : GetStringParameter(options["ParaSeparator"], "\r\n"),
-			TabSymbol          : GetStringParameter(options["TabSymbol"], "\t")
+			TableCellSeparator : GetStringParameter(options["TableCellSeparator"], "\t", false),
+			TableRowSeparator  : GetStringParameter(options["TableRowSeparator"], "\r\n", false),
+			ParaSeparator      : GetStringParameter(options["ParaSeparator"], "\r\n", false),
+			TabSymbol          : GetStringParameter(options["TabSymbol"], "\t", false)
 		};
 		
 		private_RefreshRangesPosition();
@@ -3895,16 +3895,14 @@
 		this.UniFill = UniFill;
 	}
 
-
 	/**
 	 * Class representing a stroke.
 	 * @constructor
 	 */
-	function ApiStroke(oLn)
-	{
+	function ApiStroke(oLn, parentSpPr) {
 		this.Ln = oLn;
+		this.parent = parentSpPr || null;
 	}
-
 
 	/**
 	 * Class representing gradient stop.
@@ -3912,6 +3910,11 @@
 	 */
 	function ApiGradientStop(color, pos)
 	{
+		const isColorValid = color instanceof ApiColor || color instanceof ApiUniColor;
+		if (!isColorValid) {
+			throwException(new Error('The color parameter must be an instance of ApiColor or ApiUniColor'));
+		}
+
 		this.Gs = new AscFormat.CGs();
 		this.Gs.pos = pos;
 		this.Gs.color = color instanceof ApiColor
@@ -4256,6 +4259,16 @@
 	 * @typedef {("solid" | "gradient" | "pattern" | "blip" | "nofill")} FillType
 	 */
 	
+	/**
+	 * The line end type.
+	 * @typedef {"none" | "arrow" | "diamond" | "oval" | "stealth" | "triangle"} LineEndType
+	 */
+
+	/**
+	 * The line end size.
+	 * @typedef {"large" | "medium" | "small"} LineEndSize
+	 */
+
 	/**
 	* The available color scheme identifiers.
 	 * @typedef {("accent1" | "accent2" | "accent3" | "accent4" | "accent5" | "accent6" | "bg1" | "bg2" | "dk1" | "dk2"
@@ -5078,6 +5091,64 @@
 			? ApiColor.ThemeColorMap[name]
 			: ApiColor.ThemeColorMap['tx1'];
 		return new ApiColor('theme', index);
+	};
+
+	/**
+	 * Creates an ApiColor from a universal input. The method recognizes several call signatures and either delegates to a narrower factory or constructs an ApiColor directly.
+	 * <b>Numeric components</b>: "Api.Color(r, g, b)" or "Api.Color(r, g, b, a)" creates an RGB or RGBA color from byte components (0-255).
+	 * <b>Packed integer</b>: "Api.Color(0xRRGGBB)" creates an RGB color from a 24-bit integer.
+	 * <b>Full HEX string</b>: "Api.Color('#RRGGBB')" or "Api.Color('RRGGBB')" creates a HEX color; the leading "#" is optional.
+	 * <b>Short HEX string</b>: "Api.Color('#RGB')" expands each digit by duplication, so "#F0A" becomes "#FF00AA".
+	 * <b>Theme color name</b>: "Api.Color('accent1')" creates a theme color; any value of SchemeColorId is accepted.
+	 * <b>Preset color name</b>: "Api.Color('aliceBlue')" resolves any value of PresetColor to its RGB equivalent.
+	 * <b>Auto color</b>: "Api.Color('auto')" creates an auto color.
+	 * For a single string argument, the resolution priority is: "auto", a string starting with "#", a theme name, a preset name, a bare 6-digit HEX. Theme and preset palettes do not overlap. A 3-digit shorthand is accepted only with the leading "#".
+	 * Unsupported inputs (objects, arrays, an existing ApiColor, unknown strings, no arguments) return a black color (#000000).
+	 *
+	 * @memberof Api
+	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
+	 * @param {number | string | byte | SchemeColorId | PresetColor} r - The universal color input. With three or four arguments, the red component (0-255).
+	 * @param {byte} [g] - The green component (0-255). Used only with the (r, g, b) and (r, g, b, a) forms.
+	 * @param {byte} [b] - The blue component (0-255). Used only with the (r, g, b) and (r, g, b, a) forms.
+	 * @param {byte} [a] - The alpha component (0-255). Used only with the (r, g, b, a) form.
+	 * @returns {ApiColor}
+	 * @see office-js-api/Examples/{Editor}/Api/Methods/Color.js
+	 */
+	function private_IsHexString(s) {
+		for (let i = 0; i < s.length; i++) {
+			const c = s.charCodeAt(i);
+			if (!((c >= 0x30 && c <= 0x39) || (c >= 0x41 && c <= 0x46) || (c >= 0x61 && c <= 0x66)))
+				return false;
+		}
+		return true;
+	}
+
+	Api.Color = function (r, g, b, a) {
+		if (arguments.length === 4)
+			return Api.RGBA(r, g, b, a);
+		if (arguments.length === 3)
+			return Api.RGB(r, g, b);
+		if (typeof r === 'number' && isFinite(r) && r >= 0 && r <= 0xFFFFFF && (r | 0) === r)
+			return Api.RGB((r >> 16) & 0xFF, (r >> 8) & 0xFF, r & 0xFF);
+		if (typeof r === 'string') {
+			if (r === 'auto')
+				return new ApiColor('auto');
+			const hasHash = r.charAt(0) === '#';
+			if (!hasHash) {
+				if (ApiColor.ThemeColorMap[r] !== undefined)
+					return Api.ThemeColor(r);
+				if (AscFormat.map_prst_color[r] !== undefined) {
+					const v = AscFormat.map_prst_color[r];
+					return Api.RGB((v >> 16) & 0xFF, (v >> 8) & 0xFF, v & 0xFF);
+				}
+			}
+			let hex = hasHash ? r.slice(1) : r;
+			if (hasHash && hex.length === 3 && private_IsHexString(hex))
+				hex = hex.charAt(0) + hex.charAt(0) + hex.charAt(1) + hex.charAt(1) + hex.charAt(2) + hex.charAt(2);
+			if (hex.length === 6 && private_IsHexString(hex))
+				return Api.HexColor(hex);
+		}
+		return Api.RGB(0, 0, 0);
 	};
 
 	/**
@@ -6420,12 +6491,50 @@
 		return this.Document.GetText({
 			Numbering          : GetBoolParameter(options["Numbering"], true),
 			Math               : GetBoolParameter(options["Math"], true),
-			TableCellSeparator : GetStringParameter(options["TableCellSeparator"], '\t'),
-			TableRowSeparator  : GetStringParameter(options["TableRowSeparator"], '\r\n'),
-			ParaSeparator      : GetStringParameter(options["ParaSeparator"], '\r\n'),
-			TabSymbol          : GetStringParameter(options["TabSymbol"], '\t'),
-			NewLineSeparator   : GetStringParameter(options["NewLineSeparator"], '\r')
+			TableCellSeparator : GetStringParameter(options["TableCellSeparator"], '\t', false),
+			TableRowSeparator  : GetStringParameter(options["TableRowSeparator"], '\r\n', false),
+			ParaSeparator      : GetStringParameter(options["ParaSeparator"], '\r\n', false),
+			TabSymbol          : GetStringParameter(options["TabSymbol"], '\t', false),
+			NewLineSeparator   : GetStringParameter(options["NewLineSeparator"], '\r', false)
 		});
+	};
+	/**
+	 * Replaces all content of the current document content object with the specified text,
+	 * preserving the formatting of the first paragraph.
+	 * @memberof ApiDocumentContent
+	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
+	 * @param {string} text - The text to set.
+	 * @return {ApiRun}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiDocumentContent/Methods/SetText.js
+	 */
+	ApiDocumentContent.prototype.SetText = function(text)
+	{
+		let docContent = this.Document;
+		
+		let firstParagraph = docContent.GetFirstParagraph();
+		
+		let textPr = firstParagraph.GetFirstRunPr();
+		let endPr  = firstParagraph.GetParaEndPr();
+		let paraPr = firstParagraph.GetDirectParaPr();
+		
+		docContent.ClearContent(false);
+		
+		let para;
+		let logicDocument = private_GetLogicDocument();
+		if (logicDocument && logicDocument.IsDocumentEditor())
+			para = new AscWord.Paragraph();
+		else
+			para = new AscWord.Paragraph(null, true);
+		
+		let run  = new AscWord.Run();
+		run.AddText(text);
+		run.SetPr(textPr.Copy());
+		para.SetDirectParaPr(paraPr);
+		para.SetParaEndPr(endPr);
+		para.AddToContent(0, run);
+		docContent.AddToContent(0, para);
+		return new ApiRun(run);
 	};
 
 	/**
@@ -6555,7 +6664,7 @@
 	/**
 	 * Appends the specified text to the end of the document content.
 	 * @memberof ApiDocumentContent
-	 * @typeofeditors ["CDE"]
+	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
 	 * @param {string} text - The text to add.
 	 * @returns {ApiRun}
 	 * @since 9.4.0
@@ -6573,6 +6682,7 @@
 		
 		return this.AddParagraph().AddText(text);
 	};
+
 
 	/**
 	 * Class representing a custom XML manager, which provides methods to manage custom XML parts in the document.
@@ -8022,6 +8132,19 @@
 	 * @typedef {("text" | "checkBox" | "picture" | "comboBox" | "dropDownList" | "dateTime" | "radio" | "complex" | "signature")} FormSpecificType
 	 * @see office-js-api/Examples/Enumerations/FormSpecificType.js
 	 */
+
+	/** 
+	 * Option for radio groups, dropdowns and combo boxes.
+	 * @typedef {Object} ChoiceOption
+	 * @property {string} value - Stored value.
+	 * @property {string} label - Display text.
+	 */
+
+	/**
+	 * Option for checkbox
+	 * @typedef {boolean} CheckboxOption
+	 */
+
 	/**
 	 * Form data.
 	 * @typedef {Object} FormData
@@ -8031,11 +8154,8 @@
 	 * @property {FormSpecificType} type - The form type.
 	 * @property {string} [role] - The form role.
 	 * @property {string} [roleColor] - The form role color in hex format.
-	 * @property {Array.<{value: string, label: string}> | Array.<boolean>} [options] - The list of available options for the field.
+	 * @property {ChoiceOption[] | CheckboxOption[]} [options] - The list of available options for the field.
 	 * Present for checkboxes, radio button groups, dropdown lists, and combo boxes.
-	 * For <b>checkboxes</b> this is <b>[true, false]</b>.
-	 * For <b>radio buttons</b>, <b>dropdown lists</b>, and <b>combo boxes</b> each entry contains
-	 * a <b>value</b> (the stored value) and a <b>label</b> (the display text).
 	 * @property {string} [label] - The checkbox label. Present only for checkbox fields.
 	 * @property {string} [format] - The date format string (e.g. <b>MM/DD/YYYY</b>). Present only for date picker fields.
 	 * @property {string} [lang] - The date language/locale name (e.g. <b>en-US</b>). Present only for date picker fields.
@@ -8138,7 +8258,8 @@
 	var trackRevisionBuffer = {
 		name : "",
 		userId : "",
-		isTrack : false
+		isTrack : false,
+		isUser : false
 	};
 	/**
 	 * Enables or disables AI-assisted change tracking in the document.
@@ -8157,8 +8278,19 @@
 			this.Document.SetGlobalTrackRevisions(true);
 			
 			let userInfo = Asc.editor.DocInfo.get_UserInfo();
-			trackRevisionBuffer.userId   = userInfo.get_Id();
-			trackRevisionBuffer.userName = userInfo.get_FullName();
+			if (!userInfo)
+			{
+				trackRevisionBuffer.isUser = false;
+				
+				userInfo = new Asc.asc_CUserInfo();
+				Asc.editor.DocInfo.put_UserInfo(userInfo);
+			}
+			else
+			{
+				trackRevisionBuffer.isUser   = true;
+				trackRevisionBuffer.userId   = userInfo.get_Id();
+				trackRevisionBuffer.userName = userInfo.get_FullName();
+			}
 			
 			let userId = "uid-" + assistantName;
 			userInfo.put_Id(userId);
@@ -8169,9 +8301,23 @@
 		else
 		{
 			this.Document.SetGlobalTrackRevisions(trackRevisionBuffer.isTrack);
-			let userInfo = Asc.editor.DocInfo.get_UserInfo();
-			userInfo.put_Id(trackRevisionBuffer.userId);
-			userInfo.put_FullName(trackRevisionBuffer.userName);
+			
+			if (trackRevisionBuffer.isUser)
+			{
+				let userInfo = Asc.editor.DocInfo.get_UserInfo();
+				if (!userInfo)
+				{
+					userInfo = new Asc.asc_CUserInfo();
+					Asc.editor.DocInfo.put_UserInfo(userInfo);
+				}
+				userInfo.put_Id(trackRevisionBuffer.userId);
+				userInfo.put_FullName(trackRevisionBuffer.userName);
+			}
+			else
+			{
+				Asc.editor.DocInfo.put_UserInfo(null);
+			}
+			
 		}
 		return true;
 	};
@@ -8555,22 +8701,77 @@
 	 * @returns {?ApiDrawing} - The object which represents the watermark drawing if the watermark type in Settings is not "none".
 	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/SetWatermarkSettings.js
 	 */
-	ApiDocument.prototype.SetWatermarkSettings = function(Settings)
-	{
-		let oDrawing = this.Document.SetWatermarkPropsAction(Settings.Settings);
-		if(oDrawing && oDrawing.GraphicObj)
-		{
-			const oGraphic = oDrawing.GraphicObj;
-			if(oGraphic.isImage())
-			{
-				return new ApiImage(oGraphic);
-			}
-			else if(oGraphic.isShape())
-			{
-				return new ApiShape(oGraphic);
+	ApiDocument.prototype.SetWatermarkSettings = function (Settings) {
+		const doc = this.Document;
+		const settings = Settings.Settings;
+		const drawing = doc.SetWatermarkPropsAction(settings);
+		const graphicObject = drawing && drawing.GraphicObj;
+
+		const isShape = graphicObject && graphicObject.isShape();
+		if (isShape) {
+			const shape = graphicObject;
+			const docContent = shape.getDocContent();
+			if (!docContent) {
+				return;
 			}
 
+			const settingsTextPr = settings.get_TextPr();
+			const settingsFontSize = settingsTextPr ? settingsTextPr.get_FontSize() : null;
+			const needResize = !(settingsFontSize > 0);
+
+			const resizeWatermark = function () {
+				let docContentSize = AscFormat.GetContentOneStringSizes(docContent);
+				docContentSize.w = AscFormat.CTextBody.prototype.getContentWidth.call({ content: docContent }) + 0.1;
+				if (needResize) {
+					const sectionProps = doc.Get_SectionProps();
+					const maxWidth = sectionProps.get_W() - sectionProps.get_LeftMargin() - sectionProps.get_RightMargin();
+					const maxHeight = sectionProps.get_H() - sectionProps.get_TopMargin() - sectionProps.get_BottomMargin();
+
+					let scale;
+
+					const rot = shape.spPr.xfrm.rot || 0;
+					const isZeroAngle = AscFormat.fApproxEqual(0.0, rot);
+					if (isZeroAngle) {
+						scale = Math.min(maxWidth / docContentSize.w, maxHeight / docContentSize.h);
+					} else {
+						const cos = Math.abs(Math.cos(rot));
+						const sin = Math.abs(Math.sin(rot));
+
+						const scaleX = maxWidth / (docContentSize.w * cos + docContentSize.h * sin);
+						const scaleY = maxHeight / (docContentSize.w * sin + docContentSize.h * cos);
+
+						scale = Math.min(scaleX, scaleY);
+					}
+
+					let textPr = docContent.GetCalculatedTextPr();
+					textPr.SetFontSize(textPr.GetFontSize() * scale);
+
+					docContent.SetApplyToAll(true);
+					docContent.AddToParagraph(new ParaTextPr(textPr));
+					docContent.SetApplyToAll(false);
+
+					docContentSize = AscFormat.GetContentOneStringSizes(docContent);
+					docContentSize.w = AscFormat.CTextBody.prototype.getContentWidth.call({ content: docContent }) + 0.1;
+				}
+
+				shape.spPr.xfrm.setExtX(docContentSize.w + 1);
+				shape.spPr.xfrm.setExtY(docContentSize.h);
+				drawing.setExtent(shape.spPr.xfrm.extX, shape.spPr.xfrm.extY);
+			};
+
+			AscCommon.isFileBuild()
+				? resizeWatermark()
+				: AddEndScriptAction(resizeWatermark);
+
+			return new ApiShape(shape);
 		}
+
+		const isImage = graphicObject && graphicObject.isImage();
+		if (isImage) {
+			const image = graphicObject;
+			return new ApiImage(image);
+		}
+
 		return null;
 	};
 
@@ -11470,7 +11671,7 @@
 	 * @param {boolean} [options.Math=false] - Defines if the resulting string will include mathematical expressions or not.
 	 * @param {string} [options.NewLineSeparator='\r'] - Defines how the line separator will be specified in the resulting string. Any string can be used. The default separator is "\r".
 	 * @param {string} [options.TabSymbol='\t'] - Defines how the tab will be specified in the resulting string (does not apply to numbering). Any string can be used. The default symbol is "\t".
-	 * @typeofeditors ["CDE"]
+	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
 	 * @return {string}
 	 * @see office-js-api/Examples/{Editor}/ApiParagraph/Methods/GetText.js
 	 */
@@ -11484,6 +11685,30 @@
 			Math             : GetBoolParameter(options["Math"], true),
 			TabSymbol        : GetStringParameter(options["TabSymbol"], "\t")
 		});
+	};
+	/**
+	 * Replaces the paragraph content with the specified text.
+	 * @memberof ApiParagraph
+	 * @param {string} text - The text to set.
+	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
+	 * @return {ApiRun}
+	 * @see office-js-api/Examples/{Editor}/ApiParagraph/Methods/SetText.js
+	 */
+	ApiParagraph.prototype.SetText = function(text)
+	{
+		text = GetStringParameter(text, "");
+		
+		let p = this.Paragraph;
+		
+		let textPr = p.GetFirstRunPr();
+		let run    = new AscWord.Run();
+		p.RemoveFromContent(0, p.GetElementsCount());
+		p.AddToContent(0, run);
+		
+		run.AddText(text);
+		run.SetPr(textPr.Copy());
+		
+		return new ApiRun(run);
 	};
 	/**
 	 * Returns the text properties for a paragraph end mark.
@@ -11638,8 +11863,8 @@
 			var StartSearchContentPos = SearchResults[FoundId].StartPos;
 			var EndSearchContentPos   = SearchResults[FoundId].EndPos;
 
-			var StartChar	= this.Paragraph.ConvertParaContentPosToRangePos(StartSearchContentPos);
-			var EndChar		= this.Paragraph.ConvertParaContentPosToRangePos(EndSearchContentPos);
+			var StartChar	= this.Paragraph.GetFlatPos(StartSearchContentPos);
+			var EndChar		= this.Paragraph.GetFlatPos(EndSearchContentPos);
 
 			arrApiRanges.push(this.GetRange(StartChar, EndChar));
 		}
@@ -15680,7 +15905,7 @@
 		return allCellsUpdated;
 	};
 	/**
-	 * Appends text to the first paragraph of the cell content.
+	 * Appends text to the end of the cell content.
 	 * @memberof ApiTableCell
 	 * @typeofeditors ["CDE"]
 	 * @param {string} text - The text to append.
@@ -15691,6 +15916,40 @@
 	ApiTableCell.prototype.AddText = function(text)
 	{
 		return this.GetContent().AddText(text);
+	};
+	/**
+	 * Returns the inner text of the current table cell.
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 * @param {object} [pr] - Options for formatting the returned text.
+	 * @param {boolean} [pr.Numbering=true] - Defines if the resulting string will include numbering or not.
+	 * @param {boolean} [pr.Math=true] - Defines if the resulting string will include mathematical expressions or not.
+	 * @param {string} [pr.TableCellSeparator='\t'] - Defines how the table cell separator will be specified in the resulting string.
+	 * @param {string} [pr.TableRowSeparator='\r\n'] - Defines how the table row separator will be specified in the resulting string.
+	 * @param {string} [pr.ParaSeparator='\r\n'] - Defines how the paragraph separator will be specified in the resulting string.
+	 * @param {string} [pr.TabSymbol='\t'] - Defines how the tab will be specified in the resulting string.
+	 * @param {string} [pr.NewLineSeparator='\r'] - Defines how the line separator will be specified in the resulting string.
+	 * @return {string}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/GetText.js
+	 */
+	ApiTableCell.prototype.GetText = function(pr)
+	{
+		return this.GetContent().GetText(pr);
+	};
+	/**
+	 * Replaces all content of the current table cell with the specified text,
+	 * preserving the formatting of the first paragraph.
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["CDE"]
+	 * @param {string} text - The text to set.
+	 * @return {ApiRun}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/SetText.js
+	 */
+	ApiTableCell.prototype.SetText = function(text)
+	{
+		return this.GetContent().SetText(text);
 	};
 
 	//------------------------------------------------------------------------------------------------------------------
@@ -19550,12 +19809,20 @@
 	{
 		let oDrawing = this.Drawing;
 		if(!oDrawing)
-			return false
+			return false;
 		let oLogicDocument = private_GetLogicDocument();
 		let oDrawingObjects = oLogicDocument.GetDrawingObjects();
 		if (!oDrawingObjects)
 			return false;
+
+		let bIsLast = oDrawingObjects.selectedObjects.length === 1
+			&& oDrawingObjects.selectedObjects[0] === oDrawing;
+
 		oDrawingObjects.deselectObject(oDrawing);
+
+		if (bIsLast)
+			oLogicDocument.DrawingsController.RemoveSelection();
+
 		return true;
 	};
 	/**
@@ -20452,7 +20719,7 @@
 			}
 			if (this.Shape.pen)
 			{
-				return new ApiStroke(this.Shape.pen);
+				return new ApiStroke(this.Shape.pen, this.Shape.spPr);
 			}
 		}
 
@@ -21423,6 +21690,46 @@
 	};
 
 	/**
+	 * Sets the text properties to the chart data labels.
+	 *
+	 * @memberof ApiChart
+	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 *
+	 * @param {ApiTextPr} textPr - The text properties to apply to the data labels.
+	 * @returns {boolean} - Returns true if the text properties were applied successfully, false otherwise.
+	 *
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiChart/Methods/SetDataLabelsTextPr.js
+	 */
+	ApiChart.prototype.SetDataLabelsTextPr = function (textPr) {
+		if (textPr && textPr.TextPr) {
+			return AscFormat.builder_SetDataLabelsTextPr(this.Chart, textPr.TextPr);
+		}
+		return false;
+	};
+
+	/**
+	 * Sets the text properties to the chart point data label.
+	 *
+	 * @memberof ApiChart
+	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 *
+	 * @param {number} seriesIndex - The series index from the array of the data used to build the chart from.
+	 * @param {number} pointIndex - The point index from this series.
+	 * @param {ApiTextPr} textPr - The text properties to apply to the data label.
+	 * @returns {boolean} - Returns true if the text properties were applied successfully, false otherwise.
+	 *
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiChart/Methods/SetPointDataLabelTextPr.js
+	 */
+	ApiChart.prototype.SetPointDataLabelTextPr = function (seriesIndex, pointIndex, textPr) {
+		if (textPr && textPr.TextPr) {
+			return AscFormat.builder_SetPointDataLabelTextPr(this.Chart, seriesIndex, pointIndex, textPr.TextPr);
+		}
+		return false;
+	};
+
+	/**
 	 * Spicifies tick labels position for the vertical axis.
 	 * @memberof ApiChart
 	 * @typeofeditors ["CDE", "CSE", "CPE", "PDFE"]
@@ -22329,6 +22636,144 @@
 				return dashString || "solid";
 			}
 			return "solid";
+		}
+		return null;
+	};
+
+	/**
+	 * Sets the beginning arrow of the stroke.
+	 *
+	 * @memberof ApiStroke
+	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 *
+	 * @param {LineEndType} type - The type of the beginning arrow.
+	 * @param {LineEndSize} [width="medium"] - The width of the beginning arrow.
+	 * @param {LineEndSize} [length="medium"] - The length of the beginning arrow.
+	 * @returns {boolean}
+	 *
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiStroke/Methods/SetBeginArrow.js
+	 */
+	ApiStroke.prototype.SetBeginArrow = function (type, width, length) {
+		const typeCode = private_GetLineEndTypeCode(type);
+		if (typeCode === undefined) {
+			return false;
+		}
+
+		const widthCode = private_GetLineEndSizeCode(width);
+		const lengthCode = private_GetLineEndSizeCode(length);
+		if (widthCode === undefined || lengthCode === undefined) {
+			return false;
+		}
+
+		if (this.Ln) {
+			if (this.parent) {
+				this.Ln = this.Ln.createDuplicate();
+			}
+
+			const endArrow = new AscFormat.EndArrow();
+			endArrow.setType(typeCode);
+			endArrow.setW(widthCode);
+			endArrow.setLen(lengthCode);
+			this.Ln.setHeadEnd(endArrow);
+
+			if (this.parent) {
+				this.parent.setLn(this.Ln);
+			}
+
+			return true;
+		}
+
+		return false;
+	};
+
+	/**
+	 * Returns the beginning arrow properties of the stroke.
+	 *
+	 * @memberof ApiStroke
+	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 *
+	 * @returns {{Type: LineEndType, Width: LineEndSize, Length: LineEndSize} | null}
+	 *
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiStroke/Methods/GetBeginArrow.js
+	 */
+	ApiStroke.prototype.GetBeginArrow = function () {
+		if (this.Ln && this.Ln.headEnd) {
+			return {
+				'Type': private_GetLineEndTypeString(this.Ln.headEnd.type),
+				'Width': private_GetLineEndSizeString(this.Ln.headEnd.w),
+				'Length': private_GetLineEndSizeString(this.Ln.headEnd.len)
+			};
+		}
+		return null;
+	};
+
+	/**
+	 * Sets the ending arrow of the stroke.
+	 *
+	 * @memberof ApiStroke
+	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 *
+	 * @param {LineEndType} type - The type of the ending arrow.
+	 * @param {LineEndSize} [width="medium"] - The width of the ending arrow.
+	 * @param {LineEndSize} [length="medium"] - The length of the ending arrow.
+	 * @returns {boolean}
+	 *
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiStroke/Methods/SetEndArrow.js
+	 */
+	ApiStroke.prototype.SetEndArrow = function (type, width, length) {
+		const typeCode = private_GetLineEndTypeCode(type);
+		if (typeCode === undefined) {
+			return false;
+		}
+
+		const widthCode = private_GetLineEndSizeCode(width);
+		const lengthCode = private_GetLineEndSizeCode(length);
+		if (widthCode === undefined || lengthCode === undefined) {
+			return false;
+		}
+
+		if (this.Ln) {
+			if (this.parent) {
+				this.Ln = this.Ln.createDuplicate();
+			}
+
+			const endArrow = new AscFormat.EndArrow();
+			endArrow.setType(typeCode);
+			endArrow.setW(widthCode);
+			endArrow.setLen(lengthCode);
+			this.Ln.setTailEnd(endArrow);
+
+			if (this.parent) {
+				this.parent.setLn(this.Ln);
+			}
+
+			return true;
+		}
+
+		return false;
+	};
+
+	/**
+	 * Returns the ending arrow properties of the stroke.
+	 *
+	 * @memberof ApiStroke
+	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 *
+	 * @returns {{Type: LineEndType, Width: LineEndSize, Length: LineEndSize} | null}
+	 *
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiStroke/Methods/GetEndArrow.js
+	 */
+	ApiStroke.prototype.GetEndArrow = function () {
+		if (this.Ln && this.Ln.tailEnd) {
+			return {
+				'Type': private_GetLineEndTypeString(this.Ln.tailEnd.type),
+				'Width': private_GetLineEndSizeString(this.Ln.tailEnd.w),
+				'Length': private_GetLineEndSizeString(this.Ln.tailEnd.len)
+			};
 		}
 		return null;
 	};
@@ -28595,7 +29040,7 @@
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/PixelsToEmu.js
 	 */
 	Api.PixelsToEmus = function Px2Emu(px) {
-		return Math.round(private_MM2EMU(AscCommon.g_dKoef_pix_to_mm * px));
+		return private_MM2EMU(AscCommon.g_dKoef_pix_to_mm * px);
 	};
 
 	/**
@@ -29408,7 +29853,11 @@
 	 */
 	ApiWatermarkSettings.prototype.SetTextPr = function (oTextPr)
 	{
-		this.Settings.put_TextPr(new Asc.CTextProp(oTextPr.TextPr));
+		const textProp = new Asc.CTextProp(oTextPr.TextPr);
+		const fontFamilyName = oTextPr.TextPr.GetFontFamily();
+		const fontFamily = new AscCommon.asc_CTextFontFamily({ Name: fontFamilyName, Index: -1 });
+		textProp.put_FontFamily(fontFamily);
+		this.Settings.put_TextPr(textProp);
 		return true;
 	};
 
@@ -29731,13 +30180,13 @@
 		options = options || {};
 		
 		let _options = {
-			NewLineSeparator   : GetStringParameter(options["NewLineSeparator"], "\r"),
+			NewLineSeparator   : GetStringParameter(options["NewLineSeparator"], "\r", false),
 			Numbering          : GetBoolParameter(options["Numbering"], true),
 			Math               : GetBoolParameter(options["Math"], true),
-			TableCellSeparator : GetStringParameter(options["TableCellSeparator"], "\t"),
-			TableRowSeparator  : GetStringParameter(options["TableRowSeparator"], "\r\n"),
-			ParaSeparator      : GetStringParameter(options["ParaSeparator"], "\r\n"),
-			TabSymbol          : GetStringParameter(options["TabSymbol"], "\t")
+			TableCellSeparator : GetStringParameter(options["TableCellSeparator"], "\t", false),
+			TableRowSeparator  : GetStringParameter(options["TableRowSeparator"], "\r\n", false),
+			ParaSeparator      : GetStringParameter(options["ParaSeparator"], "\r\n", false),
+			TabSymbol          : GetStringParameter(options["TabSymbol"], "\t", false)
 		};
 		
 		let docState = this.Document.SaveDocumentState();
@@ -30263,6 +30712,7 @@
 	Api["RGBA"]                             = Api.RGBA;
 	Api["HexColor"]                         = Api.HexColor;
 	Api["ThemeColor"]                       = Api.ThemeColor;
+	Api["Color"]                            = Api.Color;
 	Api["CreateSolidFill"]                  = Api.CreateSolidFill;
 	Api["CreateLinearGradientFill"]         = Api.CreateLinearGradientFill;
 	Api["CreateRadialGradientFill"]         = Api.CreateRadialGradientFill;
@@ -30350,6 +30800,7 @@
 	ApiDocumentContent.prototype["GetAllParagraphs"]          = ApiDocumentContent.prototype.GetAllParagraphs;
 	ApiDocumentContent.prototype["GetAllTables"]              = ApiDocumentContent.prototype.GetAllTables;
 	ApiDocumentContent.prototype["GetText"]                   = ApiDocumentContent.prototype.GetText;
+	ApiDocumentContent.prototype["SetText"]                   = ApiDocumentContent.prototype.SetText;
 	ApiDocumentContent.prototype["GetCurrentParagraph"]       = ApiDocumentContent.prototype.GetCurrentParagraph;
 	ApiDocumentContent.prototype["GetCurrentRun"]             = ApiDocumentContent.prototype.GetCurrentRun;
 	ApiDocumentContent.prototype["GetCurrentContentControl"]  = ApiDocumentContent.prototype.GetCurrentContentControl;
@@ -30575,6 +31026,7 @@
 	ApiParagraph.prototype["GetParentTable"]         = ApiParagraph.prototype.GetParentTable;
 	ApiParagraph.prototype["GetParentTableCell"]     = ApiParagraph.prototype.GetParentTableCell;
 	ApiParagraph.prototype["GetText"]                = ApiParagraph.prototype.GetText;
+	ApiParagraph.prototype["SetText"]                = ApiParagraph.prototype.SetText;
 	ApiParagraph.prototype["GetTextPr"]              = ApiParagraph.prototype.GetTextPr;
 	ApiParagraph.prototype["SetTextPr"]              = ApiParagraph.prototype.SetTextPr;
 	ApiParagraph.prototype["InsertInContentControl"] = ApiParagraph.prototype.InsertInContentControl;
@@ -30770,6 +31222,8 @@
 	ApiTableCell.prototype["GetBackgroundColor"]       = ApiTableCell.prototype.GetBackgroundColor;
 	ApiTableCell.prototype["SetColumnBackgroundColor"] = ApiTableCell.prototype.SetColumnBackgroundColor;
 	ApiTableCell.prototype["AddText"]                  = ApiTableCell.prototype.AddText;
+	ApiTableCell.prototype["GetText"]                  = ApiTableCell.prototype.GetText;
+	ApiTableCell.prototype["SetText"]                  = ApiTableCell.prototype.SetText;
 
 	ApiStyle.prototype["GetClassType"]               = ApiStyle.prototype.GetClassType;
 	ApiStyle.prototype["GetName"]                    = ApiStyle.prototype.GetName;
@@ -31082,6 +31536,8 @@
 	ApiChart.prototype["SetLegendFontSize"]            = ApiChart.prototype.SetLegendFontSize;
 	ApiChart.prototype["SetShowDataLabels"]            = ApiChart.prototype.SetShowDataLabels;
 	ApiChart.prototype["SetShowPointDataLabel"]        = ApiChart.prototype.SetShowPointDataLabel;
+	ApiChart.prototype["SetDataLabelsTextPr"]          = ApiChart.prototype.SetDataLabelsTextPr;
+	ApiChart.prototype["SetPointDataLabelTextPr"]      = ApiChart.prototype.SetPointDataLabelTextPr;
 	ApiChart.prototype["SetVertAxisTickLabelPosition"] = ApiChart.prototype.SetVertAxisTickLabelPosition;
 	ApiChart.prototype["SetHorAxisTickLabelPosition"]  = ApiChart.prototype.SetHorAxisTickLabelPosition;
 
@@ -31141,6 +31597,10 @@
 	ApiStroke.prototype["GetWidth"]                  = ApiStroke.prototype.GetWidth;
 	ApiStroke.prototype["GetFill"]                   = ApiStroke.prototype.GetFill;
 	ApiStroke.prototype["GetDashType"]               = ApiStroke.prototype.GetDashType;
+	ApiStroke.prototype["SetBeginArrow"]             = ApiStroke.prototype.SetBeginArrow;
+	ApiStroke.prototype["GetBeginArrow"]             = ApiStroke.prototype.GetBeginArrow;
+	ApiStroke.prototype["SetEndArrow"]               = ApiStroke.prototype.SetEndArrow;
+	ApiStroke.prototype["GetEndArrow"]               = ApiStroke.prototype.GetEndArrow;
 
 	ApiGradientStop.prototype["GetClassType"]        = ApiGradientStop.prototype.GetClassType;
 	ApiGradientStop.prototype["ToJSON"]              = ApiGradientStop.prototype.ToJSON;
@@ -31204,7 +31664,6 @@
 	ApiInlineLvlSdt.prototype["GetPlaceholderText"]     = ApiInlineLvlSdt.prototype.GetPlaceholderText;
 	ApiInlineLvlSdt.prototype["SetPlaceholderText"]     = ApiInlineLvlSdt.prototype.SetPlaceholderText;
 	ApiInlineLvlSdt.prototype["IsForm"]                 = ApiInlineLvlSdt.prototype.IsForm;
-	ApiInlineLvlSdt.prototype["GetForm"]                = ApiInlineLvlSdt.prototype.GetForm;
 	ApiInlineLvlSdt.prototype["GetDropdownList"]        = ApiInlineLvlSdt.prototype.GetDropdownList;
 	ApiInlineLvlSdt.prototype["SetBorderColor"]         = ApiInlineLvlSdt.prototype.SetBorderColor;
 	ApiInlineLvlSdt.prototype["GetBorderColor"]         = ApiInlineLvlSdt.prototype.GetBorderColor;
@@ -31623,9 +32082,9 @@
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Area for internal usage
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	function GetStringParameter(parameter, defaultValue)
+	function GetStringParameter(parameter, defaultValue, checkEmpty)
 	{
-		if (undefined !== parameter && typeof(parameter) === "string" && "" !== parameter)
+		if (undefined !== parameter && typeof(parameter) === "string" && ("" !== parameter || false === checkEmpty))
 			return parameter;
 
 		return defaultValue;
@@ -31833,8 +32292,6 @@
 			return private_CheckForm(oElement);
 		else if (oElement instanceof ParaHyperlink)
 			return new ApiHyperlink(oElement);
-		else if (oElement instanceof ApiFormBase)
-			return (new ApiInlineLvlSdt(oElement)).GetForm();
 		else
 			return new ApiUnsupported();
 	}
@@ -31952,7 +32409,7 @@
 	
 	function private_MM2EMU(mm)
 	{
-		return mm * 36000.0;
+		return Math.round(mm * 36000.0);
 	}
 
 	function private_GetHps(hps)
@@ -32213,6 +32670,51 @@
 			return Asc.c_oAscRelativeFromV.Paragraph;
 
 		return Asc.c_oAscRelativeFromV.Page;
+	}
+
+	function private_GetLineEndTypeCode(typeName) {
+		switch (typeName) {
+			case 'none': return AscFormat.LineEndType.None;
+			case 'arrow': return AscFormat.LineEndType.Arrow;
+			case 'diamond': return AscFormat.LineEndType.Diamond;
+			case 'oval': return AscFormat.LineEndType.Oval;
+			case 'stealth': return AscFormat.LineEndType.Stealth;
+			case 'triangle': return AscFormat.LineEndType.Triangle;
+		}
+		return undefined;
+	}
+
+	function private_GetLineEndTypeString(typeCode) {
+		switch (typeCode) {
+			case AscFormat.LineEndType.None: return 'none';
+			case AscFormat.LineEndType.Arrow: return 'arrow';
+			case AscFormat.LineEndType.Diamond: return 'diamond';
+			case AscFormat.LineEndType.Oval: return 'oval';
+			case AscFormat.LineEndType.Stealth: return 'stealth';
+			case AscFormat.LineEndType.Triangle: return 'triangle';
+		}
+		return 'none';
+	}
+
+	function private_GetLineEndSizeCode(sizeName) {
+		switch (sizeName) {
+			case 'large': return AscFormat.LineEndSize.Large;
+			case 'small': return AscFormat.LineEndSize.Small;
+			case 'medium': return AscFormat.LineEndSize.Mid;
+		}
+		if (sizeName === undefined) {
+			return AscFormat.LineEndSize.Mid;
+		}
+		return undefined;
+	}
+
+	function private_GetLineEndSizeString(sizeCode) {
+		switch (sizeCode) {
+			case AscFormat.LineEndSize.Large: return 'large';
+			case AscFormat.LineEndSize.Small: return 'small';
+			case AscFormat.LineEndSize.Mid: return 'medium';
+		}
+		return 'medium';
 	}
 
 	function private_GetDrawingLockType(sType)

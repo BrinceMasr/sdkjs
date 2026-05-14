@@ -67,7 +67,8 @@ CChangesDocumentContentAddItem.prototype.Undo = function()
 		var Pos = true !== this.UseArray ? this.Pos : this.PosArray[nIndex];
 		
 		oDocument.UpdateSectionsBeforeRemove([oDocument.Content[Pos]], false);
-		
+		oDocument.Content[Pos].OnDetach();
+
 		var Elements = oDocument.Content.splice(Pos, 1);
 		oDocument.private_RecalculateNumbering(Elements);
 		oDocument.private_ReindexContent(Pos);
@@ -127,6 +128,7 @@ CChangesDocumentContentAddItem.prototype.Redo = function()
 
 		Element.Parent = oDocument;
 		oDocument.UpdateSectionsAfterAdd([Element]);
+		Element.OnAttach();
 	}
 	this.Class.Recalculated = false;
 };
@@ -181,9 +183,10 @@ CChangesDocumentContentAddItem.prototype.Load = function(Color)
 
 			AscCommon.CollaborativeEditing.Update_DocumentPositionsOnAdd(oDocument, Pos);
 			oDocument.UpdateSectionsAfterAdd([Element]);
+			Element.OnAttach();
 		}
 	}
-	
+
 	this.Class.Recalculated = false;
 };
 CChangesDocumentContentAddItem.prototype.IsRelated = function(oChanges)
@@ -243,6 +246,8 @@ CChangesDocumentContentRemoveItem.prototype.Undo = function()
 	}
 	this.Class.Recalculated = false;
 	oDocument.UpdateSectionsAfterAdd(this.Items);
+	for (let i = 0; i < this.Items.length; ++i)
+		this.Items[i].OnAttach();
 };
 CChangesDocumentContentRemoveItem.prototype.Redo = function()
 {
@@ -253,7 +258,10 @@ CChangesDocumentContentRemoveItem.prototype.Redo = function()
 	
 	let removedElements = oDocument.Content.slice(this.Pos, this.Pos + this.Items.length);
 	oDocument.UpdateSectionsBeforeRemove(removedElements, false);
-	
+
+	for (let i = 0; i < removedElements.length; ++i)
+		removedElements[i].OnDetach();
+
 	var Elements = oDocument.Content.splice(this.Pos, this.Items.length);
 	oDocument.private_RecalculateNumbering(Elements);
 	oDocument.private_ReindexContent(this.Pos);
@@ -298,7 +306,8 @@ CChangesDocumentContentRemoveItem.prototype.Load = function(Color)
 			continue;
 		
 		oDocument.UpdateSectionsBeforeRemove([oDocument.Content[Pos]], false);
-		
+		oDocument.Content[Pos].OnDetach();
+
 		var Elements = oDocument.Content.splice(Pos, 1);
 		oDocument.private_RecalculateNumbering(Elements);
 		AscCommon.CollaborativeEditing.Update_DocumentPositionsOnRemove(oDocument, Pos, 1);

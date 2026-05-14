@@ -80,7 +80,7 @@ var c_oChartBar3dFaces =
 
 var globalGapDepth = 150;
 var isTurnOn3DCharts = true;
-var standartMarginForCharts = 13;
+var standartMarginForCharts = 14;
 
 function arrReverse(arr) {
 	if(!arr || !arr.length)
@@ -116,7 +116,6 @@ function CChartsDrawer()
 	this.errBars = new CErrBarsDraw(this);
 	this.trendline = new CTrendline(this);
 	this.upDownBars = new CUpDownBars(this);
-
 
 	this.changeAxisMap = null;
 
@@ -187,7 +186,6 @@ CChartsDrawer.prototype =
 			}
 
 		}
-
 		//CHARTS
 		if (!chartSpace.bEmptySeries) {
 			for(var i in this.charts) {
@@ -960,7 +958,6 @@ CChartsDrawer.prototype =
 	//****calculate margins****
 	_calculateMarginsChart: function (chartSpace, dNotPutResult) {
 		this.calcProp.chartGutter = {};
-
 		if (this._isSwitchCurrent3DChart(chartSpace)) {
 			standartMarginForCharts = 16;
 		}
@@ -970,6 +967,9 @@ CChartsDrawer.prototype =
 
 		var pxToMM = this.calcProp.pxToMM;
 		var plotArea = chartSpace.chart.plotArea;
+		var charts = plotArea.charts;
+		const isChartEx = chartSpace ? chartSpace.isChartEx() : false;
+		let dataTableExtY = 0;
 
 		//if points are calculated - set margin based on them
 		var marginOnPoints = this._calculateMarginOnPoints(chartSpace/*, isHBar*/);
@@ -977,7 +977,10 @@ CChartsDrawer.prototype =
 
 		//calculate axis labels extending beyond bounds
 		var labelsMargin = this._calculateMarginLabels(chartSpace);
-		var left = labelsMargin.left, right = labelsMargin.right, top = labelsMargin.top, bottom = labelsMargin.bottom;
+		let left = labelsMargin.left;
+		let right = labelsMargin.right;
+		let top = 0;
+		let bottom = 0;
 
 
 		var leftTextLabels = 0;
@@ -988,10 +991,26 @@ CChartsDrawer.prototype =
 		//add axis label sizes + title sizes
 		//TODO generate extX for all axes
 		var axId = chartSpace.chart.plotArea.axId;
-		let isLeftAxis = false;
-		let isRightAxis = false;
-		let isTopExist = chartSpace && chartSpace.chart ? !!chartSpace.chart.title || (!!chartSpace.chart.legend && chartSpace.chart.legend.legendPos === Asc.c_oAscChartLegendShowSettings.top) : false;
-		let isVertAxisExist = false;
+		const axisSettings = [{ isExist: false, opKey: 1}, {isExist: false, opKey: 0}, {isExist: false, opKey : 3}, {isExist: false, opKey: 2}]; //L,R,T,D
+
+		const checkAxis = function (index, ax) {
+			if (ax.bDelete || ax.tickLblPos === Asc.c_oAscTickLabelsPos.TICK_LABEL_POSITION_NONE) {
+				return;
+			}
+
+			const isCurrAxis = ax.tickLblPos === AscFormat.TICK_LABEL_POSITION_NEXT_TO || ax.tickLblPos === AscFormat.TICK_LABEL_POSITION_LOW;
+			const isOpposite = ax.tickLblPos === AscFormat.TICK_LABEL_POSITION_HIGH;
+
+			if (isCurrAxis){
+				axisSettings[index].isExist = true;
+			}
+
+			if (isOpposite) {
+				const opKey = axisSettings[index].opKey;
+				axisSettings[opKey].isExist = true;
+			}
+		}
+
 		if(axId) {
 			for(var i = 0; i < axId.length; i++) {
 				switch (axId[i].axPos) {
@@ -999,47 +1018,33 @@ CChartsDrawer.prototype =
 						if (null !== axId[i].title) {
 							bottomTextLabels += axId[i].title.extY;
 						}
+						checkAxis(3, axId[i]);
 						break;
 					}
 					case window['AscFormat'].AX_POS_T: {
 						if (null !== axId[i].title) {
 							topTextLabels += axId[i].title.extY;
 						}
+						checkAxis(2, axId[i]);
 						break;
 					}
 					case window['AscFormat'].AX_POS_L: {
 						if (null !== axId[i].title) {
 							leftTextLabels += axId[i].title.extX;
 						}
+						checkAxis(0, axId[i]);
 						break;
 					}
 					case window['AscFormat'].AX_POS_R: {
 						if (null !== axId[i].title) {
 							rightTextLabels += axId[i].title.extX;
 						}
+						checkAxis(1, axId[i]);
 						break;
 					}
 				}
-				const bLeftVert = axId[i].axPos === AscFormat.AX_POS_L;
-				const bRigthVert = axId[i].axPos === AscFormat.AX_POS_R;
-				if (!axId[i].bDelete) {
-					if (bLeftVert) {
-						isLeftAxis = axId[i].tickLblPos === AscFormat.TICK_LABEL_POSITION_NEXT_TO || axId[i].tickLblPos === AscFormat.TICK_LABEL_POSITION_LOW;
-						isRightAxis = axId[i].tickLblPos === AscFormat.TICK_LABEL_POSITION_HIGH;
-					}
-					if (bRigthVert) {
-						isLeftAxis = axId[i].tickLblPos === AscFormat.TICK_LABEL_POSITION_HIGH;
-						isRightAxis = axId[i].tickLblPos === AscFormat.TICK_LABEL_POSITION_NEXT_TO || axId[i].tickLblPos === AscFormat.TICK_LABEL_POSITION_LOW;
-					}
-				}
-				if (!axId[i].bDelete && axId[i].tickLblPos !== Asc.c_oAscTickLabelsPos.TICK_LABEL_POSITION_NONE && (bLeftVert || bRigthVert) && !isVertAxisExist) {
-					isVertAxisExist = true;
-				}
 			}
 		}
-
-		// if no vetical axis when top is not exist, then should work as if top exist
-		isTopExist = !isTopExist && !isVertAxisExist ? true : isTopExist;
 
 		//TITLE
 		var topMainTitle = 0;
@@ -1079,6 +1084,7 @@ CChartsDrawer.prototype =
 					break;
 				}
 				case c_oAscChartLegendShowSettings.topRight: {
+					topKey += fLegendExtY;
 					rightKey += fLegendExtX;
 					break;
 				}
@@ -1086,20 +1092,36 @@ CChartsDrawer.prototype =
 		}
 
 		//exception - when there is a pie chart among the charts
-		var pieChart = null;
+		let isCircleShape = null;
 		var radarChart = null;
-		var charts = plotArea.charts;
-		for(i = 0; i < charts.length; i++) {
-			var chartType = this._getChartType(charts[i]);
-			if(c_oChartTypes.Pie === chartType || c_oChartTypes.DoughnutChart === chartType) {
-				pieChart = charts[i];
-				break;
-			} else if (c_oChartTypes.Radar === chartType) {
-				radarChart = charts[i];
+
+		// check whether chart is of type pie, doughnut or sunburst
+		if (isChartEx) {
+			const series = plotArea.plotAreaRegion ? plotArea.plotAreaRegion.series : null;
+			if (Array.isArray(series) && series.length > 0) {
+				for (let i = 0; i < series.length; i++) {
+					radarChart = charts[i];
+					const type = series[i].layoutId;
+					if (type === AscFormat.SERIES_LAYOUT_SUNBURST) {
+						isCircleShape = series[i];
+						break;
+					}
+				}
+			}
+		} else {
+			for(i = 0; i < charts.length; i++) {
+				var chartType = this._getChartType(charts[i]);
+				if(c_oChartTypes.Pie === chartType || c_oChartTypes.DoughnutChart === chartType) {
+					isCircleShape = charts[i];
+					break;
+				} else if (c_oChartTypes.Radar === chartType) {
+					radarChart = charts[i];
+				}
 			}
 		}
+
 		var is3dChart = this._isSwitchCurrent3DChart(chartSpace);
-		if(!is3dChart && null !== pieChart) {
+		if(!is3dChart && isCircleShape !== null) {
 			//calculate the true (original) width and height of the chart
 			left = this._getStandartMargin(left, leftKey, leftTextLabels, 0) + leftKey + leftTextLabels;
 			bottom = this._getStandartMargin(bottom, bottomKey, bottomTextLabels, 0) + bottomKey + bottomTextLabels;
@@ -1132,11 +1154,26 @@ CChartsDrawer.prototype =
 			}
 		}
 
-		if((null === pieChart) || is3dChart) {
-			left += this._getStandartMargin(isLeftAxis ? 1 : left, leftKey, leftTextLabels, 0) + leftKey + leftTextLabels;
+		if(is3dChart) {
+			left += this._getStandartMargin(left, leftKey, leftTextLabels, 0) + leftKey + leftTextLabels;
 			bottom += this._getStandartMargin(bottom, bottomKey, bottomTextLabels, 0) + bottomKey + bottomTextLabels;
-			top += this._getStandartMargin(isTopExist ? top : 1, topKey, topTextLabels, topMainTitle) + topKey + topTextLabels + topMainTitle;
-			right += this._getStandartMargin(isRightAxis ? 1 : right, rightKey, rightTextLabels, 0) + rightKey + rightTextLabels;
+			top += this._getStandartMargin(top, topKey, topTextLabels, topMainTitle) + topKey + topTextLabels + topMainTitle;
+			right += this._getStandartMargin(right, rightKey, rightTextLabels, 0) + rightKey + rightTextLabels;
+		}
+
+		if (!is3dChart && !isCircleShape && !radarChart) {
+			// barChart, hBarChart, lineChart, scatterChart, areaChart,
+			const info = this._calculateMarginsChartOrdinaryDiagrams(
+				topMainTitle,
+				dataTableExtY,
+				{left: axisSettings[0].isExist, right: axisSettings[1].isExist, top: axisSettings[2].isExist, bottom: axisSettings[3].isExist},
+				{left: leftTextLabels, right: rightTextLabels, top: topTextLabels, bottom: bottomTextLabels},
+				{left: leftKey, right: rightKey, top: topKey, bottom: bottomKey},
+			)
+			left = info.left;
+			right = info.right;
+			top = info.top;
+			bottom = info.bottom;
 		}
 
 		var pxLeft = calculateLeft ? calculateLeft * pxToMM : left * pxToMM;
@@ -1150,7 +1187,7 @@ CChartsDrawer.prototype =
 		}
 
 		//TODO review!!!
-		if(pieChart && plotArea.charts.length === 1) {
+		if(isCircleShape && plotArea.charts.length === 1) {
 			if (plotArea.layout) {
 				var oLayout = plotArea.layout;
 				pxLeft = chartSpace.calculatePosByLayout(pxLeft / pxToMM, oLayout.xMode, oLayout.x, (pxRight - pxLeft) / pxToMM, chartSpace.extX) * pxToMM;
@@ -1167,6 +1204,10 @@ CChartsDrawer.prototype =
 			}
 		}
 
+		if (plotArea.dTable && !this._isSwitchCurrent3DChart(chartSpace) &&
+				!(chartSpace.isLayoutSizes && chartSpace.isLayoutSizes()) && pxLeft < standartMarginForCharts * 1.5) {
+			pxLeft = standartMarginForCharts * 1.5;
+		}
 		if (dNotPutResult) {
 			return {left: pxLeft, right: pxRight, top: pxTop, bottom: pxBottom};
 		} else {
@@ -1177,6 +1218,71 @@ CChartsDrawer.prototype =
 		}
 
 		this._checkMargins();
+	},
+
+	// margin is combination of outward things + inward things
+	// outward things are: title and legend labels
+	// inward things are: axis titles, axes themselves and standard margin.
+	_calculateMarginsChartOrdinaryDiagrams: function (chartTitle, dataTableExtY, axes, axesTitles, legendTexts) {
+		if (true) {
+			return this._calculateMarginsChartOrdinaryDiagramsOld(chartTitle, axes, axesTitles, legendTexts);
+		}
+
+		const normalizedMargin = standartMarginForCharts / this.calcProp.pxToMM;
+		const marginWithOffsetApplied1 = normalizedMargin / 2;
+		const marginWithOffsetApplied2 = normalizedMargin / 2;
+		const marginWithOffsetApplied3 = normalizedMargin / 3;
+		const marginWithOffsetApplied4 = normalizedMargin + (normalizedMargin * 2 / 3);
+
+		const titleBasedMargin = chartTitle ? chartTitle + marginWithOffsetApplied1 : 0;
+
+		const labelBasedMarginTop = legendTexts && legendTexts.top ? legendTexts.top + marginWithOffsetApplied2 : 0;
+		const labelBasedMarginLeft = legendTexts && legendTexts.left ? legendTexts.left + marginWithOffsetApplied2 : 0;
+		const labelBasedMarginRight = legendTexts && legendTexts.right ? legendTexts.right + marginWithOffsetApplied2 : 0;
+		const labelBasedMarginBottom = legendTexts && legendTexts.bottom ? legendTexts.bottom + marginWithOffsetApplied2 : 0;
+
+		const decider = function (dataTableExtY, dataTableMargin, axisTitle, axisTitleMargin, axis, axisMargin, defaultMarginEffect) {
+			const dataTableEffect = dataTableExtY ? dataTableExtY + dataTableMargin : 0;
+			const axisTitleEffect = axisTitle ? axisTitle + axisTitleMargin : 0;
+			const axisEffect = axis ? axisMargin : 0;
+			return dataTableEffect || axisTitleEffect || axisEffect || defaultMarginEffect;
+		}
+
+		const left = labelBasedMarginLeft + decider(0, marginWithOffsetApplied4, axesTitles.left, normalizedMargin, axes.left, marginWithOffsetApplied1, normalizedMargin);
+		const bottom = labelBasedMarginBottom + decider(dataTableExtY, marginWithOffsetApplied2, axesTitles.bottom, normalizedMargin, axes.bottom || axes.left || axes.right, marginWithOffsetApplied2, normalizedMargin);
+		const right = labelBasedMarginRight + decider(0, 0, axesTitles.right, normalizedMargin, axes.right, marginWithOffsetApplied2, normalizedMargin);
+		const top = titleBasedMargin + labelBasedMarginTop + decider(0, 0, axesTitles.top, normalizedMargin, axes.top || axes.left || axes.right, (titleBasedMargin || axes.top) ? marginWithOffsetApplied1 : marginWithOffsetApplied3, (labelBasedMarginTop && labelBasedMarginRight) ? marginWithOffsetApplied1 : normalizedMargin);
+
+		return {left: left, right: right, top: top, bottom: bottom};
+	},
+
+	_calculateMarginsChartOrdinaryDiagramsOld: function (chartTitle, axes, axesTitles, legendTexts) {
+		const normalizedMargin = standartMarginForCharts / this.calcProp.pxToMM;
+		const marginWithOffsetApplied1 = normalizedMargin * 1 / 2;
+		const marginWithOffsetApplied2 = normalizedMargin * 2 / 3;
+		const marginWithOffsetApplied3 = normalizedMargin * 1 / 3;
+
+		// title can stay only in top
+		const titleBasedMargin = chartTitle ? chartTitle + marginWithOffsetApplied1 : 0;
+
+		const labelBasedMarginTop = legendTexts && legendTexts.top ? legendTexts.top + marginWithOffsetApplied2 : 0;
+		const labelBasedMarginLeft = legendTexts && legendTexts.left ? legendTexts.left + marginWithOffsetApplied2 : 0;
+		const labelBasedMarginRight = legendTexts && legendTexts.right ? legendTexts.right + marginWithOffsetApplied2 : 0;
+		const labelBasedMarginBottom = legendTexts && legendTexts.bottom ? legendTexts.bottom + marginWithOffsetApplied2 : 0;
+
+		// the gap from inward to outward depends on what type direction ends, the order is axisTitle > axis > normalMargin
+		const decider = function (axisTitle, axisTitleMargin, axis, axisMargin, defaultMargin) {
+			axisTitle = axisTitle ? axisTitle + axisTitleMargin : 0;
+			axis = axis ? axisMargin : 0;
+			return axisTitle || axis || defaultMargin;
+		}
+
+		const left = labelBasedMarginLeft + decider(axesTitles.left, normalizedMargin, axes.left, marginWithOffsetApplied1, normalizedMargin);
+		const right = labelBasedMarginRight + decider(axesTitles.right, normalizedMargin, axes.right, marginWithOffsetApplied2, normalizedMargin);
+		const top = titleBasedMargin + labelBasedMarginTop + decider(axesTitles.top, normalizedMargin, axes.top || axes.left || axes.right, (titleBasedMargin || axes.top) ? marginWithOffsetApplied1 : marginWithOffsetApplied3, (labelBasedMarginTop && labelBasedMarginRight) ? marginWithOffsetApplied1 : normalizedMargin);
+		const bottom = labelBasedMarginBottom + decider(axesTitles.bottom, normalizedMargin, axes.bottom || axes.left || axes.right, marginWithOffsetApplied2, normalizedMargin);
+
+		return {left : left, right: right, top: top, bottom: bottom};
 	},
 
 	_checkMargins: function () {
@@ -1301,7 +1407,17 @@ CChartsDrawer.prototype =
 
 		return {calculateLeft: calculateLeft, calculateRight : calculateRight, calculateTop: calculateTop, calculateBottom: calculateBottom};
 	},
-	
+
+	/**
+	 * Calculates and returns standard margins configuration for a chart.
+	 *
+	 * @param {number} labelsMargin - Margin responsible for labels positioning (affects potential label overlaps/leaks).
+	 * @param {number} keyMargin - Margin responsible for legend (key) positioning.
+	 * @param {number} textMargin - Margin responsible for axis titles positioning.
+	 * @param {number} topMainTitleMargin - Margin responsible for the main title positioning at the top.
+	 *
+	 * @returns {Object} Standard margin configuration object.
+	 */
 	_getStandartMargin: function(labelsMargin, keyMargin, textMargin, topMainTitleMargin)
 	{
 		var defMargin = standartMarginForCharts / this.calcProp.pxToMM;
@@ -2085,7 +2201,7 @@ CChartsDrawer.prototype =
 					// find max value across each seria
 					for (let i = 0; i < series.length; i++) {
 						const seria = series[i];
-						if (seria) {
+						if (seria && !seria.isHidden) {
 							numCache = t.getNumCache(seria.val);
 							const ptCount = numCache && AscFormat.isRealNumber(numCache.ptCount) ? numCache.ptCount : 0;
 							// trendline can affect max value
@@ -2954,7 +3070,7 @@ CChartsDrawer.prototype =
 			this._calculateMarginsChart(chartSpace);
 		}
 
-		if (!this.calcProp.chartGutter.left && !this.calcProp.chartGutter.right && !this.calcProp.chartGutter._bottom && !this.calcProp.chartGutter.top) {
+		if (!this.calcProp.chartGutter._left && !this.calcProp.chartGutter._right && !this.calcProp.chartGutter._bottom && !this.calcProp.chartGutter._top) {
 			this._calculateMarginsChart(chartSpace);
 		}
 
@@ -4699,7 +4815,7 @@ CChartsDrawer.prototype =
 			path.lnTo(constP * pathW, (p1 - l) * pathH);
 		} else {
 			path.moveTo(p1 * pathW, constP * pathH);
-			path.lnTo(p1 + l * pathW, constP * pathH);
+			path.lnTo((p1 + l) * pathW, constP * pathH);
 		}
 
 		return pathId;
@@ -7063,6 +7179,7 @@ drawBarChart.prototype = {
 		var centerX, centerY;
 		//TODO check revert valAx orientation for other charts labels
 		var maxMinAxis = this.valAx && this.valAx.isReversed();
+		const offset = 4 / pxToMm;
 
 		switch (point.compiledDlb.dLblPos) {
 			case c_oAscChartDataLabelsPos.bestFit: {
@@ -7083,6 +7200,7 @@ drawBarChart.prototype = {
 				if ((point.val > 0 && !maxMinAxis) || (point.val < 0 && maxMinAxis)) {
 					centerY = y - height;
 				}
+				centerY -= offset;
 				break;
 			}
 			case c_oAscChartDataLabelsPos.inEnd: {
@@ -7091,6 +7209,7 @@ drawBarChart.prototype = {
 				if ((point.val < 0 && !maxMinAxis) || (point.val > 0 && maxMinAxis)) {
 					centerY = centerY - height;
 				}
+				centerY += offset;
 				break;
 			}
 			case c_oAscChartDataLabelsPos.outEnd: {
@@ -7099,6 +7218,7 @@ drawBarChart.prototype = {
 				if ((point.val < 0 && !maxMinAxis) || (point.val > 0 && maxMinAxis)) {
 					centerY = centerY + height;
 				}
+				centerY -= offset;
 				break;
 			}
 		}
@@ -9220,6 +9340,10 @@ drawLineChart.prototype = {
 			return;
 		}
 
+		if (!point.compiledDlb) {
+			return;
+		}
+
 		var oPath = this.cChartSpace.GetPath(path);
 		var oCommand0 = oPath.getCommandByIndex(commandIndex);
 		var x = oCommand0.X;
@@ -10742,6 +10866,10 @@ drawAreaChart.prototype = {
 
 		var constMargin = 5 / pxToMm;
 
+		if (!point.compiledDlb) {
+			return;
+		}
+
 		var width = point.compiledDlb.extX;
 		var height = point.compiledDlb.extY;
 
@@ -11563,6 +11691,10 @@ drawHBarChart.prototype = {
 		var w = oCommand2.X - oCommand1.X;
 
 		var pxToMm = this.chartProp.pxToMM;
+
+		if (!point.compiledDlb) {
+			return;
+		}
 
 		var width = point.compiledDlb.extX;
 		var height = point.compiledDlb.extY;
@@ -14721,6 +14853,10 @@ drawRadarChart.prototype = {
 
 		var pxToMm = this.chartProp.pxToMM;
 		var constMargin = 5 / pxToMm;
+
+		if (!point.compiledDlb) {
+			return;
+		}
 
 		var width = point.compiledDlb.extX;
 		var height = point.compiledDlb.extY;
@@ -20952,4 +21088,5 @@ CErrBarsDraw.prototype = {
 	window["AscFormat"].c_oChartTypes = c_oChartTypes;
 	window["AscCommon"]._roundValue = _roundValue;
 	window["AscFormat"].CachedClusteredColumn = CCachedClusteredColumn;
+	window["AscFormat"].CGeometry2 = CGeometry2;
 })(window);

@@ -529,6 +529,14 @@ CSdtBase.prototype.IsCheckBoxChecked = function()
 	return false;
 };
 /**
+ * Проверяем, является ли данный класс специальным контейнером для картинки
+ * @returns {boolean}
+ */
+CSdtBase.prototype.IsPicture = function()
+{
+	return (!!this.Pr.Picture);
+};
+/**
  * Копируем placeholder
  * @return {string}
  */
@@ -1452,5 +1460,15 @@ CSdtBase.prototype.SetRepeatingSectionItem = function(isRepeatingSectionItem)
 CSdtBase.prototype.IsRepeatingSectionItem = function()
 {
 	return !!(this.Pr.RepeatingSectionItem);
+};
+CSdtBase.prototype.CheckFormType = function()
+{
+	if (!this.IsForm())
+		return;
+
+	if (this.IsCheckBox() || this.IsComboBox() || this.IsDropDownList() || this.IsDatePicker() || this.IsTextForm() || this.IsPicture() || this.IsComplexForm())
+		return;
+
+	this.Pr.TextForm = new AscWord.CSdtTextFormPr();
 };
 

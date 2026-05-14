@@ -674,6 +674,28 @@ CBlockLevelSdt.prototype.PreDelete = function()
 
 	this.Content.PreDelete();
 };
+CBlockLevelSdt.prototype.OnDetach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+	
+	let logicDocument = this.GetLogicDocument();
+	if (logicDocument && logicDocument.IsDocumentEditor())
+		logicDocument.OnDetachContentControl(this);
+	
+	this.Content.OnDetach();
+};
+CBlockLevelSdt.prototype.OnAttach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+	
+	let logicDocument = this.GetLogicDocument();
+	if (logicDocument && logicDocument.IsDocumentEditor())
+		logicDocument.OnAttachContentControl(this);
+	
+	this.Content.OnAttach();
+};
 CBlockLevelSdt.prototype.ClearParagraphFormatting = function(isClearParaPr, isClearTextPr)
 {
 	if (this.IsPlaceHolder())
@@ -2162,14 +2184,6 @@ CBlockLevelSdt.prototype.private_UpdateCheckBoxContent = function()
 		oRun.SetRFontsCS({Index : -1, Name : this.Pr.CheckBox.UncheckedFont});
 		oRun.SetRFontsEastAsia({Index : -1, Name : this.Pr.CheckBox.UncheckedFont});
 	}
-};
-/**
- * Проверяем, является ли данный класс специальным контейнером для картинки
- * @returns {boolean}
- */
-CBlockLevelSdt.prototype.IsPicture = function()
-{
-	return (!!this.Pr.Picture);
 };
 /**
  * Выставляем настройку того, что это контент контрол с картинкой

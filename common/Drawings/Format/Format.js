@@ -1932,88 +1932,16 @@
 			return duplicate;
 		};
 		CColorModifiers.prototype.RGB2HSL = function (R, G, B, HLS) {
-			var iMin = (R < G ? R : G);
-			iMin = iMin < B ? iMin : B;//Math.min(R, G, B);
-			var iMax = (R > G ? R : G);
-			iMax = iMax > B ? iMax : B;//Math.max(R, G, B);
-			var iDelta = iMax - iMin;
-			var dMax = (iMax + iMin) / 255.0;
-			var dDelta = iDelta / 255.0;
-			var H = 0;
-			var S = 0;
-			var L = dMax / 2.0;
-
-			if (iDelta != 0) {
-				if (L < 0.5) S = dDelta / dMax;
-				else S = dDelta / (2.0 - dMax);
-
-				dDelta = dDelta * 1530.0;
-				var dR = (iMax - R) / dDelta;
-				var dG = (iMax - G) / dDelta;
-				var dB = (iMax - B) / dDelta;
-
-				if (R == iMax) H = dB - dG;
-				else if (G == iMax) H = cd13 + dR - dB;
-				else if (B == iMax) H = cd23 + dG - dR;
-
-				if (H < 0.0) H += 1.0;
-				if (H > 1.0) H -= 1.0;
-			}
-
-			H = H * max_hls;
-			if (H < 0)
-				H = 0;
-			if (H > 255)
-				H = 255;
-
-			S = S * max_hls;
-			if (S < 0)
-				S = 0;
-			if (S > 255)
-				S = 255;
-
-			L = L * max_hls;
-			if (L < 0)
-				L = 0;
-			if (L > 255)
-				L = 255;
-
-			HLS.H = H;
-			HLS.S = S;
-			HLS.L = L;
+			var hsl = AscCommon.CU.rgbToHsl({R: R, G: G, B: B});
+			HLS.H = hsl.H;
+			HLS.S = hsl.S;
+			HLS.L = hsl.L;
 		};
 		CColorModifiers.prototype.HSL2RGB = function (HSL, RGB, bRoundValues) {
-			if (HSL.S == 0) {
-				const clampL = bRoundValues ? AscFormat.ClampColor(HSL.L) : HSL.L;
-				RGB.R = clampL;
-				RGB.G = clampL;
-				RGB.B = clampL;
-			} else {
-				var H = HSL.H / max_hls;
-				var S = HSL.S / max_hls;
-				var L = HSL.L / max_hls;
-				var v2 = 0;
-				if (L < 0.5)
-					v2 = L * (1.0 + S);
-				else
-					v2 = L + S - S * L;
-
-				var v1 = 2.0 * L - v2;
-
-				var R = (255 * this.Hue_2_RGB(v1, v2, H + cd13));
-				var G = (255 * this.Hue_2_RGB(v1, v2, H));
-				var B = (255 * this.Hue_2_RGB(v1, v2, H - cd13));
-
-				if (bRoundValues) {
-					RGB.R = AscFormat.ClampColor(R);
-					RGB.G = AscFormat.ClampColor(G);
-					RGB.B = AscFormat.ClampColor(B);
-				} else {
-					RGB.R = R;
-					RGB.G = G;
-					RGB.B = B;
-				}
-			}
+			var rgb = AscCommon.CU.hslToRgb(HSL, bRoundValues);
+			RGB.R = rgb.R;
+			RGB.G = rgb.G;
+			RGB.B = rgb.B;
 		};
 		CColorModifiers.prototype.Hue_2_RGB = function (v1, v2, vH) {
 			if (vH < 0.0)
@@ -2029,16 +1957,10 @@
 			return v1;
 		};
 		CColorModifiers.prototype.standardToLinear = function(nColorValue) {
-			if (nColorValue <= 0.04045) {
-				return nColorValue / 12.92;
-			}
-			return Math.pow((nColorValue + 0.055) / 1.055, 2.4);
+			return AscCommon.CU.srgbToLinear(nColorValue);
 		}
 		CColorModifiers.prototype.linearToStandard = function(nColorValue) {
-			if (nColorValue <= 0.0031308) {
-				return  12.92 * nColorValue;
-			}
-			return 1.055 * Math.pow(nColorValue, 1 / 2.4) - 0.055;
+			return AscCommon.CU.linearToSrgb(nColorValue);
 		}
 		CColorModifiers.prototype.RgbtoCrgbColor = function (c) {
 			if (this.isUsePow) {
@@ -2875,13 +2797,9 @@
 		MODS_MAP["shade"] = true;
 		MODS_MAP["tint"] = true;
 
-		function toHex(c) {
-			var res = Number(c).toString(16).toUpperCase();
-			return res.length === 1 ? "0" + res : res;
-		}
-
 		function fRGBAToHexString(oRGBA) {
-			return "" + toHex(oRGBA.R) + toHex(oRGBA.G) + toHex(oRGBA.B);
+			var byteToHex = AscCommon.ByteToHex;
+			return "" + byteToHex(oRGBA.R) + byteToHex(oRGBA.G) + byteToHex(oRGBA.B);
 		}
 
 		/**
@@ -6718,6 +6636,9 @@
 			if(this.fill && this.fill.type === c_oAscFill.FILL_TYPE_GRAD) {
 				return true;
 			}
+		};
+		CUniFill.prototype.isPatternFill = function () {
+			return !!(this.fill && this.fill.type === c_oAscFill.FILL_TYPE_PATT);
 		};
 		CUniFill.prototype.checkTransparent = function() {
 			let oFill = this.fill;
@@ -17770,89 +17691,244 @@
 			builder_SetObjectFontSize(oChartSpace.chart.plotArea.getVerticalAxis(), nFontSize, oChartSpace.getDrawingDocument());
 		}
 
+		function builder_MergeObjectDefaultTextPr(object, textPr, drawingDocument) {
+			if (!object || !textPr) {
+				return false;
+			}
 
-		function builder_SetShowPointDataLabel(oChartSpace, nSeriesIndex, nPointIndex, bShowSerName, bShowCatName, bShowVal, bShowPerecent) {
-			if (oChartSpace && oChartSpace.chart && oChartSpace.chart.plotArea && oChartSpace.chart.plotArea.charts[0]) {
-				var oChart = oChartSpace.chart.plotArea.charts[0];
-				var bPieChart = oChart.getObjectType() === AscDFH.historyitem_type_PieChart || oChart.getObjectType() === AscDFH.historyitem_type_DoughnutChart;
-				var ser = oChart.series[nSeriesIndex];
-				if (ser) {
-					{
-						var bNewSerDLbls = false;
-						if (!ser.dLbls) {
-							if (oChart.dLbls) {
-								ser.setDLbls(oChart.dLbls.createDuplicate());
-							} else {
-								ser.setDLbls(new AscFormat.CDLbls());
-								ser.dLbls.setSeparator(",");
-								ser.dLbls.setShowSerName(false);
-								ser.dLbls.setShowCatName(false);
-								ser.dLbls.setShowVal(false);
-								ser.dLbls.setShowLegendKey(false);
-								if (bPieChart) {
-									ser.dLbls.setShowPercent(false);
-								}
-								ser.dLbls.setShowBubbleSize(false);
-								bNewSerDLbls = true;
-							}
+			if (!object.txPr) {
+				object.setTxPr(new AscFormat.CTextBody());
+			}
+			if (!object.txPr.bodyPr) {
+				object.txPr.setBodyPr(new AscFormat.CBodyPr());
+			}
+			if (!object.txPr.content) {
+				object.txPr.setContent(new AscFormat.CDrawingDocContent(object.txPr, drawingDocument, 0, 0, 100, 500, false, false, true));
+			}
+
+			const propCopy = object.txPr.content.Content[0].Pr.Copy();
+			if (!propCopy.DefaultRunPr) {
+				propCopy.DefaultRunPr = new AscCommonWord.CTextPr();
+			}
+
+			propCopy.DefaultRunPr.Merge(textPr);
+			object.txPr.content.Content[0].Set_Pr(propCopy);
+			return true;
+		}
+
+		function builder_SetDataLabelsTextPr(chartSpace, textPr) {
+			const chart = (
+				chartSpace &&
+				chartSpace.chart &&
+				chartSpace.chart.plotArea &&
+				chartSpace.chart.plotArea.charts[0]
+			);
+
+			if (!chart) {
+				return false;
+			}
+
+			if (!chart.dLbls) {
+				chart.setDLbls(new AscFormat.CDLbls());
+			}
+
+			const drawingDocument = chartSpace.getDrawingDocument();
+			for (let i = 0; i < chart.series.length; ++i) {
+				const ser = chart.series[i];
+				if (!ser.dLbls) {
+					ser.setDLbls(new AscFormat.CDLbls());
+				}
+				builder_MergeObjectDefaultTextPr(ser.dLbls, textPr, drawingDocument);
+
+				const labelArray = ser.dLbls.dLbl;
+				for (let j = 0; j < labelArray.length; ++j) {
+					const dLbl = labelArray[j];
+					if (dLbl) {
+						if (ser.dLbls.txPr && !dLbl.txPr) {
+							dLbl.setTxPr(ser.dLbls.txPr.createDuplicate());
 						}
-						if (bNewSerDLbls) {
-							builder_ApplyChartStyleToElement(oChartSpace, ser.dLbls);
-						}
-						var dLbl = ser.dLbls && ser.dLbls.findDLblByIdx(nPointIndex);
-						var bNewDLbl = false;
-						if (!dLbl) {
-							dLbl = new AscFormat.CDLbl();
-							dLbl.setIdx(nPointIndex);
-							if (ser.dLbls.txPr) {
-								dLbl.merge(ser.dLbls);
-							}
-							ser.dLbls.addDLbl(dLbl);
-							bNewDLbl = true;
-						}
-						dLbl.setSeparator(",");
-						dLbl.setShowSerName(true == bShowSerName);
-						dLbl.setShowCatName(true == bShowCatName);
-						dLbl.setShowVal(true == bShowVal);
-						dLbl.setShowLegendKey(false);
-						if (bPieChart) {
-							dLbl.setShowPercent(true === bShowPerecent);
-						}
-						dLbl.setShowBubbleSize(false);
-						if (bNewDLbl) {
-							builder_ApplyChartStyleToElement(oChartSpace, dLbl);
-						}
+						builder_MergeObjectDefaultTextPr(dLbl, textPr, drawingDocument);
 					}
 				}
 			}
+
+			chartSpace.handleUpdateDataLabels();
+			return true;
 		}
 
-		function builder_SetShowDataLabels(oChartSpace, bShowSerName, bShowCatName, bShowVal, bShowPerecent) {
-			if (oChartSpace && oChartSpace.chart && oChartSpace.chart.plotArea && oChartSpace.chart.plotArea.charts[0]) {
-				var oChart = oChartSpace.chart.plotArea.charts[0];
-				var bPieChart = oChart.getObjectType() === AscDFH.historyitem_type_PieChart || oChart.getObjectType() === AscDFH.historyitem_type_DoughnutChart;
-				if (false == bShowSerName && false == bShowCatName && false == bShowVal && (bPieChart && bShowPerecent === false)) {
-					if (oChart.dLbls) {
-						oChart.setDLbls(null);
+		function builder_SetPointDataLabelTextPr(chartSpace, seriesIndex, pointIndex, textPr) {
+			const chart = (
+				chartSpace &&
+				chartSpace.chart &&
+				chartSpace.chart.plotArea &&
+				chartSpace.chart.plotArea.charts[0]
+			);
+			if (!chart) {
+				return false;
+			}
+
+			const ser = chart.series[seriesIndex];
+			if (!ser) {
+				return false;
+			}
+
+			if (!ser.dLbls) {
+				const newDLbls = chart.dLbls ? chart.dLbls.createDuplicate() : new AscFormat.CDLbls();
+				ser.setDLbls(newDLbls);
+			}
+
+			let dLbl = ser.dLbls.findDLblByIdx(pointIndex);
+			if (!dLbl) {
+				dLbl = new AscFormat.CDLbl();
+				dLbl.setIdx(pointIndex);
+				if (ser.dLbls.txPr) {
+					dLbl.merge(ser.dLbls);
+				}
+				ser.dLbls.addDLbl(dLbl);
+			}
+
+			const result = builder_MergeObjectDefaultTextPr(dLbl, textPr, chartSpace.getDrawingDocument());
+			if (result) {
+				chartSpace.handleUpdateDataLabels();
+			}
+			return result;
+		}
+
+		function builder_SetShowPointDataLabel(oChartSpace, nSeriesIndex, nPointIndex, bShowSerName, bShowCatName, bShowVal, bShowPercent) {
+			const chart = (
+				oChartSpace &&
+				oChartSpace.chart &&
+				oChartSpace.chart.plotArea &&
+				oChartSpace.chart.plotArea.charts[0]
+			);
+			if (!chart) {
+				return;
+			}
+
+			const objectType = chart.getObjectType();
+			const isCircleChart = (
+				objectType === AscDFH.historyitem_type_PieChart ||
+				objectType === AscDFH.historyitem_type_DoughnutChart
+			);
+
+			const ser = chart.series[nSeriesIndex];
+			if (!ser) {
+				return;
+			}
+
+			let bNewSerDLbls = false;
+			if (!ser.dLbls) {
+				if (chart.dLbls) {
+					ser.setDLbls(chart.dLbls.createDuplicate());
+				} else {
+					ser.setDLbls(new AscFormat.CDLbls());
+					ser.dLbls.setSeparator(",");
+					ser.dLbls.setShowSerName(false);
+					ser.dLbls.setShowCatName(false);
+					ser.dLbls.setShowVal(false);
+					ser.dLbls.setShowLegendKey(false);
+					if (isCircleChart) {
+						ser.dLbls.setShowPercent(false);
+					}
+					ser.dLbls.setShowBubbleSize(false);
+					bNewSerDLbls = true;
+				}
+			}
+			if (bNewSerDLbls) {
+				builder_ApplyChartStyleToElement(oChartSpace, ser.dLbls);
+			}
+
+			let dLbl = ser.dLbls && ser.dLbls.findDLblByIdx(nPointIndex);
+			let bNewDLbl = false;
+			if (!dLbl) {
+				dLbl = new AscFormat.CDLbl();
+				dLbl.setIdx(nPointIndex);
+				if (ser.dLbls.txPr) {
+					dLbl.merge(ser.dLbls);
+				}
+				ser.dLbls.addDLbl(dLbl);
+				bNewDLbl = true;
+			}
+			if (bNewDLbl) {
+				builder_ApplyChartStyleToElement(oChartSpace, dLbl);
+			}
+
+			dLbl.setSeparator(",");
+			dLbl.setShowSerName(true === bShowSerName);
+			dLbl.setShowCatName(true === bShowCatName);
+			dLbl.setShowVal(true === bShowVal);
+			dLbl.setShowLegendKey(false);
+			if (isCircleChart) {
+				dLbl.setShowPercent(true === bShowPercent);
+			}
+			dLbl.setShowBubbleSize(false);
+		}
+
+		function builder_SetShowDataLabels(chartSpace, bShowSerName, bShowCatName, bShowVal, bShowPercent) {
+			const chart = (
+				chartSpace &&
+				chartSpace.chart &&
+				chartSpace.chart.plotArea &&
+				chartSpace.chart.plotArea.charts[0]
+			);
+			if (!chart) {
+				return;
+			}
+
+			const objectType = chart.getObjectType();
+			const isCircleChart = (
+				objectType === AscDFH.historyitem_type_PieChart ||
+				objectType === AscDFH.historyitem_type_DoughnutChart
+			);
+
+			const clearDataLabels = (
+				bShowSerName === false &&
+				bShowCatName === false &&
+				bShowVal === false &&
+				(!isCircleChart || bShowPercent === false)
+			);
+			if (clearDataLabels) {
+				if (chart.dLbls) {
+					chart.setDLbls(null);
+				}
+				for (let i = 0; i < chart.series.length; ++i) {
+					if (chart.series[i].dLbls) {
+						chart.series[i].setDLbls(null);
 					}
 				}
-				var bNewDLbls = false;
-				if (!oChart.dLbls) {
-					oChart.setDLbls(new AscFormat.CDLbls());
-					bNewDLbls = true;
-				}
-				oChart.dLbls.setSeparator(",");
-				oChart.dLbls.setShowSerName(true == bShowSerName);
-				oChart.dLbls.setShowCatName(true == bShowCatName);
-				oChart.dLbls.setShowVal(true == bShowVal);
-				oChart.dLbls.setShowLegendKey(false);
-				if (bPieChart) {
-					oChart.dLbls.setShowPercent(true === bShowPerecent);
-				}
+				return;
+			}
 
-				oChart.dLbls.setShowBubbleSize(false);
-				if (bNewDLbls) {
-					builder_ApplyChartStyleToElement(oChartSpace, oChart.dLbls);
+			let bNewChartDLbls = false;
+			if (!chart.dLbls) {
+				chart.setDLbls(new AscFormat.CDLbls());
+				bNewChartDLbls = true;
+			}
+
+			chart.dLbls.setSeparator(',');
+			chart.dLbls.setShowSerName(true === bShowSerName);
+			chart.dLbls.setShowCatName(true === bShowCatName);
+			chart.dLbls.setShowVal(true === bShowVal);
+			chart.dLbls.setShowLegendKey(false);
+			if (isCircleChart) {
+				chart.dLbls.setShowPercent(true === bShowPercent);
+			}
+			chart.dLbls.setShowBubbleSize(false);
+			if (bNewChartDLbls) {
+				builder_ApplyChartStyleToElement(chartSpace, chart.dLbls);
+			}
+
+			for (let i = 0; i < chart.series.length; ++i) {
+				const ser = chart.series[i];
+				if (ser.dLbls) {
+					ser.dLbls.setShowSerName(true === bShowSerName);
+					ser.dLbls.setShowCatName(true === bShowCatName);
+					ser.dLbls.setShowVal(true === bShowVal);
+					ser.dLbls.setShowLegendKey(false);
+					if (isCircleChart) {
+						ser.dLbls.setShowPercent(true === bShowPercent);
+					}
+					ser.dLbls.setShowBubbleSize(false);
 				}
 			}
 		}
@@ -20668,6 +20744,8 @@
 		window['AscFormat'].builder_SetHorAxisFontSize = builder_SetHorAxisFontSize;
 		window['AscFormat'].builder_SetVerAxisFontSize = builder_SetVerAxisFontSize;
 		window['AscFormat'].builder_SetShowPointDataLabel = builder_SetShowPointDataLabel;
+		window['AscFormat'].builder_SetDataLabelsTextPr = builder_SetDataLabelsTextPr;
+		window['AscFormat'].builder_SetPointDataLabelTextPr = builder_SetPointDataLabelTextPr;
 
 
 		window['AscFormat'].Ax_Counter = Ax_Counter;
@@ -20885,6 +20963,7 @@
 		window['AscFormat'].CLR_IDX_MAP = CLR_IDX_MAP;
 		window['AscFormat'].MAP_AUTONUM_TYPES = MAP_AUTONUM_TYPES;
 		window['AscFormat'].CLR_NAME_MAP = CLR_NAME_MAP;
+		window['AscFormat'].map_prst_color = map_prst_color;
 		window['AscFormat'].LINE_PRESETS_MAP = LINE_PRESETS_MAP;
 		window['AscFormat'].OBJECT_MORPH_MARKER = OBJECT_MORPH_MARKER;
 

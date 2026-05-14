@@ -5144,8 +5144,9 @@ ParaRun.prototype.Recalculate_LineMetrics = function(PRS, ParaPr, _CurLine, _Cur
 					let textAscent2 = metrics.Ascent;
 					let textAscent  = metrics.Ascent + metrics.LineGap;
 					
-					if (Item.getHeight() > textAscent && textAscent > AscWord.EPSILON)
-						textDescent *= Item.getHeight() / textAscent;
+					let horRuleH = Item.getHeight() + 1; // take into account 1mm offset from top
+					if (horRuleH > textAscent && textAscent > AscWord.EPSILON)
+						textAscent *= horRuleH / textAscent;
 					
 					if (Asc.linerule_Exact === LineRule)
 					{
@@ -6880,21 +6881,13 @@ ParaRun.prototype.Set_ParaContentPos = function(ContentPos, Depth)
 };
 /**
  * Функция для перевода позиции внутри параграфа в специальную позицию используемую в ApiRange
- * @param {AscWord.CParagraphContentPos} oContentPos - если null -> возвращает количество символов в элементе.
- * @param {number} nDepth
+ * @param {AscWord.CParagraphContentPos} contentPos - если null -> возвращает количество символов в элементе.
+ * @param {number} depth
  * @return {number}
  */
-ParaRun.prototype.ConvertParaContentPosToRangePos = function(oContentPos, nDepth)
+ParaRun.prototype.GetFlatPos = function(contentPos, depth)
 {
-	var nRangePos = 0;
-
-	var nCurPos = oContentPos ? Math.max(0, Math.min(this.Content.length, oContentPos.Get(nDepth))) : this.Content.length;
-	for (var nPos = 0; nPos < nCurPos; ++nPos)
-	{
-		nRangePos++;
-    }
-
-	return nRangePos;
+	return contentPos ? Math.max(0, Math.min(this.Content.length, contentPos.Get(depth))) : this.Content.length;
 };
 ParaRun.prototype.Get_PosByElement = function(Class, ContentPos, Depth, UseRange, Range, Line)
 {

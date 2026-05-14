@@ -7523,6 +7523,7 @@ CDocumentContent.prototype.Internal_Content_Add = function(Position, NewObject, 
 	this.private_ReindexContent(Position);
 	this.OnContentChange();
 	this.UpdateSectionsAfterAdd([NewObject]);
+	NewObject.OnAttach();
 	this.Recalculated = false;
 };
 CDocumentContent.prototype.Internal_Content_Remove = function(Position, Count, isCorrectContent)
@@ -7535,7 +7536,10 @@ CDocumentContent.prototype.Internal_Content_Remove = function(Position, Count, i
 
 	for (var Index = 0; Index < Count; Index++)
 		this.Content[Position + Index].PreDelete();
-	
+
+	for (let i = 0; i < Count; ++i)
+		this.Content[Position + i].OnDetach();
+
 	let removedElements = this.Content.slice(Position, Position + Count);
 	this.UpdateSectionsBeforeRemove(removedElements, true);
 
@@ -7581,6 +7585,11 @@ CDocumentContent.prototype.Internal_Content_RemoveAll = function()
 	for (let index = 0, count = this.Content.length; index < count; ++index)
 	{
 		this.Content[index].PreDelete();
+	}
+	
+	for (let index = 0, count = this.Content.length; index < count; ++index)
+	{
+		this.Content[index].OnDetach();
 	}
 	
 	let removedElements = this.Content.slice(0, this.Content.length);
@@ -8827,6 +8836,28 @@ CDocumentContent.prototype.PreDelete = function()
 	}
 
 	this.RemoveSelection();
+};
+CDocumentContent.prototype.OnDetach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+
+	for (let i = this.Content.length - 1; i >= 0; --i)
+	{
+		this.Content[i].OnDetach();
+	}
+
+	this.RemoveSelection();
+};
+CDocumentContent.prototype.OnAttach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+
+	for (let i = 0; i < this.Content.length; ++i)
+	{
+		this.Content[i].OnAttach();
+	}
 };
 CDocumentContent.prototype.IsBlockLevelSdtContent = function()
 {

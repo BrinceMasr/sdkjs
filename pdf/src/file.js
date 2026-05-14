@@ -412,13 +412,61 @@ void main() {\n\
     };
 
     // TEXT
-    CFile.prototype.getPageTextStream = function(pageIndex) {
-        let textCommands = this.pages[pageIndex].text;
-        if (!textCommands || 0 === textCommands.length)
-            return null;
+	CFile.prototype.getPageTextStream = function(pageIndex) {
+		let page = this.pages[pageIndex];
+		let textLen = page.text ? page.text.length : 0;
+		let drawingsLen = page.drawingsText ? page.drawingsText.length : 0;
 
-        return new TextStreamReader(textCommands, textCommands.length);
-    };
+		if (Asc.editor.canEdit()) {
+			if (this.pages[pageIndex].isRecognized) {
+				return null;
+			}
+			else {
+				return new TextStreamReader(page.text, textLen);
+			}
+		}
+
+		let oDoc = this.viewer.getPDFDoc();
+		let oPageInfo = oDoc.GetPageInfo(pageIndex);
+		let aDrawings = oPageInfo.drawings;
+		if (aDrawings.length == 0) {
+			if (this.pages[pageIndex].isRecognized) {
+				return null;
+			}
+			else {
+				return new TextStreamReader(page.text, textLen);
+			}
+		}
+
+		this.pages[pageIndex].drawingsText = this.getDrawingsGlyphs(pageIndex);
+		drawingsLen = page.drawingsText.length;
+		if (this.pages[pageIndex].isRecognized || textLen == 0) {
+			return new TextStreamReader(page.drawingsText, drawingsLen);
+		}
+
+		let totalLen = textLen + drawingsLen;
+		let merged = new Uint8Array(totalLen);
+		merged.set(page.text, 0);
+		merged.set(page.drawingsText, textLen);
+
+		return new TextStreamReader(merged, merged.length);
+	};
+	CFile.prototype.getDrawingsGlyphs = function(pageIndex) {
+		let oDoc = this.viewer.getPDFDoc();
+		let oPageInfo = oDoc.GetPageInfo(pageIndex);
+		let aDrawings = oPageInfo.drawings;
+		if (aDrawings.length == 0) {
+			return [];
+		}
+
+		let metafile = new AscPDF.CPdfTextMetafile();
+		aDrawings.forEach(function(drawing) {
+			drawing.draw(metafile);
+		});
+		
+		metafile.endLine();
+		return metafile.getData();
+	};
     CFile.prototype.removeSelection = function() {
         this.Selection = {
 			Page1 : 0,
@@ -529,15 +577,108 @@ void main() {\n\
     CFile.prototype.getSelection = function() {
         return this.Selection;
     };
+    CFile.prototype.getGlyphCoord = function(page, line, glyph) {
+        let stream = this.getPageTextStream(page);
+        if (!stream) return null;
+
+        // line < 0 means "before first line" → treat as start of line 0
+        if (line < 0) {
+            line  = 0;
+            glyph = -2;
+        }
+
+        let _lineX = 0, _lineY = 0, _lineEx = 1, _lineEy = 0;
+        let _lineWidth = 0;
+        let _linePrevCharX = 0;
+        let _arrayGlyphOffsets = [];
+        let nChars = 0;
+        let iLine = -1;
+
+        while (stream.pos < stream.size) {
+            iLine++;
+            _lineEx = 1;
+            _lineEy = 0;
+            _linePrevCharX = 0;
+            _arrayGlyphOffsets.splice(0, _arrayGlyphOffsets.length);
+
+            _lineX = stream.GetDouble();
+            _lineY = stream.GetDouble();
+            if (stream.GetChar()) {
+                _lineEx = stream.GetDouble();
+                _lineEy = stream.GetDouble();
+            }
+            stream.GetDouble(); // _lineAscent (skip, not needed)
+            stream.GetDouble(); // _lineDescent (skip, not needed)
+            _lineWidth = stream.GetDouble();
+
+            nChars = stream.GetLong();
+            for (let i = 0; i < nChars; ++i) {
+                if (i) _linePrevCharX += stream.GetDouble();
+                _arrayGlyphOffsets[i] = _linePrevCharX;
+                stream.Skip(8);
+            }
+
+            if (iLine === line) {
+                break;
+            }
+        }
+
+        if (iLine < 0) return null;
+        // iLine < line means the stream ended before reaching the requested line
+        // (e.g. Line2 = _numLine + 1 from selectWholePage) → use last available line as-is
+
+        let off;
+        if (glyph === -2) {
+            off = 0;
+        } else if (glyph === -1) {
+            off = _lineWidth;
+        } else {
+            let left  = _arrayGlyphOffsets[glyph] || 0;
+            let right = (glyph + 1 < nChars) ? _arrayGlyphOffsets[glyph + 1] : _lineWidth;
+            off = (left + right) / 2;
+        }
+
+        return {
+            x: _lineX + off * _lineEx,
+            y: _lineY + off * _lineEy
+        };
+    };
+    CFile.prototype.getSelectionCoords = function() {
+        if (!this.isSelectionUse()) {
+            return null;
+        }
+
+        let sel = this.sortSelection();
+        let startCoord = this.getGlyphCoord(sel.Page1, sel.Line1, sel.Glyph1);
+        let endCoord   = this.getGlyphCoord(sel.Page2, sel.Line2, sel.Glyph2);
+
+        if (!startCoord || !endCoord) return null;
+
+        return {
+            start: { page: sel.Page1, x: startCoord.x, y: startCoord.y },
+            end:   { page: sel.Page2, x: endCoord.x,   y: endCoord.y }
+        };
+    };
+    CFile.prototype.getPageLastLine = function(pageIndex) {
+        let stream = this.getPageTextStream(pageIndex);
+        if (!stream) return -1;
+        let _numLine = -1;
+        while (stream.pos < stream.size) {
+            _numLine++;
+            stream.Skip(8);
+            if (stream.GetChar())
+                stream.Skip(8);
+            stream.Skip(12);
+            stream.Skip(12 * stream.GetLong() - 4);
+        }
+        return _numLine;
+    };
     CFile.prototype.onMouseDown = function(pageIndex, x, y) {
         let isRedactTool = Asc.editor.IsRedactTool();
         let isLinkTool   = Asc.editor.IsLinkTool();
 
-        if (this.pages[pageIndex].isRecognized && !isRedactTool && !isLinkTool)
-            return;
-        
         let ret = this.getNearestPos(pageIndex, x, y);
-        let sel = this.Selection;
+		let sel = this.Selection;
 
         let isTextSel = ret.Glyph >= 0 && ret.Line >= 0;
 
@@ -677,7 +818,7 @@ void main() {\n\
         let stream = this.getPageTextStream(pageIndex);
         if (!stream) return { Line : -1, Glyph : -1 };
 
-        if (this.type === 2)
+        if (this.type === 2 || this.type === 3)
         {
             let k = 72 / 96;
             x *= k;
@@ -1113,7 +1254,7 @@ void main() {\n\
         for (let iPage = Page1; iPage <= Page2; ++iPage)
         {
             let stream = this.getPageTextStream(iPage);
-            if (!stream || this.pages[iPage].isRecognized)
+            if (!stream)
                 continue;
 
             let oInfo = { page: iPage, quads: [] };
@@ -1288,9 +1429,6 @@ void main() {\n\
             return;
         }
 
-        if (this.pages[pageIndex].isRecognized)
-            return;
-        
         let stream = this.getPageTextStream(pageIndex);
         if (!stream)
             return;
@@ -1662,8 +1800,6 @@ void main() {\n\
         let ret = "<div>";
         for (let i = page1; i <= page2; ++i)
         {
-            if (this.pages[i].isRecognized)
-                continue;
             ret += this.copySelection(i, _text_format);
         }
         ret += "</div>";

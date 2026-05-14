@@ -2623,11 +2623,12 @@
       }
     }
 
-    if (!bLockDraw) {
-      ws.draw();
-      ws.objectRender.controller.updateSelectionState();
-      ws.objectRender.controller.updateOverlay();
-    }
+	if (!bLockDraw) {
+		ws.objectRender.controller.recalculate2();
+		ws.draw();
+		ws.objectRender.controller.updateSelectionState();
+		ws.objectRender.controller.updateOverlay();
+	}
 
     if (!window["NATIVE_EDITOR_ENJINE"] || window["IS_NATIVE_EDITOR"]) {
       this._onSelectionNameChanged(ws.getSelectionName(/*bRangeText*/false));
@@ -5572,7 +5573,7 @@
 		if (!this.SearchEngine) {
 			return;
 		}
-		if (this.SearchEngine.Compare(oProps) && !oProps.isNeedRecalc && !(oProps.lastSearchElem && this.SearchEngine.modifiedDocument)) {
+		if (this.SearchEngine.Compare(oProps) && !oProps.isNeedRecalc && !this.SearchEngine.modifiedDocument) {
 			this.SearchEngine.props.activeCell = oProps.activeCell;
 			return this.SearchEngine;
 		}

@@ -168,7 +168,6 @@ $(function () {
 	AscCommon.baseEditorsApi.prototype._onEndLoadSdk = function () {
 	};
 	Asc.ReadDefTableStyles = function(){};
-
 	function openDocument(){
 		AscCommon.g_oTableId.init();
 		api._onEndLoadSdk();
@@ -224,6 +223,19 @@ $(function () {
 	wsView.handlers = api.handlers;
 	wsView.objectRender = new AscFormat.DrawingObjects();
 	var ws = api.wbModel.aWorksheets[0];
+	// Mock Date to static data
+	const RealDate = window.Date;
+	const mockNow = new RealDate(2026, 2, 4, 0, 0, 0, 0);
+	function MockDate () {
+		if (arguments.length > 0) {
+			return new (Function.prototype.bind.apply(RealDate, [null].concat(Array.prototype.slice.call(arguments))))();
+		}
+		return new RealDate(mockNow.getTime());
+	}
+	MockDate.prototype = RealDate.prototype;
+	MockDate.now = function() { return mockNow.getTime(); };
+	MockDate.parse = RealDate.parse;
+	MockDate.UTC = RealDate.UTC;
 
 	var getRange = function (c1, r1, c2, r2) {
 		return new window["Asc"].Range(c1, r1, c2, r2);
@@ -4245,6 +4257,125 @@ $(function () {
 
 		clearData(0, 99, 0, 105);
 	});
+	/* for bug 73818 */
+	QUnit.test('Broadcast def name speed tests', function (assert) {
+		let array;
+		ws.getRange2("A1:Z10000").cleanAll();
+
+		// ws.getRange2("A1:Z10000").setValue("1");
+
+		let tableOptions = new AscCommonExcel.AddFormatTableOptions();
+		tableOptions.range = "A1:Z10000";
+		api.asc_addAutoFilter("TableStyleMedium2", tableOptions);	// create table in A1:Z10000 range
+
+		let tables = wsView.model.autoFilters.getTablesIntersectionRange(new Asc.Range(0, 1, 0, 1));
+		assert.strictEqual(tables.length, 1, "compare tables length");
+
+		let table = tables[0];
+		let tableName = table.DisplayName;
+		wsView.af_changeFormatTableInfo(tableName, Asc.c_oAscChangeTableStyleInfo.rowTotal, true);
+		for (let i = 1; i < 1000; i += 2) {
+			// areaMap
+			ws.getRange2(`J${i}:L${i}`).setValue(`=A${i}`);
+			// cellMap
+			ws.getRange2(`M${i}`).setValue(`=B${i}`);
+			ws.getRange2(`N${i}`).setValue(`=C${i}`);
+
+			// table refs
+			ws.getRange2(`O${i}`).setValue("=" + tableName + "[Column2]");
+			ws.getRange2(`P${i}`).setValue("=" + tableName + "[Column3]");
+		}
+
+		ws.getRange2("A10:A100").setValue("="+ tableName + "[Column2]");
+
+		// value for edit and formula in cell check
+		resCell = ws.getRange4(101, 20);
+		resCell.setValue("=" + tableName +"[@Column1]");
+		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@Column1]", "Value for edit in cell after Table[@Column1] is typed");
+		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[Column1]]", "Formula in cell after Table[@Column1] is typed");
+
+
+		// value for edit and formula in cell check
+		resCell = ws.getRange4(101, 25);
+		resCell.setValue("=" + tableName +"[[#This Row],[Column1]]");
+		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@Column1]", "Value for edit in cell after Table[[#This Row],[Column1]] is typed");
+		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[Column1]]", "Formula in cell after Table[[#This Row],[Column1]] is typed");
+
+
+		// value for edit and formula in cell check
+		resCell = ws.getRange4(101, 30);
+		resCell.setValue("=" + tableName +"[[Column1]:[Column2]]");
+		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[[Column1]:[Column2]]", "Value for edit in cell after Table[[Column1]:[Column2]] is typed");
+		assert.strictEqual(resCell.getFormula(), tableName + "[[Column1]:[Column2]]", "Formula in cell after Table[[Column1]:[Column2]] is typed");
+
+
+		// value for edit and formula in cell check
+		resCell = ws.getRange4(101, 30);
+		resCell.setValue("=" + tableName +"[[Column1]:[Column3]]");	
+		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[[Column1]:[Column3]]", "Value for edit in cell after Table[[Column1]:[Column3]] is typed");
+		assert.strictEqual(resCell.getFormula(), tableName + "[[Column1]:[Column3]]", "Formula in cell after Table[[Column1]:[Column3]] is typed");
+
+
+		// value for edit and formula in cell check
+		resCell = ws.getRange4(101, 30);
+		resCell.setValue("=" + tableName +"[@[Column1]:[Column2]]");
+		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@[Column1]:[Column2]]", "Value for edit in cell after Table[@[Column1]:[Column2]] is typed");
+		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[Column1]:[Column2]]", "Formula in cell after Table[@[Column1]:[Column2]] is typed");
+
+
+		// value for edit and formula in cell check
+		resCell = ws.getRange4(101, 35);
+		resCell.setValue("=" + tableName +"[[#This Row],[Column1]:[Column2]]");
+		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@[Column1]:[Column2]]", "Value for edit in cell after Table[[#This Row],[Column1]:[Column2]] is typed");
+		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[Column1]:[Column2]]", "Formula in cell after Table[[#This Row],[Column1]:[Column2]] is typed");
+
+
+		// value for edit and formula in cell check
+		resCell = ws.getRange4(101, 40);
+		resCell.setValue("=" + tableName +"[[#This Row],[Column1]:[Column2]]");
+		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@[Column1]:[Column2]]", "Value for edit in cell after Table[[#This Row],[Column1]:[Column2]] is typed");
+		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[Column1]:[Column2]]", "Formula in cell after Table[[#This Row],[Column1]:[Column2]] is typed");
+
+
+		// value for edit and formula in cell check
+		resCell = ws.getRange4(101, 45);
+		resCell.setValue("=" + tableName +"[@[Column1]]");
+		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@Column1]", "Value for edit in cell after Table[@[Column1]] is typed");
+		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[Column1]]", "Formula in cell after Table[@[Column1]] is typed");
+
+
+		// value for edit and formula in cell check
+		resCell = ws.getRange4(101, 60);
+		resCell.setValue("=" + tableName +"[[#Headers],[Column1]]");
+		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[[#Headers],[Column1]]", "Value for edit in cell after Table[[#Headers],[Column1]] is typed");
+		assert.strictEqual(resCell.getFormula(), tableName + "[[#Headers],[Column1]]", "Formula in cell after Table[[#Headers],[Column1]] is typed");
+
+
+		// value for edit and formula in cell check
+		resCell = ws.getRange4(101, 65);
+		resCell.setValue("=" + tableName +"[[#Headers],[Column1]:[Column2]]");
+		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[[#Headers],[Column1]:[Column2]]", "Value for edit in cell after Table[[#Headers],[Column1]:[Column3]] is typed");
+		assert.strictEqual(resCell.getFormula(), tableName + "[[#Headers],[Column1]:[Column2]]", "Formula in cell after Table[[#Headers],[Column1]:[Column2]] is typed");
+
+		let textVal = "newVal";
+		// change the value inside the table
+		// we should recalculate only the values ​​that refer to this column
+		ws.getRange2("A100").setValue(textVal);
+		ws.checkChangeTablesContent(ws.getRange2("A100").bbox);
+
+		// value for edit and formula in cell check
+		resCell = ws.getRange4(101, 20);
+		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@Column1]", "Value for edit in cell after textVal inside the table is typed");
+		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[Column1]]", "Formula in cell after textVal inside the table is typed");
+
+		// value for edit and formula in cell check
+		resCell = ws.getRange2("A100");
+		assert.strictEqual(resCell.getValueForEdit(), textVal, "Value for edit in cell after textVal inside the table is typed");
+		assert.strictEqual(resCell.getFormula(), "", "Formula in cell after textVal inside the table is typed");
+
+		ws.getRange2("A1:Z11000").cleanAll();
+		ws.deleteTablePart(0);
+	});
 
 	/* for bug 77989 */
 	QUnit.test('Table column names changes tests', function (assert) {
@@ -4274,13 +4405,6 @@ $(function () {
 		// value for edit and formula in cell check
 		resCell = ws.getRange4(101, 20);
 		resCell.setValue("=" + tableName +"[@Column1]");
-		
-		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@Column1]", "Value for edit in cell after Table[@Column1] is typed");
-		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[Column1]]", "Formula in cell after Table[@Column1] is typed");
-
-		// value for edit and formula in cell check
-		resCell = ws.getRange4(101, 20);
-		// resCell.setValue("=" + tableName +"[@Column1]");
 		
 		assert.strictEqual(resCell.getValueForEdit(), "=" + tableName + "[@Column1]", "Value for edit in cell after Table[@Column1] is typed");
 		assert.strictEqual(resCell.getFormula(), tableName + "[[#This Row],[Column1]]", "Formula in cell after Table[@Column1] is typed");
@@ -7368,12 +7492,73 @@ $(function () {
 		testData = [
 			['03/30/2003'],
 			['04/30/2003']
-		]
+		];
 		range = ws.getRange4(6, 0);
 		range.fillData(testData);
 		undoData = [[''], [''], [''], [''], ['37651'], ['37620']];
 		expectedData = [['37680'], ['37651'], ['37620'], ['37590'], ['37559'], ['37529']];
 		getAutofillCase([0, 0, 6, 7], [0, 0, 5, 0], 1, 'Date format. Reverse sequence. Vertical. Two selected cells. Step - month. Next month is February, and the day is more than the last day of the month.', expectedData);
+		// Case #105: Date format. Asc sequence. Vertical. Three selected cells. Step - month. Bug-79127
+		// Mock Date object to prevent dynamic change of date. Those cases have dynamic year
+		window.Date = MockDate;
+		testData = [
+			['01/20'],
+			['02/20'],
+			['03/20']
+		];
+		range = ws.getRange4(0, 0);
+		range.fillData(testData);
+		undoData = [[''], [''], ['']];
+		expectedData = [['46132'], ['46162'], ['46193']];
+		getAutofillCase([0, 0, 0, 2], [0, 0, 3, 5], 3, 'Short date format - 01/20, 02/20, 03/20. Asc sequence. Vertical. Three selected cells. Step - month. Bug-79127', expectedData);
+		// Case #106: Date format. Reverse sequence. Vertical. Three selected cells. Step - month. Bug-79127
+		range = ws.getRange4(3, 0);
+		range.fillData(testData);
+		undoData = [['46101'], ['46073'], ['46042']];
+		expectedData = [['46011'], ['45981'], ['45950']];
+		getAutofillCase([0, 0, 3, 5], [0, 0, 2, 0], 1, 'Short date format - 01/20, 02/20, 03/20. Reverse sequence. Vertical. Three selected cells. Step - month. Bug-79127', expectedData);
+		// Case #107: Date format. Asc sequence. Horizontal. Five selected cells. Step - month. Bug-79127
+		testData = [
+			['01/20', '02/20', '03/20', '04/20', '05/20']
+		];
+		range = ws.getRange4(0, 0);
+		range.fillData(testData);
+		undoData = ['', '', '', '', ''];
+		expectedData = ['46193', '46223', '46254', '46285', '46315'];
+		getAutofillCase([0, 4, 0, 0], [5, 9, 0, 0], 3, 'Short date format - 01/20, 02/20, 03/20, 04/20, 05/20. Asc sequence. Horizontal. Five selected cells. Step - month. Bug-79127', expectedData);
+		// Case #108: Date format. Reverse sequence. Horizontal. Five selected cells. Step - month. Bug-79127
+		range = ws.getRange4(0, 5);
+		range.fillData(testData);
+		undoData = ['46162', '46132', '46101', '46073', '46042'];
+		expectedData = ['46011', '45981', '45950', '45920', '45889'];
+		getAutofillCase([5, 9, 0, 0], [4, 0, 0, 0], 1, 'Short date format - 01/20, 02/20, 03/20, 04/20, 05/20. Reverse sequence. Horizontal. Five selected cells. Step - month. Bug-79127', expectedData);
+		// Restore Date object
+		window.Date = RealDate;
+		// Case #109: Date format. Asc sequence. Vertical. Five selected cells. Sequence with the last day of the month. Step - month. Bug-79127
+		testData = [
+			['01/31/2026'],
+			['02/28/2026'],
+			['03/31/2026'],
+			['04/30/2026'],
+			['05/31/2026']
+		];
+		range = ws.getRange4(0, 0);
+		range.fillData(testData);
+		undoData = [['46101'], ['37710'], ['37741'], [''], ['']];
+		expectedData = [['46203'], ['46234'], ['46265'], ['46295'], ['46326']];
+		getAutofillCase([0, 0, 0, 4], [0, 0, 5, 9], 3, 'Date format. Asc sequence. Vertical. Five selected cells. Sequence with the last day of month. Step - month. Bug-79127', expectedData);
+		// Case #110: Date format. Asc sequence. Vertical. Three selected cells. Change to default mode coz sequence for month step isn't correct, but it's int sequence. Bug-79127
+		testData = [
+			['01/01/2026'],
+			['02/01/2026'],
+			['03/04/2026']
+		];
+		range = ws.getRange4(0, 0);
+		range.fillData(testData);
+		undoData = [['46142'], ['46173'], ['46101']];
+		expectedData = [['46116'], ['46147'], ['46178']];
+		getAutofillCase([0, 0, 0, 2], [0, 0, 3, 5], 3, 'Date format. Asc sequence. Vertical. Three selected cells. Change to default mode coz sequence for month step isn\'t correct, but it\'s int sequence. Bug-79127', expectedData);
+
 		ws.getRange2('A1:A20').cleanAll();
 	});
 	QUnit.test('Autofill - work with applied filter', function (assert) {

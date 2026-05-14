@@ -2466,14 +2466,6 @@ CInlineLevelSdt.prototype.private_UpdateCheckBoxContent = function()
 	}
 };
 /**
- * Проверяем, является ли данный класс специальным контейнером для картинки
- * @returns {boolean}
- */
-CInlineLevelSdt.prototype.IsPicture = function()
-{
-	return (!!this.Pr.Picture);
-};
-/**
  * Выставляем настройку того, что это контент контрол с картинкой
  * @param isPicture {boolean}
  */
@@ -4264,6 +4256,28 @@ CInlineLevelSdt.prototype.CorrectSingleLineFormContent = function()
 CInlineLevelSdt.prototype.GetDataBinding = function()
 {
 	return this.Pr.DataBinding;
+};
+CInlineLevelSdt.prototype.OnAttach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+	
+	let logicDocument = this.GetLogicDocument();
+	if (logicDocument && logicDocument.IsDocumentEditor())
+		logicDocument.OnAttachContentControl(this);
+	
+	CParagraphContentWithParagraphLikeContent.prototype.OnAttach.apply(this, arguments);
+};
+CInlineLevelSdt.prototype.OnDetach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+	
+	let logicDocument = this.GetLogicDocument();
+	if (logicDocument && logicDocument.IsDocumentEditor())
+		logicDocument.OnDetachContentControl(this);
+	
+	CParagraphContentWithParagraphLikeContent.prototype.OnDetach.apply(this, arguments);
 };
 
 

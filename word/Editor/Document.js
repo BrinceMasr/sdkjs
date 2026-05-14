@@ -11371,8 +11371,9 @@ CDocument.prototype.Internal_Content_Add = function(Position, NewObject, isCorre
 
 	if (type_Paragraph === NewObject.GetType())
 		this.DocumentOutline.CheckParagraph(NewObject);
-	
+
 	this.UpdateSectionsAfterAdd([NewObject]);
+	NewObject.OnAttach();
 };
 CDocument.prototype.Internal_Content_Remove = function(Position, Count, isCorrectContent)
 {
@@ -11388,10 +11389,13 @@ CDocument.prototype.Internal_Content_Remove = function(Position, Count, isCorrec
 	{
 		this.Content[Position + Index].PreDelete();
 	}
-	
+
 	let removedElements = this.Content.slice(Position, Position + Count);
 	this.UpdateSectionsBeforeRemove(removedElements, true);
-	
+
+	for (let i = 0; i < removedElements.length; ++i)
+		removedElements[i].OnDetach();
+
 	this.History.Add(new CChangesDocumentRemoveItem(this, Position, removedElements));
 	var Elements = this.Content.splice(Position, Count);
 	this.private_RecalculateNumbering(Elements);
@@ -12823,7 +12827,7 @@ CDocument.prototype.SetWatermarkPropsAction = function(oProps)
 		if (watermark.GraphicObj.selected)
 			this.RemoveSelection(true);
 		watermark.Remove_FromDocument(false);
-	});
+	}, this);
 	
 	if (Asc.c_oAscWatermarkType.None === oProps.get_Type())
 		return null;
@@ -14524,17 +14528,18 @@ CDocument.prototype.OnUserScroll = function()
 {
 	if (this.Api.isGroupActions())
 	{
+		this.Api.setUserScrollGroupActions(true);
 		if (this.DrawingDocument.IsTargetOnScreen())
 		{
 			this.UpdateTargetOnRecalculate = true;
-			this.Api.setUserScrollGroupActions(false);
 		}
 		else
 		{
 			this.NeedUpdateTarget          = false;
 			this.UpdateTargetOnRecalculate = false;
-			this.Api.setUserScrollGroupActions(true);
 		}
+
+		this.Api.resetUserScrollGroupActionsTimer();
 	}
 };
 //----------------------------------------------------------------------------------------------------------------------
@@ -26682,6 +26687,35 @@ CDocument.prototype.OnChangeContentControl = function(oControl)
 		return;
 
 	this.Action.Additional.ContentControlChange[sId] = oControl;
+};
+CDocument.prototype.OnAttachContentControl = function(contentControl)
+{
+	if (window.g_asc_plugins)
+		window.g_asc_plugins.onPluginEvent("onContentControlAdd", contentControl.GetContentControlPr().GetEventObject());
+};
+CDocument.prototype.OnDetachContentControl = function(contentControl)
+{
+	if (!contentControl)
+		return;
+	
+	if (this.FocusCC === contentControl)
+	{
+		this.Api.asc_OnBlurContentControl(this.FocusCC);
+		this.FocusCC = null;
+	}
+	
+	if (window.g_asc_plugins)
+		window.g_asc_plugins.onPluginEvent("onContentControlRemove", contentControl.GetContentControlPr().GetEventObject());
+};
+CDocument.prototype.OnAttachParagraph = function(paragraph)
+{
+	if (window.g_asc_plugins)
+		window.g_asc_plugins.onPluginEvent("onParagraphAdd", {"InternalId" : paragraph.GetId()});
+};
+CDocument.prototype.OnDetachParagraph = function(paragraph)
+{
+	if (window.g_asc_plugins)
+		window.g_asc_plugins.onPluginEvent("onParagraphRemove", {"InternalId" : paragraph.GetId()});
 };
 /**
  * @returns {?AscOForm.CDocument}

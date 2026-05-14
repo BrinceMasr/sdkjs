@@ -2006,6 +2006,7 @@
 						}
 					}
 				}
+				this.recalculate();
 				this.checkExtentsByDocContent(true, true);
 			}
 		};
@@ -5624,6 +5625,9 @@
 				} else {
 					geometry.check_bounds(graphics, this);
 				}
+
+				graphics.CheckLineWidth(this);
+				graphics.CorrectBounds2();
 
 				if (this.txBody) {
 					graphics.SetIntegerGrid(false);

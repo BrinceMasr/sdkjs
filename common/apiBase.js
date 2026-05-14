@@ -2220,8 +2220,11 @@
 								if (t["asc_isSupportFeature"]("ooxml") && !documentUrl) {
 									documentUrl = urls['origin.docx'] || urls['origin.xlsx'] || urls['origin.pptx'];
 								}
-								if (t.isUseNativeViewer && !documentUrl)
-									documentUrl = urls['origin.pdf'] || urls['origin.xps'] || urls['origin.oxps'] || urls['origin.djvu'];
+								if (t.isUseNativeViewer && !documentUrl) {
+									var exts = Asc.c_sNativeViewerFormats.slice(1).split('.');
+									for (var i = 0; i < exts.length && !documentUrl; i++)
+										documentUrl = urls['origin.' + exts[i]];
+								}
 								if (null != documentUrl) {
 									if ('ok' === input["status"] || t.getViewMode()) {
 										t._onOpenCommand(documentUrl);
@@ -6106,7 +6109,11 @@
 		return false;
 	};
 	baseEditorsApi.prototype.setUserScrollGroupActions = function(isUserScroll)
-	{};
+	{
+	};
+	baseEditorsApi.prototype.resetUserScrollGroupActionsTimer = function()
+	{
+	};
 	
 	baseEditorsApi.prototype.getMacroRecorder = function()
 	{

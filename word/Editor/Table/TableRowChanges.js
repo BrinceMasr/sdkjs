@@ -438,6 +438,7 @@ CChangesTableRowAddCell.prototype.Undo = function()
 		return;
 
 	var oRow = this.Class;
+	oRow.Content[this.Pos].OnDetach();
 	oRow.Content[this.Pos].SetIndex(-1);
 	oRow.Content.splice(this.Pos, 1);
 	oRow.CellsInfo.splice(this.Pos, 1);
@@ -456,6 +457,7 @@ CChangesTableRowAddCell.prototype.Redo = function()
 	oRow.Internal_ReIndexing(this.Pos);
 	oRow.private_CheckCurCell();
 	oRow.private_UpdateTableGrid();
+	this.Items[0].OnAttach();
 };
 CChangesTableRowAddCell.prototype.private_WriteItem = function(Writer, Item)
 {
@@ -479,6 +481,7 @@ CChangesTableRowAddCell.prototype.Load = function(Color)
 	{
 		oRow.Content.splice(Pos, 0, Element);
 		AscCommon.CollaborativeEditing.Update_DocumentPositionsOnAdd(oRow, Pos);
+		Element.OnAttach();
 	}
 
 	oRow.Internal_ReIndexing();
@@ -519,6 +522,7 @@ CChangesTableRowRemoveCell.prototype.Undo = function()
 	oRow.Internal_ReIndexing(this.Pos);
 	oRow.private_CheckCurCell();
 	oRow.private_UpdateTableGrid();
+	this.Items[0].OnAttach();
 };
 CChangesTableRowRemoveCell.prototype.Redo = function()
 {
@@ -526,6 +530,7 @@ CChangesTableRowRemoveCell.prototype.Redo = function()
 		return;
 
 	var oRow = this.Class;
+	oRow.Content[this.Pos].OnDetach();
 	oRow.Content[this.Pos].SetIndex(-1);
 	oRow.Content.splice(this.Pos, 1);
 	oRow.CellsInfo.splice(this.Pos, 1);
@@ -552,6 +557,7 @@ CChangesTableRowRemoveCell.prototype.Load = function(Color)
 	if (false === Pos)
 		return;
 
+	oRow.Content[Pos].OnDetach();
 	oRow.Content[Pos].SetIndex(-1);
 	oRow.Content.splice(Pos, 1);
 	AscCommon.CollaborativeEditing.Update_DocumentPositionsOnRemove(oRow, Pos, 1);

@@ -886,22 +886,8 @@
 		
 		bClearText = (bClearText === true);
 		
-		let oDoc		= this.getPDFDoc();
-		let oTxObject	= oDoc.getTextController();
-		let textObj		= {Text : ""};
-		
-		if (oTxObject) {
-			let oContent = oTxObject.GetDocContent();
-			textObj.Text = oContent ? (oContent.GetSelectedText(bClearText, select_Pr) || "") : "";
-		}
-		else {
-			this.DocumentRenderer.Copy(textObj);
-		}
-		
-		if (!textObj.Text || textObj.Text.trim() === "")
-			return "";
-		
-		return textObj.Text;
+		let oDoc = this.getPDFDoc();
+		return oDoc.GetSelectedText(bClearText, select_Pr);
 	};
 	PDFEditorApi.prototype.asc_AddMath2 = function(Type) {
 		let oDoc	= this.getPDFDoc();
@@ -1432,6 +1418,18 @@
 	};
 	PDFEditorApi.prototype.IsRedactTool = function() {
 		return !!this.isRedactTool;
+	};
+	PDFEditorApi.prototype.SetRedactDelForm = function(bDel) {
+		this.bRedactDelForms = bDel;
+	};
+	PDFEditorApi.prototype.IsRedactDelForms = function() {
+		return !!this.bRedactDelForms;
+	};
+	PDFEditorApi.prototype.SetRedactDelAnnots = function(bDel) {
+		this.bRedactDelAnnots = bDel;
+	};
+	PDFEditorApi.prototype.IsRedactDelAnnots = function() {
+		return !!this.bRedactDelAnnots;
 	};
 	PDFEditorApi.prototype.RedactPages = function(aIdxs) {
 		let oDoc = this.getPDFDoc();
@@ -3206,7 +3204,7 @@
 			return false;
 		}
 
-		let aColor = [r / 255, g / 255, b / 255];
+		let aColor = ![r, g, b].includes(undefined) ? [r / 255, g / 255, b / 255] : undefined;
 		
 		return oDoc.DoAction(function() {
 			oController.selectedObjects.forEach(function(annot) {
@@ -3342,71 +3340,94 @@
 		return oDoc.DoAction(function() {
 			oController.selectedObjects.forEach(function(annot) {
 				if (annot.IsAnnot()) {
-					switch (nComplexType) {
-						case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.solid: {
-							annot.SetBorderStyle(AscPDF.BORDER_TYPES.solid);
-							annot.SetDashPattern([]);
-							annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
-							annot.SetBorderEffectIntensity(0);
-							break;
+					if (annot.IsLink()) {
+						if (nComplexType == null) {
+							annot.SetBorderWidth(0);
 						}
-						case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash1: {
-							annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
-							annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash1);
-							annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
-							annot.SetBorderEffectIntensity(0);
-							break;
-						}
-						case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash2: {
-							annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
-							annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash2);
-							annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
-							annot.SetBorderEffectIntensity(0);
-							break;
-						}
-						case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash3: {
-							annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
-							annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash3);
-							annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
-							annot.SetBorderEffectIntensity(0);
-							break;
-						}
-						case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash4: {
-							annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
-							annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash4);
-							annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
-							annot.SetBorderEffectIntensity(0);
-							break;
-						}
-						case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash5: {
-							annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
-							annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash5);
-							annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
-							annot.SetBorderEffectIntensity(0);
-							break;
-						}
-						case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash6: {
-							annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
-							annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash6);
-							annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
-							annot.SetBorderEffectIntensity(0);
-							break;
-						}
-						case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.cloud1: {
-							annot.SetBorderStyle(AscPDF.BORDER_TYPES.solid);
-							annot.SetDashPattern([]);
-							annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.cloud);
-							annot.SetBorderEffectIntensity(1);
-							break;
-						}
-						case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.cloud2: {
-							annot.SetBorderStyle(AscPDF.BORDER_TYPES.solid);
-							annot.SetDashPattern([]);
-							annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.cloud);
-							annot.SetBorderEffectIntensity(2);
-							break;
+						else {
+							if (annot.GetBorderWidth() == 0) {
+								annot.SetBorderWidth(1);
+							}
+
+							if (nComplexType == AscPDF.BORDER_TYPES.dashed) {
+								annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash1);
+							}
+							else {
+								annot.SetDashPattern(undefined);
+							}
+							
+							annot.SetBorderStyle(nComplexType);
 						}
 					}
+					else {
+						switch (nComplexType) {
+							case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.solid: {
+								annot.SetBorderStyle(AscPDF.BORDER_TYPES.solid);
+								annot.SetDashPattern([]);
+								annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
+								annot.SetBorderEffectIntensity(0);
+								break;
+							}
+							case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash1: {
+								annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
+								annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash1);
+								annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
+								annot.SetBorderEffectIntensity(0);
+								break;
+							}
+							case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash2: {
+								annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
+								annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash2);
+								annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
+								annot.SetBorderEffectIntensity(0);
+								break;
+							}
+							case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash3: {
+								annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
+								annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash3);
+								annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
+								annot.SetBorderEffectIntensity(0);
+								break;
+							}
+							case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash4: {
+								annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
+								annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash4);
+								annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
+								annot.SetBorderEffectIntensity(0);
+								break;
+							}
+							case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash5: {
+								annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
+								annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash5);
+								annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
+								annot.SetBorderEffectIntensity(0);
+								break;
+							}
+							case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash6: {
+								annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
+								annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash6);
+								annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
+								annot.SetBorderEffectIntensity(0);
+								break;
+							}
+							case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.cloud1: {
+								annot.SetBorderStyle(AscPDF.BORDER_TYPES.solid);
+								annot.SetDashPattern([]);
+								annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.cloud);
+								annot.SetBorderEffectIntensity(1);
+								break;
+							}
+							case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.cloud2: {
+								annot.SetBorderStyle(AscPDF.BORDER_TYPES.solid);
+								annot.SetDashPattern([]);
+								annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.cloud);
+								annot.SetBorderEffectIntensity(2);
+								break;
+							}
+						}
+					}
+
+					annot.private_UpdateRect();
 				}
 			});
 
@@ -4582,10 +4603,23 @@
 		let oThumbnails = oDoc.Viewer.Thumbnails;
 		aPages = aPages != undefined ? aPages : oThumbnails.getSelectedPages().slice();
 
-		oDoc.DoAction(function() {
+		let isLocalRotate = false == Asc.editor.canEdit();
+
+		function rotatePages() {
 			oDoc.RotatePages(aPages, nAngle);
 			oThumbnails.keepSelectedPages = true;
-		}, AscDFH.historydescription_Pdf_RotatePage, this, aPages);
+		}
+
+		// editing rotate, for history
+		if (!isLocalRotate) {
+			oDoc.DoAction(function() {
+				rotatePages();
+			}, AscDFH.historydescription_Pdf_RotatePage, this, aPages);
+		}
+		// viewing rotate, no history
+		else {
+			rotatePages();
+		}
 	};
 	PDFEditorApi.prototype.asc_GetPageRotate = function(nPage) {
 		let oViewer = this.getDocumentRenderer();
@@ -5200,6 +5234,15 @@
 		return oDoc.Viewer.file.nativeFile['CheckOwnerPassword'](password);
 	};
 
+	PDFEditorApi.prototype.asc_onSelectionEnd = function(page, x, y) {
+		if (window.g_asc_plugins)
+			window.g_asc_plugins.onPluginEvent("onSelectionEnd", page, x, y);
+	};
+	PDFEditorApi.prototype.asc_onSelectionCancel = function() {
+		if (window.g_asc_plugins)
+			window.g_asc_plugins.onPluginEvent("onSelectionCancel");
+	};
+	
 	function CPdfContextMenuData(obj) {
 		if (obj) {
 			this.Type  		= ( undefined != obj.Type ) ? obj.Type : Asc.c_oAscPdfContextMenuTypes.Common;
@@ -5395,6 +5438,8 @@
 	// redact
 	PDFEditorApi.prototype['SetRedactTool']		= PDFEditorApi.prototype.SetRedactTool;
 	PDFEditorApi.prototype['IsRedactTool']		= PDFEditorApi.prototype.IsRedactTool;
+	PDFEditorApi.prototype['SetRedactDelForm']	= PDFEditorApi.prototype.SetRedactDelForm;
+	PDFEditorApi.prototype['SetRedactDelAnnots']= PDFEditorApi.prototype.SetRedactDelAnnots;
 	PDFEditorApi.prototype['RedactPages']		= PDFEditorApi.prototype.RedactPages;
 	PDFEditorApi.prototype['ApplyRedact']		= PDFEditorApi.prototype.ApplyRedact;
 	PDFEditorApi.prototype['HasRedact']			= PDFEditorApi.prototype.HasRedact;

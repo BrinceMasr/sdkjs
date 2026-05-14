@@ -1338,12 +1338,17 @@
 		changeTableName: function(tableName, newName) {
 			var defName = this.getDefNameByName(tableName, null);
 			if (defName) {
+				this.buildDependency();
 				var oldUndoName = defName.getUndoDefName();
 				var newUndoName = defName.getUndoDefName();
 				newUndoName.name = newName;
+				
+				var notifyData = {type: c_oNotifyType.ChangeDefName, from: oldUndoName, to: newUndoName};
+				this._broadcastDefName(tableName, notifyData);
 				AscCommon.History.TurnOff();
 				this.editDefinesNames(oldUndoName, newUndoName);
 				AscCommon.History.TurnOn();
+				this.calcTree();
 			}
 		},
 		delTableName: function(tableName, bConvertTableFormulaToRef) {
@@ -1678,6 +1683,8 @@
 			AscCommonExcel.g_oSUMIFSCache.clean();
 			AscCommonExcel.g_oFormulaRangesCache.clean();
 			AscCommonExcel.g_oCountIfCache.clean();
+			AscCommonExcel.g_oSumIfCache.clean();
+			AscCommonExcel.g_oAverageIfCache.clean();
 		},
 		notifyAllFormulasInChangedWs: function() {
 			let sheetIds = {};
@@ -1868,8 +1875,8 @@
 			}
 
 			let isDefnameTable = defNameObj && defNameObj.type === Asc.c_oAscDefNameType.table;
-			// TODO do notify below only when we rename the table?
-			if (isDefnameTable /*&& notifyData.type === c_oNotifyType.RenameTableColumn*/) {
+			// go through  all intersected listeners only if we do not change the cell inside the table
+			if (isDefnameTable && notifyData.type !== c_oNotifyType.Dirty) {
 				// we are getting table info and notify all range listeners that intersects with the table ref
 				let table = wb.getTableByName(nameIndex);
 				if (table) {
@@ -3110,17 +3117,6 @@
 		}
 	};
 
-	/**
-	 * @param {string} s1
-	 * @param {string} s2
-	 * @return {number}
-	 */
-	function stringCompare(s1, s2) {
-		if (s1 === s2) {
-			return 0;
-		}
-		return s1.localeCompare(s2, AscCommon.g_oDefaultCultureInfo ? AscCommon.g_oDefaultCultureInfo.Name : "en");
-	}
 	function ForwardTransformationFormula(elem, formula, parsed) {
 		this.elem = elem;
 		this.formula = formula;
@@ -5534,13 +5530,20 @@
 		var aCharts = [];
 		var aRanges = [new AscCommonExcel.Range(oWorksheet, 0, 0, gc_nMaxRow0, gc_nMaxCol0)];
 		const fDrawingCallback = function(oDrawing) {
-			if(oDrawing.getObjectType() === AscDFH.historyitem_type_ChartSpace) {
+			var nType = oDrawing.getObjectType();
+			if(nType === AscDFH.historyitem_type_ChartSpace) {
 				var nPrevLength = aRefsToChange.length;
 				oDrawing.clearDataRefs();
 				oDrawing.collectIntersectionRefs(aRanges, aRefsToChange);
 				oDrawing.clearDataRefs();
 				if(aRefsToChange.length > nPrevLength) {
 					aCharts.push(oDrawing);
+					aId.push(oDrawing.Get_Id());
+				}
+			}
+			else if(nType === AscDFH.historyitem_type_Shape) {
+				if(oDrawing.matchesTextLinkSheet && oDrawing.matchesTextLinkSheet(oWorksheet.sName)) {
+					aRefsToChange.push(oDrawing);
 					aId.push(oDrawing.Get_Id());
 				}
 			}
@@ -6479,6 +6482,18 @@
 	Workbook.prototype.addExternalReferencesAfterParseFormulas = function (externalReferenesNeedAdd) {
 		let newExternalReferences = [];
 		for (let i in externalReferenesNeedAdd) {
+			let entries = externalReferenesNeedAdd[i];
+			let allAlreadyExist = entries.length > 0;
+			for (let j = 0; j < entries.length; j++) {
+				if (!entries[j].alreadyExists) {
+					allAlreadyExist = false;
+					break;
+				}
+			}
+			if (allAlreadyExist) {
+				continue;
+			}
+
 			let needAdd = false;
 			let newExternalReference = this.getExternalReferenceById(i);
 			if (!newExternalReference) {
@@ -6487,8 +6502,11 @@
 				needAdd = true;
 			}
 
-			for (let j = 0; j < externalReferenesNeedAdd[i].length; j++) {
-				let oNewSheet = externalReferenesNeedAdd[i][j];
+			for (let j = 0; j < entries.length; j++) {
+				let oNewSheet = entries[j];
+				if (oNewSheet.alreadyExists) {
+					continue;
+				}
 				if (null === newExternalReference.getSheetByName(oNewSheet.sheet)) {
 					let newSheet = oNewSheet.sheet;
 					newExternalReference.addSheetName(newSheet, true);
@@ -6792,6 +6810,7 @@
 		const oApi = this.oApi;
 		var aChartRefsToChange = [];
 		var aCharts = [];
+		var aShapesWithTextLink = [];
 		let bHandled = false;
 		const fDrawingCallback = function(oDrawing) {
 			switch (oDrawing.getObjectType()) {
@@ -6808,6 +6827,13 @@
 					bHandled |= oDrawing.handleChangeRanges(aRanges);
 					break;
 				}
+				case AscDFH.historyitem_type_Shape: {
+					if(oDrawing.handleTextLinkChange && oDrawing.handleTextLinkChange(aRanges)) {
+						aShapesWithTextLink.push(oDrawing);
+						bHandled = true;
+					}
+					break;
+				}
 				default: {
 					break;
 				}
@@ -6815,6 +6841,9 @@
 		};
 		this.handleDrawings(fDrawingCallback);
 		oApi.frameManager.handleMainDiagram(fDrawingCallback);
+		for(var nSp = 0; nSp < aShapesWithTextLink.length; ++nSp) {
+			aShapesWithTextLink[nSp].recalculate();
+		}
 		if(aChartRefsToChange.length > 0) {
 			for(var nRef = 0; nRef < aChartRefsToChange.length; ++nRef) {
 				aChartRefsToChange[nRef].updateCacheAndCat();
@@ -7209,13 +7238,10 @@
 
 		// Copy allFormulasCountMap only for same-workbook copy
 		// For cross-workbook copy, it will be regenerated with new indexes
-		if (AscCommonExcel.bIsSupportDynamicArrays && wsFrom.dynamicArrayManager && wsFrom.dynamicArrayManager.allFormulasCountMap) {
+		if (AscCommonExcel.bIsSupportDynamicArrays && wsFrom.dynamicArrayManager) {
 			var isCrossWorkbookCopy = (wsFrom.workbook !== this.workbook);
 			if (!isCrossWorkbookCopy) {
-				this.dynamicArrayManager.allFormulasCountMap = {};
-				for (var cmIndex in wsFrom.dynamicArrayManager.allFormulasCountMap) {
-					this.dynamicArrayManager.allFormulasCountMap[cmIndex] = wsFrom.dynamicArrayManager.allFormulasCountMap[cmIndex];
-				}
+				this.dynamicArrayManager.copyCountMapFrom(wsFrom.dynamicArrayManager);
 			}
 		}
 
@@ -7328,15 +7354,7 @@
 					if (dynamicProps) {
 						if (dynamicProps.cmIndex != null) {
 							parsed.setCm(dynamicProps.cmIndex);
-							// Update allFormulasCountMap for the new index
-							if (!t.dynamicArrayManager.allFormulasCountMap) {
-								t.dynamicArrayManager.allFormulasCountMap = {};
-							}
-							if (!t.dynamicArrayManager.allFormulasCountMap[dynamicProps.cmIndex]) {
-								t.dynamicArrayManager.allFormulasCountMap[dynamicProps.cmIndex] = 1;
-							} else {
-								t.dynamicArrayManager.allFormulasCountMap[dynamicProps.cmIndex]++;
-							}
+							t.dynamicArrayManager.addDynamicFormula(dynamicProps.cmIndex);
 						}
 						if (dynamicProps.vmIndex != null && beforeSpillRange) {
 							parsed.setVm(dynamicProps.vmIndex);
@@ -7741,6 +7759,9 @@
 									case Asc.ECfType.endsWith:
 										operator = AscCommonExcel.ECfOperator.Operator_endsWith;
 										break;
+								}
+								if (operator) {
+									oRule.asc_setOperator(operator);
 								}
 								formulaParent = new AscCommonExcel.CConditionalFormattingFormulaParent(this, oRule, true);
 								oRuleElement =  oRule.getFormulaCellIs(Asc.ECfType.notContainsText === oRule.type || Asc.ECfType.containsText === oRule.type);
@@ -15263,7 +15284,11 @@
 		(true !== options.isWholeCell || options.findWhat.length === cellText.length);
 
 	};
-	Cell.prototype.isNullText=function(){
+	Cell.prototype.isNullText=function(opt_noCalc){
+		if (opt_noCalc) {
+			// Without _checkDirty: only check raw data, ignore formulaParsed
+			return null === this.number && null === this.text && null === this.multiText;
+		}
 		return this.isNullTextString() && !this.formulaParsed;
 	};
 	Cell.prototype.isEmptyTextString = function() {
@@ -15524,6 +15549,16 @@
 					if (externalLinks[i]) {
 						delete externalLinks[i];
 					}
+				}
+			}
+		}
+
+		// full set of external references collected while parsing the formula in _saveCellValueAfterEdit
+		let parseExternalRefs = this.ws && this.ws.dynamicArrayManager && this.ws.dynamicArrayManager._externalReferenesNeedAdd;
+		if (parseExternalRefs && externalLinks) {
+			for (i in parseExternalRefs) {
+				if (externalLinks[i]) {
+					delete externalLinks[i];
 				}
 			}
 		}
@@ -15864,8 +15899,8 @@
 			}
 		}
 	};
-	Cell.prototype.getType=function(){
-		this._checkDirty();
+	Cell.prototype.getType=function(opt_noCalc){
+		if (!opt_noCalc) { this._checkDirty(); }
 		return this.type;
 	};
 	Cell.prototype.setCellStyle=function(val){
@@ -16229,8 +16264,8 @@
 		var aText = this._getValue2(AscCommon.gc_nMaxDigCountView, function(){return true;}, numFormat, cultureInfo, true);
 		return AscCommonExcel.getStringFromMultiText(aText);
 	};
-	Cell.prototype.getValueWithoutFormat = function() {
-		this._checkDirty();
+	Cell.prototype.getValueWithoutFormat = function(opt_noCalc) {
+		if (!opt_noCalc) { this._checkDirty(); }
 		var sResult = "";
 		if(null != this.number)
 		{
@@ -16265,8 +16300,8 @@
 			dDigitsCount = AscCommon.gc_nMaxDigCountView;
 		return this._getValue2(dDigitsCount, fIsFitMeasurer);
 	};
-	Cell.prototype.getNumberValue = function() {
-		this._checkDirty();
+	Cell.prototype.getNumberValue = function(opt_noCalc) {
+		if (!opt_noCalc) { this._checkDirty(); }
 		return this.number;
 	};
 	Cell.prototype.getBoolValue = function() {
@@ -17319,6 +17354,8 @@
 			AscCommonExcel.g_oSUMIFSCache.remove(this);
 			AscCommonExcel.g_oFormulaRangesCache.remove(this);
 			AscCommonExcel.g_oCountIfCache.remove(this, DataOld, res);
+			AscCommonExcel.g_oSumIfCache.remove(this, DataOld, res);
+			AscCommonExcel.g_oAverageIfCache.remove(this, DataOld, res);
 		}
 	};
 	Cell.prototype.cleanText = function() {
@@ -21336,9 +21373,7 @@
 			bAscent = !sortConditions[0].ConditionDescending;
 		}
 		if(opt_custom_sort) {
-			//caseSensitive = opt_custom_sort.CaseSensitive;
-			//for now we ignore this flag, since string comparison in excel sorting works differently (e.g. "Green" > "green")
-			//possibly worth using localeCompare function - but need to verify if the comparison will be correct
+			caseSensitive = opt_custom_sort.CaseSensitive;
 		}
 
 		var nLastRow0, nLastCol0;
@@ -21569,7 +21604,7 @@
 							if (_b && null != _b.text) {
 								var val1 = caseSensitive ? _a.text : _a.text.toUpperCase();
 								var val2 = caseSensitive ? _b.text : _b.text.toUpperCase();
-								res = stringCompare(val1, val2);
+								res = AscCommon.stringCompare(val1, val2);
 							} else if(_b && null != _b.num) {
 								res = 1;
 							} else {
@@ -23008,6 +23043,7 @@
 		this.nPrevIntDateValue = null;
 		this.bDiffDirectionDateTime = null;
 		this.nCurrentDayValue = null; // Using for Date & Time format for month step mode when day changed.
+		this.bLastDaysInMonth = false;
 
 		this.bOneSelectedCell = false;
 	}
@@ -23277,8 +23313,7 @@
 						//for dates and numbers with prefix, only integer sequences are autofilled
 						let nFirstVal = oFirstData.getVal();
 						let bIsNotIntegerSequence = oSequence.a1 !== parseInt(oSequence.a1);
-						let bDateCalcModeHasDiffDay = aDigits.length > 1 && bIsCalcDateMode && this.isDiffDaysForCalcMode(aDigits, nFirstVal);
-						let bDateCalcModeCorrectSeq = bIsCalcDateMode && !bDateCalcModeHasDiffDay && parseInt(nFirstVal) === Math.round(oSequence.a0);
+						let bDateCalcModeCorrectSeq = bIsCalcDateMode && this.hasDateModeCorrectSequence(aDigits, nFirstVal);
 						let sPrefix = oFirstData.getPrefix();
 						let bDelimiter = oFirstData.getDelimiter();
 						// For Date format
@@ -23456,6 +23491,7 @@
 		},
 		/**
 		 * Returns chosen property from context menu.
+		 * @memberof PromoteHelper
 		 * @returns {Asc.c_oAscFillType}
 		 */
 		getFillMenuChosenProp: function () {
@@ -23463,6 +23499,7 @@
 		},
 		/**
 		 * Sets chosen property from context menu.
+		 * @memberof PromoteHelper
 		 * @param {Asc.c_oAscFillType} nFillMenuChosenProp
 		 */
 		setFillMenuChosenProp: function (nFillMenuChosenProp) {
@@ -23470,6 +23507,7 @@
 		},
 		/**
 		 * Returns the last day of a month.
+		 * @memberof PromoteHelper
 		 * @returns {number}
 		 */
 		getLastDayOfMonth: function () {
@@ -23477,6 +23515,7 @@
 		},
 		/**
 		 * Sets the last day of a month taken from ExcelDateValue.
+		 * @memberof PromoteHelper
 		 * @param {number} nExcelDateValue
 		 */
 		setLastDayOfMonth: function (nExcelDateValue) {
@@ -23487,6 +23526,7 @@
 		},
 		/**
 		 * Returns days in year.
+		 * @memberof PromoteHelper
 		 * @returns {number}
 		 */
 		getDaysInYear: function () {
@@ -23494,6 +23534,7 @@
 		},
 		/**
 		 * Sets days in year taken from ExcelDateValue.
+		 * @memberof PromoteHelper
 		 * @param {number} nExcelDateValue
 		 */
 		setDaysInYear: function (nExcelDateValue) {
@@ -23503,6 +23544,7 @@
 		},
 		/**
 		 * Returns previous date value while calculating for modes: "Fill months", "Fill years" and "Fill weekdays".
+		 * @memberof PromoteHelper
 		 * @returns {number}
 		 */
 		getPrevDateValue: function () {
@@ -23510,6 +23552,7 @@
 		},
 		/**
 		 * Sets previous date value while calculating for modes: "Fill months", "Fill years" and "Fill weekdays".
+		 * @memberof PromoteHelper
 		 * @param {number} nPrevDateValue
 		 */
 		setPrevDateValue: function (nPrevDateValue) {
@@ -23518,6 +23561,7 @@
 		/**
 		 * Returns previous integer date value while calculating for modes: "Fill months", "Fill years".
 		 * Using when step is fractional number.
+		 * @memberof PromoteHelper
 		 * @returns {number}
 		 */
 		getPrevIntDateValue: function () {
@@ -23525,7 +23569,8 @@
 		},
 		/**
 		 * Sets previous integer date value while calculating for modes: "Fill months", "Fill years".
-		 * Using when step is fractional number.
+		 * Using when a step is fractional number.
+		 * @memberof PromoteHelper
 		 * @param {number} nPrevIntDateValue
 		 */
 		setPrevIntDateValue: function (nPrevIntDateValue) {
@@ -23533,13 +23578,15 @@
 		},
 		/**
 		 * Returns the current state of the flag recognizing different direction at date and time.
+		 * @memberof PromoteHelper
 		 * @returns {boolean}
 		 */
 		getIsDiffDirectionDateTime: function () {
 			return this.bDiffDirectionDateTime;
 		},
 		/**
-		 * Sets the current state of the flag recognizing different direction at date and time.
+		 * Sets the current state of the flag recognizing a different direction at date and time.
+		 * @memberof PromoteHelper
 		 * @param {boolean} bDiffDirectionDateTime
 		 */
 		setIsDiffDirectionDateTime: function (bDiffDirectionDateTime) {
@@ -23548,6 +23595,7 @@
 		/**
 		 * Returns current day value for Date & Time format.
 		 * Using for month step mode when day changed.
+		 * @memberof PromoteHelper
 		 * @returns {number}
 		 */
 		getCurrentDayValue: function () {
@@ -23556,6 +23604,7 @@
 		/**
 		 * Sets current day value for Date & Time format.
 		 * Using for month step mode when day changed.
+		 * @memberof PromoteHelper
 		 * @param {number} nCurrentDayValue
 		 */
 		setCurrentDayValue: function (nCurrentDayValue) {
@@ -23565,6 +23614,7 @@
 		 * Initializes flag recognizing that date and time have different direction between each other.
 		 * true - date and time have different direction.
 		 * false - date and time have same direction
+		 * @memberof PromoteHelper
 		 * @param {{x:number, y:number}[]} aDigits
 		 */
 		initDiffDirectionDateTime: function (aDigits) {
@@ -23578,49 +23628,98 @@
 			this.setIsDiffDirectionDateTime(bAscTimePart !== bAscDatePart);
 		},
 		/**
-		 * Initializes property of autofill context menu if in default autofill, has the required step to needed mode.
+		 * Initializes property of an autofill context menu if in default autofill has the required step to needed mode.
 		 * Modes: "Fill months", "Fill years".
+		 * @memberof PromoteHelper
 		 * @param {{x:number, y:number}[]} aDigits
 		 * @param {number} nFirstValue
 		 */
 		initFillMenuChosenProp: function (aDigits, nFirstValue) {
-			const SECOND_VALUE_INDEX = 1;
 			const oFillType = Asc.c_oAscFillType;
-			const nSecondValue = aDigits[SECOND_VALUE_INDEX].y;
 			const dtFirstValue = new Asc.cDate().getDateFromExcel(nFirstValue < 60 ? nFirstValue + 1 : nFirstValue);
-			const dtSecondValue = new Asc.cDate().getDateFromExcel(nSecondValue < 60 ? nSecondValue + 1 : nSecondValue);
+			const aDates = aDigits.map(function (oDigit) {
+				return new Asc.cDate().getDateFromExcel(oDigit.y < 60 ? oDigit.y + 1 : oDigit.y);
+			});
+			const bSameDay = aDates.every(function (dtValue) {
+				return (dtValue.getDate() === dtFirstValue.getDate()) || (dtValue.lastDayOfMonth());
+			});
+			const bSameMonth = aDates.every(function (dtValue) {
+				return dtValue.getMonth() === dtFirstValue.getMonth();
+			});
+			const bSameYear = aDates.every(function (dtValue) {
+				return dtValue.getFullYear() === dtFirstValue.getFullYear();
+			});
+			this.setIsLastDayOfMonth(aDates.every(function (dtValue) {
+				return dtValue.lastDayOfMonth();
+			}));
 
-			let nDayFirstValue = dtFirstValue.getDate();
-			let nMonthFirstValue = dtFirstValue.getMonth();
-			let nYearFirstValue = dtFirstValue.getFullYear();
-
-			let nDaySecondValue = dtSecondValue.getDate();
-			let nMonthSecondValue = dtSecondValue.getMonth();
-			let nYearSecondValue = dtSecondValue.getFullYear();
-
-			if (nDayFirstValue === nDaySecondValue && nMonthFirstValue !== nMonthSecondValue) {
+			if (bSameDay && !bSameMonth) {
 				this.setFillMenuChosenProp(oFillType.fillMonths);
-			} else if (nDayFirstValue === nDaySecondValue && nMonthFirstValue === nMonthSecondValue && nYearFirstValue !== nYearSecondValue) {
+			} else if (bSameDay && bSameMonth && !bSameYear) {
 				this.setFillMenuChosenProp(oFillType.fillYears);
 			}
 		},
 		/**
-		 * Checks has different days in the date of the selected range for date calculate modes from the context menu.
-		 * Applies for modes : "Fill months", "Fill years".
+		 * Checks whether the correct sequence for the date calculation mode.
+		 * Applies for modes: "Fill months", "Fill years".
+		 * @memberof PromoteHelper
 		 * @param {{x:number, y:number}[]} aDigits
 		 * @param {number} nFirstValue
 		 * @returns {boolean}
 		 */
-		isDiffDaysForCalcMode: function (aDigits, nFirstValue) {
-			const SECOND_VALUE_INDEX = 1;
-			const nSecondValue = aDigits[SECOND_VALUE_INDEX].y;
-			const dtFirstValue = new Asc.cDate().getDateFromExcel(nFirstValue < 60 ? nFirstValue + 1 : nFirstValue);
-			const dtSecondValue = new Asc.cDate().getDateFromExcel(nSecondValue < 60 ? nSecondValue + 1 : nSecondValue);
+		hasDateModeCorrectSequence: function (aDigits, nFirstValue) {
+			function checkSequence (nCurrentValue, nExpectedStep) {
+				if (nPreviousValue) {
+					const nStep =  nCurrentValue - nPreviousValue;
+					if (nStep !== nExpectedStep) {
+						bSequenceCorrect = false;
+					}
+				}
+				nPreviousValue = nCurrentValue;
+			}
+			if (aDigits.length === 1) {
+				return true;
+			}
 
-			return dtFirstValue.getDate() !== dtSecondValue.getDate();
+			const oFillType = Asc.c_oAscFillType;
+			const oSecondValue = aDigits[1];
+			const dtFirstValue = new Asc.cDate().getDateFromExcel(nFirstValue < 60 ? nFirstValue + 1 : nFirstValue);
+			const dtSecondValue = new Asc.cDate().getDateFromExcel(oSecondValue.y < 60 ? oSecondValue.y + 1 : oSecondValue.y);
+			const aDates = aDigits.map(function (oDigit) {
+				return new Asc.cDate().getDateFromExcel(oDigit.y < 60 ? oDigit.y + 1 : oDigit.y);
+			});
+
+			let bSequenceCorrect = true;
+			let nPreviousValue = null;
+
+			if (this.getFillMenuChosenProp() === oFillType.fillMonths) {
+				const nExpectedStep = dtSecondValue.getMonth() - dtFirstValue.getMonth();
+				if (nExpectedStep === 0) {
+					return false;
+				}
+				for (let i = 1, length = aDates.length; i < length; i++) {
+					const nCurrentValue = aDates[i].getMonth();
+					checkSequence(nCurrentValue, nExpectedStep);
+				}
+				return bSequenceCorrect;
+			}
+			if (this.getFillMenuChosenProp() === oFillType.fillYears) {
+				const nExpectedStep = dtSecondValue.getYear() - dtFirstValue.getYear();
+				if (nExpectedStep === 0) {
+					return false;
+				}
+				for (let i = 1, length = aDates.length; i < length; i++) {
+					const nCurrentValue = aDates[i].getYear();
+					checkSequence(nCurrentValue, nExpectedStep);
+				}
+				return bSequenceCorrect;
+			}
+
+			return false;
 		},
 		/**
 		 * Calculates date based on step and modes: "Fill months", "Fill years" or "Fill weekdays".
+		 * @memberof PromoteHelper
 		 * @param {cDataRow} oDataRow
 		 * @returns {number}
 		 */
@@ -23628,6 +23727,7 @@
 			const DEFAULT_STEP = this.bReverse ? -1 : 1;
 			const oSequence = oDataRow.getSequence();
 			const nChosenMenuItem = this.getFillMenuChosenProp();
+			const bRightClickAutoFill = this.getFillHandleRightClick();
 			let nStep =  null;
 			let nStepDivider = null;
 			let nUnitDate = null;
@@ -23655,7 +23755,7 @@
 					nStepDivider = this.getDaysInYear();
 					break;
 			}
-			if (!this.getIsOneSelectedCell() && nChosenMenuItem !== Asc.c_oAscFillType.fillWeekdays) {
+			if (!this.getIsOneSelectedCell() && nChosenMenuItem !== Asc.c_oAscFillType.fillWeekdays && bRightClickAutoFill) {
 				bUseValFromDataRow =  Math.abs(oSequence.a1) < nStepDivider;
 			}
 			if (bUseValFromDataRow) {
@@ -23665,7 +23765,8 @@
 					dateUnit: nUnitDate,
 					previousValue: oDataRow.getVal(),
 					previousIntValue: oDataRow.getVal(),
-					expectedDayValue: oDataRow.getStartValue()
+					expectedDayValue: oDataRow.getStartValue(),
+					isLastDayOfMonth: this.getIsLastDayOfMonth()
 				};
 				const oResult = _calculateDate(oCellInfo, true);
 				oDataRow.setVal(oResult.previousValue);
@@ -23678,7 +23779,8 @@
 				dateUnit: nUnitDate,
 				previousValue: this.getPrevDateValue(),
 				previousIntValue: this.getPrevIntDateValue(),
-				expectedDayValue: oDataRow.getVal()
+				expectedDayValue: oDataRow.getVal(),
+				isLastDayOfMonth: this.getIsLastDayOfMonth()
 			};
 			if (oDataRow.getIsDateTime() && this.nColLength === 2) {
 				if (oSequence.nX === this.nColLength) { // For first iteration using element from selected range.
@@ -23728,6 +23830,7 @@
 		},
 		/**
 		 * Returns flag that recognizes it as one selected cell.
+		 * @memberof PromoteHelper
 		 * @returns {boolean}
 		 */
 		getIsOneSelectedCell: function () {
@@ -23735,10 +23838,27 @@
 		},
 		/**
 		 * Sets flag that recognizes it as one selected cell.
+		 * @memberof PromoteHelper
 		 * @param {boolean} bOneSelectedCell
 		 */
 		setIsOneSelectedCell: function (bOneSelectedCell) {
 			this.bOneSelectedCell = bOneSelectedCell;
+		},
+		/**
+		 * Sets a flag that recognizes all dates in selected range have last day of month.
+		 * @memberof PromoteHelper
+		 * @param {boolean} bLastDayOfMonth
+		 */
+		setIsLastDayOfMonth: function (bLastDayOfMonth) {
+			this.bLastDaysInMonth = bLastDayOfMonth;
+		},
+		/**
+		 * Returns a flag that recognizes all dates in selected range have last day of month.
+		 * @memberof PromoteHelper
+		 * @returns {boolean}
+		 */
+		getIsLastDayOfMonth: function () {
+			return this.bLastDaysInMonth;
 		}
 	};
 
@@ -24622,7 +24742,7 @@
 
 	/**
 	 * Calculates date for autofill and Series.
-	 * @param {{step:number, dateUnit:c_oAscDateUnitType, previousValue:number, previousIntValue:number, expectedDayValue:number}} oCellInfo
+	 * @param {{step:number, dateUnit:c_oAscDateUnitType, previousValue:number, previousIntValue:number, expectedDayValue:number, isLastDayOfMonth:boolean}} oCellInfo
 	 * @param {boolean} bAutofill
 	 * @returns {{previousValue:number, currentValue:number, previousIntValue:number}}
 	 * @private
@@ -24634,6 +24754,7 @@
 		let nPrevValue = oCellInfo.previousValue;
 		let nPrevIntValue = oCellInfo.previousIntValue;
 		let dtExpectedDayValue = new Asc.cDate().getDateFromExcel(oCellInfo.expectedDayValue < 59 && !bDate1904 ? oCellInfo.expectedDayValue + 1 : oCellInfo.expectedDayValue);
+		let bLastDayInMonth = !!(oCellInfo.isLastDayOfMonth);
 		let oReturn = {};
 
 		// Condition: nPrevVal < 60 is temporary solution for "01/01/1900 - 01/03/1900" dates
@@ -24706,7 +24827,8 @@
 			if (Number.isInteger(nFinalStep)) {
 				oCurrentValDate.addMonths(nFinalStep);
 				let nLastDayOfCurrentMonth = AscCommonExcel.getLastDayInMonth(oCurrentValDate.getExcelDate(), 0).getDate();
-				if (!bNextMonthIsFeb &&  nLastDayOfCurrentMonth >= dtExpectedDayValue.getDate() && dtExpectedDayValue.getDate() !== oCurrentValDate.getDate()) {
+				if (!bNextMonthIsFeb && !bLastDayInMonth && nLastDayOfCurrentMonth >= dtExpectedDayValue.getDate() &&
+					dtExpectedDayValue.getDate() !== oCurrentValDate.getDate()) {
 					oCurrentValDate.setUTCDate(dtExpectedDayValue.getDate());
 				}
 				oReturn.currentValue = oCurrentValDate.getExcelDate();
@@ -25328,6 +25450,40 @@
 		this.allFormulasCountMap = null;
 	}
 
+	CDynamicArrayManager.prototype._initCountMap = function () {
+		if (!this.allFormulasCountMap) {
+			this.allFormulasCountMap = {};
+		}
+	};
+
+	CDynamicArrayManager.prototype._incrementCount = function (cmIndex) {
+		this._initCountMap();
+		if (!this.allFormulasCountMap[cmIndex]) {
+			this.allFormulasCountMap[cmIndex] = 0;
+		}
+		this.allFormulasCountMap[cmIndex]++;
+	};
+
+	CDynamicArrayManager.prototype._decrementCount = function (cmIndex) {
+		if (this.allFormulasCountMap && this.allFormulasCountMap[cmIndex]) {
+			this.allFormulasCountMap[cmIndex]--;
+			if (this.allFormulasCountMap[cmIndex] === 0) {
+				delete this.allFormulasCountMap[cmIndex];
+			}
+		}
+	};
+
+	CDynamicArrayManager.prototype.copyCountMapFrom = function (sourceManager) {
+		if (!sourceManager || !sourceManager.allFormulasCountMap) {
+			this.allFormulasCountMap = null;
+			return;
+		}
+		this.allFormulasCountMap = {};
+		for (var cmIndex in sourceManager.allFormulasCountMap) {
+			this.allFormulasCountMap[cmIndex] = sourceManager.allFormulasCountMap[cmIndex];
+		}
+	};
+
 	CDynamicArrayManager.prototype.changeFormula = function (to, from, parent) {
 		if (!AscCommonExcel.bIsSupportDynamicArrays) {
 			return;
@@ -25346,9 +25502,15 @@
 			}
 			if (toCmIndex != null && to.checkFirstCellArray(parent)) {
 				this.addDynamicFormula(toCmIndex);
-				if (to.getVm() != null && !this.ws.workbook.bUndoChanges) {
+				if (to.getVm() != null && !this.ws.workbook.bUndoChanges && !this.ws.workbook.bRedoChanges) {
 					this.ws.workbook.dependencyFormulas.addToVolatileArrays(to);
 				}
+			}
+		} else if (fromCmIndex != null && from && from.checkFirstCellArray(parent)) {
+			if (fromVmIndex != null && (toVmIndex == null || toVmIndex === 0)) {
+				// cm unchanged, but vm cleared: formula unblocked (e.g. redo of expand) → remove listener
+				var listenerId = from.getListenerId();
+				this.ws.workbook.dependencyFormulas.endListeningVolatileArray(listenerId);
 			}
 		}
 	};
@@ -25358,24 +25520,16 @@
 			return;
 		}
 		//add special structure - it help remove metadata/richdata after delete all dynamic formulas
-		if (!this.allFormulasCountMap) {
-			this.allFormulasCountMap = {};
-		}
-		if (!this.allFormulasCountMap[cmIndex]) {
-			this.allFormulasCountMap[cmIndex] = 0;
-		}
-		this.allFormulasCountMap[cmIndex]++;
+		this._incrementCount(cmIndex);
 	};
 
 	CDynamicArrayManager.prototype.deleteDynamicFormula = function (cmIndex, vmIndex, fP) {
 		if (!AscCommonExcel.bIsSupportDynamicArrays) {
 			return;
 		}
-		if (this.allFormulasCountMap && this.allFormulasCountMap[cmIndex]) {
-			this.allFormulasCountMap[cmIndex]--;
-		}
+		this._decrementCount(cmIndex);
 		let isRemovedMetaData;
-		if (this.allFormulasCountMap[cmIndex] < 1) {
+		if (this.getDynamicFormulaCount(cmIndex) < 1) {
 			isRemovedMetaData = this.ws.workbook.checkRemoveMetadataByCmIndex(cmIndex);
 		}
 		if (!isRemovedMetaData && vmIndex != null) {
@@ -25387,7 +25541,7 @@
 		if (!AscCommonExcel.bIsSupportDynamicArrays) {
 			return null;
 		}
-		return this.allFormulasCountMap && this.allFormulasCountMap[cmIndex];
+		return (this.allFormulasCountMap && this.allFormulasCountMap[cmIndex]) || 0;
 	};
 	
 	CDynamicArrayManager.prototype.recalculateVolatileArrays = function () {
@@ -25408,9 +25562,36 @@
 			return;
 		}
 
+		// Anchor formulas (containing ANCHORARRAY / # operator) depend on their head formula
+		// having already expanded. Process them last so head formulas run first.
+		const anchorIds = [];
+		const regularIds = [];
 		for (let listenerId in volatileArrayList) {
+			const f = volatileArrayList[listenerId];
+			let isAnchor = false;
+			if (f && f.outStack) {
+				for (let i = 0; i < f.outStack.length; i++) {
+					if (f.outStack[i] && f.outStack[i].name === 'ANCHORARRAY') {
+						isAnchor = true;
+						break;
+					}
+				}
+			}
+			if (isAnchor) {
+				anchorIds.push(listenerId);
+			} else {
+				regularIds.push(listenerId);
+			}
+		}
+		const orderedIds = regularIds.concat(anchorIds);
+
+		for (let oi = 0; oi < orderedIds.length; oi++) {
+			const listenerId = orderedIds[oi];
 			const formula = volatileArrayList[listenerId];
-			
+			if (!formula) {
+				continue;
+			}
+
 			// Store old range before recalculation
 			const oldDynamicRef = formula.getDynamicRef();
 			const oldRef = oldDynamicRef ? oldDynamicRef.clone() : null;
@@ -25527,7 +25708,10 @@
 			const newR2 = (formula.parent.nRow + arraySize.row) > AscCommon.gc_nMaxRow ? AscCommon.gc_nMaxRow - 1 : (formula.parent.nRow + arraySize.row - 1);
 			const newC2 = (formula.parent.nCol + arraySize.col) > AscCommon.gc_nMaxCol ? AscCommon.gc_nMaxCol - 1 : (formula.parent.nCol + arraySize.col - 1);
 
-			if (formulaResult.type !== cElementType.array) {
+			// cellsRange/cellsRange3D is produced by ANCHORARRAY (`A1#`) — treat as a spillable source.
+			if (formulaResult.type !== cElementType.array &&
+				formulaResult.type !== cElementType.cellsRange &&
+				formulaResult.type !== cElementType.cellsRange3D) {
 				return false;
 			}
 
@@ -26733,6 +26917,5 @@
 
 	window['AscCommonExcel'].mergeCustomFunctions = mergeCustomFunctions;
 	window['AscCommonExcel'].safeJsonParse = safeJsonParse;
-	window['AscCommonExcel'].stringCompare = stringCompare;
 
 })(window);

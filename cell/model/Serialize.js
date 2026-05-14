@@ -265,7 +265,8 @@
     var c_oSerNumFmtTypes =
     {
         FormatCode: 0,
-        NumFmtId: 1
+        NumFmtId: 1,
+        FormatCode16: 2
     };
     /** @enum */
     var c_oSerSharedStringTypes =
@@ -3331,11 +3332,18 @@
         };
         this.WriteNum = function(id, format)
         {
+            var gannen = AscCommon.getGannenFormatCodes && AscCommon.getGannenFormatCodes(format);
             if(null != format)
             {
                 this.memory.WriteByte(c_oSerNumFmtTypes.FormatCode);
                 this.memory.WriteByte(c_oSerPropLenType.Variable);
-                this.memory.WriteString2(format);
+                this.memory.WriteString2(gannen ? gannen.fallback : format);
+            }
+            if(gannen)
+            {
+                this.memory.WriteByte(c_oSerNumFmtTypes.FormatCode16);
+                this.memory.WriteByte(c_oSerPropLenType.Variable);
+                this.memory.WriteString2(gannen.formatCode16);
             }
             if(null != id)
             {
@@ -9318,13 +9326,17 @@
         this.ReadNumFmt = function(type, length, oNumFmt)
         {
             var res = c_oSerConstants.ReadOk;
-            if ( c_oSerNumFmtTypes.FormatCode == type )
+            if ( c_oSerNumFmtTypes.FormatCode == type && !oNumFmt.f )
             {
                 oNumFmt.f = this.stream.GetString2LE(length);
             }
             else if ( c_oSerNumFmtTypes.NumFmtId == type )
             {
                 oNumFmt.id = this.stream.GetULongLE();
+            }
+            else if ( c_oSerNumFmtTypes.FormatCode16 == type )
+            {
+                oNumFmt.f = this.stream.GetString2LE(length);
             }
             else
                 res = c_oSerConstants.ReadUnknown;

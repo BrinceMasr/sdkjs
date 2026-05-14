@@ -2787,6 +2787,20 @@ CTableCell.prototype.PreDelete = function()
 {
 	this.Content.PreDelete();
 };
+CTableCell.prototype.OnDetach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+
+	this.Content.OnDetach();
+};
+CTableCell.prototype.OnAttach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+
+	this.Content.OnAttach();
+};
 
 
 function CTableCellRecalculateObject()

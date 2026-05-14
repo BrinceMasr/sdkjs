@@ -75,6 +75,12 @@ CParagraphContentBase.prototype.IsStopCursorOnEntryExit = function()
 CParagraphContentBase.prototype.PreDelete = function()
 {
 };
+CParagraphContentBase.prototype.OnDetach = function()
+{
+};
+CParagraphContentBase.prototype.OnAttach = function()
+{
+};
 CParagraphContentBase.prototype.GetCurrentPermRanges = function(permRanges, isCurrent)
 {
 };
@@ -522,6 +528,10 @@ CParagraphContentBase.prototype.Get_PosByElement = function(Class, ContentPos, D
 CParagraphContentBase.prototype.Get_ElementByPos = function(ContentPos, Depth)
 {
 	return this;
+};
+CParagraphContentBase.prototype.GetFlatPos = function(contentPos, depth)
+{
+	return 0;
 };
 CParagraphContentBase.prototype.Get_ClassesByPos = function(Classes, ContentPos, Depth)
 {
@@ -1294,6 +1304,12 @@ CParagraphContentWithContentBase.prototype.CanSplit = function()
 	return true;
 };
 CParagraphContentWithContentBase.prototype.PreDelete = function(isDeep)
+{
+};
+CParagraphContentWithContentBase.prototype.OnDetach = function()
+{
+};
+CParagraphContentWithContentBase.prototype.OnAttach = function()
 {
 };
 CParagraphContentWithContentBase.prototype.private_UpdateDocumentOutline = function()
@@ -3287,28 +3303,19 @@ CParagraphContentWithParagraphLikeContent.prototype.Get_ElementByPos = function(
 
     return this.Content[CurPos].Get_ElementByPos(ContentPos, Depth + 1);
 };
-CParagraphContentWithParagraphLikeContent.prototype.ConvertParaContentPosToRangePos = function(oContentPos, nDepth)
+CParagraphContentWithParagraphLikeContent.prototype.GetFlatPos = function(contentPos, depth)
 {
-	var nRangePos = 0;
-
-	var nCurPos = oContentPos ? Math.max(0, Math.min(this.Content.length - 1, oContentPos.Get(nDepth))) : this.Content.length - 1;
-	for (var nPos = 0; nPos < nCurPos; ++nPos)
+	let rangePos = 0;
+	let endPos   = contentPos ? Math.max(0, Math.min(this.Content.length - 1, contentPos.Get(depth))) : this.Content.length - 1;
+	for (let pos = 0; pos <= endPos; ++pos)
 	{
-		if (this.Content[nPos] instanceof ParaRun)
-			nRangePos++;
-
-		nRangePos += this.Content[nPos].ConvertParaContentPosToRangePos(null);
-	}
-
-	if (this.Content[nCurPos])
-	{
-		if (this.Content[nPos] instanceof ParaRun)
-			nRangePos++;
-
-		nRangePos += this.Content[nCurPos].ConvertParaContentPosToRangePos(oContentPos, nDepth + 1);
-	}
+		if (this.Content[pos] instanceof ParaRun)
+			rangePos++;
 		
-	return nRangePos;
+		rangePos += this.Content[pos].GetFlatPos(pos === endPos && contentPos ? contentPos : null, depth + 1);
+	}
+	
+	return rangePos;
 };
 CParagraphContentWithParagraphLikeContent.prototype.GetPosByDrawing = function(Id, ContentPos, Depth)
 {
@@ -4623,7 +4630,7 @@ CParagraphContentWithParagraphLikeContent.prototype.PreDelete = function()
 {
 	if (this.Paragraph && this.Paragraph.isPreventedPreDelete())
 		return;
-	
+
 	for (var nIndex = 0, nCount = this.Content.length; nIndex < nCount; ++nIndex)
 	{
 		if (this.Content[nIndex] && this.Content[nIndex].PreDelete)
@@ -4631,6 +4638,26 @@ CParagraphContentWithParagraphLikeContent.prototype.PreDelete = function()
 	}
 
 	this.RemoveSelection();
+};
+CParagraphContentWithParagraphLikeContent.prototype.OnAttach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+	
+	for (let i = 0; i < this.Content.length; ++i)
+	{
+		this.Content[i].OnAttach();
+	}
+};
+CParagraphContentWithParagraphLikeContent.prototype.OnDetach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+	
+	for (let i = 0; i < this.Content.length; ++i)
+	{
+		this.Content[i].OnAttach();
+	}
 };
 CParagraphContentWithParagraphLikeContent.prototype.GetCurrentPermRanges = function(permRanges, isCurrent)
 {

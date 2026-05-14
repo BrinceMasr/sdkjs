@@ -6678,6 +6678,11 @@ function BinaryPPTYLoader()
                     shape.setUseBgFill(s.GetBool());
                     break;
                 }
+                case 1:
+                {
+                    shape.setTextLink(s.GetString2());
+                    break;
+                }
                 default:
                     break;
             }
@@ -11158,6 +11163,11 @@ function BinaryPPTYLoader()
                         shape.setUseBgFill(s.GetBool());
                         break;
                     }
+                    case 1:
+                    {
+                        shape.setTextLink(s.GetString2());
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -11689,7 +11699,11 @@ function BinaryPPTYLoader()
                 {
                     case 0:
                     {
-                        s.SkipRecord();
+						const nvSpPr = this.Reader.ReadNvUniProp(shape);
+						shape.setNvSpPr(nvSpPr);
+						if (AscFormat.isRealNumber(nvSpPr.locks)) {
+							shape.setLocks(nvSpPr.locks);
+						}
                         break;
                     }
                     case 1:

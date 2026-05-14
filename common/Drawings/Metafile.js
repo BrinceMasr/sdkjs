@@ -3106,7 +3106,15 @@
 			this.m_oPen.Color.R    = -1;
 			this.m_oBrush.Color1.R = -1;
 			this.m_oBrush.Color2.R = -1;
-		}
+		},
+		
+		Start_Command : function(commandId)
+		{
+		},
+		
+		End_Command : function(commandId)
+		{
+		},
 	};
 
 	function CDocumentRenderer()
@@ -3360,10 +3368,10 @@
 		if (0 != this.m_lPagesCount)
 			this.m_arrayPages[this.m_lPagesCount - 1].FillTextCode(x, y, text);
 	};
-	CDocumentRenderer.prototype.tg = function(gid, x, y, codePoints)
+	CDocumentRenderer.prototype.tg = function(gid, x, y, codePoints, advX, advY)
 	{
 		if (0 != this.m_lPagesCount)
-			this.m_arrayPages[this.m_lPagesCount - 1].tg(gid, x, y, codePoints);
+			this.m_arrayPages[this.m_lPagesCount - 1].tg(gid, x, y, codePoints, advX, advY);
 	};
 	CDocumentRenderer.prototype.FillText2 = function(x, y, text)
 	{

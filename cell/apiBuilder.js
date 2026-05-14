@@ -100,6 +100,7 @@
 	 * @property {ApiFreezePanes} FreezePanes - Returns the freeze panes for the current worksheet.
 	 * @property {ApiProtectedRange[]} AllProtectedRanges - Returns all protected ranges from the current worksheet.
 	 * @property {ApiPivotTable[]} PivotTables - Returns all pivot tables from the current worksheet.
+	 * @property {ApiHyperlink[]} Hyperlinks - Returns an array of all the hyperlinks on the worksheet.
 	 */
 	function ApiWorksheet(worksheet) {
 		this.worksheet = worksheet;
@@ -154,6 +155,7 @@
 	 * @property {number} RowsCount - Returns a number of rows in the current range.
 	 * @property {ApiFormatConditions} FormatConditions - Returns the collection of conditional formatting rules for the current range.
      * @property {ApiValidation} Validation - Returns the ApiValidation class instance associated with this range. If no validation instance exists yet, it will be created.
+	 * @property {ApiHyperlink[]} Hyperlinks - Returns an array of all the hyperlinks in the range.
 	 */
 	function ApiRange(range, areas) {
 		this.range = range;
@@ -438,6 +440,22 @@
 		for (var i = 0; i < items.length; i++) {
 			this.Items.push(new ApiRange(items[i]));
 		}
+	}
+
+	/**
+	 * Class representing a hyperlink.
+	 * @constructor
+	 * @property {string} Address - Returns or sets the address of the target document.
+	 * @property {string} SubAddress - Returns or sets the subaddress of the target document.
+	 * @property {string} ScreenTip - Returns or sets the screen tip text for the hyperlink.
+	 * @property {string} TextToDisplay - Returns or sets the text to be displayed for the hyperlink.
+	 * @property {ApiRange} Range - Returns the range the hyperlink is attached to.
+	 * @property {string} Name - Returns the name of the hyperlink.
+	 * @property {number} Type - Returns the type of the hyperlink.
+	 */
+	function ApiHyperlink(oElem, oWorksheet) {
+		this._elem = oElem;
+		this._ws   = oWorksheet;
 	}
 
 	/**
@@ -7707,13 +7725,13 @@
 	 */
 	Api.InsertPivotExistingWorksheet = function (dataRef, pivotRef, confirmation) {
 		if (dataRef) {
-			dataRef = dataRef.GetWorksheet().GetName() + "!" + dataRef.GetAddress(true, true);
+			dataRef = AscCommon.parserHelp.get3DRef(dataRef.GetWorksheet().GetName(), dataRef.GetAddress(true, true));
 		} else {
 			var options = Asc.editor.asc_getAddPivotTableOptions();
 			dataRef = options.range;
 		}
 		if (pivotRef) {
-			pivotRef = pivotRef.GetWorksheet().GetName() + "!" + pivotRef.GetAddress(true, true);
+			pivotRef = AscCommon.parserHelp.get3DRef(pivotRef.GetWorksheet().GetName(), pivotRef.GetAddress(true, true));
 		} else {
 			private_MakeError('"pivotRef" is undefined.');
 		}
@@ -7737,7 +7755,7 @@
 	Api.InsertPivotNewWorksheet = function (dataRef, newSheetName) {
 		let editor = Asc.editor;
 		if (dataRef) {
-			dataRef = dataRef.GetWorksheet().GetName() + "!" + dataRef.GetAddress(true, true);
+			dataRef = AscCommon.parserHelp.get3DRef(dataRef.GetWorksheet().GetName(), dataRef.GetAddress(true, true));
 		} else {
 			var options = editor.asc_getAddPivotTableOptions();
 			dataRef = options.range;
@@ -7899,7 +7917,7 @@
 	Api.GetComments = function () {
 		var comments = [];
 		for (var i = 0; i < Asc.editor.wbModel.aComments.length; i++) {
-			comments.push(new ApiComment(Asc.editor.wbModel.aComments[i], this.wb));
+			comments.push(new ApiComment(Asc.editor.wbModel.aComments[i], Asc['editor'].wb));
 		}
 		return comments;
 	};
@@ -8711,11 +8729,27 @@
 			throwException(new Error('Cannot modify protected sheet'));
 			return false;
 		}
+		let nStart, nEnd;
+		if (typeof nColumn === 'string') {
+			if (AscCommon.isNumber(nColumn)) {
+				nStart = nEnd = parseFloat(nColumn);
+			} else {
+				let sRange = nColumn.indexOf(':') === -1 ? nColumn + ':' + nColumn : nColumn;
+				let oAscRange = AscCommonExcel.g_oRangeCache.getAscRange(sRange);
+				if (!oAscRange) {
+					return false;
+				}
+				nStart = oAscRange.c1;
+				nEnd = oAscRange.c2;
+			}
+		} else {
+			nStart = nEnd = nColumn;
+		}
 		if (bWithotPaddings) {
 			let wb = this.worksheet.workbook;
 			nWidth = (nWidth * wb.maxDigitWidth - wb.paddingPlusBorder) / wb.maxDigitWidth;
 		}
-		this.worksheet.setColWidth(nWidth, nColumn, nColumn);
+		this.worksheet.setColWidth(nWidth, nStart, nEnd);
 		return true;
 	};
 
@@ -9092,7 +9126,7 @@
 	 */
 	ApiWorksheet.prototype.SetHyperlink = function (sRange, sAddress, subAddress, sScreenTip, sTextToDisplay) {
 		// Validate required parameters
-		if (!sRange || !sAddress) {
+		if (!sRange || sAddress == null) {
 			throwException(new Error('Incorrect required parameters'));
 			return false;
 		}
@@ -9144,6 +9178,25 @@
 		}
 		return true;
 	};
+
+	/**
+	 * Returns a collection of all the hyperlinks on the worksheet.
+	 * @memberof ApiWorksheet
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiHyperlinks}
+	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/GetHyperlinks.js
+	 */
+	ApiWorksheet.prototype.GetHyperlinks = function () {
+		var ws    = this.worksheet;
+		var items = ws.hyperlinkManager.getAll();
+		return items.map(function (elem) { return new ApiHyperlink(elem, ws); });
+	};
+
+	Object.defineProperty(ApiWorksheet.prototype, "Hyperlinks", {
+		get: function () {
+			return this.GetHyperlinks();
+		}
+	});
 
 	/**
 	 * Creates a chart of the specified type from the selected data range of the current sheet.
@@ -9210,10 +9263,14 @@
 	 * @param {EMU} nColOffset - The offset from the nFromCol column to the left part of the shape measured in English measure units.
 	 * @param {number} nFromRow - The number of the row where the beginning of the shape will be placed.
 	 * @param {EMU} nRowOffset - The offset from the nFromRow row to the upper part of the shape measured in English measure units.
-	 * @returns {ApiShape}
+	 * @returns {ApiShape | null}
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/AddShape.js
 	 */
 	ApiWorksheet.prototype.AddShape = function (sType, nWidth, nHeight, oFill, oStroke, nFromCol, nColOffset, nFromRow, nRowOffset) {
+		if (this.worksheet && this.worksheet.getSheetProtection(Asc.c_oAscSheetProtectType.objects)) {
+			throwException(new Error('Cannot modify protected sheet'));
+			return null;
+		}
 		sType = sType || "rect";
 		if (!AscFormat.isValidShapeType(sType)) sType = "rect";
 		var oShape = AscFormat.builder_CreateShape(sType, nWidth / 36000, nHeight / 36000, oFill.UniFill, oStroke.Ln, null, this.worksheet.workbook.theme, this.worksheet.getDrawingDocument(), false, this.worksheet);
@@ -9233,10 +9290,14 @@
 	 * @param {EMU} nColOffset - The offset from the nFromCol column to the left part of the image measured in English measure units.
 	 * @param {number} nFromRow - The number of the row where the beginning of the image will be placed.
 	 * @param {EMU} nRowOffset - The offset from the nFromRow row to the upper part of the image measured in English measure units.
-	 * @returns {ApiImage}
+	 * @returns {ApiImage | null}
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/AddImage.js
 	 */
 	ApiWorksheet.prototype.AddImage = function (sImageSrc, nWidth, nHeight, nFromCol, nColOffset, nFromRow, nRowOffset) {
+		if (this.worksheet && this.worksheet.getSheetProtection(Asc.c_oAscSheetProtectType.objects)) {
+			throwException(new Error('Cannot modify protected sheet'));
+			return null;
+		}
 		var oImage = AscFormat.DrawingObjectsController.prototype.createImage(sImageSrc, 0, 0, nWidth / 36000, nHeight / 36000);
 		private_SetCoords(oImage, this.worksheet, nWidth, nHeight, nFromCol, nColOffset, nFromRow, nRowOffset);
 		return new ApiImage(oImage);
@@ -9258,10 +9319,14 @@
 	 * @param {number} [nFromRow=0] - The row number where the beginning of the Text Art object will be placed.
 	 * @param {EMU} [nColOffset=0] - The offset from the nFromCol column to the left part of the Text Art object measured in English measure units.
 	 * @param {EMU} [nRowOffset=0] - The offset from the nFromRow row to the upper part of the Text Art object measured in English measure units.
-	 * @returns {ApiDrawing}
+	 * @returns {ApiDrawing | null}
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/AddWordArt.js
 	 */
 	ApiWorksheet.prototype.AddWordArt = function (oTextPr, sText, sTransform, oFill, oStroke, nRotAngle, nWidth, nHeight, nFromCol, nFromRow, nColOffset, nRowOffset) {
+		if (this.worksheet && this.worksheet.getSheetProtection(Asc.c_oAscSheetProtectType.objects)) {
+			throwException(new Error('Cannot modify protected sheet'));
+			return null;
+		}
 		oTextPr = oTextPr && oTextPr.TextPr ? oTextPr.TextPr : null;
 		nRotAngle = typeof (nRotAngle) === "number" && nRotAngle > 0 ? nRotAngle : 0;
 		nWidth = typeof (nWidth) === "number" && nWidth > 0 ? nWidth : 1828800;
@@ -9294,10 +9359,14 @@
 	 * @param {EMU} nColOffset - The offset from the nFromCol column to the left part of the OLE object measured in English measure units.
 	 * @param {number} nFromRow - The number of the row where the beginning of the OLE object will be placed.
 	 * @param {EMU} nRowOffset - The offset from the nFromRow row to the upper part of the OLE object measured in English measure units.
-	 * @returns {ApiOleObject}
+	 * @returns {ApiOleObject | null}
 	 * @see office-js-api/Examples/{Editor}/ApiWorksheet/Methods/AddOleObject.js
 	 */
 	ApiWorksheet.prototype.AddOleObject = function (sImageSrc, nWidth, nHeight, sData, sAppId, nFromCol, nColOffset, nFromRow, nRowOffset) {
+		if (this.worksheet && this.worksheet.getSheetProtection(Asc.c_oAscSheetProtectType.objects)) {
+			throwException(new Error('Cannot modify protected sheet'));
+			return null;
+		}
 		if (typeof sImageSrc === "string" && sImageSrc.length > 0 && typeof sData === "string"
 			&& typeof sAppId === "string" && sAppId.length > 0
 			&& AscFormat.isRealNumber(nWidth) && AscFormat.isRealNumber(nHeight)
@@ -9866,6 +9935,25 @@
 		}
         this.range.cleanHyperlinks();
     };
+
+	/**
+	 * Returns a collection of all the hyperlinks in the range.
+	 * @memberof ApiRange
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiHyperlinks}
+	 * @see office-js-api/Examples/{Editor}/ApiRange/Methods/GetHyperlinks.js
+	 */
+	ApiRange.prototype.GetHyperlinks = function () {
+		var ws    = this.range.worksheet;
+		var items = ws.hyperlinkManager.get(this.range.bbox).all;
+		return items.map(function (elem) { return new ApiHyperlink(elem, ws); });
+	};
+
+	Object.defineProperty(ApiRange.prototype, "Hyperlinks", {
+		get: function () {
+			return this.GetHyperlinks();
+		}
+	});
 
 	/**
 	 * Returns a Range object that represents the rows in the specified range. If the specified row is outside the Range object, a new Range will be returned that represents the cells between the columns of the original range in the specified row.
@@ -13411,21 +13499,72 @@
 
 	/**
 	 * Sets the fill formatting properties to the current graphic object.
+	 *
 	 * @memberof ApiDrawing
 	 * @typeofeditors ["CSE"]
-	 * @param {ApiFill} oFill - The fill type used to fill the graphic object.
-	 * @returns {boolean} - returns false if param is invalid.
-	 * @since 9.3.0
-	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/Fill.js
+	 *
+	 * @param {ApiFill} fill - The fill type used to fill the graphic object.
+	 * @returns {boolean} - returns false if param is invalid or not supported for the current graphic object.
+	 *
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/SetFill.js
 	 */
-	ApiDrawing.prototype.Fill = function(oFill)
-	{
-		if (!oFill || !oFill.GetClassType || oFill.GetClassType() !== "fill")
+	ApiDrawing.prototype.SetFill = function (fill) {
+		const classType = this.GetClassType();
+		if (classType !== 'shape' && classType !== 'image' && classType !== 'chart') {
 			return false;
+		}
 
-		this.Drawing.spPr.setFill(oFill.UniFill);
-		return true;
+		if (!fill || !fill.GetClassType || fill.GetClassType() !== 'fill') {
+			return false;
+		}
+
+		if (this.Drawing && this.Drawing.spPr) {
+			this.Drawing.spPr.setFill(fill.UniFill);
+			return true;
+		}
+
+		return false;
 	};
+
+	/**
+	 * Gets the fill formatting properties from the current graphic object.
+	 *
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CSE"]
+	 *
+	 * @returns {ApiFill | null}
+	 *
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetFill.js
+	 */
+	ApiDrawing.prototype.GetFill = function () {
+		const classType = this.GetClassType();
+		if (classType !== 'shape' && classType !== 'image' && classType !== 'chart') {
+			return null;
+		}
+
+		if (this.Drawing) {
+			if (this.Drawing.recalcInfo && this.Drawing.recalcInfo.recalculateBrush) {
+				if (classType === 'chart') {
+					this.Drawing.recalculateChartBrush();
+				} else {
+					this.Drawing.recalculateBrush();
+				}
+			}
+
+			if (this.Drawing.brush) {
+				return new AscBuilder.ApiFill(this.Drawing.brush);
+			}
+		}
+
+		return null;
+	};
+
+	Object.defineProperty(ApiDrawing.prototype, 'Fill', {
+		set: function (fill) { this.SetFill(fill); },
+		get: function () { return this.GetFill(); }
+	});
 
 	/**
 	 * Sets the outline properties to the specified graphic object.
@@ -13663,52 +13802,6 @@
 	};
 
 	/**
-	 * Sets the fill properties to the current shape.
-	 * @memberof ApiShape
-	 * @typeofeditors ["CSE"]
-	 * @param {ApiFill} oFill - The fill type used to fill the shape.
-	 * @returns {boolean} - returns false if param is invalid.
-	 * @see office-js-api/Examples/{Editor}/ApiShape/Methods/SetFill.js
-	 */
-	ApiShape.prototype.SetFill = function(oFill)
-	{
-		if (!oFill || !oFill.GetClassType || oFill.GetClassType() !== "fill")
-			return false;
-
-		if (this.Shape && this.Shape.spPr)
-		{
-			this.Shape.spPr.setFill(oFill.UniFill);
-			return true;
-		}
-
-		return false;
-	};
-
-	/**
-	 * Gets the fill properties from the current shape.
-	 * @memberof ApiShape
-	 * @typeofeditors ["CSE"]
-	 * @returns {ApiFill | null}
-	 * @see office-js-api/Examples/{Editor}/ApiShape/Methods/GetFill.js
-	 */
-	ApiShape.prototype.GetFill = function()
-	{
-		if (this.Shape)
-		{
-			if (this.Shape.recalcInfo && this.Shape.recalcInfo.recalculateBrush)
-			{
-				this.Shape.recalculateBrush();
-			}
-			if (this.Shape.brush)
-			{
-				return new AscBuilder.ApiFill(this.Shape.brush);
-			}
-		}
-
-		return null;
-	};
-
-	/**
 	 * Sets the outline properties to the current shape.
 	 * @memberof ApiShape
 	 * @typeofeditors ["CSE"]
@@ -13747,7 +13840,7 @@
 			}
 			if (this.Shape.pen)
 			{
-				return new AscBuilder.ApiStroke(this.Shape.pen);
+				return new AscBuilder.ApiStroke(this.Shape.pen, this.Shape.spPr);
 			}
 		}
 
@@ -14726,6 +14819,224 @@
 			return this.GetParent();
 		}
 	});
+
+	//------------------------------------------------------------------------------------------------------------------
+	//
+	// ApiHyperlink
+	//
+	//------------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Returns a type of the ApiHyperlink class.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @returns {"hyperlink"}
+	 */
+	ApiHyperlink.prototype.GetClassType = function () {
+		return "hyperlink";
+	};
+
+	ApiHyperlink.prototype._applyData = function (oData) {
+		var bbox = this._elem.bbox;
+		this._ws.getRange3(bbox.r1, bbox.c1, bbox.r2, bbox.c2).setHyperlink(oData, true);
+		var oNewElem = this._ws.hyperlinkManager.getFirst(bbox);
+		if (oNewElem) {
+			this._elem = oNewElem;
+		}
+	};
+
+	/**
+	 * Returns the address of the target document.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/GetAddress.js
+	 */
+	ApiHyperlink.prototype.GetAddress = function () {
+		return this._elem.data.Hyperlink || "";
+	};
+
+	/**
+	 * Sets the address of the target document.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @param {string} sAddress - The hyperlink address.
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/SetAddress.js
+	 */
+	ApiHyperlink.prototype.SetAddress = function (sAddress) {
+		var clone = this._elem.data.clone();
+		clone.Hyperlink = sAddress || null;
+		this._applyData(clone);
+	};
+
+	Object.defineProperty(ApiHyperlink.prototype, "Address", {
+		get: function () {
+			return this.GetAddress();
+		},
+		set: function (v) {
+			this.SetAddress(v);
+		}
+	});
+
+	/**
+	 * Returns the subaddress of the target document.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/GetSubAddress.js
+	 */
+	ApiHyperlink.prototype.GetSubAddress = function () {
+		return this._elem.data.getLocation() || "";
+	};
+
+	/**
+	 * Sets the subaddress of the target document.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @param {string} sSubAddress - The subaddress in "Sheet1!A1" format.
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/SetSubAddress.js
+	 */
+	ApiHyperlink.prototype.SetSubAddress = function (sSubAddress) {
+		var clone = this._elem.data.clone();
+		clone.setLocation(sSubAddress || null);
+		this._applyData(clone);
+	};
+
+	Object.defineProperty(ApiHyperlink.prototype, "SubAddress", {
+		get: function () {
+			return this.GetSubAddress();
+		},
+		set: function (v) {
+			this.SetSubAddress(v);
+		}
+	});
+
+	/**
+	 * Returns the screen tip text for the hyperlink.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/GetScreenTip.js
+	 */
+	ApiHyperlink.prototype.GetScreenTip = function () {
+		return this._elem.data.Tooltip || "";
+	};
+
+	/**
+	 * Sets the screen tip text for the hyperlink.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @param {string} sScreenTip - The screen tip text.
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/SetScreenTip.js
+	 */
+	ApiHyperlink.prototype.SetScreenTip = function (sScreenTip) {
+		var clone = this._elem.data.clone();
+		clone.Tooltip = sScreenTip || null;
+		this._applyData(clone);
+	};
+
+	Object.defineProperty(ApiHyperlink.prototype, "ScreenTip", {
+		get: function () {
+			return this.GetScreenTip();
+		},
+		set: function (v) {
+			this.SetScreenTip(v);
+		}
+	});
+
+	/**
+	 * Returns the text displayed for the hyperlink.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/GetTextToDisplay.js
+	 */
+	ApiHyperlink.prototype.GetTextToDisplay = function () {
+		return this.GetRange().GetText();
+	};
+
+	/**
+	 * Sets the text to be displayed for the hyperlink.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @param {string} sText - The text to display.
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/SetTextToDisplay.js
+	 */
+	ApiHyperlink.prototype.SetTextToDisplay = function (sText) {
+		this.GetRange().SetValue(sText);
+	};
+
+	Object.defineProperty(ApiHyperlink.prototype, "TextToDisplay", {
+		get: function () {
+			return this.GetTextToDisplay();
+		},
+		set: function (v) {
+			this.SetTextToDisplay(v);
+		}
+	});
+
+	/**
+	 * Returns the range the hyperlink is attached to.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @returns {ApiRange}
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/GetRange.js
+	 */
+	ApiHyperlink.prototype.GetRange = function () {
+		var bbox = this._elem.bbox;
+		return new ApiRange(this._ws.getRange3(bbox.r1, bbox.c1, bbox.r2, bbox.c2));
+	};
+
+	Object.defineProperty(ApiHyperlink.prototype, "Range", {
+		get: function () {
+			return this.GetRange();
+		}
+	});
+
+	/**
+	 * Returns the name of the hyperlink.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @returns {string}
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/GetName.js
+	 */
+	ApiHyperlink.prototype.GetName = function () {
+		return this.GetTextToDisplay();
+	};
+
+	Object.defineProperty(ApiHyperlink.prototype, "Name", {
+		get: function () {
+			return this.GetName();
+		}
+	});
+
+	/**
+	 * Returns the type of the hyperlink.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @returns {number}
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/GetType.js
+	 */
+	ApiHyperlink.prototype.GetType = function () {
+		return Asc.c_oAscMsoHyperlinkType.Range;
+	};
+
+	Object.defineProperty(ApiHyperlink.prototype, "Type", {
+		get: function () {
+			return this.GetType();
+		}
+	});
+
+	/**
+	 * Deletes the hyperlink.
+	 * @memberof ApiHyperlink
+	 * @typeofeditors ["CSE"]
+	 * @see office-js-api/Examples/{Editor}/ApiHyperlink/Methods/Delete.js
+	 */
+	ApiHyperlink.prototype.Delete = function () {
+		var bbox = this._elem.bbox;
+		this._ws.getRange3(bbox.r1, bbox.c1, bbox.r2, bbox.c2).removeHyperlink(this._elem, true);
+	};
 
 	//------------------------------------------------------------------------------------------------------------------
 	//
@@ -17488,7 +17799,7 @@
 	 */
 	ApiPivotTable.prototype.SetSource = function (source) {
 		if (source instanceof ApiRange) {
-			var ref = source.GetWorksheet().GetName() + "!" + source.GetAddress(true, true);
+			var ref = AscCommon.parserHelp.get3DRef(source.GetWorksheet().GetName(), source.GetAddress(true, true));
 			var props = new Asc.CT_pivotTableDefinition();
 			props.asc_setDataRef(ref);
 			this.pivot.asc_set(this.api, props);
@@ -20252,7 +20563,7 @@
         }
 
 		let processFormula = function(formula, t) {
-			if (formula === undefined || formula === null) {
+			if (formula === undefined || formula === null || formula === "") {
 				return null;
 			}
 
@@ -20272,13 +20583,8 @@
 		};
 
         const t = this;
-		if (Formula1 !== undefined) {
-			dataValidation.formula1 = processFormula(Formula1, t);
-		}
-
-		if (Formula2 !== undefined) {
-			dataValidation.formula2 = processFormula(Formula2, t);
-		}
+        dataValidation.formula1 = processFormula(Formula1, t);
+        dataValidation.formula2 = processFormula(Formula2, t);
 
 		let ranges = [];
 		if (this.range.areas) {
@@ -24653,7 +24959,7 @@
 		this.private_changeStyle(function(newRule) {
 			if (newRule.aRuleElements && newRule.aRuleElements[0] &&
 				newRule.aRuleElements[0].aCFVOs && newRule.aRuleElements[0].aCFVOs[0]) {
-				newRule.aRuleElements[0].aCFVOs[0].asc_setVal(value);
+				newRule.aRuleElements[0].aCFVOs[0].asc_setVal(value != null ? value + "" : value);
 			}
 		}, true);
 	};
@@ -24741,7 +25047,7 @@
 		this.private_changeStyle(function(newRule) {
 			if (newRule.aRuleElements && newRule.aRuleElements[0] &&
 				newRule.aRuleElements[0].aCFVOs && newRule.aRuleElements[0].aCFVOs[1]) {
-				newRule.aRuleElements[0].aCFVOs[1].asc_setVal(value);
+				newRule.aRuleElements[0].aCFVOs[1].asc_setVal(value != null ? value + "" : value);
 			}
 		}, true);
 	};
@@ -25561,7 +25867,7 @@
 
 						if (lastCFVO.asc_getType() === window['AscCommonExcel'].ECfvoType.Percent ||
 							lastCFVO.asc_getType() === window['AscCommonExcel'].ECfvoType.Percentile) {
-							let baseValue = parseFloat(lastCFVO.asc_getVal()) || 0;
+							let baseValue = parseFloat(lastCFVO.Val) || 0;
 							let step = (100 - baseValue) / (newIconCount - currentCFVOs.length + 1);
 							let newValue = Math.round(baseValue + step * (i - currentCFVOs.length + 1));
 							newCFVO.asc_setVal(newValue.toString());
@@ -25620,13 +25926,13 @@
 
 		if (cfvo.asc_getType() === window['AscCommonExcel'].ECfvoType.Percent) {
 			let expectedPercent = Math.round((index * 100) / totalCount);
-			let actualValue = parseFloat(cfvo.asc_getVal());
+			let actualValue = parseFloat(cfvo.Val);
 			return Math.abs(actualValue - expectedPercent) <= 1;
 		}
 
 		if (cfvo.asc_getType() === window['AscCommonExcel'].ECfvoType.Percentile) {
 			let expectedPercentile = Math.round((index * 100) / totalCount);
-			let actualValue = parseFloat(cfvo.asc_getVal());
+			let actualValue = parseFloat(cfvo.Val);
 			return Math.abs(actualValue - expectedPercentile) <= 1;
 		}
 
@@ -25699,7 +26005,7 @@
 					if (percentileValues) {
 						cfvo.asc_setType(AscCommonExcel.ECfvoType.Percentile);
 						// Set default percentile values if not already set
-						if (!cfvo.asc_getVal()) {
+						if (!cfvo.Val) {
 							// For 3-icon set: 33%, 67%; for 4-icon set: 25%, 50%, 75%; for 5-icon set: 20%, 40%, 60%, 80%
 							let totalCfvos = iconSetElement.aCFVOs.length;
 							let percentileValue = Math.round((i / (totalCfvos - 1)) * 100);
@@ -25708,7 +26014,7 @@
 					} else {
 						cfvo.asc_setType(AscCommonExcel.ECfvoType.Number);
 						// Reset to default numeric values if needed
-						if (!cfvo.asc_getVal()) {
+						if (!cfvo.Val) {
 							cfvo.asc_setVal("0");
 						}
 					}
@@ -26253,7 +26559,7 @@
 		let t = this;
 		this.parent.private_changeStyle(function (newRule) {
 			let index = t.GetIndex() - 1;
-			newRule.aRuleElements[0].aCFVOs[index].asc_setVal(value);
+			newRule.aRuleElements[0].aCFVOs[index].asc_setVal(value != null ? value + "" : value);
 		}, true);
 	};
 
@@ -28151,7 +28457,8 @@
 	ApiWorksheet.prototype["AddDefName"] = ApiWorksheet.prototype.AddDefName;
 	ApiWorksheet.prototype["GetComments"] = ApiWorksheet.prototype.GetComments;
 	ApiWorksheet.prototype["Delete"] = ApiWorksheet.prototype.Delete;
-	ApiWorksheet.prototype["SetHyperlink"] = ApiWorksheet.prototype.SetHyperlink;
+	ApiWorksheet.prototype["SetHyperlink"]   = ApiWorksheet.prototype.SetHyperlink;
+	ApiWorksheet.prototype["GetHyperlinks"] = ApiWorksheet.prototype.GetHyperlinks;
 	ApiWorksheet.prototype["AddChart"] = ApiWorksheet.prototype.AddChart;
 	ApiWorksheet.prototype["AddShape"] = ApiWorksheet.prototype.AddShape;
 	ApiWorksheet.prototype["AddImage"] = ApiWorksheet.prototype.AddImage;
@@ -28205,6 +28512,7 @@
     ApiRange.prototype["ClearFormats"] = ApiRange.prototype.ClearFormats;
     ApiRange.prototype["ClearContents"] = ApiRange.prototype.ClearContents;
     ApiRange.prototype["ClearHyperlinks"] = ApiRange.prototype.ClearHyperlinks;
+	ApiRange.prototype["GetHyperlinks"]   = ApiRange.prototype.GetHyperlinks;
 	ApiRange.prototype["GetRows"] = ApiRange.prototype.GetRows;
 	ApiRange.prototype["GetCols"] = ApiRange.prototype.GetCols;
 	ApiRange.prototype["End"] = ApiRange.prototype.End;
@@ -28297,7 +28605,8 @@
 	ApiDrawing.prototype["SetFlipH"]                   =  ApiDrawing.prototype.SetFlipH;
 	ApiDrawing.prototype["SetFlipV"]                   =  ApiDrawing.prototype.SetFlipV;
 	ApiDrawing.prototype["Select"]                     =  ApiDrawing.prototype.Select;
-	ApiDrawing.prototype["Fill"]                       =  ApiDrawing.prototype.Fill;
+	ApiDrawing.prototype["SetFill"]                    =  ApiDrawing.prototype.SetFill;
+	ApiDrawing.prototype["GetFill"]                    =  ApiDrawing.prototype.GetFill;
 	ApiDrawing.prototype["SetOutLine"]                 =  ApiDrawing.prototype.SetOutLine;
 	ApiDrawing.prototype["Unselect"]                   =  ApiDrawing.prototype.Unselect;
 
@@ -28314,8 +28623,6 @@
 	ApiShape.prototype["SetPaddings"]                  =  ApiShape.prototype.SetPaddings;
 	ApiShape.prototype["GetGeometry"]                  =  ApiShape.prototype.GetGeometry;
 	ApiShape.prototype["SetGeometry"]                  =  ApiShape.prototype.SetGeometry;
-	ApiShape.prototype["SetFill"]                      =  ApiShape.prototype.SetFill;
-	ApiShape.prototype["GetFill"]                      =  ApiShape.prototype.GetFill;
 	ApiShape.prototype["SetLine"]                      =  ApiShape.prototype.SetLine;
 	ApiShape.prototype["GetLine"]                      =  ApiShape.prototype.GetLine;
 
@@ -28331,6 +28638,8 @@
 	ApiChart.prototype["SetLegendFontSize"] = ApiChart.prototype.SetLegendFontSize = AscBuilder.ApiChart.prototype.SetLegendFontSize;
 	ApiChart.prototype["SetShowDataLabels"] = ApiChart.prototype.SetShowDataLabels = AscBuilder.ApiChart.prototype.SetShowDataLabels;
 	ApiChart.prototype["SetShowPointDataLabel"] = ApiChart.prototype.SetShowPointDataLabel = AscBuilder.ApiChart.prototype.SetShowPointDataLabel;
+	ApiChart.prototype["SetDataLabelsTextPr"] = ApiChart.prototype.SetDataLabelsTextPr = AscBuilder.ApiChart.prototype.SetDataLabelsTextPr;
+	ApiChart.prototype["SetPointDataLabelTextPr"] = ApiChart.prototype.SetPointDataLabelTextPr = AscBuilder.ApiChart.prototype.SetPointDataLabelTextPr;
 	ApiChart.prototype["SetVertAxisTickLabelPosition"] = ApiChart.prototype.SetVertAxisTickLabelPosition = AscBuilder.ApiChart.prototype.SetVertAxisTickLabelPosition;
 	ApiChart.prototype["SetHorAxisTickLabelPosition"] = ApiChart.prototype.SetHorAxisTickLabelPosition = AscBuilder.ApiChart.prototype.SetHorAxisTickLabelPosition;
 	ApiChart.prototype["SetHorAxisMajorTickMark"] = ApiChart.prototype.SetHorAxisMajorTickMark = AscBuilder.ApiChart.prototype.SetHorAxisMajorTickMark;
@@ -28426,6 +28735,21 @@
 	ApiAreas.prototype["GetCount"]               = ApiAreas.prototype.GetCount;
 	ApiAreas.prototype["GetItem"]                = ApiAreas.prototype.GetItem;
 	ApiAreas.prototype["GetParent"]              = ApiAreas.prototype.GetParent;
+
+
+	ApiHyperlink.prototype["GetClassType"]     = ApiHyperlink.prototype.GetClassType;
+	ApiHyperlink.prototype["GetAddress"]       = ApiHyperlink.prototype.GetAddress;
+	ApiHyperlink.prototype["SetAddress"]       = ApiHyperlink.prototype.SetAddress;
+	ApiHyperlink.prototype["GetSubAddress"]    = ApiHyperlink.prototype.GetSubAddress;
+	ApiHyperlink.prototype["SetSubAddress"]    = ApiHyperlink.prototype.SetSubAddress;
+	ApiHyperlink.prototype["GetScreenTip"]     = ApiHyperlink.prototype.GetScreenTip;
+	ApiHyperlink.prototype["SetScreenTip"]     = ApiHyperlink.prototype.SetScreenTip;
+	ApiHyperlink.prototype["GetTextToDisplay"] = ApiHyperlink.prototype.GetTextToDisplay;
+	ApiHyperlink.prototype["SetTextToDisplay"] = ApiHyperlink.prototype.SetTextToDisplay;
+	ApiHyperlink.prototype["GetRange"]         = ApiHyperlink.prototype.GetRange;
+	ApiHyperlink.prototype["GetName"]          = ApiHyperlink.prototype.GetName;
+	ApiHyperlink.prototype["GetType"]          = ApiHyperlink.prototype.GetType;
+	ApiHyperlink.prototype["Delete"]           = ApiHyperlink.prototype.Delete;
 
 
 	ApiCharacters.prototype["GetCount"]          = ApiCharacters.prototype.GetCount;
@@ -29406,7 +29730,7 @@
 	}
 
 	function private_MM2EMU(mm) {
-		return mm * 36000.0;
+		return Math.round(mm * 36000.0);
 	}
 
 	function private_GetDrawingLockType(sType) {
@@ -29587,6 +29911,7 @@
 	AscBuilder.Cell["ApiPivotDataField"]         = AscBuilder.Cell.ApiPivotDataField         = ApiPivotDataField;
 	AscBuilder.Cell["ApiPivotItem"]              = AscBuilder.Cell.ApiPivotItem              = ApiPivotItem;
 	AscBuilder.Cell["ApiPivotFilters"]           = AscBuilder.Cell.ApiPivotFilters           = ApiPivotFilters;
+	AscBuilder.Cell["ApiHyperlink"]              = AscBuilder.Cell.ApiHyperlink              = ApiHyperlink;
 
 	AscBuilder.Cell.init = function()
 	{

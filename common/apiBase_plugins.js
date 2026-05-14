@@ -525,8 +525,8 @@
      * @param {string | Object} [description] - For <b>"Information"</b> and <b>"Block"</b> types: a string description displayed during the action.
      * For <b>"GroupActions"</b> type: an optional object with the following properties:
      * @param {boolean} [description.scrollToTarget=true] - If <em>false</em>, the editor will not scroll to the target after the group operation ends.
-     * @param {string} [status] - For <b>"GroupActions"</b> type: if a non-empty string is passed, the group operation is cancelled and rolled back instead of committed.
-     * For other types: the error status code. If no error occurs, then an empty string is passed.
+     * @param {boolean} [description.cancel=false] - If <em>true</em>, the group operation is cancelled and rolled back instead of committed.
+     * @param {string} [status] - For <b>"Information"</b> and <b>"Block"</b> types: the error status code. If no error occurs, then an empty string is passed.
      * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/EndAction.js
      */
     Api.prototype["pluginMethod_EndAction"] = function(type, description, status)
@@ -535,10 +535,9 @@
 		{
 			let pr = description && (typeof description === "object") ? description : {};
 			if (status)
-				this.cancelGroupActions(pr);
-			else
-				this.endGroupActions(pr);
+				pr["cancel"] = true;
 			
+			this.endGroupActions(pr);
 			return;
 		}
 		
@@ -1928,6 +1927,24 @@
 		} else {
 			this.sendEvent("asc_onPluginHideButton", id);
 		}
+	};
+
+	/**
+	 * Enables or disables the modal plugin footer button by index.
+	 *
+	 * @memberof Api
+	 * @typeofeditors ["CDE", "CSE", "CPE"]
+	 *
+	 * @param {number} index - The button index (0-based) in the buttons array from config.json.
+	 * @param {boolean} isDisabled - Specifies whether to disable (true) or enable (false) the button.
+	 *
+	 * @alias SetButtonDisabled
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/SetButtonDisabled.js
+	 */
+	Api.prototype['pluginMethod_SetButtonDisabled'] = function (index, isDisabled) {
+		const eventName = isDisabled ? 'asc_onPluginSetButtonDisabled' : 'asc_onPluginSetButtonEnabled';
+		this.sendEvent(eventName, index);
 	};
 
 	Api.prototype["pluginMethod_GetKeychainStorageInfo"] = function(keys)

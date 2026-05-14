@@ -138,6 +138,18 @@ $(function ()
 		assert.strictEqual(run.Run.GetReviewType(), reviewtype_Remove, "Text run inside the paragraph is marked as removed in review");
 	});
 
+	QUnit.test("SetText", function (assert)
+	{
+		let p = createApiParagraph();
+		p.AddText("Hello World");
+		assert.strictEqual(p.GetText(), "Hello World\r\n", "Check initial text");
+		p.SetText("Replaced");
+		assert.strictEqual(p.GetText(), "Replaced\r\n", "Check SetText replaces all content");
+
+		p.SetText("");
+		assert.strictEqual(p.GetText(), "\r\n", "Check SetText with empty string");
+	});
+
 	QUnit.test('SetColor, GetColor', function (assert) {
 		const hexColor = AscTest.JsApi.HexColor('#bada55');
 		const themeColor = AscTest.JsApi.ThemeColor('accent2');

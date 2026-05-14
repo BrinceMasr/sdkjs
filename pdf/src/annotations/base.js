@@ -312,7 +312,7 @@
         this._dash = aDash;
 
         this.SetWasChanged(true);
-        this.AddToRedraw();
+		this.SetNeedRecalc(true);
     };
     CAnnotationBase.prototype.GetDashPattern = function() {
         return this._dash;
@@ -344,7 +344,9 @@
         this._borderWidth = nWidthPt;
 
         this.SetWasChanged(true);
-        this.private_UpdateLn();
+        this.SetNeedUpdateLn(true);
+		this.SetNeedUpdateOpacity(true);
+		this.SetNeedRecalc(true);
     };
     CAnnotationBase.prototype.private_UpdateLn = function() {
         let nWidthPt = this.GetBorderWidth();
@@ -490,6 +492,12 @@
 
         AscCommon.History.Add(new CChangesPDFAnnotBorderType(this, this._borderStyle, nType));
         this._borderStyle = nType;
+
+		this.SetWasChanged(true);
+		this.SetNeedUpdateLn(true);
+		this.SetNeedUpdateOpacity(true);
+		this.recalcGeometry && this.recalcGeometry();
+		this.SetNeedRecalc(true);
     };
     CAnnotationBase.prototype.GetBorderStyle = function() {
         return this._borderStyle;
@@ -587,10 +595,17 @@
 
         AscCommon.History.Add(new CChangesPDFAnnotOpacity(this, this._opacity, value));
         this._opacity = value;
+		
         this.SetWasChanged(true);
         this.SetNeedRecalc(true);
         this.SetNeedUpdateOpacity(true);
     };
+	CAnnotationBase.prototype.SetNeedUpdateLn = function(isNeed) {
+		this._needUpdateLn = isNeed;
+	};
+	CAnnotationBase.prototype.IsNeedUpdateLn = function() {
+		return this._needUpdateLn;
+	};
     CAnnotationBase.prototype.SetNeedUpdateOpacity = function(isNeed) {
         this._needUpdateOpacity = isNeed;
     };
@@ -602,7 +617,6 @@
         const t = this.GetOpacity() * 100 * 2.55;
 
         if (!this.IsShapeBased()) {
-            this.AddToRedraw();
             this.SetNeedUpdateOpacity(false);
             return;
         }
@@ -676,7 +690,7 @@
             if (this.IsHighlight())
                 AscPDF.startMultiplyMode(oGraphicsPDF.GetContext());
             
-            oGraphicsPDF.SetGlobalAlpha(1);
+            oGraphicsPDF.SetGlobalAlpha(this.GetOpacity());
             oGraphicsPDF.DrawImageXY(originView, X, Y, undefined, true);
             AscPDF.endMultiplyMode(oGraphicsPDF.GetContext());
         }
@@ -1110,6 +1124,10 @@
             return;
         }
 
+		this.bSkipAddToRedraw = true;
+        if (this.IsNeedUpdateLn()) {
+            this.private_UpdateLn();
+        }
         if (this.IsNeedUpdateOpacity()) {
             this.private_UpdateOpacity();
         }
@@ -1120,6 +1138,7 @@
         if (this.recalcInfo.recalculateGeometry) {
             this.RefillGeometry();
         }
+		this.bSkipAddToRedraw = false;
 
         this.recalculateTransform();
         this.updateTransformMatrix();
@@ -1418,6 +1437,10 @@
         return this._apIdx == undefined;
     };
     CAnnotationBase.prototype.AddToRedraw = function() {
+		if (this.bSkipAddToRedraw) {
+			return;
+		}
+
         let oViewer = editor.getDocumentRenderer();
         let nPage   = this.GetPage();
 
@@ -1504,7 +1527,7 @@
         this.SetWasChanged(true);
 
         if (this.IsShapeBased()) {
-            this.private_UpdateLn();
+            this.SetNeedUpdateLn(true);
             this.SetNeedUpdateOpacity(true);
         }
         else {

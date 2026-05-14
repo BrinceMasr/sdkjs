@@ -1034,7 +1034,8 @@ Paragraph.prototype.Internal_Content_Add = function(Pos, Item)
 
 	if (Item.SetParagraph)
 		Item.SetParagraph(this);
-
+	
+	Item.OnAttach();
 	this.OnContentChange();
 };
 Paragraph.prototype.Add_ToContent = function(Pos, Item)
@@ -1106,6 +1107,9 @@ Paragraph.prototype.Internal_Content_Remove = function(Pos)
 
 	if (Item.PreDelete)
 		Item.PreDelete();
+
+	if (Item.OnDetach)
+		Item.OnDetach();
 
 	this.Content.splice(Pos, 1);
 	this.updateTrackRevisions();
@@ -1184,6 +1188,8 @@ Paragraph.prototype.Internal_Content_Remove2 = function(Pos, Count)
 	{
 		if (this.Content[nIndex].PreDelete)
 			this.Content[nIndex].PreDelete();
+		
+		this.Content[nIndex].OnDetach();
 	}
 
 	var DeletedItems = this.Content.slice(Pos, Pos + Count);
@@ -1415,38 +1421,22 @@ Paragraph.prototype.Get_ParaPosByContentPos = function(ContentPos)
 };
 /**
  * Функция для перевода позиции внутри параграфа в специальную позицию используемую в ApiRange
- * @param {AscWord.CParagraphContentPos} oContentPos
+ * @param {AscWord.CParagraphContentPos} contentPos
  * @return {number}
  */
-Paragraph.prototype.ConvertParaContentPosToRangePos = function(oContentPos)
+Paragraph.prototype.GetFlatPos = function(contentPos)
 {
-	var nRangePos = 0;
-
-	var nCurPos = oContentPos ? Math.max(0, Math.min(this.Content.length - 1, oContentPos.Get(0))) : this.Content.length;
-	
-	for (var nPos = 0; nPos < nCurPos; ++nPos)
+	let rangePos = 0;
+	let endPos   = contentPos ? Math.max(0, Math.min(this.Content.length - 1, contentPos.Get(0))) : this.Content.length - 1;
+	for (let pos = 0; pos <= endPos; ++pos)
 	{
-		if (this.Content[nPos] instanceof CParagraphContentWithContentBase)
-		{
-			if (nPos != 0 && this.Content[nPos] instanceof ParaRun)
-				nRangePos++;
-			
-			nRangePos += this.Content[nPos].ConvertParaContentPosToRangePos(null);
-		}
-	}
-
-	if (this.Content[nCurPos])
-	{
-		if (this.Content[nCurPos] instanceof CParagraphContentWithContentBase)
-		{
-			if (nCurPos != 0 && this.Content[nCurPos] instanceof ParaRun)
-				nRangePos++;
-
-			nRangePos += this.Content[nCurPos].ConvertParaContentPosToRangePos(oContentPos, 1);
-		}
-	}
+		if (0 !== pos && this.Content[pos] instanceof ParaRun)
+			rangePos++;
 		
-	return nRangePos;
+		rangePos += this.Content[pos].GetFlatPos(pos === endPos && contentPos ? contentPos : null, 1);
+	}
+	
+	return rangePos;
 };
 Paragraph.prototype.Check_Range_OnlyMath = function(CurRange, CurLine)
 {
@@ -2257,7 +2247,7 @@ Paragraph.prototype.Draw = function(CurPage, pGraphics)
 	//    Рисуем верхнюю, нижнюю и промежуточную границы
 	this.Internal_Draw_6(CurPage, pGraphics, Pr);
 	
-	pGraphics.End_Command();
+	pGraphics.End_Command(AscFormat.DRAW_COMMAND_PARAGRAPH);
 	
 	AscWord.ParagraphStatePool.release(drawState);
 };
@@ -3132,6 +3122,8 @@ Paragraph.prototype.drawRunContentElements = function(CurPage, pGraphics, drawSt
 		PDSE.resetLine(CurLine, Y, Y - Line.Metrics.Ascent, Y + Line.Metrics.Descent);
 		for (var CurRange = 0; CurRange < RangesCount; CurRange++)
 		{
+			pGraphics.Start_Command(AscFormat.DRAW_COMMAND_LINE_RANGE, Line, CurLine, CurRange);
+			
 			X = this.Lines[CurLine].Ranges[CurRange].XVisible;
 
 			var Range = Line.Ranges[CurRange];
@@ -3149,12 +3141,11 @@ Paragraph.prototype.drawRunContentElements = function(CurPage, pGraphics, drawSt
 			}
 			
 			PDSE.endRange();
+			
+			pGraphics.End_Command(AscFormat.DRAW_COMMAND_LINE_RANGE);
 		}
 
-		if (needClip)
-			pGraphics.RestoreGrState();
-		
-		pGraphics.End_Command();
+		pGraphics.End_Command(AscFormat.DRAW_COMMAND_LINE);
 	}
 };
 Paragraph.prototype.drawRunContentLines = function(CurPage, pGraphics, drawState)
@@ -11117,6 +11108,98 @@ Paragraph.prototype.private_CompileParaPr = function(isForce)
 		this.CompiledPr.NeedRecalc = true;
 	}
 };
+Paragraph.prototype.GetCompiledInheritedPr = function()
+{
+	var Styles     = this.Parent.Get_Styles();
+	var Numbering  = this.Parent.GetNumbering();
+	var TableStyle = this.Parent.Get_TableStyleForPara();
+	var ShapeStyle = this.Parent.Get_ShapeStyleForPara();
+	var StyleId    = this.Style_Get();
+	
+	// Считываем свойства для текущего стиля
+	var Pr = Styles.Get_Pr(StyleId, styletype_Paragraph, TableStyle, ShapeStyle);
+	// Если в стиле была задана нумерация сохраним это в специальном поле
+	if (undefined != Pr.ParaPr.NumPr)
+		Pr.ParaPr.StyleNumPr = Pr.ParaPr.NumPr.Copy();
+	
+	var Lvl = -1;
+	if (this.Pr.NumPr)
+	{
+		if (this.Pr.NumPr.IsValid())
+		{
+			Lvl = this.Pr.NumPr.Lvl;
+			if (undefined === Lvl)
+				Lvl = 0;
+			
+			if (Lvl >= 0 && Lvl <= 8)
+			{
+				Pr.ParaPr.Merge(Numbering.GetParaPr(this.Pr.NumPr.NumId, this.Pr.NumPr.Lvl));
+			}
+			else
+			{
+				Lvl             = -1;
+				Pr.ParaPr.NumPr = undefined;
+			}
+		}
+		else if (this.Pr.NumPr.IsZero())
+		{
+			// Нулевую нумерацию воспринимаем, как отмену нумерации по иерархии
+			Lvl             = -1;
+			Pr.ParaPr.NumPr = undefined;
+			
+			Pr.ParaPr.Ind.Left      = 0;
+			Pr.ParaPr.Ind.FirstLine = 0;
+		}
+	}
+	else if (Pr.ParaPr.NumPr && Pr.ParaPr.NumPr.IsValid())
+	{
+		let num = Numbering.GetNum(Pr.ParaPr.NumPr.NumId);
+		
+		let _styleId = StyleId;
+		
+		// MSWord не следует спецификации, и не ищет номер уровня по стилю
+		// Lvl = oNum.GetLvlByStyle(_StyleId);
+		let _Lvl = Pr.ParaPr.NumPr.Lvl ? Pr.ParaPr.NumPr.Lvl : 0;
+		
+		let lvlPStyle = num.GetLvl(_Lvl).GetPStyle();
+		if (lvlPStyle === _styleId)
+		{
+			Lvl = _Lvl;
+		}
+		else
+		{
+			let passedStyles       = {};
+			passedStyles[_styleId] = true;
+			while (true)
+			{
+				let style = Styles.Get(_styleId);
+				if (!style)
+					break;
+				
+				_styleId = style.GetBasedOn();
+				if (!_styleId || passedStyles[_styleId])
+					break;
+				
+				passedStyles[_styleId] = true;
+				
+				// Lvl = oNum.GetLvlByStyle(_StyleId);
+				if (lvlPStyle === _styleId)
+				{
+					Lvl = _Lvl;
+					break;
+				}
+			}
+		}
+		
+		if (-1 === Lvl)
+			Pr.ParaPr.NumPr = undefined;
+	}
+	
+	Pr.ParaPr.StyleTabs = ( undefined != Pr.ParaPr.Tabs ? Pr.ParaPr.Tabs.Copy() : new CParaTabs() );
+	Pr.ParaPr.CheckBorderSpaces();
+	Pr.Lvl = Lvl;
+	return Pr;
+};
 /**
  * Формируем конечные свойства параграфа на основе стиля, возможной нумерации и прямых настроек.
  */
@@ -11124,92 +11207,7 @@ Paragraph.prototype.Internal_CompileParaPr2 = function()
 {
 	if (this.bFromDocument)
 	{
-		var Styles     = this.Parent.Get_Styles();
-		var Numbering  = this.Parent.GetNumbering();
-		var TableStyle = this.Parent.Get_TableStyleForPara();
-		var ShapeStyle = this.Parent.Get_ShapeStyleForPara();
-		var StyleId    = this.Style_Get();
-
-		// Считываем свойства для текущего стиля
-		var Pr = Styles.Get_Pr(StyleId, styletype_Paragraph, TableStyle, ShapeStyle);
-		// Если в стиле была задана нумерация сохраним это в специальном поле
-		if (undefined != Pr.ParaPr.NumPr)
-			Pr.ParaPr.StyleNumPr = Pr.ParaPr.NumPr.Copy();
-
-		var Lvl = -1;
-		if (this.Pr.NumPr)
-		{
-			if (this.Pr.NumPr.IsValid())
-			{
-				Lvl = this.Pr.NumPr.Lvl;
-				if (undefined === Lvl)
-					Lvl = 0;
-
-				if (Lvl >= 0 && Lvl <= 8)
-				{
-					Pr.ParaPr.Merge(Numbering.GetParaPr(this.Pr.NumPr.NumId, this.Pr.NumPr.Lvl));
-				}
-				else
-				{
-					Lvl             = -1;
-					Pr.ParaPr.NumPr = undefined;
-				}
-			}
-			else if (this.Pr.NumPr.IsZero())
-			{
-				// Нулевую нумерацию воспринимаем, как отмену нумерации по иерархии
-				Lvl             = -1;
-				Pr.ParaPr.NumPr = undefined;
-
-				Pr.ParaPr.Ind.Left      = 0;
-				Pr.ParaPr.Ind.FirstLine = 0;
-			}
-		}
-		else if (Pr.ParaPr.NumPr && Pr.ParaPr.NumPr.IsValid())
-		{
-			let num = Numbering.GetNum(Pr.ParaPr.NumPr.NumId);
-
-			let _styleId = StyleId;
-			
-			// MSWord не следует спецификации, и не ищет номер уровня по стилю
-			// Lvl = oNum.GetLvlByStyle(_StyleId);
-			let _Lvl = Pr.ParaPr.NumPr.Lvl ? Pr.ParaPr.NumPr.Lvl : 0;
-
-			let lvlPStyle = num.GetLvl(_Lvl).GetPStyle();
-			if (lvlPStyle === _styleId)
-			{
-				Lvl = _Lvl;
-			}
-			else
-			{
-				let passedStyles       = {};
-				passedStyles[_styleId] = true;
-				while (true)
-				{
-					let style = Styles.Get(_styleId);
-					if (!style)
-						break;
-					
-					_styleId = style.GetBasedOn();
-					if (!_styleId || passedStyles[_styleId])
-						break;
-					
-					passedStyles[_styleId] = true;
-					
-					// Lvl = oNum.GetLvlByStyle(_StyleId);
-					if (lvlPStyle === _styleId)
-					{
-						Lvl = _Lvl;
-						break;
-					}
-				}
-			}
-
-			if (-1 === Lvl)
-				Pr.ParaPr.NumPr = undefined;
-		}
-
-		Pr.ParaPr.StyleTabs = ( undefined != Pr.ParaPr.Tabs ? Pr.ParaPr.Tabs.Copy() : new CParaTabs() );
+		let Pr = this.GetCompiledInheritedPr();
 
 		// Копируем прямые настройки параграфа.
 		Pr.ParaPr.Merge(this.Pr);
@@ -11221,10 +11219,12 @@ Paragraph.prototype.Internal_CompileParaPr2 = function()
 			Pr.ParaPr.Merge(oForm && oForm.IsCheckBox() ? AscWord.DEFAULT_PARAPR_FIXED_CHECKBOXFORM : AscWord.DEFAULT_PARAPR_FIXED_TEXTFORM);
 		}
 
-		if (-1 != Lvl && undefined != Pr.ParaPr.NumPr)
-			Pr.ParaPr.NumPr.Lvl = Lvl;
+		if (-1 != Pr.Lvl && undefined != Pr.ParaPr.NumPr)
+			Pr.ParaPr.NumPr.Lvl = Pr.Lvl;
 		else
 			Pr.ParaPr.NumPr = undefined;
+		
+		delete Pr.Lvl;
 		
 		let logicDocument = this.GetLogicDocument();
 		if (logicDocument && logicDocument.IsDocumentEditor())
@@ -11331,6 +11331,47 @@ Paragraph.prototype.getCompiledPrFromStyle = function()
 	let styleId      = this.Style_Get();
 	
 	return styleManager.Get_Pr(styleId, styletype_Paragraph, tableStyle, shapeStyle);
+};
+Paragraph.prototype.GetParaPrForWrite = function(paraPr)
+{
+	paraPr = paraPr.Copy();
+	let inheritedPr = this.GetCompiledInheritedPr().ParaPr;
+	
+	// TODO: Check other properties
+	
+	if (paraPr.Brd)
+	{
+		if (paraPr.Brd.Top && inheritedPr.Brd.Top.IsEqualWeak(paraPr.Brd.Top))
+			paraPr.Brd.Top = undefined;
+		
+		if (paraPr.Brd.Left && inheritedPr.Brd.Left.IsEqualWeak(paraPr.Brd.Left))
+			paraPr.Brd.Left = undefined;
+		
+		if (paraPr.Brd.Right && inheritedPr.Brd.Right.IsEqualWeak(paraPr.Brd.Right))
+			paraPr.Brd.Right = undefined;
+		
+		if (paraPr.Brd.Bottom && inheritedPr.Brd.Bottom.IsEqualWeak(paraPr.Brd.Bottom))
+			paraPr.Brd.Bottom = undefined;
+		
+		if (paraPr.Brd.Between && inheritedPr.Brd.Between.IsEqualWeak(paraPr.Brd.Between))
+			paraPr.Brd.Between = undefined;
+		
+		
+		let isEmpty = true;
+		for (let b in paraPr.Brd)
+		{
+			if (paraPr.Brd[b])
+			{
+				isEmpty = false;
+				break;
+			}
+		}
+		
+		if (isEmpty)
+			paraPr.Brd = undefined;
+	}
+	
+	return paraPr;
 };
 /**
  * Сообщаем параграфу, что ему надо будет пересчитать скомпилированный стиль
@@ -12033,102 +12074,65 @@ Paragraph.prototype.Set_WidowControl = function(Value)
 };
 Paragraph.prototype.Set_Borders = function(Borders)
 {
-	if (undefined === Borders)
+	if (!Borders)
 		return;
 
 	var OldBorders = this.Get_CompiledPr2(false).ParaPr.Brd;
-
-	if (undefined != Borders.Between)
+	
+	function getBorder(newBrd, oldBrd)
 	{
-		var NewBorder = undefined;
-		if (undefined != Borders.Between.Value /*&& border_Single === Borders.Between.Value*/)
+		let brd = undefined;
+		if (undefined != newBrd.Value /*&& border_Single === newBrd.Value*/)
 		{
-			NewBorder         = new CDocumentBorder();
-			NewBorder.Color   = ( undefined != Borders.Between.Color ? new CDocumentColor(Borders.Between.Color.r, Borders.Between.Color.g, Borders.Between.Color.b) : new CDocumentColor(OldBorders.Between.Color.r, OldBorders.Between.Color.g, OldBorders.Between.Color.b) );
-			NewBorder.Space   = ( undefined != Borders.Between.Space ? Borders.Between.Space : OldBorders.Between.Space );
-			NewBorder.Size    = ( undefined != Borders.Between.Size ? Borders.Between.Size : OldBorders.Between.Size  );
-			NewBorder.Value   = ( undefined != Borders.Between.Value ? Borders.Between.Value : OldBorders.Between.Value );
-			NewBorder.Unifill = ( undefined != Borders.Between.Unifill ? Borders.Between.Unifill.createDuplicate() : OldBorders.Between.Unifill );
+			brd         = new CDocumentBorder();
+			brd.Color   = ( undefined != newBrd.Color   ? new CDocumentColor(newBrd.Color.r, newBrd.Color.g, newBrd.Color.b, newBrd.Color.Auto) : new CDocumentColor(oldBrd.Color.r, oldBrd.Color.g, oldBrd.Color.b, oldBrd.Color.Auto) );
+			brd.Space   = ( undefined != newBrd.Space   ? newBrd.Space : oldBrd.Space );
+			brd.Size    = ( undefined != newBrd.Size    ? newBrd.Size : oldBrd.Size  );
+			brd.Value   = ( undefined != newBrd.Value   ? newBrd.Value : oldBrd.Value );
+			brd.Unifill = ( undefined != newBrd.Unifill ? newBrd.Unifill.createDuplicate() : oldBrd.Unifill );
 		}
-
-		this.private_AddPrChange();
-		AscCommon.History.Add(new CChangesParagraphBordersBetween(this, this.Pr.Brd.Between, NewBorder));
-		this.Pr.Brd.Between = NewBorder;
+		
+		return brd;
 	}
 
-	if (undefined != Borders.Top)
+	if (Borders.Between)
 	{
-		var NewBorder = undefined;
-		if (undefined != Borders.Top.Value /*&& border_Single === Borders.Top.Value*/)
-		{
-			NewBorder         = new CDocumentBorder();
-			NewBorder.Color   = ( undefined != Borders.Top.Color ? new CDocumentColor(Borders.Top.Color.r, Borders.Top.Color.g, Borders.Top.Color.b) : new CDocumentColor(OldBorders.Top.Color.r, OldBorders.Top.Color.g, OldBorders.Top.Color.b) );
-			NewBorder.Space   = ( undefined != Borders.Top.Space ? Borders.Top.Space : OldBorders.Top.Space );
-			NewBorder.Size    = ( undefined != Borders.Top.Size ? Borders.Top.Size : OldBorders.Top.Size  );
-			NewBorder.Value   = ( undefined != Borders.Top.Value ? Borders.Top.Value : OldBorders.Top.Value );
-			NewBorder.Unifill = ( undefined != Borders.Top.Unifill ? Borders.Top.Unifill.createDuplicate() : OldBorders.Top.Unifill );
-
-		}
-
+		let newBorder = getBorder(Borders.Between, OldBorders.Between);
 		this.private_AddPrChange();
-		AscCommon.History.Add(new CChangesParagraphBordersTop(this, this.Pr.Brd.Top, NewBorder));
-		this.Pr.Brd.Top = NewBorder;
+		AscCommon.History.Add(new CChangesParagraphBordersBetween(this, this.Pr.Brd.Between, newBorder));
+		this.Pr.Brd.Between = newBorder;
 	}
 
-	if (undefined != Borders.Right)
+	if (Borders.Top)
 	{
-		var NewBorder = undefined;
-		if (undefined != Borders.Right.Value /*&& border_Single === Borders.Right.Value*/)
-		{
-			NewBorder         = new CDocumentBorder();
-			NewBorder.Color   = ( undefined != Borders.Right.Color ? new CDocumentColor(Borders.Right.Color.r, Borders.Right.Color.g, Borders.Right.Color.b) : new CDocumentColor(OldBorders.Right.Color.r, OldBorders.Right.Color.g, OldBorders.Right.Color.b) );
-			NewBorder.Space   = ( undefined != Borders.Right.Space ? Borders.Right.Space : OldBorders.Right.Space );
-			NewBorder.Size    = ( undefined != Borders.Right.Size ? Borders.Right.Size : OldBorders.Right.Size  );
-			NewBorder.Value   = ( undefined != Borders.Right.Value ? Borders.Right.Value : OldBorders.Right.Value );
-			NewBorder.Unifill = ( undefined != Borders.Right.Unifill ? Borders.Right.Unifill.createDuplicate() : OldBorders.Right.Unifill );
-
-		}
-
+		let newBorder = getBorder(Borders.Top, OldBorders.Top);
 		this.private_AddPrChange();
-		AscCommon.History.Add(new CChangesParagraphBordersRight(this, this.Pr.Brd.Right, NewBorder));
-		this.Pr.Brd.Right = NewBorder;
+		AscCommon.History.Add(new CChangesParagraphBordersTop(this, this.Pr.Brd.Top, newBorder));
+		this.Pr.Brd.Top = newBorder;
 	}
 
-	if (undefined != Borders.Bottom)
+	if (Borders.Right)
 	{
-		var NewBorder = undefined;
-		if (undefined != Borders.Bottom.Value /*&& border_Single === Borders.Bottom.Value*/)
-		{
-			NewBorder         = new CDocumentBorder();
-			NewBorder.Color   = ( undefined != Borders.Bottom.Color ? new CDocumentColor(Borders.Bottom.Color.r, Borders.Bottom.Color.g, Borders.Bottom.Color.b) : new CDocumentColor(OldBorders.Bottom.Color.r, OldBorders.Bottom.Color.g, OldBorders.Bottom.Color.b) );
-			NewBorder.Space   = ( undefined != Borders.Bottom.Space ? Borders.Bottom.Space : OldBorders.Bottom.Space );
-			NewBorder.Size    = ( undefined != Borders.Bottom.Size ? Borders.Bottom.Size : OldBorders.Bottom.Size  );
-			NewBorder.Value   = ( undefined != Borders.Bottom.Value ? Borders.Bottom.Value : OldBorders.Bottom.Value );
-			NewBorder.Unifill = ( undefined != Borders.Bottom.Unifill ? Borders.Bottom.Unifill.createDuplicate() : OldBorders.Bottom.Unifill );
-		}
-
+		let newBorder = getBorder(Borders.Right, OldBorders.Right);
 		this.private_AddPrChange();
-		AscCommon.History.Add(new CChangesParagraphBordersBottom(this, this.Pr.Brd.Bottom, NewBorder));
-		this.Pr.Brd.Bottom = NewBorder;
+		AscCommon.History.Add(new CChangesParagraphBordersRight(this, this.Pr.Brd.Right, newBorder));
+		this.Pr.Brd.Right = newBorder;
 	}
 
-	if (undefined != Borders.Left)
+	if (Borders.Bottom)
 	{
-		var NewBorder = undefined;
-		if (undefined != Borders.Left.Value /*&& border_Single === Borders.Left.Value*/)
-		{
-			NewBorder         = new CDocumentBorder();
-			NewBorder.Color   = ( undefined != Borders.Left.Color ? new CDocumentColor(Borders.Left.Color.r, Borders.Left.Color.g, Borders.Left.Color.b) : new CDocumentColor(OldBorders.Left.Color.r, OldBorders.Left.Color.g, OldBorders.Left.Color.b) );
-			NewBorder.Space   = ( undefined != Borders.Left.Space ? Borders.Left.Space : OldBorders.Left.Space );
-			NewBorder.Size    = ( undefined != Borders.Left.Size ? Borders.Left.Size : OldBorders.Left.Size  );
-			NewBorder.Value   = ( undefined != Borders.Left.Value ? Borders.Left.Value : OldBorders.Left.Value );
-			NewBorder.Unifill = ( undefined != Borders.Left.Unifill ? Borders.Left.Unifill.createDuplicate() : OldBorders.Left.Unifill );
-
-		}
-
+		let newBorder = getBorder(Borders.Bottom, OldBorders.Bottom);
 		this.private_AddPrChange();
-		AscCommon.History.Add(new CChangesParagraphBordersLeft(this, this.Pr.Brd.Left, NewBorder));
-		this.Pr.Brd.Left = NewBorder;
+		AscCommon.History.Add(new CChangesParagraphBordersBottom(this, this.Pr.Brd.Bottom, newBorder));
+		this.Pr.Brd.Bottom = newBorder;
+	}
+
+	if (Borders.Left)
+	{
+		let newBorder = getBorder(Borders.Left, OldBorders.Left);
+		this.private_AddPrChange();
+		AscCommon.History.Add(new CChangesParagraphBordersLeft(this, this.Pr.Brd.Left, newBorder));
+		this.Pr.Brd.Left = newBorder;
 	}
 
 	// Надо пересчитать конечный стиль
@@ -13086,6 +13090,34 @@ Paragraph.prototype.PreDelete = function()
 		// Чтобы при удалении параграфа с секцией автоматически запускался правильно пересчет секции, и правильно
 		// пересчитывалось на Undo/Redo.
 		this.Set_SectionPr(undefined);
+	}
+};
+Paragraph.prototype.OnDetach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+	
+	let logicDocument = this.GetLogicDocument();
+	if (logicDocument && logicDocument.IsDocumentEditor())
+		logicDocument.OnDetachParagraph(this);
+	
+	for (let i = this.Content.length - 1; i >= 0; --i)
+	{
+		this.Content[i].OnDetach();
+	}
+};
+Paragraph.prototype.OnAttach = function()
+{
+	if (!this.IsUseInDocument())
+		return;
+	
+	let logicDocument = this.GetLogicDocument();
+	if (logicDocument && logicDocument.IsDocumentEditor())
+		logicDocument.OnAttachParagraph(this);
+	
+	for (let i = 0; i < this.Content.length; ++i)
+	{
+		this.Content[i].OnAttach();
 	}
 };
 //----------------------------------------------------------------------------------------------------------------------

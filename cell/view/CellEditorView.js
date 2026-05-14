@@ -1017,7 +1017,20 @@ function (window, undefined) {
 				}
 				if ((cElementType.cell === oper.type || cElementType.cellsRange === oper.type || cElementType.cell3D === oper.type) && oper.externalLink == null) {
 					wsName = oper.getWS().getName();
-					bboxOper = oper.getBBox0();
+					// For `A1#` (spilled-range operator): show the full spill range on the sheet
+					// instead of just the anchor cell, mirroring Excel behaviour.
+					if (r.isHashRef && AscCommonExcel.bIsSupportDynamicArrays) {
+						var _anchorWs = oper.getWS();
+						var _anchorBbox = oper.getBBox0();
+						if (_anchorWs && _anchorBbox && _anchorWs.dynamicArrayManager) {
+							var _spillRef = _anchorWs.dynamicArrayManager.getDynamicArrayFirstCell(_anchorBbox.c1, _anchorBbox.r1);
+							bboxOper = _spillRef || _anchorBbox;
+						} else {
+							bboxOper = _anchorBbox;
+						}
+					} else {
+						bboxOper = oper.getBBox0();
+					}
 				} else if ((cElementType.cellsRange3D === oper.type) && oper.externalLink == null) {
 					if (oper.isSingleSheet()) {
 						wsName = oper.getWS().getName();

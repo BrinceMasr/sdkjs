@@ -234,6 +234,19 @@ $(function () {
 		ws.getRange3(r1, c1, r2, c2).cleanAll();
 	};
 
+	const assertVolatileArraysEmpty = function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			return;
+		}
+		var va = wb.dependencyFormulas && wb.dependencyFormulas.getVolatileArrays();
+		var leaked = [];
+		for (var k in va) {
+			leaked.push(k);
+		}
+		assert.strictEqual(leaked.length, 0,
+			"volatileArrays must be empty after test, leaked listenerId(s): [" + leaked.join(", ") + "]");
+	};
+
 	function checkUndoRedo(fBefore, fAfter, desc, skipLastUndo) {
 		fAfter("after_" + desc);
 		AscCommon.History.Undo();
@@ -6600,9 +6613,9 @@ $(function () {
 		resultRow = formulaInfo && formulaInfo.dynamicRange.getHeight();
 		resultCol = formulaInfo && formulaInfo.dynamicRange.getWidth();
 		applyByArray = formulaInfo && formulaInfo.applyByArray;
-		assert.strictEqual(applyByArray, false, 'Is =A1:A3 array formula');
-		assert.strictEqual(resultRow, false, 'Rows in =A1:A3');
-		assert.strictEqual(resultCol, false, 'Cols in =A1:A3');
+		assert.strictEqual(applyByArray, true, 'Is =A1:A3 array formula');
+		assert.strictEqual(resultRow, 3, 'Rows in =A1:A3');
+		assert.strictEqual(resultCol, 1, 'Cols in =A1:A3');
 
 
 		oParser = new parserFormula('{1;2;3}', cellWithFormula, ws);
@@ -6621,9 +6634,9 @@ $(function () {
 		resultRow = formulaInfo && formulaInfo.dynamicRange.getHeight();
 		resultCol = formulaInfo && formulaInfo.dynamicRange.getWidth();
 		applyByArray = formulaInfo && formulaInfo.applyByArray;
-		assert.strictEqual(applyByArray, false, 'Is =A1:C1 array formula');
-		assert.strictEqual(resultRow, false, 'Rows in =A1:C1');
-		assert.strictEqual(resultCol, false, 'Cols in =A1:C1');
+		assert.strictEqual(applyByArray, true, 'Is =A1:C1 array formula');
+		assert.strictEqual(resultRow, 1, 'Rows in =A1:C1');
+		assert.strictEqual(resultCol, 3, 'Cols in =A1:C1');
 
 		oParser = new parserFormula('{1,2,3}', cellWithFormula, ws);
 		assert.ok(oParser.parse(), '{1,2,3}');
@@ -6641,9 +6654,9 @@ $(function () {
 		resultRow = formulaInfo && formulaInfo.dynamicRange.getHeight();
 		resultCol = formulaInfo && formulaInfo.dynamicRange.getWidth();
 		applyByArray = formulaInfo && formulaInfo.applyByArray;
-		assert.strictEqual(applyByArray, false, 'Is =A1:C3 array formula');
-		assert.strictEqual(resultRow, false, 'Rows in =A1:C3');
-		assert.strictEqual(resultCol, false, 'Cols in =A1:C3');
+		assert.strictEqual(applyByArray, true, 'Is =A1:C3 array formula');
+		assert.strictEqual(resultRow, 3, 'Rows in =A1:C3');
+		assert.strictEqual(resultCol, 3, 'Cols in =A1:C3');
 
 		oParser = new parserFormula('{1,2;3,4}', cellWithFormula, ws);
 		assert.ok(oParser.parse(), '{1,2;3,4}');
@@ -6721,9 +6734,9 @@ $(function () {
 		resultRow = formulaInfo && formulaInfo.dynamicRange.getHeight();
 		resultCol = formulaInfo && formulaInfo.dynamicRange.getWidth();
 		applyByArray = formulaInfo && formulaInfo.applyByArray;
-		assert.strictEqual(applyByArray, false, 'Is =A:A array formula');
-		assert.strictEqual(resultRow, false /*AscCommon.gc_nMaxRow*/, 'Rows in =A:A from D1');
-		assert.strictEqual(resultCol, false, 'Cols in =A:A from D1');
+		assert.strictEqual(applyByArray, true, 'Is =A:A array formula');
+		assert.strictEqual(resultRow, AscCommon.gc_nMaxRow, 'Rows in =A:A from D1');
+		assert.strictEqual(resultCol, 1, 'Cols in =A:A from D1');
 
 		oParser = new parserFormula('A1:XFD1', cellWithFormula, ws);
 		assert.ok(oParser.parse(), 'A1:XFD1');
@@ -6731,9 +6744,9 @@ $(function () {
 		resultRow = formulaInfo && formulaInfo.dynamicRange.getHeight();
 		resultCol = formulaInfo && formulaInfo.dynamicRange.getWidth();
 		applyByArray = formulaInfo && formulaInfo.applyByArray;
-		assert.strictEqual(applyByArray, false, 'Is =A1:XFD1 array formula');
-		assert.strictEqual(resultRow, false, 'Rows in =A1:XFD1 from D1');
-		assert.strictEqual(resultCol, false /*AscCommon.gc_nMaxCol - 3*/, 'Cols in =A1:XFD1 from D1');
+		assert.strictEqual(applyByArray, true, 'Is =A1:XFD1 array formula');
+		assert.strictEqual(resultRow, 1, 'Rows in =A1:XFD1 from D1');
+		assert.strictEqual(resultCol, AscCommon.gc_nMaxCol - 3, 'Cols in =A1:XFD1 from D1');
 
 
 		oParser = new parserFormula('SIN(A1)', cellWithFormula, ws);
@@ -8262,6 +8275,7 @@ $(function () {
 		checkUndoRedo(checkOneFormula, checkAllDeleted, "After deleting K1 (third formula, all formulas deleted)", true);
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"Complex dynamic array metadata with expanded and blocked arrays - delete with undo/redo\"", function (assert) {
@@ -8431,6 +8445,7 @@ $(function () {
 
 		// Cleanup
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"Metadata add test\"", function (assert) {
@@ -8535,6 +8550,7 @@ $(function () {
 		assert.ok(metadata == null, "Metadata removed after all formulas deleted");
 
 		clearData(0, 0, 10, 20);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	var getMetadata = function () {
@@ -8647,6 +8663,7 @@ $(function () {
 		assert.ok(richValueTypesInfo == null, "richValueTypesInfo removed");
 
 		clearData(0, 0, 10, 20);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"Multiple richdata formulas collapse and delete\"", function (assert) {
@@ -8787,6 +8804,7 @@ $(function () {
 		assert.ok(metadata == null, "Metadata removed after all formulas deleted");
 
 		clearData(0, 0, 10, 20);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"Delete head cell of expanded and collapsed array\"", function (assert) {
@@ -8926,6 +8944,7 @@ $(function () {
 		assert.ok(metadata == null, "Metadata removed after collapsed array deletion");
 
 		clearData(0, 0, 10, 20);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	function _getArrayFormulaRef(sAddr) {
@@ -9056,6 +9075,7 @@ $(function () {
 		assert.ok(metadata != null, "Metadata exists after all replacements");
 
 		clearData(0, 0, 10, 20);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"Add dynamic array in previous cell when next cell has array\"", function (assert) {
@@ -9196,6 +9216,7 @@ $(function () {
 		assert.ok(metadata != null, "Metadata still exists");
 
 		clearData(0, 0, 10, 20);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"Insert dynamic array into existing spill range\"", function (assert) {
@@ -9270,6 +9291,66 @@ $(function () {
 		assert.ok(richValueData != null, "richValueData exists due to collapsed A1");
 
 		clearData(0, 0, 10, 20);
+		assertVolatileArraysEmpty(assert);
+	});
+
+	QUnit.test("Test: \"ANCHORARRAY (A1#) re-spill after upstream block/unblock\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+		clearData(0, 0, 100, 200);
+
+		var flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		// 1. A1 = SEQUENCE(5) -> spills A1:A5
+		var fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		var fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=SEQUENCE(5)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		assert.strictEqual(ws.getRange2("A1").getValue(), "1", "A1 spilled to 1");
+		assert.strictEqual(ws.getRange2("A5").getValue(), "5", "A5 spilled to 5");
+
+		// 2. B1 = A1# -> ANCHORARRAY(A1) spills B1:B5
+		fillRange = ws.getRange2("B1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("B1").getValueForEdit2();
+		fragment[0].setFragmentText("=A1#");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		assert.strictEqual(ws.getRange2("B1").getValue(), "1", "B1=A1# spilled to 1");
+		assert.strictEqual(ws.getRange2("B5").getValue(), "5", "B5=A1# spilled to 5");
+
+		// 3. Block A1 by typing into A2 -> A1 collapses to #SPILL!, B1=A1# inherits #SPILL!
+		ws.getRange2("A2").setValue("x");
+
+		assert.strictEqual(ws.getRange2("A1").getValue(), "#SPILL!", "A1 #SPILL! after block");
+		assert.strictEqual(ws.getRange2("B1").getValue(), "#SPILL!", "B1=A1# #SPILL! after upstream block");
+		assert.strictEqual(ws.getRange2("B2").getValue(), "", "B2 cleared after B1 collapse");
+		assert.strictEqual(ws.getRange2("B5").getValue(), "", "B5 cleared after B1 collapse");
+
+		// 4. Unblock A1 by clearing A2 -> A1 re-spills, and B1=A1# must re-spill too
+		ws.getRange2("A2").setValue("");
+
+		assert.strictEqual(ws.getRange2("A1").getValue(), "1", "A1 re-spilled to 1");
+		assert.strictEqual(ws.getRange2("A5").getValue(), "5", "A5 re-spilled to 5");
+		assert.strictEqual(ws.getRange2("B1").getValue(), "1", "B1=A1# re-spilled to 1 (regression)");
+		assert.strictEqual(ws.getRange2("B5").getValue(), "5", "B5=A1# re-spilled to 5 (regression)");
+
+		// Array ref restored to full B1:B5
+		var arrayRefB1 = _getArrayFormulaRef("B1");
+		assert.ok(arrayRefB1 != null, "B1 has array reference after recovery");
+		assert.strictEqual(arrayRefB1.r1, 0, "B1 array starts at row 0");
+		assert.strictEqual(arrayRefB1.c1, 1, "B1 array starts at col 1 (B)");
+		assert.strictEqual(arrayRefB1.r2, 4, "B1 array ends at row 4");
+		assert.strictEqual(arrayRefB1.c2, 1, "B1 array ends at col 1 (B)");
+
+		clearData(0, 0, 10, 20);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"Paste with clipboard collision - dynamic array collapse/delete\"", function (assert) {
@@ -9413,6 +9494,7 @@ $(function () {
 		assert.ok(vmIndexA1Formula > 0, "A1 has richdata after formula paste (collapsed)");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 
@@ -9482,6 +9564,7 @@ $(function () {
 		assert.ok(cmIndexG1 > 0, "G1 has metadata after collapsed paste");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"Dynamic array add/delete with undo/redo\"", function (assert) {
@@ -9594,6 +9677,7 @@ $(function () {
 
 
 		clearData(0, 0, 10, 20);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"Autofill with collision - dynamic array collapse/delete\"", function (assert) {
@@ -9930,6 +10014,7 @@ $(function () {
 		checkUndoRedo(checkBlockedEmptyState, checkBlockedState, "Blocked array add");
 
 		clearData(0, 0, 10, 20);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"Dynamic array blocked, then unblocked with undo/redo\"", function (assert) {
@@ -10071,6 +10156,7 @@ $(function () {
 		checkUndoRedo(checkBlockedStateC3, checkExpandedStateC3, "Expanded->Blocked->Expanded undo/redo");
 
 		clearData(0, 0, 10, 20);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"Range reference as dynamic array\"", function (assert) {
@@ -10158,6 +10244,7 @@ $(function () {
 		checkUndoRedo(checkCollapsedState, checkExpandedState, "Expanded->Blocked->Expanded undo/redo");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"SIN with entire column reference (A:A)\"", function (assert) {
@@ -10238,6 +10325,7 @@ $(function () {
 		assert.ok(Math.abs(d100Value - 0) < 0.0001, "D100 should contain SIN(empty) ≈ 0, got: " + d100Value);
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"COS with dynamic arrays\"", function (assert) {
@@ -10300,6 +10388,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("D1").getValue(), "#VALUE!", "COS implicit intersection: D1 = COS(@A1:B2) = COS(1) = 0.5403");
 	
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"ABS with dynamic arrays\"", function (assert) {
@@ -10358,6 +10447,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "ABS implicit intersection: M1 = ABS(@J1:K2) = ABS(-1) = 1");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"ACOS with dynamic arrays\"", function (assert) {
@@ -10416,6 +10506,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "ACOS implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"ASIN with dynamic arrays\"", function (assert) {
@@ -10474,6 +10565,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "ASIN implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"ATAN with dynamic arrays\"", function (assert) {
@@ -10532,6 +10624,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "ATAN implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"ACOSH with dynamic arrays\"", function (assert) {
@@ -10590,6 +10683,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "ACOSH implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"ASINH with dynamic arrays\"", function (assert) {
@@ -10648,6 +10742,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "ASINH implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"ATANH with dynamic arrays\"", function (assert) {
@@ -10706,6 +10801,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "ATANH implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"TAN with dynamic arrays\"", function (assert) {
@@ -10764,6 +10860,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "TAN implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"COSH with dynamic arrays\"", function (assert) {
@@ -10822,6 +10919,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "COSH implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"SINH with dynamic arrays\"", function (assert) {
@@ -10880,6 +10978,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "SINH implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"TANH with dynamic arrays\"", function (assert) {
@@ -10938,6 +11037,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "TANH implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"DEGREES with dynamic arrays\"", function (assert) {
@@ -10996,6 +11096,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "DEGREES implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"RADIANS with dynamic arrays\"", function (assert) {
@@ -11054,6 +11155,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "RADIANS implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"EXP with dynamic arrays\"", function (assert) {
@@ -11112,6 +11214,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "EXP implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"FACT with dynamic arrays\"", function (assert) {
@@ -11170,6 +11273,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "FACT implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"FACTDOUBLE with dynamic arrays\"", function (assert) {
@@ -11227,6 +11331,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "FACTDOUBLE implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"INT with dynamic arrays\"", function (assert) {
@@ -11285,6 +11390,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "INT implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"EVEN with dynamic arrays\"", function (assert) {
@@ -11343,6 +11449,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "EVEN implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"ODD with dynamic arrays\"", function (assert) {
@@ -11401,6 +11508,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "ODD implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"LN with dynamic arrays\"", function (assert) {
@@ -11459,6 +11567,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "LN implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"LOG10 with dynamic arrays\"", function (assert) {
@@ -11517,6 +11626,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "LOG10 implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"SIGN with dynamic arrays\"", function (assert) {
@@ -11575,6 +11685,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "SIGN implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"SQRT with dynamic arrays\"", function (assert) {
@@ -11633,6 +11744,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "SQRT implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"SQRTPI with dynamic arrays\"", function (assert) {
@@ -11690,6 +11802,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "SQRTPI implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"FISHER with dynamic arrays\"", function (assert) {
@@ -11748,6 +11861,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "FISHER implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"FISHERINV with dynamic arrays\"", function (assert) {
@@ -11806,6 +11920,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "FISHERINV implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"GAUSS with dynamic arrays\"", function (assert) {
@@ -11864,6 +11979,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "GAUSS implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"PHI with dynamic arrays\"", function (assert) {
@@ -11922,6 +12038,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "PHI implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"GAMMALN with dynamic arrays\"", function (assert) {
@@ -11980,6 +12097,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "GAMMALN implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"GAMMALN.PRECISE with dynamic arrays\"", function (assert) {
@@ -12038,6 +12156,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "GAMMALN.PRECISE implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"NORMSDIST with dynamic arrays\"", function (assert) {
@@ -12096,6 +12215,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "NORMSDIST implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"NORMSINV with dynamic arrays\"", function (assert) {
@@ -12154,6 +12274,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "NORMSINV implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"NORM.S.INV with dynamic arrays\"", function (assert) {
@@ -12212,6 +12333,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "NORM.S.INV implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"ERFC with dynamic arrays\"", function (assert) {
@@ -12269,6 +12391,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "ERFC implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"LEN with dynamic arrays\"", function (assert) {
@@ -12327,6 +12450,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "LEN implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"LOWER with dynamic arrays\"", function (assert) {
@@ -12385,6 +12509,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "LOWER implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"UPPER with dynamic arrays\"", function (assert) {
@@ -12443,6 +12568,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "UPPER implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"PROPER with dynamic arrays\"", function (assert) {
@@ -12501,6 +12627,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "PROPER implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"TRIM with dynamic arrays\"", function (assert) {
@@ -12559,6 +12686,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "TRIM implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"CLEAN with dynamic arrays\"", function (assert) {
@@ -12617,6 +12745,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "CLEAN implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"VALUE with dynamic arrays\"", function (assert) {
@@ -12675,6 +12804,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "VALUE implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"CODE with dynamic arrays\"", function (assert) {
@@ -12733,6 +12863,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "CODE implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"CHAR with dynamic arrays\"", function (assert) {
@@ -12791,6 +12922,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "CHAR implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"UNICHAR with dynamic arrays\"", function (assert) {
@@ -12849,6 +12981,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "UNICHAR implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"UNICODE with dynamic arrays\"", function (assert) {
@@ -12907,6 +13040,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "#VALUE!", "UNICODE implicit intersection: M1 shows #VALUE! for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"TYPE with dynamic arrays\"", function (assert) {
@@ -12962,6 +13096,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("M1").getValue(), "16", "TYPE implicit intersection: M1 shows 16 (error) for implicit intersection over a range");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"Multiplication table with SEQUENCE\"", function (assert) {
@@ -12996,6 +13131,7 @@ $(function () {
 		assert.strictEqual(Number(ws.getRange2("H4").getValue()), 32, "H4 = 4*8 = 32");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"FILTER and SORT with multiple conditions\"", function (assert) {
@@ -13090,6 +13226,7 @@ $(function () {
 		assert.strictEqual(Number(ws.getRange2("H3").getValue()), 120, "H3 = 120");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"Dynamic summary with SORTBY, HSTACK, UNIQUE, SUMIF\"", function (assert) {
@@ -13157,6 +13294,7 @@ $(function () {
 		assert.strictEqual(Number(ws.getRange2("E3").getValue()), 2900, "E3 = 2900 (1500+800+600)");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"Matrix calculations with SQRT and SEQUENCE\"", function (assert) {
@@ -13189,6 +13327,7 @@ $(function () {
 		assert.strictEqual(Number(ws.getRange2("C3").getValue()), Math.sqrt(13), "C3 = SQRT(13)");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"Complex dynamic arrays scenarios - FILTER, SORT, VSTACK, error handling\"", function (assert) {
@@ -13385,6 +13524,7 @@ $(function () {
 		assert.ok(spillValue === "#SPILL!" || spillValue === "#REF!" || Number(spillValue) === 1, "P10 shows #SPILL!, #REF! error, or spill is prevented");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"IF with array condition and range values\"", function (assert) {
@@ -13492,6 +13632,7 @@ $(function () {
 		//TODO IF({1,0,1;2,0,4;1,0,1;1,0,1;1,0,1;1,0,1;1,0,1;1,0,1;1,0,1;1,0,1},A1:C10)
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"FILTER dynamic array size tracking\"", function (assert) {
@@ -13621,6 +13762,7 @@ $(function () {
 		checkUndoRedo(checkFruitState, checkVegetableState, "Change D4 from fruit to vegetable");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"FILTER dynamic array spill conflict after resize\"", function (assert) {
@@ -13732,6 +13874,7 @@ $(function () {
 		assert.strictEqual(ws.getRange2("D3").getValue(), "orange", "D3 = orange");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"Copy worksheet with dynamic arrays\"", function (assert) {
@@ -13912,6 +14055,7 @@ $(function () {
 		}
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"Array formula display with undo/redo\"", function (assert) {
@@ -13945,6 +14089,7 @@ $(function () {
 		checkUndoRedo(checkFormulaAbsent, checkFormulaPresent, "Array formula add/remove");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test("Test: \"Ctrl+Enter with range formula - offset behavior\"", function (assert) {
@@ -14025,6 +14170,7 @@ $(function () {
 		assert.ok(!vmB1 || vmB1 === 0, "B1 should NOT have richdata vmIndex (expanded successfully)");
 
 		clearData(0, 0, 100, 200);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test('Test: "Math functions — dynamic array spill"', function (assert) {
@@ -14974,6 +15120,7 @@ $(function () {
 		curRow += 7;
 
 		clearData(0, 0, 50, 1600);
+		assertVolatileArraysEmpty(assert);
 	});
 
 
@@ -15313,6 +15460,7 @@ $(function () {
 		// curRow += 7;
 
 		clearData(0, 0, 50, 500);
+		assertVolatileArraysEmpty(assert);
 	});
 
 
@@ -15692,6 +15840,7 @@ $(function () {
 		curRow += 7;
 
 		clearData(0, 0, 50, 500);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test('Test: "Statistical functions — dynamic array spill"', function (assert) {
@@ -16078,6 +16227,7 @@ $(function () {
 		curRow += 7;
 
 		clearData(0, 0, 50, 500);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.test('Test: "Engineering functions — dynamic array spill"', function (assert) {
@@ -16548,6 +16698,7 @@ $(function () {
 		curRow += 7;
 
 		clearData(0, 0, 50, 500);
+		assertVolatileArraysEmpty(assert);
 	});
 
 
@@ -17007,6 +17158,7 @@ $(function () {
 		curRow += 7;
 
 		clearData(0, 0, 50, 500);
+		assertVolatileArraysEmpty(assert);
 	});
 
 
@@ -17357,6 +17509,7 @@ $(function () {
 		curRow += 7;
 
 		clearData(0, 0, 50, 500);
+		assertVolatileArraysEmpty(assert);
 	});
 
 
@@ -17778,6 +17931,7 @@ $(function () {
 		curRow += 7;
 
 		clearData(0, 0, 50, 500);
+		assertVolatileArraysEmpty(assert);
 	});
 
 
@@ -18591,6 +18745,7 @@ $(function () {
 		// curRow += 7;
 
 		clearData(0, 0, 50, 500);
+		assertVolatileArraysEmpty(assert);
 	});
 
 
@@ -19188,6 +19343,810 @@ $(function () {
 		curRow += 7;
 
 		clearData(0, 0, 50, 700);
+		assertVolatileArraysEmpty(assert);
+	});
+
+	QUnit.test("Test: \"ANCHORARRAY basic: create, collapse head, expand head with undo/redo\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+		clearData(0, 0, 100, 200);
+
+		var flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		// Step 1: Add head formula =SEQUENCE(3) in A1 → spills A1:A3
+		var fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		var fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=SEQUENCE(3)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		assert.strictEqual(ws.getRange2("A1").getValue(), "1", "A1=SEQUENCE(3): A1=1");
+		assert.strictEqual(ws.getRange2("A2").getValue(), "2", "A1=SEQUENCE(3): A2=2");
+		assert.strictEqual(ws.getRange2("A3").getValue(), "3", "A1=SEQUENCE(3): A3=3");
+
+		// Step 2: Add anchor formula =A1# in B1 → should spill B1:B3
+		fillRange = ws.getRange2("B1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("B1").getValueForEdit2();
+		fragment[0].setFragmentText("=A1#");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		var checkExpandedState = function (desc) {
+			assert.strictEqual(ws.getRange2("A1").getValue(), "1", desc + ": A1=1");
+			assert.strictEqual(ws.getRange2("A2").getValue(), "2", desc + ": A2=2");
+			assert.strictEqual(ws.getRange2("A3").getValue(), "3", desc + ": A3=3");
+			assert.strictEqual(ws.getRange2("B1").getValue(), "1", desc + ": B1=1");
+			assert.strictEqual(ws.getRange2("B2").getValue(), "2", desc + ": B2=2");
+			assert.strictEqual(ws.getRange2("B3").getValue(), "3", desc + ": B3=3");
+
+			var refB1 = _getArrayFormulaRef("B1");
+			assert.ok(refB1 != null, desc + ": B1 has array ref");
+			assert.strictEqual(refB1.r1, 0, desc + ": B1 array starts at row 0");
+			assert.strictEqual(refB1.r2, 2, desc + ": B1 array ends at row 2");
+			assert.strictEqual(refB1.c1, 1, desc + ": B1 array starts at col 1");
+			assert.strictEqual(refB1.c2, 1, desc + ": B1 array ends at col 1");
+
+			var vmB1 = getCellRichValueIndex(0, 1);
+			assert.ok(!vmB1 || vmB1 === 0, desc + ": B1 has no vm (expanded)");
+		};
+
+		checkExpandedState("After creating anchor formula");
+
+		// Step 3: Collapse head formula by writing into A2
+		ws.getRange2("A2").setValue("x");
+
+		var checkBlockedState = function (desc) {
+			assert.strictEqual(ws.getRange2("A1").getValue(), "#SPILL!", desc + ": A1=#SPILL!");
+			assert.strictEqual(ws.getRange2("A2").getValue(), "x", desc + ": A2=x (blocker)");
+			assert.strictEqual(ws.getRange2("B1").getValue(), "#SPILL!", desc + ": B1=#SPILL! (anchor inherits)");
+			assert.strictEqual(ws.getRange2("B2").getValue(), "", desc + ": B2 cleared after anchor collapse");
+			assert.strictEqual(ws.getRange2("B3").getValue(), "", desc + ": B3 cleared after anchor collapse");
+
+			var vmA1 = getCellRichValueIndex(0, 0);
+			assert.ok(vmA1 > 0, desc + ": A1 has vm (collapsed)");
+
+			var vmB1 = getCellRichValueIndex(0, 1);
+			assert.ok(vmB1 > 0, desc + ": B1 has vm (collapsed)");
+		};
+
+		checkBlockedState("After blocking head via A2");
+
+		// Step 4: Expand head by removing blocker from A2
+		ws.getRange2("A2").setValue("");
+
+		checkExpandedState("After clearing A2 blocker");
+
+		// Step 5: Undo/redo of the unblocking step.
+		// skipLastUndo=true: end in expanded state so formulas leave volatileArrays before clearData.
+		checkUndoRedo(checkBlockedState, checkExpandedState, "anchor collapse/expand undo/redo", true);
+
+		clearData(0, 0, 10, 20);
+		assertVolatileArraysEmpty(assert);
+	});
+
+	QUnit.test('Test: "ANCHORARRAY inside nested formula: SIN(SUM(A1#)) and range+# is invalid"', function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+		clearData(0, 0, 10, 20);
+
+		var flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		// Step 1: head formula =SEQUENCE(4) in A1 → spills A1:A4 = {1, 2, 3, 4}
+		var fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		var fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=SEQUENCE(4)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		assert.strictEqual(ws.getRange2("A1").getValue(), "1", "head SEQUENCE(4): A1=1");
+		assert.strictEqual(ws.getRange2("A2").getValue(), "2", "head SEQUENCE(4): A2=2");
+		assert.strictEqual(ws.getRange2("A3").getValue(), "3", "head SEQUENCE(4): A3=3");
+		assert.strictEqual(ws.getRange2("A4").getValue(), "4", "head SEQUENCE(4): A4=4");
+
+		// Step 2: =SIN(SUM(A1#)) in C1
+		// A1# expands to spill range A1:A4 → SUM(1+2+3+4)=10 → SIN(10)≈-0.54402
+		var formula = "=SIN(SUM(A1#))";
+		fillRange = ws.getRange2("C1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("C1").getValueForEdit2();
+		fragment[0].setFragmentText(formula);
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		var resCell = getCell(ws.getRange2("C1"));
+		assert.strictEqual(
+			resCell.getFormulaParsed().getFormula(),
+			"SIN(SUM(_xlfn.ANCHORARRAY(A1)))",
+			"=SIN(SUM(A1#)) stored as SIN(SUM(ANCHORARRAY(A1)))"
+		);
+		assert.strictEqual(
+			ws.getRange2("C1").getValueForEdit(),
+			formula,
+			"getValueForEdit returns =SIN(SUM(A1#))"
+		);
+		checkClose(assert, ws.getRange2("C1").getValue(), Math.sin(10), "SIN(SUM(A1#)) = SIN(10)");
+
+		// Step 3: =ROUND(SIN(SUM(A1#))*100, 2) in C2 — deeper nesting
+		// same SIN(10)*100 = -54.40211...  → ROUND(..., 2) = -54.40
+		var formula2 = "=ROUND(SIN(SUM(A1#))*100,2)";
+		fillRange = ws.getRange2("C2");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("C2").getValueForEdit2();
+		fragment[0].setFragmentText(formula2);
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		var resCell2 = getCell(ws.getRange2("C2"));
+		assert.strictEqual(
+			resCell2.getFormulaParsed().getFormula(),
+			"ROUND(SIN(SUM(_xlfn.ANCHORARRAY(A1)))*100,2)",
+			"=ROUND(SIN(SUM(A1#))*100,2) stored with ANCHORARRAY"
+		);
+		assert.strictEqual(
+			ws.getRange2("C2").getValueForEdit(),
+			formula2,
+			"getValueForEdit returns =ROUND(SIN(SUM(A1#))*100,2)"
+		);
+		checkClose(assert, ws.getRange2("C2").getValue(), Math.round(Math.sin(10) * 100 * 100) / 100, "ROUND(SIN(SUM(A1#))*100,2)");
+
+		// Step 4: =SUM(A1:A4#) — range reference + # must NOT be treated as anchorArray (our fix)
+		// MS Excel returns an error for range+# syntax
+		var formula3 = "=SUM(A1:A4#)";
+		fillRange = ws.getRange2("C3");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("C3").getValueForEdit2();
+		fragment[0].setFragmentText(formula3);
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		var c3Val = ws.getRange2("C3").getValue();
+		assert.ok(
+			c3Val !== String(Math.sin(10)) && parseFloat(c3Val) !== Math.sin(10),
+			"=SUM(A1:A4#) is NOT treated as anchorArray (value is not SIN(10)): got " + c3Val
+		);
+		var c3Cell = getCell(ws.getRange2("C3"));
+		var c3Formula = c3Cell && c3Cell.getFormulaParsed() && c3Cell.getFormulaParsed().getFormula();
+		assert.ok(
+			!c3Formula || c3Formula.indexOf("ANCHORARRAY") === -1,
+			"=SUM(A1:A4#) does not contain ANCHORARRAY in stored formula: " + c3Formula
+		);
+
+		clearData(0, 0, 10, 20);
+		assertVolatileArraysEmpty(assert);
+	});
+
+	QUnit.test("Test: \"ANCHORARRAY 2D head: SEQUENCE(3,2) anchor mirrors full spill range\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+		clearData(0, 0, 100, 200);
+
+		var flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		// A1 = SEQUENCE(3,2) → spills A1:B3 (3 rows × 2 cols): 1,2,3,4,5,6
+		var fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		var fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=SEQUENCE(3,2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		assert.strictEqual(ws.getRange2("A1").getValue(), "1", "head A1=1");
+		assert.strictEqual(ws.getRange2("B1").getValue(), "2", "head B1=2");
+		assert.strictEqual(ws.getRange2("A2").getValue(), "3", "head A2=3");
+		assert.strictEqual(ws.getRange2("B2").getValue(), "4", "head B2=4");
+		assert.strictEqual(ws.getRange2("A3").getValue(), "5", "head A3=5");
+		assert.strictEqual(ws.getRange2("B3").getValue(), "6", "head B3=6");
+
+		// D1 = A1# → must spill D1:E3 mirroring the 3×2 shape
+		fillRange = ws.getRange2("D1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("D1").getValueForEdit2();
+		fragment[0].setFragmentText("=A1#");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		assert.strictEqual(ws.getRange2("D1").getValue(), "1", "anchor D1=1");
+		assert.strictEqual(ws.getRange2("E1").getValue(), "2", "anchor E1=2");
+		assert.strictEqual(ws.getRange2("D2").getValue(), "3", "anchor D2=3");
+		assert.strictEqual(ws.getRange2("E2").getValue(), "4", "anchor E2=4");
+		assert.strictEqual(ws.getRange2("D3").getValue(), "5", "anchor D3=5");
+		assert.strictEqual(ws.getRange2("E3").getValue(), "6", "anchor E3=6");
+		assert.strictEqual(ws.getRange2("D4").getValue(), "", "D4 outside anchor spill: empty");
+		assert.strictEqual(ws.getRange2("F1").getValue(), "", "F1 outside anchor spill: empty");
+
+		var refD1 = _getArrayFormulaRef("D1");
+		assert.ok(refD1 != null, "D1 has array ref");
+		assert.strictEqual(refD1.r1, 0, "D1 array r1=0");
+		assert.strictEqual(refD1.c1, 3, "D1 array c1=3 (col D)");
+		assert.strictEqual(refD1.r2, 2, "D1 array r2=2");
+		assert.strictEqual(refD1.c2, 4, "D1 array c2=4 (col E)");
+
+		clearData(0, 0, 10, 20);
+		assertVolatileArraysEmpty(assert);
+	});
+
+	QUnit.test("Test: \"ANCHORARRAY head resize: anchor re-spills when head changes size\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+		clearData(0, 0, 100, 200);
+
+		var flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		// Step 1: A1=SEQUENCE(3), B1=A1# → B1:B3
+		var fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		var fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=SEQUENCE(3)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		fillRange = ws.getRange2("B1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("B1").getValueForEdit2();
+		fragment[0].setFragmentText("=A1#");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		assert.strictEqual(ws.getRange2("B1").getValue(), "1", "initial: B1=1");
+		assert.strictEqual(ws.getRange2("B3").getValue(), "3", "initial: B3=3");
+		assert.strictEqual(ws.getRange2("B4").getValue(), "", "initial: B4 empty");
+
+		var refBefore = _getArrayFormulaRef("B1");
+		assert.strictEqual(refBefore && refBefore.r2, 2, "initial: B1 array ends at row 2");
+
+		// Step 2: Grow head — SEQUENCE(3) → SEQUENCE(5); anchor must expand to B1:B5
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=SEQUENCE(5)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		assert.strictEqual(ws.getRange2("A5").getValue(), "5", "after grow: A5=5");
+		assert.strictEqual(ws.getRange2("B1").getValue(), "1", "after grow: B1=1");
+		assert.strictEqual(ws.getRange2("B5").getValue(), "5", "after grow: B5=5");
+		assert.strictEqual(ws.getRange2("B6").getValue(), "", "after grow: B6 empty");
+
+		var refAfterGrow = _getArrayFormulaRef("B1");
+		assert.ok(refAfterGrow != null, "B1 has array ref after grow");
+		assert.strictEqual(refAfterGrow.r2, 4, "after grow: B1 array ends at row 4");
+		assert.strictEqual(refAfterGrow.c2, 1, "after grow: B1 array col stays at 1");
+
+		// Step 3: Shrink head — SEQUENCE(5) → SEQUENCE(2); anchor must shrink, B3:B5 cleared
+		fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=SEQUENCE(2)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		assert.strictEqual(ws.getRange2("B1").getValue(), "1", "after shrink: B1=1");
+		assert.strictEqual(ws.getRange2("B2").getValue(), "2", "after shrink: B2=2");
+		assert.strictEqual(ws.getRange2("B3").getValue(), "", "after shrink: B3 cleared");
+		assert.strictEqual(ws.getRange2("B5").getValue(), "", "after shrink: B5 cleared");
+
+		var refAfterShrink = _getArrayFormulaRef("B1");
+		assert.ok(refAfterShrink != null, "B1 has array ref after shrink");
+		assert.strictEqual(refAfterShrink.r2, 1, "after shrink: B1 array ends at row 1");
+
+		clearData(0, 0, 10, 20);
+		assertVolatileArraysEmpty(assert);
+	});
+
+	QUnit.test("Test: \"ANCHORARRAY multiple anchors to same head update together\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+		clearData(0, 0, 100, 200);
+
+		var flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		// Step 1: A1=SEQUENCE(3), B1=A1#, D1=A1# (two independent anchors to same head)
+		var fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		var fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=SEQUENCE(3)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		fillRange = ws.getRange2("B1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("B1").getValueForEdit2();
+		fragment[0].setFragmentText("=A1#");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		fillRange = ws.getRange2("D1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("D1").getValueForEdit2();
+		fragment[0].setFragmentText("=A1#");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		assert.strictEqual(ws.getRange2("B1").getValue(), "1", "initial B1=A1#: B1=1");
+		assert.strictEqual(ws.getRange2("B3").getValue(), "3", "initial B1=A1#: B3=3");
+		assert.strictEqual(ws.getRange2("D1").getValue(), "1", "initial D1=A1#: D1=1");
+		assert.strictEqual(ws.getRange2("D3").getValue(), "3", "initial D1=A1#: D3=3");
+
+		// Step 2: Block head via A2 → both anchors inherit #SPILL!
+		ws.getRange2("A2").setValue("x");
+
+		assert.strictEqual(ws.getRange2("A1").getValue(), "#SPILL!", "head A1=#SPILL! after block");
+		assert.strictEqual(ws.getRange2("B1").getValue(), "#SPILL!", "B1 anchor: #SPILL! after head block");
+		assert.strictEqual(ws.getRange2("D1").getValue(), "#SPILL!", "D1 anchor: #SPILL! after head block");
+		assert.strictEqual(ws.getRange2("B2").getValue(), "", "B2 cleared after B1 collapse");
+		assert.strictEqual(ws.getRange2("D2").getValue(), "", "D2 cleared after D1 collapse");
+
+		// Step 3: Unblock head → both anchors recover
+		ws.getRange2("A2").setValue("");
+
+		assert.strictEqual(ws.getRange2("B1").getValue(), "1", "B1 anchor recovered: B1=1");
+		assert.strictEqual(ws.getRange2("B3").getValue(), "3", "B1 anchor recovered: B3=3");
+		assert.strictEqual(ws.getRange2("D1").getValue(), "1", "D1 anchor recovered: D1=1");
+		assert.strictEqual(ws.getRange2("D3").getValue(), "3", "D1 anchor recovered: D3=3");
+
+		clearData(0, 0, 10, 20);
+		assertVolatileArraysEmpty(assert);
+	});
+
+	QUnit.test("Test: \"ANCHORARRAY anchor itself blocked: head spills OK but anchor area blocked → #SPILL!\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+		clearData(0, 0, 100, 200);
+
+		var flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		// Step 1: A1=SEQUENCE(3) → spills A1:A3 OK
+		var fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		var fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=SEQUENCE(3)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		// Step 2: Place blocker at C2 — in the spill path of the anchor (C1:C3)
+		ws.getRange2("C2").setValue("x");
+
+		// Step 3: C1=A1# — anchor needs C1:C3 but C2 is occupied → anchor gets #SPILL!
+		fillRange = ws.getRange2("C1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("C1").getValueForEdit2();
+		fragment[0].setFragmentText("=A1#");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		// Head is unaffected
+		assert.strictEqual(ws.getRange2("A1").getValue(), "1", "head A1 still spills: A1=1");
+		assert.strictEqual(ws.getRange2("A3").getValue(), "3", "head A1 still spills: A3=3");
+
+		// Anchor is #SPILL! because C2 blocks it
+		assert.strictEqual(ws.getRange2("C1").getValue(), "#SPILL!", "C1=A1# is #SPILL! (C2 blocker)");
+		assert.strictEqual(ws.getRange2("C3").getValue(), "", "C3 empty — anchor never spilled");
+
+		var vmC1 = getCellRichValueIndex(0, 2);
+		assert.ok(vmC1 > 0, "C1 has vm (anchor collapsed due to own blocker)");
+
+		// Step 4: Remove blocker → anchor re-spills
+		ws.getRange2("C2").setValue("");
+
+		assert.strictEqual(ws.getRange2("C1").getValue(), "1", "C1 re-spilled after removing C2");
+		assert.strictEqual(ws.getRange2("C3").getValue(), "3", "C3=3 after anchor re-spill");
+
+		var refC1 = _getArrayFormulaRef("C1");
+		assert.ok(refC1 != null, "C1 has array ref after re-spill");
+		assert.strictEqual(refC1.r2, 2, "C1 array ends at row 2 (C1:C3)");
+		assert.strictEqual(refC1.c1, 2, "C1 array starts at col 2 (C)");
+
+		var vmC1After = getCellRichValueIndex(0, 2);
+		assert.ok(!vmC1After || vmC1After === 0, "C1 vm cleared after re-spill");
+
+		clearData(0, 0, 10, 20);
+		assertVolatileArraysEmpty(assert);
+	});
+
+	QUnit.test("Test: \"ANCHORARRAY on non-spill cell returns error\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+		clearData(0, 0, 100, 200);
+
+		var flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		// Case 1: B1=42 (plain scalar), C1=B1# — B1 is not a spill head → error
+		ws.getRange2("B1").setValue("42");
+
+		var fillRange = ws.getRange2("C1");
+		wsView.setSelection(fillRange.bbox);
+		var fragment = ws.getRange2("C1").getValueForEdit2();
+		fragment[0].setFragmentText("=B1#");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		var c1Val = ws.getRange2("C1").getValue();
+		assert.ok(c1Val.charAt(0) === "#", "=B1# on plain scalar returns error: got " + c1Val);
+
+		// Case 2: E1 is empty, D1=E1# — no spill array at all → error
+		fillRange = ws.getRange2("D1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("D1").getValueForEdit2();
+		fragment[0].setFragmentText("=E1#");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		var d1Val = ws.getRange2("D1").getValue();
+		assert.ok(d1Val.charAt(0) === "#", "=E1# on empty cell returns error: got " + d1Val);
+
+		// Case 3: G1 has a scalar formula (=1+1), not a dynamic array head — H1=G1# → error
+		fillRange = ws.getRange2("G1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("G1").getValueForEdit2();
+		fragment[0].setFragmentText("=1+1");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		assert.strictEqual(ws.getRange2("G1").getValue(), "2", "G1=1+1=2 (scalar formula, not a spill head)");
+
+		fillRange = ws.getRange2("H1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("H1").getValueForEdit2();
+		fragment[0].setFragmentText("=G1#");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		var h1Val = ws.getRange2("H1").getValue();
+		assert.ok(h1Val.charAt(0) === "#", "=G1# on scalar formula cell returns error: got " + h1Val);
+
+		clearData(0, 0, 10, 20);
+		assertVolatileArraysEmpty(assert);
+	});
+
+	QUnit.test("Test: \"ANCHORARRAY anchor formula stored/displayed as A1# (getValueForEdit roundtrip)\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+		clearData(0, 0, 100, 200);
+
+		var flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		// A1=SEQUENCE(3), B1=A1#
+		var fillRange = ws.getRange2("A1");
+		wsView.setSelection(fillRange.bbox);
+		var fragment = ws.getRange2("A1").getValueForEdit2();
+		fragment[0].setFragmentText("=SEQUENCE(3)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		fillRange = ws.getRange2("B1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("B1").getValueForEdit2();
+		fragment[0].setFragmentText("=A1#");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		// Internal (XLSX) storage uses _xlfn.ANCHORARRAY(A1)
+		var b1Cell = getCell(ws.getRange2("B1"));
+		var storedFormula = b1Cell && b1Cell.getFormulaParsed() && b1Cell.getFormulaParsed().getFormula();
+		assert.strictEqual(storedFormula, "_xlfn.ANCHORARRAY(A1)", "B1 stored formula: _xlfn.ANCHORARRAY(A1)");
+
+		// UI display converts back to A1#
+		assert.strictEqual(ws.getRange2("B1").getValueForEdit(), "=A1#", "B1 getValueForEdit returns =A1#");
+
+		// Same roundtrip for a more complex anchor formula
+		fillRange = ws.getRange2("C1");
+		wsView.setSelection(fillRange.bbox);
+		fragment = ws.getRange2("C1").getValueForEdit2();
+		fragment[0].setFragmentText("=SUM(A1#)");
+		wsView._saveCellValueAfterEdit(fillRange, fragment, flags, null, null);
+
+		var c1Cell = getCell(ws.getRange2("C1"));
+		var c1Stored = c1Cell && c1Cell.getFormulaParsed() && c1Cell.getFormulaParsed().getFormula();
+		assert.strictEqual(c1Stored, "SUM(_xlfn.ANCHORARRAY(A1))", "C1 stored: SUM(_xlfn.ANCHORARRAY(A1))");
+		assert.strictEqual(ws.getRange2("C1").getValueForEdit(), "=SUM(A1#)", "C1 getValueForEdit returns =SUM(A1#)");
+
+		// SUM(A1#) = SUM(1+2+3) = 6
+		assert.strictEqual(ws.getRange2("C1").getValue(), "6", "C1=SUM(A1#)=6");
+
+		clearData(0, 0, 10, 20);
+		assertVolatileArraysEmpty(assert);
+	});
+
+	QUnit.test("Test: \"ANCHORARRAY complex nested expressions + undo/redo of head resize\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+		clearData(0, 0, 100, 200);
+
+		var flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		var enterAt = function (cell, formula) {
+			var r = ws.getRange2(cell);
+			wsView.setSelection(r.bbox);
+			var frag = r.getValueForEdit2();
+			frag[0].setFragmentText(formula);
+			wsView._saveCellValueAfterEdit(r, frag, flags, null, null);
+		};
+
+		// A1=SEQUENCE(4) — head
+		// B1=A1#        — direct mirror (spills B1:B4)
+		// C1=SORT(A1#,1,-1) — reverse-sorted anchor (spills C1:C4)
+		// D1=SUM(A1#)   — scalar: sum via anchor
+		// E1=MAX(A1#)   — scalar: max via anchor
+		enterAt("A1", "=SEQUENCE(4)");
+		enterAt("B1", "=A1#");
+		enterAt("C1", "=SORT(A1#,1,-1)");
+		enterAt("D1", "=SUM(A1#)");
+		enterAt("E1", "=MAX(A1#)");
+
+		var checkState4 = function (desc) {
+			// head A1:A4 = {1,2,3,4}
+			assert.strictEqual(ws.getRange2("A1").getValue(), "1", desc + ": A1=1");
+			assert.strictEqual(ws.getRange2("A4").getValue(), "4", desc + ": A4=4");
+			assert.strictEqual(ws.getRange2("A5").getValue(), "", desc + ": A5 empty");
+			// B1=A1# mirrors {1,2,3,4}
+			assert.strictEqual(ws.getRange2("B1").getValue(), "1", desc + ": B1=1");
+			assert.strictEqual(ws.getRange2("B4").getValue(), "4", desc + ": B4=4");
+			assert.strictEqual(ws.getRange2("B5").getValue(), "", desc + ": B5 empty");
+			var refB = _getArrayFormulaRef("B1");
+			assert.ok(refB != null, desc + ": B1 has array ref");
+			assert.strictEqual(refB.r2, 3, desc + ": B1 ref r2=3 (B1:B4)");
+			assert.strictEqual(refB.c1, 1, desc + ": B1 ref c1=1");
+			assert.strictEqual(refB.c2, 1, desc + ": B1 ref c2=1");
+			// C1=SORT(A1#,1,-1) → {4,3,2,1}
+			assert.strictEqual(ws.getRange2("C1").getValue(), "4", desc + ": C1=4");
+			assert.strictEqual(ws.getRange2("C2").getValue(), "3", desc + ": C2=3");
+			assert.strictEqual(ws.getRange2("C3").getValue(), "2", desc + ": C3=2");
+			assert.strictEqual(ws.getRange2("C4").getValue(), "1", desc + ": C4=1");
+			assert.strictEqual(ws.getRange2("C5").getValue(), "", desc + ": C5 empty");
+			var refC = _getArrayFormulaRef("C1");
+			assert.ok(refC != null, desc + ": C1 has array ref");
+			assert.strictEqual(refC.r2, 3, desc + ": C1 ref r2=3 (C1:C4)");
+			assert.strictEqual(refC.c1, 2, desc + ": C1 ref c1=2");
+			// D1=SUM(A1#)=10, E1=MAX(A1#)=4
+			assert.strictEqual(ws.getRange2("D1").getValue(), "10", desc + ": D1=SUM(A1#)=10");
+			assert.strictEqual(ws.getRange2("E1").getValue(), "4", desc + ": E1=MAX(A1#)=4");
+		};
+
+		checkState4("initial SEQUENCE(4)");
+
+		// Resize head: SEQUENCE(4) → SEQUENCE(3)
+		enterAt("A1", "=SEQUENCE(3)");
+
+		var checkState3 = function (desc) {
+			// head A1:A3 = {1,2,3}, A4 cleared
+			assert.strictEqual(ws.getRange2("A1").getValue(), "1", desc + ": A1=1");
+			assert.strictEqual(ws.getRange2("A3").getValue(), "3", desc + ": A3=3");
+			assert.strictEqual(ws.getRange2("A4").getValue(), "", desc + ": A4 cleared");
+			// B1=A1# mirrors {1,2,3}, B4 cleared
+			assert.strictEqual(ws.getRange2("B1").getValue(), "1", desc + ": B1=1");
+			assert.strictEqual(ws.getRange2("B3").getValue(), "3", desc + ": B3=3");
+			assert.strictEqual(ws.getRange2("B4").getValue(), "", desc + ": B4 cleared");
+			var refB = _getArrayFormulaRef("B1");
+			assert.ok(refB != null, desc + ": B1 has array ref");
+			assert.strictEqual(refB.r2, 2, desc + ": B1 ref r2=2 (B1:B3)");
+			// C1=SORT(A1#,1,-1) → {3,2,1}, C4 cleared
+			assert.strictEqual(ws.getRange2("C1").getValue(), "3", desc + ": C1=3");
+			assert.strictEqual(ws.getRange2("C2").getValue(), "2", desc + ": C2=2");
+			assert.strictEqual(ws.getRange2("C3").getValue(), "1", desc + ": C3=1");
+			assert.strictEqual(ws.getRange2("C4").getValue(), "", desc + ": C4 cleared");
+			var refC = _getArrayFormulaRef("C1");
+			assert.ok(refC != null, desc + ": C1 has array ref");
+			assert.strictEqual(refC.r2, 2, desc + ": C1 ref r2=2 (C1:C3)");
+			// D1=SUM(A1#)=6, E1=MAX(A1#)=3
+			assert.strictEqual(ws.getRange2("D1").getValue(), "6", desc + ": D1=SUM(A1#)=6");
+			assert.strictEqual(ws.getRange2("E1").getValue(), "3", desc + ": E1=MAX(A1#)=3");
+		};
+
+		checkState3("after SEQUENCE(3)");
+
+		// fBefore=checkState4 (SEQUENCE(4)), fAfter=checkState3 (SEQUENCE(3))
+		// End in SEQUENCE(3) state (skipLastUndo) so all formulas are expanded before clearData
+		checkUndoRedo(checkState4, checkState3, "multiple anchors head resize", true);
+
+		clearData(0, 0, 10, 20);
+		assertVolatileArraysEmpty(assert);
+	});
+
+	QUnit.test("Test: \"ANCHORARRAY cascade chain (A1→B1→C1) with nested scalar formulas + block/unblock undo/redo\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+		clearData(0, 0, 100, 200);
+
+		var flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		var enterAt = function (cell, formula) {
+			var r = ws.getRange2(cell);
+			wsView.setSelection(r.bbox);
+			var frag = r.getValueForEdit2();
+			frag[0].setFragmentText(formula);
+			wsView._saveCellValueAfterEdit(r, frag, flags, null, null);
+		};
+
+		// A1=SEQUENCE(3) — head
+		// B1=A1#         — first link (spills B1:B3)
+		// C1=B1#         — anchor of anchor (spills C1:C3)
+		// D1=SUM(A1#)+SUM(B1#)+SUM(C1#) — scalar combining all three chain levels
+		// E1=SUM(C1#)    — scalar from chain end, to verify the tail is navigable
+		enterAt("A1", "=SEQUENCE(3)");
+		enterAt("B1", "=A1#");
+		enterAt("C1", "=B1#");
+		enterAt("D1", "=SUM(A1#)+SUM(B1#)+SUM(C1#)");
+		enterAt("E1", "=SUM(C1#)");
+
+		var checkExpandedState = function (desc) {
+			// A1:A3={1,2,3}
+			assert.strictEqual(ws.getRange2("A1").getValue(), "1", desc + ": A1=1");
+			assert.strictEqual(ws.getRange2("A2").getValue(), "2", desc + ": A2=2");
+			assert.strictEqual(ws.getRange2("A3").getValue(), "3", desc + ": A3=3");
+			// B1=A1# → B1:B3={1,2,3}
+			assert.strictEqual(ws.getRange2("B1").getValue(), "1", desc + ": B1=1");
+			assert.strictEqual(ws.getRange2("B2").getValue(), "2", desc + ": B2=2");
+			assert.strictEqual(ws.getRange2("B3").getValue(), "3", desc + ": B3=3");
+			var refB = _getArrayFormulaRef("B1");
+			assert.ok(refB != null, desc + ": B1 has array ref");
+			assert.strictEqual(refB.r2, 2, desc + ": B1 ref r2=2");
+			assert.strictEqual(refB.c1, 1, desc + ": B1 ref c1=1");
+			// C1=B1# → C1:C3={1,2,3}
+			assert.strictEqual(ws.getRange2("C1").getValue(), "1", desc + ": C1=1");
+			assert.strictEqual(ws.getRange2("C2").getValue(), "2", desc + ": C2=2");
+			assert.strictEqual(ws.getRange2("C3").getValue(), "3", desc + ": C3=3");
+			var refC = _getArrayFormulaRef("C1");
+			assert.ok(refC != null, desc + ": C1 has array ref");
+			assert.strictEqual(refC.r2, 2, desc + ": C1 ref r2=2");
+			assert.strictEqual(refC.c1, 2, desc + ": C1 ref c1=2");
+			// D1=SUM(A1#)+SUM(B1#)+SUM(C1#)=6+6+6=18
+			assert.strictEqual(ws.getRange2("D1").getValue(), "18", desc + ": D1=18");
+			// E1=SUM(C1#)=6
+			assert.strictEqual(ws.getRange2("E1").getValue(), "6", desc + ": E1=SUM(C1#)=6");
+			// All vm cleared (expanded state)
+			var vmA1 = getCellRichValueIndex(0, 0);
+			assert.ok(!vmA1 || vmA1 === 0, desc + ": A1 no vm");
+			var vmB1 = getCellRichValueIndex(0, 1);
+			assert.ok(!vmB1 || vmB1 === 0, desc + ": B1 no vm");
+			var vmC1 = getCellRichValueIndex(0, 2);
+			assert.ok(!vmC1 || vmC1 === 0, desc + ": C1 no vm");
+		};
+
+		checkExpandedState("initial");
+
+		// Block head via A2="x" → cascade: A1, B1, C1 all collapse
+		ws.getRange2("A2").setValue("x");
+
+		var checkBlockedState = function (desc) {
+			assert.strictEqual(ws.getRange2("A1").getValue(), "#SPILL!", desc + ": A1=#SPILL!");
+			assert.strictEqual(ws.getRange2("A2").getValue(), "x", desc + ": A2=x");
+			// B1=A1# inherits error; spill cells cleared
+			assert.strictEqual(ws.getRange2("B1").getValue(), "#SPILL!", desc + ": B1=#SPILL!");
+			assert.strictEqual(ws.getRange2("B2").getValue(), "", desc + ": B2 cleared");
+			assert.strictEqual(ws.getRange2("B3").getValue(), "", desc + ": B3 cleared");
+			// C1=B1# inherits error from B1; spill cells cleared
+			assert.strictEqual(ws.getRange2("C1").getValue(), "#SPILL!", desc + ": C1=#SPILL!");
+			assert.strictEqual(ws.getRange2("C2").getValue(), "", desc + ": C2 cleared");
+			assert.strictEqual(ws.getRange2("C3").getValue(), "", desc + ": C3 cleared");
+			// D1 and E1: all their anchor args evaluate to #SPILL! → propagate
+			assert.strictEqual(ws.getRange2("D1").getValue(), "#SPILL!", desc + ": D1=#SPILL!");
+			assert.strictEqual(ws.getRange2("E1").getValue(), "#SPILL!", desc + ": E1=#SPILL!");
+			// vm set for collapsed dynamic array heads
+			var vmA1 = getCellRichValueIndex(0, 0);
+			assert.ok(vmA1 > 0, desc + ": A1 has vm");
+			var vmB1 = getCellRichValueIndex(0, 1);
+			assert.ok(vmB1 > 0, desc + ": B1 has vm");
+			var vmC1 = getCellRichValueIndex(0, 2);
+			assert.ok(vmC1 > 0, desc + ": C1 has vm");
+		};
+
+		checkBlockedState("after block");
+
+		// Unblock: clear A2 → full cascade re-spill
+		ws.getRange2("A2").setValue("");
+
+		checkExpandedState("after unblock");
+
+		// Undo the unblock (re-blocks), then redo
+		// skipLastUndo=true: end in expanded state for clean clearData
+		checkUndoRedo(checkBlockedState, checkExpandedState, "cascade chain block/unblock", true);
+
+		clearData(0, 0, 10, 20);
+		assertVolatileArraysEmpty(assert);
+	});
+
+	QUnit.test("Test: \"COUNTIFS/SUMIFS broadcasting with orthogonal inline arrays\"", function (assert) {
+		if (!AscCommonExcel.bIsSupportDynamicArrays) {
+			assert.ok(true, "Dynamic arrays support is disabled");
+			return;
+		}
+		clearData(0, 0, 20, 20);
+
+		var flags = wsView._getCellFlags(0, 0);
+		flags.ctrlKey = false;
+		flags.shiftKey = false;
+
+		var enterAt = function (cell, formula) {
+			var r = ws.getRange2(cell);
+			wsView.setSelection(r.bbox);
+			var frag = r.getValueForEdit2();
+			frag[0].setFragmentText(formula);
+			wsView._saveCellValueAfterEdit(r, frag, flags, null, null);
+		};
+
+		ws.getRange2("A1").setValue("1");
+		ws.getRange2("A2").setValue("2");
+		ws.getRange2("A3").setValue("1");
+		ws.getRange2("A4").setValue("3");
+		ws.getRange2("A5").setValue("2");
+		ws.getRange2("B1").setValue("10");
+		ws.getRange2("B2").setValue("20");
+		ws.getRange2("B3").setValue("10");
+		ws.getRange2("B4").setValue("10");
+		ws.getRange2("B5").setValue("20");
+		ws.getRange2("C1").setValue("100");
+		ws.getRange2("C2").setValue("200");
+		ws.getRange2("C3").setValue("100");
+		ws.getRange2("C4").setValue("300");
+		ws.getRange2("C5").setValue("200");
+
+		// Test 1: COUNTIFS — vertical {1;2;3} * horizontal {10,20} → 3*2 result
+		enterAt("E1", "=COUNTIFS(A1:A5,{1;2;3},B1:B5,{10,20})");
+		var resCell = getCell(ws.getRange2("E1"));
+		var dynamicRef = resCell.getFormulaParsed().getDynamicRef();
+		assert.strictEqual(dynamicRef.getHeight(), 3, "COUNTIFS({1;2;3},{10,20}): height = 3");
+		assert.strictEqual(dynamicRef.getWidth(), 2, "COUNTIFS({1;2;3},{10,20}): width = 2");
+		assert.strictEqual(ws.getRange2("E1").getValue(), "2", "COUNTIFS E1 (cat=1, grp=10) = 2");
+		assert.strictEqual(ws.getRange2("F1").getValue(), "0", "COUNTIFS F1 (cat=1, grp=20) = 0");
+		assert.strictEqual(ws.getRange2("E2").getValue(), "0", "COUNTIFS E2 (cat=2, grp=10) = 0");
+		assert.strictEqual(ws.getRange2("F2").getValue(), "2", "COUNTIFS F2 (cat=2, grp=20) = 2");
+		assert.strictEqual(ws.getRange2("E3").getValue(), "1", "COUNTIFS E3 (cat=3, grp=10) = 1");
+		assert.strictEqual(ws.getRange2("F3").getValue(), "0", "COUNTIFS F3 (cat=3, grp=20) = 0");
+
+		// Test 2: SUMIFS — same orthogonal broadcast
+		enterAt("H1", "=SUMIFS(C1:C5,A1:A5,{1;2;3},B1:B5,{10,20})");
+		resCell = getCell(ws.getRange2("H1"));
+		dynamicRef = resCell.getFormulaParsed().getDynamicRef();
+		assert.strictEqual(dynamicRef.getHeight(), 3, "SUMIFS({1;2;3},{10,20}): height = 3");
+		assert.strictEqual(dynamicRef.getWidth(), 2, "SUMIFS({1;2;3},{10,20}): width = 2");
+		assert.strictEqual(ws.getRange2("H1").getValue(), "200", "SUMIFS H1 (cat=1, grp=10) = 200");
+		assert.strictEqual(ws.getRange2("I1").getValue(), "0", "SUMIFS I1 (cat=1, grp=20) = 0");
+		assert.strictEqual(ws.getRange2("H2").getValue(), "0", "SUMIFS H2 (cat=2, grp=10) = 0");
+		assert.strictEqual(ws.getRange2("I2").getValue(), "400", "SUMIFS I2 (cat=2, grp=20) = 400");
+		assert.strictEqual(ws.getRange2("H3").getValue(), "300", "SUMIFS H3 (cat=3, grp=10) = 300");
+		assert.strictEqual(ws.getRange2("I3").getValue(), "0", "SUMIFS I3 (cat=3, grp=20) = 0");
+
+		// Test 3: COUNTIFS — vertical-only array (Nx1), regression check
+		enterAt("E6", "=COUNTIFS(A1:A5,{1;2;3},B1:B5,10)");
+		resCell = getCell(ws.getRange2("E6"));
+		dynamicRef = resCell.getFormulaParsed().getDynamicRef();
+		assert.strictEqual(dynamicRef.getHeight(), 3, "COUNTIFS({1;2;3},10): height = 3");
+		assert.strictEqual(dynamicRef.getWidth(), 1, "COUNTIFS({1;2;3},10): width = 1");
+		assert.strictEqual(ws.getRange2("E6").getValue(), "2", "COUNTIFS E6 (cat=1, grp=10) = 2");
+		assert.strictEqual(ws.getRange2("E7").getValue(), "0", "COUNTIFS E7 (cat=2, grp=10) = 0");
+		assert.strictEqual(ws.getRange2("E8").getValue(), "1", "COUNTIFS E8 (cat=3, grp=10) = 1");
+
+		// Test 4: COUNTIFS — horizontal-only array (1xM), regression check
+		enterAt("E10", "=COUNTIFS(A1:A5,1,B1:B5,{10,20})");
+		resCell = getCell(ws.getRange2("E10"));
+		dynamicRef = resCell.getFormulaParsed().getDynamicRef();
+		assert.strictEqual(dynamicRef.getHeight(), 1, "COUNTIFS(1,{10,20}): height = 1");
+		assert.strictEqual(dynamicRef.getWidth(), 2, "COUNTIFS(1,{10,20}): width = 2");
+		assert.strictEqual(ws.getRange2("E10").getValue(), "2", "COUNTIFS E10 (cat=1, grp=10) = 2");
+		assert.strictEqual(ws.getRange2("F10").getValue(), "0", "COUNTIFS F10 (cat=1, grp=20) = 0");
+
+		clearData(0, 0, 20, 20);
+		assertVolatileArraysEmpty(assert);
 	});
 
 	QUnit.module("Dynamic Arrays Tests");

@@ -2348,8 +2348,9 @@
 				var changeFilter = function (filter, bTablePart) {
 					var ref = filter.Ref;
 					var oldFilter = null;
+					let bTableHeaders = !bTablePart || filter.isHeaderRow();
 					if (activeRange.c1 <= ref.c1 && activeRange.c2 >= ref.c2) {
-						if (activeRange.r1 <= ref.r1)//until
+						if ((activeRange.r1 <= ref.r1 && bTableHeaders) || (activeRange.r1 < ref.r1 && !bTableHeaders))//until
 						{
 							oldFilter = filter.clone(null);
 

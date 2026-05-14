@@ -185,8 +185,8 @@
 		if (layerColor) {
 			uniFillForegndWithPattern = layerFill;
 			uniFillForegndNoGradient = layerFill;
-			lineUniFillNoGradient = layerColor;
-			lineUniFill = layerColor;
+			lineUniFillNoGradient = layerColor.createDuplicate();
+			lineUniFill = lineUniFillNoGradient;
 		} else {
 			/**
 			 * @type boolean

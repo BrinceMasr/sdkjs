@@ -345,12 +345,24 @@
 		let oFile       = oViewer.file;
 		let nIndex		= this.GetIndex();
 
+		let isLocalRotate = false == Asc.editor.canEdit();
 		if (oFile.pages[nIndex].Rotate == nAngle) {
+			oFile.pages[nIndex].LocalRotate = undefined;
+			this.fields.forEach(function(field) {
+				field.UpdateEditShape();
+			});
+			
 			return;
 		}
 
-        AscCommon.History.Add(new CChangesPDFDocumentRotatePage(this, oFile.pages[nIndex].Rotate, nAngle));
-		oFile.pages[nIndex].Rotate = nAngle;
+        if (!isLocalRotate) {
+			AscCommon.History.Add(new CChangesPDFDocumentRotatePage(this, oFile.pages[nIndex].Rotate, nAngle));
+			oFile.pages[nIndex].Rotate = nAngle;
+			oFile.pages[nIndex].LocalRotate = undefined;
+		}
+		else {
+			oFile.pages[nIndex].LocalRotate = nAngle;
+		}
 
 		if (oDoc.IsEditFieldsMode()) {
 			this.fields.forEach(function(field) {
@@ -1852,6 +1864,10 @@
 		};
 		this.getPageDrawingByMouse = function()
 		{
+			if (false == Asc.editor.canEdit()) {
+				return null;
+			}
+
 			var pageObject = this.getPageByCoords2(AscCommon.global_mouseEvent.X, AscCommon.global_mouseEvent.Y);
 			if (!pageObject)
 				return null;
@@ -2055,7 +2071,7 @@
 			//if (e && e.preventDefault)
 			//	e.preventDefault();
 
-			let wasMouseDown = oThis.isMouseDown;
+			oThis.wasMouseDown = oThis.isMouseDown;
 			oThis.isMouseDown = false;
 
 			if (!oThis.file || !oThis.file.isValid())
@@ -2106,37 +2122,6 @@
 
 			oDoc.OnMouseUp(AscCommon.global_mouseEvent.X, AscCommon.global_mouseEvent.Y, AscCommon.global_mouseEvent);
 
-			if (oThis.canSelectPageText() && !oThis.MouseHandObject && !oDoc.mouseDownAnnot && !oDoc.mouseDownField)
-			{
-				let pageObjectLogic = oThis.getPageByCoords2(oThis.mouseDownCoords.X, oThis.mouseDownCoords.Y);
-				if (!pageObjectLogic) {
-					pluginOnClick();
-					return false;
-				}
-				
-				if (global_mouseEvent.ClickCount == 2) {
-					oThis.file.selectWholeWord(pageObjectLogic.index, pageObjectLogic.x, pageObjectLogic.y);
-					pluginOnClick();
-					return;
-				}
-				else if (global_mouseEvent.ClickCount == 3) {
-					oThis.file.selectWholeRow(pageObjectLogic.index, pageObjectLogic.x, pageObjectLogic.y);
-					pluginOnClick();
-					return;
-				}
-				else if (global_mouseEvent.ClickCount == 4) {
-					oThis.file.selectWholePage(pageObjectLogic.index);
-					pluginOnClick();
-					return;
-				}
-			}
-
-			// if there was a click - release it
-			if (wasMouseDown && (!oDoc.GetActiveObject() || Asc.editor.IsLinkTool() || Asc.editor.IsRedactTool())) {
-				let pageObjectLogic = oThis.getPageByCoords2(AscCommon.global_mouseEvent.X, AscCommon.global_mouseEvent.Y);
-				oThis.file.onMouseUp(pageObjectLogic.index, pageObjectLogic.x, pageObjectLogic.y);
-			}
-				
 			if (oThis.MouseHandObject) {
 				oThis.MouseHandObject.Active = false;
 
@@ -2153,6 +2138,7 @@
 				oThis.timerScrollSelect = -1;
 			}
 
+			delete oThis.wasMouseDown;
 			pluginOnClick();
 		};
 
@@ -2558,7 +2544,6 @@
 			
 			if (this.IsSearch) {
 				this.drawSearchHighlights(ctx, oDoc, oDrDoc);
-				this.drawCurrentSearchHighlight(ctx, oDoc, oDrDoc);
 			}
 			
 			this.drawSelection(ctx, oDoc, oDrDoc);
@@ -2604,18 +2589,6 @@
 			}
 			ctx.fill();
 			ctx.globalAlpha = 0.2;
-		};
-		
-		this.drawCurrentSearchHighlight = function(ctx, oDoc, oDrDoc) {
-			if (this.CurrentSearchNavi && oDoc.SearchEngine.Show && !(this.CurrentSearchNavi instanceof AscWord.Paragraph)) {
-				const pageNum = this.CurrentSearchNavi[0].PageNum;
-				if (pageNum >= this.startVisiblePage && pageNum <= this.endVisiblePage) {
-					ctx.fillStyle = "rgba(51,102,204,255)";
-					oDrDoc.AutoShapesTrack.SetCurrentPage(pageNum, true);
-					ctx.globalAlpha = 0.2;
-					this.drawSearchCur(pageNum, this.CurrentSearchNavi);
-				}
-			}
 		};
 		
 		this.drawSelection = function(ctx, oDoc, oDrDoc) {
@@ -3714,6 +3687,12 @@
 				return 0;
 
 			let value = this.file.pages[pageNum].Rotate;
+
+			let localValue = this.file.pages[pageNum].LocalRotate;
+			if (localValue !== undefined) {
+				return localValue;
+			}
+
 			return (undefined === value) ? 0 : value;
 		};
 		this.getDrawingPageScale = function(pageNum)
@@ -4466,8 +4445,8 @@
 		}
 	};
 	CHtmlPage.prototype.InitDocRenderer = function(oMemory, nPage) {
-		let oDoc        = this.getPDFDoc();
-        let oRenderer   = new AscCommon.CDocumentRenderer();
+		let oDoc        			= this.getPDFDoc();
+        let oRenderer   			= new AscCommon.CDocumentRenderer();
 		oRenderer.InitPicker(AscCommon.g_oTextMeasurer.m_oManager);
 
 		oRenderer.Memory		= oMemory;

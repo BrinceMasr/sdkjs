@@ -1364,6 +1364,63 @@ $(function () {
         sheet2.Delete();
     });
 
+    QUnit.test("GetHyperlinks - empty range", function (assert) {
+        initializeTest();
+        ws.GetHyperlinks().forEach(function (h) { h.Delete(); });
+        let hyperlinks = ws.GetRange("A1").GetHyperlinks();
+        assert.ok(Array.isArray(hyperlinks), "returns array");
+        assert.strictEqual(hyperlinks.length, 0, "range without hyperlinks returns empty array");
+    });
+
+    QUnit.test("GetHyperlinks - single cell", function (assert) {
+        initializeTest();
+        ws.GetHyperlinks().forEach(function (h) { h.Delete(); });
+        ws.SetHyperlink("A1", "https://onlyoffice.com", null, "tip1", "link1");
+        ws.SetHyperlink("C1", "https://helpcenter.onlyoffice.com", null, "tip2", "link2");
+        let hyperlinks = ws.GetRange("A1").GetHyperlinks();
+        assert.strictEqual(hyperlinks.length, 1, "range A1 returns 1 hyperlink");
+        assert.strictEqual(hyperlinks[0].GetAddress(), "https://onlyoffice.com", "correct address for A1");
+    });
+
+    QUnit.test("GetHyperlinks - multi-cell range filters by bounds", function (assert) {
+        initializeTest();
+        ws.GetHyperlinks().forEach(function (h) { h.Delete(); });
+        ws.SetHyperlink("A1", "https://onlyoffice.com", null, "tip1", "link1");
+        ws.SetHyperlink("B1", "https://helpcenter.onlyoffice.com", null, "tip2", "link2");
+        ws.SetHyperlink("D1", "https://api.onlyoffice.com", null, "tip3", "link3");
+        let hyperlinks = ws.GetRange("A1:C1").GetHyperlinks();
+        assert.strictEqual(hyperlinks.length, 2, "range A1:C1 returns 2 hyperlinks (excludes D1)");
+        let addresses = hyperlinks.map(function (h) { return h.GetAddress(); });
+        assert.ok(addresses.indexOf("https://onlyoffice.com") !== -1, "A1 hyperlink included");
+        assert.ok(addresses.indexOf("https://helpcenter.onlyoffice.com") !== -1, "B1 hyperlink included");
+        assert.strictEqual(addresses.indexOf("https://api.onlyoffice.com"), -1, "D1 hyperlink excluded");
+    });
+
+    QUnit.test("GetHyperlinks - multi-row range", function (assert) {
+        initializeTest();
+        ws.GetHyperlinks().forEach(function (h) { h.Delete(); });
+        ws.SetHyperlink("A1", "https://onlyoffice.com", null, "tip1", "link1");
+        ws.SetHyperlink("A2", "https://helpcenter.onlyoffice.com", null, "tip2", "link2");
+        ws.SetHyperlink("A3", "https://api.onlyoffice.com", null, "tip3", "link3");
+        let hyperlinks = ws.GetRange("A1:A2").GetHyperlinks();
+        assert.strictEqual(hyperlinks.length, 2, "range A1:A2 returns 2 hyperlinks");
+        let addresses = hyperlinks.map(function (h) { return h.GetAddress(); });
+        assert.ok(addresses.indexOf("https://onlyoffice.com") !== -1, "A1 included");
+        assert.ok(addresses.indexOf("https://helpcenter.onlyoffice.com") !== -1, "A2 included");
+        assert.strictEqual(addresses.indexOf("https://api.onlyoffice.com"), -1, "A3 excluded");
+    });
+
+    QUnit.test("Hyperlinks property", function (assert) {
+        initializeTest();
+        ws.GetHyperlinks().forEach(function (h) { h.Delete(); });
+        ws.SetHyperlink("A1", "https://onlyoffice.com", null, "tip", "link");
+        let range = ws.GetRange("A1");
+        let viaMethod = range.GetHyperlinks();
+        let viaProp = range.Hyperlinks;
+        assert.strictEqual(viaProp.length, viaMethod.length, "Hyperlinks property returns same count as GetHyperlinks()");
+        assert.strictEqual(viaProp[0].GetAddress(), viaMethod[0].GetAddress(), "Hyperlinks[0] matches GetHyperlinks()[0]");
+    });
+
     QUnit.test("Find: xlPart match case-sensitive on non-active sheet", function (assert) {
         initializeTest();
         const sheet2 = AscTest.JsApi.AddSheet("FindPartCaseSheet2_" + Date.now());
