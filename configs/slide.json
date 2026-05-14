@@ -193,6 +193,8 @@
 			"word/Editor/Numbering/Numbering.js",
 			"word/Drawing/GraphicsEvents.js",
 			"word/Drawing/Rulers.js",
+			"slide/Drawing/printer/printer-settings.js",
+			"slide/Drawing/printer/printer.js",
 			"word/Drawing/printpreview.js",
 			"word/Editor/DocumentContentElementBase.js",
 			"word/Editor/Table.js",
