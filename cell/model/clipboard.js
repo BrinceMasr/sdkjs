@@ -561,8 +561,6 @@
 		};
 
 		Clipboard.prototype.drawSelectedArea = function (ws, opt_get_bytes) {
-			let activeRange = ws.model.selectionRange.getLast();
-
 			// Canvas limitations for different browsers:
 			// Chrome/Edge: 32767px x 32767px
 			// Firefox: 32767px x 32767px
@@ -590,54 +588,71 @@
 				maxCanvasArea = 8192 * 8192;
 			}
 
-			let estimatedHeight = ws._getRowTop(activeRange.r2 + 1) - ws._getRowTop(activeRange.r1);
-			let estimatedWidth = ws._getColLeft(activeRange.c2 + 1) - ws._getColLeft(activeRange.c1);
-
-			// Check height limitations
-			if (estimatedHeight > maxCanvasHeight) {
-				let currentHeight = 0;
-				let maxRow = activeRange.r1;
-
-				for (let row = activeRange.r1; row <= activeRange.r2; row++) {
-					let rowHeight = ws._getRowHeight(row);
-					if (currentHeight + rowHeight > maxCanvasHeight) {
-						break;
-					}
-					currentHeight += rowHeight;
-					maxRow = row;
-				}
-
-				activeRange = new Asc.Range(activeRange.c1, activeRange.r1, activeRange.c2, maxRow);
-				estimatedHeight = ws._getRowTop(activeRange.r2 + 1) - ws._getRowTop(activeRange.r1);
-			}
-
-			// Check width limitations
-			if (estimatedWidth > maxCanvasWidth) {
-				let currentWidth = 0;
-				let maxCol = activeRange.c1;
-
-				for (let col = activeRange.c1; col <= activeRange.c2; col++) {
-					let colWidth = ws._getColLeft(col + 1) - ws._getColLeft(col);
-					if (currentWidth + colWidth > maxCanvasWidth) {
-						break;
-					}
-					currentWidth += colWidth;
-					maxCol = col;
-				}
-
-				activeRange = new Asc.Range(activeRange.c1, activeRange.r1, maxCol, activeRange.r2);
-				estimatedWidth = ws._getColLeft(activeRange.c2 + 1) - ws._getColLeft(activeRange.c1);
-			}
-
-			//TODO cut by max size
-			if (estimatedHeight * estimatedWidth >= maxCanvasArea) {
-				return;
-			}
-
 			let base64;
-			let ctx = ws.workbook.printForCopyPaste(ws, activeRange, true);
-			if (ctx && ctx.canvas) {
-				base64 = ctx.canvas.toDataURL("image/png");
+
+			if (ws.objectRender && ws.objectRender.selectedGraphicObjectsExists()) {
+				let controller = ws.objectRender.controller;
+				if (controller.getTargetDocContent()) {
+					return;
+				}
+				let imgProperty = controller.getSelectionImage();
+				if (!imgProperty) {
+					return;
+				}
+				base64 = imgProperty.asc_getImageUrl();
+				if (!base64) {
+					return;
+				}
+			} else {
+				let activeRange = ws.model.selectionRange.getLast();
+				let estimatedHeight = ws._getRowTop(activeRange.r2 + 1) - ws._getRowTop(activeRange.r1);
+				let estimatedWidth = ws._getColLeft(activeRange.c2 + 1) - ws._getColLeft(activeRange.c1);
+
+				// Check height limitations
+				if (estimatedHeight > maxCanvasHeight) {
+					let currentHeight = 0;
+					let maxRow = activeRange.r1;
+
+					for (let row = activeRange.r1; row <= activeRange.r2; row++) {
+						let rowHeight = ws._getRowHeight(row);
+						if (currentHeight + rowHeight > maxCanvasHeight) {
+							break;
+						}
+						currentHeight += rowHeight;
+						maxRow = row;
+					}
+
+					activeRange = new Asc.Range(activeRange.c1, activeRange.r1, activeRange.c2, maxRow);
+					estimatedHeight = ws._getRowTop(activeRange.r2 + 1) - ws._getRowTop(activeRange.r1);
+				}
+
+				// Check width limitations
+				if (estimatedWidth > maxCanvasWidth) {
+					let currentWidth = 0;
+					let maxCol = activeRange.c1;
+
+					for (let col = activeRange.c1; col <= activeRange.c2; col++) {
+						let colWidth = ws._getColLeft(col + 1) - ws._getColLeft(col);
+						if (currentWidth + colWidth > maxCanvasWidth) {
+							break;
+						}
+						currentWidth += colWidth;
+						maxCol = col;
+					}
+
+					activeRange = new Asc.Range(activeRange.c1, activeRange.r1, maxCol, activeRange.r2);
+					estimatedWidth = ws._getColLeft(activeRange.c2 + 1) - ws._getColLeft(activeRange.c1);
+				}
+
+				//TODO cut by max size
+				if (estimatedHeight * estimatedWidth >= maxCanvasArea) {
+					return;
+				}
+
+				let ctx = ws.workbook.printForCopyPaste(ws, activeRange, true);
+				if (ctx && ctx.canvas) {
+					base64 = ctx.canvas.toDataURL("image/png");
+				}
 			}
 
 			if (opt_get_bytes && base64) {

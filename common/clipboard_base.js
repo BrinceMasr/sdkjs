@@ -1130,9 +1130,8 @@
 
 							callback(true);
 						})
-						.catch(function(error) {
-							console.error('Failed to query clipboard permissions:', error);
-							callback(false);
+						.catch(function() {
+							callback(typeof navigator.clipboard.read === 'function');
 						});
 
 					return true;
@@ -1162,7 +1161,7 @@
 							callback && callback(true);
 						})
 						.catch(function() {
-							callback && callback(false);
+							callback && callback(typeof navigator.clipboard.write === 'function');
 						});
 
 					return true;
