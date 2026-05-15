@@ -370,6 +370,33 @@
 
 		this.WordControl.GoToPage(this.Document.getCurrentPage());
 	};
+	VisioEditorApi.prototype.asc_setViewMode = function(isViewMode)
+	{
+		this.isViewMode = !!isViewMode;
+		if (!this.isLoadFullApi)
+		{
+			return;
+		}
+
+		if (this.isViewMode)
+		{
+			AscCommon.CollaborativeEditing.Set_GlobalLock(true);
+			if (null != this.WordControl.m_oLogicDocument)
+			{
+				this.WordControl.m_oLogicDocument.viewMode = true;
+			}
+			this.turnOffSpecialModes();
+		}
+		else
+		{
+			if (null != this.WordControl.m_oLogicDocument)
+			{
+				this.WordControl.m_oLogicDocument.viewMode = false;
+			}
+		}
+
+		this.checkInputMode();
+	};
 	VisioEditorApi.prototype._coAuthoringInitEnd = function()
 	{
 		//todo other events
