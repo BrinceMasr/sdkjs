@@ -1337,9 +1337,13 @@ function (window, undefined) {
 			let oCurFunc = fCurrent && AscCommonExcel.cFormulaFunction[fCurrent];
 			if (oCurFunc) {
 				let argHelpList = oCurFunc.prototype.getArgHelpList(functionInfo.activeArgPos - 1);
+				if (argHelpList) {
+					let charBeforeCursor = (this.cursorPos > 0 && this.cursorPos <= s.length) ? s.charAt(this.cursorPos - 1) : '';
+					if (charBeforeCursor && /\s/.test(charBeforeCursor)) {
+						argHelpList = null;
+					}
+				}
 				functionInfo.argHelpList = argHelpList;
-				//after need filter list in dependence from arg data
-				//this._parseResult.getElementByPos(this._parseResult.cursorPos)
 			}
 		}
 		this.handlers.trigger("updatedEditableFunction", fCurrent, fPos !== undefined ? this.calculateOffset(fPos) : null, functionInfo);
