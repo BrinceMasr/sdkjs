@@ -6231,17 +6231,6 @@ var CPresentation = CPresentation || function(){};
             }
         }
 
-        const fEndCallback = function() {
-			AscCommon.History.Add(new CChangesEmbedFontsMap(_this, sOldEmbedFontsMap, JSON.stringify(Asc.editor.embeddedFontsMap)));
-
-            _this.FinalizeAction();
-            _this.Viewer.file.removeSelection();
-            _this.Viewer.paint(function() {
-                _this.Viewer.thumbnails._repaintPage(nPage);
-            });
-            Asc.editor.canSave = true;
-        };
-
         const aFonts = [];
         for (let sFont in oFontMap) {
             if (oFontMap.hasOwnProperty(sFont)) {
@@ -6264,14 +6253,10 @@ var CPresentation = CPresentation || function(){};
                 for (let nIdx = 0; nIdx < data.length; ++nIdx) {
                     _file.nativeFile["changeImageUrl"](allImages[nIdx], AscCommon.g_oDocumentUrls.imagePath2Local(data[nIdx].path));
                 }
-
-                Asc.editor.pre_Paste(aFonts, oLoadUrls, fEndCallback);
             });
         }
-        else {
 
-            Asc.editor.pre_Paste(aFonts, oLoadUrls, fEndCallback);
-        }
+		AscCommon.History.Add(new CChangesEmbedFontsMap(_this, sOldEmbedFontsMap, JSON.stringify(Asc.editor.embeddedFontsMap)));
 
 		for (let idx = 0; idx < aPageDrawings.length; idx++) {
 			const drawing = aPageDrawings[idx];
@@ -6280,7 +6265,7 @@ var CPresentation = CPresentation || function(){};
 			drawing.SetNeedRecalc(true);
 		}
 
-        return true;
+        return {fonts: aFonts, images: oLoadUrls};
     };
 
 

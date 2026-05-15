@@ -779,8 +779,18 @@
 			oDoc.FinalizeAction(true);
 			return false;
 		}
+		
+		const fEndCallback = function() {
+			oDoc.FinalizeAction();
+            oDoc.Viewer.file.removeSelection();
+            oDoc.Viewer.paint(function() {
+                oDoc.Viewer.thumbnails._repaintPage(oViewer.currentPage);
+            });
+            Asc.editor.canSave = true;
+        };
 
-		oDoc.EditPage(oViewer.currentPage);
+		let result = oDoc.EditPage(oViewer.currentPage);
+		this.pre_Paste(result.fonts, result.images, fEndCallback);
 	};
 	PDFEditorApi.prototype.asc_AddPage = function(nPos) {
 		let oViewer = this.getDocumentRenderer();
