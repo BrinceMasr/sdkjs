@@ -348,6 +348,15 @@
 	};
 	HandoutPrinter.prototype.drawPage = function (graphics, index) {
 		const pageSlides = this.getPageSlides(index);
+		const presentation = this.getPresentation();
+		const handoutMaster = presentation.handoutMasters[0];
+		handoutMaster.draw(graphics, null, pageSlides, this.isDrawFrame(), this.isDrawSlideNumber());
+	};
+	HandoutPrinter.prototype.isDrawFrame = function () {
+		return this.printOptions.slidesOnPageOptions.asc_getIsFrameSlides();
+	};
+	HandoutPrinter.prototype.isDrawSlideNumber = function () {
+		return this.printOptions.slidesOnPageOptions.asc_getIsPrintSlideNumbersOnHandouts();
 	};
 
 	function SlidePrinter(presentation, printOptions) {
@@ -360,9 +369,13 @@
 		const slideIndex = printIndexes[index];
 		const slides = presentation.Slides;
 		const slide = slides[slideIndex];
+		slide.draw(graphics);
 
 	}
 	SlidePrinter.prototype.getPagesCount = function () {
 		return this.getPrintIndexes().length;
 	};
+
+	window["AscCommonSlide"] = window["AscCommonSlide"] || {};
+	window["AscCommonSlide"].PrintManager = PrintManager;
 })();

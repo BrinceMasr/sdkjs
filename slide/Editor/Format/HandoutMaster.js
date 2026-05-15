@@ -198,7 +198,7 @@
 	CHandoutMaster.prototype.drawNoPlaceholders = function(graphics, slide) {
 
 	};
-	CHandoutMaster.prototype.draw = function(graphics, slide) {
+	CHandoutMaster.prototype.draw = function(graphics, slide, handoutSlides, isDrawFrame, isDrawSlideNumber) {
 		if (slide) {
 			if (AscFormat.isRealNumber(slide.num) && slide.num !== this.lastRecalcSlideIndex) {
 				this.lastRecalcSlideIndex = slide.num;
@@ -219,7 +219,7 @@
 				oSp.draw(graphics);
 			}
 		});
-		this.drawPlaceholders(graphics);
+		this.drawPlaceholders(graphics, handoutSlides, isDrawFrame, isDrawSlideNumber);
 	};
 	const CHANDOUTMASTER_GAP = 10;
 	const CHANDOUTMASTER_FIELDSIZE = 20;
@@ -232,7 +232,7 @@
 	CHandoutMaster.prototype.getSlidesCount = function () {
 		return this.handoutSettings.slideCount;
 	};
-	CHandoutMaster.prototype.getHandouts = function() {
+	CHandoutMaster.prototype.getHandouts = function(slides) {
 		let align = this.getAlign();
 		const handouts = [];
 		let slidesCount = this.getSlidesCount();
@@ -273,6 +273,7 @@
 		const startX = scaledFieldSize + (paperWidth - resultWidth) / 2;
 		const startY = scaledFieldSize + (paperHeight - resultHeight) / 2;
 
+		let slideIndex = 0;
 		if (align === HANDOUT_ALIGNMENT_HORIZONTAL) {
 			for (let i = 0; i < rowsCount; i += 1) {
 				const slideY = startY + i * verticalGap + h_mm * i * slideScale;
@@ -281,7 +282,15 @@
 					if (isDrawWithSlideTextPlaceholder && handouts.length % 2 === 1) {
 						handouts.push(new TextPlaceholder(slideX, slideY, scaledPresentationWidth, scaledPresentationHeight));
 					} else {
-						handouts.push(new SlidePlaceholder(slideX, slideY, scaledPresentationWidth, scaledPresentationHeight));
+						let slide = null;
+						if (slides) {
+							slide = slides[slideIndex];
+							if (!slide) {
+								return handouts;
+							}
+							slideIndex += 1;
+						}
+						handouts.push(new SlidePlaceholder(slideX, slideY, scaledPresentationWidth, scaledPresentationHeight, slide));
 					}
 				}
 			}
@@ -293,18 +302,26 @@
 					if (isDrawWithSlideTextPlaceholder && handouts.length % 2 === 1) {
 						handouts.push(new TextPlaceholder(slideX, slideY, scaledPresentationWidth, scaledPresentationHeight));
 					} else {
-						handouts.push(new SlidePlaceholder(slideX, slideY, scaledPresentationWidth, scaledPresentationHeight));
+						let slide = null;
+						if (slides) {
+							slide = slides[slideIndex];
+							if (!slide) {
+								return handouts;
+							}
+							slideIndex += 1;
+						}
+						handouts.push(new SlidePlaceholder(slideX, slideY, scaledPresentationWidth, scaledPresentationHeight, slide));
 					}
 				}
 			}
 		}
 		return handouts;
 	};
-	CHandoutMaster.prototype.drawPlaceholders = function(g) {
-		const handouts = this.getHandouts();
+	CHandoutMaster.prototype.drawPlaceholders = function(g, handoutSlides, isDrawFrame, isDrawSlideNumber) {
+		const handouts = this.getHandouts(handoutSlides);
 		for (let i = 0; i < handouts.length; i += 1) {
 			const handout = handouts[i];
-			handout.draw(g);
+			handout.draw(g, isDrawFrame, isDrawSlideNumber);
 		}
 	};
 	CHandoutMaster.prototype.getSlidesCountOnRow = function(slidesCount) {
@@ -474,9 +491,6 @@
 	CHandoutMaster.prototype.isHandoutMaster = function() {
 		return true;
 	};
-	CHandoutMaster.prototype.draw = function () {
-
-	};
 
 	function PlaceholderBase(x, y, width, height) {
 		this.x = x;
@@ -485,15 +499,23 @@
 		this.height = height;
 	}
 
-	PlaceholderBase.prototype.draw = function(g) {
+	PlaceholderBase.prototype.draw = function(g, isDrawFrame, isDrawSlideNumber) {
 
 	};
 
-	function SlidePlaceholder(x, y, width, height) {
+	function SlidePlaceholder(x, y, width, height, slide) {
 		PlaceholderBase.call(this, x, y, width, height);
+		this.slide = slide || null;
 	}
 	AscFormat.InitClassWithoutType(SlidePlaceholder, PlaceholderBase);
-	SlidePlaceholder.prototype.draw = function(graphics) {
+	SlidePlaceholder.prototype.draw = function(graphics, isDrawFrame, isDrawSlideNumber) {
+		if (this.slide) {
+			this.drawWithSlide(graphics, isDrawFrame, isDrawSlideNumber);
+		} else {
+			this.drawPlaceholder(graphics);
+		}
+	};
+	SlidePlaceholder.prototype.drawPlaceholder = function (graphics) {
 		if (graphics.isBoundsChecker()) {
 			return;
 		}
@@ -508,6 +530,73 @@
 		graphics.p_dash(null);
 		graphics.RestoreGrState();
 	};
+	SlidePlaceholder.prototype.drawWithSlide = function(graphics, isDrawFrame, isDrawSlideNumber) {
+		if (graphics.isBoundsChecker()) {
+			return;
+		}
+		graphics.SaveGrState();
+		let baseTransform = graphics.GetBaseTransform();
+		let copyBaseTransform = baseTransform ? baseTransform.CreateDublicate() : new AscCommon.CMatrix();
+		const slide = this.slide;
+		const presentation = slide.presentation;
+		const slideWidth = presentation.GetWidthMM();
+		const scaleCoefficient = this.width / slideWidth;
+		copyBaseTransform.Scale(scaleCoefficient, scaleCoefficient);
+		copyBaseTransform.Translate(this.x, this.y);
+		graphics.SetBaseTransform(copyBaseTransform);
+		graphics.reset();
+		slide.draw(graphics);
+		graphics.SetBaseTransform(baseTransform);
+		graphics.reset();
+		if (isDrawFrame) {
+			this.drawFrame(graphics);
+		}
+		if (isDrawSlideNumber) {
+			this.drawSlideNumber(graphics);
+		}
+		graphics.RestoreGrState();
+	};
+	SlidePlaceholder.prototype.drawFrame = function (graphics) {
+		graphics.p_color(0, 0, 0, 255);
+		graphics.AddSmartRect(this.x, this.y, this.width, this.height, 0);
+	};
+	SlidePlaceholder.prototype.drawSlideNumber = function (graphics) {
+		AscFormat.ExecuteNoHistory(function() {
+			const shape = this.getNumberShape();
+			const content = shape.txBody.content;
+			shape.txBody.replaceContentFitText("" + (this.slide.num + 1));
+			content.ApplyToAll = true;
+			content.AddToParagraph(new AscCommonWord.ParaTextPr({
+				FontSize  : 13,
+				FontFamily: {Name: "Arial", Index: -1},
+				Color     : AscWord.BLACK_COLOR
+			}), false);
+			content.ApplyToAll = false;
+			shape.recalculateContent();
+			const transform = shape.transformText;
+			transform.tx = this.x;
+			transform.ty = this.y + this.height + 1;
+			shape.draw(graphics);
+		}, this, []);
+	};
+
+	SlidePlaceholder.prototype.getNumberShape = function () {
+			return AscFormat.ExecuteNoHistory(function () {
+				const shape = new AscFormat.CShape();
+				shape.setBDeleted(false);
+				shape.extX = this.width;
+				shape.extY = this.height;
+				shape.createTextBody();
+				const bodyPr = new AscFormat.CBodyPr();
+				bodyPr.setInsets(0, 0, 0, 0);
+				shape.txBody.setBodyPr(bodyPr);
+				return shape;
+			}, this, []);
+
+	};
+	SlidePlaceholder.prototype.drawText = function(graphics, text) {
+
+	};
 
 	const TEXTPLACEHOLDER_STEP_COUNT = 7;
 
@@ -516,7 +605,7 @@
 	}
 
 	AscFormat.InitClassWithoutType(TextPlaceholder, PlaceholderBase);
-	TextPlaceholder.prototype.draw = function(graphics) {
+	TextPlaceholder.prototype.draw = function(graphics, isDrawFrame) {
 		if (graphics.isBoundsChecker()) {
 			return;
 		}
