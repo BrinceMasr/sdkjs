@@ -2578,7 +2578,6 @@
 	window['AscDFH'].historyitem_ChartSpace_SetExternalReference    = window['AscDFH'].historyitem_type_ChartSpace | 25;
 	window['AscDFH'].historyitem_ChartSpace_SetBDeleted        = window['AscDFH'].historyitem_type_ChartSpace | 26;
 	window['AscDFH'].historyitem_ChartSpace_SetChartData       = window['AscDFH'].historyitem_type_ChartSpace | 27;
-	window['AscDFH'].historyitem_ChartSpace_SetBinaryData      = window['AscDFH'].historyitem_type_ChartSpace | 28;
 
 	window['AscDFH'].historyitem_Legend_SetLayout      = window['AscDFH'].historyitem_type_Legend | 1;
 	window['AscDFH'].historyitem_Legend_AddLegendEntry = window['AscDFH'].historyitem_type_Legend | 2;
@@ -3102,7 +3101,6 @@
 	window['AscDFH'].historyitem_ImageShapeSetDataLink           = window['AscDFH'].historyitem_type_ImageShape | 16;
 	window['AscDFH'].historyitem_ImageShapeSetDrawAspect         = window['AscDFH'].historyitem_type_ImageShape | 17;
 	window['AscDFH'].historyitem_ImageShapeLoadImagesfromContent = window['AscDFH'].historyitem_type_ImageShape | 18;
-	window['AscDFH'].historyitem_ImageShapeSetBinaryData         = window['AscDFH'].historyitem_type_ImageShape | 19;
 
 	window['AscDFH'].historyitem_GeometrySetParent      = window['AscDFH'].historyitem_type_Geometry | 1;
 	window['AscDFH'].historyitem_GeometryAddAdj         = window['AscDFH'].historyitem_type_Geometry | 2;

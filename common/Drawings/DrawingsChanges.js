@@ -33,6 +33,8 @@
 "use strict";
 
 (function (window, undefined) {
+	const BINARY_PART_HISTORY_LIMIT = 1048576;
+
     var drawingsChangesMap = {};
     var drawingConstructorsMap = {};
     var drawingContentChanges = {};
@@ -1208,39 +1210,131 @@
     };
     window['AscDFH'].CChangesDrawingsSparklinesRemove = CChangesDrawingsSparklinesRemove;
 
-	function CChangesBinaryData(Class, Old, New, Type, Color) {
+	function CChangesStartBinaryData(Class, Old, New, Type, Color) {
 		this.Type = Type;
 		AscDFH.CChangesBaseProperty.call(this, Class, Old, New, Color);
 	}
-	CChangesBinaryData.prototype = Object.create(AscDFH.CChangesBaseProperty.prototype);
-	CChangesBinaryData.prototype.constructor = CChangesBinaryData;
+	CChangesStartBinaryData.prototype = Object.create(AscDFH.CChangesBaseProperty.prototype);
+	CChangesStartBinaryData.prototype.constructor = CChangesStartBinaryData;
 
-	CChangesBinaryData.prototype.setBinaryDataToClass = function (oPr) {};
-	CChangesBinaryData.prototype.private_SetValue = function (oPr) {
-		this.setBinaryDataToClass(oPr || new Uint8Array(0));
+	CChangesStartBinaryData.prototype.setBinaryDataToClass = function (oPr) {};
+	CChangesStartBinaryData.prototype.Undo = function () {
+		if (!this.Class.partsOfBinaryData) {
+			return this.Redo();
+		}
+
+		let lenOfAllBinaryData = 0;
+		for (let i = 0; i < this.Class.partsOfBinaryData.length; i += 1) {
+			lenOfAllBinaryData += this.Class.partsOfBinaryData[i].length;
+		}
+		const arrBinaryData = new Uint8Array(lenOfAllBinaryData);
+		this.setBinaryDataToClass(arrBinaryData);
+		let indexOfInsert = 0;
+		for (let i = this.Class.partsOfBinaryData.length - 1; i >= 0; i -= 1) {
+			const partOfBinaryData = this.Class.partsOfBinaryData[i];
+			for (let j = 0; j < partOfBinaryData.length; j += 1) {
+				arrBinaryData[indexOfInsert] = partOfBinaryData[j];
+				indexOfInsert += 1;
+			}
+		}
+		delete this.Class.partsOfBinaryData;
+	}
+
+	CChangesStartBinaryData.prototype.Redo = function () {
+		if (this.Class.partsOfBinaryData) {
+			return this.Undo()
+		}
+		this.Class.partsOfBinaryData = [];
+	}
+	window['AscDFH'].CChangesStartBinaryData = CChangesStartBinaryData;
+
+	function CChangesPartBinaryData(Class, Old, New, Type, Color) {
+		this.Type = Type;
+		AscDFH.CChangesBaseProperty.call(this, Class, Old, New, Color);
+	}
+	CChangesPartBinaryData.prototype = Object.create(AscDFH.CChangesBaseProperty.prototype);
+	CChangesPartBinaryData.prototype.constructor = CChangesPartBinaryData;
+
+	CChangesPartBinaryData.prototype.private_SetValue = function (oPr) {
+		if (oPr.length) {
+			this.Class.partsOfBinaryData.push(oPr);
+		}
+	}
+
+	CChangesPartBinaryData.prototype.WriteToBinary = function(Writer)
+	{
+		Writer.WriteLong(this.Old.length);
+		Writer.WriteBuffer(this.Old, 0, this.Old.length);
+
+		Writer.WriteLong(this.New.length);
+		Writer.WriteBuffer(this.New, 0, this.New.length);
 	};
-	CChangesBinaryData.prototype.WriteToBinary = function (Writer) {
-		const oldLen = this.Old ? this.Old.length : 0;
-		Writer.WriteLong(oldLen);
-		if (oldLen) Writer.WriteBuffer(this.Old, 0, oldLen);
-		const newLen = this.New ? this.New.length : 0;
-		Writer.WriteLong(newLen);
-		if (newLen) Writer.WriteBuffer(this.New, 0, newLen);
-	};
-	CChangesBinaryData.prototype.ReadFromBinary = function (Reader) {
+	CChangesPartBinaryData.prototype.ReadFromBinary = function(Reader)
+	{
 		let length = Reader.GetLong();
-		this.Old = length ? new Uint8Array(Reader.GetBuffer(length)) : new Uint8Array(0);
+		this.Old = new Uint8Array(Reader.GetBuffer(length));
+
 		length = Reader.GetLong();
-		this.New = length ? new Uint8Array(Reader.GetBuffer(length)) : new Uint8Array(0);
+		this.New = new Uint8Array(Reader.GetBuffer(length));
 	};
-	CChangesBinaryData.prototype.Load = function () {
-		this.Redo();
-		this.RefreshRecalcData();
-	};
-	CChangesBinaryData.prototype.CheckCorrect = function () {
-		return true;
-	};
-	window['AscDFH'].CChangesBinaryData = CChangesBinaryData;
+	window['AscDFH'].CChangesPartBinaryData = CChangesPartBinaryData;
+
+
+	function CChangesEndBinaryData(Class, Old, New, Type, Color) {
+		this.Type = Type;
+		AscDFH.CChangesBaseProperty.call(this, Class, Old, New, Color);
+	}
+	CChangesEndBinaryData.prototype = Object.create(AscDFH.CChangesBaseProperty.prototype);
+	CChangesEndBinaryData.prototype.constructor = CChangesEndBinaryData;
+
+
+	CChangesEndBinaryData.prototype.Undo = function () {
+		if (this.Class.partsOfBinaryData) {
+			return this.Redo();
+		}
+		this.Class.partsOfBinaryData = [];
+	}
+	CChangesEndBinaryData.prototype.setBinaryDataToClass = function (oPr) {};
+	CChangesEndBinaryData.prototype.Redo = function () {
+		if (!this.Class.partsOfBinaryData) {
+			return this.Undo();
+		}
+		let lenOfAllBinaryData = 0;
+		for (let i = 0; i < this.Class.partsOfBinaryData.length; i += 1) {
+			lenOfAllBinaryData += this.Class.partsOfBinaryData[i].length;
+		}
+		const arrBinaryData = new Uint8Array(lenOfAllBinaryData);
+		this.setBinaryDataToClass(arrBinaryData);
+
+		let indexOfInsert = 0;
+		for (let i = 0; i < this.Class.partsOfBinaryData.length; i += 1) {
+			const partOfBinaryData = this.Class.partsOfBinaryData[i];
+			for (let j = 0; j < partOfBinaryData.length; j += 1) {
+				arrBinaryData[indexOfInsert] = partOfBinaryData[j];
+				indexOfInsert += 1;
+			}
+		}
+		delete this.Class.partsOfBinaryData;
+	}
+	window['AscDFH'].CChangesEndBinaryData = CChangesEndBinaryData;
+
+	function addBinaryDataToHistory(oClass, arrOldData, arrNewData, oStartChangesClass, oPartChangesClass, oEndChangesClass)
+	{
+		const maxLen = arrNewData.length > arrOldData.length ? arrNewData.length : arrOldData.length;
+		const oldParts = [];
+		const newParts = [];
+		const amountOfParts = Math.ceil(maxLen / BINARY_PART_HISTORY_LIMIT);
+		for (let i = 0; i < amountOfParts; i += 1) {
+			oldParts.push(arrOldData.slice(i * BINARY_PART_HISTORY_LIMIT, (i + 1) * BINARY_PART_HISTORY_LIMIT));
+			newParts.push(arrNewData.slice(i * BINARY_PART_HISTORY_LIMIT, (i + 1) * BINARY_PART_HISTORY_LIMIT));
+		}
+		AscCommon.History.Add(new oStartChangesClass(oClass, null, null, false));
+		for (let i = 0; i < amountOfParts; i += 1) {
+			AscCommon.History.Add(new oPartChangesClass(oClass, oldParts[i], newParts[i], false));
+		}
+		AscCommon.History.Add(new oEndChangesClass(oClass, null, null, false));
+	}
+	window['AscDFH'].addBinaryDataToHistory = addBinaryDataToHistory;
 
 
 	function CChangesDrawingsImageId(Class, NewPr) {

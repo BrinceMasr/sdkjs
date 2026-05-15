@@ -54,14 +54,31 @@ function (window, undefined) {
             this.h = Reader.GetLong();
         };
 
-	    function CChangesOleObjectBinary(Class, Old, New, Color) {
-		    AscDFH.CChangesBinaryData.call(this, Class, Old, New, AscDFH.historyitem_ImageShapeSetBinaryData, Color);
+	    function CChangesStartOleObjectBinary(Class, Old, New, Color) {
+		    AscDFH. CChangesStartBinaryData.call(this, Class, Old, New, AscDFH.historyitem_ImageShapeSetStartBinaryData, Color);
 	    }
-	    CChangesOleObjectBinary.prototype = Object.create(AscDFH.CChangesBinaryData.prototype);
-	    CChangesOleObjectBinary.prototype.constructor = CChangesOleObjectBinary;
-	    CChangesOleObjectBinary.prototype.setBinaryDataToClass = function (oPr) {
+	    CChangesStartOleObjectBinary.prototype = Object.create(AscDFH.CChangesStartBinaryData.prototype);
+	    CChangesStartOleObjectBinary.prototype.constructor = CChangesStartOleObjectBinary;
+	    CChangesStartOleObjectBinary.prototype.setBinaryDataToClass = function (oPr)
+	    {
 		    this.Class.m_aBinaryData = oPr;
-	    };
+	    }
+
+	    function CChangesPartOleObjectBinary(Class, Old, New, Color) {
+		    AscDFH.CChangesPartBinaryData.call(this, Class, Old, New, AscDFH.historyitem_ImageShapeSetPartBinaryData, Color);
+	    }
+	    CChangesPartOleObjectBinary.prototype = Object.create(AscDFH.CChangesPartBinaryData.prototype);
+	    CChangesPartOleObjectBinary.prototype.constructor = CChangesPartOleObjectBinary;
+
+	    function CChangesEndOleObjectBinary(Class, Old, New, Color) {
+		    AscDFH.CChangesEndBinaryData.call(this, Class, Old, New, AscDFH.historyitem_ImageShapeSetEndBinaryData, Color);
+	    }
+	    CChangesEndOleObjectBinary.prototype = Object.create(AscDFH.CChangesEndBinaryData.prototype);
+	    CChangesEndOleObjectBinary.prototype.constructor = CChangesEndOleObjectBinary;
+	    CChangesEndOleObjectBinary.prototype.setBinaryDataToClass = function (oPr)
+	    {
+		    this.Class.m_aBinaryData = oPr;
+	    }
 
         AscDFH.changesFactory[AscDFH.historyitem_ImageShapeSetData] = AscDFH.CChangesDrawingsString;
         AscDFH.changesFactory[AscDFH.historyitem_ImageShapeSetApplicationId] = AscDFH.CChangesDrawingsString;
@@ -72,7 +89,9 @@ function (window, undefined) {
 		AscDFH.changesFactory[AscDFH.historyitem_ImageShapeSetMathObject] = AscDFH.CChangesDrawingsObject;
 		AscDFH.changesFactory[AscDFH.historyitem_ImageShapeSetDrawAspect] = AscDFH.CChangesDrawingsLong;
         AscDFH.drawingsConstructorsMap[AscDFH.historyitem_ChartStyleEntryDefRPr] = AscCommonWord.CTextPr;
-        AscDFH.changesFactory[AscDFH.historyitem_ImageShapeSetBinaryData] = CChangesOleObjectBinary;
+        AscDFH.changesFactory[AscDFH.historyitem_ImageShapeSetStartBinaryData] = CChangesStartOleObjectBinary;
+        AscDFH.changesFactory[AscDFH.historyitem_ImageShapeSetPartBinaryData] = CChangesPartOleObjectBinary;
+        AscDFH.changesFactory[AscDFH.historyitem_ImageShapeSetEndBinaryData] = CChangesEndOleObjectBinary;
 
         AscDFH.drawingsChangesMap[AscDFH.historyitem_ImageShapeSetData] = function(oClass, value){oClass.m_sData = value;};
         AscDFH.drawingsChangesMap[AscDFH.historyitem_ImageShapeSetApplicationId] = function(oClass, value){oClass.m_sApplicationId = value;};
@@ -187,7 +206,7 @@ function (window, undefined) {
     };
     COleObject.prototype.setBinaryData = function(aBinaryData)
     {
-        AscCommon.History.Add(new CChangesOleObjectBinary(this, this.m_aBinaryData, aBinaryData));
+	    AscDFH.addBinaryDataToHistory(this, this.m_aBinaryData, aBinaryData, CChangesStartOleObjectBinary, CChangesPartOleObjectBinary, CChangesEndOleObjectBinary);
         this.m_aBinaryData = aBinaryData;
     };
     COleObject.prototype.setMathObject = function(oMath)
