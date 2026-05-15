@@ -2465,8 +2465,10 @@
         }
         
         for (let i = 0; i < oOriginPage.fieldsAPInfo.info.length; i++) {
-            if (oOriginPage.fieldsAPInfo.info[i]["i"] == this._apIdx)
-                return oOriginPage.fieldsAPInfo.info[i];
+            if (oOriginPage.fieldsAPInfo.info[i]["i"] == this._apIdx) {
+				let oInfo = oOriginPage.fieldsAPInfo.info.splice(i, 1)[0];
+                return oInfo; 
+			}
         }
 
         return null;
