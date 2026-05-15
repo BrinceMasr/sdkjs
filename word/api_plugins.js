@@ -989,7 +989,7 @@
 
 				window.g_asc_plugins && window.g_asc_plugins.setPluginMethodReturnAsync();
 				AscCommon.Check_LoadingDataBeforePrepaste(this, {}, oImagesMap, function() {
-					oLogicDocument.Reassign_ImageUrls(oImagesMap);
+					AscCommon.History.RewriteImageUrlsInLastPoint(oImagesMap);
 					oLogicDocument.Recalculate();
 					oLogicDocument.End_SilentMode();
 					oLogicDocument.LoadDocumentState(oStartState);

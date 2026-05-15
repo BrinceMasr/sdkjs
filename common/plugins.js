@@ -1620,7 +1620,6 @@
 					let _t = this;
 					function onEndScript()
 					{
-						_t.api.evalCommand = false;
 						_t.api.onEndBuilderScript(function(result)
 						{
 							if (!result)

@@ -1312,6 +1312,24 @@ CHistory.prototype.Add = function(Class, Type, sheetid, range, Data, LocalChange
 		item.Binary.Pos = Binary_Pos;
 		item.Binary.Len = Binary_Len;
 	};
+	CHistory.prototype.RefreshBinaryDataItem = function(item)
+	{
+		this.Refresh_SpreadsheetChanges(item);
+	};
+	CHistory.prototype.RewriteImageUrlsInLastPoint = function(mapUrl)
+	{
+		if (this.Index < 0 || !this.Points[this.Index])
+			return;
+		let items = this.Points[this.Index].Items;
+		for (let i = 0; i < items.length; ++i) {
+			let item   = items[i];
+			let change = item.Data || item.Class;
+			if (!change || !change.ReplaceImageUrl || !change.ReplaceImageUrl(mapUrl))
+				continue;
+			this.RefreshBinaryDataItem(item);
+			change.Redo();
+		}
+	};
 CHistory.prototype.CanAddChanges = function()
 {
 	return (0 === this.TurnOffHistory && this.Index >= 0);

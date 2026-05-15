@@ -218,8 +218,6 @@
 
 		this.SaveAfterMacros = false;
 
-		this.evalCommand = false;
-
 		// Spell Checking
 		this.SpellCheckApi = new AscCommon.CSpellCheckApi();
 		this.isSpellCheckEnable = true;
@@ -4590,7 +4588,6 @@
 	baseEditorsApi.prototype._beforeEvalCommand = function()
 	{
 		let oApi = this;
-		this.evalCommand = true;
 		switch (this.editorId)
 		{
 			case AscCommon.c_oEditorId.Word:
@@ -4616,7 +4613,6 @@
 	baseEditorsApi.prototype._afterEvalCommand = function(endAction)
 	{
 		var oApi = this;
-		this.evalCommand = false;
 		switch (this.editorId)
 		{
 			case AscCommon.c_oEditorId.Word:
@@ -4635,8 +4631,7 @@
 					_images[_imagesArray[i]] = _imagesArray[i];
 
 				AscCommon.Check_LoadingDataBeforePrepaste(this, oLogicDocument.Document_Get_AllFontNames(), _images, function() {
-					if (oLogicDocument.Reassign_ImageUrls)
-						oLogicDocument.Reassign_ImageUrls(_images);
+					AscCommon.History.RewriteImageUrlsInLastPoint(_images);
 
 					if (AscCommon.c_oEditorId.Word === oApi.editorId)
 					{
@@ -4657,7 +4652,7 @@
 					_images[_imagesArray[i]] = _imagesArray[i];
 
 				AscCommon.Check_LoadingDataBeforePrepaste(this, oModel._generateFontMap(), _images, function() {
-					oModel.reassignImageUrls(_images);
+					AscCommon.History.RewriteImageUrlsInLastPoint(_images);
 					oApi.asc_Recalculate(true);
 					var wsView = oApi.wb && oApi.wb.getWorksheet();
 					if (wsView && wsView.objectRender && wsView.objectRender.controller)

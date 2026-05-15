@@ -700,7 +700,7 @@
 						function()
 						{
 							var _api = window.g_asc_plugins.api;
-							_api.WordControl.m_oLogicDocument.Reassign_ImageUrls(window.g_asc_plugins.images_rename);
+							AscCommon.History.RewriteImageUrlsInLastPoint(window.g_asc_plugins.images_rename);
 							delete window.g_asc_plugins.images_rename;
 							_api.asc_Recalculate(true);
 							_api.WordControl.m_oLogicDocument.UnlockPanelStyles(true);

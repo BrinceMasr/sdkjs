@@ -1027,6 +1027,41 @@ CHistory.prototype =
             }
         } catch (e) {
         }
+    },
+
+    RefreshBinaryDataItem : function(item)
+    {
+        let Binary_Pos = this.BinaryWriter.GetCurPosition();
+        let _t         = this;
+        if ((Asc.editor || editor).binaryChanges) {
+            this.BinaryWriter.WriteWithLen(this, function () {
+                _t.BinaryWriter.WriteString2(item.Class.Get_Id());
+                _t.BinaryWriter.WriteLong(item.Data.Type);
+                item.Data.WriteToBinary(_t.BinaryWriter);
+            });
+        } else {
+            this.BinaryWriter.WriteString2(item.Class.Get_Id());
+            this.BinaryWriter.WriteLong(item.Data.Type);
+            item.Data.WriteToBinary(this.BinaryWriter);
+        }
+        let Binary_Len = this.BinaryWriter.GetCurPosition() - Binary_Pos;
+        item.Binary.Pos = Binary_Pos;
+        item.Binary.Len = Binary_Len;
+    },
+
+    RewriteImageUrlsInLastPoint : function(mapUrl)
+    {
+        if (this.Index < 0 || !this.Points[this.Index])
+            return;
+        let items = this.Points[this.Index].Items;
+        for (let i = 0; i < items.length; ++i) {
+            let item   = items[i];
+            let change = item.Data;
+            if (!change || !change.ReplaceImageUrl || !change.ReplaceImageUrl(mapUrl))
+                continue;
+            this.RefreshBinaryDataItem(item);
+            change.Redo();
+        }
     }
 };
 	CHistory.prototype.GetLocalChangesSize = function()

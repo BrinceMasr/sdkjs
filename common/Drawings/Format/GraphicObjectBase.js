@@ -1066,22 +1066,30 @@
 		return !this.isObjectInSmartArt() && this.getNoAdjustHandles() === false;
 	};
 	CGraphicObjectBase.prototype.Reassign_ImageUrls = function (mapUrl) {
-		if (this.blipFill) {
-			if (mapUrl[this.blipFill.RasterImageId]) {
-				if (this.setBlipFill) {
-					const blip_fill = this.blipFill.createDuplicate();
-					blip_fill.setRasterImageId(mapUrl[this.blipFill.RasterImageId]);
-					this.setBlipFill(blip_fill);
-				}
+		if (this.blipFill && mapUrl[this.blipFill.RasterImageId]) {
+			if (this.setBlipFill) {
+				const oNew = this.blipFill.createDuplicate();
+				oNew.ReplaceImageUrl(mapUrl);
+				this.setBlipFill(oNew);
 			}
 		}
 		if (this.spPr) {
-			const oNewFill = this.spPr.Fill && this.spPr.Fill.reassignImageUrl(mapUrl);
-			if (oNewFill)
-				this.spPr.setFill(oNewFill);
-			const oNewLn = this.spPr.ln && this.spPr.ln.reassignImageUrl(mapUrl);
-			if (oNewLn)
-				this.spPr.setLn(oNewLn);
+			if (this.spPr.Fill) {
+				const sId = this.spPr.Fill.checkRasterImageId();
+				if (sId && mapUrl[sId]) {
+					const oNew = this.spPr.Fill.createDuplicate();
+					oNew.ReplaceImageUrl(mapUrl);
+					this.spPr.setFill(oNew);
+				}
+			}
+			if (this.spPr.ln) {
+				const sId = this.spPr.ln.checkRasterImageId();
+				if (sId && mapUrl[sId]) {
+					const oNew = this.spPr.ln.createDuplicate();
+					oNew.ReplaceImageUrl(mapUrl);
+					this.spPr.setLn(oNew);
+				}
+			}
 		}
 		if (Array.isArray(this.spTree)) {
 			for (let i = 0; i < this.spTree.length; ++i) {

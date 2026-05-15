@@ -33,8 +33,6 @@
 "use strict";
 
 (function (window, undefined) {
-	const BINARY_PART_HISTORY_LIMIT = 1048576;
-
     var drawingsChangesMap = {};
     var drawingConstructorsMap = {};
     var drawingContentChanges = {};
@@ -316,146 +314,6 @@
         }
         return null;
     };
-
-
-    /**
-     * @constructor
-     * @extends {AscDFH.CChangesBase}
-     */
-    function CChangesImageIdStart(Class)
-    {
-        AscDFH.CChangesBase.call(this, Class);
-    }
-    CChangesImageIdStart.prototype = Object.create(AscDFH.CChangesBase.prototype);
-    CChangesImageIdStart.prototype.constructor = CChangesImageIdStart;
-    CChangesImageIdStart.prototype.Type = AscDFH.historyitem_type_ImageBlipStart;
-    CChangesImageIdStart.prototype.Undo = function()
-    {
-        let value = this.Class.blipFill;
-        if(!value) return;
-        let chunks = this.Class._chunkedRaster;
-        if(!Array.isArray(chunks) || chunks.length === 0) return;
-        chunks.reverse();
-        const fullVal = chunks.join("");
-        value.RasterImageId = fullVal;
-        delete this.Class._chunkedRaster;
-    };
-    CChangesImageIdStart.prototype.Redo = function()
-    {
-    };
-    CChangesImageIdStart.prototype.WriteToBinary = function(writer)
-    {
-    };
-    CChangesImageIdStart.prototype.ReadFromBinary = function(reader)
-    {
-    };
-    CChangesImageIdStart.prototype.CreateReverseChange = function()
-    {
-        return new CChangesImageIdEnd(this.Class);
-    };
-    AscDFH.changesFactory[AscDFH.historyitem_type_ImageBlipStart] = CChangesImageIdStart;
-    window['AscDFH'].CChangesImageIdStart = CChangesImageIdStart;
-    /**
-     * @constructor
-     * @extends {AscDFH.CChangesBase}
-     */
-    function CChangesImageIdEnd(Class)
-    {
-        AscDFH.CChangesBase.call(this, Class);
-    }
-    CChangesImageIdEnd.prototype = Object.create(AscDFH.CChangesBase.prototype);
-    CChangesImageIdEnd.prototype.constructor = CChangesImageIdEnd;
-    CChangesImageIdEnd.prototype.Type = AscDFH.historyitem_type_ImageBlipEnd;
-    CChangesImageIdEnd.prototype.Undo = function()
-    {
-    };
-    CChangesImageIdEnd.prototype.Redo = function()
-    {
-        let value = this.Class.blipFill;
-        if(!value) return;
-        let chunks = this.Class._chunkedRaster;
-        if(!Array.isArray(chunks) || chunks.length === 0) return;
-
-
-        const fullVal = chunks.join("");
-        value.RasterImageId = fullVal;
-        delete this.Class._chunkedRaster;
-
-        let _correct_id = AscCommon.getImageFromChanges(value.RasterImageId);
-        if (null != _correct_id)
-            value.RasterImageId = _correct_id;
-        if (value && (typeof value.RasterImageId === "string") && value.RasterImageId.length > 0) {
-            AscCommon.CollaborativeEditing.Add_NewImage(value.RasterImageId);
-        }
-    };
-    CChangesImageIdEnd.prototype.WriteToBinary = function(writer)
-    {
-    };
-    CChangesImageIdEnd.prototype.ReadFromBinary = function(reader)
-    {
-    };
-    CChangesImageIdEnd.prototype.CreateReverseChange = function()
-    {
-        return new CChangesImageIdStart(this.Class);
-    };
-    AscDFH.changesFactory[AscDFH.historyitem_type_ImageBlipEnd] = CChangesImageIdEnd;
-    window['AscDFH'].CChangesImageIdEnd = CChangesImageIdEnd;
-
-
-    function CChangesDrawingsImageRasterImageIdPart(Class, NewChunk, OldChunk) {
-		this.NewChunk = NewChunk;
-		this.OldChunk = OldChunk;
-		AscDFH.CChangesBaseStringProperty.call(this, Class, undefined, undefined);
-	}
-
-	CChangesDrawingsImageRasterImageIdPart.prototype = Object.create(AscDFH.CChangesBaseStringProperty.prototype);
-	CChangesDrawingsImageRasterImageIdPart.prototype.constructor = CChangesDrawingsImageRasterImageIdPart;
-
-	CChangesDrawingsImageRasterImageIdPart.prototype.Type = AscDFH.historyitem_type_ImageBlipFillPart;
-	window['AscDFH'].CChangesDrawingsImageRasterImageIdPart = CChangesDrawingsImageRasterImageIdPart;
-	AscDFH.changesFactory[AscDFH.historyitem_type_ImageBlipFillPart]			= CChangesDrawingsImageRasterImageIdPart;
-
-	CChangesDrawingsImageRasterImageIdPart.prototype.CreateReverseChange = function () {
-		return new this.constructor(this.Class, this.OldChunk, this.NewChunk);
-	};
-
-	CChangesDrawingsImageRasterImageIdPart.prototype.ReadFromBinary = function (reader) {
-		this.NewChunk = reader.GetString2();
-		this.OldChunk = reader.GetString2();
-		AscDFH.CChangesBaseStringProperty.prototype.ReadFromBinary.call(this, reader);
-	};
-
-	CChangesDrawingsImageRasterImageIdPart.prototype.WriteToBinary = function (writer) {
-		writer.WriteString2(this.NewChunk);
-		writer.WriteString2(this.OldChunk);
-		AscDFH.CChangesBaseStringProperty.prototype.WriteToBinary.call(this, writer);
-	};
-
-	CChangesDrawingsImageRasterImageIdPart.prototype.Redo = function () {
-		this._applyChunk(this.NewChunk);
-	};
-
-	CChangesDrawingsImageRasterImageIdPart.prototype.Undo = function () {
-		this._applyChunk(this.OldChunk);
-	};
-
-	CChangesDrawingsImageRasterImageIdPart.prototype._applyChunk = function (chunk) {
-		if (!this.Class._chunkedRaster) {
-			this.Class._chunkedRaster = [];
-		}
-		this.Class._chunkedRaster.push(chunk);
-	};
-
-	CChangesDrawingsImageRasterImageIdPart.prototype.Load = function () {
-		this.Redo();
-		this.RefreshRecalcData();
-	};
-
-	CChangesDrawingsImageRasterImageIdPart.prototype.CheckCorrect = function () {
-		return true;
-	};
-
-
     function CChangesDrawingsObject(Class, Type, OldPr, NewPr) {
         this.Type = Type;
         var _OldPr = OldPr && OldPr.Get_Id ? OldPr.Get_Id() : undefined;
@@ -1350,131 +1208,39 @@
     };
     window['AscDFH'].CChangesDrawingsSparklinesRemove = CChangesDrawingsSparklinesRemove;
 
-	function CChangesStartBinaryData(Class, Old, New, Type, Color) {
+	function CChangesBinaryData(Class, Old, New, Type, Color) {
 		this.Type = Type;
 		AscDFH.CChangesBaseProperty.call(this, Class, Old, New, Color);
 	}
-	CChangesStartBinaryData.prototype = Object.create(AscDFH.CChangesBaseProperty.prototype);
-	CChangesStartBinaryData.prototype.constructor = CChangesStartBinaryData;
+	CChangesBinaryData.prototype = Object.create(AscDFH.CChangesBaseProperty.prototype);
+	CChangesBinaryData.prototype.constructor = CChangesBinaryData;
 
-	CChangesStartBinaryData.prototype.setBinaryDataToClass = function (oPr) {};
-	CChangesStartBinaryData.prototype.Undo = function () {
-		if (!this.Class.partsOfBinaryData) {
-			return this.Redo();
-		}
-
-		let lenOfAllBinaryData = 0;
-		for (let i = 0; i < this.Class.partsOfBinaryData.length; i += 1) {
-			lenOfAllBinaryData += this.Class.partsOfBinaryData[i].length;
-		}
-		const arrBinaryData = new Uint8Array(lenOfAllBinaryData);
-		this.setBinaryDataToClass(arrBinaryData);
-		let indexOfInsert = 0;
-		for (let i = this.Class.partsOfBinaryData.length - 1; i >= 0; i -= 1) {
-			const partOfBinaryData = this.Class.partsOfBinaryData[i];
-			for (let j = 0; j < partOfBinaryData.length; j += 1) {
-				arrBinaryData[indexOfInsert] = partOfBinaryData[j];
-				indexOfInsert += 1;
-			}
-		}
-		delete this.Class.partsOfBinaryData;
-	}
-
-	CChangesStartBinaryData.prototype.Redo = function () {
-		if (this.Class.partsOfBinaryData) {
-			return this.Undo()
-		}
-		this.Class.partsOfBinaryData = [];
-	}
-	window['AscDFH'].CChangesStartBinaryData = CChangesStartBinaryData;
-
-	function CChangesPartBinaryData(Class, Old, New, Type, Color) {
-		this.Type = Type;
-		AscDFH.CChangesBaseProperty.call(this, Class, Old, New, Color);
-	}
-	CChangesPartBinaryData.prototype = Object.create(AscDFH.CChangesBaseProperty.prototype);
-	CChangesPartBinaryData.prototype.constructor = CChangesPartBinaryData;
-
-	CChangesPartBinaryData.prototype.private_SetValue = function (oPr) {
-		if (oPr.length) {
-			this.Class.partsOfBinaryData.push(oPr);
-		}
-	}
-
-	CChangesPartBinaryData.prototype.WriteToBinary = function(Writer)
-	{
-		Writer.WriteLong(this.Old.length);
-		Writer.WriteBuffer(this.Old, 0, this.Old.length);
-
-		Writer.WriteLong(this.New.length);
-		Writer.WriteBuffer(this.New, 0, this.New.length);
+	CChangesBinaryData.prototype.setBinaryDataToClass = function (oPr) {};
+	CChangesBinaryData.prototype.private_SetValue = function (oPr) {
+		this.setBinaryDataToClass(oPr || new Uint8Array(0));
 	};
-	CChangesPartBinaryData.prototype.ReadFromBinary = function(Reader)
-	{
+	CChangesBinaryData.prototype.WriteToBinary = function (Writer) {
+		const oldLen = this.Old ? this.Old.length : 0;
+		Writer.WriteLong(oldLen);
+		if (oldLen) Writer.WriteBuffer(this.Old, 0, oldLen);
+		const newLen = this.New ? this.New.length : 0;
+		Writer.WriteLong(newLen);
+		if (newLen) Writer.WriteBuffer(this.New, 0, newLen);
+	};
+	CChangesBinaryData.prototype.ReadFromBinary = function (Reader) {
 		let length = Reader.GetLong();
-		this.Old = new Uint8Array(Reader.GetBuffer(length));
-
+		this.Old = length ? new Uint8Array(Reader.GetBuffer(length)) : new Uint8Array(0);
 		length = Reader.GetLong();
-		this.New = new Uint8Array(Reader.GetBuffer(length));
+		this.New = length ? new Uint8Array(Reader.GetBuffer(length)) : new Uint8Array(0);
 	};
-	window['AscDFH'].CChangesPartBinaryData = CChangesPartBinaryData;
-
-
-	function CChangesEndBinaryData(Class, Old, New, Type, Color) {
-		this.Type = Type;
-		AscDFH.CChangesBaseProperty.call(this, Class, Old, New, Color);
-	}
-	CChangesEndBinaryData.prototype = Object.create(AscDFH.CChangesBaseProperty.prototype);
-	CChangesEndBinaryData.prototype.constructor = CChangesEndBinaryData;
-
-
-	CChangesEndBinaryData.prototype.Undo = function () {
-		if (this.Class.partsOfBinaryData) {
-			return this.Redo();
-		}
-		this.Class.partsOfBinaryData = [];
-	}
-	CChangesEndBinaryData.prototype.setBinaryDataToClass = function (oPr) {};
-	CChangesEndBinaryData.prototype.Redo = function () {
-		if (!this.Class.partsOfBinaryData) {
-			return this.Undo();
-		}
-		let lenOfAllBinaryData = 0;
-		for (let i = 0; i < this.Class.partsOfBinaryData.length; i += 1) {
-			lenOfAllBinaryData += this.Class.partsOfBinaryData[i].length;
-		}
-		const arrBinaryData = new Uint8Array(lenOfAllBinaryData);
-		this.setBinaryDataToClass(arrBinaryData);
-
-		let indexOfInsert = 0;
-		for (let i = 0; i < this.Class.partsOfBinaryData.length; i += 1) {
-			const partOfBinaryData = this.Class.partsOfBinaryData[i];
-			for (let j = 0; j < partOfBinaryData.length; j += 1) {
-				arrBinaryData[indexOfInsert] = partOfBinaryData[j];
-				indexOfInsert += 1;
-			}
-		}
-		delete this.Class.partsOfBinaryData;
-	}
-	window['AscDFH'].CChangesEndBinaryData = CChangesEndBinaryData;
-
-	function addBinaryDataToHistory(oClass, arrOldData, arrNewData, oStartChangesClass, oPartChangesClass, oEndChangesClass)
-	{
-		const maxLen = arrNewData.length > arrOldData.length ? arrNewData.length : arrOldData.length;
-		const oldParts = [];
-		const newParts = [];
-		const amountOfParts = Math.ceil(maxLen / BINARY_PART_HISTORY_LIMIT);
-		for (let i = 0; i < amountOfParts; i += 1) {
-			oldParts.push(arrOldData.slice(i * BINARY_PART_HISTORY_LIMIT, (i + 1) * BINARY_PART_HISTORY_LIMIT));
-			newParts.push(arrNewData.slice(i * BINARY_PART_HISTORY_LIMIT, (i + 1) * BINARY_PART_HISTORY_LIMIT));
-		}
-		AscCommon.History.Add(new oStartChangesClass(oClass, null, null, false));
-		for (let i = 0; i < amountOfParts; i += 1) {
-			AscCommon.History.Add(new oPartChangesClass(oClass, oldParts[i], newParts[i], false));
-		}
-		AscCommon.History.Add(new oEndChangesClass(oClass, null, null, false));
-	}
-	window['AscDFH'].addBinaryDataToHistory = addBinaryDataToHistory;
+	CChangesBinaryData.prototype.Load = function () {
+		this.Redo();
+		this.RefreshRecalcData();
+	};
+	CChangesBinaryData.prototype.CheckCorrect = function () {
+		return true;
+	};
+	window['AscDFH'].CChangesBinaryData = CChangesBinaryData;
 
 
 	function CChangesDrawingsImageId(Class, NewPr) {
