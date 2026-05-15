@@ -7523,34 +7523,76 @@
 
 	/**
 	 * Inserts an array of elements into the current position of the document.
+	 * The array may contain a mix of element types:
+	 * - {@link DocumentElement} elements are inserted as-is.
+	 * - {@link ParagraphContent} elements are automatically grouped into paragraphs: consecutive paragraph-level elements
+	 *   share one new paragraph.
+	 * - Plain strings and numbers are wrapped in a new run and added to the current paragraph (same grouping rules as {@link ParagraphContent}).
+	 * - {@link ApiDrawing} elements are wrapped in a new run and added to the current paragraph.
+	 * Elements that are already in use in a document are skipped.
 	 * @memberof ApiDocument
 	 * @typeofeditors ["CDE"]
-	 * @param {DocumentElement[]} arrContent - An array of elements to insert.
+	 * @param {Array.<DocumentElement|ParagraphContent|ApiDrawing|string|number>} content - An array of elements to insert.
 	 * @param {boolean} [isInline=false] - Inline insert or not (works only for the last and the first element and only if it's a paragraph).
-	 * @param {object} [oPr=undefined] - Specifies that text and paragraph document properties are preserved for the inserted elements. 
-	 * The object should look like this: {"KeepTextOnly": true}. 
+	 * @param {object} [pr=undefined] - Specifies that text and paragraph document properties are preserved for the inserted elements.
+	 * The object should look like this: {"KeepTextOnly": true}.
 	 * @returns {boolean} Success?
 	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/InsertContent.js
 	 */
-	ApiDocument.prototype.InsertContent = function(arrContent, isInline, oPr)
+	ApiDocument.prototype.InsertContent = function(content, isInline, pr)
 	{
 		var oSelectedContent = new AscCommonWord.CSelectedContent();
-		var oElement;
-		for (var nIndex = 0, nCount = arrContent.length; nIndex < nCount; ++nIndex)
+
+		let flushPara = null;
+
+		function addToFlushPara(element)
 		{
-			oElement = arrContent[nIndex];
-			var oElm;
+			let paraElement = element.private_GetImpl();
+			if (paraElement.IsUseInDocument())
+				return;
+
+			if (!flushPara)
+			{
+				flushPara = new AscWord.Paragraph();
+				oSelectedContent.Add(new AscCommonWord.CSelectedElement(flushPara, true));
+			}
+
+			private_PushElementToParagraph(flushPara, paraElement);
+		};
+
+		for (var nIndex = 0, nCount = content.length; nIndex < nCount; ++nIndex)
+		{
+			var oElement = content[nIndex];
 			if (oElement instanceof ApiParagraph || oElement instanceof ApiTable || oElement instanceof ApiBlockLvlSdt)
 			{
-				oElm = oElement.private_GetImpl();
+				flushPara = null;
+				var oElm = oElement.private_GetImpl();
 				if (oElm.IsUseInDocument())
 					continue;
 
-				if (oElm.Parent != null) {
+				if (oElm.Parent != null)
 					oElm.SetParent(private_GetLogicDocument());
-				}
 
 				oSelectedContent.Add(new AscCommonWord.CSelectedElement(oElm, true));
+			}
+			else if (private_IsSupportedParaElement(oElement))
+			{
+				addToFlushPara(oElement);
+			}
+			else if (typeof oElement === 'string' || typeof oElement === 'number')
+			{
+				let apiRun = Api.CreateRun();
+				apiRun.AddText(String(oElement));
+				addToFlushPara(apiRun);
+			}
+			else if (oElement instanceof ApiDrawing)
+			{
+				if (oElement.Drawing.group || oElement.Drawing.IsUseInDocument())
+					continue;
+
+				let apiRun = Api.CreateRun();
+				apiRun.AddDrawing(oElement);
+				addToFlushPara(apiRun);
 			}
 		}
 		oSelectedContent.EndCollect(this.Document);
@@ -7575,9 +7617,9 @@
 			ContentPos : oParagraph.Get_ParaContentPos(false, false)
 		};
 
-		if (oPr)
+		if (pr)
 		{
-			if (oPr["KeepTextOnly"])
+			if (pr["KeepTextOnly"])
 			{
 				var oParaPr = this.Document.GetDirectParaPr();
 				var oTextPr = this.Document.GetDirectTextPr();
@@ -23669,13 +23711,13 @@
 	 * @memberof ApiInlineLvlSdt
 	 * @typeofeditors ["CDE"]
 	 * @param {String} text - The text which will be added to the content control.
-	 * @returns {boolean} - returns false if param is invalid.
+	 * @returns {?ApiRun} - returns null if content control can't be edited.
 	 * @see office-js-api/Examples/{Editor}/ApiInlineLvlSdt/Methods/AddText.js
 	 */
 	ApiInlineLvlSdt.prototype.AddText = function(text)
 	{
 		if (!this._canBeEdited())
-			return false;
+			return null;
 		
 		text = GetStringParameter(text, "");
 		
@@ -23689,7 +23731,7 @@
 		newRun.AddText(text);
 		this.AddElement(newRun, this.GetElementsCount())
 
-		return true;
+		return newRun;
 	};
 
 	/**

@@ -67,4 +67,43 @@ $(function ()
 		doc.SetControlsHighlight(0, 0, 0, true);
 		assert.strictEqual(doc.GetControlsHighlight(), null, 'Check that controls highlight is null after disabling it');
 	});
+
+	QUnit.test('InsertContent', function (assert)
+	{
+		const doc = AscTest.JsApi.GetDocument();
+		doc.Push(AscTest.JsApi.CreateParagraph());
+
+		const para = AscTest.JsApi.CreateParagraph();
+		para.AddText("Hello");
+		assert.strictEqual(doc.InsertContent([para]), true, 'InsertContent returns true for a single paragraph');
+		assert.strictEqual(doc.GetElement(0).GetText(), "Hello\r\n", 'Inserted paragraph appears as first element');
+
+		AscTest.ClearDocument();
+		doc.Push(AscTest.JsApi.CreateParagraph());
+
+		const para2 = AscTest.JsApi.CreateParagraph();
+		para2.AddText("Block");
+		const run = AscTest.JsApi.CreateRun();
+		run.AddText("Inline");
+		const countBefore = doc.GetElementsCount();
+		assert.strictEqual(doc.InsertContent([para2, "plain text", run]), true, 'InsertContent returns true for mixed content');
+		assert.ok(doc.GetElementsCount() >= countBefore + 2, 'Two new blocks added: one paragraph and one grouped inline paragraph');
+		assert.strictEqual(doc.GetElement(0).GetText(), "Block\r\n", 'First inserted block is the ApiParagraph');
+		assert.strictEqual(doc.GetElement(1).GetText(), "plain textInline\r\n", 'String and run are grouped into one paragraph');
+
+		AscTest.ClearDocument();
+		doc.Push(AscTest.JsApi.CreateParagraph());
+
+		const table = AscTest.JsApi.CreateTable(2, 2);
+		table.Cells[0][0].AddText("1");
+		table.Cells[0][1].AddText("2");
+		table.Cells[1][0].AddText("3");
+		table.Cells[1][1].AddText("4");
+		assert.strictEqual(doc.InsertContent([table]), true, 'InsertContent returns true when inserting a table');
+		assert.strictEqual(doc.GetText({
+			TableCellSeparator : "_c_",
+			TableRowSeparator : "_r_",
+			ParaSeparator : "_p_"
+		}), "1_c_2_r_3_c_4_r__p_", 'Check document text');
+	});
 });
