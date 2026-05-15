@@ -1735,6 +1735,15 @@ CChartsDrawer.prototype =
 
 		var getMinMaxCurCharts = function(axisCharts, axis) {
 
+			const axisType = axis.getObjectType();
+			if (axisType === AscDFH.historyitem_type_DateAx) {
+				const dateRange = t._getDateAxisRange(axisCharts);
+				if (dateRange) {
+					console.log(dateRange)
+					return dateRange;
+				}
+			}
+
 			//first pass through all charts looking for 100% stacked type
 			isStackedType = false;
 			for (var i = 0; i < axisCharts.length; i++) {
@@ -1923,6 +1932,119 @@ CChartsDrawer.prototype =
 				}
 			}
 		}
+	},
+
+	_getDateAxisRange: function (axisCharts) {
+		if (!Array.isArray(axisCharts) || axisCharts.length === 0) {
+			return null;
+		}
+
+		const uniqueDateMap = Object.create(null);
+		const uniqueDateValues = [];
+
+		const getStringCacheFromCategory = function (cat) {
+			if (cat) {
+				if (cat.calculatedRef && cat.calculatedRef.strCache) {
+					return cat.calculatedRef.strCache;
+				}
+				if (cat.strRef && cat.strRef.strCache) {
+					return cat.strRef.strCache;
+				}
+				if (cat.strLit) {
+					return cat.strLit;
+				}
+			}
+			return null;
+		};
+
+		const getInvalidPointsMap = function (strCache) {
+			const map = Object.create(null);
+
+			if (!strCache || !Array.isArray(strCache.pts)) {
+				return map;
+			}
+
+			for (let n = 0; n < strCache.pts.length; n++) {
+				const pt = strCache.pts[n];
+				if (!pt || !AscFormat.isRealNumber(pt.idx)) {
+					continue;
+				}
+
+				if (pt.isHidden === true) {
+					map[pt.idx] = true;
+					continue;
+				}
+
+				const text = pt.val.trim();
+				if (text.length === 0 || text[0] === "#") {
+					map[pt.idx] = true;
+				}
+			}
+
+			return map;
+		};
+
+		for (let i = 0; i < axisCharts.length; i++) {
+			const chart = axisCharts[i];
+			if (!chart || !Array.isArray(chart.series)) {
+				continue;
+			}
+
+			for (let j = 0; j < chart.series.length; j++) {
+				const seria = chart.series[j];
+				if (!seria || seria.isHidden) {
+					continue;
+				}
+
+				const catNumCache = seria.cat && seria.cat.numRef && seria.cat.numRef.numCache;
+				if (!catNumCache || !Array.isArray(catNumCache.pts) || catNumCache.pts.length === 0) {
+					continue;
+				}
+
+				const strCache = getStringCacheFromCategory(seria.cat);
+				const invalidPointsMap = getInvalidPointsMap(strCache);
+
+				for (let k = 0; k < catNumCache.pts.length; k++) {
+					const pt = catNumCache.pts[k];
+					const isPointValid = (
+						pt &&
+						pt.isHidden !== true &&
+						AscFormat.isRealNumber(pt.idx) &&
+						invalidPointsMap[pt.idx] !== true
+					);
+					if (!isPointValid) {
+						continue;
+					}
+
+					const dateValue = parseFloat(pt.val);
+					if (!isFinite(dateValue)) {
+						continue;
+					}
+
+					const dateSerial = Math.floor(dateValue);
+					if (!isFinite(dateSerial)) {
+						continue;
+					}
+
+					if (!uniqueDateMap[dateSerial]) {
+						uniqueDateMap[dateSerial] = true;
+						uniqueDateValues.push(dateSerial);
+					}
+				}
+			}
+		}
+
+		if (uniqueDateValues.length === 0) {
+			return null;
+		}
+
+		uniqueDateValues.sort(function (a, b) {
+			return a - b;
+		});
+
+		const min = uniqueDateValues[0];
+		const max = uniqueDateValues[uniqueDateValues.length - 1];
+		return { min: min, max: max };
 	},
 
 	_getChartsByAxisId: function(charts, id) {
