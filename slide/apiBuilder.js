@@ -1718,27 +1718,6 @@
     };
 
 	/**
-	 * Inserts slides from the specified file into the current presentation.
-	 * @param {object} file - An object containing the information about the presentation to insert slides from.
-	 * @param {number} [index=ApiPresentation.GetSlidesCount()] - The 0-based position at which the new slides are inserted.
-	 * @param {number} [slideStart=0] - The 0-based index of the first slide to insert from the source file.
-	 * @param {number} [slideEnd=-1] - The 0-based index of the last slide to insert from the source file.
-	 * @param {boolean} [keepSourceFormatting=false] - Specifies whether to keep the source formatting of the inserted slides.
-	 * @returns {number} - The number of slides that were inserted.
-	 */
-	ApiPresentation.prototype.InsertFromFile = function (file, index, slideStart, slideEnd, keepSourceFormatting) {
-		if (!this.Presentation || !file || typeof file["GetBinary"] !== "function") {
-			return 0;
-		}
-		if (typeof file["IsValid"] === "function" && !file["IsValid"]()) {
-			return 0;
-		}
-		const binary = file["GetBinary"]();
-		const imageMap = typeof file["GetImageMap"] === "function" ? file["GetImageMap"]() : {};
-		return this.Presentation.InsertSlidesFromBinary(binary, imageMap, index, slideStart, slideEnd, keepSourceFormatting);
-	};
-
-	/**
 	 * Returns all comments from the current presentation.
 	 * @memberof ApiPresentation
 	 * @typeofeditors ["CPE"]
@@ -8298,7 +8277,6 @@
     ApiPresentation.prototype["GetDocumentInfo"]          = ApiPresentation.prototype.GetDocumentInfo;
     ApiPresentation.prototype["AddMathEquation"]          = ApiPresentation.prototype.AddMathEquation;
     ApiPresentation.prototype["SlidesToJSON"]             = ApiPresentation.prototype.SlidesToJSON;
-    ApiPresentation.prototype["InsertFromFile"]           = ApiPresentation.prototype.InsertFromFile;
     ApiPresentation.prototype["ToJSON"]                   = ApiPresentation.prototype.ToJSON;
     ApiPresentation.prototype["GetAllOleObjects"]         = ApiPresentation.prototype.GetAllOleObjects;
     ApiPresentation.prototype["GetAllTables"]             = ApiPresentation.prototype.GetAllTables;
