@@ -17012,18 +17012,21 @@ Paragraph.prototype.SetParagraphBidi = function(isRtl)
 {
 	if (this.Pr.Bidi === isRtl)
 		return;
-	
-	this.private_AddPrChange();
-	AscCommon.AddAndExecuteChange(new CChangesParagraphBidi(this, this.Pr.Bidi, isRtl));
-	
+
 	if (!this.bFromDocument)
 	{
-		let jc = this.GetParagraphAlign();
-		if (AscCommon.align_Left === jc)
-			this.Set_Align(AscCommon.align_Right);
-		else if (AscCommon.align_Right === jc)
-			this.Set_Align(AscCommon.align_Left);
+		if (this.GetParagraphBidi() !== isRtl)
+		{
+			let jc = this.GetParagraphAlign();
+			if (AscCommon.align_Left === jc)
+				this.Set_Align(AscCommon.align_Right);
+			else if (AscCommon.align_Right === jc)
+				this.Set_Align(AscCommon.align_Left);
+		}
 	}
+
+	this.private_AddPrChange();
+	AscCommon.AddAndExecuteChange(new CChangesParagraphBidi(this, this.Pr.Bidi, isRtl));
 };
 Paragraph.prototype.GetParagraphBidi = function()
 {
