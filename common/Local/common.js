@@ -371,12 +371,14 @@ window["Asc"]["asc_CBullet"].prototype["showFileDialog"] = window["Asc"]["asc_CB
 		var url = window["AscDesktopEditor"]["LocalFileGetImageUrl"](file);
 		var urls = [AscCommon.g_oDocumentUrls.getImageUrl(url)];
 
+		Api.sync_StartAction(Asc.c_oAscAsyncActionType.BlockInteraction, Asc.c_oAscAsyncAction.UploadImage);
 		Api.ImageLoader.LoadImagesWithCallback(urls, function(){
 			if(urls.length > 0)
 			{
 				_this.fillBulletImage(urls[0]);
 				Api.sendEvent("asc_onBulletImageLoaded", _this);
 			}
+			Api.sync_EndAction(Asc.c_oAscAsyncActionType.BlockInteraction, Asc.c_oAscAsyncAction.UploadImage);
 		});
 	});
 };
