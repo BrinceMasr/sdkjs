@@ -6337,7 +6337,10 @@ function(window, undefined) {
 		let oSeries = oPlotArea.getSeriesWithSmallestIndexForAxis(oAxis);
 		let bCat = false;
 		switch (nAxisType) {
-			case AscDFH.historyitem_type_DateAx:
+			case AscDFH.historyitem_type_DateAx: {
+				aStrings = oAxis.scale.map(num => String(num));
+				break;
+			}
 			case AscDFH.historyitem_type_CatAx: {
 				//calculate labels for horizontal axis
 				let nPtsLen = 0;

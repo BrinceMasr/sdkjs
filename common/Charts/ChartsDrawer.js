@@ -1739,7 +1739,6 @@ CChartsDrawer.prototype =
 			if (axisType === AscDFH.historyitem_type_DateAx) {
 				const dateRange = t._getDateAxisRange(axisCharts);
 				if (dateRange) {
-					console.log(dateRange)
 					return dateRange;
 				}
 			}
@@ -1996,7 +1995,7 @@ CChartsDrawer.prototype =
 					continue;
 				}
 
-				const catNumCache = seria.cat && seria.cat.numRef && seria.cat.numRef.numCache;
+				const catNumCache = seria.cat && (seria.cat.numRef && seria.cat.numRef.numCache || seria.cat.numLit);
 				if (!catNumCache || !Array.isArray(catNumCache.pts) || catNumCache.pts.length === 0) {
 					continue;
 				}
@@ -2045,6 +2044,24 @@ CChartsDrawer.prototype =
 		const min = uniqueDateValues[0];
 		const max = uniqueDateValues[uniqueDateValues.length - 1];
 		return { min: min, max: max };
+	},
+
+	_getDateAxisValues: function (axis) {
+		if (!axis || !AscFormat.isRealNumber(axis.min) || !AscFormat.isRealNumber(axis.max)) {
+			return [];
+		}
+
+		const min = Math.floor(axis.min);
+		const max = Math.floor(axis.max);
+		if (max < min) {
+			return [];
+		}
+
+		const values = [];
+		for (let day = min; day <= max; day++) {
+			values.push(day);
+		}
+		return values;
 	},
 
 	_getChartsByAxisId: function(charts, id) {
@@ -2440,7 +2457,13 @@ CChartsDrawer.prototype =
 		//for category axis we take interval 1
 		let arrayValues;
 		const axisType = axis.getObjectType();
-		if(AscDFH.historyitem_type_CatAx === axisType || AscDFH.historyitem_type_DateAx === axisType) {
+
+		if (axisType === AscDFH.historyitem_type_DateAx) {
+			arrayValues = this._getDateAxisValues(axis);
+			return arrayValues;
+		}
+
+		if (axisType === AscDFH.historyitem_type_CatAx) {
 			arrayValues = [];
 			let max = axis.max;
 			for(let i = axis.min; i <= max; i++) {
