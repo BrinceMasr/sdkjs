@@ -3912,6 +3912,37 @@ CChartsDrawer.prototype =
 		return null;
 	},
 
+	getCategoryPointByIndex: function (seria, index) {
+		if (!seria || !seria.cat) {
+			return null;
+		}
+
+		const catNumCache = (seria.cat.numRef && seria.cat.numRef.numCache) || seria.cat.numLit;
+		if (!catNumCache) {
+			return null;
+		}
+
+		return catNumCache.getPtByIndex ? catNumCache.getPtByIndex(index) : null;
+	},
+
+	getDateAxisPointValue: function (seria, index) {
+		if (!AscFormat.isRealNumber(index)) {
+			return null;
+		}
+
+		const catPoint = this.getCategoryPointByIndex(seria, index);
+		if (!catPoint || catPoint.isHidden === true) {
+			return null;
+		}
+
+		const catVal = parseFloat(catPoint.val);
+		if (!isFinite(catVal)) {
+			return null;
+		}
+
+		return Math.floor(catVal);
+	},
+
 	getPtCount: function (series) {
 		let numCache, oVal;
 		for (var i = 0; i < series.length; i++) {
@@ -6644,6 +6675,17 @@ CChartsDrawer.prototype =
 		return res;
 	},
 
+	getPrevArrElem: function (arr, index) {
+		let res = null;
+		for (let i = index - 1; i >= 0; i--) {
+			if (arr[i]) {
+				res = arr[i];
+				break;
+			}
+		}
+		return res;
+	},
+
 	getNextCachePoint: function (oNumCache, index, dispBlanksAs) {
 		let pt = oNumCache.getPtByIndex(index + 1);
 		if (!pt) {
@@ -9313,6 +9355,9 @@ drawLineChart.prototype = {
 		var points, y, x, val, seria, dataSeries, compiledMarkerSize, compiledMarkerSymbol, idx, numCache, idxPoint;
 		for (var i = 0; i < this.chart.series.length; i++) {
 
+			const isDateCategoryAxis = this.catAx.getObjectType() === AscDFH.historyitem_type_DateAx;
+			let dateEntries = isDateCategoryAxis ? [] : null;
+
 			seria = this.chart.series[i];
 			numCache = this.cChartDrawer.getNumCache(seria.val);
 			isLog = this.valAx && this.valAx.scaling ? this.valAx.scaling.logBase : false;
@@ -9328,7 +9373,15 @@ drawLineChart.prototype = {
 				//using n for search - idx with 0 index may not exist, but point at zero position needs to be drawn
 				val = this._getYVal(n, i);
 
-				x = this.catAx ? this.cChartDrawer.getYPosition(n + 1, this.catAx) : xPoints[n].pos;
+				let xVal;
+				if (isDateCategoryAxis) {
+					xVal = this.cChartDrawer.getDateAxisPointValue(seria, n);
+					x = AscFormat.isRealNumber(xVal) ? this.cChartDrawer.getYPosition(xVal, this.catAx) : null;
+				} else {
+					xVal = n + 1;
+					x = this.catAx ? this.cChartDrawer.getYPosition(xVal, this.catAx) : xPoints[n].pos;
+				}
+
 				y = this.cChartDrawer.getYPosition(val, this.valAx);
 
 				if (!this.paths.points) {
@@ -9349,16 +9402,51 @@ drawLineChart.prototype = {
 				compiledMarkerSize = idxPoint && idxPoint.compiledMarker && idxPoint.compiledMarker.size ? idxPoint.compiledMarker.size : null;
 				compiledMarkerSymbol = idxPoint && idxPoint.compiledMarker && AscFormat.isRealNumber(idxPoint.compiledMarker.symbol) ? idxPoint.compiledMarker.symbol : null;
 
-				if (val != null && ((isLog && val !== 0) || !isLog)) {
+				const isPositionsValid = AscFormat.isRealNumber(x) && AscFormat.isRealNumber(y);
+				if (isPositionsValid && val != null && ((isLog && val !== 0) || !isLog)) {
 					this.paths.points[i][n] = this.cChartDrawer.calculatePoint(x, y, compiledMarkerSize, compiledMarkerSymbol);
 					let errBars = this.chart.series[i].errBars[0];
 					if (errBars) {
 						this.cChartDrawer.errBars.putPoint(x, y, val, null,  seria.idx, n);
 					}
-					points[i][n] = {x: x, y: y};
+					points[i][n] = {x: x, y: y, xVal: xVal, yVal: val};
+
+					if (isDateCategoryAxis) {
+						dateEntries.push({
+							sourceIdx: n,
+							xVal: xVal,
+							point: points[i][n],
+						});
+					}
+
 				} else {
 					this.paths.points[i][n] = null;
 					points[i][n] = null;
+
+					if (isDateCategoryAxis) {
+						if (AscFormat.isRealNumber(xVal)) {
+							dateEntries.push({
+								sourceIdx: n,
+								xVal: xVal,
+								point: null
+							});
+						}
+					}
+
+				}
+			}
+
+			if (isDateCategoryAxis) {
+				dateEntries.sort(function (a, b) {
+					if (a.xVal === b.xVal) {
+						return a.sourceIdx - b.sourceIdx;
+					}
+					return a.xVal - b.xVal;
+				});
+
+				points[i] = [];
+				for (let pointIndex = 0; pointIndex < dateEntries.length; pointIndex++) {
+					points[i][pointIndex] = dateEntries[pointIndex].point;
 				}
 			}
 		}
@@ -9429,23 +9517,31 @@ drawLineChart.prototype = {
 						point8 = this.cChartDrawer._convertAndTurnPoint(x, y + widthLine, diffGapDepth + depthSer + serDiff * i);
 
 						this.paths.series[i][n] = this.cChartDrawer.calculateRect3D([point1, point2, point3, point4, point5, point6, point7, point8]);
-					} else if (isSplineLine) {
-						x = points[i][n - 1] ? n - 1 : 0;
-						y = this._getYVal(x, i);
-
-						x1 = n;
-						y1 = this._getYVal(x1, i);
-
-						x2 = points[i][n + 1] ? n + 1 : n;
-						y2 = this._getYVal(x2, i);
-
-						x3 = points[i][n + 2] ? n + 2 : points[i][n + 1] ? n + 1 : n;
-						y3 = this._getYVal(x3, i);
-
-						this.paths.series[i][n] = this.cChartDrawer.calculateSplineLine(x + 1, y, x1 + 1, y1, x2 + 1, y2, x3 + 1, y3, this.catAx, this.valAx);
-					} else {
-						this.paths.series[i][n] = this._calculateLine(curPoint.x, curPoint.y, nextPoint.x, nextPoint.y);
+						continue;
 					}
+
+					if (isSplineLine) {
+						const isSpanBlanks = AscFormat.DISP_BLANKS_AS_SPAN === this.cChartSpace.chart.dispBlanksAs;
+						const prevPoint = isSpanBlanks ? this.cChartDrawer.getPrevArrElem(points[i], n) : points[i][n - 1];
+						const pointAfterNext = isSpanBlanks ? this.cChartDrawer.getNextArrElem(points[i], n + 1) : points[i][n + 2];
+						const splineStart = prevPoint || curPoint;
+						const splineEnd = pointAfterNext || nextPoint;
+						this.paths.series[i][n] = this.cChartDrawer.calculateSplineLine(
+							splineStart.xVal,
+							splineStart.yVal,
+							curPoint.xVal,
+							curPoint.yVal,
+							nextPoint.xVal,
+							nextPoint.yVal,
+							splineEnd.xVal,
+							splineEnd.yVal,
+							this.catAx,
+							this.valAx
+						);
+						continue;
+					}
+
+					this.paths.series[i][n] = this._calculateLine(curPoint.x, curPoint.y, nextPoint.x, nextPoint.y);
 				}
 			}
 		}
