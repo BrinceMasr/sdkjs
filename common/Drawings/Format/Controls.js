@@ -390,7 +390,13 @@ function getFlatPenColor() {
 	CControl.prototype.getAllFonts = function (fonts) {
 		AscFormat.CShape.prototype.getAllFonts.call(this, fonts);
 		if (this.formControlPr && this.formControlPr.objectType === CFormControlPr_objectType_checkBox) {
-			fonts[getCheckBoxGlyphFontName()] = 1;
+			fonts[CHECKBOX_GLYPH_FONT_NAME] = 1;
+		}
+	};
+	CControl.prototype.documentGetAllFontNames = function (fonts) {
+		AscFormat.CShape.prototype.documentGetAllFontNames.call(this, fonts);
+		if (this.formControlPr && this.formControlPr.objectType === CFormControlPr_objectType_checkBox) {
+			fonts[CHECKBOX_GLYPH_FONT_NAME] = 1;
 		}
 	};
 	CControl.prototype.initController = function () {
@@ -720,28 +726,18 @@ function getFlatPenColor() {
 	const CHECKBOX_GLYPH_PROBE_FONT_SIZE = 10;
 
 	let CHECKBOX_GLYPH_METRICS = null;
-	function getCheckBoxGlyphFontName() {
-		if (AscFonts && AscFonts.FontPickerByCharacter) {
-			const sPicked = AscFonts.FontPickerByCharacter.getFontBySymbol(CHECKBOX_GLYPH_CODE_CHECKED);
-			if (sPicked) {
-				return sPicked;
-			}
-		}
-		return CHECKBOX_GLYPH_FONT_NAME;
-	}
 	function getCheckBoxGlyphMetrics() {
 		if (CHECKBOX_GLYPH_METRICS) {
 			return CHECKBOX_GLYPH_METRICS;
 		}
-		const sFontName = getCheckBoxGlyphFontName();
 		const oTextPr = new AscCommonWord.CTextPr();
 		oTextPr.Set_FromObject({
-			FontFamily: {Name: sFontName, Index: -1},
+			FontFamily: {Name: CHECKBOX_GLYPH_FONT_NAME, Index: -1},
 			FontSize: CHECKBOX_GLYPH_PROBE_FONT_SIZE,
 			Bold: false,
 			Italic: false
 		});
-		oTextPr.RFonts.SetAll(sFontName);
+		oTextPr.RFonts.SetAll(CHECKBOX_GLYPH_FONT_NAME);
 
 		AscCommon.g_oTextMeasurer.SetTextPr(oTextPr);
 		const nProbeSlot = AscWord.GetFontSlotByTextPr(CHECKBOX_GLYPH_CODE_CHECKED, oTextPr);
@@ -762,7 +758,7 @@ function getFlatPenColor() {
 		CHECKBOX_GLYPH_METRICS = {
 			useManual: false,
 			font: {
-				FontFamily: {Name: sFontName, Index: -1},
+				FontFamily: {Name: CHECKBOX_GLYPH_FONT_NAME, Index: -1},
 				FontSize: nFontSize,
 				Bold: false,
 				Italic: false
@@ -854,6 +850,11 @@ function getFlatPenColor() {
 		CControlControllerBase.call(this, oControl);
 		this.checkBox = new CCheckBox(this);
 		this.initCheckBoxHandlers();
+		if (AscFonts.IsCheckSymbols) {
+			AscFonts.FontPickerByCharacter.getFontBySymbol(CHECKBOX_GLYPH_CODE_CHECKED);
+			AscFonts.FontPickerByCharacter.getFontBySymbol(CHECKBOX_GLYPH_CODE_UNCHECKED);
+			AscFonts.FontPickerByCharacter.getFontBySymbol(CHECKBOX_GLYPH_CODE_MIXED);
+		}
 	}
 	AscFormat.InitClassWithoutType(CCheckBoxController, CControlControllerBase);
 	CCheckBoxController.prototype.initCheckBoxHandlers = function () {
