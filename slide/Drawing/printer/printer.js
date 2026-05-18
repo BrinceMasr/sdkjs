@@ -190,6 +190,9 @@
 	SpecificPrinter.prototype.drawPage = function (graphics, index) {
 
 	};
+
+	NOTESPRINTER_HORIZONTAL_FIELD = 20;
+	NOTESPRINTER_VERTICAL_FIELD = 15;
 	function NotesPrinter(presentation, printOptions) {
 		SpecificPrinter.call(this, presentation, printOptions);
 	}
@@ -199,16 +202,37 @@
 			pages: null
 		};
 	};
+	NotesPrinter.prototype.drawPlaceholders = function (note, graphics) {
+		note.cSld.forEachSp(function (shape) {
+			const placeholderType = shape.getPlaceholderType();
+			switch (placeholderType) {
+				case AscFormat.phType_dt:
+				case AscFormat.phType_sldNum:
+				case AscFormat.phType_ftr:
+				case AscFormat.phType_hdr: {
+					shape.draw(graphics);
+				}
+			}
+		});
+	};
 	NotesPrinter.prototype.drawPage = function (graphics, index) {
 		const pages = this.getNotesPages();
 		const page = pages[index];
+		const note = page.note;
 		if (page.pageIndex === 0) {
-
+			note.draw(graphics);
 		} else {
-			const notesShape = page.note.getBodyShape();
+			graphics.SaveGrState();
+			this.drawPlaceholders(note, graphics);
+			const transform = new AscCommon.CMatrix();
+			transform.tx = NOTESPRINTER_HORIZONTAL_FIELD;
+			transform.ty = NOTESPRINTER_VERTICAL_FIELD;
+			graphics.transform3(transform);
+			const notesShape = note.getBodyShape();
 			const docContent = notesShape.getDocContent();
 			docContent.Set_StartPage(0);
 			docContent.Draw(page.pageIndex, graphics);
+			graphics.RestoreGrState();
 		}
 	};
 	NotesPrinter.prototype.getNotesPages = function () {
@@ -216,36 +240,47 @@
 			const pages = [];
 			const printIndexes = this.getPrintIndexes();
 			const presentation = this.getPresentation();
-			const notesHeight = presentation.GetNotesHeightMM();
+			const notesPageHeight = presentation.GetNotesHeightMM() - NOTESPRINTER_VERTICAL_FIELD * 2;
+			const notesPageWidth = presentation.GetNotesWidthMM() - NOTESPRINTER_HORIZONTAL_FIELD * 2;
 			const slides = presentation.Slides;
 			for (let i = 0; i < printIndexes.length; i += 1) {
 				const index = printIndexes[i];
 				const slide = slides[index];
 				const note = slide.notes;
 				const shape = note.getBodyShape();
+				note.recalculate();
 				if (shape) {
+					note.cSld.forEachSp(function (shape) {
+						shape.setRecalculateInfo();
+						shape.recalculate()
+					});
+					shape.setRecalculateInfo();
+					shape.recalculate();
 					var oDocContent = shape.getDocContent();
 					if(oDocContent) {
-						const rect = shape.getTextRect();
-						const oldGetColumnContentFrame = shape.GetColumnContentFrame;
-						shape.GetColumnContentFrame = function (page, column, sectPr) {
+						const oldGetPageContentFrame = oDocContent.GetPageContentFrame;
+						const oldGetColumnContentFrame = oDocContent.GetColumnContentFrame;
+						oDocContent.GetPageContentFrame = function (page, sectPr) {
 							if (page === 0) {
-								return {X: 0, Y: 0, XLimit: rect.r - rect.l, YLimit: rect.b - rect.t};
+								return {X: 0, Y: 0, XLimit: shape.extX, YLimit: shape.extY, ColumnSpaceBefore: 0, ColumnSpaceAfter: 0};
 							}
-							return {X: 0, Y: 0, XLimit: rect.r - rect.l, YLimit: notesHeight};
+							return {X: 0, Y: 0, XLimit: notesPageWidth, YLimit: notesPageHeight, ColumnSpaceBefore: 0, ColumnSpaceAfter: 0};
+						}
+						oDocContent.GetColumnContentFrame = function (page, column, sectPr) {
+							return oDocContent.GetPageContentFrame(page, sectPr);
 						}
 						oDocContent.CalculateAllFields();
-						var Width = shape.spPr.xfrm.extX;
-						oDocContent.Reset(0, 0, Width, 20000);
+						oDocContent.Reset(0, 0, shape.extX, 20000);
 						var CurPage = 0;
 						var RecalcResult = recalcresult2_NextPage;
 						while (recalcresult2_End !== RecalcResult) {
 							pages.push(new NotePage(note, CurPage));
 							RecalcResult = oDocContent.Recalculate_Page(CurPage++, true);
 						}
-						shape.contentWidth = Width;
+						shape.contentWidth = shape.extX;
 						shape.contentHeight = 20000;
-						shape.GetColumnContentFrame = oldGetColumnContentFrame;
+						oDocContent.GetPageContentFrame = oldGetPageContentFrame;
+						oDocContent.GetColumnContentFrame = oldGetColumnContentFrame;
 					}
 				}
 			}

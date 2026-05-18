@@ -3292,8 +3292,6 @@
 
 		CShape.prototype.recalculateLocalTransform = function (transform) {
 			AscFormat.ExecuteNoHistory(function () {
-				var bNotesShape = false;
-
 				let oParaDrawing = getParaDrawing(this);
 				if (!isRealObject(this.group)) {
 					var bUserShape = false;
@@ -3369,15 +3367,6 @@
 							this.x = metrics.x + metricExtX / 2 - metricExtY / 2;
 							this.y = metrics.y + metricExtY / 2 - metricExtX / 2;
 						}
-					} else if (this.isSlideNoteShape()) {
-						bNotesShape = true;
-						this.x = 0;
-						this.y = editor.WordControl.m_oLogicDocument.GetHeightMM();
-						this.extX = this.parent.getWidth();
-						this.extY = 2000;
-						this.rot = 0;
-						this.flipH = false;
-						this.flipV = false;
 					} else if (this.spPr && this.spPr.xfrm && this.spPr.xfrm.isNotNull()) {
 						var xfrm = this.spPr.xfrm;
 						let bDoNotUseOffset = false;
@@ -3600,7 +3589,7 @@
 
 
 				if (this.checkAutofit && this.checkAutofit() &&
-					(!this.bWordShape || !this.group || this.bCheckAutoFitFlag) && !bNotesShape) {
+					(!this.bWordShape || !this.group || this.bCheckAutoFitFlag)) {
 					var oBodyPr = this.getBodyPr();
 					if (this.bWordShape) {
 						if (this.recalcInfo.recalculateTxBoxContent) {
@@ -5601,7 +5590,7 @@
 			}
 		};
 		CShape.prototype.drawSlideImagePlaceholder = function(graphics, transform, transformText, pageIndex) {
-			//todo think about base transform
+			graphics.SaveGrState();
 			const _transform  = transform || this.transform;
 			const parent = this.parent;
 			const presentation = Asc.editor.WordControl.m_oLogicDocument;
@@ -5629,15 +5618,13 @@
 					graphics.ResetBaseTransform();
 					graphics.reset();
 					if (this.pen || this.brush) {
-						graphics.SaveGrState();
 						graphics.transform3(_transform);
 						const shapeDrawer = new AscCommon.CShapeDrawer();
 						shapeDrawer.fromShape2(this, graphics, this.calcGeometry);
 						shapeDrawer.draw(this.calcGeometry);
 						shapeDrawer.Clear();
-						graphics.RestoreGrState();
 					}
-
+					graphics.RestoreGrState();
 				}
 			}
 		};

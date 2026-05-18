@@ -360,9 +360,13 @@
 	CGraphics.prototype.SetBaseTransform = function(m)
 	{
 		this.ResetBaseTransform();
-		this.m_oBaseTransform = new AscCommon.CMatrix();
-		this.m_oBaseTransform.CopyFrom(m);
-		this.m_oTransform.Multiply(this.m_oBaseTransform, AscCommon.MATRIX_ORDER_APPEND);
+		if (m) {
+			this.m_oBaseTransform = new AscCommon.CMatrix();
+			this.m_oBaseTransform.CopyFrom(m);
+			this.m_oTransform.Multiply(this.m_oBaseTransform, AscCommon.MATRIX_ORDER_APPEND);
+		} else {
+			this.m_oBaseTransform = null;
+		}
 	};
 	CGraphics.prototype.ResetBaseTransform = function()
 	{
