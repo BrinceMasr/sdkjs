@@ -489,7 +489,9 @@
 		var rels = this.getRelationships();
 		for (var i = 0; i < rels.length; ++i) {
 			var part = this.pkg.getPartByUri(rels[i].targetFullName);
-			parts.push(part);
+			if (part) {
+				parts.push(part);
+			}
 		}
 		return parts;
 	}
@@ -507,7 +509,9 @@
 		var rels = this.getRelationshipsByRelationshipType(relationshipType);
 		for (var i = 0; i < rels.length; ++i) {
 			var part = this.pkg.getPartByUri(rels[i].targetFullName);
-			parts.push(part);
+			if (part) {
+				parts.push(part);
+			}
 		}
 		return parts;
 	}
@@ -521,9 +525,10 @@
 	}
 
 	openXml.OpenXmlPart.prototype.getRelationshipsByContentType = function(contentType) {
+		var pkg = this.pkg;
 		var rels = this.getRelationships();
 		return rels.filter(function (rel) {
-			return this.getContentType(rel.targetFullName) === contentType;
+			return pkg.getContentType(rel.targetFullName) === contentType;
 		});
 	}
 
@@ -532,7 +537,9 @@
 		var rels = this.getRelationshipsByContentType(contentType);
 		for (var i = 0; i < rels.length; ++i) {
 			var part = this.pkg.getPartByUri(rels[i].targetFullName);
-			parts.push(part);
+			if (part) {
+				parts.push(part);
+			}
 		}
 		return parts;
 	}
