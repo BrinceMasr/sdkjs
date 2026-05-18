@@ -11479,14 +11479,15 @@
 			obj = ws.AutoFilter;
 		}
 
+		var sortRange = range.clone();
 		if (sortSettings.hasHeaders) {
 			if (sortSettings.columnSort) {
-				range.r1++;
+				sortRange.r1++;
 			} else {
-				range.c1++;
+				sortRange.c1++;
 			}
 		}
-		ws.setCustomSort(sortSettings, obj, null, oWorksheet && oWorksheet.cellCommentator, range);
+		ws.setCustomSort(sortSettings, obj, null, oWorksheet && oWorksheet.cellCommentator, sortRange);
 	};
 
 	/*Object.defineProperty(ApiRange.prototype, "Sort", {
