@@ -2677,6 +2677,23 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 25, 'Test: Bounded case: Area, Ref, Area. Empty cell reference as criteria is treated as 0, averages values where criteria cell equals 0');
 
+		// Case #21: Area, String, Area. NFC/NFD twins both match a collation-equal criterion.
+		// CL41 = "café" (NFC, single code point U+00E9, 4 chars),
+		// CL43 = "café" (NFD, base "e" + combining acute U+0301, 5 chars).
+		// Distinct by === but compare equal via stringCompare; rank-equality
+		// brackets the whole equivalence run, so both contribute to the average.
+		AscCommonExcel.g_oAverageIfCache.clean();
+		ws.getRange2("CL41:CM43").cleanAll();
+		ws.getRange2("CL41").setValue("café");
+		ws.getRange2("CL42").setValue("apple");
+		ws.getRange2("CL43").setValue("café");
+		ws.getRange2("CM41").setValue("10");
+		ws.getRange2("CM42").setValue("100");
+		ws.getRange2("CM43").setValue("20");
+		oParser = new parserFormula('AVERAGEIF(CL41:CL43, "café", CM41:CM43)', "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 15, 'AVERAGEIF NFC/NFD twins: both forms of "café" contribute → (10+20)/2 = 15');
+
 		// Cleanup: remove named ranges
 		wb.delDefinesNames(defNameAvgIfRange);
 		wb.delDefinesNames(defNameAvgIfAvg);
@@ -3454,6 +3471,23 @@ $(function () {
 		oParser = new parserFormula("AVERAGEIFS(B196:B197, A196:A197, \"12/1\")", "A1", ws);
 		assert.ok(oParser.parse(), "AVERAGEIFS date-string exact match");
 		assert.strictEqual(oParser.calculate().getValue(), 15, "AVERAGEIFS date-string \"12/1\" → 15");
+
+		// Case #11: Area, Area, String. NFC/NFD twins both match a collation-equal criterion.
+		// CL51 = "café" (NFC, single code point U+00E9, 4 chars),
+		// CL53 = "café" (NFD, base "e" + combining acute U+0301, 5 chars).
+		// Distinct by === but compare equal via stringCompare; rank-equality
+		// brackets the whole equivalence run, so both contribute to the average.
+		AscCommonExcel.g_oAverageIFSCache.clean();
+		ws.getRange2("CL51:CM53").cleanAll();
+		ws.getRange2("CL51").setValue("café");
+		ws.getRange2("CL52").setValue("apple");
+		ws.getRange2("CL53").setValue("café");
+		ws.getRange2("CM51").setValue("10");
+		ws.getRange2("CM52").setValue("100");
+		ws.getRange2("CM53").setValue("20");
+		oParser = new parserFormula('AVERAGEIFS(CM51:CM53, CL51:CL53, "café")', "A1", ws);
+		assert.ok(oParser.parse(), "AVERAGEIFS NFC/NFD twins");
+		assert.strictEqual(oParser.calculate().getValue(), 15, 'AVERAGEIFS NFC/NFD twins: both forms of "café" contribute → (10+20)/2 = 15');
 
 		// Array-output Cases:
 
@@ -10905,6 +10939,20 @@ $(function () {
 		assert.strictEqual(oParser.calculate().getElementRowCol(1, 0).getValue(), 0, 'COUNTIFS range+scalar: result[1,0]=0');
 		assert.strictEqual(oParser.calculate().getElementRowCol(2, 0).getValue(), 1, 'COUNTIFS range+scalar: result[2,0]=1 (row 532 matches)');
 
+		// Case #13: Area, String. NFC/NFD twins both match a collation-equal criterion.
+		// CL11 = "café" (NFC, single code point U+00E9, 4 chars),
+		// CL13 = "café" (NFD, base "e" + combining acute U+0301, 5 chars).
+		// Distinct by === but compare equal via stringCompare; rank-equality
+		// brackets the whole equivalence run via [lower, upper).
+		AscCommonExcel.g_oCountIFSCache.clean();
+		ws.getRange2("CL11:CL13").cleanAll();
+		ws.getRange2("CL11").setValue("café");
+		ws.getRange2("CL12").setValue("apple");
+		ws.getRange2("CL13").setValue("café");
+		oParser = new parserFormula('COUNTIFS(CL11:CL13,"café")', "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2, 'COUNTIFS NFC/NFD twins: both forms of "café" match a NFC criterion');
+
 	});
 
 	QUnit.test("Test: \"COUNTIF\"", function (assert) {
@@ -12024,6 +12072,19 @@ $(function () {
 		oParser = new parserFormula('COUNTIF(CH1:CH3,">=foo")', "AC8", ws);
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 2, 'append+change interleave: both "foo" entries match >= foo');
+
+		// Case #52: Area, String. NFC/NFD twins both match a collation-equal criterion.
+		// CL1 = "café" (NFC, single code point U+00E9), CL3 = "café" (NFD,
+		// base "e" + combining acute U+0301). They are distinct by === but compare
+		// equal via stringCompare; rank-equality must bracket the whole equivalence run.
+		AscCommonExcel.g_oCountIfCache.clean();
+		ws.getRange2("CL1:CL3").cleanAll();
+		ws.getRange2("CL1").setValue("café");
+		ws.getRange2("CL2").setValue("apple");
+		ws.getRange2("CL3").setValue("café");
+		oParser = new parserFormula('COUNTIF(CL1:CL3,"café")', "AC8", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 2, 'COUNTIF NFC/NFD twins: both forms of "café" match');
 
 		testArrayFormula2(assert, "COUNTIF", 2, 2);
 	});

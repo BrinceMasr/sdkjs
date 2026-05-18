@@ -21978,6 +21978,23 @@ $(function () {
 		assert.ok(oParser.parse());
 		assert.strictEqual(oParser.calculate().getValue(), 50, 'Test: Bounded case: Area, Ref, Area. Empty cell reference as criteria is treated as 0, sums values where criteria cell equals 0');
 
+		// Case #22: Area, String, Area. NFC/NFD twins both match a collation-equal criterion.
+		// CL21 = "café" (NFC, single code point U+00E9, 4 chars),
+		// CL23 = "café" (NFD, base "e" + combining acute U+0301, 5 chars).
+		// Distinct by === but compare equal via stringCompare; rank-equality
+		// brackets the whole equivalence run, so both contribute to the sum.
+		AscCommonExcel.g_oSumIfCache.clean();
+		ws.getRange2("CL21:CM23").cleanAll();
+		ws.getRange2("CL21").setValue("café");
+		ws.getRange2("CL22").setValue("apple");
+		ws.getRange2("CL23").setValue("café");
+		ws.getRange2("CM21").setValue("10");
+		ws.getRange2("CM22").setValue("100");
+		ws.getRange2("CM23").setValue("20");
+		oParser = new parserFormula('SUMIF(CL21:CL23, "café", CM21:CM23)', "A1", ws);
+		assert.ok(oParser.parse());
+		assert.strictEqual(oParser.calculate().getValue(), 30, 'SUMIF NFC/NFD twins: both forms of "café" contribute → 10+20 = 30');
+
 		// Cleanup: remove named ranges
 		wb.delDefinesNames(defNameSumIfRange);
 		wb.delDefinesNames(defNameSumIfSum);
@@ -22587,6 +22604,23 @@ $(function () {
 		oParser = new parserFormula("SUMIFS(B495:B496, A495:A496, \"12/1\")", "A1", ws);
 		assert.ok(oParser.parse(), "SUMIFS date-string exact match");
 		assert.strictEqual(oParser.calculate().getValue(), 30, "SUMIFS date-string \"12/1\" → 30");
+
+		// Case #6: Area, Area, String. NFC/NFD twins both match a collation-equal criterion.
+		// CL31 = "café" (NFC, single code point U+00E9, 4 chars),
+		// CL33 = "café" (NFD, base "e" + combining acute U+0301, 5 chars).
+		// Distinct by === but compare equal via stringCompare; rank-equality
+		// brackets the whole equivalence run, so both contribute to the sum.
+		AscCommonExcel.g_oSumIFSCache.clean();
+		ws.getRange2("CL31:CM33").cleanAll();
+		ws.getRange2("CL31").setValue("café");
+		ws.getRange2("CL32").setValue("apple");
+		ws.getRange2("CL33").setValue("café");
+		ws.getRange2("CM31").setValue("10");
+		ws.getRange2("CM32").setValue("100");
+		ws.getRange2("CM33").setValue("20");
+		oParser = new parserFormula('SUMIFS(CM31:CM33, CL31:CL33, "café")', "A1", ws);
+		assert.ok(oParser.parse(), "SUMIFS NFC/NFD twins");
+		assert.strictEqual(oParser.calculate().getValue(), 30, 'SUMIFS NFC/NFD twins: both forms of "café" contribute → 10+20 = 30');
 
 		// Array-output Cases:
 
