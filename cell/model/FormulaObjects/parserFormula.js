@@ -5573,7 +5573,9 @@ _func[cElementType.string][cElementType.string] = function ( arg0, arg1, what ) 
 	let res = null;
 
 	let isEqualStrings = function (str1, str2) {
-		return opt_return_bool ? str1 === str2 : str1.toLowerCase() === str2.toLowerCase();
+		return opt_return_bool
+			? AscCommon.stringCompare(str1, str2) === 0
+			: AscCommon.stringCompare(str1.toLowerCase(), str2.toLowerCase()) === 0;
 	};
 
 	let _arg0, _arg1;
