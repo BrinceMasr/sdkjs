@@ -2342,42 +2342,43 @@
         let oFile   = oViewer.file;
         
         let oApearanceInfo  = this.GetOriginViewInfo(nPageW, nPageH);
-        let oSavedView, oApInfoTmp;
-        if (!oApearanceInfo)
-            return null;
+        let oSavedView, oTargetApInfo;
             
         switch (nAPType) {
             case AscPDF.APPEARANCE_TYPES.normal:
-                oApInfoTmp = oApearanceInfo["N"];
+                oTargetApInfo = oApearanceInfo && oApearanceInfo["N"];
                 oSavedView = this._originView.normal;
                 break;
             case AscPDF.APPEARANCE_TYPES.rollover:
-                if (oApearanceInfo["R"]) {
-                    oApInfoTmp = oApearanceInfo["R"]
+                if (oApearanceInfo && oApearanceInfo["R"]) {
+                    oTargetApInfo = oApearanceInfo && oApearanceInfo["R"]
                     oSavedView = this._originView.rollover;
                 }
                 else {
-                    oApInfoTmp = oApearanceInfo["N"]
+                    oTargetApInfo = oApearanceInfo && oApearanceInfo["N"]
                     oSavedView = this._originView.normal;
                 }
                 break;
             case AscPDF.APPEARANCE_TYPES.mouseDown:
-                if (oApearanceInfo["D"]) {
-                    oApInfoTmp = oApearanceInfo["D"]
+                if (oApearanceInfo && oApearanceInfo["D"]) {
+                    oTargetApInfo = oApearanceInfo && oApearanceInfo["D"]
                     oSavedView = this._originView.mouseDown;
                 }
                 else {
-                    oApInfoTmp = oApearanceInfo["N"]
+                    oTargetApInfo = oApearanceInfo && oApearanceInfo["N"]
                     oSavedView = this._originView.normal;
                 }
                 break;
             default:
-                oApInfoTmp = oApearanceInfo["N"];
+                oTargetApInfo = oApearanceInfo && oApearanceInfo["N"];
                 oSavedView = this._originView.normal;
                 break;
         }
 
-        if (oSavedView && oSavedView.width == oApearanceInfo["w"] && oSavedView.height == oApearanceInfo["h"])
+		if (!oApearanceInfo && !oSavedView)
+            return null;
+
+        if (oSavedView && (!oApearanceInfo || oSavedView.width == oApearanceInfo["w"] && oSavedView.height == oApearanceInfo["h"]))
             return oSavedView;
         
         let canvas  = document.createElement("canvas");
@@ -2390,13 +2391,13 @@
         canvas.x    = oApearanceInfo["x"];
         canvas.y    = oApearanceInfo["y"];
         
-        if (!oApInfoTmp)
+        if (!oTargetApInfo)
             return null;
 
         let supportImageDataConstructor = (AscCommon.AscBrowser.isIE && !AscCommon.AscBrowser.isIeEdge) ? false : true;
 
         let ctx             = canvas.getContext("2d");
-        let mappedBuffer    = oFile.getUint8ClampedArray(oApInfoTmp["retValue"], 4 * nWidth * nHeight);
+        let mappedBuffer    = oFile.getUint8ClampedArray(oTargetApInfo["retValue"], 4 * nWidth * nHeight);
         let imageData       = null;
 
         if (supportImageDataConstructor)
@@ -2411,7 +2412,7 @@
         if (ctx)
             ctx.putImageData(imageData, 0, 0);
         
-        oViewer.file.free(oApInfoTmp["retValue"]);
+        oViewer.file.free(oTargetApInfo["retValue"]);
 
         switch (nAPType) {
             case AscPDF.APPEARANCE_TYPES.normal:
