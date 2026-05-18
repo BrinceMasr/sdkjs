@@ -13571,24 +13571,47 @@ PasteProcessor.prototype =
 		var nHeight = parseInt(node.getAttribute("height"));
 		if (!nWidth || !nHeight) {
 			var computedStyle = oThis._getComputedStyle(node);
-			nWidth = parseInt(oThis._getStyle(node, computedStyle, "width"));
-			nHeight = parseInt(oThis._getStyle(node, computedStyle, "height"));
+			if (!nWidth) {
+				var sWidth = oThis._getStyle(node, computedStyle, "width");
+				var mWidth = AscCommon.valueToMm(sWidth);
+				if (mWidth !== null) {
+					nWidth = Math.round(mWidth / AscCommon.g_dKoef_pix_to_mm);
+				}
+			}
+			if (!nHeight) {
+				var sHeight = oThis._getStyle(node, computedStyle, "height");
+				var mHeight = AscCommon.valueToMm(sHeight);
+				if (mHeight !== null) {
+					nHeight = Math.round(mHeight / AscCommon.g_dKoef_pix_to_mm);
+				}
+			}
 		}
 
 		//TODO review! node.getAttribute("width") in FF returns "auto" -> images in FF are not pasted
 		if ((!nWidth || !nHeight)) {
 			if (AscBrowser.isMozilla || AscBrowser.isIE) {
-				nWidth = parseInt(node.width);
-				nHeight = parseInt(node.height);
-			} else if (AscBrowser.isChrome) {
-				if (nWidth && !nHeight) {
-					nHeight = nWidth;
-				} else if (!nWidth && nHeight) {
-					nWidth = nHeight;
-				} else {
+				if (!nWidth) {
 					nWidth = parseInt(node.width);
+				}
+				if (!nHeight) {
 					nHeight = parseInt(node.height);
 				}
+			} else if (AscBrowser.isChrome) {
+				if (!nWidth) {
+					nWidth = parseInt(node.width);
+				}
+				if (!nHeight) {
+					nHeight = parseInt(node.height);
+				}
+			}
+		}
+
+		if ((!nWidth || !nHeight) && node.naturalWidth && node.naturalHeight) {
+			if (!nWidth) {
+				nWidth = node.naturalWidth;
+			}
+			if (!nHeight) {
+				nHeight = node.naturalHeight;
 			}
 		}
 
