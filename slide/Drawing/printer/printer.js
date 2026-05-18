@@ -31,6 +31,23 @@
  */
 
 (function () {
+
+	function executeWithContentLimits(callback, content, x, y, xLimit, yLimit) {
+		const oldX = content.X;
+		const oldY = content.Y;
+		const oldXLimit = content.XLimit;
+		const oldYLimit = content.XLimit;
+		content.X = x;
+		content.Y = y;
+		content.XLimit = xLimit;
+		content.YLimit = yLimit;
+		callback();
+		content.X = oldX;
+		content.Y = oldY;
+		content.XLimit = oldXLimit;
+		content.YLimit = oldYLimit;
+	}
+
 	function NotePage(note, pageIndex) {
 		this.note = note;
 		this.pageIndex = pageIndex;
@@ -258,29 +275,23 @@
 					shape.recalculate();
 					var oDocContent = shape.getDocContent();
 					if(oDocContent) {
-						const oldGetPageContentFrame = oDocContent.GetPageContentFrame;
-						const oldGetColumnContentFrame = oDocContent.GetColumnContentFrame;
-						oDocContent.GetPageContentFrame = function (page, sectPr) {
-							if (page === 0) {
-								return {X: 0, Y: 0, XLimit: shape.extX, YLimit: shape.extY, ColumnSpaceBefore: 0, ColumnSpaceAfter: 0};
-							}
-							return {X: 0, Y: 0, XLimit: notesPageWidth, YLimit: notesPageHeight, ColumnSpaceBefore: 0, ColumnSpaceAfter: 0};
-						}
-						oDocContent.GetColumnContentFrame = function (page, column, sectPr) {
-							return oDocContent.GetPageContentFrame(page, sectPr);
-						}
 						oDocContent.CalculateAllFields();
 						oDocContent.Reset(0, 0, shape.extX, 20000);
 						var CurPage = 0;
 						var RecalcResult = recalcresult2_NextPage;
 						while (recalcresult2_End !== RecalcResult) {
-							pages.push(new NotePage(note, CurPage));
-							RecalcResult = oDocContent.Recalculate_Page(CurPage++, true);
+							const callback = function () {
+								pages.push(new NotePage(note, CurPage));
+								RecalcResult = oDocContent.Recalculate_Page(CurPage++, true);
+							};
+							if (CurPage === 0) {
+								executeWithContentLimits(callback, oDocContent, 0, 0, shape.extX, shape.extY);
+							} else {
+								executeWithContentLimits(callback, oDocContent, 0, 0, notesPageWidth, notesPageHeight);
+							}
 						}
 						shape.contentWidth = shape.extX;
 						shape.contentHeight = 20000;
-						oDocContent.GetPageContentFrame = oldGetPageContentFrame;
-						oDocContent.GetColumnContentFrame = oldGetColumnContentFrame;
 					}
 				}
 			}
@@ -292,6 +303,7 @@
 		return this.getNotesPages().length;
 	};
 
+	const OUTLINEPRINTER_DECORATIONS_OFFSET_LEFT = 15;
 	function OutlinePrinter(presentation, printOptions) {
 		SpecificPrinter.call(this, presentation, printOptions);
 	}
@@ -300,7 +312,8 @@
 	OutlinePrinter.prototype.getSpecificCache = function () {
 		return {
 			pagesCount: null,
-			outlineShape: null
+			outlineView: null,
+			decorationsByPage: null
 		};
 	};
 	OutlinePrinter.prototype.getPagesCount = function () {
@@ -312,11 +325,11 @@
 		return this.cache.pagesCount;
 	};
 	OutlinePrinter.prototype.getPageOptions = function () {
-		const printerOptions = this.printOptions;
-		return printerOptions.pageOptions;
+		const pageOptions = this.printOptions.pageOptions;
+		return {width: pageOptions.width - NOTESPRINTER_HORIZONTAL_FIELD * 2 - OUTLINEPRINTER_DECORATIONS_OFFSET_LEFT, height: pageOptions.height - NOTESPRINTER_VERTICAL_FIELD * 2};
 	};
-	OutlinePrinter.prototype.getOutlineShape = function () {
-		if (this.cache.outlineShape === null) {
+	OutlinePrinter.prototype.getOutlineView = function () {
+		if (this.cache.outlineView === null) {
 			const pageOptions = this.getPageOptions();
 			const indexes = this.getPrintIndexes();
 			const presentation = this.getPresentation();
@@ -326,21 +339,93 @@
 				const slide = slides[indexes[i]];
 				outlineSlides.push(slide.getOutlineSlide());
 			}
-			const outlineView = new AscCommonSlide.OutlineView();
-			this.cache.outlineShape = outlineView.createOutlineShape(outlineSlides, pageOptions.width, pageOptions.height);
+			const outlineView = new AscCommonSlide.OutlineView(presentation.Api);
+			outlineView.createOutlineShape(outlineSlides, pageOptions.width, pageOptions.height);
+			this.cache.outlineView = outlineView;
 			this.recalculateOutlinePages();
 		}
-		return this.cache.outlineShape;
+		return this.cache.outlineView;
+	};
+	OutlinePrinter.prototype.getOutlineShape = function () {
+		const outlineView = this.getOutlineView();
+		return outlineView.outlineShape;
 	};
 	OutlinePrinter.prototype.recalculateOutlinePages = function () {
 		const outlineShape = this.getOutlineShape();
-		outlineShape.recalculateDocContent();
-	}
+		const content = outlineShape.getDocContent();
+		let recalResult = recalcresult2_NextPage;
+		let curPage = 0;
+		while (recalcresult2_End !== recalResult)
+			executeWithContentLimits(function () {
+				recalResult = content.Recalculate_Page(curPage++, true);
+			}, content, 0, 0, outlineShape.extX, outlineShape.extY);
+	};
+	OutlinePrinter.prototype.getDecorationsByPage = function () {
+		if (this.cache.decorationsByPage === null) {
+			this.cache.decorationsByPage = {
+				titleCache: {},
+				contentCache: {}
+			};
+			const titleCache = this.cache.decorationsByPage.titleCache;
+			const contentCache = this.cache.decorationsByPage.contentCache;
+			const outlineView = this.getOutlineView();
+			const paragraphMap = outlineView.outlineInfo.getOutlineParagraphToInfoMap();
+			for (let outlineId in paragraphMap) {
+				const info = paragraphMap[outlineId];
+				const outlineParagraph = info.outlineParagraph;
+
+				if (!titleCache[outlineParagraph.PageNum]) {
+					titleCache[outlineParagraph.PageNum] = [];
+				}
+				titleCache[outlineParagraph.PageNum].push(info);
+				const contentShapeInfoMap = info.getContentShapeInfoMap(outlineView);
+				for (let contentShapeInfoId in contentShapeInfoMap) {
+					const contentShapeInfo = contentShapeInfoMap[contentShapeInfoId];
+					const contentOutlineParagraph = contentShapeInfo.getOutlineParagraph(outlineView);
+					if (!contentCache[contentOutlineParagraph.PageNum]) {
+						contentCache[contentOutlineParagraph.PageNum] = [];
+					}
+					contentCache[contentOutlineParagraph.PageNum].push(contentShapeInfo);
+				}
+			}
+		}
+		return this.cache.decorationsByPage;
+	};
+	OutlinePrinter.prototype.drawDecorationsByPage = function (graphics, index) {
+		const t = new AscCommon.CMatrix();
+		t.tx = NOTESPRINTER_HORIZONTAL_FIELD;
+		t.ty = NOTESPRINTER_VERTICAL_FIELD;
+		const decorationsInfo = this.getDecorationsByPage();
+		const outlineView = this.getOutlineView();
+
+		const decoratorDrawer = new AscCommonSlide.DecoratorDrawer(outlineView, t);
+		const titlePageInfos = decorationsInfo.titleCache[index];
+		const contentPageInfos = decorationsInfo.contentCache[index];
+		if (titlePageInfos) {
+			for (let i = 0; i < titlePageInfos.length; i += 1) {
+				const info = titlePageInfos[i];
+				decoratorDrawer.drawTitleDecorations(graphics, info);
+			}
+		}
+		if (contentPageInfos) {
+			for (let i = 0; i < contentPageInfos.length; i += 1) {
+				const info = contentPageInfos[i];
+				decoratorDrawer.drawContentDecorations(graphics, info);
+			}
+		}
+	};
 	OutlinePrinter.prototype.drawPage = function (graphics, index) {
+		this.drawDecorationsByPage(graphics, index);
+		graphics.SaveGrState();
+		const t = new AscCommon.CMatrix();
+		t.tx = NOTESPRINTER_HORIZONTAL_FIELD + OUTLINEPRINTER_DECORATIONS_OFFSET_LEFT;
+		t.ty = NOTESPRINTER_VERTICAL_FIELD;
+		graphics.transform3(t);
 		const shape = this.getOutlineShape();
 		const content = shape.getDocContent();
 		content.Set_StartPage(0);
 		content.Draw(index, graphics);
+		graphics.RestoreGrState();
 	};
 
 	function HandoutPrinter(presentation, printOptions) {
@@ -349,8 +434,7 @@
 	AscFormat.InitClassWithoutType(HandoutPrinter, SpecificPrinter);
 	HandoutPrinter.prototype.getSpecificCache = function () {
 		return {
-			pagesCount: null,
-			outlineShape: null
+			pagesCount: null
 		};
 	};
 	HandoutPrinter.prototype.getSlidesOnPageCount = function () {

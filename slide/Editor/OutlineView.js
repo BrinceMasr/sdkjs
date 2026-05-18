@@ -64,6 +64,106 @@
 		return textPr;
 	}
 
+
+	const DECORATORDRAWER_OFFSET_LEFT = 2;
+	const DECORATORDRAWER_SLIDE_WIDTH = 6;
+	function DecoratorDrawer(outlineView, transform, selectedSlideIndex, focusSlideIndex) {
+		this.cache = {
+			slideNumbersWidth: null
+		};
+		this.outlineView = outlineView;
+
+		this.selectedSlideIndex = selectedSlideIndex;
+		this.focusSlideIndex = focusSlideIndex;
+
+		this.backgroundColor = AscCommon.GlobalSkin.BackgroundColorThumbnails;
+		this.normalSlideColor = AscCommon.GlobalSkin.ThumbnailsPageOutline;
+		this.activeSlideColor = AscCommon.GlobalSkin.ThumbnailsPageOutlineActive;
+		this.hoverSlideColor = AscCommon.GlobalSkin.ThumbnailsPageOutlineHover;
+
+		this.transform = transform;
+
+		this.init();
+	}
+	DecoratorDrawer.prototype.init = function () {
+		return this.getDecorCacheManager().resetColors();
+	};
+	DecoratorDrawer.prototype.getParagraphY = function (paragraph) {
+		return this.outlineView.getParagraphY(paragraph);
+	};
+	DecoratorDrawer.prototype.getDecorCacheManager = function () {
+		return this.outlineView.decorCacheManager;
+	}
+	DecoratorDrawer.prototype.getPresentation = function () {
+		return this.outlineView.getPresentation();
+	};
+	DecoratorDrawer.prototype.getSlideNumbersWidth = function () {
+		if (this.cache.slideNumbersWidth === null) {
+			const measureInfo = this.getDecorCacheManager().getMeasureInfo();
+			const presentation = this.getPresentation();
+			const slidesCount = presentation.GetSlidesCount();
+			const firstSlideNumber = presentation.getFirstSlideNumber();
+			const totalSlidesLength = String(slidesCount + firstSlideNumber).length;
+			this.cache.slideNumbersWidth = measureInfo.charWidth * totalSlidesLength;
+		}
+		return this.cache.slideNumbersWidth;
+	};
+	DecoratorDrawer.prototype.drawDecorShape = function (graphics, shape, x, y) {
+		var t = new AscCommon.CMatrix();
+		t.tx = this.getX(x);
+		t.ty = this.getY(y);
+		shape.draw(graphics, t, t);
+	};
+	DecoratorDrawer.prototype.drawTitleDecorations = function (graphics, info) {
+		const slideNumberWidth = this.getSlideNumbersWidth();
+		const slideX = DECORATORDRAWER_OFFSET_LEFT + slideNumberWidth;
+		const decorCacheManager = this.getDecorCacheManager();
+		const measureInfo = decorCacheManager.getMeasureInfo();
+		const height = measureInfo.height;
+		const charWidth = measureInfo.charWidth;
+
+		const paragraph = info.outlineParagraph;
+		const slide = info.slide;
+		const slideTopY = this.getParagraphY(paragraph);
+
+		const currentSlideIndex = slide.num;
+		const currentSlideLabel = String(currentSlideIndex + 1);
+		const slideNumberShape = decorCacheManager.getSlideNumberShape(slideNumberWidth, height, currentSlideLabel);
+		this.drawDecorShape(graphics, slideNumberShape, slideX - (currentSlideLabel.length * charWidth + 1), slideTopY);
+
+		let penHex;
+		if (currentSlideIndex === this.selectedSlideIndex) {
+			penHex = this.activeSlideColor;
+		} else if (currentSlideIndex === this.focusSlideIndex) {
+			penHex = this.hoverSlideColor;
+		} else {
+			penHex = this.normalSlideColor
+		}
+		const barShape = decorCacheManager.getTitleShape(this.backgroundColor, penHex, DECORATORDRAWER_SLIDE_WIDTH, height);
+		this.drawDecorShape(graphics, barShape, slideX, slideTopY);
+	};
+	DecoratorDrawer.prototype.drawContentDecorations = function (graphics, info) {
+		const slideNumberWidth = this.getSlideNumbersWidth();
+		const slideX = DECORATORDRAWER_OFFSET_LEFT + slideNumberWidth;
+
+		const decorCacheManager = this.getDecorCacheManager();
+		const measureInfo = decorCacheManager.getMeasureInfo();
+		const height = measureInfo.height;
+		const charWidth = measureInfo.charWidth;
+
+		const outlineParagraph = info.getOutlineParagraph(this.outlineView);
+		const contentY = this.getParagraphY(outlineParagraph);
+		const label = String(info.index + 1);
+		const numberWShape = charWidth * label.length + 1;
+		const badgeShape = decorCacheManager.getContentShape(this.backgroundColor, this.normalSlideColor, numberWShape, height, label);
+		this.drawDecorShape(graphics, badgeShape, slideX + DECORATORDRAWER_SLIDE_WIDTH - numberWShape, contentY);
+	};
+	DecoratorDrawer.prototype.getY = function (y) {
+		return this.transform.TransformPointY(0, y);
+	};
+	DecoratorDrawer.prototype.getX = function (x) {
+		return this.transform.TransformPointX(x, 0);
+	};
 	function OutlineSlide() {
 		this.title = null;
 		this.content = [];
@@ -1275,7 +1375,7 @@
 			const outlineContent = outlineShape.txBody.content;
 			outlineContent.ClearContent(false);
 			this.fillOutlineShape(outlineShape, outlineSlides);
-			this.setSizes(width);
+			this.setSizes(width, height);
 			return outlineShape;
 		}, this, []);
 	};
@@ -1308,12 +1408,6 @@
 		shape.draw(graphics);
 	};
 
-	OutlineView.prototype.drawDecorShape = function (graphics, shape, x, y) {
-		var t = new AscCommon.CMatrix();
-		t.tx = x;
-		t.ty = y;
-		shape.draw(graphics, t, t);
-	};
 	OutlineView.prototype.getOutlineParagraphs = function () {
 		const content = this.getDocContent();
 		if (content) {
@@ -1351,64 +1445,19 @@
 		}
 		return null;
 	};
-	OutlineView.prototype.getSlideNumbersWidth = function () {
-		const measureInfo = this.decorCacheManager.getMeasureInfo();
-		const presentation = this.getPresentation();
-		const slidesCount = presentation.GetSlidesCount();
-		const firstSlideNumber = presentation.getFirstSlideNumber();
-		const totalSlidesLength = String(slidesCount + firstSlideNumber).length;
-		return measureInfo.charWidth * totalSlidesLength;
-	}
 	OutlineView.prototype.drawDecorations = function (graphics, selectedSlideIndex, focusSlideIndex) {
 		if (!this.outlineShape || !this.isHaveParagraphs()) return;
-		this.decorCacheManager.resetColors();
 
-		const slideNumberWidth = this.getSlideNumbersWidth();
-		const leftOffsetX = 2;
-		const slideWidth = 6;
-		const slideX = leftOffsetX + slideNumberWidth;
-
-		const backgroundHex = AscCommon.GlobalSkin.BackgroundColorThumbnails;
-		const normalSlideHex = AscCommon.GlobalSkin.ThumbnailsPageOutline;
-		const activeSlideHex = AscCommon.GlobalSkin.ThumbnailsPageOutlineActive;
-		const hoverSlideHex = AscCommon.GlobalSkin.ThumbnailsPageOutlineHover;
-
-		const measureInfo = this.decorCacheManager.getMeasureInfo();
-		const height = measureInfo.height;
-		const charWidth = measureInfo.charWidth;
+		const decoratorDrawer = new DecoratorDrawer(this, new AscCommon.CMatrix(), selectedSlideIndex, focusSlideIndex);
 
 		const paragraphMap = this.outlineInfo.getOutlineParagraphToInfoMap();
 		for (let outlineId in paragraphMap) {
 			const info = paragraphMap[outlineId];
-			const paragraph = info.outlineParagraph;
-			const slide = info.slide;
-			const slideTopY = this.getParagraphY(paragraph);
-
-			const currentSlideIndex = slide.num;
-			const currentSlideLabel = String(currentSlideIndex + 1);
-			const slideNumberShape = this.decorCacheManager.getSlideNumberShape(slideNumberWidth, height, currentSlideLabel);
-			this.drawDecorShape(graphics, slideNumberShape, slideX - (currentSlideLabel.length * charWidth + 1), slideTopY);
-
-			let penHex;
-			if (currentSlideIndex === selectedSlideIndex) {
-				penHex = activeSlideHex;
-			} else if (currentSlideIndex === focusSlideIndex) {
-				penHex = hoverSlideHex;
-			} else {
-				penHex = normalSlideHex;
-			}
-			const barShape = this.decorCacheManager.getTitleShape(backgroundHex, penHex, slideWidth, height);
-			this.drawDecorShape(graphics, barShape, slideX, slideTopY);
-
+			decoratorDrawer.drawTitleDecorations(graphics, info);
 			const contentShapeInfoMap = info.getContentShapeInfoMap(this);
 			for (let contentShapeInfoId in contentShapeInfoMap) {
 				const contentShapeInfo = contentShapeInfoMap[contentShapeInfoId];
-				const outlineParagraph = contentShapeInfo.getOutlineParagraph(this);
-				const contentY = this.getParagraphY(outlineParagraph);
-				const label = String(contentShapeInfo.index + 1);
-				const numberWShape = charWidth * label.length + 1;
-				const badgeShape = this.decorCacheManager.getContentShape(backgroundHex, normalSlideHex, numberWShape, height, label);
-				this.drawDecorShape(graphics, badgeShape, slideX + slideWidth - numberWShape, contentY);
+				decoratorDrawer.drawContentDecorations(graphics, contentShapeInfo);
 			}
 		}
 	};
@@ -2465,4 +2514,5 @@
 	window["AscCommonSlide"] = window["AscCommonSlide"] || {};
 	window["AscCommonSlide"].OutlineSlide = OutlineSlide;
 	window["AscCommonSlide"].OutlineView = OutlineView;
+	window["AscCommonSlide"].DecoratorDrawer = DecoratorDrawer;
 })();
