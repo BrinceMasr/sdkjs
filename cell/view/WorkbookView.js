@@ -3129,7 +3129,7 @@
                 this.cellEditor.replaceText(this.lastFPos, this.lastFNameLength, type === c_oAscPopUpSelectorType.TableThisRow ? "@" : name);
                 this.cellEditor.skipTLUpdate = tmp;
             } else {
-                if (isNotFunction && c_oAscPopUpSelectorType.None === type) {
+                if (isNotFunction && c_oAscPopUpSelectorType.FuncConstant === type) {
                     let argHelpName = this._prepareArgHelpInsertion(name);
                     if (argHelpName != null) {
                         name = argHelpName;
@@ -3143,7 +3143,7 @@
 
             this.skipHelpSelector = false;
         } else {
-            if (c_oAscPopUpSelectorType.None === type) {
+            if (c_oAscPopUpSelectorType.FuncConstant === type) {
 				ws.executeWithFirstActiveCellInMerge(function () {
 					ws.setSelectionInfo("value", name, /*onlyActive*/true);
 				});
