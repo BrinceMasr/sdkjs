@@ -13573,16 +13573,16 @@ PasteProcessor.prototype =
 			var computedStyle = oThis._getComputedStyle(node);
 			if (!nWidth) {
 				var sWidth = oThis._getStyle(node, computedStyle, "width");
-				var mWidth = AscCommon.valueToMm(sWidth);
-				if (mWidth !== null) {
-					nWidth = Math.round(mWidth / AscCommon.g_dKoef_pix_to_mm);
+				var oWidth = AscCommon.valueToMmType(sWidth);
+				if (oWidth && "%" !== oWidth.type) {
+					nWidth = Math.round(oWidth.val / AscCommon.g_dKoef_pix_to_mm);
 				}
 			}
 			if (!nHeight) {
 				var sHeight = oThis._getStyle(node, computedStyle, "height");
-				var mHeight = AscCommon.valueToMm(sHeight);
-				if (mHeight !== null) {
-					nHeight = Math.round(mHeight / AscCommon.g_dKoef_pix_to_mm);
+				var oHeight = AscCommon.valueToMmType(sHeight);
+				if (oHeight && "%" !== oHeight.type) {
+					nHeight = Math.round(oHeight.val / AscCommon.g_dKoef_pix_to_mm);
 				}
 			}
 		}
