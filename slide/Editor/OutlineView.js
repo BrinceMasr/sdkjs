@@ -99,12 +99,7 @@
 	};
 	DecoratorDrawer.prototype.getSlideNumbersWidth = function () {
 		if (this.cache.slideNumbersWidth === null) {
-			const measureInfo = this.getDecorCacheManager().getMeasureInfo();
-			const presentation = this.getPresentation();
-			const slidesCount = presentation.GetSlidesCount();
-			const firstSlideNumber = presentation.getFirstSlideNumber();
-			const totalSlidesLength = String(slidesCount + firstSlideNumber).length;
-			this.cache.slideNumbersWidth = measureInfo.charWidth * totalSlidesLength;
+			this.cache.slideNumbersWidth = this.outlineView.getSlideNumbersWidth();
 		}
 		return this.cache.slideNumbersWidth;
 	};
@@ -1190,6 +1185,14 @@
 		this.decorCacheManager = new DecorCacheManager();
 		this.reset();
 	}
+	OutlineView.prototype.getSlideNumbersWidth = function () {
+			const measureInfo = this.decorCacheManager.getMeasureInfo();
+			const presentation = this.getPresentation();
+			const slidesCount = presentation.GetSlidesCount();
+			const firstSlideNumber = presentation.getFirstSlideNumber();
+			const totalSlidesLength = String(slidesCount + firstSlideNumber).length;
+			return measureInfo.charWidth * totalSlidesLength;
+	};
 	OutlineView.prototype.createTitleContent = function (outlineParagraph) {
 		const slideInfo = this.outlineInfo.getSlideInfoByParagraph(outlineParagraph);
 		if (!slideInfo) {
