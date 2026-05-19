@@ -1136,28 +1136,32 @@ function (window, undefined) {
 					const firstOverlapping = overlapping[0];
 					const lastOverlapping  = overlapping[overlapping.length - 1];
 
-					// Multi-range F4: selection must start and end at paren depth 0,
-					// and begin at or before the first reference.
-					let depth = 0, depthAtMin = 0;
+					let depth = 0, depthAtMin = 0, depthChangedWithin = false;
 					for (let i = 1; i < selMax; i++) {
 						if (i === selMin) depthAtMin = depth;
 						const ch = s.charAt(i);
 						if (ch === '(') depth++;
 						else if (ch === ')') depth--;
+						if (i >= selMin && depth !== depthAtMin) depthChangedWithin = true;
 					}
 					if (selMin >= selMax) depthAtMin = depth;
 					const depthAtMax = depth;
+					const isValidDepth = depthAtMin === depthAtMax && (depthAtMin === 0 || !depthChangedWithin);
 
-					if (depthAtMin === 0 && depthAtMax === 0 && selMin <= firstOverlapping.cursorePos) {
+					if (isValidDepth && selMin <= firstOverlapping.cursorePos) {
 						const fullyContained = overlapping.filter(function (a) {
 							return a.cursorePos >= selMin && a.cursorePos + a.formulaRangeLength <= selMax;
 						});
 						if (fullyContained.length > 0) {
 							const lastEnd = lastOverlapping.cursorePos + lastOverlapping.formulaRangeLength;
+							let displaySelMin = selMin;
+							while (displaySelMin > 1 && /[A-Za-z0-9_]/.test(s.charAt(displaySelMin - 1))) {
+								displaySelMin--;
+							}
 							return {
 								range: null,
 								allRanges: fullyContained.map(function (a) { return buildCachedResult(a); }),
-								selMin: selMin,
+								selMin: displaySelMin,
 								selMax: selMax,
 								lastOverlappingEnd: lastEnd,
 								expandToLast: lastEnd > selMax
