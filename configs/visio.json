@@ -140,8 +140,9 @@
 			"common/wordcopypaste.js",
 			"common/intervalTree.js",
 
-		  "cell/view/HandlerList.js",
+			"cell/view/HandlerList.js",
 			"cell/model/SheetMemory.js",
+			"cell/model/FormulaObjects/parserFormula.js",
 			"cell/model/WorkbookElems.js",
 			"cell/model/Workbook.js",
 			"cell/model/Serialize.js",
@@ -375,11 +376,7 @@
 			"visio/model/SerializeReader.js",
 			"visio/model/SerializeWriter.js",
 			
-			"word/Editor/document-visitor.js",
-			
-			"word/Editor/annotations/custom-text-annotator/custom-text-annotator.js",
-			"word/Editor/annotations/custom-text-annotator/range-marks.js",
-			"word/Editor/annotations/custom-text-annotator/text-annotator-manager.js"
+			"word/Editor/document-visitor.js"
 		],
 		"desktop": {
 			"min": [

@@ -1,33 +1,36 @@
 /*
- * (c) Copyright Ascensio System SIA 2010-2024
+ * Copyright (C) Ascensio System SIA, 2009-2026
  *
  * This program is a free software product. You can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License (AGPL)
- * version 3 as published by the Free Software Foundation. In accordance with
- * Section 7(a) of the GNU AGPL its Section 15 shall be amended to the effect
- * that Ascensio System SIA expressly excludes the warranty of non-infringement
- * of any third-party rights.
+ * version 3 as published by the Free Software Foundation, together with the
+ * additional terms provided in the LICENSE file.
  *
  * This program is distributed WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
- * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+ * details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
+ * You can contact Ascensio System SIA by email at info@onlyoffice.com
+ * or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+ * LV-1050, Latvia, European Union.
  *
- * The  interactive user interfaces in modified source and object code versions
- * of the Program must display Appropriate Legal Notices, as required under
+ * The interactive user interfaces in modified versions of the Program
+ * are required to display Appropriate Legal Notices in accordance with
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
+ * No trademark rights are granted under this License.
  *
- * All the Product's GUI elements, including illustrations and icon sets, as
- * well as technical writing content are licensed under the terms of the
- * Creative Commons Attribution-ShareAlike 4.0 International. See the License
- * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+ * All non-code elements of the Product, including illustrations,
+ * icon sets, and technical writing content, are licensed under the
+ * Creative Commons Attribution-ShareAlike 4.0 International License:
+ * https://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
+ * This license applies only to such non-code elements and does not
+ * modify or replace the licensing terms applicable to the Program's
+ * source code, which remains licensed under the GNU Affero General
+ * Public License v3.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only
  */
 
 "use strict";
@@ -298,18 +301,15 @@
 	{
 		if (!this.canEdit() || this.isPdfEditor() || !AscCommon.g_inputContext)
 			return;
-	
-		this.executeGroupActions(function()
-		{
-			if (textReplace)
-			{
-				for (var i = 0; i < textReplace.length; i++)
-					AscCommon.g_inputContext.emulateKeyDownApi(8);
-			}
 		
-			AscCommon.g_inputContext.addText(text);
-			AscCommon.g_inputContext.keyPressInput = "";
-		});
+		if (textReplace)
+		{
+			for (var i = 0; i < textReplace.length; i++)
+				AscCommon.g_inputContext.emulateKeyDownApi(8);
+		}
+	
+		AscCommon.g_inputContext.addText(text);
+		AscCommon.g_inputContext.keyPressInput = "";
 	};
 
 	/**
@@ -486,38 +486,61 @@
 
     /**
      * Specifies the start action for long operations.
+	 * :::note
+	 * GroupActions are available only for [ONLYOFFICE Docs Enterprise](https://www.onlyoffice.com/docs-enterprise-prices.aspx?from=api) and [ONLYOFFICE Docs Developer](https://www.onlyoffice.com/developer-edition-prices.aspx?from=api).
+	 * :::
      * @memberof Api
      * @alias StartAction
-     * @param {number} type - A value which defines an action type which can take <b>0</b> if this is an *Information* action or <b>1</b> if this is a *BlockInteraction* action.
-	 * @param {string} description - A string value that specifies the description text for the start action of the operation.
+     * @param {"Information" | "Block" | "GroupActions"} type - The action type:
+     * <b>"Information"</b> - a non-blocking informational action,
+     * <b>"Block"</b> - a blocking interaction action,
+     * <b>"GroupActions"</b> - groups multiple editor operations into a single undoable step.
+     * @param {string | Object} [description] - For <b>"Information"</b> and <b>"Block"</b> types: a string description displayed during the action.
+     * For <b>"GroupActions"</b> type: an optional object with the following properties:
+     * @param {boolean} [description.lockScroll] - If <em>true</em>, the editor scroll position will be locked during the group operation.
+     * @param {boolean} [description.keepSelection] - If <em>true</em>, the cursor position and selection will be preserved after the group operation ends.
      * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/StartAction.js
 	 */
     Api.prototype["pluginMethod_StartAction"] = function(type, description)
     {
 		if ("GroupActions" === type)
-			this.startGroupActions();
+		{
+			let pr = description && (typeof description === "object") ? description : {};
+			this.startGroupActions(pr);
+		}
 		else
+		{
 			this.sync_StartAction((type === "Block") ? Asc.c_oAscAsyncActionType.BlockInteraction : Asc.c_oAscAsyncActionType.Information, description);
+		}
     };
 
     /**
      * Specifies the end action for long operations.
+	 * :::note
+	 * GroupActions are available only for [ONLYOFFICE Docs Enterprise](https://www.onlyoffice.com/docs-enterprise-prices.aspx?from=api) and [ONLYOFFICE Docs Developer](https://www.onlyoffice.com/developer-edition-prices.aspx?from=api).
+	 * :::
      * @memberof Api
      * @alias EndAction
-     * @param {number} type - A value which defines an action type which can take <b>"Block"</b> if this is the *BlockInteraction* action or <b>"Information</b> if this is the *Information* action.
-     * @param {string} description - A string value that specifies the description text for the operation end action.
-	 * @param {string} status - The error status code. If no error occurs, then an empty string is passed.
+     * @param {"Information" | "Block" | "GroupActions"} type - The action type:
+     * <b>"Information"</b> - ends a non-blocking informational action,
+     * <b>"Block"</b> - ends a blocking interaction action,
+     * <b>"GroupActions"</b> - ends the grouped operations started with <em>StartAction("GroupActions")</em>.
+     * @param {string | Object} [description] - For <b>"Information"</b> and <b>"Block"</b> types: a string description displayed during the action.
+     * For <b>"GroupActions"</b> type: an optional object with the following properties:
+     * @param {boolean} [description.scrollToTarget=true] - If <em>false</em>, the editor will not scroll to the target after the group operation ends.
+     * @param {boolean} [description.cancel=false] - If <em>true</em>, the group operation is cancelled and rolled back instead of committed.
+     * @param {string} [status] - For <b>"Information"</b> and <b>"Block"</b> types: the error status code. If no error occurs, then an empty string is passed.
      * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/EndAction.js
-	 */
+     */
     Api.prototype["pluginMethod_EndAction"] = function(type, description, status)
     {
 		if ("GroupActions" === type)
 		{
+			let pr = description && (typeof description === "object") ? description : {};
 			if (status)
-				this.cancelGroupActions();
-			else
-				this.endGroupActions();
+				pr["cancel"] = true;
 			
+			this.endGroupActions(pr);
 			return;
 		}
 		
@@ -597,7 +620,7 @@
                 }
                 if ("no_build" === obj["error"])
 				{
-					// проблемы - но такие, при которых просто не собираем файл...
+					// problems - but ones where we just don't build the file...
 					window["AscDesktopEditor"]["buildCryptedEnd"](true);
 					return;
 				}
@@ -1018,7 +1041,7 @@
      * @param {string} guid - A string value which specifies a plugin identifier which must be of the *asc.{UUID}* type.
      * @param {string} isclear - Defines if the input context will be cleared (**true**) or not (**false**).
      * @see office-js-api/Examples/Plugins/{Editor}/Api/Methods/UnShowInputHelper.js
-	 */
+     */
     Api.prototype["pluginMethod_UnShowInputHelper"] = function(guid, isclear)
     {
         var _frame = document.getElementById("iframe_" + guid);
@@ -1030,6 +1053,9 @@
         _frame.removeAttribute("oo_editor_input");
 
         _frame.style.zIndex = -1000;
+        try {
+            window.focus();
+        } catch (e) {}
 
         if (AscCommon.g_inputContext && AscCommon.g_inputContext.HtmlArea)
         {
@@ -1422,9 +1448,9 @@
 		const isLocal = ( (window["AscDesktopEditor"] !== undefined) && (window.location.protocol.indexOf('file') !== -1) );
 		if (isLocal)
 		{
-			// Отдаём весь конфиг, внутри вычислим путь к deploy
-			// TODO: отслеживать возможные ошибки при +/- плагинов: из ++кода отправлять статус операции и на основе его отправлять в менеджер плагинов корректный ответ.
-			// UPD: done. Ничего не изменять в менеджере плагинов, если guid пуст
+			// Pass the entire config, the path to deploy will be calculated inside
+			// TODO: track possible errors when adding/removing plugins: send operation status from native code and based on it send correct response to plugin manager.
+			// UPD: done. Do not change anything in plugin manager if guid is empty
 
             let result = window["AscDesktopEditor"]["PluginInstall"](JSON.stringify(config));
 
@@ -1549,8 +1575,8 @@
 
 		const isLocal = ( (window["AscDesktopEditor"] !== undefined) && (window.location.protocol.indexOf('file') !== -1) );
 		if (isLocal) {
-			// В случае Desktop не работаем с localStorage и extensions, этот метод может быть вызван из интерфейса
-			// если по какой-то причине (неактуальный cache) у пользователя есть asc_plugins_installed, asc_plugins_removed, то их нужно игнорировать/удалить
+			// In case of Desktop, we don't work with localStorage and extensions, this method can be called from the interface
+			// if for some reason (outdated cache) the user has asc_plugins_installed, asc_plugins_removed, they should be ignored/deleted
 			return;
 		}
 
@@ -1590,13 +1616,13 @@
 			}
 		}
 
-		// этот метод может быть вызван из интерфейса - нужен таймаут для web-apps
+		// this method can be called from the interface - a timeout is needed for web-apps
 		if (isRemovedPresent || isInstalledPresent) {
 
 			setTimeout(function () {
 
-				// в принципе можно не удалять, так как если ничего не поменялось - то не зайдем второй раз сюда.
-				// но зачем еще раз парсить
+				// in principle, we don't need to delete, since if nothing has changed - we won't enter here again.
+				// but why parse again
 				window.g_asc_plugins.api.disableCheckInstalledPlugins = true;
 
 				if (isRemovedPresent)
@@ -1699,20 +1725,20 @@
 	Api.prototype["pluginMethod_GetInstalledPlugins"] = function()
 	{
 		/*
-			формат объекта 
+			object format
 			{
-				url: url на конфиг (хотя по факту он не нужен, так как конфиг есть в этом объекте и внутри маркетплейса тоже),
-				guid: guid плагина,
-				canRemoved: флаг, может ли быть удалён плагин или нет (true/false),
-				obj: конфиг установленного плагина (от туда берется версия и сравнивается с текущей для проверки обновлений)
+				url: url to config (although in fact it's not needed, since the config is in this object and inside the marketplace too),
+				guid: plugin guid,
+				canRemoved: flag indicating whether the plugin can be removed or not (true/false),
+				obj: installed plugin config (the version is taken from there and compared with the current one to check for updates)
 			}
 		*/
 
 		const isLocal = ( (window["AscDesktopEditor"] !== undefined) && (window.location.protocol.indexOf('file') !== -1) );
 
-		// В случае Desktop нужно проверить какие плагины нельзя удалять. В UpdateInstallPlugins работаем с двумя типами папок.
-		// Пока проверка тут, но грамотнее будет сделать и использовать доп.свойство isSystemInstall класса CPlugin
-		// т.к. не будем лишний раз парсить папки, только при +/- плагинов.
+		// In case of Desktop, we need to check which plugins cannot be removed. In UpdateInstallPlugins we work with two types of folders.
+		// For now the check is here, but it would be better to create and use additional property isSystemInstall of CPlugin class
+		// since we won't parse folders unnecessarily, only when adding/removing plugins.
 		let protectedPlugins = [];
 
 		if (isLocal) {
@@ -1723,7 +1749,7 @@
 				protectedPlugins.push(_pluginsTmp[0]["pluginsData"][i]["guid"]);
 			}
 			
-			// Также смотрим плагины из папки пользователя, возможно там есть обновленные системные
+			// Also look at plugins from the user folder, there may be updated system plugins there
 			len = _pluginsTmp[1]["pluginsData"].length;
 			for (var i = 0; i < len; i++) {
 				if (_pluginsTmp[1]["pluginsData"][i]["canRemoved"] === false)
@@ -1755,7 +1781,7 @@
 		if (isLocal)
 			return returnArray;
 
-		// нужно послать и удаленные. так как удаленный может не быть в сторе. тогда его никак не установить обратно
+		// need to also send removed plugins. since a removed plugin may not be in the store. then there's no way to install it back
 		let currentRemovedPlugins = getLocalStorageItem("asc_plugins_removed");
 
 		if (currentRemovedPlugins)
@@ -1794,13 +1820,13 @@
 
 		if (isLocal)
 		{
-			// Вызываем только этот ++код, никаких дополнительных действий типа:
+			// We only call this native code, no additional actions like:
 			// window.g_asc_plugins.unregister(guid), window["UpdateInstallPlugins"](), this.sendEvent("asc_onPluginsReset"), window.g_asc_plugins.updateInterface()
-			// не требуется, т.к. ++код вызывает UpdateInstallPlugins, в нём идёт перестроение списка плагинов и обновление интерфейса.
-			// Просто отдаём менеджеру плагинов ответ.
-			// TODO: отслеживать возможные ошибки при +/- плагинов:
-			// из ++кода отправлять статус операции и на основе его отправлять в менеджер плагинов корректный ответ.
-			// ничего не изменять в менеджере плагинов, если guid пуст
+			// are required, because the native code calls UpdateInstallPlugins, which rebuilds the plugin list and updates the interface.
+			// We just send the response to the plugin manager.
+			// TODO: track possible errors when adding/removing plugins:
+			// send operation status from native code and based on it send correct response to plugin manager.
+			// do not change anything in plugin manager if guid is empty
 
 			let result = window["AscDesktopEditor"]["PluginUninstall"](guid, backup);
 						

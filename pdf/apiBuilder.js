@@ -1,34 +1,37 @@
 /*
-* (c) Copyright Ascensio System SIA 2010-2024
-*
-* This program is a free software product. You can redistribute it and/or
-* modify it under the terms of the GNU Affero General Public License (AGPL)
-* version 3 as published by the Free Software Foundation. In accordance with
-* Section 7(a) of the GNU AGPL its Section 15 shall be amended to the effect
-* that Ascensio System SIA expressly excludes the warranty of non-infringement
-* of any third-party rights.
-*
-* This program is distributed WITHOUT ANY WARRANTY; without even the implied
-* warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
-* details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-*
-* You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
-* street, Riga, Latvia, EU, LV-1050.
-*
-* The  interactive user interfaces in modified source and object code versions
-* of the Program must display Appropriate Legal Notices, as required under
-* Section 5 of the GNU AGPL version 3.
-*
-* Pursuant to Section 7(b) of the License you must retain the original Product
-* logo when distributing the program. Pursuant to Section 7(e) we decline to
-* grant you any rights under trademark law for use of our trademarks.
-*
-* All the Product's GUI elements, including illustrations and icon sets, as
-* well as technical writing content are licensed under the terms of the
-* Creative Commons Attribution-ShareAlike 4.0 International. See the License
-* terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-*
-*/
+ * Copyright (C) Ascensio System SIA, 2009-2026
+ *
+ * This program is a free software product. You can redistribute it and/or
+ * modify it under the terms of the GNU Affero General Public License (AGPL)
+ * version 3 as published by the Free Software Foundation, together with the
+ * additional terms provided in the LICENSE file.
+ *
+ * This program is distributed WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+ * details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+ *
+ * You can contact Ascensio System SIA by email at info@onlyoffice.com
+ * or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+ * LV-1050, Latvia, European Union.
+ *
+ * The interactive user interfaces in modified versions of the Program
+ * are required to display Appropriate Legal Notices in accordance with
+ * Section 5 of the GNU AGPL version 3.
+ *
+ * No trademark rights are granted under this License.
+ *
+ * All non-code elements of the Product, including illustrations,
+ * icon sets, and technical writing content, are licensed under the
+ * Creative Commons Attribution-ShareAlike 4.0 International License:
+ * https://creativecommons.org/licenses/by-sa/4.0/legalcode
+ *
+ * This license applies only to such non-code elements and does not
+ * modify or replace the licensing terms applicable to the Program's
+ * source code, which remains licensed under the GNU Affero General
+ * Public License v3.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only
+ */
 
 "use strict";
 (function(window, builder)
@@ -66,11 +69,6 @@
 	/**
 	 * The available widget border width.
 	 * @typedef {("none" | "thin" | "medium" | "thick")} WidgetBorderWidth
-	 */
-
-	/**
-	 * The available widget border styles.
-	 * @typedef {("solid" | "beveled" | "dashed" | "inset" | "underline")} WidgetBorderStyle
 	 */
 
 	/**
@@ -549,11 +547,9 @@
 		oAnnot.SetBorderWidth(1);
 		oAnnot.SetBorderStyle(AscPDF.BORDER_TYPES.solid);
 		oAnnot.SetBorderColor([0, 0, 0]);
+		oAnnot.private_UpdateRect(rect);
 
-		let oApiAnnot = new ApiCircleAnnotation(oAnnot);
-		oApiAnnot.private_UpdateRect(rect);
-
-		return oApiAnnot;
+		return new ApiCircleAnnotation(oAnnot);
 	};
 	
 	/**
@@ -583,11 +579,9 @@
 		oAnnot.SetBorderWidth(1);
 		oAnnot.SetBorderStyle(AscPDF.BORDER_TYPES.solid);
 		oAnnot.SetBorderColor([0, 0, 0]);
+		oAnnot.private_UpdateRect(rect);
 
-		let oApiAnnot = new ApiSquareAnnotation(oAnnot);
-		oApiAnnot.private_UpdateRect(rect);
-
-		return oApiAnnot;
+		return new ApiSquareAnnotation(oAnnot);
 	};
 
 	/**
@@ -846,7 +840,7 @@
 
 		if (creationDate != null) {
 			creationDate = AscBuilder.GetNumberParameter(creationDate, null);
-			if (!creationDate) {
+			if (creationDate === null) {
 				AscBuilder.throwException("The creationDate parameter must be a number");
 			}
 		}
@@ -865,8 +859,8 @@
 			rect:			[X1, Y1, X2, Y2],
 			name:           AscCommon.CreateGUID(),
 			type:           AscPDF.ANNOTATIONS_TYPES.Stamp,
-			creationDate:   creationDate ? new Date().getTime() : creationDate,
-			modDate:        creationDate ? new Date().getTime() : creationDate,
+			creationDate:   creationDate ? creationDate : new Date().getTime(),
+			modDate:        creationDate ? creationDate : new Date().getTime(),
 			hidden:         false
 		}
 
@@ -1249,6 +1243,7 @@
 	Api.CreateShape = function(sType, nWidth, nHeight, oFill, oStroke) {
 		let oDoc = private_GetLogicDocument();
 		sType = sType || "rect";
+		if (!AscFormat.isValidShapeType(sType)) sType = "rect";
 		nWidth = nWidth || 72;
 		nHeight = nHeight || 72;
 		oFill = oFill || Api.CreateNoFill();
@@ -1278,19 +1273,19 @@
 	 * Creates a table.
 	 * @memberof Api
 	 * @typeofeditors ["PDFE"]
-	 * @param nCols - Number of columns.
-	 * @param nRows - Number of rows.
+	 * @param rows - Number of rows.
+	 * @param cols - Number of columns.
 	 * @returns {ApiTable}
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/CreateTable.js
 	 */
-	Api.CreateTable = function(nCols, nRows) {
+	Api.CreateTable = function(rows, cols) {
 		let oDoc = private_GetLogicDocument();
 		let nPage = oDoc.GetCurPage();
 		if (nPage == -1) {
 			nPage = 0;
 		}
 
-		let oGraphicFrame = oDoc.private_Create_TableGraphicFrame(nCols, nRows, oDoc.DefaultTableStyleId, undefined, undefined, undefined, undefined, nPage);
+		let oGraphicFrame = oDoc.private_Create_TableGraphicFrame(cols, rows, oDoc.DefaultTableStyleId, undefined, undefined, undefined, undefined, nPage);
 		
 		let content = oGraphicFrame.graphicObject.Content;
 		for (let i = 0; i < content.length; ++i) {
@@ -1302,6 +1297,9 @@
 
 	/**
 	 * Creates a chart with the parameters specified.
+	 * :::note
+	 * Values of <em>nStyleIndex</em> outside <b>1 - 48</b> are interpreted as a chart style id from the <em>cs:chartStyle</em> element (e.g. 201, 215, 284) and are available only for [ONLYOFFICE Docs Enterprise](https://www.onlyoffice.com/docs-enterprise-prices.aspx?from=api) and [ONLYOFFICE Docs Developer](https://www.onlyoffice.com/developer-edition-prices.aspx?from=api).
+	 * :::
 	 * @memberof Api
 	 * @typeofeditors ["PDFE"]
 	 * @param {ChartType} [sType="bar"] - The chart type used for the chart display.
@@ -1395,20 +1393,22 @@
 
 	/**
 	 * Removes page by index from document
+	 * <note> You can't delete last page </note>
 	 * @memberof ApiDocument
 	 * @typeofeditors ["PDFE"]
-	 * @param {number} nPos - page position
+	 * @param {number} pos - page position
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiDocument/Methods/RemovePage.js
 	 */
-	ApiDocument.prototype.RemovePage = function(nPos) {
+	ApiDocument.prototype.RemovePage = function(pos) {
 		let oFile = this.Document.GetFile();
-		if (!oFile.pages[nPos]) {
-			return false;
+
+		pos = AscBuilder.GetNumberParameter(pos, null);
+		if (null == pos || pos < 0 || pos > oFile.pages.length - 1) {
+			AscBuilder.throwException("The pos parameter must be a valid position");
 		}
 
-		this.Document.RemovePage(nPos);
-		return true;
+		return !!this.Document.RemovePage(pos);
 	};
 
 	/**
@@ -1439,13 +1439,9 @@
 			oPageInfo.fields.forEach(function(widget) {
 				let oParent = widget.GetParent();
 				
-				if (oParent) {
-					while (oParent) {
-						if (!aFields.includes(oParent)) {
-							aFields.push(oParent);
-						}
-
-						oParent = oParent.GetParent();
+				if (oParent && oParent.IsAllKidsWidgets()) {
+					if (!aFields.includes(oParent)) {
+						aFields.push(oParent);
 					}
 				}
 				else if (!aFields.includes(widget)) {
@@ -1454,7 +1450,7 @@
 			});
 		}
 
-		return aFields.map(private_GetFieldApi);
+		return aFields.map(GetFieldApi);
 	};
 
 	/**
@@ -1466,12 +1462,19 @@
 	 */
 	ApiDocument.prototype.GetFieldByName = function(sName) {
 		let oField = this.Document.GetField(sName);
-		if (false == oField.IsWidget() || !oField.GetParent())	{
-			return private_GetFieldApi(oField);
+		if (!oField)
+			return null;
+
+		if (!oField.IsWidget()) {
+			return oField.IsAllKidsWidgets() ? GetFieldApi(oField) : null;
 		}
-		else {
-			return private_GetFieldApi(oField.GetParent());
+
+		let oParent = oField.GetParent();
+		if (oParent && oParent.IsAllKidsWidgets()) {
+			return GetFieldApi(oParent);
 		}
+
+		return GetFieldApi(oField);
 	};
 
 	/**
@@ -1501,7 +1504,7 @@
 		searchSettings.put_WholeWords(wholeWords);
 
 		this.Document.Search(searchSettings);
-		return this.Document.MarkAllSearchElementsForRedact().map(private_GetAnnotApi);
+		return this.Document.MarkAllSearchElementsForRedact().map(GetAnnotApi);
 	};
 
 	/**
@@ -1598,7 +1601,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiPage/Methods/GetAllWidgets.js
 	 */
 	ApiPage.prototype.GetAllWidgets = function() {
-		return this.Page.fields.map(private_GetWidgetApi);
+		return this.Page.fields.map(GetWidgetApi);
 	};
 
 	/**
@@ -1649,7 +1652,7 @@
 				continue;
 			}
 
-			aResult.push(private_GetAnnotApi(aAnnots[i]));
+			aResult.push(GetAnnotApi(aAnnots[i]));
 		}
 		
 		return aResult;
@@ -1690,7 +1693,9 @@
 		Object.values(oSearchEngine.Elements).forEach(function(pdfMatch, idx) {
 			if (pdfMatch.GetAbsolutePage() == nPageIdx) {
 				let aPageSelQuads = oDoc.GetSearchElementSelectionQuads(idx);
-				aResult = aResult.concat(aPageSelQuads[0].quads);
+				aPageSelQuads.forEach(function(pageSelQuads) {
+					aResult = aResult.concat(pageSelQuads.quads);
+				});
 			}
 		});
 		
@@ -1870,6 +1875,7 @@
 	 * Sets field required
 	 * @memberof ApiBaseField
 	 * @typeofeditors ["PDFE"]
+	 * @param {boolean} bRequired
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiBaseField/Methods/SetRequired.js
 	 */
@@ -1893,6 +1899,7 @@
 	 * Sets field read only
 	 * @memberof ApiBaseField
 	 * @typeofeditors ["PDFE"]
+	 * @param {boolean} bRequired
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiBaseField/Methods/SetReadOnly.js
 	 */
@@ -1923,14 +1930,27 @@
 	ApiBaseField.prototype.SetValue = function(sValue) {
 		let oDoc = private_GetLogicDocument();
 
-		let oFieldToCommit = this.Field.IsWidget() ? this.Field : this.Field.GetKid(0);
-
+		let oFieldToCommit;
+		if (this.Field.IsWidget()) {
+			oFieldToCommit = this.Field;
+		}
+		else {
+			if (this instanceof ApiCheckboxField) {
+				oFieldToCommit = this.Field.GetKids().find(function(widget) {
+					return widget.GetExportValue() == sValue;
+				});
+			}
+			else {
+				oFieldToCommit = this.Field.GetKid(0);
+			}
+		}
+		
 		if (sValue != undefined && sValue.toString) {
 			sValue = sValue.toString();
 		}
 
 		oFieldToCommit.SetValue(sValue);
-		return oDoc.CommitField(oFieldToCommit);
+		return oDoc.private_CommitField(oFieldToCommit);
 	};
 
 	/**
@@ -1967,7 +1987,7 @@
 
 		this.Field = oWidget.GetParent();
 
-		return private_GetWidgetApi(oWidget);
+		return GetWidgetApi(oWidget);
 	};
 
 	/**
@@ -1978,7 +1998,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiBaseField/Methods/GetAllWidgets.js
 	 */
 	ApiBaseField.prototype.GetAllWidgets = function() {
-		return this.Field.GetAllWidgets().map(private_GetWidgetApi);
+		return this.Field.GetAllWidgets().map(GetWidgetApi);
 	};
 
 	/**
@@ -2473,7 +2493,7 @@
 	 * @memberof ApiTextField
 	 * @typeofeditors ["PDFE"]
 	 * @param {number} nDemical - number of decimals
-	 * @param {NumberSepStyle} - number separate style
+	 * @param {NumberSepStyle} sSepStyle - number separate style
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiTextField/Methods/SetPercentageFormat.js
 	 */
@@ -2859,7 +2879,7 @@
 		let oFieldToCommit = this.Field.IsWidget() ? this.Field : this.Field.GetKid(0);
 
 		oFieldToCommit.SetCurIdxs(aIndexes);
-		return oDoc.CommitField(oFieldToCommit);
+		return oDoc.private_CommitField(oFieldToCommit);
 	};
 
 	/**
@@ -2911,8 +2931,8 @@
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiComboboxField/Methods/SetEditable.js
 	 */
-	ApiComboboxField.prototype.SetEditable = function(bCommit) {
-		return this.Field.SetEditable(bCommit)
+	ApiComboboxField.prototype.SetEditable = function(bEditable) {
+		return this.Field.SetEditable(bEditable)
 	};
 
 	/**
@@ -2922,8 +2942,8 @@
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiComboboxField/Methods/IsEditable.js
 	 */
-	ApiComboboxField.prototype.IsEditable = function(bCommit) {
-		return this.Field.IsEditable(bCommit)
+	ApiComboboxField.prototype.IsEditable = function() {
+		return this.Field.IsEditable()
 	};
 
 	/**
@@ -2931,8 +2951,8 @@
 	 * @memberof ApiComboboxField
 	 * @typeofeditors ["PDFE"]
 	 * @param {number} nDemical - number of decimals
-	 * @param {NumberSepStyle} - number separate style
-	 * @param {NumberNegStyle} - number negative style
+	 * @param {NumberSepStyle} sSepStyle - number separate style
+	 * @param {NumberNegStyle} sNegStyle - number negative style
 	 * @param {string} sCurrency - currency sybmol
 	 * @param {boolean} bCurrencyPrepend - If true, places the currency symbol before the number (e.g., $1,234.56); 
 	 * if false, places it after (e.g., 1,234.56$).
@@ -2964,7 +2984,7 @@
 	 * @memberof ApiComboboxField
 	 * @typeofeditors ["PDFE"]
 	 * @param {number} nDemical - number of decimals
-	 * @param {NumberSepStyle} - number separate style
+	 * @param {NumberSepStyle} sSepStyle - number separate style
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiComboboxField/Methods/SetPercentageFormat.js
 	 */
@@ -3339,7 +3359,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiRadiobuttonField/Methods/IsCheckInUnison.js
 	 */
 	ApiRadiobuttonField.prototype.IsCheckInUnison = function() {
-		return this.Field.SetRadiosInUnison();
+		return this.Field.IsRadiosInUnison();
 	};
 
 	/**
@@ -3850,12 +3870,6 @@
 		return this.Annot;
 	};
 
-	ApiBaseAnnotation.prototype.private_UpdateRect = function(rect) {
-		if (rect) {
-			this.Annot.SetRect(rect);
-		}
-	};
-
 	/**
 	 * Sets annotation rect.
 	 * @memberof ApiBaseAnnotation
@@ -3869,7 +3883,7 @@
 			AscBuilder.throwException("The rect parameter must be a valid rect");
 		}
 
-		this.private_UpdateRect(rect);
+		this.Annot.private_UpdateRect(rect);
 		return true;
 	};
 
@@ -3927,7 +3941,7 @@
 	 */
 	ApiBaseAnnotation.prototype.SetBorderColor = function(color) {
 		if (!(color instanceof AscBuilder.ApiColor)) {
-			return false;
+			AscBuilder.throwException("The name parameter must be an ApiColor object");
 		}
 
 		this.Annot.SetBorderColor(private_GetInnerColorByRGB(color["r"], color["g"], color["b"]));
@@ -3956,16 +3970,22 @@
 	 * Sets annotation fill color.
 	 * @memberof ApiBaseAnnotation
 	 * @typeofeditors ["PDFE"]
-	 * @param {ApiColor} color
+	 * @param {?ApiColor} color - color to set fill (omit the argument to set no fill)
 	 * @returns {boolean}
 	 * @see office-js-api/Examples/{Editor}/ApiBaseAnnotation/Methods/SetFillColor.js
 	 */
 	ApiBaseAnnotation.prototype.SetFillColor = function(color) {
-		if (!(color instanceof AscBuilder.ApiColor)) {
-			return false;
+		if (!(color instanceof AscBuilder.ApiColor) && color != undefined) {
+			AscBuilder.throwException("The name parameter must be an ApiColor object or undefined");
 		}
 
-		this.Annot.SetFillColor(private_GetInnerColorByRGB(color["r"], color["g"], color["b"]));
+		if (this.Annot.IsShapeBased() || this.Annot.IsRedact()) {
+			this.Annot.SetFillColor(color ? private_GetInnerColorByRGB(color["r"], color["g"], color["b"]) : undefined);
+		}
+		else {
+			this.Annot.SetBorderColor(color ? private_GetInnerColorByRGB(color["r"], color["g"], color["b"]) : undefined);
+		}
+		
 		return true;
 	};
 
@@ -3977,7 +3997,14 @@
 	 * @see office-js-api/Examples/{Editor}/ApiBaseAnnotation/Methods/GetFillColor.js
 	 */
 	ApiBaseAnnotation.prototype.GetFillColor = function() {
-		let aInnerColor = this.Annot.GetFillColor();
+		let aInnerColor;
+		if (this.Annot.IsShapeBased() || this.Annot.IsRedact()) {
+			aInnerColor = this.Annot.GetFillColor();
+		}
+		else {
+			aInnerColor = this.Annot.GetBorderColor();
+		}
+
 		if (!aInnerColor) {
 			return null;
 		}
@@ -3998,6 +4025,7 @@
 	ApiBaseAnnotation.prototype.SetBorderWidth = function(width) {
 		width = AscBuilder.GetNumberParameter(width, 0);
 		this.Annot.SetBorderWidth(width);
+		this.Annot.private_UpdateRect();
 		return true;
 	};
 
@@ -4296,7 +4324,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiBaseAnnotation/Methods/SetDashPattern.js
 	 */
 	ApiBaseAnnotation.prototype.SetDashPattern = function(pattern) {
-		if (pattern.find(function(value) { value = AscBuilder.GetNumberParameter(value, null); if (!value) return true})) {
+		if (pattern.find(function(value) { let num = AscBuilder.GetNumberParameter(value, null); if (num === null) return true})) {
 			AscBuilder.throwException("The pattern parameter must be an array with numbers");
 		}
 
@@ -4330,7 +4358,7 @@
 		}
 
 		this.Annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES[style]);
-		this.private_UpdateRect();
+		this.Annot.private_UpdateRect();
 
 		return true;
 	};
@@ -4372,7 +4400,7 @@
 		}
 
 		this.Annot.SetBorderEffectIntensity(value);
-		this.private_UpdateRect();
+		this.Annot.private_UpdateRect();
 
 		return true;
 	};
@@ -4418,7 +4446,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiBaseAnnotation/Methods/GetReplies.js
 	 */
 	ApiBaseAnnotation.prototype.GetReplies = function() {
-		return this.Annot.GetReplies().map(private_GetAnnotApi);
+		return this.Annot.GetReplies().map(GetAnnotApi);
 	};
 
 	/**
@@ -4564,43 +4592,6 @@
 	ApiCircleAnnotation.prototype = Object.create(ApiBaseAnnotation.prototype);
 	ApiCircleAnnotation.prototype.constructor = ApiCircleAnnotation;
 
-	ApiCircleAnnotation.prototype.private_UpdateRect = function(rect) {
-		if (!rect) {
-			rect = this.Annot.GetRect();
-		}
-
-		AscCommon.History.StartNoHistoryMode();
-		let aCurRect = this.Annot.GetRect();
-		let aCurRD = this.Annot.GetRectangleDiff().slice();
-		let nLineW = this.Annot.GetBorderWidth() * g_dKoef_pt_to_mm;
-		this.Annot.SetRect(rect);
-		this.Annot.SetRectangleDiff([0, 0, 0, 0]);
-		this.Annot.recalcBounds();
-		this.Annot.recalcGeometry();
-		this.Annot.Recalculate(true);
-		
-		AscCommon.History.EndNoHistoryMode();
-		
-		let oGrBounds = this.Annot.bounds;
-		let oShapeBounds = this.Annot.getRectBounds();
-
-		rect[0] = (oGrBounds.l - nLineW) * g_dKoef_mm_to_pt;
-		rect[1] = (oGrBounds.t - nLineW) * g_dKoef_mm_to_pt;
-		rect[2] = (oGrBounds.r + nLineW) * g_dKoef_mm_to_pt;
-		rect[3] = (oGrBounds.b + nLineW) * g_dKoef_mm_to_pt;
-
-		this.Annot._rect = aCurRect;
-		this.Annot._rectDiff = aCurRD;
-
-		this.Annot.SetRect(rect);
-		this.Annot.SetRectangleDiff([
-			(oShapeBounds.l - oGrBounds.l + nLineW) * g_dKoef_mm_to_pt,
-			(oShapeBounds.t - oGrBounds.t + nLineW) * g_dKoef_mm_to_pt,
-			(oGrBounds.r - oShapeBounds.r + nLineW) * g_dKoef_mm_to_pt,
-			(oGrBounds.b - oShapeBounds.b + nLineW) * g_dKoef_mm_to_pt
-		]);
-	};
-
 	/**
 	 * Returns a type of the ApiCircleAnnotation class.
 	 * @memberof ApiCircleAnnotation
@@ -4658,43 +4649,6 @@
 
 	ApiSquareAnnotation.prototype = Object.create(ApiBaseAnnotation.prototype);
 	ApiSquareAnnotation.prototype.constructor = ApiSquareAnnotation;
-
-	ApiSquareAnnotation.prototype.private_UpdateRect = function(rect) {
-		if (!rect) {
-			rect = this.Annot.GetRect();
-		}
-
-		AscCommon.History.StartNoHistoryMode();
-		let aCurRect = this.Annot.GetRect();
-		let aCurRD = this.Annot.GetRectangleDiff().slice();
-		let nLineW = this.Annot.GetBorderWidth() * g_dKoef_pt_to_mm;
-		this.Annot.SetRect(rect);
-		this.Annot.SetRectangleDiff([0, 0, 0, 0]);
-		this.Annot.recalcBounds();
-		this.Annot.recalcGeometry();
-		this.Annot.Recalculate(true);
-		
-		AscCommon.History.EndNoHistoryMode();
-		
-		let oGrBounds = this.Annot.bounds;
-		let oShapeBounds = this.Annot.getRectBounds();
-
-		rect[0] = (oGrBounds.l - nLineW) * g_dKoef_mm_to_pt;
-		rect[1] = (oGrBounds.t - nLineW) * g_dKoef_mm_to_pt;
-		rect[2] = (oGrBounds.r + nLineW) * g_dKoef_mm_to_pt;
-		rect[3] = (oGrBounds.b + nLineW) * g_dKoef_mm_to_pt;
-
-		this.Annot._rect = aCurRect;
-		this.Annot._rectDiff = aCurRD;
-
-		this.Annot.SetRect(rect);
-		this.Annot.SetRectangleDiff([
-			(oShapeBounds.l - oGrBounds.l + nLineW) * g_dKoef_mm_to_pt,
-			(oShapeBounds.t - oGrBounds.t + nLineW) * g_dKoef_mm_to_pt,
-			(oGrBounds.r - oShapeBounds.r + nLineW) * g_dKoef_mm_to_pt,
-			(oGrBounds.b - oShapeBounds.b + nLineW) * g_dKoef_mm_to_pt
-		]);
-	};
 
 	/**
 	 * Returns a type of the ApiSquareAnnotation class.
@@ -4794,10 +4748,10 @@
 
 		switch (nIntentType) {
 			case AscPDF.FREE_TEXT_INTENT_TYPE.freeText: {
-				return "check";
+				return "freeText";
 			}
 			case AscPDF.FREE_TEXT_INTENT_TYPE.freeTextCallout: {
-				return "circle";
+				return "freeTextCallout";
 			}
 		}
 	};
@@ -4840,7 +4794,7 @@
 		let aCallout = this.Annot.GetCallout();
 
 		let aResult = [];
-		for (let i = 0; i < aCallout.length - 1; i++) {
+		for (let i = 0; i < aCallout.length - 1; i += 2) {
 			aResult.push({
 				"x": aCallout[i],
 				"y": aCallout[i + 1],
@@ -5726,6 +5680,36 @@
 			AscBuilder.throwException("This Redact annot is already applied and can't be used");
 		}
 	});
+
+	//------------------------------------------------------------------------------------------------------------------
+	//
+	// ApiLinkAnnotation
+	//
+	//------------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Class representing a link annotation.
+	 * @constructor
+	 * @typeofeditors ["PDFE"]
+	 * @extends {ApiBaseMarkupAnnotation}
+	 */
+	function ApiLinkAnnotation(oAnnot) {
+		ApiBaseMarkupAnnotation.call(this, oAnnot);
+	}
+
+	ApiLinkAnnotation.prototype = Object.create(ApiBaseMarkupAnnotation.prototype);
+	ApiLinkAnnotation.prototype.constructor = ApiLinkAnnotation;
+
+	/**
+	 * Returns a type of the ApiLinkAnnotation class.
+	 * @memberof ApiLinkAnnotation
+	 * @typeofeditors ["PDFE"]
+	 * @returns {"linkAnnot"}
+	 * @see office-js-api/Examples/{Editor}/ApiLinkAnnotation/Methods/GetClassType.js
+	 */
+	ApiLinkAnnotation.prototype.GetClassType = function() {
+		return "linkAnnot";
+	};
 
 	//------------------------------------------------------------------------------------------------------------------
 	//
@@ -6719,7 +6703,7 @@
 	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/Copy.js
 	 */
 	ApiDrawing.prototype.Copy = function() {
-		return new ApiDrawing(this.Drawing.copy());
+		return new this.constructor(this.Drawing.copy());
 	};
 
 	/**
@@ -7759,6 +7743,50 @@
 		this.Cell.Set_Pr(oPr);
 		return true;
 	};
+	/**
+	 * Appends text to the end of the cell content.
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["PDFE"]
+	 * @param {string} text - The text to append.
+	 * @returns {ApiRun}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/AddText.js
+	 */
+	ApiTableCell.prototype.AddText = function(text) {
+		return this.GetContent().AddText(text);
+	};
+	/**
+	 * Returns the inner text of the current table cell.
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["PDFE"]
+	 * @param {object} [pr] - Options for formatting the returned text.
+	 * @param {boolean} [pr.Numbering=true] - Defines if the resulting string will include numbering or not.
+	 * @param {boolean} [pr.Math=true] - Defines if the resulting string will include mathematical expressions or not.
+	 * @param {string} [pr.TableCellSeparator='\t'] - Defines how the table cell separator will be specified in the resulting string.
+	 * @param {string} [pr.TableRowSeparator='\r\n'] - Defines how the table row separator will be specified in the resulting string.
+	 * @param {string} [pr.ParaSeparator='\r\n'] - Defines how the paragraph separator will be specified in the resulting string.
+	 * @param {string} [pr.TabSymbol='\t'] - Defines how the tab will be specified in the resulting string.
+	 * @param {string} [pr.NewLineSeparator='\r'] - Defines how the line separator will be specified in the resulting string.
+	 * @return {string}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/GetText.js
+	 */
+	ApiTableCell.prototype.GetText = function(pr) {
+		return this.GetContent().GetText(pr);
+	};
+	/**
+	 * Replaces all content of the current table cell with the specified text,
+	 * preserving the formatting of the first paragraph.
+	 * @memberof ApiTableCell
+	 * @typeofeditors ["PDFE"]
+	 * @param {string} text - The text to set.
+	 * @return {ApiRun}
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/SetText.js
+	 */
+	ApiTableCell.prototype.SetText = function(text) {
+		return this.GetContent().SetText(text);
+	};
 
 	//------------------------------------------------------------------------------------------------------------------
 	//
@@ -7838,7 +7866,7 @@
 		return Asc.editor.getPDFDoc();
 	}
 
-	function private_GetFieldApi(field) {
+	function GetFieldApi(field) {
 		if (!field) {
 			return null;
 		}
@@ -7865,7 +7893,7 @@
 		}
 	}
 
-	function private_GetWidgetApi(field) {
+	function GetWidgetApi(field) {
 		if (!field) {
 			return null;
 		}
@@ -8216,7 +8244,7 @@
 		return [r / 255, g / 255, b / 255];
 	}
 
-	function private_GetAnnotApi(annot) {
+	function GetAnnotApi(annot) {
 		if (!annot) {
 			return null;
 		}
@@ -8264,6 +8292,9 @@
 			case AscPDF.ANNOTATIONS_TYPES.Redact: {
 				return new ApiRedactAnnotation(annot);
 			}
+			case AscPDF.ANNOTATIONS_TYPES.Link: {
+				return new ApiLinkAnnotation(annot);
+			}
 		}
 	}
 
@@ -8291,12 +8322,12 @@
 		}
 
 		let x = AscBuilder.GetNumberParameter(point['x'], null);
-		if (!x) {
+		if (x === null) {
 			AscBuilder.throwException("The x coordinate of a point must be a number");
 		}
 
 		let y = AscBuilder.GetNumberParameter(point['y'], null);
-		if (!y) {
+		if (y === null) {
 			AscBuilder.throwException("The y coordinate of a point must be a number");
 		}
 	}
@@ -8778,6 +8809,9 @@
 
 	// ApiRedactAnnotation
 	ApiRedactAnnotation.prototype["GetClassType"]			= ApiRedactAnnotation.prototype.GetClassType;
+	
+	// ApiLinkAnnotation
+	ApiLinkAnnotation.prototype["GetClassType"]				= ApiLinkAnnotation.prototype.GetClassType;
 
 	// ApiRichContent
 	ApiRichContent.prototype["GetClassType"]				= ApiRichContent.prototype.GetClassType;
@@ -8910,6 +8944,9 @@
 	ApiTableCell.prototype["SetCellBorderTop"]				= ApiTableCell.prototype.SetCellBorderTop;
 	ApiTableCell.prototype["SetVerticalAlign"]				= ApiTableCell.prototype.SetVerticalAlign;
 	ApiTableCell.prototype["SetTextDirection"]				= ApiTableCell.prototype.SetTextDirection;
+	ApiTableCell.prototype["AddText"]						= ApiTableCell.prototype.AddText;
+	ApiTableCell.prototype["GetText"]						= ApiTableCell.prototype.GetText;
+	ApiTableCell.prototype["SetText"]						= ApiTableCell.prototype.SetText;
 
 	// ApiChart
 	ApiChart.prototype["GetClassType"]						= ApiChart.prototype.GetClassType = AscBuilder.ApiChart.prototype.GetClassType;
@@ -8967,8 +9004,26 @@
 	ApiSmartArt.prototype["GetClassType"]					= ApiSmartArt.prototype.GetClassType;
 	
 	window['AscBuilder']["Pdf"] = window['AscBuilder'].Pdf = window['AscBuilder'].Pdf || {};
-	AscBuilder.Pdf["Api"] = AscBuilder.Pdf.Api = Api;
-	
+	AscBuilder.Pdf["Api"]          = AscBuilder.Pdf.Api          = Api;
+	AscBuilder.Pdf["ApiDrawing"]   = AscBuilder.Pdf.ApiDrawing   = ApiDrawing;
+	AscBuilder.Pdf["ApiShape"]     = AscBuilder.Pdf.ApiShape     = ApiShape;
+	AscBuilder.Pdf["ApiImage"]     = AscBuilder.Pdf.ApiImage     = ApiImage;
+	AscBuilder.Pdf["ApiTable"]     = AscBuilder.Pdf.ApiTable     = ApiTable;
+	AscBuilder.Pdf["ApiChart"]     = AscBuilder.Pdf.ApiChart     = ApiChart;
+	AscBuilder.Pdf["ApiGroup"]     = AscBuilder.Pdf.ApiGroup     = ApiGroup;
+	AscBuilder.Pdf["ApiSmartArt"]  = AscBuilder.Pdf.ApiSmartArt  = ApiSmartArt;
+
+	AscBuilder.Pdf["ApiPage"]			= AscBuilder.Pdf.ApiPage			= ApiPage;
+	AscBuilder.Pdf["ApiBaseField"]		= AscBuilder.Pdf.ApiBaseField		= ApiBaseField;
+	AscBuilder.Pdf["ApiButtonField"]	= AscBuilder.Pdf.ApiButtonField		= ApiButtonField;
+	AscBuilder.Pdf["ApiBaseWidget"]		= AscBuilder.Pdf.ApiBaseWidget		= ApiBaseWidget;
+	AscBuilder.Pdf["ApiBaseAnnotation"]	= AscBuilder.Pdf.ApiBaseAnnotation	= ApiBaseAnnotation;
+
+	AscBuilder.Pdf["private_GetLogicDocument"]	= AscBuilder.Pdf.private_GetLogicDocument	= private_GetLogicDocument;
+	AscBuilder.Pdf["GetFieldApi"]				= AscBuilder.Pdf.GetFieldApi				= GetFieldApi;
+	AscBuilder.Pdf["GetWidgetApi"]				= AscBuilder.Pdf.GetWidgetApi				= GetWidgetApi;
+	AscBuilder.Pdf["GetAnnotApi"]				= AscBuilder.Pdf.GetAnnotApi				= GetAnnotApi;
+
 	AscBuilder.Pdf.init = function()
 	{
 		AscBuilder.ApiDrawing   = ApiDrawing;

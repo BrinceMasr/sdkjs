@@ -1,33 +1,36 @@
 /*
- * (c) Copyright Ascensio System SIA 2010-2024
+ * Copyright (C) Ascensio System SIA, 2009-2026
  *
  * This program is a free software product. You can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License (AGPL)
- * version 3 as published by the Free Software Foundation. In accordance with
- * Section 7(a) of the GNU AGPL its Section 15 shall be amended to the effect
- * that Ascensio System SIA expressly excludes the warranty of non-infringement
- * of any third-party rights.
+ * version 3 as published by the Free Software Foundation, together with the
+ * additional terms provided in the LICENSE file.
  *
  * This program is distributed WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
- * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+ * details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
+ * You can contact Ascensio System SIA by email at info@onlyoffice.com
+ * or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+ * LV-1050, Latvia, European Union.
  *
- * The  interactive user interfaces in modified source and object code versions
- * of the Program must display Appropriate Legal Notices, as required under
+ * The interactive user interfaces in modified versions of the Program
+ * are required to display Appropriate Legal Notices in accordance with
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
+ * No trademark rights are granted under this License.
  *
- * All the Product's GUI elements, including illustrations and icon sets, as
- * well as technical writing content are licensed under the terms of the
- * Creative Commons Attribution-ShareAlike 4.0 International. See the License
- * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+ * All non-code elements of the Product, including illustrations,
+ * icon sets, and technical writing content, are licensed under the
+ * Creative Commons Attribution-ShareAlike 4.0 International License:
+ * https://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
+ * This license applies only to such non-code elements and does not
+ * modify or replace the licensing terms applicable to the Program's
+ * source code, which remains licensed under the GNU Affero General
+ * Public License v3.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only
  */
 
 "use strict";
@@ -653,8 +656,9 @@
     Api.CreateTheme = function(sName, oMaster, oClrScheme, oFormatScheme, oFontScheme){
         if (typeof(sName) !== "string")
             sName = "";
-        if (oMaster.GetClassType() !== "master" || oClrScheme.GetClassType() !== "themeColorScheme" ||
-        oFormatScheme.GetClassType() !== "themeFormatScheme" || oFontScheme.GetClassType() !== "themeFontScheme")
+        if (!oMaster || !oClrScheme || !oFormatScheme || !oFontScheme
+        || oMaster.GetClassType() !== "master" || oClrScheme.GetClassType() !== "themeColorScheme"
+        || oFormatScheme.GetClassType() !== "themeFormatScheme" || oFontScheme.GetClassType() !== "themeFontScheme")
             return null;
 
         var oPresentation      = private_GetPresentation();
@@ -855,10 +859,10 @@
 	 */
 	Api.CreateOleObject = function(sImageSrc, nWidth, nHeight, sData, sAppId)
 	{
-		if (typeof sImageSrc === "string" && sImageSrc.length > 0 && typeof sData === "string"
+		if (!(typeof sImageSrc === "string" && sImageSrc.length > 0 && typeof sData === "string"
 			&& typeof sAppId === "string" && sAppId.length > 0
-			&& AscFormat.isRealNumber(nWidth) && AscFormat.isRealNumber(nHeight)
-		)
+			&& AscFormat.isRealNumber(nWidth) && AscFormat.isRealNumber(nHeight)))
+			return null;
 
 		var nW = private_EMU2MM(nWidth);
 		var nH = private_EMU2MM(nHeight);
@@ -884,6 +888,7 @@
         let curSlide = private_GetCurrentSlide();
 		let presentation = private_GetPresentation();
         sType   = sType   || "rect";
+        if (!AscFormat.isValidShapeType(sType)) sType = "rect";
         nWidth  = nWidth  || 914400;
 	    nHeight = nHeight || 914400;
 	    oFill   = oFill   || Api.CreateNoFill();
@@ -895,6 +900,9 @@
     
     /**
      * Creates a chart with the parameters specified.
+     * :::note
+     * Values of <em>nStyleIndex</em> outside <b>1 - 48</b> are interpreted as a chart style id from the <em>cs:chartStyle</em> element (e.g. 201, 215, 284) and are available only for [ONLYOFFICE Docs Enterprise](https://www.onlyoffice.com/docs-enterprise-prices.aspx?from=api) and [ONLYOFFICE Docs Developer](https://www.onlyoffice.com/developer-edition-prices.aspx?from=api).
+     * :::
      * @memberof Api
      * @typeofeditors ["CPE"]
      * @param {ChartType} [sType="bar"] - The chart type used for the chart display.
@@ -950,18 +958,21 @@
 
     /**
      * Creates a table.
+	 * :::danger[Breaking Change]
+	 * Starting from version 9.4.0, the parameter order has been changed from `Api.CreateTable(cols, rows)` to `Api.CreateTable(rows, cols)`.
+	 * :::
      * @memberof Api
      * @typeofeditors ["CPE"]
-     * @param nCols - Number of columns.
-     * @param nRows - Number of rows.
+     * @param rows - Number of rows.
+     * @param cols - Number of columns.
      * @returns {?ApiTable}
      * @see office-js-api/Examples/{Editor}/Api/Methods/CreateTable.js
 	 */
-    Api.CreateTable = function(nCols, nRows){
+    Api.CreateTable = function(rows, cols){
         var oPresentation = private_GetPresentation();
         var oSlide = private_GetCurrentSlide();
         if(oPresentation && oSlide){
-            var oGraphicFrame = oPresentation.Create_TableGraphicFrame(nCols, nRows, oSlide, oPresentation.DefaultTableStyleId);
+            var oGraphicFrame = oPresentation.Create_TableGraphicFrame(cols, rows, oSlide, oPresentation.DefaultTableStyleId);
             var content = oGraphicFrame.graphicObject.Content, i;
             for(i = 0; i < content.length; ++i)
             {
@@ -991,7 +1002,7 @@
 	 * @see office-js-api/Examples/{Editor}/Api/Methods/Save.js
 	 */
 	Api.Save = function () {
-		this.SaveAfterMacros = true;
+		Asc.editor.SaveAfterMacros = true;
 	};
 
     /**
@@ -1252,7 +1263,7 @@
 	 * @memberof Api
 	 * @typeofeditors ["CPE"]
 	 *
-	 * @param {string} link - The hyperlink address.
+	 * @param {string} link - The hyperlink address. Accepts an external URL (http, https, mailto, ftp) or one of the internal slide actions: "ppaction://hlinkshowjump?jump=firstslide", "ppaction://hlinkshowjump?jump=lastslide", "ppaction://hlinkshowjump?jump=nextslide", "ppaction://hlinkshowjump?jump=previousslide", "ppaction://hlinksldjumpslide{N}" (N is the zero-based slide index), "ppaction://hlinkfile?file={path}" (opens an external file).
 	 * @param {string} tooltip - The tooltip text.
 	 *
 	 * @returns {ApiHyperlink}
@@ -1341,6 +1352,7 @@
         }
         return null;
     };
+    ApiPresentation.prototype.GetSlide = ApiPresentation.prototype.GetSlideByIndex;
 
     /**
      * Returns the current slide.
@@ -1698,9 +1710,9 @@
         nEnd = nEnd == undefined ? this.Presentation.Slides.length - 1 : nEnd;
 
         if (nStart < 0 || nStart >= this.Presentation.Slides.length)
-            return;
+            return null;
         if (nEnd < 0 || nEnd >= this.Presentation.Slides.length)
-            return;
+            return null;
 
         let oResult = oWriter.SerSlides(nStart, nEnd, bWriteLayout, bWriteMaster, bWriteAllMasLayouts);
         if (bWriteTableStyles)
@@ -1885,7 +1897,7 @@
 		const api = this.Presentation.Api;
 		
 		let props = (api) ? api.asc_getAppProps() : null;
-		oDocInfo["Application"] = (props.asc_getApplication() || '') + (props.asc_getAppVersion() ? ' ' : '') + (props.asc_getAppVersion() || '');
+		oDocInfo["Application"] = props ? (props.asc_getApplication() || '') + (props.asc_getAppVersion() ? ' ' : '') + (props.asc_getAppVersion() || '') : '';
 		
 		let langCode = 1033; // en-US
 		let langName = 'en-us';
@@ -2128,7 +2140,7 @@
 	 */
     ApiMaster.prototype.GetLayout = function(nPos)
     {
-        if (nPos < 0 || nPos > this.Master.sldLayoutLst.length || typeof (nPos) !== 'number')
+        if (nPos < 0 || nPos >= this.Master.sldLayoutLst.length || typeof (nPos) !== 'number')
             return null;
         
         return new ApiLayout(this.Master.sldLayoutLst[nPos])
@@ -2606,9 +2618,9 @@
 	 */
     ApiLayout.prototype.SetName = function(sName)
     {
-        if (typeof(sName) !== "string")
+        if (typeof(sName) === "string")
             this.Layout.setCSldName(sName);
-        else 
+        else
             return false;
         
         return true;
@@ -2623,7 +2635,7 @@
 	 */
     ApiLayout.prototype.GetLayoutType = function()
     {
-		this.Layout.getType();
+		return AscCommonSlide.LAYOUT_TYPE_TO_STRING[this.Layout.getType()];
     };
 
     /**
@@ -2835,6 +2847,7 @@
                 return true;
             }
         }
+        return false;
     };
 
     /**
@@ -3092,6 +3105,7 @@
 
         nIdx >>= 0;
         this.Placeholder.setIdx(nIdx);
+        return true;
     };
 
     /**
@@ -3162,6 +3176,19 @@
         if (oApiColorScheme && oApiColorScheme.GetClassType && oApiColorScheme.GetClassType() === "themeColorScheme")
         {
             this.ThemeInfo.Theme.setColorScheme(oApiColorScheme.ColorScheme);
+            var oPresentation = private_GetPresentation();
+            if (oPresentation) {
+                var oThemeObjects = oPresentation.GetSlideObjectsWithTheme(this.ThemeInfo.Theme);
+                for (var i = 0; i < oThemeObjects.masters.length; i++) {
+                    oThemeObjects.masters[i].checkSlideColorScheme();
+                }
+                for (var i = 0; i < oThemeObjects.layouts.length; i++) {
+                    oThemeObjects.layouts[i].checkSlideColorScheme();
+                }
+                for (var i = 0; i < oThemeObjects.slides.length; i++) {
+                    oThemeObjects.slides[i].checkSlideColorScheme();
+                }
+            }
             return true;
         }
 
@@ -4443,8 +4470,8 @@
 			const notes = AscCommonSlide.CreateNotes();
 			notes.setNotesMaster(presentation.notesMasters[0]);
 
-			notes.setSlide(this);
-			this.setNotes(notes);
+			notes.setSlide(this.Slide);
+			this.Slide.setNotes(notes);
 
 			oNotesPage = new ApiNotesPage(notes);
 		}
@@ -4647,7 +4674,7 @@
 		'effectCut':             { tag: 'p:cut', attrNames: ['thruBlk'], attrValues: ['0'] },
 		'effectCutThroughBlack': { tag: 'p:cut', attrNames: ['thruBlk'], attrValues: ['1'] },
 
-		// Default 'p:fade' effect attribute is: dir='horz'
+		// Default 'p:blinds' effect attribute is: dir='horz'
 		'effectBlindsHorizontal': { tag: 'p:blinds', attrNames: ['dir'], attrValues: ['horz'] },
 		'effectBlindsVertical':   { tag: 'p:blinds', attrNames: ['dir'], attrValues: ['vert'] },
 
@@ -4681,14 +4708,9 @@
 		'effectCombHorizontal': { tag: 'p:comb', attrNames: ['dir'], attrValues: ['horz'] },
 		'effectCombVertical':   { tag: 'p:comb', attrNames: ['dir'], attrValues: ['vert'] },
 
-		// Default 'p14:conveyor' effect attribute is: dir='l'
-		// Attribute must be specified explicitly - <p14:conveyor/> without 'dir' attribute is forbidden
-		'effectConveyorLeft':  { tag: 'p14:conveyor', attrNames: ['dir'], attrValues: ['l'] },
-		'effectConveyorRight': { tag: 'p14:conveyor', attrNames: ['dir'], attrValues: ['r'] },
-
 		// Default 'p:cover' effect attribute is: dir='l'
 		'effectCoverDown':      { tag: 'p:cover', attrNames: ['dir'], attrValues: ['d'] },
-		'effectCoverLeft':      { tag: 'p:cover', attrNames: ['dir'], attrValues: ['l']},
+		'effectCoverLeft':      { tag: 'p:cover', attrNames: ['dir'], attrValues: ['l'] },
 		'effectCoverLeftDown':  { tag: 'p:cover', attrNames: ['dir'], attrValues: ['ld'] },
 		'effectCoverLeftUp':    { tag: 'p:cover', attrNames: ['dir'], attrValues: ['lu'] },
 		'effectCoverRight':     { tag: 'p:cover', attrNames: ['dir'], attrValues: ['r'] },
@@ -4700,7 +4722,6 @@
 		'effectCircleOut': { tag: 'p:circle' },
 		'effectDiamondOut': { tag: 'p:diamond' },
 		'effectDissolve': { tag: 'p:dissolve' },
-		'effectFlashbulb': { tag: 'p14:flash' },
 		'effectHoneycomb': { tag: 'p14:honeycomb' },
 		'effectNewsflash': { tag: 'p:newsflash' },
 		'effectPlusOut': { tag: 'p:plus' },
@@ -4722,37 +4743,15 @@
 
 		// Default 'p14:flip' effect attribute is: dir='l'
 		// Attribute must be specified explicitly - <p14:flip/> without 'dir' attribute is forbidden
-		'effectFlipDown': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['r'] },
+		'effectFlipDown': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['d'] },
 		'effectFlipLeft': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['l'] },
 		'effectFlipRight': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['r'] },
-		'effectFlipUp': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['r'] },
-
-		// Default 'p14:flythrough' effect attributes are: dir='in', hasBounce='0'
-		'effectFlyThroughIn':        { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['in', '0'] },
-		'effectFlyThroughInBounce':  { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['in', '1'] },
-		'effectFlyThroughOut':       { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['out', '0'] },
-		'effectFlyThroughOutBounce': { tag: 'p14:flythrough', attrNames: ['dir', 'hasBounce'], attrValues: ['out', '1'] },
+		'effectFlipUp': { tag: 'p14:flip', attrNames: ['dir'], attrValues: ['u'] },
 
 		// Default 'p14:gallery' effect attribute is: dir='l'
 		// Attribute must be specified explicitly - <p14:gallery/> without 'dir' attribute is forbidden
 		'effectGalleryLeft': { tag: 'p14:gallery', attrNames: ['dir'], attrValues: ['l'] },
 		'effectGalleryRight': { tag: 'p14:gallery', attrNames: ['dir'], attrValues: ['r'] },
-
-		// Default 'p14:glitter' effect attribute is: dir='l', pattern='diamond'
-		'effectGlitterDiamondDown':  { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['u', 'diamond'] },
-		'effectGlitterDiamondLeft':  { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['r', 'diamond'] },
-		'effectGlitterDiamondRight': { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['l', 'diamond'] },
-		'effectGlitterDiamondUp':    { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['d', 'diamond'] },
-		'effectGlitterHexagonDown':  { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['u', 'hexagon'] },
-		'effectGlitterHexagonLeft':  { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['r', 'hexagon'] },
-		'effectGlitterHexagonRight': { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['l', 'hexagon'] },
-		'effectGlitterHexagonUp':    { tag: 'p14:glitter', attrNames: ['dir', 'pattern'], attrValues: ['d', 'hexagon'] },
-
-		// Default 'p14:pan' effect attribute is: dir='l'
-		'effectPanDown':  { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['d'] },
-		'effectPanLeft':  { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['l'] },
-		'effectPanRight': { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['r'] },
-		'effectPanUp':    { tag: 'p14:pan', attrNames: ['dir'], attrValues: ['u'] },
 
 		// Default 'p:push' effect attribute is: dir='l'
 		'effectPushDown':  { tag: 'p:push', attrNames: ['dir'], attrValues: ['d'] },
@@ -4764,24 +4763,12 @@
 		'effectRandomBarsHorizontal': { tag: 'p:randomBar', attrNames: ['dir'], attrValues: ['horz'] },
 		'effectRandomBarsVertical':   { tag: 'p:randomBar', attrNames: ['dir'], attrValues: ['vert'] },
 
-		// Default 'p14:reveal' effect attribute is: thruBlk='0', dir='l'
-		'effectRevealBlackLeft':   { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['1', 'l'] },
-		'effectRevealBlackRight':  { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['1', 'r'] },
-		'effectRevealSmoothLeft':  { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['0', 'l'] },
-		'effectRevealSmoothRight': { tag: 'p14:reveal', attrNames: ['thruBlk', 'dir'], attrValues: ['0', 'r'] },
-
 		// Default 'p14:ripple' effect attribute is: dir='center'
 		'effectRippleCenter':    { tag: 'p14:ripple', attrNames: ['dir'], attrValues: ['center'] },
 		'effectRippleLeftDown':  { tag: 'p14:ripple', attrNames: ['dir'], attrValues: ['ld'] },
 		'effectRippleLeftUp':    { tag: 'p14:ripple', attrNames: ['dir'], attrValues: ['lu'] },
 		'effectRippleRightDown': { tag: 'p14:ripple', attrNames: ['dir'], attrValues: ['rd'] },
 		'effectRippleRightUp':   { tag: 'p14:ripple', attrNames: ['dir'], attrValues: ['ru'] },
-
-		// Default 'p14:shred' effect attribute is: pattern='strip', dir='in'
-		'effectShredRectangleIn':  { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['rectangle', 'in'] },
-		'effectShredRectangleOut': { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['rectangle', 'out'] },
-		'effectShredStripsIn':     { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['strip', 'in'] },
-		'effectShredStripsOut':    { tag: 'p14:shred', attrNames: ['pattern', 'dir'], attrValues: ['strip', 'out'] },
 
 		// Default 'p:split' effect attribute is: orient='horz', dir='out'
 		'effectSplitHorizontalIn':  { tag: 'p:split', attrNames: ['orient', 'dir'], attrValues: ['horz', 'in'] },
@@ -4801,10 +4788,10 @@
 
 		// Default 'p14:switch' effect attribute is: dir='l'
 		// Attribute must be specified explicitly - <p14:switch/> without 'dir' attribute is forbidden
-		'effectSwitchDown':  { tag: 'p14:switch', attrNames: ['dir'], attrValues: ['r'] },
+		'effectSwitchDown':  { tag: 'p14:switch', attrNames: ['dir'], attrValues: ['d'] },
 		'effectSwitchLeft':  { tag: 'p14:switch', attrNames: ['dir'], attrValues: ['l'] },
 		'effectSwitchRight': { tag: 'p14:switch', attrNames: ['dir'], attrValues: ['r'] },
-		'effectSwitchUp':    { tag: 'p14:switch', attrNames: ['dir'], attrValues: ['r'] },
+		'effectSwitchUp':    { tag: 'p14:switch', attrNames: ['dir'], attrValues: ['u'] },
 
 		// Default 'p:pull' effect attribute is: dir='l'
 		'effectUncoverDown':      { tag: 'p:pull', attrNames: ['dir'], attrValues: ['d'] },
@@ -4961,7 +4948,7 @@
 
 		if (entryEffectName === 'effectNone') {
 			this.Transition.TransitionType = c_oAscSlideTransitionTypes.None;
-			this.TransitionOption = -1;
+			this.Transition.TransitionOption = -1;
 			return true;
 		}
 
@@ -6306,7 +6293,7 @@
     ApiDrawing.prototype.Copy = function()
     {
         if (this.Drawing)
-            return new ApiDrawing(this.Drawing.copy());
+            return new this.constructor(this.Drawing.copy());
 
         return null;
     };
@@ -6486,23 +6473,6 @@
 		if (name === "" || name === null || name === undefined)
 			return false;
 
-        let drawings = [];
-		let oPresentation = Api.GetPresentation();
-        oPresentation.GetAllSlides().forEach(function (oSource) {
-			oSource.GetAllDrawings().forEach(function (oObject) {
-				drawings.push(oObject);
-			});
-		})
-
-		for (let nCount = 0; nCount < drawings.length; nCount++)
-		{
-			let drawing = drawings[nCount];
-			if (drawing.Drawing.getOwnName() === name)
-			{
-				drawing.Drawing.setName("");
-				break;
-			}
-		}
 		this.Drawing.setName(name);
 		return true;
 	};
@@ -6804,8 +6774,10 @@
 		let slide = this.Drawing.parent;
 		if (!slide || !slide.graphicObjects) return false;
 
+		let oldSpPr = oDrawing.Drawing.spPr;
+
 		slide.replaceSp(this.Drawing, oDrawing.Drawing);
-        
+
 		oDrawing.Drawing.setSpPr(this.Drawing.spPr.createDuplicate());
         if(oDrawing.GetClassType() === "table")
         {
@@ -6827,6 +6799,11 @@
             xfrm.setOffY(this.GetPosY() / 36000);
             xfrm.setExtX(this.GetWidth() / 36000);
             xfrm.setExtY(this.GetHeight() / 36000);
+            if (oldSpPr)
+            {
+                oDrawing.Drawing.spPr.setFill(oldSpPr.Fill ? oldSpPr.Fill.createDuplicate() : null);
+                oDrawing.Drawing.spPr.setLn(oldSpPr.ln ? oldSpPr.ln.createDuplicate() : null);
+            }
             oDrawing.Drawing.recalculate();
         }
         return true;
@@ -6837,7 +6814,7 @@
 	 * @memberof ApiDrawing
 	 * @typeofeditors ["CPE"]
 	 * @returns {string}
-	 * @see office-js-api/Examples/{Editor}/ApiDocumentContent/Methods/GetInternalId.js
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetInternalId.js
 	 */
 	ApiDrawing.prototype.GetInternalId = function() {
 		return this.Drawing.GetId();
@@ -7706,6 +7683,76 @@
 	};
 
 	/**
+	 * Sets the width of the specified column in the current table.
+	 *
+	 * @memberof ApiTable
+	 * @typeofeditors ["CPE"]
+	 *
+	 * @param {number} columnIndex - The zero-based column index.
+	 * @param {EMU} width - The column width measured in English measure units.
+	 * @returns {EMU | null} - Returns the actual column width set (in EMU), or null if the column index is invalid.
+	 *
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/SetColumnWidth.js
+	 */
+	ApiTable.prototype.SetColumnWidth = function (columnIndex, width) {
+		const table = this.Table;
+		if (!table || columnIndex < 0 || columnIndex >= table.TableGrid.length) {
+			return null;
+		}
+
+		const colsMinWidth = table.GetMinWidth(true);
+		const minWidth = colsMinWidth[columnIndex] || 1;
+		const widthMM = Math.max(private_EMU2MM(width), minWidth);
+
+		const newGrid = table.TableGrid.slice();
+		newGrid[columnIndex] = widthMM;
+		table.SetTableGrid(newGrid);
+
+		const rowsCount = table.GetRowsCount();
+		for (let rowIndex = 0; rowIndex < rowsCount; rowIndex++) {
+			const row = table.GetRow(rowIndex);
+			let gridColumnIndex = row.GetBefore().Grid;
+
+			const cellsCount = row.GetCellsCount();
+			for (let cellIndex = 0; cellIndex < cellsCount; cellIndex++) {
+				const cell = row.GetCell(cellIndex);
+				const gridSpan = cell.GetGridSpan();
+
+				if (gridColumnIndex <= columnIndex && columnIndex < gridColumnIndex + gridSpan) {
+					const spanWidth = table.GetSpanWidth(gridColumnIndex, gridSpan);
+					cell.SetW(new CTableMeasurement(tblwidth_Mm, spanWidth));
+				}
+
+				gridColumnIndex += gridSpan;
+			}
+		}
+
+		return private_MM2EMU(widthMM);
+	};
+
+	/**
+	 * Returns the width of the specified column (by index) of the current table.
+	 *
+	 * @memberof ApiTable
+	 * @typeofeditors ["CPE"]
+	 *
+	 * @param {number} columnIndex - The zero-based column index.
+	 * @returns {EMU | null}
+	 *
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiTable/Methods/GetColumnWidth.js
+	 */
+	ApiTable.prototype.GetColumnWidth = function (columnIndex) {
+		const table = this.Table;
+		const isValidIndex = table && columnIndex >= 0 && columnIndex < table.TableGrid.length;
+		if (isValidIndex) {
+			return private_MM2EMU(table.TableGrid[columnIndex]);
+		}
+		return null;
+	};
+
+	/**
 	 * Converts the ApiTable object into the JSON object.
 	 * @memberof ApiTable
 	 * @typeofeditors ["CPE"]
@@ -7727,6 +7774,7 @@
     // ApiTableRow
     //
     //------------------------------------------------------------------------------------------------------------------
+
     /**
      * Returns the type of the ApiTableRow class.
      * @memberof ApiTableRow
@@ -7738,6 +7786,7 @@
     {
         return "tableRow";
     };
+
     /**
      * Returns a number of cells in the current row.
      * @memberof ApiTableRow
@@ -7749,6 +7798,7 @@
     {
         return this.Row.Content.length;
     };
+
     /**
      * Returns a cell by its position in the current row.
      * @memberof ApiTableRow
@@ -7765,39 +7815,52 @@
         return new ApiTableCell(this.Row.Content[nPos]);
     };
 
-
-    /**
-     * Sets the height to the current table row.
-     * @memberof ApiTableRow
-     * @typeofeditors ["CPE"]
-     * @param {EMU} [nValue] - The row height in English measure units.
-     * @see office-js-api/Examples/{Editor}/ApiTableRow/Methods/SetHeight.js
+	/**
+	 * Sets the height to the current table row.
+	 *
+	 * @memberof ApiTableRow
+	 * @typeofeditors ["CPE"]
+	 *
+	 * @param {EMU} [nValue] - The row height in English measure units.
+	 * @returns {EMU | null}
+	 * 
+	 * @since 5.1.0
+	 * @see office-js-api/Examples/{Editor}/ApiTableRow/Methods/SetHeight.js
 	 */
-    ApiTableRow.prototype.SetHeight = function(nValue)
-    {
-        var fMaxTopMargin = 0, fMaxBottomMargin = 0, fMaxTopBorder = 0, fMaxBottomBorder = 0;
+	ApiTableRow.prototype.SetHeight = function (nValue) {
+		const heightMM = Math.max(0, nValue / 36000);
+		const horizontalLineRule = Asc.linerule_AtLeast;
+		this.Row.Set_Height(heightMM, horizontalLineRule);
+		return private_MM2EMU(heightMM);
+	};
 
-        for (var i = 0;  i < this.Row.Content.length; ++i){
-            var oCell = this.Row.Content[i];
-            var oMargins = oCell.GetMargins();
-            if(oMargins.Bottom.W > fMaxBottomMargin){
-                fMaxBottomMargin = oMargins.Bottom.W;
-            }
-            if(oMargins.Top.W > fMaxTopMargin){
-                fMaxTopMargin = oMargins.Top.W;
-            }
-            var oBorders = oCell.Get_Borders();
-            if(oBorders.Top.Size > fMaxTopBorder){
-                fMaxTopBorder = oBorders.Top.Size;
-            }
-            if(oBorders.Bottom.Size > fMaxBottomBorder){
-                fMaxBottomBorder = oBorders.Bottom.Size;
-            }
-        }
-        this.Row.Set_Height(Math.max(1, nValue/36000 - fMaxTopMargin - fMaxBottomMargin - fMaxTopBorder/2 - fMaxBottomBorder/2), Asc.linerule_AtLeast);
-    };
+	/**
+	 * Returns the height of the current table row.
+	 *
+	 * @memberof ApiTableRow
+	 * @typeofeditors ["CPE"]
+	 *
+	 * @returns {EMU | null}
+	 *
+	 * @since 9.4.0
+	 * @see office-js-api/Examples/{Editor}/ApiTableRow/Methods/GetHeight.js
+	 */
+	ApiTableRow.prototype.GetHeight = function () {
+		const table = this.Row.Table;
+		if (!table || !table.Parent) {
+			return null;
+		}
 
+		table.Parent.recalculateTable();
+		table.Parent.recalculateSizes();
 
+		const rowInfo = table.RowsInfo[this.Row.Index];
+		if (!rowInfo || !rowInfo.H[0]) {
+			return null;
+		}
+
+		return private_MM2EMU(rowInfo.H[0]);
+	};
 
     //------------------------------------------------------------------------------------------------------------------
     //
@@ -8113,6 +8176,53 @@
             oPr.TextDirection = textdirection_BTLR;
         this.Cell.Set_Pr(oPr);
     };
+    /**
+     * Appends text to the end of the cell content.
+     * @memberof ApiTableCell
+     * @typeofeditors ["CPE"]
+     * @param {string} text - The text to append.
+     * @returns {ApiRun}
+     * @since 9.4.0
+     * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/AddText.js
+     */
+    ApiTableCell.prototype.AddText = function(text)
+    {
+        return this.GetContent().AddText(text);
+    };
+    /**
+     * Returns the inner text of the current table cell.
+     * @memberof ApiTableCell
+     * @typeofeditors ["CPE"]
+     * @param {object} [pr] - Options for formatting the returned text.
+     * @param {boolean} [pr.Numbering=true] - Defines if the resulting string will include numbering or not.
+     * @param {boolean} [pr.Math=true] - Defines if the resulting string will include mathematical expressions or not.
+     * @param {string} [pr.TableCellSeparator='\t'] - Defines how the table cell separator will be specified in the resulting string.
+     * @param {string} [pr.TableRowSeparator='\r\n'] - Defines how the table row separator will be specified in the resulting string.
+     * @param {string} [pr.ParaSeparator='\r\n'] - Defines how the paragraph separator will be specified in the resulting string.
+     * @param {string} [pr.TabSymbol='\t'] - Defines how the tab will be specified in the resulting string.
+     * @param {string} [pr.NewLineSeparator='\r'] - Defines how the line separator will be specified in the resulting string.
+     * @return {string}
+     * @since 9.4.0
+     * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/GetText.js
+     */
+    ApiTableCell.prototype.GetText = function(pr)
+    {
+        return this.GetContent().GetText(pr);
+    };
+    /**
+     * Replaces all content of the current table cell with the specified text,
+     * preserving the formatting of the first paragraph.
+     * @memberof ApiTableCell
+     * @typeofeditors ["CPE"]
+     * @param {string} text - The text to set.
+     * @return {ApiRun}
+     * @since 9.4.0
+     * @see office-js-api/Examples/{Editor}/ApiTableCell/Methods/SetText.js
+     */
+    ApiTableCell.prototype.SetText = function(text)
+    {
+        return this.GetContent().SetText(text);
+    };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Export
@@ -8148,6 +8258,7 @@
     ApiPresentation.prototype["GetClassType"]             = ApiPresentation.prototype.GetClassType;
     ApiPresentation.prototype["GetCurSlideIndex"]         = ApiPresentation.prototype.GetCurSlideIndex;
     ApiPresentation.prototype["GetSlideByIndex"]          = ApiPresentation.prototype.GetSlideByIndex;
+    ApiPresentation.prototype["GetSlide"]                 = ApiPresentation.prototype.GetSlide;
     ApiPresentation.prototype["GetCurrentSlide"]          = ApiPresentation.prototype.GetCurrentSlide;
     ApiPresentation.prototype["GetCurrentVisibleSlide"]   = ApiPresentation.prototype.GetCurrentVisibleSlide;
     ApiPresentation.prototype["AddSlide"]                 = ApiPresentation.prototype.AddSlide;
@@ -8479,12 +8590,15 @@
     ApiTable.prototype["RemoveColumn"]                    = ApiTable.prototype.RemoveColumn;
     ApiTable.prototype["SetShd"]                          = ApiTable.prototype.SetShd;
 	ApiTable.prototype["SetSize"]                         = ApiTable.prototype.SetSize;
-    ApiTable.prototype["ToJSON"]    				      = ApiTable.prototype.ToJSON;
+	ApiTable.prototype["SetColumnWidth"]                  = ApiTable.prototype.SetColumnWidth;
+	ApiTable.prototype["GetColumnWidth"]                  = ApiTable.prototype.GetColumnWidth;
+	ApiTable.prototype["ToJSON"]                          = ApiTable.prototype.ToJSON;
 
     ApiTableRow.prototype["GetClassType"]                 = ApiTableRow.prototype.GetClassType;
     ApiTableRow.prototype["GetCellsCount"]                = ApiTableRow.prototype.GetCellsCount;
     ApiTableRow.prototype["GetCell"]                      = ApiTableRow.prototype.GetCell;
     ApiTableRow.prototype["SetHeight"]                    = ApiTableRow.prototype.SetHeight;
+    ApiTableRow.prototype["GetHeight"]                    = ApiTableRow.prototype.GetHeight;
 
     ApiTableCell.prototype["GetClassType"]                = ApiTableCell.prototype.GetClassType;
     ApiTableCell.prototype["GetContent"]                  = ApiTableCell.prototype.GetContent;
@@ -8499,6 +8613,9 @@
     ApiTableCell.prototype["SetCellBorderTop"]            = ApiTableCell.prototype.SetCellBorderTop;
     ApiTableCell.prototype["SetVerticalAlign"]            = ApiTableCell.prototype.SetVerticalAlign;
     ApiTableCell.prototype["SetTextDirection"]            = ApiTableCell.prototype.SetTextDirection;
+    ApiTableCell.prototype["AddText"]                     = ApiTableCell.prototype.AddText;
+    ApiTableCell.prototype["GetText"]                     = ApiTableCell.prototype.GetText;
+    ApiTableCell.prototype["SetText"]                     = ApiTableCell.prototype.SetText;
 
     Api.private_CreateApiSlide = function(oSlide){
         return new ApiSlide(oSlide);
@@ -8903,8 +9020,17 @@
 	window['AscBuilder'] = window['AscBuilder'] || {};
 	
 	window['AscBuilder']["Slide"] = window['AscBuilder'].Slide = window['AscBuilder'].Slide || {};
-	AscBuilder.Slide["Api"] = AscBuilder.Slide.Api = Api;
-	
+	AscBuilder.Slide["Api"]              = AscBuilder.Slide.Api              = Api;
+	AscBuilder.Slide["ApiPresentation"]  = AscBuilder.Slide.ApiPresentation  = ApiPresentation;
+	AscBuilder.Slide["ApiDrawing"]       = AscBuilder.Slide.ApiDrawing       = ApiDrawing;
+	AscBuilder.Slide["ApiShape"]         = AscBuilder.Slide.ApiShape         = ApiShape;
+	AscBuilder.Slide["ApiImage"]         = AscBuilder.Slide.ApiImage         = ApiImage;
+	AscBuilder.Slide["ApiGroup"]         = AscBuilder.Slide.ApiGroup         = ApiGroup;
+	AscBuilder.Slide["ApiSmartArt"]      = AscBuilder.Slide.ApiSmartArt      = ApiSmartArt;
+	AscBuilder.Slide["ApiOleObject"]     = AscBuilder.Slide.ApiOleObject     = ApiOleObject;
+	AscBuilder.Slide["ApiTable"]         = AscBuilder.Slide.ApiTable         = ApiTable;
+	AscBuilder.Slide["ApiChart"]         = AscBuilder.Slide.ApiChart         = ApiChart;
+
 	AscBuilder.Slide.init = function()
 	{
 		AscBuilder.ApiDrawing   = ApiDrawing;
