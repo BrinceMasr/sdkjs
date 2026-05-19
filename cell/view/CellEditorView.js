@@ -1138,13 +1138,22 @@ function (window, undefined) {
 
 					let depth = 0, depthAtMin = 0, depthChangedWithin = false;
 					for (let i = 1; i < selMax; i++) {
-						if (i === selMin) depthAtMin = depth;
+						if (i === selMin) {
+							depthAtMin = depth;
+						}
 						const ch = s.charAt(i);
-						if (ch === '(') depth++;
-						else if (ch === ')') depth--;
-						if (i >= selMin && depth !== depthAtMin) depthChangedWithin = true;
+						if (ch === '(') {
+							depth++;
+						} else if (ch === ')') {
+							depth--;
+						}
+						if (i >= selMin && depth !== depthAtMin) {
+							depthChangedWithin = true;
+						}
 					}
-					if (selMin >= selMax) depthAtMin = depth;
+					if (selMin >= selMax) {
+						depthAtMin = depth;
+					}
 					const depthAtMax = depth;
 					const isValidDepth = depthAtMin === depthAtMax && (depthAtMin === 0 || !depthChangedWithin);
 
@@ -1155,7 +1164,7 @@ function (window, undefined) {
 						if (fullyContained.length > 0) {
 							const lastEnd = lastOverlapping.cursorePos + lastOverlapping.formulaRangeLength;
 							let displaySelMin = selMin;
-							while (displaySelMin > 1 && /[A-Za-z0-9_]/.test(s.charAt(displaySelMin - 1))) {
+							while (displaySelMin > 1 && !this.reNotFormula.test(s.charAt(displaySelMin - 1))) {
 								displaySelMin--;
 							}
 							return {
