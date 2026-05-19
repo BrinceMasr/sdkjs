@@ -209,6 +209,33 @@
     ApiTable.prototype = Object.create(ApiDrawing.prototype);
     ApiTable.prototype.constructor = ApiTable;
 
+    function GetApiDrawing(drawing) {
+        switch (drawing.getObjectType()) {
+            case AscDFH.historyitem_type_Shape:
+                return new ApiShape(drawing);
+            case AscDFH.historyitem_type_ImageShape:
+                return new ApiImage(drawing);
+            case AscDFH.historyitem_type_GroupShape:
+                return new ApiGroup(drawing);
+            case AscDFH.historyitem_type_SmartArt:
+                return new ApiSmartArt(drawing);
+            case AscDFH.historyitem_type_OleObject:
+                return new ApiOleObject(drawing);
+            case AscDFH.historyitem_type_GraphicFrame:
+                return new ApiTable(drawing);
+            case AscDFH.historyitem_type_ChartSpace:
+                return new ApiChart(drawing);
+            default:
+                return new ApiDrawing(drawing);
+        }
+    }
+
+    function GetApiDrawings(drawingObjects) {
+        return drawingObjects.map(function(drawing) {
+            return GetApiDrawing(drawing);
+        }).filter(Boolean);
+    }
+
     /**
      * Class representing a table row.
      * @param oTableRow
@@ -2445,7 +2472,7 @@
         }
 
         let drawingObjects = this.Master.cSld.spTree;
-        return AscBuilder.GetApiDrawings(drawingObjects);
+        return GetApiDrawings(drawingObjects);
     };
 
     /**
@@ -2873,7 +2900,7 @@
         }
 
         let drawingObjects = this.Layout.cSld.spTree;
-        return AscBuilder.GetApiDrawings(drawingObjects);
+        return GetApiDrawings(drawingObjects);
     };
 
     /**
@@ -4268,7 +4295,7 @@
         }
 
         let drawingObjects = this.Slide.getDrawingObjects();
-        return AscBuilder.GetApiDrawings(drawingObjects);
+        return GetApiDrawings(drawingObjects);
     };
 
     /**
