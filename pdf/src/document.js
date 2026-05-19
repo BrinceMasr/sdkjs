@@ -3387,6 +3387,8 @@ var CPresentation = CPresentation || function(){};
         if (!oPagesInfo)
             return false;
 
+		this.BlurActiveObject();
+		
         let sFieldName = oField.GetFullName();
         let oExistsField = this.GetField(sFieldName);
         if (oExistsField) {

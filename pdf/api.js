@@ -2172,13 +2172,15 @@
 	// fields common
 	PDFEditorApi.prototype.SetFieldName = function(sName) {
 		let oDoc = this.getPDFDoc();
-		
+		let oController = oDoc.GetController();
+
 		return oDoc.DoAction(function() {
-			let oField = oDoc.activeForm;
-			if (!oField) {
-				return false;
-			}
-			return oField.SetName(sName);
+			oController.selectedObjects.forEach(function(shape) {
+				let field = shape.GetEditField();
+				field.SetName(sName);
+			});
+
+			return true;
 		}, AscDFH.historydescription_Pdf_ChangeField, this);
 	};
 	PDFEditorApi.prototype.GetAllFieldsNames = function() {
@@ -2599,55 +2601,77 @@
 	// baselist field
 	PDFEditorApi.prototype.AddListFieldOption = function(option, nPos) {
 		let oDoc = this.getPDFDoc();
+		let oController = oDoc.GetController();
 
 		return oDoc.DoAction(function() {
-			let oField = oDoc.activeForm;
-			if (!oField) {
-				return false;
-			}
-			if (oField && [AscPDF.FIELD_TYPES.combobox, AscPDF.FIELD_TYPES.listbox].includes(oField.GetType())) {
-				oField.AddOption(option, nPos);
-			}
+			const doneNames = {};
+			oController.selectedObjects.forEach(function(shape) {
+				let field = shape.GetEditField();
+				if ([AscPDF.FIELD_TYPES.combobox, AscPDF.FIELD_TYPES.listbox].includes(field.GetType())) {
+					let fullName = field.GetFullName();
+					if (doneNames[fullName]) {
+						return;
+					}
+
+					field.AddOption(option, nPos);
+					doneNames[fullName] = true;
+				}
+			});
 
 			return true;
 		}, AscDFH.historydescription_Pdf_AddField, this);
 	};
 	PDFEditorApi.prototype.RemoveListFieldOption = function(nPos) {
 		let oDoc = this.getPDFDoc();
+		let oController = oDoc.GetController();
 
 		return oDoc.DoAction(function() {
-			let oField = oDoc.activeForm;
-			if (!oField) {
-				return false;
-			}
-			if (oField && [AscPDF.FIELD_TYPES.combobox, AscPDF.FIELD_TYPES.listbox].includes(oField.GetType())) {
-				oField.RemoveOption(nPos);
-			}
+			const doneNames = {};
+			oController.selectedObjects.forEach(function(shape) {
+				let field = shape.GetEditField();
+				if ([AscPDF.FIELD_TYPES.combobox, AscPDF.FIELD_TYPES.listbox].includes(field.GetType())) {
+					let fullName = field.GetFullName();
+					if (doneNames[fullName]) {
+						return;
+					}
+
+					field.RemoveOption(nPos);
+					doneNames[fullName] = true;
+				}
+			});
 
 			return true;
 		}, AscDFH.historydescription_Pdf_AddField, this);
 	};
 	PDFEditorApi.prototype.MoveListFieldOption = function(nPos, bUp) {
 		let oDoc = this.getPDFDoc();
+		let oController = oDoc.GetController();
 
 		return oDoc.DoAction(function() {
-			let oField = oDoc.activeForm;
-			if (!oField) {
-				return false;
-			}
+			const doneNames = {};
+			oController.selectedObjects.forEach(function(shape) {
+				let field = shape.GetEditField();
+				if ([AscPDF.FIELD_TYPES.combobox, AscPDF.FIELD_TYPES.listbox].includes(field.GetType())) {
+					if (field && [AscPDF.FIELD_TYPES.combobox, AscPDF.FIELD_TYPES.listbox].includes(field.GetType())) {
+						let fullName = field.GetFullName();
+						if (doneNames[fullName]) {
+							return;
+						}
 
-			let aOptions = oField.GetOptions();
-			if (bUp && nPos == 0) {
-				return false;
-			}
-			else if (!bUp && nPos == aOptions.length -1) {
-				return false;
-			}
+						let aOptions = field.GetOptions();
+						if (bUp && nPos == 0) {
+							return false;
+						}
+						else if (!bUp && nPos == aOptions.length -1) {
+							return false;
+						}
 
-			if (oField && [AscPDF.FIELD_TYPES.combobox, AscPDF.FIELD_TYPES.listbox].includes(oField.GetType())) {
-				let opt = oField.RemoveOption(nPos);
-				oField.AddOption(opt, bUp ? nPos - 1 : nPos + 1)
-			}
+						let opt = field.RemoveOption(nPos);
+						field.AddOption(opt, bUp ? nPos - 1 : nPos + 1);
+						doneNames[fullName] = true;
+					}
+				}
+			});
 
 			return true;
 		}, AscDFH.historydescription_Pdf_AddField, this);

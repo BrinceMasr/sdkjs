@@ -430,6 +430,7 @@
 
         this._kids.push(oField);
         oField._parent = this;
+		oField.SetNeedUpdateEditShape(true);
 
         if (false == Asc.editor.getDocumentRenderer().IsOpenFormsInProgress) {
             if (oField.IsWidget()) {
@@ -458,6 +459,7 @@
         if (nIndex != -1) {
             this._kids.splice(nIndex, 1);
             AscCommon.History.Add(new CChangesPDFFormKidsContent(this, nIndex, [oField], false))
+			oField.SetNeedUpdateEditShape(true);
             oField._parent = null;
             return true;
         }
