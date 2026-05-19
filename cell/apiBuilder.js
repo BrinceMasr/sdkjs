@@ -29915,6 +29915,7 @@
 	AscBuilder.Cell["ApiPivotDataField"]         = AscBuilder.Cell.ApiPivotDataField         = ApiPivotDataField;
 	AscBuilder.Cell["ApiPivotItem"]              = AscBuilder.Cell.ApiPivotItem              = ApiPivotItem;
 	AscBuilder.Cell["ApiPivotFilters"]           = AscBuilder.Cell.ApiPivotFilters           = ApiPivotFilters;
+	AscBuilder.Cell["ApiWorkbook"]               = AscBuilder.Cell.ApiWorkbook               = ApiWorkbook;
 	AscBuilder.Cell["ApiHyperlink"]              = AscBuilder.Cell.ApiHyperlink              = ApiHyperlink;
 
 	AscBuilder.Cell.init = function()
