@@ -64,7 +64,7 @@ $(function()
 	AscTest.JsApi.CreateStroke = AscBuilder.Slide.Api.CreateStroke.bind(AscTest.Editor);
 	AscTest.JsApi.CreateGradientStop = AscBuilder.Slide.Api.CreateGradientStop.bind(AscTest.Editor);
 
-	AscTest.JsApi.CreateRGBColor = AscBuilder.Word.Api.RGB.bind(AscTest.Editor);
+	AscTest.JsApi.CreateRGBColor = AscBuilder.Slide.Api.CreateRGBColor.bind(AscTest.Editor);
 	AscTest.JsApi.CreateSchemeColor = AscBuilder.Slide.Api.CreateSchemeColor.bind(AscTest.Editor);
 	AscTest.JsApi.CreatePresetColor = AscBuilder.Slide.Api.CreatePresetColor.bind(AscTest.Editor);
 

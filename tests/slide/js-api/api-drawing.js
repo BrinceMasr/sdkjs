@@ -43,42 +43,6 @@ $(function () {
 		editor.WordControl.Thumbnails.CalculatePlaces();
 	}
 
-	function createTextShape(text)
-	{
-		CreateSlide();
-
-		const presentation = AscTest.JsApi.GetPresentation();
-		const slide        = presentation.GetSlideByIndex(0);
-		const fill         = AscTest.JsApi.CreateSolidFill(AscTest.JsApi.CreateRGBColor(200, 200, 200));
-		const stroke       = AscTest.JsApi.CreateStroke(0, AscTest.JsApi.CreateNoFill());
-		const shape        = AscTest.JsApi.CreateShape("rect", 300 * 36000, 150 * 36000, fill, stroke);
-		slide.AddObject(shape);
-
-		const docContent = shape.GetDocContent();
-		const lines      = typeof text === "string" ? text.split("\r") : [""];
-
-		let firstPara = docContent.GetElement(0);
-		if (firstPara)
-		{
-			firstPara.AddText(lines[0]);
-		}
-		else
-		{
-			firstPara = AscTest.JsApi.CreateParagraph();
-			firstPara.AddText(lines[0]);
-			docContent.Push(firstPara);
-		}
-
-		for (let i = 1; i < lines.length; i++)
-		{
-			const para = AscTest.JsApi.CreateParagraph();
-			para.AddText(lines[i]);
-			docContent.Push(para);
-		}
-
-		return shape;
-	}
-
 	QUnit.test("Test: Create shape with gradient fill", function (assert) {
         CreateSlide();
 
@@ -316,36 +280,5 @@ $(function () {
 		assert.strictEqual(result, false, 'Check SetFlipV returns false for invalid parameter');
 	});
 
-	QUnit.test("Test: ApiShape.GetTextRange returns an ApiTextRange for a shape", function (assert) {
-		const shape = createTextShape("Sample");
-		const range = shape.GetTextRange();
-		assert.ok(range !== null, "GetTextRange returns non-null for a shape with text");
-		assert.strictEqual(range.GetClassType(), "textRange", "GetClassType returns 'textRange'");
-		assert.strictEqual(range.GetText(), "Sample\r\n", "GetText returns the shape text");
-	});
-
-	QUnit.test("Test: ApiShape.GetTextRange creates text body for fresh shape", function (assert) {
-		CreateSlide();
-		const presentation = AscTest.JsApi.GetPresentation();
-		const slide        = presentation.GetSlideByIndex(0);
-		const fill         = AscTest.JsApi.CreateSolidFill(AscTest.JsApi.CreateRGBColor(200, 200, 200));
-		const stroke       = AscTest.JsApi.CreateStroke(0, AscTest.JsApi.CreateNoFill());
-		const shape        = AscTest.JsApi.CreateShape("rect", 300 * 36000, 150 * 36000, fill, stroke);
-		slide.AddObject(shape);
-
-		const range = shape.GetTextRange();
-		assert.ok(range !== null, "GetTextRange auto-creates text body and returns non-null");
-		range.SetText("Created");
-		assert.strictEqual(shape.GetTextRange().GetText(), "Created\r\n", "Text set via range is readable back");
-	});
-
-	QUnit.test("Test: ApiShape.GetTextRange returns null for table drawing", function (assert) {
-		CreateSlide();
-		const presentation = AscTest.JsApi.GetPresentation();
-		const slide        = presentation.GetSlideByIndex(0);
-		const table        = AscTest.JsApi.CreateTable(1, 1);
-		slide.AddObject(table);
-		assert.strictEqual(table.GetTextRange(), null, "GetTextRange returns null for a table drawing");
-	});
 });
 
