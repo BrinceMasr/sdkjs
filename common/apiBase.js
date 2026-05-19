@@ -1963,6 +1963,7 @@
 		this.CoAuthoringApi.onSetIndexUser            = function(e)
 		{
 			AscCommon.g_oIdCounter.Set_UserId('' + e);
+			AscCommon.g_oDrawingIdAllocator.setUserIndex(e);
 		};
 		this.CoAuthoringApi.onFirstLoadChangesEnd     = function(openedAt)
 		{
