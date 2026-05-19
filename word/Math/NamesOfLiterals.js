@@ -7207,14 +7207,6 @@
 							end: oTempStartPos
 						}
 					}
-					else if (oEndPos.GetType() === MathLiterals.divide.id)
-					{
-						oEndPos.IncreasePosition();
-						return {
-							start: oEndPos,
-							end: oTempStartPos
-						}
-					}
 					else if (oEndPos.GetType() === MathLiterals.subSup.id && !isNary) // если _ или ^, то прерываемся
 					{
 						if (isSubSup)
