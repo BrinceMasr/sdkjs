@@ -16171,7 +16171,7 @@ Paragraph.prototype.UpdatePresentationOutline = function () {
 	{
 		return;
 	}
-	const outlineView = this.LogicDocument.GetOutlineView();
+	const outlineView = this.LogicDocument.GetOutlineView && this.LogicDocument.GetOutlineView();
 	if (outlineView)
 	{
 		outlineView.checkParagraph(this);
