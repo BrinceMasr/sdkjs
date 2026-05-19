@@ -1462,7 +1462,7 @@
 			oPageInfo.fields.forEach(function(widget) {
 				let oParent = widget.GetParent();
 				
-				if (oParent && oParent.IsAllKidsWidgets()) {
+				if (oParent && oParent.IsLogicalParent()) {
 					if (!aFields.includes(oParent)) {
 						aFields.push(oParent);
 					}
@@ -1489,11 +1489,11 @@
 			return null;
 
 		if (!oField.IsWidget()) {
-			return oField.IsAllKidsWidgets() ? GetFieldApi(oField) : null;
+			return oField.IsLogicalParent() ? GetFieldApi(oField) : null;
 		}
 
 		let oParent = oField.GetParent();
-		if (oParent && oParent.IsAllKidsWidgets()) {
+		if (oParent && oParent.IsLogicalParent()) {
 			return GetFieldApi(oParent);
 		}
 

@@ -739,7 +739,7 @@ var CPresentation = CPresentation || function(){};
             let oField = this.widgets[i];
             if ((oField.GetPartialName() == null || oField.GetParentValue(bInberitValue) == null) && oField.GetParent()) {
                 let oParent = oField.GetParent();
-                if (oParent.GetType() == AscPDF.FIELD_TYPES.radiobutton && oParent.IsAllKidsWidgets())
+                if (oParent.GetType() == AscPDF.FIELD_TYPES.radiobutton && oParent.IsLogicalParent())
                     aRadios.push(oParent);
 
                 value = oParent.GetParentValue(false);
@@ -751,7 +751,7 @@ var CPresentation = CPresentation || function(){};
                     oField.SetCurIdxs(oParent._currentValueIndexes);
                 }
                 else {
-                    if (oField.GetType() !== AscPDF.FIELD_TYPES.radiobutton && oParent.IsAllKidsWidgets())
+                    if (oField.GetType() !== AscPDF.FIELD_TYPES.radiobutton && oParent.IsLogicalParent())
                         oField.SetValue(value, true);
                 }
             }

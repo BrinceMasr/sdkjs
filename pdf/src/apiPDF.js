@@ -132,21 +132,29 @@
 	 * @typeofeditors ["PDF"]
 	 */
     Object.defineProperty(ApiBaseField.prototype, "borderStyle", {
-        set: function(sValue) {
-            if (Object.values(border).includes(sValue)) {
-                let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
-                aFields.forEach(function(field) {
-                    field.SetBorderStyle(private_GetIntBorderStyle(sValue));
-                });
-            }
-        },
+		set: function(sValue) {
+			if (this.field.IsLogicalParent()) {
+				if (Object.values(border).includes(sValue)) {
+					let aFields = this.field.GetAllWidgets();
+					aFields.forEach(function(field) {
+						field.SetBorderStyle(private_GetIntBorderStyle(sValue));
+					});
+				}
+				else {
+					throw Error("InvalidSetError: Set not possible, invalid value.");
+				}
+			}
+			else {
+				throw Error("InvalidSetError: The field has no child widgets.");
+			}
+		},
         get: function() {
             if (this.field.IsWidget())
                 return private_GetStrBorderStyle(this.field.GetBorderStyle());
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return private_GetStrBorderStyle(this.field.GetKid(0).GetBorderStyle());
             else
-                throw Error("InvalidGetError: Field is not a widget");
+                throw Error("InvalidGetError: The field has no child widgets.");
         }
 	});
 
@@ -160,27 +168,24 @@
 	 */
     Object.defineProperty(ApiBaseField.prototype, "defaultValue", {
         set: function(value) {
-            if (value && value.toString) {
-                value = value.toString();
-
-                if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
-                    this.field.SetDefaultValue(value);
-                }
-                else {
-                    throw Error("InvalidGetError: Field is not a widget");
-                }
-            }
+			if (this.field.IsLogicalParent()) {
+				if (value && value.toString) {
+					value = value.toString();
+					return this.field.SetDefaultValue(value);
+				}
+				else {
+					throw Error("InvalidSetError: Set not possible, invalid value.");
+				}
+			}
             else {
-                throw Error("InvalidSetError: Set not possible, invalid value.");
-            }
+				throw Error("InvalidSetError: The field has no child widgets.");
+			}
         },
         get: function() {
-            if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
+			if (this.field.IsLogicalParent())
                 return this.field.GetDefaultValue();
-            }
-            else {
-                throw Error("InvalidGetError: Field is not a widget");
-            }
+            else
+                throw Error("InvalidGetError: The field has no child widgets.");
         }
 	});
 
@@ -192,24 +197,28 @@
 	 */
     Object.defineProperty(ApiBaseField.prototype, "display", {
         set: function(nType) {
-            if (Object.values(display).includes(nType)) {
-                let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
-                aFields.forEach(function(field) {
-                    field.SetDisplay(nType);
-                });
-            }
+			if (this.field.IsLogicalParent()) {
+				if (Object.values(display).includes(nType)) {
+					let aFields = this.field.GetAllWidgets();
+					aFields.forEach(function(field) {
+						field.SetDisplay(nType);
+					});
+				}
+				else {
+					throw Error("InvalidSetError: Set not possible, invalid value.");
+				}
+			}
             else {
-                throw Error("InvalidSetError: Set not possible, invalid value.");
-            }
-           
+				throw Error("InvalidSetError: The field has no child widgets.");
+			}
         },
         get: function() {
             if (this.field.IsWidget())
                 return this.field.GetDisplay();
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return this.field.GetKid(0).GetDisplay();
             else
-                throw Error("InvalidGetError: Field is not a widget");
+                throw Error("InvalidGetError: The field has no child widgets.");
         }
 	});
 
@@ -221,23 +230,28 @@
 	 */
     Object.defineProperty(ApiBaseField.prototype, "hidden", {
         set: function(bValue) {
-            if (typeof bValue == "boolean") {
-                let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
-                aFields.forEach(function(field) {
-                    field.SetDisplay(bValue ? display["hidden"] : display["visible"]);
-                });
-            }
-            else {
-                throw Error("InvalidSetError: Set not possible, invalid value.");
-            }
+			if (this.field.IsLogicalParent()) {
+				if (typeof bValue == "boolean") {
+					let aFields = this.field.GetAllWidgets();
+					aFields.forEach(function(field) {
+						field.SetDisplay(bValue ? display["hidden"] : display["visible"]);
+					});
+				}
+				else {
+					throw Error("InvalidSetError: Set not possible, invalid value.");
+				}
+			}
+			else {
+				throw Error("InvalidSetError: The field has no child widgets.");
+			}
         },
         get: function() {
             if (this.field.IsWidget())
                 return this.field.GetDisplay() == display["hidden"];
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return this.field.GetKid(0).GetDisplay() == display["hidden"];
             else
-                throw Error("InvalidGetError: Field is not a widget");
+                throw Error("InvalidGetError: The field has no child widgets.");
         }
 	});
 
@@ -252,25 +266,29 @@
 	 */
     Object.defineProperty(ApiBaseField.prototype, "fillColor", {
         set: function(value) {
-            if (Array.isArray(value)) {
-                let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
-                let aColor  = private_correctApiColor(value).slice(1);
-                aFields.forEach(function(field) {
-                    field.SetBackgroundColor(aColor);
-                });
-            }
-            else {
-                throw Error("InvalidSetError: Set not possible, invalid value.");
-            }
-            
+			if (this.field.IsLogicalParent()) {
+				if (Array.isArray(value)) {
+					let aFields = this.field.GetAllWidgets();
+					let aColor  = private_correctApiColor(value).slice(1);
+					aFields.forEach(function(field) {
+						field.SetBackgroundColor(aColor);
+					});
+				}
+				else {
+					throw Error("InvalidSetError: Set not possible, invalid value.");
+				}
+			}
+			else {
+				throw Error("InvalidSetError: The field has no child widgets.");
+			}
         },
         get: function() {
             if (this.field.IsWidget())
                 return private_getApiColor(this.field.GetBackgroundColor());
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return private_getApiColor(this.field.GetKid(0).GetBackgroundColor());
             else
-                throw Error("InvalidGetError: Field is not a widget");
+                throw Error("InvalidGetError: The field has no child widgets.");
         }
 	});
 
@@ -319,22 +337,29 @@
 	 */
     Object.defineProperty(ApiBaseField.prototype, "lineWidth", {
         set: function(nValue) {
-            nValue = parseInt(nValue);
-            if (Object.values(LINE_WIDTH).includes(nValue)) {
-                let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
-                aFields.forEach(function(field) {
-                    field.SetBorderWidth(nValue);
-                });
-            }
-            else {
-                throw Error("InvalidSetError: Set not possible, invalid value.");
-            }
+			if (this.field.IsLogicalParent()) {
+				nValue = parseInt(nValue);
+				if (Object.values(LINE_WIDTH).includes(nValue)) {
+					let aFields = this.field.GetAllWidgets();
+					aFields.forEach(function(field) {
+						field.SetBorderWidth(nValue);
+					});
+				}
+				else {
+					throw Error("InvalidSetError: Set not possible, invalid value.");
+				}
+			}
+			else {
+				throw Error("InvalidSetError: The field has no child widgets.");
+			}
         },
         get: function() {
             if (this.field.IsWidget())
                 return this.field.GetBorderWidth();
+			else if (this.field.IsLogicalParent())
+                return this.field.GetKid(0).GetBorderWidth();
             else
-                throw Error("InvalidGetError: Field is not a widget");
+                throw Error("InvalidGetError: The field has no child widgets.");
         }
 	});
 
@@ -376,7 +401,7 @@
                 return this.field.GetPage();
             }
             else {
-                let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
+                let aFields = this.field.GetAllWidgets();
                 let aPages = aFields.map(function(field) {
                     return field.GetPage();
                 })
@@ -393,23 +418,23 @@
 	 */
     Object.defineProperty(ApiBaseField.prototype, "readonly", {
         set: function(bValue) {
-            if (typeof(bValue) == "boolean") {
-                let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
-                aFields.forEach(function(field) {
-                    field.SetReadOnly(bValue);
-                });
-            }
-            else {
-                throw Error("InvalidSetError: Set not possible, invalid value.");
-            }
+			if (this.field.IsLogicalParent()) {
+				if (typeof(bValue) == "boolean") {
+					return this.field.SetReadOnly(bValue);
+				}
+				else {
+					throw Error("InvalidSetError: Set not possible, invalid value.");
+				}
+			}
+			else {
+				throw Error("InvalidSetError: The field has no child widgets.");
+			}
         },
         get: function() {
-            if (this.field.IsWidget())
+			if (this.field.IsLogicalParent())
                 return this.field.IsReadOnly();
-            else if (this.field.IsAllKidsWidgets())
-                return this.field.GetKid(0).IsReadOnly();
             else
-                throw Error("InvalidGetError: Field is not a widget");
+                throw Error("InvalidGetError: The field has no child widgets.");
         }
 	});
 
@@ -421,28 +446,25 @@
 	 * @typeofeditors ["PDF"]
 	 */
     Object.defineProperty(ApiBaseField.prototype, "rect", {
-        // set: function(aRect) {
-        //     if (Array.isArray(aRect)) {
-        //         let isValidRect = true;
-        //         for (let i = 0; i < 4; i++) {
-        //             if (typeof(aRect[i]) != "number") {
-        //                 isValidRect = false;
-        //                 break;
-        //             }
-        //         }
-              
-        //         if (isValidRect) {
-                    
-        //         }
-        //     }
-        // },
+        set: function(aRect) {
+            if (!private_IsValidRect(aRect)) {
+				throw Error("InvalidSetError: Set not possible, invalid value.");
+			}
+
+			if (this.field.IsWidget())
+                return this.field.SetRect(aRect);
+            else if (this.field.IsLogicalParent())
+                return this.field.GetKid(0).SetRect(aRect);
+            else
+                throw Error("InvalidSetError: The field has no child widgets.");
+        },
         get: function() {
             if (this.field.IsWidget())
                 return this.field.GetRect();
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return this.field.GetKid(0).GetRect();
             else
-                throw Error("InvalidGetError: Field is not a widget");
+                throw Error("InvalidGetError: The field has no child widgets.");
         }
 	});
 
@@ -455,29 +477,28 @@
 	 */
     Object.defineProperty(ApiBaseField.prototype, "required", {
         set: function(bValue) {
-            if (typeof(bValue) == "boolean") {
-                if (this.field.GetType() == AscPDF.FIELD_TYPES.button) {
-                    throw Error("InvalidSetError: button field doesn't have 'required' prop.");
-                }
+			if (this.field.IsLogicalParent()) {
+				if (typeof(bValue) == "boolean") {
+					if (this.field.GetType() == AscPDF.FIELD_TYPES.button) {
+						throw Error("InvalidSetError: button field doesn't have 'required' prop.");
+					}
 
-                let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
-                aFields.forEach(function(field) {
-                    if (field.GetType() != AscPDF.FIELD_TYPES.button)
-                        field.SetRequired(bValue);
-                });
-            }
+					return this.field.SetRequired(bValue);
+				}
+				else {
+					throw Error("InvalidSetError: Set not possible, invalid value.");
+				}
+			}
             else {
-                throw Error("InvalidSetError: Set not possible, invalid value.");
-            }
+				throw Error("InvalidSetError: The field has no child widgets.");
+			}
         },
         get: function() {
             if (this.field.GetType() != AscPDF.FIELD_TYPES.button) {
-                if (this.field.IsWidget())
+               	if (this.field.IsLogicalParent())
                     return this.field.IsRequired();
-                else if (this.field.IsAllKidsWidgets())
-                    return this.field.GetKid(0).IsRequired();
                 else
-                    throw Error("InvalidGetError: Field is not a widget");
+                    throw Error("InvalidGetError: The field has no child widgets.");
             }
             else {
                 throw Error("InvalidGetError: button field doesn't have 'required' prop.");
@@ -496,25 +517,29 @@
 	 */
     Object.defineProperty(ApiBaseField.prototype, "strokeColor", {
         set: function(value) {
-            if (Array.isArray(value)) {
-                let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
-                let aColor  = private_correctApiColor(value).slice(1);
-                aFields.forEach(function(field) {
-                    field.SetBorderColor(aColor);
-                });
-            }
+			if (this.field.IsLogicalParent()) {
+				if (Array.isArray(value)) {
+					let aFields = this.field.GetAllWidgets();
+					let aColor  = private_correctApiColor(value).slice(1);
+					aFields.forEach(function(field) {
+						field.SetBorderColor(aColor);
+					});
+				}
+				else {
+					throw Error("InvalidSetError: Set not possible, invalid value.");
+				}
+			}
             else {
-                throw Error("InvalidSetError: Set not possible, invalid value.");
-            }
-            
+				throw Error("InvalidSetError: The field has no child widgets.");
+			}
         },
         get: function() {
             if (this.field.IsWidget())
                 return private_getApiColor(this.field.GetBorderColor());
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return private_getApiColor(this.field.GetKid(0).GetBorderColor());
             else
-                throw Error("InvalidGetError: Field is not a widget");
+                throw Error("InvalidGetError: The field has no child widgets.");
         }
 	});
 
@@ -538,20 +563,25 @@
 	 */
     Object.defineProperty(ApiBaseField.prototype, "textColor", {
         set: function(aColor) {
-            if (Array.isArray(aColor)) {
-                let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
-                aFields.forEach(function(field) {
-                    field.SetTextColor(aColor.slice(1));
-                });
-            }
+			if (this.field.IsLogicalParent()) {
+				if (Array.isArray(aColor)) {
+					let aFields = this.field.GetAllWidgets();
+					aFields.forEach(function(field) {
+						field.SetTextColor(aColor.slice(1));
+					});
+				}
+			}
+            else {
+				throw Error("InvalidSetError: The field has no child widgets.");
+			}
         },
         get: function() {
             if (this.field.IsWidget())
                 return private_getApiColor(this.field.GetTextColor());
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return private_getApiColor(this.field.GetKid(0).GetTextColor());
             else
-                throw Error("InvalidGetError: Field is not a widget");
+                throw Error("InvalidGetError: The field has no child widgets.");
         }
 	});
 
@@ -572,25 +602,29 @@
 	 * @typeofeditors ["PDF"]
 	 */
     Object.defineProperty(ApiBaseField.prototype, "textSize", {
-        set: function(nValue) {
-            if (typeof(nValue) == "number" && nValue >= 0 && nValue < AscPDF.MAX_TEXT_SIZE) {
-                let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
-                aFields.forEach(function(field) {
-                    field.SetTextSize(Math.round(nValue));
-                });
-            }
-            else {
-                throw Error("InvalidSetError: Set not possible, invalid value.");
-            }
-                
-        },
+		set: function(nValue) {
+			if (this.field.IsLogicalParent()) {
+				if (typeof(nValue) == "number" && nValue >= 0 && nValue < AscPDF.MAX_TEXT_SIZE) {
+					let aFields = this.field.GetAllWidgets();
+					aFields.forEach(function(field) {
+						field.SetTextSize(Math.round(nValue));
+					});
+				}
+				else {
+					throw Error("InvalidSetError: Set not possible, invalid value.");
+				}
+			}
+			else {
+				throw Error("InvalidSetError: The field has no child widgets.");
+			}
+		},
         get: function() {
             if (this.field.IsWidget())
                 return this.field.GetTextSize();
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return this.field.GetKid(0).GetTextSize();
             else
-                throw Error("InvalidGetError: Field is not a widget");
+                throw Error("InvalidGetError: The field has no child widgets.");
         }
 	});
 
@@ -663,27 +697,27 @@
         set: function(nValue) {
             if (typeof(nValue) == "number") {
                 nValue = Math.round(nValue);
-                if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
-                    let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
+                if (this.field.IsLogicalParent()) {
+                    let aFields = this.field.GetAllWidgets();
                     aFields.forEach(function(field) {
                         field.SetIconPosition(nValue, field.GetIconPosition().Y);
                     });
                 }
                 else {
-                    throw Error("InvalidSetError: Set not possible, invalid value.");
+                	throw Error("InvalidSetError: Set not possible, The field has no child widgets.");    
                 }
             }
             else {
-                throw Error("InvalidSetError: Set not possible, field is not a widget.");
+				throw Error("InvalidSetError: Set not possible, invalid value.");
             }
         },
         get: function() {
             if (this.field.IsWidget())
                 return this.field.GetIconPosition().X;
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return this.field.GetKid(0).GetIconPosition().X;
             else
-                throw Error("InvalidGetError: Field is not a widget");
+                throw Error("InvalidGetError: The field has no child widgets.");
         }
 	});
     /**
@@ -697,27 +731,27 @@
         set: function(nValue) {
             if (typeof(nValue) == "number") {
                 nValue = Math.round(nValue);
-                if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
-                    let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
+                if (this.field.IsLogicalParent()) {
+                    let aFields = this.field.GetAllWidgets();
                     aFields.forEach(function(field) {
                         field.SetIconPosition(field.GetIconPosition().X, nValue);
                     });
                 }
                 else {
-                    throw Error("InvalidSetError: Set not possible, invalid value.");
+                    throw Error("InvalidSetError: Set not possible, The field has no child widgets.");
                 }
             }
             else {
-                throw Error("InvalidSetError: Set not possible, field is not a widget.");
+				throw Error("InvalidSetError: Set not possible, invalid value.");
             }
         },
         get: function() {
             if (this.field.IsWidget())
                 return this.field.GetIconPosition().Y;
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return this.field.GetKid(0).GetIconPosition().Y;
             else
-                throw Error("InvalidGetError: Field is not a widget");
+                throw Error("InvalidGetError: The field has no child widgets.");
         }
 	});
 
@@ -742,53 +776,24 @@
 	 * @typeofeditors ["PDF"]
 	 */
     Object.defineProperty(ApiBaseCheckBoxField.prototype, "exportValues", {
-        // set: function(arrValues) {
-        //     if (Array.isArray(arrValues)) {
-        //         if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
-        //             let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
-
-        //             let aOpt = this.field.GetOptions();
-        //             let apiValueToSet;
-        //             let apiExpValue = this["value"];
-
-        //             for (let i = 0; i < aFields.length; i++) {
-        //                 let oField  = aFields[i];
-        //                 let sExport = undefined;
-        //                 if (arrValues[i] != undefined && arrValues[i] !== "") {
-        //                     sExport = String(arrValues[i]);
-        //                 }
-
-        //                 if (sExport != undefined) {
-        //                     oField.SetExportValue(arrValues[i]);
-        //                     if (aOpt) {
-        //                         aOpt[i] = arrValues[i];
-        //                     }
-        //                     if (oField.GetExportValue() == apiExpValue) {
-        //                         apiValueToSet = oField.GetParentValue();
-        //                     }
-        //                 }
-        //             }
-        //             if (apiValueToSet != undefined)
-        //                 this["value"] = apiValueToSet;
-        //             else
-        //                 this["value"] = "Off";
-        //         }
-        //         else {
-        //             throw Error("InvalidSetError: Set not possible, field is not a widget.");
-        //         }
-        //     }
-        //     else {
-        //         throw Error("InvalidSetError: Set not possible, invalid value.");
-        //     }
-            
-        // },
+        set: function(arrValues) {
+            if (Array.isArray(arrValues)) {
+                if (this.field.IsLogicalParent())
+					return this.field.SetOptions(arrValues);
+				else
+					throw Error("InvalidSetError: The field has no child widgets.");
+            }
+            else {
+                throw Error("InvalidSetError: Set not possible, invalid value.");
+            }
+        },
         get: function() {
             if (this.field.IsWidget())
                 return [this.field.GetExportValue()];
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return this.field.GetKids().map(function(field) { return field.GetExportValue()});
             else
-                throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
         }
 	});
 
@@ -808,14 +813,14 @@
     Object.defineProperty(ApiBaseCheckBoxField.prototype, "style", {
         set: function(sStyle) {
             if (Object.values(style).includes(sStyle)) {
-                if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
-                    let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
+                if (this.field.IsLogicalParent()) {
+                    let aFields = this.field.GetAllWidgets();
                     aFields.forEach(function(field) {
                         field.SetStyle(private_GetIntChStyle(sStyle));
                     })
                 }
                 else {
-                    throw Error("InvalidSetError: Set not possible, field is not a widget.");
+                    throw Error("InvalidSetError: Set not possible, The field has no child widgets.");
                 }
             }
             else {
@@ -826,10 +831,10 @@
         get: function() {
             if (this.field.IsWidget())
                 return private_GetStrChStyle(this.field.GetStyle());
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return private_GetStrChStyle(this.field.GetKid(0).GetStyle());
             else
-                throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
         }
 	});
 
@@ -838,17 +843,17 @@
      * Note: For a set of radio buttons that do not have duplicate export values, you can get the value, which is equal to the
      * export value of the individual widget that is currently checked (or returns an empty string, if none is).
 	 * @memberof ApiBaseCheckBoxField
-     * @param {number} nWidget - The 0-based index of an individual radio button or check box widget for this field.
+     * @param {number} optionIdx - The 0-based index of an individual radio button or check box widget for this field.
      * The index is determined by the order in which the individual widgets of this field
      * were created (and is unaffected by tab-order).
      * Every entry in the Fields panel has a suffix giving this index, for example, MyField #0.
 	 * @typeofeditors ["PDF"]
      * @returns {string}
 	 */
-    ApiBaseCheckBoxField.prototype.isBoxChecked = function(nWidget) {
-        if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
-            let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
-            let oField  = aFields[nWidget];
+    ApiBaseCheckBoxField.prototype.isBoxChecked = function(optionIdx) {
+        if (this.field.IsLogicalParent()) {
+            let aFields = this.field.GetAllWidgets();
+            let oField  = aFields[optionIdx];
             if (!oField)
                 throw Error("InvalidGetError: checkbox with this index doesn't exist");
 
@@ -870,15 +875,15 @@
             set: function(value) {
                 if (value != undefined) {
                     value = String(value);
-                    if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
+                    if (this.field.IsLogicalParent()) {
                         let oDoc            = this.field.GetDocument();
                         let oCalcInfo       = oDoc.GetCalculateInfo();
                         let oSourceField    = oCalcInfo.GetSourceField();
 
                         if (oCalcInfo.IsInProgress() && ((oSourceField && oSourceField.GetFullName() == this.field.GetFullName() && oCalcInfo.GetCurrentField() !== oSourceField) && oCalcInfo.GetCurrentField() !== oSourceField))
-                            throw Error('InvalidSetError: Set not possible, invalid or unknown.');
+                            throw Error('InvalidSetError: Set not possible, action is progress.');
                         if (oDoc.isOnValidate)
-                            throw Error('InvalidSetError: Set not possible, invalid or unknown.');
+                            throw Error('InvalidSetError: Set not possible, action is progress.');
 
 						let sApiValueToSet = value;
                         let aOpt = this.field.GetOptions();
@@ -898,7 +903,7 @@
                         }
                     }
                     else {
-                        this.field.SetParentValue(value);
+                        throw Error("InvalidSetError: The field has no child widgets.");
                     }
                 }
                 else {
@@ -907,7 +912,10 @@
                 
             },
             get: function() {
-                return this.field.GetParentValue();
+				if (this.field.IsLogicalParent())
+					return this.field.GetParentValue();
+				else
+					throw Error("InvalidGetError: The field has no child widgets.");
             }
         }
     });
@@ -930,25 +938,23 @@
     Object.defineProperty(ApiRadioButtonField.prototype, "radiosInUnison", {
         set: function(bValue) {
             if (typeof(bValue) == "boolean") {
-                if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
-                    let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
-                    aFields.forEach(function(field) {
-                        field.SetRadiosInUnison(bValue);
-                    });
-                    aFields[0].UpdateAll();
-                }
+                if (this.field.IsLogicalParent()) {
+					this.field.SetRadiosInUnison(bValue);
+					this.field.UpdateAll();
+					return true;
+				}
+				else
+					throw Error("InvalidGetError: The field has no child widgets.");
             }
             else {
                 throw Error("InvalidSetError: Set not possible, invalid value.");
             }
         },
         get: function() {
-            if (this.field.IsWidget())
+			if (this.field.IsLogicalParent())
                 return this.field.IsRadiosInUnison();
-            else if (this.field.IsAllKidsWidgets())
-                return this.field.GetKid(0).IsRadiosInUnison();
             else
-                throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                throw Error("InvalidGetError: The field has no child widgets.");
         }
 	});
 
@@ -957,7 +963,7 @@
             set: function(sValue) {
                 if (sValue != undefined) {
                     sValue = String(sValue);
-                    if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
+                    if (this.field.IsLogicalParent()) {
                         let oDoc            = this.field.GetDocument();
                         let oCalcInfo       = oDoc.GetCalculateInfo();
                         let oSourceField    = oCalcInfo.GetSourceField();
@@ -994,13 +1000,17 @@
                 }
             },
             get: function() {
-                let aOpt = this.field.GetOptions();
-                if (aOpt) {
-                    return aOpt[this.field.GetParentValue()];
-                }
-                else {
-                    return this.field.GetParentValue();
-                }
+				if (this.field.IsLogicalParent()) {
+					let aOpt = this.field.GetOptions();
+					if (aOpt) {
+						return aOpt[this.field.GetParentValue()];
+					}
+					else {
+						return this.field.GetParentValue();
+					}
+				}
+				else
+					throw Error("InvalidGetError: The field has no child widgets.");
             }
         }
     });
@@ -1020,15 +1030,15 @@
     Object.defineProperty(ApiTextField.prototype, "alignment", {
         set: function(sValue) {
             if (Object.values(ALIGN_TYPE).includes(sValue)) {
-                if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
-                    let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
+                if (this.field.IsLogicalParent()) {
+                    let aFields = this.field.GetAllWidgets();
                     var nJcType = private_GetIntAlign(sValue);
                     aFields.forEach(function(field) {
                         field.SetAlign(nJcType);
                     });
                 }
                 else {
-                    throw Error("InvalidSetError: Set not possible, field is not a widget.");
+                    throw Error("InvalidSetError: Set not possible, The field has no child widgets.");
                 }
             }
             else
@@ -1037,10 +1047,10 @@
         get: function() {
             if (this.field.IsWidget())
                 return private_GetStrAlign(this.field.GetAlign());
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return private_GetStrAlign(this.field.GetKid(0).GetAlign());
             else
-                throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
         }
 	});
 
@@ -1056,11 +1066,11 @@
         set: function(nValue) {
             let nIdx = parseInt(nValue);
             if (isNaN(parseInt(nIdx)) == false) {
-                if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
+                if (this.field.IsLogicalParent()) {
                     this.field.SetCalcOrderIndex(nIdx)
                 }
                 else {
-                    throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                    throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
                 }
             }
             else {
@@ -1068,11 +1078,11 @@
             }
         },
         get: function() {
-            if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
+            if (this.field.IsLogicalParent()) {
                 return this.field.GetCalcOrderIndex();
             }
             else
-                throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
         }
 	});
 
@@ -1085,14 +1095,14 @@
         set: function(nValue) {
             let nCharLimit = parseInt(nValue);
             if (isNaN(nCharLimit) == false) {
-                if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
-                    let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
+                if (this.field.IsLogicalParent()) {
+                    let aFields = this.field.GetAllWidgets();
                     aFields.forEach(function(field) {
                         field.SetCharLimit(nCharLimit);
                     });
                 }
                 else {
-                    throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                    throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
                 }
             }
             else {
@@ -1103,10 +1113,10 @@
         get: function() {
             if (this.field.IsWidget())
                 return this.field.GetCharLimit();
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return this.field.GetKid(0).GetCharLimit();
             else
-                throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
         }
 	});
 
@@ -1122,14 +1132,14 @@
     Object.defineProperty(ApiTextField.prototype, "comb", {
         // set: function(bComb) {
         //     if (typeof bComb == "boolean") {
-        //         if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
-        //             let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
+        //         if (this.field.IsLogicalParent()) {
+        //             let aFields = this.field.GetAllWidgets();
         //             aFields.forEach(function(field) {
         //                 field.SetComb(bComb);
         //             });
         //         }
         //         else {
-        //             throw Error("InvalidGetError: Get not possible, field is not a widget.");
+        //             throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
         //         }
         //     }
         //     else {
@@ -1139,10 +1149,10 @@
         get: function() {
             if (this.field.IsWidget())
                 return this.field.IsComb();
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return this.field.GetKid(0).IsComb();
             else
-                throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
         }
 	});
 
@@ -1156,14 +1166,14 @@
     Object.defineProperty(ApiTextField.prototype, "doNotScroll", {
         set: function(bDoNot) {
             if (typeof bDoNot == "boolean") {
-                if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
-                    let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
+                if (this.field.IsLogicalParent()) {
+                    let aFields = this.field.GetAllWidgets();
                     aFields.forEach(function(field) {
                         field.SetDoNotScroll(bDoNot);
                     });
                 }
                 else {
-                    throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                    throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
                 }
             }
             else {
@@ -1173,10 +1183,10 @@
         get: function() {
             if (this.field.IsWidget())
                 return this.field.IsDoNotScroll();
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return this.field.GetKid(0).IsDoNotScroll();
             else
-                throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
         }
     });
 
@@ -1189,14 +1199,14 @@
     Object.defineProperty(ApiTextField.prototype, "doNotSpellCheck", {
         set: function(bDoNot) {
             if (typeof bDoNot == "boolean") {
-                if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
-                    let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
+                if (this.field.IsLogicalParent()) {
+                    let aFields = this.field.GetAllWidgets();
                     aFields.forEach(function(field) {
                         field.SetDoNotSpellCheck(bDoNot);
                     });
                 }
                 else {
-                    throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                    throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
                 }
             }
             else {
@@ -1206,10 +1216,10 @@
         get: function() {
             if (this.field.IsWidget())
                 return this.field.IsDoNotSpellCheck();
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return this.field.GetKid(0).IsDoNotSpellCheck();
             else
-                throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
         }
     });
 
@@ -1222,14 +1232,14 @@
     Object.defineProperty(ApiTextField.prototype, "multiline", {
         // set: function(bValue) {
         //     if (typeof bValue == "boolean") {
-        //         if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
-        //             let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
+        //         if (this.field.IsLogicalParent()) {
+        //             let aFields = this.field.GetAllWidgets();
         //             aFields.forEach(function(field) {
         //                 field.SetMultiline(bValue);
         //             });
         //         }
         //         else {
-        //             throw Error("InvalidGetError: Get not possible, field is not a widget.");
+        //             throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
         //         }
         //     }
         //     else {
@@ -1239,10 +1249,10 @@
         get: function() {
             if (this.field.IsWidget())
                 return this.field.IsMultiline();
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return this.field.GetKid(0).IsMultiline();
             else
-                throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
         }
     });
 
@@ -1251,7 +1261,7 @@
             set: function(value) {
                 if (value != undefined) {
                     value = String(value);
-                    if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
+                    if (this.field.IsLogicalParent()) {
                         let oDoc            = this.field.GetDocument();
                         let oCalcInfo       = oDoc.GetCalculateInfo();
                         let oSourceField    = oCalcInfo.GetSourceField();
@@ -1315,14 +1325,14 @@
     Object.defineProperty(ApiBaseListField.prototype, "commitOnSelChange", {
         set: function(bValue) {
             if (typeof bValue == "boolean") {
-                if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
-                    let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
+                if (this.field.IsLogicalParent()) {
+                    let aFields = this.field.GetAllWidgets();
                     aFields.forEach(function(field) {
                         field.SetCommitOnSelChange(bValue);
                     });
                 }
                 else {
-                    throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                    throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
                 }
             }
             else {
@@ -1332,10 +1342,10 @@
         get: function() {
             if (this.field.IsWidget())
                 return this.field.IsCommitOnSelChange();
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return this.field.GetKid(0).IsCommitOnSelChange();
             else
-                throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
         }
 	});
 
@@ -1348,8 +1358,8 @@
      * @returns {string}
 	 */
     ApiBaseListField.prototype.getItemAt = function(nIdx, bExportValue) {
-        if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
-            let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
+        if (this.field.IsLogicalParent()) {
+            let aFields = this.field.GetAllWidgets();
             let oWidget = aFields[0];
             let aOptions = oWidget.GetOptions();
             if (aOptions[nIdx]) {
@@ -1365,7 +1375,7 @@
             }
         }
         else {
-            throw Error("InvalidGetError: Get not possible, field is not a widget.");
+            throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
         }
     };
 
@@ -1384,15 +1394,15 @@
     Object.defineProperty(ApiComboBoxField.prototype, "alignment", {
         set: function(sValue) {
             if (Object.values(ALIGN_TYPE).includes(sValue)) {
-                if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
-                    let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
+                if (this.field.IsLogicalParent()) {
+                    let aFields = this.field.GetAllWidgets();
                     var nJcType = private_GetIntAlign(sValue);
                     aFields.forEach(function(field) {
                         field.SetAlign(nJcType);
                     });
                 }
                 else {
-                    throw Error("InvalidSetError: Set not possible, field is not a widget.");
+                    throw Error("InvalidSetError: Set not possible, The field has no child widgets.");
                 }
             }
             else
@@ -1401,10 +1411,10 @@
         get: function() {
             if (this.field.IsWidget())
                 return private_GetStrAlign(this.field.GetAlign());
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return private_GetStrAlign(this.field.GetKid(0).GetAlign());
             else
-                throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
         }
 	});
 
@@ -1420,11 +1430,11 @@
         set: function(nValue) {
             let nIdx = parseInt(nValue);
             if (isNaN(parseInt(nIdx)) == false) {
-                if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
+                if (this.field.IsLogicalParent()) {
                     this.field.SetCalcOrderIndex(nIdx)
                 }
                 else {
-                    throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                    throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
                 }
             }
             else {
@@ -1432,11 +1442,11 @@
             }
         },
         get: function() {
-            if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
+            if (this.field.IsLogicalParent()) {
                 this.field.GetCalcOrderIndex();
             }
             else
-                throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
         }
 	});
 
@@ -1449,7 +1459,7 @@
         set: function(nValue) {
             let nIdx = parseInt(nValue);
             if (isNaN(parseInt(nIdx)) == false) {
-                if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
+                if (this.field.IsLogicalParent()) {
                     let oDoc            = this.field.GetDocument();
                     let oCalcInfo       = oDoc.GetCalculateInfo();
                     let oSourceField    = oCalcInfo.GetSourceField();
@@ -1459,7 +1469,7 @@
                     if (oDoc.isOnValidate)
                         throw Error('InvalidSetError: Set not possible, invalid or unknown.');
 
-                    let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
+                    let aFields = this.field.GetAllWidgets();
                     let oWidget = aFields[0];
                     if (oWidget.GetCurIdxs()[0] == nIdx)
                         return;
@@ -1480,7 +1490,7 @@
                     }
                 }
                 else {
-                    throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                    throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
                 }
             }
             else {
@@ -1488,12 +1498,12 @@
             }
         },
         get: function() {
-            if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
+            if (this.field.IsLogicalParent()) {
                 let aCurIdxs = this.field.GetCurIdxs(true);
                 return aCurIdxs[0] != undefined ? aCurIdxs[0] : -1;
             }
             else
-                throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
         }
 	});
 
@@ -1506,14 +1516,14 @@
     Object.defineProperty(ApiComboBoxField.prototype, "editable", {
         set: function(bValue) {
             if (typeof bValue == "boolean") {
-                if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
-                    let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
+                if (this.field.IsLogicalParent()) {
+                    let aFields = this.field.GetAllWidgets();
                     aFields.forEach(function(field) {
                         field.SetEditable(bValue);
                     });
                 }
                 else {
-                    throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                    throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
                 }
             }
             else {
@@ -1523,10 +1533,10 @@
         get: function() {
             if (this.field.IsWidget())
                 return this.field.IsEditable();
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return this.field.GetKid(0).IsEditable();
             else
-                throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
         }
 	});
 
@@ -1535,7 +1545,7 @@
             set: function(value) {
                 if (value != undefined) {
                     value = String(value);
-                    if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
+                    if (this.field.IsLogicalParent()) {
                         let oDoc = this.field.GetDocument();
                         let oCalcInfo = oDoc.GetCalculateInfo();
                         let oSourceField = oCalcInfo.GetSourceField();
@@ -1609,14 +1619,14 @@
     Object.defineProperty(ApiComboBoxField.prototype, "doNotSpellCheck", {
         set: function(bDoNot) {
             if (typeof bDoNot == "boolean") {
-                if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
-                    let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
+                if (this.field.IsLogicalParent()) {
+                    let aFields = this.field.GetAllWidgets();
                     aFields.forEach(function(field) {
                         field.SetDoNotSpellCheck(bDoNot);
                     });
                 }
                 else {
-                    throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                    throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
                 }
             }
             else {
@@ -1626,10 +1636,10 @@
         get: function() {
             if (this.field.IsWidget())
                 return this.field.IsDoNotSpellCheck();
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return this.field.GetKid(0).IsDoNotSpellCheck();
             else
-                throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
         }
     });
 
@@ -1649,15 +1659,15 @@
     Object.defineProperty(ApiListBoxField.prototype, "alignment", {
         set: function(sValue) {
             if (Object.values(ALIGN_TYPE).includes(sValue)) {
-                if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
-                    let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
+                if (this.field.IsLogicalParent()) {
+                    let aFields = this.field.GetAllWidgets();
                     var nJcType = private_GetIntAlign(sValue);
                     aFields.forEach(function(field) {
                         field.SetAlign(nJcType);
                     });
                 }
                 else {
-                    throw Error("InvalidSetError: Set not possible, field is not a widget.");
+                    throw Error("InvalidSetError: Set not possible, The field has no child widgets.");
                 }
             }
             else
@@ -1666,10 +1676,10 @@
         get: function() {
             if (this.field.IsWidget())
                 return private_GetStrAlign(this.field.GetAlign());
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return private_GetStrAlign(this.field.GetKid(0).GetAlign());
             else
-                throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
         }
 	});
 
@@ -1680,7 +1690,7 @@
 	 */
     Object.defineProperty(ApiListBoxField.prototype, "currentValueIndices", {
         set: function(aIdxs) {
-            if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
+            if (this.field.IsLogicalParent()) {
                 let oDoc            = this.field.GetDocument();
                 let oCalcInfo       = oDoc.GetCalculateInfo();
                 let oSourceField    = oCalcInfo.GetSourceField();
@@ -1709,11 +1719,11 @@
                 }
             }
             else {
-                throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
             }
         },
         get: function() {
-            if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
+            if (this.field.IsLogicalParent()) {
                 let aFields     = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
                 let aCurIdxs    = this.field.GetCurIdxs(true);
                 if (aFields[0].IsMultipleSelection() == false) {
@@ -1723,7 +1733,7 @@
                     return aCurIdxs.slice();
             }
             else
-                throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
         }
 	});
 
@@ -1735,14 +1745,14 @@
     Object.defineProperty(ApiListBoxField.prototype, "multipleSelection", {
         set: function(bValue) {
             if (typeof bValue == "boolean") {
-                if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
-                    let aFields = this.field.GetDocument().GetAllWidgets(this.field.GetFullName());
+                if (this.field.IsLogicalParent()) {
+                    let aFields = this.field.GetAllWidgets();
                     aFields.forEach(function(field) {
                         field.SetMultipleSelection(bValue);
                     });
                 }
                 else {
-                    throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                    throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
                 }
             }
             else {
@@ -1752,10 +1762,10 @@
         get: function() {
             if (this.field.IsWidget())
                 return this.field.IsMultipleSelection();
-            else if (this.field.IsAllKidsWidgets())
+            else if (this.field.IsLogicalParent())
                 return this.field.GetKid(0).IsMultipleSelection();
             else
-                throw Error("InvalidGetError: Get not possible, field is not a widget.");
+                throw Error("InvalidGetError: Get not possible, The field has no child widgets.");
         }
     });
 
@@ -1764,7 +1774,7 @@
             set: function(value) {
                 if (value != undefined) {
                     value = String(value);
-                    if (this.field.IsWidget() || this.field.IsAllKidsWidgets()) {
+                    if (this.field.IsLogicalParent()) {
                         let oDoc = this.field.GetDocument();
                         let oCalcInfo = oDoc.GetCalculateInfo();
                         let oSourceField = oCalcInfo.GetSourceField();
@@ -1978,6 +1988,16 @@
 
         return ["T"];
     }
+
+	function private_IsValidRect(value, isForStamp) {
+		return (
+			Array.isArray(value) &&
+			value.length === 4 &&
+			value.every(Number.isFinite) &&
+			(isForStamp !== true ? value[0] < value[2] &&
+			value[1] < value[3] : true)
+		);
+	}
 
     if (!window["AscPDF"])
 	    window["AscPDF"] = {};

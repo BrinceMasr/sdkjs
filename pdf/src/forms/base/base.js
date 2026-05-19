@@ -994,7 +994,7 @@
             return this._parent;
         }
 
-        if (this._parent && this._parent.IsAllKidsWidgets()) {
+        if (this._parent && this._parent.IsLogicalParent()) {
             return this._parent;
         }
         
@@ -1048,9 +1048,12 @@
 	 * @memberof CBaseField
 	 * @typeofeditors ["PDF"]
 	 */
-    CBaseField.prototype.IsAllKidsWidgets = function() {
-        let aKids = this.GetKids();
+    CBaseField.prototype.IsLogicalParent = function() {
+		if (this.IsWidget()) {
+			return true;
+		}
 
+        let aKids = this.GetKids();
         if (aKids.length > 0) {
             if (aKids[0].IsWidget() == false)
                 return false;
@@ -1676,7 +1679,7 @@
 
             if (oExistsField) {
                 if (!oExistsField.IsWidget()) {
-                    if (!oExistsField.IsAllKidsWidgets()) {
+                    if (!oExistsField.IsLogicalParent()) {
                         return false;
                     }
                     else {
@@ -3418,7 +3421,7 @@
         nFlags |= (1 << 7);
 
         let nFieldType = this.GetType();
-        let bWriteType = this.IsAllKidsWidgets();
+        let bWriteType = this.IsLogicalParent();
 
         let nWidgetFlags = 0;
         if (bWriteType) {

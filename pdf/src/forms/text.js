@@ -465,8 +465,8 @@
     CTextField.prototype.SetCalcOrderIndex = function(nIdx) {
         let oCalcInfo   = this.GetDocument().GetCalculateInfo();
         let oWidget     = null;
-        if (this.IsWidget() || this.IsAllKidsWidgets()) {
-            oWidget = this.GetKid(0) || this;
+        if (this.IsLogicalParent()) {
+            oWidget = this.GetKid(0);
         }
         let oCalcTrigget = oWidget.GetTrigger(AscPDF.PDF_TRIGGERS_TYPES.Calculate);
         if (oCalcTrigget == null || nIdx < 0)
