@@ -274,7 +274,7 @@
 		const startY = scaledFieldSize + (paperHeight - resultHeight) / 2;
 
 		let slideIndex = 0;
-		if (align === HANDOUT_ALIGNMENT_HORIZONTAL) {
+		if (align === HANDOUT_ALIGNMENT_VERTICAL) {
 			for (let i = 0; i < rowsCount; i += 1) {
 				const slideY = startY + i * verticalGap + h_mm * i * slideScale;
 				for (let j = 0; j < countSlidesOnRow; j += 1) {

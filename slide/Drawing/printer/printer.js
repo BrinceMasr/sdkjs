@@ -493,6 +493,11 @@
 		}
 		return printSlides;
 	};
+	HandoutPrinter.prototype.getHandoutSettings = function () {
+		const printOptions = this.printOptions;
+		const slidesOnPagePrintOptions = printOptions.slidesOnPagePrintOptions;
+		return slidesOnPagePrintOptions.getHandoutSettings();
+	};
 	HandoutPrinter.prototype.drawPage = function (graphics, index) {
 		const pageSlides = this.getPageSlides(index);
 		const presentation = this.getPresentation();
@@ -500,8 +505,11 @@
 		const pageSize = this.getPageSizes();
 		graphics.SaveGrState();
 		graphics.AddClipRect(0, 0, pageSize.width, pageSize.height);
+		const oldHandoutSettings = handoutMaster.handoutSettings;
+		handoutMaster.handoutSettings = this.getHandoutSettings();
 		handoutMaster.draw(graphics, null, pageSlides, this.isDrawFrame(), this.isDrawSlideNumber());
-		graphics.RestoreGrState();
+		handoutMaster.handoutSettings = oldHandoutSettings;
+			graphics.RestoreGrState();
 	};
 	HandoutPrinter.prototype.getPageSizes = function () {
 		const presentation = this.getPresentation();
