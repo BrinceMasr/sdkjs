@@ -481,6 +481,7 @@ function (window, undefined) {
 			this.input.style.whiteSpace = 'pre-wrap';
 			this.input.style.overflowY = 'auto';
 			this.input.style.overflowX = 'auto';
+			this.input.style.overflowAnchor = 'none';
 		}
 
 		var b = this._getInputSelectionStart();
@@ -2205,6 +2206,73 @@ function (window, undefined) {
 		return this.textRender.getLineByY(coord.y, this.topLineIndex, this.getZoom());
 	};
 
+	CellEditor.prototype._scrollToCursorInContentEditable = function () {
+		if (!this._isContentEditable() || !this.input) {
+			return;
+		}
+		var sel = window.getSelection();
+		if (!sel || !sel.rangeCount) {
+			return;
+		}
+		var range = sel.getRangeAt(0);
+		var rect = range.getBoundingClientRect();
+		if (!rect || (rect.width === 0 && rect.height === 0 && rect.top === 0 && rect.left === 0)) {
+			var rects = range.getClientRects();
+			rect = rects && rects.length ? rects[0] : null;
+		}
+		if (!rect || rect.height === 0) {
+			var node = range.startContainer;
+			var off = range.startOffset;
+			var charRange = document.createRange();
+			var cr;
+			if (node && node.nodeType === 3) {
+				if (off < node.length) {
+					charRange.setStart(node, off);
+					charRange.setEnd(node, off + 1);
+					cr = charRange.getBoundingClientRect();
+					if (cr && cr.height > 0) {
+						rect = cr;
+					}
+				}
+				if ((!rect || rect.height === 0) && off > 0) {
+					charRange.setStart(node, off - 1);
+					charRange.setEnd(node, off);
+					cr = charRange.getBoundingClientRect();
+					if (cr && cr.height > 0) {
+						rect = cr;
+					}
+				}
+			} else if (node && node.nodeType === 1) {
+				var child = node.childNodes[off] || node.childNodes[off - 1];
+				if (child && child.getBoundingClientRect) {
+					cr = child.getBoundingClientRect();
+					if (cr && cr.height > 0) {
+						rect = cr;
+					}
+				}
+			}
+		}
+		if (!rect) {
+			return;
+		}
+		var containerRect = this.input.getBoundingClientRect();
+		var scrollTop = this.input.scrollTop;
+		var height = this.input.clientHeight;
+		var lineTop = rect.top - containerRect.top + scrollTop;
+		var measuredHeight = rect.bottom - rect.top;
+		var lineHeight = measuredHeight > 2 ? measuredHeight : (parseFloat(window.getComputedStyle(this.input).lineHeight) || height);
+		var centerOffset = Math.floor((height - lineHeight) / 2);
+		var target = Math.max(0, lineTop - centerOffset);
+		var maxScroll = this.input.scrollHeight - height;
+		if (target > maxScroll) {
+			var curPB = parseFloat(this.input.style.paddingBottom) || 0;
+			this.input.style.paddingBottom = (curPB + target - maxScroll) + 'px';
+		}
+		if (this.input.scrollTop !== target) {
+			this.input.scrollTop = target;
+		}
+	};
+
 	CellEditor.prototype._updateTopLineCurPos = function () {
 		if (this.loadFonts) {
 			return;
@@ -2213,32 +2281,7 @@ function (window, undefined) {
 		var b = isSelected ? this.selectionBegin : this.cursorPos;
 		var e = isSelected ? this.selectionEnd : this.cursorPos;
 		this._setInputSelectionRange(Math.min(b, e), Math.max(b, e));
-
-		// Scroll to show active line in contenteditable
-		if (this._isContentEditable() && this.input && this.textRender) {
-			var curPos = this.cursorPos;
-			var charInfo = this.textRender.calcCharOffset(curPos);
-			if (charInfo) {
-				var lineInfo = this.textRender.getLineInfo(charInfo.lineIndex);
-				if (lineInfo) {
-					var lineTop = this.textRender.calcLineOffset(charInfo.lineIndex);
-					var scrollTop = lineTop - this.textRender.calcLineOffset(0);
-
-					// Check if line is within visible area, if not scroll
-					var containerHeight = this.input.clientHeight;
-					var visibleTop = this.input.scrollTop;
-					var visibleBottom = visibleTop + containerHeight;
-					var lineHeight = lineInfo.th;
-					var lineBottom = scrollTop + lineHeight;
-
-					if (scrollTop < visibleTop) {
-						this.input.scrollTop = scrollTop;
-					} else if (lineBottom > visibleBottom) {
-						this.input.scrollTop = lineBottom - containerHeight;
-					}
-				}
-			}
-		}
+		this._scrollToCursorInContentEditable();
 	};
 
 	CellEditor.prototype._topLineGotFocus = function () {
@@ -2249,6 +2292,10 @@ function (window, undefined) {
 		this._cleanSelection();
 		if (this.isOpened && !this.getMenuEditorMode()) {
 			this._setInputFragments(this._getRenderFragments());
+			var tmp = this.skipTLUpdate;
+			this.skipTLUpdate = false;
+			this._updateTopLineCurPos();
+			this.skipTLUpdate = tmp;
 		}
 	};
 
@@ -2260,9 +2307,15 @@ function (window, undefined) {
 	};
 	CellEditor.prototype._delayedUpdateCursorByTopLine = function () {
 		var t = this;
-		setTimeout(function () {
-			t._updateCursorByTopLine();
-		});
+		if (this._isContentEditable()) {
+			if (t.input) t.input.style.overflowY = 'hidden';
+			requestAnimationFrame(function () {
+				if (t.input) t.input.style.overflowY = 'auto';
+				t._updateCursorByTopLine();
+			});
+		} else {
+			setTimeout(function () { t._updateCursorByTopLine(); });
+		}
 	};
 	CellEditor.prototype._updateCursorByTopLine = function () {
 		var b = this._getInputSelectionStart();
@@ -2286,6 +2339,7 @@ function (window, undefined) {
 				this.handlers.trigger("onSelectionEnd");
 			}
 		}
+		this._scrollToCursorInContentEditable();
 	};
 
 	CellEditor.prototype._syncEditors = function () {
