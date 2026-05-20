@@ -1,33 +1,36 @@
 /*
- * (c) Copyright Ascensio System SIA 2010-2024
+ * Copyright (C) Ascensio System SIA, 2009-2026
  *
  * This program is a free software product. You can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License (AGPL)
- * version 3 as published by the Free Software Foundation. In accordance with
- * Section 7(a) of the GNU AGPL its Section 15 shall be amended to the effect
- * that Ascensio System SIA expressly excludes the warranty of non-infringement
- * of any third-party rights.
+ * version 3 as published by the Free Software Foundation, together with the
+ * additional terms provided in the LICENSE file.
  *
  * This program is distributed WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
- * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+ * details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
+ * You can contact Ascensio System SIA by email at info@onlyoffice.com
+ * or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+ * LV-1050, Latvia, European Union.
  *
- * The  interactive user interfaces in modified source and object code versions
- * of the Program must display Appropriate Legal Notices, as required under
+ * The interactive user interfaces in modified versions of the Program
+ * are required to display Appropriate Legal Notices in accordance with
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
+ * No trademark rights are granted under this License.
  *
- * All the Product's GUI elements, including illustrations and icon sets, as
- * well as technical writing content are licensed under the terms of the
- * Creative Commons Attribution-ShareAlike 4.0 International. See the License
- * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+ * All non-code elements of the Product, including illustrations,
+ * icon sets, and technical writing content, are licensed under the
+ * Creative Commons Attribution-ShareAlike 4.0 International License:
+ * https://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
+ * This license applies only to such non-code elements and does not
+ * modify or replace the licensing terms applicable to the Program's
+ * source code, which remains licensed under the GNU Affero General
+ * Public License v3.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only
  */
 
 "use strict";
@@ -468,6 +471,11 @@ function (window, undefined) {
 	 */
 	CellEditor.prototype.open = function (options) {
 		this._setEditorState(c_oAscCellEditorState.editStart);
+
+		if (AscCommon.g_inputContext) {
+			AscCommon.g_inputContext.moveAccurateForce();
+		}
+		
 
 		if (this._isContentEditable()) {
 			this.input.style.whiteSpace = 'pre-wrap';
@@ -1163,7 +1171,20 @@ function (window, undefined) {
 				}
 				if ((cElementType.cell === oper.type || cElementType.cellsRange === oper.type || cElementType.cell3D === oper.type) && oper.externalLink == null) {
 					wsName = oper.getWS().getName();
-					bboxOper = oper.getBBox0();
+					// For `A1#` (spilled-range operator): show the full spill range on the sheet
+					// instead of just the anchor cell, mirroring Excel behaviour.
+					if (r.isHashRef && AscCommonExcel.bIsSupportDynamicArrays) {
+						var _anchorWs = oper.getWS();
+						var _anchorBbox = oper.getBBox0();
+						if (_anchorWs && _anchorBbox && _anchorWs.dynamicArrayManager) {
+							var _spillRef = _anchorWs.dynamicArrayManager.getDynamicArrayFirstCell(_anchorBbox.c1, _anchorBbox.r1);
+							bboxOper = _spillRef || _anchorBbox;
+						} else {
+							bboxOper = _anchorBbox;
+						}
+					} else {
+						bboxOper = oper.getBBox0();
+					}
 				} else if ((cElementType.cellsRange3D === oper.type) && oper.externalLink == null) {
 					if (oper.isSingleSheet()) {
 						wsName = oper.getWS().getName();
@@ -1643,7 +1664,8 @@ function (window, undefined) {
 					doAdjust = true;
 				}
 			}
-			while (tm.height > this._getContentHeight() && this._expandHeight()) {
+			let tmHeight = asc_round(tm.height * this.getZoom());
+			while (tmHeight > this._getContentHeight() && this._expandHeight()) {
 			}
 			if (bottom !== this.bottom) {
 				if (bottom > this.bottom) {
@@ -1844,7 +1866,10 @@ function (window, undefined) {
 		endPos = this.selectionEnd;
 
 		if (!window['IS_NATIVE_EDITOR']) {
-			ctx.setFillStyle(this.defaults.selectColor).clear();
+			var selOldDarkMode = ctx.isDarkMode; ctx.isDarkMode = false;
+			ctx.setFillStyle(this.defaults.selectColor);
+			ctx.isDarkMode = selOldDarkMode;
+			ctx.clear();
 		}
 
 		if (begPos !== endPos && !this.isTopLineActive) {
@@ -1945,6 +1970,23 @@ function (window, undefined) {
 			this._hideCursor();
 		} else {
 			this._showCursor();
+		}
+	};
+
+	CellEditor.prototype.updateDarkMode = function (isDarkMode) {
+		if (isDarkMode) {
+			this.drawingCtx.setDarkMode();
+			this.overlayCtx.setDarkMode();
+		} else {
+			this.drawingCtx.isDarkMode = false;
+			this.overlayCtx.isDarkMode = false;
+		}
+		if (this.cursorStyle) {
+			this.cursorStyle.backgroundColor = isDarkMode ? "#FFFFFF" : "";
+		}
+		if (this.isOpened) {
+			this._renderText();
+			this._drawSelection();
 		}
 	};
 
@@ -3376,7 +3418,8 @@ function (window, undefined) {
 		this.input.isFocused = false;
 
 		if (0 === button) {
-			if (1 === this.clickCounter.getClickCount() % 2) {
+			let clickCount = this.clickCounter.getClickCount() % 3;
+			if (clickCount === 1) {
 				this.isSelectMode = c_oAscCellEditorSelectState.char;
 				if (!event.shiftKey) {
 					this._updateCursor();
@@ -3387,7 +3430,7 @@ function (window, undefined) {
 				} else {
 					this._changeSelection(coord);
 				}
-			} else {
+			} else if (clickCount === 2) {
 				// Dbl click
 				this.isSelectMode = c_oAscCellEditorSelectState.word;
 
@@ -3413,6 +3456,9 @@ function (window, undefined) {
 				this._moveCursor(kPosition, startWord);
 				this.textRender.cursorAtTrailingEdge = true;
 				this._selectChars(kPosition, endWord);
+			} else {
+				this.isSelectMode = c_oAscCellEditorSelectState.char;
+				this.selectAll();
 			}
 		} else if (2 === button) {
 			this.handlers.trigger('onContextMenu', event);

@@ -1,43 +1,46 @@
 /*
- * (c) Copyright Ascensio System SIA 2010-2024
+ * Copyright (C) Ascensio System SIA, 2009-2026
  *
  * This program is a free software product. You can redistribute it and/or
  * modify it under the terms of the GNU Affero General Public License (AGPL)
- * version 3 as published by the Free Software Foundation. In accordance with
- * Section 7(a) of the GNU AGPL its Section 15 shall be amended to the effect
- * that Ascensio System SIA expressly excludes the warranty of non-infringement
- * of any third-party rights.
+ * version 3 as published by the Free Software Foundation, together with the
+ * additional terms provided in the LICENSE file.
  *
  * This program is distributed WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
- * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+ * details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
  *
- * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
- * street, Riga, Latvia, EU, LV-1050.
+ * You can contact Ascensio System SIA by email at info@onlyoffice.com
+ * or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+ * LV-1050, Latvia, European Union.
  *
- * The  interactive user interfaces in modified source and object code versions
- * of the Program must display Appropriate Legal Notices, as required under
+ * The interactive user interfaces in modified versions of the Program
+ * are required to display Appropriate Legal Notices in accordance with
  * Section 5 of the GNU AGPL version 3.
  *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
+ * No trademark rights are granted under this License.
  *
- * All the Product's GUI elements, including illustrations and icon sets, as
- * well as technical writing content are licensed under the terms of the
- * Creative Commons Attribution-ShareAlike 4.0 International. See the License
- * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+ * All non-code elements of the Product, including illustrations,
+ * icon sets, and technical writing content, are licensed under the
+ * Creative Commons Attribution-ShareAlike 4.0 International License:
+ * https://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
+ * This license applies only to such non-code elements and does not
+ * modify or replace the licensing terms applicable to the Program's
+ * source code, which remains licensed under the GNU Affero General
+ * Public License v3.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only
  */
 
 "use strict";
 
 (function(window, document)
 {
-	// TODO: Пока тут идет наследование от класса asc_docs_api для документов
-	//       По логике нужно от этого уйти и сделать наследование от базового класса и добавить тип AscCommon.c_oEditorId.PDF
-	// TODO: Возможно стоит перенести инициализацию initDocumentRenderer и тогда не придется в каждом методе проверять
-	//       наличие this.DocumentRenderer
+	// TODO: Currently inheriting from asc_docs_api class for documents
+	//       Logically we should move away from this and inherit from the base class and add type AscCommon.c_oEditorId.PDF
+	// TODO: Perhaps we should move initDocumentRenderer initialization and then we won't need to check
+	//       for this.DocumentRenderer in every method
 	
 	/**
 	 * @param config
@@ -51,9 +54,9 @@
 		this.DocumentType     = 1;
 		
 		this.compositeInput = null;
-		this.isPdfViewer    = false; // Было решено, что флаг isViewMode присылается всегда false, т.к. пдф всегда
-		                             // можно редактировать (во вьювере заполнять поля, например)
-		                             // Данный флаг различает в каком режиме загружен документ (edit/view)
+		this.isPdfViewer    = false; // It was decided that isViewMode flag is always sent as false, since PDF can always
+		                             // be edited (e.g., filling form fields in the viewer)
+		                             // This flag distinguishes in which mode the document is loaded (edit/view)
 	}
 	
 	PDFEditorApi.prototype = Object.create(AscCommon.DocumentEditorApi.prototype);
@@ -67,7 +70,7 @@
 		window["AscViewer"]["baseUrl"] = (typeof document !== 'undefined' && document.currentScript) ? "" : "./../../../../sdkjs/pdf/src/engine/";
 		window["AscViewer"]["baseEngineUrl"] = "./../../../../sdkjs/pdf/src/engine/";
 		
-		// TODO: Возможно стоит перенести инициализацию в
+		// TODO: Perhaps we should move initialization to
 		this.initDocumentRenderer();
 		this.DocumentRenderer.open(file.data);
 		
@@ -398,8 +401,8 @@
 
 		oDoc.StartAction(AscDFH.historydescription_Document_PasteHotKey);
 		
-		this.needPasteText = false; // если не вставили бинарник, то вставляем текст
-		// пока что копирование бинарником только внутри drawings или самих drawings
+		this.needPasteText = false; // if binary wasn't pasted, then paste text
+		// currently binary copying only within drawings or drawings themselves
 		if ([AscCommon.c_oAscClipboardDataFormat.Internal, AscCommon.c_oAscClipboardDataFormat.HtmlElement, AscCommon.c_oAscClipboardDataFormat.Text].includes(_format)) {
 			window['AscCommon'].g_specialPasteHelper.Paste_Process_Start(arguments[5]);
 			AscCommon.Editor_Paste_Exec(this, _format, data1, data2, text_data, undefined, callback);
@@ -616,8 +619,8 @@
 			doc.StartAction(AscDFH.historydescription_Document_AddLetter);
 		}
 
-		let docContent = textController.GetDocContent();
 		let result = textController.EnterText(codePoints);
+		let docContent = textController.GetDocContent();
 		
 		if (null == drController.getTargetTextObject() && false == textController.IsForm()) {
 			if (textController.IsAnnot() && textController.IsFreeText()) {
@@ -720,7 +723,10 @@
 			}
 
 			let oContent = textController.GetDocContent();
-
+			if (!oContent) {
+				return false;
+			}
+			
 			let oldText = "";
 			for (let index = 0, count = oldCodePoints.length; index < count; ++index) {
 				oldText += String.fromCodePoint(oldCodePoints[index]);
@@ -773,8 +779,18 @@
 			oDoc.FinalizeAction(true);
 			return false;
 		}
+		
+		const fEndCallback = function() {
+			oDoc.FinalizeAction();
+            oDoc.Viewer.file.removeSelection();
+            oDoc.Viewer.paint(function() {
+                oDoc.Viewer.thumbnails._repaintPage(oViewer.currentPage);
+            });
+            Asc.editor.canSave = true;
+        };
 
-		oDoc.EditPage(oViewer.currentPage);
+		let result = oDoc.EditPage(oViewer.currentPage);
+		this.pre_Paste(result.fonts, result.images, fEndCallback);
 	};
 	PDFEditorApi.prototype.asc_AddPage = function(nPos) {
 		let oViewer = this.getDocumentRenderer();
@@ -883,22 +899,8 @@
 		
 		bClearText = (bClearText === true);
 		
-		let oDoc		= this.getPDFDoc();
-		let oTxObject	= oDoc.getTextController();
-		let textObj		= {Text : ""};
-		
-		if (oTxObject) {
-			let oContent = oTxObject.GetDocContent();
-			textObj.Text = oContent ? (oContent.GetSelectedText(bClearText, select_Pr) || "") : "";
-		}
-		else {
-			this.DocumentRenderer.Copy(textObj);
-		}
-		
-		if (!textObj.Text || textObj.Text.trim() === "")
-			return "";
-		
-		return textObj.Text;
+		let oDoc = this.getPDFDoc();
+		return oDoc.GetSelectedText(bClearText, select_Pr);
 	};
 	PDFEditorApi.prototype.asc_AddMath2 = function(Type) {
 		let oDoc	= this.getPDFDoc();
@@ -1103,12 +1105,12 @@
 		}
 
 		var t = this;
-        if (this.WordControl) // после показа диалога может не прийти mouseUp
+        if (this.WordControl) // mouseUp may not come after showing the dialog
         	this.WordControl.m_bIsMouseLock = false;
 		
 		AscCommon.ShowImageFileDialog(this.documentId, this.documentUserId, this.CoAuthoringApi.get_jwt(), this.documentShardKey, this.documentWopiSrc, this.documentUserSessionId, function(error, files)
 		{
-			// ошибка может быть объектом в случае отмены добавления картинки в форму
+			// error can be an object in case of canceling image addition to form
 			if (typeof(error) == "object")
 				return;
 
@@ -1273,7 +1275,7 @@
 			}, AscDFH.historydescription_Pdf_AddHighlightAnnot, this);
 		}
 		else {
-			// SetMarkerFormat вызывается при включении ластика/рисовалки, курсор не сбрасываем
+			// SetMarkerFormat is called when enabling eraser/drawing tool, don't reset cursor
 			if (false == this.isDrawInkMode() && false == this.isEraseInkMode()) {
 				oDrDoc.UnlockCursorType();
 				oViewer.setCursorType('default');
@@ -1388,10 +1390,10 @@
 		if (sType == AscPDF.STAMP_TYPES.Image) {
 			let t = this;
 			AscCommon.ShowImageFileDialog(this.documentId, this.documentUserId, this.CoAuthoringApi.get_jwt(), this.documentShardKey, this.documentWopiSrc, this.documentUserSessionId, function(error, files) {
-				// ошибка может быть объектом в случае отмены добавления картинки в форму
+				// error can be an object in case of canceling image addition to form
 				if (typeof(error) == "object")
 					return;
-		
+
 				t._uploadCallback(error, files, {
 					isStamp: true
 				});
@@ -1905,13 +1907,13 @@
 
 				let aActionsFormat = [{
 					"S": AscPDF.ACTIONS_TYPES.JavaScript,
-					"JS": 'AFTime_FormatEx(' + nFormat + ');'
+					"JS": 'AFTime_Format(' + nFormat + ');'
 				}]
 				oField.SetActions(AscPDF.PDF_TRIGGERS_TYPES.Format, aActionsFormat);
 
 				let aActionsKeystroke = [{
 					"S": AscPDF.ACTIONS_TYPES.JavaScript,
-					"JS": 'AFTime_KeystrokeEx(' + nFormat + ');'
+					"JS": 'AFTime_Keystroke(' + nFormat + ');'
 				}];
 				oField.SetActions(AscPDF.PDF_TRIGGERS_TYPES.Keystroke, aActionsKeystroke);
 				if (oField.IsCanCommit()) {
@@ -2993,7 +2995,7 @@
 		let oDoc	= this.getPDFDoc();
 		let oDrDoc	= oDoc.GetDrawingDocument();
 
-		// нужно определить, картинка это или нет
+		// need to determine if this is an image or not
 		let image_url = "";
 		let sToken = undefined;
 		prop.Width    = prop.w;
@@ -3351,71 +3353,94 @@
 		return oDoc.DoAction(function() {
 			oController.selectedObjects.forEach(function(annot) {
 				if (annot.IsAnnot()) {
-					switch (nComplexType) {
-						case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.solid: {
-							annot.SetBorderStyle(AscPDF.BORDER_TYPES.solid);
-							annot.SetDashPattern([]);
-							annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
-							annot.SetBorderEffectIntensity(0);
-							break;
+					if (annot.IsLink()) {
+						if (nComplexType == null) {
+							annot.SetBorderWidth(0);
 						}
-						case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash1: {
-							annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
-							annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash1);
-							annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
-							annot.SetBorderEffectIntensity(0);
-							break;
-						}
-						case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash2: {
-							annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
-							annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash2);
-							annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
-							annot.SetBorderEffectIntensity(0);
-							break;
-						}
-						case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash3: {
-							annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
-							annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash3);
-							annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
-							annot.SetBorderEffectIntensity(0);
-							break;
-						}
-						case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash4: {
-							annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
-							annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash4);
-							annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
-							annot.SetBorderEffectIntensity(0);
-							break;
-						}
-						case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash5: {
-							annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
-							annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash5);
-							annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
-							annot.SetBorderEffectIntensity(0);
-							break;
-						}
-						case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash6: {
-							annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
-							annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash6);
-							annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
-							annot.SetBorderEffectIntensity(0);
-							break;
-						}
-						case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.cloud1: {
-							annot.SetBorderStyle(AscPDF.BORDER_TYPES.solid);
-							annot.SetDashPattern([]);
-							annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.cloud);
-							annot.SetBorderEffectIntensity(1);
-							break;
-						}
-						case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.cloud2: {
-							annot.SetBorderStyle(AscPDF.BORDER_TYPES.solid);
-							annot.SetDashPattern([]);
-							annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.cloud);
-							annot.SetBorderEffectIntensity(2);
-							break;
+						else {
+							if (annot.GetBorderWidth() == 0) {
+								annot.SetBorderWidth(1);
+							}
+
+							if (nComplexType == AscPDF.BORDER_TYPES.dashed) {
+								annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash1);
+							}
+							else {
+								annot.SetDashPattern(undefined);
+							}
+							
+							annot.SetBorderStyle(nComplexType);
 						}
 					}
+					else {
+						switch (nComplexType) {
+							case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.solid: {
+								annot.SetBorderStyle(AscPDF.BORDER_TYPES.solid);
+								annot.SetDashPattern([]);
+								annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
+								annot.SetBorderEffectIntensity(0);
+								break;
+							}
+							case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash1: {
+								annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
+								annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash1);
+								annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
+								annot.SetBorderEffectIntensity(0);
+								break;
+							}
+							case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash2: {
+								annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
+								annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash2);
+								annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
+								annot.SetBorderEffectIntensity(0);
+								break;
+							}
+							case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash3: {
+								annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
+								annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash3);
+								annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
+								annot.SetBorderEffectIntensity(0);
+								break;
+							}
+							case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash4: {
+								annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
+								annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash4);
+								annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
+								annot.SetBorderEffectIntensity(0);
+								break;
+							}
+							case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash5: {
+								annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
+								annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash5);
+								annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
+								annot.SetBorderEffectIntensity(0);
+								break;
+							}
+							case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.dash6: {
+								annot.SetBorderStyle(AscPDF.BORDER_TYPES.dashed);
+								annot.SetDashPattern(AscPDF.ANNOT_BORDER_DASHED_VALUES.dash6);
+								annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.none);
+								annot.SetBorderEffectIntensity(0);
+								break;
+							}
+							case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.cloud1: {
+								annot.SetBorderStyle(AscPDF.BORDER_TYPES.solid);
+								annot.SetDashPattern([]);
+								annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.cloud);
+								annot.SetBorderEffectIntensity(1);
+								break;
+							}
+							case AscPDF.ANNOT_COMPLEX_BORDER_TYPES.cloud2: {
+								annot.SetBorderStyle(AscPDF.BORDER_TYPES.solid);
+								annot.SetDashPattern([]);
+								annot.SetBorderEffectStyle(AscPDF.BORDER_EFFECT_STYLES.cloud);
+								annot.SetBorderEffectIntensity(2);
+								break;
+							}
+						}
+					}
+
+					annot.private_UpdateRect();
 				}
 			});
 
@@ -3513,27 +3538,22 @@
 		}
 		oDoc.SetTableProps(oPr);
 	};
-	PDFEditorApi.prototype.asc_DistributeTableCells = function(isHorizontally) {
-		let oDoc	= this.getPDFDoc();
-		let bResult	= false;
-
-		bResult = oDoc.DistributeTableCells(isHorizontally);
-		return bResult;
-	};
 	PDFEditorApi.prototype.remColumn = function() {
 		let oDoc = this.getPDFDoc();
-		oDoc.RemoveTableColumn();
-		return true;
+		return oDoc.DoAction(function() {
+			oDoc.RemoveTableColumn();
+		}, AscDFH.historydescription_Document_TableRemoveColumn);
 	};
 	PDFEditorApi.prototype.remTable = function() {
 		let oDoc = this.getPDFDoc();
+		let oController = oDoc.GetController();
 		let oObject = oDoc.GetActiveObject();
 		
 		if (oObject && oObject.IsDrawing() && oObject.IsGraphicFrame()) {
-			oDoc.CreateNewHistoryPoint();
-			oDoc.RemoveDrawing(oObject.GetId());
-			oDoc.TurnOffHistory();
-			return true;
+			oDoc.DoAction(function() {
+				oDoc.RemoveDrawing(oObject.GetId());
+				oController.resetSelection();
+			}, AscDFH.historydescription_Pdf_ContextMenuRemove);
 		}
 
 		return false;
@@ -4212,7 +4232,7 @@
 							return;
 						}
 
-						// Выставляем ID пользователя, залочившего данный элемент
+						// Set the ID of the user who locked this element
 						Lock.Set_UserId(e["user"]);
 						let OldType = Lock.Get_Type();
 						if (AscCommon.c_oAscLockTypes.kLockTypeOther2 === OldType || AscCommon.c_oAscLockTypes.kLockTypeOther3 === OldType) {
@@ -4240,7 +4260,7 @@
 						oThumbnails && oThumbnails._repaintPage(oPage.GetIndex());
 					}
                     if (Class.IsAnnot && Class.IsAnnot()) {
-						// если аннотация коммент или аннотация с комментом то блокируем и комментарий тоже
+						// if annotation is a comment or annotation with a comment, then lock the comment too
 						if (Class.IsComment() || (Class.IsUseContentAsComment() && Class.GetContents() != undefined) || Class.GetReply(0) != null) {
 							t.sync_LockComment(Class.Get_Id(), e["user"]);
 						}
@@ -4280,7 +4300,7 @@
 							AscCommon.CollaborativeEditing.Add_Unlock(Class);
 						}
 					} else if (CurType === AscCommon.c_oAscLockTypes.kLockTypeMine) {
-						// Такого быть не должно
+						// This should not happen
 						NewType = AscCommon.c_oAscLockTypes.kLockTypeMine;
 					} else if (CurType === AscCommon.c_oAscLockTypes.kLockTypeOther2 || CurType === AscCommon.c_oAscLockTypes.kLockTypeOther3) {
 						NewType = AscCommon.c_oAscLockTypes.kLockTypeOther2;
@@ -4596,10 +4616,23 @@
 		let oThumbnails = oDoc.Viewer.Thumbnails;
 		aPages = aPages != undefined ? aPages : oThumbnails.getSelectedPages().slice();
 
-		oDoc.DoAction(function() {
+		let isLocalRotate = false == Asc.editor.canEdit();
+
+		function rotatePages() {
 			oDoc.RotatePages(aPages, nAngle);
 			oThumbnails.keepSelectedPages = true;
-		}, AscDFH.historydescription_Pdf_RotatePage, this, aPages);
+		}
+
+		// editing rotate, for history
+		if (!isLocalRotate) {
+			oDoc.DoAction(function() {
+				rotatePages();
+			}, AscDFH.historydescription_Pdf_RotatePage, this, aPages);
+		}
+		// viewing rotate, no history
+		else {
+			rotatePages();
+		}
 	};
 	PDFEditorApi.prototype.asc_GetPageRotate = function(nPage) {
 		let oViewer = this.getDocumentRenderer();
@@ -4994,7 +5027,7 @@
 		this.ImageLoader.bIsLoadDocumentFirst = false;
 		var _bIsOldPaste                      = this.isPasteFonts_Images;
 
-		// на методе _openDocumentEndCallback может поменяться this.EndActionLoadImages
+		// this.EndActionLoadImages may change on _openDocumentEndCallback method
 		if (this.EndActionLoadImages == 1) {
 			this.sync_EndAction(Asc.c_oAscAsyncActionType.BlockInteraction, Asc.c_oAscAsyncAction.LoadDocumentImages);
 		}
@@ -5006,7 +5039,7 @@
 		}
 		this.EndActionLoadImages = 0;
 
-		// размораживаем меню... и начинаем считать документ
+		// unfreeze menu... and start processing the document
 		if (false === this.isPasteFonts_Images && false === this.isSaveFonts_Images && false === this.isLoadImagesCustom) {
 			this.ServerImagesWaitComplete = true;
 			this._openDocumentEndCallback();
@@ -5098,7 +5131,7 @@
 
 		this.sendMathToMenu();
 		this.sendStandartTextures();
-		//выставляем тип copypaste
+		// set copypaste type
 		this.isDocumentEditor = false;
 		AscCommon.PasteElementsId.g_bIsDocumentCopyPaste = false;
 		AscCommon.PasteElementsId.g_bIsPDFCopyPaste = true;
@@ -5115,10 +5148,10 @@
 			this.isApplyChangesOnOpenEnabled = false;
 			this._applyPreOpenLocks();
 
-			// TODO: onDocumentContentReady вызываем в конце загрузки всех изменений (и объектов для этих изменений)
+			// TODO: onDocumentContentReady is called at the end of loading all changes (and objects for these changes)
 			let oThis = this;
 			
-			// Принимаем изменения на открытии только если это редактор, либо LiveViewer (т.е. включена быстрая совместка)
+			// Accept changes on open only if this is the editor or LiveViewer (i.e., fast collaboration is enabled)
 			if (this.isLiveViewer() || !this.isPdfViewer)
 			{
 				let perfStart    = performance.now();
@@ -5255,8 +5288,8 @@
 
 	/** @enum {number} */
 	let c_oAscPdfContextMenuTypes = {
-		Common       	: 0,	// Обычное контекстное меню
-		Thumbnails		: 1		// контекстное меню тамбнейлов
+		Common       	: 0,	// Standard context menu
+		Thumbnails		: 1		// thumbnails context menu
 	};
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -5542,7 +5575,6 @@
 	// table
 	PDFEditorApi.prototype['put_Table']						= PDFEditorApi.prototype.put_Table;
 	PDFEditorApi.prototype['tblApply']						= PDFEditorApi.prototype.tblApply;
-	PDFEditorApi.prototype['asc_DistributeTableCells']		= PDFEditorApi.prototype.asc_DistributeTableCells;
 	PDFEditorApi.prototype['remColumn']						= PDFEditorApi.prototype.remColumn;
 	PDFEditorApi.prototype['remTable']						= PDFEditorApi.prototype.remTable;
 	PDFEditorApi.prototype['asc_getTableStylesPreviews']	= PDFEditorApi.prototype.asc_getTableStylesPreviews;
