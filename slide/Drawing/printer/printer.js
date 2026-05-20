@@ -360,6 +360,16 @@
 				recalResult = content.Recalculate_Page(curPage++, true);
 			}, content, 0, 0, outlineShape.extX, outlineShape.extY);
 	};
+	OutlinePrinter.prototype.getParagraphPage = function (paragraph) {
+		const startPage = paragraph.PageNum;
+		for (let i = 0; i < paragraph.Pages.length; i += 1) {
+			const page = paragraph.Pages[i];
+			if (page.EndLine >= 0) {
+				return startPage + i;
+			}
+		}
+		return startPage;
+	};
 	OutlinePrinter.prototype.getDecorationsByPage = function () {
 		if (this.cache.decorationsByPage === null) {
 			this.cache.decorationsByPage = {
@@ -372,20 +382,21 @@
 			const paragraphMap = outlineView.outlineInfo.getOutlineParagraphToInfoMap();
 			for (let outlineId in paragraphMap) {
 				const info = paragraphMap[outlineId];
-				const outlineParagraph = info.outlineParagraph;
-
-				if (!titleCache[outlineParagraph.PageNum]) {
-					titleCache[outlineParagraph.PageNum] = [];
+				const titleOutlineParagraph = info.outlineParagraph;
+				const titlePageNum = this.getParagraphPage(titleOutlineParagraph);
+				if (!titleCache[titlePageNum]) {
+					titleCache[titlePageNum] = [];
 				}
-				titleCache[outlineParagraph.PageNum].push(info);
+				titleCache[titlePageNum].push(info);
 				const contentShapeInfoMap = info.getContentShapeInfoMap(outlineView);
 				for (let contentShapeInfoId in contentShapeInfoMap) {
 					const contentShapeInfo = contentShapeInfoMap[contentShapeInfoId];
 					const contentOutlineParagraph = contentShapeInfo.getOutlineParagraph(outlineView);
-					if (!contentCache[contentOutlineParagraph.PageNum]) {
-						contentCache[contentOutlineParagraph.PageNum] = [];
+					const contentPageNum = this.getParagraphPage(contentOutlineParagraph);
+					if (!contentCache[contentPageNum]) {
+						contentCache[contentPageNum] = [];
 					}
-					contentCache[contentOutlineParagraph.PageNum].push(contentShapeInfo);
+					contentCache[contentPageNum].push(contentShapeInfo);
 				}
 			}
 		}

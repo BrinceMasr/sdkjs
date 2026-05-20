@@ -1422,6 +1422,13 @@
 		return this.getOutlineParagraphs();
 	};
 	OutlineView.prototype.getParagraphY = function (paragraph) {
+		for (let i = 0; i < paragraph.Pages.length; i += 1) {
+			const page = paragraph.Pages[i];
+			if (page.EndLine >= 0) {
+				return this.getTransformY(page.Y);
+			}
+		}
+
 		return this.getTransformY(paragraph.Y);
 	};
 	OutlineView.prototype.getTransformY = function (y) {
