@@ -5604,18 +5604,24 @@
 				if (slideObject) {
 					const widthScale = this.extX / presentation.GetWidthMM();
 					const heightScale = this.extY / presentation.GetHeightMM();
-					const m = new AscCommon.CMatrix();
-					m.CopyFrom(_transform);
-					m.Scale(widthScale, heightScale);
-					m.tx /= widthScale;
-					m.ty /= heightScale;
-					graphics.SetBaseTransform(m);
+					const localTransform = new AscCommon.CMatrix();
+					localTransform.CopyFrom(_transform);
+					localTransform.Scale(widthScale, heightScale);
+					localTransform.tx /= widthScale;
+					localTransform.ty /= heightScale;
+
+					const existingBase = graphics.GetBaseTransform();
+					const composedTransform = existingBase ? existingBase.CreateDublicate() : new AscCommon.CMatrix();
+					composedTransform.Multiply(localTransform, AscCommon.MATRIX_ORDER_PREPEND);
+
+					graphics.SetBaseTransform(composedTransform);
 					graphics.reset();
+					graphics.AddClipRect(0, 0, presentation.GetWidthMM(), presentation.GetHeightMM());
 					graphics.isSlidePaceholder = true;
 					slideObject.draw(graphics, 0);
 					graphics.isSlidePaceholder = false;
 
-					graphics.ResetBaseTransform();
+					graphics.SetBaseTransform(existingBase);
 					graphics.reset();
 					if (this.pen || this.brush) {
 						graphics.transform3(_transform);

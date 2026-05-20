@@ -535,16 +535,23 @@
 			return;
 		}
 		graphics.SaveGrState();
-		let baseTransform = graphics.GetBaseTransform();
-		let copyBaseTransform = baseTransform ? baseTransform.CreateDublicate() : new AscCommon.CMatrix();
+		const baseTransform = graphics.GetBaseTransform();
 		const slide = this.slide;
 		const presentation = slide.presentation;
 		const slideWidth = presentation.GetWidthMM();
+		const slideHeight = presentation.GetHeightMM();
 		const scaleCoefficient = this.width / slideWidth;
-		copyBaseTransform.Scale(scaleCoefficient, scaleCoefficient);
-		copyBaseTransform.Translate(this.x, this.y);
-		graphics.SetBaseTransform(copyBaseTransform);
+
+		const localTransform = new AscCommon.CMatrix();
+		localTransform.Scale(scaleCoefficient, scaleCoefficient);
+		localTransform.Translate(this.x, this.y);
+
+		const composedTransform = baseTransform ? baseTransform.CreateDublicate() : new AscCommon.CMatrix();
+		composedTransform.Multiply(localTransform, AscCommon.MATRIX_ORDER_PREPEND);
+
+		graphics.SetBaseTransform(composedTransform);
 		graphics.reset();
+		graphics.AddClipRect(0, 0, slideWidth, slideHeight);
 		slide.draw(graphics);
 		graphics.SetBaseTransform(baseTransform);
 		graphics.reset();
