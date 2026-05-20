@@ -555,13 +555,13 @@
 		slide.draw(graphics);
 		graphics.SetBaseTransform(baseTransform);
 		graphics.reset();
+		graphics.RestoreGrState();
 		if (isDrawFrame) {
 			this.drawFrame(graphics);
 		}
 		if (isDrawSlideNumber) {
 			this.drawSlideNumber(graphics);
 		}
-		graphics.RestoreGrState();
 	};
 	SlidePlaceholder.prototype.drawFrame = function (graphics) {
 		graphics.p_color(0, 0, 0, 255);
