@@ -323,45 +323,75 @@ function (window, undefined) {
 	};
 
 	CellEditor.prototype._getInputValue = function () {
-		if (!this.input) return '';
-		return this._isContentEditable() ? (this.input.textContent || '') : (this.input.value || '');
+		if (!this.input) {
+			return '';
+		}
+		if (this._isContentEditable()) {
+			var divs = this.input.children;
+			if (!divs.length) {
+				return this.input.textContent || '';
+			}
+			var lines = [];
+			for (var i = 0; i < divs.length; i++) {
+				lines.push(divs[i].textContent || '');
+			}
+			return lines.join('\n');
+		}
+		return this.input.value || '';
 	};
 
 	CellEditor.prototype._setInputValue = function (text) {
-		if (!this.input) return;
+		if (!this.input) {
+			return;
+		}
 		if (this._isContentEditable()) {
-			this.input.textContent = text;
+			var lines = (text || '').split('\n');
+			var html = '';
+			for (var i = 0; i < lines.length; i++) {
+				html += '<div>';
+				html += lines[i]
+					? lines[i].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+					: '<br>';
+				html += '</div>';
+			}
+			this.input.innerHTML = html || '<div><br></div>';
 		} else {
 			this.input.value = text;
 		}
 	};
 
 	CellEditor.prototype._getInputSelectionStart = function () {
-		if (!this.input) return undefined;
+		if (!this.input) {
+			return undefined;
+		}
 		if (this._isContentEditable()) {
 			var sel = window.getSelection();
-			if (!sel || !sel.rangeCount) return 0;
+			if (!sel || !sel.rangeCount) {
+				return 0;
+			}
 			var range = sel.getRangeAt(0);
-			if (!this.input.contains(range.startContainer)) return 0;
-			var preRange = document.createRange();
-			preRange.selectNodeContents(this.input);
-			preRange.setEnd(range.startContainer, range.startOffset);
-			return preRange.toString().length;
+			if (!this.input.contains(range.startContainer)) {
+				return 0;
+			}
+			return this._getContentEditableOffset(range.startContainer, range.startOffset);
 		}
 		return this.input.selectionStart;
 	};
 
 	CellEditor.prototype._getInputSelectionEnd = function () {
-		if (!this.input) return undefined;
+		if (!this.input) {
+			return undefined;
+		}
 		if (this._isContentEditable()) {
 			var sel = window.getSelection();
-			if (!sel || !sel.rangeCount) return 0;
+			if (!sel || !sel.rangeCount) {
+				return 0;
+			}
 			var range = sel.getRangeAt(0);
-			if (!this.input.contains(range.endContainer)) return 0;
-			var preRange = document.createRange();
-			preRange.selectNodeContents(this.input);
-			preRange.setEnd(range.endContainer, range.endOffset);
-			return preRange.toString().length;
+			if (!this.input.contains(range.endContainer)) {
+				return 0;
+			}
+			return this._getContentEditableOffset(range.endContainer, range.endOffset);
 		}
 		return this.input.selectionEnd;
 	};
@@ -400,20 +430,95 @@ function (window, undefined) {
 	};
 
 	CellEditor.prototype._getNodeAtOffset = function (container, charOffset) {
-		var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
-		var node, cumulative = 0, lastNode = null;
-		while ((node = walker.nextNode()) !== null) {
-			lastNode = node;
-			var len = node.length;
-			if (cumulative + len >= charOffset) {
-				return { node: node, offset: charOffset - cumulative };
-			}
-			cumulative += len;
+		return this._getNodeAtOffsetForDivs(container, charOffset);
+	};
+
+	CellEditor.prototype._getTextNodeInSpan = function (child) {
+		if (child.nodeType === 3) {
+			return child;
 		}
-		if (lastNode) {
-			return { node: lastNode, offset: lastNode.length };
+		if (child.firstChild && child.firstChild.nodeType === 3) {
+			return child.firstChild;
 		}
 		return null;
+	};
+
+	CellEditor.prototype._getNodeAtOffsetForDivs = function (container, charOffset) {
+		var divs = container.children;
+		var cumulative = 0;
+		var i, j, div, textNode, lastTextNode;
+		for (i = 0; i < divs.length; i++) {
+			div = divs[i];
+			if (i > 0) {
+				if (cumulative === charOffset) {
+					return this._getLastNodeInDiv(divs[i - 1]);
+				}
+				cumulative++;
+			}
+			lastTextNode = null;
+			for (j = 0; j < div.childNodes.length; j++) {
+				textNode = this._getTextNodeInSpan(div.childNodes[j]);
+				if (textNode) {
+					lastTextNode = textNode;
+					if (cumulative + textNode.length >= charOffset) {
+						return { node: textNode, offset: charOffset - cumulative };
+					}
+					cumulative += textNode.length;
+				}
+			}
+			if (!lastTextNode && cumulative === charOffset) {
+				return { node: div, offset: 0 };
+			}
+		}
+		if (divs.length > 0) {
+			return this._getLastNodeInDiv(divs[divs.length - 1]);
+		}
+		return null;
+	};
+
+	CellEditor.prototype._getLastNodeInDiv = function (div) {
+		var textNode;
+		for (var j = div.childNodes.length - 1; j >= 0; j--) {
+			textNode = this._getTextNodeInSpan(div.childNodes[j]);
+			if (textNode) {
+				return { node: textNode, offset: textNode.length };
+			}
+		}
+		return { node: div, offset: div.childNodes.length };
+	};
+
+	CellEditor.prototype._getContentEditableOffset = function (targetNode, targetOffset) {
+		var divs = this.input.children;
+		var cumulative = 0;
+		var i, j, div, textNode;
+		for (i = 0; i < divs.length; i++) {
+			div = divs[i];
+			if (i > 0) {
+				cumulative++;
+			}
+			if (div === targetNode || div.contains(targetNode)) {
+				if (div === targetNode) {
+					return cumulative;
+				}
+				for (j = 0; j < div.childNodes.length; j++) {
+					textNode = this._getTextNodeInSpan(div.childNodes[j]);
+					if (textNode) {
+						if (textNode === targetNode) {
+							return cumulative + targetOffset;
+						}
+						cumulative += textNode.length;
+					}
+				}
+				return cumulative;
+			}
+			for (j = 0; j < div.childNodes.length; j++) {
+				textNode = this._getTextNodeInSpan(div.childNodes[j]);
+				if (textNode) {
+					cumulative += textNode.length;
+				}
+			}
+		}
+		return cumulative;
 	};
 
 	CellEditor.prototype._colorToCSS = function (color) {
@@ -423,38 +528,61 @@ function (window, undefined) {
 		return '';
 	};
 
-	CellEditor.prototype._buildInputHTML = function (fragments) {
-		if (!fragments || !fragments.length) return '';
-		var result = '';
-		for (var i = 0; i < fragments.length; i++) {
-			var fr = fragments[i];
-			var text = fr.getFragmentText ? fr.getFragmentText() : (fr.text || '');
-			if (!text) continue;
-			var explicitColor = fr.isFormulaRange && fr.format && fr.format.c;
-			var cssColor = explicitColor ? this._colorToCSS(explicitColor) : '';
-			var escaped = text
-				.replace(/&/g, '&amp;')
-				.replace(/</g, '&lt;')
-				.replace(/>/g, '&gt;');
-			result += cssColor
-				? '<span style="color:' + cssColor + '">' + escaped + '</span>'
-				: '<span>' + escaped + '</span>';
+	CellEditor.prototype._buildLineHTML = function (fragments) {
+		if (!fragments || !fragments.length) {
+			return '<div><br></div>';
 		}
-		return result;
+		var i, j, fr, text, color, parts, currentLine;
+		currentLine = [];
+		var lines = [currentLine];
+		for (i = 0; i < fragments.length; i++) {
+			fr = fragments[i];
+			text = fr.getFragmentText ? fr.getFragmentText() : (fr.text || '');
+			color = (fr.isFormulaRange && fr.format && fr.format.c) ? this._colorToCSS(fr.format.c) : '';
+			parts = text.split('\n');
+			for (j = 0; j < parts.length; j++) {
+				if (j > 0) {
+					currentLine = [];
+					lines.push(currentLine);
+				}
+				if (parts[j]) {
+					currentLine.push({ text: parts[j], color: color });
+				}
+			}
+		}
+		var html = '';
+		var l, k, item, escaped;
+		var divOpen = this._ceDivStyle ? '<div style="' + this._ceDivStyle + '">' : '<div>';
+		for (l = 0; l < lines.length; l++) {
+			html += divOpen;
+			if (lines[l].length === 0) {
+				html += '<br>';
+			} else {
+				for (k = 0; k < lines[l].length; k++) {
+					item = lines[l][k];
+					escaped = item.text
+						.replace(/&/g, '&amp;')
+						.replace(/</g, '&lt;')
+						.replace(/>/g, '&gt;');
+					if (item.color) {
+						html += '<span style="color:' + item.color + '">' + escaped + '</span>';
+					} else {
+						html += '<span>' + escaped + '</span>';
+					}
+				}
+			}
+			html += '</div>';
+		}
+		return html;
 	};
 
 	CellEditor.prototype._setInputFragments = function (fragments) {
-		if (!this.input) return;
+		if (!this.input) {
+			return;
+		}
 		if (this._isContentEditable()) {
 			this._programmaticInput = true;
-			if (this.isTopLineActive && this.isFormula()) {
-				this.input.innerHTML = this._buildInputHTML(fragments);
-			} else {
-				this.input.textContent = AscCommonExcel.getFragmentsText(fragments);
-			}
-			if (this.input.textContent.endsWith('\n')) {
-				this.input.appendChild(document.createElement('br'));
-			}
+			this.input.innerHTML = this._buildLineHTML(fragments);
 			this._programmaticInput = false;
 		} else {
 			this.input.value = AscCommonExcel.getFragmentsText(fragments);
@@ -478,10 +606,17 @@ function (window, undefined) {
 		
 
 		if (this._isContentEditable()) {
-			this.input.style.whiteSpace = 'pre-wrap';
 			this.input.style.overflowY = 'auto';
 			this.input.style.overflowX = 'auto';
-			this.input.style.overflowAnchor = 'none';
+			var lh = parseFloat(window.getComputedStyle(this.input).lineHeight) || 0;
+			var ch = this.input.clientHeight;
+			//this.input.style.scrollSnapType = 'y mandatory';
+			//this.input.style.msScrollSnapType = 'mandatory';
+			//this.input.style.msScrollSnapPointsY = 'snapInterval(0px,' + lh + 'px)';
+			this._ceDivStyle = 'white-space:pre-wrap' + (lh > 0 ? ';min-height:' + lh + 'px' : '');
+			if (lh > 0 && ch > lh) {
+				this.input.style.paddingBottom = (ch - lh) + 'px';
+			}
 		}
 
 		var b = this._getInputSelectionStart();
@@ -1506,7 +1641,9 @@ function (window, undefined) {
 		if (!this.isTopLineActive || !this.skipTLUpdate || this.undoMode) {
 			// When editing in cell (not in topline), show only current line in formula bar
 			if (!this.isTopLineActive && this.input) {
-				this.input.textContent = this._getCurrentLineText();
+				this._programmaticInput = true;
+				this.input.innerHTML = '<div>' + (this._getCurrentLineText() || '<br>') + '</div>';
+				this._programmaticInput = false;
 			} else {
 				this._setInputFragments(this._getRenderFragments());
 			}
@@ -2194,7 +2331,9 @@ function (window, undefined) {
 		t._updateCursor();
 		// Update formula bar when cursor moves between lines while editing in cell
 		if (!t.isTopLineActive && t.input) {
-			t.input.textContent = t._getCurrentLineText();
+			t._programmaticInput = true;
+			t.input.innerHTML = '<div>' + (t._getCurrentLineText() || '<br>') + '</div>';
+			t._programmaticInput = false;
 		}
 	};
 
@@ -2206,73 +2345,6 @@ function (window, undefined) {
 		return this.textRender.getLineByY(coord.y, this.topLineIndex, this.getZoom());
 	};
 
-	CellEditor.prototype._scrollToCursorInContentEditable = function () {
-		if (!this._isContentEditable() || !this.input) {
-			return;
-		}
-		var sel = window.getSelection();
-		if (!sel || !sel.rangeCount) {
-			return;
-		}
-		var range = sel.getRangeAt(0);
-		var rect = range.getBoundingClientRect();
-		if (!rect || (rect.width === 0 && rect.height === 0 && rect.top === 0 && rect.left === 0)) {
-			var rects = range.getClientRects();
-			rect = rects && rects.length ? rects[0] : null;
-		}
-		if (!rect || rect.height === 0) {
-			var node = range.startContainer;
-			var off = range.startOffset;
-			var charRange = document.createRange();
-			var cr;
-			if (node && node.nodeType === 3) {
-				if (off < node.length) {
-					charRange.setStart(node, off);
-					charRange.setEnd(node, off + 1);
-					cr = charRange.getBoundingClientRect();
-					if (cr && cr.height > 0) {
-						rect = cr;
-					}
-				}
-				if ((!rect || rect.height === 0) && off > 0) {
-					charRange.setStart(node, off - 1);
-					charRange.setEnd(node, off);
-					cr = charRange.getBoundingClientRect();
-					if (cr && cr.height > 0) {
-						rect = cr;
-					}
-				}
-			} else if (node && node.nodeType === 1) {
-				var child = node.childNodes[off] || node.childNodes[off - 1];
-				if (child && child.getBoundingClientRect) {
-					cr = child.getBoundingClientRect();
-					if (cr && cr.height > 0) {
-						rect = cr;
-					}
-				}
-			}
-		}
-		if (!rect) {
-			return;
-		}
-		var containerRect = this.input.getBoundingClientRect();
-		var scrollTop = this.input.scrollTop;
-		var height = this.input.clientHeight;
-		var lineTop = rect.top - containerRect.top + scrollTop;
-		var measuredHeight = rect.bottom - rect.top;
-		var lineHeight = measuredHeight > 2 ? measuredHeight : (parseFloat(window.getComputedStyle(this.input).lineHeight) || height);
-		var centerOffset = Math.floor((height - lineHeight) / 2);
-		var target = Math.max(0, lineTop - centerOffset);
-		var maxScroll = this.input.scrollHeight - height;
-		if (target > maxScroll) {
-			var curPB = parseFloat(this.input.style.paddingBottom) || 0;
-			this.input.style.paddingBottom = (curPB + target - maxScroll) + 'px';
-		}
-		if (this.input.scrollTop !== target) {
-			this.input.scrollTop = target;
-		}
-	};
-
 	CellEditor.prototype._updateTopLineCurPos = function () {
 		if (this.loadFonts) {
 			return;
@@ -2281,7 +2353,6 @@ function (window, undefined) {
 		var b = isSelected ? this.selectionBegin : this.cursorPos;
 		var e = isSelected ? this.selectionEnd : this.cursorPos;
 		this._setInputSelectionRange(Math.min(b, e), Math.max(b, e));
-		this._scrollToCursorInContentEditable();
 	};
 
 	CellEditor.prototype._topLineGotFocus = function () {
@@ -2308,13 +2379,13 @@ function (window, undefined) {
 	CellEditor.prototype._delayedUpdateCursorByTopLine = function () {
 		var t = this;
 		if (this._isContentEditable()) {
-			if (t.input) t.input.style.overflowY = 'hidden';
 			requestAnimationFrame(function () {
-				if (t.input) t.input.style.overflowY = 'auto';
 				t._updateCursorByTopLine();
 			});
 		} else {
-			setTimeout(function () { t._updateCursorByTopLine(); });
+			setTimeout(function () {
+				t._updateCursorByTopLine();
+			});
 		}
 	};
 	CellEditor.prototype._updateCursorByTopLine = function () {
@@ -2339,7 +2410,12 @@ function (window, undefined) {
 				this.handlers.trigger("onSelectionEnd");
 			}
 		}
-		this._scrollToCursorInContentEditable();
+		if (this._isContentEditable() && this.input && this.input.children.length) {
+			var lineH = this.input.children[0].offsetHeight;
+			if (lineH > 0) {
+				this.input.scrollTop = Math.round(this.input.scrollTop / lineH) * lineH;
+			}
+		}
 	};
 
 	CellEditor.prototype._syncEditors = function () {

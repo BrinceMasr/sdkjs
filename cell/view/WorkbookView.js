@@ -363,9 +363,20 @@
   };
 
   WorkbookView.prototype._setInputValue = function (text) {
-    if (!this.input) return;
+    if (!this.input) {
+      return;
+    }
     if (this._isInputContentEditable()) {
-      this.input.textContent = text;
+      var lines = (text || '').split('\n');
+      var html = '';
+      for (var i = 0; i < lines.length; i++) {
+        html += '<div>';
+        html += lines[i]
+          ? lines[i].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          : '<br>';
+        html += '</div>';
+      }
+      this.input.innerHTML = html || '<div><br></div>';
     } else {
       this.input.value = text;
     }
