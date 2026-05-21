@@ -204,11 +204,8 @@
 		return null;
 	};
 	SpecificPrinter.prototype.getPageSizes = function () {
-		if (this.isScaleToFitPaper()) {
-			const pageOptions = this.printOptions.pageOptions;
-			return { width: pageOptions.width, height: pageOptions.height };
-		}
-		return this.getContentSizes();
+		const pageOptions = this.printOptions.pageOptions;
+		return { width: pageOptions.width, height: pageOptions.height };
 	};
 	SpecificPrinter.prototype.isScaleToFitPaper = function () {
 		return this.printOptions.slidesOnPageOptions.asc_getIsScaleToFitPaper();
@@ -219,11 +216,11 @@
 			return;
 		}
 		const contentSizes = this.getContentSizes();
-		const pageOptions = this.printOptions.pageOptions;
-		const scale = Math.min(pageOptions.width / contentSizes.width, pageOptions.height / contentSizes.height);
+		const pageSizes = this.getPageSizes();
+		const scale = Math.min(pageSizes.width / contentSizes.width, pageSizes.height / contentSizes.height);
 		const m = new AscCommon.CMatrix();
 		m.Scale(scale, scale);
-		m.Translate((pageOptions.width - contentSizes.width * scale) / 2, (pageOptions.height - contentSizes.height * scale) / 2);
+		m.Translate((pageSizes.width - contentSizes.width * scale) / 2, (pageSizes.height - contentSizes.height * scale) / 2);
 		const baseTransform = graphics.GetBaseTransform();
 		const composedTransform = baseTransform ? baseTransform.CreateDublicate() : new AscCommon.CMatrix();
 		composedTransform.Multiply(m, AscCommon.MATRIX_ORDER_PREPEND);
@@ -569,6 +566,16 @@
 	SlidePrinter.prototype.getContentSizes = function () {
 		const presentation = this.getPresentation();
 		return { width: presentation.GetWidthMM(), height: presentation.GetHeightMM() };
+	};
+	SlidePrinter.prototype.getPageSizes = function () {
+		const pageOptions = this.printOptions.pageOptions;
+		const contentSizes = this.getContentSizes();
+		const isSlideLandscape = contentSizes.width > contentSizes.height;
+		const isPageLandscape = pageOptions.width > pageOptions.height;
+		if (isSlideLandscape !== isPageLandscape) {
+			return { width: pageOptions.height, height: pageOptions.width };
+		}
+		return { width: pageOptions.width, height: pageOptions.height };
 	};
 
 	window["AscCommonSlide"] = window["AscCommonSlide"] || {};
