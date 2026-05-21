@@ -2371,13 +2371,16 @@ function (window, undefined) {
 		this.callTopLineMouseup = false;
 		// with this combination ctrl+a, click, ctrl+a, click selectionStart is not updated
 		// therefore we perform processing after the system handler
-		this._delayedUpdateCursorByTopLine();
+		this._delayedUpdateCursorByTopLine(this._isContentEditable());
 	};
-	CellEditor.prototype._delayedUpdateCursorByTopLine = function () {
+	CellEditor.prototype._delayedUpdateCursorByTopLine = function (cleanRange) {
 		var t = this;
 		if (this._isContentEditable()) {
 			requestAnimationFrame(function () {
 				t._updateCursorByTopLine();
+				if (cleanRange) {
+					t.cleanSelectRange();
+				}
 			});
 		} else {
 			setTimeout(function () {
