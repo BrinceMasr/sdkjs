@@ -207,11 +207,6 @@
 		const oThis = this;
 		return new Promise(function (resolve)
 		{
-			if (AscCommon.DISABLE_SMARTART_BINARY_DATA)
-			{
-				resolve();
-				return;
-			}
 			if (oThis.drawingBin.bin)
 			{
 				resolve();
@@ -259,11 +254,6 @@
 		const oThis = this;
 		return new Promise(function (resolve)
 		{
-			if (AscCommon.DISABLE_SMARTART_BINARY_DATA)
-			{
-				resolve();
-				return;
-			}
 			if (oThis.dataBin[nSmartArtType])
 			{
 				resolve();
@@ -288,5 +278,4 @@
 	window["AscCommon"] = window.AscCommon = window["AscCommon"] || {};
 
 	window["AscCommon"].g_oBinarySmartArts = new CSmartArtBinCache();
-	window["AscCommon"].DISABLE_SMARTART_BINARY_DATA = true;
 }(window));
