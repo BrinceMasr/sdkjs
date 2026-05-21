@@ -213,9 +213,6 @@
 	SpecificPrinter.prototype.drawPage = function (graphics, index) {
 		const pageSizes = this.getPageSizes();
 		const contentSizes = this.getContentSizes();
-		graphics.SaveGrState();
-		graphics.SetIntegerGrid(false);
-		graphics.AddClipRect(0, 0, pageSizes.width, pageSizes.height);
 		const scale = this.isScaleToFitPaper()
 			? Math.min(pageSizes.width / contentSizes.width, pageSizes.height / contentSizes.height)
 			: 1;
@@ -225,6 +222,10 @@
 		const baseTransform = graphics.GetBaseTransform();
 		const composedTransform = baseTransform ? baseTransform.CreateDublicate() : new AscCommon.CMatrix();
 		composedTransform.Multiply(m, AscCommon.MATRIX_ORDER_PREPEND);
+
+		graphics.SaveGrState();
+		graphics.SetIntegerGrid(false);
+		graphics.AddClipRect(0, 0, pageSizes.width, pageSizes.height);
 		graphics.SetBaseTransform(composedTransform);
 		graphics.reset();
 		graphics.SetIntegerGrid(false);
@@ -232,9 +233,28 @@
 		graphics.SetBaseTransform(baseTransform);
 		graphics.reset();
 		graphics.RestoreGrState();
+
+		if (this.isDrawFrame()) {
+			graphics.SaveGrState();
+			graphics.SetBaseTransform(composedTransform);
+			graphics.reset();
+			graphics.SetIntegerGrid(false);
+			this.drawFrame(graphics);
+			graphics.SetBaseTransform(baseTransform);
+			graphics.reset();
+			graphics.RestoreGrState();
+		}
 	};
 	SpecificPrinter.prototype.draw = function (graphics, index) {
 
+	};
+	SpecificPrinter.prototype.isDrawFrame = function () {
+		return this.printOptions.slidesOnPageOptions.asc_getIsFrameSlides();
+	};
+	SpecificPrinter.prototype.drawFrame = function (graphics) {
+		const contentSizes = this.getContentSizes();
+		graphics.p_color(0, 0, 0, 255);
+		graphics.AddSmartRect(0, 0, contentSizes.width, contentSizes.height, 0);
 	};
 
 	const NOTESPRINTER_HORIZONTAL_FIELD = 20;
@@ -481,6 +501,9 @@
 		content.Draw(index, graphics);
 		graphics.RestoreGrState();
 	};
+	OutlinePrinter.prototype.isDrawFrame = function () {
+		return false;
+	};
 
 	function HandoutPrinter(presentation, printOptions) {
 		SpecificPrinter.call(this, presentation, printOptions);
@@ -533,7 +556,7 @@
 		graphics.AddClipRect(0, 0, contentSizes.width, contentSizes.height);
 		const oldHandoutSettings = handoutMaster.handoutSettings;
 		handoutMaster.handoutSettings = this.getHandoutSettings();
-		handoutMaster.draw(graphics, null, pageSlides, this.isDrawFrame(), this.isDrawSlideNumber());
+		handoutMaster.draw(graphics, null, pageSlides, this.isDrawSlideFrame(), this.isDrawSlideNumber());
 		handoutMaster.handoutSettings = oldHandoutSettings;
 		graphics.RestoreGrState();
 	};
@@ -542,6 +565,9 @@
 		return { width: presentation.GetNotesWidthMM(), height: presentation.GetNotesHeightMM() };
 	};
 	HandoutPrinter.prototype.isDrawFrame = function () {
+		return false;
+	};
+	HandoutPrinter.prototype.isDrawSlideFrame = function () {
 		return this.printOptions.slidesOnPageOptions.asc_getIsFrameSlides();
 	};
 	HandoutPrinter.prototype.isDrawSlideNumber = function () {
