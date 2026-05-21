@@ -327,7 +327,7 @@
 	CHandoutMaster.prototype.getSlidesCountOnRow = function(slidesCount) {
 		if (slidesCount % 3 === 0) {
 			return 3;
-		} else if (slidesCount % 2) {
+		} else if (slidesCount % 2 === 0) {
 			return 2;
 		}
 		return 1;

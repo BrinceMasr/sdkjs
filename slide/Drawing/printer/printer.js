@@ -211,13 +211,14 @@
 		return this.printOptions.slidesOnPageOptions.asc_getIsScaleToFitPaper();
 	};
 	SpecificPrinter.prototype.drawPage = function (graphics, index) {
-		if (!this.isScaleToFitPaper()) {
-			this.draw(graphics, index);
-			return;
-		}
-		const contentSizes = this.getContentSizes();
 		const pageSizes = this.getPageSizes();
-		const scale = Math.min(pageSizes.width / contentSizes.width, pageSizes.height / contentSizes.height);
+		const contentSizes = this.getContentSizes();
+		graphics.SaveGrState();
+		graphics.SetIntegerGrid(false);
+		graphics.AddClipRect(0, 0, pageSizes.width, pageSizes.height);
+		const scale = this.isScaleToFitPaper()
+			? Math.min(pageSizes.width / contentSizes.width, pageSizes.height / contentSizes.height)
+			: 1;
 		const m = new AscCommon.CMatrix();
 		m.Scale(scale, scale);
 		m.Translate((pageSizes.width - contentSizes.width * scale) / 2, (pageSizes.height - contentSizes.height * scale) / 2);
@@ -226,16 +227,18 @@
 		composedTransform.Multiply(m, AscCommon.MATRIX_ORDER_PREPEND);
 		graphics.SetBaseTransform(composedTransform);
 		graphics.reset();
+		graphics.SetIntegerGrid(false);
 		this.draw(graphics, index);
 		graphics.SetBaseTransform(baseTransform);
 		graphics.reset();
+		graphics.RestoreGrState();
 	};
 	SpecificPrinter.prototype.draw = function (graphics, index) {
 
 	};
 
-	NOTESPRINTER_HORIZONTAL_FIELD = 20;
-	NOTESPRINTER_VERTICAL_FIELD = 15;
+	const NOTESPRINTER_HORIZONTAL_FIELD = 20;
+	const NOTESPRINTER_VERTICAL_FIELD = 15;
 	function NotesPrinter(presentation, printOptions) {
 		SpecificPrinter.call(this, presentation, printOptions);
 	}
