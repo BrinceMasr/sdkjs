@@ -377,6 +377,9 @@
         html += '</div>';
       }
       this.input.innerHTML = html || '<div><br></div>';
+      if (this.cellEditor) {
+        this.cellEditor._updateTopLineScroll();
+      }
     } else {
       this.input.value = text;
     }

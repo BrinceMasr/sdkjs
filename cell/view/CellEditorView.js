@@ -584,9 +584,21 @@ function (window, undefined) {
 			this._programmaticInput = true;
 			this.input.innerHTML = this._buildLineHTML(fragments);
 			this._programmaticInput = false;
+			this._updateTopLineScroll();
 		} else {
 			this.input.value = AscCommonExcel.getFragmentsText(fragments);
 		}
+	};
+
+	CellEditor.prototype._updateTopLineScroll = function () {
+		if (!this._isContentEditable() || !this.input) {
+			return;
+		}
+		var lineH = this.input.children.length ? this.input.children[0].offsetHeight : 0;
+		var multiLine = lineH > 0 && this.input.clientHeight > lineH * 1.5;
+		var overflow = multiLine ? 'auto' : 'hidden';
+		this.input.style.overflowY = overflow;
+		this.input.style.overflowX = overflow;
 	};
 
 	/**
