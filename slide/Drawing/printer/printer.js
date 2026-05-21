@@ -91,7 +91,7 @@
 	PrintManager.prototype.getPageSizes = function () {
 		return this.specificPrinter.getPageSizes();
 	};
-
+	const SPECIFICPRINTER_FITPAGE_MARGIN = 1;
 	function SpecificPrinter(presentation, printOptions) {
 		this.presentation = presentation;
 		this.printOptions = printOptions;
@@ -213,8 +213,9 @@
 	SpecificPrinter.prototype.drawPage = function (graphics, index) {
 		const pageSizes = this.getPageSizes();
 		const contentSizes = this.getContentSizes();
+		const margin = this.isScaleToFitPaper() ? SPECIFICPRINTER_FITPAGE_MARGIN : 0;
 		const scale = this.isScaleToFitPaper()
-			? Math.min(pageSizes.width / contentSizes.width, pageSizes.height / contentSizes.height)
+			? Math.min((pageSizes.width - 2 * margin) / contentSizes.width, (pageSizes.height - 2 * margin) / contentSizes.height)
 			: 1;
 		const m = new AscCommon.CMatrix();
 		m.Scale(scale, scale);
@@ -253,6 +254,7 @@
 	};
 	SpecificPrinter.prototype.drawFrame = function (graphics) {
 		const contentSizes = this.getContentSizes();
+		graphics.p_width(0);
 		graphics.p_color(0, 0, 0, 255);
 		graphics.AddSmartRect(0, 0, contentSizes.width, contentSizes.height, 0);
 	};
