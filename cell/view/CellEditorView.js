@@ -651,6 +651,15 @@ function (window, undefined) {
 			this._moveCursor(kEndOfText);
 		}
 
+		// If the formula bar had focus when open() was called (async lock path where
+		// _topLineGotFocus fired before isOpened was true), ensure the cursor is visible now.
+		if (this.isTopLineActive && this._isContentEditable()) {
+			var tmp = this.skipTLUpdate;
+			this.skipTLUpdate = false;
+			this._updateTopLineCurPos();
+			this.skipTLUpdate = tmp;
+		}
+
 		/*
 			* Set focus when opening
 			* When clicking a symbol, do not set focus
@@ -1521,24 +1530,6 @@ function (window, undefined) {
 		}
 	};
 
-	CellEditor.prototype._getCurrentLineText = function () {
-		// Get text for current cursor line only (for topline display when editing in cell)
-		var fullText = AscCommonExcel.getFragmentsText(this.options.fragments);
-		if (!fullText) return '';
-
-		var curCharInfo = this.textRender.calcCharOffset(this.cursorPos);
-		if (!curCharInfo || curCharInfo.lineIndex === undefined) {
-			return fullText;
-		}
-
-		// Find start and end of current line based on newlines
-		var lines = fullText.split('\n');
-		if (curCharInfo.lineIndex < lines.length) {
-			return lines[curCharInfo.lineIndex];
-		}
-		return fullText;
-	};
-
 	CellEditor.prototype._getRenderFragments = function () {
 		var opt = this.options, fragments = opt.fragments, i, k, l, first, last, val, lengthColors, tmpColors,
 			colorIndex, uniqueColorIndex;
@@ -1639,14 +1630,7 @@ function (window, undefined) {
 		var fPos, fName, match, fCurrent;
 
 		if (!this.isTopLineActive || !this.skipTLUpdate || this.undoMode) {
-			// When editing in cell (not in topline), show only current line in formula bar
-			if (!this.isTopLineActive && this.input) {
-				this._programmaticInput = true;
-				this.input.innerHTML = '<div>' + (this._getCurrentLineText() || '<br>') + '</div>';
-				this._programmaticInput = false;
-			} else {
-				this._setInputFragments(this._getRenderFragments());
-			}
+			this._setInputFragments(this._getRenderFragments());
 		}
 
 		//get a string without double-byte characters and pass it to the regular expression
@@ -2217,8 +2201,15 @@ function (window, undefined) {
 			AscCommon.g_inputContext.moveAccurate(this.left * this.kx + curLeft, this.top * this.ky + curTop);
 		}
 
-		if (cur && !this._isContentEditable()) {
-			this.input.scrollTop = this.input.clientHeight * cur.lineIndex;
+		if (cur) {
+			if (this._isContentEditable()) {
+				var lineH = this.input.children.length ? this.input.children[0].offsetHeight : 0;
+				if (lineH > 0) {
+					this.input.scrollTop = lineH * cur.lineIndex;
+				}
+			} else {
+				this.input.scrollTop = this.input.clientHeight * cur.lineIndex;
+			}
 		}
 		if (this.isTopLineActive && !this.skipTLUpdate) {
 			this._updateTopLineCurPos();
@@ -2329,12 +2320,6 @@ function (window, undefined) {
 		}
 		t._updateCursorPosition(null, null, lineIndex);
 		t._updateCursor();
-		// Update formula bar when cursor moves between lines while editing in cell
-		if (!t.isTopLineActive && t.input) {
-			t._programmaticInput = true;
-			t.input.innerHTML = '<div>' + (t._getCurrentLineText() || '<br>') + '</div>';
-			t._programmaticInput = false;
-		}
 	};
 
 	CellEditor.prototype._findCursorPosition = function (coord) {
