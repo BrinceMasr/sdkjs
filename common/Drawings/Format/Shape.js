@@ -5605,10 +5605,8 @@
 					const widthScale = this.extX / presentation.GetWidthMM();
 					const heightScale = this.extY / presentation.GetHeightMM();
 					const localTransform = new AscCommon.CMatrix();
-					localTransform.CopyFrom(_transform);
 					localTransform.Scale(widthScale, heightScale);
-					localTransform.tx /= widthScale;
-					localTransform.ty /= heightScale;
+					localTransform.Translate(_transform.tx, _transform.ty);
 
 					const existingBase = graphics.GetBaseTransform();
 					const composedTransform = existingBase ? existingBase.CreateDublicate() : new AscCommon.CMatrix();
@@ -5616,6 +5614,7 @@
 
 					graphics.SetBaseTransform(composedTransform);
 					graphics.reset();
+					graphics.SetIntegerGrid(false);
 					graphics.AddClipRect(0, 0, presentation.GetWidthMM(), presentation.GetHeightMM());
 					graphics.isSlidePaceholder = true;
 					slideObject.draw(graphics, 0);

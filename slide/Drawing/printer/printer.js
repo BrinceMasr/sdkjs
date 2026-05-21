@@ -36,7 +36,7 @@
 		const oldX = content.X;
 		const oldY = content.Y;
 		const oldXLimit = content.XLimit;
-		const oldYLimit = content.XLimit;
+		const oldYLimit = content.YLimit;
 		content.X = x;
 		content.Y = y;
 		content.XLimit = xLimit;
@@ -90,13 +90,6 @@
 	};
 	PrintManager.prototype.getPageSizes = function () {
 		return this.specificPrinter.getPageSizes();
-	};
-
-	PrintManager.prototype.printFullPage = function (index) {
-		printPreview.drawOnPaper(index, {width:sizes.width, height:sizes.height, offset: 0}, {
-			width:  sizes.width,
-			height: sizes.height
-		}, renderer, printPreview.drawFullPageSlide.bind(printPreview));
 	};
 
 	function SpecificPrinter(presentation, printOptions) {
@@ -207,7 +200,40 @@
 	SpecificPrinter.prototype.getPagesCount = function () {
 		return 0;
 	};
+	SpecificPrinter.prototype.getContentSizes = function () {
+		return null;
+	};
+	SpecificPrinter.prototype.getPageSizes = function () {
+		if (this.isScaleToFitPaper()) {
+			const pageOptions = this.printOptions.pageOptions;
+			return { width: pageOptions.width, height: pageOptions.height };
+		}
+		return this.getContentSizes();
+	};
+	SpecificPrinter.prototype.isScaleToFitPaper = function () {
+		return this.printOptions.slidesOnPageOptions.asc_getIsScaleToFitPaper();
+	};
 	SpecificPrinter.prototype.drawPage = function (graphics, index) {
+		if (!this.isScaleToFitPaper()) {
+			this.draw(graphics, index);
+			return;
+		}
+		const contentSizes = this.getContentSizes();
+		const pageOptions = this.printOptions.pageOptions;
+		const scale = Math.min(pageOptions.width / contentSizes.width, pageOptions.height / contentSizes.height);
+		const m = new AscCommon.CMatrix();
+		m.Scale(scale, scale);
+		m.Translate((pageOptions.width - contentSizes.width * scale) / 2, (pageOptions.height - contentSizes.height * scale) / 2);
+		const baseTransform = graphics.GetBaseTransform();
+		const composedTransform = baseTransform ? baseTransform.CreateDublicate() : new AscCommon.CMatrix();
+		composedTransform.Multiply(m, AscCommon.MATRIX_ORDER_PREPEND);
+		graphics.SetBaseTransform(composedTransform);
+		graphics.reset();
+		this.draw(graphics, index);
+		graphics.SetBaseTransform(baseTransform);
+		graphics.reset();
+	};
+	SpecificPrinter.prototype.draw = function (graphics, index) {
 
 	};
 
@@ -235,13 +261,13 @@
 			}
 		});
 	};
-	NotesPrinter.prototype.drawPage = function (graphics, index) {
+	NotesPrinter.prototype.draw = function (graphics, index) {
 		const pages = this.getNotesPages();
 		const page = pages[index];
 		const note = page.note;
-		const pageSize = this.getPageSizes();
+		const contentSizes = this.getContentSizes();
 		graphics.SaveGrState();
-		graphics.AddClipRect(0, 0, pageSize.width, pageSize.height);
+		graphics.AddClipRect(0, 0, contentSizes.width, contentSizes.height);
 		if (page.pageIndex === 0) {
 			note.draw(graphics);
 		} else {
@@ -309,7 +335,7 @@
 	NotesPrinter.prototype.getPagesCount = function () {
 		return this.getNotesPages().length;
 	};
-	NotesPrinter.prototype.getPageSizes = function () {
+	NotesPrinter.prototype.getContentSizes = function () {
 		const presentation = this.getPresentation();
 		return { width: presentation.GetNotesWidthMM(), height: presentation.GetNotesHeightMM() };
 	};
@@ -436,11 +462,11 @@
 			}
 		}
 	};
-	OutlinePrinter.prototype.getPageSizes = function () {
+	OutlinePrinter.prototype.getContentSizes = function () {
 		const pageOptions = this.printOptions.pageOptions;
 		return { width: pageOptions.width, height: pageOptions.height };
 	};
-	OutlinePrinter.prototype.drawPage = function (graphics, index) {
+	OutlinePrinter.prototype.draw = function (graphics, index) {
 		const pageSize = this.getPageSizes();
 		graphics.SaveGrState();
 		graphics.AddClipRect(0, 0, pageSize.width, pageSize.height);
@@ -498,20 +524,20 @@
 		const slidesOnPagePrintOptions = printOptions.slidesOnPagePrintOptions;
 		return slidesOnPagePrintOptions.getHandoutSettings();
 	};
-	HandoutPrinter.prototype.drawPage = function (graphics, index) {
+	HandoutPrinter.prototype.draw = function (graphics, index) {
 		const pageSlides = this.getPageSlides(index);
 		const presentation = this.getPresentation();
 		const handoutMaster = presentation.handoutMasters[0];
-		const pageSize = this.getPageSizes();
+		const contentSizes = this.getContentSizes();
 		graphics.SaveGrState();
-		graphics.AddClipRect(0, 0, pageSize.width, pageSize.height);
+		graphics.AddClipRect(0, 0, contentSizes.width, contentSizes.height);
 		const oldHandoutSettings = handoutMaster.handoutSettings;
 		handoutMaster.handoutSettings = this.getHandoutSettings();
 		handoutMaster.draw(graphics, null, pageSlides, this.isDrawFrame(), this.isDrawSlideNumber());
 		handoutMaster.handoutSettings = oldHandoutSettings;
-			graphics.RestoreGrState();
+		graphics.RestoreGrState();
 	};
-	HandoutPrinter.prototype.getPageSizes = function () {
+	HandoutPrinter.prototype.getContentSizes = function () {
 		const presentation = this.getPresentation();
 		return { width: presentation.GetNotesWidthMM(), height: presentation.GetNotesHeightMM() };
 	};
@@ -526,22 +552,21 @@
 		SpecificPrinter.call(this, presentation, printOptions);
 	}
 	AscFormat.InitClassWithoutType(SlidePrinter, SpecificPrinter);
-	SlidePrinter.prototype.drawPage = function (graphics, index) {
+	SlidePrinter.prototype.draw = function (graphics, index) {
 		const presentation = this.getPresentation();
 		const printIndexes = this.getPrintIndexes();
 		const slideIndex = printIndexes[index];
-		const slides = presentation.Slides;
-		const slide = slides[slideIndex];
-		const pageSize = this.getPageSizes();
+		const slide = presentation.Slides[slideIndex];
+		const contentSizes = this.getContentSizes();
 		graphics.SaveGrState();
-		graphics.AddClipRect(0, 0, pageSize.width, pageSize.height);
+		graphics.AddClipRect(0, 0, contentSizes.width, contentSizes.height);
 		slide.draw(graphics);
 		graphics.RestoreGrState();
-	}
+	};
 	SlidePrinter.prototype.getPagesCount = function () {
 		return this.getPrintIndexes().length;
 	};
-	SlidePrinter.prototype.getPageSizes = function () {
+	SlidePrinter.prototype.getContentSizes = function () {
 		const presentation = this.getPresentation();
 		return { width: presentation.GetWidthMM(), height: presentation.GetHeightMM() };
 	};
