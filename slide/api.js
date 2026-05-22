@@ -5242,7 +5242,10 @@ background-repeat: no-repeat;\
 		if (window.g_asc_plugins)
 			window.g_asc_plugins.onPluginEvent("onChangeCurrentSlide", number);
 	};
-
+	asc_docs_api.prototype.sync_updatePrintPreview  = function(count)
+	{
+		this.sendEvent("asc_onUpdatePreview");
+	};
 	asc_docs_api.prototype.sync_SendThemeColors = function(colors, standart_colors)
 	{
 		this.sendEvent("asc_onSendThemeColors", colors, standart_colors);
@@ -9301,15 +9304,24 @@ background-repeat: no-repeat;\
 	asc_docs_api.prototype.asc_initPrintPreview = function(containerId, options)
 	{
 		if (this.printPreview)
-			return;
+			return null;
 		this.printPreview = new AscCommon.CPresentationPrintPreview(this, containerId);
+		this.printPreview.initPrinter(options.advancedOptions);
+		return this.printPreview.printer.getPagesCount();
 	};
-	asc_docs_api.prototype.asc_drawPrintPreview = function(index, paperSize)
+	asc_docs_api.prototype.asc_updatePrintPreview = function (options) {
+		if (this.printPreview) {
+			this.printPreview.initPrinter(options.advancedOptions);
+			return this.printPreview.printer.getPagesCount();
+		}
+		return null;
+	}
+	asc_docs_api.prototype.asc_drawPrintPreview = function(index)
 	{
 		if (this.printPreview)
 		{
 			this.printPreview.page = index;
-			this.printPreview.update(paperSize);
+			this.printPreview.update();
 		}
 	};
 	asc_docs_api.prototype.asc_closePrintPreview = function()
@@ -9833,6 +9845,7 @@ background-repeat: no-repeat;\
 	asc_docs_api.prototype['getCurrentPage']                      = asc_docs_api.prototype.getCurrentPage;
 	asc_docs_api.prototype['sync_countPagesCallback']             = asc_docs_api.prototype.sync_countPagesCallback;
 	asc_docs_api.prototype['sync_currentPageCallback']            = asc_docs_api.prototype.sync_currentPageCallback;
+	asc_docs_api.prototype['sync_updatePrintPreview']            = asc_docs_api.prototype.sync_updatePrintPreview;
 	asc_docs_api.prototype['sync_SendThemeColors']                = asc_docs_api.prototype.sync_SendThemeColors;
 	asc_docs_api.prototype['ChangeColorScheme']                   = asc_docs_api.prototype.ChangeColorScheme;
 	asc_docs_api.prototype['asc_ChangeColorSchemeByIdx']          = asc_docs_api.prototype.asc_ChangeColorSchemeByIdx;
@@ -10095,9 +10108,10 @@ background-repeat: no-repeat;\
 	asc_docs_api.prototype["asc_generateTableStylesPreviews"] 		= asc_docs_api.prototype.asc_generateTableStylesPreviews;
 
 	// print-preview
-	asc_docs_api.prototype["asc_initPrintPreview"] 	= asc_docs_api.prototype.asc_initPrintPreview;
-	asc_docs_api.prototype["asc_drawPrintPreview"] 	= asc_docs_api.prototype.asc_drawPrintPreview;
-	asc_docs_api.prototype["asc_closePrintPreview"] = asc_docs_api.prototype.asc_closePrintPreview;
+	asc_docs_api.prototype["asc_initPrintPreview"]   = asc_docs_api.prototype.asc_initPrintPreview;
+	asc_docs_api.prototype["asc_updatePrintPreview"] = asc_docs_api.prototype.asc_updatePrintPreview;
+	asc_docs_api.prototype["asc_drawPrintPreview"]   = asc_docs_api.prototype.asc_drawPrintPreview;
+	asc_docs_api.prototype["asc_closePrintPreview"]  = asc_docs_api.prototype.asc_closePrintPreview;
 
 	asc_docs_api.prototype["asc_getExternalReferences"]    = asc_docs_api.prototype.asc_getExternalReferences;
 	asc_docs_api.prototype["asc_updateExternalReferences"] = asc_docs_api.prototype.asc_updateExternalReferences;

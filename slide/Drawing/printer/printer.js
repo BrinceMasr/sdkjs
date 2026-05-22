@@ -86,7 +86,7 @@
 		this.specificPrinter.drawPage(graphics, index);
 	};
 	PrintManager.prototype.getPagesCount = function () {
-		this.specificPrinter.getPagesCount();
+		return this.specificPrinter.getPagesCount();
 	};
 	PrintManager.prototype.getPageSizes = function () {
 		return this.specificPrinter.getPageSizes();

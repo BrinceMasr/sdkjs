@@ -1713,6 +1713,7 @@ function CDrawingDocument()
 		this.SlidesCount                               = this.m_oLogicDocument.GetSlidesCount();
 		this.m_oWordControl.CalculateDocumentSize();
 		this.m_oWordControl.m_oApi.sync_countPagesCallback(this.SlidesCount);
+		this.m_oWordControl.m_oApi.sync_updatePrintPreview();
 		this.m_oWordControl.Thumbnails.LockMainObjType = false;
 	};
 

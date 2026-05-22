@@ -269,7 +269,10 @@
 		graphics.reset();
 		graphics.RestoreGrState();
 	}
-	CPresentationPrintPreview.prototype.update = function(advancedOptions) {
+	CPresentationPrintPreview.prototype.initPrinter = function(advancedOptions) {
+		this.printer = new AscCommonSlide.PrintManager(this.getPresentation(), advancedOptions);
+	}
+	CPresentationPrintPreview.prototype.update = function() {
 		this.initCalculatedValues();
 		if (null === this.page)
 			return;
