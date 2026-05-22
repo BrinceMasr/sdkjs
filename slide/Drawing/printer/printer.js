@@ -211,6 +211,9 @@
 	SpecificPrinter.prototype.isScaleToFitPaper = function () {
 		return this.printOptions.slidesOnPageOptions.asc_getIsScaleToFitPaper();
 	};
+	SpecificPrinter.prototype.isSkipSlideBackground = function () {
+		return !this.printOptions.slidePrintOptions.asc_getIsPrintSlideBackground();
+	};
 	SpecificPrinter.prototype.drawPage = function (graphics, index) {
 		const pageSizes = this.getPageSizes();
 		const contentSizes = this.getContentSizes();
@@ -305,7 +308,9 @@
 		graphics.SaveGrState();
 		graphics.AddClipRect(0, 0, contentSizes.width, contentSizes.height);
 		if (page.pageIndex === 0) {
+			graphics.m_bNoPrintSlideBackground = this.isSkipSlideBackground();
 			note.draw(graphics);
+			graphics.m_bNoPrintSlideBackground = false;
 		} else {
 			graphics.SaveGrState();
 			this.drawPlaceholders(note, graphics);
@@ -572,7 +577,9 @@
 		graphics.AddClipRect(0, 0, contentSizes.width, contentSizes.height);
 		const oldHandoutSettings = handoutMaster.handoutSettings;
 		handoutMaster.handoutSettings = this.getHandoutSettings();
+		graphics.m_bNoPrintSlideBackground = this.isSkipSlideBackground();
 		handoutMaster.draw(graphics, null, pageSlides, this.isDrawSlideFrame(), this.isDrawSlideNumber());
+		graphics.m_bNoPrintSlideBackground = false;
 		handoutMaster.handoutSettings = oldHandoutSettings;
 		graphics.RestoreGrState();
 	};
@@ -602,7 +609,9 @@
 		const contentSizes = this.getContentSizes();
 		graphics.SaveGrState();
 		graphics.AddClipRect(0, 0, contentSizes.width, contentSizes.height);
+		graphics.m_bNoPrintSlideBackground = this.isSkipSlideBackground();
 		slide.draw(graphics);
+		graphics.m_bNoPrintSlideBackground = false;
 		graphics.RestoreGrState();
 	};
 	SlidePrinter.prototype.getPagesCount = function () {

@@ -910,7 +910,9 @@ Slide.prototype.recalculateBackground = function() {
 
     Slide.prototype.drawBgMasterAndLayout = function(graphics, bClipBySlide, bCheckBounds) {
         let _bounds;
-        DrawBackground(graphics, this.backgroundFill, this.Width, this.Height);
+        if (!graphics.m_bNoPrintSlideBackground) {
+            DrawBackground(graphics, this.backgroundFill, this.Width, this.Height);
+        }
         if(bClipBySlide) {
             graphics.SaveGrState();
             graphics.AddClipRect(0, 0, this.Width, this.Height);
