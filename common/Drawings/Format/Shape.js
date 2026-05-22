@@ -5612,6 +5612,7 @@
 					const composedTransform = existingBase ? existingBase.CreateDublicate() : new AscCommon.CMatrix();
 					composedTransform.Multiply(localTransform, AscCommon.MATRIX_ORDER_PREPEND);
 
+					graphics.SaveGrState();
 					graphics.SetBaseTransform(composedTransform);
 					graphics.reset();
 					graphics.SetIntegerGrid(false);
@@ -5622,6 +5623,7 @@
 
 					graphics.SetBaseTransform(existingBase);
 					graphics.reset();
+					graphics.RestoreGrState();
 					if (this.pen || this.brush) {
 						graphics.transform3(_transform);
 						const shapeDrawer = new AscCommon.CShapeDrawer();
