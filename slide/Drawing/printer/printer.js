@@ -127,7 +127,7 @@
 				break;
 			}
 			case Asc.c_oAscPresentationRangeType.SelectedSlides: {
-				if (presentation.IsSlidePageMode()) {
+				if (presentation.IsSlidePageMode() || presentation.IsOutlineMode()) {
 					const thumbnails = presentation.DrawingDocument.m_oWordControl.Thumbnails;
 					result = thumbnails.GetSelectedArray();
 				} else {

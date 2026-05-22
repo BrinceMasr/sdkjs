@@ -8462,7 +8462,31 @@ background-repeat: no-repeat;\
 
 		AscCommon.CollaborativeEditing = new AscCommon.SlideCollaborativeEditing();
 	};
-	
+	asc_docs_api.prototype.getRendererPrintOptions = function (isSelectedSlides) {
+		const presentation = this.private_GetLogicDocument();
+		if (!presentation) {
+			return null;
+		}
+		const printOptions = new AscCommonSlide.CAscPresentationPrintOptions();
+
+		if (isSelectedSlides) {
+			const rangeOptions = printOptions.rangeOptions;
+			rangeOptions.asc_setRangeType(Asc.c_oAscPresentationRangeType.SelectedSlides);
+		}
+		const slidePrintOptions = printOptions.slidePrintOptions;
+		slidePrintOptions.asc_setIsPrintHiddenSlides(false);
+
+		const pageOptions = printOptions.pageOptions;
+		pageOptions.asc_setHeight(presentation.GetHeightMM());
+		pageOptions.asc_setWidth(presentation.GetWidthMM());
+
+		const slidesOnPageOptions = printOptions.slidesOnPageOptions;
+		slidesOnPageOptions.asc_setIsFrameSlides(false);
+		slidesOnPageOptions.asc_setIsPrintComments(false);
+		slidesOnPageOptions.asc_setIsScaleToFitPaper(false);
+
+		return printOptions;
+	};
 	asc_docs_api.prototype._downloadAs = function(actionType, options, oAdditionalData, dataContainer, downloadType)
 	{
 		var t = this;
@@ -8470,14 +8494,17 @@ background-repeat: no-repeat;\
 
 		if (this.isCloudSaveAsLocalToDrawingFormat(actionType, fileType))
 		{
-			this.localSaveToDrawingFormat(this.WordControl.m_oDrawingDocument.ToRendererPart(false, {isSelection: options.isPdfPrint}), fileType);
+			const printOptions = this.getRendererPrintOptions(options.isPdfPrint);
+			if (printOptions) {
+				this.localSaveToDrawingFormat(this.WordControl.m_oDrawingDocument.ToRendererPart(false, printOptions), fileType);
+			}
 			return true;
 		}
 
 		if (c_oAscFileType.PDF === fileType || c_oAscFileType.PDFA === fileType)
 		{
 			var dd             = this.WordControl.m_oDrawingDocument;
-			dataContainer.data = dd.ToRendererPart(oAdditionalData["nobase64"], {printOptions: options.advancedOptions});
+			dataContainer.data = dd.ToRendererPart(oAdditionalData["nobase64"], options.advancedOptions);
 		}
 		else if (this.insertDocumentUrlsData) {
 			var last = this.insertDocumentUrlsData.documents.shift();
