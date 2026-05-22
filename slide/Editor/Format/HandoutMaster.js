@@ -111,7 +111,12 @@
 	}
 
 	AscFormat.InitClass(CHandoutMaster, AscCommonSlide.SlideBase, AscDFH.historyitem_type_HandoutMaster);
-
+	CHandoutMaster.prototype.recalcSpTree = function () {
+		this.recalcInfo.recalculateSpTree = true;
+	};
+	CHandoutMaster.prototype.recalcBackground = function () {
+		this.recalcInfo.recalculateBackground = true;
+	};
 	CHandoutMaster.prototype.getObjectType = function() {
 		return AscDFH.historyitem_type_HandoutMaster;
 	};
@@ -198,14 +203,16 @@
 	CHandoutMaster.prototype.drawNoPlaceholders = function(graphics, slide) {
 
 	};
-	CHandoutMaster.prototype.draw = function(graphics, slide, handoutSlides, isDrawFrame, isDrawSlideNumber) {
-		if (slide) {
-			if (AscFormat.isRealNumber(slide.num) && slide.num !== this.lastRecalcSlideIndex) {
-				this.lastRecalcSlideIndex = slide.num;
+	CHandoutMaster.prototype.draw = function(graphics, slideNum, handoutSlides, isDrawFrame, isDrawSlideNumber) {
+		if (AscFormat.isRealNumber(slideNum)) {
+			if (slideNum !== this.lastRecalcSlideIndex) {
+				this.recalcSpTree();
+				this.lastRecalcSlideIndex = slideNum;
 				this.cSld.refreshAllContentsFields(true);
 			}
 		} else {
 			if (-1 !== this.lastRecalcSlideIndex) {
+				this.recalcSpTree();
 				this.lastRecalcSlideIndex = -1;
 				this.cSld.refreshAllContentsFields(true);
 
@@ -363,8 +370,8 @@
 		this.backgroundFill = backgroundFill;
 	};
 	CHandoutMaster.prototype.checkSlideColorScheme = function() {
-		this.recalcInfo.recalculateSpTree = true;
-		this.recalcInfo.recalculateBackground = true;
+		this.recalcSpTree();
+		this.recalcBackground();
 		for (let i = 0; i < this.cSld.spTree.length; ++i) {
 			const shape = this.cSld.spTree[i];
 			if (!shape.isPlaceholder()) {
@@ -468,7 +475,7 @@
 		if (data) {
 			switch (data.Type) {
 				case AscDFH.historyitem_HandoutMasterSetBg: {
-					this.recalcInfo.recalculateBackground = true;
+					this.recalcBackground();
 					break;
 				}
 				// case AscDFH.historyitem_HandoutMasterAddToSpTree:

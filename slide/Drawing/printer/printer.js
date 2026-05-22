@@ -541,7 +541,7 @@
 	HandoutPrinter.prototype.getPagesCount = function () {
 		if (this.cache.pagesCount === null) {
 			const printIndexes = this.getPrintIndexes();
-			this.cache.pagesCount = Math.ceil(printIndexes.length / this.getHandoutSlidesCount());
+			this.cache.pagesCount = Math.ceil(printIndexes.length / this.getSlidesOnPageCount());
 		}
 		return this.cache.pagesCount;
 	};
@@ -578,7 +578,7 @@
 		const oldHandoutSettings = handoutMaster.handoutSettings;
 		handoutMaster.handoutSettings = this.getHandoutSettings();
 		graphics.m_bNoPrintSlideBackground = this.isSkipSlideBackground();
-		handoutMaster.draw(graphics, null, pageSlides, this.isDrawSlideFrame(), this.isDrawSlideNumber());
+		handoutMaster.draw(graphics, index, pageSlides, this.isDrawSlideFrame(), this.isDrawSlideNumber());
 		graphics.m_bNoPrintSlideBackground = false;
 		handoutMaster.handoutSettings = oldHandoutSettings;
 		graphics.RestoreGrState();
