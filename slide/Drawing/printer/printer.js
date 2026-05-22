@@ -187,7 +187,8 @@
 		if (isDrawHiddenSlides) {
 			return result;
 		}
-		return result.filter(function (slide) {
+		return result.filter(function (slideIndex) {
+			const slide = slides[slideIndex];
 			return slide.isVisible();
 		});
 	};
@@ -254,9 +255,22 @@
 	};
 	SpecificPrinter.prototype.drawFrame = function (graphics) {
 		const contentSizes = this.getContentSizes();
-		graphics.p_width(0);
 		graphics.p_color(0, 0, 0, 255);
-		graphics.AddSmartRect(0, 0, contentSizes.width, contentSizes.height, 0);
+		this.strokeRect(graphics, 0, 0, contentSizes.width, contentSizes.height);
+	};
+	SpecificPrinter.prototype.strokeRect = function (graphics, x, y, width, height) {
+		if (graphics.AddSmartRect) {
+			graphics.AddSmartRect(x, y, width, height, 0);
+		} else {
+			graphics.p_width(0);
+			graphics._s();
+			graphics._m(x, y);
+			graphics._l(x + width, y);
+			graphics._l(x + width, y + height);
+			graphics._l(x, y + height);
+			graphics._z();
+			graphics.ds();
+		}
 	};
 
 	const NOTESPRINTER_HORIZONTAL_FIELD = 20;

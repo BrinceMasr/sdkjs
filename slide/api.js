@@ -8467,7 +8467,7 @@ background-repeat: no-repeat;\
 		if (!presentation) {
 			return null;
 		}
-		const printOptions = new AscCommonSlide.CAscPresentationPrintOptions();
+		const printOptions = new Asc.CAscPresentationPrintOptions();
 
 		if (isSelectedSlides) {
 			const rangeOptions = printOptions.rangeOptions;
@@ -8504,7 +8504,7 @@ background-repeat: no-repeat;\
 		if (c_oAscFileType.PDF === fileType || c_oAscFileType.PDFA === fileType)
 		{
 			var dd             = this.WordControl.m_oDrawingDocument;
-			dataContainer.data = dd.ToRendererPart(oAdditionalData["nobase64"], options.advancedOptions);
+			dataContainer.data = dd.ToRendererPart(oAdditionalData["nobase64"], options.advancedOptions || this.getRendererPrintOptions());
 		}
 		else if (this.insertDocumentUrlsData) {
 			var last = this.insertDocumentUrlsData.documents.shift();

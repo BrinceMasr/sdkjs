@@ -515,6 +515,20 @@
 			this.drawPlaceholder(graphics);
 		}
 	};
+	SlidePlaceholder.prototype.strokeRect = function (graphics, x, y, width, height) {
+		if (graphics.AddSmartRect) {
+			graphics.AddSmartRect(x, y, width, height, 0);
+		} else {
+			graphics.p_width(0);
+			graphics._s();
+			graphics._m(x, y);
+			graphics._l(x + width, y);
+			graphics._l(x + width, y + height);
+			graphics._l(x, y + height);
+			graphics._z();
+			graphics.ds();
+		}
+	};
 	SlidePlaceholder.prototype.drawPlaceholder = function (graphics) {
 		if (graphics.isBoundsChecker()) {
 			return;
@@ -526,7 +540,7 @@
 		graphics.transform3(transform);
 		graphics.p_color(127, 127, 127, 255);
 		graphics.p_dash(AscCommon.DashPatternPresets[10].slice());
-		graphics.AddSmartRect(0, 0, this.width, this.height, 0);
+		this.strokeRect(graphics, 0, 0, this.width, this.height);
 		graphics.p_dash(null);
 		graphics.RestoreGrState();
 	};
@@ -565,7 +579,7 @@
 	};
 	SlidePlaceholder.prototype.drawFrame = function (graphics) {
 		graphics.p_color(0, 0, 0, 255);
-		graphics.AddSmartRect(this.x, this.y, this.width, this.height, 0);
+		this.strokeRect(graphics, this.x, this.y, this.width, this.height);
 	};
 	SlidePlaceholder.prototype.drawSlideNumber = function (graphics) {
 		AscFormat.ExecuteNoHistory(function() {

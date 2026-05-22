@@ -3091,7 +3091,6 @@ function CDrawingDocument()
 	};
 	this.ToRendererPart = function (noBase64, options) {
 		const watermark = this.m_oWordControl.m_oApi.watermarkDraw;
-		const renderer = this.m_oDocRenderer;
 		if (-1 === this.m_lCurrentRendererPage) {
 			if (watermark)
 				watermark.StartRenderer();
@@ -3104,6 +3103,7 @@ function CDrawingDocument()
 			this.m_oWordControl.m_oApi.ShowParaMarks = false;
 			this.m_oDocRenderer.IsNoDrawingEmptyPlaceholder = true;
 		}
+		const renderer = this.m_oDocRenderer;
 
 		if (this.m_oLogicDocument.IsVisioEditor()) {
 			this.toVisioRendererPart(options.isSelection);
