@@ -3030,9 +3030,9 @@ function CDrawingDocument()
 		const presentation = this.m_oLogicDocument;
 		const watermark = this.m_oWordControl.m_oApi.watermarkDraw;
 		const printer = new AscCommonSlide.PrintManager(presentation, printOptions);
-		const pageOptions = printOptions.pageOptions;
-		const height = pageOptions.height;
-		const width = pageOptions.width;
+		const sizes = printer.getPageSizes();
+		const height = sizes.height;
+		const width = sizes.width;
 		const pagesCount = printer.getPagesCount();
 		const start = this.m_lCurrentRendererPage;
 		const end = pagesCount - 1;

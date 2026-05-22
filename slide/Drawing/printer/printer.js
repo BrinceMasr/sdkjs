@@ -91,7 +91,7 @@
 	PrintManager.prototype.getPageSizes = function () {
 		return this.specificPrinter.getPageSizes();
 	};
-	const SPECIFICPRINTER_FITPAGE_MARGIN = 1;
+	const SPECIFICPRINTER_FITPAGE_MARGIN = 1 * AscCommon.g_dKoef_pix_to_mm;
 	function SpecificPrinter(presentation, printOptions) {
 		this.presentation = presentation;
 		this.printOptions = printOptions;
