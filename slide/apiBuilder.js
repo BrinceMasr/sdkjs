@@ -6985,11 +6985,11 @@
 	/**
 	 * Returns an ApiTextRange covering the full text content of the shape.
 	 * Creates a text body if the shape does not yet have one.
-	 * @memberof ApiShape
+	 * @memberof ApiDrawing
 	 * @typeofeditors ["CPE"]
 	 * @returns {ApiTextRange|null}
 	 * @since 9.5.0
-	 * @see office-js-api/Examples/{Editor}/ApiShape/Methods/GetTextRange.js
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/GetTextRange.js
 	 */
 	ApiDrawing.prototype.GetTextRange = function() {
 		if (this.Drawing.isTable())
@@ -7001,6 +7001,43 @@
 			return null;
 		else (docContent)
 			return new ApiTextRange(docContent, 0, -1);
+	};
+
+	/**
+	 * Checks whether the drawing has an associated text body.
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CPE"]
+	 * @returns {boolean}
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/IsTextRange.js
+	 */
+	ApiDrawing.prototype.IsTextRange = function() {
+		if (this.Drawing.isTable())
+			return false;
+
+		return !!this.Drawing.getDocContent();
+	};
+
+	/**
+	 * Creates a text body for the drawing if it does not already exist and returns its full text range.
+	 * @memberof ApiDrawing
+	 * @typeofeditors ["CPE"]
+	 * @returns {ApiTextRange|null}
+	 * @since 9.5.0
+	 * @see office-js-api/Examples/{Editor}/ApiDrawing/Methods/CreateTextRange.js
+	 */
+	ApiDrawing.prototype.CreateTextRange = function() {
+		if (this.Drawing.isTable())
+			return null;
+
+		if (!this.Drawing.getDocContent()) {
+			this.Drawing.createTextBodyOnEdit();
+			if (this.Drawing.style && this.Drawing.style.fontRef) {
+				this.Drawing.style.fontRef.setColor(null);
+			}
+		}
+
+		return new ApiTextRange(this.Drawing.getDocContent(), 0, -1);
 	};
 
     //------------------------------------------------------------------------------------------------------------------
@@ -8382,7 +8419,12 @@
 
 		nIndex			= AscBuilder.GetNumberParameter(nIndex, 0);
 
-		let aInRange  = map.filter(function(item) { return item.charEnd > nEffStart && item.charStart < nEffEnd; });
+		let aInRange  = map.filter(function(item) {
+			var bEmpty    = item.charStart === item.charEnd;
+			var afterStart = bEmpty ? item.charStart >= nEffStart : item.charEnd > nEffStart;
+			var beforeEnd  = nEffEnd === -1 || item.charStart < nEffEnd;
+			return afterStart && beforeEnd;
+		});
 
 		if (nIndex < 0 || nIndex >= aInRange.length)
 			return null;
@@ -8402,7 +8444,12 @@
 		let nEffStart	= this.private_GetEffectiveStart();
 		let nEffEnd		= this.private_GetEffectiveEnd();
 		let map			= this.private_BuildCharMap();
-		let paras		= map.filter(function(item) { return item.charEnd > nEffStart && item.charStart < nEffEnd });
+		let paras		= map.filter(function(item) {
+			var bEmpty     = item.charStart === item.charEnd;
+			var afterStart = bEmpty ? item.charStart >= nEffStart : item.charEnd > nEffStart;
+			var beforeEnd  = nEffEnd === -1 || item.charStart < nEffEnd;
+			return afterStart && beforeEnd;
+		});
 		let apiParas	= paras.map(function(item) { return Api.private_CreateApiParagraph(item.para) });
 		return apiParas;
 	};
@@ -9598,6 +9645,8 @@
     ApiDrawing.prototype["SetOutLine"]                    = ApiDrawing.prototype.SetOutLine;
 
 	ApiDrawing.prototype["GetTextRange"]					= ApiDrawing.prototype.GetTextRange;
+	ApiDrawing.prototype["IsTextRange"]						= ApiDrawing.prototype.IsTextRange;
+	ApiDrawing.prototype["CreateTextRange"]					= ApiDrawing.prototype.CreateTextRange;
 
 
 	ApiChart.prototype["GetClassType"] = ApiChart.prototype.GetClassType = AscBuilder.ApiChart.prototype.GetClassType;
