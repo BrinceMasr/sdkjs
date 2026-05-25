@@ -1100,6 +1100,13 @@ function (window, undefined) {
 	CellEditor.prototype.restoreFocus = function () {
 		if (this.isTopLineActive) {
 			this.input.focus();
+			// contenteditable loses DOM selection on focus changes (unlike textarea); re-apply from internal state
+			if (this._isContentEditable() && this.isOpened) {
+				var tmp = this.skipTLUpdate;
+				this.skipTLUpdate = false;
+				this._updateTopLineCurPos();
+				this.skipTLUpdate = tmp;
+			}
 		}
 	};
 
