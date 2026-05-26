@@ -491,10 +491,9 @@
 		};
 	};
 
-	CommentsPrinter.prototype.hasAnyCommentsForSlides = function (slideIndexes) {
-		const slides = this.presentation.Slides;
-		for (let i = 0; i < slideIndexes.length; i += 1) {
-			const slide = slides[slideIndexes[i]];
+	CommentsPrinter.prototype.hasAnyCommentsForSlides = function (slides) {
+		for (let i = 0; i < slides.length; i += 1) {
+			const slide = slides[i];
 			if (slide && slide.slideComments && slide.slideComments.comments && slide.slideComments.comments.length > 0) {
 				return true;
 			}
@@ -502,12 +501,12 @@
 		return false;
 	};
 
-	CommentsPrinter.prototype.getSegment = function (slideIndexes) {
-		if (!this.hasAnyCommentsForSlides(slideIndexes)) {
+	CommentsPrinter.prototype.getSegment = function (slides) {
+		if (!this.hasAnyCommentsForSlides(slides)) {
 			return null;
 		}
 		const segment = new CommentsSegment();
-		this.buildSegmentBlocks(segment, slideIndexes);
+		this.buildSegmentBlocks(segment, slides);
 		if (!segment.hasBlocks()) {
 			return null;
 		}
@@ -515,16 +514,14 @@
 		return segment;
 	};
 
-	CommentsPrinter.prototype.buildSegmentBlocks = function (segment, slideIndexes) {
+	CommentsPrinter.prototype.buildSegmentBlocks = function (segment, slides) {
 		const contentSize = this.getContentSize();
-		const slides = this.presentation.Slides;
-		for (let s = 0; s < slideIndexes.length; s += 1) {
-			const slideIdx = slideIndexes[s];
-			const slide = slides[slideIdx];
+		for (let s = 0; s < slides.length; s += 1) {
+			const slide = slides[s];
 			if (!slide || !slide.slideComments) continue;
 			const comments = slide.slideComments.comments;
 			if (!comments || comments.length === 0) continue;
-			this.appendSlideBlocks(segment, slideIdx, comments, contentSize);
+			this.appendSlideBlocks(segment, slide.num, comments, contentSize);
 		}
 	};
 
