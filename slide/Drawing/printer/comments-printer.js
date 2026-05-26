@@ -32,8 +32,8 @@
 
 (function () {
 
-	const COMMENTSPRINTER_HORIZONTAL_FIELD = 20;
-	const COMMENTSPRINTER_VERTICAL_FIELD = 15;
+	const COMMENTSPRINTER_HORIZONTAL_FIELD = AscCommonSlide.PRINTER_HORIZONTAL_FIELD;
+	const COMMENTSPRINTER_VERTICAL_FIELD = AscCommonSlide.PRINTER_VERTICAL_FIELD;
 	const COMMENTSPRINTER_INITIALS_WIDTH = 25;
 	const COMMENTSPRINTER_BLOCK_GAP = 5;
 	const COMMENTSPRINTER_HEADER_LINE_OFFSET = 2;
@@ -47,21 +47,7 @@
 
 	const COMMENTSPRINTER_DATE_COLOR = {R: 110, G: 110, B: 110};
 
-	function executeWithContentLimits(callback, content, x, y, xLimit, yLimit) {
-		const oldX = content.X;
-		const oldY = content.Y;
-		const oldXLimit = content.XLimit;
-		const oldYLimit = content.YLimit;
-		content.X = x;
-		content.Y = y;
-		content.XLimit = xLimit;
-		content.YLimit = yLimit;
-		callback();
-		content.X = oldX;
-		content.Y = oldY;
-		content.XLimit = oldXLimit;
-		content.YLimit = oldYLimit;
-	}
+	const executeWithContentLimits = AscCommonSlide.executeWithContentLimits;
 
 	function getTextPr(opts) {
 		opts = opts || {};
@@ -239,15 +225,14 @@
 	AscFormat.InitClassWithoutType(HeaderBlock, CommentsBlock);
 
 	HeaderBlock.prototype.fillContent = function () {
-		const self = this;
 		AscFormat.ExecuteNoHistory(function () {
-			const content = self.getContent();
-			const title = "Slide " + (self.slideIdx + 1);
+			const content = this.getContent();
+			const title = "Slide " + (this.slideIdx + 1);
 			addParagraphToContent(content, [{
 				text  : title,
 				textPr: {size: COMMENTSPRINTER_FONT_HEADER, bold: true, color: COMMENTSPRINTER_DATE_COLOR}
 			}], {spacingAfter: 1});
-		}, null, []);
+		}, this, []);
 	};
 	HeaderBlock.prototype.isHeader = function () {
 		return true;
@@ -265,24 +250,23 @@
 	AscFormat.InitClassWithoutType(CommentBlock, CommentsBlock);
 
 	CommentBlock.prototype.fillContent = function () {
-		const self = this;
 		AscFormat.ExecuteNoHistory(function () {
-			const content = self.getContent();
+			const content = this.getContent();
 
 			const textPr = {size: COMMENTSPRINTER_FONT_TEXT};
-			const lines = splitTextIntoLines(self.text);
+			const lines = splitTextIntoLines(this.text);
 			for (let i = 0; i < lines.length; i += 1) {
 				addParagraphToContent(content, [{text: lines[i], textPr: textPr}], {spacingAfter: 1});
 			}
 
 			const infoPr = {size: COMMENTSPRINTER_FONT_DATE, color: COMMENTSPRINTER_DATE_COLOR};
-			const dateStr = formatCommentDate(self.time);
-			const authorRuns = [{text: self.authorName || "", textPr: infoPr}];
+			const dateStr = formatCommentDate(this.time);
+			const authorRuns = [{text: this.authorName || "", textPr: infoPr}];
 			if (dateStr) {
 				authorRuns.push({text: "; " + dateStr, textPr: infoPr});
 			}
 			addParagraphToContent(content, authorRuns, {spacingBefore: 1, spacingAfter: 1});
-		}, null, []);
+		}, this, []);
 	};
 
 	function CommentsFragment(block, fragmentIndex, y, height) {

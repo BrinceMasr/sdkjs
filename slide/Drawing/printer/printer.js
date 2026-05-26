@@ -32,21 +32,9 @@
 
 (function () {
 
-	function executeWithContentLimits(callback, content, x, y, xLimit, yLimit) {
-		const oldX = content.X;
-		const oldY = content.Y;
-		const oldXLimit = content.XLimit;
-		const oldYLimit = content.YLimit;
-		content.X = x;
-		content.Y = y;
-		content.XLimit = xLimit;
-		content.YLimit = yLimit;
-		callback();
-		content.X = oldX;
-		content.Y = oldY;
-		content.XLimit = oldXLimit;
-		content.YLimit = oldYLimit;
-	}
+	const executeWithContentLimits = AscCommonSlide.executeWithContentLimits;
+	const PRINTER_HORIZONTAL_FIELD = AscCommonSlide.PRINTER_HORIZONTAL_FIELD;
+	const PRINTER_VERTICAL_FIELD = AscCommonSlide.PRINTER_VERTICAL_FIELD;
 
 	function NotePage(note, pageIndex) {
 		this.note = note;
@@ -349,8 +337,6 @@
 		}
 	};
 
-	const NOTESPRINTER_HORIZONTAL_FIELD = 20;
-	const NOTESPRINTER_VERTICAL_FIELD = 15;
 	function NotesPrinter(presentation, printOptions) {
 		SpecificPrinter.call(this, presentation, printOptions);
 	}
@@ -433,8 +419,8 @@
 			graphics.SaveGrState();
 			this.drawPlaceholders(note, graphics);
 			const transform = new AscCommon.CMatrix();
-			transform.tx = NOTESPRINTER_HORIZONTAL_FIELD;
-			transform.ty = NOTESPRINTER_VERTICAL_FIELD;
+			transform.tx = PRINTER_HORIZONTAL_FIELD;
+			transform.ty = PRINTER_VERTICAL_FIELD;
 			graphics.transform3(transform);
 			const notesShape = note.getBodyShape();
 			const docContent = notesShape.getDocContent();
@@ -449,8 +435,8 @@
 			const pages = [];
 			const printIndexes = this.getPrintIndexes();
 			const presentation = this.getPresentation();
-			const notesPageHeight = presentation.GetNotesHeightMM() - NOTESPRINTER_VERTICAL_FIELD * 2;
-			const notesPageWidth = presentation.GetNotesWidthMM() - NOTESPRINTER_HORIZONTAL_FIELD * 2;
+			const notesPageHeight = presentation.GetNotesHeightMM() - PRINTER_VERTICAL_FIELD * 2;
+			const notesPageWidth = presentation.GetNotesWidthMM() - PRINTER_HORIZONTAL_FIELD * 2;
 			const slides = presentation.Slides;
 			for (let i = 0; i < printIndexes.length; i += 1) {
 				const index = printIndexes[i];
@@ -519,7 +505,7 @@
 	};
 	OutlinePrinter.prototype.getPageOptions = function () {
 		const pageOptions = this.printOptions.pageOptions;
-		return {width: pageOptions.width - NOTESPRINTER_HORIZONTAL_FIELD * 2 - OUTLINEPRINTER_DECORATIONS_OFFSET_LEFT, height: pageOptions.height - NOTESPRINTER_VERTICAL_FIELD * 2};
+		return {width: pageOptions.width - PRINTER_HORIZONTAL_FIELD * 2 - OUTLINEPRINTER_DECORATIONS_OFFSET_LEFT, height: pageOptions.height - PRINTER_VERTICAL_FIELD * 2};
 	};
 	OutlinePrinter.prototype.getOutlineView = function () {
 		if (this.cache.outlineView === null) {
@@ -597,8 +583,8 @@
 	};
 	OutlinePrinter.prototype.drawDecorationsByPage = function (graphics, index) {
 		const t = new AscCommon.CMatrix();
-		t.tx = NOTESPRINTER_HORIZONTAL_FIELD;
-		t.ty = NOTESPRINTER_VERTICAL_FIELD;
+		t.tx = PRINTER_HORIZONTAL_FIELD;
+		t.ty = PRINTER_VERTICAL_FIELD;
 		const decorationsInfo = this.getDecorationsByPage();
 		const outlineView = this.getOutlineView();
 
@@ -628,8 +614,8 @@
 		graphics.AddClipRect(0, 0, pageSize.width, pageSize.height);
 		this.drawDecorationsByPage(graphics, index);
 		const t = new AscCommon.CMatrix();
-		t.tx = NOTESPRINTER_HORIZONTAL_FIELD + OUTLINEPRINTER_DECORATIONS_OFFSET_LEFT;
-		t.ty = NOTESPRINTER_VERTICAL_FIELD;
+		t.tx = PRINTER_HORIZONTAL_FIELD + OUTLINEPRINTER_DECORATIONS_OFFSET_LEFT;
+		t.ty = PRINTER_VERTICAL_FIELD;
 		graphics.transform3(t);
 		const shape = this.getOutlineShape();
 		const content = shape.getDocContent();
