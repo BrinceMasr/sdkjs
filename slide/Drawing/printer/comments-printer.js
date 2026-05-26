@@ -48,6 +48,12 @@
 	const COMMENTSPRINTER_DATE_COLOR = {R: 110, G: 110, B: 110};
 
 	const executeWithContentLimits = AscCommonSlide.executeWithContentLimits;
+	function getSlideText() {
+		return AscCommon.translateManager.getValue("Slide");
+	}
+	function getContinuedText() {
+		return AscCommon.translateManager.getValue("continued");
+	}
 
 	function getTextPr(opts) {
 		opts = opts || {};
@@ -227,7 +233,7 @@
 	HeaderBlock.prototype.fillContent = function () {
 		AscFormat.ExecuteNoHistory(function () {
 			const content = this.getContent();
-			const title = "Slide " + (this.slideIdx + 1);
+			const title = getSlideText() + " " + (this.slideIdx + 1);
 			addParagraphToContent(content, [{
 				text  : title,
 				textPr: {size: COMMENTSPRINTER_FONT_HEADER, bold: true, color: COMMENTSPRINTER_DATE_COLOR}
@@ -597,7 +603,7 @@
 
 		if (page.hasContinuationHeader()) {
 			const lines = [{
-				text  : "Slide " + (page.continuedSlideIdx + 1) + " (continued)",
+				text  : getSlideText() + " " + (page.continuedSlideIdx + 1) + " (" + getContinuedText() + ")",
 				textPr: {size: COMMENTSPRINTER_FONT_HEADER, bold: true, color: COMMENTSPRINTER_DATE_COLOR}
 			}];
 			drawInlineShape(graphics, xOriginBase, yOrigin, contentSize.width, lines);
