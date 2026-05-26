@@ -1375,6 +1375,7 @@
 			outlineShape.setBDeleted(false);
 			outlineShape.createTextBody();
 			outlineShape.txBody.bodyPr.setInsets(0, 0, 0, 0);
+			outlineShape.themeOverride = AscFormat.GenerateDefaultTheme();
 			const outlineContent = outlineShape.txBody.content;
 			outlineContent.ClearContent(false);
 			this.fillOutlineShape(outlineShape, outlineSlides);
