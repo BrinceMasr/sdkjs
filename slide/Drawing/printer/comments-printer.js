@@ -233,15 +233,25 @@
 	HeaderBlock.prototype.fillContent = function () {
 		AscFormat.ExecuteNoHistory(function () {
 			const content = this.getContent();
-			const title = getSlideText() + " " + (this.slideIdx + 1);
 			addParagraphToContent(content, [{
-				text  : title,
+				text  : this.getTitle(),
 				textPr: {size: COMMENTSPRINTER_FONT_HEADER, bold: true, color: COMMENTSPRINTER_DATE_COLOR}
 			}], {spacingAfter: 1});
 		}, this, []);
 	};
+	HeaderBlock.prototype.getTitle = function () {
+		return getSlideText() + " " + (this.slideIdx + 1);
+	};
 	HeaderBlock.prototype.isHeader = function () {
 		return true;
+	};
+
+	function ContinuedHeaderBlock(slideIdx, width) {
+		HeaderBlock.call(this, slideIdx, width);
+	}
+	AscFormat.InitClassWithoutType(ContinuedHeaderBlock, HeaderBlock);
+	ContinuedHeaderBlock.prototype.getTitle = function () {
+		return getSlideText() + " " + (this.slideIdx + 1) + " (" + getContinuedText() + ")";
 	};
 
 	function CommentBlock(opts, width) {
@@ -286,9 +296,8 @@
 		return this.fragmentIndex === 0;
 	};
 
-	function CommentsPage(continuedSlideIdx) {
+	function CommentsPage() {
 		this.fragments = [];
-		this.continuedSlideIdx = (continuedSlideIdx != null) ? continuedSlideIdx : null;
 	}
 
 	CommentsPage.prototype.addFragment = function (block, fragmentIndex, y, height) {
@@ -297,10 +306,6 @@
 
 	CommentsPage.prototype.isEmpty = function () {
 		return this.fragments.length === 0;
-	};
-
-	CommentsPage.prototype.hasContinuationHeader = function () {
-		return this.continuedSlideIdx !== null;
 	};
 
 	CommentsPage.prototype.getFragments = function () {
@@ -359,11 +364,11 @@
 		return usableWidth - block.indent - (block.hasInitialsLabel ? COMMENTSPRINTER_INITIALS_WIDTH : 0);
 	};
 
-	SegmentLayouter.prototype.layout = function () {
+	SegmentLayouter.prototype.recalculate = function () {
 		this.computeHeaderMetrics();
 		const blocks = this.segment.getBlocks();
 		for (let i = 0; i < blocks.length; i += 1) {
-			this.layoutBlock(blocks[i]);
+			this.recalculateBlock(blocks[i]);
 		}
 		this.flushPage();
 		this.segment.setPages(this.pages);
@@ -384,11 +389,21 @@
 	};
 
 	SegmentLayouter.prototype.ensurePage = function (block) {
-		if (!this.currentPage) {
-			const isContinued = (!block.isHeader() && this.openSlideIdx !== null);
-			this.currentPage = new CommentsPage(isContinued ? this.openSlideIdx : null);
-			this.yCursor = 0;
+		if (this.currentPage) {
+			return;
 		}
+		this.currentPage = new CommentsPage();
+		this.yCursor = 0;
+		if (!block.isHeader() && this.openSlideIdx !== null) {
+			this.placeContinuedHeader(this.openSlideIdx);
+		}
+	};
+
+	SegmentLayouter.prototype.placeContinuedHeader = function (slideIdx) {
+		const width = this.usable.width;
+		const block = new ContinuedHeaderBlock(slideIdx, width);
+		block.recalcPage(width, 0, this.usable.height);
+		this.placeFragment(block, 0, this.segment.headerReservedHeight);
 	};
 
 	SegmentLayouter.prototype.placeFragment = function (block, fragmentIndex, height) {
@@ -398,7 +413,12 @@
 		this.yCursor = placeY + height;
 	};
 
-	SegmentLayouter.prototype.layoutBlock = function (block) {
+	SegmentLayouter.prototype.getRemainingHeight = function () {
+		const gap = (this.yCursor > 0) ? COMMENTSPRINTER_BLOCK_GAP : 0;
+		return this.usable.height - this.yCursor - gap;
+	};
+
+	SegmentLayouter.prototype.recalculateBlock = function (block) {
 		if (block.isHeader()) {
 			this.openSlideIdx = block.slideIdx;
 		}
@@ -408,25 +428,22 @@
 		const probe = block.recalcPage(blockWidth, 0, this.usable.height);
 
 		if (block.isHeader()) {
-			this.layoutHeaderBlock(block, blockWidth);
+			this.recalculateHeaderBlock(block, blockWidth);
 			return;
 		}
 
-		const gap = (this.yCursor > 0) ? COMMENTSPRINTER_BLOCK_GAP : 0;
-		const remainingHeight = this.usable.height - this.yCursor - gap;
+		const remainingHeight = this.getRemainingHeight();
 		if (probe.result === recalcresult2_End && probe.height <= remainingHeight) {
 			this.placeFragment(block, 0, probe.height);
 			return;
 		}
 
-		this.layoutMultiFragmentBlock(block, blockWidth);
+		this.recalculateMultiFragmentBlock(block, blockWidth);
 	};
 
-	SegmentLayouter.prototype.layoutHeaderBlock = function (block, blockWidth) {
+	SegmentLayouter.prototype.recalculateHeaderBlock = function (block, blockWidth) {
 		const placedHeight = this.segment.headerReservedHeight;
-		const gap = (this.yCursor > 0) ? COMMENTSPRINTER_BLOCK_GAP : 0;
-		const remainingHeight = this.usable.height - this.yCursor - gap;
-		if (placedHeight > remainingHeight && this.yCursor > 0) {
+		if (placedHeight > this.getRemainingHeight() && this.yCursor > 0) {
 			this.flushPage();
 			this.ensurePage(block);
 			block.recalcPage(blockWidth, 0, this.usable.height);
@@ -434,19 +451,17 @@
 		this.placeFragment(block, 0, placedHeight);
 	};
 
-	SegmentLayouter.prototype.layoutMultiFragmentBlock = function (block, blockWidth) {
-		const initialGap = (this.yCursor > 0) ? COMMENTSPRINTER_BLOCK_GAP : 0;
-		let remainingHeight = this.usable.height - this.yCursor - initialGap;
+	SegmentLayouter.prototype.recalculateMultiFragmentBlock = function (block, blockWidth) {
+		let remainingHeight = this.getRemainingHeight();
 		if (remainingHeight < COMMENTSPRINTER_MIN_FIRST_FRAGMENT_HEIGHT) {
 			this.flushPage();
 			this.ensurePage(block);
-			remainingHeight = this.usable.height;
+			remainingHeight = this.getRemainingHeight();
 		}
 
 		let pageIdx = 0;
 		while (true) {
-			const pageHeight = (pageIdx === 0) ? remainingHeight : this.usable.height;
-			const probe = block.recalcPage(blockWidth, pageIdx, pageHeight);
+			const probe = block.recalcPage(blockWidth, pageIdx, remainingHeight);
 
 			if (probe.height <= 0) {
 				if (this.yCursor === 0) {
@@ -454,7 +469,7 @@
 				}
 				this.flushPage();
 				this.ensurePage(block);
-				remainingHeight = this.usable.height;
+				remainingHeight = this.getRemainingHeight();
 				pageIdx = 0;
 				continue;
 			}
@@ -466,6 +481,7 @@
 			pageIdx += 1;
 			this.flushPage();
 			this.ensurePage(block);
+			remainingHeight = this.getRemainingHeight();
 		}
 	};
 
@@ -510,7 +526,7 @@
 		if (!segment.hasBlocks()) {
 			return null;
 		}
-		this.layoutSegment(segment);
+		this.recalculateSegment(segment);
 		return segment;
 	};
 
@@ -560,8 +576,8 @@
 		}
 	};
 
-	CommentsPrinter.prototype.layoutSegment = function (segment) {
-		new SegmentLayouter(segment, this.getContentSize()).layout();
+	CommentsPrinter.prototype.recalculateSegment = function (segment) {
+		new SegmentLayouter(segment, this.getContentSize()).recalculate();
 	};
 
 	CommentsPrinter.prototype.getSegmentPagesCount = function (segment) {
@@ -593,21 +609,10 @@
 		const contentSize = this.getContentSize();
 		const pageSizes = this.getPageSizes();
 		const xOriginBase = COMMENTSPRINTER_HORIZONTAL_FIELD;
-		let yOrigin = COMMENTSPRINTER_VERTICAL_FIELD;
+		const yOrigin = COMMENTSPRINTER_VERTICAL_FIELD;
 
 		graphics.SaveGrState();
 		graphics.AddClipRect(0, 0, pageSizes.width, pageSizes.height);
-
-		if (page.hasContinuationHeader()) {
-			const lines = [{
-				text  : getSlideText() + " " + (page.continuedSlideIdx + 1) + " (" + getContinuedText() + ")",
-				textPr: {size: COMMENTSPRINTER_FONT_HEADER, bold: true, color: COMMENTSPRINTER_DATE_COLOR}
-			}];
-			drawInlineShape(graphics, xOriginBase, yOrigin, contentSize.width, lines);
-			const lineY = yOrigin + segment.headerContentHeight + COMMENTSPRINTER_HEADER_LINE_OFFSET;
-			this.drawHeaderLine(graphics, xOriginBase, lineY, contentSize.width);
-			yOrigin = lineY + COMMENTSPRINTER_BLOCK_GAP;
-		}
 
 		const fragments = page.getFragments();
 		for (let i = 0; i < fragments.length; i += 1) {
