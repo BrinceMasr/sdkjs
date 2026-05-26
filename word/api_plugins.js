@@ -92,7 +92,8 @@
 	 */
 	
 	/**
-	 * @typedef {Object} Color
+	 * @typedef {Object} Color 
+	 * Represents an RGBA color with components in the range [0, 255].
 	 * @property {number} Color.R - Red color component value.
 	 * @property {number} Color.G - Green color component value.
 	 * @property {number} Color.B - Blue color component value.
