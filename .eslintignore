@@ -1,0 +1,16 @@
+# Build outputs — generated, not source
+deploy/
+develop/
+build/node_modules/
+
+# Vendor / third-party libraries — not our code
+vendor/
+common/zlib/
+common/libfont/
+
+# Generated / compiled PDF engine files (28k+ lines, not hand-written)
+pdf/src/engine/drawingfile_ie.js
+pdf/build/
+
+# Test fixtures that are not JS source
+tests/
