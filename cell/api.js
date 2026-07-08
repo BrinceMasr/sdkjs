@@ -3411,6 +3411,10 @@ var editor;
 		this.wb = new AscCommonExcel.WorkbookView(this.wbModel, this.controller, this.handlers, this.HtmlElement,
 			this.topLineEditorElement, this, this.collaborativeEditing, this.fontRenderingMode);
 
+		// interface theme (and its GlobalSkin colors) may already be applied before wb exists —
+		// re-sync now so the default/auto cell text color isn't left stale on initial load
+		this.updateSkin();
+
 		this.registerCustomFunctionsLibrary(undefined, true);
 
 		if (this.isCopyOutEnabled && this.topLineEditorElement) {
@@ -8628,10 +8632,23 @@ var editor;
 
     if (this.wb) {
       this.wb.updateSkin();
+      if (this.wb.stringRender) {
+        this.wb.stringRender._reset();
+      }
       var ws = this.wb.getWorksheet();
       if (ws) {
           this.controller.updateScrollSettings();
 		  ws.draw();
+      }
+    }
+  };
+
+  spreadsheet_api.prototype.updateDarkMode = function () {
+    if (this.wb) {
+      this.wb.updateDarkMode(this.isDarkMode);
+      var ws = this.wb.getWorksheet();
+      if (ws) {
+        ws.draw();
       }
     }
   };

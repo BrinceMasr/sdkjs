@@ -98,12 +98,18 @@
 			var rgb = parseInt(_color.split('#')[1], 16);
 			return new CColor((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF);
 		};
-		this.updateStyle = function () {
+		this.updateStyle = function (isContentDarkMode) {
 			this.header.style = this._generateStyle();
 			this.header.groupDataBorder = this.getCColor(AscCommon.GlobalSkin.GroupDataBorder);
 			this.header.editorBorder = this.getCColor(AscCommon.GlobalSkin.EditorBorder);
 			this.header.cornerColor = this.getCColor(AscCommon.GlobalSkin.SelectAllIcon);
 			this.header.cornerColorSheetView = this.getCColor(AscCommon.GlobalSkin.SheetViewSelectAllIcon);
+			// Cell background/grid follow the "Dark Document" (content) theme, not the
+			// interface theme's GlobalSkin — the two are independent (light UI + dark
+			// document and vice versa must both be possible).
+			var cellSkin = AscCommon.EditorSkins[isContentDarkMode ? "theme-dark" : "theme-light"];
+			this.cells.defaultState.background = this.getCColor(cellSkin.CellBackground);
+			this.cells.defaultState.border = this.getCColor(cellSkin.CellGrid);
 		};
 		this._generateStyle = function () {
 			return [// Header colors
@@ -148,7 +154,7 @@
 		};
 		this.cells = {
 			defaultState: {
-				background: new CColor(255, 255, 255), border: new CColor(202, 202, 202)
+				background: this.getCColor(AscCommon.GlobalSkin.CellBackground), border: this.getCColor(AscCommon.GlobalSkin.CellGrid)
 			}, padding: -1 /*px horizontal padding*/
 		};
 		this.activeCellBorderColor = new CColor(72, 121, 92);
@@ -335,6 +341,9 @@
 	this.externalReferenceUpdateTimer = null;
 
 	this.isPartialReading = null;
+
+	this.isDarkMode = !!(Api && Api.isDarkMode);
+	this.defaults.worksheetView.updateStyle(this.isDarkMode);
 
 	return this;
   }
@@ -5290,7 +5299,32 @@
 	};
 
 	WorkbookView.prototype.updateSkin = function () {
-		this.defaults.worksheetView.updateStyle();
+		this.defaults.worksheetView.updateStyle(this.isDarkMode);
+	};
+
+	WorkbookView.prototype.updateDarkMode = function (isDarkMode) {
+		this.isDarkMode = isDarkMode;
+		this.defaults.worksheetView.updateStyle(isDarkMode);
+		if (this.buffers.main) {
+			this.buffers.main.isDarkMode = isDarkMode;
+		}
+		if (this.buffers.overlay) {
+			this.buffers.overlay.isDarkMode = isDarkMode;
+		}
+		if (this.cellEditor) {
+			if (this.cellEditor.drawingCtx) {
+				this.cellEditor.drawingCtx.isDarkMode = isDarkMode;
+			}
+			if (this.cellEditor.overlayCtx) {
+				this.cellEditor.overlayCtx.isDarkMode = isDarkMode;
+			}
+		}
+		for (var i in this.wsViews) {
+			var ws = this.wsViews[i];
+			if (ws) {
+				ws._cleanCellsTextMetricsCache();
+			}
+		}
 	};
 
 	WorkbookView.prototype.executeWithCurrentTopLeftCell = function (runFunction) {

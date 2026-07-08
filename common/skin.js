@@ -169,6 +169,10 @@ var EditorSkins = {
 		SheetViewCellBackgroundHover   : "#97e3b6",
 		SheetViewCellTitleLabel        : "#121212",
 
+		CellBackground                 : "#FFFFFF",
+		CellGrid                       : "#CACACA",
+		CellTextColor                  : "#000000",
+
 		ColorDark                : "#ffffff",
 		ColorDarkActive          : "#ffffff",
 		ColorDarkHighlighted     : "#c1c1c1",
@@ -318,6 +322,10 @@ var EditorSkins = {
 		SheetViewCellBackgroundHover   : "#97e3b6",
 		SheetViewCellTitleLabel        : "#121212",
 
+		CellBackground                 : "#262626",
+		CellGrid                       : "#454545",
+		CellTextColor                  : "#e8e8e8",
+
 		ColorDark                : "#333",
 		ColorDarkActive          : "#333",
 		ColorDarkHighlighted     : "#333",
@@ -455,6 +463,11 @@ function updateGlobalSkinColors(theme)
 		SheetViewCellBackgroundHover    : "canvas-sheet-view-cell-background-hover",
 		SheetViewCellTitleLabel         : "canvas-sheet-view-cell-title-label",
 
+
+		CellBackground                  : "canvas-cell-background",
+		CellGrid                        : "canvas-cell-grid",
+		CellTextColor                   : "canvas-cell-text",
+
 		ColorDark                       : "canvas-dark-cell-title-text",
 		ColorDarkActive                 : "canvas-dark-cell-title-text",
 		ColorDarkHighlighted            : "canvas-dark-cell-title-text",
@@ -491,7 +504,7 @@ function updateGlobalSkinColors(theme)
 			continue;
 		if ("" === colorMap[color])
 			continue;
-		if (undefined === theme[colorMap[color]])
+		if (undefined === theme[colorMap[color]] || "" === theme[colorMap[color]])
 			continue;
 
 		if(typeof GlobalSkin[color] === "number")
@@ -547,6 +560,7 @@ function updateGlobalSkin(obj)
 window['AscCommon'] = window['AscCommon'] || {};
 window['AscCommon'].GlobalSkin = GlobalSkin;
 window['AscCommon'].updateGlobalSkin = updateGlobalSkin;
+window['AscCommon'].EditorSkins = EditorSkins;
 
 window['AscCommon'].RgbaHexToRGBA = function(color)
 {
