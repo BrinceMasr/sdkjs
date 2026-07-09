@@ -171,7 +171,6 @@ var EditorSkins = {
 
 		CellBackground                 : "#FFFFFF",
 		CellGrid                       : "#CACACA",
-		CellTextColor                  : "#000000",
 
 		ColorDark                : "#ffffff",
 		ColorDarkActive          : "#ffffff",
@@ -324,7 +323,6 @@ var EditorSkins = {
 
 		CellBackground                 : "#262626",
 		CellGrid                       : "#454545",
-		CellTextColor                  : "#e8e8e8",
 
 		ColorDark                : "#333",
 		ColorDarkActive          : "#333",
@@ -463,10 +461,8 @@ function updateGlobalSkinColors(theme)
 		SheetViewCellBackgroundHover    : "canvas-sheet-view-cell-background-hover",
 		SheetViewCellTitleLabel         : "canvas-sheet-view-cell-title-label",
 
-
 		CellBackground                  : "canvas-cell-background",
 		CellGrid                        : "canvas-cell-grid",
-		CellTextColor                   : "canvas-cell-text",
 
 		ColorDark                       : "canvas-dark-cell-title-text",
 		ColorDarkActive                 : "canvas-dark-cell-title-text",
