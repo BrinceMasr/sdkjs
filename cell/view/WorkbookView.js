@@ -105,8 +105,8 @@
 			this.header.cornerColor = this.getCColor(AscCommon.GlobalSkin.SelectAllIcon);
 			this.header.cornerColorSheetView = this.getCColor(AscCommon.GlobalSkin.SheetViewSelectAllIcon);
 			// Cell background/grid follow the "Dark Document" (content) theme, not the
-			// interface theme's GlobalSkin — the two are independent (light UI + dark
-			// document and vice versa must both be possible).
+			// interface theme's GlobalSkin. The two are independent: light UI with a dark
+			// document, and vice versa, must both be possible.
 			var cellSkin = AscCommon.EditorSkins[isContentDarkMode ? "theme-dark" : "theme-light"];
 			this.cells.defaultState.background = this.getCColor(cellSkin.CellBackground);
 			this.cells.defaultState.border = this.getCColor(cellSkin.CellGrid);
@@ -342,8 +342,12 @@
 
 	this.isPartialReading = null;
 
+	// buffers/cellEditor already exist at this point (created inside _init() above), so
+	// routing through updateDarkMode here keeps the DrawingContext instances used for the
+	// very first paint in sync with the mode the document actually loads in, rather than
+	// only picking it up on the next explicit dark-mode toggle
 	this.isDarkMode = !!(Api && Api.isDarkMode);
-	this.defaults.worksheetView.updateStyle(this.isDarkMode);
+	this.updateDarkMode(this.isDarkMode);
 
 	return this;
   }
@@ -5302,23 +5306,33 @@
 		this.defaults.worksheetView.updateStyle(this.isDarkMode);
 	};
 
-	WorkbookView.prototype.updateDarkMode = function (isDarkMode) {
-		this.isDarkMode = isDarkMode;
-		this.defaults.worksheetView.updateStyle(isDarkMode);
+	// Every DrawingContext owned by this WorkbookView: the main/overlay buffers and the
+	// cell editor's own contexts. Used by updateDarkMode to keep them all in sync.
+	WorkbookView.prototype._getOwnedDrawingContexts = function () {
+		var contexts = [];
 		if (this.buffers.main) {
-			this.buffers.main.isDarkMode = isDarkMode;
+			contexts.push(this.buffers.main);
 		}
 		if (this.buffers.overlay) {
-			this.buffers.overlay.isDarkMode = isDarkMode;
+			contexts.push(this.buffers.overlay);
 		}
 		if (this.cellEditor) {
 			if (this.cellEditor.drawingCtx) {
-				this.cellEditor.drawingCtx.isDarkMode = isDarkMode;
+				contexts.push(this.cellEditor.drawingCtx);
 			}
 			if (this.cellEditor.overlayCtx) {
-				this.cellEditor.overlayCtx.isDarkMode = isDarkMode;
+				contexts.push(this.cellEditor.overlayCtx);
 			}
 		}
+		return contexts;
+	};
+
+	WorkbookView.prototype.updateDarkMode = function (isDarkMode) {
+		this.isDarkMode = isDarkMode;
+		this.defaults.worksheetView.updateStyle(isDarkMode);
+		this._getOwnedDrawingContexts().forEach(function (drawingCtx) {
+			drawingCtx.isDarkMode = isDarkMode;
+		});
 		for (var i in this.wsViews) {
 			var ws = this.wsViews[i];
 			if (ws) {

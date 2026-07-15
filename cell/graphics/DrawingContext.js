@@ -451,12 +451,10 @@
 		return this;
 	}
 
-	// Only correct colors extremely close to pure black/white (default/theme text,
-	// unstyled white fills) — genuinely chromatic user colors, and the
-	// already-theme-correct grays the skin pipeline supplies for the sheet
-	// background (#3a3a3a) and gridlines (#555555), must NOT be re-corrected here
-	// or they'd be double-inverted back toward light. Kept well below those two
-	// values (58 and 85) with margin, since default text resolves to pure (0,0,0).
+	// Only near-pure black/white qualifies (default text, unstyled fills). Genuinely
+	// chromatic colors, and the already-theme-correct grays the skin pipeline supplies for
+	// the sheet background (#3a3a3a) and gridlines (#555555), must stay untouched, so the
+	// margin (20) sits well below both (58 and 85).
 	var g_nCellDarkModeEdge = 20;
 	function darkModeShouldCorrectColor(r, g, b) {
 		if (r < g_nCellDarkModeEdge && g < g_nCellDarkModeEdge && b < g_nCellDarkModeEdge)
@@ -464,6 +462,17 @@
 		var max = 255 - g_nCellDarkModeEdge;
 		return (r > max && g > max && b > max);
 	}
+
+	// bSkipCorrection: true for a color the user explicitly picked, as opposed to the
+	// automatic default, so it is never inverted. Compare a caller's own cached color
+	// against this function's return value, not against the raw r/g/b, since the raw value
+	// may not match what actually landed on the canvas last time.
+	DrawingContext.prototype.getDarkModeCorrectedColor = function (r, g, b, bSkipCorrection) {
+		if (!bSkipCorrection && this.isDarkMode && darkModeShouldCorrectColor(r, g, b)) {
+			return AscCommon.darkModeCorrectColor2(r, g, b);
+		}
+		return {R: r, G: g, B: b};
+	};
 
 	DrawingContext.prototype._ppiInit = function () {
 		this.scaleFactor = 1;
@@ -765,12 +774,6 @@
 		var _g = val.getG();
 		var _b = val.getB();
 		var _a = val.getA();
-		if (this.isDarkMode && darkModeShouldCorrectColor(_r, _g, _b)) {
-			var oCorrected = AscCommon.darkModeCorrectColor2(_r, _g, _b);
-			_r = oCorrected.R;
-			_g = oCorrected.G;
-			_b = oCorrected.B;
-		}
 		this.fillColor = new AscCommon.CColor(_r, _g, _b, _a);
 		if (this.ctx.fillStyle) {
 			this.ctx.fillStyle = "rgba(" + _r + "," + _g + "," + _b + "," + _a + ")";
@@ -794,12 +797,6 @@
 		var _g = val.getG();
 		var _b = val.getB();
 		var _a = val.getA();
-		if (this.isDarkMode && darkModeShouldCorrectColor(_r, _g, _b)) {
-			var oCorrected = AscCommon.darkModeCorrectColor2(_r, _g, _b);
-			_r = oCorrected.R;
-			_g = oCorrected.G;
-			_b = oCorrected.B;
-		}
 		if (this.ctx.strokeStyle) {
 			this.ctx.strokeStyle = "rgba(" + _r + "," + _g + "," + _b + "," + _a + ")";
 		} else {

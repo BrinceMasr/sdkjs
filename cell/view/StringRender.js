@@ -594,10 +594,12 @@
 		 * @param {Number} y  Top of the text rect
 		 * @param {Number} maxWidth  Text width restriction
 		 * @param {String} textColor  Default text color for formatless string
+		 * @param {boolean} [bHasExplicitFill]  true when the cell being drawn has its own
+		 *   explicit background fill, so dark-mode text correction must not apply
 		 * @return {StringRender}  Returns 'this' to allow chaining
 		 */
-		StringRender.prototype.render = function (drawingCtx, x, y, maxWidth, textColor) {
-			this._doRender(drawingCtx, x, y, maxWidth, textColor);
+		StringRender.prototype.render = function (drawingCtx, x, y, maxWidth, textColor, bHasExplicitFill) {
+			this._doRender(drawingCtx, x, y, maxWidth, textColor, bHasExplicitFill);
 			return this;
 		};
 
@@ -1170,12 +1172,12 @@
 		 * @param {String} textColor
 		 */
 
-		StringRender.prototype._doRender = function (drawingCtx, x, y, maxWidth, textColor) {
+		StringRender.prototype._doRender = function (drawingCtx, x, y, maxWidth, textColor, bHasExplicitFill) {
 			let self = this;
 			let ctx = drawingCtx || this.drawingCtx;
 			let zoom = ctx.getZoom();
 			let ppiy = ctx.getPPIY();
-			this.drawState.reset(drawingCtx, textColor, this.flags, this.angle);
+			this.drawState.reset(drawingCtx, textColor, this.flags, this.angle, bHasExplicitFill);
 			let drawState = this.drawState;
 			let align = this.getEffectiveAlign();
 			let i, j, p, p_, strBeg;
@@ -1370,6 +1372,7 @@
 			this.currentFont = null;
 			this.currentColor = null;
 			this.textColor = null;
+			this.hasExplicitFill = false;
 			this.angle = 0;
 			this.currentLine = null;
 			this.startIdx = 0;
@@ -1407,7 +1410,20 @@
 
 				let fsz = prop.font.getSize();
 				let lw = asc_round(fsz * ppiy / 72 / 18) || 1;
-				ctx.setStrokeStyle(prop.c || textColor)
+				// setStrokeStyle draws whatever color it is given, so underline/strikeout must
+				// resolve the same dark-mode correction as the text it decorates, and only
+				// when dark mode is actually on
+				let decorationColor = prop.c || textColor;
+				if (ctx.isDarkMode) {
+					let isDecorationColorExplicit = this.hasExplicitFill || !AscCommonExcel.isColorAutomatic(decorationColor);
+					if (!isDecorationColorExplicit) {
+						let oDecorationCorrected = ctx.getDarkModeCorrectedColor(decorationColor.getR(), decorationColor.getG(),
+							decorationColor.getB(), isDecorationColorExplicit);
+						decorationColor = new AscCommon.CColor(oDecorationCorrected.R, oDecorationCorrected.G,
+							oDecorationCorrected.B, decorationColor.getA());
+					}
+				}
+				ctx.setStrokeStyle(decorationColor)
 					.setLineWidth(lw)
 					.beginPath();
 				let dy = (lw / 2);
@@ -1455,6 +1471,22 @@
 				let _g = textColor.getG();
 				let _b = textColor.getB();
 				let _a = textColor.getA();
+				// isColorAutomatic identifies the "no color set" default (see WorkbookElems.js);
+				// only that should be dark-mode-inverted, never a color some cell/run actually
+				// picked. A cell with its own explicit fill is exempt too, even with default
+				// text: that fill was authored with some text color pairing in mind, and
+				// inverting default text on top of it can turn readable-on-light into
+				// unreadable-on-light (e.g. white text on a light table-style band).
+				if (this.drawingCtx.isDarkMode) {
+					let isExplicitColor = this.hasExplicitFill || !AscCommonExcel.isColorAutomatic(textColor);
+					if (!isExplicitColor) {
+						let oCorrected = this.drawingCtx.getDarkModeCorrectedColor(_r, _g, _b, isExplicitColor);
+						_r = oCorrected.R;
+						_g = oCorrected.G;
+						_b = oCorrected.B;
+						textColor = new AscCommon.CColor(_r, _g, _b, _a);
+					}
+				}
 				let setColor = true;
 				if (this.drawingCtx.fillColor && this.drawingCtx.fillColor.isEqual(_r, _g, _b, _a)) {
 					setColor = false;
@@ -1518,6 +1550,18 @@
 				let _g = textColor.getG();
 				let _b = textColor.getB();
 				let _a = textColor.getA();
+				// see beginFragment above: use AscCommonExcel.isColorAutomatic plus hasExplicitFill,
+				// and only resolve/reallocate when dark mode is on and the color isn't explicit
+				if (this.drawingCtx.isDarkMode) {
+					let isExplicitColor = this.hasExplicitFill || !AscCommonExcel.isColorAutomatic(textColor);
+					if (!isExplicitColor) {
+						let oCorrected = this.drawingCtx.getDarkModeCorrectedColor(_r, _g, _b, isExplicitColor);
+						_r = oCorrected.R;
+						_g = oCorrected.G;
+						_b = oCorrected.B;
+						textColor = new AscCommon.CColor(_r, _g, _b, _a);
+					}
+				}
 				let setColor = true;
 				if (this.drawingCtx.fillColor && this.drawingCtx.fillColor.isEqual(_r, _g, _b, _a)) {
 					setColor = false;
@@ -1584,8 +1628,9 @@
 
 
 
-		TableCellDrawState.prototype.reset = function(drawingCtx, textColor, flags, angle) {
+		TableCellDrawState.prototype.reset = function(drawingCtx, textColor, flags, angle, bHasExplicitFill) {
 			this.drawingCtx = drawingCtx || this.stringRender.drawingCtx;
+			this.hasExplicitFill = !!bHasExplicitFill;
 			this.x = 0;
 			this.y = 0;
 			this.baseY = 0;

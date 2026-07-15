@@ -6111,11 +6111,12 @@ function isAllowPasteLink(pastedWb) {
     };
 
     /** Рисует фон ячеек в строке */
+	/** ↪ Translate → “Draws the background of cells in a row” */
     WorksheetView.prototype._drawRowBG = function (drawingCtx, row, colStart, colEnd, offsetX, offsetY, mergedCells, mc, cfIterator) {
 		var height = this._getRowHeight(row);
 		if (0 === height && mergedCells) {
 			return;
-		}
+		}		
 
 		var drawCells = {}, i;
 
@@ -6163,7 +6164,14 @@ function isAllowPasteLink(pastedWb) {
 			if (findFillColor || hasFill || mc) {
 				// ToDo не отрисовываем заливку границ от ячеек c заливкой, которые находятся правее и ниже
 				//  отрисовываемого диапазона. Но по факту проблем быть не должно.
+				/** ↪ Translate → “TODO: we don't draw the fill of cell borders 
+				 * for filled cells that are located to the right and below the range being drawn. 
+				 * But in practice there shouldn't be any problems.” */
 				var fillGrid = findFillColor || hasFill;
+				// only the cell's own fill (hasFill, with no search-highlight/theme override
+				// about to replace it below) is a color the user actually picked, so that one
+				// must be exempt from dark-mode auto-correction, same as explicit font colors
+				var bIsExplicitFill = hasFill && !findFillColor;
 				findFillColor = findFillColor || (!hasFill && mc && this.settings.cells.defaultState.background);
 
 				var x = this._getColLeft(col) - (fillGrid ? 1 : 0) + this.getRightToLeftOffset();
@@ -6175,7 +6183,7 @@ function isAllowPasteLink(pastedWb) {
                     fill = new AscCommonExcel.Fill();
 					fill.fromColor(findFillColor);
                 }
-                AscCommonExcel.drawFillCell(ctx, graphics, fill, new AscCommon.asc_CRect((this.getRightToLeft() ? (this.getCtxWidth(ctx) - x - w + offsetX) : x - offsetX), y - offsetY, w, h));
+                AscCommonExcel.drawFillCell(ctx, graphics, fill, new AscCommon.asc_CRect((this.getRightToLeft() ? (this.getCtxWidth(ctx) - x - w + offsetX) : x - offsetX), y - offsetY, w, h), bIsExplicitFill);
 			}
 
 			if (this.isPageBreakPreview(true) && mc) {
@@ -6486,6 +6494,10 @@ function isAllowPasteLink(pastedWb) {
 
 		var font = c.getFont();
 		var color = font.getColor();
+		// a cell with its own explicit fill was authored with some text color pairing in
+		// mind (even "default black"), so dark mode must not invert default text on top of
+		// it, same reasoning as bIsExplicitFill in _drawRowBG for the fill itself
+		var hasExplicitFill = c.getFill().hasFill();
 		var isMerged = ct.flags.isMerged(), range, isWrapped = ct.flags.wrapText;
 		var ctx = drawingCtx || this.drawingCtx;
 
@@ -6659,7 +6671,7 @@ function isAllowPasteLink(pastedWb) {
 				}
 			}
 
-			this._drawText(this.stringRender, drawingCtx, 0, 0, textW, color, true);
+			this._drawText(this.stringRender, drawingCtx, 0, 0, textW, color, true, hasExplicitFill);
 			this.stringRender.resetTransform(isPrintPreview ? null : drawingCtx);
 
 			if (transformMatrix) {
@@ -6713,7 +6725,7 @@ function isAllowPasteLink(pastedWb) {
 				}
 			}
 
-			this._drawText(this.stringRender.restoreInternalState(ct.state), ctx, textX, textY, textW, color);
+			this._drawText(this.stringRender.restoreInternalState(ct.state), ctx, textX, textY, textW, color, false, hasExplicitFill);
 			this._RemoveClipRect(ctx);
 		}
 
@@ -7466,7 +7478,17 @@ function isAllowPasteLink(pastedWb) {
 
 			if (isNewColor) {
 				bc = border.getColorOrDefault();
-				ctx.setStrokeStyle(bc);
+				// bc itself must stay the raw color: isNewColor above compares it against the
+				// next border's raw color too, to decide whether to batch them into one path
+				var colorToDraw = bc;
+				if (ctx.isDarkMode) {
+					var isExplicitBorderColor = !AscCommonExcel.isColorAutomatic(bc);
+					if (!isExplicitBorderColor) {
+						var oCorrected = ctx.getDarkModeCorrectedColor(bc.getR(), bc.getG(), bc.getB(), isExplicitBorderColor);
+						colorToDraw = new CColor(oCorrected.R, oCorrected.G, oCorrected.B, bc.getA());
+					}
+				}
+				ctx.setStrokeStyle(colorToDraw);
 			}
 			if (isNewStyle) {
 				bs = border.s;
@@ -27848,8 +27870,8 @@ function isAllowPasteLink(pastedWb) {
 		ctx.clearRectByX(this.getRightToLeft() ? (this.getCtxWidth(ctx) - x - w) : x, y, w, h);
 		return ctx;
 	};
-	WorksheetView.prototype._drawText = function (stringRender, ctx, textX, textY, textW, color, skipRtl) {
-		stringRender.render(ctx, this.getRightToLeft() && !skipRtl ? (this.getCtxWidth(ctx) - textX - textW) : textX, textY, textW, color);
+	WorksheetView.prototype._drawText = function (stringRender, ctx, textX, textY, textW, color, skipRtl, bHasExplicitFill) {
+		stringRender.render(ctx, this.getRightToLeft() && !skipRtl ? (this.getCtxWidth(ctx) - textX - textW) : textX, textY, textW, color, bHasExplicitFill);
 		return stringRender;
 	};
 	WorksheetView.prototype._fillText = function (ctx, text, x, y, maxWidth, charWidths, angle) {
