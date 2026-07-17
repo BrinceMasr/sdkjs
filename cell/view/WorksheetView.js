@@ -5706,7 +5706,9 @@ function isAllowPasteLink(pastedWb) {
 		//рисуем текст для преварительного просмотра
 		//this._drawPageBreakPreviewText(drawingCtx, range, leftFieldInPx, topFieldInPx, width, height);
 
-		ctx.setStrokeStyle(this.settings.cells.defaultState.border)
+		// Printed gridlines must always be the light theme's, not whatever content dark mode
+		// is currently active on screen.
+		ctx.setStrokeStyle(isPrint ? this.settings.cells.printState.border : this.settings.cells.defaultState.border)
 			.setLineWidth(1).beginPath();
 
 		let i, d, l;
@@ -5735,7 +5737,7 @@ function isAllowPasteLink(pastedWb) {
 
 		// Clear grid for pivot tables with classic and outline layout
 		let clearRange, pivotRange, clearRanges = this.model.getPivotTablesClearRanges(range);
-		ctx.setFillStyle(this.settings.cells.defaultState.background);
+		ctx.setFillStyle(isPrint ? this.settings.cells.printState.background : this.settings.cells.defaultState.background);
 		for (i = 0; i < clearRanges.length; i += 2) {
 			clearRange = clearRanges[i];
 			pivotRange = clearRanges[i + 1];

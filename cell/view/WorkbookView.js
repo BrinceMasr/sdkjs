@@ -155,7 +155,15 @@
 		this.cells = {
 			defaultState: {
 				background: this.getCColor(AscCommon.GlobalSkin.CellBackground), border: this.getCColor(AscCommon.GlobalSkin.CellGrid)
-			}, padding: -1 /*px horizontal padding*/
+			},
+			// Print and print-preview must always render the light theme, regardless of whatever
+			// content dark mode is currently active on screen (dark mode is a screen-editing
+			// affordance, not a document property) - fixed, never updated by updateStyle().
+			printState: {
+				background: this.getCColor(AscCommon.EditorSkins["theme-light"].CellBackground),
+				border: this.getCColor(AscCommon.EditorSkins["theme-light"].CellGrid)
+			},
+			padding: -1 /*px horizontal padding*/
 		};
 		this.activeCellBorderColor = new CColor(72, 121, 92);
 		this.activeCellBorderColor2 = new CColor(255, 255, 255, 1);
@@ -4132,7 +4140,8 @@
 		}
 
 		printPreviewContext.clear();
-		printPreviewContext.setFillStyle( this.defaults.worksheetView.cells.defaultState.background )
+		// Always the light theme here - print preview must not inherit content dark mode.
+		printPreviewContext.setFillStyle( this.defaults.worksheetView.cells.printState.background )
 			.fillRect( 0, 0, printPreviewContext.getWidth(), printPreviewContext.getHeight() );
 
 		var ws;
