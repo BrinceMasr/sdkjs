@@ -4,19 +4,33 @@
   "homepage": "https://www.onlyoffice.com",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=18.13.0"
+  },
   "dependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
     "glob": "^8.1.0",
+    "source-map-js": "^1.2.1",
     "terser": "^5.20.0",
     "terser-webpack-plugin": "^5.3.11",
     "webpack": "^5.98.0",
     "webpack-cli": "^6.0.1"
   },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  },
   "scripts": {
-    "build": "node scripts/build-pipeline.js",
+    "build": "node scripts/build-pipeline.cjs",
     "build:word": "webpack --config webpack.word.mjs",
     "build:cell": "webpack --config webpack.cell.mjs",
     "build:slide": "webpack --config webpack.slide.mjs",
     "build:visio": "webpack --config webpack.visio.mjs",
-    "develop": "node scripts/build-develop.js"
+    "watch:word":  "cross-env NODE_ENV=development webpack --config webpack.word.mjs --watch",
+    "watch:cell":  "cross-env NODE_ENV=development webpack --config webpack.cell.mjs --watch",
+    "watch:slide": "cross-env NODE_ENV=development webpack --config webpack.slide.mjs --watch",
+    "watch:visio": "cross-env NODE_ENV=development webpack --config webpack.visio.mjs --watch",
+    "develop": "node scripts/build-develop.cjs",
+    "test": "node --test test/"
   }
 }

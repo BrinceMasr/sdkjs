@@ -63,9 +63,9 @@ jobs:
       - name: Build develop SDK
         working-directory: sdkjs
         run: |
-          npm install grunt-cli node-qunit-puppeteer
-          npm install --prefix build
-          node node_modules/grunt-cli/bin/grunt --gruntfile build/Gruntfile.js develop --addon=sdkjs-forms
+          npm install node-qunit-puppeteer
+          npm ci --prefix build
+          npm run --prefix build develop
 
       - name: Run unit tests
         working-directory: sdkjs
@@ -102,9 +102,46 @@ jobs:
         with:
           node-version: 20
 
+      - name: Run build-tooling unit tests
+        run: |
+          cd sdkjs
+          npm ci --prefix build
+          npm test --prefix build
+
       - name: Run build sdkjs
         run: |
           cd sdkjs
-          npm install grunt-cli
-          npm install --prefix build
-          node node_modules/grunt-cli/bin/grunt --gruntfile build/Gruntfile.js
+          # npm ci here too (not just in "Run build-tooling unit tests"): this job
+          # runs on a runner where steps share a workspace but a fresh checkout
+          # may still land without node_modules installed. npm ci is fast on a
+          # warm cache, so this is cheap insurance against "webpack: not found".
+          npm ci --prefix build
+          npm run --prefix build build
+
+      - name: Install QUnit runner dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libatk1.0-0 libcups2 libatk-bridge2.0-0 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libnss3 libgbm1 libasound2t64
+          cd sdkjs
+          npm install node-qunit-puppeteer
+
+      # The "unit-tests" job above runs the QUnit suite against raw source files
+      # (COMPILED unset) — it never touches the webpack output, so a regression in the
+      # actual bundle (wrong concatenation order, a helper-dedup bug, a stripped-directive
+      # bug, etc.) can pass CI entirely undetected. Re-point develop/sdkjs/*/scripts.js at
+      # the just-built sdk-all-min.js (COMPILED=1) and run a smoke test against that, so
+      # the built artifact itself is exercised at least once.
+      #
+      # Only tests/common/api/api.html is used here — verified locally (not assumed):
+      # COMPILED=1's generated scripts.js references ONLY sdk-all-min.js, never
+      # sdk-all.js (this mirrors the original Gruntfile's writeScripts() exactly, it is
+      # not a webpack-migration change). sdk-all-min.js is the bootstrap chunk only;
+      # AscWord/AscCommonExcel/etc. live in sdk-all.js, so any suite touching those
+      # (tests/word/api, tests/*/shortcuts, tests/cell/js-api, ...) fails under
+      # COMPILED=1 with "AscWord is not defined" — a pre-existing limitation of
+      # developer-compiled mode, not something this step should be asserting on.
+      - name: Run QUnit against the built bundle (COMPILED=1)
+        run: |
+          cd sdkjs
+          COMPILED=1 npm run --prefix build develop
+          node node_modules/node-qunit-puppeteer/cli.js tests/common/api/api.html 30000 "--no-sandbox"

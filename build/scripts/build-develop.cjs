@@ -34,96 +34,21 @@
 const path = require('path');
 const fs   = require('fs');
 const url  = require('url');
+const { loadAllConfigs, getFilesMin, getFilesAll, expandGlobs } = require('../lib/sdk-configs.cjs');
+const { parseAddonDirs, resolveBuildRoot } = require('../lib/env.cjs');
 
 const BUILD_DIR = path.resolve(__dirname, '..');
 const SRC_ROOT  = path.resolve(BUILD_DIR, '..');
 
-const BUILD_ROOT = process.env.BUILD_ROOT
-    ? path.resolve(process.env.BUILD_ROOT, 'sdkjs')
-    : path.resolve(BUILD_DIR, '..', 'deploy', 'sdkjs');
+const BUILD_ROOT = resolveBuildRoot(BUILD_DIR);
 
 const DEVELOP_ROOT = process.env.BUILD_ROOT
     ? path.join(process.env.BUILD_ROOT, 'sdkjs', 'develop', 'sdkjs')
     : path.join(BUILD_DIR, '..', 'develop', 'sdkjs');
 
 const platform  = process.env.SDK_PLATFORM || '';
-const addonDirs = process.env.SDK_ADDONS
-    ? process.env.SDK_ADDONS.split(path.delimiter).filter(Boolean)
-    : [];
+const addonDirs = parseAddonDirs();
 const compiled  = process.env.COMPILED === '1';
-
-// ---- Config loading (mirrors CConfig from Gruntfile.js) --------------------
-
-function loadJsonConfig(configsDir, name) {
-    const file = path.join(configsDir, name + '.json');
-    if (!fs.existsSync(file)) return null;
-    return JSON.parse(fs.readFileSync(file, 'utf8'));
-}
-
-function fixPath(obj, basePath) {
-    if (Array.isArray(obj)) {
-        for (let i = 0; i < obj.length; i++) obj[i] = path.join(basePath, obj[i]);
-        return;
-    }
-    for (const k of Object.keys(obj)) fixPath(obj[k], basePath);
-}
-
-function mergeConfigs(base, addon) {
-    for (const k of Object.keys(addon)) {
-        if (Array.isArray(addon[k])) {
-            base[k] = Array.isArray(base[k]) ? base[k].concat(addon[k]) : addon[k];
-        } else {
-            if (!base[k]) base[k] = {};
-            mergeConfigs(base[k], addon[k]);
-        }
-    }
-}
-
-function loadAllConfigs() {
-    const configs = {};
-    const configsDir = path.join(SRC_ROOT, 'configs');
-    for (const name of ['word', 'cell', 'slide', 'visio']) {
-        const cfg = loadJsonConfig(configsDir, name);
-        if (cfg) { fixPath(cfg, SRC_ROOT); configs[name] = cfg; }
-    }
-    for (const addonDir of addonDirs) {
-        for (const name of ['word', 'cell', 'slide', 'visio']) {
-            if (!configs[name]) continue;
-            const addon = loadJsonConfig(path.join(addonDir, 'configs'), name);
-            if (!addon) continue;
-            fixPath(addon, addonDir);
-            mergeConfigs(configs[name], addon);
-        }
-    }
-    return configs;
-}
-
-function getFilesMin(sdkCfg) {
-    let files = (sdkCfg['min'] || []).slice();
-    if (platform === 'mobile' && sdkCfg['mobile_banners']) {
-        files = sdkCfg['mobile_banners']['min'].concat(files);
-    }
-    if (platform === 'desktop' && sdkCfg['desktop']) {
-        files = files.concat(sdkCfg['desktop']['min']);
-    }
-    return files;
-}
-
-function getFilesAll(sdkCfg) {
-    let files = (sdkCfg['common'] || []).slice();
-    if (platform === 'mobile') {
-        if (sdkCfg['mobile_banners']) {
-            files = sdkCfg['mobile_banners']['common'].concat(files);
-        }
-        const exclude = sdkCfg['exclude_mobile'] || [];
-        files = files.filter(f => !exclude.includes(f));
-        files = files.concat(sdkCfg['mobile'] || []);
-    }
-    if (platform === 'desktop' && sdkCfg['desktop']) {
-        files = files.concat(sdkCfg['desktop']['common']);
-    }
-    return files;
-}
 
 // ---- writeScripts (exact port of writeScripts() from Gruntfile.js) ---------
 
@@ -138,23 +63,27 @@ function writeScripts(sdkCfg, name) {
     ];
 
     if (compiled) {
-        if (process.env.BUILD_ROOT) {
-            files.push(path.join('..', name, 'sdk-all-min.js'));
-        } else {
-            files.push(path.join(BUILD_ROOT, name, 'sdk-all-min.js'));
-        }
+        // When process.env.BUILD_ROOT is set (e.g. Docker's /package), BUILD_ROOT
+        // resolves to a path outside this checkout's directory tree, so
+        // path.relative(BUILD_DIR, ...) below would compute a bogus path escaping
+        // out to that external root instead of the sibling compiled bundle.
+        // Push an already-relative entry in that case instead — mirrors the old
+        // Gruntfile's writeScripts() special case exactly.
+        files.push(process.env.BUILD_ROOT
+            ? path.join('..', name, 'sdk-all-min.js')
+            : path.join(BUILD_ROOT, name, 'sdk-all-min.js'));
     } else {
         files = files.concat(
             [path.join(SRC_ROOT, 'common', 'applyDocumentChanges.js')],
-            getFilesMin(sdkCfg),
-            getFilesAll(sdkCfg),
+            expandGlobs(getFilesMin(sdkCfg, platform)),
+            expandGlobs(getFilesAll(sdkCfg, platform)),
         );
     }
 
     // Convert absolute paths to relative URL strings anchored at build/
     // (mirrors fixUrl(files, '../../../../sdkjs/build/') from Gruntfile.js)
     files = fixUrl(
-        files.map(f => path.relative(BUILD_DIR, f)),
+        files.map(f => path.isAbsolute(f) ? path.relative(BUILD_DIR, f) : f),
         '../../../../sdkjs/build/',
     );
 
@@ -169,16 +98,35 @@ function writeScripts(sdkCfg, name) {
     process.stdout.write(`build-develop: wrote ${outFile}\n`);
 }
 
+// Replaces the grunt copy-standalone task: device_scale.js is loaded directly
+// by HTML templates (outside the SDK bundle), so it needs a standalone copy
+// into the deploy root alongside develop/, not just inside the min/all bundles.
+//
+// Only needed when this script runs standalone (`npm run develop`, outside the
+// full build-pipeline). The full pipeline already deploys a properly processed
+// (terser + license header) copy via deploy-assets.cjs — running this here too
+// would clobber it with a raw, unprocessed file. build-pipeline.cjs sets
+// SKIP_STANDALONE=1 when invoking this script for that reason.
+function copyStandalone() {
+    const src  = path.join(SRC_ROOT, 'common', 'device_scale.js');
+    const dest = path.join(BUILD_ROOT, 'common', 'device_scale.js');
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    fs.copyFileSync(src, dest);
+    process.stdout.write(`build-develop: wrote ${dest}\n`);
+}
+
 // ---- main ------------------------------------------------------------------
 
 function main() {
-    const configs = loadAllConfigs();
+    const configs = loadAllConfigs(SRC_ROOT, addonDirs);
     for (const name of ['word', 'cell', 'slide', 'visio']) {
-        if (!configs[name]) {
-            process.stderr.write(`build-develop: no config for ${name}, skipping\n`);
-            continue;
+        if (!configs[name] || !configs[name]['sdk']) {
+            throw new Error(`build-develop: missing sdk config for ${name}`);
         }
         writeScripts(configs[name]['sdk'], name);
+    }
+    if (process.env.SKIP_STANDALONE !== '1') {
+        copyStandalone();
     }
 }
 

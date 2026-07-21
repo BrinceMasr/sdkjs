@@ -26,7 +26,7 @@ bundles (`sdk-all.js` / `sdk-all-min.js`) that the sibling **web-apps** repo loa
 | `slide/`    | Presentation editor + themes/textures. |
 | `pdf/`      | PDF editor; `src/` is the implementation, `build/` a compiled wrapper, `test/` a harness. |
 | `visio/`    | Diagram editor with its own VSDX serialization (`model/`). |
-| `build/`    | Grunt build: `Gruntfile.js`, `package.json`, `license.header`. Run grunt from **here**. |
+| `build/`    | Webpack build: `webpack.*.mjs`, `scripts/`, `package.json`, `license.header`. Run npm from **here**. See `build/DEVELOPER-GUIDE.md` for the full workflow. |
 | `configs/`  | `<editor>.json` file-lists that drive the build (load order); `externs.json` for Closure. |
 | `tests/`    | QUnit suites per editor + `code-style/check.py` (the lint gate). |
 | `vendor/`   | Third-party libs (jQuery, XRegExp, etc.). Excluded from lint/build minification. |
@@ -36,34 +36,38 @@ bundles (`sdk-all.js` / `sdk-all-min.js`) that the sibling **web-apps** repo loa
 
 For Docker dev environment setup (running the full server stack), see [/DocumentServer/AGENTS.md](../DocumentServer/AGENTS.md).
 
-Requires **Node.js** and, for the full compile, **Java** (the build uses Google Closure
-Compiler, pinned to `google-closure-compiler@20240317`). There is **no root `package.json`**;
-all build deps live in `build/`.
+Requires **Node.js** only — the build now runs on Webpack + Terser (no Java, no Google
+Closure Compiler). There is **no root `package.json`**; all build deps live in `build/`.
+See `build/DEVELOPER-GUIDE.md` for the full workflow (watch mode, source maps, cache).
 
 ```bash
-# Full SDK build (release; ADVANCED minification). Run from build/.
-cd build && npm install -g grunt-cli && npm ci && grunt
+# Full SDK build (release; all 4 modules in parallel, ~50s cold / ~2-3s warm). Run from build/.
+cd build && npm ci && npm run build
 # Outputs: ../deploy/sdkjs/{word,cell,slide,visio}/sdk-all-min.js + sdk-all.js
 ```
 
 ```bash
-# Debug/dev loop — NO recompile, NO Java needed. Run from build/.
-grunt develop              # writes ../develop/sdkjs/<editor>/scripts.js listing the
-                           # individual source files, so editors/tests load unminified sources
-grunt develop --compiled   # same manifest, but pointing at the compiled bundles
+# Debug/dev loop — no bundling. Run from build/.
+npm run develop              # writes ../develop/sdkjs/<editor>/scripts.js listing the
+                              # individual source files, so editors/tests load unminified sources
+COMPILED=1 npm run develop   # same manifest, but pointing at the compiled bundles
 ```
 
-Day-to-day inner loop: edit a source file → `grunt develop` → reload the editor/test page.
-You only need the full `grunt` (Closure) build to produce release/min bundles.
+Day-to-day inner loop: edit a source file → `npm run develop` → reload the editor/test page.
+You only need the full `npm run build` (webpack) to produce release/min bundles, or
+`npm run watch:word` (etc.) for an auto-rebuilding dev bundle.
 
-Other flags: `--desktop=true` (desktop-only files), `--mobile=true`, `--map` (source maps),
-`--level=WHITESPACE_ONLY` (faster, readable output), `--addon=sdkjs-forms` (merges an external
-addon repo's `configs/`).
+Config is via **environment variables**, not CLI flags: `SDK_PLATFORM=desktop` or `mobile`
+(desktop/mobile-only files), `SDK_SOURCE_MAPS=1` (source maps on a production build),
+`SDK_ADDONS=../../sdkjs-forms` (`path.delimiter`-separated list; merges external addon repos'
+`configs/`), `NODE_ENV=development` (readable, unminified output). There is no `--level` /
+`ADVANCED` vs `WHITESPACE_ONLY` distinction anymore — minification is always Terser with
+`mangle: false` (see Gotchas below).
 
 **`make` is NOT the SDK build.** The Makefile's default target also builds the sibling
 `../web-apps` repo and requires it to be checked out next to sdkjs; it is the integration
-build. Use `grunt` in `build/` for SDK-only work. (The Makefile's `SDKJS_FILES` is also stale —
-it lists only `word/sdk-all.js` though grunt builds all editors.)
+build. Use `npm run build` in `build/` for SDK-only work. (The Makefile's `SDKJS_FILES` is also
+stale — it lists only `word/sdk-all.js` though the build produces all editors.)
 
 ### Adding a source file
 
@@ -81,9 +85,9 @@ QUnit suites run headless via `node-qunit-puppeteer`, **from the repo root**:
 
 ```bash
 # one-time setup (from repo root)
-npm install grunt-cli node-qunit-puppeteer
-npm install --prefix build
-node node_modules/grunt-cli/bin/grunt --gruntfile build/Gruntfile.js develop
+npm install node-qunit-puppeteer
+npm ci --prefix build
+npm run --prefix build develop
 
 # run a single suite
 node node_modules/node-qunit-puppeteer/cli.js tests/word/api/api.html 30000 "--no-sandbox"
@@ -98,7 +102,7 @@ CI-guarded by this workflow.
 
 Heaviest coverage is in `tests/cell/spreadsheet-calculation/` (formula engine) and
 `tests/word/`. Suites depend on the generated `develop/sdkjs/*/scripts.js`, so run
-`grunt develop` first.
+`npm run develop` (in `build/`) first.
 
 ## Code style — the build-breakers
 
@@ -192,11 +196,15 @@ Each editor dir has the same set of API files:
 
 - The editor instance lives in both `Asc.editor` and `window.editor` (desktop compat) — code
   often checks both.
-- External callers must use bracket access (`window['Asc']['asc_docs_api']`); dot access on
-  public names gets mangled by Closure ADVANCED minification.
-- `make` pulls in `../web-apps`; for SDK-only work use `grunt` in `build/`.
+- External callers must use bracket access (`window['Asc']['asc_docs_api']`); public names are
+  still published both ways (`window['Name'].Sym = window.Name.Sym = Sym`) as a defensive
+  convention, but the current webpack build runs Terser with `mangle: false` — property/name
+  mangling is not actually applied. Keep using bracket access anyway; don't rely on this as
+  license to switch to dot-access-only code.
+- `make` pulls in `../web-apps`; for SDK-only work use `npm run build` in `build/`.
 - Use `npm ci` (not `npm install`) in `build/` to respect the committed `npm-shrinkwrap.json`.
-- The full `grunt` build needs Java; `grunt develop` does not.
+- No Java/Closure Compiler dependency anymore — `npm run build` and `npm run develop` both only
+  need Node.js.
 
 ## Where future findings live
 

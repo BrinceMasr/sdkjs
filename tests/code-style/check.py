@@ -1,6 +1,6 @@
 import os
 
-exclude_dirs = set(['vendor', 'externs'])
+exclude_dirs = set(['vendor', 'externs', 'node_modules', '.webpack-cache'])
 exclude_files = set(['jquery_native.js'])
 
 def get_string_from_list(list):
@@ -68,7 +68,11 @@ def check_file_without_newline(files):
     raise Exception("Files without newline:\n" + get_string_from_list(files_without_new_line))
 
 def check_code_style():
-  files_js = get_files_by_ext(".js")
+  # .cjs/.mjs are the build-tooling script extensions introduced by the
+  # webpack migration (build/scripts, build/lib, build/loaders) — without
+  # them here, that whole directory silently falls outside every one of
+  # these checks going forward.
+  files_js = get_files_by_ext(".js") + get_files_by_ext(".cjs") + get_files_by_ext(".mjs")
   check_file_without_license(files_js)
   # check_file_without_latvian_address(files_js)
   check_file_without_lf_ending(files_js)

@@ -27,21 +27,21 @@
 
 const path  = require('path');
 const fs    = require('fs');
-const { globSync } = require('glob');
+const { sync: globSync } = require('glob');
 const { minify }   = require('terser');
+const babel = require('@babel/core');
+const { resolveBuildRoot } = require('../lib/env.cjs');
 
 const BUILD_DIR = path.resolve(__dirname, '..');
 const SRC_ROOT  = path.resolve(BUILD_DIR, '..');
 
-const BUILD_ROOT = process.env.BUILD_ROOT
-    ? path.resolve(process.env.BUILD_ROOT, 'sdkjs')
-    : path.resolve(BUILD_DIR, '..', 'deploy', 'sdkjs');
+const BUILD_ROOT = resolveBuildRoot(BUILD_DIR);
 
 const version      = process.env.PRODUCT_VERSION || '0.0.0';
 const buildNumber  = process.env.BUILD_NUMBER     || '0';
 const appCopyright = process.env.APP_COPYRIGHT
-    || `Copyright (C) Ascensio System SIA 2012-${new Date().getFullYear()}. All rights reserved`;
-const publisherUrl = process.env.PUBLISHER_URL || 'https://www.onlyoffice.com/';
+    || `Copyright (C) Ascensio System SIA 2012-2025. All rights reserved; Euro-Office contributors 2026 - ${new Date().getFullYear()}`;
+const publisherUrl = process.env.PUBLISHER_URL || 'https://github.com/Euro-Office/';
 
 let licenseText = fs.readFileSync(path.join(BUILD_DIR, 'license.header'), 'utf8');
 licenseText = licenseText
@@ -106,14 +106,32 @@ const OTHER_FILES = [
     },
 ];
 
+// The old Grunt path ran these through Closure with --language_out=ECMASCRIPT5.
+// Terser alone doesn't downlevel syntax (it only avoids introducing new-ES
+// syntax while minifying), so let/const/arrow functions/etc from source files
+// like zlib/engine or the service worker would otherwise reach deploy/ as-is.
+function transpileToES5(source, filename) {
+    const result = babel.transformSync(source, {
+        filename,
+        babelrc:    false,
+        configFile: false,
+        sourceType: 'script',
+        presets: [
+            [require.resolve('@babel/preset-env'), { targets: { ie: '11' }, modules: false }],
+        ],
+    });
+    return result.code;
+}
+
 async function deployJsFile(srcPath, destPath) {
     const source = fs.readFileSync(srcPath, 'utf8');
-    const result = await minify(source, {
+    const es5    = transpileToES5(source, srcPath);
+    const result = await minify(es5, {
         compress: false,
         mangle:   false,
         format:   { comments: false },
     });
-    const content = licenseText + '\n' + (result.code || source);
+    const content = licenseText + '\n' + (result.code != null ? result.code : es5);
     fs.mkdirSync(path.dirname(destPath), { recursive: true });
     fs.writeFileSync(destPath, content, 'utf8');
 }

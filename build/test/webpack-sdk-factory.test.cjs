@@ -1,0 +1,113 @@
+/**
+ * (c) Copyright Ascensio System SIA 2010-2024
+ *
+ * This program is a free software product. You can redistribute it and/or
+ * modify it under the terms of the GNU Affero General Public License (AGPL)
+ * version 3 as published by the Free Software Foundation. In accordance with
+ * Section 7(a) of the GNU AGPL its Section 15 shall be amended to the effect
+ * that Ascensio System SIA expressly excludes the warranty of non-infringement
+ * of any third-party rights.
+ *
+ * This program is distributed WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
+ * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+ */
+
+'use strict';
+
+const test   = require('node:test');
+const assert = require('node:assert/strict');
+const path   = require('node:path');
+const url    = require('node:url');
+const fs     = require('node:fs');
+const os     = require('node:os');
+const webpack = require('webpack');
+const TerserPlugin = require('terser-webpack-plugin');
+
+test('stripBootstrapStrictDirective: removes webpack\'s forced top-level "use strict" prologue', async () => {
+    const { stripBootstrapStrictDirective } = await import(
+        url.pathToFileURL(path.join(__dirname, '..', 'webpack.sdk.factory.mjs'))
+    );
+
+    const bundle = '/******/ "use strict";\n/******/ (() => {\nvar x = 1;\n})();';
+    const patched = stripBootstrapStrictDirective(bundle);
+
+    assert.equal(patched.includes('"use strict"'), false);
+    // Same length / same line count — must not shift anything a source map points at.
+    assert.equal(patched.length, bundle.length);
+    assert.equal(patched.split('\n').length, bundle.split('\n').length);
+});
+
+test('stripBootstrapStrictDirective: leaves the bundle unchanged when no directive is present', async () => {
+    const { stripBootstrapStrictDirective } = await import(
+        url.pathToFileURL(path.join(__dirname, '..', 'webpack.sdk.factory.mjs'))
+    );
+
+    const bundle = '/******/ (() => {\nvar x = 1;\n})();';
+    assert.equal(stripBootstrapStrictDirective(bundle), bundle);
+});
+
+test('stripBootstrapStrictDirective: does not touch a "use strict" appearing past the prologue window', async () => {
+    const { stripBootstrapStrictDirective, PROLOGUE_SCAN_LIMIT } = await import(
+        url.pathToFileURL(path.join(__dirname, '..', 'webpack.sdk.factory.mjs'))
+    );
+
+    // A real source file's own string literal containing this text, buried
+    // deep in the concatenated bundle, must never be mistaken for webpack's
+    // bootstrap directive.
+    const padding = 'x'.repeat(PROLOGUE_SCAN_LIMIT + 100);
+    const bundle = `${padding}var msg = "use strict";`;
+    assert.equal(stripBootstrapStrictDirective(bundle), bundle);
+});
+
+test('StripBootstrapStrictModePlugin: strips webpack\'s bootstrap "use strict" from a real minified compilation', async (t) => {
+    const { StripBootstrapStrictModePlugin } = await import(
+        url.pathToFileURL(path.join(__dirname, '..', 'webpack.sdk.factory.mjs'))
+    );
+
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'strip-strict-test-'));
+    const entry  = path.join(tmpDir, 'entry.js');
+    // Bare top-level var, no import/export — same shape sdk-concat-loader
+    // produces (sourceType:'script'), so webpack treats this chunk the same
+    // way it treats a real SDK bundle for bootstrap-generation purposes.
+    fs.writeFileSync(entry, 'var AscCommonSdkTestGlobal = { value: 1 + 1 };\n');
+
+    function runCompiler(withPlugin) {
+        return new Promise((resolve, reject) => {
+            const compiler = webpack({
+                mode: 'production',
+                entry,
+                output: { path: tmpDir, filename: withPlugin ? 'with-plugin.js' : 'without-plugin.js', iife: false },
+                optimization: {
+                    minimize: true,
+                    minimizer: [new TerserPlugin({ terserOptions: { mangle: false, compress: true } })],
+                },
+                plugins: withPlugin ? [new StripBootstrapStrictModePlugin()] : [],
+            });
+            compiler.run((err, stats) => {
+                compiler.close(() => {});
+                if (err || stats.hasErrors()) return reject(err || new Error(stats.toString()));
+                resolve(fs.readFileSync(path.join(tmpDir, withPlugin ? 'with-plugin.js' : 'without-plugin.js'), 'utf8'));
+            });
+        });
+    }
+
+    try {
+        const withoutPlugin = await runCompiler(false);
+        const withPlugin    = await runCompiler(true);
+
+        // Sanity check the test fixture itself is meaningful: if webpack's own
+        // output never carries the directive in the first place (e.g. a future
+        // webpack version stops emitting it for script-sourceType chunks), the
+        // plugin has nothing to strip and this assertion would catch that the
+        // integration test itself needs updating, rather than silently passing
+        // for the wrong reason.
+        if (!withoutPlugin.includes('"use strict"')) {
+            t.diagnostic('webpack did not emit a bootstrap "use strict" for this chunk shape — plugin has nothing to strip here');
+        } else {
+            assert.equal(withPlugin.includes('"use strict"'), false);
+        }
+    } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+});
