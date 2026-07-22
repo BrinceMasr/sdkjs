@@ -451,27 +451,34 @@
 		return this;
 	}
 
-	// Only near-pure black/white qualifies (default text, unstyled fills). Genuinely
-	// chromatic colors, and the already-theme-correct grays the skin pipeline supplies for
-	// the sheet background (#3a3a3a) and gridlines (#555555), must stay untouched, so the
-	// margin (20) sits well below both (58 and 85).
-	var g_nCellDarkModeEdge = 20;
-	function darkModeShouldCorrectColor(r, g, b) {
-		if (r < g_nCellDarkModeEdge && g < g_nCellDarkModeEdge && b < g_nCellDarkModeEdge)
-			return true;
-		var max = 255 - g_nCellDarkModeEdge;
-		return (r > max && g > max && b > max);
-	}
+	// Returns the corrected color when dark mode is on and the input color is near black/white.
+	// Callers should decide whether a color is eligible (explicit vs. automatic) before calling this;
+	DrawingContext.prototype.getDarkModeCorrectedColor = function (r, g, b) {
 
-	// bSkipCorrection: true for a color the user explicitly picked, as opposed to the
-	// automatic default, so it is never inverted. Compare a caller's own cached color
-	// against this function's return value, not against the raw r/g/b, since the raw value
-	// may not match what actually landed on the canvas last time.
-	DrawingContext.prototype.getDarkModeCorrectedColor = function (r, g, b, bSkipCorrection) {
-		if (!bSkipCorrection && this.isDarkMode && darkModeShouldCorrectColor(r, g, b)) {
-			return AscCommon.darkModeCorrectColor2(r, g, b);
-		}
-		return {R: r, G: g, B: b};
+		return AscCommon.darkModeCorrectColor2(r, g, b);
+		/*
+		draft remove it if confirm useless
+		//preserved the remaning for now but i suspect its useless since
+		//only applied to automatic colors, amd automatic colors are probably already 
+		//choosen to be contrasted
+
+		// rely on darkModeCorrectColor2 but add 
+		// a near white or black limit 
+		var color = {R: r, G: g, B: b};
+		// isDarkMode re-checked here, to reduce refactor on some external callers
+		//disable ifDarkModeforTest if (this.isDarkMode) {
+			// threshold = distance from 0 AND 255 to consider if color is near black or white
+			// 20 chosen to stay well clear of the theme's own dark grays (#3a3a3a, #555555)
+			var threshold = 20;
+			var max = 255 - threshold;
+			var isNearBlackOrWhite = (r < threshold && g < threshold && b < threshold) || (r > max && g > max && b > max);
+			// Only near-pure black/white qualifies (default text, unstyled fills)
+			if (isNearBlackOrWhite) {
+				color = AscCommon.darkModeCorrectColor2(r, g, b);
+			}			
+		//disable ifDarkModeforTest }
+		return color;
+		*/
 	};
 
 	DrawingContext.prototype._ppiInit = function () {

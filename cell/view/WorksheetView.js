@@ -7480,14 +7480,17 @@ function isAllowPasteLink(pastedWb) {
 
 			if (isNewColor) {
 				bc = border.getColorOrDefault();
-				// bc itself must stay the raw color: isNewColor above compares it against the
-				// next border's raw color too, to decide whether to batch them into one path
+				// bc itself must stay the raw color				
 				var colorToDraw = bc;
+
+				// resolve dark-mode correction if relevant :
+				
 				if (ctx.isDarkMode) {
-					var isExplicitBorderColor = !AscCommonExcel.isColorAutomatic(bc);
-					if (!isExplicitBorderColor) {
-						var oCorrected = ctx.getDarkModeCorrectedColor(bc.getR(), bc.getG(), bc.getB(), isExplicitBorderColor);
-						colorToDraw = new CColor(oCorrected.R, oCorrected.G, oCorrected.B, bc.getA());
+					var isNotCustomColor = AscCommonExcel.isColorAutomatic(bc);
+					if (isNotCustomColor) {
+						//dont have explicit border colors -> modify it						
+						var oCorrectedColor = ctx.getDarkModeCorrectedColor(bc.getR(), bc.getG(), bc.getB());
+						colorToDraw = new CColor(oCorrectedColor.R, oCorrectedColor.G, oCorrectedColor.B, bc.getA());
 					}
 				}
 				ctx.setStrokeStyle(colorToDraw);
@@ -19566,6 +19569,11 @@ function isAllowPasteLink(pastedWb) {
 			flags: fl,
 			font: font,
 			background: bg || this.settings.cells.defaultState.background,
+			// same rule StringRender uses for the grid (c.getFill().hasFill(), see
+			// _drawCellText): a cell with its own explicit fill keeps its default text
+			// color unmodified even in dark mode. bg (c.getFillColor()) isn't a reliable
+			// substitute, it misses gradient fills that hasFill() catches.
+			hasExplicitFill: c.getFill().hasFill(),
 			zoom: this.getZoom(),
 			isAddPersentFormat: enterOptions.quickInput && Asc.c_oAscNumFormatType.Percent === c.getNumFormatType(),
 			autoComplete: arrAutoComplete,

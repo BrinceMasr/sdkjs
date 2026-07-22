@@ -2545,10 +2545,13 @@
 
 			var solid = fill.getSolidFill();
 			if (solid) {
+				// resolve dark-mode correction if relevant :
 				if (ctx.isDarkMode) {
 					// only resolve a corrected color when dark mode is actually active
-					var oCorrected = ctx.getDarkModeCorrectedColor(solid.getR(), solid.getG(), solid.getB(), bIsExplicitFill);
-					solid = new AscCommon.CColor(oCorrected.R, oCorrected.G, oCorrected.B, solid.getA());
+					if (!bIsExplicitFill) {
+						var oCorrected = ctx.getDarkModeCorrectedColor(solid.getR(), solid.getG(), solid.getB());
+						solid = new AscCommon.CColor(oCorrected.R, oCorrected.G, oCorrected.B, solid.getA());
+					}
 				}
 				ctx.setFillStyle(solid).fillRect(rect._x, rect._y, rect._width, rect._height);
 				return;

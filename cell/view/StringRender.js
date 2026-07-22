@@ -1410,17 +1410,18 @@
 
 				let fsz = prop.font.getSize();
 				let lw = asc_round(fsz * ppiy / 72 / 18) || 1;
-				// setStrokeStyle draws whatever color it is given, so underline/strikeout must
-				// resolve the same dark-mode correction as the text it decorates, and only
-				// when dark mode is actually on
+				
+				// resolve dark-mode correction if relevant :
 				let decorationColor = prop.c || textColor;
 				if (ctx.isDarkMode) {
-					let isDecorationColorExplicit = this.hasExplicitFill || !AscCommonExcel.isColorAutomatic(decorationColor);
-					if (!isDecorationColorExplicit) {
-						let oDecorationCorrected = ctx.getDarkModeCorrectedColor(decorationColor.getR(), decorationColor.getG(),
-							decorationColor.getB(), isDecorationColorExplicit);
-						decorationColor = new AscCommon.CColor(oDecorationCorrected.R, oDecorationCorrected.G,
-							oDecorationCorrected.B, decorationColor.getA());
+					let isNotCustomColor = !this.hasExplicitFill && AscCommonExcel.isColorAutomatic(decorationColor);
+					if (isNotCustomColor) {
+						//only modify default colored cell (the ones not explicitly colored by the user or a table template)
+						let oCorrectedColor = ctx.getDarkModeCorrectedColor(decorationColor.getR(), decorationColor.getG(),
+							decorationColor.getB());
+						decorationColor = new AscCommon.CColor(oCorrectedColor.R, oCorrectedColor.G,
+							oCorrectedColor.B, decorationColor.getA());
+							//console.log("564x AscCommon.CColor >>> " , decorationColor );
 					}
 				}
 				ctx.setStrokeStyle(decorationColor)
@@ -1471,6 +1472,8 @@
 				let _g = textColor.getG();
 				let _b = textColor.getB();
 				let _a = textColor.getA();
+				
+				// resolve dark-mode correction if relevant :
 				// isColorAutomatic identifies the "no color set" default (see WorkbookElems.js);
 				// only that should be dark-mode-inverted, never a color some cell/run actually
 				// picked. A cell with its own explicit fill is exempt too, even with default
@@ -1478,12 +1481,13 @@
 				// inverting default text on top of it can turn readable-on-light into
 				// unreadable-on-light (e.g. white text on a light table-style band).
 				if (this.drawingCtx.isDarkMode) {
-					let isExplicitColor = this.hasExplicitFill || !AscCommonExcel.isColorAutomatic(textColor);
-					if (!isExplicitColor) {
-						let oCorrected = this.drawingCtx.getDarkModeCorrectedColor(_r, _g, _b, isExplicitColor);
-						_r = oCorrected.R;
-						_g = oCorrected.G;
-						_b = oCorrected.B;
+					let isNotCustomColor = !this.hasExplicitFill && AscCommonExcel.isColorAutomatic(textColor);
+					if (isNotCustomColor) {
+						//only modify default colored cell (the ones not explicitly colored by the user or a table template)
+						let oCorrectedColor = this.drawingCtx.getDarkModeCorrectedColor(_r, _g, _b);
+						_r = oCorrectedColor.R;
+						_g = oCorrectedColor.G;
+						_b = oCorrectedColor.B;
 						textColor = new AscCommon.CColor(_r, _g, _b, _a);
 					}
 				}
@@ -1550,15 +1554,18 @@
 				let _g = textColor.getG();
 				let _b = textColor.getB();
 				let _a = textColor.getA();
+
+				// resolve dark-mode correction if relevant :
 				// see beginFragment above: use AscCommonExcel.isColorAutomatic plus hasExplicitFill,
 				// and only resolve/reallocate when dark mode is on and the color isn't explicit
 				if (this.drawingCtx.isDarkMode) {
-					let isExplicitColor = this.hasExplicitFill || !AscCommonExcel.isColorAutomatic(textColor);
-					if (!isExplicitColor) {
-						let oCorrected = this.drawingCtx.getDarkModeCorrectedColor(_r, _g, _b, isExplicitColor);
-						_r = oCorrected.R;
-						_g = oCorrected.G;
-						_b = oCorrected.B;
+					let isNotCustomColor = !this.hasExplicitFill && AscCommonExcel.isColorAutomatic(textColor);
+					if (isNotCustomColor) {
+						//only modify default colored cell (the ones not explicitly colored by the user or a table template)
+						let oCorrectedColor = this.drawingCtx.getDarkModeCorrectedColor(_r, _g, _b);
+						_r = oCorrectedColor.R;
+						_g = oCorrectedColor.G;
+						_b = oCorrectedColor.B;
 						textColor = new AscCommon.CColor(_r, _g, _b, _a);
 					}
 				}
