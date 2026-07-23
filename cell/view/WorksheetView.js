@@ -7418,7 +7418,9 @@ function isAllowPasteLink(pastedWb) {
 		let rtlKf = this.getRightToLeft() ? -1 : 1;
         var nextCell = -1;
         var ctx = drawingCtx || this.drawingCtx;
-        ctx.setFillStyle( this.settings.cells.defaultState.background );
+        // Printed fill must always be the light theme's, not whatever content dark mode
+        // is currently active on screen.
+        ctx.setFillStyle( this.usePrintScale ? this.settings.cells.printState.background : this.settings.cells.defaultState.background );
         for ( var col = colBeg; col < colEnd; ++col ) {
             var c = -1 !== nextCell ? nextCell : this._getCell( col, row );
             var bg = null !== c ? c.getFillColor() : null;
