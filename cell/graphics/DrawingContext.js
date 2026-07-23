@@ -447,20 +447,20 @@
 		// AscCommon.CColor
 		this.fillColor = new AscCommon.CColor(255, 255, 255);
 
+		//////
+		// DarkMode support
 		this.isDarkMode = false;
 
-		// Reused across every getDarkModeCorrectedColor call, instead of allocating a fresh
-		// CColor each time. A real CColor (not a lookalike) so it satisfies isEqual/Copy/etc.
-		// too, not just getR/getG/getB/getA. Safe only because every caller reads it
-		// synchronously via those getters and never retains the reference past that same call
-		// (see setStrokeStyle/setFillStyle: both unpack it immediately, they don't keep it).
-		this._darkModeColorShuttle = new AscCommon.CColor(0, 0, 0, 1);
-
-		// darkModeCorrectColor2 is a pure function of (r,g,b): same input always produces the
-		// same output, so its result can be memoized keyed by the raw input. Never exposed to
-		// callers directly, only read back into _darkModeColorShuttle, so there's nothing here a
-		// caller could hold onto and mutate.
+		// DM / performance - cache for darkModeCorrectColor2 results, avoids recalculating the
+		// same color thousands of times per redraw. Never exposed to callers directly, only
+		// read back into _darkModeColorShuttle, so there's nothing here a caller could mutate.
 		this._darkModeRgbCache = {};
+
+		// DM / performance - one shared CColor reused for every getDarkModeCorrectedColor call,
+		// instead of allocating a new one each time. Safe only because every caller reads it
+		// synchronously (getR/getG/getB/getA) and never retains the reference past that same
+		// call - see setStrokeStyle/setFillStyle, both unpack it immediately.
+		this._darkModeColorShuttle = new AscCommon.CColor(0, 0, 0, 1);
 
 		return this;
 	}
