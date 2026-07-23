@@ -6170,11 +6170,13 @@ function isAllowPasteLink(pastedWb) {
 				 * for filled cells that are located to the right and below the range being drawn. 
 				 * But in practice there shouldn't be any problems.” */
 				var fillGrid = findFillColor || hasFill;
-				// only the cell's own fill (hasFill, with no search-highlight/theme override
-				// about to replace it below) is a color the user actually picked, so that one
-				// must be exempt from dark-mode auto-correction, same as explicit font colors
-				var bIsExplicitFill = hasFill && !findFillColor;
-				findFillColor = findFillColor || (!hasFill && mc && this.settings.cells.defaultState.background);
+				// exempt from dark-mode auto-correction unless this is a search-highlight
+				// override (findFillColor, read here before it's reassigned below): both the
+				// cell's own fill and the merge's default background set below are already correct
+				var bIsExplicitFill = !findFillColor;
+				// print/print-preview must use the always-light printState.background, not
+				// the document's dark-mode-resolved defaultState.background
+				findFillColor = findFillColor || (!hasFill && mc && (this.usePrintScale ? this.settings.cells.printState.background : this.settings.cells.defaultState.background));
 
 				var x = this._getColLeft(col) - (fillGrid ? 1 : 0) + this.getRightToLeftOffset();
 				var y = top - (fillGrid ? 1 : 0);
