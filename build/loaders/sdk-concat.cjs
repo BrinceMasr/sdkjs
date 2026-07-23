@@ -59,14 +59,16 @@ try {
 // though the transpiled output only depends on the file's own content.
 const CACHE_DIR = path.join(__dirname, '..', '.webpack-cache', 'babel');
 
-// The actual babel preset/options object transpileToES5 passes — folded into
-// the cache key below (not a manually-maintained version integer) so a future
-// change to these options (e.g. the 'ie: 11' target) can't silently leave
-// stale cache entries from a previous options set undetected.
+// Mirrors the actual options transpileToES5 passes to Babel (sourceType, preset-env
+// targets/modules) plus the installed @babel/preset-env version, so a change to
+// either the options below or the preset-env package itself invalidates old cache
+// entries instead of silently serving stale transpiles. Keep this literal in sync
+// with transpileToES5's babel.transformSync() call.
 const BABEL_OPTIONS_KEY = JSON.stringify({
     sourceType: 'script',
     presetEnvTargets: { ie: '11' },
     presetEnvModules: false,
+    presetEnvVersion: require('@babel/preset-env/package.json').version,
 });
 
 // needSourceMap is folded into the key: a cache entry produced without a map

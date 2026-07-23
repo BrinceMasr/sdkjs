@@ -114,6 +114,35 @@ export class StripBootstrapStrictModePlugin {
     }
 }
 
+// @@license-banner@@ exists only so Terser's format.comments regex (below) can tell
+// the single BannerPlugin-injected banner apart from the ~400 identical per-file AGPL
+// headers it would otherwise also match. It has to survive in the bundle text through
+// the Terser pass for that match to work, so it can't be stripped from licenseText
+// before injection — instead, strip it from the asset after minification is done.
+class StripLicenseSentinelPlugin {
+    apply(compiler) {
+        compiler.hooks.compilation.tap('StripLicenseSentinelPlugin', (compilation) => {
+            compilation.hooks.processAssets.tap(
+                {
+                    name: 'StripLicenseSentinelPlugin',
+                    stage: webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT,
+                },
+                (assets) => {
+                    for (const name of Object.keys(assets)) {
+                        if (!name.endsWith('.js')) continue;
+
+                        const source = compilation.getAsset(name).source.source();
+                        if (typeof source !== 'string' || !source.includes('@@license-banner@@')) continue;
+
+                        const patched = source.replace(' @@license-banner@@', '');
+                        compilation.updateAsset(name, new webpack.sources.RawSource(patched));
+                    }
+                }
+            );
+        });
+    }
+}
+
 /**
  * @param {string} moduleName  'word' | 'cell' | 'slide' | 'visio'
  * @returns {object[]}  Two webpack compiler configs: [sdk-all-min, sdk-all]
@@ -218,6 +247,7 @@ export function sdkConfig(moduleName) {
                 }),
 
                 new StripBootstrapStrictModePlugin(),
+                new StripLicenseSentinelPlugin(),
 
                 // Replaces Closure Compiler's --define= flags.
                 // webpack DefinePlugin performs AST-level identifier replacement

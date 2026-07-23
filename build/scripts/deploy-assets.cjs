@@ -48,7 +48,11 @@ licenseText = licenseText
     .replace('@@AppCopyright', appCopyright)
     .replace('@@PublisherUrl', publisherUrl)
     .replace('@@Version', version)
-    .replace('@@Build', buildNumber);
+    .replace('@@Build', buildNumber)
+    // @@license-banner@@ only exists so webpack.sdk.factory.mjs's Terser pass can
+    // distinguish this banner from per-file headers — irrelevant here since this
+    // script never runs Terser over the banner text, so it must not ship.
+    .replace(' @@license-banner@@', '');
 
 // JS files skipped from individual minification (same as ignoreFiles in Gruntfile.js)
 const IGNORE_NAMES = new Set([
