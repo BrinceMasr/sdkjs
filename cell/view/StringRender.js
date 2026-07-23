@@ -1417,11 +1417,8 @@
 					let isNotCustomColor = !this.hasExplicitFill && AscCommonExcel.isColorAutomatic(decorationColor);
 					if (isNotCustomColor) {
 						//only modify default colored cell (the ones not explicitly colored by the user or a table template)
-						let oCorrectedColor = ctx.getDarkModeCorrectedColor(decorationColor.getR(), decorationColor.getG(),
-							decorationColor.getB());
-						decorationColor = new AscCommon.CColor(oCorrectedColor.R, oCorrectedColor.G,
-							oCorrectedColor.B, decorationColor.getA());
-							//console.log("564x AscCommon.CColor >>> " , decorationColor );
+						decorationColor = ctx.getDarkModeCorrectedColor(decorationColor.getR(), decorationColor.getG(),
+							decorationColor.getB(), decorationColor.getA());
 					}
 				}
 				ctx.setStrokeStyle(decorationColor)
@@ -1484,11 +1481,10 @@
 					let isNotCustomColor = !this.hasExplicitFill && AscCommonExcel.isColorAutomatic(textColor);
 					if (isNotCustomColor) {
 						//only modify default colored cell (the ones not explicitly colored by the user or a table template)
-						let oCorrectedColor = this.drawingCtx.getDarkModeCorrectedColor(_r, _g, _b);
-						_r = oCorrectedColor.R;
-						_g = oCorrectedColor.G;
-						_b = oCorrectedColor.B;
-						textColor = new AscCommon.CColor(_r, _g, _b, _a);
+						textColor = this.drawingCtx.getDarkModeCorrectedColor(_r, _g, _b, _a);
+						_r = textColor.getR();
+						_g = textColor.getG();
+						_b = textColor.getB();
 					}
 				}
 				let setColor = true;
@@ -1562,11 +1558,10 @@
 					let isNotCustomColor = !this.hasExplicitFill && AscCommonExcel.isColorAutomatic(textColor);
 					if (isNotCustomColor) {
 						//only modify default colored cell (the ones not explicitly colored by the user or a table template)
-						let oCorrectedColor = this.drawingCtx.getDarkModeCorrectedColor(_r, _g, _b);
-						_r = oCorrectedColor.R;
-						_g = oCorrectedColor.G;
-						_b = oCorrectedColor.B;
-						textColor = new AscCommon.CColor(_r, _g, _b, _a);
+						textColor = this.drawingCtx.getDarkModeCorrectedColor(_r, _g, _b, _a);
+						_r = textColor.getR();
+						_g = textColor.getG();
+						_b = textColor.getB();
 					}
 				}
 				let setColor = true;

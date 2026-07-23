@@ -2549,8 +2549,7 @@
 				if (ctx.isDarkMode) {
 					// only resolve a corrected color when dark mode is actually active
 					if (!bIsExplicitFill) {
-						var oCorrected = ctx.getDarkModeCorrectedColor(solid.getR(), solid.getG(), solid.getB());
-						solid = new AscCommon.CColor(oCorrected.R, oCorrected.G, oCorrected.B, solid.getA());
+						solid = ctx.getDarkModeCorrectedColor(solid.getR(), solid.getG(), solid.getB(), solid.getA());
 					}
 				}
 				ctx.setFillStyle(solid).fillRect(rect._x, rect._y, rect._width, rect._height);

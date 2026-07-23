@@ -7488,9 +7488,8 @@ function isAllowPasteLink(pastedWb) {
 				if (ctx.isDarkMode) {
 					var isNotCustomColor = AscCommonExcel.isColorAutomatic(bc);
 					if (isNotCustomColor) {
-						//dont have explicit border colors -> modify it						
-						var oCorrectedColor = ctx.getDarkModeCorrectedColor(bc.getR(), bc.getG(), bc.getB());
-						colorToDraw = new CColor(oCorrectedColor.R, oCorrectedColor.G, oCorrectedColor.B, bc.getA());
+						//dont have explicit border colors -> modify it
+						colorToDraw = ctx.getDarkModeCorrectedColor(bc.getR(), bc.getG(), bc.getB(), bc.getA());
 					}
 				}
 				ctx.setStrokeStyle(colorToDraw);

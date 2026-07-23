@@ -448,37 +448,50 @@
 		this.fillColor = new AscCommon.CColor(255, 255, 255);
 
 		this.isDarkMode = false;
+
+		// Reused across every getDarkModeCorrectedColor call, instead of allocating a fresh
+		// CColor each time. A real CColor (not a lookalike) so it satisfies isEqual/Copy/etc.
+		// too, not just getR/getG/getB/getA. Safe only because every caller reads it
+		// synchronously via those getters and never retains the reference past that same call
+		// (see setStrokeStyle/setFillStyle: both unpack it immediately, they don't keep it).
+		this._darkModeColorShuttle = new AscCommon.CColor(0, 0, 0, 1);
+
+		// darkModeCorrectColor2 is a pure function of (r,g,b): same input always produces the
+		// same output, so its result can be memoized keyed by the raw input. Never exposed to
+		// callers directly, only read back into _darkModeColorShuttle, so there's nothing here a
+		// caller could hold onto and mutate.
+		this._darkModeRgbCache = {};
+
 		return this;
 	}
 
-	// Returns the corrected color when dark mode is on and the input color is near black/white.
-	// Callers should decide whether a color is eligible (explicit vs. automatic) before calling this;
-	DrawingContext.prototype.getDarkModeCorrectedColor = function (r, g, b) {
+	// Returns the corrected color for the given automatic color. No near-black/white gate:
+	// tested against the standard theme and a synthetic non-black/white default (a mid navy)
+	// with no visible artifacts in either case, so the gate was removed as unnecessary.
+	// Callers should decide whether a color is eligible (explicit vs. automatic) before calling this.
+	// isDarkMode is not re-checked here: every current caller already gates the call itself on it.
+	DrawingContext.prototype.getDarkModeCorrectedColor = function (r, g, b, a) {
+		/*** dev-only log - start ***/		
+		(window.ionos_debug_db ??= {}).calls = (window.ionos_debug_db.calls ?? 0) + 1;
+		/*** dev-only log - end ***/
 
-		return AscCommon.darkModeCorrectColor2(r, g, b);
-		/*
-		draft remove it if confirm useless
-		//preserved the remaning for now but i suspect its useless since
-		//only applied to automatic colors, amd automatic colors are probably already 
-		//choosen to be contrasted
+		var shuttle = this._darkModeColorShuttle;
+		var key = r + ',' + g + ',' + b;
+		var corrected = this._darkModeRgbCache[key];
+		/*** dev-only log - start ***/
+		if (corrected) 
+			(window.ionos_debug_db ??= {}).cacheHits = (window.ionos_debug_db.cacheHits ?? 0) + 1;
+		/*** dev-only log - end ***/
 
-		// rely on darkModeCorrectColor2 but add 
-		// a near white or black limit 
-		var color = {R: r, G: g, B: b};
-		// isDarkMode re-checked here, to reduce refactor on some external callers
-		//disable ifDarkModeforTest if (this.isDarkMode) {
-			// threshold = distance from 0 AND 255 to consider if color is near black or white
-			// 20 chosen to stay well clear of the theme's own dark grays (#3a3a3a, #555555)
-			var threshold = 20;
-			var max = 255 - threshold;
-			var isNearBlackOrWhite = (r < threshold && g < threshold && b < threshold) || (r > max && g > max && b > max);
-			// Only near-pure black/white qualifies (default text, unstyled fills)
-			if (isNearBlackOrWhite) {
-				color = AscCommon.darkModeCorrectColor2(r, g, b);
-			}			
-		//disable ifDarkModeforTest }
-		return color;
-		*/
+		if (!corrected)  {
+			corrected = AscCommon.darkModeCorrectColor2(r, g, b);
+			this._darkModeRgbCache[key] = corrected;
+		}
+		shuttle.put_r(corrected.R);
+		shuttle.put_g(corrected.G);
+		shuttle.put_b(corrected.B);
+		shuttle.a = a;
+		return shuttle;
 	};
 
 	DrawingContext.prototype._ppiInit = function () {
