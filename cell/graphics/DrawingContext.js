@@ -471,26 +471,21 @@
 	// Callers should decide whether a color is eligible (explicit vs. automatic) before calling this.
 	// isDarkMode is not re-checked here: every current caller already gates the call itself on it.
 	DrawingContext.prototype.getDarkModeCorrectedColor = function (r, g, b, a) {
-		/*** dev-only log - start ***/		
-		(window.ionos_debug_db ??= {}).calls = (window.ionos_debug_db.calls ?? 0) + 1;
-		/*** dev-only log - end ***/
 
 		var shuttle = this._darkModeColorShuttle;
 		var key = r + ',' + g + ',' + b;
 		var corrected = this._darkModeRgbCache[key];
-		/*** dev-only log - start ***/
-		if (corrected) 
-			(window.ionos_debug_db ??= {}).cacheHits = (window.ionos_debug_db.cacheHits ?? 0) + 1;
-		/*** dev-only log - end ***/
 
 		if (!corrected)  {
 			corrected = AscCommon.darkModeCorrectColor2(r, g, b);
 			this._darkModeRgbCache[key] = corrected;
 		}
+
 		shuttle.put_r(corrected.R);
 		shuttle.put_g(corrected.G);
 		shuttle.put_b(corrected.B);
 		shuttle.a = a;
+		
 		return shuttle;
 	};
 
