@@ -166,6 +166,10 @@ export function sdkConfig(moduleName) {
             output: {
                 path: OUT_DIR,
                 filename: '[name].js',
+                // publicPath intentionally unset: safe today because there's no code
+                // splitting or dynamic import() in this config, so nothing needs to
+                // resolve a chunk/asset URL at runtime. Set it (matching DocumentServer's
+                // non-root deployment path) if splitChunks or import() is ever added here.
                 // iife:false — we control wrapping via the loader:
                 //   sdk-all-min: no wrapper
                 //   sdk-all:     (function(window, undefined){…})(window)
@@ -244,19 +248,34 @@ export function sdkConfig(moduleName) {
                         extractComments: false,
                         terserOptions: {
                             format: {
-                                // Preserve the license header injected by BannerPlugin.
-                                comments: /AGPL|Copyright|Ascensio|License/i,
+                                // BannerPlugin (stage ADDITIONS) injects the license banner into
+                                // the asset *before* Terser (stage OPTIMIZE_SIZE) runs, so the
+                                // banner is just another comment to Terser at this point. Match
+                                // only the sentinel below — matching on AGPL/Copyright/License
+                                // text also matches the identical per-file header repeated in
+                                // all ~400+ concatenated source files.
+                                comments: /@@license-banner@@/,
                             },
-                            compress: {
-                                // The legacy Closure Compiler build did not drop console
-                                // calls, and sdkjs uses console.* for non-debug diagnostics
-                                // (invalid-JS errors, clipboard permission warnings, custom
-                                // function registration warnings, workbook diagnostics) —
-                                // silently discarding those in production removes real
-                                // observability and can skip evaluation of their arguments.
-                                // Opt in explicitly per-build instead of dropping by default.
-                                drop_console: process.env.DROP_CONSOLE === '1',
-                            },
+                            compress: (platform === 'desktop' || platform === 'mobile')
+                                // Old build-desktop.bat/build-mobile.command ran Closure's
+                                // WHITESPACE_ONLY (comments/whitespace stripped, no semantic
+                                // transforms) instead of web's ADVANCED. `compress: false` is
+                                // Terser's closest equivalent — it disables the whole compress
+                                // pass (dead-code elim, inlining, etc.) and keeps output to
+                                // whitespace/name-shortening-free minification, restoring that
+                                // lighter tier instead of silently adopting web's ADVANCED-like
+                                // pass on desktop/mobile.
+                                ? false
+                                : {
+                                    // The legacy Closure Compiler build did not drop console
+                                    // calls, and sdkjs uses console.* for non-debug diagnostics
+                                    // (invalid-JS errors, clipboard permission warnings, custom
+                                    // function registration warnings, workbook diagnostics) —
+                                    // silently discarding those in production removes real
+                                    // observability and can skip evaluation of their arguments.
+                                    // Opt in explicitly per-build instead of dropping by default.
+                                    drop_console: process.env.DROP_CONSOLE === '1',
+                                },
                             // mangle:false is load-bearing — same reason as web-apps:
                             // sdkjs files communicate via window.AscCommon.xxx and bare
                             // top-level var declarations shared across concatenated scope.

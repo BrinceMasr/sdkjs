@@ -7,6 +7,11 @@ on:
       - 'release/**'
       - 'hotfix/**'
   pull_request:
+    branches:
+      - fork
+      - develop
+      - 'release/**'
+      - 'hotfix/**'
 jobs:
   code-style:
     runs-on: ubuntu-latest
@@ -132,12 +137,15 @@ jobs:
       # the just-built sdk-all-min.js (COMPILED=1) and run a smoke test against that, so
       # the built artifact itself is exercised at least once.
       #
-      # Only tests/common/api/api.html is used here — verified locally (not assumed):
-      # COMPILED=1's generated scripts.js references ONLY sdk-all-min.js, never
-      # sdk-all.js (this mirrors the original Gruntfile's writeScripts() exactly, it is
-      # not a webpack-migration change). sdk-all-min.js is the bootstrap chunk only;
-      # AscWord/AscCommonExcel/etc. live in sdk-all.js, so any suite touching those
-      # (tests/word/api, tests/*/shortcuts, tests/cell/js-api, ...) fails under
+      # tests/common/api/api.js only exercises AscCommon.* (editor-agnostic bootstrap
+      # APIs), never AscWord/AscCommonExcel/etc., so it's safe to reuse verbatim per
+      # module — api-cell.html/api-slide.html/api-visio.html point the same test file
+      # at cell/slide/visio's own scripts.js. This is deliberately NOT extended to
+      # suites touching module-specific APIs (tests/word/api, tests/*/shortcuts,
+      # tests/cell/js-api, ...): COMPILED=1's generated scripts.js references ONLY
+      # sdk-all-min.js, never sdk-all.js (mirrors the original Gruntfile's
+      # writeScripts() exactly — not a webpack-migration change), and
+      # AscWord/AscCommonExcel/etc. live in sdk-all.js, so those suites fail under
       # COMPILED=1 with "AscWord is not defined" — a pre-existing limitation of
       # developer-compiled mode, not something this step should be asserting on.
       - name: Run QUnit against the built bundle (COMPILED=1)
@@ -145,3 +153,6 @@ jobs:
           cd sdkjs
           COMPILED=1 npm run --prefix build develop
           node node_modules/node-qunit-puppeteer/cli.js tests/common/api/api.html 30000 "--no-sandbox"
+          node node_modules/node-qunit-puppeteer/cli.js tests/common/api/api-cell.html 30000 "--no-sandbox"
+          node node_modules/node-qunit-puppeteer/cli.js tests/common/api/api-slide.html 30000 "--no-sandbox"
+          node node_modules/node-qunit-puppeteer/cli.js tests/common/api/api-visio.html 30000 "--no-sandbox"
