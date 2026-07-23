@@ -69,6 +69,13 @@ jobs:
 
       - name: Build develop SDK
         working-directory: sdkjs
+        env:
+          # sdkjs-forms is checked out as a sibling of sdkjs/, so relative to
+          # sdkjs/build/ (where npm --prefix cds to run the script) it's two
+          # levels up. Without this, the forms/oform tests fail with
+          # "AscOForm is not defined" / "CreateTextForm is not a function"
+          # because the addon is checked out but never merged into the build.
+          SDK_ADDONS: ../../sdkjs-forms
         run: |
           npm install node-qunit-puppeteer
           npm ci --prefix build
