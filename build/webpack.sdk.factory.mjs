@@ -204,6 +204,17 @@ export function sdkConfig(moduleName) {
                 //   sdk-all:     (function(window, undefined){…})(window)
                 // Letting webpack add its own ()=>{} on top would still work
                 // (code sets window.xxx), but iife:false gives a cleaner output.
+                //
+                // WARNING: ~287 places across sdkjs (GlobalSkin, etc.) read bare globals
+                // with no `window.X = ...` assignment anywhere — they rely on webpack
+                // inlining this single-module, no-import entry at true top level (no
+                // function wrapper), so bare `var`s land on `window` the same way a
+                // plain <script> tag would. That inlining is a webpack optimization that
+                // only kicks in for a module with no imports/splitChunks/externals. If
+                // this config ever gains import(), splitChunks, or an external, webpack
+                // switches to its wrapped bootstrap form and all 287 bare-global reads
+                // break silently at runtime — with a green build and no warning. Re-verify
+                // this before adding any of those.
                 iife: false,
                 // Multiple chunk configs share OUT_DIR; do not wipe sibling output.
                 clean: false,

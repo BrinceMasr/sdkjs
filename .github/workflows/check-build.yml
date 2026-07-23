@@ -2,12 +2,14 @@ name: Check sdkjs
 on:
   push:
     branches:
+      - main
       - fork
       - develop
       - 'release/**'
       - 'hotfix/**'
   pull_request:
     branches:
+      - main
       - fork
       - develop
       - 'release/**'
