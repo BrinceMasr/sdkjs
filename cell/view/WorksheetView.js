@@ -6500,8 +6500,13 @@ function isAllowPasteLink(pastedWb) {
 		var color = font.getColor();
 		// a cell with its own explicit fill was authored with some text color pairing in
 		// mind (even "default black"), so dark mode must not invert default text on top of
-		// it, same reasoning as bIsExplicitFill in _drawRowBG for the fill itself
-		var hasExplicitFill = c.getFill().hasFill();
+		// it, same reasoning as bIsExplicitFill in _drawRowBG for the fill itself. A search
+		// highlight paints the same fixed (non-theme) yellow over the cell, so it needs the
+		// same treatment - otherwise default/automatic text gets inverted for the dark canvas
+		// even though it's actually sitting on the yellow highlight.
+		var isFindResult = this.handlers.trigger('selectSearchingResults') && undefined !== this.workbook.inFindResults(this, row, col);
+		var hasExplicitFill = c.getFill().hasFill() || isFindResult;
+		//var hasExplicitFill = c.getFill().hasFill() ;
 		var isMerged = ct.flags.isMerged(), range, isWrapped = ct.flags.wrapText;
 		var ctx = drawingCtx || this.drawingCtx;
 
