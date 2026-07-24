@@ -104,12 +104,28 @@
 			this.header.editorBorder = this.getCColor(AscCommon.GlobalSkin.EditorBorder);
 			this.header.cornerColor = this.getCColor(AscCommon.GlobalSkin.SelectAllIcon);
 			this.header.cornerColorSheetView = this.getCColor(AscCommon.GlobalSkin.SheetViewSelectAllIcon);
+			
 			// Cell background/grid follow the "Dark Document" (content) theme, not the
 			// interface theme's GlobalSkin. The two are independent: light UI with a dark
 			// document, and vice versa, must both be possible.
 			var cellSkin = AscCommon.EditorSkins[isContentDarkMode ? "theme-dark" : "theme-light"];
 			this.cells.defaultState.background = this.getCColor(cellSkin.CellBackground);
 			this.cells.defaultState.border = this.getCColor(cellSkin.CellGrid);
+			// col/row resize border pattern must be regenerated for the new theme's color
+			this.ptrnLineDotted1 = this._generateLineDottedPattern(cellSkin.ColOrRowResizeBorderColor);
+		};
+
+		// builds the 2x2 dotted-pattern canvas used by ptrnLineDotted1
+		this._generateLineDottedPattern = function (color) {
+			let cnv = document.createElement("canvas");
+			cnv.width = 2;
+			cnv.height = 2;
+			let ctx = cnv.getContext("2d");
+			ctx.clearRect(0, 0, 2, 2);
+			ctx.fillStyle = color;
+			ctx.fillRect(0, 0, 1, 1);
+			ctx.fillRect(1, 1, 1, 1);
+			return ctx.createPattern(cnv, "repeat");
 		};
 		this._generateStyle = function () {
 			return [// Header colors
@@ -175,15 +191,8 @@
 		// Число знаков для математической информации
 		this.mathMaxDigCount = 9;
 
-		var cnv = document.createElement("canvas");
-		cnv.width = 2;
-		cnv.height = 2;
-		var ctx = cnv.getContext("2d");
-		ctx.clearRect(0, 0, 2, 2);
-		ctx.fillStyle = "#000";
-		ctx.fillRect(0, 0, 1, 1);
-		ctx.fillRect(1, 1, 1, 1);
-		this.ptrnLineDotted1 = ctx.createPattern(cnv, "repeat");
+		// externalise canvas-based col/rows resize border creation AND color
+		this.ptrnLineDotted1 = this._generateLineDottedPattern(AscCommon.EditorSkins["theme-light"].ColOrRowResizeBorderColor);
 
 		this.halfSelection = false;
 

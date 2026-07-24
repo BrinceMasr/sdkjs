@@ -172,6 +172,8 @@ var EditorSkins = {
 		CellBackground                 : "#FFFFFF",
 		CellGrid                       : "#CACACA",
 
+		ColOrRowResizeBorderColor      : "#000000", //spreadsheeteditor - col/row resize guides
+
 		ColorDark                : "#ffffff",
 		ColorDarkActive          : "#ffffff",
 		ColorDarkHighlighted     : "#c1c1c1",
@@ -323,6 +325,8 @@ var EditorSkins = {
 
 		CellBackground                 : "#262626",
 		CellGrid                       : "#454545",
+
+		ColOrRowResizeBorderColor      : "#CCCCCC", //spreadsheeteditor - col/row resize guides
 
 		ColorDark                : "#333",
 		ColorDarkActive          : "#333",
