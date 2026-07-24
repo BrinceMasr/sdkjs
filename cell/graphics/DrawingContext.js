@@ -448,28 +448,33 @@
 		this.fillColor = new AscCommon.CColor(255, 255, 255);
 
 		//////
-		// DarkMode support
+		// DarkMode support (DM)
 		this.isDarkMode = false;
 
 		// DM / performance - cache for darkModeCorrectColor2 results, avoids recalculating the
-		// same color thousands of times per redraw. Never exposed to callers directly, only
-		// read back into _darkModeColorShuttle, so there's nothing here a caller could mutate.
+		// same color thousands of times per redraw. Never exposed directly, only read back via
+		// _darkModeColorShuttle.
 		this._darkModeRgbCache = {};
 
 		// DM / performance - one shared CColor reused for every getDarkModeCorrectedColor call,
-		// instead of allocating a new one each time. Safe only because every caller reads it
-		// synchronously (getR/getG/getB/getA) and never retains the reference past that same
-		// call - see setStrokeStyle/setFillStyle, both unpack it immediately.
+		// instead of allocating a new one each time. Safe because every caller reads it
+		// synchronously (setStrokeStyle/setFillStyle unpack it immediately) and never retains it.
 		this._darkModeColorShuttle = new AscCommon.CColor(0, 0, 0, 1);
 
 		return this;
 	}
 
-	// Returns the corrected color for the given automatic color. No near-black/white gate:
-	// tested against the standard theme and a synthetic non-black/white default (a mid navy)
-	// with no visible artifacts in either case, so the gate was removed as unnecessary.
-	// Callers should decide whether a color is eligible (explicit vs. automatic) before calling this.
-	// isDarkMode is not re-checked here: every current caller already gates the call itself on it.
+	/**
+	 * Returns the corrected color for the given automatic color.
+	 * Callers should decide whether a color is eligible (explicit vs. automatic) before calling this.
+	 * isDarkMode is not re-checked here: every current caller already gates the call itself on it.
+	 * @param {Number} r  0-255
+	 * @param {Number} g  0-255
+	 * @param {Number} b  0-255
+	 * @param {Number} [a]  0-1
+	 * @return {AscCommon.CColor}  the shared shuttle instance - read it immediately, it is
+	 * overwritten by the next call, never store or mutate the reference
+	 */
 	DrawingContext.prototype.getDarkModeCorrectedColor = function (r, g, b, a) {
 
 		var shuttle = this._darkModeColorShuttle;
