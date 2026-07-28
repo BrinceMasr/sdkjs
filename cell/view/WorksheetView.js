@@ -6479,6 +6479,30 @@ function isAllowPasteLink(pastedWb) {
 		return oRuleElement.ShowValue;
 	};
 
+	// Decides whether default/automatic text drawn on this cell should be exempt from
+	// dark-mode inversion. A cell's own fill (or the fixed search-highlight color) only
+	// exempts it when that background is itself light enough for black text to stay
+	// readable on it - a dark fill still needs the correction, same as no fill at all
+	// (where the dark canvas shows through and always needs it).
+	WorksheetView.prototype._getHasExplicitFillForTextColor = function (c, row, col) {
+		var isFindResult = this.handlers.trigger('selectSearchingResults') && undefined !== this.workbook.inFindResults(this, row, col);
+		if (isFindResult) {
+			var findColor = this.settings.findFillColor;
+			return !AscCommon.isColorDark(findColor.getR(), findColor.getG(), findColor.getB());
+		}
+		var fill = c.getFill();
+		if (!fill.hasFill()) {
+			return false;
+		}
+		var solidFill = fill.getSolidFill();
+		if (!solidFill) {
+			// pattern/gradient fill: no single background color to check against, keep the
+			// pre-existing conservative behavior of exempting default text from correction
+			return true;
+		}
+		return !AscCommon.isColorDark(solidFill.getR(), solidFill.getG(), solidFill.getB());
+	};
+
 	/** Рисует текст ячейки */
 	WorksheetView.prototype._drawCellText = function (drawingCtx, cfIterator, col, row, colStart, colEnd, offsetX, offsetY) {
 		var ct = this._getCellTextCache(col, row);
@@ -6498,24 +6522,18 @@ function isAllowPasteLink(pastedWb) {
 
 		var font = c.getFont();
 		var color = font.getColor();
-		// a cell with its own explicit fill was authored with some text color pairing in
-		// mind (even "default black"), so dark mode must not invert default text on top of
-		// it, same reasoning as bIsExplicitFill in _drawRowBG for the fill itself. A search
-		// highlight paints the same fixed (non-theme) yellow over the cell, so it needs the
-		// same treatment - otherwise default/automatic text gets inverted for the dark canvas
-		// even though it's actually sitting on the yellow highlight.
-		var isFindResult = this.handlers.trigger('selectSearchingResults') && undefined !== this.workbook.inFindResults(this, row, col);
-		var hasExplicitFill = c.getFill().hasFill() || isFindResult;
-		//var hasExplicitFill = c.getFill().hasFill() ;
 		var isMerged = ct.flags.isMerged(), range, isWrapped = ct.flags.wrapText;
 		var ctx = drawingCtx || this.drawingCtx;
-
 		if (isMerged) {
 			range = ct.flags.merged;
 			if (col !== range.c1 || row !== range.r1) {
 				return null;
 			}
 		}
+
+		// see _getHasExplicitFillForTextColor: only a light fill (or the fixed yellow search
+		// highlight) exempts default text from dark-mode inversion; a dark fill still needs it.
+		var hasExplicitFill = this._getHasExplicitFillForTextColor(c, row, col);
 
 		var colL = isMerged ? range.c1 : Math.max(colStart, col - ct.sideL);
 		var colR = isMerged ? Math.min(range.c2, this.nColsCount - 1) : Math.min(colEnd, col + ct.sideR);
@@ -19577,11 +19595,10 @@ function isAllowPasteLink(pastedWb) {
 			flags: fl,
 			font: font,
 			background: bg || this.settings.cells.defaultState.background,
-			// same rule StringRender uses for the grid (c.getFill().hasFill(), see
-			// _drawCellText): a cell with its own explicit fill keeps its default text
-			// color unmodified even in dark mode. bg (c.getFillColor()) isn't a reliable
-			// substitute, it misses gradient fills that hasFill() catches.
-			hasExplicitFill: c.getFill().hasFill(),
+			// same rule StringRender uses for the grid, see _getHasExplicitFillForTextColor:
+			// a cell's own fill only keeps default text unmodified when that fill is light
+			// enough for black text to stay readable on it.
+			hasExplicitFill: this._getHasExplicitFillForTextColor(c, row, col),
 			zoom: this.getZoom(),
 			isAddPersentFormat: enterOptions.quickInput && Asc.c_oAscNumFormatType.Percent === c.getNumFormatType(),
 			autoComplete: arrAutoComplete,
