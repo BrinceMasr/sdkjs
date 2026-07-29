@@ -6484,7 +6484,13 @@ function isAllowPasteLink(pastedWb) {
 	// color) only earns that when the background is itself light enough for black text to stay
 	// readable on it - a dark fill still needs the correction, same as no fill at all (where
 	// the dark canvas shows through and always needs it).
-	WorksheetView.prototype._getKeepsAutomaticTextColorAsIs = function (c, row, col) {
+	// resolvedFallbackBg: only passed by the cell editor (openCellEditor). There, a pattern/
+	// gradient fill is never actually drawn - the editor paints cells.defaultState.background
+	// (already dark-mode-corrected) behind the text instead, so that color is fully known and
+	// this can check it directly instead of falling back to the "unknown contrast" exemption
+	// below. The grid's real draw path (_drawCellText) never passes it, since there the
+	// pattern/gradient genuinely is rendered and its per-pixel contrast is genuinely unknown.
+	WorksheetView.prototype._getKeepsAutomaticTextColorAsIs = function (c, row, col, resolvedFallbackBg) {
 		var isFindResult = this.handlers.trigger('selectSearchingResults') && undefined !== this.workbook.inFindResults(this, row, col);
 		if (isFindResult) {
 			var findColor = this.settings.findFillColor;
@@ -6496,6 +6502,9 @@ function isAllowPasteLink(pastedWb) {
 		}
 		var solidFill = fill.getSolidFill();
 		if (!solidFill) {
+			if (resolvedFallbackBg) {
+				return !AscCommon.isColorDark(resolvedFallbackBg.getR(), resolvedFallbackBg.getG(), resolvedFallbackBg.getB());
+			}
 			// pattern/gradient fill: no single background color to check against, keep the
 			// pre-existing conservative behavior of exempting default text from correction
 			return true;
@@ -19601,7 +19610,12 @@ function isAllowPasteLink(pastedWb) {
 			// same rule StringRender uses for the grid, see _getKeepsAutomaticTextColorAsIs:
 			// a cell's own fill only earns this when that fill is light enough for black
 			// text to stay readable on it. Only consulted in dark mode, so skip computing it otherwise.
-			keepsAutomaticTextColorAsIs: this.drawingCtx.isDarkMode ? this._getKeepsAutomaticTextColorAsIs(c, row, col) : true,
+			// When bg is null (no fill, or a pattern/gradient fill), the editor is about to paint
+			// defaultState.background behind the text instead - pass it through as the resolved
+			// fallback so a pattern/gradient fill gets checked against what's actually rendered
+			// here, rather than the grid's "unknown contrast" exemption (irrelevant to a no-fill
+			// cell, whose _getKeepsAutomaticTextColorAsIs branch returns before ever using it).
+			keepsAutomaticTextColorAsIs: this.drawingCtx.isDarkMode ? this._getKeepsAutomaticTextColorAsIs(c, row, col, null === bg ? this.settings.cells.defaultState.background : undefined) : true,
 			zoom: this.getZoom(),
 			isAddPersentFormat: enterOptions.quickInput && Asc.c_oAscNumFormatType.Percent === c.getNumFormatType(),
 			autoComplete: arrAutoComplete,
