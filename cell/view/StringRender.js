@@ -594,12 +594,13 @@
 		 * @param {Number} y  Top of the text rect
 		 * @param {Number} maxWidth  Text width restriction
 		 * @param {String} textColor  Default text color for formatless string
-		 * @param {boolean} [bHasExplicitFill]  true when the cell being drawn has its own
-		 *   explicit background fill, so dark-mode text correction must not apply
+		 * @param {boolean} [bKeepsAutomaticTextColorAsIs]  true when the effective background under
+		 *   this text (its own fill, the fixed search-highlight color, or nothing at all) is light
+		 *   enough that default/automatic text doesn't need dark-mode color correction
 		 * @return {StringRender}  Returns 'this' to allow chaining
 		 */
-		StringRender.prototype.render = function (drawingCtx, x, y, maxWidth, textColor, bHasExplicitFill) {
-			this._doRender(drawingCtx, x, y, maxWidth, textColor, bHasExplicitFill);
+		StringRender.prototype.render = function (drawingCtx, x, y, maxWidth, textColor, bKeepsAutomaticTextColorAsIs) {
+			this._doRender(drawingCtx, x, y, maxWidth, textColor, bKeepsAutomaticTextColorAsIs);
 			return this;
 		};
 
@@ -1172,12 +1173,12 @@
 		 * @param {String} textColor
 		 */
 
-		StringRender.prototype._doRender = function (drawingCtx, x, y, maxWidth, textColor, bHasExplicitFill) {
+		StringRender.prototype._doRender = function (drawingCtx, x, y, maxWidth, textColor, bKeepsAutomaticTextColorAsIs) {
 			let self = this;
 			let ctx = drawingCtx || this.drawingCtx;
 			let zoom = ctx.getZoom();
 			let ppiy = ctx.getPPIY();
-			this.drawState.reset(drawingCtx, textColor, this.flags, this.angle, bHasExplicitFill);
+			this.drawState.reset(drawingCtx, textColor, this.flags, this.angle, bKeepsAutomaticTextColorAsIs);
 			let drawState = this.drawState;
 			let align = this.getEffectiveAlign();
 			let i, j, p, p_, strBeg;
@@ -1372,7 +1373,7 @@
 			this.currentFont = null;
 			this.currentColor = null;
 			this.textColor = null;
-			this.hasExplicitFill = false;
+			this.keepsAutomaticTextColorAsIs = false;
 			this.angle = 0;
 			this.currentLine = null;
 			this.startIdx = 0;
@@ -1414,8 +1415,8 @@
 				// resolve dark-mode correction if relevant :
 				let decorationColor = prop.c || textColor;
 				if (ctx.isDarkMode) {
-					let isNotCustomColor = !this.hasExplicitFill && AscCommonExcel.isColorAutomatic(decorationColor);
-					if (isNotCustomColor) {
+					let isTextRecolorable = !this.keepsAutomaticTextColorAsIs && AscCommonExcel.isColorAutomatic(decorationColor);
+					if (isTextRecolorable) {
 						//only modify default colored cell (the ones not explicitly colored by the user or a table template)
 						decorationColor = ctx.getDarkModeCorrectedColor(decorationColor.getR(), decorationColor.getG(),
 							decorationColor.getB(), decorationColor.getA());
@@ -1473,13 +1474,14 @@
 				// resolve dark-mode correction if relevant :
 				// isColorAutomatic identifies the "no color set" default (see WorkbookElems.js);
 				// only that should be dark-mode-inverted, never a color some cell/run actually
-				// picked. A cell with its own explicit fill is exempt too, even with default
-				// text: that fill was authored with some text color pairing in mind, and
-				// inverting default text on top of it can turn readable-on-light into
+				// picked. keepsAutomaticTextColorAsIs exempts default text too, when the
+				// background it sits on (the cell's own fill, or nothing at all) is already
+				// light enough: that background was authored with some text color pairing in
+				// mind, and inverting default text on top of it can turn readable-on-light into
 				// unreadable-on-light (e.g. white text on a light table-style band).
 				if (this.drawingCtx.isDarkMode) {
-					let isNotCustomColor = !this.hasExplicitFill && AscCommonExcel.isColorAutomatic(textColor);
-					if (isNotCustomColor) {
+					let isTextRecolorable = !this.keepsAutomaticTextColorAsIs && AscCommonExcel.isColorAutomatic(textColor);
+					if (isTextRecolorable) {
 						//only modify default colored cell (the ones not explicitly colored by the user or a table template)
 						textColor = this.drawingCtx.getDarkModeCorrectedColor(_r, _g, _b, _a);
 						_r = textColor.getR();
@@ -1552,11 +1554,12 @@
 				let _a = textColor.getA();
 
 				// resolve dark-mode correction if relevant :
-				// see beginFragment above: use AscCommonExcel.isColorAutomatic plus hasExplicitFill,
-				// and only resolve/reallocate when dark mode is on and the color isn't explicit
+				// see beginFragment above: use AscCommonExcel.isColorAutomatic plus
+				// keepsAutomaticTextColorAsIs, and only resolve/reallocate when dark mode is on
+				// and the color isn't explicit
 				if (this.drawingCtx.isDarkMode) {
-					let isNotCustomColor = !this.hasExplicitFill && AscCommonExcel.isColorAutomatic(textColor);
-					if (isNotCustomColor) {
+					let isTextRecolorable = !this.keepsAutomaticTextColorAsIs && AscCommonExcel.isColorAutomatic(textColor);
+					if (isTextRecolorable) {
 						//only modify default colored cell (the ones not explicitly colored by the user or a table template)
 						textColor = this.drawingCtx.getDarkModeCorrectedColor(_r, _g, _b, _a);
 						_r = textColor.getR();
@@ -1630,9 +1633,9 @@
 
 
 
-		TableCellDrawState.prototype.reset = function(drawingCtx, textColor, flags, angle, bHasExplicitFill) {
+		TableCellDrawState.prototype.reset = function(drawingCtx, textColor, flags, angle, bKeepsAutomaticTextColorAsIs) {
 			this.drawingCtx = drawingCtx || this.stringRender.drawingCtx;
-			this.hasExplicitFill = !!bHasExplicitFill;
+			this.keepsAutomaticTextColorAsIs = !!bKeepsAutomaticTextColorAsIs;
 			this.x = 0;
 			this.y = 0;
 			this.baseY = 0;

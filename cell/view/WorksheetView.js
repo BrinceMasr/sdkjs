@@ -6479,12 +6479,12 @@ function isAllowPasteLink(pastedWb) {
 		return oRuleElement.ShowValue;
 	};
 
-	// Decides whether default/automatic text drawn on this cell should be exempt from
-	// dark-mode inversion. A cell's own fill (or the fixed search-highlight color) only
-	// exempts it when that background is itself light enough for black text to stay
-	// readable on it - a dark fill still needs the correction, same as no fill at all
-	// (where the dark canvas shows through and always needs it).
-	WorksheetView.prototype._getHasExplicitFillForTextColor = function (c, row, col) {
+	// Decides whether default/automatic text drawn on this cell should keep its color as-is
+	// rather than get dark-mode corrected. A cell's own fill (or the fixed search-highlight
+	// color) only earns that when the background is itself light enough for black text to stay
+	// readable on it - a dark fill still needs the correction, same as no fill at all (where
+	// the dark canvas shows through and always needs it).
+	WorksheetView.prototype._getKeepsAutomaticTextColorAsIs = function (c, row, col) {
 		var isFindResult = this.handlers.trigger('selectSearchingResults') && undefined !== this.workbook.inFindResults(this, row, col);
 		if (isFindResult) {
 			var findColor = this.settings.findFillColor;
@@ -6531,9 +6531,12 @@ function isAllowPasteLink(pastedWb) {
 			}
 		}
 
-		// see _getHasExplicitFillForTextColor: only a light fill (or the fixed yellow search
-		// highlight) exempts default text from dark-mode inversion; a dark fill still needs it.
-		var hasExplicitFill = this._getHasExplicitFillForTextColor(c, row, col);
+		// see _getKeepsAutomaticTextColorAsIs: only a light fill (or the fixed yellow
+		// search highlight) exempts default text from dark-mode inversion; a dark fill still needs it.
+		// Only consulted when this draw target is in dark mode, so skip computing it otherwise.
+		//computed at cell level to avoid per character at the cost of passing in parameter
+		//computed only fordarkmode for now -> = on darkbackground invert text color
+		var keepsAutomaticTextColorAsIs = ctx.isDarkMode ? this._getKeepsAutomaticTextColorAsIs(c, row, col) : true;
 
 		var colL = isMerged ? range.c1 : Math.max(colStart, col - ct.sideL);
 		var colR = isMerged ? Math.min(range.c2, this.nColsCount - 1) : Math.min(colEnd, col + ct.sideR);
@@ -6698,7 +6701,7 @@ function isAllowPasteLink(pastedWb) {
 				}
 			}
 
-			this._drawText(this.stringRender, drawingCtx, 0, 0, textW, color, true, hasExplicitFill);
+			this._drawText(this.stringRender, drawingCtx, 0, 0, textW, color, true, keepsAutomaticTextColorAsIs);
 			this.stringRender.resetTransform(isPrintPreview ? null : drawingCtx);
 
 			if (transformMatrix) {
@@ -6752,7 +6755,7 @@ function isAllowPasteLink(pastedWb) {
 				}
 			}
 
-			this._drawText(this.stringRender.restoreInternalState(ct.state), ctx, textX, textY, textW, color, false, hasExplicitFill);
+			this._drawText(this.stringRender.restoreInternalState(ct.state), ctx, textX, textY, textW, color, false, keepsAutomaticTextColorAsIs);
 			this._RemoveClipRect(ctx);
 		}
 
@@ -19595,10 +19598,10 @@ function isAllowPasteLink(pastedWb) {
 			flags: fl,
 			font: font,
 			background: bg || this.settings.cells.defaultState.background,
-			// same rule StringRender uses for the grid, see _getHasExplicitFillForTextColor:
-			// a cell's own fill only keeps default text unmodified when that fill is light
-			// enough for black text to stay readable on it.
-			hasExplicitFill: this._getHasExplicitFillForTextColor(c, row, col),
+			// same rule StringRender uses for the grid, see _getKeepsAutomaticTextColorAsIs:
+			// a cell's own fill only earns this when that fill is light enough for black
+			// text to stay readable on it. Only consulted in dark mode, so skip computing it otherwise.
+			keepsAutomaticTextColorAsIs: this.drawingCtx.isDarkMode ? this._getKeepsAutomaticTextColorAsIs(c, row, col) : true,
 			zoom: this.getZoom(),
 			isAddPersentFormat: enterOptions.quickInput && Asc.c_oAscNumFormatType.Percent === c.getNumFormatType(),
 			autoComplete: arrAutoComplete,
@@ -27905,8 +27908,8 @@ function isAllowPasteLink(pastedWb) {
 		ctx.clearRectByX(this.getRightToLeft() ? (this.getCtxWidth(ctx) - x - w) : x, y, w, h);
 		return ctx;
 	};
-	WorksheetView.prototype._drawText = function (stringRender, ctx, textX, textY, textW, color, skipRtl, bHasExplicitFill) {
-		stringRender.render(ctx, this.getRightToLeft() && !skipRtl ? (this.getCtxWidth(ctx) - textX - textW) : textX, textY, textW, color, bHasExplicitFill);
+	WorksheetView.prototype._drawText = function (stringRender, ctx, textX, textY, textW, color, skipRtl, bKeepsAutomaticTextColorAsIs) {
+		stringRender.render(ctx, this.getRightToLeft() && !skipRtl ? (this.getCtxWidth(ctx) - textX - textW) : textX, textY, textW, color, bKeepsAutomaticTextColorAsIs);
 		return stringRender;
 	};
 	WorksheetView.prototype._fillText = function (ctx, text, x, y, maxWidth, charWidths, angle) {
