@@ -1633,9 +1633,9 @@ function (window, undefined) {
 		}
 
 		if (opt.fragments && opt.fragments.length > 0) {
-			//darkmode support: keepsAutomaticTextColorAsIs also has to reach beginFragment's own correction check
+			// keepsAutomaticTextColorAsIs reaches beginFragment's and handleBidiFlow's own
+			// lighting mode correction checks
 			t.textRender.render(undefined, t._getContentLeft(), dy || 0, t._getContentWidth(), opt.font.getColor(), opt.keepsAutomaticTextColorAsIs);
-
 		}
 	};
 

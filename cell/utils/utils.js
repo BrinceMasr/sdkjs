@@ -2538,17 +2538,15 @@
 			}
 		}
 
-		function drawFillCell(ctx, graphics, fill, rect, bIsExplicitFill) {
+		function drawFillCell(ctx, graphics, fill, rect, bKeepsFillColorAsIs) {
 			if (!fill.hasFill()) {
 				return;
 			}
 
 			var solid = fill.getSolidFill();
 			if (solid) {
-				// resolve dark-mode correction if relevant :
 				if (ctx.isDarkMode) {
-					// only resolve a corrected color when dark mode is actually active
-					if (!bIsExplicitFill) {
+					if (!bKeepsFillColorAsIs) {
 						solid = ctx.getDarkModeCorrectedColor(solid.getR(), solid.getG(), solid.getB(), solid.getA());
 					}
 				}

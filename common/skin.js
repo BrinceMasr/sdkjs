@@ -465,8 +465,6 @@ function updateGlobalSkinColors(theme)
 		SheetViewCellBackgroundHover    : "canvas-sheet-view-cell-background-hover",
 		SheetViewCellTitleLabel         : "canvas-sheet-view-cell-title-label",
 
-		CellBackground                  : "canvas-cell-background",
-		CellGrid                        : "canvas-cell-grid",
 
 		ColorDark                       : "canvas-dark-cell-title-text",
 		ColorDarkActive                 : "canvas-dark-cell-title-text",
@@ -504,6 +502,11 @@ function updateGlobalSkinColors(theme)
 			continue;
 		if ("" === colorMap[color])
 			continue;
+		// theme[colorMap[color]] resolving to "" (not just undefined) must be checked too:
+		// some caller-supplied theme objects derive from CSS custom properties (web-apps'
+		// Themes.js), where an undefined property reads back as "" (never undefined) --
+		// and correctColor("") would otherwise silently resolve to solid black instead of
+		// leaving GlobalSkin[color] alone
 		if (undefined === theme[colorMap[color]] || "" === theme[colorMap[color]])
 			continue;
 

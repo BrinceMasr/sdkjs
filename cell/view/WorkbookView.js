@@ -169,8 +169,12 @@
 			printColor: new CColor(0, 0, 0)
 		};
 		this.cells = {
+			// note, below defaultState.background colors values are for placeholder only -- WorkbookView's own constructor unconditionally overwrites both
+			// values via this.updateDarkMode() -> updateStyle() before it returns, in light mode
+			// same as dark, from EditorSkins (content theme), not GlobalSkin (interface theme,
+			// a different, independent axis)
 			defaultState: {
-				background: this.getCColor(AscCommon.GlobalSkin.CellBackground), border: this.getCColor(AscCommon.GlobalSkin.CellGrid)
+				background: new CColor(255, 255, 255), border: new CColor(202, 202, 202)
 			},
 			// Print and print-preview must always render the light theme, regardless of whatever
 			// content dark mode is currently active on screen (dark mode is a screen-editing
@@ -5345,7 +5349,7 @@
 		return contexts;
 	};
 
-	WorkbookView.prototype.updateDarkMode = function (isDarkMode) {
+	WorkbookView.prototype.updateDarkMode = function (isDarkMode) {		
 		this.isDarkMode = isDarkMode;
 		this.defaults.worksheetView.updateStyle(isDarkMode);
 		this._getOwnedDrawingContexts().forEach(function (drawingCtx) {

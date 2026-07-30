@@ -1411,12 +1411,11 @@
 
 				let fsz = prop.font.getSize();
 				let lw = asc_round(fsz * ppiy / 72 / 18) || 1;
-				
-				// resolve dark-mode correction if relevant :
+
 				let decorationColor = prop.c || textColor;
 				if (ctx.isDarkMode) {
-					let isTextRecolorable = !this.keepsAutomaticTextColorAsIs && AscCommonExcel.isColorAutomatic(decorationColor);
-					if (isTextRecolorable) {
+					let isDecorationRecolorable = !this.keepsAutomaticTextColorAsIs && AscCommonExcel.isColorAutomatic(decorationColor);
+					if (isDecorationRecolorable) {
 						//only modify default colored cell (the ones not explicitly colored by the user or a table template)
 						decorationColor = ctx.getDarkModeCorrectedColor(decorationColor.getR(), decorationColor.getG(),
 							decorationColor.getB(), decorationColor.getA());
@@ -1470,16 +1469,15 @@
 				let _g = textColor.getG();
 				let _b = textColor.getB();
 				let _a = textColor.getA();
-				
-				// resolve dark-mode correction if relevant :
-				// isColorAutomatic identifies the "no color set" default (see WorkbookElems.js);
-				// only that should be dark-mode-inverted, never a color some cell/run actually
-				// picked. keepsAutomaticTextColorAsIs exempts default text too, when the
-				// background it sits on (the cell's own fill, or nothing at all) is already
-				// light enough: that background was authored with some text color pairing in
-				// mind, and inverting default text on top of it can turn readable-on-light into
-				// unreadable-on-light (e.g. white text on a light table-style band).
+
 				if (this.drawingCtx.isDarkMode) {
+					// isColorAutomatic identifies the "no color set" default (see WorkbookElems.js);
+					// only that should be dark-mode-inverted, never a color some cell/run actually
+					// picked. keepsAutomaticTextColorAsIs exempts default text too, when the
+					// background it sits on (the cell's own fill, or nothing at all) is already
+					// light enough: that background was authored with some text color pairing in
+					// mind, and inverting default text on top of it can turn readable-on-light into
+					// unreadable-on-light (e.g. white text on a light table-style band).
 					let isTextRecolorable = !this.keepsAutomaticTextColorAsIs && AscCommonExcel.isColorAutomatic(textColor);
 					if (isTextRecolorable) {
 						//only modify default colored cell (the ones not explicitly colored by the user or a table template)
@@ -1553,11 +1551,10 @@
 				let _b = textColor.getB();
 				let _a = textColor.getA();
 
-				// resolve dark-mode correction if relevant :
-				// see beginFragment above: use AscCommonExcel.isColorAutomatic plus
-				// keepsAutomaticTextColorAsIs, and only resolve/reallocate when dark mode is on
-				// and the color isn't explicit
 				if (this.drawingCtx.isDarkMode) {
+					// see beginFragment above: use AscCommonExcel.isColorAutomatic plus
+					// keepsAutomaticTextColorAsIs, and only resolve/reallocate when dark mode is on
+					// and the color isn't explicit
 					let isTextRecolorable = !this.keepsAutomaticTextColorAsIs && AscCommonExcel.isColorAutomatic(textColor);
 					if (isTextRecolorable) {
 						//only modify default colored cell (the ones not explicitly colored by the user or a table template)

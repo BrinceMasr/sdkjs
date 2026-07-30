@@ -6113,12 +6113,12 @@ function isAllowPasteLink(pastedWb) {
     };
 
     /** Рисует фон ячеек в строке */
-	/** ↪ Translate → “Draws the background of cells in a row” */
+	/** ↪ AI Translation → “Draws the background of cells in a row” */
     WorksheetView.prototype._drawRowBG = function (drawingCtx, row, colStart, colEnd, offsetX, offsetY, mergedCells, mc, cfIterator) {
 		var height = this._getRowHeight(row);
 		if (0 === height && mergedCells) {
 			return;
-		}		
+		}
 
 		var drawCells = {}, i;
 
@@ -6159,21 +6159,24 @@ function isAllowPasteLink(pastedWb) {
 			}
 
 			//without merged -> merged after, because part of merged can
-			if (this.isPageBreakPreview(true) && !mc && this.pagesModeDataContains(col, row) === false) {
+			// isPageBreakBorderFill: this cell's fill is about to become the page-break-preview
+			// border overlay, already theme-resolved (not a raw color needing correction)
+			var isPageBreakBorderFill = this.isPageBreakPreview(true) && !mc && this.pagesModeDataContains(col, row) === false;
+			if (isPageBreakBorderFill) {
 				findFillColor = this.settings.cells.defaultState.border;
 			}
 
 			if (findFillColor || hasFill || mc) {
 				// ToDo не отрисовываем заливку границ от ячеек c заливкой, которые находятся правее и ниже
 				//  отрисовываемого диапазона. Но по факту проблем быть не должно.
-				/** ↪ Translate → “TODO: we don't draw the fill of cell borders 
+				/** ↪ AI Translation → “TODO: we don't draw the fill of cell borders 
 				 * for filled cells that are located to the right and below the range being drawn. 
 				 * But in practice there shouldn't be any problems.” */
 				var fillGrid = findFillColor || hasFill;
 				// exempt from dark-mode auto-correction unless this is a search-highlight
 				// override (findFillColor, read here before it's reassigned below): both the
 				// cell's own fill and the merge's default background set below are already correct
-				var bIsExplicitFill = !findFillColor;
+				var keepsFillColorAsIs = !findFillColor || isPageBreakBorderFill;
 				// print/print-preview must use the always-light printState.background, not
 				// the document's dark-mode-resolved defaultState.background
 				findFillColor = findFillColor || (!hasFill && mc && (this.usePrintScale ? this.settings.cells.printState.background : this.settings.cells.defaultState.background));
@@ -6187,7 +6190,7 @@ function isAllowPasteLink(pastedWb) {
                     fill = new AscCommonExcel.Fill();
 					fill.fromColor(findFillColor);
                 }
-                AscCommonExcel.drawFillCell(ctx, graphics, fill, new AscCommon.asc_CRect((this.getRightToLeft() ? (this.getCtxWidth(ctx) - x - w + offsetX) : x - offsetX), y - offsetY, w, h), bIsExplicitFill);
+                AscCommonExcel.drawFillCell(ctx, graphics, fill, new AscCommon.asc_CRect((this.getRightToLeft() ? (this.getCtxWidth(ctx) - x - w + offsetX) : x - offsetX), y - offsetY, w, h), keepsFillColorAsIs);
 			}
 
 			if (this.isPageBreakPreview(true) && mc) {
@@ -6204,7 +6207,8 @@ function isAllowPasteLink(pastedWb) {
 
 							let _fill = new AscCommonExcel.Fill();
 							_fill.fromColor(this.settings.cells.defaultState.border);
-							AscCommonExcel.drawFillCell(ctx, graphics, _fill, new AscCommon.asc_CRect((this.getRightToLeft() ? (this.getCtxWidth(ctx) - _x - w + offsetX) : _x - offsetX), _y - offsetY, _w, _h));
+							// defaultState.border is already theme-resolved, same as isPageBreakBorderFill above
+							AscCommonExcel.drawFillCell(ctx, graphics, _fill, new AscCommon.asc_CRect((this.getRightToLeft() ? (this.getCtxWidth(ctx) - _x - w + offsetX) : _x - offsetX), _y - offsetY, _w, _h), true);
 						}
 					}
 				}
@@ -7519,15 +7523,13 @@ function isAllowPasteLink(pastedWb) {
 
 			if (isNewColor) {
 				bc = border.getColorOrDefault();
-				// bc itself must stay the raw color				
+				// bc itself must stay the raw color
 				var colorToDraw = bc;
 
-				// resolve dark-mode correction if relevant :
-				
 				if (ctx.isDarkMode) {
-					var isNotCustomColor = AscCommonExcel.isColorAutomatic(bc);
-					if (isNotCustomColor) {
-						//dont have explicit border colors -> modify it
+					var isBorderRecolorable = AscCommonExcel.isColorAutomatic(bc);
+					if (isBorderRecolorable) {
+						//don't have explicit border colors -> modify it
 						colorToDraw = ctx.getDarkModeCorrectedColor(bc.getR(), bc.getG(), bc.getB(), bc.getA());
 					}
 				}
@@ -19610,12 +19612,12 @@ function isAllowPasteLink(pastedWb) {
 			// same rule StringRender uses for the grid, see _getKeepsAutomaticTextColorAsIs:
 			// a cell's own fill only earns this when that fill is light enough for black
 			// text to stay readable on it. Only consulted in dark mode, so skip computing it otherwise.
-			// When bg is null (no fill, or a pattern/gradient fill), the editor is about to paint
-			// defaultState.background behind the text instead - pass it through as the resolved
-			// fallback so a pattern/gradient fill gets checked against what's actually rendered
-			// here, rather than the grid's "unknown contrast" exemption (irrelevant to a no-fill
-			// cell, whose _getKeepsAutomaticTextColorAsIs branch returns before ever using it).
-			keepsAutomaticTextColorAsIs: this.drawingCtx.isDarkMode ? this._getKeepsAutomaticTextColorAsIs(c, row, col, null === bg ? this.settings.cells.defaultState.background : undefined) : true,
+			// bg is non-null for a genuine pattern fill too (its foreground color, see
+			// Fill.prototype.bg), and that's exactly what gets painted raw as the background
+			// above - pass the same value through so contrast is checked against what's actually
+			// rendered, not the grid's "unknown contrast" exemption (that exemption is for the
+			// grid's real per-pixel pattern rendering, which this editor never does).
+			keepsAutomaticTextColorAsIs: this.drawingCtx.isDarkMode ? this._getKeepsAutomaticTextColorAsIs(c, row, col, bg || this.settings.cells.defaultState.background) : true,
 			zoom: this.getZoom(),
 			isAddPersentFormat: enterOptions.quickInput && Asc.c_oAscNumFormatType.Percent === c.getNumFormatType(),
 			autoComplete: arrAutoComplete,
