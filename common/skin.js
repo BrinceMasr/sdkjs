@@ -465,7 +465,6 @@ function updateGlobalSkinColors(theme)
 		SheetViewCellBackgroundHover    : "canvas-sheet-view-cell-background-hover",
 		SheetViewCellTitleLabel         : "canvas-sheet-view-cell-title-label",
 
-
 		ColorDark                       : "canvas-dark-cell-title-text",
 		ColorDarkActive                 : "canvas-dark-cell-title-text",
 		ColorDarkHighlighted            : "canvas-dark-cell-title-text",

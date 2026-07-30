@@ -65,7 +65,8 @@
 	{
 		var oHSL = {};
 		AscFormat.CColorModifiers.prototype.RGB2HSL(r, g, b, oHSL);
-		return oHSL.L < 128;
+		//arbitrary choosen 100 by experience instead of theorical 128;
+		return oHSL.L < 100;
 	};
 
 	AscCommon.RendererType = {
