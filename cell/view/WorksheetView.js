@@ -6381,7 +6381,7 @@ function isAllowPasteLink(pastedWb) {
 			} else {
 				fill.fromColor(color);
 			}
-			AscCommonExcel.drawFillCell(ctx, graphics, fill, new AscCommon.asc_CRect((this.getRightToLeft() ? (this.getCtxWidth(ctx) - x - dataBarLength) : x), top, dataBarLength, height - 3));
+			AscCommonExcel.drawFillCell(ctx, graphics, fill, new AscCommon.asc_CRect((this.getRightToLeft() ? (this.getCtxWidth(ctx) - x - dataBarLength) : x), top, dataBarLength, height - 3), true);
 
 			var color = (isPositive || oRuleElement.NegativeBarBorderColorSameAsPositive) ? oRuleElement.BorderColor : oRuleElement.NegativeBorderColor;
 			if (color) {
