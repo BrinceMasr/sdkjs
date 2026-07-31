@@ -19603,12 +19603,13 @@ function isAllowPasteLink(pastedWb) {
 		this.model.workbook.handlers.trigger("cleanCutData", true, true);
 		this.model.workbook.handlers.trigger("cleanCopyData", true);
 
+		var resolvedBg = bg || this.settings.cells.defaultState.background;
 		editor.open({
 			enterOptions: enterOptions,
 			fragments: fragments,
 			flags: fl,
 			font: font,
-			background: bg || this.settings.cells.defaultState.background,
+			background: resolvedBg,
 			// same rule StringRender uses for the grid, see _getKeepsAutomaticTextColorAsIs:
 			// a cell's own fill only earns this when that fill is light enough for black
 			// text to stay readable on it. Only consulted in dark mode, so skip computing it otherwise.
@@ -19617,7 +19618,7 @@ function isAllowPasteLink(pastedWb) {
 			// above - pass the same value through so contrast is checked against what's actually
 			// rendered, not the grid's "unknown contrast" exemption (that exemption is for the
 			// grid's real per-pixel pattern rendering, which this editor never does).
-			keepsAutomaticTextColorAsIs: this.drawingCtx.isDarkMode ? this._getKeepsAutomaticTextColorAsIs(c, row, col, bg || this.settings.cells.defaultState.background) : true,
+			keepsAutomaticTextColorAsIs: this.drawingCtx.isDarkMode ? this._getKeepsAutomaticTextColorAsIs(c, row, col, resolvedBg) : true,
 			zoom: this.getZoom(),
 			isAddPersentFormat: enterOptions.quickInput && Asc.c_oAscNumFormatType.Percent === c.getNumFormatType(),
 			autoComplete: arrAutoComplete,
