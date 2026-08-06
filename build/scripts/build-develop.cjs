@@ -1,17 +1,7 @@
 #!/usr/bin/env node
 /**
- * (c) Copyright Ascensio System SIA 2010-2024
- *
- * This program is a free software product. You can redistribute it and/or
- * modify it under the terms of the GNU Affero General Public License (AGPL)
- * version 3 as published by the Free Software Foundation. In accordance with
- * Section 7(a) of the GNU AGPL its Section 15 shall be amended to the effect
- * that Ascensio System SIA expressly excludes the warranty of non-infringement
- * of any third-party rights.
- *
- * This program is distributed WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
- * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+ * SPDX-FileCopyrightText: 2026 Euro-Office contributors
+ * SPDX-License-Identifier: AGPL-3.0-only
  */
 
 'use strict';
@@ -82,8 +72,14 @@ function writeScripts(sdkCfg, name) {
 
     // Convert absolute paths to relative URL strings anchored at build/
     // (mirrors fixUrl(files, '../../../../sdkjs/build/') from Gruntfile.js)
+    // path.relative() returns backslash-separated segments on Windows, but
+    // url.resolve() treats '\' as a literal character rather than a
+    // separator, which would corrupt every generated URL. Normalize to '/'
+    // first — a no-op on POSIX, where path.sep is already '/'.
     files = fixUrl(
-        files.map(f => path.isAbsolute(f) ? path.relative(BUILD_DIR, f) : f),
+        files.map(f => path.isAbsolute(f)
+            ? path.relative(BUILD_DIR, f).split(path.sep).join('/')
+            : f),
         '../../../../sdkjs/build/',
     );
 
@@ -130,4 +126,11 @@ function main() {
     }
 }
 
-main();
+if (require.main === module) {
+    main();
+} else {
+    // Exposed for unit testing only (fixUrl's Windows path-separator handling)
+    // — running this file directly as a script (require.main === module) is
+    // still the only way build-develop itself executes.
+    module.exports = { fixUrl };
+}

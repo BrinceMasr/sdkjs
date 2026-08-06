@@ -1,16 +1,6 @@
 /**
- * (c) Copyright Ascensio System SIA 2010-2024
- *
- * This program is a free software product. You can redistribute it and/or
- * modify it under the terms of the GNU Affero General Public License (AGPL)
- * version 3 as published by the Free Software Foundation. In accordance with
- * Section 7(a) of the GNU AGPL its Section 15 shall be amended to the effect
- * that Ascensio System SIA expressly excludes the warranty of non-infringement
- * of any third-party rights.
- *
- * This program is distributed WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
- * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+ * SPDX-FileCopyrightText: 2026 Euro-Office contributors
+ * SPDX-License-Identifier: AGPL-3.0-only
  */
 
 /**
@@ -56,8 +46,8 @@ const DUMMY_ENTRY   = path.join(__dirname, 'dummy.js');
 
 // webpack 5's own runtime bootstrap unconditionally emits a top-level
 // `"use strict";` directive (see JavascriptModulesPlugin's renderMain), even
-// though sdk-concat-loader's babel pass uses sourceType:'script' specifically
-// to avoid injecting one — sdkjs's bare-var-across-files shared-scope model
+// though sdk-concat-loader concatenates files verbatim, with no per-file
+// transform that would inject one — sdkjs's bare-var-across-files shared-scope model
 // (see sdk-concat.cjs) predates strict mode and has never been validated
 // against it (undeclared-assignment/delete/duplicate-parameter semantics all
 // differ). Strip it to preserve the legacy script's non-strict semantics.

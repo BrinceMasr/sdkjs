@@ -34,9 +34,9 @@ repository checked out as a sibling of this one (`../sdkjs-forms`).
 
 ```bash
 # from the sdkjs/ directory, one-time setup
-npm install grunt-cli node-qunit-puppeteer
-npm install --prefix build
-node node_modules/grunt-cli/bin/grunt --gruntfile build/Gruntfile.js develop --addon=sdkjs-forms
+npm install node-qunit-puppeteer
+npm ci --prefix build
+SDK_ADDONS=../../sdkjs-forms npm run --prefix build develop
 
 # run the whole suite (exits non-zero on failure)
 node tests/runAll.js

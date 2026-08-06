@@ -34,9 +34,12 @@ def get_last_symbol_in_file(file_path):
 
 def check_file_without_license(files):
   files_without_license = []
-  license_header = b'Copyright Ascensio System'
+  ascensio_header = b'Copyright Ascensio System'
+  spdx_header = b'SPDX-License-Identifier'
   for file in files:
-    if -1 == find_string_in_file(file, license_header):
+    has_ascensio = -1 != find_string_in_file(file, ascensio_header)
+    has_spdx = -1 != find_string_in_file(file, spdx_header)
+    if not has_ascensio and not has_spdx:
       files_without_license.append(file)
   if files_without_license:
     raise Exception("Files without license:\n" + get_string_from_list(files_without_license))

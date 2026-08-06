@@ -8,8 +8,6 @@
     "node": ">=18.13.0"
   },
   "dependencies": {
-    "@babel/core": "^7.26.0",
-    "@babel/preset-env": "^7.26.0",
     "glob": "^8.1.0",
     "source-map-js": "^1.2.1",
     "terser": "^5.20.0",

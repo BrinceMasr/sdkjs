@@ -1,17 +1,7 @@
 #!/usr/bin/env node
 /**
- * (c) Copyright Ascensio System SIA 2010-2024
- *
- * This program is a free software product. You can redistribute it and/or
- * modify it under the terms of the GNU Affero General Public License (AGPL)
- * version 3 as published by the Free Software Foundation. In accordance with
- * Section 7(a) of the GNU AGPL its Section 15 shall be amended to the effect
- * that Ascensio System SIA expressly excludes the warranty of non-infringement
- * of any third-party rights.
- *
- * This program is distributed WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
- * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+ * SPDX-FileCopyrightText: 2026 Euro-Office contributors
+ * SPDX-License-Identifier: AGPL-3.0-only
  */
 
 'use strict';
@@ -29,7 +19,6 @@ const path  = require('path');
 const fs    = require('fs');
 const { sync: globSync } = require('glob');
 const { minify }   = require('terser');
-const babel = require('@babel/core');
 const { resolveBuildRoot } = require('../lib/env.cjs');
 
 const BUILD_DIR = path.resolve(__dirname, '..');
@@ -110,32 +99,14 @@ const OTHER_FILES = [
     },
 ];
 
-// The old Grunt path ran these through Closure with --language_out=ECMASCRIPT5.
-// Terser alone doesn't downlevel syntax (it only avoids introducing new-ES
-// syntax while minifying), so let/const/arrow functions/etc from source files
-// like zlib/engine or the service worker would otherwise reach deploy/ as-is.
-function transpileToES5(source, filename) {
-    const result = babel.transformSync(source, {
-        filename,
-        babelrc:    false,
-        configFile: false,
-        sourceType: 'script',
-        presets: [
-            [require.resolve('@babel/preset-env'), { targets: { ie: '11' }, modules: false }],
-        ],
-    });
-    return result.code;
-}
-
 async function deployJsFile(srcPath, destPath) {
-    const source = fs.readFileSync(srcPath, 'utf8');
-    const es5    = transpileToES5(source, srcPath);
-    const result = await minify(es5, {
+    const source  = fs.readFileSync(srcPath, 'utf8');
+    const result  = await minify(source, {
         compress: false,
         mangle:   false,
         format:   { comments: false },
     });
-    const content = licenseText + '\n' + (result.code != null ? result.code : es5);
+    const content = licenseText + '\n' + (result.code != null ? result.code : source);
     fs.mkdirSync(path.dirname(destPath), { recursive: true });
     fs.writeFileSync(destPath, content, 'utf8');
 }

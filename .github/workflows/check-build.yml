@@ -1,4 +1,8 @@
 name: Check sdkjs
+
+permissions:
+  contents: read
+
 on:
   push:
     branches:
@@ -123,6 +127,11 @@ jobs:
           npm test --prefix build
 
       - name: Run build sdkjs
+        env:
+          # sdkjs-forms is checked out as a sibling of sdkjs/ (mirrors the
+          # unit-tests job above). Without this, the addon is checked out but
+          # never merged into the bundle this job actually builds and tests.
+          SDK_ADDONS: ../../sdkjs-forms
         run: |
           cd sdkjs
           # npm ci here too (not just in "Run build-tooling unit tests"): this job
@@ -158,6 +167,10 @@ jobs:
       # COMPILED=1 with "AscWord is not defined" — a pre-existing limitation of
       # developer-compiled mode, not something this step should be asserting on.
       - name: Run QUnit against the built bundle (COMPILED=1)
+        env:
+          # Same addon wiring as the "Run build sdkjs" step above — this step
+          # rebuilds develop/ from scratch and must merge the addon in too.
+          SDK_ADDONS: ../../sdkjs-forms
         run: |
           cd sdkjs
           COMPILED=1 npm run --prefix build develop

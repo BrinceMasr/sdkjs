@@ -3493,15 +3493,20 @@ function getFlatPenColor() {
 	window["AscFormat"].CControlPr = CControlPr;
 	window["AscFormat"].CFormControlPr = CFormControlPr;
 
-	// Register factory entries here (not in TableId.js) because TableId.js is in the
-	// sdk-all-min.js chunk which executes before sdk-all.js — AscFormat.CControl etc.
-	// are undefined at that point, so the if(AscCommonExcel) block in CTableId constructor
-	// is skipped. Registering here ensures the classes are defined before the entries are set.
-	if (AscCommon.g_oTableId) {
-		AscCommon.g_oTableId.m_oFactoryClass[AscDFH.historyitem_type_Control]       = CControl;
-		AscCommon.g_oTableId.m_oFactoryClass[AscDFH.historyitem_type_ControlPr]     = CControlPr;
-		AscCommon.g_oTableId.m_oFactoryClass[AscDFH.historyitem_type_FormControlPr] = CFormControlPr;
-	}
+	// Control/ControlPr/FormControlPr factory registration lives solely in
+	// TableId.js's private_InitFactoryClass now (see common/TableId.js). It
+	// used to be duplicated here on the theory that TableId.js's module-load-time
+	// registration ran before this file's classes existed under webpack's chunk
+	// split. That doesn't hold: private_InitFactoryClass only runs from
+	// CTableId.prototype.init(), which apiBase.js calls at editor-construction
+	// time — after every chunk (module or webpack bundle) has already loaded —
+	// not at this file's own module-load time. init() also resets
+	// m_oFactoryClass to {} before repopulating it, so this file's early
+	// registration was being silently discarded and replaced by TableId.js's
+	// own entries anyway. Verified via the real built bundle: word/forms/forms.html
+	// and word/forms/complexForm.html (which exercise CControl-backed form
+	// fields, including checkboxes) pass unchanged with only the single
+	// registration site.
 	window["AscFormat"].CFormControlPr_checked_unchecked = CFormControlPr_checked_unchecked;
 	window["AscFormat"].CFormControlPr_checked_checked = CFormControlPr_checked_checked;
 	window["AscFormat"].CFormControlPr_checked_mixed = CFormControlPr_checked_mixed;
