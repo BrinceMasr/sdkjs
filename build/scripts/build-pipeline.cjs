@@ -19,9 +19,16 @@
 //   SDK_PLATFORM      '' | 'desktop' | 'mobile' — passed through to webpack configs
 //   SDK_ADDONS        path.delimiter-separated addon directories
 //   SKIP_DEVELOP      set to '1' to skip develop scripts generation
+//   SKIP_BUNDLE       set to '1' to skip Phase 1 (deploy-assets + webpack ×4) entirely —
+//                      for the fast-iteration workflow that only wants the
+//                      develop/sdkjs/{module}/scripts.js manifest regenerated, without
+//                      paying for a full bundle build. Implies build-develop runs with
+//                      copyStandalone (deploy-assets, which normally supplies the
+//                      processed device_scale.js, didn't run).
 //
 // Phase layout (wall-clock optimised):
-//   Phase 1 — parallel: deploy-assets + webpack ×4 (word, cell, slide, visio)
+//   Phase 1 — parallel: deploy-assets + webpack ×4 (word, cell, slide, visio) — skipped
+//             entirely when SKIP_BUNDLE=1.
 //             Each webpack config runs 2 compiler configs (min + all chunk) in parallel.
 //   Phase 2 — sequential: build-develop (writes develop/sdkjs/{module}/scripts.js)
 
@@ -110,6 +117,7 @@ assertSafeBuildRoot(BUILD_ROOT);
 const PRODUCT_VERSION = process.env.PRODUCT_VERSION || '0.0.0';
 const BUILD_NUMBER    = String(process.env.BUILD_NUMBER || process.env.GITHUB_RUN_NUMBER || '0');
 const SKIP_DEVELOP    = process.env.SKIP_DEVELOP === '1';
+const SKIP_BUNDLE     = process.env.SKIP_BUNDLE === '1';
 
 // Only pass BUILD_ROOT through when the user actually set it — build-develop.cjs
 // branches on process.env.BUILD_ROOT's presence to decide between a relative and
@@ -313,37 +321,46 @@ async function main() {
         `  BUILD_NUMBER      ${BUILD_NUMBER}`,
         `  SDK_PLATFORM      ${process.env.SDK_PLATFORM || '(default)'}`,
         `  SKIP_DEVELOP      ${SKIP_DEVELOP}`,
+        `  SKIP_BUNDLE       ${SKIP_BUNDLE}`,
         '',
     ].join('\n'));
 
-    // Clean deploy directory before building.
-    if (fs.existsSync(BUILD_ROOT)) {
+    // Clean deploy directory before building. Skipped under SKIP_BUNDLE — Phase 1
+    // (the only phase that writes into BUILD_ROOT) doesn't run, so there's nothing
+    // to clean, and wiping it would just discard whatever a prior full build left there.
+    if (!SKIP_BUNDLE && fs.existsSync(BUILD_ROOT)) {
         fs.rmSync(BUILD_ROOT, { recursive: true, force: true });
     }
 
     // Phase 1: all independent work in parallel.
     //   - deploy-assets: copies CSS, fonts, images, themes, native JS (WHITESPACE compiled)
     //   - webpack ×4: each produces sdk-all-min.js + sdk-all.js for its module
-    const phase1Tasks = [
-        task('deploy-assets', node, ['scripts/deploy-assets.cjs']),
-        ...WEBPACK_CONFIGS.map(cfg => {
-            const name = cfg.replace('webpack.', '').replace('.mjs', '');
-            return task(`webpack:${name}`, node, [wpCli, '--config', cfg]);
-        }),
-    ];
+    let p1 = [];
+    if (!SKIP_BUNDLE) {
+        const phase1Tasks = [
+            task('deploy-assets', node, ['scripts/deploy-assets.cjs']),
+            ...WEBPACK_CONFIGS.map(cfg => {
+                const name = cfg.replace('webpack.', '').replace('.mjs', '');
+                return task(`webpack:${name}`, node, [wpCli, '--config', cfg]);
+            }),
+        ];
 
-    const p1 = await phase('Phase 1 — parallel', phase1Tasks);
+        p1 = await phase('Phase 1 — parallel', phase1Tasks);
 
-    relocateSourceMaps();
+        relocateSourceMaps();
+    }
 
     // Phase 2: develop scripts (fast, sequential is fine).
     let p2 = [];
     if (!SKIP_DEVELOP) {
         p2 = await phase('Phase 2 — develop', [
-            // SKIP_STANDALONE=1: deploy-assets (phase 1) already deployed a
-            // processed device_scale.js; build-develop's copyStandalone would
-            // overwrite it with an unprocessed raw copy.
-            task('build-develop', node, ['scripts/build-develop.cjs'], { env: { SKIP_STANDALONE: '1' } }),
+            // SKIP_STANDALONE=1 only when Phase 1 ran: deploy-assets already deployed
+            // a processed device_scale.js there, and build-develop's copyStandalone
+            // would overwrite it with an unprocessed raw copy. Under SKIP_BUNDLE,
+            // deploy-assets never ran, so copyStandalone needs to run instead.
+            task('build-develop', node, ['scripts/build-develop.cjs'], {
+                env: SKIP_BUNDLE ? {} : { SKIP_STANDALONE: '1' },
+            }),
         ]);
     }
 

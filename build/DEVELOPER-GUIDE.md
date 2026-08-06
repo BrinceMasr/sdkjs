@@ -234,6 +234,28 @@ error message itself for the full mapping). Three don't:
 
 ---
 
+## Open Decision — ES5 Syntax Downleveling / webpack `target`
+
+The old Gruntfile forced `--language_out=ECMASCRIPT5` on every Closure Compiler
+build. Terser (this pipeline's minifier) only minifies — it does not transpile
+syntax, so `let`/`const`/arrow functions/classes/template literals now ship
+as-authored. `webpack.sdk.factory.mjs` also sets no explicit `target`, and
+`build/package.json` has no `browserslist` field, so webpack 5 falls back to
+its own implicit target resolution.
+
+This is only a problem if a currently supported `SDK_PLATFORM=desktop|mobile`
+shell embeds a CEF/WebView/Electron runtime old enough to require ES5 — in
+that case this is a silent runtime `SyntaxError` on load, not a build-time
+failure. **Not yet resolved**: needs sign-off on the actual minimum supported
+desktop/mobile runtime versions before choosing between "document that ES6+ is
+safe and close this out" and "add a `babel-loader` downlevel step (and a
+matching `target`/`browserslist`) scoped to `SDK_PLATFORM=desktop|mobile`
+builds." Do not add a downlevel step speculatively — it has real build-time
+and bundle-size cost and should only be added once the minimum runtime version
+is actually confirmed to need it.
+
+---
+
 ## Quick Reference
 
 ```bash

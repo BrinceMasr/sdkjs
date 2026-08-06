@@ -70,6 +70,8 @@ jobs:
         uses: actions/setup-node@v6
         with:
             node-version: 20
+            cache: npm
+            cache-dependency-path: sdkjs/build/npm-shrinkwrap.json
 
       - name: Build develop SDK
         working-directory: sdkjs
@@ -119,6 +121,8 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 20
+          cache: npm
+          cache-dependency-path: sdkjs/build/npm-shrinkwrap.json
 
       - name: Run build-tooling unit tests
         run: |
@@ -166,6 +170,14 @@ jobs:
       # AscWord/AscCommonExcel/etc. live in sdk-all.js, so those suites fail under
       # COMPILED=1 with "AscWord is not defined" — a pre-existing limitation of
       # developer-compiled mode, not something this step should be asserting on.
+      #
+      # api-{word,cell,slide,visio}-compiled.html cover exactly that gap: they load
+      # deploy/sdkjs/{module}/sdk-all-min.js + sdk-all.js directly (not through
+      # scripts.js at all) and assert the editor-specific namespace
+      # (AscWord/AscCommonExcel/AscCommonSlide/AscVisio) is actually defined — so a bad
+      # concat order or dropped file specific to one editor's "all" chunk doesn't ship
+      # undetected. deploy/ already has both chunks from "Run build sdkjs" above; no
+      # extra build step needed for these four.
       - name: Run QUnit against the built bundle (COMPILED=1)
         env:
           # Same addon wiring as the "Run build sdkjs" step above — this step
@@ -178,3 +190,7 @@ jobs:
           node node_modules/node-qunit-puppeteer/cli.js tests/common/api/api-cell.html 30000 "--no-sandbox"
           node node_modules/node-qunit-puppeteer/cli.js tests/common/api/api-slide.html 30000 "--no-sandbox"
           node node_modules/node-qunit-puppeteer/cli.js tests/common/api/api-visio.html 30000 "--no-sandbox"
+          node node_modules/node-qunit-puppeteer/cli.js tests/common/api/api-word-compiled.html 30000 "--no-sandbox"
+          node node_modules/node-qunit-puppeteer/cli.js tests/common/api/api-cell-compiled.html 30000 "--no-sandbox"
+          node node_modules/node-qunit-puppeteer/cli.js tests/common/api/api-slide-compiled.html 30000 "--no-sandbox"
+          node node_modules/node-qunit-puppeteer/cli.js tests/common/api/api-visio-compiled.html 30000 "--no-sandbox"

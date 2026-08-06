@@ -87,18 +87,22 @@ QUnit suites run headless via `node-qunit-puppeteer`, **from the repo root**:
 # one-time setup (from repo root)
 npm install node-qunit-puppeteer
 npm ci --prefix build
-npm run --prefix build develop
+SDK_ADDONS=../../sdkjs-forms npm run --prefix build develop
+
+# run the whole suite (exits non-zero on failure)
+node tests/runAll.js
 
 # run a single suite
 node node_modules/node-qunit-puppeteer/cli.js tests/word/api/api.html 30000 "--no-sandbox"
 ```
 
-CI (`.github/workflows/check-build.yml`, self-hosted runners) enumerates suites explicitly —
-there is **no working aggregate runner** (`tests/runAll.js` exists but CI doesn't use it).
+CI (`.github/workflows/check-build.yml`, `ubuntu-latest` runners, not self-hosted) runs the
+whole suite via the aggregate runner (`node tests/runAll.js`) in its `unit-tests` job. Suites
+that can't pass yet are listed with reasons in `skippedTests` at the top of `tests/runAll.js`,
+not silently dropped.
 
-**CI branch scope:** `check-build.yml` triggers on push and pull_request for `fork`, `develop`,
-`release/**`, and `hotfix/**`. It does **not** run on `main` — PRs targeting `main` are not
-CI-guarded by this workflow.
+**CI branch scope:** `check-build.yml` triggers on push and pull_request for `main`, `fork`,
+`develop`, `release/**`, and `hotfix/**` — PRs targeting `main` are CI-guarded by this workflow.
 
 Heaviest coverage is in `tests/cell/spreadsheet-calculation/` (formula engine) and
 `tests/word/`. Suites depend on the generated `develop/sdkjs/*/scripts.js`, so run

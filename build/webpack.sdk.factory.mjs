@@ -35,6 +35,7 @@ import webpack    from 'webpack';
 import TerserPlugin from 'terser-webpack-plugin';
 import path       from 'path';
 import fs         from 'fs';
+import os         from 'os';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
@@ -277,6 +278,14 @@ export function sdkConfig(moduleName) {
                 minimizer: [
                     new TerserPlugin({
                         extractComments: false,
+                        // build-pipeline.cjs spawns 4 webpack-cli processes concurrently
+                        // (word/cell/slide/visio), each running 2 chunk configs — up to 8
+                        // TerserPlugin worker pools at once. Left at the library default
+                        // (parallel:true, sized to os.cpus().length), that's 8x
+                        // over-subscription on small CI runners. Cap each pool to a
+                        // quarter of the core count so total worker threads stay in the
+                        // same ballpark as the host's core count.
+                        parallel: Math.max(1, Math.floor(os.cpus().length / 4)),
                         terserOptions: {
                             format: {
                                 // BannerPlugin (stage ADDITIONS) injects the license banner into
@@ -349,6 +358,15 @@ export function sdkConfig(moduleName) {
                 // against the same cache dir silently reuses the plain build's cached
                 // module and produces byte-identical output missing every
                 // platform/addon file, with no error or warning.
+                //
+                // `mode`/NODE_ENV deliberately does NOT need to be in this key.
+                // Verified empirically: production (SDK_SOURCE_MAPS=1) -> development
+                // -> production again against the same cache dir produces byte-identical,
+                // correctly-minified output on the second production run, served from
+                // `[cached] modules`. Terser only minifies the *output* of the cached
+                // module (per optimization.minimize, gated on `mode`) as a separate
+                // build-time step every run — it is never itself part of what gets
+                // cached, so a mode switch can't serve a stale minified/unminified asset.
                 version: `${companyName}-${version}-${buildNumber}-${beta}-${appCopyright}-${publisherUrl}-${emitSourceMaps}-${platform}-${addonDirs.join(',')}-${process.env.DROP_CONSOLE || ''}`,
                 buildDependencies: {
                     config: [
