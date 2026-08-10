@@ -39,6 +39,7 @@ const allTests = [
 	'cell/spreadsheet-calculation/conditionalFormattingTests.html',
 	'cell/spreadsheet-calculation/ExternalReference.html',
 	'cell/spreadsheet-calculation/SheetMemoryTest.html',
+	'cell/darkmode/DarkModeTests.html',
 	'cell/js-api/js-api.html',
 
 	'word/unit-tests/paragraphContentPos.html',
