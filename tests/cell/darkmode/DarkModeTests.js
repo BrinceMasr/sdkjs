@@ -145,4 +145,226 @@ $(function () {
 		Asc.DrawingContext.prototype.getDarkModeCorrectedColor.call(ctx, 100, 100, 100, 0.5);
 		assert.strictEqual(ctx._darkModeColorShuttle.getA(), 0.5, 'alpha is carried through as given, not corrected');
 	});
+
+	// =====================================================================
+	// WorksheetView.prototype._getKeepsAutomaticTextColorAsIs
+	// =====================================================================
+	QUnit.module('_getKeepsAutomaticTextColorAsIs');
+
+	// Only this.handlers/this.workbook/this.settings.findFillColor and the passed-in cell's
+	// Fill are touched, so a real WorksheetView (which needs a full editor boot to construct)
+	// isn't required - a manufactured `this` matching that shape is enough.
+	function makeFakeWorksheetView(opts) {
+		opts = opts || {};
+		return {
+			handlers: {
+				trigger: function (name) {
+					return name === 'selectSearchingResults' ? !!opts.searchHighlightOn : false;
+				}
+			},
+			workbook: {
+				inFindResults: function () {
+					return opts.isFindResult ? true : undefined;
+				}
+			},
+			settings: {
+				findFillColor: opts.findFillColor
+			}
+		};
+	}
+
+	function callKeepsAsIs(wsOpts, fill, resolvedFallbackBg) {
+		var ws = makeFakeWorksheetView(wsOpts);
+		var cell = {getFill: function () { return fill; }};
+		return AscCommonExcel.WorksheetView.prototype._getKeepsAutomaticTextColorAsIs.call(ws, cell, 0, 0, resolvedFallbackBg);
+	}
+
+	function makeSolidFill(r, g, b) {
+		var fill = new AscCommonExcel.Fill();
+		fill.fromColor(AscCommonExcel.createRgbColor(r, g, b));
+		return fill;
+	}
+
+	function makeGradientFill() {
+		var fill = new AscCommonExcel.Fill();
+		fill.gradientFill = new AscCommonExcel.GradientFill();
+		return fill;
+	}
+
+	QUnit.test('no fill at all: does not keep as-is (needs correction, same as bare canvas)', function (assert) {
+		var noFill = new AscCommonExcel.Fill();
+		assert.notOk(noFill.hasFill(), 'sanity check: this Fill really has no fill (hasFill() can be null, not just false)');
+		assert.strictEqual(callKeepsAsIs({}, noFill), false);
+	});
+
+	QUnit.test('solid light fill keeps automatic text as-is', function (assert) {
+		assert.strictEqual(callKeepsAsIs({}, makeSolidFill(255, 255, 255)), true, 'white fill');
+		assert.strictEqual(callKeepsAsIs({}, makeSolidFill(255, 255, 0)), true, 'yellow fill');
+	});
+
+	QUnit.test('solid dark fill does NOT keep automatic text as-is', function (assert) {
+		assert.strictEqual(callKeepsAsIs({}, makeSolidFill(0, 0, 0)), false, 'black fill');
+		assert.strictEqual(callKeepsAsIs({}, makeSolidFill(10, 10, 10)), false, 'near-black fill');
+	});
+
+	QUnit.test('pattern/gradient fill without resolvedFallbackBg: conservative true', function (assert) {
+		assert.strictEqual(callKeepsAsIs({}, makeGradientFill()), true,
+			'unknown per-pixel contrast is exempted from correction by default');
+	});
+
+	QUnit.test('pattern/gradient fill WITH resolvedFallbackBg: resolves against it instead of the conservative default', function (assert) {
+		var gradient = makeGradientFill();
+		assert.strictEqual(callKeepsAsIs({}, gradient, new AscCommon.CColor(255, 255, 255)), true,
+			'light resolvedFallbackBg overrides the conservative true with a true - but for the real reason (contrast), not by default');
+		assert.strictEqual(callKeepsAsIs({}, gradient, new AscCommon.CColor(0, 0, 0)), false,
+			'dark resolvedFallbackBg flips the result to false, proving the fallback is actually consulted, not ignored');
+	});
+
+	QUnit.test('search-highlighted cell overrides the fill-based result entirely', function (assert) {
+		// dark fill would normally return false; a light findFillColor while highlighted
+		// must still return true, proving the highlight branch short-circuits before the
+		// fill is ever consulted (not that it coincidentally agrees with it)
+		var darkFill = makeSolidFill(0, 0, 0);
+		assert.strictEqual(
+			callKeepsAsIs({searchHighlightOn: true, isFindResult: true, findFillColor: new AscCommon.CColor(255, 255, 0)}, darkFill),
+			true,
+			'light search-highlight color wins over the cell\'s own dark fill'
+		);
+
+		// light fill would normally return true; a dark findFillColor while highlighted must
+		// still return false, for the same reason in the opposite direction
+		var lightFill = makeSolidFill(255, 255, 255);
+		assert.strictEqual(
+			callKeepsAsIs({searchHighlightOn: true, isFindResult: true, findFillColor: new AscCommon.CColor(0, 0, 0)}, lightFill),
+			false,
+			'dark search-highlight color wins over the cell\'s own light fill'
+		);
+	});
+
+	QUnit.test('selectSearchingResults off, or cell not actually a find result: falls through to the fill', function (assert) {
+		var lightFill = makeSolidFill(255, 255, 255);
+		assert.strictEqual(
+			callKeepsAsIs({searchHighlightOn: false, isFindResult: true, findFillColor: new AscCommon.CColor(0, 0, 0)}, lightFill),
+			true,
+			'search highlighting disabled entirely: falls through to the fill-based result'
+		);
+		assert.strictEqual(
+			callKeepsAsIs({searchHighlightOn: true, isFindResult: false, findFillColor: new AscCommon.CColor(0, 0, 0)}, lightFill),
+			true,
+			'highlighting is on but this specific cell is not a find result: falls through to the fill-based result'
+		);
+	});
+
+	// =====================================================================
+	// AscCommonExcel.drawFillCell - regression pin for the opt-in guard (point 1 of the
+	// PR #70 review) and for the exact bug class already fixed once in this branch's
+	// history (commit 42705a02f4, conditional-formatting Data Bar colors)
+	// =====================================================================
+	QUnit.module('drawFillCell dark-mode guard');
+
+	// setFillStyle/fillRect are the only ctx methods drawFillCell calls for a solid fill, so a
+	// manufactured ctx recording what it was asked to draw is enough - no real canvas needed.
+	function makeFakeFillCtx(isDarkMode) {
+		var lastFillColor = null;
+		return {
+			isDarkMode: !!isDarkMode,
+			_darkModeRgbCache: {},
+			_darkModeColorShuttle: new AscCommon.CColor(0, 0, 0, 1),
+			getDarkModeCorrectedColor: Asc.DrawingContext.prototype.getDarkModeCorrectedColor,
+			setFillStyle: function (color) {
+				lastFillColor = color;
+				return this;
+			},
+			fillRect: function () {
+			},
+			getLastFillColor: function () {
+				return lastFillColor;
+			}
+		};
+	}
+
+	function makeRect() {
+		return new AscCommon.asc_CRect(0, 0, 10, 10);
+	}
+
+	QUnit.test('caller that omits the flag draws the literal color unmodified in dark mode (the fixed bug)', function (assert) {
+		var ctx = makeFakeFillCtx(true);
+		var fill = new AscCommonExcel.Fill();
+		fill.fromColor(AscCommonExcel.createRgbColor(10, 20, 30));
+
+		AscCommonExcel.drawFillCell(ctx, null, fill, makeRect());
+
+		var drawn = ctx.getLastFillColor();
+		assert.strictEqual(drawn.getR(), 10, 'red channel untouched');
+		assert.strictEqual(drawn.getG(), 20, 'green channel untouched');
+		assert.strictEqual(drawn.getB(), 30, 'blue channel untouched');
+	});
+
+	QUnit.test('caller that explicitly opts in gets the dark-mode-corrected color', function (assert) {
+		var ctx = makeFakeFillCtx(true);
+		var fill = new AscCommonExcel.Fill();
+		fill.fromColor(AscCommonExcel.createRgbColor(0, 0, 0));
+
+		AscCommonExcel.drawFillCell(ctx, null, fill, makeRect(), true);
+
+		var drawn = ctx.getLastFillColor();
+		assert.notStrictEqual(drawn.getR(), 0, 'literal black must have actually been corrected, not left as-is');
+	});
+
+	QUnit.test('outside dark mode, the flag has no effect either way', function (assert) {
+		var ctx = makeFakeFillCtx(false);
+		var fill = new AscCommonExcel.Fill();
+		fill.fromColor(AscCommonExcel.createRgbColor(0, 0, 0));
+
+		AscCommonExcel.drawFillCell(ctx, null, fill, makeRect(), true);
+
+		var drawn = ctx.getLastFillColor();
+		assert.strictEqual(drawn.getR(), 0, 'light mode never corrects, even when bIsFillRecolorable is true');
+	});
+
+	// =====================================================================
+	// AscCommon.updateGlobalSkin - regression pin for the theme-corruption bug fixed in
+	// commit 0f55894fb7 (interface theme switches were silently corrupting content dark
+	// mode's cell background/grid color through a shared GlobalSkin/EditorSkins alias)
+	// =====================================================================
+	QUnit.module('interface theme switch must not corrupt cell background/grid colors');
+
+	QUnit.test('canvas-cell-background/canvas-cell-grid no longer alias into GlobalSkin.CellBackground/CellGrid', function (assert) {
+		var before = AscCommon.GlobalSkin;
+		var savedCellBackground = before.CellBackground;
+		var savedCellGrid = before.CellGrid;
+		var savedBackground = before.Background;
+
+		try {
+			// simulates a web-apps interface-theme switch supplying CSS-custom-property-backed
+			// values, including the two keys that used to alias straight into CellBackground/CellGrid
+			AscCommon.updateGlobalSkin({
+				type: 'light',
+				'canvas-cell-background': '#010203',
+				'canvas-cell-grid': '#040506',
+				'canvas-cell-title-background': '#0a0b0c'
+			});
+
+			var after = AscCommon.GlobalSkin;
+			assert.strictEqual(after.CellBackground, savedCellBackground,
+				'interface theme switch must not overwrite content dark mode\'s cell background color');
+			assert.strictEqual(after.CellGrid, savedCellGrid,
+				'interface theme switch must not overwrite content dark mode\'s cell grid color');
+
+			// sanity check the update mechanism itself still works for a color that IS still
+			// coupled (Background <- canvas-cell-title-background), so the two assertions above
+			// are proven by an actually-removed mapping, not by updateGlobalSkin silently no-oping
+			assert.notStrictEqual(after.Background, savedBackground,
+				'a genuinely-mapped color changes, proving updateGlobalSkin is not a global no-op');
+		} finally {
+			var skin = AscCommon.GlobalSkin;
+			skin.CellBackground = savedCellBackground;
+			skin.CellGrid = savedCellGrid;
+			skin.Background = savedBackground;
+			delete skin['canvas-cell-background'];
+			delete skin['canvas-cell-grid'];
+			delete skin['canvas-cell-title-background'];
+			delete skin.type;
+		}
+	});
 });
