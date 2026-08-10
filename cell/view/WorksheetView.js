@@ -6112,8 +6112,7 @@ function isAllowPasteLink(pastedWb) {
 			offsetX * asc_getcvt(0, 3, this._getPPIX()), offsetY * asc_getcvt(0, 3, this._getPPIX()));
     };
 
-    /** Рисует фон ячеек в строке */
-	/** ↪ AI Translation → “Draws the background of cells in a row” */
+    /** Draws the background of cells in a row (translated from original Russian comment) */
     WorksheetView.prototype._drawRowBG = function (drawingCtx, row, colStart, colEnd, offsetX, offsetY, mergedCells, mc, cfIterator) {
 		var height = this._getRowHeight(row);
 		if (0 === height && mergedCells) {
@@ -6167,11 +6166,9 @@ function isAllowPasteLink(pastedWb) {
 			}
 
 			if (findFillColor || hasFill || mc) {
-				// ToDo не отрисовываем заливку границ от ячеек c заливкой, которые находятся правее и ниже
-				//  отрисовываемого диапазона. Но по факту проблем быть не должно.
-				/** ↪ AI Translation → “TODO: we don't draw the fill of cell borders 
-				 * for filled cells that are located to the right and below the range being drawn. 
-				 * But in practice there shouldn't be any problems.” */
+				// ToDo (translated from original Russian comment): we don't draw the fill of
+				// cell borders for filled cells that are located to the right and below the
+				// range being drawn. But in practice there shouldn't be any problems.
 				var fillGrid = findFillColor || hasFill;
 				// only the search-highlight override (findFillColor, read here before it's
 				// reassigned below) is recolorable; the cell's own fill and the merge's
