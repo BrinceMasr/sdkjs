@@ -5355,12 +5355,11 @@
 		this._getOwnedDrawingContexts().forEach(function (drawingCtx) {
 			drawingCtx.isDarkMode = isDarkMode;
 		});
-		for (var i in this.wsViews) {
-			var ws = this.wsViews[i];
+		this.wsViews.forEach(function (ws) {
 			if (ws) {
 				ws._cleanCellsTextMetricsCache();
 			}
-		}
+		});
 	};
 
 	WorkbookView.prototype.executeWithCurrentTopLeftCell = function (runFunction) {
