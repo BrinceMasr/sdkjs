@@ -6173,10 +6173,10 @@ function isAllowPasteLink(pastedWb) {
 				 * for filled cells that are located to the right and below the range being drawn. 
 				 * But in practice there shouldn't be any problems.” */
 				var fillGrid = findFillColor || hasFill;
-				// exempt from dark-mode auto-correction unless this is a search-highlight
-				// override (findFillColor, read here before it's reassigned below): both the
-				// cell's own fill and the merge's default background set below are already correct
-				var keepsFillColorAsIs = !findFillColor || isPageBreakBorderFill;
+				// only the search-highlight override (findFillColor, read here before it's
+				// reassigned below) is recolorable; the cell's own fill and the merge's
+				// default background set below are already correct
+				var isFillRecolorable = !!findFillColor && !isPageBreakBorderFill;
 				// print/print-preview must use the always-light printState.background, not
 				// the document's dark-mode-resolved defaultState.background
 				findFillColor = findFillColor || (!hasFill && mc && (this.usePrintScale ? this.settings.cells.printState.background : this.settings.cells.defaultState.background));
@@ -6190,7 +6190,7 @@ function isAllowPasteLink(pastedWb) {
                     fill = new AscCommonExcel.Fill();
 					fill.fromColor(findFillColor);
                 }
-                AscCommonExcel.drawFillCell(ctx, graphics, fill, new AscCommon.asc_CRect((this.getRightToLeft() ? (this.getCtxWidth(ctx) - x - w + offsetX) : x - offsetX), y - offsetY, w, h), keepsFillColorAsIs);
+                AscCommonExcel.drawFillCell(ctx, graphics, fill, new AscCommon.asc_CRect((this.getRightToLeft() ? (this.getCtxWidth(ctx) - x - w + offsetX) : x - offsetX), y - offsetY, w, h), isFillRecolorable);
 			}
 
 			if (this.isPageBreakPreview(true) && mc) {
@@ -6207,8 +6207,8 @@ function isAllowPasteLink(pastedWb) {
 
 							let _fill = new AscCommonExcel.Fill();
 							_fill.fromColor(this.settings.cells.defaultState.border);
-							// defaultState.border is already theme-resolved, same as isPageBreakBorderFill above
-							AscCommonExcel.drawFillCell(ctx, graphics, _fill, new AscCommon.asc_CRect((this.getRightToLeft() ? (this.getCtxWidth(ctx) - _x - w + offsetX) : _x - offsetX), _y - offsetY, _w, _h), true);
+							// defaultState.border is already theme-resolved, same as isPageBreakBorderFill above, so not recolorable
+							AscCommonExcel.drawFillCell(ctx, graphics, _fill, new AscCommon.asc_CRect((this.getRightToLeft() ? (this.getCtxWidth(ctx) - _x - w + offsetX) : _x - offsetX), _y - offsetY, _w, _h), false);
 						}
 					}
 				}
@@ -6381,7 +6381,8 @@ function isAllowPasteLink(pastedWb) {
 			} else {
 				fill.fromColor(color);
 			}
-			AscCommonExcel.drawFillCell(ctx, graphics, fill, new AscCommon.asc_CRect((this.getRightToLeft() ? (this.getCtxWidth(ctx) - x - dataBarLength) : x), top, dataBarLength, height - 3), true);
+			// data bar color is explicit conditional-formatting config, not recolorable
+			AscCommonExcel.drawFillCell(ctx, graphics, fill, new AscCommon.asc_CRect((this.getRightToLeft() ? (this.getCtxWidth(ctx) - x - dataBarLength) : x), top, dataBarLength, height - 3), false);
 
 			var color = (isPositive || oRuleElement.NegativeBarBorderColorSameAsPositive) ? oRuleElement.BorderColor : oRuleElement.NegativeBorderColor;
 			if (color) {
