@@ -473,7 +473,8 @@
 	 * @param {Number} b  0-255
 	 * @param {Number} [a]  0-1
 	 * @return {AscCommon.CColor}  the shared shuttle instance - read it immediately, it is
-	 * overwritten by the next call, never store or mutate the reference
+	 * overwritten by the next call, never store or mutate the reference. Not safe across an
+	 * async boundary: a caller that awaits before reading it may see a different call's color.
 	 */
 	DrawingContext.prototype.getDarkModeCorrectedColor = function (r, g, b, a) {
 
