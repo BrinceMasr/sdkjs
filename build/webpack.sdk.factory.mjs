@@ -110,7 +110,12 @@ export class StripBootstrapStrictModePlugin {
 // headers it would otherwise also match. It has to survive in the bundle text through
 // the Terser pass for that match to work, so it can't be stripped from licenseText
 // before injection — instead, strip it from the asset after minification is done.
-class StripLicenseSentinelPlugin {
+//
+// Exported (only) for the real-compilation integration test in
+// build/test/webpack-sdk-factory.test.cjs — like StripBootstrapStrictModePlugin above,
+// this plugin's job is entangled with Terser's own comment-matching behavior, so it
+// needs an actual webpack+Terser run to validate, not just a string-replace unit test.
+export class StripLicenseSentinelPlugin {
     apply(compiler) {
         compiler.hooks.compilation.tap('StripLicenseSentinelPlugin', (compilation) => {
             compilation.hooks.processAssets.tap(

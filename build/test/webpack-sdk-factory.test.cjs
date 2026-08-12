@@ -101,3 +101,74 @@ test('StripBootstrapStrictModePlugin: strips webpack\'s bootstrap "use strict" f
         fs.rmSync(tmpDir, { recursive: true, force: true });
     }
 });
+
+test('StripLicenseSentinelPlugin: strips the @@license-banner@@ sentinel after Terser has used it to keep the banner', async () => {
+    const { StripLicenseSentinelPlugin } = await import(
+        url.pathToFileURL(path.join(__dirname, '..', 'webpack.sdk.factory.mjs'))
+    );
+
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'strip-license-sentinel-test-'));
+    const entry  = path.join(tmpDir, 'entry.js');
+    // A per-file AGPL header identical in shape to the ~400 real ones sdk-concat-loader
+    // concatenates ahead of the BannerPlugin-injected banner — it must NOT be kept by
+    // Terser's comments regex, only the sentinel-marked banner should survive.
+    fs.writeFileSync(
+        entry,
+        '/* AGPL header, repeated in every source file */\n' +
+        'var AscCommonSdkTestGlobal = { value: 1 + 1 };\n'
+    );
+
+    const banner = '/* @@license-banner@@\n * Copyright (C) Test Corp\n */';
+
+    function runCompiler(withPlugin) {
+        return new Promise((resolve, reject) => {
+            const compiler = webpack({
+                mode: 'production',
+                entry,
+                output: { path: tmpDir, filename: withPlugin ? 'with-plugin.js' : 'without-plugin.js', iife: false },
+                plugins: [
+                    new webpack.BannerPlugin({ banner, raw: true, entryOnly: true }),
+                    ...(withPlugin ? [new StripLicenseSentinelPlugin()] : []),
+                ],
+                optimization: {
+                    minimize: true,
+                    minimizer: [
+                        new TerserPlugin({
+                            extractComments: false,
+                            terserOptions: {
+                                mangle: false,
+                                compress: true,
+                                // Same regex used in sdkConfig(): only the sentinel-marked
+                                // banner should survive Terser's comment-stripping pass,
+                                // not the per-file AGPL headers.
+                                format: { comments: /@@license-banner@@/ },
+                            },
+                        }),
+                    ],
+                },
+            });
+            compiler.run((err, stats) => {
+                compiler.close(() => {});
+                if (err || stats.hasErrors()) return reject(err || new Error(stats.toString()));
+                resolve(fs.readFileSync(path.join(tmpDir, withPlugin ? 'with-plugin.js' : 'without-plugin.js'), 'utf8'));
+            });
+        });
+    }
+
+    try {
+        const withoutPlugin = await runCompiler(false);
+        const withPlugin    = await runCompiler(true);
+
+        // Sanity checks on the fixture itself: the per-file header must be gone
+        // (Terser's regex didn't match it) and the banner text must have survived
+        // in both outputs — only the sentinel differs between them.
+        assert.equal(withoutPlugin.includes('AGPL header, repeated'), false);
+        assert.equal(withoutPlugin.includes('Copyright (C) Test Corp'), true);
+        assert.equal(withPlugin.includes('Copyright (C) Test Corp'), true);
+
+        assert.equal(withoutPlugin.includes('@@license-banner@@'), true);
+        assert.equal(withPlugin.includes('@@license-banner@@'), false);
+    } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+});
