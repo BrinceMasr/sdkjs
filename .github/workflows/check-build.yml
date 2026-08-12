@@ -183,6 +183,13 @@ jobs:
           # Same addon wiring as the "Run build sdkjs" step above — this step
           # rebuilds develop/ from scratch and must merge the addon in too.
           SDK_ADDONS: ../../sdkjs-forms
+          # `npm run develop` invokes build-develop.cjs directly (not through
+          # build-pipeline.cjs), so SKIP_STANDALONE isn't set for us here. Without
+          # it, copyStandalone() overwrites the Terser-minified, license-headered
+          # device_scale.js that "Run build sdkjs" (deploy-assets.cjs) already
+          # wrote to this same BUILD_ROOT, with a raw unprocessed copy — silently
+          # defeating that step's processing for the rest of this job.
+          SKIP_STANDALONE: '1'
         run: |
           cd sdkjs
           COMPILED=1 npm run --prefix build develop

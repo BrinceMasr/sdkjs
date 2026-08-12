@@ -26,7 +26,7 @@ bundles (`sdk-all.js` / `sdk-all-min.js`) that the sibling **web-apps** repo loa
 | `slide/`    | Presentation editor + themes/textures. |
 | `pdf/`      | PDF editor; `src/` is the implementation, `build/` a compiled wrapper, `test/` a harness. |
 | `visio/`    | Diagram editor with its own VSDX serialization (`model/`). |
-| `build/`    | Webpack build: `webpack.*.mjs`, `scripts/`, `package.json`, `license.header`. Run npm from **here**. See `build/DEVELOPER-GUIDE.md` for the full workflow. |
+| `build/`    | Webpack build: `webpack.*.mjs`, `scripts/`, `lib/` (shared env/config helpers), `loaders/` (`sdk-concat.cjs`), `test/` (build-tooling unit/integration tests), `package.json`, `license.header`. Run npm from **here**. See `build/DEVELOPER-GUIDE.md` for the full workflow. |
 | `configs/`  | `<editor>.json` file-lists that drive the build (load order); `externs.json` for Closure. |
 | `tests/`    | QUnit suites per editor + `code-style/check.py` (the lint gate). |
 | `vendor/`   | Third-party libs (jQuery, XRegExp, etc.). Excluded from lint/build minification. |
@@ -60,9 +60,12 @@ You only need the full `npm run build` (webpack) to produce release/min bundles,
 Config is via **environment variables**, not CLI flags: `SDK_PLATFORM=desktop` or `mobile`
 (desktop/mobile-only files), `SDK_SOURCE_MAPS=1` (source maps on a production build),
 `SDK_ADDONS=../../sdkjs-forms` (`path.delimiter`-separated list; merges external addon repos'
-`configs/`), `NODE_ENV=development` (readable, unminified output). There is no `--level` /
-`ADVANCED` vs `WHITESPACE_ONLY` distinction anymore — minification is always Terser with
-`mangle: false` (see Gotchas below).
+`configs/`), `NODE_ENV=development` (readable, unminified output). There is no `--level`
+CLI flag anymore — minification is always Terser, but `webpack.sdk.factory.mjs` still
+distinguishes desktop/mobile from web: `SDK_PLATFORM=desktop`/`mobile` sets Terser's
+`compress: false` (closer to the old `WHITESPACE_ONLY` tier), while web builds keep
+`compress` on (closer to `ADVANCED`, minus mangling). `mangle: false` is load-bearing on
+every platform (see Gotchas below).
 
 **`make` is NOT the SDK build.** The Makefile's default target also builds the sibling
 `../web-apps` repo and requires it to be checked out next to sdkjs; it is the integration
@@ -111,19 +114,24 @@ Heaviest coverage is in `tests/cell/spreadsheet-calculation/` (formula engine) a
 ## Code style — the build-breakers
 
 The **only** enforced lint gate is `python tests/code-style/check.py` (run from repo root).
-ESLint config (`.eslintrc.yaml`) exists but is **not** wired into CI. `check.py` fails the build
-if any `.js` (outside `vendor/` and `externs/`) does not:
+ESLint config (`.eslintrc.yaml`) exists but is **not** wired into CI. `check.py` checks every
+`.js`/`.cjs`/`.mjs` file (outside `vendor/`, `externs/`, `node_modules/`, `.webpack-cache/`) —
+the `.cjs`/`.mjs` extensions cover the build-tooling scripts added by the webpack migration
+(`build/scripts`, `build/lib`, `build/loaders`). `check.py` fails the build if such a file does
+not:
 
-1. contain the AGPL header string `Copyright Ascensio System`,
+1. contain either the AGPL header string `Copyright Ascensio System` **or** an
+   `SPDX-License-Identifier` header (the new build-tooling files use SPDX headers only),
 2. contain the literal `LV-1050`,
 3. use LF line endings (no CRLF), and
 4. end with a trailing newline.
 
 ⚠️ **Known divergence:** the Euro-Office fork removed the `LV-1050` Latvian address from *every*
-header, but `check.py` still checks for it — so **`check.py` currently fails at the
-Latvian-address step** on a clean checkout. Don't "fix" this by re-adding `LV-1050` to files;
-match the existing header (which omits it). Treat the upstream check script as out of sync with
-the fork.
+header. `check.py`'s Latvian-address check (`check_file_without_latvian_address`) still exists
+in the script but its call in `main()` is commented out, so **`check.py` does not fail on a
+clean checkout** — the address requirement is dormant, not enforced. Don't "fix" this by
+re-adding `LV-1050` to files; match the existing header (which omits it), and don't
+uncomment the call either, since that would fail every file in the repo.
 
 Every source file starts with the AGPL block (copy an existing file's header verbatim), then:
 

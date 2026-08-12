@@ -50,8 +50,79 @@ test('stripBootstrapStrictDirective: does not touch a "use strict" appearing pas
     assert.equal(stripBootstrapStrictDirective(bundle), bundle);
 });
 
-test('StripBootstrapStrictModePlugin: strips webpack\'s bootstrap "use strict" from a real minified compilation', async (t) => {
-    const { StripBootstrapStrictModePlugin } = await import(
+test('stripBootstrapStrictDirective: honors a caller-supplied scanLimit', async () => {
+    const { stripBootstrapStrictDirective, PROLOGUE_SCAN_LIMIT } = await import(
+        url.pathToFileURL(path.join(__dirname, '..', 'webpack.sdk.factory.mjs'))
+    );
+
+    // Directive sits past the default PROLOGUE_SCAN_LIMIT but within a
+    // caller-supplied, larger scanLimit (e.g. derived from an actual banner
+    // length) — must still be found and stripped.
+    const padding = 'x'.repeat(PROLOGUE_SCAN_LIMIT + 100);
+    const bundle  = `${padding}"use strict";\nvar y = 1;`;
+
+    assert.equal(stripBootstrapStrictDirective(bundle), bundle);
+    const patched = stripBootstrapStrictDirective(bundle, PROLOGUE_SCAN_LIMIT + 200);
+    assert.equal(patched.includes('"use strict"'), false);
+    assert.equal(patched.length, bundle.length);
+});
+
+test('StripBundlePostprocessPlugin: strips the sentinel even without a leading space (reformatted banner)', async () => {
+    const { StripBundlePostprocessPlugin } = await import(
+        url.pathToFileURL(path.join(__dirname, '..', 'webpack.sdk.factory.mjs'))
+    );
+
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'strip-license-sentinel-nospace-test-'));
+    const entry  = path.join(tmpDir, 'entry.js');
+    fs.writeFileSync(entry, 'var AscCommonSdkTestGlobal = { value: 1 + 1 };\n');
+
+    // No leading space before the sentinel — the guard/action mismatch this
+    // regression covers only manifests once the banner is formatted this way.
+    const banner = '/*@@license-banner@@\n * Copyright (C) Test Corp\n */';
+
+    function runCompiler(withPlugin) {
+        return new Promise((resolve, reject) => {
+            const compiler = webpack({
+                mode: 'production',
+                entry,
+                output: { path: tmpDir, filename: withPlugin ? 'with-plugin.js' : 'without-plugin.js', iife: false },
+                plugins: [
+                    new webpack.BannerPlugin({ banner, raw: true, entryOnly: true }),
+                    ...(withPlugin ? [new StripBundlePostprocessPlugin({ stripStrictMode: false })] : []),
+                ],
+                optimization: {
+                    minimize: true,
+                    minimizer: [
+                        new TerserPlugin({
+                            extractComments: false,
+                            terserOptions: {
+                                mangle: false,
+                                compress: true,
+                                format: { comments: /@@license-banner@@/ },
+                            },
+                        }),
+                    ],
+                },
+            });
+            compiler.run((err, stats) => {
+                compiler.close(() => {});
+                if (err || stats.hasErrors()) return reject(err || new Error(stats.toString()));
+                resolve(fs.readFileSync(path.join(tmpDir, withPlugin ? 'with-plugin.js' : 'without-plugin.js'), 'utf8'));
+            });
+        });
+    }
+
+    try {
+        const withPlugin = await runCompiler(true);
+        assert.equal(withPlugin.includes('Copyright (C) Test Corp'), true);
+        assert.equal(withPlugin.includes('@@license-banner@@'), false);
+    } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+});
+
+test('StripBundlePostprocessPlugin: strips webpack\'s bootstrap "use strict" from a real minified compilation', async (t) => {
+    const { StripBundlePostprocessPlugin } = await import(
         url.pathToFileURL(path.join(__dirname, '..', 'webpack.sdk.factory.mjs'))
     );
 
@@ -72,7 +143,9 @@ test('StripBootstrapStrictModePlugin: strips webpack\'s bootstrap "use strict" f
                     minimize: true,
                     minimizer: [new TerserPlugin({ terserOptions: { mangle: false, compress: true } })],
                 },
-                plugins: withPlugin ? [new StripBootstrapStrictModePlugin()] : [],
+                plugins: withPlugin
+                    ? [new StripBundlePostprocessPlugin({ stripLicenseSentinel: false })]
+                    : [],
             });
             compiler.run((err, stats) => {
                 compiler.close(() => {});
@@ -102,8 +175,8 @@ test('StripBootstrapStrictModePlugin: strips webpack\'s bootstrap "use strict" f
     }
 });
 
-test('StripLicenseSentinelPlugin: strips the @@license-banner@@ sentinel after Terser has used it to keep the banner', async () => {
-    const { StripLicenseSentinelPlugin } = await import(
+test('StripBundlePostprocessPlugin: strips the @@license-banner@@ sentinel after Terser has used it to keep the banner', async () => {
+    const { StripBundlePostprocessPlugin } = await import(
         url.pathToFileURL(path.join(__dirname, '..', 'webpack.sdk.factory.mjs'))
     );
 
@@ -128,7 +201,7 @@ test('StripLicenseSentinelPlugin: strips the @@license-banner@@ sentinel after T
                 output: { path: tmpDir, filename: withPlugin ? 'with-plugin.js' : 'without-plugin.js', iife: false },
                 plugins: [
                     new webpack.BannerPlugin({ banner, raw: true, entryOnly: true }),
-                    ...(withPlugin ? [new StripLicenseSentinelPlugin()] : []),
+                    ...(withPlugin ? [new StripBundlePostprocessPlugin({ stripStrictMode: false })] : []),
                 ],
                 optimization: {
                     minimize: true,

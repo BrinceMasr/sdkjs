@@ -37,6 +37,62 @@ try {
     SourceMapGenerator = require('source-map-js').SourceMapGenerator;
 } catch (_) {}
 
+// Module-scope memo for loadAllConfigs(), keyed on its own inputs. Each webpack
+// process (word/cell/slide/visio) runs 2 chunk configs ('min' + 'all'), and
+// build-pipeline.cjs spawns 4 such processes in parallel — so without this,
+// the same 4 module configs get re-read and re-JSON-parsed (plus a full
+// recursive fixPath walk) 8 times across a build instead of once per process.
+//
+// Cached alongside each entry are the mtimes of every config file that fed it,
+// so a long-lived process (npm run watch:*) re-parses once a config actually
+// changes on disk instead of serving the pre-edit result forever. Without this,
+// webpack correctly detects the addDependency() change and re-invokes the
+// loader, but the loader itself would keep returning the stale parsed config.
+const configsCache = new Map();
+
+function configFiles(srcRoot, addonDirs) {
+    const files = ['word', 'cell', 'slide', 'visio'].map(name =>
+        path.join(srcRoot, 'configs', name + '.json'));
+    for (const addonDir of addonDirs) {
+        for (const name of ['word', 'cell', 'slide', 'visio']) {
+            files.push(path.join(addonDir, 'configs', name + '.json'));
+        }
+    }
+    return files;
+}
+
+function statMtimes(files) {
+    const mtimes = {};
+    for (const f of files) {
+        try {
+            mtimes[f] = fs.statSync(f).mtimeMs;
+        } catch (_) {
+            mtimes[f] = null; // missing file — still tracked, so it re-triggers if later created
+        }
+    }
+    return mtimes;
+}
+
+function mtimesEqual(a, b) {
+    const keys = Object.keys(a);
+    if (keys.length !== Object.keys(b).length) return false;
+    return keys.every(k => a[k] === b[k]);
+}
+
+function loadAllConfigsMemoized(srcRoot, addonDirs) {
+    const key         = srcRoot + '|' + addonDirs.join(',');
+    const currMtimes  = statMtimes(configFiles(srcRoot, addonDirs));
+    const cached       = configsCache.get(key);
+
+    if (cached && mtimesEqual(cached.mtimes, currMtimes)) {
+        return cached.configs;
+    }
+
+    const configs = loadAllConfigs(srcRoot, addonDirs);
+    configsCache.set(key, { configs, mtimes: currMtimes });
+    return configs;
+}
+
 // ---------------------------------------------------------------------------
 // Loader
 // ---------------------------------------------------------------------------
@@ -47,9 +103,9 @@ module.exports = function sdkConcatLoader() {
     const opts      = this.getOptions(module.exports.schema);
     const srcRoot   = path.resolve(opts.srcRoot   || path.join(this.context, '..'));
     const platform  = opts.platform  || '';
-    const addonDirs = opts.addonDirs || [];
+    const addonDirs = (opts.addonDirs || []).map(d => path.resolve(d));
 
-    const configs = loadAllConfigs(srcRoot, addonDirs);
+    const configs = loadAllConfigsMemoized(srcRoot, addonDirs);
     const sdkCfg  = configs[opts.module] && configs[opts.module]['sdk'];
 
     if (!sdkCfg) {

@@ -12,15 +12,17 @@
  * wrapper — a bare top-level `var` in the source lands on the global object
  * exactly like a plain <script> tag would.
  *
- * That property is an emergent side effect of the config shape, not something
- * asserted anywhere else. This test compiles a real, minimal webpack config
- * with the SAME load-bearing shape (iife:false, single no-import entry) and
- * proves both directions:
- *   - the safe shape stays unwrapped and the bare var reaches the global object
- *   - the shape the warning comment predicts as dangerous (adding import())
- *     actually does switch webpack to the wrapped __webpack_require__ form,
- *     so this test would fail loudly if a future edit to webpack.sdk.factory.mjs
- *     ever introduced that shape for the real 'min' chunk.
+ * The first test below compiles sdkConfig()'s own real 'min' chunk config
+ * (not a hand-written stand-in) so a future edit to chunkConfig() that
+ * accidentally adds externals/splitChunks/a dynamic import() to the actual
+ * production config is caught directly, rather than only being caught if
+ * someone remembers to also update a synthetic config here.
+ *
+ * The second test proves the discriminating assertion itself is meaningful —
+ * that adding import() (the documented danger case) actually does switch a
+ * matching synthetic config to the wrapped __webpack_require__ form — so a
+ * webpack version change that stopped honoring iife:false wouldn't leave
+ * this suite passing for the wrong reason.
  */
 
 'use strict';
@@ -28,9 +30,9 @@
 const test   = require('node:test');
 const assert = require('node:assert/strict');
 const path   = require('node:path');
+const url    = require('node:url');
 const fs     = require('node:fs');
 const os     = require('node:os');
-const vm     = require('node:vm');
 const webpack = require('webpack');
 
 function compile(tmpDir, entrySource, { withDynamicImport }) {
@@ -64,26 +66,49 @@ function compile(tmpDir, entrySource, { withDynamicImport }) {
     });
 }
 
-test('bare-global contract: a single no-import iife:false entry stays unwrapped and reaches the global object', async () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'bare-global-safe-'));
+test('bare-global contract: the real sdkConfig() "min" chunk stays unwrapped', async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'bare-global-real-'));
+    const prevBuildRoot = process.env.BUILD_ROOT;
+    const prevCacheDir  = process.env.WEBPACK_CACHE_DIR;
+    // Isolate this run from the real deploy dir and the shared persistent
+    // webpack cache — this test only cares about the compiled shape, not
+    // about producing (or reusing) real build output.
+    process.env.BUILD_ROOT       = tmpDir;
+    process.env.WEBPACK_CACHE_DIR = path.join(tmpDir, '.webpack-cache');
     try {
-        const bundle = await compile(
-            tmpDir,
-            'var AscCommonSdkTestGlobal = { value: 1 + 1 };\nconsole.log(AscCommonSdkTestGlobal);\n',
-            { withDynamicImport: false },
+        const { sdkConfig } = await import(
+            url.pathToFileURL(path.join(__dirname, '..', 'webpack.sdk.factory.mjs'))
         );
+        const [minConfig] = sdkConfig('word');
 
-        assert.equal(bundle.includes('__webpack_require__'), false,
-            'a real sdk-concat-loader entry has no imports/splitChunks/externals — this config shape must never grow the wrapped-module runtime');
+        const bundle = await new Promise((resolve, reject) => {
+            const compiler = webpack(minConfig);
+            compiler.run((err, stats) => {
+                compiler.close(() => {});
+                if (err || stats.hasErrors()) return reject(err || new Error(stats.toString()));
+                resolve(fs.readFileSync(path.join(minConfig.output.path, 'sdk-all-min.js'), 'utf8'));
+            });
+        });
 
-        const sandbox = { console: { log: () => {} } };
-        vm.createContext(sandbox);
-        vm.runInContext(bundle, sandbox);
-
-        assert.equal(sandbox.AscCommonSdkTestGlobal !== undefined, true,
-            'a bare top-level var must land on the execution global, matching plain <script> tag semantics');
-        assert.equal(sandbox.AscCommonSdkTestGlobal.value, 2);
+        // sdkjs's real 'min' chunk does trip webpack's harmless "global object"
+        // runtime helper (some concatenated file does a `typeof global`-style
+        // check) — that adds a bare `__webpack_require__.g` accessor object but
+        // does NOT wrap the module code itself, so checking for that substring
+        // alone (as an earlier version of this test did against a trivial
+        // synthetic entry that never triggered it) would false-positive on the
+        // real config. The markers below are specific to true modularization:
+        // they only appear once webpack decides it needs the require-function/
+        // module-map runtime, which is what actually moves the bare vars inside
+        // a function scope and breaks the ~287 call sites.
+        assert.equal(bundle.includes('__webpack_modules__'), false,
+            'sdkConfig("word")\'s real "min" chunk config must not gain a webpack module map — that would mean the bare-global inlining broke');
+        assert.equal(bundle.includes('__webpack_module_cache__'), false,
+            'sdkConfig("word")\'s real "min" chunk config must not gain a webpack module cache — a future edit adding externals/splitChunks/import() would silently break ~287 bare-global call sites at runtime with a green build and no warning');
+        assert.equal(/function\s+__webpack_require__\s*\(/.test(bundle), false,
+            'sdkConfig("word")\'s real "min" chunk config must not gain a __webpack_require__ module-loader function — same regression as above');
     } finally {
+        if (prevBuildRoot === undefined) delete process.env.BUILD_ROOT; else process.env.BUILD_ROOT = prevBuildRoot;
+        if (prevCacheDir === undefined) delete process.env.WEBPACK_CACHE_DIR; else process.env.WEBPACK_CACHE_DIR = prevCacheDir;
         fs.rmSync(tmpDir, { recursive: true, force: true });
     }
 });

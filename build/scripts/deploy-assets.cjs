@@ -19,29 +19,14 @@ const path  = require('path');
 const fs    = require('fs');
 const { sync: globSync } = require('glob');
 const { minify }   = require('terser');
-const { resolveBuildRoot } = require('../lib/env.cjs');
+const { resolveBuildRoot, buildLicenseHeader } = require('../lib/env.cjs');
 
 const BUILD_DIR = path.resolve(__dirname, '..');
 const SRC_ROOT  = path.resolve(BUILD_DIR, '..');
 
 const BUILD_ROOT = resolveBuildRoot(BUILD_DIR);
 
-const version      = process.env.PRODUCT_VERSION || '0.0.0';
-const buildNumber  = process.env.BUILD_NUMBER     || '0';
-const appCopyright = process.env.APP_COPYRIGHT
-    || `Copyright (C) Ascensio System SIA 2012-2025. All rights reserved; Euro-Office contributors 2026 - ${new Date().getFullYear()}`;
-const publisherUrl = process.env.PUBLISHER_URL || 'https://github.com/Euro-Office/';
-
-let licenseText = fs.readFileSync(path.join(BUILD_DIR, 'license.header'), 'utf8');
-licenseText = licenseText
-    .replace('@@AppCopyright', appCopyright)
-    .replace('@@PublisherUrl', publisherUrl)
-    .replace('@@Version', version)
-    .replace('@@Build', buildNumber)
-    // @@license-banner@@ only exists so webpack.sdk.factory.mjs's Terser pass can
-    // distinguish this banner from per-file headers — irrelevant here since this
-    // script never runs Terser over the banner text, so it must not ship.
-    .replace(' @@license-banner@@', '');
+const licenseText = buildLicenseHeader(BUILD_DIR, { stripSentinel: true });
 
 // JS files skipped from individual minification (same as ignoreFiles in Gruntfile.js)
 const IGNORE_NAMES = new Set([
@@ -118,6 +103,11 @@ function deployFile(srcPath, destPath) {
 
 async function main() {
     const tasks = [];
+    // Counts every deployed file, not just the async deployJsFile() tasks below —
+    // tasks.length alone undercounts, since non-JS assets are copied synchronously
+    // via deployFile() outside the tasks array. A wrong count here would mask a
+    // real regression (e.g. a broken glob silently matching nothing).
+    let fileCount = 0;
 
     for (const entry of OTHER_FILES) {
         const matches = [];
@@ -132,6 +122,7 @@ async function main() {
             const srcPath  = path.join(entry.cwd, relFile);
             const destPath = path.join(entry.dest, relFile);
 
+            fileCount++;
             if (ext === '.js' && !IGNORE_NAMES.has(baseName)) {
                 tasks.push(deployJsFile(srcPath, destPath));
             } else {
@@ -141,7 +132,7 @@ async function main() {
     }
 
     await Promise.all(tasks);
-    process.stdout.write(`deploy-assets: ${tasks.length} files deployed to ${BUILD_ROOT}\n`);
+    process.stdout.write(`deploy-assets: ${fileCount} files deployed to ${BUILD_ROOT}\n`);
 }
 
 main().catch(err => {

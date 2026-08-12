@@ -245,11 +245,13 @@ its own implicit target resolution.
 
 **Resolved: ES6+ is safe.** Desktop pins CEF 107 (Chromium 107, October
 2022 — ES2022-capable; see `Euro-Office/desktop-apps/win-linux/defaults.pri`).
-Mobile floor is iOS 17/Safari 17 → ES2022 per
-`web-apps/.claude/browser-floor-stage2-target.md`, with Android WebView
-tracking current Chrome regardless of OS version — that same doc traces a
-real mobile crash to over-aggressive ES2015 downleveling, the opposite
-direction of concern from this change. No downlevel step needed.
+Mobile floor is iOS 17/Safari 17 → ES2022 per `web-apps/build/browser-floor.mjs`
+/ `browser-floor.manifest.mjs`, with Android WebView tracking current Chrome
+regardless of OS version — `web-apps` commit `7ebda70613` ("centralise browser
+target to ES2022, fixing i18next crash") traces a real mobile crash to
+over-aggressive ES2015 downleveling (esbuild's `target:'es2015'` mis-compiling
+i18next 25's class fields), the opposite direction of concern from this
+change. No downlevel step needed.
 
 ---
 

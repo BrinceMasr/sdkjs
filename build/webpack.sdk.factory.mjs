@@ -34,12 +34,11 @@
 import webpack    from 'webpack';
 import TerserPlugin from 'terser-webpack-plugin';
 import path       from 'path';
-import fs         from 'fs';
 import os         from 'os';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-const { parseAddonDirs, resolveBuildRoot } = require('./lib/env.cjs');
+const { parseAddonDirs, resolveBuildRoot, buildLicenseHeader, defaultAppCopyright, DEFAULT_PUBLISHER_URL } = require('./lib/env.cjs');
 
 const __dirname     = path.dirname(fileURLToPath(import.meta.url));
 const CONCAT_LOADER = path.join(__dirname, 'loaders', 'sdk-concat.cjs');
@@ -60,13 +59,17 @@ const DUMMY_ENTRY   = path.join(__dirname, 'dummy.js');
 // inside a real source file's own string literals, since those come tens of
 // KB into the bundle, well past PROLOGUE_SCAN_LIMIT.
 export const STRICT_DIRECTIVE    = '"use strict";';
+// Fallback only for callers (e.g. tests) that don't pass an explicit scanLimit.
+// Production use always passes a limit derived from the actual banner length
+// (see StripBundlePostprocessPlugin below), so a growing license.header can't
+// silently push the directive past a hardcoded window.
 export const PROLOGUE_SCAN_LIMIT = 2048;
 
 // Pure and exported so it can be unit-tested (build/test/webpack-sdk-factory.test.cjs)
 // without spinning up a full webpack build. Returns `source` unchanged if no
 // directive is found within the prologue window.
-export function stripBootstrapStrictDirective(source) {
-    const idx = source.slice(0, PROLOGUE_SCAN_LIMIT).indexOf(STRICT_DIRECTIVE);
+export function stripBootstrapStrictDirective(source, scanLimit = PROLOGUE_SCAN_LIMIT) {
+    const idx = source.slice(0, scanLimit).indexOf(STRICT_DIRECTIVE);
     if (idx === -1) return source;
 
     return source.slice(0, idx) +
@@ -74,17 +77,36 @@ export function stripBootstrapStrictDirective(source) {
         source.slice(idx + STRICT_DIRECTIVE.length);
 }
 
+// @@license-banner@@ exists only so Terser's format.comments regex (below) can tell
+// the single BannerPlugin-injected banner apart from the ~400 identical per-file AGPL
+// headers it would otherwise also match. It has to survive in the bundle text through
+// the Terser pass for that match to work, so it can't be stripped from licenseText
+// before injection — instead, strip it from the asset after minification is done.
+//
+// Combines both the strict-mode-directive strip and the license-sentinel strip into a
+// single processAssets pass: each is a separate transform on the same asset, and doing
+// them as two independent plugins would materialize/scan/updateAsset the full bundle
+// source twice per chunk (multi-MB for sdk-all, across 4 modules x 2 chunks per build).
+//
 // Exported (only) for the real-compilation integration test in
-// build/test/webpack-sdk-factory.test.cjs — this plugin's correctness depends
-// on webpack's own internal bootstrap-generation format and Terser's output
-// formatting, neither of which is a stable public API, so it needs an actual
-// webpack+Terser run to validate, not just the pure-string-function tests above.
-export class StripBootstrapStrictModePlugin {
+// build/test/webpack-sdk-factory.test.cjs — this plugin's correctness depends on
+// webpack's own internal bootstrap-generation format and Terser's output formatting,
+// neither of which is a stable public API, so it needs an actual webpack+Terser run to
+// validate, not just the pure-string-function tests above. The constructor flags let
+// that test exercise each transform in isolation without giving up the single-pass shape
+// used in production (sdkConfig() below always enables both).
+export class StripBundlePostprocessPlugin {
+    constructor({ stripStrictMode = true, stripLicenseSentinel = true, scanLimit = PROLOGUE_SCAN_LIMIT } = {}) {
+        this.stripStrictMode = stripStrictMode;
+        this.stripLicenseSentinel = stripLicenseSentinel;
+        this.scanLimit = scanLimit;
+    }
+
     apply(compiler) {
-        compiler.hooks.compilation.tap('StripBootstrapStrictModePlugin', (compilation) => {
+        compiler.hooks.compilation.tap('StripBundlePostprocessPlugin', (compilation) => {
             compilation.hooks.processAssets.tap(
                 {
-                    name: 'StripBootstrapStrictModePlugin',
+                    name: 'StripBundlePostprocessPlugin',
                     stage: webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT,
                 },
                 (assets) => {
@@ -94,43 +116,15 @@ export class StripBootstrapStrictModePlugin {
                         const source = compilation.getAsset(name).source.source();
                         if (typeof source !== 'string') continue;
 
-                        const patched = stripBootstrapStrictDirective(source);
+                        let patched = source;
+                        if (this.stripStrictMode) {
+                            patched = stripBootstrapStrictDirective(patched, this.scanLimit);
+                        }
+                        if (this.stripLicenseSentinel && patched.includes('@@license-banner@@')) {
+                            patched = patched.replace(/\s?@@license-banner@@/, '');
+                        }
                         if (patched === source) continue;
 
-                        compilation.updateAsset(name, new webpack.sources.RawSource(patched));
-                    }
-                }
-            );
-        });
-    }
-}
-
-// @@license-banner@@ exists only so Terser's format.comments regex (below) can tell
-// the single BannerPlugin-injected banner apart from the ~400 identical per-file AGPL
-// headers it would otherwise also match. It has to survive in the bundle text through
-// the Terser pass for that match to work, so it can't be stripped from licenseText
-// before injection — instead, strip it from the asset after minification is done.
-//
-// Exported (only) for the real-compilation integration test in
-// build/test/webpack-sdk-factory.test.cjs — like StripBootstrapStrictModePlugin above,
-// this plugin's job is entangled with Terser's own comment-matching behavior, so it
-// needs an actual webpack+Terser run to validate, not just a string-replace unit test.
-export class StripLicenseSentinelPlugin {
-    apply(compiler) {
-        compiler.hooks.compilation.tap('StripLicenseSentinelPlugin', (compilation) => {
-            compilation.hooks.processAssets.tap(
-                {
-                    name: 'StripLicenseSentinelPlugin',
-                    stage: webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT,
-                },
-                (assets) => {
-                    for (const name of Object.keys(assets)) {
-                        if (!name.endsWith('.js')) continue;
-
-                        const source = compilation.getAsset(name).source.source();
-                        if (typeof source !== 'string' || !source.includes('@@license-banner@@')) continue;
-
-                        const patched = source.replace(' @@license-banner@@', '');
                         compilation.updateAsset(name, new webpack.sources.RawSource(patched));
                     }
                 }
@@ -168,16 +162,15 @@ export function sdkConfig(moduleName) {
 
     // Matches the Euro-Office rebrand defaults main() picked up independently
     // (see build/Gruntfile.js history) after this migration branched off it.
-    const appCopyright = process.env.APP_COPYRIGHT
-        || `Copyright (C) Ascensio System SIA 2012-2025. All rights reserved; Euro-Office contributors 2026 - ${new Date().getFullYear()}`;
-    const publisherUrl = process.env.PUBLISHER_URL || 'https://github.com/Euro-Office/';
+    // Defaults come from env.cjs so this cache.version salt can't drift from
+    // buildLicenseHeader()'s own copy of the same strings (used for the banner).
+    const appCopyright = process.env.APP_COPYRIGHT || defaultAppCopyright();
+    const publisherUrl = process.env.PUBLISHER_URL || DEFAULT_PUBLISHER_URL;
 
-    let licenseText = fs.readFileSync(path.join(__dirname, 'license.header'), 'utf8');
-    licenseText = licenseText
-        .replace('@@AppCopyright', appCopyright)
-        .replace('@@PublisherUrl', publisherUrl)
-        .replace('@@Version', version)
-        .replace('@@Build', buildNumber);
+    // Sentinel deliberately kept in (stripSentinel: false, the default) — Terser's
+    // format.comments regex below matches on it, and StripBundlePostprocessPlugin
+    // strips it from the asset only after that Terser pass runs.
+    const licenseText = buildLicenseHeader(__dirname);
 
     function chunkConfig(chunk, outName) {
         return {
@@ -253,8 +246,11 @@ export function sdkConfig(moduleName) {
                     entryOnly: true,
                 }),
 
-                new StripBootstrapStrictModePlugin(),
-                new StripLicenseSentinelPlugin(),
+                // scanLimit derives from the actual injected banner so a future
+                // license.header edit that grows the banner can't silently push
+                // webpack's "use strict"; directive past the scan window — see
+                // the PROLOGUE_SCAN_LIMIT comment above.
+                new StripBundlePostprocessPlugin({ scanLimit: licenseText.length + PROLOGUE_SCAN_LIMIT }),
 
                 // Replaces Closure Compiler's --define= flags.
                 // webpack DefinePlugin performs AST-level identifier replacement
@@ -378,6 +374,8 @@ export function sdkConfig(moduleName) {
                         fileURLToPath(import.meta.url),
                         CONCAT_LOADER,
                         path.join(__dirname, 'lib', 'sdk-configs.cjs'),
+                        path.join(__dirname, 'lib', 'env.cjs'),
+                        path.join(__dirname, 'license.header'),
                     ],
                 },
             },
