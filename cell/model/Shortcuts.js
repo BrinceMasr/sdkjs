@@ -66,6 +66,9 @@
 	c_oAscUnlockedShortcutActionTypes[Asc.c_oAscSpreadsheetShortcutType.RightPara] = true;
 	c_oAscUnlockedShortcutActionTypes[Asc.c_oAscSpreadsheetShortcutType.CellEditorSwitchReference] = true;
 	c_oAscUnlockedShortcutActionTypes[Asc.c_oAscSpreadsheetShortcutType.EnDash] = true;
+	c_oAscUnlockedShortcutActionTypes[Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsSize] = true;
+	c_oAscUnlockedShortcutActionTypes[Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsWidth] = true;
+	c_oAscUnlockedShortcutActionTypes[Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsHeight] = true;
 
 	const c_oAscDefaultShortcuts = {};
 
@@ -214,6 +217,9 @@
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.ExitAddingShapesMode] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.ExitAddingShapesMode, keyCodes.Escape, false, false, false, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.SpeechWorker] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.SpeechWorker, keyCodes.KeyZ, true, false, true, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.EnDash] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.EnDash, keyCodes.KeyMinus, true, true, false, false)];
+	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsSize] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsSize, keyCodes.KeyS, true, true, true, false)];
+	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsWidth] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsWidth, keyCodes.KeyW, true, true, true, false)];
+	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsHeight] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsHeight, keyCodes.KeyH, true, true, true, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.SelectNonblankLeft] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.SelectNonblankLeft, keyCodes.ArrowLeft, true, true, false, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.SelectNearestNonblankDown] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.SelectNearestNonblankDown, keyCodes.ArrowDown, true, true, false, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.SelectNearestNonblankUp] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.SelectNearestNonblankUp, keyCodes.ArrowUp, true, true, false, false)];
@@ -221,6 +227,9 @@
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.CellAddSeparator] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.CellAddSeparator, keyCodes.NumpadDecimal, false, false, false, false)];
 
 	if (AscCommon.AscBrowser.isMacOs) {
+		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsSize].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsSize, keyCodes.KeyS, false, true, true, true));
+		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsWidth].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsWidth, keyCodes.KeyW, false, true, true, true));
+		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsHeight].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsHeight, keyCodes.KeyH, false, true, true, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.OpenFilePanel] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.OpenFilePanel, keyCodes.KeyF, true, false, true, false)];
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.OpenCommentField] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.OpenCommentField, keyCodes.KeyA, false, false, true, true)];
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.OpenChatPanel] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.OpenChatPanel, keyCodes.KeyQ, true, false, true, false)];

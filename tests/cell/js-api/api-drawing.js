@@ -140,6 +140,33 @@
 		assert.ok(true, 'Check Select with isReplace=true works');
 	});
 
+	QUnit.test("Set selected drawing object sizes from first selection", function (assert) {
+		let worksheet = AscTest.JsApi.GetActiveSheet();
+		let fill = AscTest.JsApi.CreateSolidFill(AscTest.JsApi.CreateRGBColor(51, 51, 51));
+		let stroke = AscTest.JsApi.CreateStroke(0, AscTest.JsApi.CreateNoFill());
+		let first = worksheet.AddShape("rect", 40 * 36000, 30 * 36000, fill, stroke, 0, 0, 0, 0);
+		let second = worksheet.AddShape("ellipse", 20 * 36000, 10 * 36000, fill, stroke, 0, 100 * 36000, 0, 0);
+
+		first.Select(true);
+		second.Select(false);
+		assert.true(AscTest.Editor.asc_setSelectedDrawingObjectSize(0), "Same-size command accepts two selected objects");
+		assert.strictEqual(second.Shape.extX, first.Shape.extX, "Same-size copies the first width");
+		assert.strictEqual(second.Shape.extY, first.Shape.extY, "Same-size copies the first height");
+
+		second.Shape.applyDrawingSize({Width: 10 * 36000, Height: 15 * 36000});
+		first.Select(true);
+		second.Select(false);
+		assert.true(AscTest.Editor.asc_setSelectedDrawingObjectSize(1), "Same-width command accepts two selected objects");
+		assert.strictEqual(second.Shape.extX, first.Shape.extX, "Same-width copies the first width");
+		assert.strictEqual(second.Shape.extY, 15 * 36000, "Same-width preserves the second height");
+
+		first.Select(true);
+		second.Select(false);
+		assert.true(AscTest.Editor.asc_setSelectedDrawingObjectSize(2), "Same-height command accepts two selected objects");
+		assert.strictEqual(second.Shape.extY, first.Shape.extY, "Same-height copies the first height");
+		assert.strictEqual(second.Shape.extX, first.Shape.extX, "Same-height preserves the already matched width");
+	});
+
 	QUnit.test("Unselect", function (assert) {
 		let worksheet = AscTest.JsApi.GetActiveSheet();
 		let fill = AscTest.JsApi.CreateSolidFill(AscTest.JsApi.CreateRGBColor(51, 51, 51));

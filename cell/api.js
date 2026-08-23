@@ -5042,6 +5042,34 @@ var editor;
       var ws = this.wb.getWorksheet();
       return ws.objectRender.distributeGraphicObjectVer();
   };
+  spreadsheet_api.prototype.asc_setSelectedDrawingObjectSize = function(sizeType) {
+    if (!this.canEdit()) {
+      return false;
+    }
+    var ws = this.wb.getWorksheet();
+    var controller = ws && ws.objectRender && ws.objectRender.controller;
+    if (!controller || controller.checkSelectedObjectsProtection()) {
+      return false;
+    }
+    var selectedObjects = controller.getSelectedArray();
+    if (!selectedObjects || selectedObjects.length < 2) {
+      return false;
+    }
+    var firstObject = selectedObjects[0];
+    if (!AscFormat.isRealNumber(firstObject.extX) || !AscFormat.isRealNumber(firstObject.extY)) {
+      return false;
+    }
+    var props = {};
+    if (sizeType !== 2) {
+      props.Width = firstObject.extX;
+    }
+    if (sizeType !== 1) {
+      props.Height = firstObject.extY;
+    }
+    controller.setGraphicObjectProps(props);
+    return true;
+  };
+
 
   spreadsheet_api.prototype.asc_getSelectedDrawingObjectsCount = function()
   {
@@ -10297,6 +10325,7 @@ var editor;
   prot["asc_setSelectedDrawingObjectAlign"] = prot.asc_setSelectedDrawingObjectAlign;
   prot["asc_DistributeSelectedDrawingObjectHor"] = prot.asc_DistributeSelectedDrawingObjectHor;
   prot["asc_DistributeSelectedDrawingObjectVer"] = prot.asc_DistributeSelectedDrawingObjectVer;
+  prot["asc_setSelectedDrawingObjectSize"] = prot.asc_setSelectedDrawingObjectSize;
   prot["asc_getSelectedDrawingObjectsCount"] = prot.asc_getSelectedDrawingObjectsCount;
   prot["SetDrawImagePreviewBulletForMenu"] = prot.SetDrawImagePreviewBulletForMenu;
   prot["asc_getChartPreviews"] = prot.asc_getChartPreviews;

@@ -1041,6 +1041,18 @@
 					this.view.setFontAttributes("changeFontSize", nShortcutAction === Asc.c_oAscSpreadsheetShortcutType.IncreaseFontSize);
 					break;
 				}
+				case Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsSize:
+				case Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsWidth:
+				case Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsHeight: {
+					if (!bCanEdit || bSelectionDialogMode || this.getCellEditMode()) {
+						break;
+					}
+					var sizeType = nShortcutAction === Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsWidth
+						? 1
+						: nShortcutAction === Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsHeight ? 2 : 0;
+					this.view.Api.asc_setSelectedDrawingObjectSize(sizeType);
+					break;
+				}
 				default: {
 					const oCustom = this.view.Api.getCustomShortcutAction(nShortcutAction);
 					if (oCustom) {
