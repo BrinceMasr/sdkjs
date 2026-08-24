@@ -53,6 +53,33 @@ QUnit.config.autostart = false;
 		QUnit.start();
 	});
 
+	QUnit.module('Test Excel-compatible shortcut defaults');
+	QUnit.test('Check comment shortcut does not consume Alt+H', (assert) =>
+	{
+		const shortcuts = Asc.c_oAscDefaultShortcuts;
+		const commentField = shortcuts[Asc.c_oAscSpreadsheetShortcutType.OpenCommentField];
+
+		assert.deepEqual(
+			commentField.map((shortcut) => ({
+				keyCode: shortcut.keyCode,
+				ctrlKey: shortcut.ctrlKey,
+				shiftKey: shortcut.shiftKey,
+				altKey: shortcut.altKey
+			})),
+			[{
+				keyCode: Asc.c_oAscKeyCodes.F2,
+				ctrlKey: true,
+				shiftKey: true,
+				altKey: false
+			}],
+			'Ctrl+Shift+F2 creates or replies to a threaded comment'
+		);
+		assert.notOk(
+			shortcuts[Asc.c_oAscSpreadsheetShortcutType.OpenCommentsPanel],
+			'The non-Excel comments-panel shortcut is not registered by default'
+		);
+	});
+
 	function UpdateView()
 	{
 		wsView._cleanCache(new Asc.Range(0, 0, wsView.cols.length - 1, wsView.rows.length - 1));
