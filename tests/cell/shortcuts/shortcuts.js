@@ -80,11 +80,46 @@ QUnit.config.autostart = false;
 		);
 	});
 
+	QUnit.test('Check Ctrl+T creates a table instead of transposing', (assert) =>
+	{
+		const shortcuts = Asc.c_oAscDefaultShortcuts;
+		const isCtrlT = (shortcut) => shortcut.keyCode === Asc.c_oAscKeyCodes.KeyT &&
+			shortcut.ctrlKey && !shortcut.shiftKey && !shortcut.altKey;
+		const formatAsTable = shortcuts[Asc.c_oAscSpreadsheetShortcutType.FormatAsTableTemplate];
+		const transpose = shortcuts[Asc.c_oAscSpreadsheetShortcutType.Transpose];
+
+		assert.true(
+			formatAsTable.some(isCtrlT),
+			'Ctrl+T opens Format as Table'
+		);
+		assert.notOk(
+			transpose && transpose.some(isCtrlT),
+			'Transpose has no conflicting Ctrl+T default'
+		);
+	});
+
+	QUnit.test('Check Ctrl+D and Ctrl+R resolve to Excel fill commands', (assert) =>
+	{
+		editor.asc_resetAllShortcutTypes();
+
+		assert.strictEqual(
+			editor.Shortcuts.Get(Asc.c_oAscKeyCodes.KeyD, true, false, false, false),
+			Asc.c_oAscSpreadsheetShortcutType.FillDown,
+			'Ctrl+D resolves to FillDown'
+		);
+		assert.strictEqual(
+			editor.Shortcuts.Get(Asc.c_oAscKeyCodes.KeyR, true, false, false, false),
+			Asc.c_oAscSpreadsheetShortcutType.FillRight,
+			'Ctrl+R resolves to FillRight'
+		);
+	});
+
 	function UpdateView()
 	{
 		wsView._cleanCache(new Asc.Range(0, 0, wsView.cols.length - 1, wsView.rows.length - 1));
 		wsView.changeWorksheet("update", {reinitRanges: true});
 	}
+
 
 	function GetCellCacheText(column, row)
 	{
@@ -1608,6 +1643,26 @@ QUnit.config.autostart = false;
 		ExecuteShortcut(Asc.c_oAscSpreadsheetShortcutType.CellAddSeparator);
 		CloseCellEditor(true);
 		assert.strictEqual(GetCellText(0, 0), '.', 'Check add separator');
+	});
+
+	QUnit.test('Check fill right shortcut', (assert) =>
+	{
+		Select(0, 0, 0, 0, 0, 1);
+		FillActiveCell('fill-right');
+
+		ExecuteShortcut(Asc.c_oAscSpreadsheetShortcutType.FillRight);
+
+		assert.strictEqual(GetCellText(0, 1), 'fill-right', 'Ctrl+R fills the selection from the left');
+	});
+
+	QUnit.test('Check fill down shortcut', (assert) =>
+	{
+		Select(0, 0, 0, 0, 1, 0);
+		FillActiveCell('fill-down');
+
+		ExecuteShortcut(Asc.c_oAscSpreadsheetShortcutType.FillDown);
+
+		assert.strictEqual(GetCellText(1, 0), 'fill-down', 'Ctrl+D fills the selection from the top');
 	});
 
 	QUnit.test('Check actions with formatting cell', (assert) =>

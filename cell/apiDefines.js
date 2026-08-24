@@ -674,7 +674,9 @@ var c_oAscPopUpSelectorType = {
 		EnDash:                     175,
 		SameSelectedObjectsSize:    176,
 		SameSelectedObjectsWidth:   177,
-		SameSelectedObjectsHeight:  178
+		SameSelectedObjectsHeight:  178,
+		FillRight:                  179,
+		FillDown:                   180
 	};
 
   var c_oAscCalcMode = {
@@ -1199,6 +1201,8 @@ var c_oAscPopUpSelectorType = {
 	prot["SameSelectedObjectsSize"] = prot.SameSelectedObjectsSize;
 	prot["SameSelectedObjectsWidth"] = prot.SameSelectedObjectsWidth;
 	prot["SameSelectedObjectsHeight"] = prot.SameSelectedObjectsHeight;
+	prot["FillRight"] = prot.FillRight;
+	prot["FillDown"] = prot.FillDown;
 
   window['Asc']['c_oAscCalcMode'] = window['Asc'].c_oAscCalcMode = c_oAscCalcMode;
   prot = c_oAscCalcMode;

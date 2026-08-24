@@ -868,6 +868,18 @@
 					this.handlers.trigger("editCell", oEnterOptions);
 					break;
 				}
+				case Asc.c_oAscSpreadsheetShortcutType.FillDown:
+				case Asc.c_oAscSpreadsheetShortcutType.FillRight: {
+					if (!bCanEdit || this.getCellEditMode() || bSelectionDialogMode) {
+						break;
+					}
+					this.view.Api.asc_FillCells(
+						nShortcutAction === Asc.c_oAscSpreadsheetShortcutType.FillDown
+							? Asc.c_oAscFillType.fillDown
+							: Asc.c_oAscFillType.fillRight
+					);
+					break;
+				}
 				case Asc.c_oAscSpreadsheetShortcutType.NextWorksheet: {
 					this.handlers.trigger("showNextPrevWorksheet", +1);
 					break;

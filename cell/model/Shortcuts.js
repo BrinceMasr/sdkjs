@@ -47,6 +47,8 @@
 	c_oAscUnlockedShortcutActionTypes[Asc.c_oAscSpreadsheetShortcutType.SpeechWorker] = true;
 	c_oAscUnlockedShortcutActionTypes[Asc.c_oAscSpreadsheetShortcutType.PrintPreviewAndPrint] = true;
 	c_oAscUnlockedShortcutActionTypes[Asc.c_oAscSpreadsheetShortcutType.EditOpenCellEditor] = true;
+	c_oAscUnlockedShortcutActionTypes[Asc.c_oAscSpreadsheetShortcutType.FillDown] = true;
+	c_oAscUnlockedShortcutActionTypes[Asc.c_oAscSpreadsheetShortcutType.FillRight] = true;
 	c_oAscUnlockedShortcutActionTypes[Asc.c_oAscSpreadsheetShortcutType.CellAddSeparator] = true;
 	c_oAscUnlockedShortcutActionTypes[Asc.c_oAscSpreadsheetShortcutType.CellNumberFormat] = true;
 	c_oAscUnlockedShortcutActionTypes[Asc.c_oAscSpreadsheetShortcutType.CellTimeFormat] = true;
@@ -127,7 +129,6 @@
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.PasteFormulaAllFormatting] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.PasteFormulaAllFormatting, keyCodes.KeyK, true, false, false, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.PasteFormulaNoBorders] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.PasteFormulaNoBorders, keyCodes.KeyB, true, false, false, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.PasteFormulaColumnWidth] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.PasteFormulaColumnWidth, keyCodes.KeyW, true, false, false, false)];
-	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.Transpose] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.Transpose, keyCodes.KeyT, true, false, false, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.PasteOnlyValue] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.PasteOnlyValue, keyCodes.KeyV, true, false, false, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.PasteValueNumberFormat] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.PasteValueNumberFormat, keyCodes.KeyA, true, false, false, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.PasteValueAllFormatting] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.PasteValueAllFormatting, keyCodes.KeyE, true, false, false, false)];
@@ -141,13 +142,15 @@
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.EditOpenCellEditor] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.EditOpenCellEditor, keyCodes.F2, false, false, false, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.ToggleAutoFilter] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.ToggleAutoFilter, keyCodes.KeyL, true, true, false, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.OpenFilterWindow] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.OpenFilterWindow, keyCodes.ArrowDown, false, false, true, false)];
-	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.FormatAsTableTemplate] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.FormatAsTableTemplate, keyCodes.KeyL, true, false, false, false)];
+	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.FormatAsTableTemplate] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.FormatAsTableTemplate, keyCodes.KeyL, true, false, false, false), new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.FormatAsTableTemplate, keyCodes.KeyT, true, false, false, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.CompleteCellEntryMoveDown] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.CompleteCellEntryMoveDown, keyCodes.Enter, false, false, false, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.CompleteCellEntryMoveUp] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.CompleteCellEntryMoveUp, keyCodes.Enter, false, true, false, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.CompleteCellEntryMoveRight] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.CompleteCellEntryMoveRight, keyCodes.Tab, false, false, false, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.CompleteCellEntryMoveLeft] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.CompleteCellEntryMoveLeft, keyCodes.Tab, false, true, false, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.CompleteCellEntryStay] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.CompleteCellEntryStay, keyCodes.Enter, true, true, false, false), new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.CompleteCellEntryStay, keyCodes.Enter, true, false, false, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.FillSelectedCellRange] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.FillSelectedCellRange, keyCodes.Enter, true, false, false, false)];
+	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.FillDown] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.FillDown, keyCodes.KeyD, true, false, false, false)];
+	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.FillRight] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.FillRight, keyCodes.KeyR, true, false, false, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.CellStartNewLine] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.CellStartNewLine, keyCodes.Enter, false, false, true, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.EquationAddPlaceholder] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.EquationAddPlaceholder, keyCodes.Enter, false, false, false, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.CellEntryCancel] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.CellEntryCancel, keyCodes.Escape, false, false, false, false)];
@@ -276,7 +279,7 @@
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.Underline].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.Underline, keyCodes.KeyU, false, false, false, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.Strikeout].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.Strikeout, keyCodes.Digit5, false, false, false, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.ToggleAutoFilter].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.ToggleAutoFilter, keyCodes.KeyL, false, true, false, true));
-		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.FormatAsTableTemplate].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.FormatAsTableTemplate, keyCodes.KeyL, false, false, false, true));
+		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.FormatAsTableTemplate].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.FormatAsTableTemplate, keyCodes.KeyL, false, false, false, true), new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.FormatAsTableTemplate, keyCodes.KeyT, false, false, false, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.OpenInsertCellsWindow].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.OpenInsertCellsWindow, keyCodes.KeyEqual, false, true, false, true), new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.OpenInsertCellsWindow, keyCodes.NumpadPlus, false, true, false, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.OpenDeleteCellsWindow].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.OpenDeleteCellsWindow, keyCodes.KeyMinus, false, true, false, true), new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.OpenDeleteCellsWindow, keyCodes.NumpadMinus, false, true, false, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.CellInsertDate].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.CellInsertDate, keyCodes.KeySemicolon, false, false, false, true));
@@ -543,6 +546,10 @@
 				return "CompleteCellEntryStay";
 			case Asc.c_oAscSpreadsheetShortcutType.FillSelectedCellRange:
 				return "FillSelectedCellRange";
+			case Asc.c_oAscSpreadsheetShortcutType.FillDown:
+				return "FillDown";
+			case Asc.c_oAscSpreadsheetShortcutType.FillRight:
+				return "FillRight";
 			case Asc.c_oAscSpreadsheetShortcutType.CellStartNewLine:
 				return "CellStartNewLine";
 			case Asc.c_oAscSpreadsheetShortcutType.EquationAddPlaceholder:
@@ -901,6 +908,8 @@
 				return Asc.c_oAscSpreadsheetShortcutType.CompleteCellEntryStay;
 			case "FillSelectedCellRange":
 				return Asc.c_oAscSpreadsheetShortcutType.FillSelectedCellRange;
+			case "FillRight":
+				return Asc.c_oAscSpreadsheetShortcutType.FillRight;
 			case "CellStartNewLine":
 				return Asc.c_oAscSpreadsheetShortcutType.CellStartNewLine;
 			case "EquationAddPlaceholder":
