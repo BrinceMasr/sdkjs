@@ -74,7 +74,6 @@
 
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.OpenFindDialog] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.OpenFindDialog, keyCodes.KeyF, true, false, false, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.OpenFindAndReplaceMenu] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.OpenFindAndReplaceMenu, keyCodes.KeyH, true, false, false, false)];
-	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.OpenCommentsPanel] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.OpenCommentsPanel, keyCodes.KeyH, true, true, false, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.Save] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.Save, keyCodes.KeyS, true, false, false, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.PrintPreviewAndPrint] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.PrintPreviewAndPrint, keyCodes.KeyP, true, false, false, false)];
 	c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.DownloadAs] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.DownloadAs, keyCodes.KeyS, true, true, false, false)];
@@ -231,7 +230,8 @@
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsWidth].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsWidth, keyCodes.KeyW, false, true, true, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsHeight].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.SameSelectedObjectsHeight, keyCodes.KeyH, false, true, true, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.OpenFilePanel] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.OpenFilePanel, keyCodes.KeyF, true, false, true, false)];
-		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.OpenCommentField] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.OpenCommentField, keyCodes.KeyA, false, false, true, true)];
+		// Excel reserves Alt+H for the Home ribbon; threaded comments use Command+Shift+F2.
+		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.OpenCommentField] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.OpenCommentField, keyCodes.F2, false, true, false, true)];
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.OpenChatPanel] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.OpenChatPanel, keyCodes.KeyQ, true, false, true, false)];
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.CellMoveLeftNonBlank] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.CellMoveLeftNonBlank, keyCodes.ArrowLeft, false, false, false, true)];
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.CellMoveBottomNonBlank] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.CellMoveBottomNonBlank, keyCodes.ArrowDown, false, false, false, true)];
@@ -253,7 +253,6 @@
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.MoveShapeLittleStepUp] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.MoveShapeLittleStepUp, keyCodes.ArrowUp, false, false, false, true)];
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.MoveShapeLittleStepBottom] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.MoveShapeLittleStepBottom, keyCodes.ArrowDown, false, false, false, true)];
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.OpenFindDialog].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.OpenFindDialog, keyCodes.KeyF, false, false, false, true));
-		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.OpenCommentsPanel].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.OpenCommentsPanel, keyCodes.KeyH, false, true, false, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.Save].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.Save, keyCodes.KeyS, false, false, false, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.PrintPreviewAndPrint].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.PrintPreviewAndPrint, keyCodes.KeyP, false, false, false, true));
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.DownloadAs].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.DownloadAs, keyCodes.KeyS, false, true, false, true));
@@ -318,7 +317,8 @@
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.ShowFormulas].push(new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.ShowFormulas, keyCodes.KeyBackquote, false, false, false, true));
 	} else {
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.OpenFilePanel] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.OpenFilePanel, keyCodes.KeyF, false, false, true, false)];
-		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.OpenCommentField] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.OpenCommentField, keyCodes.KeyH, false, false, true, false)];
+		// Excel reserves Alt+H for the Home ribbon; threaded comments use Ctrl+Shift+F2.
+		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.OpenCommentField] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.OpenCommentField, keyCodes.F2, true, true, false, false)];
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.OpenChatPanel] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.OpenChatPanel, keyCodes.KeyQ, false, false, true, false)];
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.CellMoveLeftNonBlank] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.CellMoveLeftNonBlank, keyCodes.ArrowLeft, true, false, false, false)];
 		c_oAscDefaultShortcuts[Asc.c_oAscSpreadsheetShortcutType.CellMoveBottomNonBlank] = [new AscShortcut(Asc.c_oAscSpreadsheetShortcutType.CellMoveBottomNonBlank, keyCodes.ArrowDown, true, false, false, false)];
