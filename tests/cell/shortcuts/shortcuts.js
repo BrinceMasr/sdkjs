@@ -638,7 +638,7 @@ QUnit.config.autostart = false;
 
 		ExecuteShortcut(Asc.c_oAscSpreadsheetShortcutType.CellInsertDate);
 		CloseCellEditor(true);
-		assert.strictEqual(GetCellText(0, 0), (new Asc.cDate()).getDateString(editor), 'Check add date');
+		assert.strictEqual(GetCellText(0, 0), (new Asc.cDate()).getDateString(editor, true), 'Check add date');
 		EnterText('');
 
 		ExecuteShortcut(Asc.c_oAscSpreadsheetShortcutType.CellInsertTime);
@@ -648,7 +648,7 @@ QUnit.config.autostart = false;
 
 		ExecuteShortcut(Asc.c_oAscSpreadsheetShortcutType.CellInsertDate);
 		CloseCellEditor(true);
-		assert.strictEqual(GetCellText(0, 0), (new Asc.cDate()).getDateString(editor), 'Check add date');
+		assert.strictEqual(GetCellText(0, 0), (new Asc.cDate()).getDateString(editor, true), 'Check add date');
 		EnterText('');
 
 		ExecuteShortcut(Asc.c_oAscSpreadsheetShortcutType.CellAddSeparator);
@@ -1591,7 +1591,7 @@ QUnit.config.autostart = false;
 		Select(0, 0, 0, 0, 0, 0);
 		ExecuteShortcut(Asc.c_oAscSpreadsheetShortcutType.CellInsertDate);
 		CloseCellEditor(true);
-		assert.strictEqual(GetCellText(0, 0), (new Asc.cDate()).getDateString(editor), 'Check add date');
+		assert.strictEqual(GetCellText(0, 0), (new Asc.cDate()).getDateString(editor, true), 'Check add date');
 
 		ExecuteShortcut(Asc.c_oAscSpreadsheetShortcutType.CellInsertTime);
 		CloseCellEditor(true);
@@ -1599,7 +1599,7 @@ QUnit.config.autostart = false;
 
 		ExecuteShortcut(Asc.c_oAscSpreadsheetShortcutType.CellInsertDate);
 		CloseCellEditor(true);
-		assert.strictEqual(GetCellText(0, 0), (new Asc.cDate()).getDateString(editor), 'Check add date');
+		assert.strictEqual(GetCellText(0, 0), (new Asc.cDate()).getDateString(editor, true), 'Check add date');
 
 		ExecuteShortcut(Asc.c_oAscSpreadsheetShortcutType.CellInsertTime);
 		CloseCellEditor(true);
